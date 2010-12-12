@@ -26,6 +26,15 @@
 #undef getpid
 #include <process.h>
 
+#if defined WINVER
+
+extern
+    WINBASEAPI
+        BOOL
+        WINAPI
+        TryEnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
+#endif
+
 static pthread_mutex_t THR_LOCK_thread;
 
 struct pthread_map
