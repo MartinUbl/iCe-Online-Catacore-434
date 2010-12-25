@@ -73,17 +73,23 @@ void WorldSession::SendBattlegGroundList(uint64 guid, BattlegroundTypeId bgTypeI
 
 void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 {
-    uint64 guid;
+    uint32 unk0;
+    uint8 unk1;
     uint32 bgTypeId_;
-    uint32 instanceId;
+    //uint32 instanceId;
     uint8 joinAsGroup;
+    uint8 unk2;
+    uint16 unk3;
     bool isPremade = false;
     Group * grp = NULL;
 
-    recv_data >> guid;                                      // battlemaster guid
+    recv_data >> unk0;                                      // unknown (changed in 4.0.0)
+    recv_data >> unk1;                                      // unknown (changed in 4.0.0)
     recv_data >> bgTypeId_;                                 // battleground type id (DBC id)
-    recv_data >> instanceId;                                // instance id, 0 if First Available selected
+    //recv_data >> instanceId;                              // instance id, 0 if First Available selected (removed 4.0.0 ?)
     recv_data >> joinAsGroup;                               // join as group
+    recv_data >> unk2;                                      // unknown (added in 4.0.0)
+    recv_data >> unk3;                                      // unknown (added in 4.0.0)
 
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
@@ -99,7 +105,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
 
-    sLog.outDebug("WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from (GUID: %u TypeId:%u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
+    //sLog.outDebug("WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from (GUID: %u TypeId:%u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
 
     // can do this, since it's battleground, not arena
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, 0);
@@ -111,8 +117,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
     // get bg instance or bg template if instance not found
     Battleground *bg = NULL;
-    if (instanceId)
-        bg = sBattlegroundMgr.GetBattlegroundThroughClientInstance(instanceId, bgTypeId);
+    //if (instanceId)
+    //    bg = sBattlegroundMgr.GetBattlegroundThroughClientInstance(instanceId, bgTypeId);
 
     if (!bg)
         bg = sBattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
