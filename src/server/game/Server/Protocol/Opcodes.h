@@ -720,8 +720,8 @@ enum Opcodes
     CMSG_MOVE_NOT_ACTIVE_MOVER                       = 0x100EC, // (  nf  )(0x02D1) //
     SMSG_PLAY_SOUND                                  = 0x0A47F, // (0xA2D1)(0x02D2) //
     CMSG_BATTLEFIELD_STATUS                          = 0x00101, // (  nf  )(0x02D3) //
-    SMSG_BATTLEFIELD_STATUS                          = 0x100EE, // (  nf  )(0x02D4) //
-    CMSG_BATTLEFIELD_PORT                            = 0x100EF, // (0x1373)(0x02D5) //
+    SMSG_BATTLEFIELD_STATUS                          = 0x018B8, // (  nf  )(0x02D4) //
+    CMSG_BATTLEFIELD_PORT                            = 0x04027, // (0x1373)(0x02D5) //
     MSG_INSPECT_HONOR_STATS                          = 0x100F0, // (  nf  )(0x02D6) //
     CMSG_BATTLEMASTER_HELLO                          = 0x100F1, // (  nf  )(0x02D7) //
     CMSG_MOVE_START_SWIM_CHEAT                       = 0x100F2, // (  nf  )(0x02D8) //
@@ -732,7 +732,7 @@ enum Opcodes
     CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK            = 0x100F7, // (  nf  )(0x02DD) //
     SMSG_FORCE_TURN_RATE_CHANGE                      = 0x0375E, // (  nf  )(0x02DE) // TESTED
     CMSG_FORCE_TURN_RATE_CHANGE_ACK                  = 0x0665D, // (  nf  )(0x02DF) // TESTED
-    MSG_PVP_LOG_DATA                                 = 0x100FA, // (0x0762)(0x02E0) //
+    MSG_PVP_LOG_DATA                                 = 0x04126, // (0x0762)(0x02E0) //
     CMSG_LEAVE_BATTLEFIELD                           = 0x07757, // (0xAA15)(0x02E1) //
     CMSG_AREA_SPIRIT_HEALER_QUERY                    = 0x0EF55, // (  nf  )(0x02E2) //
     CMSG_AREA_SPIRIT_HEALER_QUEUE                    = 0x06C56, // (  nf  )(0x02E3) //
@@ -741,7 +741,7 @@ enum Opcodes
     SMSG_WARDEN_DATA                                 = 0x0212B, // (0x23DD)(0x02E6) //
     CMSG_WARDEN_DATA                                 = 0x0467F, // (0x233D)(0x02E7) //
     SMSG_GROUP_JOINED_BATTLEGROUND                   = 0x100FE, // (  nf  )(0x02E8) //
-    MSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x100FF, // (0x8772)(0x02E9) //
+    MSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x04237, // (0x8772)(0x02E9) //
     CMSG_PET_STOP_ATTACK                             = 0x10100, // (  nf  )(0x02EA) //
     SMSG_BINDER_CONFIRM                              = 0x10101, // (0x4234)(0x02EB) //
     SMSG_BATTLEGROUND_PLAYER_JOINED                  = 0x10101, // (  nf  )(0x02EC) //

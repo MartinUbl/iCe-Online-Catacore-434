@@ -53,7 +53,6 @@ void SendTestPacket(uint32 opcodeID, Player* plr)
     data.append(plr->GetPackGUID());
     data << uint32(0);
     data << float(100.0f);
-    plr->SendMessageToSet(&data,true);
 }
 
 bool ChatHandler::HandleOpcodeTestCommand(const char* args)
@@ -133,7 +132,7 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
         SendTestPacket(opcode, m_session->GetPlayer());
         return true;
     }
-        
+
     PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
     SendTestPacket(testopcode++, m_session->GetPlayer());
 

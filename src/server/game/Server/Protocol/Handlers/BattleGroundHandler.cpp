@@ -187,7 +187,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
                                                             // send status packet (in queue)
         sBattlegroundMgr.BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, ginfo->ArenaType);
         SendPacket(&data);
-        sLog.outDebug("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,_player->GetGUIDLow(), _player->GetName());
+        sLog.outString("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,_player->GetGUIDLow(), _player->GetName());
     }
     else
     {
@@ -353,13 +353,14 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
 {
     sLog.outDebug("WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
 
-    uint8 type;                                             // arenatype if arena
-    uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1
+    uint8 action;                                           // enter battle 0x80, leave queue 0x0
     uint32 bgTypeId_;                                       // type id from dbc
+    uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1
+    uint8 type;                                             // arenatype if arena
     uint16 unk;                                             // 0x1F90 constant?
-    uint8 action;                                           // enter battle 0x1, leave queue 0x0
 
-    recv_data >> type >> unk2 >> bgTypeId_ >> unk >> action;
+    recv_data >> action >> bgTypeId_ >> unk2 >> type >> unk;
+    //maybe unk2 and type are switched (need to debug after BG implement)
 
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
@@ -384,7 +385,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         return;
     }
     // if action == 1, then instanceId is required
-    if (!ginfo.IsInvitedToBGInstanceGUID && action == 1)
+    if (!ginfo.IsInvitedToBGInstanceGUID && action == 0x80)
     {
         sLog.outError("BattlegroundHandler: instance not found.");
         return;
@@ -407,7 +408,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         return;
 
     //some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
-    if (action == 1 && ginfo.ArenaType == 0)
+    if (action == 0x80 && ginfo.ArenaType == 0)
     {
         //if player is trying to enter battleground (not arena!) and he has deserter debuff, we must just remove him from queue
         if (!_player->CanJoinToBattleground())
