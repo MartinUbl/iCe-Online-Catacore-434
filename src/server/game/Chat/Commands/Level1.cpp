@@ -237,6 +237,72 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
 }
 //----------------------------------------------------------
 
+bool ChatHandler::HandleModifyHolyPowerCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    int32 holypower = atoi((char*)args);
+    int32 holypowerm = 3;
+
+    if (holypower <= 0 || holypowerm <= 0 || holypowerm < holypower)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(15001, GetNameLink(chr).c_str(), holypower, holypowerm);
+    if (needReportToTarget(chr))
+        ChatHandler(chr).PSendSysMessage(15002, GetNameLink().c_str(), holypower, holypowerm);
+
+    chr->SetMaxPower(POWER_HOLY_POWER, holypowerm);
+    chr->SetPower(POWER_HOLY_POWER, holypower);
+
+    return true;
+}
+
+bool ChatHandler::HandleModifyEclipseCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    int32 eclipse = atoi((char*)args);
+    int32 eclipsem = 100;
+
+    if (eclipse <= 0 || eclipsem <= 0 || eclipsem < eclipse)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(15003, GetNameLink(chr).c_str(), eclipse, eclipsem);
+    if (needReportToTarget(chr))
+        ChatHandler(chr).PSendSysMessage(15004, GetNameLink().c_str(), eclipse, eclipsem);
+
+    chr->SetMaxPower(POWER_ECLIPSE, eclipsem);
+    chr->SetPower(POWER_ECLIPSE, eclipse);
+
+    return true;
+}
+
 bool ChatHandler::HandleNameAnnounceCommand(const char* args)
 {
     WorldPacket data;

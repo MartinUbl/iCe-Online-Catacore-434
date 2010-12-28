@@ -357,6 +357,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "rage",           SEC_MODERATOR,      false, &ChatHandler::HandleModifyRageCommand,          "", NULL },
         { "runicpower",     SEC_MODERATOR,      false, &ChatHandler::HandleModifyRunicPowerCommand,    "", NULL },
         { "energy",         SEC_MODERATOR,      false, &ChatHandler::HandleModifyEnergyCommand,        "", NULL },
+        { "holypower",      SEC_MODERATOR,      false, &ChatHandler::HandleModifyHolyPowerCommand,     "", NULL },
+        { "eclipse",        SEC_MODERATOR,      false, &ChatHandler::HandleModifyEclipseCommand,       "", NULL },
         { "money",          SEC_MODERATOR,      false, &ChatHandler::HandleModifyMoneyCommand,         "", NULL },
         { "speed",          SEC_MODERATOR,      false, &ChatHandler::HandleModifySpeedCommand,         "", NULL },
         { "swim",           SEC_MODERATOR,      false, &ChatHandler::HandleModifySwimCommand,          "", NULL },
