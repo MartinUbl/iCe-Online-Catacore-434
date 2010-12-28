@@ -196,13 +196,13 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 		case STATUS_WAIT_QUEUE:
 			data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
 
-			*data << uint8(0); //uint8? QueueSlot?
+			*data << uint8(QueueSlot); //not sure
 
 			*data << uint32(Time2); //time in queue?
 
 			*data << uint32(bg->GetClientInstanceID());
 
-			*data << uint8(0); //arenatype
+			*data << uint8(arenatype); //arenatype
 
 			*data << uint32(Time1); //average wait time
 
@@ -219,16 +219,15 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 			*data << uint8(0x10);
 			*data << uint8(0x1F);
 
-			*data << uint8(2);
+			*data << uint8(0);
 			break;
 		case STATUS_WAIT_JOIN:
 			data->Initialize(0x38D8, 1+4+6+2+1+4+10);
-			*data << uint8(0);
+			*data << uint8(QueueSlot); //not sure
 			*data << uint32(bg->GetMapId()); //map
-			*data << uint8(0x02); //unk
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
+
+			*data << uint32(bg->GetTypeID()); //not sure!
+
 			*data << uint8(0);
 			*data << uint8(0);
 			*data << uint8(0x10); //const?
@@ -252,7 +251,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 		case STATUS_IN_PROGRESS:
 			//uiFrame?
 			data->Initialize(0x3818,1+4+4+1+4+1+4+1+1+4+4+5+4);
-			*data << uint8(0);
+			*data << uint8(QueueSlot); //not sure
 			*data << uint32(0); //unk
 			*data << uint32(bg->GetMapId()); //map
 			*data << uint8(0x55); //const?
@@ -269,7 +268,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 			*data << uint8(0);
 			*data << uint8(0);
 			*data << uint32(Time2); //time2 (elapsed?)
-			sLog.outString("0x381 sent, uiFrame: %u, Time1: %u, Time2: %u",uiFrame, Time1, Time2);
+			sLog.outString("0x3818 sent, uiFrame: %u, Time1: %u, Time2: %u",uiFrame, Time1, Time2);
 			break;
 		default:
 			sLog.outError("Unknown BG status %u!",StatusID);
