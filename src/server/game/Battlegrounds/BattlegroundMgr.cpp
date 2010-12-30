@@ -191,98 +191,91 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         return;
     }
 
-	switch(StatusID)
-	{
-		case STATUS_WAIT_QUEUE:
-			data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
+    switch(StatusID)
+    {
+        case STATUS_WAIT_QUEUE:
+            data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(Time2); //time in queue?
+            *data << uint32(bg->GetClientInstanceID());
+            *data << uint8(arenatype); //arenatype
+            *data << uint32(Time1); //average wait time
 
-			*data << uint8(QueueSlot); //not sure
+            *data << uint8(0); //unk
+            *data << uint32(0); //unk
 
-			*data << uint32(Time2); //time in queue?
+            *data << uint32(bg->GetTypeID()); //BG type ID
 
-			*data << uint32(bg->GetClientInstanceID());
+            *data << uint8(0); //unk
+            *data << uint8(0); //unk
 
-			*data << uint8(arenatype); //arenatype
+            //following is probably read as uint16, constant?
+            *data << uint8(0x10);
+            *data << uint8(0x1F);
 
-			*data << uint32(Time1); //average wait time
+            *data << uint8(0); //unk
+            break;
+        case STATUS_WAIT_JOIN:
+            data->Initialize(0x38D8, 1+4+6+2+1+4+10);
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(bg->GetMapId()); //map
 
-			*data << uint8(0); //2n
+            *data << uint32(bg->GetTypeID()); //not sure!
 
-			*data << uint32(0); //unk
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0x10); //const?
+            *data << uint8(0x1F); //const?
+            *data << uint8(0x55); //const??
 
-			*data << uint32(bg->GetTypeID()); //BG type ID
+            *data << uint32(Time1); //time before remove
 
-			*data << uint8(0); //unk
-			*data << uint8(0); //unk
-
-			//following is probably read as uint16
-			*data << uint8(0x10);
-			*data << uint8(0x1F);
-
-			*data << uint8(0);
-			break;
-		case STATUS_WAIT_JOIN:
-			data->Initialize(0x38D8, 1+4+6+2+1+4+10);
-			*data << uint8(QueueSlot); //not sure
-			*data << uint32(bg->GetMapId()); //map
-
-			*data << uint32(bg->GetTypeID()); //not sure!
-
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0x10); //const?
-			*data << uint8(0x1F); //const?
-			*data << uint8(0x55); //const?
-
-			*data << uint32(Time1); //time before remove
-
-			//unks
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			break;
-		case STATUS_IN_PROGRESS:
-			//uiFrame?
-			data->Initialize(0x3818,1+4+4+1+4+1+4+1+1+4+4+5+4);
-			*data << uint8(QueueSlot); //not sure
-			*data << uint32(0); //unk
-			*data << uint32(bg->GetMapId()); //map
-			*data << uint8(0x55); //const?
-			*data << uint32(Time1); //time1 (time to end)
-			*data << uint8(0);
-			*data << uint32(bg->GetTypeID()); //bg typeid
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0x10); //const?
-			*data << uint8(0x1F); //const?
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint8(0);
-			*data << uint32(Time2); //time2 (elapsed?)
-			sLog.outString("0x3818 sent, uiFrame: %u, Time1: %u, Time2: %u",uiFrame, Time1, Time2);
-			break;
-		default:
-			sLog.outError("Unknown BG status %u!",StatusID);
-			break;
-	}
+            //unks
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            break;
+        case STATUS_IN_PROGRESS:
+            //where uiFrame?
+            data->Initialize(0x3818,1+4+4+1+4+1+4+1+1+4+4+5+4);
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(0); //unk
+            *data << uint32(bg->GetMapId()); //map
+            *data << uint8(0x55); //const?
+            *data << uint32(Time1); //time1 (time to end)
+            *data << uint8(0);
+            *data << uint32(bg->GetTypeID()); //bg typeid
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0x10); //const?
+            *data << uint8(0x1F); //const?
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint32(Time2); //time2 (elapsed?)
+            break;
+        default:
+            sLog.outError("Unknown BG status %u!",StatusID);
+            break;
+    }
 }
 
 void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 {
     uint8 type = (bg->isArena() ? 1 : 0);
-                                                            // last check on 3.0.3
-    //data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
-	data->Initialize(0x3878,200);
-    /**data << uint8(type);                                   // type (battleground=0/arena=1)
+
+    //Since 4.0.x, the MSG_PVP_LOG_DATA has different response opcode ID
+    data->Initialize(0x3878,(1+1+4+40*bg->GetPlayerScoresSize()));
+    *data << uint8(type);                                    // type (battleground=0/arena=1)
 
     if (type)                                                // arena
     {
@@ -320,33 +313,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     size_t wpos = data->wpos();
     uint32 scoreCount = 0;
     *data << uint32(scoreCount);                            // placeholder
-*/
-	uint8(0x00);
-	uint8(0x0F);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0x15);
-	uint8(0x51);
-	uint8(0x11);
-	uint8(0x55);
-	uint8(0x11);
-	uint8(0x11);
-	uint8(0x55);
-	uint8(0x10);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
-	uint8(0);
 
     Battleground::BattlegroundScoreMap::const_iterator itr2 = bg->GetPlayerScoresBegin();
     for (Battleground::BattlegroundScoreMap::const_iterator itr = itr2; itr != bg->GetPlayerScoresEnd();)
@@ -465,14 +431,14 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                 break;
         }
         // should never happen
-        /*if (++scoreCount >= bg->GetMaxPlayers() && itr != bg->GetPlayerScoresEnd())
+        if (++scoreCount >= bg->GetMaxPlayers() && itr != bg->GetPlayerScoresEnd())
         {
             sLog.outError("Battleground %u scoreboard has more entries (%u) than allowed players in this bg (%u)", bg->GetTypeID(true), bg->GetPlayerScoresSize(), bg->GetMaxPlayers());
             break;
-        }*/
+        }
     }
 
-   // data->put(wpos, scoreCount);
+    data->put(wpos, scoreCount);
 }
 
 void BattlegroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket *data, GroupJoinBattlegroundResult result)
@@ -677,7 +643,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         case BATTLEGROUND_TP:
             bg = new BattlegroundTP(*(BattlegroundTP*)bg_template);
             break;
-		default:
+        default:
             //error, but it is handled few lines above
             return 0;
     }
@@ -723,7 +689,7 @@ uint32 BattlegroundMgr::CreateBattleground(BattlegroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_RV: bg = new BattlegroundRV; break;
         case BATTLEGROUND_IC: bg = new BattlegroundIC; break;
         case BATTLEGROUND_RB: bg = new BattlegroundRB; break;
-		case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
+        case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
         default:
             bg = new Battleground;
             break;
@@ -952,7 +918,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     if (!plr)
         return;
 
-	return; //CRASHES CLIENT! return till we don't know the right structure!
+    return; //CRASHES CLIENT! return till we don't know the right structure!
 
     uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
     uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;

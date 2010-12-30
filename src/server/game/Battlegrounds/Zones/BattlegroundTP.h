@@ -23,13 +23,13 @@ class Battleground;
 
 enum BG_TP_WorldStates
 {
-	TP_FLAGS_TOTAL         = 1601,
-	TP_ALLIANCE_FLAGS      = 1581,
-	TP_ALLIANCE_FLAGS_SHOW = 2339,
-	TP_HORDE_FLAGS         = 1582,
-	TP_HORDE_FLAGS_SHOW    = 2338,
-	TP_TIME_DISPLAY        = 4247,
-	TP_TIME_VALUE          = 4248 //minutes
+    TP_FLAGS_TOTAL         = 1601,
+    TP_ALLIANCE_FLAGS      = 1581,
+    TP_ALLIANCE_FLAGS_SHOW = 2339,
+    TP_HORDE_FLAGS         = 1582,
+    TP_HORDE_FLAGS_SHOW    = 2338,
+    TP_TIME_DISPLAY        = 4247,
+    TP_TIME_VALUE          = 4248 //minutes
 };
 
 enum BG_TP_Objectives
@@ -43,8 +43,8 @@ class BattlegroundTPScore : public BattlegroundScore
     public:
         BattlegroundTPScore() {};
         virtual ~BattlegroundTPScore() {};
-		uint32 FlagCaptures;
-		uint32 FlagReturns;
+        uint32 FlagCaptures;
+        uint32 FlagReturns;
 };
 
 class BattlegroundTP : public Battleground
