@@ -193,6 +193,9 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 
     switch(StatusID)
     {
+        case STATUS_NONE:
+            //TODO: sniff and implement proper opcode with structure for leaving queue
+            break;
         case STATUS_WAIT_QUEUE:
             data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
             *data << uint8(QueueSlot); //not sure
@@ -918,65 +921,24 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     if (!plr)
         return;
 
-    return; //CRASHES CLIENT! return till we don't know the right structure!
-
-    uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-    uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
-    uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
-
-    win_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), win_kills);
-    loos_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), loos_kills);
+    uint32 win_honor  = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+    uint32 lose_honor = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << uint64(guid);                                  // battlemaster guid
-    *data << uint8(0);                                      // from where you joined
-    *data << uint32(bgTypeId);                              // battleground id
-    *data << uint8(0);                                      // unk
-    *data << uint8(0);                                      // unk
+    *data << uint64(guid);           //probably battlemaster guid, but who knows...
+    *data << uint16(0);              //unk
+    *data << uint32(win_honor);      //winner honor reward (call to arms)
+    *data << uint32(bgTypeId);       //Battleground typeid from dbc
+    *data << uint32(0);              //unk
+    *data << uint32(lose_honor);     //loser honor reward (call to arms)
+    *data << uint8(0xF);             //unk, 0xF in sniffed data
+    *data << uint32(lose_honor);     //loser honor reward random
+    *data << uint32(win_honor);      //winner honor reward random
+    *data << uint8(0);               //unk
+    *data << uint32(0);              //unk
+    *data << uint32(0);              //unk
 
-    // Rewards
-    *data << uint8(plr->GetRandomWinner());               // 3.3.3 hasWin
-    *data << uint32(win_kills);                           // 3.3.3 winHonor
-    *data << uint32(win_arena);                           // 3.3.3 winArena
-    *data << uint32(loos_kills);                          // 3.3.3 lossHonor
-
-    uint8 isRandom = bgTypeId == BATTLEGROUND_RB;
-
-    *data << uint8(isRandom);                               // 3.3.3 isRandom
-    if (isRandom)
-    {
-        // Rewards (random)
-        *data << uint8(plr->GetRandomWinner());           // 3.3.3 hasWin_Random
-        *data << uint32(win_kills);                       // 3.3.3 winHonor_Random
-        *data << uint32(win_arena);                       // 3.3.3 winArena_Random
-        *data << uint32(loos_kills);                      // 3.3.3 lossHonor_Random
-    }
-
-    if (bgTypeId == BATTLEGROUND_AA)                         // arena
-    {
-        *data << uint32(0);                                 // unk (count?)
-    }
-    else                                                    // battleground
-    {
-        size_t count_pos = data->wpos();
-        uint32 count = 0;
-        *data << uint32(0);                                 // number of bg instances
-
-        if (Battleground* bgTemplate = sBattlegroundMgr.GetBattlegroundTemplate(bgTypeId))
-        {
-            // expected bracket entry
-            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTemplate->GetMapId(),plr->getLevel()))
-            {
-                BattlegroundBracketId bracketId = bracketEntry->GetBracketId();
-                for (std::set<uint32>::iterator itr = m_ClientBattlegroundIds[bgTypeId][bracketId].begin(); itr != m_ClientBattlegroundIds[bgTypeId][bracketId].end();++itr)
-                {
-                    *data << uint32(*itr);
-                    ++count;
-                }
-                data->put<uint32>(count_pos , count);
-            }
-        }
-    }
+    //Maybe it will be necessary to append some fields related to arena in future
 }
 
 void BattlegroundMgr::SendToBattleground(Player *pl, uint32 instanceId, BattlegroundTypeId bgTypeId)
