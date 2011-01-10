@@ -451,7 +451,7 @@ enum Opcodes
     CMSG_BINDER_ACTIVATE                             = 0x01D7F, // (0xE39C)(0x01B5) //
     SMSG_PLAYERBINDERROR                             = 0x0765C, // (0xC3FC)(0x01B6) //
     CMSG_BANKER_ACTIVATE                             = 0x09C5E, // (  nf  )(0x01B7) //
-    SMSG_SHOW_BANK                                   = 0x10074, // (  nf  )(0x01B8) //
+    SMSG_SHOW_BANK                                   = 0x07655, // (  nf  )(0x01B8) //
     CMSG_BUY_BANK_SLOT                               = 0x06C5F, // (  nf  )(0x01B9) //
     SMSG_BUY_BANK_SLOT_RESULT                        = 0x10076, // (  nf  )(0x01BA) //
     CMSG_PETITION_SHOWLIST                           = 0x0DE7D, // (  nf  )(0x01BB) //
@@ -1249,7 +1249,7 @@ enum Opcodes
     CMSG_QUERY_QUESTS_COMPLETED                      = 0x0FE5E, // (  nf  )(0x0500) //
     SMSG_QUERY_QUESTS_COMPLETED_RESPONSE             = 0x1023D, // (  nf  )(0x0501) //
     CMSG_GM_REPORT_LAG                               = 0x08E5D, // (  nf  )(0x0502) //
-    SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x10242, // (  nf  )(0x0506) //
+    SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x0047F, // (  nf  )(0x0506) //
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                   = 0x0777D, // (  nf  )(0x0508) //
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2                   = 0x0375C, // (  nf  )(0x0509) //
     SMSG_CAMERA_SHAKE                                = 0x10246, // (0xA3B0)(0x050A) //
