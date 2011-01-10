@@ -274,6 +274,8 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 
 void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 {
+    return; //Return because of crashing client!! Need to find correct structure
+
     uint8 type = (bg->isArena() ? 1 : 0);
 
     //Since 4.0.x, the MSG_PVP_LOG_DATA has different response opcode ID
