@@ -723,7 +723,7 @@ enum Opcodes
     SMSG_BATTLEFIELD_STATUS                          = 0x018B8, // (  nf  )(0x02D4) //
     CMSG_BATTLEFIELD_PORT                            = 0x04027, // (0x1373)(0x02D5) //
     MSG_INSPECT_HONOR_STATS                          = 0x100F0, // (  nf  )(0x02D6) //
-    CMSG_BATTLEMASTER_HELLO                          = 0x100F1, // (  nf  )(0x02D7) //
+    CMSG_BATTLEMASTER_HELLO                          = 0x06D57, // (  nf  )(0x02D7) //
     CMSG_MOVE_START_SWIM_CHEAT                       = 0x100F2, // (  nf  )(0x02D8) //
     CMSG_MOVE_STOP_SWIM_CHEAT                        = 0x100F3, // (  nf  )(0x02D9) //
     SMSG_FORCE_WALK_SPEED_CHANGE                     = 0x100F4, // (  nf  )(0x02DA) //
