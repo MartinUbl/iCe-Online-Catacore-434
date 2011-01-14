@@ -51,10 +51,13 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
     //recvPacket.hexlike();
 
-    uint32 unk;
-    std::string channelname;
-    recvPacket >> unk;                                      // channel id?
-    recvPacket >> channelname;
+    uint8 unk;
+    uint8 unk1;
+    uint32 channelId;
+    std::string channelname, unk2;
+
+    recvPacket >> unk >> unk1 >> channelId;
+    recvPacket >> channelname >> unk2;
 
     if (channelname.empty())
         return;
