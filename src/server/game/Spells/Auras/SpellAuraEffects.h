@@ -51,6 +51,8 @@ class AuraEffect
         void HandleEffect(Unit * target, uint8 mode, bool apply);
         void ApplySpellMod(Unit * target, bool apply);
 
+        void HandleEffectAll(AuraApplication const * aurApp, uint8 mode, bool apply);
+
         void Update(uint32 diff, Unit * caster);
         void UpdatePeriodic(Unit * caster);
 
