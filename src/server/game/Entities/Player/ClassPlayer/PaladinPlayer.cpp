@@ -2,8 +2,6 @@
 
 PaladinPlayer::PaladinPlayer(WorldSession* session): Player(session)
 {
-    SetMaxPower(POWER_HOLY_POWER,3);
-    SetHolyPower(0);
 }
 
 uint8 PaladinPlayer::GetHolyPower()
