@@ -1991,9 +1991,9 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, b
 
 void AchievementMgr::SendAllAchievementData()
 {
-    //WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, m_completedAchievements.size()*8+4+m_criteriaProgress.size()*38+4);
-    //BuildAllDataPacket(&data);
-    //GetPlayer()->GetSession()->SendPacket(&data);
+    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, m_completedAchievements.size()*8+4+m_criteriaProgress.size()*38+4);
+    BuildAllDataPacket(&data);
+    GetPlayer()->GetSession()->SendPacket(&data);
 }
 
 void AchievementMgr::SendRespondInspectAchievements(Player* player)
