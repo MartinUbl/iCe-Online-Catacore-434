@@ -284,8 +284,9 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recv_data)
 void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
 {
     //sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
-    uint32 item;
-    recv_data >> item;
+    uint64 unk;
+    uint32 item, unk1;
+    recv_data >> unk >> item >> unk1;
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
