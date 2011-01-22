@@ -218,14 +218,19 @@ int Master::Run()
     sLog.outString( "%s (core-daemon)", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
-    sLog.outString( "CCCCCCCC     A     CCCCCCCC TTTTTTTTTT UU     UU SSSSSSSS");
-    sLog.outString( "CC         AA AA   CC           TT     UU     UU SS");
-    sLog.outString( "CC       AA     AA CC           TT     UU     UU SS");
-    sLog.outString( "CC       AA     AA CC           TT     UU     UU SS       EEEE MM MM U  U");
-    sLog.outString( "CC       AAAAAAAAA CC           TT     UU     UU SSSSSSSS E    M M M U  U");
-    sLog.outString( "CC       AA     AA CC           TT     UU     UU       SS EEEE M   M U  U");
-    sLog.outString( "CC       AA     AA CC           TT     UU     UU       SS E    M   M U  U");
-    sLog.outString( "CCCCCCCC AA     AA CCCCCCCC     TT     UUUUUUUUU SSSSSSSS EEEE M   M UUUU");
+    sLog.outString( "          CCCCCCC               ");
+    sLog.outString( "        CC                      ");
+    sLog.outString( "   i   C                eeeeee  ");
+    sLog.outString( "       C              eee    eee");
+    sLog.outString( "   i   C              eeeeeeeeee");
+    sLog.outString( "   i   C              ee        ");
+    sLog.outString( "   i    CC            eee    eee");
+    sLog.outString( "   i      CCCCCCC       eeeeee    Online ");
+    sLog.outString( "");
+    sLog.outString( " Developed by: iCe Online GM Team");
+    sLog.outString( " Head developer: Gregory (Cmaranec)");
+    sLog.outString( "");
+    sLog.outString( " Special thanks to: MaNGOS, TrinityCore, CactusEMU");
     sLog.outString( "");
 
     /// worldd PID file creation
