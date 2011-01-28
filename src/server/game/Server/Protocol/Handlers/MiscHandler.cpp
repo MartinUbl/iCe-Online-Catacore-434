@@ -729,6 +729,16 @@ void WorldSession::HandleBugOpcode(WorldPacket & recv_data)
     CharacterDatabase.PExecute ("INSERT INTO bugreport (type,content) VALUES('%s', '%s')", type.c_str(), content.c_str());
 }
 
+void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket &recv_data)
+{
+    sLog.outDetail("WORLD: Received CMSG_RETURN_TO_GRAVEYARD");
+
+    // no data to process, just empty packet
+
+    // Tell player to return to graveyard
+    GetPlayer()->ReturnToGraveyard();
+}
+
 void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_RECLAIM_CORPSE");

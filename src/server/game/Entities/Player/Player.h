@@ -1871,6 +1871,7 @@ class Player : public Unit, public GridObject<Player>
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
         void BuildPlayerRepop();
         void RepopAtGraveyard();
+        void ReturnToGraveyard();
 
         void DurabilityLossAll(double percent, bool inventory);
         void DurabilityLoss(Item* item, double percent);
@@ -2548,6 +2549,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint64 m_comboTarget;
         int8 m_comboPoints;
+
+        WorldSafeLocsEntry* m_graveyard;
 
         QuestStatusMap mQuestStatus;
 

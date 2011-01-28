@@ -5214,6 +5214,18 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
     return TotalCost;
 }
 
+void Player::ReturnToGraveyard()
+{
+    if(!isDead())
+        return;
+
+    // If graveyard is stored, teleport there. If not, find nearest and teleport there.
+    if(m_graveyard)
+        TeleportTo(m_graveyard->map_id, m_graveyard->x, m_graveyard->y, m_graveyard->z, GetOrientation());
+    else
+        RepopAtGraveyard();
+}
+
 void Player::RepopAtGraveyard()
 {
     // note: this can be called also when the player is alive
@@ -5227,6 +5239,8 @@ void Player::RepopAtGraveyard()
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
     }
+
+    m_graveyard = NULL;
 
     WorldSafeLocsEntry const *ClosestGrave = NULL;
 
@@ -5252,6 +5266,8 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->y;
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
+
+            m_graveyard = (WorldSafeLocsEntry*)ClosestGrave;
         }
     }
     else if (GetPositionZ() < -500.0f)

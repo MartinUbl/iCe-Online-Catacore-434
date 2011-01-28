@@ -1267,5 +1267,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_REDIRECT_AUTH_PROOF,                     STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_AUTO_DECLINE_GUILD_INVITES,              STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_SET_PRIMARY_TALENT_TREE,                 STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_RETURN_TO_GRAVEYARD,                     STATUS_LOGGEDIN, &WorldSession::HandleReturnToGraveyardOpcode   );
     OPCODE( CMSG_GROUP_SET_ROLES,                         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetRoles             );
 };

@@ -1282,6 +1282,7 @@ enum Opcodes
     CMSG_AUTO_DECLINE_GUILD_INVITES                  = 0x00C7D, // (  nf  )(  nf  ) //
     CMSG_SET_PRIMARY_TALENT_TREE                     = 0x0B47D, // (  nf  )(  nf  ) //
     CMSG_GROUP_SET_ROLES                             = 0x00509, // (  nf  )(  nf  ) //
+    CMSG_RETURN_TO_GRAVEYARD                         = 0x00037, // (  nf  )(  nf  ) //
     NUM_MSG_TYPES                                    = 0x102B7  // last unknow opcode + 1.
 };
 
