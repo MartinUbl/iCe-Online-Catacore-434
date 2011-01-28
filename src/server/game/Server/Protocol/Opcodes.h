@@ -246,8 +246,8 @@ enum Opcodes
     CMSG_FORCE_SWIM_SPEED_CHANGE_ACK                 = 0x0F677, // (  nf  )(0x00E7) // TESTED
     SMSG_FORCE_MOVE_ROOT                             = 0x09657, // (  nf  )(0x00E8) // TESTED
     CMSG_FORCE_MOVE_ROOT_ACK                         = 0x0CF7E, // (  nf  )(0x00E9) // TESTED
-    SMSG_FORCE_MOVE_UNROOT                           = 0x0647C, // (  nf  )(0x00EA) //
-    CMSG_FORCE_MOVE_UNROOT_ACK                       = 0x10035, // (  nf  )(0x00EB) //
+    SMSG_FORCE_MOVE_UNROOT                           = 0x0377F, // (  nf  )(0x00EA) //
+    CMSG_FORCE_MOVE_UNROOT_ACK                       = 0x0CD54, // (  nf  )(0x00EB) //
     MSG_MOVE_ROOT                                    = 0x09555, // (0x0275)(0x00EC) //
     MSG_MOVE_UNROOT                                  = 0x0FC55, // (0x2338)(0x00ED) //
     MSG_MOVE_HEARTBEAT                               = 0x0177C, // (0x0B38)(0x00EE) //
