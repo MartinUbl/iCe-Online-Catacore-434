@@ -463,6 +463,8 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
             sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
                 move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
             _player->SetSpeed(move_type,_player->GetSpeedRate(move_type),true);
+            if (move_type == MOVE_TURN_RATE)
+                _player->SetSpeed(MOVE_TURN_RATE,1.0f,true);
         }
         else                                                // must be lesser - cheating
         {
