@@ -2191,8 +2191,16 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
 
         int32 addhealth = damage;
 
+        // Word of Glory (paladin holy talent)
+        if (m_spellInfo->Id == 85673)
+        {
+            //multiply by amount of holy power (+1 for unknown purposes)
+            addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
+            //and clear holy power
+            caster->SetPower(POWER_HOLY_POWER, 0);
+        }
         // Vessel of the Naaru (Vial of the Sunwell trinket)
-        if (m_spellInfo->Id == 45064)
+        else if (m_spellInfo->Id == 45064)
         {
             // Amount of heal - depends from stacked Holy Energy
             int damageAmount = 0;
