@@ -921,7 +921,7 @@ enum Opcodes
     CMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY                 = 0x1015F, // (  nf  )(0x039A) //
     SMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY_RESPONSE        = 0x10160, // (0x212C)(0x039B) //
     SMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY_RESPONSE_WRITE_FILE  = 0x10161, // (  nf  )(0x039C) //
-    SMSG_UPDATE_COMBO_POINTS                         = 0x10162, // (  nf  )(0x039D) //
+    SMSG_UPDATE_COMBO_POINTS                         = 0x0CD5F, // (  nf  )(0x039D) //
     SMSG_VOICE_SESSION_ROSTER_UPDATE                 = 0x10163, // (0xEBD5)(0x039E) //
     SMSG_VOICE_SESSION_LEAVE                         = 0x10164, // (0xC255)(0x039F) //
     SMSG_VOICE_SESSION_ADJUST_PRIORITY               = 0x10165, // (  nf  )(0x03A0) //

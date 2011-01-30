@@ -2836,6 +2836,10 @@ void Player::GiveLevel(uint8 level)
         CharacterDatabase.CommitTransaction(trans);
     }
 
+    //only for rogues: if reached level 3, allow using combo points by passive aura
+    if(getClass() == CLASS_ROGUE && level >= 3 && !HasAura(79327))
+        CastSpell(this,79327,true);
+
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 }
 
@@ -16931,6 +16935,9 @@ void Player::_LoadAuras(PreparedQueryResult result, uint32 timediff)
 
     if (getClass() == CLASS_WARRIOR && !HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         CastSpell(this, 2457, true);
+
+    if (getClass() == CLASS_ROGUE && !HasAura(79327))
+        CastSpell(this, 79327, true);
 }
 
 void Player::_LoadGlyphAuras()
