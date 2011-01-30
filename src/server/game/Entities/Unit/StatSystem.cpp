@@ -135,6 +135,25 @@ bool Player::UpdateStats(Stats stat)
     return true;
 }
 
+void Player::UpdateClassSpecificPowers()
+{
+    switch(getClass())
+    {
+        case CLASS_PALADIN:
+            if(GetMaxPower(POWER_HOLY_POWER) == 0)
+                SetMaxPower(POWER_HOLY_POWER, 3);
+            break;
+        case CLASS_DRUID:
+            if(GetMaxPower(POWER_ECLIPSE) == 0)
+                SetMaxPower(POWER_ECLIPSE, 100);
+            break;
+        case CLASS_WARLOCK:
+            if(GetMaxPower(POWER_SOUL_SHARDS) == 0)
+                SetMaxPower(POWER_SOUL_SHARDS,3);
+            break;
+    }
+}
+
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);
@@ -174,6 +193,8 @@ bool Player::UpdateAllStats()
 
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
+
+    UpdateClassSpecificPowers();
 
     UpdateAllRatings();
     UpdateAllCritPercentages();
