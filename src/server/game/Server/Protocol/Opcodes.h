@@ -163,7 +163,7 @@ enum Opcodes
     CMSG_MESSAGECHAT_RAID_WARNING                    = 0x04A88, // (0xDA00)(0x0000) //
     SMSG_MESSAGECHAT                                 = 0x0867F, // (0x0BD0)(0x0096) //
     CMSG_JOIN_CHANNEL                                = 0x03A98, // (0x9A00)(0x0097) //
-    CMSG_LEAVE_CHANNEL                               = 0x03A98, // (0x9A20)(0x0098) //
+    CMSG_LEAVE_CHANNEL                               = 0x00A88, // (0x9A20)(0x0098) //
     SMSG_CHANNEL_NOTIFY                              = 0x0C574, // (0x6358)(0x0099) //
     CMSG_CHANNEL_LIST                                = 0x01A88, // (0x1220)(0x009A) //
     SMSG_CHANNEL_LIST                                = 0x0745D, // (0x0A5D)(0x009B) //
