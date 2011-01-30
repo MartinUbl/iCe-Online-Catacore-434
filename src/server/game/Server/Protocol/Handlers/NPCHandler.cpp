@@ -108,10 +108,8 @@ void WorldSession::SendShowBank(uint64 guid)
 void WorldSession::HandleTrainerListOpcode(WorldPacket & recv_data)
 {
     uint64 guid;
-    uint32 spellId;
-    uint32 unk;
 
-    recv_data >> guid >> spellId >> unk;
+    recv_data >> guid;
     SendTrainerList(guid);
 }
 
