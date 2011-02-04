@@ -296,7 +296,7 @@ enum Opcodes
     CMSG_IGNORE_TRADE                                = 0x1004D, // (  nf  )(0x0119) //
     CMSG_ACCEPT_TRADE                                = 0x1004E, // (  nf  )(0x011A) //
     CMSG_UNACCEPT_TRADE                              = 0x1004F, // (  nf  )(0x011B) //
-    CMSG_CANCEL_TRADE                                = 0x00C2A, // (0x1F72)(0x011C) // Maybe 0x04327 in 4.0.3.13329
+    CMSG_CANCEL_TRADE                                = 0x04327, // (0x1F72)(0x011C) //
     CMSG_SET_TRADE_ITEM                              = 0x10050, // (  nf  )(0x011D) //
     CMSG_CLEAR_TRADE_ITEM                            = 0x10051, // (  nf  )(0x011E) //
     CMSG_SET_TRADE_GOLD                              = 0x10052, // (  nf  )(0x011F) //
