@@ -995,7 +995,7 @@ enum Opcodes
     CMSG_REPORT_PVP_AFK                              = 0x0E55F, // (  nf  )(0x03E4) //
     SMSG_REPORT_PVP_AFK_RESULT                       = 0x0A75F, // (0x239D)(0x03E5) //
     CMSG_GUILD_BANKER_ACTIVATE                       = 0x0045E, // (  nf  )(0x03E6) // TESTED
-    CMSG_GUILD_BANK_QUERY_TAB                        = 0x0F554, // (  nf  )(0x03E7) //
+    CMSG_GUILD_BANK_QUERY_TAB                        = 0x0CF76, // (  nf  )(0x03E7) //
     SMSG_GUILD_BANK_LIST                             = 0x0BC76, // (0xE3D0)(0x03E8) //
     CMSG_GUILD_BANK_SWAP_ITEMS                       = 0x0557C, // (  nf  )(0x03E9) //
     CMSG_GUILD_BANK_BUY_TAB                          = 0x10190, // (  nf  )(0x03EA) //
@@ -1124,11 +1124,11 @@ enum Opcodes
     CMSG_COMPLETE_MOVIE                              = 0x05C76, // (  nf  )(0x0465) //
     CMSG_SET_GLYPH_SLOT                              = 0x101D4, // (  nf  )(0x0466) //
     CMSG_SET_GLYPH                                   = 0x101D5, // (  nf  )(0x0467) //
-    SMSG_ACHIEVEMENT_EARNED                          = 0x101D6, // (  nf  )(0x0468) //
+    SMSG_ACHIEVEMENT_EARNED                          = 0x0FC7C, // (  nf  )(0x0468) //
     SMSG_DYNAMIC_DROP_ROLL_RESULT                    = 0x101D7, // (  nf  )(0x0469) //
     SMSG_CRITERIA_UPDATE                             = 0x03E55, // (  nf  )(0x046A) //
     CMSG_QUERY_INSPECT_ACHIEVEMENTS                  = 0x06E55, // (  nf  )(0x046B) //
-    SMSG_RESPOND_INSPECT_ACHIEVEMENTS                = 0x101DA, // (0xE303)(0x046C) //
+    SMSG_RESPOND_INSPECT_ACHIEVEMENTS                = 0x018E8, // (0xE303)(0x046C) //
     CMSG_DISMISS_CONTROLLED_VEHICLE                  = 0x101DB, // (  nf  )(0x046D) //
     CMSG_COMPLETE_ACHIEVEMENT_CHEAT                  = 0x101DC, // (  nf  )(0x046E) //
     SMSG_QUESTUPDATE_ADD_PVP_KILL                    = 0x05D55, // (0xE210)(0x046F) //
