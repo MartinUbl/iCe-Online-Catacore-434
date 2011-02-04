@@ -23189,7 +23189,16 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
 {
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
-    return v_map != 571 || HasSpell(54197); // Cold Weather Flying
+
+    bool canNorthrendFly = HasSpell(54197); //Cold Weather Flying
+    bool canAzerothFly = HasSpell(90267);   //Flight Master's License
+
+    if(v_map == 571 && canNorthrendFly)
+        return true;
+    if((v_map == 0 || v_map == 1) && canAzerothFly)
+        return true;
+
+    return false;
 }
 
 void Player::learnSpellHighRank(uint32 spellid)
