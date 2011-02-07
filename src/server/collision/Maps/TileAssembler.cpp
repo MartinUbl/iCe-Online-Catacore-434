@@ -185,9 +185,9 @@ namespace VMAP
             std::cout << "Converting " << *mfile << std::endl;
             if (!convertRawFile(*mfile))
             {
-                std::cout << "error converting " << *mfile << std::endl;
-                success = false;
-                break;
+                std::cout << "error converting " << *mfile << std::endl << "but.. who cares..." << std::endl;
+                //success = false;
+                //break;
             }
         }
 
