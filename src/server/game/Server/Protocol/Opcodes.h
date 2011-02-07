@@ -262,7 +262,7 @@ enum Opcodes
     MSG_MOVE_HOVER                                   = 0x0D575, // (0x0331)(0x00F7) //
     CMSG_TRIGGER_CINEMATIC_CHEAT                     = 0x1003D, // (  nf  )(0x00F8) //
     CMSG_OPENING_CINEMATIC                           = 0x0CF5F, // (  nf  )(0x00F9) //
-    SMSG_TRIGGER_CINEMATIC                           = 0x0057D, // (  nf  )(0x00FA) //
+    SMSG_TRIGGER_CINEMATIC                           = 0x0457D, // (  nf  )(0x00FA) //
     CMSG_NEXT_CINEMATIC_CAMERA                       = 0x03D75, // (  nf  )(0x00FB) //
     CMSG_COMPLETE_CINEMATIC                          = 0x0CC55, // (  nf  )(0x00FC) //
     SMSG_TUTORIAL_FLAGS                              = 0x08657, // (0x4B31)(0x00FD) //
