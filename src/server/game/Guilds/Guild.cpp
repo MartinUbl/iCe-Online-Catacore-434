@@ -836,15 +836,15 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
     data7 << (uint32)m_Ranks.size();
     for(uint32 i = 0; i < m_Ranks.size(); i++)
     {
-        data7 << (uint32)i;
+        data7 << m_Ranks[i].Name;
         for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
             data7 << (uint32)m_Ranks[i].TabRight[j];
         data7 << (uint32)m_Ranks[i].BankMoneyPerDay;
         for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
             data7 << (uint32)m_Ranks[i].TabSlotPerDay[j];
-        data7 << (uint32)i; //unk.
-        data7 << m_Ranks[i].Name;
         data7 << (uint32)GetRankRights(i);
+        data7 << (uint32)GetRankRights(i); //unk, maybe 
+        data7 << (uint32)i;
     }
     if (session)
         session->SendPacket(&data7);
