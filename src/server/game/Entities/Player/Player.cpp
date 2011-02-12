@@ -15465,6 +15465,21 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
                     if (qInfo->ReqSpell[j] != 0)
                         continue;
 
+                    if (entry >= 90000 && entry <= 90003)
+                    {
+                        if(Creature* pVictim = (Creature*)Unit::GetUnit(*this,guid))
+                        {
+                            QueryResult qr = WorldDatabase.PQuery("SELECT questcredit FROM ice_quest_credit WHERE guid=%u LIMIT 1;",pVictim->GetDBTableGUIDLow());
+                            if(qr)
+                            {
+                                Field* fd = qr->Fetch();
+                                uint32 killcredit = fd[0].GetUInt32();
+                                if(killcredit != qInfo->GetQuestId())
+                                    continue;
+                            }
+                        }
+                    }
+
                     uint32 reqkill = qInfo->ReqCreatureOrGOId[j];
 
                     if (reqkill == real_entry)

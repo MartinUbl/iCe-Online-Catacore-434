@@ -329,6 +329,7 @@ class ChatHandler
         bool HandleNpcSetModelCommand(const char* args);
         bool HandleNpcSetMoveTypeCommand(const char* args);
         bool HandleNpcSetPhaseCommand(const char* args);
+        bool HandleNpcSetTriggerCommand(const char* args);
         bool HandleNpcSpawnDistCommand(const char* args);
         bool HandleNpcSpawnTimeCommand(const char* args);
         bool HandleNpcTameCommand(const char* args);
