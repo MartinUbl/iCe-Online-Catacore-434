@@ -132,7 +132,7 @@ enum Opcodes
     CMSG_GUILD_ACCEPT                                = 0x1000D, // (  nf  )(0x0084) //
     CMSG_GUILD_DECLINE                               = 0x1000E, // (  nf  )(0x0085) //
     SMSG_GUILD_DECLINE                               = 0x0375F, // (0xABD9)(0x0086) //
-    CMSG_GUILD_INFO                                  = 0x0AF5E, // (0x6B75)(0x0087) //
+    CMSG_GUILD_INFO                                  = 0x09BC2, // (0x6B75)(0x0087) //
     SMSG_GUILD_INFO                                  = 0x07C7F, // (0x02DD)(0x0088) //
     CMSG_GUILD_ROSTER                                = 0x00757, // (0x22FD)(0x0089) //
     SMSG_GUILD_ROSTER                                = 0x038B0, // (0x1303)(0x008A) //
@@ -564,8 +564,7 @@ enum Opcodes
     CMSG_GUILD_ADD_RANK                              = 0x00BC2, // (  nf  )(0x0232) //
     CMSG_GUILD_DEL_RANK                              = 0x100A5, // (0x4205)(0x0233) //
     CMSG_GUILD_SWITCH_RANK                           = 0x00942, // (0x0A04)(0x0000) //
-    CMSG_GUILD_SET_PUBLIC_NOTE                       = 0x100A7, // (  nf  )(0x0234) //
-    CMSG_GUILD_SET_OFFICER_NOTE                      = 0x100A8, // (  nf  )(0x0235) //
+    CMSG_GUILD_SET_NOTE                              = 0x01B02, // (  nf  )(0x0234) //
     SMSG_LOGIN_VERIFY_WORLD                          = 0x0EC7C, // (0x4A5D)(0x0236) // TESTED
     CMSG_CLEAR_EXPLORATION                           = 0x100A9, // (  nf  )(0x0237) //
     CMSG_SEND_MAIL                                   = 0x0067D, // (  nf  )(0x0238) //

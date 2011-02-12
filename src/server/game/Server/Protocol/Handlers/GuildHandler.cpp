@@ -494,53 +494,23 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     guild->BroadcastEvent(GE_MOTD, 0, 1, MOTD, "", "");
 }
 
-void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE");
+    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_NOTE");
 
-    std::string name,PNOTE;
-    recvPacket >> name;
+    uint8 command;
+    uint64 guid;
+    uint32 unk0;
+    uint16 unk1;
+    uint32 unk2; //probably read as 8,8,16
+    uint32 unk3;
+    uint8 unk4;
+    uint8 unk5;
+    std::string NOTE;
 
-    if (!normalizePlayerName(name))
-        return;
+    recvPacket >> command >> guid >> unk0 >> unk1 >> unk2 >> unk3 >> unk4 >> unk5 >> NOTE;
 
-    Guild* guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
-    if (!guild)
-    {
-        SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
-        return;
-    }
-
-    if (!guild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_EPNOTE))
-    {
-        SendGuildCommandResult(GUILD_INVITE_S, "", ERR_GUILD_PERMISSIONS);
-        return;
-    }
-
-    uint64 plGuid;
-    MemberSlot* slot = guild->GetMemberSlot(name, plGuid);
-
-    if (!slot)
-    {
-        SendGuildCommandResult(GUILD_INVITE_S, name, ERR_GUILD_PLAYER_NOT_IN_GUILD_S);
-        return;
-    }
-
-    recvPacket >> PNOTE;
-    guild->SetPNOTE(plGuid, PNOTE);
-
-    guild->Roster(this);
-}
-
-void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
-{
-    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE");
-
-    std::string plName, OFFNOTE;
-    recvPacket >> plName;
-
-    if (!normalizePlayerName(plName))
-        return;
+    std::string plName = sObjectMgr.GetPlayer(guid)?sObjectMgr.GetPlayer(guid)->GetName():"<Unknown>";
 
     Guild* guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
@@ -564,8 +534,18 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    recvPacket >> OFFNOTE;
-    guild->SetOFFNOTE(plGuid, OFFNOTE);
+    switch(command)
+    {
+        case 0:
+            guild->SetOFFNOTE(plGuid, NOTE);
+            break;
+        case 128:
+            guild->SetPNOTE(plGuid, NOTE);
+            break;
+        default:
+            sLog.outError("Guild: unhandled command %u in SetNote function!",command);
+            break;
+    }
 
     guild->Roster(this);
 }

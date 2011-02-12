@@ -563,8 +563,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_GUILD_ADD_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildAddRankOpcode        );
     OPCODE( CMSG_GUILD_DEL_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode        );
     OPCODE( CMSG_GUILD_SWITCH_RANK,                       STATUS_LOGGEDIN, &WorldSession::HandleGuildSwitchRankOpcode     );
-    OPCODE( CMSG_GUILD_SET_PUBLIC_NOTE,                   STATUS_LOGGEDIN, &WorldSession::HandleGuildSetPublicNoteOpcode  );
-    OPCODE( CMSG_GUILD_SET_OFFICER_NOTE,                  STATUS_LOGGEDIN, &WorldSession::HandleGuildSetOfficerNoteOpcode );
+    OPCODE( CMSG_GUILD_SET_NOTE,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildSetNoteOpcode        );
     OPCODE( SMSG_LOGIN_VERIFY_WORLD,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_CLEAR_EXPLORATION,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_SEND_MAIL,                               STATUS_LOGGEDIN, &WorldSession::HandleSendMail                  );
