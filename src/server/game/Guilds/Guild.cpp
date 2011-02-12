@@ -768,70 +768,178 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
 {
                                                             // we can only guess size
     WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+2+4+2+members.size()*100));
-    data << (uint32)members.size();
-    data << MOTD;
     data << GINFO;
+    data << MOTD;
+    data << (uint32)members.size();
 
-    uint32 totalBytesToSend = uint32(uint32(members.size()) / uint32(8)) + 1;
-    for(uint32 i = 0; i < totalBytesToSend; i++)
-        data << uint8(0); //unk
-    
+    //unk32
+    std::list<uint32> zone_list;
+    //unk32
+    //unk8
+    //unk64
+    std::list<uint64> guid_list;
+    std::list<uint32> rank_list;
+    //unk16, unk32, unk8, unk8
+    std::list<uint32> apoints_list;
+    std::list<uint8> class_list;
+    std::list<const char*> pnote_list;
+    std::list<uint8> connected_list;
+    std::list<uint32> prof_data;
+    //unk32
+    //unk8, ONLY ONE IN ROSTER
+    std::list<const char*> offnote_list;
+    std::list<const char*> name_list;
+    std::list<uint8> level_list;
+
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if (Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
+        if (Player *pl = sObjectMgr.GetPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
         {
-            data << uint64(pl->GetGUID());
-            data << uint8(0);                               //unk
-            data << uint32(itr->second.RankId);
-            data << float(0);
-            data << uint8(1);                               //connecté
-            data << uint32(pl->GetAchievementMgr().GetAchievementPoints());                               //points de haut-fait
-            data << uint32(/*pl->GetZoneId()*/ 4395);
-            data << uint8(pl->getLevel());
-            data << uint64(0);                              //unk, seulement 0
-            data << pl->GetName();
-            data << uint8(pl->getClass());
-            for(int i = 0; i < 2; i++)
-            {
-                data << uint32(itr->second.professions[i].title);                          //apprenti-compagnon-artisan...
-                data << uint32(itr->second.professions[i].level);                          //level métier
-                data << uint32(itr->second.professions[i].skillID);                          //skillID métier
-            }
-            data << itr->second.Pnote;
-            data << uint64(0);                              //unk, seulement 0
-            data << itr->second.OFFnote;
-            data << uint32(0);                              //unk, seulement 0
+            //unk0 (32) - unknown values, various
+            zone_list.push_back(pl->GetZoneId()); //zoneid
+            //unk1 (32) - unknown values, various
+            //unk2 (8) - 0 or 1
+            //unk3 (64) - unknown values, sometimes 0
+            guid_list.push_back(pl->GetGUID());
+            rank_list.push_back(itr->second.RankId);
+            //unk4 (16) - whole range values
+            //unk5 (32) - related to ranks? values 0 - 4
+            //unk6 (8) - always 1, not seen any other values
+            //unk7 (8) - unknown, probably whole range
+            apoints_list.push_back(pl->GetAchievementMgr().GetAchievementPoints());
+            class_list.push_back(pl->getClass());
+            pnote_list.push_back(itr->second.Pnote.c_str());
+            connected_list.push_back(1); //connected, yes
+            prof_data.push_back(itr->second.professions[0].title);
+            prof_data.push_back(itr->second.professions[0].level);
+            prof_data.push_back(itr->second.professions[0].skillID);
+            prof_data.push_back(itr->second.professions[1].title);
+            prof_data.push_back(itr->second.professions[1].level);
+            prof_data.push_back(itr->second.professions[1].skillID);
+            //unk8 (32) - unknown, whole range
+            name_list.push_back(pl->GetName());
+            offnote_list.push_back(itr->second.OFFnote.c_str());
+            level_list.push_back(pl->getLevel());
         }
         else
         {
-            data << uint64(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
-            data << uint8(0);                               //unk
-            data << uint32(itr->second.RankId);
-            data << float(float(time(NULL)-itr->second.LogoutTime) / DAY);
-            data << uint8(0);                               //non-connecté
-            data << uint32(itr->second.achievementPoints);  //points de haut-fait
-            data << uint32(itr->second.ZoneId);
-            data << uint8(itr->second.Level);
-            data << uint64(0);                              //unk, seulement 0
-            data << itr->second.Name;
-            data << uint8(itr->second.Class);
-            for(int i = 0; i < 2; i++)
-            {
-                data << uint32(itr->second.professions[i].title);                          //apprenti-compagnon-artisan...
-                data << uint32(itr->second.professions[i].level);                          //level métier
-                data << uint32(itr->second.professions[i].skillID);                          //skillID métier
-            }
-            data << itr->second.Pnote;
-            data << uint64(0);                              //unk, seulement 0
-            data << itr->second.OFFnote;
-            data << uint32(0);                              //unk, seulement 0
+            //unk0 (32) - unknown values, various
+            zone_list.push_back(itr->second.ZoneId); //zoneid
+            //unk1 (32) - unknown values, various
+            //unk2 (8) - 0 or 1
+            //unk3 (64) - unknown values, sometimes 0
+            guid_list.push_back(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+            rank_list.push_back(itr->second.RankId);
+            //unk4 (16) - whole range values
+            //unk5 (32) - related to ranks? values 0 - 4
+            //unk6 (8) - always 1, not seen any other values
+            //unk7 (8) - unknown, probably whole range
+            apoints_list.push_back(itr->second.achievementPoints);
+            class_list.push_back(itr->second.Class);
+            pnote_list.push_back(itr->second.Pnote.c_str());
+            connected_list.push_back(0); //connected, no, offline
+            prof_data.push_back(itr->second.professions[0].title);
+            prof_data.push_back(itr->second.professions[0].level);
+            prof_data.push_back(itr->second.professions[0].skillID);
+            prof_data.push_back(itr->second.professions[1].title);
+            prof_data.push_back(itr->second.professions[1].level);
+            prof_data.push_back(itr->second.professions[1].skillID);
+            //unk8 (32) - unknown, whole range
+            name_list.push_back(itr->second.Name.c_str());
+            offnote_list.push_back(itr->second.OFFnote.c_str());
+            level_list.push_back(itr->second.Level);
         }
     }
+
+    //unk0
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint32(0);
+    //zones
+    for(std::list<uint32>::const_iterator itr = zone_list.begin(); itr != zone_list.end(); ++itr)
+        data << (uint32)(*itr);
+    //unk1
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint32(0);
+    //unk2
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint8(0);
+    //unk3
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint64(0);
+    //guids
+    for(std::list<uint64>::const_iterator itr = guid_list.begin(); itr != guid_list.end(); ++itr)
+        data << (uint64)(*itr);
+    //ranks
+    for(std::list<uint32>::const_iterator itr = rank_list.begin(); itr != rank_list.end(); ++itr)
+        data << (uint32)(*itr);
+    //unk4,5,6,7
+    //hardcoded values, with zeros in all fields its impossible to open character guild dialog
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint16(0x6DA1) << uint32(0x2) << uint8(0x1) << uint8(0x34);
+    //achievement points
+    for(std::list<uint32>::const_iterator itr = apoints_list.begin(); itr != apoints_list.end(); ++itr)
+        data << (uint32)(*itr);
+    //classes
+    for(std::list<uint8>::const_iterator itr = class_list.begin(); itr != class_list.end(); ++itr)
+        data << (uint8)(*itr);
+    //player notes
+    for(std::list<const char*>::const_iterator itr = pnote_list.begin(); itr != pnote_list.end(); ++itr)
+        data << (*itr);
+    //online status
+    for(std::list<uint8>::const_iterator itr = connected_list.begin(); itr != connected_list.end(); ++itr)
+        data << (uint8)(*itr);
+    //professions
+    for(std::list<uint32>::const_iterator itr = prof_data.begin(); itr != prof_data.end(); ++itr)
+        data << (uint32)(*itr);
+    //unk8
+    for(uint32 i = 0; i < members.size(); i++)
+        data << uint32(0);
+    //unk, alone in whole roster
+    data << uint8(0);
+    //officers note
+    for(std::list<const char*>::const_iterator itr = offnote_list.begin(); itr != offnote_list.end(); ++itr)
+        data << (*itr);
+    //names
+    for(std::list<const char*>::const_iterator itr = name_list.begin(); itr != name_list.end(); ++itr)
+        data << (*itr);
+    //levels
+    for(std::list<uint8>::const_iterator itr = level_list.begin(); itr != level_list.end(); ++itr)
+        data << (uint8)(*itr);
+
+/*
+    //Research
+
+    data << uint32(0); //unk
+    data << uint32(0x026A); //zona
+    data << uint32(0); //unk
+    data << uint8(0);  //unk
+    data << uint64(0); //unk
+    data << uint64(01); //guid
+    data << uint32(0); //rank
+
+    data << uint16(0x6DA1); //6DA1
+    data << uint32(0x02); //2
+    data << uint8(0x01); //1
+    data << uint8(0x34); //34
+
+    data << uint32(0xBE5); //achiev
+    data << uint8(9); //class
+    data << "Ten, co jezdil na babete";
+    data << uint8(1); //online
+    data << uint32(7) << uint32(0x20D) << uint32(0xC5); //prof1
+    data << uint32(0) << uint32(0) << uint32(0); //prof2
+    data << uint32(0); //3AD4
+    data << uint8(0); //unk, ONLY ONE IN WHOLE ROSTER!!!
+    data << "Oficiri jedna";
+    data << "Gregorius";
+    data << uint8(0x55); //lvl
+*/
+
     if (session)
         session->SendPacket(&data);
     else
         BroadcastPacket(&data);
-    
+
     WorldPacket data7(SMSG_GUILD_RANK);
     data7 << (uint32)m_Ranks.size();
     for(uint32 i = 0; i < m_Ranks.size(); i++)
@@ -850,7 +958,7 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
         session->SendPacket(&data7);
     else
         BroadcastPacket(&data7);
-    
+
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_ROSTER)");
 }
 
