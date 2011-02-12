@@ -561,9 +561,9 @@ enum Opcodes
     CMSG_CHAT_IGNORED                                = 0x0C456, // (  nf  )(0x0225) //
     CMSG_GUILD_RANK                                  = 0x0FFC7, // (0x4A81)(0x0231) //
     SMSG_GUILD_RANK                                  = 0x02840, // (0x4090)(  nf  ) //
-    CMSG_GUILD_ADD_RANK                              = 0x100A4, // (  nf  )(0x0232) //
+    CMSG_GUILD_ADD_RANK                              = 0x00BC2, // (  nf  )(0x0232) //
     CMSG_GUILD_DEL_RANK                              = 0x100A5, // (0x4205)(0x0233) //
-    CMSG_GUILD_SWITCH_RANK                           = 0x100A6, // (0x0A04)(0x0000) //
+    CMSG_GUILD_SWITCH_RANK                           = 0x00942, // (0x0A04)(0x0000) //
     CMSG_GUILD_SET_PUBLIC_NOTE                       = 0x100A7, // (  nf  )(0x0234) //
     CMSG_GUILD_SET_OFFICER_NOTE                      = 0x100A8, // (  nf  )(0x0235) //
     SMSG_LOGIN_VERIFY_WORLD                          = 0x0EC7C, // (0x4A5D)(0x0236) // TESTED
@@ -998,7 +998,7 @@ enum Opcodes
     CMSG_GUILD_BANK_QUERY_TAB                        = 0x0CF76, // (  nf  )(0x03E7) //
     SMSG_GUILD_BANK_LIST                             = 0x0BC76, // (0xE3D0)(0x03E8) //
     CMSG_GUILD_BANK_SWAP_ITEMS                       = 0x0557C, // (  nf  )(0x03E9) //
-    CMSG_GUILD_BANK_BUY_TAB                          = 0x10190, // (  nf  )(0x03EA) //
+    CMSG_GUILD_BANK_BUY_TAB                          = 0x05D56, // (  nf  )(0x03EA) //
     CMSG_GUILD_BANK_UPDATE_TAB                       = 0x10191, // (  nf  )(0x03EB) //
     CMSG_GUILD_BANK_DEPOSIT_MONEY                    = 0x0157C, // (  nf  )(0x03EC) //
     CMSG_GUILD_BANK_WITHDRAW_MONEY                   = 0x10193, // (  nf  )(0x03ED) //
