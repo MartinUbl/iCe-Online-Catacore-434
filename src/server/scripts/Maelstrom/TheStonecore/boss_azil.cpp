@@ -19,6 +19,6 @@
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
-void AddSC_corborus()
+void AddSC_azil()
 {
 }

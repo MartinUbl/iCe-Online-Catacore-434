@@ -203,7 +203,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/BlackrockCaverns/boss_beauty.cpp
   EasternKingdoms/BlackrockMountain/BlackrockCaverns/boss_obsidius.cpp
   EasternKingdoms/BlackrockMountain/BlackwingDescent/blackwing_descent.h
-  EasternKingdoms/BlackrockMountain/BlackwingDescent/instanceblackwing_descent.cpp
+  EasternKingdoms/BlackrockMountain/BlackwingDescent/instance_blackwing_descent.cpp
   EasternKingdoms/BlackrockMountain/BlackwingDescent/boss_magmaw.cpp
   EasternKingdoms/BlackrockMountain/BlackwingDescent/boss_omnotron.cpp
   EasternKingdoms/BlackrockMountain/BlackwingDescent/boss_maloriak.cpp

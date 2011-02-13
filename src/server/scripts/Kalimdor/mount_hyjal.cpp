@@ -18,6 +18,6 @@
 
 #include "ScriptPCH.h"
 
-void AddSC_gilneas()
+void AddSC_mount_hyjal()
 {
 }
