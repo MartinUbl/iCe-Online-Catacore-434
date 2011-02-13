@@ -26,7 +26,7 @@
 #include "ScriptMgr.h"
 #include "WorldPacket.h"
 #include "DBCStores.h"
-#include "ProgressBar.h"
+
 #include "World.h"
 
 void MapManager::LoadTransports()
@@ -37,19 +37,19 @@ void MapManager::LoadTransports()
 
     if (!result)
     {
-        barGoLink bar(1);
-        bar.step();
+        
+        
 
         sLog.outString();
         sLog.outString(">> Loaded %u transports", count);
         return;
     }
 
-    barGoLink bar(result->GetRowCount());
+    
 
     do
     {
-        bar.step();
+        
 
         Field *fields = result->Fetch();
         uint32 lowguid = fields[0].GetUInt32();
@@ -149,19 +149,19 @@ void MapManager::LoadTransportNPCs()
 
     if (!result)
     {
-        barGoLink bar(1);
-        bar.step();
+        
+        
 
         sLog.outString();
         sLog.outString(">> Loaded %u transport NPCs.", count);
         return;
     }
 
-    barGoLink bar(result->GetRowCount());
+    
 
     do
     {
-        bar.step();
+        
         Field *fields = result->Fetch();
         TransportCreatureProto *transportCreatureProto = new TransportCreatureProto;
         transportCreatureProto->guid = fields[0].GetUInt32();

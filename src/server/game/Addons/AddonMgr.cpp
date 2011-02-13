@@ -23,7 +23,6 @@
 #include "Player.h"
 #include "Util.h"
 #include "SHA1.h"
-#include "ProgressBar.h"
 
 AddonMgr::AddonMgr()
 {
@@ -42,14 +41,14 @@ void AddonMgr::LoadFromDB()
         return;
     }
 
-    barGoLink bar(result->GetRowCount());
+    
     uint32 count = 0;
     Field *fields;
 
     do
     {
         fields = result->Fetch();
-        bar.step();
+        
         count++;
 
         std::string name = fields[0].GetCppString();

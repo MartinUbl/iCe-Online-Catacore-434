@@ -38,7 +38,7 @@
 #include "World.h"
 #include "Group.h"
 #include "InstanceScript.h"
-#include "ProgressBar.h"
+
 
 uint16 InstanceSaveManager::ResetTimeDelay[] = {3600, 900, 300, 60};
 
@@ -251,9 +251,6 @@ void InstanceSaveManager::_DelHelper(const char *fields, const char *table, cons
 
 void InstanceSaveManager::CleanupInstances()
 {
-    barGoLink bar(2);
-    bar.step();
-
     // load reset times and clean expired instances
     sInstanceSaveMgr.LoadResetTimes();
 
@@ -334,7 +331,6 @@ void InstanceSaveManager::CleanupInstances()
         while (result->NextRow());
     }
 
-    bar.step();
     sLog.outString();
     sLog.outString(">> Initialized %u instances", (uint32)InstanceSet.size());
 }
@@ -361,9 +357,6 @@ void InstanceSaveManager::PackInstances()
         while (result->NextRow());
     }
 
-    barGoLink bar(InstanceSet.size() + 1);
-    bar.step();
-
     uint32 InstanceNumber = 1;
     // we do assume std::set is sorted properly on integer value
     for (std::set<uint32>::iterator i = InstanceSet.begin(); i != InstanceSet.end(); ++i)
@@ -381,7 +374,6 @@ void InstanceSaveManager::PackInstances()
         }
 
         ++InstanceNumber;
-        bar.step();
     }
 
     sLog.outString();

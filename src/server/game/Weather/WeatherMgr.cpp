@@ -24,7 +24,7 @@
 
 #include "WeatherMgr.h"
 #include "Log.h"
-#include "ProgressBar.h"
+
 #include "ObjectMgr.h"
 
 WeatherMgr::~WeatherMgr()
@@ -85,21 +85,21 @@ void WeatherMgr::LoadWeatherData()
 
     if (!result)
     {
-        barGoLink bar(1);
+        
 
-        bar.step();
+        
 
         sLog.outString();
         sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
         return;
     }
 
-    barGoLink bar(result->GetRowCount());
+    
 
     do
     {
         Field *fields = result->Fetch();
-        bar.step();
+        
 
         uint32 zone_id = fields[0].GetUInt32();
 

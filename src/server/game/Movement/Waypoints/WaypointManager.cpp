@@ -21,7 +21,7 @@
 #include "DatabaseEnv.h"
 #include "GridDefines.h"
 #include "WaypointManager.h"
-#include "ProgressBar.h"
+
 #include "MapManager.h"
 
 void WaypointStore::Free()
@@ -56,7 +56,7 @@ void WaypointStore::Load()
 
     WaypointPath* path_data = NULL;
 
-    barGoLink bar(result->GetRowCount());
+    
     uint32 count = 0;
     Field *fields;
     uint32 last_id = 0;
@@ -65,7 +65,7 @@ void WaypointStore::Load()
     {
         fields = result->Fetch();
         uint32 id = fields[0].GetUInt32();
-        bar.step();
+        
         count++;
         WaypointData *wp = new WaypointData;
 
