@@ -101,6 +101,33 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/boss_onyxia.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
+  Kalimdor/HallsOfOrigination/halls_of_origination.h
+  Kalimdor/HallsOfOrigination/instance_halls_of_origination.cpp
+  Kalimdor/HallsOfOrigination/boss_anhuur.cpp
+  Kalimdor/HallsOfOrigination/boss_ptah.cpp
+  Kalimdor/HallsOfOrigination/boss_anraphet.cpp
+  Kalimdor/HallsOfOrigination/boss_isiset.cpp
+  Kalimdor/HallsOfOrigination/boss_ammunae.cpp
+  Kalimdor/HallsOfOrigination/boss_setesh.cpp
+  Kalimdor/HallsOfOrigination/boss_rajh.cpp
+  Kalimdor/TolVir/tolvir.h
+  Kalimdor/TolVir/instance_tolvir.cpp
+  Kalimdor/TolVir/boss_husam.cpp
+  Kalimdor/TolVir/boss_barim.cpp
+  Kalimdor/TolVir/boss_lockmaw_and_augh.cpp
+  Kalimdor/TolVir/boss_siamat.cpp
+  Kalimdor/TheSkywall/VortexPinnacle/vortex_pinnacle.h
+  Kalimdor/TheSkywall/VortexPinnacle/instance_vortex_pinnacle.cpp
+  Kalimdor/TheSkywall/VortexPinnacle/boss_ertan.cpp
+  Kalimdor/TheSkywall/VortexPinnacle/boss_altairus.cpp
+  Kalimdor/TheSkywall/VortexPinnacle/boss_asaad.cpp
+  Kalimdor/TheSkywall/ThroneOfTheFourWinds/throne_of_the_four_winds.h
+  Kalimdor/TheSkywall/ThroneOfTheFourWinds/instance_throne_of_the_four_winds.cpp
+  Kalimdor/TheSkywall/ThroneOfTheFourWinds/boss_conclave_of_wind.cpp
+  Kalimdor/TheSkywall/ThroneOfTheFourWinds/boss_alakir.cpp
+  Kalimdor/ahnqiraj.cpp
+  Kalimdor/mount_hyjal.cpp
+  Kalimdor/uldum.cpp
 )
 
 message("  -> Prepared: Kalimdor")
