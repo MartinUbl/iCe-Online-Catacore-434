@@ -2626,20 +2626,20 @@ public:
             QueryResult qr = WorldDatabase.PQuery("SELECT questcredit FROM ice_quest_credit WHERE guid=%u LIMIT 1;",me->GetDBTableGUIDLow());
             if(qr)
             {
-                Field* fd = qr->Fetch();
-                killcredit = fd[0].GetUInt32();
+                if(Field* fd = qr->Fetch())
+                    killcredit = fd[0].GetUInt32();
             }
-            QueryResult qr2 = WorldDatabase.PQuery("SELECT title FROM quest_template WHERE ReqCreatureOrGOId1=%u UNION \
+            /*QueryResult qr2 = WorldDatabase.PQuery("SELECT title FROM quest_template WHERE ReqCreatureOrGOId1=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId2=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId3=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId4=%u;",killcredit,killcredit,killcredit,killcredit);
             if(qr2)
             {
-                Field* fd = qr->Fetch();
+                Field* fd = qr2->Fetch();
                 subname = fd[0].GetCppString();
             }
 
-            me->SetName(subname);
+            me->SetName(subname);*/
         }
 
         void DoAction(const int32 action)
@@ -2649,20 +2649,20 @@ public:
                 QueryResult qr = WorldDatabase.PQuery("SELECT questcredit FROM ice_quest_credit WHERE guid=%u LIMIT 1;",me->GetDBTableGUIDLow());
                 if(qr)
                 {
-                    Field* fd = qr->Fetch();
-                    killcredit = fd[0].GetUInt32();
+                    if(Field* fd = qr->Fetch())
+                        killcredit = fd[0].GetUInt32();
                 }
-                QueryResult qr2 = WorldDatabase.PQuery("SELECT title FROM quest_template WHERE ReqCreatureOrGOId1=%u UNION \
+                /*QueryResult qr2 = WorldDatabase.PQuery("SELECT title FROM quest_template WHERE ReqCreatureOrGOId1=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId2=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId3=%u UNION \
                                                     SELECT title FROM quest_template WHERE ReqCreatureOrGOId4=%u;",killcredit,killcredit,killcredit,killcredit);
                 if(qr2)
                 {
-                    Field* fd = qr->Fetch();
+                    Field* fd = qr2->Fetch();
                     subname = fd[0].GetCppString();
                 }
 
-                me->SetName(subname);
+                me->SetName(subname);*/
             }
         }
 
