@@ -8784,6 +8784,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 3277:
             NumberOfFields = 16;
             break;
+        case 5031:
+            NumberOfFields = 18;
+            break;
         case 3358:
         case 3820:
             NumberOfFields = 40;
@@ -9304,6 +9307,23 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xe10) << uint32(0x0);           // 7 gold
                 data << uint32(0xe11) << uint32(0x0);           // 8 green
                 data << uint32(0xe1a) << uint32(0x0);           // 9 show
+            }
+            break;
+        case 5031:                                          // Twin Peaks
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP)
+                bg->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(0x62d) << uint32(0x0);       // 7 1581 alliance flag captures
+                data << uint32(0x62e) << uint32(0x0);       // 8 1582 horde flag captures
+                data << uint32(0x609) << uint32(0x0);       // 9 1545 unk, set to 1 on alliance flag pickup...
+                data << uint32(0x60a) << uint32(0x0);       // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
+                //data << uint32(0x60b) << uint32(0x2);       // 11 1547 unk
+                data << uint32(0x641) << uint32(0x3);       // 12 1601 unk (max flag captures?)
+                data << uint32(0x922) << uint32(0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                data << uint32(0x923) << uint32(0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                data << uint32(4247) << uint32(0x0);
+                data << uint32(4248) << uint32(0x0);
             }
             break;
         default:
