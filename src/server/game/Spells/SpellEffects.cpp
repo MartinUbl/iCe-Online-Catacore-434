@@ -5046,48 +5046,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     }
                     return;
                 }
-                case 72286:                                     // Invincible
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE) || !pArea)
-                        canFly = false;
-
-                    switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 75: unitTarget->CastSpell(unitTarget, 72281, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 72282, true); break;
-                    case 225:
-                        {
-                        if (canFly)
-                                unitTarget->CastSpell(unitTarget, 72283, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 72282, true);
-                        }break;
-                    case 300:
-                        {
-                        if (canFly)
-                            unitTarget->CastSpell(unitTarget, 72284, true);
-                        else
-                            unitTarget->CastSpell(unitTarget, 72282, true);
-                        }break;
-                    }
-                    return;
-                }
                 case 74856:                                     // Blazing Hippogryph
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

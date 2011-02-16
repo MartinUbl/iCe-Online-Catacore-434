@@ -217,39 +217,24 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
     Guild* guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
     {
-        SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
-        return;
-    }
-
-    if (!guild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_EOFFNOTE))
-    {
-        SendGuildCommandResult(GUILD_INVITE_S, "", ERR_GUILD_PERMISSIONS);
-        return;
-    }
-
-    std::string officerNote;
-    recvPacket >> officerNote;
-
-    if (!slot)
-    {
-        SendGuildCommandResult(GUILD_INVITE_S, plName, ERR_GUILD_PLAYER_NOT_IN_GUILD_S);
+        //SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
 
     switch(command)
     {
         case 0:
-            guild->SetOFFNOTE(plGuid, NOTE);
+            guild->HandleSetMemberNote(this,plName, NOTE, true);
             break;
         case 128:
-            guild->SetPNOTE(plGuid, NOTE);
+            guild->HandleSetMemberNote(this,plName, NOTE, false);
             break;
         default:
             sLog.outError("Guild: unhandled command %u in SetNote function!",command);
             break;
     }
 
-    guild->Roster(this);
+    guild->HandleRoster(this);
 }
 
 void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
@@ -370,6 +355,32 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& /*recvPacket*/)
 
     if (Guild* pGuild = _GetPlayerGuild(this, true))
         pGuild->HandleRemoveLowestRank(this);
+}
+
+void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
+{
+    uint8 sens;
+    uint32 rankID;
+    uint64 playerGUID;
+    
+    recvPacket >> sens >> rankID >> playerGUID;
+    
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    if (!guild)
+    {
+        Guild::SendCommandResult(this,GUILD_CREATE_S, ERR_GUILD_PLAYER_NOT_IN_GUILD, "");
+        return;
+    }
+    else if (GetPlayer()->GetGUID() != guild->GetLeaderGUID())
+    {
+        Guild::SendCommandResult(this,GUILD_INVITE_S, ERR_GUILD_PERMISSIONS, "");
+        return;
+    }
+    
+    guild->SwitchRank(rankID, sens == 128 ? rankID - 1 : rankID + 1);
+    
+    guild->HandleQuery(this);
+    guild->HandleRoster(this);
 }
 
 void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)

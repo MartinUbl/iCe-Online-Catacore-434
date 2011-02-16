@@ -1255,10 +1255,10 @@ void Guild::Disband()
 void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 {
                                                             // we can only guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+2+4+2+members.size()*100));
-    data << GINFO;
-    data << MOTD;
-    data << (uint32)members.size();
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+GetMOTD().length()+1+GetInfo().length()+1+2+4+2+m_members.size()*100));
+    data << GetInfo();
+    data << GetMOTD();
+    data << (uint32)m_members.size();
 
     //unk32
     std::list<uint32> zone_list;
@@ -1279,7 +1279,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     std::list<const char*> name_list;
     std::list<uint8> level_list;
 
-    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         if (Player *pl = sObjectMgr.GetPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
         {
@@ -1289,70 +1289,70 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
             //unk2 (8) - 0 or 1
             //unk3 (64) - unknown values, sometimes 0
             guid_list.push_back(pl->GetGUID());
-            rank_list.push_back(itr->second.RankId);
+            rank_list.push_back(itr->second->GetRankId());
             //unk4 (16) - whole range values
             //unk5 (32) - related to ranks? values 0 - 4
             //unk6 (8) - always 1, not seen any other values
             //unk7 (8) - unknown, probably whole range
             apoints_list.push_back(pl->GetAchievementMgr().GetAchievementPoints());
             class_list.push_back(pl->getClass());
-            pnote_list.push_back(itr->second.Pnote.c_str());
+            pnote_list.push_back(itr->second->m_publicNote.c_str());
             connected_list.push_back(1); //connected, yes
-            prof_data.push_back(itr->second.professions[0].title);
-            prof_data.push_back(itr->second.professions[0].level);
-            prof_data.push_back(itr->second.professions[0].skillID);
-            prof_data.push_back(itr->second.professions[1].title);
-            prof_data.push_back(itr->second.professions[1].level);
-            prof_data.push_back(itr->second.professions[1].skillID);
+            prof_data.push_back(itr->second->professions[0].title);
+            prof_data.push_back(itr->second->professions[0].level);
+            prof_data.push_back(itr->second->professions[0].skillID);
+            prof_data.push_back(itr->second->professions[1].title);
+            prof_data.push_back(itr->second->professions[1].level);
+            prof_data.push_back(itr->second->professions[1].skillID);
             //unk8 (32) - unknown, whole range
             name_list.push_back(pl->GetName());
-            offnote_list.push_back(itr->second.OFFnote.c_str());
+            offnote_list.push_back(itr->second->m_officerNote.c_str());
             level_list.push_back(pl->getLevel());
         }
         else
         {
             //unk0 (32) - unknown values, various
-            zone_list.push_back(itr->second.ZoneId); //zoneid
+            zone_list.push_back(itr->second->m_zoneId); //zoneid
             //unk1 (32) - unknown values, various
             //unk2 (8) - 0 or 1
             //unk3 (64) - unknown values, sometimes 0
             guid_list.push_back(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
-            rank_list.push_back(itr->second.RankId);
+            rank_list.push_back(itr->second->GetRankId());
             //unk4 (16) - whole range values
             //unk5 (32) - related to ranks? values 0 - 4
             //unk6 (8) - always 1, not seen any other values
             //unk7 (8) - unknown, probably whole range
-            apoints_list.push_back(itr->second.achievementPoints);
-            class_list.push_back(itr->second.Class);
-            pnote_list.push_back(itr->second.Pnote.c_str());
+            apoints_list.push_back(itr->second->achievementPoints);
+            class_list.push_back(itr->second->m_class);
+            pnote_list.push_back(itr->second->m_publicNote.c_str());
             connected_list.push_back(0); //connected, no, offline
-            prof_data.push_back(itr->second.professions[0].title);
-            prof_data.push_back(itr->second.professions[0].level);
-            prof_data.push_back(itr->second.professions[0].skillID);
-            prof_data.push_back(itr->second.professions[1].title);
-            prof_data.push_back(itr->second.professions[1].level);
-            prof_data.push_back(itr->second.professions[1].skillID);
+            prof_data.push_back(itr->second->professions[0].title);
+            prof_data.push_back(itr->second->professions[0].level);
+            prof_data.push_back(itr->second->professions[0].skillID);
+            prof_data.push_back(itr->second->professions[1].title);
+            prof_data.push_back(itr->second->professions[1].level);
+            prof_data.push_back(itr->second->professions[1].skillID);
             //unk8 (32) - unknown, whole range
-            name_list.push_back(itr->second.Name.c_str());
-            offnote_list.push_back(itr->second.OFFnote.c_str());
-            level_list.push_back(itr->second.Level);
+            name_list.push_back(itr->second->m_name.c_str());
+            offnote_list.push_back(itr->second->m_officerNote.c_str());
+            level_list.push_back(itr->second->m_level);
         }
     }
 
     //unk0
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint32(0);
     //zones
     for(std::list<uint32>::const_iterator itr = zone_list.begin(); itr != zone_list.end(); ++itr)
         data << (uint32)(*itr);
     //unk1
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint32(0);
     //unk2
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint8(0);
     //unk3
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint64(0);
     //guids
     for(std::list<uint64>::const_iterator itr = guid_list.begin(); itr != guid_list.end(); ++itr)
@@ -1362,7 +1362,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         data << (uint32)(*itr);
     //unk4,5,6,7
     //hardcoded values, with zeros in all fields its impossible to open character guild dialog
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint16(0x6DA1) << uint32(0x2) << uint8(0x1) << uint8(0x34);
     //achievement points
     for(std::list<uint32>::const_iterator itr = apoints_list.begin(); itr != apoints_list.end(); ++itr)
@@ -1380,7 +1380,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     for(std::list<uint32>::const_iterator itr = prof_data.begin(); itr != prof_data.end(); ++itr)
         data << (uint32)(*itr);
     //unk8
-    for(uint32 i = 0; i < members.size(); i++)
+    for(uint32 i = 0; i < m_members.size(); i++)
         data << uint32(0);
     //unk, alone in whole roster
     data << uint8(0);
@@ -1429,17 +1429,17 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         BroadcastPacket(&data);
 
     WorldPacket data7(SMSG_GUILD_RANK);
-    data7 << (uint32)m_Ranks.size();
-    for(uint32 i = 0; i < m_Ranks.size(); i++)
+    data7 << (uint32)m_ranks.size();
+    for(uint32 i = 0; i < m_ranks.size(); i++)
     {
-        data7 << m_Ranks[i].Name;
+        data7 << GetRankInfo(i).GetName().c_str();
         for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << (uint32)m_Ranks[i].TabRight[j];
-        data7 << (uint32)m_Ranks[i].BankMoneyPerDay;
+            data7 << (uint32)GetRankInfo(i).GetBankTabRights(j);
+        data7 << (uint32)GetRankInfo(i).GetBankMoneyPerDay();
         for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << (uint32)m_Ranks[i].TabSlotPerDay[j];
-        data7 << (uint32)GetRankRights(i);
-        data7 << (uint32)GetRankRights(i); //unk, maybe 
+            data7 << (uint32)GetRankInfo(i).GetBankTabSlotsPerDay(j);
+        data7 << (uint32)GetRankInfo(i).GetRights();
+        data7 << (uint32)GetRankInfo(i).GetRights(); //unk, maybe 
         data7 << (uint32)i;
     }
     if (session)

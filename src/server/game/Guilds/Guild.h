@@ -301,7 +301,6 @@ private:
 
         inline Player* FindPlayer() const { return sObjectMgr.GetPlayer(m_guid); }
 
-    private:
         uint32 m_guildId;
         // Fields from characters table
         uint64 m_guid;

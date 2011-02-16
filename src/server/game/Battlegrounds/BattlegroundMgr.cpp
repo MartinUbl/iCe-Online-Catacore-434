@@ -658,9 +658,6 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         case BATTLEGROUND_RB:
             bg = new BattlegroundRB(*(BattlegroundRB*)bg_template);
             break;
-        case BATTLEGROUND_TP:
-            bg = new BattlegroundTP(*(BattlegroundTP*)bg_template);
-            break;
         default:
             //error, but it is handled few lines above
             return 0;
@@ -709,7 +706,6 @@ uint32 BattlegroundMgr::CreateBattleground(BattlegroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_BG: bg = new BattlegroundBG; break;
         case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
         case BATTLEGROUND_RB: bg = new BattlegroundRB; break;
-        case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
         default:
             bg = new Battleground;
             break;

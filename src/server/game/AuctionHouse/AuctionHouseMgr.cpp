@@ -325,8 +325,10 @@ void AuctionHouseMgr::LoadAuctionItems()
     uint32 count = 0;
     do
     {
-        uint32 item_guid        = result->GetUInt32(11);
-        uint32 item_template    = result->GetUInt32(12);
+        Field* fields = result->Fetch();
+
+        uint32 item_guid        = fields[11].GetUInt32();
+        uint32 item_template    = fields[12].GetUInt32();
 
         ItemPrototype const *proto = sObjectMgr.GetItemPrototype(item_template);
         if (!proto)
@@ -369,7 +371,7 @@ void AuctionHouseMgr::LoadAuctions()
     AuctionEntry *aItem;
     do
     {
-        fields = result->Fetch();
+        Field* fields = result->Fetch();
 
         aItem = new AuctionEntry;
         aItem->Id = fields[0].GetUInt32();

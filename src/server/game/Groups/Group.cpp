@@ -1834,7 +1834,7 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
 {
     if (!mapEntry)
         return NULL;
-/*
+
     Difficulty difficulty = GetDifficulty(mapEntry->IsRaid()); // - Not work? cause crash when incorrect difficulty.
 
     // some instances only have one difficulty
@@ -1845,9 +1845,7 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
         return &itr->second;
     else
         return NULL;
-*/
 }
-
 
 InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, bool load)
 {

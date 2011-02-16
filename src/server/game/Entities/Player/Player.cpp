@@ -9409,6 +9409,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4294) << uint32(1); // 22
                 data << uint32(4243) << uint32(1); // 23
                 data << uint32(4345) << uint32(1); // 24
+            }
         case 5031:                                          // Twin Peaks
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP)
                 bg->FillInitialWorldStates(data);

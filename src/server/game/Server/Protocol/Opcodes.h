@@ -559,8 +559,7 @@ enum Opcodes
     CMSG_GUILD_ADD_RANK                              = 0x100A4, //
     CMSG_GUILD_DEL_RANK                              = 0x100A5, //
     CMSG_GUILD_SWITCH_RANK                           = 0x100A6, //
-    CMSG_GUILD_SET_PUBLIC_NOTE                       = 0x100A7, //
-    CMSG_GUILD_SET_OFFICER_NOTE                      = 0x100A8, //
+    CMSG_GUILD_SET_NOTE                              = 0x100A7, //
     SMSG_LOGIN_VERIFY_WORLD                          = 0x028C0, // 4.0.6a 13623
     CMSG_CLEAR_EXPLORATION                           = 0x100A9, //
     CMSG_SEND_MAIL                                   = 0x02DEC, // 4.0.6a 13623
@@ -1278,6 +1277,7 @@ enum Opcodes
     CMSG_SET_PRIMARY_TALENT_TREE                     = 0x0B47D, //
     CMSG_GROUP_SET_ROLES                             = 0x08509, // 4.0.6a 13623
     CMSG_UNKNOWN_34056                               = 0x08508, // 
+    CMSG_RETURN_TO_GRAVEYARD                         = 0x1025D,
     NUM_MSG_TYPES                                    = 0x102B7  // last unknown opcode + 1.
 };
 
