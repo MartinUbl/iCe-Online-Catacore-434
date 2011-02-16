@@ -28,13 +28,11 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
 
     uint32 channel_id;
-    uint8 unknown1, unknown2, unk; // unk 4.0.1
+    uint8 isCustom, unknown2, unk; // unk 4.0.1
     std::string channelname, pass;
 
-    recvPacket >> unknown1 >> unknown2 >> channel_id >> unk;
-
+    recvPacket >> channel_id >> isCustom >> unknown2 >> unk;
     recvPacket >> channelname;
-    recvPacket >> unk;
 
     if (channelname.empty())
         return;
