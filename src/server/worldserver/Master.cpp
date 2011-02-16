@@ -182,9 +182,21 @@ int Master::Run()
     sLog.outString( "%s (core-daemon)", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
-	sLog.outString( "Welcome to Project SkyFire Cataclysm");
-	sLog.outString( "Portions of TrinityCore & CactusEMU");
-	sLog.outString( "http://www.projectskyfire.org/");
+    sLog.outString( "          CCCCCCC               ");
+    sLog.outString( "        CC                      ");
+    sLog.outString( "   i   C                eeeeee  ");
+    sLog.outString( "       C              eee    eee");
+    sLog.outString( "   i   C              eeeeeeeeee");
+    sLog.outString( "   i   C              ee        ");
+    sLog.outString( "   i    CC            eee    eee");
+    sLog.outString( "   i      CCCCCCC       eeeeee    Online ");
+    sLog.outString( "");
+    sLog.outString( " Developed by: iCe Online GM Team");
+    sLog.outString( " Head developer: Gregory (Cmaranec)");
+    sLog.outString( "");
+    sLog.outString( " Special thanks to: MaNGOS, TrinityCore, CactusEMU, SkyFire");
+    sLog.outString( "");
+
     /// worldd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile", "");
     if(!pidfile.empty())

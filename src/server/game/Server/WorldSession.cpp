@@ -194,8 +194,18 @@ bool WorldSession::Update(uint32 diff)
                         packet->GetOpcode());
         #endif*/
 
-        sLog.outString("SESSION: Received opcode 0x%.4X (%s)", packet->GetOpcode(), packet->GetOpcode()>OPCODE_NOT_FOUND?"nf":LookupOpcodeName(packet->GetOpcode()));
-		if (packet->GetOpcode() >= NUM_MSG_TYPES)
+		switch(packet->GetOpcode())
+		{
+			case 0x0177C:
+			case 0x00D57:
+			case 0x03574:
+				break;
+			default:
+				sLog.outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+				break;
+		}
+
+        if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
             sLog.outError("SESSION: received non-existed opcode %s (0x%.4X)",
                 LookupOpcodeName(packet->GetOpcode()),

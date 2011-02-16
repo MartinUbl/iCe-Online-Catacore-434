@@ -13178,6 +13178,16 @@ void Unit::SetPower(Powers power, uint32 val)
     if (GetPower(power) == val)
         return;
 
+    // Client limits
+    switch(power)
+    {
+        case POWER_SOUL_SHARDS:
+        case POWER_HOLY_POWER:
+            if(val > 3)
+                val = 3;
+            break;
+    }
+
     uint32 maxPower = GetMaxPower(power);
     if (maxPower < val)
         val = maxPower;

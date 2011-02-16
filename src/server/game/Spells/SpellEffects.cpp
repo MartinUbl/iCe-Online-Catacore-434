@@ -2242,8 +2242,16 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
 
         int32 addhealth = damage;
 
+        // Word of Glory (paladin holy talent)
+        if (m_spellInfo->Id == 85673)
+        {
+            //multiply by amount of holy power (+1 for unknown purposes)
+            addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
+            //and clear holy power
+            caster->SetPower(POWER_HOLY_POWER, 0);
+        }
         // Vessel of the Naaru (Vial of the Sunwell trinket)
-        if (m_spellInfo->Id == 45064)
+        else if (m_spellInfo->Id == 45064)
         {
             // Amount of heal - depends from stacked Holy Energy
             int damageAmount = 0;
@@ -4580,10 +4588,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     // Triggered spell id dependent on riding skill and zone
                     bool canFly = true;
                     uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571 && v_map != 0)
-                        canFly = false;
 
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
+                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
 					
 					if(canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))
@@ -4631,7 +4637,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (v_map != 530 && v_map != 571 && v_map != 0)
                         canFly = false;
 
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
+                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
 					
 					if(canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))
@@ -5008,10 +5014,50 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (v_map != 530 && v_map != 571 && v_map != 0)
                         canFly = false;
 
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
+                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
 
-					if (canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))
+                    float x, y, z;
+                    unitTarget->GetPosition(x, y, z);
+                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
+                    AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
+                    if (canFly && pArea->flags & AREA_FLAG_NO_FLY_ZONE)
+                        canFly = false;
+
+                    switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
+                    {
+                    case 0: unitTarget->CastSpell(unitTarget, 71343, true); break;
+                    case 75: unitTarget->CastSpell(unitTarget, 71344, true); break;
+                    case 150: unitTarget->CastSpell(unitTarget, 71345, true); break;
+                    case 225:
+                        {
+                        if (canFly)
+                                unitTarget->CastSpell(unitTarget, 71346, true);
+                            else
+                                unitTarget->CastSpell(unitTarget, 71345, true);
+                        }break;
+                    case 300:
+                        {
+                        if (canFly)
+                            unitTarget->CastSpell(unitTarget, 71347, true);
+                        else
+                            unitTarget->CastSpell(unitTarget, 71345, true);
+                        }break;
+                    }
+                    return;
+                }
+                case 72286:                                     // Invincible
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Prevent stacking of mounts and client crashes upon dismounting
+                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+                    // Triggered spell id dependent on riding skill and zone
+                    bool canFly = true;
+                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
+                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
 
                     float x, y, z;
@@ -5074,7 +5120,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (v_map != 530 && v_map != 571 && v_map != 0)
                         canFly = false;
 
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
+                    if (!unitTarget->ToPlayer()->IsKnowHowFlyIn(unitTarget->GetMapId(), unitTarget->GetZoneId()))
                         canFly = false;
 
 					if(canFly && v_map == 0 && !unitTarget->ToPlayer()->HasSpell(90267))

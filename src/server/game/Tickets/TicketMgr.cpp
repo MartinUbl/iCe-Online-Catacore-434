@@ -57,15 +57,13 @@ void TicketMgr::LoadGMTickets()
 
     if (!result)
     {
-        
-        
         sLog.outString();
         sLog.outString(">> GM Tickets table is empty, no tickets were loaded.");
         return;
     }
 
     uint16 count = 0;
-    
+
     GM_Ticket *ticket;
     do
     {

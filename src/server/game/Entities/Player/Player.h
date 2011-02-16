@@ -156,6 +156,7 @@ enum ActionButtonType
     ACTION_BUTTON_SPELL     = 0x00,
     ACTION_BUTTON_C         = 0x01,                         // click?
     ACTION_BUTTON_EQSET     = 0x20,
+    ACTION_BUTTON_LIST      = 0x30,
     ACTION_BUTTON_MACRO     = 0x40,
     ACTION_BUTTON_CMACRO    = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
     ACTION_BUTTON_ITEM      = 0x80
@@ -1781,6 +1782,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateSpellPower();
         void UpdateMaxHealth();
         void UpdateMaxPower(Powers power);
+        void UpdateClassSpecificPowers();
         void ApplyFeralAPBonus(int32 amount, bool apply);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateShieldBlockValue();
@@ -1870,6 +1872,7 @@ class Player : public Unit, public GridObject<Player>
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
         void BuildPlayerRepop();
         void RepopAtGraveyard();
+        void ReturnToGraveyard();
 
         void DurabilityLossAll(double percent, bool inventory);
         void DurabilityLoss(Item* item, double percent);
@@ -2560,6 +2563,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint64 m_comboTarget;
         int8 m_comboPoints;
+
+        WorldSafeLocsEntry* m_graveyard;
 
         QuestStatusMap mQuestStatus;
 

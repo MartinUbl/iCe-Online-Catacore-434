@@ -66,16 +66,23 @@ void WorldSession::SendBattlegGroundList(uint64 guid, BattlegroundTypeId bgTypeI
 
 void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 {
-    uint8 joinAsGroup;
+    uint32 unk0;
+    uint8 unk1;
     uint32 bgTypeId_;
-    uint32 unk, unk2;
+    //uint32 instanceId;
+    uint8 joinAsGroup;
+    uint8 unk2;
+    uint16 unk3;
     bool isPremade = false;
     Group * grp = NULL;
 
-    recv_data >> joinAsGroup;                               // join as group (join as group = 0x80, else 0x0)
-    recv_data >> unk;                                       // unk
+    recv_data >> unk0;                                      // unknown (changed in 4.0.0)
+    recv_data >> unk1;                                      // unknown (changed in 4.0.0)
     recv_data >> bgTypeId_;                                 // battleground type id (DBC id)
-    recv_data >> unk2;                                      // unk
+    //recv_data >> instanceId;                              // instance id, 0 if First Available selected (removed 4.0.0 ?)
+    recv_data >> joinAsGroup;                               // join as group
+    recv_data >> unk2;                                      // unknown (added in 4.0.0)
+    recv_data >> unk3;                                      // unknown (added in 4.0.0)
 
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
@@ -99,15 +106,27 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     if (_player->InBattleground())
         return;
 
-    // get bg template
-    Battleground *bg = sBattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
+    // get bg instance or bg template if instance not found
+    Battleground *bg = NULL;
+    //if (instanceId)
+    //    bg = sBattlegroundMgr.GetBattlegroundThroughClientInstance(instanceId, bgTypeId);
+
     if (!bg)
+        bg = sBattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
+
+    if (!bg)
+    {
+        sLog.outError("Battleground template for BG Type ID %u not found!",bgTypeId_);
         return;
+    }
 
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),_player->getLevel());
     if (!bracketEntry)
+    {
+        sLog.outError("Unexpected level branch branch for player level %u",_player->getLevel());
         return;
+    }
 
     GroupJoinBattlegroundResult err;
 
@@ -129,6 +148,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data);
+            sLog.outString("Cannot join do BG because of deserter!");
             return;
         }
 
@@ -138,6 +158,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
+            sLog.outString("Cannot join do BG because of already in random BG queue!");
             return;
         }
 
@@ -147,13 +168,17 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_NON_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
+            sLog.outString("Cannot join do BG because of already in non-random queue!");
             return;
         }
 
         // check if already in queue
         if (_player->GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+        {
+            sLog.outString("Cannot join do BG because of already in that queue!");
             //player is already in this queue
             return;
+        }
 
         // check if has free queue slots
         if (!_player->HasFreeBattlegroundQueueId())
@@ -161,6 +186,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(&data);
+            sLog.outString("Cannot join do BG because of full BG queue slots!");
             return;
         }
 
@@ -328,13 +354,14 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
 {
     sLog.outDebug("WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
 
-    uint8 type;                                             // arenatype if arena
-    uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1
+    uint8 action;                                           // enter battle 0x80, leave queue 0x0
     uint32 bgTypeId_;                                       // type id from dbc
-    uint16 unk;                                             // 0x1F90 constant?
-    uint8 action;                                           // enter battle 0x1, leave queue 0x0
+    uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1
+    uint8 type;                                             // arenatype if arena
+    uint16 unk;                                             // 0x1F10 constant?
 
-    recv_data >> type >> unk2 >> bgTypeId_ >> unk >> action;
+    recv_data >> action >> bgTypeId_ >> unk2 >> type >> unk;
+    //maybe unk2 and type are switched (need to debug after BG implement)
 
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
@@ -359,7 +386,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         return;
     }
     // if action == 1, then instanceId is required
-    if (!ginfo.IsInvitedToBGInstanceGUID && action == 1)
+    if (!ginfo.IsInvitedToBGInstanceGUID && action == 128)
     {
         sLog.outError("BattlegroundHandler: instance not found.");
         return;
@@ -379,10 +406,13 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),_player->getLevel());
     if (!bracketEntry)
+    {
+        sLog.outError("BattlegroundHandler: Unexpected level bracket request for level %u",_player->getLevel());
         return;
+    }
 
     //some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
-    if (action == 1 && ginfo.ArenaType == 0)
+    if (action == 128 && ginfo.ArenaType == 0)
     {
         //if player is trying to enter battleground (not arena!) and he has deserter debuff, we must just remove him from queue
         if (!_player->CanJoinToBattleground())
@@ -406,7 +436,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
     WorldPacket data;
     switch(action)
     {
-        case 1:                                         // port to battleground
+        case 128:                                       // port to battleground
             if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
                 return;                                 // cheating?
 

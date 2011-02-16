@@ -28,8 +28,11 @@
 class PaladinPlayer: public Player
 {
 public:
-    PaladinPlayer(WorldSession * session): Player(session) {}
+    explicit PaladinPlayer(WorldSession * session);
     virtual uint8 getClass() const { return CLASS_PALADIN; }
+
+    uint8 GetHolyPower();
+    void SetHolyPower(uint8 value);
 };
 
 #endif

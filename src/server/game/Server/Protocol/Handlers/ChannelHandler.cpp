@@ -27,27 +27,12 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
 
-    uint32 channel_id, unk; // unk 4.0.1
-    uint8 unknown1, unknown2;
+    uint32 channel_id;
+    uint8 unknown1, unknown2, unk; // unk 4.0.1
     std::string channelname, pass;
 
-    recvPacket >> channel_id;
+    recvPacket >> unknown1 >> unknown2 >> channel_id >> unk;
 
-    if (channel_id)
-    {
-        ChatChannelsEntry const* channel = sChatChannelsStore.LookupEntry(channel_id);
-        if (!channel)
-            return;
-
-        AreaTableEntry const* current_zone = GetAreaEntryByAreaID(_player->GetZoneId());
-        if (!current_zone)
-            return;
-
-        if (!_player->CanJoinConstantChannelInZone(channel, current_zone))
-            return;
-    }
-
-    recvPacket >> unknown1 >> unknown2;
     recvPacket >> channelname;
     recvPacket >> unk;
 
@@ -58,7 +43,8 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
         cMgr->team = _player->GetTeam();
-        if (Channel *chn = cMgr->GetJoinChannel(channelname, channel_id))
+        Channel *chn = cMgr->GetJoinChannel(channelname, channel_id);
+        if (chn)
             chn->Join(_player->GetGUID(), pass.c_str());
     }
 }
@@ -68,10 +54,11 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
     //recvPacket.hexlike();
 
-    uint32 unk;
-    std::string channelname;
-    recvPacket >> unk;                                      // channel id?
-    recvPacket >> channelname;
+    uint32 unk0; //unknown 4 bytes, read as uint32 (4.0.3)
+    std::string channelname, unk1;
+
+    recvPacket >> unk0;
+    recvPacket >> channelname >> unk1;
 
     if (channelname.empty())
         return;

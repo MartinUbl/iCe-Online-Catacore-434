@@ -196,34 +196,60 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
         pGuild->HandleSetMOTD(this, motd);
 }
 
-void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE");
+    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_NOTE");
 
-    std::string playerName;
-    recvPacket >> playerName;
+    uint8 command;
+    uint64 guid;
+    uint32 unk0;
+    uint16 unk1;
+    uint32 unk2; //probably read as 8,8,16
+    uint32 unk3;
+    uint8 unk4;
+    uint8 unk5;
+    std::string NOTE;
 
-    std::string publicNote;
-    recvPacket >> publicNote;
+    recvPacket >> command >> guid >> unk0 >> unk1 >> unk2 >> unk3 >> unk4 >> unk5 >> NOTE;
 
-    if (normalizePlayerName(playerName))
-        if (Guild* pGuild = _GetPlayerGuild(this, true))
-            pGuild->HandleSetMemberNote(this, playerName, publicNote, false);
-}
+    std::string plName = sObjectMgr.GetPlayer(guid)?sObjectMgr.GetPlayer(guid)->GetName():"<Unknown>";
 
-void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
-{
-    sLog.outDebug("WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE");
+    Guild* guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    if (!guild)
+    {
+        SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
+        return;
+    }
 
-    std::string playerName;
-    recvPacket >> playerName;
+    if (!guild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_EOFFNOTE))
+    {
+        SendGuildCommandResult(GUILD_INVITE_S, "", ERR_GUILD_PERMISSIONS);
+        return;
+    }
 
     std::string officerNote;
     recvPacket >> officerNote;
 
-    if (normalizePlayerName(playerName))
-        if (Guild* pGuild = _GetPlayerGuild(this, true))
-            pGuild->HandleSetMemberNote(this, playerName, officerNote, true);
+    if (!slot)
+    {
+        SendGuildCommandResult(GUILD_INVITE_S, plName, ERR_GUILD_PLAYER_NOT_IN_GUILD_S);
+        return;
+    }
+
+    switch(command)
+    {
+        case 0:
+            guild->SetOFFNOTE(plGuid, NOTE);
+            break;
+        case 128:
+            guild->SetPNOTE(plGuid, NOTE);
+            break;
+        default:
+            sLog.outError("Guild: unhandled command %u in SetNote function!",command);
+            break;
+    }
+
+    guild->Roster(this);
 }
 
 void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)

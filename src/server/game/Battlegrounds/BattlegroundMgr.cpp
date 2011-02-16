@@ -43,6 +43,7 @@
 #include "BattlegroundBG.h"
 #include "BattlegroundTP.h"
 #include "BattlegroundRB.h"
+#include "BattlegroundTP.h"
 #include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
@@ -189,54 +190,97 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         *data << uint32(QueueSlot);                         // queue id (0...1)
         return;
     }
-    
-    data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+8+1+1+4+1+4+4+4));
-    *data << uint32(QueueSlot);                             // queue id (0...1) - player can be in 2 queues in time
-    // The following segment is read as uint64 in client but can be appended as their original type.
-    *data << uint8(arenatype);
-    sLog.outDebug("BattlegroundMgr::BuildBattlegroundStatusPacket: arenatype = %u for bg instanceID %u, TypeID %u.", arenatype, bg->GetClientInstanceID(), bg->GetTypeID());
-    *data << uint8(bg->isArena() ? 0xC : 0x2);
-    *data << uint32(bg->GetTypeID());
-    *data << uint16(0x1F90);
-    // End of uint64 segment, decomposed this way for simplicity
-    *data << uint8(0);                                      // 3.3.0, some level, only saw 80...
-    *data << uint8(0);                                      // 3.3.0, some level, only saw 80...
-    *data << uint32(bg->GetClientInstanceID());
-    // alliance/horde for BG and skirmish/rated for Arenas
-    // following displays the minimap-icon 0 = faction icon 1 = arenaicon
-    *data << uint8(bg->isRated());                          // 1 for rated match, 0 for bg or non rated match
 
-    *data << uint32(StatusID);                              // status
     switch(StatusID)
     {
-        case STATUS_WAIT_QUEUE:                             // status_in_queue
-            *data << uint32(Time1);                         // average wait time, milliseconds
-            *data << uint32(Time2);                         // time in queue, updated every minute!, milliseconds
+        case STATUS_NONE:
+            //TODO: sniff and implement proper opcode with structure for leaving queue
             break;
-        case STATUS_WAIT_JOIN:                              // status_invite
-            *data << uint32(bg->GetMapId());                // map id
-            *data << uint64(0);                             // 3.3.5, unknown
-            *data << uint32(Time1);                         // time to remove from queue, milliseconds
+        case STATUS_WAIT_QUEUE:
+            data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(Time2); //time in queue?
+            *data << uint32(bg->GetClientInstanceID());
+            *data << uint8(arenatype); //arenatype
+            *data << uint32(Time1); //average wait time
+
+            *data << uint8(0); //unk
+            *data << uint32(0); //unk
+
+            *data << uint32(bg->GetTypeID()); //BG type ID
+
+            *data << uint8(0); //unk
+            *data << uint8(0); //unk
+
+            //following is probably read as uint16, constant?
+            *data << uint8(0x10);
+            *data << uint8(0x1F);
+
+            *data << uint8(0); //unk
             break;
-        case STATUS_IN_PROGRESS:                            // status_in_progress
-            *data << uint32(bg->GetMapId());                // map id
-            *data << uint64(0);                             // 3.3.5, unknown
-            *data << uint32(Time1);                         // time to bg auto leave, 0 at bg start, 120000 after bg end, milliseconds
-            *data << uint32(Time2);                         // time from bg start, milliseconds
-            *data << uint8(uiFrame);
+        case STATUS_WAIT_JOIN:
+            data->Initialize(0x38D8, 1+4+6+2+1+4+10);
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(bg->GetMapId()); //map
+
+            *data << uint32(bg->GetTypeID()); //not sure!
+
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0x10); //const?
+            *data << uint8(0x1F); //const?
+            *data << uint8(0x55); //const??
+
+            *data << uint32(Time1); //time before remove
+
+            //unks
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            break;
+        case STATUS_IN_PROGRESS:
+            //where uiFrame?
+            data->Initialize(0x3818,1+4+4+1+4+1+4+1+1+4+4+5+4);
+            *data << uint8(QueueSlot); //not sure
+            *data << uint32(0); //unk
+            *data << uint32(bg->GetMapId()); //map
+            *data << uint8(0x55); //const?
+            *data << uint32(Time1); //time1 (time to end)
+            *data << uint8(0);
+            *data << uint32(bg->GetTypeID()); //bg typeid
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0x10); //const?
+            *data << uint8(0x1F); //const?
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint8(0);
+            *data << uint32(Time2); //time2 (elapsed?)
             break;
         default:
-            sLog.outError("Unknown BG status!");
+            sLog.outError("Unknown BG status %u!",StatusID);
             break;
     }
 }
 
 void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 {
+    return; //Return because of crashing client!! Need to find correct structure
+
     uint8 type = (bg->isArena() ? 1 : 0);
-                                                            // last check on 3.0.3
-    data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
-    *data << uint8(type);                                   // type (battleground=0/arena=1)
+
+    //Since 4.0.x, the MSG_PVP_LOG_DATA has different response opcode ID
+    data->Initialize(0x3878,(1+1+4+40*bg->GetPlayerScoresSize()));
+    *data << uint8(type);                                    // type (battleground=0/arena=1)
 
     if (type)                                                // arena
     {
@@ -340,6 +384,11 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                         *data << uint32(0x00000002);            // count of next fields
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);       // bases asssulted
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);        // bases defended
+                    case 726:                                   // TP
+                        *data << uint32(0x00000002);            // count of next fields
+                        *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagCaptures);
+                        *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagReturns);
+                        break;
                     default:
                         *data << uint32(0);
                         break;
@@ -375,6 +424,10 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                 *data << uint32(0x00000002);                // count of next fields
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);       // bases asssulted
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);        // bases defended
+            case BATTLEGROUND_TP:
+                *data << uint32(0x00000002);                    // count of next fields
+                *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagCaptures);
+                *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagReturns);
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
@@ -605,6 +658,9 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         case BATTLEGROUND_RB:
             bg = new BattlegroundRB(*(BattlegroundRB*)bg_template);
             break;
+        case BATTLEGROUND_TP:
+            bg = new BattlegroundTP(*(BattlegroundTP*)bg_template);
+            break;
         default:
             //error, but it is handled few lines above
             return 0;
@@ -653,6 +709,7 @@ uint32 BattlegroundMgr::CreateBattleground(BattlegroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_BG: bg = new BattlegroundBG; break;
         case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
         case BATTLEGROUND_RB: bg = new BattlegroundRB; break;
+        case BATTLEGROUND_TP: bg = new BattlegroundTP; break;
         default:
             bg = new Battleground;
             break;
@@ -881,29 +938,25 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     if (!plr)
         return;
 
-    uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-    uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
-    uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
-
-    win_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), win_kills);
-    loos_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), loos_kills);
+    uint32 win_honor  = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+    uint32 lose_honor = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << uint8(0x2);                                    // unk
-    *data << uint8(0x31);                                   // unk
-    *data << uint32(0);                                     // unk
-    uint32 count = 0;
-    size_t count_pos = data->wpos();
-    *data << uint32(count);                                 // count
-    
-    *data << uint32(win_kills);                             // 3.3.3 winHonor
-    *data << uint32(bgTypeId);                              // bgtypeid
-    *data << uint32(win_arena);                             // 3.3.3 winArena
-    *data << uint32(loos_kills);                            // 3.3.3 lossHonor
-    *data << uint8(0x2D);                                   // unk
-    *data << uint32(loos_kills);                            // 3.3.3 lossHonor
-    *data << uint32(win_kills);                             // 3.3.3 winHonor
-    *data << uint64(guid);                                  // battlemaster guid
+
+    *data << uint64(guid);           //probably battlemaster guid, but who knows...
+    *data << uint16(0);              //unk
+    *data << uint32(win_honor);      //winner honor reward (call to arms)
+    *data << uint32(bgTypeId);       //Battleground typeid from dbc
+    *data << uint32(0);              //unk
+    *data << uint32(lose_honor);     //loser honor reward (call to arms)
+    *data << uint8(0xF);             //unk, 0xF in sniffed data
+    *data << uint32(lose_honor);     //loser honor reward random
+    *data << uint32(win_honor);      //winner honor reward random
+    *data << uint8(0);               //unk
+    *data << uint32(0);              //unk
+    *data << uint32(0);              //unk
+
+    //Maybe it will be necessary to append some fields related to arena in future
 }
 
 void BattlegroundMgr::SendToBattleground(Player *pl, uint32 instanceId, BattlegroundTypeId bgTypeId)
@@ -964,6 +1017,10 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
             return BATTLEGROUND_QUEUE_SA;
         case BATTLEGROUND_IC:
             return BATTLEGROUND_QUEUE_IC;
+        case BATTLEGROUND_TP:
+            return BATTLEGROUND_QUEUE_TP;
+        case BATTLEGROUND_BG:
+            return BATTLEGROUND_QUEUE_BG;
         case BATTLEGROUND_RB:
             return BATTLEGROUND_QUEUE_RB;
         case BATTLEGROUND_AA:

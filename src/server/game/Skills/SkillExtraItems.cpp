@@ -65,12 +65,9 @@ void LoadSkillExtraItemTable()
     {
         uint32 count = 0;
 
-        
-
         do
         {
             Field *fields = result->Fetch();
-            
 
             uint32 spellId = fields[0].GetUInt32();
 

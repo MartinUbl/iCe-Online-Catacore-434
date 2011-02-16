@@ -30,7 +30,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
  : m_announce(true), m_moderate(false), m_name(name), m_password(""), m_flags(0), m_channelId(channel_id), m_ownerGUID(0), m_Team(Team)
 {
     // set special flags if built-in channel
-    if (ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(channel_id)) // check whether it's a built-in channel
+    if (ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(channel_id))
     {
         m_announce = false;                                 // no join/leave announces
 
@@ -53,7 +53,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
         channel_id = 0;
         m_flags |= CHANNEL_FLAG_CUSTOM;
         //load not built in channel if saved
-        std::string _name(name);
+        std::string _name(m_name);
         CharacterDatabase.escape_string(_name);
         QueryResult result = CharacterDatabase.PQuery("SELECT m_announce, m_moderate, m_public, m_password, BannedList FROM channels WHERE m_name = '%s' AND m_team = '%u'", _name.c_str(), m_Team);
         if (result)//load

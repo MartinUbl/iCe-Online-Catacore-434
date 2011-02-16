@@ -734,7 +734,24 @@ enum TrinityStrings
     LANG_COMMAND_CREATURESTORAGE_NOTFOUND  = 818,
 
     LANG_CHANNEL_CITY                   = 819,
-    // Room for in-game strings           820-999 not used
+
+    LANG_BG_TP_START_TWO_MINUTES        = 820,
+    LANG_BG_TP_START_ONE_MINUTE         = 821,
+    LANG_BG_TP_START_HALF_MINUTE        = 822,
+    LANG_BG_TP_HAS_BEGUN                = 823,
+
+    LANG_BG_TP_CAPTURED_HF              = 824,
+    LANG_BG_TP_CAPTURED_AF              = 825,
+    LANG_BG_TP_DROPPED_HF               = 826,
+    LANG_BG_TP_DROPPED_AF               = 827,
+    LANG_BG_TP_RETURNED_AF              = 828,
+    LANG_BG_TP_RETURNED_HF              = 829,
+    LANG_BG_TP_PICKEDUP_HF              = 830,
+    LANG_BG_TP_PICKEDUP_AF              = 831,
+    LANG_BG_TP_F_PLACED                 = 832,
+    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED  = 833,
+    LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 834,
+    // Room for in-game strings           835-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,

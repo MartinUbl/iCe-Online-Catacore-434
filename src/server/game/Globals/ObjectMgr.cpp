@@ -3448,10 +3448,12 @@ void ObjectMgr::LoadGuilds()
     result = CharacterDatabase.Query(stmt);
     if (!result)
     {
+        sLog.outString();
         sLog.outString(">> Loaded 0 guild definitions");
         sLog.outString();
         return;
     }
+
     mGuildMap.resize(m_guildId, NULL);         // Reserve space and initialize storage for loading guilds
     // 1. Load all guilds
     uint64 rowCount = result->GetRowCount();
@@ -5454,20 +5456,15 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        
-        
         sLog.outString();
         sLog.outString(">> Only expired mails (need to be return or delete) or DB table `mail` is empty.");
         return;                                             // any mails need to be returned or deleted
     }
 
-    
     uint32 count = 0;
     Field *fields;
     do
     {
-        
-
         fields = result->Fetch();
         Mail *m = new Mail;
         m->messageID = fields[0].GetUInt32();
@@ -8402,21 +8399,14 @@ void ObjectMgr::LoadTrainerSpell()
 
     if (!result)
     {
-        
-
-        
-
         sLog.outString();
         sLog.outErrorDb(">> Loaded `npc_trainer`, table is empty!");
         return;
     }
 
-    
     uint32 count = 0;
     do
     {
-        
-
         Field* fields = result->Fetch();
 
         uint32 entry         = fields[0].GetUInt32();

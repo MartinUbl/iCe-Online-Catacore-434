@@ -335,6 +335,9 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
         unit->StopMoving();
     }
 
+    // iCelike quest workaround
+    _player->KilledMonsterCredit(unit->GetEntry(),unit->GetGUID());
+
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
     if (unit->isSpiritGuide())
     {

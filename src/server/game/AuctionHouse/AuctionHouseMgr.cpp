@@ -317,24 +317,16 @@ void AuctionHouseMgr::LoadAuctionItems()
 
     if (!result)
     {
-        
-        
         sLog.outString();
         sLog.outString(">> Loaded 0 auction items");
         return;
     }
 
-    
-
     uint32 count = 0;
     do
     {
-        
-    
-        Field* fields = result->Fetch();
-
-        uint32 item_guid        = fields[11].GetUInt32();
-        uint32 item_template    = fields[12].GetUInt32();
+        uint32 item_guid        = result->GetUInt32(11);
+        uint32 item_template    = result->GetUInt32(12);
 
         ItemPrototype const *proto = sObjectMgr.GetItemPrototype(item_template);
         if (!proto)
@@ -365,14 +357,11 @@ void AuctionHouseMgr::LoadAuctions()
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
-        
-        
         sLog.outString();
         sLog.outString(">> Loaded 0 auctions. DB table `auctionhouse` is empty.");
         return;
     }
 
-    
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
@@ -380,9 +369,38 @@ void AuctionHouseMgr::LoadAuctions()
     AuctionEntry *aItem;
     do
     {
-        Field* fields = result->Fetch();
+        fields = result->Fetch();
 
-        
+        aItem = new AuctionEntry;
+        aItem->Id = fields[0].GetUInt32();
+        aItem->auctioneer = fields[1].GetUInt32();
+        aItem->item_guidlow = fields[2].GetUInt32();
+        aItem->item_template = fields[3].GetUInt32();
+        aItem->owner = fields[4].GetUInt32();
+        aItem->buyout = fields[5].GetUInt32();
+        aItem->expire_time = fields[6].GetUInt32();
+        aItem->bidder = fields[7].GetUInt32();
+        aItem->bid = fields[8].GetUInt32();
+        aItem->startbid = fields[9].GetUInt32();
+        aItem->deposit = fields[10].GetUInt32();
+
+        CreatureData const* auctioneerData = sObjectMgr.GetCreatureData(aItem->auctioneer);
+        if (!auctioneerData)
+        {
+            aItem->DeleteFromDB(trans);
+            sLog.outError("Auction %u has not a existing auctioneer (GUID : %u)", aItem->Id, aItem->auctioneer);
+            delete aItem;
+            continue;
+        }
+
+        CreatureInfo const* auctioneerInfo = sObjectMgr.GetCreatureTemplate(auctioneerData->id);
+        if (!auctioneerInfo)
+        {
+            aItem->DeleteFromDB(trans);
+            sLog.outError("Auction %u has not a existing auctioneer (GUID : %u Entry: %u)", aItem->Id, aItem->auctioneer,auctioneerData->id);
+            delete aItem;
+            continue;
+        }
 
         aItem = new AuctionEntry();
         if (!aItem->LoadFromDB(fields))

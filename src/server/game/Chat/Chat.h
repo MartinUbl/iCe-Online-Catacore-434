@@ -289,6 +289,8 @@ class ChatHandler
         bool HandleModifyRageCommand(const char* args);
         bool HandleModifyRunicPowerCommand(const char* args);
         bool HandleModifyEnergyCommand(const char* args);
+        bool HandleModifyHolyPowerCommand(const char* args);
+        bool HandleModifyEclipseCommand(const char* args);
         bool HandleModifyMoneyCommand(const char* args);
         bool HandleModifyASpeedCommand(const char* args);
         bool HandleModifySpeedCommand(const char* args);
@@ -327,6 +329,7 @@ class ChatHandler
         bool HandleNpcSetModelCommand(const char* args);
         bool HandleNpcSetMoveTypeCommand(const char* args);
         bool HandleNpcSetPhaseCommand(const char* args);
+        bool HandleNpcSetTriggerCommand(const char* args);
         bool HandleNpcSpawnDistCommand(const char* args);
         bool HandleNpcSpawnTimeCommand(const char* args);
         bool HandleNpcTameCommand(const char* args);

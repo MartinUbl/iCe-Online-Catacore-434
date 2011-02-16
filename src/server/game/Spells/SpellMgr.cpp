@@ -1128,9 +1128,11 @@ SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 
     }
     else
     {
+        //HACK ! removed check for additional (AttributesEx2) requirements for shapeshift
+        //This hackfix fixes druid forms
         // needs shapeshift
-        if (!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
-            return SPELL_FAILED_ONLY_SHAPESHIFT;
+        //if (!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
+        //    return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 
     // Check if stance disables cast of not-stance spells
@@ -2772,9 +2774,9 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
     // bg spell checks
     switch(spellInfo->Id)
     {
-        case 23333:                                         // Warsong Flag
-        case 23335:                                         // Silverwing Flag
-            return map_id == 489 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        case 23333:                                         // Horde Flag
+        case 23335:                                         // Alliance Flag
+            return (map_id == 489 || map_id == 726) && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 34976:                                         // Netherstorm Flag
             return map_id == 566 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect

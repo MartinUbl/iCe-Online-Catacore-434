@@ -43,6 +43,103 @@
 #include "VMapFactory.h"
 #endif
 
+uint32 testopcode = 0x0000;
+
+void SendTestPacket(uint32 opcodeID, Player* plr)
+{
+    //Basic SMSG_FORCE_* opcode.
+    WorldPacket data;
+    data.Initialize(opcodeID, (8+4+4));
+    data.append(plr->GetPackGUID());
+    data << uint32(0);
+    data << float(100.0f);
+    plr->SendMessageToSet(&data,true);
+}
+
+bool ChatHandler::HandleOpcodeTestCommand(const char* args)
+{
+    std::istringstream arg(args);
+        
+    std::string command;
+    arg >> command;
+    
+    if (command == "reset")
+    {
+        uint32 opcode = 0;
+        if (!arg.eof())
+            arg >> std::hex >> opcode;
+        
+        testopcode = opcode;
+        return true;
+    }
+        
+    if (command == "jump")
+    {
+        uint32 jump = 0;
+        if (!arg.eof())
+            arg >> std::hex >> jump;
+        if (jump == 0)
+            jump = 0xFF;
+        
+        sLog.outString("Performing opcode jump!");
+        for (uint32 i = 0; i < jump; i++)
+        {
+            if (strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+            {
+                PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
+                SendTestPacket(testopcode, m_session->GetPlayer());
+            }
+            testopcode++;
+        }
+        
+        PSendSysMessage("Opcodes: 0x%.4X - 0x%.4X",testopcode-jump,testopcode);
+        return true;
+    }
+        
+    if (command == "jumpback")
+    {
+        uint32 jump = 0;
+        if (!arg.eof())
+            arg >> std::hex >> jump;
+        if (jump == 0)
+            jump = 0xFF;
+            
+        PSendSysMessage("Performing opcode jumpback!(0x%.4X)", jump);
+        testopcode = testopcode - jump;
+        return true;
+    }
+    
+    if (command == "repeat")
+    {
+        PSendSysMessage("Opcode: 0x%.4X",testopcode);
+        SendTestPacket(testopcode, m_session->GetPlayer());
+        return true;
+    }
+    
+    if (command == "back")
+    {
+        PSendSysMessage("Opcode: 0x%.4X",--testopcode);
+        return true;
+    }
+    
+    if( command == "send")
+    {
+        if(arg.eof())
+            return false;
+        uint32 opcode;
+        arg >> std::hex >> opcode;
+    
+        PSendSysMessage("Opcode: 0x%.4X - %s",opcode,LookupOpcodeName(opcode));
+        SendTestPacket(opcode, m_session->GetPlayer());
+        return true;
+    }
+
+    PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
+    SendTestPacket(testopcode++, m_session->GetPlayer());
+
+	return true;
+}
+
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
 {
@@ -140,6 +237,72 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     return true;
 }
 //----------------------------------------------------------
+
+bool ChatHandler::HandleModifyHolyPowerCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    int32 holypower = atoi((char*)args);
+    int32 holypowerm = 3;
+
+    if (holypower <= 0 || holypowerm <= 0 || holypowerm < holypower)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(15001, GetNameLink(chr).c_str(), holypower, holypowerm);
+    if (needReportToTarget(chr))
+        ChatHandler(chr).PSendSysMessage(15002, GetNameLink().c_str(), holypower, holypowerm);
+
+    chr->SetMaxPower(POWER_HOLY_POWER, holypowerm);
+    chr->SetPower(POWER_HOLY_POWER, holypower);
+
+    return true;
+}
+
+bool ChatHandler::HandleModifyEclipseCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    int32 eclipse = atoi((char*)args);
+    int32 eclipsem = 100;
+
+    if (eclipse <= 0 || eclipsem <= 0 || eclipsem < eclipse)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(15003, GetNameLink(chr).c_str(), eclipse, eclipsem);
+    if (needReportToTarget(chr))
+        ChatHandler(chr).PSendSysMessage(15004, GetNameLink().c_str(), eclipse, eclipsem);
+
+    chr->SetMaxPower(POWER_ECLIPSE, eclipsem);
+    chr->SetPower(POWER_ECLIPSE, eclipse);
+
+    return true;
+}
 
 bool ChatHandler::HandleNameAnnounceCommand(const char* args)
 {

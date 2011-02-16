@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
  *
  * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
@@ -197,8 +197,8 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
             SetTaximaskNode(94);
             break;
     }
-
     // new continent starting masks (It will be accessible only at new map)
+
     switch (Player::TeamForRace(race))
     {
         case ALLIANCE:
@@ -265,6 +265,7 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, uint3
         uint32 cost;
         uint32 path;
         sObjectMgr.GetTaxiPath(m_TaxiDestinations[i-1],m_TaxiDestinations[i],path,cost);
+
         if (!path)
             return false;
     }
@@ -2862,6 +2863,10 @@ void Player::GiveLevel(uint8 level)
         CharacterDatabase.CommitTransaction(trans);
     }
 
+    //only for rogues: if reached level 3, allow using combo points by passive aura
+    if(getClass() == CLASS_ROGUE && level >= 3 && !HasAura(79327))
+        CastSpell(this,79327,true);
+
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 }
 
@@ -5254,6 +5259,18 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
     return TotalCost;
 }
 
+void Player::ReturnToGraveyard()
+{
+    if(!isDead())
+        return;
+
+    // If graveyard is stored, teleport there. If not, find nearest and teleport there.
+    if(m_graveyard)
+        TeleportTo(m_graveyard->map_id, m_graveyard->x, m_graveyard->y, m_graveyard->z, GetOrientation());
+    else
+        RepopAtGraveyard();
+}
+
 void Player::RepopAtGraveyard()
 {
     // note: this can be called also when the player is alive
@@ -5267,6 +5284,8 @@ void Player::RepopAtGraveyard()
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
     }
+
+    m_graveyard = NULL;
 
     WorldSafeLocsEntry const *ClosestGrave = NULL;
 
@@ -5292,6 +5311,8 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->y;
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
+
+            m_graveyard = (WorldSafeLocsEntry*)ClosestGrave;
         }
     }
     else if (GetPositionZ() < -500.0f)
@@ -5304,11 +5325,9 @@ bool Player::CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, Area
     {
         if (zone->flags & AREA_FLAG_ARENA_INSTANCE)
             return false;
-
         if ((channel->flags & CHANNEL_DBC_FLAG_CITY_ONLY) && !(zone->flags & AREA_FLAG_CAPITAL))
             return false;
     }
-
     return true;
 }
 
@@ -5401,25 +5420,25 @@ void Player::UpdateLocalChannels(uint32 newZone)
                             removeChannel = usedChannel;
                             sendRemove = false;              // Do not send leave channel, it already replaced at client
                         }
-                        else
-                            joinChannel = NULL;
+                            else
+                                joinChannel = NULL;
                     }
+                    else
+                        joinChannel = cMgr->GetJoinChannel(channel->pattern, channel->ChannelID);
                 }
                 else
-                    joinChannel = cMgr->GetJoinChannel(channel->pattern, channel->ChannelID);
-            }
-            else
-                removeChannel = usedChannel;
+                    removeChannel = usedChannel;
 
-            if (joinChannel)
-                joinChannel->Join(GetGUID(), "");            // Changed Channel: ... or Joined Channel: ...
+                if (joinChannel)
+                    joinChannel->Join(GetGUID(), "");            // Changed Channel: ... or Joined Channel: ...
 
-            if (removeChannel)
-            {
-                removeChannel->Leave(GetGUID(), sendRemove); // Leave old channel
-                std::string name = removeChannel->GetName(); // Store name, (*i)erase in LeftChannel
-                LeftChannel(removeChannel);                  // Remove from player's channel list
-                cMgr->LeftChannel(name);                     // Delete if empty
+                if (removeChannel)
+                {
+                    removeChannel->Leave(GetGUID(), sendRemove); // Leave old channel
+                    std::string name = removeChannel->GetName(); // Store name, (*i)erase in LeftChannel
+                    LeftChannel(removeChannel);                  // Remove from player's channel list
+                    cMgr->LeftChannel(name);                     // Delete if empty
+                }
             }
         }
     }
@@ -8838,6 +8857,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 3277:
             NumberOfFields = 16;
             break;
+        case 5031:
+            NumberOfFields = 18;
+            break;
         case 3358:
         case 3820:
             NumberOfFields = 40;
@@ -9387,6 +9409,21 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4294) << uint32(1); // 22
                 data << uint32(4243) << uint32(1); // 23
                 data << uint32(4345) << uint32(1); // 24
+        case 5031:                                          // Twin Peaks
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP)
+                bg->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(0x62d) << uint32(0x0);       // 7 1581 alliance flag captures
+                data << uint32(0x62e) << uint32(0x0);       // 8 1582 horde flag captures
+                data << uint32(0x609) << uint32(0x0);       // 9 1545 unk, set to 1 on alliance flag pickup...
+                data << uint32(0x60a) << uint32(0x0);       // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
+                //data << uint32(0x60b) << uint32(0x2);       // 11 1547 unk
+                data << uint32(0x641) << uint32(0x3);       // 12 1601 unk (max flag captures?)
+                data << uint32(0x922) << uint32(0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                data << uint32(0x923) << uint32(0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                data << uint32(4247) << uint32(0x0);
+                data << uint32(4248) << uint32(0x0);
             }
             break;
         default:
@@ -15610,6 +15647,21 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
                     if (qInfo->ReqSpell[j] != 0)
                         continue;
 
+                    if (entry >= 90000 && entry <= 90003)
+                    {
+                        if(Creature* pVictim = (Creature*)Unit::GetUnit(*this,guid))
+                        {
+                            QueryResult qr = WorldDatabase.PQuery("SELECT questcredit FROM ice_quest_credit WHERE guid=%u LIMIT 1;",pVictim->GetDBTableGUIDLow());
+                            if(qr)
+                            {
+                                Field* fd = qr->Fetch();
+                                uint32 killcredit = fd[0].GetUInt32();
+                                if(killcredit != qInfo->GetQuestId())
+                                    continue;
+                            }
+                        }
+                    }
+
                     uint32 reqkill = qInfo->ReqCreatureOrGOId[j];
 
                     if (reqkill == real_entry)
@@ -17086,6 +17138,9 @@ void Player::_LoadAuras(PreparedQueryResult result, uint32 timediff)
 
     if (getClass() == CLASS_WARRIOR && !HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         CastSpell(this, 2457, true);
+
+    if (getClass() == CLASS_ROGUE && !HasAura(79327))
+        CastSpell(this, 79327, true);
 }
 
 void Player::_LoadGlyphAuras()
@@ -23364,20 +23419,22 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
 
 uint32 Player::CalculateTalentsPoints() const
 {
-    uint32 base_talent = 0;
-    if (getLevel() >= 10 && getLevel() <= 81)
-        base_talent = (((getLevel() - 10 + 1) - ( ((getLevel() - 10 + 1) % 2) == 1 ? 1 : 0))/2)+1;
-    else
-        base_talent = getLevel() - 44;
+    uint8 level = GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32 talent_points = (level < 10 ? 0 : ((level - 9) / 2) + 1);
+
+    if (level == 82 || level == 83)
+        talent_points += 1;
+    else if (level >= 84)
+        talent_points += 2;
 
     if (getClass() != CLASS_DEATH_KNIGHT || GetMapId() != 609)
-        return uint32(base_talent * sWorld.getRate(RATE_TALENT));
+        return uint32(talent_points * sWorld.getRate(RATE_TALENT));
 
     uint32 talentPointsForLevel = getLevel() < 56 ? 0 : getLevel() - 55;
     talentPointsForLevel += m_questRewardTalentCount;
 
-    if (talentPointsForLevel > base_talent)
-        talentPointsForLevel = base_talent;
+    if (talentPointsForLevel > talent_points)
+        talentPointsForLevel = talent_points;
 
     return uint32(talentPointsForLevel * sWorld.getRate(RATE_TALENT));
 }
@@ -23386,7 +23443,15 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
 {
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
-    return (v_map != 571 || HasSpell(54197)) && (v_map != 0 || HasSpell(90267)); // Cold Weather Flying
+    bool canNorthrendFly = HasSpell(54197); //Cold Weather Flying
+    bool canAzerothFly = HasSpell(90267);   //Flight Master's License
+
+    if(v_map == 571 && canNorthrendFly)
+        return true;
+    if((v_map == 0 || v_map == 1) && canAzerothFly)
+        return true;
+
+    return false;
 }
 
 void Player::learnSpellHighRank(uint32 spellid)

@@ -110,12 +110,9 @@ void LootStore::LoadLootTable()
     {
         uint32 count = 0;
 
-        
-
         do
         {
             Field *fields = result->Fetch();
-            
 
             uint32 entry               = fields[0].GetUInt32();
             uint32 item                = fields[1].GetUInt32();
@@ -823,6 +820,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     b << uint32(l.gold);
 
     size_t count_pos = b.wpos();                            // pos of item count byte
+
     b << uint8(0);                                          // item count placeholder
     b << uint8(0);                                          // unk 4.0.x
 

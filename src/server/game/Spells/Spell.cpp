@@ -4728,8 +4728,6 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     uint8 eff = m_spellInfo->Effect[i];
 
-    sLog.outDebug("Spell: %u Effect : %u", m_spellInfo->Id, eff);
-
     //we do not need DamageMultiplier here.
     damage = CalculateDamage(i, NULL);
 

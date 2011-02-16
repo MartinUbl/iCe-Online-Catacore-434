@@ -1007,6 +1007,40 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark)
     }
 }
 
+void AuraEffect::HandleEffectAll(AuraApplication const *aurApp, uint8 mode, bool apply)
+{
+    if(apply)
+    {
+        //
+    }
+    else
+    {
+        switch(GetSpellProto()->SpellFamilyName)
+        {
+            case SPELLFAMILY_WARLOCK:
+                // Drain Soul
+                if(GetSpellProto()->Id == 1120 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_DEATH && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* plCaster = (Player*)GetCaster();
+                    Unit* target = aurApp->GetTarget();
+
+                    if (!plCaster->isHonorOrXPTarget(target) ||
+                        (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
+                        return;
+
+                    plCaster->CastSpell(plCaster, 79264, true);
+
+                    // Glyph of Drain Soul
+                    if(plCaster->HasAura(58070))
+                        plCaster->CastSpell(plCaster, 58068, true);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void AuraEffect::HandleEffect(AuraApplication const *aurApp, uint8 mode, bool apply)
 {
     // check if call is correct
@@ -1022,11 +1056,10 @@ void AuraEffect::HandleEffect(AuraApplication const *aurApp, uint8 mode, bool ap
     else
         prevented = GetBase()->CallScriptEffectRemoveHandlers(const_cast<AuraEffect const *>(this), aurApp, (AuraEffectHandleModes)mode);
 
-    // check if script events have removed the aura or if default effect prevention was requested
-    if ((apply && aurApp->GetRemoveMode()) || prevented)
-        return;
+    HandleEffectAll(aurApp, mode, apply);
 
-    (*this.*AuraEffectHandler [GetAuraType()])(aurApp, mode, apply);
+    if (!prevented)
+        (*this.*AuraEffectHandler [GetAuraType()])(aurApp, mode, apply); // this is AWFUL
 }
 
 void AuraEffect::HandleEffect(Unit *target, uint8 mode, bool apply)
@@ -1380,21 +1413,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         damage += (damage + 1) / 2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
                     // 5..8 ticks have normal tick damage
                 }
-                // There is a Chance to make a Soul Shard when Drain soul does damage
-                if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags[0] & 0x00004000))
-                {
-                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
-                    {
-                        if (roll_chance_i(20))
-                        {
-                            caster->CastSpell(caster, 43836, true, 0, this);
-                            // Glyph of Drain Soul - chance to create an additional Soul Shard
-                            if (AuraEffect *aur = caster->GetAuraEffect(58070, 0))
-                                if (roll_chance_i(aur->GetMiscValue()))
-                                    caster->CastSpell(caster, 58068, true, 0, aur);
-                        }
-                    }
-                }
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
                 {
                     switch (GetId())
@@ -1409,6 +1427,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             break;
                     }
                 }
+
             }
             else
                 damage = uint32(target->CountPctFromMaxHealth(damage));
@@ -6275,24 +6294,6 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const *aurApp, uint8 mod
 
         if (GetSpellProto()->EffectItemType[m_effIndex] == 0)
             return;
-
-        // Soul Shard
-        if (GetSpellProto()->EffectItemType[m_effIndex] == 6265)
-        {
-            // Soul Shard only from units that grant XP or honor
-            if (!plCaster->isHonorOrXPTarget(target) ||
-                (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
-                return;
-
-            // If this is Drain Soul, check for Glyph of Drain Soul
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags[0] & 0x00004000))
-            {
-                // Glyph of Drain Soul - chance to create an additional Soul Shard
-                if (AuraEffect *aur = caster->GetAuraEffect(58070, 0))
-                    if (roll_chance_i(aur->GetMiscValue()))
-                        caster->CastSpell(caster, 58068, true, 0, aur); // We _could_ simply do ++count here, but Blizz does it this way :)
-            }
-        }
 
         //Adding items
         uint32 noSpaceForCount = 0;

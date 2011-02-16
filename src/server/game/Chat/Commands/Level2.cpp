@@ -47,6 +47,8 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
 #include "ScriptMgr.h"
+#include "CreatureAI.h"
+#include "CreatureAIImpl.h"
 
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
@@ -1765,6 +1767,35 @@ bool ChatHandler::HandleNpcSetPhaseCommand(const char* args)
 
     if (!pCreature->isPet())
         pCreature->SaveToDB();
+
+    return true;
+}
+//npc trigger set
+bool ChatHandler::HandleNpcSetTriggerCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    uint32 questcredit = (uint32)atoi((char*)args);
+
+    Creature* pCreature = getSelectedCreature();
+    if (!pCreature || pCreature->GetEntry() != 90000)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    if (questcredit == 0)
+    {
+        WorldDatabase.PExecute("DELETE FROM ice_quest_credit WHERE guid=%u;",pCreature->GetDBTableGUIDLow());
+        PSendSysMessage("NPC s GUID %u byl odebran quest credit!",pCreature->GetDBTableGUIDLow());
+        pCreature->AI()->DoAction(1);
+        return true;
+    }
+
+    WorldDatabase.PExecute("REPLACE INTO ice_quest_credit VALUES (%u,%u)",pCreature->GetDBTableGUIDLow(),questcredit);
+    PSendSysMessage("NPC s GUID %u byl prirazen quest credit s ID %u",pCreature->GetDBTableGUIDLow(),questcredit);
+    pCreature->AI()->DoAction(1);
 
     return true;
 }
