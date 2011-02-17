@@ -307,24 +307,26 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
             uint32 flags3 = SPLINEFLAG_GLIDE;
 
-            *data << uint32(flags3);                        // splines flag?
+            *data << uint32(flags3);                         // splines flag?
 
-            if (flags3 & 0x20000)                            // may be orientation
+            if (flags3 & 0x20000)
             {
-                *data << (float)0;
+                *data << float(player->GetOrientation());
             }
             else
             {
-                if (flags3 & 0x8000)                         // probably x,y,z coords there
-                {
-                    *data << (float)0;
-                    *data << (float)0;
-                    *data << (float)0;
-                }
-
                 if (flags3 & 0x10000)                        // probably guid there
                 {
                     *data << uint64(0);
+                }
+                else
+                {
+                    if (flags3 & 0x8000)
+                    {
+                        *data << float(player->GetPositionX());
+                        *data << float(player->GetPositionY());
+                        *data << float(player->GetPositionZ());
+                    }
                 }
             }
 
@@ -1140,7 +1142,7 @@ bool Position::HasInLine(const Unit * const target, float distance, float width)
         return false;
     width += target->GetObjectSize();
     float angle = GetRelativeAngle(target);
-    return abs(sin(angle)) * GetExactDist2d(target->GetPositionX(), target->GetPositionY()) < width;
+    return fabs(sin(angle)) * GetExactDist2d(target->GetPositionX(), target->GetPositionY()) < width;
 }
 
 std::string Position::ToString() const
@@ -1524,7 +1526,7 @@ bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, 
         size = GetObjectSize() / 2;
 
     float angle = obj1->GetAngle(this) - obj1->GetAngle(obj2);
-    return abs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
+    return fabs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
 }
 
 bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc) const
