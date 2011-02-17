@@ -573,7 +573,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_MAIL_LIST_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_LIST,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldListOpcode     );
     OPCODE( SMSG_BATTLEFIELD_LIST,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
     OPCODE( SMSG_BATTLEFIELD_WIN_OBSOLETE,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_BATTLEFIELD_LOSE_OBSOLETE,               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_TAXICLEARNODE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );

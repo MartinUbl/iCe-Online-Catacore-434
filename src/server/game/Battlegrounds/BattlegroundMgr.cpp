@@ -190,7 +190,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         *data << uint32(QueueSlot);                         // queue id (0...1)
         return;
     }
-
+    sLog.outString("Status: %u",StatusID);
     switch(StatusID)
     {
         case STATUS_NONE:
@@ -198,73 +198,63 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             break;
         case STATUS_WAIT_QUEUE:
             data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
-            *data << uint8(QueueSlot); //not sure
+            //*data << uint8(QueueSlot); //not sure
+            *data << uint8(0x20);
+            *data << uint8(0x55);
             *data << uint32(Time2); //time in queue?
             *data << uint32(bg->GetClientInstanceID());
-            *data << uint8(arenatype); //arenatype
-            *data << uint32(Time1); //average wait time
-
-            *data << uint8(0); //unk
             *data << uint32(0); //unk
-
+            *data << uint8(arenatype); //arenatype
             *data << uint32(bg->GetTypeID()); //BG type ID
 
-            *data << uint8(0); //unk
-            *data << uint8(0); //unk
+            *data << uint16(0); //unk
 
             //following is probably read as uint16, constant?
             *data << uint8(0x10);
             *data << uint8(0x1F);
 
-            *data << uint8(0); //unk
+            *data << uint32(Time1); //average wait time
             break;
         case STATUS_WAIT_JOIN:
-            data->Initialize(0x38D8, 1+4+6+2+1+4+10);
+            data->Initialize(0x081C, 1+4+6+2+1+4+10);
             *data << uint8(QueueSlot); //not sure
-            *data << uint32(bg->GetMapId()); //map
-
-            *data << uint32(bg->GetTypeID()); //not sure!
+            *data << uint8(0); //unk
+            *data << uint32(0); //unk
+            *data << uint32(bg->GetTypeID()); //TypeID
 
             *data << uint8(0);
             *data << uint8(0);
             *data << uint8(0x10); //const?
             *data << uint8(0x1F); //const?
-            *data << uint8(0x55); //const??
+
+            *data << uint32(0); //unk
+            *data << uint8(0); //unk
 
             *data << uint32(Time1); //time before remove
+            *data << uint32(bg->GetMapId()); //map
 
-            //unks
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
+            *data << uint8(0x55); //const??
             break;
         case STATUS_IN_PROGRESS:
             //where uiFrame?
-            data->Initialize(0x3818,1+4+4+1+4+1+4+1+1+4+4+5+4);
+            data->Initialize(0x051E,1+4+4+1+4+1+4+1+1+4+4+5+4);
             *data << uint8(QueueSlot); //not sure
+            *data << uint32(Time2); //time2 (time elapsed?)
             *data << uint32(0); //unk
             *data << uint32(bg->GetMapId()); //map
-            *data << uint8(0x55); //const?
-            *data << uint32(Time1); //time1 (time to end)
-            *data << uint8(0);
             *data << uint32(bg->GetTypeID()); //bg typeid
             *data << uint8(0);
             *data << uint8(0);
             *data << uint8(0x10); //const?
             *data << uint8(0x1F); //const?
+            *data << uint32(0); //unk
             *data << uint8(0);
+            *data << uint8(0x55); //const?
+            
+            *data << uint32(0);
             *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint8(0);
-            *data << uint32(Time2); //time2 (elapsed?)
+            //*data << uint32(Time2); //time2 (elapsed?)
+            //one of times unreferenced
             break;
         default:
             sLog.outError("Unknown BG status %u!",StatusID);
