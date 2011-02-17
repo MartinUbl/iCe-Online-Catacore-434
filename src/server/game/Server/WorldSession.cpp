@@ -755,10 +755,10 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->pitch;
     }
 
-    data >> mi->fallTime;
-
     if (mi->flags & MOVEMENTFLAG_JUMPING)
     {
+        data >> mi->fallTime; //moved?
+
         data >> mi->j_zspeed;
         data >> mi->j_sinAngle;
         data >> mi->j_cosAngle;
