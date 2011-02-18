@@ -235,11 +235,11 @@ enum Opcodes
     SMSG_MOVE_LAND_WALK                              = 0x1002B, //
     MSG_MOVE_SET_RAW_POSITION_ACK                    = 0x026C8, // 4.0.6a 13623
     CMSG_MOVE_SET_RAW_POSITION                       = 0x0F0C8, // 4.0.6a 13623
-    SMSG_FORCE_RUN_SPEED_CHANGE                      = 0x07F5E, //
+    SMSG_FORCE_RUN_SPEED_CHANGE                      = 0x0F1CC, // 4.0.6a 13623
     CMSG_FORCE_RUN_SPEED_CHANGE_ACK                  = 0x026C8, // 4.0.6a 13623
     SMSG_FORCE_RUN_BACK_SPEED_CHANGE                 = 0x1002E, //
     CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK             = 0x078E4, // 4.0.6a 13623
-    SMSG_FORCE_SWIM_SPEED_CHANGE                     = 0x0ED75, //
+    SMSG_FORCE_SWIM_SPEED_CHANGE                     = 0x0F5A0, // 4.0.6a 13623
     CMSG_FORCE_SWIM_SPEED_CHANGE_ACK                 = 0x0B1A0, // 4.0.6a 13623
     SMSG_FORCE_MOVE_ROOT                             = 0x02F88, // 4.0.6a 13623
     CMSG_FORCE_MOVE_ROOT_ACK                         = 0x07184, // 4.0.6a 13623
@@ -385,7 +385,7 @@ enum Opcodes
     CMSG_PET_ACTION                                  = 0x0AFC0, // 4.0.6a 13623
     CMSG_PET_ABANDON                                 = 0x03576, //
     CMSG_PET_RENAME                                  = 0x07D57, //
-    SMSG_PET_NAME_INVALID                            = 0x01457, //
+    SMSG_PET_NAME_INVALID                            = 0x0F7E4, // 4.0.6a 13623
     SMSG_PET_SPELLS                                  = 0x0B780, // 4.0.6a 13623
     SMSG_PET_MODE                                    = 0x079C0, // 4.0.6a 13623
     CMSG_GOSSIP_HELLO                                = 0x074C8, // 4.0.6a 13623
@@ -435,11 +435,11 @@ enum Opcodes
     CMSG_TAXISHOWNODES                               = 0x1006E, //
     SMSG_SHOWTAXINODES                               = 0x0D654, //
     CMSG_TAXINODE_STATUS_QUERY                       = 0x0A1EC, // 4.0.6a 13623
-    SMSG_TAXINODE_STATUS                             = 0x06F76, //
+    SMSG_TAXINODE_STATUS                             = 0x02B84, // 4.0.6a 13623 ???
     CMSG_TAXIQUERYAVAILABLENODES                     = 0x0BE8E, // 4.0.6a 13623
     CMSG_ACTIVATETAXI                                = 0x039A4, // 4.0.6a 13623
     SMSG_ACTIVATETAXIREPLY                           = 0x06F7C, //
-    SMSG_NEW_TAXI_PATH                               = 0x0AE5E, //
+    SMSG_NEW_TAXI_PATH                               = 0x0E5E4, // 4.0.6a 13623
     CMSG_TRAINER_LIST                                = 0x0E5AC, // 4.0.6a 13623
     SMSG_TRAINER_LIST                                = 0x0AC7E, // 4.0.6a 13623
     CMSG_TRAINER_BUY_SPELL                           = 0x09754, //
@@ -448,7 +448,7 @@ enum Opcodes
     CMSG_BINDER_ACTIVATE                             = 0x0A48C, // 4.0.6a 13623
     SMSG_PLAYERBINDERROR                             = 0x0765C, //
     CMSG_BANKER_ACTIVATE                             = 0x0E7E0, // 4.0.6a 13623
-    SMSG_SHOW_BANK                                   = 0x10074, //
+    SMSG_SHOW_BANK                                   = 0x027A4, // 4.0.6a 13623
     CMSG_BUY_BANK_SLOT                               = 0x06C5F, //
     SMSG_BUY_BANK_SLOT_RESULT                        = 0x10076, //
     CMSG_PETITION_SHOWLIST                           = 0x0FCC4, // 4.0.6a 13623
@@ -464,8 +464,8 @@ enum Opcodes
     SMSG_TURN_IN_PETITION_RESULTS                    = 0x02E74, //
     CMSG_PETITION_QUERY                              = 0x0B1AC, // 4.0.6a 13623
     SMSG_PETITION_QUERY_RESPONSE                     = 0x0FB80, // 4.0.6a 13623
-    SMSG_FISH_NOT_HOOKED                             = 0x03F76, //
-    SMSG_FISH_ESCAPED                                = 0x01F77, //
+    SMSG_FISH_NOT_HOOKED                             = 0x039EC, // 4.0.6a 13623
+    SMSG_FISH_ESCAPED                                = 0x0F080, // 4.0.6a 13623
     CMSG_BUG                                         = 0x034AC, // 4.0.6a 13623
     SMSG_NOTIFICATION                                = 0x0BC88, // 4.0.6a 13623
     CMSG_PLAYED_TIME                                 = 0x0F480, // 4.0.6a 13623
@@ -662,7 +662,7 @@ enum Opcodes
     CMSG_GMTICKETSYSTEM_TOGGLE                       = 0x100D7, //
     CMSG_CANCEL_GROWTH_AURA                          = 0x100D8, //
     SMSG_CANCEL_AUTO_REPEAT                          = 0x0ECC4, // 
-    SMSG_STANDSTATE_UPDATE                           = 0x0CD55, //
+    SMSG_STANDSTATE_UPDATE                           = 0x0E6A8, // 4.0.6a 13623 ??
     SMSG_LOOT_ALL_PASSED                             = 0x06AC4, // 4.0.6a 13623
     SMSG_LOOT_ROLL_WON                               = 0x06280, // 4.0.6a 13623
     CMSG_LOOT_ROLL                                   = 0x0BDA8, // 4.0.6a 13623
@@ -722,11 +722,11 @@ enum Opcodes
     CMSG_BATTLEMASTER_HELLO                          = 0x06D57, //
     CMSG_MOVE_START_SWIM_CHEAT                       = 0x026C0, // 4.0.6a 13623
     CMSG_MOVE_STOP_SWIM_CHEAT                        = 0x06988, // 4.0.6a 13623
-    SMSG_FORCE_WALK_SPEED_CHANGE                     = 0x068E8, // 4.0.6a 13623
+    SMSG_FORCE_WALK_SPEED_CHANGE                     = 0x068E8, // 4.0.6a 13623 0xFAA0 ?
     CMSG_FORCE_WALK_SPEED_CHANGE_ACK                 = 0x078CC, // 4.0.6a 13623
-    SMSG_FORCE_SWIM_BACK_SPEED_CHANGE                = 0x002DC, // 
+    SMSG_FORCE_SWIM_BACK_SPEED_CHANGE                = 0x0AE88, // 4.0.6a 13623
     CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK            = 0x0E8C4, // 4.0.6a 13623
-    SMSG_FORCE_TURN_RATE_CHANGE                      = 0x0375E, //
+    SMSG_FORCE_TURN_RATE_CHANGE                      = 0x0708C, // 4.0.6a 13623
     CMSG_FORCE_TURN_RATE_CHANGE_ACK                  = 0x0E384, // 4.0.6a 13623
     MSG_PVP_LOG_DATA                                 = 0x00493, // 4.0.6a 13623
     CMSG_LEAVE_BATTLEFIELD                           = 0x07DC4, // 4.0.6a 13623
@@ -803,7 +803,7 @@ enum Opcodes
     CMSG_GM_UPDATE_TICKET_STATUS                     = 0x10124, //
     SMSG_GM_TICKET_STATUS_UPDATE                     = 0x0BF7D, //
     MSG_SET_DUNGEON_DIFFICULTY                       = 0x074E0, // 
-    CMSG_GMSURVEY_SUBMIT                             = 0x10125, //
+    CMSG_GMSURVEY_SUBMIT                             = 0x0E280, // 4.0.6a 13623
     SMSG_UPDATE_INSTANCE_OWNERSHIP                   = 0x03B8C, // 4.0.6a 13623
     CMSG_IGNORE_KNOCKBACK_CHEAT                      = 0x10126, //
     SMSG_CHAT_PLAYER_AMBIGUOUS                       = 0x03674, //
@@ -889,9 +889,9 @@ enum Opcodes
     MSG_MOVE_SET_FLIGHT_SPEED                        = 0x0B088, // 4.0.6a 13623
     MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT             = 0x10150, //
     MSG_MOVE_SET_FLIGHT_BACK_SPEED                   = 0x0B484, // 4.0.6a 13623
-    SMSG_FORCE_FLIGHT_SPEED_CHANGE                   = 0x03F7D, //
+    SMSG_FORCE_FLIGHT_SPEED_CHANGE                   = 0x0E5CC, // 4.0.6a 13623
     CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK               = 0x0A98C, // 4.0.6a 13623
-    SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE              = 0x10153, //
+    SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE              = 0x0F1E4, // 4.0.6a 13623
     CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK          = 0x0FBC8, // 4.0.6a 13623
     SMSG_SPLINE_SET_FLIGHT_SPEED                     = 0x0E0C0, // 4.0.6a 13623
     SMSG_SPLINE_SET_FLIGHT_BACK_SPEED                = 0x0F2EC, // 4.0.6a 13623
@@ -1108,7 +1108,7 @@ enum Opcodes
     CMSG_SET_RUNE_COOLDOWN                           = 0x101CC, //
     MSG_MOVE_SET_PITCH_RATE_CHEAT                    = 0x101CD, //
     MSG_MOVE_SET_PITCH_RATE                          = 0x0ABA4, // 4.0.6a 13623
-    SMSG_FORCE_PITCH_RATE_CHANGE                     = 0x101CE, //
+    SMSG_FORCE_PITCH_RATE_CHANGE                     = 0x0BF8C, // 4.0.6a 13623 ??
     CMSG_FORCE_PITCH_RATE_CHANGE_ACK                 = 0x0E6C0, // 4.0.6a 13623
     SMSG_SPLINE_SET_PITCH_RATE                       = 0x070c4, // 4.0.6a 13623
     SMSG_MOVE_ABANDON_TRANSPORT                      = 0x101D0, //
@@ -1245,7 +1245,7 @@ enum Opcodes
     CMSG_QUERY_QUESTS_COMPLETED                      = 0x0FE5E, //
     SMSG_QUERY_QUESTS_COMPLETED_RESPONSE             = 0x1023D, //
     CMSG_GM_REPORT_LAG                               = 0x03FA0, // 4.0.6a 13623
-    SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x10242, //
+    SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x031E4, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                   = 0x0777D, //
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2                   = 0x0375C, //
     SMSG_CAMERA_SHAKE                                = 0x10246, //
@@ -1285,7 +1285,8 @@ enum Opcodes
 
 /*
 NOTES:
-0x1850 open reforging
+0x0C5C open reforging -> 0x0313 "Reforge" button
+0x490C open pvp menu (bgs, arenas, conquests)
 */
 extern void InitOpcodeTable();
 
