@@ -123,7 +123,7 @@ enum SpellNotifyPushType
 
 enum SpellLogType
 {
-    SPELL_LOG_NON_MELEE_DAMAGE          = 0x9D7D,
+    SPELL_LOG_NON_MELEE_DAMAGE          = 0x74AC, //4.0.6a 13623
     SPELL_LOG_EXECUTE                   = 0x2476,
     SPELL_LOG_ENERGIZE                  = 0x3C56,
     SPELL_LOG_HEAL                      = 0x8C5D,
