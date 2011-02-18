@@ -433,12 +433,12 @@ enum Opcodes
     CMSG_TAXICLEARALLNODES                           = 0x1006C, //
     CMSG_TAXIENABLEALLNODES                          = 0x1006D, //
     CMSG_TAXISHOWNODES                               = 0x1006E, //
-    SMSG_SHOWTAXINODES                               = 0x0D654, //
+    SMSG_SHOWTAXINODES                               = 0x02B84, // 4.0.6a 13623 ?
     CMSG_TAXINODE_STATUS_QUERY                       = 0x0A1EC, // 4.0.6a 13623
-    SMSG_TAXINODE_STATUS                             = 0x02B84, // 4.0.6a 13623 ???
+    SMSG_TAXINODE_STATUS                             = 0x12B84, //
     CMSG_TAXIQUERYAVAILABLENODES                     = 0x0BE8E, // 4.0.6a 13623
     CMSG_ACTIVATETAXI                                = 0x039A4, // 4.0.6a 13623
-    SMSG_ACTIVATETAXIREPLY                           = 0x06F7C, //
+    SMSG_ACTIVATETAXIREPLY                           = 0x07A84, // 4.0.6a 13623 ?
     SMSG_NEW_TAXI_PATH                               = 0x0E5E4, // 4.0.6a 13623
     CMSG_TRAINER_LIST                                = 0x0E5AC, // 4.0.6a 13623
     SMSG_TRAINER_LIST                                = 0x0AC7E, // 4.0.6a 13623
@@ -552,7 +552,7 @@ enum Opcodes
     SMSG_QUEST_FORCE_REMOVED                         = 0x034E8, // 4.0.6a 13623
     CMSG_SKILL_BUY_STEP                              = 0x1009E, //
     CMSG_SKILL_BUY_RANK                              = 0x1009F, //
-    SMSG_SPIRIT_HEALER_CONFIRM                       = 0x07C57, //
+    SMSG_SPIRIT_HEALER_CONFIRM                       = 0x067E0, // 4.0.6a 13623
     CMSG_CHARACTER_POINT_CHEAT                       = 0x100A0, //
     SMSG_GOSSIP_POI                                  = 0x0B9AC, // 4.0.6a 13623
     CMSG_CHAT_IGNORED                                = 0x0A78C, // 4.0.6a 13623
