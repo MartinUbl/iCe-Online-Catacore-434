@@ -37,6 +37,8 @@
 
 #define OPCODE_NOT_FOUND 0x10000
 
+#define PRINTPACKET(a,b) {uint8 chr;for(int i=0;i<b;i++){a>>chr;sLog.outString("Data %i: %u",i,chr)}}
+
 /// List of Opcodes
 enum Opcodes
 {
@@ -331,7 +333,7 @@ enum Opcodes
     CMSG_ATTACKSWING                                 = 0x074A8, // 4.0.6a 13623
     CMSG_ATTACKSTOP                                  = 0x062C4, // 4.0.6a 13623
     SMSG_ATTACKSTART                                 = 0x0B68C, // 4.0.6a 13623
-    SMSG_ATTACKSTOP                                  = 0x062C4, // 4.0.6a 13623
+    SMSG_ATTACKSTOP                                  = 0x035E0, // 4.0.6a 13623
     SMSG_ATTACKSWING_NOTINRANGE                      = 0x036C4, // 4.0.6a 13623
     SMSG_ATTACKSWING_BADFACING                       = 0x067A8, // 4.0.6a 13623
     SMSG_INSTANCE_LOCK_WARNING_QUERY                 = 0x0B574, //
@@ -353,7 +355,7 @@ enum Opcodes
     SMSG_BINDZONEREPLY                               = 0x0ACAC, // 4.0.6a 13623
     SMSG_PLAYERBOUND                                 = 0x06BCC, // 4.0.6a 13623
     SMSG_CLIENT_CONTROL_UPDATE                       = 0x03C84, // 4.0.6a 13623
-    CMSG_REPOP_REQUEST                               = 0x0A9E8, // 4.0.6a 13623
+    CMSG_REPOP_REQUEST                               = 0x0A9E4, // 4.0.6a 13623
     SMSG_RESURRECT_REQUEST                           = 0x022A4, // 4.0.6a 13623
     CMSG_RESURRECT_RESPONSE                          = 0x0EA84, // 4.0.6a 13623
     CMSG_LOOT                                        = 0x0FCEC, // 4.0.6a 13623
@@ -726,8 +728,8 @@ enum Opcodes
     CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK            = 0x0E8C4, // 4.0.6a 13623
     SMSG_FORCE_TURN_RATE_CHANGE                      = 0x0375E, //
     CMSG_FORCE_TURN_RATE_CHANGE_ACK                  = 0x0E384, // 4.0.6a 13623
-    MSG_PVP_LOG_DATA                                 = 0x100FA, //
-    CMSG_LEAVE_BATTLEFIELD                           = 0x07757, //
+    MSG_PVP_LOG_DATA                                 = 0x00493, // 4.0.6a 13623
+    CMSG_LEAVE_BATTLEFIELD                           = 0x07DC4, // 4.0.6a 13623
     CMSG_AREA_SPIRIT_HEALER_QUERY                    = 0x0EF55, //
     CMSG_AREA_SPIRIT_HEALER_QUEUE                    = 0x06C56, //
     SMSG_AREA_SPIRIT_HEALER_TIME                     = 0x0A457, //
@@ -735,7 +737,7 @@ enum Opcodes
     SMSG_WARDEN_DATA                                 = 0x0F8A0, // 4.0.6a 13623
     CMSG_WARDEN_DATA                                 = 0x02F84, // 4.0.6a 13623
     SMSG_GROUP_JOINED_BATTLEGROUND                   = 0x100FE, //
-    MSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x100FF, //
+    MSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x00293, // 4.0.6a 13623
     CMSG_PET_STOP_ATTACK                             = 0x10100, //
     SMSG_BINDER_CONFIRM                              = 0x10101, //
     SMSG_BATTLEGROUND_PLAYER_JOINED                  = 0x10101, //
@@ -1277,7 +1279,7 @@ enum Opcodes
     CMSG_SET_PRIMARY_TALENT_TREE                     = 0x0FEA8, // 4.0.6a 13623
     CMSG_GROUP_SET_ROLES                             = 0x08509, // 4.0.6a 13623
     CMSG_UNKNOWN_34056                               = 0x08508, // 
-    CMSG_RETURN_TO_GRAVEYARD                         = 0x1025D,
+    CMSG_RETURN_TO_GRAVEYARD                         = 0x00593, // 4.0.6a 13623
     NUM_MSG_TYPES                                    = 0x102B7  // last unknown opcode + 1.
 };
 
