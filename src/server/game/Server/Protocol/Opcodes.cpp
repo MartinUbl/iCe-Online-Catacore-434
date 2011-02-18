@@ -191,7 +191,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_READ_ITEM_FAILED,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ITEM_COOLDOWN,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GAMEOBJ_USE,                             STATUS_LOGGEDIN, &WorldSession::HandleGameObjectUseOpcode       );
-    OPCODE( CMSG_DESTROY_ITEMS,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_DESTROY_ITEMS,                           STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode         );
     OPCODE( SMSG_GAMEOBJECT_CUSTOM_ANIM,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_AREATRIGGER,                             STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode         );
     OPCODE( MSG_MOVE_START_FORWARD,                       STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           );
