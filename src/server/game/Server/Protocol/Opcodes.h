@@ -631,7 +631,7 @@ enum Opcodes
     SMSG_SPELLDISPELLOG                              = 0x03C56, //
     SMSG_DAMAGE_CALC_LOG                             = 0x0FD84, // 4.0.6a 13623
     CMSG_ENABLE_DAMAGE_LOG                           = 0x100CB, //
-    CMSG_GROUP_CHANGE_SUB_GROUP                      = 0x0E576, //
+    CMSG_GROUP_CHANGE_SUB_GROUP                      = 0x03A80, // 4.0.6a 13623
     CMSG_REQUEST_PARTY_MEMBER_STATS                  = 0x0E77E, //
     CMSG_GROUP_SWAP_SUB_GROUP                        = 0x0677F, //
     CMSG_RESET_FACTION_CHEAT                         = 0x100CD, //
@@ -648,7 +648,7 @@ enum Opcodes
     SMSG_PVP_CREDIT                                  = 0x08E57, //
     SMSG_AUCTION_REMOVED_NOTIFICATION                = 0x00E5E, //
     CMSG_GROUP_RAID_CONVERT                          = 0x0628C, // 4.0.6a 13623
-    CMSG_GROUP_ASSISTANT_LEADER                      = 0x08556, //
+    CMSG_GROUP_ASSISTANT_LEADER                      = 0x03F84, // 4.0.6a 13623
     CMSG_BUYBACK_ITEM                                = 0x0A4CA, // 4.0.6a 13623
     SMSG_SERVER_MESSAGE                              = 0x078C0, // 4.0.6a 13623
     CMSG_SET_SAVED_INSTANCE_EXTEND                   = 0x0FD54, //
@@ -1141,7 +1141,7 @@ enum Opcodes
     CMSG_PET_LEARN_TALENT                            = 0x0255F, //
     CMSG_PET_UNLEARN_TALENTS                         = 0x08F5D, //
     SMSG_SET_PHASE_SHIFT                             = 0x022ED, // 4.0.6a 13623
-    SMSG_ALL_ACHIEVEMENT_DATA                        = 0x0FF9D, //
+    SMSG_ALL_ACHIEVEMENT_DATA                        = 0x0445E, // 4.0.6a 13623
     CMSG_FORCE_SAY_CHEAT                             = 0x101E7, //
     SMSG_HEALTH_UPDATE                               = 0x02AA8, // 4.0.6a 13623
     SMSG_POWER_UPDATE                                = 0x065E8, // 4.0.6a 13623
