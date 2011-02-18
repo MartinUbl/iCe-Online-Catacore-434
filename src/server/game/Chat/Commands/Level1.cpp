@@ -43,6 +43,91 @@
 #include "VMapFactory.h"
 #endif
 
+uint32 testopcode = 0x0000;
+
+bool ChatHandler::HandleOpcodeTestCommand(const char* args)
+{
+	if(*args)
+	{
+		if(strcmp(args,"reset") == 0)
+		{
+			testopcode = 0;
+			return true;
+		}
+		if(strcmp(args,"jump") == 0)
+		{
+			sLog.outString("Performing opcode jump!");
+			for(uint32 i = 0; i < 0xFF; i++)
+			{
+				if(strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+				{
+					PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
+					WorldPacket data;
+					data.Initialize(testopcode, (8+4+4));
+					data.append(m_session->GetPlayer()->GetPackGUID());
+					data << uint32(0);
+					data << float(10.0f);
+					m_session->GetPlayer()->SendMessageToSet(&data,true);
+				}
+				testopcode++;
+			}
+
+			PSendSysMessage("Opcodes: 0x%.4X - 0x%.4X",testopcode-0xFF,testopcode);
+			return true;
+		}
+		if(strcmp(args,"jumpback") == 0)
+		{
+			sLog.outString("Performing opcode jumpback!");
+			testopcode = testopcode - 0xFF;
+			return true;
+		}
+		if(strcmp(args,"repeat") == 0)
+		{
+			PSendSysMessage("Opcode: 0x%.4X",testopcode);
+
+			WorldPacket data;
+			data.Initialize(testopcode, (8+4+4));
+			data.append(m_session->GetPlayer()->GetPackGUID());
+			data << uint32(0);
+			data << float(10.0f);
+			m_session->GetPlayer()->SendMessageToSet(&data,true);
+			return true;
+		}
+		if(strcmp(args,"back") == 0)
+		{
+			testopcode--;
+			PSendSysMessage("Opcode: 0x%.4X",testopcode);
+			return true;
+		}
+		WorldPacket data;
+		data.Initialize(atoi(args), (8+4+4));
+		data.append(m_session->GetPlayer()->GetPackGUID());
+		data << uint32(0);
+		data << float(10.0f);
+		m_session->GetPlayer()->SendMessageToSet(&data,true);
+		return true;
+	}
+
+	if(strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+	{
+		PSendSysMessage("Opcode: 0x%.4X",testopcode);
+
+		WorldPacket data;
+		data.Initialize(testopcode, (8+4+4));
+		data.append(m_session->GetPlayer()->GetPackGUID());
+		data << uint32(0);
+		data << float(10.0f);
+		m_session->GetPlayer()->SendMessageToSet(&data,true);
+	}
+	else
+	{
+		PSendSysMessage("Opcode: 0x%.4X - KNOWN",testopcode);
+	}
+	testopcode++;
+
+	return true;
+}
+
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
 {

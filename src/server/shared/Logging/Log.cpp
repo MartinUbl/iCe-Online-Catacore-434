@@ -852,7 +852,7 @@ void Log::outCommand(uint32 account, const char * str, ...)
         va_end(ap2);
     }
 
-    if (m_logLevel > LOGL_NORMAL)
+    /*if (m_logLevel > LOGL_NORMAL)
     {
         if (m_colored)
             SetColor(true,m_colors[LOGL_BASIC]);
@@ -877,7 +877,7 @@ void Log::outCommand(uint32 account, const char * str, ...)
             va_end(ap);
             fflush(logfile);
         }
-    }
+    }*/
 
     if (m_gmlog_per_account)
     {

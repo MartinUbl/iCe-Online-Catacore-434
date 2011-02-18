@@ -196,9 +196,9 @@ bool WorldSession::Update(uint32 diff)
 
 		switch(packet->GetOpcode())
 		{
-			case 0x0177C:
-			case 0x00D57:
-			case 0x03574:
+			case 0x03FA8:
+			case 0x0A8AC:
+			case 0x022EC:
 				break;
 			default:
 				sLog.outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
