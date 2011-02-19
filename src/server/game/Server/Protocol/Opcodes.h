@@ -446,7 +446,7 @@ enum Opcodes
     SMSG_TRAINER_BUY_SUCCEEDED                       = 0x10072, //
     SMSG_TRAINER_BUY_FAILED                          = 0x0257E, //
     CMSG_BINDER_ACTIVATE                             = 0x0A48C, // 4.0.6a 13623
-    SMSG_PLAYERBINDERROR                             = 0x0765C, //
+    SMSG_PLAYERBINDERROR                             = 0x0EEC8, // 4.0.6a 13623 ?
     CMSG_BANKER_ACTIVATE                             = 0x0E7E0, // 4.0.6a 13623
     SMSG_SHOW_BANK                                   = 0x027A4, // 4.0.6a 13623
     CMSG_BUY_BANK_SLOT                               = 0x06C5F, //
@@ -739,7 +739,7 @@ enum Opcodes
     SMSG_GROUP_JOINED_BATTLEGROUND                   = 0x100FE, //
     MSG_BATTLEGROUND_PLAYER_POSITIONS                = 0x00293, // 4.0.6a 13623
     CMSG_PET_STOP_ATTACK                             = 0x10100, //
-    SMSG_BINDER_CONFIRM                              = 0x10101, //
+    SMSG_BINDER_CONFIRM                              = 0x033C4, // 4.0.6a 13623
     SMSG_BATTLEGROUND_PLAYER_JOINED                  = 0x10101, //
     SMSG_BATTLEGROUND_PLAYER_LEFT                    = 0x10102, //
     CMSG_BATTLEMASTER_JOIN                           = 0x00137, //
@@ -1280,7 +1280,7 @@ enum Opcodes
     CMSG_GROUP_SET_ROLES                             = 0x08509, // 4.0.6a 13623
     CMSG_UNKNOWN_34056                               = 0x08508, // 
     CMSG_RETURN_TO_GRAVEYARD                         = 0x00593, // 4.0.6a 13623
-    NUM_MSG_TYPES                                    = 0x102B7  // last unknown opcode + 1.
+    NUM_MSG_TYPES                                    = 0x20000  // last unknown opcode + 1.
 };
 
 /*
