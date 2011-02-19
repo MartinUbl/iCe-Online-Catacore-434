@@ -171,14 +171,14 @@ enum Opcodes
     CMSG_CHANNEL_UNMODERATOR                         = 0x00809, // 4.0.6a 13623
     CMSG_CHANNEL_MUTE                                = 0x00023, // 4.0.6a 13623
     CMSG_CHANNEL_UNMUTE                              = 0x00841, // 4.0.6a 13623
-    CMSG_CHANNEL_INVITE                              = 0x00020, // 4.0.6a 13623
+    CMSG_CHANNEL_INVITE                              = 0x00021, // 4.0.6a 13623
     CMSG_CHANNEL_KICK                                = 0x00068, // 4.0.6a 13623
     CMSG_CHANNEL_ROSTER_INFO                         = 0x00069, // 4.0.6a 13623
     CMSG_CHANNEL_BAN                                 = 0x0000A, // 4.0.6a 13623
     CMSG_CHANNEL_UNBAN                               = 0x00048, // 4.0.6a 13623
     CMSG_CHANNEL_ANNOUNCEMENTS                       = 0x0004B, // 4.0.6a 13623
     CMSG_CHANNEL_MODERATE                            = 0x10018, //
-    SMSG_UPDATE_OBJECT                               = 0x03780, // 
+    SMSG_UPDATE_OBJECT                               = 0x03780, // 4.0.6a 13623
     SMSG_DESTROY_OBJECT                              = 0x02AA0, // 
     CMSG_USE_ITEM                                    = 0x07080, // 4.0.6a 13623
     CMSG_OPEN_ITEM                                   = 0x0A2A8, // 4.0.6a 13623
@@ -972,7 +972,7 @@ enum Opcodes
     CMSG_TARGET_SCRIPT_CAST                          = 0x10184, //
     CMSG_CHANNEL_DISPLAY_LIST                        = 0x10185, //
     CMSG_SET_ACTIVE_VOICE_CHANNEL                    = 0x0C577, //
-    CMSG_GET_CHANNEL_MEMBER_COUNT                    = 0x03A90, //
+    CMSG_GET_CHANNEL_MEMBER_COUNT                    = 0x00009, // 4.0.6a 13623
     SMSG_CHANNEL_MEMBER_COUNT                        = 0x02CEC, // 4.0.6a 13623
     CMSG_CHANNEL_VOICE_ON                            = 0x05A98, //
     CMSG_CHANNEL_VOICE_OFF                           = 0x07A88, //
