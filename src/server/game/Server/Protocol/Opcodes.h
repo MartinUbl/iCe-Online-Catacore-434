@@ -37,7 +37,7 @@
 
 #define OPCODE_NOT_FOUND 0x10000
 
-#define PRINTPACKET(a,b) {uint8 chr;for(int i=0;i<b;i++){a>>chr;sLog.outString("Data %i: %u",i,chr)}}
+#define PRINTPACKET(a,b) {uint8 chr;for(int i=0;i<b;i++){a>>chr;sLog.outString("Data %i: %u (0x%.4X)",i,chr,chr);}}
 
 /// List of Opcodes
 enum Opcodes
