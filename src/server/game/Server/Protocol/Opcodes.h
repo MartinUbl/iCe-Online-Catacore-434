@@ -287,7 +287,7 @@ enum Opcodes
     SMSG_OPEN_CONTAINER                              = 0x01C5F, //
     CMSG_INSPECT                                     = 0x078A8, // 4.0.6a 13623
     SMSG_INSPECT                                     = 0x07AC8, // 
-    CMSG_INITIATE_TRADE                              = 0x00411, // 4.0.6a 13623
+    CMSG_INITIATE_TRADE                              = 0x00413, // 4.0.6a 13623
     CMSG_BEGIN_TRADE                                 = 0x1004B, //
     CMSG_BUSY_TRADE                                  = 0x1004C, //
     CMSG_IGNORE_TRADE                                = 0x1004D, //
@@ -414,10 +414,10 @@ enum Opcodes
     SMSG_QUESTGIVER_QUEST_FAILED                     = 0x0A084, // 4.0.6a 13623
     CMSG_QUESTLOG_SWAP_QUEST                         = 0x10068, //
     CMSG_QUESTLOG_REMOVE_QUEST                       = 0x0EDA8, // 4.0.6a 13623
-    SMSG_QUESTLOG_FULL                               = 0x0618C, // 4.0.6a 13623
+    SMSG_QUESTLOG_FULL                               = 0x0618C, // 4.0.6a 13623 !! probably wrong
     SMSG_QUESTUPDATE_FAILED                          = 0x0DC5D, //
     SMSG_QUESTUPDATE_FAILEDTIMER                     = 0x03F5D, //
-    SMSG_QUESTUPDATE_COMPLETE                        = 0x04575, //
+    SMSG_QUESTUPDATE_COMPLETE                        = 0x0EDA0, // 4.0.6a 13623
     SMSG_QUESTUPDATE_ADD_KILL                        = 0x0ADA0, // 4.0.6a 13623
     SMSG_QUESTUPDATE_ADD_ITEM                        = 0x1006B, // 4.0.6a 13623
     CMSG_QUEST_CONFIRM_ACCEPT                        = 0x06FCC, // 4.0.6a 13623
@@ -1009,7 +1009,7 @@ enum Opcodes
     SMSG_ECHO_PARTY_SQUELCH                          = 0x02AC4, // 4.0.6a 13623 
     CMSG_SET_TITLE_SUFFIX                            = 0x10196, //
     CMSG_SPELLCLICK                                  = 0x10197, //
-    SMSG_LOOT_LIST                                   = 0x0F684, // 4.0.6a 13623
+    SMSG_LOOT_LIST                                   = 0x03DE0, // 4.0.6a 13623
     CMSG_GM_CHARACTER_RESTORE                        = 0x10198, //
     CMSG_GM_CHARACTER_SAVE                           = 0x10199, //
     SMSG_VOICESESSION_FULL                           = 0x0A456, //
@@ -1120,11 +1120,11 @@ enum Opcodes
     CMSG_COMPLETE_MOVIE                              = 0x0E188, // 4.0.6a 13623
     CMSG_SET_GLYPH_SLOT                              = 0x101D4, //
     CMSG_SET_GLYPH                                   = 0x101D5, //
-    SMSG_ACHIEVEMENT_EARNED                          = 0x101D6, //
+    SMSG_ACHIEVEMENT_EARNED                          = 0x0F5E4, // 4.0.6a 13623
     SMSG_DYNAMIC_DROP_ROLL_RESULT                    = 0x101D7, //
-    SMSG_CRITERIA_UPDATE                             = 0x00470, // 
+    SMSG_CRITERIA_UPDATE                             = 0x0AFC8, // 4.0.6a 13623
     CMSG_QUERY_INSPECT_ACHIEVEMENTS                  = 0x028EC, //
-    SMSG_RESPOND_INSPECT_ACHIEVEMENTS                = 0x101DA, //
+    SMSG_RESPOND_INSPECT_ACHIEVEMENTS                = 0x0041C, // 4.0.6a 13623
     CMSG_DISMISS_CONTROLLED_VEHICLE                  = 0x0E3C0, // 4.0.6a 13623
     CMSG_COMPLETE_ACHIEVEMENT_CHEAT                  = 0x101DC, //
     SMSG_QUESTUPDATE_ADD_PVP_KILL                    = 0x05D55, //
@@ -1132,7 +1132,7 @@ enum Opcodes
     SMSG_CALENDAR_UPDATE_INVITE_LIST3                = 0x04E7F, //
     CMSG_UNITANIMTIER_CHEAT                          = 0x101DE, //
     CMSG_CHAR_CUSTOMIZE                              = 0x04F75, //
-    SMSG_CHAR_CUSTOMIZE                              = 0x02da4, // 4.0.6a 13623
+    SMSG_CHAR_CUSTOMIZE                              = 0x02DA4, // 4.0.6a 13623
     SMSG_PET_RENAMEABLE                              = 0x0B6C8, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_EXIT                        = 0x0547C, //
     CMSG_REQUEST_VEHICLE_PREV_SEAT                   = 0x08E7F, //
@@ -1236,7 +1236,7 @@ enum Opcodes
     CMSG_GMRESPONSE_RESOLVE                          = 0x0455E, //
     SMSG_GMRESPONSE_STATUS_UPDATE                    = 0x0057C, //
     CMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x03FA8, // 4.0.6a 13623
-    SMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x05557, //
+    SMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x0618C, // 4.0.6a 13623
     CMSG_CHAR_RACE_CHANGE                            = 0x0775C, //
     SMSG_TALENTS_INVOLUNTARILY_RESET                 = 0x04E54, //
     SMSG_UNKNOWN_1276                                = 0x1023A, //
