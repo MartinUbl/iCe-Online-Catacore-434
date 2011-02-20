@@ -425,7 +425,7 @@ enum Opcodes
     CMSG_PUSHQUESTTOPARTY                            = 0x029E8, // 4.0.6a 13623
     CMSG_LIST_INVENTORY                              = 0x0EDC8, // 4.0.6a 13623
     SMSG_LIST_INVENTORY                              = 0x0F8AC, // 4.0.6a 13623
-    CMSG_SELL_ITEM                                   = 0x06384, // 4.0.6a 13623
+    CMSG_SELL_ITEM                                   = 0x063A4, // 4.0.6a 13623
     SMSG_SELL_ITEM                                   = 0x037AC, // 4.0.6a 13623
     CMSG_BUY_ITEM                                    = 0x0EA84, // 4.0.6a 13623
     SMSG_BUY_ITEM                                    = 0x04676, // 4.0.6a 13623
@@ -441,7 +441,7 @@ enum Opcodes
     SMSG_ACTIVATETAXIREPLY                           = 0x07A84, // 4.0.6a 13623 ?
     SMSG_NEW_TAXI_PATH                               = 0x0E5E4, // 4.0.6a 13623
     CMSG_TRAINER_LIST                                = 0x0E5AC, // 4.0.6a 13623
-    SMSG_TRAINER_LIST                                = 0x0AC7E, // 4.0.6a 13623
+    SMSG_TRAINER_LIST                                = 0x06DEC, // 4.0.6a 13623
     CMSG_TRAINER_BUY_SPELL                           = 0x09754, //
     SMSG_TRAINER_BUY_SUCCEEDED                       = 0x10072, //
     SMSG_TRAINER_BUY_FAILED                          = 0x0257E, //
@@ -589,7 +589,7 @@ enum Opcodes
     SMSG_PERIODICAURALOG                             = 0x03388, // 
     SMSG_SPELLDAMAGESHIELD                           = 0x073A0, // 4.0.6a 13623
     SMSG_SPELLNONMELEEDAMAGELOG                      = 0x074AC, // 4.0.6a 13623
-    CMSG_LEARN_TALENT                                = 0x0A7A0, // 4.0.6a 13623 
+    CMSG_LEARN_TALENT                                = 0x0A7CC, // 4.0.6a 13623 
     SMSG_RESURRECT_FAILED                            = 0x0D557, //
     CMSG_TOGGLE_PVP                                  = 0x06480, // 4.0.6a 13623
     SMSG_ZONE_UNDER_ATTACK                           = 0x0BD80, // 4.0.6a 13623
@@ -828,7 +828,7 @@ enum Opcodes
     CMSG_MOVE_FLIGHT_ACK                             = 0x0A3C8, // 4.0.6a 13623
     MSG_MOVE_START_SWIM_CHEAT                        = 0x02755, //
     MSG_MOVE_STOP_SWIM_CHEAT                         = 0x03D54, //
-    SMSG_MOVE_SET_CAN_FLY                            = 0x00C5F, //
+    SMSG_MOVE_SET_CAN_FLY                            = 0x025E0, // 4.0.6a 13623
     SMSG_MOVE_UNSET_CAN_FLY                          = 0x0DC57, //
     CMSG_MOVE_SET_CAN_FLY_ACK                        = 0x0FCAC, // 4.0.6a 13623
     CMSG_MOVE_SET_FLY                                = 0x0E0E0, // 4.0.6a 13623
@@ -1138,7 +1138,7 @@ enum Opcodes
     CMSG_REQUEST_VEHICLE_PREV_SEAT                   = 0x08E7F, //
     CMSG_REQUEST_VEHICLE_NEXT_SEAT                   = 0x0FE5D, //
     CMSG_REQUEST_VEHICLE_SWITCH_SEAT                 = 0x0CE54, //
-    CMSG_PET_LEARN_TALENT                            = 0x0255F, //
+    CMSG_PET_LEARN_TALENT                            = 0x0A7A0, // 4.0.6a 13623
     CMSG_PET_UNLEARN_TALENTS                         = 0x08F5D, //
     SMSG_SET_PHASE_SHIFT                             = 0x022ED, // 4.0.6a 13623
     SMSG_ALL_ACHIEVEMENT_DATA                        = 0x0445E, // 4.0.6a 13623
@@ -1172,7 +1172,7 @@ enum Opcodes
     SMSG_PET_LEARNED_SPELL                           = 0x0B3C4, // 4.0.6a 13623 
     SMSG_PET_REMOVED_SPELL                           = 0x0F28C, // 4.0.6a 13623
     CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE          = 0x0E988, // 4.0.6a 13623
-    CMSG_HEARTH_AND_RESURRECT                        = 0x0D67E, //
+    CMSG_HEARTH_AND_RESURRECT                        = 0x07080, //
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA        = 0x03380, // 4.0.6a 13623
     SMSG_CRITERIA_DELETED                            = 0x101F4, //
     SMSG_ACHIEVEMENT_DELETED                         = 0x101F5, //
@@ -1210,7 +1210,7 @@ enum Opcodes
     CMSG_FORCE_UNK1_SPEED_CHANGE_ACK                 = 0x0F0C0, // 4.0.6a 13623
     SMSG_FORCE_UNK2_SPEED_CHANGE                     = 0x1021B, //
     CMSG_FORCE_UNK2_SPEED_CHANGE_ACK                 = 0x07DE8, // 4.0.6a 13623
-    SMSG_MOVE_LEVITATING                             = 0x1021D, //
+    SMSG_MOVE_LEVITATING                             = 0x0B8AC, // 4.0.6a 13623
     SMSG_SPLINE_MOVE_UNKNOWN_1235                    = 0x1021E, //
     SMSG_SPLINE_MOVE_UNKNOWN_1236                    = 0x1021F, //
     CMSG_EQUIPMENT_SET_USE                           = 0x0E8A0, // 4.0.6a 13623
