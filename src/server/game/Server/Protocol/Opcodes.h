@@ -1054,7 +1054,7 @@ enum Opcodes
     SMSG_SPLINE_MOVE_UNSET_FLYING                    = 0x07688, // 4.0.6a 13623
     SMSG_SUMMON_CANCEL                               = 0x0645E, //
     CMSG_CHANGE_PERSONAL_ARENA_RATING                = 0x101B2, //
-    CMSG_ALTER_APPEARANCE                            = 0x034A4, //
+    CMSG_ALTER_APPEARANCE                            = 0x034A4, // 4.0.6a 13623
     SMSG_ENABLE_BARBER_SHOP                          = 0x037E8, // 4.0.6a 13623
     SMSG_BARBER_SHOP_RESULT                          = 0x03188, // 4.0.6a 13623
     CMSG_CALENDAR_GET_CALENDAR                       = 0x101B4, //
@@ -1120,7 +1120,7 @@ enum Opcodes
     CMSG_COMPLETE_MOVIE                              = 0x0E188, // 4.0.6a 13623
     CMSG_SET_GLYPH_SLOT                              = 0x101D4, //
     CMSG_SET_GLYPH                                   = 0x101D5, //
-    SMSG_ACHIEVEMENT_EARNED                          = 0x0F5E4, // 4.0.6a 13623
+    SMSG_ACHIEVEMENT_EARNED                          = 0x0F5E4, // 4.0.6a 13623 0x0D5C ?
     SMSG_DYNAMIC_DROP_ROLL_RESULT                    = 0x101D7, //
     SMSG_CRITERIA_UPDATE                             = 0x0AFC8, // 4.0.6a 13623
     CMSG_QUERY_INSPECT_ACHIEVEMENTS                  = 0x028EC, //
