@@ -356,7 +356,7 @@ enum Opcodes
     SMSG_PLAYERBOUND                                 = 0x06BCC, // 4.0.6a 13623
     SMSG_CLIENT_CONTROL_UPDATE                       = 0x03C84, // 4.0.6a 13623
     CMSG_REPOP_REQUEST                               = 0x0A9E4, // 4.0.6a 13623
-    SMSG_RESURRECT_REQUEST                           = 0x0F3A3, // 4.0.6a 13623
+    SMSG_RESURRECT_REQUEST                           = 0x0F3A0, // 4.0.6a 13623
     CMSG_RESURRECT_RESPONSE                          = 0x0EA84, // 4.0.6a 13623
     CMSG_LOOT                                        = 0x0FCEC, // 4.0.6a 13623
     CMSG_LOOT_MONEY                                  = 0x079E0, // 4.0.6a 13623
@@ -444,7 +444,7 @@ enum Opcodes
     SMSG_TRAINER_LIST                                = 0x0BBE0, // 4.0.6a 13623
     CMSG_TRAINER_BUY_SPELL                           = 0x0FDC8, //
     SMSG_TRAINER_BUY_SUCCEEDED                       = 0x10072, //
-    SMSG_TRAINER_BUY_FAILED                          = 0x0257E, //
+    SMSG_TRAINER_BUY_FAILED                          = 0x06DEC, // 4.0.6a 13623
     CMSG_BINDER_ACTIVATE                             = 0x0A48C, // 4.0.6a 13623
     SMSG_PLAYERBINDERROR                             = 0x0EEC8, // 4.0.6a 13623 ?
     CMSG_BANKER_ACTIVATE                             = 0x0E7E0, // 4.0.6a 13623
@@ -828,7 +828,7 @@ enum Opcodes
     CMSG_MOVE_FLIGHT_ACK                             = 0x0A3C8, // 4.0.6a 13623
     MSG_MOVE_START_SWIM_CHEAT                        = 0x02755, //
     MSG_MOVE_STOP_SWIM_CHEAT                         = 0x03D54, //
-    SMSG_MOVE_SET_CAN_FLY                            = 0x025E0, // 4.0.6a 13623
+    SMSG_MOVE_SET_CAN_FLY                            = 0x00C5F, //
     SMSG_MOVE_UNSET_CAN_FLY                          = 0x0DC57, //
     CMSG_MOVE_SET_CAN_FLY_ACK                        = 0x0FCAC, // 4.0.6a 13623
     CMSG_MOVE_SET_FLY                                = 0x0E0E0, // 4.0.6a 13623
@@ -1054,7 +1054,7 @@ enum Opcodes
     SMSG_SPLINE_MOVE_UNSET_FLYING                    = 0x07688, // 4.0.6a 13623
     SMSG_SUMMON_CANCEL                               = 0x0645E, //
     CMSG_CHANGE_PERSONAL_ARENA_RATING                = 0x101B2, //
-    CMSG_ALTER_APPEARANCE                            = 0x101B3, //
+    CMSG_ALTER_APPEARANCE                            = 0x034A4, //
     SMSG_ENABLE_BARBER_SHOP                          = 0x037E8, // 4.0.6a 13623
     SMSG_BARBER_SHOP_RESULT                          = 0x03188, // 4.0.6a 13623
     CMSG_CALENDAR_GET_CALENDAR                       = 0x101B4, //
