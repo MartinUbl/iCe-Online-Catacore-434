@@ -3907,8 +3907,8 @@ void Spell::SendSpellStart()
     //sLog.outDebug("Sending SMSG_SPELL_START id=%u", m_spellInfo->Id);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_2;
-    if (m_spellInfo->Attributes & SPELL_ATTR_REQ_AMMO)
-        castFlags |= CAST_FLAG_AMMO;
+    //if (m_spellInfo->Attributes & SPELL_ATTR_REQ_AMMO)
+    //    castFlags |= CAST_FLAG_AMMO;
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
          && m_spellInfo->powerType != POWER_HEALTH)
@@ -4173,12 +4173,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
 
 void Spell::SendLogExecute()
 {
-    WorldPacket data(SMSG_COMBAT_LOG_MULTIPLE, 4+4+4+4+8+4+4+4+4+8);
-
-    data << uint32(1);                                      // total number of log lines
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(SPELL_LOG_EXECUTE);
+	WorldPacket data(SMSG_SPELLLOGEXECUTE, 8+4+4+4+4+8);
 
     data.append(m_caster->GetPackGUID());
 

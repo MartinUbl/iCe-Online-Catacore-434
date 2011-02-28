@@ -121,6 +121,7 @@ enum SpellNotifyPushType
     PUSH_CHAIN,
 };
 
+//for packet with opcode SMSG_COMBAT_LOG_MULTIPLE
 enum SpellLogType
 {
     SPELL_LOG_NON_MELEE_DAMAGE          = 0x74AC, //4.0.6a 13623
