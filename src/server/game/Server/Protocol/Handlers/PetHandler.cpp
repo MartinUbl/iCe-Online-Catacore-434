@@ -64,7 +64,6 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
     recv_data >> guid1;                                     // pet guid
     recv_data >> data;
     recv_data >> guid2;                                     // tag guid
-    recv_data >> guid2;                                     // tag guid
 
     Unit* pet= ObjectAccessor::GetUnit(*_player, guid1);
 
