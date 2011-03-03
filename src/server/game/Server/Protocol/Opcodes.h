@@ -426,7 +426,7 @@ enum Opcodes
     CMSG_LIST_INVENTORY                              = 0x0EDC8, // 4.0.6a 13623
     SMSG_LIST_INVENTORY                              = 0x0F8AC, // 4.0.6a 13623
     CMSG_SELL_ITEM                                   = 0x063A4, // 4.0.6a 13623
-    SMSG_SELL_ITEM                                   = 0x037AC, // 4.0.6a 13623
+    SMSG_SELL_ITEM                                   = 0x06CE8, // 4.0.6a 13623
     CMSG_BUY_ITEM                                    = 0x0EA84, // 4.0.6a 13623
     SMSG_BUY_ITEM                                    = 0x04676, // 4.0.6a 13623
     SMSG_BUY_FAILED                                  = 0x0C6E8, // 4.0.6a 13623
