@@ -37,12 +37,60 @@ class npc_gwen_armstead: public CreatureScript
             if(action == GOSSIP_ACTION_INFO_DEF+1)
             {
                 Creature* kun = cr->SummonCreature(42260,pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),0,TEMPSUMMON_DEAD_DESPAWN,0);
-                pl->EnterVehicle(kun);
+                //pl->EnterVehicle(kun);
+                WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, kun->GetPackGUID().size()+1);
+                data.append(kun->GetPackGUID());
+                data << uint8(0); //allow move
+                pl->GetSession()->SendPacket(&data);
+                //
+                WorldPacket data2(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
+                data2 << uint64(cr->GetGUID());
+                data2 << uint16(0);
+                data2 << uint32(0);
+                data2 << uint32(0);
+                data2 << uint8(0);     // spells count
+                data2 << uint8(0);     // cooldowns count
+                pl->GetSession()->SendPacket(&data2);
+                //
+                WorldPacket data3(SMSG_MONSTER_MOVE_TRANSPORT, cr->GetPackGUID().size()+pl->GetPackGUID().size());
+                data3.append(cr->GetPackGUID());
+                data3.append(pl->GetPackGUID());
+                data3 << int8(cr->GetTransSeat());
+                data3 << uint8(0);
+                data3 << cr->GetPositionX() - pl->GetPositionX();
+                data3 << cr->GetPositionY() - pl->GetPositionY();
+                data3 << cr->GetPositionZ() - pl->GetPositionZ();
+                data3 << uint32(getMSTime());
+                data3 << uint8(4);
+                data3 << cr->GetTransOffsetO();
+                data3 << uint32(SPLINEFLAG_TRANSPORT);
+                data3 << uint32(0);// move time
+                data3 << uint32(0);//GetTransOffsetX();
+                data3 << uint32(0);//GetTransOffsetY();
+                data3 << uint32(0);//GetTransOffsetZ();
+                pl->SendMessageToSet(&data3, true);
+                //
+                WorldPacket data4(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
+                pl->GetSession()->SendPacket(&data4);
             }
             pl->CLOSE_GOSSIP_MENU();
             return true;
         }
 };
+/*
+2011-03-05 10:03:49 received opcode 0xFF88 (CMSG_GOSSIP_SELECT_OPTION)
+2011-03-05 10:03:49 sent opcode SMSG_COMPRESSED_UPDATE_OBJECT (0xEAC0)
+2011-03-05 10:03:49 sent opcode SMSG_CLIENT_CONTROL_UPDATE (0x3C84)
+2011-03-05 10:03:49 sent opcode SMSG_PET_SPELLS (0xB780)
+2011-03-05 10:03:49 sent opcode SMSG_MONSTER_MOVE_TRANSPORT (0x248C)
+2011-03-05 10:03:49 sent opcode SMSG_FORCE_MOVE_ROOT (0x2F88)
+2011-03-05 10:03:49 sent opcode SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA (0x3380)
+2011-03-05 10:03:49 sent opcode SMSG_GOSSIP_COMPLETE (0xF0AC)
+2011-03-05 10:03:49 received opcode 0x268C (CMSG_CREATURE_QUERY)
+2011-03-05 10:03:49 sent opcode SMSG_CREATURE_QUERY_RESPONSE (0xE6AC)
+2011-03-05 10:03:49 received opcode 0x69A0 (UNKNOWN)
+2011-03-05 10:03:49 sent opcode SMSG_COMPRESSED_UPDATE_OBJECT (0xEAC0)
+*/
 /*
 -- npc_gwen_armstead
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (36452, 0, 0, 0, 0, 0, 29290, 0, 0, 0, 'Gwen Armstead', 'Mayor of Duskhaven', '', 0, 1, 1, 0, 35, 35, 3, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_gwen_armstead', 1);
