@@ -98,7 +98,36 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (42260, 0, 0, 0, 0, 0, 29284, 0, 0, 0, 'Stormwind Charger', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2056, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 486, 0, 0, '', 0, 3, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 182, 1, 0, 0, 0, 'mob_horse_gilneas', 1);
 */
 
+class npc_gilneas_homebinder: public CreatureScript
+{
+    public:
+        npc_gilneas_homebinder(): CreatureScript("npc_gilneas_homebinder") {}
+
+        bool OnQuestComplete(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+        {
+            if(pQuest->GetQuestId() == 24438 && pCreature->GetEntry() == 37065)
+            {
+                WorldLocation wloc;
+                wloc.Relocate(-2456.45f, 1552.06f, 18.692f);
+                wloc.m_mapId = 654;
+                pPlayer->SetHomebind(wloc,4731);
+                return true;
+            }
+            if(pQuest->GetQuestId() == 14434 && pCreature->GetEntry() == 36616)
+            {
+                WorldLocation wloc;
+                wloc.Relocate(-8867.25f, 671.881f, 97.9036f);
+                wloc.m_mapId = 0;
+                pPlayer->SetHomebind(wloc,5148);
+                return true;
+            }
+
+            return false;
+        }
+};
+
 void AddSC_gilneas()
 {
     new npc_gwen_armstead();
+    new npc_gilneas_homebinder();
 }
