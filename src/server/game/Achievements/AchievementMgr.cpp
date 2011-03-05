@@ -694,7 +694,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
 
 void AchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted)
 {
-    WorldPacket data(SMSG_CRITERIA_UPDATE, 8+4+8);
+    WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(entry->ID);
 
     // the counter is packed like a packed Guid
@@ -2131,31 +2131,30 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
  */
 void AchievementMgr::BuildAllDataPacket(WorldPacket *data)
 {
-    AchievementEntry const *achievement;
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
-    {
-        // Skip tracking - they bug client UI
-        achievement = sAchievementStore.LookupEntry(iter->first);
-        if (achievement->flags & ACHIEVEMENT_FLAG_TRACKING)
-            continue;
-
+    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
         *data << uint32(iter->first);
-        *data << uint32(secsToTimeBitFields(iter->second.date));
-    }
-    *data << int32(-1);
+
+    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    
+        *data << uint64(m_completedAchievements.size());
 
     for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
-    {
-        *data << uint32(iter->first);
-        data->appendPackGUID(iter->second.counter);
-        data->append(GetPlayer()->GetPackGUID());
-        *data << uint32(0);
         *data << uint32(secsToTimeBitFields(iter->second.date));
-        *data << uint32(0);
-        *data << uint32(0);
-    }
+    
+    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+        *data << uint32(iter->first);
 
-    *data << int32(-1);
+    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+        *data << uint64(m_criteriaProgress.size());
+
+    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+        *data << uint32(secsToTimeBitFields(iter->second.date));
+
+	for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+        *data << int32(-1);
+
+    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+        *data << int32(-1);
 }
 
 bool AchievementMgr::HasAchieved(AchievementEntry const* achievement) const
