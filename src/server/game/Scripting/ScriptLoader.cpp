@@ -201,6 +201,7 @@ void AddSC_boss_nalorakk();
 void AddSC_boss_zuljin();
 void AddSC_instance_zulaman();
 void AddSC_zulaman();
+void AddSC_gilneas();
 
 //void AddSC_alterac_mountains();
 void AddSC_arathi_highlands();
@@ -755,6 +756,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_zuljin();
     AddSC_instance_zulaman();
     AddSC_zulaman();
+    AddSC_gilneas();
 
     //AddSC_alterac_mountains();
     AddSC_arathi_highlands();
