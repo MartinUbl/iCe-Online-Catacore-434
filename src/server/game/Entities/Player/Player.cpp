@@ -16293,13 +16293,24 @@ bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float&
     return true;
 }
 
-void Player::SetHomebind(WorldLocation const& /*loc*/, uint32 /*area_id*/)
+void Player::SetHomebind(WorldLocation const& loc, uint32 area_id)
 {
-    m_homebindMapId = GetMapId();
-    m_homebindAreaId = GetAreaId();
-    m_homebindX = GetPositionX();
-    m_homebindY = GetPositionY();
-    m_homebindZ = GetPositionZ();
+    if(loc.GetMapId() != MAPID_INVALID && loc.IsPositionValid())
+    {
+        m_homebindMapId = loc.GetMapId();
+        m_homebindAreaId = area_id;
+        m_homebindX = loc.GetPositionX();
+        m_homebindY = loc.GetPositionY();
+        m_homebindZ = loc.GetPositionZ();
+    }
+    else
+    {
+        m_homebindMapId = GetMapId();
+        m_homebindAreaId = GetAreaId();
+        m_homebindX = GetPositionX();
+        m_homebindY = GetPositionY();
+        m_homebindZ = GetPositionZ();
+    }
 
     // update sql homebind
     CharacterDatabase.PExecute("UPDATE character_homebind SET map = '%u', zone = '%u', position_x = '%f', position_y = '%f', position_z = '%f' WHERE guid = '%u'",
