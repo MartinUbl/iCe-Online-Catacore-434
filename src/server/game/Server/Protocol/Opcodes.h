@@ -1204,7 +1204,7 @@ enum Opcodes
     CMSG_LEARN_PREVIEW_TALENTS                       = 0x0FFAC, // 4.0.6a 13623
     CMSG_LEARN_PREVIEW_TALENTS_PET                   = 0x0BCE8, // 4.0.6a 13623
     SMSG_ARENA_OPPONENT_UPDATE                       = 0x028CC, // 4.0.6a 13623
-    SMSG_ARENA_TEAM_CHANGE_FAILED_QUEUED             = 0x0BF5C, //
+    SMSG_ARENA_TEAM_CHANGE_FAILED_QUEUED             = 0x0B2A0, // 4.0.6a 13623
     SMSG_MULTIPLE_PACKETS                            = 0x0FEC0, // 4.0.6a 13623
     SMSG_FORCE_UNK1_SPEED_CHANGE                     = 0x10219, //
     CMSG_FORCE_UNK1_SPEED_CHANGE_ACK                 = 0x0F0C0, // 4.0.6a 13623
