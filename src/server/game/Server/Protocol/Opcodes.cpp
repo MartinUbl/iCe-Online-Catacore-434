@@ -574,8 +574,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_BATTLEFIELD_LIST,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldListOpcode     );
     OPCODE( SMSG_BATTLEFIELD_LIST,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
-    OPCODE( SMSG_BATTLEFIELD_WIN_OBSOLETE,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_BATTLEFIELD_LOSE_OBSOLETE,               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_TAXICLEARNODE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXIENABLENODE,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_ITEM_TEXT_QUERY,                         STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery             );
@@ -719,7 +717,10 @@ void InitOpcodeTable()
     OPCODE( CMSG_MOVE_NOT_ACTIVE_MOVER,                   STATUS_LOGGEDIN, &WorldSession::HandleMoveNotActiveMover        );
     OPCODE( SMSG_PLAY_SOUND,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_STATUS,                      STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode   );
-    OPCODE( SMSG_BATTLEFIELD_STATUS,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_BATTLEFIELD_STATUS1,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_BATTLEFIELD_STATUS2,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_BATTLEFIELD_STATUS3,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_BATTLEFIELD_STATUS4,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_PORT,                        STATUS_LOGGEDIN, &WorldSession::HandleBattleFieldPortOpcode     );
     OPCODE( MSG_INSPECT_HONOR_STATS,                      STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode   );
     OPCODE( CMSG_BATTLEMASTER_HELLO,                      STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterHelloOpcode   );
@@ -745,7 +746,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_BINDER_CONFIRM,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_BATTLEGROUND_PLAYER_JOINED,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_BATTLEGROUND_PLAYER_LEFT,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_BATTLEMASTER_JOIN,                       STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
     OPCODE( SMSG_ADDON_INFO,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_PET_UNLEARN,                             STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_PET_UNLEARN_CONFIRM,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

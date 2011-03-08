@@ -141,7 +141,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     }
 
     #endif                                                  // !TRINITY_DEBUG
-
+sLog.outString("sent opcode %s (0x%.4X)", LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
     if (m_Socket->SendPacket (*packet) == -1)
         m_Socket->CloseSocket ();
 }

@@ -2082,6 +2082,7 @@ void AchievementMgr::SendAllAchievementData()
         data << uint32(now - iter->second.date);
     for (uint32 i = 0; i < flagBytesCount; ++i)
         data << uint8(0);
+
     for(CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
         data << uint32(iter->first);
 
@@ -2109,9 +2110,9 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
 
     //are following 3 lines right?
     data.append(GetPlayer()->GetPackGUID());
+
     for(uint32 i = 0; i < criterias; ++i)
         data.append(GetPlayer()->GetPackGUID());
-
     data << uint32(achievements);
 
     for(CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter!=m_completedAchievements.end(); ++iter)
@@ -2120,6 +2121,7 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
         data << uint32(secsToTimeBitFields(iter->second.date));
     for (uint32 i = 0; i < flagBytesCount; ++i)
         data << uint8(0);
+
     for(CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter!=m_completedAchievements.end(); ++iter)
         data << uint32(secsToTimeBitFields(iter->second.date));
 

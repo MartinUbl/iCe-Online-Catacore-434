@@ -5824,7 +5824,7 @@ void Player::SetRegularAttackTime()
     for (uint8 i = 0; i < MAX_ATTACK; ++i)
     {
         Item *tmpitem = GetWeaponForAttack(WeaponAttackType(i), true);
-        if (tmpitem && !tmpitem->IsBroken())
+        if (tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->Block)
         {
             ItemPrototype const *proto = tmpitem->GetProto();
             if (proto->Delay)
@@ -21542,7 +21542,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
-    m_achievementMgr.SendAllAchievementData();
+    m_achievementMgr.SendAllAchievementData();  //marker1
 
     SendEquipmentSetList();
 

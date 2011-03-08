@@ -387,7 +387,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
                     data << uint32(pProto->Spells[s].SpellCooldown);
                     data << uint32(pProto->Spells[s].SpellCategory);
                     data << uint32(pProto->Spells[s].SpellCategoryCooldown);
-                }
+               }
                 else
                 {
                     data << uint32(spell->RecoveryTime);

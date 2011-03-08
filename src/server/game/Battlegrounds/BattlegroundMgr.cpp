@@ -186,18 +186,25 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
     if (!bg)
     {
         StatusID = 0;
-        data->Initialize(SMSG_BATTLEFIELD_STATUS, 4);
+        data->Initialize(SMSG_BATTLEFIELD_STATUS1, 4);
         *data << uint32(QueueSlot);                         // queue id (0...1)
         return;
     }
     sLog.outString("Status: %u",StatusID);
+
+    /*
+    After merge:
+     SMSG_BATTLEFIELD_STATUS4 and 0x0090E unreferenced! 0x0090E is unknown, probably
+     the right opcode ID for STATUS_WAIT_QUEUE, really needs test and future work.
+    */
+
     switch(StatusID)
     {
         case STATUS_NONE:
             //TODO: sniff and implement proper opcode with structure for leaving queue
             break;
         case STATUS_WAIT_QUEUE:
-            data->Initialize(SMSG_BATTLEFIELD_STATUS, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
+            data->Initialize(SMSG_BATTLEFIELD_STATUS1, (1+4+4+1+4+1+1+1+1+1+4+1+1+1+1+1));
             //*data << uint8(QueueSlot); //not sure
             *data << uint8(0x20);
             *data << uint8(0x55);
@@ -216,7 +223,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint32(Time1); //average wait time
             break;
         case STATUS_WAIT_JOIN:
-            data->Initialize(0x081C, 1+4+6+2+1+4+10);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS3, 1+4+6+2+1+4+10);
             *data << uint8(QueueSlot); //not sure
             *data << uint8(0); //unk
             *data << uint32(0); //unk
@@ -237,7 +244,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             break;
         case STATUS_IN_PROGRESS:
             //where uiFrame?
-            data->Initialize(0x051E,1+4+4+1+4+1+4+1+1+4+4+5+4);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS2,1+4+4+1+4+1+4+1+1+4+4+5+4);
             *data << uint8(QueueSlot); //not sure
             *data << uint32(Time2); //time2 (time elapsed?)
             *data << uint32(0); //unk
@@ -924,25 +931,28 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     if (!plr)
         return;
 
-    uint32 win_honor  = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-    uint32 lose_honor = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+    uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+    uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
+    uint32 lose_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+
+    win_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), win_kills);
+    lose_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), lose_kills);
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
 
-    *data << uint64(guid);           //probably battlemaster guid, but who knows...
-    *data << uint16(0);              //unk
-    *data << uint32(win_honor);      //winner honor reward (call to arms)
-    *data << uint32(bgTypeId);       //Battleground typeid from dbc
-    *data << uint32(0);              //unk
-    *data << uint32(lose_honor);     //loser honor reward (call to arms)
-    *data << uint8(0xF);             //unk, 0xF in sniffed data
-    *data << uint32(lose_honor);     //loser honor reward random
-    *data << uint32(win_honor);      //winner honor reward random
-    *data << uint8(0);               //unk
-    *data << uint32(0);              //unk
-    *data << uint32(0);              //unk
+    *data << uint8(0x2);        // unk flags 1 << 7, 1 << 6, 1 << 5
+    *data << uint8(0x31);       // unk
+    *data << uint32(win_kills); // Call to arms win honor bonus
+    *data << uint64(guid);      // battlemaster guid?
+    *data << uint32(win_kills); // random BG win honor bonus
+    *data << uint8(0x2D);       // unk
+    *data << uint32(lose_kills);// Call to arms lose honor bonus
+    *data << uint32(win_arena); // Call to arms win conquest bonus
+    *data << uint32(win_arena); // random BG win conquest bonus
+    *data << uint32(0);         // unk
 
-    //Maybe it will be necessary to append some fields related to arena in future
+    *data << uint32(0);         // count of uints appended to the end
+    *data << uint32(lose_kills);// random BG lose honor bonus
 }
 
 void BattlegroundMgr::SendToBattleground(Player *pl, uint32 instanceId, BattlegroundTypeId bgTypeId)
