@@ -13834,7 +13834,8 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
         return;
 
                                                             // last check 2.0.10
-    WorldPacket data(SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4));
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, (2+8+4+4+4+1+4+4+4+4+4));
+    data << uint16(SMSG_ITEM_PUSH_RESULT);
     data << uint64(GetGUID());                              // player GUID
     data << uint32(received);                               // 0=looted, 1=from npc
     data << uint32(created);                                // 0=received, 1=created
