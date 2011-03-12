@@ -113,7 +113,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     data << uint32(1);
     data << uint64(unit->GetGUID());
     data << uint32(curloc);
-	data << uint8(0);
+    data << uint8(0x09);   //unk, 0x09 in sniffed data
     GetPlayer()->m_taxi.AppendTaximaskTo(data,GetPlayer()->isTaxiCheater());
     SendPacket(&data);
 

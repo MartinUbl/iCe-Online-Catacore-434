@@ -2227,7 +2227,8 @@ inline void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 star
 {
     uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
     uint32 pathSize = end - start;
-    WorldPacket data(SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+pathSize*4*3));
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, (2+GetPackGUID().size()+1+4+4+4+4+1+4+4+4+pathSize*4*3));
+    data << uint16(SMSG_MONSTER_MOVE);
     data.append(GetPackGUID());
     data << uint8(0);
     data << GetPositionX();
@@ -2235,7 +2236,7 @@ inline void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 star
     data << GetPositionZ();
     data << uint32(getMSTime());
     data << uint8(0);
-    data << uint32(((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) || isInFlight()) ? (SPLINEFLAG_FLYING|SPLINEFLAG_WALKING) : SPLINEFLAG_WALKING);
+    data << uint32(((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) || isInFlight()) ? (0x60042000) : SPLINEFLAG_WALKING);
     data << uint32(traveltime);
     data << uint32(pathSize);
 
