@@ -21089,7 +21089,7 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
 
         // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
         if (!m_mover->canDetectInvisibilityOf(u))
-      if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
+            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
                 return false;
     }
 
@@ -21102,10 +21102,14 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         if (!isAlive())
             detect = false;
         if (m_DetectInvTimer < 300 || !HaveAtClient(u))
-      if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
+            if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
                 if (!detect || !m_mover->canDetectStealthOf(u, GetDistance(u)))
                     return false;
     }
+
+    //Exception (little hackfix) for spirit healers and spirit guides
+    if(u->isSpiritService() && !isDead() && !isGameMaster())
+        return false;
 
     // If use this server will be too laggy
     // Now check is target visible with LoS
