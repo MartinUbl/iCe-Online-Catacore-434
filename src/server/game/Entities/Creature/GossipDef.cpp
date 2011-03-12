@@ -413,7 +413,8 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
 
 void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, uint64 npcGUID)
 {
-    WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, 14);
+    data << uint16(SMSG_QUESTGIVER_STATUS);
     data << uint64(npcGUID);
     data << uint32(questStatus);
 
