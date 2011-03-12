@@ -800,6 +800,38 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && GetSpellProto()->SpellFamilyFlags[2] & 0x00000008)
                 amount = GetBase()->GetUnitOwner()->GetShapeshiftForm() == FORM_CAT ? amount : 0;
             break;
+        case SPELL_AURA_MOUNTED:
+        {
+            Player *plr = caster->ToPlayer();
+            if(plr)
+            {
+                // find the spell we need
+                const MountTypeEntry *type = sMountTypeStore.LookupEntry(GetMiscValueB());
+                if(!type)
+                    return 0;
+                
+                uint32 spellId = 0;
+                uint32 plrskill = plr->GetSkillValue(SKILL_RIDING);
+                uint32 map = plr->GetMapId();
+                uint32 maxSkill = 0;
+                for(int i = 0; i < MAX_MOUNT_TYPE_COLUMN; i++)
+                {
+                    const MountCapabilityEntry *cap = sMountCapabilityStore.LookupEntry(type->capabilities[i]);
+                    if(!cap)
+                        continue;
+                    if(cap->map != -1 && cap->map != map)
+                        continue;
+                    if(cap->reqSkillLevel > plrskill || cap->reqSkillLevel <= maxSkill)
+                        continue;
+                    if(cap->reqSpell && !plr->HasSpell(cap->reqSpell))
+                        continue;
+                    maxSkill = cap->reqSkillLevel;
+                    spellId = cap->spell;
+                }
+                return (int) spellId;
+            }  
+            break;
+        }
         default:
             break;
     }
@@ -3817,7 +3849,12 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         return;
 
     Unit *target = aurApp->GetTarget();
-
+    uint32 spellId = (uint32)GetAmount();
+    Player *plr = target->ToPlayer();
+    if(plr && spellId < 2)
+    {
+        return;
+    }
     if (apply)
     {
         uint32 creatureEntry = GetMiscValue();
@@ -3853,10 +3890,15 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
                 display_id = 0;
 
         target->Mount(display_id, ci->VehicleId, GetMiscValue());
+
+        if(plr)
+            plr->CastSpell(plr, spellId, true);
     }
     else
     {
         target->Unmount();
+        if(plr)
+            plr->RemoveAurasDueToSpell(spellId);
         //some mounts like Headless Horseman's Mount or broom stick are skill based spell
         // need to remove ALL arura related to mounts, this will stop client crash with broom stick
         // and never endless flying after using Headless Horseman's Mount
@@ -3885,11 +3927,14 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp, uint8 mode
     if (Player *plr = target->m_movedPlayer)
     {
         // allow fly
-        WorldPacket data;
+        //WorldPacket data;
+        WorldPacket data(SMSG_MULTIPLE_PACKETS, 14);
         if (apply)
-            data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+            //data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+            data << uint16(SMSG_MOVE_SET_CAN_FLY);
         else
-            data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+            //data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+            data << uint16(SMSG_MOVE_UNSET_CAN_FLY);
         data.append(target->GetPackGUID());
         data << uint32(0);                                      // unk
         plr->SendDirectMessage(&data);
@@ -4309,11 +4354,13 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const *aurApp,
         {
             if (Player *plr = target->m_movedPlayer)
             {
-                WorldPacket data;
+                WorldPacket data(SMSG_MULTIPLE_PACKETS, 14);
                 if (apply)
-                    data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                    //data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                    data << uint16(SMSG_MOVE_SET_CAN_FLY);
                 else
-                    data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    //data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    data << uint16(SMSG_MOVE_UNSET_CAN_FLY);
                 data.append(plr->GetPackGUID());
                 data << uint32(0);                                      // unknown
                 plr->SendDirectMessage(&data);

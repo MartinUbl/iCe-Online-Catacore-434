@@ -574,6 +574,8 @@ void InitOpcodeTable()
     OPCODE( CMSG_BATTLEFIELD_LIST,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldListOpcode     );
     OPCODE( SMSG_BATTLEFIELD_LIST,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
+    OPCODE( CMSG_REQUEST_RATED_BG_INFO,                   STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_REQUEST_PVP_OPTIONS_ENABLED,             STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXICLEARNODE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXIENABLENODE,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_ITEM_TEXT_QUERY,                         STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery             );
@@ -722,7 +724,8 @@ void InitOpcodeTable()
     OPCODE( SMSG_BATTLEFIELD_STATUS3,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_BATTLEFIELD_STATUS4,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_PORT,                        STATUS_LOGGEDIN, &WorldSession::HandleBattleFieldPortOpcode     );
-    OPCODE( MSG_INSPECT_HONOR_STATS,                      STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode   );
+    OPCODE( CMSG_INSPECT_HONOR_STATS,                     STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode   );
+    OPCODE( SMSG_INSPECT_HONOR_STATS,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEMASTER_HELLO,                      STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterHelloOpcode   );
     OPCODE( CMSG_MOVE_START_SWIM_CHEAT,                   STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_MOVE_STOP_SWIM_CHEAT,                    STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -733,6 +736,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_FORCE_TURN_RATE_CHANGE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_TURN_RATE_CHANGE_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( MSG_PVP_LOG_DATA,                             STATUS_LOGGEDIN, &WorldSession::HandlePVPLogDataOpcode          );
+    OPCODE( CMSG_BATTLEFIELD_REQUEST_SCORE_DATA,          STATUS_LOGGEDIN, &WorldSession::HandlePVPLogDataOpcode          );
     OPCODE( CMSG_LEAVE_BATTLEFIELD,                       STATUS_LOGGEDIN, &WorldSession::HandleLeaveBattlefieldOpcode    );
     OPCODE( CMSG_AREA_SPIRIT_HEALER_QUERY,                STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode);
     OPCODE( CMSG_AREA_SPIRIT_HEALER_QUEUE,                STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode);
@@ -741,7 +745,8 @@ void InitOpcodeTable()
     OPCODE( SMSG_WARDEN_DATA,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_WARDEN_DATA,                             STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode          );
     OPCODE( SMSG_GROUP_JOINED_BATTLEGROUND,               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( MSG_BATTLEGROUND_PLAYER_POSITIONS,            STATUS_LOGGEDIN, &WorldSession::HandleBattlegroundPlayerPositionsOpcode);
+    OPCODE( CMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_LOGGEDIN, &WorldSession::HandleBattlegroundPlayerPositionsOpcode);
+    OPCODE( SMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_PET_STOP_ATTACK,                         STATUS_LOGGEDIN, &WorldSession::HandlePetStopAttack             );
     OPCODE( SMSG_BINDER_CONFIRM,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_BATTLEGROUND_PLAYER_JOINED,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

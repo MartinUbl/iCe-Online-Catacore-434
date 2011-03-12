@@ -173,7 +173,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     {
         TrainerSpell const* tSpell = &itr->second;
 
-        bool valid = true;
+        /*bool valid = true;
         bool primary_prof_first_rank = false;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
         {
@@ -189,7 +189,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         }
         if (!valid)
             continue;
-
+        */
         TrainerSpellState state = _player->GetTrainerSpellState(tSpell);
 
         data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
@@ -206,9 +206,10 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         data << uint32(0);
 		data << uint32(0);
 		data << uint32(0);
-		data << uint32(0);
-        //prev + req or req + 0
+		//prev + req or req + 0
         uint8 maxReq = 0;
+		data << uint32(0);
+		/*
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
         {
             if (!tSpell->learnedSpell[i])
@@ -237,7 +238,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
             data << uint32(0);
             ++maxReq;
         }
-
+        */
         ++count;
     }
 

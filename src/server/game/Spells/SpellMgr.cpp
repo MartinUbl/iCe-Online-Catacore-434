@@ -1126,15 +1126,12 @@ SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 
         else if (spellInfo->Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
-    /*else
+    else
     {
-        //HACK ! removed check for additional (AttributesEx2) requirements for shapeshift
-        //This hackfix fixes druid forms
-
         // needs shapeshift
-        //if (!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
-        //    return SPELL_FAILED_ONLY_SHAPESHIFT;
-    }*/
+        if (!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
 
     // Check if stance disables cast of not-stance spells
     // Example: cannot cast any other spells in zombie or ghoul form
