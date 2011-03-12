@@ -3869,7 +3869,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         }
 
         CreatureInfo const* ci = sObjectMgr.GetCreatureTemplate(creatureEntry);
-        if (!ci)
+        //Exception for Worgen spell "Running wild"
+        if (!ci && GetSpellProto()->Id != 87840)
         {
             sLog.outErrorDb("AuraMounted: `creature_template`='%u' not found in database (only need it modelid)",GetMiscValue());
             return;
@@ -3879,17 +3880,25 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         if (target->GetTypeId() == TYPEID_PLAYER)
             team = target->ToPlayer()->GetTeam();
 
-        uint32 display_id = sObjectMgr.ChooseDisplayId(team,ci);
-        CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
-        if (minfo)
-            display_id = minfo->modelid;
+        uint32 vehicleId = 0;
+        uint32 display_id = 0;
 
-        //some spell has one aura of mount and one of vehicle
-        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (GetSpellProto()->Effect[i] == SPELL_EFFECT_SUMMON && GetSpellProto()->EffectMiscValue[i] == GetMiscValue())
-                display_id = 0;
+        //Worgen's Running Wild is exception - not changing modelid
+        if(GetSpellProto()->Id != 87840)
+        {
+            vehicleId = ci->VehicleId;
+            display_id = sObjectMgr.ChooseDisplayId(team,ci);
+            CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
+            if (minfo)
+                display_id = minfo->modelid;
 
-        target->Mount(display_id, ci->VehicleId, GetMiscValue());
+            //some spell has one aura of mount and one of vehicle
+            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                if (GetSpellProto()->Effect[i] == SPELL_EFFECT_SUMMON && GetSpellProto()->EffectMiscValue[i] == GetMiscValue())
+                    display_id = 0;
+        }
+
+        target->Mount(display_id, vehicleId, GetMiscValue());
 
         if(plr)
             plr->CastSpell(plr, spellId, true);
