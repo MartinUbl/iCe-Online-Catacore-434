@@ -493,8 +493,6 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
             data << uint32(0);
     }
 
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
     data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(pQuest->XPValue(pSession->GetPlayer())*sWorld.getRate(RATE_XP_QUEST));
 
@@ -506,6 +504,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     data << uint32(0); // unknow 4.0.1
     data << uint32(0); // unknow 4.0.1
 
+    data << uint32(0); // unknow 4.0.1
+    data << uint32(0); // unknow 4.0.1
+
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << uint32(pQuest->RewRepFaction[i]);
 
@@ -514,9 +515,6 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << int32(pQuest->RewRepValue[i]);
-
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
 
     for(int i = 0; i < 4; i++)
         data << uint32(0);
@@ -566,7 +564,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const *pQuest)
         }
     }
 
-    WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);     // guess size
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, 100);     // guess size
+
+    data << uint16(SMSG_QUEST_QUERY_RESPONSE);
 
     data << uint32(pQuest->GetQuestId());                   // quest id
     data << uint32(pQuest->GetQuestMethod());               // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
