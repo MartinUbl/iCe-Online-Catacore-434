@@ -449,18 +449,18 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     data << Title;
     data << Details;
     data << Objectives;
-    data << unk;                                            // 4.0.1, unknow
-    data << unk;                                            // 4.0.1, unknow
-    data << unk;                                            // 4.0.1, unknow
-    data << unk;                                            // 4.0.1, unknow
-    data << uint32(0);                                      // 4.0.1, unknow
-    data << uint32(0);                                      // 4.0.1, unknow
+    data << pQuest->GetQuestGiverPortraitText();            // 4.0.1, questgiver portrait text
+    data << pQuest->GetQuestGiverPortraitUnk();             // 4.0.1, questgiver portrait title
+    data << pQuest->GetQuestTurnInPortraitText();           // 4.0.1, questgiver turnin portrait text (not sure!!)
+    data << pQuest->GetQuestTurnInPortraitUnk();            // 4.0.1, questgiver turnin portrait title (not sure!!)
+    data << uint32(pQuest->GetQuestGiverPortrait());        // 4.0.1, creature displayid (frame in right side)
+    data << uint32(pQuest->GetQuestTurnInPortrait());       // 4.0.1, creature displayid when turning in (not sure!!)
     data << uint8(ActivateAccept ? 1 : 0);                  // auto finish
     data << uint32(pQuest->GetFlags());                     // 3.3.3 questFlags
     data << uint32(pQuest->GetSuggestedPlayers());
     data << uint8(0);                                       // 4.0.1, unknow
     data << uint8(0);                                       // IsFinished? value is sent back to server in quest accept packet
-    data << uint32(0);                                      // 4.0.1, unknow
+    data << uint32(pQuest->GetRequiredSpell());             // 4.0.1, objective: learn spell
 
     ItemPrototype const* IProto;
     data << uint32(pQuest->GetRewChoiceItemsCount());
@@ -498,14 +498,15 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 
     // rewarded honor points. Multiply with 10 to satisfy client
     //data << 10 * Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorMultiplier());
-    data << float(0);                                       // new 3.3.0, honor multiplier?
 
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
+    data << uint32(pQuest->GetCharTitleId());
 
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
+    data << uint32(0); // unknown 4.0.1
+    data << uint32(0); // unknown 4.0.1
+    data << uint32(pQuest->GetBonusTalents());
+
+    data << uint32(0); // unknown 4.0.1
+    data << uint32(0); // unknown 4.0.1
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << uint32(pQuest->RewRepFaction[i]);
