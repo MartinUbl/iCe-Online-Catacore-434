@@ -152,9 +152,9 @@ PlayerTaxi::PlayerTaxi()
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
 {
     // class specific initial known nodes
-    switch (chrClass)
+    switch(chrClass)
     {
-        case CLASS_DEATH_KNIGHT:
+    case CLASS_DEATH_KNIGHT:
         {
             for (uint8 i = 0; i < TaxiMaskSize; ++i)
                 m_taximask[i] |= sOldContinentsNodesMask[i];
@@ -163,55 +163,30 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
     }
 
     // race specific initial known nodes: capital and taxi hub masks
-    switch (race)
+    switch(race)
     {
-        case RACE_HUMAN:
-            SetTaximaskNode(2);
-            break;
-        case RACE_ORC:
-            SetTaximaskNode(23);
-            break;
-        case RACE_DWARF:
-            SetTaximaskNode(6);
-            break;
-        case RACE_NIGHTELF:
-            SetTaximaskNode(26);
-            SetTaximaskNode(27);
-            break;
-        case RACE_UNDEAD_PLAYER:
-            SetTaximaskNode(11);
-            break;
-        case RACE_TAUREN:
-            SetTaximaskNode(22);
-            break;
-        case RACE_GNOME:
-            SetTaximaskNode(6);
-            break;
-        case RACE_TROLL:
-            SetTaximaskNode(23);
-            break;
-        case RACE_BLOODELF:
-            SetTaximaskNode(82);
-            break;
-        case RACE_DRAENEI:
-            SetTaximaskNode(94);
-            break;
+    case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
+    case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
+    case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
+    case RACE_NIGHTELF: SetTaximaskNode(26);
+                        SetTaximaskNode(27); break;     // Night Elf
+    case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
+    case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
+    case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
+    case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
+    case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
+    case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
     }
     // new continent starting masks (It will be accessible only at new map)
 
     switch (Player::TeamForRace(race))
     {
-        case ALLIANCE:
-            SetTaximaskNode(100);
-            break;
-        case HORDE:
-            SetTaximaskNode(99);
-            break;
+    case ALLIANCE: SetTaximaskNode(100); break;
+    case HORDE:    SetTaximaskNode(99);  break;
     }
-
     // level dependent taxi hubs
     if (level >= 68)
-        SetTaximaskNode(213);                               // Shattered Sun Staging Area
+        SetTaximaskNode(213);                               //Shattered Sun Staging Area
 }
 
 void PlayerTaxi::LoadTaxiMask(const char* data)
@@ -220,7 +195,8 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
 
     uint8 index;
     Tokens::iterator iter;
-    for (iter = tokens.begin(), index = 0; (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
+    for (iter = tokens.begin(), index = 0;
+        (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
         // load and set bits only for existed taxi nodes
         m_taximask[index] = sTaxiNodesMask[index] & uint32(atol(*iter));
@@ -277,6 +253,19 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, uint3
     return true;
 }
 
+std::string PlayerTaxi::SaveTaxiDestinationsToString()
+{
+    if (m_TaxiDestinations.empty())
+        return "";
+
+    std::ostringstream ss;
+
+    for (size_t i=0; i < m_TaxiDestinations.size(); ++i)
+        ss << m_TaxiDestinations[i] << " ";
+
+    return ss.str();
+}
+
 uint32 PlayerTaxi::GetCurrentTaxiPath() const
 {
     if (m_TaxiDestinations.size() < 2)
@@ -296,7 +285,6 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
     for (uint8 i = 0; i < TaxiMaskSize; ++i)
         ss << taxi.m_taximask[i] << " ";
     ss << "'";
-
     return ss;
 }
 
@@ -1341,11 +1329,11 @@ void Player::Update(uint32 p_time)
     if (now > m_Last_tick)
         UpdateItemDuration(uint32(now - m_Last_tick));
 
-	if (now > m_Save_Time) 
-		{ 
-			SaveToDB(); 
-			m_Save_Time = now + 360; 
-		} 
+    if (now > m_Save_Time) 
+        { 
+            SaveToDB(); 
+            m_Save_Time = now + 360; 
+        } 
 
 // check every second	
     if (now > m_Last_tick + 1)
@@ -2301,13 +2289,12 @@ void Player::Regenerate(Powers power)
     {
         case POWER_MANA:
         {
-            bool recentCast = IsUnderLastManaUseEffect();
             float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
 
             if (getLevel() < 15)
                 ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA) * (2.066f - (getLevel() * 0.066f));
 
-            if (recentCast) // Trinity updates Mana in intervals of 2s, which is correct
+            if (isInCombat()) // Trinity updates Mana in intervals of 2s, which is correct
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer * haste;
             else
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
@@ -6614,7 +6601,7 @@ void Player::SendMovieStart(uint32 MovieId)
 
 bool Player::isInWorgenForm()
 {
- 	return GetUInt32Value(UNIT_FIELD_FLAGS_2) & IN_WORGEN_FORM ? true : false;
+    return GetUInt32Value(UNIT_FIELD_FLAGS_2) & IN_WORGEN_FORM ? true : false;
 }
 
 void Player::setInHumanForm()
@@ -6622,16 +6609,16 @@ void Player::setInHumanForm()
     if(isInCombat())
         return;
     
- 	uint32 newFlag = GetUInt32Value(UNIT_FIELD_FLAGS_2) & ~IN_WORGEN_FORM;
- 	SetUInt32Value(UNIT_FIELD_FLAGS_2, newFlag);
+    uint32 newFlag = GetUInt32Value(UNIT_FIELD_FLAGS_2) & ~IN_WORGEN_FORM;
+    SetUInt32Value(UNIT_FIELD_FLAGS_2, newFlag);
     m_ExtraFlags &= ~PLAYER_EXTRA_WORGEN_FORM;
 }
 
 void Player::setInWorgenForm(uint32 form)
 {
- 	if(isInWorgenForm())
+    if(isInWorgenForm())
         return;
- 	SetFlag(UNIT_FIELD_FLAGS_2, form);
+    SetFlag(UNIT_FIELD_FLAGS_2, form);
     m_ExtraFlags |= PLAYER_EXTRA_WORGEN_FORM;
 }
 
@@ -8789,22 +8776,22 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     switch (loot_type)
     {
         case LOOT_INSIGNIA:
-			loot_type = LOOT_SKINNING;
-			break;
+            loot_type = LOOT_SKINNING;
+            break;
         case LOOT_FISHINGHOLE:
-			loot_type = LOOT_FISHING;
-			break;
+            loot_type = LOOT_FISHING;
+            break;
         default:
-			break;
+            break;
     }
 
     // need know merged fishing/corpse loot type for achievements
     loot->loot_type = loot_type;
-	
     
-	WorldPacket data(SMSG_MULTIPLE_PACKETS, (9 + 50 + 2));           // we guess size
+    
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, (9 + 50 + 2));           // we guess size
 
-	data << uint16(SMSG_LOOT_RESPONSE);
+    data << uint16(SMSG_LOOT_RESPONSE);
     data << uint64(guid);
     data << uint8(loot_type);
     data << LootView(*loot, this, permission);
@@ -8828,8 +8815,8 @@ void Player::SendNotifyLootMoneyRemoved()
 void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
 {
     WorldPacket data(SMSG_MULTIPLE_PACKETS, 1+2);
-	//WorldPacket data(SMSG_LOOT_REMOVED, 1);
-	data << uint16(SMSG_LOOT_REMOVED);
+    //WorldPacket data(SMSG_LOOT_REMOVED, 1);
+    data << uint16(SMSG_LOOT_REMOVED);
     data << uint8(lootSlot);
     GetSession()->SendPacket(&data);
 }
@@ -9698,7 +9685,7 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
                     if (pClass == CLASS_WARLOCK)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
-                case ITEM_SUBCLASS_ARMOR_L_I_T_S:
+				case ITEM_SUBCLASS_ARMOR_RELIC:
                     if (pClass == CLASS_PALADIN || pClass == CLASS_DRUID || pClass == CLASS_SHAMAN || pClass == CLASS_DEATH_KNIGHT)
                          slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
@@ -14109,7 +14096,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             GetSession()->SendTrainerList(guid);
             break;
         case GOSSIP_OPTION_LEARNDUALSPEC:
-			if (GetSpecsCount() == 1 && getLevel() >= sWorld.getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
+            if (GetSpecsCount() == 1 && getLevel() >= sWorld.getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
             {
                 if (!HasEnoughMoney(100000))
                 {
@@ -18287,7 +18274,7 @@ void Player::SaveToDB()
 
     ss << (uint64)m_deathExpireTime << ", '";
 
-    ss << "" << "', ";
+    ss << m_taxi.SaveTaxiDestinationsToString() << "', ";
 
     ss << GetArenaPoints() << ", ";
 
@@ -21502,10 +21489,7 @@ void Player::SetGroup(Group *group, int8 subgroup)
 
 void Player::SendInitialPacketsBeforeAddToMap()
 {
-    /// Pass 'this' as argument because we're not stored in ObjectAccessor yet
-    GetSocial()->SendSocialList(this);
-
-    // guild bank list wtf?
+    GetSocial()->SendSocialList(this, SOCIAL_FLAG_FRIEND | SOCIAL_FLAG_IGNORED | SOCIAL_FLAG_MUTED);
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 5*4);
