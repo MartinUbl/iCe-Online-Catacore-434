@@ -125,14 +125,14 @@ enum Opcodes
     SMSG_PARTY_COMMAND_RESULT                        = 0x026E0, // 4.0.6a 13623
     CMSG_GUILD_CREATE                                = 0x1000C, //
     CMSG_GUILD_INVITE                                = 0x02DA8, // 4.0.6a 13623
-    SMSG_GUILD_INVITE                                = 0x0B78C, // 4.0.6a 13623
+    SMSG_GUILD_INVITE                                = 0x0B78C, // 4.0.6a 13623 //0x010C ?
     CMSG_GUILD_ACCEPT                                = 0x03729, // 4.0.6a 13623 ?
     CMSG_GUILD_DECLINE                               = 0x0352D, // 4.0.6a 13623 ?
     SMSG_GUILD_DECLINE                               = 0x07DEC, // 4.0.6a 13623
     CMSG_GUILD_INFO                                  = 0x06884, // 4.0.6a 13623
     SMSG_GUILD_INFO                                  = 0x020A8, // 4.0.6a 13623
     CMSG_GUILD_ROSTER                                = 0x0B2A4, // 4.0.6a 13623
-    SMSG_GUILD_ROSTER                                = 0x04D5C, // 4.0.6a 13623
+    SMSG_GUILD_ROSTER                                = 0x04D5C, // 4.0.6a 13623 //0x3CC0 ?!
     CMSG_GUILD_PROMOTE                               = 0x02109, // 4.0.6a 13623
     CMSG_GUILD_DEMOTE                                = 0x01902, //
     CMSG_GUILD_LEAVE                                 = 0x03329, // 4.0.6a 13623
@@ -142,6 +142,9 @@ enum Opcodes
     CMSG_GUILD_MOTD                                  = 0x0272D, // 4.0.6a 13623
     SMSG_GUILD_EVENT                                 = 0x0B7C4, // 4.0.6a 13623
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
+    SMSG_GUILD_EXPERIENCE                            = 0x0440E, // 4.0.6a 13623
+    SMSG_GUILD_NEWS                                  = 0x0485E, // 4.0.6a 13623 (last earned achievements, etc..)
+    SMSG_GUILD_REWARDS                               = 0x00C4C, // 4.0.6a 13623
     CMSG_MESSAGECHAT_SAY                             = 0x0002A, // 4.0.6a 13623
     CMSG_MESSAGECHAT_YELL                            = 0x00802, // 4.0.6a 13623
     CMSG_MESSAGECHAT_CHANNEL                         = 0x00821, // 4.0.6a 13623
@@ -298,7 +301,7 @@ enum Opcodes
     CMSG_CLEAR_TRADE_ITEM                            = 0x00611, // 4.0.6a 13623
     CMSG_SET_TRADE_GOLD                              = 0x00793, // 4.0.6a 13623
     SMSG_TRADE_STATUS                                = 0x10053, //
-    SMSG_TRADE_STATUS_EXTENDED                       = 0x10054, //
+    SMSG_TRADE_STATUS_EXTENDED                       = 0x0400C, // 4.0.6a 13623 //research
     SMSG_INITIALIZE_FACTIONS                         = 0x025C0, // 4.0.6a 13623
     SMSG_SET_FACTION_VISIBLE                         = 0x03988, // 4.0.6a 13623
     SMSG_SET_FACTION_STANDING                        = 0x0718C, // 4.0.6a 13623
@@ -557,7 +560,7 @@ enum Opcodes
     SMSG_GOSSIP_POI                                  = 0x0B9AC, // 4.0.6a 13623
     CMSG_CHAT_IGNORED                                = 0x0A78C, // 4.0.6a 13623
     CMSG_GUILD_RANK                                  = 0x100A2, //
-    SMSG_GUILD_RANK                                  = 0x02840, //
+    SMSG_GUILD_RANK                                  = 0x041EE, // 4.0.6a 13623 ?
     CMSG_GUILD_ADD_RANK                              = 0x100A4, //
     CMSG_GUILD_DEL_RANK                              = 0x100A5, //
     CMSG_GUILD_SWITCH_RANK                           = 0x100A6, //

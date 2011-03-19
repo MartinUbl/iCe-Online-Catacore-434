@@ -147,6 +147,9 @@ void InitOpcodeTable()
     OPCODE( CMSG_GUILD_MOTD,                              STATUS_LOGGEDIN, &WorldSession::HandleGuildMOTDOpcode           );
     OPCODE( SMSG_GUILD_EVENT,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_COMMAND_RESULT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_EXPERIENCE,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_NEWS,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_REWARDS,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_MESSAGECHAT_SAY,                         STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_YELL,                        STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_CHANNEL,                     STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
