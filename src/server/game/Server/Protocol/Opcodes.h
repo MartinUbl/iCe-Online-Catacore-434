@@ -302,8 +302,8 @@ enum Opcodes
     CMSG_SET_TRADE_ITEM                              = 0x00811, // 4.0.6a 13623
     CMSG_CLEAR_TRADE_ITEM                            = 0x00611, // 4.0.6a 13623
     CMSG_SET_TRADE_GOLD                              = 0x00793, // 4.0.6a 13623
-    SMSG_TRADE_STATUS                                = 0x10053, //
-    SMSG_TRADE_STATUS_EXTENDED                       = 0x0400C, // 4.0.6a 13623 //research
+    SMSG_TRADE_STATUS                                = 0x0494E, // 4.0.6a 13623
+    SMSG_TRADE_STATUS_EXTENDED                       = 0x0400C, // 4.0.6a 13623
     SMSG_INITIALIZE_FACTIONS                         = 0x025C0, // 4.0.6a 13623
     SMSG_SET_FACTION_VISIBLE                         = 0x03988, // 4.0.6a 13623
     SMSG_SET_FACTION_STANDING                        = 0x0718C, // 4.0.6a 13623
