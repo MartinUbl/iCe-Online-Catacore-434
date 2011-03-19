@@ -499,7 +499,7 @@ struct AchievementCriteriaEntry
     {
         uint32  additionalRequirement_type;
         uint32  additionalRequirement_value;
-    } additionalRequrements[MAX_CRITERIA_REQUIREMENTS];
+    } additionalRequirements[MAX_CRITERIA_REQUIREMENTS];
     
     DBCString  name;                                            // 9
     uint32  completionFlag;                                 // 10
@@ -2402,7 +2402,7 @@ struct TaxiPathNodePtr
 typedef Path<TaxiPathNodePtr,TaxiPathNodeEntry const> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
-#define TaxiMaskSize 18
+#define TaxiMaskSize 22
 typedef uint32 TaxiMask[TaxiMaskSize];
 #endif
 
