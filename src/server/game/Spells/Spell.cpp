@@ -33,6 +33,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Player.h"
+#include "DruidPlayer.h"
 #include "Pet.h"
 #include "Unit.h"
 #include "Totem.h"
@@ -1398,6 +1399,31 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
     {
         m_caster->ToPlayer()->GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_CASTER, m_spellInfo->Id);
         m_caster->ToPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
+    }
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID)
+    {
+        bool EclipseLeft = ((DruidPlayer*)m_caster)->IsEclipseDriverLeft();
+        switch(m_spellInfo->Id)
+        {
+            //Wrath
+            case 5176:
+                if(EclipseLeft)
+                    m_caster->ModifyPower(POWER_ECLIPSE,-13);
+                break;
+            //Starfire
+            case 2912:
+                if(!EclipseLeft)
+                    m_caster->ModifyPower(POWER_ECLIPSE, 20);
+                break;
+            //Starsurge
+            case 78674:
+                if(EclipseLeft)
+                    m_caster->ModifyPower(POWER_ECLIPSE,-15);
+                else
+                    m_caster->ModifyPower(POWER_ECLIPSE, 15);
+                break;
+        }
     }
 
     if (m_caster != unit)

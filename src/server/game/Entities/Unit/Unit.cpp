@@ -32,6 +32,7 @@
 #include "Unit.h"
 #include "QuestDef.h"
 #include "Player.h"
+#include "DruidPlayer.h"
 #include "Creature.h"
 #include "Spell.h"
 #include "Group.h"
@@ -11893,10 +11894,17 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 {
     int32 gain = 0;
 
+    int32 curPower = (int32)GetPower(power);
+
+    // exception for eclipse, only one power which can be < 0
+    if (power == POWER_ECLIPSE)
+    {
+        SetPower(power, dVal + curPower);
+        return 0;
+    }
+
     if (dVal == 0)
         return 0;
-
-    int32 curPower = (int32)GetPower(power);
 
     int32 val = dVal + curPower;
     if (val <= 0)
@@ -13193,10 +13201,72 @@ void Unit::SetMaxHealth(uint32 val)
         SetHealth(val);
 }
 
-void Unit::SetPower(Powers power, uint32 val)
+void Unit::SetPower(Powers power, int32 val)
 {
     if (GetPower(power) == val)
         return;
+
+    // Special case for eclipse power (druid system)
+    if(power == POWER_ECLIPSE && getClass() == CLASS_DRUID)
+    {
+        // some checks
+        if(val > 100)
+            val = 100;
+        if(val < -100)
+            val = -100;
+
+        DruidPlayer* pPlayerDruid = (DruidPlayer*)this;
+
+        // The visual part
+        int32 actualPower = (int32)GetPower(POWER_ECLIPSE);
+        int32 deltaPower = abs(val-actualPower);
+        int32 realModify = 0;
+        if(val > actualPower)
+        {
+            realModify = deltaPower;
+            pPlayerDruid->TurnEclipseDriver(false);
+        }
+        else
+        {
+            realModify = -deltaPower;
+            pPlayerDruid->TurnEclipseDriver(true);
+        }
+
+        SendEnergizeSpellLog(this,89265,realModify,POWER_ECLIPSE);
+        // end of visual part
+
+        // function part
+        // little hack (convert value < 0 to uint32), because stats are all defined as unsigned
+        SetUInt32Value(UNIT_FIELD_POWER1 + power, (uint32)val);
+        if(val >= 100 && !HasAura(48517))
+        {
+            //run solar eclipse
+            CastSpell(this, 48517, true);
+            pPlayerDruid->TurnEclipseDriver(true);
+        }
+        else if(val <= -100 && !HasAura(48518))
+        {
+            //run lunar eclipse
+            CastSpell(this, 48518, true);
+            pPlayerDruid->TurnEclipseDriver(false);
+        }
+        else if(val >= 0 && !pPlayerDruid->IsEclipseDriverLeft() && HasAura(48518))
+        {
+            //cancel lunar eclipse
+            RemoveAurasDueToSpell(48518);
+        }
+        else if(val <= 0 && pPlayerDruid->IsEclipseDriverLeft() && HasAura(48517))
+        {
+            //cancel solar eclipse
+            RemoveAurasDueToSpell(48517);
+        }
+
+        return;
+    }
+
+    // for now, we need positive value of power (only eclipse is exception)
+    if(val < 0)
+        val = abs(val);
 
     // Client limits
     switch(power)
@@ -13209,7 +13279,7 @@ void Unit::SetPower(Powers power, uint32 val)
     }
 
     uint32 maxPower = GetMaxPower(power);
-    if (maxPower < val)
+    if (maxPower < (uint32)val)
         val = maxPower;
 
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);

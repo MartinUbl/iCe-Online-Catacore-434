@@ -276,9 +276,8 @@ bool ChatHandler::HandleModifyEclipseCommand(const char* args)
         return false;
 
     int32 eclipse = atoi((char*)args);
-    int32 eclipsem = 100;
 
-    if (eclipse <= 0 || eclipsem <= 0 || eclipsem < eclipse)
+    if (eclipse < -100 || eclipse > 100)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -293,11 +292,10 @@ bool ChatHandler::HandleModifyEclipseCommand(const char* args)
         return false;
     }
 
-    PSendSysMessage(15003, GetNameLink(chr).c_str(), eclipse, eclipsem);
+    PSendSysMessage(15003, GetNameLink(chr).c_str(), eclipse, 100);
     if (needReportToTarget(chr))
-        ChatHandler(chr).PSendSysMessage(15004, GetNameLink().c_str(), eclipse, eclipsem);
+        ChatHandler(chr).PSendSysMessage(15004, GetNameLink().c_str(), eclipse, 100);
 
-    chr->SetMaxPower(POWER_ECLIPSE, eclipsem);
     chr->SetPower(POWER_ECLIPSE, eclipse);
 
     return true;

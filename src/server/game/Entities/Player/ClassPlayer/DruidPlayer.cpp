@@ -22,4 +22,39 @@
 
 #include "DruidPlayer.h"
 
-//...
+DruidPlayer::DruidPlayer(WorldSession * session): Player(session)
+{
+    m_eclipseDriverLeft = false;
+}
+
+void DruidPlayer::TurnEclipseDriver(bool left)
+{
+    m_eclipseDriverLeft = left;
+
+    if(left)
+    {
+        RemoveAurasDueToSpell(67483);
+        CastSpell(this,67484,true);
+    }
+    else
+    {
+        RemoveAurasDueToSpell(67484);
+        CastSpell(this,67483,true);
+    }
+}
+
+void DruidPlayer::ClearEclipseState()
+{
+    // clear power
+    SetPower(POWER_ECLIPSE,0);
+
+    // we are moving to solar eclipse
+    TurnEclipseDriver(false);
+
+    // remove all eclipse spells
+    RemoveAurasDueToSpell(48517);
+    RemoveAurasDueToSpell(48518);
+
+    // and hardly set eclipse power to zero
+    SetUInt32Value(UNIT_FIELD_POWER1 + POWER_ECLIPSE, 0);
+}

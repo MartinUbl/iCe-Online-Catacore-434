@@ -28,8 +28,15 @@
 class DruidPlayer: public Player
 {
 public:
-    DruidPlayer(WorldSession * session): Player(session) {}
+    explicit DruidPlayer(WorldSession * session);
     virtual uint8 getClass() const { return CLASS_DRUID; }
+
+    void TurnEclipseDriver(bool left = false);
+    bool IsEclipseDriverLeft() { return m_eclipseDriverLeft; };
+    void ClearEclipseState();
+
+private:
+    bool m_eclipseDriverLeft;
 };
 
 #endif

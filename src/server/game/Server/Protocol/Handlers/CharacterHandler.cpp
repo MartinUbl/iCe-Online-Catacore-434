@@ -945,6 +945,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     m_playerLoading = false;
 
+    if(pCurrChar->getClass() == CLASS_DRUID)
+        ((DruidPlayer*)pCurrChar)->ClearEclipseState();
+
     sScriptMgr.OnPlayerLogin(pCurrChar);
     delete holder;
 }
