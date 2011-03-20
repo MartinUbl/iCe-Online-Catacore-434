@@ -32,13 +32,29 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     uint8 isCustom, unknown2, unk; // unk 4.0.1
     std::string channelname, pass;
 
-    recvPacket >> channel_id >> isCustom >> unknown2 >> unk;
-    recvPacket >> channelname;
+    recvPacket >> channel_id;
+
+    if (channel_id)
+    {
+        ChatChannelsEntry const* channel = sChatChannelsStore.LookupEntry(channel_id);
+        if (!channel)
+            return;
+
+        AreaTableEntry const* current_zone = GetAreaEntryByAreaID(_player->GetZoneId());
+        if (!current_zone)
+            return;
+
+        if (!_player->CanJoinConstantChannelInZone(channel, current_zone))
+            return;
+    }
+
+    recvPacket >> isCustom >> unknown2;
+    recvPacket >> pass;
+    recvPacket >> channelname;    
 
     if (channelname.empty())
         return;
 
-    recvPacket >> pass;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
         cMgr->team = _player->GetTeam();

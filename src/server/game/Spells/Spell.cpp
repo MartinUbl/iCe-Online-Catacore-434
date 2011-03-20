@@ -2036,6 +2036,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             switch(cur)
             {
                 case TARGET_UNIT_CASTER:
+                case TARGET_UNIT_CASTER_UNKNOWN:
                     AddUnitTarget(m_caster, i);
                     break;
                 case TARGET_UNIT_CASTER_FISHING:
