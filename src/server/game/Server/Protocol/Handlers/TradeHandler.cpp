@@ -36,22 +36,36 @@
 
 void WorldSession::SendTradeStatus(TradeStatus status)
 {
-    WorldPacket data;
+    WorldPacket data(SMSG_MULTIPLE_PACKETS);
+    data << uint16(SMSG_TRADE_STATUS);
 
     switch(status)
     {
         case TRADE_STATUS_BEGIN_TRADE:
-            data.Initialize(SMSG_TRADE_STATUS, 4+8);
-            data << uint32(status);
-            data << uint64(0);
+            data << uint8(0);
+            data << uint64(GetPlayer()->GetTradeData()->GetTrader()->GetGUID());
+            data << uint32(0);
+            data << uint32(status); //status?
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(3); // unk
             break;
         case TRADE_STATUS_OPEN_WINDOW:
-            data.Initialize(SMSG_TRADE_STATUS, 4+4);
-            data << uint32(status);
-            data << uint32(0);                              // added in 2.4.0
+            data << uint32(0x2A); // unk
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(status); //status?
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(0);
             break;
         case TRADE_STATUS_CLOSE_WINDOW:
-            data.Initialize(SMSG_TRADE_STATUS, 4+4+1+4);
+            // not found on 4.0.6a, trade works without it
             data << uint32(status);
             data << uint32(0);
             data << uint8(0);
@@ -59,13 +73,29 @@ void WorldSession::SendTradeStatus(TradeStatus status)
             break;
         case TRADE_STATUS_ONLY_CONJURED:
         case TRADE_STATUS_NOT_ELIGIBLE:
-            data.Initialize(SMSG_TRADE_STATUS, 4+1);
-            data << uint32(status);
+            // not found on 4.0.6a, trade works without it
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
             data << uint8(0);
+            data << uint32(status); //status?
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(0);
             break;
         default:
-            data.Initialize(SMSG_TRADE_STATUS, 4);
-            data << uint32(status);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(status); //status?
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(0);
             break;
     }
 
@@ -88,7 +118,8 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
 {
     TradeData* view_trade = trader_data ? _player->GetTradeData()->GetTraderData() : _player->GetTradeData();
 
-    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 1+4+4+4+4+4+7*(1+4+4+4+4+8+4+4+4+4+8+4+4+4+4+4+4));
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, 1+4+4+4+4+4+7*(1+4+4+4+4+8+4+4+4+4+8+4+4+4+4+4+4));
+    data << uint16(SMSG_TRADE_STATUS_EXTENDED);
     data << uint8(trader_data);                             // 1 means traders data, 0 means own
     data << uint32(0);                                      // added in 2.4.0, this value must be equal to value from TRADE_STATUS_OPEN_WINDOW status packet (different value for different players to block multiple trades?)
     data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number?, = next field in most cases
@@ -653,9 +684,17 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     _player->m_trade = new TradeData(_player, pOther);
     pOther->m_trade = new TradeData(pOther, _player);
 
-    WorldPacket data(SMSG_TRADE_STATUS, 12);
-    data << uint32(TRADE_STATUS_BEGIN_TRADE);
+    WorldPacket data(SMSG_MULTIPLE_PACKETS, 12);
+    data << uint16(SMSG_TRADE_STATUS);
+    data << uint8(0xA0);
     data << uint64(_player->GetGUID());
+    data << uint32(0);
+    data << uint32(TRADE_STATUS_BEGIN_TRADE);
+    data << uint32(0x2AAB);     // UNK!
+    data << uint8(0xD5);        // UNK!
+    data << uint32(0x1942B940); // UNK!
+    data << uint32(0);
+    data << uint32(3); // unk
     pOther->GetSession()->SendPacket(&data);
 }
 
