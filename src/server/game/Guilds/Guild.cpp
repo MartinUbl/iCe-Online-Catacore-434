@@ -1323,8 +1323,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     { 
         // Achievement Points
-        //data << uint32(itr->second->GetAchievementPoints());
-        data << uint32(100);
+        data << uint32(itr->second->GetAchievementPoints());
     }
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -1368,9 +1367,9 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         // two primary professions
         for(int i = 0; i < 2; ++i)
         {
-            data << uint32(0); // profession title
-            data << uint32(0); // profession level?
-            data << uint32(0); // skillid
+            data << uint32(itr->second->professions[i].level);
+            data << uint32(itr->second->professions[i].skillID);
+            data << uint32(itr->second->professions[i].title);
         }
     }
 
