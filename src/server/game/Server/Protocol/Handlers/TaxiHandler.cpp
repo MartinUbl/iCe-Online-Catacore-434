@@ -109,12 +109,11 @@ void WorldSession::SendTaxiMenu(Creature* unit)
 
 	sLog.outDebug("WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
-    WorldPacket data(SMSG_MULTIPLE_PACKETS, (4 + 8 + 4 + 8 * 4 + 2));
-	data << uint16(SMSG_SHOWTAXINODES);
+    WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4), true);
     data << uint32(1);
     data << uint64(unit->GetGUID());
     data << uint32(curloc);
-    data << uint8(0x09);   //unk, 0x09 in sniffed data, skyfire removed it, why?
+    data << uint8(0);
     GetPlayer()->m_taxi.AppendTaximaskTo(data,GetPlayer()->isTaxiCheater());
     SendPacket(&data);
 

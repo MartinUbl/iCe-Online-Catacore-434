@@ -1843,6 +1843,8 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
         return &itr->second;
     else
         return NULL;
+
+    return NULL;
 }
 
 InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, bool load)

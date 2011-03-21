@@ -106,6 +106,8 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 {
     if (!m_Socket)
         return;
+    if (sWorld.debugOpcode != 0 && packet->GetOpcode() != sWorld.debugOpcode)
+        return;
 
     #ifdef TRINITY_DEBUG
 
@@ -294,10 +296,10 @@ bool WorldSession::Update(uint32 diff)
                                           packet->GetOpcode());
                         }
                         break;
-                    case STATUS_UNHANDLED:	
-                        sLog.outDebug("SESSION: received not handled opcode %s (0x%.4X)",	
-                            LookupOpcodeName(packet->GetOpcode()),	
-                            packet->GetOpcode());	
+                    case STATUS_UNHANDLED:    
+                        sLog.outDebug("SESSION: received not handled opcode %s (0x%.4X)",    
+                            LookupOpcodeName(packet->GetOpcode()),    
+                            packet->GetOpcode());    
                         break;
                 }
             }

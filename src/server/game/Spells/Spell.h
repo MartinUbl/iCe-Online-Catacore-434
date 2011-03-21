@@ -121,20 +121,18 @@ enum SpellNotifyPushType
     PUSH_CHAIN,
 };
 
-//for packet with opcode SMSG_COMBAT_LOG_MULTIPLE
 enum SpellLogType
 {
-    SPELL_LOG_NON_MELEE_DAMAGE          = 0x74AC, //4.0.6a 13623
-    SPELL_LOG_EXECUTE                   = 0x2476,
-    SPELL_LOG_ENERGIZE                  = 0x3C56,
-    SPELL_LOG_HEAL                      = 0x6E84, //4.0.6a 13623
-    SPELL_LOG_MISS                      = 0x855E,
-    SPELL_LOG_PERIODIC_AURA             = 0x3388, //4.0.6a 13623
-    SPELL_LOG_REMOVE_1                  = 0xED7E,       // currently unused
-    SPELL_LOG_REMOVE_2                  = 0x9F74,       // currently unused
-    SPELL_LOG_REMOVE_3                  = 0xD557,       // currently unused
+    SPELL_LOG_NON_MELEE_DAMAGE          = 29868,
+    SPELL_LOG_EXECUTE                   = 46824,
+    SPELL_LOG_ENERGIZE                  = 61676,
+    SPELL_LOG_HEAL                      = 28292,
+    SPELL_LOG_MISS                      = 48548,
+    SPELL_LOG_PERIODIC_AURA             = 13192,
+    SPELL_LOG_REMOVE_1                  = 0xED7E,       // currently unused (not updated even)
+    SPELL_LOG_REMOVE_2                  = 0x9F74,       // currently unused (n/u)
+    SPELL_LOG_REMOVE_3                  = 0xD557,       // currently unused (n/u)
 };
-
 bool IsQuestTameSpell(uint32 spellId);
 
 namespace Trinity
@@ -707,7 +705,7 @@ class Spell
         void CallScriptBeforeHitHandlers();
         void CallScriptOnHitHandlers();
         void CallScriptAfterHitHandlers();
-		void CallScriptAfterUnitTargetSelectHandlers(std::list<Unit*>& unitTargets, SpellEffIndex effIndex);
+        void CallScriptAfterUnitTargetSelectHandlers(std::list<Unit*>& unitTargets, SpellEffIndex effIndex);
         std::list<SpellScript *> m_loadedScripts;
 
         // effect helpers
