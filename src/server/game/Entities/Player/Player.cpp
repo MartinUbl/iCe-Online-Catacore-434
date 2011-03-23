@@ -206,6 +206,7 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
 
 void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
 {
+    // These uint32's are read as uint64 at client side
     if (all)
     {
         for (uint8 i=0; i<TaxiMaskSize; i++)
@@ -2064,34 +2065,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packets
-                WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
+                WorldPacket data(SMSG_TRANSFER_PENDING, (4 + 4 + 4));
                 data << uint32(mapid);
                 if (m_transport)
-                {
                     data << m_transport->GetEntry() << GetMapId();
-                }
-                GetSession()->SendPacket(&data);
 
-                data.Initialize(SMSG_NEW_WORLD, (20));
-                if (m_transport)
-                {
-                    data << (uint32)mapid;
-                    data << (float)m_movementInfo.t_pos.m_orientation;
-                    data << (float)m_movementInfo.t_pos.m_positionX;
-                    data << (float)m_movementInfo.t_pos.m_positionY;
-                    data << (float)m_movementInfo.t_pos.m_positionZ;
-                }
-                else
-                {
-                    data << (uint32)mapid;
-                    data << (float)orientation;
-                    data << (float)x;
-                    data << (float)y;
-                    data << (float)z;
-                }
-                
                 GetSession()->SendPacket(&data);
-                SendSavedInstances();
+               
             }
 
             // remove from old map now
@@ -2116,6 +2096,19 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SetFallInformation(0, final_z);
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
+
+			if (!GetSession()->PlayerLogout())
+            {
+                WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
+                data << uint32(mapid);
+                if (m_transport)
+                    data << m_movementInfo.t_pos.PositionXYZOStream();
+                else
+                    data << m_teleport_dest.PositionXYZOStream();
+
+                GetSession()->SendPacket(&data);
+                SendSavedInstances();
+            }
 
             // move packet sent by client always after far teleport
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
