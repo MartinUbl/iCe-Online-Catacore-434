@@ -713,13 +713,12 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket & data) const
     data << uint32(pItem->GetSpellCharges());               //item->charge FFFFFFF
     data << uint32(0);                                      //Unknown
     data << uint64(owner);                                  //Auction->owner
-    data << uint32(startbid);                               //Auction->startbid (not sure if useful)
-    data << uint32(bid ? GetAuctionOutBid() : 0);
-    //minimal outbid
-    data << uint32(buyout);                                 //auction->buyout
+    data << uint64(startbid);                               //Auction->startbid (not sure if useful)
+    data << uint64(bid ? GetAuctionOutBid() : 0);           //minimal outbid
+    data << uint64(buyout);                                 //auction->buyout
     data << uint32((expire_time-time(NULL))*IN_MILLISECONDS);//time left
     data << uint64(bidder) ;                                //auction->bidder current
-    data << uint32(bid);                                    //current bid
+    data << uint64(bid);                                    //current bid
     return true;
 }
 
