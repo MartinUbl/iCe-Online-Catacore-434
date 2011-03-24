@@ -505,6 +505,7 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
     m_preCastSpell = 0;
     m_triggeredByAuraSpell  = NULL;
     m_spellAura = NULL;
+    m_magnetingAura = NULL;
 
     //Auto Shot & Shoot (wand)
     m_autoRepeat = IsAutoRepeatRangedSpell(m_spellInfo);
@@ -1336,6 +1337,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         }
     }
 
+    // Drop charge of magnet auras on hit
+    if (m_magnetingAura)
+    {
+        if (!m_magnetingAura->IsRemoved() && m_magnetingAura->GetCharges()>0)
+            m_magnetingAura->DropCharge();
+        m_magnetingAura = NULL;
+    }
+	
     if (m_caster && !m_caster->IsFriendlyTo(unit) && !IsPositiveSpell(m_spellInfo->Id))
     {
         m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO));
@@ -2488,6 +2497,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             case TARGET_UNIT_CONE_ENEMY:
             case TARGET_UNIT_CONE_ENEMY_UNKNOWN:
             case TARGET_UNIT_AREA_PATH:
+                if (m_spellInfo->Id==2643) // Multi-Shot Radius fix
+                {
+                    radius = 8;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
