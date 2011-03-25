@@ -118,46 +118,51 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
 {
     TradeData* view_trade = trader_data ? _player->GetTradeData()->GetTraderData() : _player->GetTradeData();
 
-    WorldPacket data(SMSG_MULTIPLE_PACKETS, 1+4+4+4+4+4+7*(1+4+4+4+4+8+4+4+4+4+8+4+4+4+4+4+4));
-    data << uint16(SMSG_TRADE_STATUS_EXTENDED);
+    if(!view_trade)
+        return;
+
+    view_trade->IncrementPacketCount(trader_data); // first seen value was 2
+
+    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 200, true);// really needs to be wrapped?
+    data << uint32(view_trade->GetPacketCount(trader_data));
+    data << uint32(view_trade->GetPacketCount(trader_data));// this and previous field increments with each packet sent
     data << uint8(trader_data);                             // 1 means traders data, 0 means own
-    data << uint32(0);                                      // added in 2.4.0, this value must be equal to value from TRADE_STATUS_OPEN_WINDOW status packet (different value for different players to block multiple trades?)
-    data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number?, = next field in most cases
-    data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number?, = prev field in most cases
-    data << uint32(view_trade->GetMoney());                 // trader gold
+    data << uint32(0);                                      // unk
+    data << uint32(0);                                      // unk
+    data << uint32(0);                                      // unk, maybe previously referenced "same value as in open_window"
+    data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number (we send data for all slots, Blizz only for used slots
+    data << uint64(view_trade->GetMoney());                 // trader gold
     data << uint32(view_trade->GetSpell());                 // spell casted on lowest slot item
 
     for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
     {
-        data << uint8(i);                                  // trade slot number, if not specified, then end of packet
-
         if (Item* item = view_trade->GetItem(TradeSlots(i)))
         {
+            //data << uint64(item->GetUInt64Value(ITEM_FIELD_CREATOR)); //where to put?
+
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
             data << uint32(item->GetProto()->ItemId);       // entry
-            data << uint32(item->GetProto()->DisplayInfoID);// display id
-            data << uint32(item->GetCount());               // stack count
-                                                            // wrapped: hide stats but show giftcreator name
             data << uint32(item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED) ? 1 : 0);
             data << uint64(item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR));
-                                                            // perm. enchantment and gems
             data << uint32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
             for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
                 data << uint32(item->GetEnchantmentId(EnchantmentSlot(enchant_slot)));
-                                                            // creator
-            data << uint64(item->GetUInt64Value(ITEM_FIELD_CREATOR));
-            data << uint32(item->GetSpellCharges());        // charges
+            data << uint16(0); //unk !
+            data << uint32(item->GetCount());               // stack count
             data << uint32(item->GetItemSuffixFactor());    // SuffixFactor
             data << uint32(item->GetItemRandomPropertyId());// random properties id
             data << uint32(item->GetProto()->LockID);       // lock id
-                                                            // max durability
             data << uint32(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
                                                             // durability
             data << uint32(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
         }
         else
         {
-            for (uint8 j = 0; j < 18; ++j)
-                data << uint32(0);
+            for (uint8 j = 0; j < 45; ++j)
+                data << uint16(0);
         }
     }
     SendPacket(&data);
@@ -312,7 +317,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
     my_trade->SetAccepted(true);
 
     // not accept case incorrect money amount
-    if (!_player->HasEnoughMoney(my_trade->GetMoney()))
+    if (!_player->HasEnoughMoney((uint32)my_trade->GetMoney()))
     {
         SendNotification(LANG_NOT_ENOUGH_GOLD);
         my_trade->SetAccepted(false, true);
@@ -320,7 +325,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
     }
 
     // not accept case incorrect money amount
-    if (!trader->HasEnoughMoney(his_trade->GetMoney()))
+    if (!trader->HasEnoughMoney((uint32)his_trade->GetMoney()))
     {
         trader->GetSession()->SendNotification(LANG_NOT_ENOUGH_GOLD);
         his_trade->SetAccepted(false, true);
@@ -700,7 +705,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
-    uint32 gold;
+    uint64 gold;
     recvPacket >> gold;
 
     TradeData* my_trade = _player->GetTradeData();
@@ -718,9 +723,9 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
     uint8 bag;
     uint8 slot;
 
-    recvPacket >> tradeSlot;
-    recvPacket >> bag;
     recvPacket >> slot;
+    recvPacket >> bag;
+    recvPacket >> tradeSlot;
 
     TradeData* my_trade = _player->GetTradeData();
     if (!my_trade)

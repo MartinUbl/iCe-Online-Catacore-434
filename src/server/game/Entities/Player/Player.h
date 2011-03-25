@@ -949,7 +949,7 @@ class TradeData
     public:                                                 // constructors
         TradeData(Player* player, Player* trader) :
             m_player(player),  m_trader(trader), m_accepted(false), m_acceptProccess(false),
-            m_money(0), m_spell(0) {}
+            m_money(0), m_spell(0), m_packetExtCount(1), m_packetExtCountOther(1) {}
 
         Player* GetTrader() const { return m_trader; }
         TradeData* GetTraderData() const;
@@ -964,14 +964,18 @@ class TradeData
         Item*  GetSpellCastItem() const;
         bool HasSpellCastItem() const { return m_spellCastItem != 0; }
 
-        uint32 GetMoney() const { return m_money; }
-        void SetMoney(uint32 money);
+        uint64 GetMoney() const { return m_money; }
+        void SetMoney(uint64 money);
 
         bool IsAccepted() const { return m_accepted; }
         void SetAccepted(bool state, bool crosssend = false);
 
         bool IsInAcceptProcess() const { return m_acceptProccess; }
         void SetInAcceptProcess(bool state) { m_acceptProccess = state; }
+
+        uint32 GetPacketCount(bool trader) const { return trader?m_packetExtCount:m_packetExtCountOther; };
+        void SetPacketCount(uint32 count, bool trader) { if(trader) m_packetExtCount = count; else m_packetExtCountOther = count; };
+        void IncrementPacketCount(bool trader) { if(trader) m_packetExtCount += 1; else m_packetExtCountOther += 1; };
 
     private:                                                // internal functions
 
@@ -985,12 +989,15 @@ class TradeData
         bool       m_accepted;                              // m_player press accept for trade list
         bool       m_acceptProccess;                        // one from player/trader press accept and this processed
 
-        uint32     m_money;                                 // m_player place money to trade
+        uint64     m_money;                                 // m_player place money to trade
 
         uint32     m_spell;                                 // m_player apply spell to non-traded slot item
         uint64     m_spellCastItem;                         // applied spell casted by item use
 
         uint64     m_items[TRADE_SLOT_COUNT];               // traded itmes from m_player side including non-traded slot
+
+        uint32     m_packetExtCount;                        // count of packets sent (needed by trade_status_extended)
+        uint32     m_packetExtCountOther;                   // count of packets sent (needed by trade_status_extended)
 };
 
 class Player : public Unit, public GridObject<Player>

@@ -300,8 +300,8 @@ enum Opcodes
     CMSG_BEGIN_TRADE                                 = 0x00F93, // 4.0.6a 13623 //0x0411
     CMSG_BUSY_TRADE                                  = 0x1004C, //
     CMSG_IGNORE_TRADE                                = 0x1004D, //
-    CMSG_ACCEPT_TRADE                                = 0x00891, // 4.0.6a 13623 ?
-    CMSG_UNACCEPT_TRADE                              = 0x10F93, // 4.0.6a 13623
+    CMSG_ACCEPT_TRADE                                = 0x00891, // 4.0.6a 13623
+    CMSG_UNACCEPT_TRADE                              = 0x00811, // 4.0.6a 13623
     CMSG_CANCEL_TRADE                                = 0x00013, // 4.0.6a 13623
     CMSG_SET_TRADE_ITEM                              = 0x00A11, // 4.0.6a 13623
     CMSG_CLEAR_TRADE_ITEM                            = 0x00213, // 4.0.6a 13623
