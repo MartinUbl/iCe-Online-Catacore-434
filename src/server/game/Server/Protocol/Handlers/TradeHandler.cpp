@@ -138,6 +138,9 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
     {
         if (Item* item = view_trade->GetItem(TradeSlots(i)))
         {
+            //32+64+32+32+32+32+32+8+64+32+8+32+32+32+32+32+32+32
+            //.text:00416100 (IDA debug)
+
             //data << uint64(item->GetUInt64Value(ITEM_FIELD_CREATOR)); //where to put?
 
             data << uint32(0);
