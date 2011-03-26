@@ -2529,7 +2529,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadGlyphs(PreparedQueryResult result);
         void _LoadTalents(PreparedQueryResult result);
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
-		void _LoadCurrency(QueryResult result);
+		void _LoadCurrency(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/

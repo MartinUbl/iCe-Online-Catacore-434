@@ -433,13 +433,14 @@ void Unit::SendMonsterMoveTransport(Unit *vehicleOwner)
     data << GetPositionY() - vehicleOwner->GetPositionY();
     data << GetPositionZ() - vehicleOwner->GetPositionZ();
     data << uint32(getMSTime());
-    data << uint8(4);
+    data << uint8(4); // type
     data << GetTransOffsetO();
     data << uint32(SPLINEFLAG_TRANSPORT);
     data << uint32(0);// move time
-    data << uint32(0);//GetTransOffsetX();
-    data << uint32(0);//GetTransOffsetY();
-    data << uint32(0);//GetTransOffsetZ();
+    data << uint32(1);// WP count
+    data << float(0);//GetTransOffsetX();
+    data << float(0);//GetTransOffsetY();
+    data << float(0);//GetTransOffsetZ();
     SendMessageToSet(&data, true);
 }
 
@@ -9622,17 +9623,17 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
     }
 }
 
-//void Unit::GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry)
-//{
-//    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
-//    {
-//        Unit *unit = *itr;
-//        ++itr;
-//        if (unit->GetEntry() == entry && unit->GetTypeId() == TYPEID_UNIT
-//            && unit->ToCreature()->isSummon()) // minion, actually
-//            Minions.push_back(unit->ToCreature());
-//    }
-//}
+void Unit::GetAllMinionsByEntry(std::list<Unit*>& Minions, uint32 entry)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit *unit = *itr; 
+        ++itr;
+        if (unit->GetEntry() == entry && unit->GetTypeId() == TYPEID_UNIT
+            && unit->ToCreature()->isSummon()) // minion, actually
+            Minions.push_back(unit);
+    }
+}
 
 void Unit::RemoveAllMinionsByEntry(uint32 entry)
 {

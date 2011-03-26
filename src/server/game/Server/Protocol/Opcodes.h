@@ -387,7 +387,7 @@ enum Opcodes
     SMSG_MOUNTRESULT                                 = 0x02AEC, // 4.0.6a 13623 not sure
     SMSG_DISMOUNTRESULT                              = 0x0F9C0, // 4.0.6a 13623 not sure
     SMSG_PUREMOUNT_CANCELLED_OBSOLETE                = 0x0054E, // 4.0.6a 13623
-    CMSG_MOUNTSPECIAL_ANIM                           = 0x02888, // 4.0.6a 13623
+    CMSG_MOUNTSPECIAL_ANIM                           = 0x02EE4, // 4.0.6a 13623
     SMSG_MOUNTSPECIAL_ANIM                           = 0x02388, // 4.0.6a 13623
     SMSG_PET_TAME_FAILURE                            = 0x0FDA8, // 4.0.6a 13623
     CMSG_PET_SET_ACTION                              = 0x03C8C, // 4.0.6a 13623
@@ -512,7 +512,8 @@ enum Opcodes
     CMSG_AUTH_SESSION                                = 0x00E0E, // 4.0.6a 13623
     SMSG_AUTH_RESPONSE                               = 0x0B28C, // 4.0.6a 13623
     MSG_GM_SHOWLABEL                                 = 0x1008D, //
-    CMSG_PET_CAST_SPELL                              = 0x0B6A4, // 4.0.6a 13623
+   // CMSG_PET_CAST_SPELL                              = 0x0B6A4, // 4.0.6a 13623
+    CMSG_PET_CAST_SPELL                              = 0x02888, // 4.0.6a 13623
     MSG_SAVE_GUILD_EMBLEM                            = 0x031AC, // 4.0.6a 13623
     MSG_TABARDVENDOR_ACTIVATE                        = 0x02C80, // 4.0.6a 13623
     SMSG_PLAY_SPELL_VISUAL                           = 0x0FF8C, // 4.0.6a 13623
@@ -900,9 +901,9 @@ enum Opcodes
     SMSG_FORCED_DEATH_UPDATE                         = 0x0FFE8, // 4.0.6a 13623
     CMSG_CHEAT_SET_HONOR_CURRENCY                    = 0x1014D, //
     CMSG_CHEAT_SET_ARENA_CURRENCY                    = 0x1014E, //
-	SMSG_INIT_CURRENCY                               = 0x10279, // 0x0405E
-    SMSG_UPDATE_CURRENCY                             = 0x10280, // 0x04C5C
-    SMSG_UPDATE_CURRENCY_WEEK_LIMIT                  = 0x10281, // 0x0091C
+    SMSG_INIT_CURRENCY                               = 0x0091C, // 4.0.6a 13623
+    SMSG_UPDATE_CURRENCY                             = 0x0405E, // 4.0.6a 13623
+    SMSG_UPDATE_CURRENCY_WEEK_LIMIT                  = 0x04C5C, // 4.0.6a 13623
     MSG_MOVE_SET_FLIGHT_SPEED_CHEAT                  = 0x1014F, //
     MSG_MOVE_SET_FLIGHT_SPEED                        = 0x0B088, // 4.0.6a 13623
     MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT             = 0x10150, //
@@ -1026,7 +1027,7 @@ enum Opcodes
     SMSG_GOGOGO_OBSOLETE                             = 0x10195, //
     SMSG_ECHO_PARTY_SQUELCH                          = 0x02AC4, // 4.0.6a 13623 
     CMSG_SET_TITLE_SUFFIX                            = 0x10196, //
-    CMSG_SPELLCLICK                                  = 0x10197, //
+    CMSG_SPELLCLICK                                  = 0x0F9A4, // 4.0.6a 13623
     SMSG_LOOT_LIST                                   = 0x03DE0, // 4.0.6a 13623
     CMSG_GM_CHARACTER_RESTORE                        = 0x10198, //
     CMSG_GM_CHARACTER_SAVE                           = 0x10199, //
@@ -1152,7 +1153,7 @@ enum Opcodes
     CMSG_CHAR_CUSTOMIZE                              = 0x06484, // 4.0.6a 13623
     SMSG_CHAR_CUSTOMIZE                              = 0x02dA4, // 4.0.6a 13623
     SMSG_PET_RENAMEABLE                              = 0x0B6C8, // 4.0.6a 13623
-    CMSG_REQUEST_VEHICLE_EXIT                        = 0x0208C, // 4.0.6a 13623
+    CMSG_REQUEST_VEHICLE_EXIT                        = 0x0B3CC, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_PREV_SEAT                   = 0x02DE4, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_NEXT_SEAT                   = 0x064E4, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_SWITCH_SEAT                 = 0x0A8CC, // 4.0.6a 13623
@@ -1201,7 +1202,7 @@ enum Opcodes
     CMSG_QUERY_VEHICLE_STATUS                        = 0x069A0, // 4.0.6a 13623
     SMSG_BATTLEGROUND_INFO_THROTTLED                 = 0x075C4, // 4.0.6a 13623
     SMSG_PLAYER_VEHICLE_DATA                         = 0x0A5A4, // 4.0.6a 13623
-    CMSG_PLAYER_VEHICLE_ENTER                        = 0x0F9A4, // 4.0.6a 13623
+    CMSG_PLAYER_VEHICLE_ENTER                        = 0x0AEC8, // 4.0.6a 13623
     CMSG_EJECT_PASSENGER                             = 0x0F688, // 4.0.6a 13623
     SMSG_PET_GUIDS                                   = 0x0E4E8, // 4.0.6a 13623
     SMSG_CLIENTCACHE_VERSION                         = 0x02EC4, // 4.0.6a 13623
