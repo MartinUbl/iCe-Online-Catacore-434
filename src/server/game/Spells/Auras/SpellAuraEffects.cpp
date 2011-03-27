@@ -5775,6 +5775,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
         // AT APPLY
         if (apply)
         {
+            // Arcane Missiles
+            if (m_spellProto->Id == 5143)
+                caster->RemoveAurasDueToSpell(79808); // removes Arcane Missiles enabler spell
+
             // Overpower
             if (caster && m_spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR &&
                 m_spellProto->SpellFamilyFlags[0] & 0x4)

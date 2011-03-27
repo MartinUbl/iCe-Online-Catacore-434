@@ -470,6 +470,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_MAGE:
+            {
+                // Arcane Missiles Aurastate
+                // since 4.0.1, every spell has a 40% chance of enabling Arcane Missiles
+                if (m_caster->getClass() == CLASS_MAGE && m_caster->getLevel() >= 3
+                    && m_spellInfo->Id != 7268 && roll_chance_i(40))
+                    m_caster->CastSpell(m_caster, 79808, true);
+                break;
+            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
