@@ -1411,7 +1411,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         m_caster->ToPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID && ((Player*)m_caster)->GetTalentBranchSpec(((Player*)m_caster)->GetActiveSpec()) == 752)
     {
         bool EclipseLeft = ((DruidPlayer*)m_caster)->IsEclipseDriverLeft();
         switch(m_spellInfo->Id)
