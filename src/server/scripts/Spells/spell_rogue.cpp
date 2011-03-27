@@ -173,15 +173,14 @@ class spell_rog_preparation : public SpellScriptLoader
 
                     if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
                     {
-                        if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_COLDB_SHADOWSTEP ||      // Cold Blood, Shadowstep
-                            spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VAN_EVAS_SPRINT)           // Vanish, Evasion, Sprint
+                        if (spellInfo->Id == 36554 ||                                                // Cold Blood, Shadowstep
+                            spellInfo->Id == 1856 || spellInfo->Id == 2983)                          // Vanish, Sprint
                             caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
                         else if (caster->HasAura(ROGUE_SPELL_GLYPH_OF_PREPARATION))
                         {
-                            if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE ||         // Dismantle
-                                spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||               // Kick
-                                (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_BLADE_FLURRY &&     // Blade Flurry
-                                spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_BLADE_FLURRY))
+                            if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE || // Dismantle
+                                spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||       // Kick
+                                spellInfo->Id == 76577)                                              // Smoke Bomb
                                 caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
                             else
                                 ++itr;
