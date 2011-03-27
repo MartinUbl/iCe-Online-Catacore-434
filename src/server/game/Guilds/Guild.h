@@ -145,8 +145,11 @@ enum GuildEvents
     GE_LEADER_CHANGED               = 0x08,
     GE_DISBANDED                    = 0x09,
     GE_TABARDCHANGE                 = 0x0A,
-    GE_UNK1                         = 0x0B,                 // string, string EVENT_GUILD_ROSTER_UPDATE tab content change?
+    GE_UNK1                         = 0x0B,                 // string, uint64 (guid) EVENT_GUILD_ROSTER_UPDATE tab content change?
     GE_UPDATE_ROSTER                = 0x0C,                 // EVENT_GUILD_ROSTER_UPDATE
+    GE_UNK2                         = 0x0D,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
+    GE_UNK3                         = 0x0E,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
+    GE_UNK4                         = 0x0F,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
     GE_SIGNED_ON                    = 0x10,                 // ERR_FRIEND_ONLINE_SS
     GE_SIGNED_OFF                   = 0x11,                 // ERR_FRIEND_OFFLINE_S
     GE_GUILDBANKBAGSLOTS_CHANGED    = 0x12,                 // EVENT_GUILDBANKBAGSLOTS_CHANGED

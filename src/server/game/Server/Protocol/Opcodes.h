@@ -148,7 +148,7 @@ enum Opcodes
     SMSG_GUILD_MAX_DAILY_XP                          = 0x0441C, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_NEWS_UPDATE                           = 0x0485E, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
-    //SMSG_GUILD_EXPERIENCE                            = 0x0440E, // 4.0.6a 13623
+    SMSG_GUILD_EXPERIENCE                            = 0x0440E, // 4.0.6a 13623
     CMSG_MESSAGECHAT_SAY                             = 0x0002A, // 4.0.6a 13623
     CMSG_MESSAGECHAT_YELL                            = 0x00802, // 4.0.6a 13623
     CMSG_MESSAGECHAT_CHANNEL                         = 0x00821, // 4.0.6a 13623

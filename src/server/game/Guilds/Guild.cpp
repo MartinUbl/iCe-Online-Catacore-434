@@ -1373,8 +1373,55 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     else
         BroadcastPacket(&data7);
 
+    WorldPacket data8(SMSG_GUILD_MAX_DAILY_XP);
+    data8 << uint64(0x5F4E70);
+
+    WorldPacket data9(SMSG_GUILD_REWARDS_LIST);
+    data9 << uint32(0); //unk
+    data9 << uint32(0); //count
+
+    /*data9 << uint32(0); //unk
+    data9 << uint32(0); //unk
+    data9 << uint64(1500000); //cost (copper)
+    data9 << uint32(4989); //required achievement
+    data9 << uint32(0); //unk
+    data9 << uint32(63207);*/ //items in one set
+
+    WorldPacket data6(SMSG_GUILD_EXPERIENCE);
+    data6 << uint64(0x9FC);
+    data6 << uint64(0xA4A46F);
+    data6 << uint64(0x9FC);
+    data6 << uint64(0x585931); // current XP
+    data6 << uint64(0xDE9A6);  // today XP
+
+    WorldPacket data5(SMSG_GUILD_NEWS_UPDATE);
+    data5 << uint32(0); //count
+
+    /*data5 << uint32(0); //unk
+    data5 << uint32(0x67F3120B); //?!
+    data5 << uint64(13); //guid
+    data5 << uint64(0xD);//unk
+    data5 << uint32(1);  //unk
+    data5 << uint32(0);  //unk
+    data5 << uint32(0x2B94DB);*/   //?!
+
     // This is to make client refresh the list
-    SendUpdateRoster(session);
+    // SendUpdateRoster(session);
+
+    if (session)
+    {
+        session->SendPacket(&data5);
+        session->SendPacket(&data6);
+        session->SendPacket(&data8);
+        session->SendPacket(&data9);
+    }
+    else
+    {
+        BroadcastPacket(&data5);
+        BroadcastPacket(&data6);
+        BroadcastPacket(&data8);
+        BroadcastPacket(&data9);
+    }
 
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_ROSTER)");
 }

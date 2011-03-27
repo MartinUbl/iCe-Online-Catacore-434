@@ -1016,6 +1016,13 @@ struct gtSpellScaling
     float coef;
 };
 
+struct GuildPerksEntry
+{
+    uint32 ID;
+    uint32 level;
+    uint32 spell;
+};
+
 /*struct HolidayDescriptionsEntry
 {
     uint32 ID;                                              // 0, this is NOT holiday id
