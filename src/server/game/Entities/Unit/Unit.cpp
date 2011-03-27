@@ -8399,6 +8399,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (!pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
                 return false;
             break;
+        // Deep Freeze Immunity State (hack)
+        case 71761:
+            return false;
+            break;
         // Deathbringer Saurfang - Rune of Blood
         case 72408:
             // can proc only if target is marked with rune
