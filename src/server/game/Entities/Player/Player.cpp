@@ -1693,6 +1693,11 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data)
         char_flags |= CHARACTER_FLAG_RENAME;
     if (fields[20].GetUInt32())
         char_flags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+
+    QueryResult pRes = CharacterDatabase.PQuery("SELECT guid FROM character_cata_banned WHERE guid = %u;", guid);
+    if(pRes && pRes->GetRowCount() > 0)
+        char_flags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+
     if (sWorld.getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {
         if (!fields[21].GetString().empty())
