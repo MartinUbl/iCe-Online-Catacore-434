@@ -518,7 +518,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             damage += damage/4;
                     }
                 }
-                // Conflagrate - consumes Immolate or Shadowflame
+                // Conflagrate
                 else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
                 {
                     AuraEffect const* aura = NULL;                // found req. aura for damage calculation
@@ -537,13 +537,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             aura = *i;                      // it selected always if exist
                             break;
                         }
-
-                        // Shadowflame
-                        if ((*i)->GetSpellProto()->SpellFamilyFlags[2] & 0x00000002)
-                            aura = *i;                      // remember but wait possible Immolate as primary priority
                     }
 
-                    // found Immolate or Shadowflame
+                    // found Immolate
                     if (aura)
                     {
                         uint32 pdamage = aura->GetAmount() > 0 ? aura->GetAmount() : 0;
@@ -556,10 +552,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_spellValue->EffectBasePoints[1] = SpellMgr::CalculateSpellEffectBaseAmount(pdamage * baseTotalTicks * pct_dot / 100, m_spellInfo, 1);
 
                         apply_direct_bonus = false;
-                        // Glyph of Conflagrate
-                        if (!m_caster->HasAura(56235))
-                            unitTarget->RemoveAurasDueToSpell(aura->GetId(), m_caster->GetGUID());
-
                         break;
                     }
                 }
@@ -1248,6 +1240,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // steady shot focus effect (it has its own skill for this)
             if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
                 m_caster->CastSpell(m_caster,77443,true);
+            if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
+                m_caster->CastSpell(m_caster,51755,true);
             break;
         case SPELLFAMILY_WARRIOR:
             // Charge

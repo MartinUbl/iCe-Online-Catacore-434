@@ -921,6 +921,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         SendNotification(LANG_RESET_SPELLS);
     }
 
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_LEARN_DEFAULT))
+    {
+        pCurrChar->learnDefaultSpells();
+        pCurrChar->learnQuestRewardedSpells();
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_LEARN_DEFAULT);
+    }
+
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
     {
         pCurrChar->resetTalents(true);

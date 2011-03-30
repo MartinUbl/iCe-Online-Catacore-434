@@ -2460,6 +2460,8 @@ void Player::ResetAllPowers()
         case POWER_RUNIC_POWER:
             SetPower(POWER_RUNIC_POWER, 0);
             break;
+        default:
+            break;
     }
 }
 
@@ -2968,6 +2970,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetUInt32Value(index, 0);
 
     SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,0);
+    SetFloatValue(PLAYER_FIELD_MOD_HEALING_PCT, 1.0f);
+    SetFloatValue(PLAYER_FIELD_MOD_HEALING_DONE_PCT, 1.0f);
     for (uint8 i = 0; i < 7; ++i)
     {
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i, 0);
@@ -5807,6 +5811,8 @@ void Player::UpdateRating(CombatRating cr)
             if (affectStats)
                 UpdateArmorPenetration(amount);
             break;
+        default:
+            break;
     }
 }
 
@@ -7744,8 +7750,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
         HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier), apply);
 
     WeaponAttackType attType = BASE_ATTACK;
-    float damage = 0.0f;
-
+    
     if (slot == EQUIPMENT_SLOT_RANGED && (
         proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
         proto->InventoryType == INVTYPE_RANGEDRIGHT))
@@ -10948,8 +10953,8 @@ void Player::ModifyCurrency(uint32 id, int32 count)
 	const CurrencyTypesEntry* currency = sCurrencyTypesStore.LookupEntry(id);
 	ASSERT(currency);
 
-	uint32 oldTotalCount = 0;
-	uint32 oldWeekCount = 0;
+	int32 oldTotalCount = 0;
+	int32 oldWeekCount = 0;
 	PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
 	if (itr == m_currencies.end())
 	{
@@ -10991,7 +10996,7 @@ void Player::ModifyCurrency(uint32 id, int32 count)
 	}
 
 	// if we change total, we must change week
-	ASSERT(((newTotalCount-oldTotalCount) != 0) == ((newWeekCount-oldWeekCount) != 0));
+	//ASSERT(((newTotalCount-oldTotalCount) != 0) == ((newWeekCount-oldWeekCount) != 0));
 
 	if (newTotalCount != oldTotalCount)
 	{
@@ -11031,14 +11036,14 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
 		}
 	case CURRENCY_TYPE_HONOR_POINTS:
 		{
-			uint32 honorcap = sWorld.getIntConfig(CONFIG_MAX_HONOR_POINTS);
+			uint32 honorcap = sWorld.getIntConfig(CONFIG_MAX_HONOR_POINTS) * PLAYER_CURRENCY_PRECISION;
 			if (honorcap > 0)
 				cap = honorcap;
 			break;
 		}
 	case CURRENCY_TYPE_JUSTICE_POINTS:
 		{
-			uint32 justicecap = sWorld.getIntConfig(CONFIG_MAX_JUSTICE_POINTS);
+			uint32 justicecap = sWorld.getIntConfig(CONFIG_MAX_JUSTICE_POINTS) * PLAYER_CURRENCY_PRECISION;
 			if (justicecap > 0)
 				cap = justicecap;
 			break;
@@ -16518,7 +16523,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     
     Field* fields = result->Fetch();
 
-    uint32 dbAccountId = fields[1].GetUInt32();
+    //uint32 dbAccountId = fields[1].GetUInt32();
 
     // check if the character's account in the db and the logged in account match.
     // player should be able to load/delete character only with correct account!
@@ -18502,6 +18507,7 @@ void Player::SaveToDB()
     _SaveEquipmentSets(trans);
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveGlyphs(trans);
+    _SaveCurrency();
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
@@ -19699,7 +19705,8 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     sLog.outDebug("Player::AddSpellMod %d", mod->spellId);
-    uint32 Opcode = (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+    bool isFlat = mod->type == SPELLMOD_FLAT;
+    uint32 Opcode = (isFlat) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
     
     WorldPacket data(Opcode);
     data << uint32(1); //number of spell mod to add
@@ -19725,7 +19732,10 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
             }
             val += apply ? mod->value : -(mod->value);
             data << uint8(eff);
-            data << int32(val);
+            if(isFlat)
+                data << int32(val);
+            else
+                data << float(val);
             count2++;
         }
     }
@@ -22045,7 +22055,8 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 
 void Player::SendAurasForTarget(Unit *target)
 {
-    if (!target || target->GetVisibleAuras()->empty())                  // speedup things
+    // Client requires this packet on login to initialize so we can't skip it for self
+    if (!target || (target->GetVisibleAuras()->empty() && target != this ))                  // speedup things
         return;
 
     WorldPacket data(SMSG_AURA_UPDATE_ALL);

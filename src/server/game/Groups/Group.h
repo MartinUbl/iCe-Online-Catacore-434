@@ -105,7 +105,7 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAG_PET_MAX_POWER     = 0x00020000,       // uint16 pet max power
     GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000,       // uint64 mask, for each bit set uint32 spellid + uint8 unk, pet auras...
     GROUP_UPDATE_FLAG_VEHICLE_SEAT      = 0x00080000,       // uint32 vehicle_seat_id (index from VehicleSeat.dbc)
-    GROUP_UPDATE_FLAG_UNK               = 0x00100000,       // uint32 uint32 string
+    GROUP_UPDATE_FLAG_PHASE             = 0x00100000,       // uint32, uint32 phase, string (unconfirmed)
     GROUP_UPDATE_PET                    = 0x0007FC00,       // all pet flags
     GROUP_UPDATE_FULL                   = 0x0007FFFF,       // all known flags
 };
@@ -493,10 +493,10 @@ class Group
         Battleground*       m_bgGroup;
         uint64              m_targetIcons[TARGETICONCOUNT];
         LootMethod          m_lootMethod;
-        ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;
         Rolls               RollId;
-        BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
+        ItemQualities       m_lootThreshold;
+		BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST

@@ -145,10 +145,10 @@ enum Opcodes
     SMSG_GUILD_RANKS_UPDATE                          = 0x0004C, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_REWARDS_LIST                          = 0x00C4C, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_TRADESKILL_UPDATE                     = 0x0454E, // 4.0.6a 13623, unimplemented
-    SMSG_GUILD_MAX_DAILY_XP                          = 0x0441C, // 4.0.6a 13623, unimplemented
+    SMSG_GUILD_MAX_DAILY_XP_UPDATE                   = 0x0441C, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_NEWS_UPDATE                           = 0x0485E, // 4.0.6a 13623, unimplemented
+    SMSG_GUILD_XP_UPDATE                             = 0x0440E, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
-    SMSG_GUILD_EXPERIENCE                            = 0x0440E, // 4.0.6a 13623
     CMSG_MESSAGECHAT_SAY                             = 0x0002A, // 4.0.6a 13623
     CMSG_MESSAGECHAT_YELL                            = 0x00802, // 4.0.6a 13623
     CMSG_MESSAGECHAT_CHANNEL                         = 0x00821, // 4.0.6a 13623
@@ -472,8 +472,8 @@ enum Opcodes
     SMSG_TURN_IN_PETITION_RESULTS                    = 0x035AC, // 4.0.6a 13623
     CMSG_PETITION_QUERY                              = 0x0B1AC, // 4.0.6a 13623
     SMSG_PETITION_QUERY_RESPONSE                     = 0x0FB80, // 4.0.6a 13623
-    SMSG_FISH_NOT_HOOKED                             = 0x039EC, // 4.0.6a 13623 0x310D ?
-    SMSG_FISH_ESCAPED                                = 0x0F080, // 4.0.6a 13623 0x8188 ?
+    SMSG_FISH_NOT_HOOKED                             = 0x039EC, // 4.0.6a 13623
+    SMSG_FISH_ESCAPED                                = 0x0F080, // 4.0.6a 13623
     CMSG_BUG                                         = 0x034AC, // 4.0.6a 13623
     SMSG_NOTIFICATION                                = 0x0BC88, // 4.0.6a 13623
     CMSG_PLAYED_TIME                                 = 0x0F480, // 4.0.6a 13623
@@ -1153,6 +1153,7 @@ enum Opcodes
     SMSG_CHAR_CUSTOMIZE                              = 0x02dA4, // 4.0.6a 13623
     SMSG_PET_RENAMEABLE                              = 0x0B6C8, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_EXIT                        = 0x0B3CC, // 4.0.6a 13623
+    CMSG_REQUEST_PLAYER_VEHICLE_EXIT                 = 0x0208C, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_PREV_SEAT                   = 0x02DE4, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_NEXT_SEAT                   = 0x064E4, // 4.0.6a 13623
     CMSG_REQUEST_VEHICLE_SWITCH_SEAT                 = 0x0A8CC, // 4.0.6a 13623
@@ -1248,7 +1249,7 @@ enum Opcodes
     CMSG_BATTLEFIELD_MGR_EXIT_REQUEST                = 0x08580, // 4.0.6a 13623
     SMSG_BATTLEFIELD_MGR_STATE_CHANGE                = 0x0352D, // 4.0.6a 13623
     MSG_SET_RAID_DIFFICULTY                          = 0x0B5E8, // 4.0.6a 13623
-    SMSG_TOGGLE_XP_GAIN                              = 0x02655, //
+    SMSG_TOGGLE_XP_GAIN                              = 0x07980, // 4.0.6a 13623
     SMSG_GMRESPONSE_DB_ERROR                         = 0x09576, //
     SMSG_GMRESPONSE_RECEIVED                         = 0x00F57, //
     CMSG_GMRESPONSE_RESOLVE                          = 0x0455E, //

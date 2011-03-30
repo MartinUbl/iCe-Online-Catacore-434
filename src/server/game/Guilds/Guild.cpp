@@ -1357,10 +1357,10 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         data7 << m_ranks[i].m_name;
         data7 << uint32(m_ranks[i].m_rights);
 
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
         //    data7 << uint32(m_ranks[i].m_bankMoneyPerDay);
             data7 << uint32(0xFFFFFFFF);
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
             //data7 << uint32(m_ranks[i].m_rights);
             data7 << uint32(0xFFFFFFFF);
 
@@ -1373,7 +1373,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     else
         BroadcastPacket(&data7);
 
-    WorldPacket data8(SMSG_GUILD_MAX_DAILY_XP);
+    WorldPacket data8(SMSG_GUILD_MAX_DAILY_XP_UPDATE);
     data8 << uint64(0x5F4E70);
 
     WorldPacket data9(SMSG_GUILD_REWARDS_LIST);
@@ -1387,7 +1387,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     data9 << uint32(0); //unk
     data9 << uint32(63207);*/ //items in one set
 
-    WorldPacket data6(SMSG_GUILD_EXPERIENCE);
+    WorldPacket data6(SMSG_GUILD_XP_UPDATE);
     data6 << uint64(0x9FC);
     data6 << uint64(0xA4A46F);
     data6 << uint64(0x9FC);
@@ -1442,14 +1442,14 @@ void Guild::HandleQuery(WorldSession *session)
             data << uint8(0);                                       // Empty string
     }
 
-    for(int i = 0; i < GUILD_RANKS_MAX_COUNT; ++i)
+    for(uint8 i = 0; i < GUILD_RANKS_MAX_COUNT; ++i)
     {
         if (i < _GetRanksSize())
             data << uint32(i);
         else
             data << uint32(0);
     }
-    for(int i = 0; i < GUILD_RANKS_MAX_COUNT; ++i)
+    for(uint8 i = 0; i < GUILD_RANKS_MAX_COUNT; ++i)
     {
         if (i < _GetRanksSize())
             data << uint32(i);
@@ -2052,10 +2052,10 @@ void Guild::SendPermissions(WorldSession *session) const
         data7 << m_ranks[i].m_name;
         data7 << uint32(m_ranks[i].m_rights);
 
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
             data7 << uint32(m_ranks[i].m_bankMoneyPerDay);
             //data7 << uint32(0xFFFFFFFF);
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
             data7 << uint32(m_ranks[i].m_rights);
             //data7 << uint32(0xFFFFFFFF);
 
