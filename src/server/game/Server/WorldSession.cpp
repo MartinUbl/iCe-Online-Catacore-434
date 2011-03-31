@@ -197,6 +197,7 @@ bool WorldSession::Update(uint32 diff)
                         packet->GetOpcode());
         #endif*/
 
+#if defined WINVER
 		switch(packet->GetOpcode())
 		{
 			case 0x03FA8:
@@ -207,6 +208,7 @@ bool WorldSession::Update(uint32 diff)
 				sLog.outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
 				break;
 		}
+#endif
 
         if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
