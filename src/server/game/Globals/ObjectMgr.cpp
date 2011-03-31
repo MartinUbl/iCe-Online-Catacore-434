@@ -3688,7 +3688,7 @@ void ObjectMgr::LoadGuilds()
     // 9. Validate loaded guild data
     uint32 totalGuilds = 0;
     sLog.outString("Validating data of loaded guilds...");
-    for (GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
+    /*for (GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
     {
         Guild* pGuild = *itr;
         if (pGuild)
@@ -3701,7 +3701,8 @@ void ObjectMgr::LoadGuilds()
             else
                 ++totalGuilds;
         }
-    }
+    }*/
+    sLog.outString("Skipped due to fucked up handler.");
     // Cleanup
     // Delete orphan guild ranks
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_CLEAN_GUILD_RANKS);
