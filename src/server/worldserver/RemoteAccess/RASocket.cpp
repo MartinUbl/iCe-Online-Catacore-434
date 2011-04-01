@@ -231,7 +231,7 @@ void RASocket::zprint(void* callbackArg, const char * szText )
 void RASocket::commandFinished(void* callbackArg, bool success)
 {
     RASocket* raSocket = (RASocket*)callbackArg;
-    raSocket->Sendf("SkyFire>");
+    raSocket->Sendf("GCORE>");
     uint64 remainingCommands = --raSocket->pendingCommands;
  
     if(remainingCommands == 0)

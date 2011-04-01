@@ -42,8 +42,8 @@
 
 #ifdef _WIN32
 #include "ServiceWin32.h"
-char serviceName[] = "SkyFireEMU";
-char serviceLongName[] = "SkyFireEMU service";
+char serviceName[] = "GCoreEMU";
+char serviceLongName[] = "GCoreEMU service";
 char serviceDescription[] = "Cataclysm Server";
 /*
  * -1 - not in service mode
