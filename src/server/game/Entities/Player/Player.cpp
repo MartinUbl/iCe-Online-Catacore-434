@@ -19327,10 +19327,10 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
     if (!pet || pet->GetOwnerGUID() != GetGUID())
         return;
 
-    if(mode >= PET_SLOT_HUNTER_FIRST && mode <= PET_SLOT_HUNTER_LAST && pet->getPetType() != HUNTER_PET)
-        assert(false); //debug code.
-    if(mode == PET_SLOT_OTHER_PET && pet->getPetType() == HUNTER_PET)
-        assert(false); //debug code.
+    //if(mode >= PET_SLOT_HUNTER_FIRST && mode <= PET_SLOT_HUNTER_LAST && pet->getPetType() != HUNTER_PET)
+    //    assert(false); //debug code.
+    //if(mode == PET_SLOT_OTHER_PET && pet->getPetType() == HUNTER_PET)
+    //    assert(false); //debug code.
     
     pet->CombatStop();
 
