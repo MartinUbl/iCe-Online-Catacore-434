@@ -3310,7 +3310,8 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
 {
     // aura can be removed from unit only if it's applied on it, shouldn't happen
-    ASSERT(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
+    if (aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) != aurApp)
+        return;
     uint32 spellId = aurApp->GetBase()->GetId();
     for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(spellId); iter != m_appliedAuras.upper_bound(spellId);)
     {
@@ -3322,7 +3323,7 @@ void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
         else
             ++iter;
     }
-    ASSERT(false);
+    //ASSERT(false);
 }
 
 void Unit::_RemoveNoStackAuraApplicationsDueToAura(Aura * aura)
