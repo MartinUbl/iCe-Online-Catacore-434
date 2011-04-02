@@ -28,7 +28,7 @@ EndScriptData */
 enum eEnums
 {
     SAY_AGGRO                       = -1189021,
-    SPELL_SUMMONSCARLETHOUND        = 17164,
+    SPELL_BATTLESHOUT               = 77808,
     SPELL_BLOODLUST                 = 6742
 };
 
@@ -56,6 +56,7 @@ public:
         void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
+            DoCast(me, SPELL_BATTLESHOUT);
         }
 
         void UpdateAI(const uint32 diff)

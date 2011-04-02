@@ -34,7 +34,7 @@ enum eEnums
     SAY_KILL                = -1189014,
     SAY_TRIGGER_VORREL      = -1189015,
 
-    SPELL_SHADOWWORDPAIN    = 2767,
+    SPELL_SHADOWWORDPAIN    = 14032,
 };
 
 class boss_interrogator_vishas : public CreatureScript

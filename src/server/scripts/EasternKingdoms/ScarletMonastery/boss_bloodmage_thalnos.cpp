@@ -31,10 +31,10 @@ enum eEnums
     SAY_HEALTH              = -1189017,
     SAY_KILL                = -1189018,
 
-    SPELL_FLAMESHOCK        = 8053,
-    SPELL_SHADOWBOLT        = 1106,
+    SPELL_FLAMESHOCK        = 23038,
+    SPELL_SHADOWBOLT        = 20825,
     SPELL_FLAMESPIKE        = 8814,
-    SPELL_FIRENOVA          = 16079,
+    SPELL_FIRENOVA          = 12470,
 };
 
 class boss_bloodmage_thalnos : public CreatureScript

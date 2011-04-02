@@ -32,7 +32,7 @@ enum eEnums
 
     SPELL_POLYMORPH             = 13323,
     SPELL_AOESILENCE            = 8988,
-    SPELL_ARCANEEXPLOSION       = 9433,
+    SPELL_ARCANEEXPLOSION       = 34517,
     SPELL_FIREAOE               = 9435,
     SPELL_ARCANEBUBBLE          = 9438,
 };
