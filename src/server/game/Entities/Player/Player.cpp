@@ -7081,7 +7081,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
     GetSession()->SendPacket(&data);
 
     // add honor points
-	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor));
+	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor)* 2.4);
 
     //ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, honor, true);
 
@@ -14918,6 +14918,11 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     else
         moneyRew = int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getRate(RATE_DROP_MONEY));
 
+    // If the player has a guild, it should gain 1/4 of his experience.
+    // Despite of him being at max level or not.
+    if (Guild* pGuild = sObjectMgr.GetGuildById(GetGuildId()))
+        pGuild->GainXP(XP/4);
+
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     if (pQuest->GetRewOrReqMoney())
         moneyRew += pQuest->GetRewOrReqMoney();
@@ -16692,8 +16697,8 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             m_bgData.bgTypeID = currentBg->GetTypeID(true);
 
             //join player to battleground group
-            currentBg->EventPlayerLoggedIn(this, GetGUID());
-            currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetGUID(), m_bgData.bgTeam);
+			currentBg->EventPlayerLoggedIn(this);
+			currentBg->AddOrSetPlayerToCorrectBgGroup(this, m_bgData.bgTeam);
 
             SetInviteForBattlegroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
         }
@@ -25202,4 +25207,17 @@ void Player::SetInGuild(uint32 GuildId)
         SetUInt64Value(OBJECT_FIELD_DATA, 0);
         SetUInt32Value(OBJECT_FIELD_TYPE, GetUInt32Value(OBJECT_FIELD_TYPE) & ~TYPEMASK_IN_GUILD);
     }
+}
+
+void Player::BroadcastMessage(const char* Format, ...)
+{
+	va_list l;
+	va_start(l, Format);
+	char Message[1024];
+	vsnprintf(Message, 1024, Format, l);
+	va_end(l);
+
+	WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, Message, NULL);
+	GetSession()->SendPacket(&data);
 }

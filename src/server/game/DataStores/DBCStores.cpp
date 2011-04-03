@@ -202,6 +202,7 @@ DBCStorage <SpellRuneCostEntry> sSpellRuneCostStore(SpellRuneCostfmt);
 DBCStorage <SpellShapeshiftFormEntry> sSpellShapeshiftFormStore(SpellShapeshiftFormfmt);
 //DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <SummonPropertiesEntry> sSummonPropertiesStore(SummonPropertiesfmt);
+DBCStorage <GuildPerksEntry> sGuildPerksStore(GuildPerksfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 TalentSpellPosMap sTalentSpellPosMap;
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
@@ -522,6 +523,7 @@ void LoadDBCStores(const std::string& dataPath)
     //LoadDBC(availableDbcLocales,bad_dbc_files,sStableSlotPricesStore,    dbcPath,"StableSlotPrices.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSummonPropertiesStore,    dbcPath,"SummonProperties.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sTalentStore,              dbcPath,"Talent.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sGuildPerksStore,          dbcPath,"GuildPerkSpells.dbc");
 
     // Create Spelldifficulty searcher
     for (uint32 i = 0; i < sSpellDifficultyStore.GetNumRows(); ++i)

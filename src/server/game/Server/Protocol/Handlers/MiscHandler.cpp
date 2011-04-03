@@ -1738,13 +1738,11 @@ void WorldSession::SendSetPhaseShift(uint32 PhaseShift, uint32 MapID)
 
     data << uint32(2); // Count of bytes - Array3 - Phases
     data << uint16(PhaseShift);
-    // Note that multiple phases are supported.
     
     if (MapID)
     {
         data << uint32(2); // Count of bytes - Array4 - TerrainSwap
         data << uint16(MapID);
-        // Note that more than one map merges are supported.
     }
     else data << uint32(0);
 
@@ -1760,7 +1758,7 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
     if (_player->isInFlight())
         return;
 
-    AreaTableEntry const *atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
+    AreaTableEntry const *atEntry = GetAreaEntryByAreaID(_player->GetAreaId());
     if (!atEntry || !(atEntry->flags & AREA_FLAG_OUTDOOR_PVP2))
         return;
 

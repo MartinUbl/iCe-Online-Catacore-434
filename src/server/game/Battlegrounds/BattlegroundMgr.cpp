@@ -241,7 +241,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         {
             data->Initialize(SMSG_BATTLEFIELD_STATUS2, 100);
             *data << uint8(bg->isRated() ? 128 : 0);
-            *data << uint32(Time1); // 
+            *data << uint32(Time2); // Time since started
             *data << uint32(QueueSlot); // queueslot 
             *data << uint32(bg->GetMapId()); // MapID
             
@@ -252,7 +252,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint8(0x1F); // High guid
             // end
 
-            *data << uint32(Time2); // ?
+            *data << uint32(Time1); // Time until BG closed
             *data << uint8(arenatype); // teamsize (0 if not arena)
             *data << uint8(bg->GetMaxLevel());
             *data << uint32(bg->GetClientInstanceID()); // instanceid
@@ -510,7 +510,7 @@ void BattlegroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket *data, Grou
 {
     data->Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
     *data << uint32(-1); // QueueSlot
-    *data << uint32(abs(result)); // The values in our enum are negative, while client expects positive ones now (since 4.0.6)
+    *data << uint32(result);
     *data << uint64(0);                                 // player guid
     *data << uint64(0);                                    // unk, could be bg guid, but it wasnt checked
 }
@@ -978,7 +978,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
 
     uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
     uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
-    uint32 lose_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+    uint32 lose_kills = plr->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_LAST : BG_REWARD_LOSER_HONOR_FIRST;
 
     win_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), (float)win_kills);
     lose_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), (float)lose_kills);
