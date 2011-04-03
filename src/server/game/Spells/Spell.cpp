@@ -3319,8 +3319,20 @@ void Spell::cast(bool skipCheck)
     {
         case SPELLFAMILY_GENERIC:
         {
-            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
-                m_preCastSpell = 11196;                                // Recently Bandaged
+            // Bandages and Recently Bandaged debuff (strcmp only for being sure sice MECHANIC_BANDAGE was probably removed)
+            if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_UNK1 && strcmp(m_spellInfo->SpellName,"First Aid") == 0) // Bandages
+            {
+                if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->HasAura(11196))
+                {
+                    SendCastResult(SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW);
+                    SendInterrupted(0);
+                    finish(false);
+                    SetExecutedCurrently(false);
+                    return;
+                }
+                else
+                    m_preCastSpell = 11196;                                // Recently Bandaged
+            }
             break;
         }
         case SPELLFAMILY_MAGE:
