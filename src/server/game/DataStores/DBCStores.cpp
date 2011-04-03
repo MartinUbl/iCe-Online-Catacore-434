@@ -110,8 +110,6 @@ DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore(GtChanceToSp
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 DBCStorage <gtSpellScaling> sGtSpellScalingStore(GtSpellScalingfmt);
 
-DBCStorage <GuildPerksEntry> sGuildPerksStore(GuildPerksfmt);
-
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
 
 DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore(ItemArmorQualityfmt);
@@ -376,8 +374,6 @@ void LoadDBCStores(const std::string& dataPath)
     //LoadDBC(availableDbcLocales,bad_dbc_files,sGtRegenHPPerSptStore,     dbcPath,"gtRegenHPPerSpt.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sGtRegenMPPerSptStore,     dbcPath,"gtRegenMPPerSpt.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sGtSpellScalingStore,      dbcPath,"gtSpellScaling.dbc");
-
-    LoadDBC(availableDbcLocales,bad_dbc_files,sGuildPerksStore,          dbcPath,"GuildPerkSpells.dbc");
 
     LoadDBC(availableDbcLocales,bad_dbc_files,sHolidaysStore,            dbcPath,"Holidays.dbc");
     
