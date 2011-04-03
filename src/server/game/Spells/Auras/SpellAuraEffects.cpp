@@ -3915,6 +3915,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
                 if (GetSpellProto()->Effect[i] == SPELL_EFFECT_SUMMON && GetSpellProto()->EffectMiscValue[i] == GetMiscValue())
                     display_id = 0;
         }
+        else
+            target->ToPlayer()->setInWorgenForm();
 
         target->Mount(display_id, vehicleId, GetMiscValue());
 
