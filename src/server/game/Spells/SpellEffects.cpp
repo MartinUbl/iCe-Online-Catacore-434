@@ -756,6 +756,19 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     bool triggered = true;
     SpellCastTargets targets;
 
+    // selection by spell entry for dummy buffs
+    switch(m_spellInfo->Id)
+    {
+        case 21562:         // Power Word: Fortitude
+        case 1126:          // Mark of the Wild
+        case 1459:          // Arcane Brillance
+        case 61316:         // Dalaran Brillance
+        case 20217:         // Blessing of Kings
+        case 19740:         // Blessing of Might
+            m_caster->CastSpell(unitTarget,m_spellInfo->EffectBasePoints[effIndex],true);
+            break;
+    }
+
     // selection by spell family
     switch (m_spellInfo->SpellFamilyName)
     {

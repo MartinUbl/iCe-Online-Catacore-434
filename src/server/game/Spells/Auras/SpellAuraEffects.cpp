@@ -4707,6 +4707,21 @@ void AuraEffect::HandleAuraModResistanceExclusive(AuraApplication const *aurApp,
                         modAmount += ((modAmount-70)*5 + (modAmount-80)*7);
                         break;
                     }
+                case 79060: // Mark of the Wild
+                    {
+                    uint8 level = target->getLevel();
+                    if ( level <= 70 )
+                    {
+                        modAmount = level / 2;
+                        break;
+                    }
+                    if ( level <= 80 )
+                    {
+                        modAmount = 3*level / 4;
+                        break;
+                    }
+                    modAmount = 2*level;
+                    }
                 default:
                     modAmount = GetAmount();
                     break;
@@ -4984,7 +4999,8 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        if (GetMiscValue() == i || GetMiscValue() == -1)
+        // exception for spell Mark of the Wild (increase all stats except spirit)
+        if (GetMiscValue() == i || GetMiscValue() == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
