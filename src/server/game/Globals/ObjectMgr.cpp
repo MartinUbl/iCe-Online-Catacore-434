@@ -3807,6 +3807,7 @@ void ObjectMgr::LoadGuildRewards()
     {
         sLog.outString();
         sLog.outString(">> Loaded 0 guild reward definitions");
+        return;
     }
 
     uint32 count = 0;
