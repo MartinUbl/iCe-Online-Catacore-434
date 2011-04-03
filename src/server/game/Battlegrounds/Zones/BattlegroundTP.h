@@ -25,7 +25,7 @@ class Battleground;
 
 enum BG_TP_TimerOrScore
 {
-    BG_TP_MAX_TEAM_SCORE    = 9,
+    BG_TP_MAX_TEAM_SCORE    = 3,
     BG_TP_FLAG_RESPAWN_TIME = 25000,
     BG_TP_FLAG_DROP_TIME    = 10000,
 };
