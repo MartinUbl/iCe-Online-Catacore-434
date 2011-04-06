@@ -1418,6 +1418,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             {
                 switch (GetId())
                 {
+                    case 689:    // Drain Life
+                    case 89420:
+                        caster->CastSpell(caster, 89653, true);
+                        break;
                     case 43093:
                     case 31956:
                     case 38801:  // Grievous Wound
