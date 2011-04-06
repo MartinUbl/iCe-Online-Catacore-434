@@ -1256,6 +1256,39 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
                 m_caster->CastSpell(m_caster,51755,true);
             break;
+        case SPELLFAMILY_MAGE:
+        {
+            if (!m_caster)
+                break;
+
+            uint8 caster_level = m_caster->getLevel();
+            switch(m_spellInfo->Id)
+            {
+                // Conjure Refreshment
+                case 42955:
+                    {
+                        uint32 n_spell = 0;
+                        if (caster_level >= 85)
+                            n_spell = 92727;
+                        else if (caster_level >= 80)
+                            n_spell = 42956;
+                        else if (caster_level >= 74)
+                            n_spell = 74625;
+                        else if (caster_level >= 64)
+                            n_spell = 92805;
+                        else if (caster_level >= 54)
+                            n_spell = 92802;
+                        else if (caster_level >= 44)
+                            n_spell = 92799;
+                        else
+                            n_spell = 92739;
+
+                        m_caster->CastSpell(m_caster,n_spell,true);
+                        break;
+                    }
+            };
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
             // Charge
             if (m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_WARRIOR_CHARGE && m_spellInfo->SpellVisual[0] == 867)
@@ -2328,6 +2361,9 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
         // Death Pact - return pct of max health to caster
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
+        // Healthstone
+        else if (m_spellInfo->Id == 6262)
+            addhealth = (float(addhealth)/100.0f)*caster->GetMaxHealth();
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
@@ -5434,6 +5470,12 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, spellId3, true);
                 return;
             }
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            if (m_spellInfo->Id == 6201)
+                m_caster->CastSpell(m_caster, 34130, true);
+            return;
         }
         case SPELLFAMILY_HUNTER:
         {
