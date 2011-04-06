@@ -2545,7 +2545,11 @@ void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)
     Player* player = (Player*)m_caster;
 
     // create some random items
-    player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
+    LootTemplate const* tab = LootTemplates_Spell.GetLootFor(m_spellInfo->Id);
+    if(tab)
+        player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
+    else if (m_CastItem)
+        player->AutoStoreLoot(m_CastItem->GetEntry(), LootTemplates_Item);
     // TODO: ExecuteLogEffectCreateItem(i, m_spellInfo->EffectItemType[i]);
 }
 
