@@ -5967,6 +5967,7 @@ void Spell::EffectDismissPet(SpellEffIndex effIndex)
 
     ExecuteLogEffectUnsummonObject(effIndex, pet);
     m_caster->ToPlayer()->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+    m_caster->ToPlayer()->m_currentPetSlot = PET_SLOT_DELETED;
 }
 
 void Spell::EffectSummonObject(SpellEffIndex effIndex)
