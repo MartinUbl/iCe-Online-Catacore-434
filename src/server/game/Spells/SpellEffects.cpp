@@ -6245,6 +6245,10 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
     target->GetContactPoint(m_caster, x, y, z);
     m_caster->GetMotionMaster()->MoveCharge(x, y, z);
 
+    // Warriors Charge - Stun the target - must be implemented this way since charge doesn't have "Trigger spell" effect
+    if (m_spellInfo->Id == 100)
+        m_caster->CastSpell(target, 96273, true);
+
     // not all charge effects used in negative spells
     if (!IsPositiveSpell(m_spellInfo->Id) && m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->Attack(target, true);
