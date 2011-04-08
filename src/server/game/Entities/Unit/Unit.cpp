@@ -16210,6 +16210,50 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                         return 8571;
                 }
             }
+            else if (getRace() == RACE_WORGEN)
+            {
+                // model based on skin color
+                uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
+                switch (skinColor)
+                {
+                    case 0: // Blue-gray
+                    case 2: // Black
+                        return 33661;
+                    case 1: // Brown
+                        return 33662;
+                    case 3: // White
+                        return 33663;
+                    case 4: // Dark-Brown
+                        return 33664;
+                    default:
+                        return 33660;
+                }
+            }
+            else if (getRace() == RACE_TROLL)
+            {
+                // model based on hair color
+                uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
+                switch (hairColor)
+                {
+                    case 0: // Dark Red
+                    case 1: // Red
+                        return 33668;
+                    case 2: // Dark Orange
+                    case 3: // Orange
+                        return 33667;
+                    case 4: // Green
+                    case 5: // Blue-green
+                    case 6: // Blue
+                        return 33666;
+                    case 7: // Dark Blue
+                        return 33665;
+                    case 8: // Gray
+                    case 9: // White
+                        return 33669;
+                    default:
+                        return 33665;
+                }
+            }
             else if (Player::TeamForRace(getRace()) == ALLIANCE)
                 return 892;
             else
@@ -16287,6 +16331,51 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                         return 29421;
                     default: // original - Brown
                         return 2289;
+                }
+            }
+            else if (getRace() == RACE_WORGEN)
+            {
+                // model based on skin color
+                uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
+                switch (skinColor)
+                {
+                    case 0: // Blue-gray
+                        return 33650;
+                    case 1: // Brown
+                        return 33652;
+                    case 2: // Black
+                        return 33651;
+                    case 3: // White
+                        return 33654;
+                    case 4: // Dark-Brown
+                        return 33664;
+                    default:
+                        return 33653;
+                }
+            }
+            else if (getRace() == RACE_TROLL)
+            {
+                // model based on hair color
+                uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
+                switch (hairColor)
+                {
+                    case 0: // Dark Red
+                    case 1: // Red
+                        return 33657;
+                    case 2: // Dark Orange
+                    case 3: // Orange
+                        return 33659;
+                    case 4: // Green
+                    case 5: // Blue-green
+                    case 6: // Blue
+                        return 33655;
+                    case 7: // Dark Blue
+                        return 33656;
+                    case 8: // Gray
+                    case 9: // White
+                        return 33658;
+                    default:
+                        return 33655;
                 }
             }
             else if (Player::TeamForRace(getRace()) == ALLIANCE)
