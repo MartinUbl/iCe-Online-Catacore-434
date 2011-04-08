@@ -23664,9 +23664,11 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
     bool canNorthrendFly = HasSpell(54197); //Cold Weather Flying
     bool canAzerothFly = HasSpell(90267);   //Flight Master's License
 
-    if(v_map == 571 && canNorthrendFly)
+    if(v_map == 530)                                // Outlands
         return true;
-    if((v_map == 0 || v_map == 1) && canAzerothFly)
+    if(v_map == 571 && canNorthrendFly)             // Northrend
+        return true;
+    if((v_map == 0 || v_map == 1) && canAzerothFly) // Old World
         return true;
 
     return false;
