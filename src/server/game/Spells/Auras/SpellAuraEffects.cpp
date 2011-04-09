@@ -4019,9 +4019,9 @@ void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, 
 
     WorldPacket data;
     if (apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK, 8 + 4);
+        data.Initialize(SMSG_MOVE_WATER_WALK, 8 + 4, true);
     else
-        data.Initialize(SMSG_MOVE_LAND_WALK, 8 + 4);
+        data.Initialize(SMSG_MOVE_LAND_WALK, 8 + 4, true);
     data.append(target->GetPackGUID());
     data << uint32(0);
     target->SendMessageToSet(&data,true);
@@ -4719,7 +4719,7 @@ void AuraEffect::HandleAuraModResistanceExclusive(AuraApplication const *aurApp,
 
     Unit *target = aurApp->GetTarget();
 
-    uint32 modAmount = GetAmount();
+    int32 modAmount = GetAmount();
 
     for (int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL; x++)
     {
