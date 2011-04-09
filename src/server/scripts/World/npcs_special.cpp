@@ -2769,6 +2769,33 @@ public:
     }
 };
 
+class npc_reforger: public CreatureScript
+{
+public:
+    npc_reforger(): CreatureScript("npc_reforger") { };
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to reforge an item", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(4714,pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action)
+    {
+        if(action == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            WorldPacket data(SMSG_REFORGING_OPEN,8,true);
+            data << uint64(pCreature->GetGUID());
+            pPlayer->SendMessageToSet(&data,true);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+        pPlayer->CLOSE_GOSSIP_MENU();
+        return false;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -2801,5 +2828,6 @@ void AddSC_npcs_special()
     new npc_experience;
     new quest_trigger;
     new npc_ring_of_frost;
+    new npc_reforger;
 }
 

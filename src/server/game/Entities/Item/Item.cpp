@@ -1037,6 +1037,37 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     SetState(ITEM_CHANGED, GetOwner());
 }
 
+void Item::SetReforge(uint32 id)
+{
+    if (id == 0 || id == m_reforgeId)
+        return;
+
+    //TODO: send it to client
+
+    ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(id);
+    if (ref_info)
+    {
+        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1, 2813);
+        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_DURATION_OFFSET, -1);
+        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_CHARGES_OFFSET, -1);
+        SetState(ITEM_CHANGED, GetOwner());
+        m_reforgeId = id;
+    }
+    else
+        sLog.outString("Wrong reforge ID %u", id);
+}
+
+uint32 Item::GetReforge()
+{
+    return m_reforgeId;
+}
+
+void Item::ClearReforge()
+{
+    //TODO: send it to client
+    m_reforgeId = 0;
+}
+
 bool Item::GemsFitSockets() const
 {
     bool fits = true;

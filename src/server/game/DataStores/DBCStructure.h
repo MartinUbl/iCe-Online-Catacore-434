@@ -1159,6 +1159,15 @@ struct ItemRandomSuffixEntry
     uint32    enchant_id[5];                                // 3-7      m_enchantment
     uint32    prefix[5];                                    // 8-12     m_allocationPct};
 };
+
+struct ItemReforgeEntry
+{
+    uint32    ID;                                           // 0        m_ID
+    uint32    source_stat;                                  // 1-4      m_source_stat
+    float     source_mod;                                   // 5-8      m_source_mod
+    uint32    new_stat;                                     // 9-12     m_new_stat
+    float     new_mod;                                      // 13-16    m_new_mod
+};
     
 #define MAX_ITEM_SET_ITEMS 10
 #define MAX_ITEM_SET_SPELLS 8

@@ -391,6 +391,7 @@ class WorldSession
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
         void HandleQueryCompletedArtifacts(WorldPacket& recvPacket);
+        void HandleItemReforge(WorldPacket& recvPacket);
 
         // GM Ticket opcodes
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);

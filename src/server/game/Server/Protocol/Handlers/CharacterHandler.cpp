@@ -1326,6 +1326,40 @@ void WorldSession::HandleRemoveGlyph(WorldPacket & recv_data)
     }
 }
 
+void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
+{
+    uint32 slot;      // bag slot
+    uint32 reforgeID; // ID of reforge entry in ItemReforge.dbc
+    uint64 guid;      // NPC guid
+    uint32 unk2;      // mostly 0xFF
+
+    recvPacket >> slot >> reforgeID >> guid >> unk2;
+
+    ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(reforgeID);
+    if(!ref_info)
+    {
+        sLog.outError("Invalid reforge ID %u received in packet", reforgeID);
+        return;
+    }
+
+    uint16 mslot = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+    Item* dstItem = GetPlayer()->GetItemByPos(mslot >> 8, mslot & 255);
+    if(!dstItem)
+    {
+        sLog.outError("Invalid bag slot %u received in reforge packet", slot);
+        return;
+    }
+
+    sLog.outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
+    sLog.outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
+
+    WorldPacket data(0x451C,1,true);
+    data << uint8(0);
+    SendPacket(&data);
+
+    dstItem->SetReforge(reforgeID);
+}
+
 void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
 {
     uint64 guid;
