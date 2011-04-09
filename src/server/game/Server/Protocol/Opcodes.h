@@ -612,7 +612,7 @@ enum Opcodes
     CMSG_AUCTION_LIST_OWNER_ITEMS                    = 0x02D8C, // 4.0.6a 13623
     CMSG_AUCTION_PLACE_BID                           = 0x0A6A0, // 4.0.6a 13623
     SMSG_AUCTION_COMMAND_RESULT                      = 0x0AAE0, // 4.0.6a 13623 0xA1A8 ?
-    SMSG_AUCTION_LIST_RESULT                         = 0x0A1A8, // 4.0.6a 13623 0xE5A8 ?
+    SMSG_AUCTION_LIST_RESULT                         = 0x0E5A8, // 4.0.6a 13623
     SMSG_AUCTION_OWNER_LIST_RESULT                   = 0x03CA8, // 4.0.6a 13623
     SMSG_AUCTION_BIDDER_NOTIFICATION                 = 0x0ACEC, // 4.0.6a 13623
     SMSG_AUCTION_OWNER_NOTIFICATION                  = 0x06C80, // 4.0.6a 13623
@@ -621,7 +621,7 @@ enum Opcodes
     SMSG_DISPEL_FAILED                               = 0x0AAE8, // 4.0.6a 13623
     SMSG_SPELLORDAMAGE_IMMUNE                        = 0x073C8, // 4.0.6a 13623
     CMSG_AUCTION_LIST_BIDDER_ITEMS                   = 0x021C0, // 4.0.6a 13623
-    SMSG_AUCTION_BIDDER_LIST_RESULT                  = 0x0E5A8, // 4.0.6a 13623 0xA1A8 ?
+    SMSG_AUCTION_BIDDER_LIST_RESULT                  = 0x0A1A8, // 4.0.6a 13623
     SMSG_SET_FLAT_SPELL_MODIFIER                     = 0x02BC8, // 4.0.6a 13623
     SMSG_SET_PCT_SPELL_MODIFIER                      = 0x0A6E8, // 4.0.6a 13623
     CMSG_SET_AMMO                                    = 0x100BF, //
@@ -1269,7 +1269,7 @@ enum Opcodes
     SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x031E4, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                   = 0x035EC, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2                   = 0x029C4, // 4.0.6a 13623
-    SMSG_CAMERA_SHAKE                                = 0x034A4, // 4.0.6a 13623
+    SMSG_CAMERA_SHAKE                                = 0x1000E,
     SMSG_UPDATE_ITEM_ENCHANTMENTS                    = 0x020E8, // 4.0.6a 13623
     SMSG_REDIRECT_CLIENT                             = 0x0201B, // 4.0.6a 13623
     CMSG_REDIRECTION_FAILED                          = 0x1000F,
