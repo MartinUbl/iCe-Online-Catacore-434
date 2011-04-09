@@ -33,7 +33,7 @@ namespace Trinity
     {
         inline float hk_honor_at_level_f(uint8 level, float multiplier = 1.0f)
         {
-            float honor = multiplier * level * 1.55f;
+            float honor = multiplier * level * 1.55f * 0.024f; // 155% = original multiplier, 2.4% = Cata modifier
             sScriptMgr.OnHonorCalculation(honor, level, multiplier);
             return honor;
         }

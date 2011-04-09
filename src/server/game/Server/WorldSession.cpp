@@ -520,6 +520,12 @@ void WorldSession::HandleMoveToGraveyard(WorldPacket &recv_data)
     _player->RepopAtGraveyard();
 }
 
+void WorldSession::HandleQueryCompletedArtifacts(WorldPacket& recvPacket)
+{
+    //TODO: Implement
+    return;
+}
+
 void WorldSession::SendNotification(const char *format,...)
 {
     if (format)

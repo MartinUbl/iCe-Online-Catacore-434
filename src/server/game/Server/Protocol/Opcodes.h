@@ -130,7 +130,7 @@ enum Opcodes
     SMSG_GUILD_DECLINE                               = 0x07DEC, // 4.0.6a 13623
     CMSG_GUILD_INFO                                  = 0x06884, // 4.0.6a 13623
     SMSG_GUILD_INFO                                  = 0x020A8, // 4.0.6a 13623
-    CMSG_GUILD_ROSTER                                = 0x0B2A4, // 4.0.6a 13623
+    CMSG_GUILD_ROSTER                                = 0x02329, // 4.0.6a 13623 0xB2A4 ?
     SMSG_GUILD_ROSTER                                = 0x04D5C, // 4.0.6a 13623
     CMSG_GUILD_PROMOTE                               = 0x02109, // 4.0.6a 13623
     CMSG_GUILD_DEMOTE                                = 0x0330D, // 4.0.6a 13623
@@ -141,7 +141,7 @@ enum Opcodes
     CMSG_GUILD_MOTD                                  = 0x0272D, // 4.0.6a 13623
     CMSG_QUERY_GUILD_REWARDS                         = 0x02210, // 4.0.6a 13623
     CMSG_QUERY_GUILD_MAX_XP                          = 0x0350D, // 4.0.6a 13623
-    CMSG_QUERY_GUILD_XP                              = 0x03509, // 4.0.6a 13623
+    CMSG_QUERY_GUILD_XP                              = 0x03129, // 4.0.6a 13623 0x3509 ?
     SMSG_GUILD_EVENT                                 = 0x0B7C4, // 4.0.6a 13623
     SMSG_GUILD_UPDATE_ROSTER                         = 0x0085E, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_RANKS_UPDATE                          = 0x0004C, // 4.0.6a 13623, unimplemented
@@ -1301,6 +1301,7 @@ enum Opcodes
     CMSG_GROUP_SET_ROLES                             = 0x08509, // 4.0.6a 13623
     CMSG_WORLD_LOGIN                                 = 0x08508, // 4.0.6a 13623
     CMSG_RETURN_TO_GRAVEYARD                         = 0x00593, // 4.0.6a 13623
+    CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x00A13, // 4.0.6a 13623
     NUM_MSG_TYPES                                    = 0x20000  // last unknown opcode + 1.
 };
 
