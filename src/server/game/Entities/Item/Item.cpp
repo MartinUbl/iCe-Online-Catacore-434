@@ -1047,6 +1047,11 @@ void Item::SetReforge(uint32 id)
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(id);
     if (ref_info)
     {
+        uint32 srcstatamount = 0;
+        for (int j = 0; j < 10; j++)
+            if (GetProto()->ItemStat[j].ItemStatType == ref_info->source_stat)
+                srcstatamount = GetProto()->ItemStat[j].ItemStatValue;
+
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1, 2813);
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_DURATION_OFFSET, -1);
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_CHARGES_OFFSET, -1);
