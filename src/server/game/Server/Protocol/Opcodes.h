@@ -130,7 +130,7 @@ enum Opcodes
     SMSG_GUILD_DECLINE                               = 0x07DEC, // 4.0.6a 13623
     CMSG_GUILD_INFO                                  = 0x06884, // 4.0.6a 13623
     SMSG_GUILD_INFO                                  = 0x020A8, // 4.0.6a 13623
-    CMSG_GUILD_ROSTER                                = 0x02329, // 4.0.6a 13623 0xB2A4 ?
+    CMSG_GUILD_ROSTER                                = 0x0250D, // 4.0.6a 13623 0xB2A4 ? 0x2329 ?
     SMSG_GUILD_ROSTER                                = 0x04D5C, // 4.0.6a 13623
     CMSG_GUILD_PROMOTE                               = 0x02109, // 4.0.6a 13623
     CMSG_GUILD_DEMOTE                                = 0x0330D, // 4.0.6a 13623
