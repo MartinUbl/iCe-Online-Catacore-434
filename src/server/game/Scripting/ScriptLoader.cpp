@@ -1111,7 +1111,7 @@ void AddNorthrendScripts()
     AddSC_storm_peaks();
     AddSC_zuldrak();
     AddSC_crystalsong_forest();
-    AddSC_isle_of_conquest();
+    //AddSC_isle_of_conquest();
 #endif
 }
 
