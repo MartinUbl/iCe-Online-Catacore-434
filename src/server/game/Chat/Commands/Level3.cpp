@@ -63,6 +63,8 @@
 #include "WeatherMgr.h"
 #include "ScriptMgr.h"
 #include "LFGMgr.h"
+#include "CreatureTextMgr.h"
+#include "SmartAI.h"
 
 //reload commands
 bool ChatHandler::HandleReloadAllCommand(const char*)
@@ -1173,6 +1175,22 @@ bool ChatHandler::HandleReloadConditions(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreatureText(const char* /*args*/)
+{
+    sLog.outString("Re-Loading Creature Texts...");
+    sCreatureTextMgr.LoadCreatureTexts();
+    SendGlobalGMSysMessage("Creature Texts reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSmartScripts(const char* /*args*/)
+{
+    sLog.outString("Re-Loading Smart Scripts...");
+    sSmartScriptMgr.LoadSmartAIFromDB();
+    SendGlobalGMSysMessage("Smart Scripts reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleAccountSetGmLevelCommand(const char *args)
 {
     if (!*args)
@@ -1406,7 +1424,7 @@ bool ChatHandler::HandleSetSkillCommand(const char *args)
         return false;
 
     target->SetSkill(skill, target->GetSkillStep(skill), level, max);
-    PSendSysMessage(LANG_SET_SKILL, skill, sl->name[GetSessionDbcLocale()], tNameLink.c_str(), level, max);
+    PSendSysMessage(LANG_SET_SKILL, skill, sl->name, tNameLink.c_str(), level, max);
 
     return true;
 }

@@ -1052,6 +1052,8 @@ void Item::SetReforge(uint32 id)
             if (GetProto()->ItemStat[j].ItemStatType == ref_info->source_stat)
                 srcstatamount = GetProto()->ItemStat[j].ItemStatValue;
 
+        SetFlag(ITEM_FIELD_FLAGS,ITEM_FLAG_UNK26);
+
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1, 2813);
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_DURATION_OFFSET, -1);
         //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_CHARGES_OFFSET, -1);

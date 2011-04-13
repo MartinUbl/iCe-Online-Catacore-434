@@ -47,6 +47,8 @@ void AddSC_quest_spell_scripts();
 void AddSC_item_spell_scripts();
 void AddSC_example_spell_scripts();
 
+void AddSC_SmartSCripts();
+
 #ifdef SCRIPTS
 //world
 void AddSC_areatrigger_scripts();
@@ -560,6 +562,7 @@ void AddScripts()
 {
     AddExampleScripts();
     AddSpellScripts();
+    AddSC_SmartSCripts();
 #ifdef SCRIPTS
     AddWorldScripts();
     AddEasternKingdomsScripts();

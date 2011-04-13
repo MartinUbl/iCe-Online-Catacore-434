@@ -854,7 +854,7 @@ enum Opcodes
     SMSG_ARENA_TEAM_COMMAND_RESULT                   = 0x0040C, // 4.0.6a 13623 
     CMSG_ARENA_TEAM_QUERY                            = 0x0B9C8, // 4.0.6a 13623
     SMSG_ARENA_TEAM_QUERY_RESPONSE                   = 0x03DE8, // 4.0.6a 13623
-    CMSG_ARENA_TEAM_ROSTER                           = 0x1000E,
+    CMSG_ARENA_TEAM_ROSTER                           = 0x06BAC, // 4.0.6a 13623
     SMSG_ARENA_TEAM_ROSTER                           = 0x0EC80, // 4.0.6a 13623
     CMSG_ARENA_TEAM_INVITE                           = 0x0E9CC, // 4.0.6a 13623
     SMSG_ARENA_TEAM_INVITE                           = 0x063A0, // 4.0.6a 13623
@@ -1269,7 +1269,7 @@ enum Opcodes
     SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x031E4, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                   = 0x035EC, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2                   = 0x029C4, // 4.0.6a 13623
-    SMSG_CAMERA_SHAKE                                = 0x1000E,
+    SMSG_CAMERA_SHAKE                                = 0x1000F,
     SMSG_UPDATE_ITEM_ENCHANTMENTS                    = 0x020E8, // 4.0.6a 13623
     SMSG_REDIRECT_CLIENT                             = 0x0201B, // 4.0.6a 13623
     CMSG_REDIRECTION_FAILED                          = 0x1000F,
