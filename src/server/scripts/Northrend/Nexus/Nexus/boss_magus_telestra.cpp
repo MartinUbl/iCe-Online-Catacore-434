@@ -98,9 +98,9 @@ public:
         {
             Phase = 0;
             //These times are probably wrong
-            uiIceNovaTimer =  7*IN_MILLISECONDS;
+            uiIceNovaTimer =  6*IN_MILLISECONDS;
             uiFireBombTimer =  0;
-            uiGravityWellTimer = 15*IN_MILLISECONDS;
+            uiGravityWellTimer = 12*IN_MILLISECONDS;
             uiCooldown = 0;
 
             uiFireMagusGUID = 0;
@@ -114,7 +114,7 @@ public:
             bIsWaitingToAppear = false;
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetVisibility(VISIBILITY_ON);
+            me->SetVisible(true);
 
             if (pInstance)
                 pInstance->SetData(DATA_MAGUS_TELESTRA_EVENT, NOT_STARTED);
@@ -225,7 +225,7 @@ public:
                     me->GetMotionMaster()->Clear();
                     me->GetMap()->CreatureRelocation(me, CenterOfRoom.GetPositionX(), CenterOfRoom.GetPositionY(), CenterOfRoom.GetPositionZ(), CenterOfRoom.GetOrientation());
                     DoCast(me, SPELL_TELESTRA_BACK);
-                    me->SetVisibility(VISIBILITY_ON);
+                    me->SetVisible(true);
                     if (Phase == 1)
                         Phase = 2;
                     if (Phase == 3)
@@ -234,7 +234,7 @@ public:
                     uiFrostMagusGUID = 0;
                     uiArcaneMagusGUID = 0;
                     bIsWaitingToAppear = true;
-                    uiIsWaitingToAppearTimer = 4*IN_MILLISECONDS;
+                    uiIsWaitingToAppearTimer = 3500;
                     DoScriptText(SAY_MERGE, me);
                     bIsAchievementTimerRunning = false;
                     uiAchievementTimer = 0;
@@ -248,7 +248,7 @@ public:
                 Phase = 1;
                 me->CastStop();
                 me->RemoveAllAuras();
-                me->SetVisibility(VISIBILITY_OFF);
+                me->SetVisible(false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 uiFireMagusGUID = SplitPersonality(MOB_FIRE_MAGUS);
                 uiFrostMagusGUID = SplitPersonality(MOB_FROST_MAGUS);
@@ -265,7 +265,7 @@ public:
                 Phase = 3;
                 me->CastStop();
                 me->RemoveAllAuras();
-                me->SetVisibility(VISIBILITY_OFF);
+                me->SetVisible(false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 uiFireMagusGUID = SplitPersonality(MOB_FIRE_MAGUS);
                 uiFrostMagusGUID = SplitPersonality(MOB_FROST_MAGUS);
@@ -295,7 +295,7 @@ public:
                     DoCast(pTarget, SPELL_ICE_NOVA, false);
                     uiCooldown = 1500;
                 }
-                uiIceNovaTimer = 15*IN_MILLISECONDS;
+                uiIceNovaTimer = 10*IN_MILLISECONDS;
             } else uiIceNovaTimer -= diff;
 
             if (uiGravityWellTimer <= diff)
@@ -305,7 +305,7 @@ public:
                     DoCast(pTarget, SPELL_GRAVITY_WELL);
                     uiCooldown = 6*IN_MILLISECONDS;
                 }
-                uiGravityWellTimer = 15*IN_MILLISECONDS;
+                uiGravityWellTimer = 12*IN_MILLISECONDS;
             } else uiGravityWellTimer -= diff;
 
             if (uiFireBombTimer <= diff)

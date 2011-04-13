@@ -221,16 +221,22 @@ public:
                                     target_list.push_back(pTarget);
                                 pTarget = NULL;
                             }
-                            //He only vanishes if there are 3 or more alive players
-                            if (target_list.size() > 2)
+                            //He only vanishes if there are 2 or more alive players
+                            if (target_list.size() > 1)
                             {
                                 DoScriptText(RAND(SAY_VANISH_1,SAY_VANISH_2), me);
-                                DoCast(me, SPELL_VANISH);
+							    if (Unit *pEmbraceTarget = GetEmbraceTarget())
+						            DoCast(pEmbraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
+					            me->GetMotionMaster()->Clear();
+				                me->SetSpeed(MOVE_WALK, 1.0f, true);
+					            me->GetMotionMaster()->MoveChase(me->getVictim());
+						        Phase = FEEDING;
+								uiPhaseTimer = 20*IN_MILLISECONDS;
+                                /*DoCast(me, SPELL_VANISH);
                                 Phase = JUST_VANISHED;
                                 uiPhaseTimer = 500;
                                 if (Unit* pEmbraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                    uiEmbraceTarget = pEmbraceTarget->GetGUID();
-
+                                    uiEmbraceTarget = pEmbraceTarget->GetGUID();*/
                             }
                             uiVanishTimer = urand(25*IN_MILLISECONDS,35*IN_MILLISECONDS);
                         } else uiVanishTimer -= diff;

@@ -157,7 +157,7 @@ public:
                                 if (m_fDist > 1.0f) // Further from 1 yard
                                     dmg = int32(dmg*m_fDist);
 
-                                me->CastCustomSpell(i->getSource(), DUNGEON_MODE(52942, 59837), &dmg, 0, 0, false);
+                                me->CastCustomSpell(i->getSource(), DUNGEON_MODE(52942, 59837), &dmg, 0, 0, true);
                             }
                     }
                     m_uiPulsingShockwave_Timer = 2000;
@@ -171,6 +171,8 @@ public:
                     DoCast(me, SPELL_PULSING_SHOCKWAVE_AURA, true);
 
                     DoCast(me, SPELL_PULSING_SHOCKWAVE_N); // need core support
+					me->AI()->AttackStart(me->getVictim());
+					me->GetMotionMaster()->MoveChase(me->getVictim());
                     m_bIsAura = true;
                     m_uiResumePulsingShockwave_Timer = 0;
                 }

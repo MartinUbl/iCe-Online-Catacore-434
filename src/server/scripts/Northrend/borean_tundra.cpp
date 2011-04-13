@@ -435,7 +435,7 @@ enum eJenny
 class npc_jenny : public CreatureScript
 {
 public:
-    npc_jenny() : CreatureScript("npc_jenny") { }
+    npc_jenny() : CreatureScript("npc_jenny_controlled") { }
 
     struct npc_jennyAI : public ScriptedAI
     {
@@ -575,7 +575,7 @@ public:
 
     struct npc_nesingwary_trapperAI : public ScriptedAI
     {
-        npc_nesingwary_trapperAI(Creature *c) : ScriptedAI(c) { c->SetVisibility(VISIBILITY_OFF); }
+        npc_nesingwary_trapperAI(Creature *c) : ScriptedAI(c) { c->SetVisible(false); }
 
         uint64 go_caribouGUID;
         uint8  Phase;
@@ -583,7 +583,7 @@ public:
 
         void Reset()
         {
-            me->SetVisibility(VISIBILITY_OFF);
+            me->SetVisible(false);
             uiPhaseTimer = 2500;
             Phase = 1;
             go_caribouGUID = 0;
@@ -613,7 +613,7 @@ public:
                 switch (Phase)
                 {
                     case 1:
-                        me->SetVisibility(VISIBILITY_ON);
+                        me->SetVisible(true);
                         uiPhaseTimer = 2000;
                         Phase = 2;
                         break;
@@ -2375,9 +2375,9 @@ enum eHiddenCultist
     SAY_HIDDEN_CULTIST_4                        = -1571047
 };
 
-#define GOSSIP_ITEM_TOM_HEGGER "What do you know about the Cult of the Damned?"
-#define GOSSIP_ITEM_GUARD_MITCHELLS "How long have you worked for the Cult of the Damned?"
-#define GOSSIP_ITEM_SALTY_JOHN_THORPE "I have a reason to believe you're involved in the cultist activity"
+const char* GOSSIP_ITEM_TOM_HEGGER = "What do you know about the Cult of the Damned?";
+const char* GOSSIP_ITEM_GUARD_MITCHELLS = "How long have you worked for the Cult of the Damned?";
+const char* GOSSIP_ITEM_SALTY_JOHN_THORPE = "I have a reason to believe you're involved in the cultist activity";
 
 class npc_hidden_cultist : public CreatureScript
 {
@@ -2418,11 +2418,11 @@ public:
             me->RestoreFaction();
         }
 
-        void DoAction(const int32 iParam)
+        void DoAction(const int32 /*iParam*/)
         {
             me->StopMoving();
-            me->SetUInt32Value(UNIT_NPC_FLAGS,0);
-            if (Player* pPlayer = me->GetPlayer(*me,uiPlayerGUID))
+            me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            if (Player* pPlayer = me->GetPlayer(*me, uiPlayerGUID))
             {
                 me->SetInFront(pPlayer);
                 me->SendMovementFlagUpdate();
@@ -2431,7 +2431,7 @@ public:
             uiEventPhase = 1;
         }
 
-        void SetGUID(const uint64 &uiGuid, int32 iId)
+        void SetGUID(const uint64 &uiGuid, int32 /*iId*/)
         {
             uiPlayerGUID = uiGuid;
         }
@@ -2497,7 +2497,7 @@ public:
                             uiEventPhase = 0;
                         }
                         break;
-                }                       
+                }
             }else uiEventTimer -= uiDiff;
 
             if (!UpdateVictim())
@@ -2515,7 +2515,7 @@ public:
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
         uint32 uiGossipText = 0;
-        std::string charGossipItem;
+        const char* charGossipItem;
 
         switch(pCreature->GetEntry())
         {
@@ -2532,6 +2532,7 @@ public:
                 charGossipItem = GOSSIP_ITEM_GUARD_MITCHELLS;
                 break;
             default:
+                charGossipItem = "";
                 return false;
         }
 
@@ -2546,7 +2547,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
 
@@ -2559,12 +2560,12 @@ public:
 
         if (uiAction == GOSSIP_ACTION_TRADE)
             pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
-    
+
         return true;
     }
 
 };
-    
+
 void AddSC_borean_tundra()
 {
     new npc_sinkhole_kill_credit;

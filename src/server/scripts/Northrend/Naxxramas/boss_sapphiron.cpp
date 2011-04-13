@@ -32,6 +32,8 @@
 #define SPELL_FROST_MISSILE     30101
 #define SPELL_BERSERK           26662
 #define SPELL_DIES              29357
+#define SPELL_DEEP_FREEZE       70380
+#define SPELL_MIND_TRAUMA       48301
 
 #define SPELL_CHILL             RAID_MODE(28547,55699)
 
@@ -65,6 +67,8 @@ enum Events
     EVENT_LAND,
     EVENT_GROUND,
     EVENT_BIRTH,
+    EVENT_DEEPFREEZE,
+    EVENT_MINDTRAUMA,
 };
 
 typedef std::map<uint64, uint64> IceBlockMap;
@@ -100,7 +104,7 @@ public:
             float x, y, z;
             me->GetPosition(x, y, z);
             me->SummonGameObject(GO_BIRTH, x, y, z, 0, 0, 0, 0, 0, 0);
-            me->SetVisibility(VISIBILITY_OFF);
+            me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
 
@@ -112,7 +116,12 @@ public:
             _Reset();
 
             if (phase == PHASE_FLIGHT)
+            {
+                me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SendMovementFlagUpdate();
                 ClearIceBlock();
+            }
 
             phase = PHASE_NULL;
 
@@ -177,7 +186,7 @@ public:
             if (param == DATA_SAPPHIRON_BIRTH)
             {
                 phase = PHASE_BIRTH;
-                events.ScheduleEvent(EVENT_BIRTH, 23000);
+                events.ScheduleEvent(EVENT_BIRTH, 21000);
             }
         }
 
@@ -202,10 +211,12 @@ public:
             phase = PHASE_GROUND;
             me->SetReactState(REACT_AGGRESSIVE);
             events.SetPhase(PHASE_GROUND);
-            events.ScheduleEvent(EVENT_CLEAVE, 5000+rand()%10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_TAIL, 5000+rand()%10000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_DRAIN, 24000, 0, PHASE_GROUND);
-            events.ScheduleEvent(EVENT_BLIZZARD, 5000+rand()%5000, 0, PHASE_GROUND);
+            events.ScheduleEvent(EVENT_CLEAVE, 3000+rand()%2000, 0, PHASE_GROUND);
+            events.ScheduleEvent(EVENT_TAIL, 3000+rand()%2000, 0, PHASE_GROUND);
+            events.ScheduleEvent(EVENT_DRAIN, 3000, 0, PHASE_GROUND);
+            events.ScheduleEvent(EVENT_BLIZZARD, 3000+rand()%5000, 0, PHASE_GROUND);
+			events.ScheduleEvent(EVENT_DEEPFREEZE, 3000+rand()%2000, 0, PHASE_GROUND);
+			events.ScheduleEvent(EVENT_MINDTRAUMA, 2000+rand()%2000, 0, PHASE_GROUND);
             events.ScheduleEvent(EVENT_FLIGHT, 45000);
         }
 
@@ -252,24 +263,34 @@ public:
                             return;
                         case EVENT_CLEAVE:
                             DoCast(me->getVictim(), SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, 5000+rand()%10000, 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_CLEAVE, 2000+rand()%2000, 0, PHASE_GROUND);
                             return;
                         case EVENT_TAIL:
                             DoCastAOE(SPELL_TAIL_SWEEP);
-                            events.ScheduleEvent(EVENT_TAIL, 5000+rand()%10000, 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_TAIL, 2000+rand()%2000, 0, PHASE_GROUND);
                             return;
                         case EVENT_DRAIN:
                             DoCastAOE(SPELL_LIFE_DRAIN);
-                            events.ScheduleEvent(EVENT_DRAIN, 24000, 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_DRAIN, RAID_MODE(6000,4000), 0, PHASE_GROUND);
                             return;
                         case EVENT_BLIZZARD:
                         {
                             //DoCastAOE(SPELL_SUMMON_BLIZZARD);
                             if (Creature *pSummon = DoSummon(MOB_BLIZZARD, me, 0.0f, urand(25000,30000), TEMPSUMMON_TIMED_DESPAWN))
                                 pSummon->GetMotionMaster()->MoveRandom(40);
-                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20000,7000), 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(5000,3000), 0, PHASE_GROUND);
                             break;
                         }
+						case EVENT_DEEPFREEZE:
+							if(Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
+								pTarget->CastSpell(pTarget, SPELL_DEEP_FREEZE, true);
+							events.ScheduleEvent(EVENT_DEEPFREEZE, urand(3000,5000), 0, PHASE_GROUND);
+							break;
+						case EVENT_MINDTRAUMA:
+							if(Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
+								pTarget->CastSpell(pTarget, SPELL_MIND_TRAUMA, true);
+							events.ScheduleEvent(EVENT_MINDTRAUMA, urand(2000,4000), 0, PHASE_GROUND);
+							break;
                         case EVENT_FLIGHT:
                             phase = PHASE_FLIGHT;
                             events.SetPhase(PHASE_FLIGHT);
@@ -326,7 +347,7 @@ public:
                         {
                             DoScriptText(EMOTE_BREATH, me);
                             DoCastAOE(SPELL_FROST_MISSILE);
-                            events.ScheduleEvent(EVENT_EXPLOSION, 8000);
+                            events.ScheduleEvent(EVENT_EXPLOSION, 6000);
                             return;
                         }
                         case EVENT_EXPLOSION:
@@ -344,7 +365,7 @@ public:
                             EnterPhaseGround();
                             return;
                         case EVENT_BIRTH:
-                            me->SetVisibility(VISIBILITY_ON);
+                            me->SetVisible(true);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
                             return;
@@ -395,8 +416,72 @@ public:
 
 };
 
+class at_to_frostwyrm_lair : public AreaTriggerScript
+{
+public:
+	at_to_frostwyrm_lair() : AreaTriggerScript("at_to_frostwyrm_lair") { }
+
+	bool OnTrigger(Player* pPlayer, const AreaTriggerEntry * /*at*/)
+	{
+		InstanceScript* pInstance = pPlayer->GetInstanceScript();
+		if(!pInstance)
+			return false;
+
+		uint32 uiKilledBosses = pInstance->GetData(DATA_FROSTWYRM_ACCESS);
+
+		if(uiKilledBosses >= 6)
+			pPlayer->NearTeleportTo(3498.28f,-5349.9f,144.96f,1.31f);
+		else
+			pPlayer->GetSession()->SendNotification("K pristupu do Frostwyrm Lair potrebujete zabit jeste %u bossu.",(6-uiKilledBosses));
+
+		return true;
+	}
+};
+
+class mob_chill_sapphiron : public CreatureScript
+{
+public:
+    mob_chill_sapphiron() : CreatureScript("mob_chill_sapphiron") { }
+
+    struct mob_chill_sapphironAI : public NullCreatureAI
+    {
+        mob_chill_sapphironAI(Creature* c) : NullCreatureAI(c)
+        {
+			spell = 0;
+			InstanceScript* pInstance = c->GetInstanceScript();
+			if(!pInstance)
+				return;
+			spell = pInstance->instance->IsRegularDifficulty()?28547:55699;
+            interval = 1000;
+            timer = interval;
+			me->SetReactState(REACT_PASSIVE);
+        }
+
+        uint32 timer, interval;
+        uint32 spell;
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (timer <= diff)
+            {
+                if (spell)
+                    me->CastSpell(me, spell, true);
+                timer = interval;
+            }
+            else
+                timer -= diff;
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new mob_chill_sapphironAI(creature);
+    }
+};
 
 void AddSC_boss_sapphiron()
 {
     new boss_sapphiron();
+    new at_to_frostwyrm_lair();
+	new mob_chill_sapphiron();
 }

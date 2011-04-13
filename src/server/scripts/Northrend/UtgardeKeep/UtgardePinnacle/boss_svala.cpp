@@ -30,21 +30,21 @@ enum Spells
 //not in db
 enum Yells
 {
-    SAY_DIALOG_WITH_ARTHAS_1                      = -1575015,
-    SAY_DIALOG_WITH_ARTHAS_2                      = -1575016,
-    SAY_DIALOG_WITH_ARTHAS_3                      = -1575017,
-    SAY_AGGRO                                     = -1575018,
-    SAY_SLAY_1                                    = -1575019,
-    SAY_SLAY_2                                    = -1575020,
-    SAY_SLAY_3                                    = -1575021,
-    SAY_DEATH                                     = -1575022,
-    SAY_SACRIFICE_PLAYER_1                        = -1575023,
-    SAY_SACRIFICE_PLAYER_2                        = -1575024,
-    SAY_SACRIFICE_PLAYER_3                        = -1575025,
-    SAY_SACRIFICE_PLAYER_4                        = -1575026,
-    SAY_SACRIFICE_PLAYER_5                        = -1575027,
-    SAY_DIALOG_OF_ARTHAS_1                        = -1575028,
-    SAY_DIALOG_OF_ARTHAS_2                        = -1575029
+    SAY_DIALOG_WITH_ARTHAS_1                      = -1575000,
+    SAY_DIALOG_WITH_ARTHAS_2                      = -1575002,
+    SAY_DIALOG_WITH_ARTHAS_3                      = -1575004,
+    SAY_AGGRO                                     = -1575005,
+    SAY_SLAY_1                                    = -1575006,
+    SAY_SLAY_2                                    = -1575007,
+    SAY_SLAY_3                                    = -1575008,
+    SAY_DEATH                                     = -1575014,
+    SAY_SACRIFICE_PLAYER_1                        = -1575009,
+    SAY_SACRIFICE_PLAYER_2                        = -1575010,
+    SAY_SACRIFICE_PLAYER_3                        = -1575011,
+    SAY_SACRIFICE_PLAYER_4                        = -1575012,
+    SAY_SACRIFICE_PLAYER_5                        = -1575013,
+    SAY_DIALOG_OF_ARTHAS_1                        = -1575001,
+    SAY_DIALOG_OF_ARTHAS_2                        = -1575003
 };
 enum Creatures
 {
@@ -135,14 +135,28 @@ public:
 
                 if (Creature *pArthas = me->SummonCreature(CREATURE_ARTHAS, ArthasPos, TEMPSUMMON_MANUAL_DESPAWN))
                 {
-                    pArthas->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    pArthas->SetFloatValue(OBJECT_FIELD_SCALE_X, 5);
+                    pArthas->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                    pArthas->SetFloatValue(OBJECT_FIELD_SCALE_X, 9);
+                    pArthas->CastSpell(pArthas, 54134, true);
                     uiArthasGUID = pArthas->GetGUID();
                 }
             }
         }
 
         void AttackStart(Unit* /*who*/) {}
+
+		void DoMoveToPosition()
+	    {
+		    float fX, fZ, fY;
+	        me->GetRespawnCoord(fX, fY, fZ);
+
+	        //me->AddSplineFlag(SPLINEFLAG_FLYING);
+			me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_LEVITATING);
+
+			//me->SendMonsterMoveWithSpeed(fX, fY, fZ + 5.0f, 6000);
+			me->SendMonsterMove(fX,fY,fZ+5.0f,MOVEMENTFLAG_FLYING | MOVEMENTFLAG_LEVITATING,6000,1.0f);
+		    me->GetMap()->CreatureRelocation(me, fX, fY, fZ + 5.0f, me->GetOrientation());
+	    }
 
         void UpdateAI(const uint32 diff)
         {
@@ -179,9 +193,11 @@ public:
                         break;
                     case 4:
                         DoScriptText(SAY_DIALOG_WITH_ARTHAS_3, me);
+						pArthas->CastSpell(me, 54142, false);
                         DoCast(me, SPELL_SVALA_TRANSFORMING1);
+						DoMoveToPosition();
                         ++uiIntroPhase;
-                        uiIntroTimer = 2800;
+                        uiIntroTimer = 6000;//2800;
                         break;
                     case 5:
                         DoCast(me, SPELL_SVALA_TRANSFORMING2);
@@ -189,10 +205,13 @@ public:
                         uiIntroTimer = 200;
                         break;
                     case 6:
-                        if (me->SummonCreature(CREATURE_SVALA_SORROWGRAVE, SvalaPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60*IN_MILLISECONDS))
+                        if (Creature* pSorrow = me->SummonCreature(CREATURE_SVALA_SORROWGRAVE, SvalaPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60*IN_MILLISECONDS))
                         {
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             me->SetDisplayId(DATA_SVALA_DISPLAY_ID);
+							me->SetVisible(false);
+							me->SetReactState(REACT_PASSIVE);
+							pSorrow->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
                             pArthas->ToTempSummon()->UnSummon();
                             uiArthasGUID = 0;
                             Phase = FINISHED;
@@ -232,7 +251,7 @@ public:
         }
 
         // called by svala sorrowgrave to set guid of victim
-        void DoAction(uint32 /*action*/)
+        void DoAction(const int32 /*action*/)
         {
             if (pInstance)
                 if (Unit *pVictim = me->GetUnit(*me, pInstance->GetData64(DATA_SACRIFICED_PLAYER)))
@@ -335,8 +354,8 @@ public:
                 {
                     if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
-                        DoCast(pTarget, SPELL_CALL_FLAMES);
-                        uiCallFlamesTimer = urand(8 * IN_MILLISECONDS, 12 * IN_MILLISECONDS);
+                        DoCast(pTarget, pInstance->instance->IsRegularDifficulty()?46551:20203, true);
+                        uiCallFlamesTimer = urand(8*IN_MILLISECONDS,12*IN_MILLISECONDS);
                     }
                 } else uiCallFlamesTimer -= diff;
 

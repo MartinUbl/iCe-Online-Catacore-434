@@ -86,10 +86,10 @@ public:
 
         void Reset()
         {
-            uiCrystalSpikesTimer = 12*IN_MILLISECONDS;
-            uiTrampleTimer = 10*IN_MILLISECONDS;
-            uiSpellReflectionTimer = 30*IN_MILLISECONDS;
-            uiSummonCrystallineTanglerTimer = 17*IN_MILLISECONDS;
+            uiCrystalSpikesTimer = 10*IN_MILLISECONDS;
+            uiTrampleTimer = 8*IN_MILLISECONDS;
+            uiSpellReflectionTimer = 20*IN_MILLISECONDS;
+            uiSummonCrystallineTanglerTimer = 14*IN_MILLISECONDS;
             bFrenzy = false;
             bCrystalSpikes = false;
 
@@ -153,14 +153,14 @@ public:
             if (uiTrampleTimer <= diff)
             {
                 DoCast(me, SPELL_TRAMPLE);
-                uiTrampleTimer = 10*IN_MILLISECONDS;
+                uiTrampleTimer = 8*IN_MILLISECONDS;
             } else uiTrampleTimer -= diff;
 
             if (uiSpellReflectionTimer <= diff)
             {
                 DoScriptText(SAY_REFLECT, me);
                 DoCast(me, SPELL_SPELL_REFLECTION);
-                uiSpellReflectionTimer = 30*IN_MILLISECONDS;
+                uiSpellReflectionTimer = 25*IN_MILLISECONDS;
             } else uiSpellReflectionTimer -= diff;
 
             if (uiCrystalSpikesTimer <= diff)
@@ -173,7 +173,7 @@ public:
                 fBaseY = me->GetPositionY();
                 fBaseZ = me->GetPositionZ();
                 fBaseO = me->GetOrientation();
-                uiCrystalSpikesTimer = 20*IN_MILLISECONDS;
+                uiCrystalSpikesTimer = 15*IN_MILLISECONDS;
             } else uiCrystalSpikesTimer -= diff;
 
             if (IsHeroic() && (uiSummonCrystallineTanglerTimer <= diff))
@@ -213,7 +213,7 @@ public:
                         Crystalline_Tangler->getThreatManager().addThreat(pTarget, 1000000000.0f);
                     }
                 }
-                uiSummonCrystallineTanglerTimer = 17*IN_MILLISECONDS;
+                uiSummonCrystallineTanglerTimer = 15*IN_MILLISECONDS;
             } else uiSummonCrystallineTanglerTimer -= diff;
 
             DoMeleeAttackIfReady();

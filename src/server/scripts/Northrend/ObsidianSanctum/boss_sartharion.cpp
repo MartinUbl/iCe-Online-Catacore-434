@@ -268,11 +268,11 @@ public:
             m_bIsHardEnraged = false;
 
             m_uiTenebronTimer = 30000;
-            m_uiShadronTimer = 75000;
-            m_uiVesperonTimer = 120000;
+            m_uiShadronTimer = 90000;
+            m_uiVesperonTimer = 130000;
 
-            m_uiFlameTsunamiTimer = 30000;
-            m_uiFlameBreathTimer = 20000;
+            m_uiFlameTsunamiTimer = 10000;
+            m_uiFlameBreathTimer = 15000;
             m_uiTailSweepTimer = 20000;
             m_uiCleaveTimer = 7000;
             m_uiLavaStrikeTimer = 5000;
@@ -622,7 +622,7 @@ public:
                     }
                 }
 
-                m_uiFlameTsunamiTimer = 30000;
+                m_uiFlameTsunamiTimer = 18000;
             }
             else
                 m_uiFlameTsunamiTimer -= uiDiff;
@@ -630,9 +630,12 @@ public:
             // flame breath
             if (m_uiFlameBreathTimer <= uiDiff)
             {
-                DoScriptText(SAY_SARTHARION_BREATH, me);
-                DoCast(me->getVictim(), RAID_MODE(SPELL_FLAME_BREATH, SPELL_FLAME_BREATH_H));
-                m_uiFlameBreathTimer = urand(25000,35000);
+				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				{
+					DoScriptText(SAY_SARTHARION_BREATH, me);
+					DoCast(me->getVictim(), RAID_MODE(SPELL_FLAME_BREATH, SPELL_FLAME_BREATH_H));
+					m_uiFlameBreathTimer = urand(15000,30000);
+				}
             }
             else
                 m_uiFlameBreathTimer -= uiDiff;
@@ -640,8 +643,11 @@ public:
             // Tail Sweep
             if (m_uiTailSweepTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), RAID_MODE(SPELL_TAIL_LASH, SPELL_TAIL_LASH_H));
-                m_uiTailSweepTimer = urand(15000,20000);
+				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				{
+					DoCast(me->getVictim(), RAID_MODE(SPELL_TAIL_LASH, SPELL_TAIL_LASH_H));
+					m_uiTailSweepTimer = urand(10000,20000);
+				}
             }
             else
                 m_uiTailSweepTimer -= uiDiff;
@@ -649,8 +655,11 @@ public:
             // Cleave
             if (m_uiCleaveTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
-                m_uiCleaveTimer = urand(7000,10000);
+				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				{
+					DoCast(me->getVictim(), SPELL_CLEAVE);
+					m_uiCleaveTimer = urand(5000,8000);
+				}
             }
             else
                 m_uiCleaveTimer -= uiDiff;
@@ -658,14 +667,17 @@ public:
             // Lavas Strike
             if (m_uiLavaStrikeTimer <= uiDiff)
             {
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                {
-                    CastLavaStrikeOnTarget(pTarget);
+				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				{
+					if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+					{
+						CastLavaStrikeOnTarget(pTarget);
 
-                    if(urand(0,5) == 0)
-                        DoScriptText(RAND(SAY_SARTHARION_SPECIAL_1,SAY_SARTHARION_SPECIAL_2,SAY_SARTHARION_SPECIAL_3), me);
-                }
-                m_uiLavaStrikeTimer = (m_bIsSoftEnraged ? urand(1400, 2000) : urand(5000,20000));
+						if(urand(0,5) == 0)
+							DoScriptText(RAND(SAY_SARTHARION_SPECIAL_1,SAY_SARTHARION_SPECIAL_2,SAY_SARTHARION_SPECIAL_3), me);
+					}
+					m_uiLavaStrikeTimer = (m_bIsSoftEnraged ? urand(1400, 2000) : urand(5000,20000));
+				}
             }
             else
                 m_uiLavaStrikeTimer -= uiDiff;
@@ -696,10 +708,6 @@ public:
             }
             else
                 m_uiVesperonTimer -= uiDiff;
-
-            // Don't attack current target if he's not visible for us.
-            if(me->getVictim() && me->getVictim()->HasAura(57874, 0))
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
 
             DoMeleeAttackIfReady();
 
@@ -1083,10 +1091,6 @@ public:
             else
                 m_uiShadowBreathTimer -= uiDiff;
 
-            // Don't attack current target if he's not visible for us.
-            if(me->getVictim() && me->getVictim()->HasAura(57874, 0))
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-
             DoMeleeAttackIfReady();
         }
     };
@@ -1193,10 +1197,6 @@ public:
             else
                 m_uiShadowBreathTimer -= uiDiff;
 
-            // Don't attack current target if he's not visible for us.
-            if (me->getVictim()->HasAura(57874, 0))
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-
             DoMeleeAttackIfReady();
         }
     };
@@ -1293,10 +1293,6 @@ public:
             }
             else
                 m_uiShadowBreathTimer -= uiDiff;
-
-            // Don't attack current target if he's not visible for us.
-            if(me->getVictim() && me->getVictim()->HasAura(57874, 0))
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
 
             DoMeleeAttackIfReady();
         }
@@ -1400,7 +1396,7 @@ public:
         {
             if(uiDespawnTimer < uiDiff)
             {
-                me->SetVisibility(VISIBILITY_OFF);
+                me->SetVisible(false);
                 me->Kill(me);
                 uiDespawnTimer = 28000;
                 return;
@@ -1496,7 +1492,7 @@ public:
         {
             if(uiDespawnTimer < uiDiff)
             {
-                me->SetVisibility(VISIBILITY_OFF);
+                me->SetVisible(false);
                 me->Kill(me);
                 uiDespawnTimer = 28000;
                 return;
@@ -1739,6 +1735,30 @@ public:
 
 };
 
+class go_normal_portal : public GameObjectScript
+{
+public:
+    go_normal_portal() : GameObjectScript("go_normal_portal") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject * /*pGO*/)
+    {
+        pPlayer->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT_ENTER);
+		pPlayer->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
+        return true;
+    }
+};
+
+class go_twilight_portal : public GameObjectScript
+{
+public:
+    go_twilight_portal() : GameObjectScript("go_twilight_portal") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject * /*pGO*/)
+    {
+        pPlayer->CastSpell(pPlayer,SPELL_TWILIGHT_SHIFT_ENTER,true);
+        return true;
+    }
+};
 
 void AddSC_boss_sartharion()
 {
@@ -1752,4 +1772,6 @@ void AddSC_boss_sartharion()
     new npc_flame_tsunami();
     new npc_twilight_fissure();
     new mob_twilight_whelp();
+	new go_normal_portal();
+	new go_twilight_portal();
 }

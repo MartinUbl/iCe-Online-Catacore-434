@@ -323,7 +323,7 @@ public:
             nWeaver = 0;
         }
 
-        void KilledUnit()
+        void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2), me);
         }
@@ -390,24 +390,24 @@ public:
                     {
                         case EVENT_WASTE:
                             DoSummon(NPC_WASTE, Pos[RAND(0,3,6,9)]);
-                            events.RepeatEvent(urand(2000,5000));
+                            events.RepeatEvent(urand(1000,4000));
                             break;
                         case EVENT_ABOMIN:
-                            if (nAbomination < 8)
+                            if (nAbomination < 12)
                             {
                                 DoSummon(NPC_ABOMINATION, Pos[RAND(1,4,7,10)]);
                                 nAbomination++;
-                                events.RepeatEvent(20000);
+                                events.RepeatEvent(10000);
                             }
                             else
                                 events.PopEvent();
                             break;
                         case EVENT_WEAVER:
-                            if (nWeaver < 8)
+                            if (nWeaver < 12)
                             {
                                 DoSummon(NPC_WEAVER, Pos[RAND(0,3,6,9)]);
                                 nWeaver++;
-                                events.RepeatEvent(25000);
+                                events.RepeatEvent(18000);
                             }
                             else
                                 events.PopEvent();
@@ -425,11 +425,11 @@ public:
                             me->CastStop();
 
                             DoStartMovement(me->getVictim());
-                            events.ScheduleEvent(EVENT_BOLT, urand(5000,10000));
-                            events.ScheduleEvent(EVENT_NOVA, 15000);
-                            events.ScheduleEvent(EVENT_DETONATE, urand(30000,40000));
+                            events.ScheduleEvent(EVENT_BOLT, urand(3000,8000));
+                            events.ScheduleEvent(EVENT_NOVA, 12000);
+                            events.ScheduleEvent(EVENT_DETONATE, urand(20000,30000));
                             events.ScheduleEvent(EVENT_FISSURE, urand(10000,30000));
-                            events.ScheduleEvent(EVENT_BLAST, urand(60000,120000));
+                            events.ScheduleEvent(EVENT_BLAST, urand(40000,100000));
                             if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                                 events.ScheduleEvent(EVENT_CHAIN, urand(30000,60000));
                             Phase = 2;
@@ -471,7 +471,7 @@ public:
                         if (Creature* pGuardian = DoSummon(NPC_ICECROWN, Pos[RAND(2,5,8,11)]))
                             pGuardian->SetFloatValue(UNIT_FIELD_COMBATREACH, 2);
                         ++nGuardiansOfIcecrownCount;
-                        uiGuardiansOfIcecrownTimer = 5000;
+                        uiGuardiansOfIcecrownTimer = 4000;
                     }
                     else uiGuardiansOfIcecrownTimer -= diff;
                 }
@@ -485,11 +485,11 @@ public:
                     {
                         case EVENT_BOLT:
                             DoCastVictim(RAID_MODE(SPELL_FROST_BOLT,H_SPELL_FROST_BOLT));
-                            events.RepeatEvent(urand(5000,10000));
+                            events.RepeatEvent(urand(4000,6000));
                             break;
                         case EVENT_NOVA:
-                            DoCastAOE(RAID_MODE(SPELL_FROST_BOLT_AOE,H_SPELL_FROST_BOLT_AOE));
-                            events.RepeatEvent(urand(15000,30000));
+                            DoCastAOE(RAID_MODE(SPELL_FROST_BOLT_AOE,H_SPELL_FROST_BOLT_AOE),true);
+                            events.RepeatEvent(urand(7000,9000));
                             break;
                         case EVENT_CHAIN:
                         {
@@ -610,20 +610,27 @@ public:
                                 DoScriptText(RAND(SAY_SPECIAL_1,SAY_SPECIAL_2,SAY_SPECIAL_3), me);
                             }
 
-                            events.RepeatEvent(urand(20000,50000));
+                            events.RepeatEvent(urand(10000,20000));
                             break;
                         }
                         case EVENT_FISSURE:
                             if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
-                                DoCast(pTarget, SPELL_SHADOW_FISURE);
-                            events.RepeatEvent(urand(10000,45000));
+							{
+								if(!pTarget->HasAura(SPELL_FROST_BLAST))
+								{
+									DoCast(pTarget, SPELL_SHADOW_FISURE);
+									events.RepeatEvent(urand(6000,15000));
+								}
+								else
+									events.RepeatEvent(200);
+							}
                             break;
                         case EVENT_BLAST:
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, RAID_MODE(1,0), 0, true))
                                 DoCast(pTarget, SPELL_FROST_BLAST);
                             if (rand()%2)
                                 DoScriptText(SAY_FROST_BLAST, me);
-                            events.RepeatEvent(urand(30000,90000));
+                            events.RepeatEvent(urand(30000,60000));
                             break;
                         default:
                             events.PopEvent();

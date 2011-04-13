@@ -81,9 +81,9 @@ public:
 
         void Reset()
         {
-            uiCrystalfireBreathTimer = 14*IN_MILLISECONDS;
+            uiCrystalfireBreathTimer = 10*IN_MILLISECONDS;
             uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS,11*IN_MILLISECONDS);
-            uiTailSweepTimer = 5*IN_MILLISECONDS;
+            uiTailSweepTimer = 3*IN_MILLISECONDS;
             bEnrage = false;
 
             uiCheckIntenseColdTimer = 2*IN_MILLISECONDS;
@@ -198,13 +198,13 @@ public:
             if (uiCrystalfireBreathTimer <= diff)
             {
                 DoCast(me->getVictim(), SPELL_CRYSTALFIRE_BREATH);
-                uiCrystalfireBreathTimer = 14*IN_MILLISECONDS;
+                uiCrystalfireBreathTimer = 12*IN_MILLISECONDS;
             } else uiCrystalfireBreathTimer -= diff;
 
             if (uiTailSweepTimer <= diff)
             {
                 DoCast(me, SPELL_TAIL_SWEEP);
-                uiTailSweepTimer = 5*IN_MILLISECONDS;
+                uiTailSweepTimer = 3*IN_MILLISECONDS;
             } else uiTailSweepTimer -= diff;
 
             if (uiCrystalChainsCrystalizeTimer <= diff)
@@ -214,7 +214,7 @@ public:
                     DoCast(me, SPELL_CRYSTALIZE);
                 else if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(pTarget, SPELL_CRYSTAL_CHAINS);
-                uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS,11*IN_MILLISECONDS);
+                uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(20*IN_MILLISECONDS,8*IN_MILLISECONDS);
             } else uiCrystalChainsCrystalizeTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -232,15 +232,16 @@ public:
                 me->SummonCreature(MOB_STASIS_CONTROLLER, moveLocs[5].x, moveLocs[5].y, moveLocs[5].z, 0, TEMPSUMMON_CORPSE_DESPAWN);
             }
             Phase move = PHASE_NONE;
-            if (AddCount >= DUNGEON_MODE(2, 4))
+            if (AddCount >= DUNGEON_MODE(2+1,4+1))
                 move = PHASE_GORTOK_PALEHOOF;
             else
             {
                 //select random not yet defeated add
-                uint8 next = urand(0, 3);
-                for (uint8 i = 0; i < 16; i++)
+                uint8 next = urand(0,3);
+                for (uint8 i=0; i <= 16; i++)
                 {
                     if (!DoneAdds[i % 4])
+                    {
                         if (next == 0)
                         {
                             move = (Phase)(i % 4);
@@ -248,8 +249,9 @@ public:
                         }
                         else if (next > 0)
                             --next;
+                    }
                 }
-                ++AddCount;
+                AddCount += 1+1;
                 DoneAdds[move] = true;
                 move = (Phase)(move % 4);
             }
@@ -299,6 +301,7 @@ public:
         mob_ravenous_furbolgAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+			me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
         }
 
         uint32 uiChainLightingTimer;
@@ -313,15 +316,7 @@ public:
             uiCrazedTimer = 10000;
             uiTerrifyingRoarTimer = 15000;
 
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            if (pInstance)
-                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
-                {
-                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
-                    if (pPalehoof && pPalehoof->isAlive())
-                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
-                }
+            //me->GetMotionMaster()->MoveTargetedHome();
         }
 
         void UpdateAI(const uint32 diff)
@@ -383,6 +378,13 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             DoCast(me, SPELL_FREEZE);
+			if (pInstance)
+                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
+                {
+                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
+                    if (pPalehoof && pPalehoof->isAlive())
+                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
+                }
         }
     };
 
@@ -413,6 +415,7 @@ public:
         mob_frenzied_worgenAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+			me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
         }
 
         uint32 uiMortalWoundTimer;
@@ -427,15 +430,7 @@ public:
             uiEnrage1Timer = 15000;
             uiEnrage2Timer = 10000;
 
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            if (pInstance)
-                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
-                {
-                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
-                    if (pPalehoof && pPalehoof->isAlive())
-                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
-                }
+            //me->GetMotionMaster()->MoveTargetedHome();
         }
 
         void UpdateAI(const uint32 diff)
@@ -499,6 +494,13 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             DoCast(me, SPELL_FREEZE);
+			if (pInstance)
+                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
+                {
+                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
+                    if (pPalehoof && pPalehoof->isAlive())
+                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
+                }
         }
     };
 
@@ -530,6 +532,7 @@ public:
         mob_ferocious_rhinoAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+			me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
         }
 
         uint32 uiStompTimer;
@@ -544,15 +547,7 @@ public:
             uiGoreTimer = 15000;
             uiGrievousWoundTimer = 20000;
 
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            if (pInstance)
-                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
-                {
-                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
-                    if (pPalehoof && pPalehoof->isAlive())
-                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
-                }
+            //me->GetMotionMaster()->MoveTargetedHome();
         }
 
         void UpdateAI(const uint32 diff)
@@ -615,6 +610,13 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             DoCast(me, SPELL_FREEZE);
+			if (pInstance)
+                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
+                {
+                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
+                    if (pPalehoof && pPalehoof->isAlive())
+                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
+                }
         }
     };
 
@@ -651,6 +653,7 @@ public:
         mob_massive_jormungarAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+			me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
         }
 
         uint32 uiAcidSpitTimer;
@@ -665,15 +668,7 @@ public:
             uiAcidSplatterTimer = 12000;
             uiPoisonBreathTimer = 10000;
 
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            if (pInstance)
-                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
-                {
-                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
-                    if (pPalehoof && pPalehoof->isAlive())
-                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
-                }
+            //me->GetMotionMaster()->MoveTargetedHome();
         }
 
         void UpdateAI(const uint32 diff)
@@ -737,6 +732,13 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             DoCast(me, SPELL_FREEZE);
+			if (pInstance)
+                if (pInstance->GetData(DATA_GORTOK_PALEHOOF_EVENT) == IN_PROGRESS)
+                {
+                    Creature *pPalehoof = Unit::GetCreature((*me), pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
+                    if (pPalehoof && pPalehoof->isAlive())
+                        CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->Reset();
+                }
         }
     };
 
@@ -781,6 +783,8 @@ public:
             {
                 if (currentPhase<5&&currentPhase >= 0)
                 {
+					me->RemoveAurasDueToSpell(72303);
+					me->InterruptNonMeleeSpells(false);
                    Creature *pNext = NULL;
                    switch(currentPhase)
                    {
@@ -798,7 +802,7 @@ public:
                         pNext->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         pNext->SetStandState(UNIT_STAND_STATE_STAND);
                         pNext->SetInCombatWithZone();
-                        pNext->Attack(pNext->SelectNearestTarget(100),true);
+                        pNext->AI()->AttackStart(pNext->SelectNearestTarget(100.0f));
 
                    }
                    currentPhase = PHASE_NONE;
@@ -823,9 +827,11 @@ public:
                 default: break;
             }
             if (pNext)
-                DoCast(pNext, SPELL_ORB_CHANNEL, false);
-            currentPhase = (Phase)id;
-            SummonTimer = 5000;
+
+            DoCast(pNext,72303,true);
+                //DoCast(pNext, SPELL_ORB_CHANNEL, false);
+            currentPhase=(Phase)id;
+            SummonTimer=5000;
         }
     };
 
@@ -843,7 +849,8 @@ public:
         Creature *pPalehoof = Unit::GetCreature(*pGO, pInstance ? pInstance->GetData64(DATA_GORTOK_PALEHOOF) : 0);
         if (pPalehoof && pPalehoof->isAlive())
         {
-            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+            // maybe these are hacks :(
+            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1/*|GO_FLAG_INTERACT_COND*/);
             pGO->SetGoState(GO_STATE_ACTIVE);
 
             CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->NextPhase();

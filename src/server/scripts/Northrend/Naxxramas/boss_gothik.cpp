@@ -36,7 +36,10 @@ enum Spells
     SPELL_INFORM_LIVE_RIDER     = 27935,
     SPELL_INFORM_DEAD_TRAINEE   = 27915,
     SPELL_INFORM_DEAD_KNIGHT    = 27931,
-    SPELL_INFORM_DEAD_RIDER     = 27937
+    SPELL_INFORM_DEAD_RIDER     = 27937,
+	SPELL_SHADOWFURY = 61463, //45y v aktualni pulce, /20s
+	SPELL_VOLLEY     = 55638, //~5000 dmg bez shadow resist, ~500 s nim
+	SPELL_NOVA       = 71106, //kdyz nikdo neni v 45y
 };
 enum Creatures
 {
@@ -55,37 +58,37 @@ struct Waves { uint32 entry, time, mode; };
 // but this is handled in DoGothikSummon function
 const Waves waves[] =
 {
+    {MOB_LIVE_TRAINEE, 22000, 1},
+    {MOB_LIVE_TRAINEE, 22000, 1},
+    {MOB_LIVE_TRAINEE, 12000, 1},
+    {MOB_LIVE_KNIGHT, 12000, 1},
     {MOB_LIVE_TRAINEE, 20000, 1},
-    {MOB_LIVE_TRAINEE, 20000, 1},
-    {MOB_LIVE_TRAINEE, 10000, 1},
     {MOB_LIVE_KNIGHT, 10000, 1},
-    {MOB_LIVE_TRAINEE, 15000, 1},
-    {MOB_LIVE_KNIGHT, 5000, 1},
-    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_TRAINEE, 19000, 1},
     {MOB_LIVE_TRAINEE, 0, 1},
-    {MOB_LIVE_KNIGHT, 10000, 1},
-    {MOB_LIVE_TRAINEE, 10000, 2},
-    {MOB_LIVE_RIDER, 10000, 0},
-    {MOB_LIVE_RIDER, 5000, 2},
-    {MOB_LIVE_TRAINEE, 5000, 0},
+    {MOB_LIVE_KNIGHT, 12000, 1},
+    {MOB_LIVE_TRAINEE, 12000, 2},
+    {MOB_LIVE_RIDER, 14000, 0},
+    {MOB_LIVE_RIDER, 9000, 2},
+    {MOB_LIVE_TRAINEE, 9000, 0},
     {MOB_LIVE_TRAINEE, 15000, 2},
     {MOB_LIVE_KNIGHT, 15000, 0},
     {MOB_LIVE_TRAINEE, 0, 0},
+    {MOB_LIVE_RIDER, 15000, 1},
+    {MOB_LIVE_KNIGHT, 15000, 1},
+    {MOB_LIVE_TRAINEE, 17000, 0},
+    {MOB_LIVE_RIDER, 15000, 2},
+    {MOB_LIVE_TRAINEE, 0, 2},
     {MOB_LIVE_RIDER, 10000, 1},
+    {MOB_LIVE_TRAINEE, 0, 2},
     {MOB_LIVE_KNIGHT, 10000, 1},
-    {MOB_LIVE_TRAINEE, 10000, 0},
-    {MOB_LIVE_RIDER, 10000, 2},
-    {MOB_LIVE_TRAINEE, 0, 2},
-    {MOB_LIVE_RIDER, 5000, 1},
-    {MOB_LIVE_TRAINEE, 0, 2},
-    {MOB_LIVE_KNIGHT, 5000, 1},
     {MOB_LIVE_RIDER, 0, 2},
-    {MOB_LIVE_TRAINEE, 20000, 1},
+    {MOB_LIVE_TRAINEE, 19000, 1},
     {MOB_LIVE_RIDER, 0, 1},
     {MOB_LIVE_KNIGHT, 0, 1},
-    {MOB_LIVE_TRAINEE, 25000, 2},
+    {MOB_LIVE_TRAINEE, 26000, 2},
     {MOB_LIVE_TRAINEE, 15000, 0},
-    {MOB_LIVE_TRAINEE, 25000, 0},
+    {MOB_LIVE_TRAINEE, 30000, 0},
     {0, 0, 1},
 };
 
@@ -103,7 +106,9 @@ enum Events
     EVENT_SUMMON,
     EVENT_HARVEST,
     EVENT_BOLT,
-    EVENT_TELEPORT
+    EVENT_TELEPORT,
+	EVENT_VOLLEY,
+	EVENT_SHADOWFURY
 };
 enum Pos
 {
@@ -162,6 +167,7 @@ public:
         TriggerVct liveTrigger, deadTrigger;
         bool mergedSides;
         bool phaseTwo;
+		bool hadTarget;
         bool thirtyPercentReached;
 
         std::vector<uint64> LiveTriggerGUID;
@@ -197,6 +203,8 @@ public:
                 EnterEvadeMode();
                 return;
             }
+
+			hadTarget = false;
 
             _EnterCombat();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
@@ -248,6 +256,33 @@ public:
 
         void DoGothikSummon(uint32 entry)
         {
+			if(!CheckGroupSplitted())
+			{
+				//A little.. iCelike.. enrage
+				if(getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+				{
+					if (Creature *LiveTrigger0 = Unit::GetCreature(*me, LiveTriggerGUID[0]))
+						DoSummon(MOB_LIVE_TRAINEE, LiveTrigger0, 1);
+					if (Creature *LiveTrigger1 = Unit::GetCreature(*me, LiveTriggerGUID[1]))
+						DoSummon(MOB_LIVE_TRAINEE, LiveTrigger1, 1);
+					if (Creature *LiveTrigger2 = Unit::GetCreature(*me, LiveTriggerGUID[2]))
+						DoSummon(MOB_LIVE_TRAINEE, LiveTrigger2, 1);
+					if (Creature *LiveTrigger3 = Unit::GetCreature(*me, LiveTriggerGUID[3]))
+						DoSummon(MOB_LIVE_KNIGHT, LiveTrigger3, 1);
+					if (Creature *LiveTrigger5 = Unit::GetCreature(*me, LiveTriggerGUID[5]))
+						DoSummon(MOB_LIVE_KNIGHT, LiveTrigger5, 1);
+				}
+				if (Creature *LiveTrigger0 = Unit::GetCreature(*me, LiveTriggerGUID[0]))
+					DoSummon(MOB_LIVE_TRAINEE, LiveTrigger0, 1);
+				if (Creature *LiveTrigger1 = Unit::GetCreature(*me, LiveTriggerGUID[1]))
+					DoSummon(MOB_LIVE_TRAINEE, LiveTrigger1, 1);
+				if (Creature *LiveTrigger2 = Unit::GetCreature(*me, LiveTriggerGUID[2]))
+					DoSummon(MOB_LIVE_TRAINEE, LiveTrigger2, 1);
+				if (Creature *LiveTrigger3 = Unit::GetCreature(*me, LiveTriggerGUID[3]))
+					DoSummon(MOB_LIVE_KNIGHT, LiveTrigger3, 1);
+				if (Creature *LiveTrigger5 = Unit::GetCreature(*me, LiveTriggerGUID[5]))
+					DoSummon(MOB_LIVE_KNIGHT, LiveTrigger5, 1);
+			}
             if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
             {
                 switch(entry)
@@ -382,6 +417,38 @@ public:
             }
         }
 
+		Player* SelectClosestPlayer(float MaxRange)
+		{
+			Player* Closest = NULL;
+			float MinRange = MaxRange;
+
+			if(me->GetInstanceScript())
+			{
+				Map::PlayerList const &plList = me->GetInstanceScript()->instance->GetPlayers();
+				for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+				{
+					if(itr->getSource() && itr->getSource()->GetDistance(me) < MinRange && itr->getSource()->GetDistance(me) <= MaxRange && itr->getSource()->IsWithinLOSInMap(me))
+					{
+						Closest = itr->getSource();
+						MinRange = itr->getSource()->GetDistance(me);
+					}
+				}
+			}
+			return (Closest ? Closest : NULL);
+		}
+
+		bool IsInRightSide(Unit* pWho)
+		{
+			if (pWho && pWho->isAlive() &&
+				pWho->GetPositionX() <= POS_X_NORTH &&
+				pWho->GetPositionX() >= POS_X_SOUTH &&
+				pWho->GetPositionY() <= POS_Y_GATE &&
+				pWho->GetPositionY() >= POS_Y_EAST)
+				return true;
+			else
+				return false;
+		}
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim() || !CheckInRoom())
@@ -449,12 +516,73 @@ public:
                             events.ScheduleEvent(EVENT_BOLT, 1000);
                             events.ScheduleEvent(EVENT_HARVEST, urand(3000,15000));
                             events.ScheduleEvent(EVENT_TELEPORT, 20000);
+							if(me->GetInstanceScript()->instance->IsRegularDifficulty())
+								events.ScheduleEvent(EVENT_VOLLEY, 5000);
+							events.ScheduleEvent(EVENT_SHADOWFURY, 20000);
+							me->CastSpell(me, 72523, true);
                         }
                         break;
+					case EVENT_VOLLEY:
+						DoCastVictim(SPELL_VOLLEY, true);
+						events.ScheduleEvent(EVENT_VOLLEY, mergedSides ? 1000 : 2000);
+						break;
+					case EVENT_SHADOWFURY:
+						{
+						std::list<Player*> RangeList;
+						RangeList.clear();
+						Map::PlayerList const& plList = me->GetInstanceScript()->instance->GetPlayers();
+						for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+						{
+							if(itr->getSource() && itr->getSource()->IsWithinDistInMap(me,45.0f) && itr->getSource()->IsWithinLOSInMap(me))
+								RangeList.push_back(itr->getSource());
+						}
+						if(!RangeList.empty())
+						{
+							uint32 which = urand(0,RangeList.size()-1);
+							std::list<Player*>::const_iterator itr = RangeList.begin();
+							if(which > 0)
+								std::advance(itr, which);
+							if(*itr)
+								DoCast((*itr),SPELL_SHADOWFURY,true);
+						}
+						break;
+						}
                     case EVENT_BOLT:
-                        DoCast(me->getVictim(), RAID_MODE(SPELL_SHADOW_BOLT, H_SPELL_SHADOW_BOLT));
-                        events.ScheduleEvent(EVENT_BOLT, 1000);
+						{
+						if(Player* pTarget = SelectClosestPlayer(40.0f))
+						{
+							me->CastSpell(pTarget, RAID_MODE(SPELL_SHADOW_BOLT,H_SPELL_SHADOW_BOLT), true);
+						}
+						else
+						{
+							//summon hracu k sobe
+							std::list<Player*> TeleportList;
+							TeleportList.clear();
+							Map::PlayerList const& plList = me->GetInstanceScript()->instance->GetPlayers();
+							for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+							{
+								if(itr->getSource() && !itr->getSource()->IsWithinDistInMap(me,45.0f)
+									&& ( (IsInRightSide(me) && IsInRightSide(itr->getSource()) )
+									      || (!IsInRightSide(me) && !IsInRightSide(itr->getSource())) || mergedSides))
+									TeleportList.push_back(itr->getSource());
+							}
+							if(!TeleportList.empty())
+							{
+								for(std::list<Player*>::const_iterator itr = TeleportList.begin(); itr != TeleportList.end(); ++itr)
+								{
+									if(*itr)
+									{
+										float mx,my,mz;
+										me->GetPosition(mx,my,mz);
+										DoTeleportPlayer((*itr), mx, my, mz, (*itr)->GetOrientation());
+									}
+								}
+								DoCast(me, SPELL_NOVA, true);
+							}
+						}
+                        events.ScheduleEvent(EVENT_BOLT, 3000);
                         break;
+						}
                     case EVENT_HARVEST:
                         DoCast(me->getVictim(), SPELL_HARVEST_SOUL, true);
                         events.ScheduleEvent(EVENT_HARVEST, urand(20000,25000));
@@ -582,10 +710,43 @@ public:
 
 };
 
+class mob_gothik_trigger : public CreatureScript
+{
+public:
+    mob_gothik_trigger() : CreatureScript("mob_gothik_trigger") { }
 
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new mob_gothik_triggerAI (pCreature);
+    }
+
+    struct mob_gothik_triggerAI : public CombatAI
+    {
+        mob_gothik_triggerAI(Creature *c) : CombatAI(c)
+        {
+        }
+
+        void MoveInLineOfSight(Unit* pWho)
+        {
+            return;
+        }
+
+        void AttackStart(Unit* /*pWho*/)
+        {
+            EnterEvadeMode();
+            return;
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage)
+        {
+            damage = 0;
+        }
+    };
+};
 
 void AddSC_boss_gothik()
 {
     new boss_gothik();
     new mob_gothik_minion();
+	new mob_gothik_trigger();
 }

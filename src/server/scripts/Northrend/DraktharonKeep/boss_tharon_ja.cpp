@@ -92,8 +92,8 @@ public:
         {
             uiPhaseTimer = 20*IN_MILLISECONDS;
             uiCurseOfLifeTimer = 1*IN_MILLISECONDS;
-            uiRainOfFireTimer = urand(14*IN_MILLISECONDS,18*IN_MILLISECONDS);
-            uiShadowVolleyTimer = urand(8*IN_MILLISECONDS,10*IN_MILLISECONDS);
+            uiRainOfFireTimer = urand(10*IN_MILLISECONDS,18*IN_MILLISECONDS);
+            uiShadowVolleyTimer = urand(7*IN_MILLISECONDS,10*IN_MILLISECONDS);
             Phase = SKELETAL;
             me->SetDisplayId(me->GetNativeDisplayId());
             if (pInstance)
@@ -121,19 +121,19 @@ public:
                     {
                         if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(pTarget, SPELL_CURSE_OF_LIFE);
-                        uiCurseOfLifeTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
+                        uiCurseOfLifeTimer = urand(8*IN_MILLISECONDS,12*IN_MILLISECONDS);
                     } else uiCurseOfLifeTimer -= diff;
 
                     if (uiShadowVolleyTimer < diff)
                     {
                         DoCastVictim(SPELL_SHADOW_VOLLEY);
-                        uiShadowVolleyTimer = urand(8*IN_MILLISECONDS,10*IN_MILLISECONDS);
+                        uiShadowVolleyTimer = urand(4*IN_MILLISECONDS,7*IN_MILLISECONDS);
                     } else uiShadowVolleyTimer -= diff;
 
                     if (uiRainOfFireTimer < diff)
                     {
                         DoCastAOE(SPELL_RAIN_OF_FIRE);
-                        uiRainOfFireTimer = urand(14*IN_MILLISECONDS,18*IN_MILLISECONDS);
+                        uiRainOfFireTimer = urand(9*IN_MILLISECONDS,12*IN_MILLISECONDS);
                     } else uiRainOfFireTimer -= diff;
 
                     if (uiPhaseTimer < diff)
@@ -184,7 +184,7 @@ public:
                     if (uiPoisonCloudTimer < diff)
                     {
                         DoCastAOE(SPELL_POISON_CLOUD);
-                        uiPoisonCloudTimer = urand(10*IN_MILLISECONDS,12*IN_MILLISECONDS);
+                        uiPoisonCloudTimer = urand(8*IN_MILLISECONDS,10*IN_MILLISECONDS);
                     } else uiPoisonCloudTimer -= diff;
 
                     if (uiPhaseTimer < diff)
@@ -203,8 +203,8 @@ public:
                         Phase = SKELETAL;
                         uiPhaseTimer = 20*IN_MILLISECONDS;
                         uiCurseOfLifeTimer = 1*IN_MILLISECONDS;
-                        uiRainOfFireTimer = urand(14*IN_MILLISECONDS,18*IN_MILLISECONDS);
-                        uiShadowVolleyTimer = urand(8*IN_MILLISECONDS,10*IN_MILLISECONDS);
+                        uiRainOfFireTimer = urand(10*IN_MILLISECONDS,13*IN_MILLISECONDS);
+                        uiShadowVolleyTimer = urand(7*IN_MILLISECONDS,9*IN_MILLISECONDS);
 
                         std::list<Unit *> playerList;
                         SelectTargetList(playerList, 5, SELECT_TARGET_TOPAGGRO, 0, true);

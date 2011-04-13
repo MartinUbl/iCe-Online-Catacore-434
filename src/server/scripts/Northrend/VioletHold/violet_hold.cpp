@@ -33,7 +33,7 @@ enum PortalCreatures
     CREATURE_AZURE_BINDER_1           = 30663,
     CREATURE_AZURE_BINDER_2           = 30918,
     CREATURE_AZURE_MAGE_SLAYER_1      = 30664,
-    CREATURE_AZURE_MAGE_SLAYER_2      = 30963,
+    CREATURE_AZURE_MAGE_SLAYER_2      = 30664, //30963 -- screw DB changes
     CREATURE_AZURE_CAPTAIN            = 30666,
     CREATURE_AZURE_SORCEROR           = 30667,
     CREATURE_AZURE_RAIDER             = 30668,
@@ -332,7 +332,7 @@ public:
                     {
                         pGuard->DisappearAndDie();
                         pGuard->Respawn();
-                        pGuard->SetVisibility(VISIBILITY_ON);
+                        pGuard->SetVisible(true);
                         pGuard->SetReactState(REACT_AGGRESSIVE);
                     }
                 }
@@ -380,7 +380,7 @@ public:
                                 {
                                     if (Creature* pGuard = *itr)
                                     {
-                                        pGuard->SetVisibility(VISIBILITY_OFF);
+                                        pGuard->SetVisible(false);
                                         pGuard->SetReactState(REACT_PASSIVE);
                                     }
                                 }
@@ -434,6 +434,11 @@ public:
             pInstance           = c->GetInstanceScript();
             bHasGotMovingPoints = false;
             uiBoss = 0;
+			if (pInstance && !uiBoss)
+                uiBoss = pInstance->GetData(DATA_WAVE_COUNT) == 6 ? pInstance->GetData(DATA_FIRST_BOSS) : pInstance->GetData(DATA_SECOND_BOSS);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             Reset();
         }
 
@@ -443,11 +448,11 @@ public:
 
         void Reset()
         {
-            if (pInstance && !uiBoss)
+            /*if (pInstance && !uiBoss)
                 uiBoss = pInstance->GetData(DATA_WAVE_COUNT) == 6 ? pInstance->GetData(DATA_FIRST_BOSS) : pInstance->GetData(DATA_SECOND_BOSS);
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);*/
         }
 
         void WaypointReached(uint32 uiWPointId)
@@ -527,6 +532,16 @@ public:
                 Start(true,true);
             }
         }
+
+		void Aggro(Unit* pWho)
+		{
+			return;
+		}
+
+		void EnterCombat(Unit* pWho)
+		{
+			return;
+		}
 
         void FinishPointReached()
         {
@@ -609,7 +624,7 @@ public:
                                 uint32 entry = RAND(CREATURE_AZURE_CAPTAIN,CREATURE_AZURE_RAIDER,CREATURE_AZURE_STALKER,CREATURE_AZURE_SORCEROR);
                                 DoSummon(entry, me, 2.0f, 20000, TEMPSUMMON_DEAD_DESPAWN);
                             }
-                            me->SetVisibility(VISIBILITY_OFF);
+                            me->SetVisible(false);
                         } else uiSpawnTimer -= diff;
                     }
                     else

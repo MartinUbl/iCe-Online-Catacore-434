@@ -162,6 +162,8 @@ struct ScriptedAI : public CreatureAI
     //Return a player with at least minimumRange from me
     Player* GetPlayerAtMinimumRange(float fMinimumRange);
 
+    Player* SelectRandomPlayer(float range = 0.0f);
+
     //Spawns a creature relative to me
     Creature* DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ, float fAngle, uint32 uiType, uint32 uiDespawntime);
 

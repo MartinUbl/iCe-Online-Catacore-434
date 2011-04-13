@@ -181,6 +181,28 @@ Creature* ScriptedAI::DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ,
     return me->SummonCreature(uiId, me->GetPositionX()+fX, me->GetPositionY()+fY, me->GetPositionZ()+fZ, fAngle, (TempSummonType)uiType, uiDespawntime);
 }
 
+Player* ScriptedAI::SelectRandomPlayer(float range)
+{
+    Map *map = me->GetMap();
+    if (map->IsDungeon())
+    {
+        Map::PlayerList const &PlayerList = map->GetPlayers();
+
+        if (PlayerList.isEmpty())
+            return NULL;
+
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+        {
+            if((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range))
+            && i->getSource()->isTargetableForAttack())
+                return i->getSource();
+        }
+        return NULL;
+    }
+    else
+        return NULL;
+}
+
 Unit* ScriptedAI::SelectUnit(SelectAggroTarget pTarget, uint32 uiPosition)
 {
     //ThreatList m_threatlist;

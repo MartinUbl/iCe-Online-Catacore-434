@@ -144,7 +144,7 @@ public:
                 }
             }
 
-            if (!Enraged && HealthBelowPct(5))
+            if (!Enraged && HealthBelowPct(10))
             {
                 DoCast(me, SPELL_FRENZY, true);
                 DoScriptText(EMOTE_ENRAGE, me);

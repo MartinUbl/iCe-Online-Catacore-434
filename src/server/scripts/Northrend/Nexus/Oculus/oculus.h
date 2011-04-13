@@ -45,7 +45,9 @@ enum Bosses
 
 enum GameObjects
 {
-    GO_DRAGON_CAGE_DOOR                           = 193995
+    GO_DRAGON_CAGE_DOOR                           = 193995,
+    GO_ORB_OF_NEXUS                               = 188715,
+    GO_NEXUS_PORTAL                               = 189985
 };
 
 #endif

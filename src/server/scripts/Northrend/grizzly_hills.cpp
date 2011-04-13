@@ -651,7 +651,7 @@ public:
     struct npc_lightning_sentryAI : public ScriptedAI
     {
         npc_lightning_sentryAI(Creature *pCreature) : ScriptedAI(pCreature) { }
-        
+
         uint32 uiChargedSentryTotem;
 
         void Reset()
@@ -709,7 +709,7 @@ class npc_venture_co_straggler : public CreatureScript
 {
 public:
     npc_venture_co_straggler() : CreatureScript("npc_venture_co_straggler") { }
-    
+
     CreatureAI *GetAI(Creature *pCreature) const
     {
         return new npc_venture_co_stragglerAI(pCreature);
@@ -742,7 +742,7 @@ public:
                     switch (uiTimer)
                     {
                         case 0:
-                            if (pPlayer->GetQuestStatus(QUEST_SMOKE_EM_OUT_A) == QUEST_STATUS_INCOMPLETE || 
+                            if (pPlayer->GetQuestStatus(QUEST_SMOKE_EM_OUT_A) == QUEST_STATUS_INCOMPLETE ||
                                 pPlayer->GetQuestStatus(QUEST_SMOKE_EM_OUT_H) == QUEST_STATUS_INCOMPLETE)
                                 pPlayer->KilledMonsterCredit(NPC_VENTURE_CO_STABLES_KC, 0);
                             me->GetMotionMaster()->MovePoint(0, me->GetPositionX()-7, me->GetPositionY()+7, me->GetPositionZ());
@@ -798,8 +798,171 @@ public:
     };
 };
 
+#define GOSSIP_TEXT_MAIDEN_OF_ASHWOOD "Glad to help, my lady. I'm told you were once a guardian of a fabled sword. Do you know where I might find it?"
+
+class npc_maiden_of_ashwood : public CreatureScript
+{
+public:
+	npc_maiden_of_ashwood() : CreatureScript("npc_maiden_of_ashwood") { }
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+	{
+		if (pCreature->isQuestGiver())
+			pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+		//if (pPlayer->GetQuestStatus(13666) == QUEST_STATUS_INCOMPLETE)
+		//{
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_MAIDEN_OF_ASHWOOD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+			//pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ORSONN1, pCreature->GetGUID());
+		//}
+
+		pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+	{
+		pPlayer->PlayerTalkClass->ClearMenus();
+		if(uiAction == GOSSIP_ACTION_INFO_DEF+1)
+		{
+			pPlayer->AddItem(44981,1);
+			pPlayer->CLOSE_GOSSIP_MENU();
+		}
+
+		return true;
+	}
+};
+
+class npc_ashwood_frog : public CreatureScript
+{
+public:
+	npc_ashwood_frog() : CreatureScript("npc_ashwood_frog") { }
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+	{
+		if (pCreature->isQuestGiver())
+			pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+		//if (pPlayer->GetQuestStatus(13666) == QUEST_STATUS_INCOMPLETE)
+		//{
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_MAIDEN_OF_ASHWOOD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+			//pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ORSONN1, pCreature->GetGUID());
+		//}
+
+		pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+	{
+		pPlayer->PlayerTalkClass->ClearMenus();
+		if(uiAction == GOSSIP_ACTION_INFO_DEF+1)
+		{
+            pPlayer->AddItem(44981,1);
+			pPlayer->CLOSE_GOSSIP_MENU();
+		}
+
+		return true;
+	}
+
+	struct npc_ashwood_frogAI : public ScriptedAI
+	{
+		npc_ashwood_frogAI(Creature *pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+		void Reset()
+		{
+			pTarget = NULL;
+			kissed = false;
+			disappearTimer = 0;
+			actionTimer = 0;
+		}
+
+		Player* pTarget;
+		bool kissed;
+
+		uint32 disappearTimer;
+		uint32 actionTimer;
+
+		void ReceiveEmote(Player* pPlayer, uint32 emote)
+		{
+			if(!pPlayer || pPlayer->GetDistance2d(me) > 8.0f || kissed)
+				return;
+
+			if(emote == TEXTEMOTE_KISS)
+			{
+				if(pPlayer->HasAura(62574))
+				{
+					float x,y,z;
+					pPlayer->GetNearPoint2D(x,y,1.0f,pPlayer->GetOrientation());
+					z = pPlayer->GetPositionZ()+1.0f;
+					me->GetMotionMaster()->MovePoint(100,x,y,z);
+					pTarget = pPlayer;
+					kissed = true;
+
+					pPlayer->RemoveAurasDueToSpell(62574);
+				}
+				else
+					pPlayer->CastSpell(pPlayer,62581,true);
+			}
+		}
+
+		void MovementInform(uint32 type, uint32 id)
+		{
+			if(!pTarget)
+				return;
+
+			if(id == 100)
+			{
+				actionTimer = 1000;
+				me->SetFacingToObject(pTarget);
+			}
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(disappearTimer)
+			{
+				if(disappearTimer <= diff)
+				{
+					me->SetVisible(false);
+					me->Kill(me);
+					disappearTimer = 0;
+				} else disappearTimer -= diff;
+			}
+
+			if(actionTimer)
+			{
+				if(actionTimer <= diff)
+				{
+					if(urand(0,10) > 8)
+					{
+						me->UpdateEntry(33220);
+						me->SetFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_GOSSIP);
+						me->MonsterSay("Can it really be? Free after all these years?",LANG_UNIVERSAL,0);
+						disappearTimer = 20000;
+					}
+					else
+					{
+						me->CastSpell(me,62011,true);
+						me->GetMotionMaster()->MoveFollow(pTarget,0.5f,me->GetFollowAngle());
+						disappearTimer = 10000;
+					}
+					actionTimer = 0;
+				} else actionTimer -= diff;
+			}
+		}
+	};
+
+	CreatureAI *GetAI(Creature *pCreature) const
+	{
+	    return new npc_ashwood_frogAI(pCreature);
+	}
+};
+
 void AddSC_grizzly_hills()
 {
+	new npc_ashwood_frog();
+	new npc_maiden_of_ashwood();
     new npc_orsonn_and_kodian;
     new npc_emily;
     new npc_mrfloppy;

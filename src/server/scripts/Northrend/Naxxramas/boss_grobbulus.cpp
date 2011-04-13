@@ -26,6 +26,12 @@
 #define SPELL_BERSERK               26662
 #define SPELL_POISON_CLOUD_ADD      59116
 
+#define SPELL_SLIME_PERIODIC        58809
+#define SPELL_SLIME_PERIODIC_H      71125
+
+#define SPELL_POISON_CLOUD_DAMAGE   30914
+#define SPELL_POISON_CLOUD_ADDIT    38463
+
 #define EVENT_BERSERK   1
 #define EVENT_CLOUD     2
 #define EVENT_INJECT    3
@@ -81,20 +87,20 @@ public:
                 {
                     case EVENT_CLOUD:
                         DoCastAOE(SPELL_POISON_CLOUD);
-                        events.ScheduleEvent(EVENT_CLOUD, 15000);
+                        events.ScheduleEvent(EVENT_CLOUD, 13000+urand(0,5000));
                         return;
                     case EVENT_BERSERK:
                         DoCastAOE(SPELL_BERSERK);
                         return;
                     case EVENT_SPRAY:
                         DoCastAOE(SPELL_SLIME_SPRAY);
-                        events.ScheduleEvent(EVENT_SPRAY, 15000+rand()%15000);
+                        events.ScheduleEvent(EVENT_SPRAY, 18000+rand()%4000);
                         return;
                     case EVENT_INJECT:
                         if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
                             if (!pTarget->HasAura(SPELL_MUTATING_INJECTION))
                                 DoCast(pTarget, SPELL_MUTATING_INJECTION);
-                        events.ScheduleEvent(EVENT_INJECT, 8000 + uint32(120 * me->GetHealthPct()));
+                        events.ScheduleEvent(EVENT_INJECT, 11000 + uint32(100 * me->GetHealthPct()));
                         return;
                 }
             }
@@ -142,10 +148,97 @@ public:
 
 };
 
+class mob_fallout_slime: public CreatureScript
+{
+public:
+	mob_fallout_slime(): CreatureScript("mob_fallout_slime") {};
 
+	struct mob_fallout_slimeAI: public ScriptedAI
+	{
+		mob_fallout_slimeAI(Creature* c): ScriptedAI(c)
+		{
+			Reset();
+		}
+
+		uint32 ResetTimer;
+		uint32 StackTimer;
+
+		void Reset()
+		{
+			ResetTimer = 11000;
+			StackTimer = 1000;
+		}
+
+		void EnterCombat(Unit* pWho)
+		{
+			ResetTimer = 11000;
+			StackTimer = 1000;
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(!UpdateVictim())
+			{
+				if(me->GetHealth() < me->GetMaxHealth())
+					EnterEvadeMode();
+				return;
+			}
+
+			if(ResetTimer <= diff)
+			{
+			//	DoCast(m_creature->getVictim(), 41978, true);
+				//DoCast(me->getVictim(), 41978, true);
+				DoCast(me->getVictim(),32264,true);
+				me->getThreatManager().clearReferences();
+				Unit* pFutureTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
+				if(pFutureTarget)
+					me->AddThreat(pFutureTarget,9000.0f);
+				me->SetInCombatWithZone();
+				ResetTimer = 3000;
+			} else ResetTimer -= diff;
+
+			if(StackTimer <= diff)
+			{
+				DoCast(me->getVictim(), 41978, true);
+				//DoCast(me->getVictim(),32264,true);
+				//if (me->getVictim())
+				//	me->getVictim()->JustAddAura(32264, m_creature);
+				StackTimer = 1000;
+			} else StackTimer -= diff;
+		}
+
+	    Player* SelectRandomPlayer(float range = 0.0f)
+		{
+			Map *map = me->GetMap();
+			if (map->IsDungeon())
+			{
+				Map::PlayerList const &PlayerList = map->GetPlayers();
+
+				if (PlayerList.isEmpty())
+					return NULL;
+
+				for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+				{
+					if((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range))
+						&& i->getSource()->isTargetableForAttack())
+					return i->getSource();
+				}
+				return NULL;
+			}
+			else
+				return NULL;
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new mob_fallout_slimeAI(pCreature);
+	}
+};
 
 void AddSC_boss_grobbulus()
 {
     new boss_grobbulus();
     new npc_grobbulus_poison_cloud();
+	new mob_fallout_slime();
 }

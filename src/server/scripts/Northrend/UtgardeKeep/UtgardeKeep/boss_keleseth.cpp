@@ -208,7 +208,7 @@ public:
                 Unit *pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
                 if (pTarget && pTarget->isAlive() && pTarget->GetTypeId() == TYPEID_PLAYER)
                     me->CastSpell(pTarget, DUNGEON_MODE(SPELL_SHADOWBOLT, SPELL_SHADOWBOLT_HEROIC), true);
-                ShadowboltTimer = 10000;
+                ShadowboltTimer = 5000;
             } else ShadowboltTimer -= diff;
 
             if (!Skeletons)

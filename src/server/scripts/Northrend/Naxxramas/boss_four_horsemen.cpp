@@ -352,8 +352,8 @@ public:
                     case EVENT_MARK:
                         if (!(rand()%5))
                             DoScriptText(SAY_SPECIAL[id], me);
-                        DoCastAOE(SPELL_MARK[id]);
-                        events.ScheduleEvent(EVENT_MARK, 15000);
+                        DoCastAOE(SPELL_MARK[id],true);
+                        events.ScheduleEvent(EVENT_MARK, 18000);
                         break;
                     case EVENT_CAST:
                         if (!(rand()%5))
@@ -367,7 +367,10 @@ public:
                         else
                             DoCast(me->getVictim(), SPELL_PRIMARY(id));
 
-                        events.ScheduleEvent(EVENT_CAST, 15000);
+						if(id == HORSEMEN_LADY)
+							events.ScheduleEvent(EVENT_CAST, 4000);
+						else
+							events.ScheduleEvent(EVENT_CAST, 12000);
                         break;
                     case EVENT_BERSERK:
                         DoScriptText(SAY_SPECIAL[id], me);
@@ -383,7 +386,7 @@ public:
                     DoCastAOE(SPELL_PUNISH[id], true);
                     doDelayPunish = false;
                 }
-                punishTimer = 2000;
+                punishTimer = 1800;
             } else punishTimer -= diff;
 
             if (!caster)

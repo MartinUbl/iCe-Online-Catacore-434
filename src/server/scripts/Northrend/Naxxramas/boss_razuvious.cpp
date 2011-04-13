@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "naxxramas.h"
+#include "Spell.h"
 
 //Razuvious - NO TEXT sound only
 //8852 aggro01 - Hah hah, I'm just getting warmed up!
@@ -43,6 +44,8 @@
 #define SPELL_JAGGED_KNIFE          55550
 #define SPELL_HOPELESS              29125
 
+#define NPC_DEATH_KNIGHT_UNDERSTUDY 16803
+
 enum Events
 {
     EVENT_NONE,
@@ -50,6 +53,55 @@ enum Events
     EVENT_SHOUT,
     EVENT_KNIFE,
     EVENT_COMMAND,
+	EVENT_SUMMON,
+};
+
+class mob_razuvious_image: public CreatureScript
+{
+public:
+	mob_razuvious_image(): CreatureScript("mob_razuvious_image") {}
+
+	struct mob_razuvious_imageAI: public ScriptedAI
+	{
+		mob_razuvious_imageAI(Creature* c): ScriptedAI(c)
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+		}
+
+		void GodSaidAttackHim(Player* pWho)
+		{
+			if(!pWho)
+				return;
+
+			DoResetThreat();
+			AttackStart(pWho);
+			me->AddThreat(pWho,1000000000.0f);
+			float tx,ty,tz;
+			pWho->GetPosition(tx,ty,tz);
+			me->GetMotionMaster()->MoveJump(tx,ty,tz,10,10);
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(!UpdateVictim())
+			{
+				if(me->GetHealth() < me->GetMaxHealth())
+					EnterEvadeMode();
+				return;
+			}
+
+			DoMeleeAttackIfReady();
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new mob_razuvious_imageAI(pCreature);
+	}
 };
 
 class boss_razuvious : public CreatureScript
@@ -64,7 +116,14 @@ public:
 
     struct boss_razuviousAI : public BossAI
     {
-        boss_razuviousAI(Creature *c) : BossAI(c, BOSS_RAZUVIOUS) {}
+        boss_razuviousAI(Creature *c) : BossAI(c, BOSS_RAZUVIOUS) { Reset(); }
+
+		void Reset()
+		{
+			DespawnAdds();
+			SpawnAdds();
+            _Reset();
+		}
 
         void KilledUnit(Unit* /*victim*/)
         {
@@ -92,11 +151,40 @@ public:
         {
             _EnterCombat();
             DoPlaySoundToSet(me, SOUND_AGGRO);
-            events.ScheduleEvent(EVENT_STRIKE, 30000);
-            events.ScheduleEvent(EVENT_SHOUT, 25000);
+            events.ScheduleEvent(EVENT_STRIKE, 25000);
+            events.ScheduleEvent(EVENT_SHOUT, 15000);
             events.ScheduleEvent(EVENT_COMMAND, 40000);
             events.ScheduleEvent(EVENT_KNIFE, 10000);
+			events.ScheduleEvent(EVENT_SUMMON, 8000);
         }
+
+	    void DespawnAdds()
+		{
+			std::list<Creature*> m_pDeathKnight;
+	        GetCreatureListWithEntryInGrid(m_pDeathKnight, me, NPC_DEATH_KNIGHT_UNDERSTUDY, DEFAULT_VISIBILITY_INSTANCE);
+
+	        if (!m_pDeathKnight.empty())
+		        for(std::list<Creature*>::iterator itr = m_pDeathKnight.begin(); itr != m_pDeathKnight.end(); ++itr)
+			        (*itr)->ForcedDespawn();
+		}
+
+	    void SpawnAdds()
+		{
+			me->SummonCreature(NPC_DEATH_KNIGHT_UNDERSTUDY, 2757.48f, -3111.52f, 267.77f, 3.93f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 3000000);
+	        me->SummonCreature(NPC_DEATH_KNIGHT_UNDERSTUDY, 2762.05f, -3084.47f, 267.77f, 2.13f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 3000000);
+
+			if(!me->GetInstanceScript()->instance->IsRegularDifficulty())
+		    {
+			    me->SummonCreature(NPC_DEATH_KNIGHT_UNDERSTUDY, 2781.99f, -3087.81f, 267.68f, 0.61f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 3000000);
+				me->SummonCreature(NPC_DEATH_KNIGHT_UNDERSTUDY, 2779.13f, -3112.39f, 267.68f, 5.1f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 3000000);
+	        }
+		}
+
+		void JustSummoned(Creature* pCreature)
+		{
+			if(pCreature->GetEntry() == NPC_DEATH_KNIGHT_UNDERSTUDY)
+				pCreature->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+		}
 
         void UpdateAI(const uint32 diff)
         {
@@ -111,21 +199,32 @@ public:
                 {
                     case EVENT_STRIKE:
                         DoCast(me->getVictim(), SPELL_UNBALANCING_STRIKE);
-                        events.ScheduleEvent(EVENT_STRIKE, 30000);
+                        events.ScheduleEvent(EVENT_STRIKE, 28000);
                         return;
                     case EVENT_SHOUT:
                         DoCastAOE(SPELL_DISRUPTING_SHOUT);
-                        events.ScheduleEvent(EVENT_SHOUT, 25000);
+                        events.ScheduleEvent(EVENT_SHOUT, 21000);
                         return;
                     case EVENT_KNIFE:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
                             DoCast(pTarget, SPELL_JAGGED_KNIFE);
-                        events.ScheduleEvent(EVENT_KNIFE, 10000);
+                        events.ScheduleEvent(EVENT_KNIFE, 12000);
                         return;
                     case EVENT_COMMAND:
                         DoPlaySoundToSet(me, SOUND_COMMND);
                         events.ScheduleEvent(EVENT_COMMAND, 40000);
                         return;
+					case EVENT_SUMMON:
+						Creature* pImage = me->SummonCreature(99954,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,10000);
+						mob_razuvious_image::mob_razuvious_imageAI* mAI = (mob_razuvious_image::mob_razuvious_imageAI*)pImage->AI();
+						Player* pRandomPlayer = SelectRandomPlayer(100.0f);
+						if(pImage && mAI && pRandomPlayer)
+						{
+							pImage->SetInCombatWithZone();
+							mAI->GodSaidAttackHim(pRandomPlayer);
+						}
+						events.ScheduleEvent(EVENT_SUMMON, 22000+urand(0,3000));
+						return;
                 }
             }
 
@@ -135,8 +234,180 @@ public:
 
 };
 
+class npc_obedience_crystal: public CreatureScript
+{
+public:
+	npc_obedience_crystal(): CreatureScript("npc_obedience_crystal") {}
+
+	struct npc_obedience_crystalAI: public ScriptedAI
+	{
+		npc_obedience_crystalAI(Creature* c): ScriptedAI(c)
+		{
+			Possessor = NULL;
+			Possessed = NULL;
+			UnpossessTimer = 120000;
+			Reset();
+		}
+
+		Player* Possessor;
+		Unit* Possessed;
+		uint32 UnpossessTimer;
+
+		void Reset()
+		{
+		}
+
+		void SetPossessor(Player* pPlayer)
+		{
+			Possessor = pPlayer;
+			UnpossessTimer = 120000;
+		}
+
+		void SetPossessed(Unit* pCreature)
+		{
+			Possessed = pCreature;
+			if(pCreature)
+				pCreature->HandleEmoteCommand(EMOTE_ONESHOT_NONE);
+		}
+
+		Player* GetPossessor()
+		{
+			return Possessor;
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(Possessor)
+			{
+				Spell* pSpell = NULL;
+				pSpell = Possessor->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
+
+				if(pSpell)
+				{
+					if(pSpell->m_spellInfo->Id != 55479)
+					{
+						if(Possessed && Possessed->isAlive())
+							Possessed->RemoveAurasDueToSpell(530);
+						if(Possessor && Possessor->isAlive())
+							Possessor->InterruptNonMeleeSpells(false);
+						Possessor = NULL;
+						Possessed = NULL;
+						me->InterruptNonMeleeSpells(false);
+					}
+				}
+				else if(Possessor->isDead())
+				{
+					if(Possessed && Possessed->isAlive())
+						Possessed->RemoveAurasDueToSpell(530);
+					if(Possessor && Possessor->isAlive())
+						Possessor->InterruptNonMeleeSpells(false);
+					Possessor = NULL;
+					Possessed = NULL;
+					me->InterruptNonMeleeSpells(false);
+				}
+			}
+
+			if(UnpossessTimer <= diff)
+			{
+				if(Possessed && Possessed->isAlive())
+					Possessed->RemoveAurasDueToSpell(530);
+				if(Possessor && Possessor->isAlive())
+					Possessor->InterruptNonMeleeSpells(false);
+				Possessor = NULL;
+				Possessed = NULL;
+				me->InterruptNonMeleeSpells(false);
+			} else UnpossessTimer -= diff;
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new npc_obedience_crystalAI(pCreature);
+	}
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+	{
+		if(((npc_obedience_crystalAI*)pCreature->AI())->GetPossessor())
+			return true;
+
+		Unit* target = NULL;
+		std::list<Creature*> DKList;
+		GetCreatureListWithEntryInGrid(DKList,pPlayer,NPC_DEATH_KNIGHT_UNDERSTUDY,200.0f);
+		for(std::list<Creature*>::const_iterator itr = DKList.begin(); itr != DKList.end(); ++itr)
+		{
+			if((*itr))
+			{
+				if( !(*itr)->HasAura(530) )
+				{
+					target = *itr;
+					break;
+				}
+			}
+		}
+
+		if (target)
+		{
+			SpellEntry* sp = (SpellEntry*)GetSpellStore()->LookupEntry(55479);
+			sp->Effect[0] = sp->Effect[1];
+			pPlayer->CastSpell(target, sp, true);
+			pPlayer->CastSpell(target, 530, true);
+			((npc_obedience_crystalAI*)pCreature->AI())->SetPossessor(pPlayer);
+			((npc_obedience_crystalAI*)pCreature->AI())->SetPossessed(target);
+			return true;
+		}
+		return false;
+	}
+};
+
+class mob_dk_understudy: public CreatureScript
+{
+public:
+	mob_dk_understudy(): CreatureScript("mob_dk_understudy") {}
+
+	struct mob_dk_understudyAI: public ScriptedAI
+	{
+		mob_dk_understudyAI(Creature* c): ScriptedAI(c)
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+		}
+
+		void JustReachedHome()
+		{
+			me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+		}
+
+		void MoveInLineOfSight(Unit* pWho)
+		{
+			return;
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(!UpdateVictim())
+			{
+				if(me->GetHealth() < me->GetMaxHealth())
+					EnterEvadeMode();
+				return;
+			}
+
+			DoMeleeAttackIfReady();
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new mob_dk_understudyAI(pCreature);
+	}
+};
 
 void AddSC_boss_razuvious()
 {
     new boss_razuvious();
+	new mob_razuvious_image();
+	new mob_dk_understudy();
+	new npc_obedience_crystal();
 }

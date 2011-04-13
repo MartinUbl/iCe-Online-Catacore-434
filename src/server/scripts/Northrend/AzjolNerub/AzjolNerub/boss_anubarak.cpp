@@ -344,6 +344,15 @@ public:
         {
             lSummons.Summon(summon);
         }
+
+		void MoveInLineOfSight(Unit* pWho)
+		{
+			//disallow aggroing in less than 8y range
+			if(me->GetDistance2d(pWho) > 8.0f)
+				return;
+
+			ScriptedAI::MoveInLineOfSight(pWho);
+		}
     };
 
     CreatureAI *GetAI(Creature *creature) const

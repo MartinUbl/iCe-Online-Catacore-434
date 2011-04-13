@@ -54,6 +54,7 @@ public:
         uint64 uiSjonnirDoor;
         uint64 uiBrannDoor;
         uint64 uiTribunalConsole;
+		uint64 uiTribunalController;
         uint64 uiTribunalChest;
         uint64 uiTribunalSkyFloor;
         uint64 uiKaddrakGo;
@@ -81,6 +82,7 @@ public:
             uiKaddrakGo = 0;
             uiMarnakGo = 0;
             uiAbedneumGo = 0;
+			uiTribunalController = 0;
             uiTribunalConsole = 0;
             uiTribunalChest = 0;
             uiTribunalSkyFloor = 0;
@@ -89,65 +91,66 @@ public:
                 m_auiEncounter[i] = NOT_STARTED;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+        void OnCreatureCreate(Creature* creature)
         {
-            switch(pCreature->GetEntry())
+            switch(creature->GetEntry())
             {
-                case CREATURE_MAIDEN: uiMaidenOfGrief = pCreature->GetGUID(); break;
-                case CREATURE_KRYSTALLUS: uiKrystallus = pCreature->GetGUID(); break;
-                case CREATURE_SJONNIR: uiSjonnir = pCreature->GetGUID(); break;
-                case CREATURE_MARNAK: uiMarnak = pCreature->GetGUID(); break;
-                case CREATURE_KADDRAK: uiKaddrak = pCreature->GetGUID(); break;
-                case CREATURE_ABEDNEUM: uiAbedneum = pCreature->GetGUID(); break;
-                case CREATURE_BRANN: uiBrann = pCreature->GetGUID(); break;
+                case CREATURE_MAIDEN: uiMaidenOfGrief = creature->GetGUID(); break;
+                case CREATURE_KRYSTALLUS: uiKrystallus = creature->GetGUID(); break;
+                case CREATURE_SJONNIR: uiSjonnir = creature->GetGUID(); break;
+                case CREATURE_MARNAK: uiMarnak = creature->GetGUID(); break;
+                case CREATURE_KADDRAK: uiKaddrak = creature->GetGUID(); break;
+                case CREATURE_ABEDNEUM: uiAbedneum = creature->GetGUID(); break;
+                case CREATURE_BRANN: uiBrann = creature->GetGUID(); break;
+				case 28234: uiTribunalController = creature->GetGUID(); break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
+        void OnGameObjectCreate(GameObject* go)
         {
-            switch(pGo->GetEntry())
+            switch(go->GetEntry())
             {
                 case GO_ABEDNEUM:
-                    uiAbedneumGo = pGo->GetGUID();
+                    uiAbedneumGo = go->GetGUID();
                     break;
                 case GO_MARNAK:
-                    uiMarnakGo = pGo->GetGUID();
+                    uiMarnakGo = go->GetGUID();
                     break;
                 case GO_KADDRAK:
-                    uiKaddrakGo = pGo->GetGUID();
+                    uiKaddrakGo = go->GetGUID();
                     break;
                 case GO_MAIDEN_DOOR:
-                    uiMaidenOfGriefDoor = pGo->GetGUID();
+                    uiMaidenOfGriefDoor = go->GetGUID();
                     if (m_auiEncounter[0] == DONE)
-                        pGo->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GO_STATE_ACTIVE);
                     else
-                        pGo->SetGoState(GO_STATE_READY);
+                        go->SetGoState(GO_STATE_READY);
                     break;
                 case GO_BRANN_DOOR:
-                    uiBrannDoor = pGo->GetGUID();
+                    uiBrannDoor = go->GetGUID();
                     if (m_auiEncounter[1] == DONE)
-                        pGo->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GO_STATE_ACTIVE);
                     else
-                        pGo->SetGoState(GO_STATE_READY);
+                        go->SetGoState(GO_STATE_READY);
                     break;
                 case GO_SJONNIR_DOOR:
-                    uiSjonnirDoor = pGo->GetGUID();
+                    uiSjonnirDoor = go->GetGUID();
                     if (m_auiEncounter[2] == DONE)
-                        pGo->SetGoState(GO_STATE_ACTIVE);
+                        go->SetGoState(GO_STATE_ACTIVE);
                     else
-                        pGo->SetGoState(GO_STATE_READY);
+                        go->SetGoState(GO_STATE_READY);
                     break;
                 case GO_TRIBUNAL_CONSOLE:
-                    uiTribunalConsole = pGo->GetGUID();
+                    uiTribunalConsole = go->GetGUID();
                     break;
                 case GO_TRIBUNAL_CHEST:
                 case GO_TRIBUNAL_CHEST_HERO:
-                    uiTribunalChest = pGo->GetGUID();
+                    uiTribunalChest = go->GetGUID();
                     if (m_auiEncounter[2] == DONE)
-                        pGo->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_INTERACT_COND);
+                        go->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_INTERACT_COND);
                     break;
                 case 191527:
-                    uiTribunalSkyFloor = pGo->GetGUID();
+                    uiTribunalSkyFloor = go->GetGUID();
                     break;
             }
         }
@@ -176,7 +179,10 @@ public:
                         HandleGameObject(uiSjonnirDoor,true);
                         GameObject *pGo = instance->GetGameObject(uiTribunalChest);
                         if (pGo)
-                            pGo->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_INTERACT_COND);
+						{
+							DoRespawnGameObject(uiTribunalChest, 10*MINUTE);
+                            pGo->RemoveFlag(GAMEOBJECT_FLAGS,6553616/*GO_FLAG_INTERACT_COND*/);
+						}
                     }
                     break;
             }
@@ -215,6 +221,7 @@ public:
                 case DATA_GO_SKY_FLOOR:                    return uiTribunalSkyFloor;
                 case DATA_SJONNIR_DOOR:                    return uiSjonnirDoor;
                 case DATA_MAIDEN_DOOR:                     return uiMaidenOfGriefDoor;
+				case 99: return uiTribunalController;
             }
 
             return 0;

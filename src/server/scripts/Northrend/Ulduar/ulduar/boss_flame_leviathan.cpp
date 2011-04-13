@@ -39,6 +39,7 @@ enum Spells
     SPELL_START_THE_ENGINE                      = 62472,
     SPELL_SEARING_FLAME                         = 62402,
     SPELL_BLAZE                                 = 62292,
+    SPELL_TAR_PASSIVE                           = 62288,
     SPELL_SMOKE_TRAIL                           = 63575,
     SPELL_ELECTROSHOCK                          = 62522,
     SPELL_NAPALM                                = 63666,
@@ -80,6 +81,7 @@ enum Creatures
     NPC_LOREKEEPER                              = 33686, //Hard mode starter
     NPC_BRANZ_BRONZBEARD                        = 33579,
     NPC_DELORAH                                 = 33701,
+    NPC_ULDUAR_GAUNTLET_GENERATOR               = 33571, // Trigger tied to towers
 };
 
 enum Towers
@@ -788,7 +790,7 @@ public:
         {
         }
 
-        void JustDied()
+        void JustDied(Unit* /*killer*/)
         {
             float x,y,z;
             me->GetPosition(x,y,z);
@@ -887,6 +889,7 @@ public:
         spell_pool_of_tarAI(Creature* pCreature) : PassiveAI(pCreature)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->AddAura(SPELL_TAR_PASSIVE, me);
         }
 
         void DamageTaken(Unit * /*who*/, uint32 &damage)
@@ -1204,7 +1207,7 @@ public:
             if (Creature* pLeviathan = instance->instance->GetCreature(instance->GetData64(TYPE_LEVIATHAN)))
             {
                 CAST_AI(boss_flame_leviathan::boss_flame_leviathanAI, (pLeviathan->AI()))->DoAction(0); //enable hard mode activating the 4 additional events spawning additional vehicles
-                pCreature->SetVisibility(VISIBILITY_OFF);
+                pCreature->SetVisible(false);
                 pCreature->AI()->DoAction(0); // spawn the vehicles
                 if (Creature* Delorah = pCreature->FindNearestCreature(NPC_DELORAH, 1000, true))
                 {
@@ -1323,10 +1326,8 @@ public:
     void OnDestroyed(Player* /*pPlayer*/, GameObject* pGO, uint32 /*value*/)
     {
         InstanceScript* instance = pGO->GetInstanceScript();
-        if (pGO->GetGOValue()->building.health == 0)
+        switch(pGO->GetEntry())
         {
-            switch(pGO->GetEntry())
-            {
             case GO_TOWER_OF_STORMS:
                 instance->ProcessEvent(pGO, EVENT_TOWER_OF_STORM_DESTROYED);
                 break;
@@ -1339,10 +1340,12 @@ public:
             case GO_TOWER_OF_LIFE:
                 instance->ProcessEvent(pGO, EVENT_TOWER_OF_LIFE_DESTROYED);
                 break;
-            }
         }
-    }
 
+        Creature* trigger = pGO->FindNearestCreature(NPC_ULDUAR_GAUNTLET_GENERATOR, 15.0f, true);
+        if (trigger)
+            trigger->DisappearAndDie();
+    }
 };
 
 class at_RX_214_repair_o_matic_station : public AreaTriggerScript
@@ -1358,6 +1361,7 @@ public:
             {
                 pPlayer->MonsterTextEmote(EMOTE_REPAIR, pPlayer->GetGUID(), true);
                 pPlayer->CastSpell(vehicle, SPELL_AUTO_REPAIR, true);
+				vehicle->SetHealth(vehicle->GetMaxHealth());
             }
         }
         return true;

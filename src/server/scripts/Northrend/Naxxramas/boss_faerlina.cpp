@@ -48,7 +48,7 @@ enum Events
     EVENT_NONE,
     EVENT_POISON,
     EVENT_FIRE,
-    EVENT_FRENZY
+    EVENT_FRENZY,
 };
 
 enum Achievements
@@ -79,9 +79,9 @@ public:
         {
             _EnterCombat();
             DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2,SAY_AGGRO_3,SAY_AGGRO_4), me);
-            events.ScheduleEvent(EVENT_POISON, urand(10000,15000));
-            events.ScheduleEvent(EVENT_FIRE, urand(6000,18000));
-            events.ScheduleEvent(EVENT_FRENZY, urand(60000,80000));
+            events.ScheduleEvent(EVENT_POISON, urand(10000,20000));
+            events.ScheduleEvent(EVENT_FIRE, urand(10000,18000));
+            events.ScheduleEvent(EVENT_FRENZY, urand(50000,60000));
         }
 
         void Reset()
@@ -139,12 +139,12 @@ public:
                     case EVENT_POISON:
                         if (!me->HasAura(RAID_MODE(SPELL_WIDOWS_EMBRACE,H_SPELL_WIDOWS_EMBRACE)))
                             DoCastAOE(RAID_MODE(SPELL_POISON_BOLT_VOLLEY,H_SPELL_POISON_BOLT_VOLLEY));
-                        events.ScheduleEvent(EVENT_POISON, urand(8000,15000));
+                        events.ScheduleEvent(EVENT_POISON, urand(8000,12000));
                         break;
                     case EVENT_FIRE:
                         if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
                             DoCast(pTarget, RAID_MODE(SPELL_RAIN_OF_FIRE, H_SPELL_RAIN_OF_FIRE));
-                        events.ScheduleEvent(EVENT_FIRE, urand(6000,18000));
+                        events.ScheduleEvent(EVENT_FIRE, urand(9000,18000));
                         break;
                     case EVENT_FRENZY:
                         // TODO : Add Text
@@ -153,7 +153,7 @@ public:
                         else
                             doDelayFrenzy = true;
 
-                        events.ScheduleEvent(EVENT_FRENZY, urand(60000,80000));
+                        events.ScheduleEvent(EVENT_FRENZY, urand(50000,60000));
                         break;
                 }
             }
@@ -175,6 +175,12 @@ public:
 
 };
 
+enum
+{
+	SPELL_FIREBALL = 54095,
+	SPELL_FIRENOVA = 46551,
+	H_SPELL_FIREBALL = 54096
+};
 
 class mob_faerlina_add : public CreatureScript
 {
@@ -195,6 +201,14 @@ public:
 
         InstanceScript *pInstance;
 
+		bool m_bIsRegularMode;
+		bool isMoving;
+		bool OutOfMana;
+
+		uint32 FireballTimer;
+		uint32 FirenovaTimer;
+		uint32 ResetAggroTimer;
+
         void Reset()
         {
             if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) {
@@ -202,6 +216,13 @@ public:
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_CHARM, true);
             }
         }
+
+		void EnterCombat(Unit* pWith)
+		{
+			FireballTimer = urand(1000,3000);
+			FirenovaTimer = 5000;
+			ResetAggroTimer = urand(20000,26000);;
+		}
 
         void JustDied(Unit * /*killer*/)
         {
@@ -211,6 +232,51 @@ public:
                     DoCast(pFaerlina, SPELL_WIDOWS_EMBRACE);
             }
         }
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(!UpdateVictim())
+			{
+				if(me->GetHealth() < me->GetMaxHealth())
+					EnterEvadeMode();
+				return;
+			}
+
+			if(!OutOfMana)
+			{
+				if(FireballTimer <= diff)
+				{
+					DoCast(SelectRandomPlayer(100.0f),pInstance->instance->IsRegularDifficulty()?SPELL_FIREBALL:H_SPELL_FIREBALL);
+					FireballTimer = urand(3000,5000);
+				} else FireballTimer -= diff;
+			}
+
+			if(FirenovaTimer <= diff)
+			{
+				DoCast(me,SPELL_FIRENOVA, true);
+				FirenovaTimer = 3500+urand(0,2000);
+			} else FirenovaTimer -= diff;
+
+			if(me->GetPower(POWER_MANA) < me->GetMaxPower(POWER_MANA)*0.15)
+				OutOfMana = true;
+
+			if(OutOfMana && me->GetPower(POWER_MANA) > me->GetMaxPower(POWER_MANA)*0.33)
+				OutOfMana = false;
+
+			if(ResetAggroTimer <= diff)
+			{
+				// wait a bit with aggro reset if enrage is imminent
+				Creature* boss = GetClosestCreatureWithEntry(me,15953,200.0f);
+				Unit* FutureTarget = SelectRandomPlayer(100.0f);
+				me->getThreatManager().clearReferences();
+				if(FutureTarget)
+					me->AddThreat(FutureTarget,60.0f);
+				me->SetInCombatWithZone();
+				ResetAggroTimer = 35000;
+			} else ResetAggroTimer -= diff;
+
+			DoMeleeAttackIfReady();
+		}
     };
 
 };

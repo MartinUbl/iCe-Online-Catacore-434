@@ -93,6 +93,9 @@ public:
         }
 
         InstanceScript* pInstance;
+		uint32 uiBarrageTimer;
+		uint32 uiVolleyTimer;
+		uint32 uiAssaultTimer;
 
         void Reset()
         {
@@ -104,15 +107,46 @@ public:
         {
             if (pInstance)
                 pInstance->SetData(DATA_EREGOS_EVENT, IN_PROGRESS);
+
+			uiBarrageTimer = 1000;
+			uiVolleyTimer = 4000;
+			uiAssaultTimer = 20000;
         }
 
         void AttackStart(Unit* /*who*/) {}
         void MoveInLineOfSight(Unit* /*who*/) {}
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
             if (!UpdateVictim())
                 return;
+
+			if(me->getVictim()->GetDistance2d(me) > 40.0f)
+				me->GetMotionMaster()->MoveChase(me->getVictim());
+			else
+			{
+				me->GetMotionMaster()->MovementExpired();
+				me->GetMotionMaster()->MoveIdle();
+			}
+
+			if(uiBarrageTimer <= diff)
+			{
+				DoCast(me->getVictim(),SPELL_ARCANE_BARRAGE);
+				uiBarrageTimer = 500;
+			} else uiBarrageTimer -= diff;
+
+			if(uiVolleyTimer <= diff)
+			{
+				DoCast(me->getVictim(),SPELL_ARCANE_VOLLEY);
+				uiBarrageTimer = 1000;
+				uiVolleyTimer = 4000;
+			} else uiVolleyTimer -= diff;
+
+			if(uiAssaultTimer <= diff)
+			{
+				DoCast(me,SPELL_ENRAGED_ASSAULT);
+				uiAssaultTimer = 30000;
+			} else uiAssaultTimer -= diff;
 
             DoMeleeAttackIfReady();
         }

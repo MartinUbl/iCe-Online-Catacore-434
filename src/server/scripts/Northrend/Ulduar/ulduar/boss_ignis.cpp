@@ -144,7 +144,7 @@ public:
                 vehicle->RemoveAllPassengers();
         }
 
-        void EnterCombat(Unit *who)
+        void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             DoScriptText(SAY_AGGRO, me);
@@ -160,7 +160,7 @@ public:
             Shattered = false;
         }
 
-        void JustDied(Unit *victim)
+        void JustDied(Unit* /*victim*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
@@ -181,14 +181,6 @@ public:
         {
             if (!UpdateVictim())
                 return;
-
-            if(me->GetPositionY() < 150 || me->GetPositionX() < 450 || me->getVictim()->GetTypeId() == !TYPEID_PLAYER)
-            {
-                me->RemoveAllAuras();
-                me->DeleteThreatList();
-                me->CombatStop(false);
-                me->GetMotionMaster()->MoveTargetedHome();
-            }
 
             events.Update(diff);
 
@@ -267,7 +259,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void KilledUnit(Unit* Victim)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!(rand()%5))
                 DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
@@ -329,7 +321,7 @@ public:
             Brittled = false;
         }
 
-        void DamageTaken(Unit *attacker, uint32 &damage)
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             if (me->HasAura(SPELL_BRITTLE) && damage >= 5000)
             {
@@ -342,7 +334,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(const uint32 /*uiDiff*/)
         {
             if (!UpdateVictim())
                 return;
@@ -482,8 +474,4 @@ void AddSC_boss_ignis()
     new npc_iron_construct();
     new npc_scorch_ground();
     new spell_ignis_slag_pot();
-
-    // has to be done or else players wil absorb dmg from slag pot vehicle seat 1 slagpot
-    if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3206)))
-        vehSeat->m_flags |= 0x400;
 }

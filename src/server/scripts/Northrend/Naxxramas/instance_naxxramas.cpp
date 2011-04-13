@@ -70,6 +70,11 @@ enum eEnums
     GO_KELTHUZAD_PORTAL04   = 181405,
     GO_KELTHUZAD_TRIGGER    = 181444,
 
+	GO_PORTAL_ARACHNID      = 181575,
+	GO_PORTAL_CONSTRUCT     = 181576,
+	GO_PORTAL_PLAGUE        = 181577,
+	GO_PORTAL_MILITARY      = 181578,
+
     SPELL_ERUPTION          = 29371
 };
 
@@ -144,60 +149,99 @@ public:
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
 
-        void OnCreatureCreate(Creature* pCreature, bool add)
+        void OnCreatureCreate(Creature* creature)
         {
-            switch(pCreature->GetEntry())
+            switch(creature->GetEntry())
             {
-                case 15989: SapphironGUID = add ? pCreature->GetGUID() : 0; return;
-                case 15953: uiFaerlina = pCreature->GetGUID(); return;
-                case 16064: uiThane = pCreature->GetGUID(); return;
-                case 16065: uiLady = pCreature->GetGUID(); return;
-                case 30549: uiBaron = pCreature->GetGUID(); return;
-                case 16063: uiSir = pCreature->GetGUID(); return;
-                case 15928: uiThaddius = pCreature->GetGUID(); return;
-                case 15930: uiFeugen = pCreature->GetGUID(); return;
-                case 15929: uiStalagg = pCreature->GetGUID(); return;
-                case 15990: uiKelthuzad = pCreature->GetGUID(); return;
+                case 15989: SapphironGUID = creature->GetGUID(); return;
+                case 15953: uiFaerlina = creature->GetGUID(); return;
+                case 16064: uiThane = creature->GetGUID(); return;
+                case 16065: uiLady = creature->GetGUID(); return;
+                case 30549: uiBaron = creature->GetGUID(); return;
+                case 16063: uiSir = creature->GetGUID(); return;
+                case 15928: uiThaddius = creature->GetGUID(); return;
+                case 15930: uiFeugen = creature->GetGUID(); return;
+                case 15929: uiStalagg = creature->GetGUID(); return;
+                case 15990: uiKelthuzad = creature->GetGUID(); return;
             }
 
-            AddMinion(pCreature, add);
+            AddMinion(creature, true);
         }
 
-        void OnGameObjectCreate(GameObject* pGo, bool add)
+        void OnCreatureRemove(Creature* creature)
         {
-            if (pGo->GetGOInfo()->displayId == 6785 || pGo->GetGOInfo()->displayId == 1287)
+            AddMinion(creature, false);
+        }
+
+        void OnGameObjectCreate(GameObject* go)
+        {
+            if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
             {
-                uint32 section = GetEruptionSection(pGo->GetPositionX(), pGo->GetPositionY());
-                if (add)
-                    HeiganEruptionGUID[section].insert(pGo->GetGUID());
-                else
-                    HeiganEruptionGUID[section].erase(pGo->GetGUID());
+                uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
+                HeiganEruptionGUID[section].insert(go->GetGUID());
+
                 return;
             }
 
-            switch(pGo->GetEntry())
+            switch (go->GetEntry())
             {
-                case GO_BIRTH:
-                if (!add && SapphironGUID)
-                {
-                    if (Creature *pSapphiron = instance->GetCreature(SapphironGUID))
-                        pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
-                    return;
-                }
                 case GO_GOTHIK_GATE:
-                    GothikGateGUID = add ? pGo->GetGUID() : 0;
-                    pGo->SetGoState(gothikDoorState);
+                    GothikGateGUID = go->GetGUID();
+                    go->SetGoState(gothikDoorState);
                     break;
-                case GO_HORSEMEN_CHEST: HorsemenChestGUID = add ? pGo->GetGUID() : 0; break;
-                case GO_HORSEMEN_CHEST_HERO: HorsemenChestGUID = add ? pGo->GetGUID() : 0; break;
-                case GO_KELTHUZAD_PORTAL01: uiPortals[0] = pGo->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL02: uiPortals[1] = pGo->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL03: uiPortals[2] = pGo->GetGUID(); break;
-                case GO_KELTHUZAD_PORTAL04: uiPortals[3] = pGo->GetGUID(); break;
-                case GO_KELTHUZAD_TRIGGER: uiKelthuzadTrigger = pGo->GetGUID(); break;
+                case GO_HORSEMEN_CHEST:
+                    HorsemenChestGUID = go->GetGUID();
+                    break;
+                case GO_HORSEMEN_CHEST_HERO:
+                    HorsemenChestGUID = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL01:
+                    uiPortals[0] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL02:
+                    uiPortals[1] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL03:
+                    uiPortals[2] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_PORTAL04:
+                    uiPortals[3] = go->GetGUID();
+                    break;
+                case GO_KELTHUZAD_TRIGGER:
+                    uiKelthuzadTrigger = go->GetGUID();
+                    break;
+                default:
+                    break;
             }
 
-            AddDoor(pGo, add);
+            AddDoor(go, true);
+        }
+
+        void OnGameObjectRemove(GameObject* go)
+        {
+            if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
+            {
+                uint32 section = GetEruptionSection(go->GetPositionX(), go->GetPositionY());
+
+                HeiganEruptionGUID[section].erase(go->GetGUID());
+                return;
+            }
+
+            switch (go->GetEntry())
+            {
+                case GO_BIRTH:
+                    if (SapphironGUID)
+                    {
+                        if (Creature* pSapphiron = instance->GetCreature(SapphironGUID))
+                            pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            AddDoor(go, false);
         }
 
         void SetData(uint32 id, uint32 value)
@@ -208,8 +252,8 @@ public:
                     HeiganErupt(value);
                     break;
                 case DATA_GOTHIK_GATE:
-                    if (GameObject *pGothikGate = instance->GetGameObject(GothikGateGUID))
-                        pGothikGate->SetGoState(GOState(value));
+                    if (GameObject* gothikGate = instance->GetGameObject(GothikGateGUID))
+                        gothikGate->SetGoState(GOState(value));
                     gothikDoorState = GOState(value);
                     break;
 
@@ -234,6 +278,21 @@ public:
                     break;
             }
         }
+
+		uint32 GetData(uint32 id)
+		{
+			if(id == DATA_FROSTWYRM_ACCESS)
+			{
+				uint32 uiKilledBosses = 0;
+				for(int i = 0; i < BOSS_SAPPHIRON; i++)
+				{
+					if(GetBossState(i) == DONE)
+						uiKilledBosses += 1;
+				}
+				return uiKilledBosses;
+			}
+			return 0;
+		}
 
         uint64 GetData64(uint32 id)
         {
@@ -278,7 +337,7 @@ public:
 
             if (id == BOSS_HORSEMEN && state == DONE)
             {
-                if (GameObject *pHorsemenChest = instance->GetGameObject(HorsemenChestGUID))
+                if (GameObject* pHorsemenChest = instance->GetGameObject(HorsemenChestGUID))
                     pHorsemenChest->SetRespawnTime(pHorsemenChest->GetRespawnDelay());
             }
 
@@ -294,7 +353,7 @@ public:
 
                 for (std::set<uint64>::const_iterator itr = HeiganEruptionGUID[i].begin(); itr != HeiganEruptionGUID[i].end(); ++itr)
                 {
-                    if (GameObject *pHeiganEruption = instance->GetGameObject(*itr))
+                    if (GameObject* pHeiganEruption = instance->GetGameObject(*itr))
                     {
                         pHeiganEruption->SendCustomAnim();
                         pHeiganEruption->CastSpell(NULL, SPELL_ERUPTION);

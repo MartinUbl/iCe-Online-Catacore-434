@@ -61,6 +61,7 @@ enum Events
     EVENT_BALCONY,
     EVENT_WAVE,
     EVENT_GROUND,
+	EVENT_CHARM,
 };
 
 class boss_noth : public CreatureScript
@@ -77,7 +78,7 @@ public:
     {
         boss_nothAI(Creature *c) : BossAI(c, BOSS_NOTH) {}
 
-        uint32 waveCount, balconyCount;
+        uint32 waveCount, balconyCount, CharmTimer;
 
         void Reset()
         {
@@ -103,11 +104,15 @@ public:
                 EnterEvadeMode();
             else
             {
-                events.ScheduleEvent(EVENT_BALCONY, 110000);
-                events.ScheduleEvent(EVENT_CURSE, 10000+rand()%15000);
-                events.ScheduleEvent(EVENT_WARRIOR, 30000);
+                events.ScheduleEvent(EVENT_BALCONY, 40000);
+                events.ScheduleEvent(EVENT_CURSE, 15000+rand()%15000);
+                events.ScheduleEvent(EVENT_WARRIOR, 13000);
                 if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     events.ScheduleEvent(EVENT_BLINK, 20000 + rand()%20000);
+				me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+				me->RemoveAurasDueToSpell(39258);
+
+				CharmTimer = 0;
             }
         }
 
@@ -153,12 +158,12 @@ public:
                 {
                     case EVENT_CURSE:
                         DoCastAOE(SPELL_CURSE_PLAGUEBRINGER);
-                        events.ScheduleEvent(EVENT_CURSE, 50000 + rand()%10000);
+                        events.ScheduleEvent(EVENT_CURSE, 25000 + rand()%10000);
                         return;
                     case EVENT_WARRIOR:
                         DoScriptText(SAY_SUMMON, me);
                         SummonUndead(MOB_WARRIOR, RAID_MODE(2,3));
-                        events.ScheduleEvent(EVENT_WARRIOR, 30000);
+                        events.ScheduleEvent(EVENT_WARRIOR, RAID_MODE(30000,20000));
                         return;
                     case EVENT_BLINK:
                         DoCastAOE(SPELL_CRIPPLE, true);
@@ -177,6 +182,7 @@ public:
                         waveCount = 0;
                         return;
                     case EVENT_WAVE:
+						DoCast(me,36400,true);
                         DoScriptText(SAY_SUMMON, me);
                         switch(balconyCount)
                         {
@@ -188,8 +194,17 @@ public:
                                     SummonUndead(MOB_GUARDIAN, RAID_MODE(5,10));break;
                         }
                         ++waveCount;
-                        events.ScheduleEvent(waveCount < 2 ? EVENT_WAVE : EVENT_GROUND, 30000 + rand()%15000);
+                        events.ScheduleEvent(waveCount < 2 ? EVENT_WAVE : EVENT_GROUND, RAID_MODE(22000,14000) + rand()%5000);
+						if(waveCount < 2)
+							events.ScheduleEvent(EVENT_CHARM, 6500);
                         return;
+					case EVENT_CHARM:
+					{
+						DoCast(SelectUnit(SELECT_TARGET_RANDOM,0),37122,true);
+						if(urand(0,3) > 1)
+							DoCast(SelectUnit(SELECT_TARGET_RANDOM,0),37122,true);
+						return;
+					}
                     case EVENT_GROUND:
                     {
                         ++balconyCount;
@@ -210,8 +225,76 @@ public:
 
 };
 
+class mob_plagued_champion: public CreatureScript
+{
+public:
+	mob_plagued_champion(): CreatureScript("mob_plagued_champion") {}
+
+	struct mob_plagued_championAI: public ScriptedAI
+	{
+		mob_plagued_championAI(Creature* c): ScriptedAI(c)
+		{
+			Reset();
+		}
+
+		uint32 ShadowShockTimer;
+		uint32 MortalStrikeTimer;
+		uint32 SummonTimer;
+
+		void Reset()
+		{
+			ShadowShockTimer = urand(4000,8000);
+			MortalStrikeTimer = urand(7000,9000);
+			SummonTimer = urand(8000,10000);
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(!UpdateVictim())
+			{
+				if(me->GetHealth() < me->GetMaxHealth())
+					EnterEvadeMode();
+				return;
+			}
+
+			if(ShadowShockTimer <= diff)
+			{
+				DoCast(SelectUnit(SELECT_TARGET_RANDOM,0),30138);
+				ShadowShockTimer = urand(8000,10000);
+			} else ShadowShockTimer -= diff;
+
+			if(MortalStrikeTimer <= diff)
+			{
+				DoCast(SelectUnit(SELECT_TARGET_RANDOM,0),32736);
+				MortalStrikeTimer = urand(9000,11000);
+			} else MortalStrikeTimer -= diff;
+
+			if(SummonTimer)
+			{
+				if(SummonTimer <= diff)
+				{
+					for(int i = 0; i < 3; ++i)
+					{
+						Creature* tmpsummon = me->SummonCreature(28104,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,0);
+						if(tmpsummon)
+							tmpsummon->AI()->AttackStart(SelectUnit(SELECT_TARGET_RANDOM,0));
+					}
+					SummonTimer = 0;
+				} else SummonTimer -= diff;
+			}
+
+			DoMeleeAttackIfReady();
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+	    return new mob_plagued_championAI(pCreature);
+	}
+};
 
 void AddSC_boss_noth()
 {
     new boss_noth();
+	new mob_plagued_champion();
 }

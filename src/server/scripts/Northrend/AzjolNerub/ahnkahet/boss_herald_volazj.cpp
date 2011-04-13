@@ -77,6 +77,7 @@ public:
         uint32 uiMindFlayTimer;
         uint32 uiShadowBoltVolleyTimer;
         uint32 uiShiverTimer;
+		uint32 uiInsanityTimer;
         uint32 insanityHandled;
         SummonList Summons;
 
@@ -130,7 +131,9 @@ public:
                     if (Unit *summon = me->SummonCreature(MOB_TWISTED_VISAGE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(),TEMPSUMMON_CORPSE_DESPAWN,0))
                     {
                         // clone
-                        plr->CastSpell(summon, SPELL_CLONE_PLAYER, true);
+                        //plr->CastSpell(summon, SPELL_CLONE_PLAYER, true);
+						summon->SetDisplayId(me->GetNativeDisplayId());
+						summon->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,0.3f,true);
                         // set phase
                         summon->SetPhaseMask((1<<(4+insanityHandled)),true);
                     }
@@ -154,6 +157,7 @@ public:
             uiMindFlayTimer = 8*IN_MILLISECONDS;
             uiShadowBoltVolleyTimer = 5*IN_MILLISECONDS;
             uiShiverTimer = 15*IN_MILLISECONDS;
+			uiInsanityTimer = 10*IN_MILLISECONDS;
 
             if (pInstance)
             {
@@ -273,6 +277,12 @@ public:
                 me->SetControlled(false, UNIT_STAT_STUNNED);
                 me->RemoveAurasDueToSpell(INSANITY_VISUAL);
             }
+
+			if(uiInsanityTimer <= diff)
+			{
+				DoCast(me,SPELL_INSANITY);
+				uiInsanityTimer = 40*IN_MILLISECONDS;
+			} else uiInsanityTimer -= diff;
 
             if (uiMindFlayTimer <= diff)
             {

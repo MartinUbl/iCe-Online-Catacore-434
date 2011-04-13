@@ -160,12 +160,11 @@ public:
                 }
             }
 
-
             if (uiSparkTimer <= diff)
             {
-                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                    DoCast(pTarget, SPELL_SPARK);
-                uiSparkTimer = 5*IN_MILLISECONDS;
+                if (Unit *pTarget = SelectRandomPlayer())
+                    DoCast(pTarget, SPELL_SPARK, true);
+                uiSparkTimer = 4*IN_MILLISECONDS;
             } else uiSparkTimer -= diff;
 
             DoMeleeAttackIfReady();

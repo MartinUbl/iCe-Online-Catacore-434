@@ -65,7 +65,7 @@ public:
     {
         boss_anubrekhanAI(Creature *c) : BossAI(c, BOSS_ANUBREKHAN) {}
 
-        bool hasTaunted;
+        bool hasTaunted, hasCastedBrouky;
 
         void Reset()
         {
@@ -92,9 +92,14 @@ public:
         void KilledUnit(Unit* victim)
         {
             //Force the player to spawn corpse scarabs via spell, TODO: Check percent chance for scarabs, 20% at the moment
-            if (!(rand()%5))
+			//iCelike - 100% chance
+            if (!0)
                 if (victim->GetTypeId() == TYPEID_PLAYER)
+				{
                     victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCARABS_PLR, true, NULL, NULL, me->GetGUID());
+					//iCelike - double spawn
+					//victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCARABS_PLR, true, NULL, NULL, me->GetGUID());
+				}
 
             DoScriptText(SAY_SLAY, me);
         }
@@ -111,8 +116,8 @@ public:
         {
             _EnterCombat();
             DoScriptText(SAY_AGGRO, me);
-            events.ScheduleEvent(EVENT_IMPALE, 10000 + rand()%10000);
-            events.ScheduleEvent(EVENT_LOCUST, 90000);
+            events.ScheduleEvent(EVENT_IMPALE, 10000 + rand()%5000);
+            events.ScheduleEvent(EVENT_LOCUST, 30000);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
 
             if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
@@ -145,6 +150,14 @@ public:
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;
+
+			//iCelike - spawn 20 beatles if under 5%
+			if(!hasCastedBrouky && me->GetHealthPct() < 5.1f)
+			{
+				hasCastedBrouky = true;
+				me->CastSpell(me, SPELL_SUMMON_CORPSE_SCARABS_MOB, true);
+				//me->CastSpell(me, SPELL_SUMMON_CORPSE_SCARABS_MOB, true);
+			}
 
             events.Update(diff);
 

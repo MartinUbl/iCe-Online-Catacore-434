@@ -65,9 +65,6 @@ enum Yells
     SAY_SLAY_2                                    = -1601013,
     SAY_DEATH                                     = -1601014,
     //Not in db
-    SAY_SEND_GROUP_1                              = -1601020,
-    SAY_SEND_GROUP_2                              = -1601021,
-    SAY_SEND_GROUP_3                              = -1601022,
     SAY_SWARM_1                                   = -1601015,
     SAY_SWARM_2                                   = -1601016,
     SAY_PREFIGHT_1                                = -1601017,
@@ -79,6 +76,9 @@ enum Misc
 {
     ACHIEV_WATH_HIM_DIE                           = 1296
 };
+
+uint32 Minibossess_entry[]     = {28730, 28729, 28731};
+int32  Minibossess_send_text[] = {-1601004,-1601005,-1601006};
 
 const Position SpawnPoint[] =
 {
@@ -109,15 +109,41 @@ public:
         uint32 uiMindFlayTimer;
         uint32 uiCurseFatigueTimer;
         uint32 uiSummonTimer;
+		uint32 Minibossess[3];
+		uint32 NextMinibossTimer;
 
         void Reset()
         {
             uiMindFlayTimer = 15*IN_MILLISECONDS;
             uiCurseFatigueTimer = 12*IN_MILLISECONDS;
 
+			for(uint32 i = 0; i < 3; i++)
+				Minibossess[i] = 0;
+
+			NextMinibossTimer = 0;
+
             if (pInstance)
                 pInstance->SetData(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT, NOT_STARTED);
         }
+
+		void KilledMiniBoss(uint32 id)
+		{
+			if(id > 2)
+				return;
+
+			Minibossess[id] = 2;
+			NextMinibossTimer = 5000;
+		}
+
+		void AggroedMiniBoss(uint32 id)
+		{
+			if(id > 2)
+				return;
+
+			Minibossess[id] = 1;
+			NextMinibossTimer = 50000;
+			DoScriptText(Minibossess_send_text[id],me);
+		}
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -149,8 +175,61 @@ public:
                 me->SummonCreature(MOB_SKITTERING_SWARMER,SpawnPoint[7],TEMPSUMMON_TIMED_DESPAWN,25*IN_MILLISECONDS);
         }
 
+        Player* SelectRandomPlayer(float range = 0.0f, bool checkLoS = true)
+        {
+            Map* pMap = me->GetMap();
+            if (!pMap->IsDungeon()) return NULL;
+
+            Map::PlayerList const &PlayerList = pMap->GetPlayers();
+            Map::PlayerList::const_iterator i;
+            if (PlayerList.isEmpty()) return NULL;
+
+            std::list<Player*> temp;
+            std::list<Player*>::const_iterator j;
+
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if ((me->IsWithinLOSInMap(i->getSource()) || !checkLoS) && me->getVictim() != i->getSource() &&
+                    me->IsWithinDistInMap(i->getSource(), range) && i->getSource()->isAlive())
+                    temp.push_back(i->getSource());
+
+            if (temp.size())
+            {
+                j = temp.begin();
+                advance(j, rand()%temp.size());
+                return (*j);
+            }
+            return NULL;
+        }
+
         void UpdateAI(const uint32 diff)
         {
+			if(NextMinibossTimer)
+			{
+				if(NextMinibossTimer <= diff)
+				{
+					for(uint32 i = 0; i < 3; i++)
+					{
+						if(Minibossess[i] == 0)
+						{
+							Creature* pMiniboss = GetClosestCreatureWithEntry(me,Minibossess_entry[i],50.0f,true);
+							Player* pVictim = SelectRandomPlayer(100.0f,false);
+							if(pMiniboss && pVictim)
+							{
+								pMiniboss->AddThreat(pVictim,10.0f);
+								pMiniboss->AI()->AttackStart(pVictim);
+								Minibossess[i] = 1;
+								NextMinibossTimer = 50000;
+							}
+							return;
+						}
+					}
+					Player* pVictim = SelectRandomPlayer(100.0f,false);
+					me->AddThreat(pVictim,10.0f);
+					me->AI()->AttackStart(pVictim);
+					NextMinibossTimer = 0;
+				} else NextMinibossTimer -= diff;
+			}
+
             if (!UpdateVictim())
                 return;
 
@@ -162,9 +241,9 @@ public:
 
             if (uiMindFlayTimer <= diff)
             {
-                    DoCast(me->getVictim(), SPELL_MIND_FLAY);
-                    uiMindFlayTimer = 15*IN_MILLISECONDS;
-                } else uiMindFlayTimer -= diff;
+                me->CastSpell(me->getVictim(), SPELL_MIND_FLAY, true);
+                uiMindFlayTimer = 10*IN_MILLISECONDS;
+            } else uiMindFlayTimer -= diff;
 
             if (uiCurseFatigueTimer <= diff)
             {
@@ -172,8 +251,8 @@ public:
                 Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                 Unit *pTarget_1 = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true);
 
-                DoCast(pTarget, SPELL_CURSE_OF_FATIGUE);
-                DoCast(pTarget_1, SPELL_CURSE_OF_FATIGUE);
+                DoCast(pTarget, SPELL_CURSE_OF_FATIGUE, true);
+                DoCast(pTarget_1, SPELL_CURSE_OF_FATIGUE, true);
 
                 uiCurseFatigueTimer = 10*IN_MILLISECONDS;
             } else uiCurseFatigueTimer -= diff;
@@ -183,6 +262,7 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
@@ -412,7 +492,17 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             DoCast(me, SPELL_ENRAGE, true);
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->AggroedMiniBoss(0);
         }
+
+		void JustDied(Unit* pKiller)
+		{
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->KilledMiniBoss(0);
+		}
 
         void UpdateAI(const uint32 diff)
         {
@@ -461,6 +551,20 @@ public:
             uiInfectedBiteTimer = 4*IN_MILLISECONDS;
             uiBindingWebsTimer = 17*IN_MILLISECONDS;
         }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->AggroedMiniBoss(1);
+        }
+
+		void JustDied(Unit* pKiller)
+		{
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->KilledMiniBoss(1);
+		}
 
         void UpdateAI(const uint32 diff)
         {
@@ -515,6 +619,20 @@ public:
             uiInfectedBiteTimer = 4*IN_MILLISECONDS;
             uiPoisonSprayTimer  = 15*IN_MILLISECONDS;
         }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->AggroedMiniBoss(2);
+        }
+
+		void JustDied(Unit* pKiller)
+		{
+			Creature* pBoss = GetClosestCreatureWithEntry(me,28684,150.0f, true);
+			if(pBoss)
+				CAST_AI(boss_krik_thir::boss_krik_thirAI, pBoss->AI())->KilledMiniBoss(2);
+		}
 
         void UpdateAI(const uint32 diff)
         {

@@ -34,6 +34,7 @@ enum Events
     EVENT_FEVER,
     EVENT_ERUPT,
     EVENT_PHASE,
+	//EVENT_EXPLOSION,
 };
 
 enum Phases
@@ -89,7 +90,8 @@ public:
                 events.ScheduleEvent(EVENT_DISRUPT, urand(10000, 25000));
                 events.ScheduleEvent(EVENT_FEVER, urand(15000, 20000));
                 events.ScheduleEvent(EVENT_PHASE, 90000);
-                events.ScheduleEvent(EVENT_ERUPT, 15000);
+                events.ScheduleEvent(EVENT_ERUPT, 8000);
+				//events.ScheduleEvent(EVENT_EXPLOSION, 5000);
             }
             else
             {
@@ -98,7 +100,7 @@ public:
                 me->NearTeleportTo(x, y, z, o);
                 DoCastAOE(SPELL_PLAGUE_CLOUD);
                 events.ScheduleEvent(EVENT_PHASE, 45000);
-                events.ScheduleEvent(EVENT_ERUPT, 8000);
+                events.ScheduleEvent(EVENT_ERUPT, urand(5000,6000));
             }
         }
 
@@ -136,8 +138,21 @@ public:
 
                         eruptDirection ? ++eruptSection : --eruptSection;
 
-                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? 10000 : 3000);
+                        events.ScheduleEvent(EVENT_ERUPT, phase == PHASE_FIGHT ? urand(8000, 10000) : urand(3500, 5000));
                         break;
+					/*case EVENT_EXPLOSION:
+						//35513 pro visual
+						//57976 pro efekt
+						if(SpellEntry* temp = (SpellEntry*)GetSpellStore()->LookupEntry(57976))
+						{
+							temp->EffectRadiusIndex[0] = 10; //30y ?
+							SpellEntry* visual_temp = (SpellEntry*)GetSpellStore()->LookupEntry(35513);
+							temp->SpellVisual[0] = visual_temp->SpellVisual[0];
+							temp->SpellVisual[1] = visual_temp->SpellVisual[1];
+							me->CastSpell(me,temp,true);
+						}
+						events.ScheduleEvent(EVENT_EXPLOSION, 8000);
+						break;*/
                 }
             }
 

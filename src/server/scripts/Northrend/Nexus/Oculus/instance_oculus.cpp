@@ -57,35 +57,35 @@ public:
             uiPlataformUrom = 0;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+        void OnCreatureCreate(Creature* creature)
         {
-            switch(pCreature->GetEntry())
+            switch(creature->GetEntry())
             {
                 case CREATURE_DRAKOS:
-                    uiDrakos = pCreature->GetGUID();
+                    uiDrakos = creature->GetGUID();
                     break;
                 case CREATURE_VAROS:
-                    uiVaros = pCreature->GetGUID();
+                    uiVaros = creature->GetGUID();
                     break;
                 case CREATURE_UROM:
-                    uiUrom = pCreature->GetGUID();
+                    uiUrom = creature->GetGUID();
                     break;
                 case CREATURE_EREGOS:
-                    uiEregos = pCreature->GetGUID();
+                    uiEregos = creature->GetGUID();
                     break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGO, bool /*bAdd*/)
+        void OnGameObjectCreate(GameObject* go)
         {
-            if (pGO->GetEntry() == GO_DRAGON_CAGE_DOOR)
+            if (go->GetEntry() == GO_DRAGON_CAGE_DOOR)
             {
                 if (GetData(DATA_DRAKOS_EVENT) == DONE)
-                    pGO->SetGoState(GO_STATE_ACTIVE);
+                    go->SetGoState(GO_STATE_ACTIVE);
                 else
-                    pGO->SetGoState(GO_STATE_READY);
+                    go->SetGoState(GO_STATE_READY);
 
-                GameObjectList.push_back(pGO->GetGUID());
+                GameObjectList.push_back(go->GetGUID());
             }
         }
 
@@ -150,8 +150,8 @@ public:
 
             for (std::list<uint64>::const_iterator itr = GameObjectList.begin(); itr != GameObjectList.end(); ++itr)
             {
-                if (GameObject* pGO = instance->GetGameObject(*itr))
-                    pGO->SetGoState(GO_STATE_ACTIVE);
+                if (GameObject* go = instance->GetGameObject(*itr))
+                    go->SetGoState(GO_STATE_ACTIVE);
             }
         }
 
@@ -203,8 +203,32 @@ public:
 
 };
 
+class oculus_portal : public GameObjectScript
+{
+public:
+	oculus_portal(): GameObjectScript("go_oculus_portal")
+	{
+	}
+
+	bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+	{
+		switch(pGo->GetEntry())
+		{
+		case GO_ORB_OF_NEXUS:
+			pPlayer->TeleportTo(571,3876.159912f,6984.439941f,106.32f,6.279f);
+			return true;
+		case GO_NEXUS_PORTAL:
+			pPlayer->NearTeleportTo(1001.3419f,1051.692f,359.476776f,3.189315f);
+			return true;
+		}
+
+		return false;
+	}
+};
+
 
 void AddSC_instance_oculus()
 {
     new instance_oculus();
+    new oculus_portal();
 }

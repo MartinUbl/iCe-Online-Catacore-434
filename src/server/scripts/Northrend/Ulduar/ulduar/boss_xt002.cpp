@@ -37,7 +37,7 @@ enum Spells
     SPELL_SEARING_LIGHT_25                      = 65121,
 
     SPELL_GRAVITY_BOMB_10                       = 63024,
-    SPELL_GRAVITY_BOMB_25                       = 63234,
+    SPELL_GRAVITY_BOMB_25                       = 64234,
     SPELL_GRAVITY_BOMB_AURA_10                  = 63025,
     SPELL_GRAVITY_BOMB_AURA_25                  = 63233,
 
@@ -322,7 +322,7 @@ public:
                     gravity_bomb_active = true;
                 } else uiGravityBombTimer -= diff;
 
-                if (uiTympanicTantrumTimer <= 0)
+                if (uiTympanicTantrumTimer <= diff)
                 {
                     DoScriptText(SAY_TYMPANIC_TANTRUM, me);
                     DoCast(SPELL_TYMPANIC_TANTRUM);
