@@ -6402,6 +6402,35 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 pVictim->CastSpell(pVictim, 57894, true, NULL, NULL, GetGUID());
                 return true;
             }
+            // Misdirection
+            if(dummySpell->Id == 34477)
+            {
+                // does not DoT periodic tick
+                if(!(procFlag & PROC_FLAG_DONE_PERIODIC) &&
+                // is attacking
+                procFlag & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK|
+                            PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS|
+                            PROC_FLAG_DONE_RANGED_AUTO_ATTACK|
+                            PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS) &&
+                // deals damage
+                damage > 0)
+                {
+                    if(Aura *pMisdirectAura = GetAura(34477))
+                    {
+                        // aura has not procced yet - 0 (infinte) set natively
+                        if(pMisdirectAura->GetCharges() == 0)
+                        {
+                            // set the aura duration up/down to 4 sec
+                            pMisdirectAura->SetDuration(4000);
+
+                            // aura has procced
+                            pMisdirectAura->SetCharges(1);
+                        }
+                    }
+                }
+                // not to remove charges, no spell needed to trigger
+                return false;
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:
