@@ -709,6 +709,29 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Searing Bolt
+                if (m_spellInfo->Id == 3606)
+                {
+                    Unit* m_owner = m_caster->GetOwner();
+                    if(m_owner)
+                    {
+                        if(m_owner->HasAura(77657))
+                            m_caster->CastSpell(unitTarget,77661,true);
+                        else if (m_owner->HasAura(77656))
+                        {
+                            if(roll_chance_i(67))
+                                m_caster->CastSpell(unitTarget,77661,true);
+                        }
+                        else if (m_owner->HasAura(77655))
+                        {
+                            if(roll_chance_i(33))
+                                m_caster->CastSpell(unitTarget,77661,true);
+                        }
+                    }
+                }
+            }
             case SPELLFAMILY_PALADIN:
             {
                 // Hammer of the Righteous
