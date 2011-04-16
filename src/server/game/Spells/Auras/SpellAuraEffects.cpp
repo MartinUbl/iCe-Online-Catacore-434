@@ -4993,10 +4993,20 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     Unit *target = aurApp->GetTarget();
 
-    if (GetMiscValue() < -1 || GetMiscValue() > 4)
+    int32 miscValue = GetMiscValue();
+
+    if (miscValue < -1 || miscValue > 4)
     {
         sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
         return;
+    }
+
+    // Custom handling for Cataclysm spells with non-relevant data in DBC
+    switch(GetSpellProto()->Id)
+    {
+        case 89744: // Wizardry
+            miscValue = STAT_INTELLECT; // +5% intellect istead of strength
+            break;
     }
 
     //save current and max HP before applying aura
@@ -5006,7 +5016,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         // exception for spell Mark of the Wild (increase all stats except spirit)
-        if (GetMiscValue() == i || GetMiscValue() == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT))
+        if (miscValue == i || miscValue == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
@@ -5015,7 +5025,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     }
 
     //recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR_UNK4 0x00000010 flag)
-    if ((GetMiscValue() == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & SPELL_ATTR_UNK4))
+    if ((miscValue == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & SPELL_ATTR_UNK4))
     {
         uint32 newHPValue = target->CountPctFromMaxHealth(int32(100.0f * curHPValue / maxHPValue));
         target->SetHealth(newHPValue);
