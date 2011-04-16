@@ -488,6 +488,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     else if(m_caster->HasAura(11190))
                         unitTarget->CastSpell(unitTarget,83301,true);
                 }
+                // Frostbolt
+                else if (m_spellInfo->Id == 116)
+                {
+                    // Early Frost
+                    if(m_caster->HasAura(83049) && !m_caster->HasAura(83162))
+                        m_caster->CastSpell(m_caster,83162,true);
+                    else if(m_caster->HasAura(83050) && !m_caster->HasAura(83239))
+                        m_caster->CastSpell(m_caster,83239,true);
+                }
                 break;
             }
             case SPELLFAMILY_WARRIOR:
