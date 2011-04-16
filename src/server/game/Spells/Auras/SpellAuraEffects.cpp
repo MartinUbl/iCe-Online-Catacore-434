@@ -126,7 +126,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleFeignDeath,                                // 66 SPELL_AURA_FEIGN_DEATH
     &AuraEffect::HandleAuraModDisarm,                             // 67 SPELL_AURA_MOD_DISARM
     &AuraEffect::HandleAuraModStalked,                            // 68 SPELL_AURA_MOD_STALKED
-    &AuraEffect::HandleNoImmediateEffect,                         // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
+    &AuraEffect::HandleAuraSchoolAbsorb,                          // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
     &AuraEffect::HandleUnused,                                    // 70 SPELL_AURA_EXTRA_ATTACKS clientside
     &AuraEffect::HandleModSpellCritChanceShool,                   // 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
     &AuraEffect::HandleModPowerCostPCT,                           // 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT
@@ -4707,6 +4707,35 @@ void AuraEffect::HandleAuraModDispelImmunity(AuraApplication const *aurApp, uint
     Unit *target = aurApp->GetTarget();
 
     target->ApplySpellDispelImmunity(m_spellProto, DispelType(GetMiscValue()), apply);
+}
+
+void AuraEffect::HandleAuraSchoolAbsorb(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    switch(GetSpellProto()->Id)
+    {
+        // Power Word: Shield (talent Rapture)
+        case 17:
+        {
+            // Rapture procs only when dispelled or removed when full absorb
+            if(aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+            {
+                int32 regain = 0;
+                if(target->HasAura(47537))
+                    regain = 0.06*target->GetMaxPower(POWER_MANA);
+                else if(target->HasAura(47536))
+                    regain = 0.04*target->GetMaxPower(POWER_MANA);
+                else if(target->HasAura(47535))
+                    regain = 0.02*target->GetMaxPower(POWER_MANA);
+                target->CastCustomSpell(target, 47755, &regain, 0, 0, true);
+            }
+        }
+        break;
+    }
 }
 
 /*********************************************************/

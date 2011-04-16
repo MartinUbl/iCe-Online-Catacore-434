@@ -201,6 +201,7 @@ class AuraEffect
         void HandleAuraModSchoolImmunity(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleAuraModDmgImmunity(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleAuraModDispelImmunity(AuraApplication const * aurApp, uint8 mode, bool apply) const;
+        void HandleAuraSchoolAbsorb(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         //  modify stats
         //   resistance
         void HandleAuraModResistanceExclusive(AuraApplication const * aurApp, uint8 mode, bool apply) const;
