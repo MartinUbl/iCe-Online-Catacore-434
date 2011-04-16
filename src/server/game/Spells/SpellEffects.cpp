@@ -4110,6 +4110,25 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 spell_bonus += int32(0.08f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                 spell_bonus += int32(0.13f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
             }
+            // Templar's Verdict
+            else if (m_spellInfo->Id == 85256)
+            {
+                uint32 realholypower = m_caster->GetPower(POWER_HOLY_POWER)+1;
+                switch(realholypower)
+                {
+                    case 1:
+                    default:
+                        totalDamagePercentMod *= 1.0f;                // stay on 30%
+                        break;
+                    case 2:
+                        totalDamagePercentMod *= 4.0f;                // 90%
+                        break;
+                    case 3:
+                        totalDamagePercentMod *= 1.0f+(235.0f/30.0f); // 225%
+                        break;
+                }
+                m_caster->SetPower(POWER_HOLY_POWER,0);
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
