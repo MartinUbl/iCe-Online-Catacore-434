@@ -5519,6 +5519,16 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 if (unitTarget->GetAura(1978))
                     unitTarget->GetAura(1978)->RefreshDuration();
             }
+            // Kill Command (caster fix)
+            if (m_spellInfo->Id == 34026)
+            {
+                if(m_caster->GetPetGUID())
+                {
+                    Pet* pPet = (Pet*)Unit::GetUnit(*m_caster,m_caster->GetPetGUID());
+                    if(pPet && pPet->getVictim())
+                        pPet->CastSpell(pPet->getVictim(),83381,true);
+                }
+            }
             return;
         }
         case SPELLFAMILY_POTION:
