@@ -478,6 +478,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (m_caster->getClass() == CLASS_MAGE && m_caster->getLevel() >= 3
                     && m_spellInfo->Id != 7268 && roll_chance_i(40))
                     m_caster->CastSpell(m_caster, 79808, true);
+
+                // Cone of Cold
+                if (m_spellInfo->Id == 120)
+                {
+                    // Improved Cone of Cold
+                    if(m_caster->HasAura(12489))
+                        unitTarget->CastSpell(unitTarget,83302,true);
+                    else if(m_caster->HasAura(11190))
+                        unitTarget->CastSpell(unitTarget,83301,true);
+                }
                 break;
             }
             case SPELLFAMILY_WARRIOR:
