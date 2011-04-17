@@ -1361,12 +1361,11 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         data7 << m_ranks[i].m_name;
         data7 << uint32(m_ranks[i].m_rights);
 
-        //Maybe switched with BankTabRights
-        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << uint32(m_ranks[i].GetBankTabSlotsPerDay(j));
-
         for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
             data7 << uint32(m_ranks[i].GetBankTabRights(j));
+
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
+            data7 << uint32(m_ranks[i].GetBankTabSlotsPerDay(j));
 
         data7 << uint32(m_ranks[i].GetBankMoneyPerDay());
     }
