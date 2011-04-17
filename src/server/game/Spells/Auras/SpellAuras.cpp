@@ -1061,6 +1061,56 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
                     }
                 }
+                switch(GetId())
+                {
+                // Mind Flay
+                case 15407:
+                    {
+                        // Dark Evangelism
+                        // Player has the talent
+                        uint32 auraid = 0;
+                        if(caster->HasAura(81659)) // Rank 1
+                        {
+                            auraid = 87117;
+                            // Override Evangelism (holy)
+                            caster->RemoveAurasDueToSpell(81660);
+                        }
+                        else if(caster->HasAura(81662)) // Rank 2
+                        {
+                            auraid = 87118;
+                            // Override Evangelism (holy)
+                            caster->RemoveAurasDueToSpell(81661);
+                        }
+                        else
+                            break;
+
+                        // Aura is already active
+                        if (Aura* pEvangelism = caster->GetAura(auraid))
+                        {
+                            uint8 charges = pEvangelism->GetCharges();
+                            if (charges < 5)
+                            {
+                                // Add charge
+                                pEvangelism->SetCharges(++charges);
+                            }
+                            // Refresh duration not considering number of charges
+                            pEvangelism->RefreshDuration();
+                        }
+                        else caster->CastSpell(caster, auraid, true); // Cast a new one
+
+                        // If has talent Archangel
+                        //if (caster->HasAura(87151))
+                        {
+                            // Enable Archangel
+                            if (Aura* pAura = caster->GetAura(87154))
+                                pAura->RefreshDuration();
+                            else
+                                caster->CastSpell(caster, 87154, true);
+                        }
+                        break;
+                    }
+                default: break;
+                }
                 break;
             case SPELLFAMILY_ROGUE:
                 // Sprint (skip non player casted spells by category)
@@ -1343,7 +1393,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
-                    case 47788: // Guardian Spirit
+                    /*
+                    case 47788: // Guardian Spirit --no longer needed
                         if (removeMode != AURA_REMOVE_BY_EXPIRE)
                             break;
                         if (caster->GetTypeId() != TYPEID_PLAYER)
@@ -1367,6 +1418,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             player->SendDirectMessage(&data);
                         }
                         break;
+                    */
+                    // Evangelism / Dark Evangelism rank 2
+                    case 81661:
+                    case 87118:
+                        {
+                            // Disable spell
+                            caster->RemoveAurasDueToSpell(87154);
+                            break;
+                        }
+                    default: break;
                 }
                 break;
             case SPELLFAMILY_ROGUE:

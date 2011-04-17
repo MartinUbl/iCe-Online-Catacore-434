@@ -6023,6 +6023,52 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         basepoints0 = int32(triggerAmount * damage / 100 / (GetSpellMaxDuration(blessHealing) / blessHealing->EffectAmplitude[0]));
                     }
                     break;
+                // Evangelism
+                case 81659:
+                case 81662:
+                {
+                    // Smite
+                    if (!(procSpell->Id == 585))
+                        return false;
+
+                    // Done to someone else
+                    if (!target || target == this)
+                        return false;
+
+                    // Done hit / crit
+                    if (!(procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)))
+                        return false;
+
+                    uint32 auraid = dummySpell->Id == 81659 ? 81660 : 81661; // Rank 1 or Rank 2
+
+                    // Remove Dark Evangelism
+                    RemoveAurasDueToSpell(87117);
+                    RemoveAurasDueToSpell(87118);
+
+                    // Aura is already active
+                    if (Aura* pEvangelism = GetAura(auraid))
+                    {
+                        uint8 charges = pEvangelism->GetCharges();
+                        if (charges < 5)
+                        {
+                            // Add charge
+                            pEvangelism->SetCharges(++charges);
+                        }
+                        // Refresh duration not considering number of charges
+                        pEvangelism->RefreshDuration();
+                    }
+                    else CastSpell(this, auraid, true); // Cast a new one
+
+                    // Enable Archangel spell (87151)
+                    if (Aura* pAura = GetAura(87154))
+                        pAura->RefreshDuration();
+                    else
+                        CastSpell(this, 87154, true);
+
+                    return false;
+
+                    break;
+                }
             }
             break;
         }

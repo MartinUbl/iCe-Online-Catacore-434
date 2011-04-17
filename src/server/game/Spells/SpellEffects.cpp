@@ -5646,6 +5646,57 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Archangel
+            if (m_spellInfo->Id == 87151)
+            {
+                if (!m_caster)
+                    return;
+
+                // Evangelism / Archangel
+                if (Aura* aura = m_caster->GetAura(81661))
+                {
+                    int8 charges = aura->GetCharges();
+
+					// 3% healing bonus for each stack
+                    int32 basepoints0_a = charges * 3;
+                    m_caster->CastCustomSpell(m_caster, 81700, &basepoints0_a, NULL, NULL, true);
+
+                    // Restore 1% of mana for each stack
+                    int32 basepoints0_b = charges * 1;
+                    m_caster->CastCustomSpell(m_caster, 87152, &basepoints0_b, NULL, NULL, true);
+
+                    // Consume aura
+                    m_caster->RemoveAurasDueToSpell(81661);
+                    // Add cooldown
+                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, time(NULL)+30);
+                }
+                // Dark Evangelism / Dark Archangel
+                else if (Aura* aura = m_caster->GetAura(87118))
+                {
+                    int8 charges = aura->GetCharges();
+
+                    // 4% damage bonus for each stack for specific spells
+                    int32 basepoints0_a = charges * 4;
+                    int32 basepoints1_a = charges * 4;
+                    m_caster->CastCustomSpell(m_caster, 87153, &basepoints0_a, &basepoints1_a, NULL, true);
+
+                    // Restore mana manually (eff #3 unknown effect) --workaround: using Archangel
+                    // Restore 5% of mana for each stack
+                    int32 basepoints0_b = charges * 5;
+                    m_caster->CastCustomSpell(m_caster, 87152, &basepoints0_b, NULL, NULL, true);
+
+                    // Consume aura
+                    m_caster->RemoveAurasDueToSpell(87118);
+                    // Add cooldown
+                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, time(NULL)+90);
+                }
+
+                // Disable spell
+                m_caster->RemoveAurasDueToSpell(87154);
+            }
+        }
     }
 
     // normal DB scripted effect
