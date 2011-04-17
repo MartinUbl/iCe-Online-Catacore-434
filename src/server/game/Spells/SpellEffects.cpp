@@ -475,10 +475,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             {
                 // Arcane Missiles Aurastate
                 // since 4.0.1, every spell has a 40% chance of enabling Arcane Missiles
-                if (m_caster->getClass() == CLASS_MAGE && m_caster->getLevel() >= 3
-                    && m_spellInfo->Id != 7268 && roll_chance_i(40))
-                    m_caster->CastSpell(m_caster, 79808, true);
-
+                // but is canceled by presence of talents:
+                if (!(m_caster->HasAura(44445) || // Hot Streak
+                    m_caster->HasAura(44546) ||  // Mind Freeze #1
+                    m_caster->HasAura(44548) ||  // Mind Freeze #2
+                    m_caster->HasAura(44549) ))  // Mind Freeze #3
+                {
+                    if (m_caster->getClass() == CLASS_MAGE && m_caster->getLevel() >= 3
+                        && m_spellInfo->Id != 7268 && roll_chance_i(40))
+                    {
+                        if (!m_caster->HasAura(79808))
+                            m_caster->CastSpell(m_caster, 79808, true); // Arcane Missiles Aurastate
+                    }
+                }
+                break;
                 // Cone of Cold
                 if (m_spellInfo->Id == 120)
                 {
