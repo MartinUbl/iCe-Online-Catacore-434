@@ -534,6 +534,7 @@ enum AtLoginFlags
     AT_LOGIN_CHANGE_FACTION    = 0x40,
     AT_LOGIN_CHANGE_RACE       = 0x80,
     AT_LOGIN_LEARN_DEFAULT     = 0x100,
+    AT_LOGIN_RESET_PET_SLOT    = 0x200,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;

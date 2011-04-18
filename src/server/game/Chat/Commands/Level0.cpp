@@ -94,6 +94,58 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
+{
+    // Pokud nejsme hunteri, fuck off
+    if(m_session->GetPlayer()->getClass() != CLASS_HUNTER)
+        return false;
+
+    if(m_session->GetPlayer()->GetPet())
+    {
+        PSendSysMessage("Nejdrive dismissnete sveho peta!");
+        return true;
+    }
+
+    PSendSysMessage("Reset hunter pet slotu...");
+
+    // Nastavit specialni AT_LOGIN flagu pro reset currentPetSlot u hrace (nutne, nejde za behu)
+    m_session->GetPlayer()->SetAtLoginFlag(AT_LOGIN_RESET_PET_SLOT);
+    m_session->GetPlayer()->m_petSlotUsed = 0;
+    PSendSysMessage("AT_LOGIN flag nastavena");
+
+    // Vybrat vsechny pety
+    QueryResult qr = CharacterDatabase.PQuery("SELECT id,name FROM character_pet WHERE owner = %u",m_session->GetPlayer()->GetGUID());
+    std::map<uint32,std::string> PetEntrys;
+    Field* fd = qr->Fetch();
+    // A seradit je do mapy entry+jmeno
+    while(fd)
+    {
+        PetEntrys[fd[0].GetUInt32()] = fd[1].GetCString();
+        if(!qr->NextRow())
+            break;
+        fd = qr->Fetch();
+    }
+    PSendSysMessage("Nalezeno %u petu",PetEntrys.size());
+    // Pokud jsme nenasli zadneho peta, vratime se, protoze by proces zfailoval (begin == end)
+    if(PetEntrys.size() < 1)
+    {
+        PSendSysMessage("Nemate zadneho peta!");
+        return true;
+    }
+
+    // Projdeme nasi mapu, seradime pety v databazi, masku petSlotUsed prenastavime na platnou hodnotu
+    uint32 i = 0;
+    for(std::map<uint32,std::string>::const_iterator itr = PetEntrys.begin(); itr != PetEntrys.end(); itr++)
+    {
+        CharacterDatabase.PQuery("UPDATE character_pet SET slot=%u WHERE id=%u",i,(*itr).first);
+        PSendSysMessage("Pet %s -> slot %u",(*itr).second.c_str(),i);
+        m_session->GetPlayer()->setPetSlotUsed((PetSlot)i,true);
+        i++;
+    }
+    PSendSysMessage("Proces hotov, pro projeveni zmen provedte relog.");
+    return true;
+}
+
 bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
 {
     uint32 PlayersNum = sWorld.GetPlayerCount();

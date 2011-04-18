@@ -943,6 +943,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_LEARN_DEFAULT);
     }
 
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_SLOT))
+    {
+        pCurrChar->m_currentPetSlot = PET_SLOT_DELETED;
+    }
+
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
     {
         pCurrChar->resetTalents(true);

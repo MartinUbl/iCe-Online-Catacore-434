@@ -519,6 +519,7 @@ class ChatHandler
         bool HandleStartCommand(const char* args);
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
+        bool HandlePetResetCommand(const char* args);
 
         bool HandleSummonCommand(const char* args);
         bool HandleAppearCommand(const char* args);
