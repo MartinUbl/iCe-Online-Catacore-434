@@ -115,6 +115,11 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
 
     // Vybrat vsechny pety
     QueryResult qr = CharacterDatabase.PQuery("SELECT id,name FROM character_pet WHERE owner = %u",m_session->GetPlayer()->GetGUID());
+    if(!qr)
+    {
+        PSendSysMessage("Nemate zadneho peta, bude vam nejspis stacit jen relog. Pokud ne, kontaktujte spravce.");
+        return true;
+    }
     std::map<uint32,std::string> PetEntrys;
     Field* fd = qr->Fetch();
     // A seradit je do mapy entry+jmeno
