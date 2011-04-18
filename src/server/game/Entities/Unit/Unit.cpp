@@ -8466,6 +8466,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Glyph of Silencing Shot
+        case 56836:
+        {
+            // Can proc only from Silencing Shot
+            if(procSpell->Id != 34490)
+                return false;
+            break;
+        }
         // Decimation
         case 63156:
         case 63158:
