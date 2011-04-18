@@ -488,7 +488,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             m_caster->CastSpell(m_caster, 79808, true); // Arcane Missiles Aurastate
                     }
                 }
-                break;
+
                 // Cone of Cold
                 if (m_spellInfo->Id == 120)
                 {
