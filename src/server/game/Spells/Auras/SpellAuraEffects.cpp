@@ -5036,6 +5036,9 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         case 89744: // Wizardry
             miscValue = STAT_INTELLECT; // +5% intellect istead of strength
             break;
+        case 53592: // Touched by the Light
+            miscValue = STAT_STAMINA;
+            break;
     }
 
     //save current and max HP before applying aura
