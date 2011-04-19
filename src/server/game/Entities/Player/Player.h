@@ -1780,7 +1780,9 @@ class Player : public Unit, public GridObject<Player>
         void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
         uint8 GetRank() { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
-        uint32 GetGuildId() { return m_guildId;  }
+        uint32 GetGuildId() { return m_guildId; }
+        uint32 GetLastGuildId() { return m_lastGuildId; }
+        void SetLastGuildId(uint32 guildid) { m_lastGuildId = guildid; }
         static uint32 GetGuildIdFromDB(uint64 guid);
         static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
@@ -2706,6 +2708,7 @@ class Player : public Unit, public GridObject<Player>
         // Social
         PlayerSocial *m_social;
         uint32 m_guildId;
+        uint32 m_lastGuildId;
 
         // Groups
         GroupReference m_group;

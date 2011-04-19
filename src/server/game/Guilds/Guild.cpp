@@ -1695,6 +1695,7 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
             DeleteMember(guid, false, true);
             _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
             _BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName());
+            player->SetLastGuildId(m_id);
         }
     }
 }
@@ -2302,6 +2303,10 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
     // Remove all player signs from another petitions
     // This will be prevent attempt to join many guilds and corrupt guild data integrity
     Player::RemovePetitionsAndSigns(guid, GUILD_CHARTER_TYPE);
+
+    // If player wasn't in this guild before relog, reset guild reputation to zero
+    if (player->GetLastGuildId() != m_id)
+        player->SetReputation(1168,0);
 
     uint32 lowguid = GUID_LOPART(guid);
 

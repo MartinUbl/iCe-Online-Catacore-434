@@ -458,6 +458,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     m_social = NULL;
     m_guildId = 0;
+    m_lastGuildId = 0;
 
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
@@ -14925,8 +14926,16 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
     // If the player has a guild, it should gain 1/4 of his experience.
     // Despite of him being at max level or not.
-    if (Guild* pGuild = sObjectMgr.GetGuildById(GetGuildId()))
-        pGuild->GainXP(XP/4);
+    if (sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+    {
+        if (Guild* pGuild = sObjectMgr.GetGuildById(GetGuildId()))
+        {
+            pGuild->GainXP(XP/4);
+            // Give player also 15-30 guild reputation (based on quest level)
+            uint32 rep_val = 15+uint32((float(pQuest->GetQuestLevel())/85.0f)*15.0f);
+            SetReputation(1168,GetReputation(1168)+rep_val);
+        }
+    }
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     if (pQuest->GetRewOrReqMoney())
