@@ -2325,8 +2325,10 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
         {
             //multiply by amount of holy power (+1 for unknown purposes)
             addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
-            //and clear holy power
-            caster->SetPower(POWER_HOLY_POWER, 0);
+            //and clear holy power (except if Eternal Glory talent procs)
+            if (!((caster->HasAura(87163) && roll_chance_i(15)) ||
+                 (caster->HasAura(87164) && roll_chance_i(30))) )
+                caster->SetPower(POWER_HOLY_POWER, 0);
         }
         // Vessel of the Naaru (Vial of the Sunwell trinket)
         else if (m_spellInfo->Id == 45064)

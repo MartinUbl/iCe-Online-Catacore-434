@@ -4546,6 +4546,10 @@ void Spell::TakePower()
         return;
     }
 
+    // Terrible hack for Word of Glory not taking holy power when Sacred Light procs
+    if (GetSpellInfo()->Id == 85673 && m_caster->GetPower(POWER_HOLY_POWER) > 0)
+        return;
+
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
     else
