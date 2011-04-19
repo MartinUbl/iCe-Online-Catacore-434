@@ -1419,15 +1419,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Life Tap
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARLOCK_LIFETAP)
             {
-                float spFactor = 0.0f;
-                switch (m_spellInfo->Id)
-                {
-                    case 11689: spFactor = 0.2f; break;
-                    case 27222:
-                    case 57946: spFactor = 0.5f; break;
-                }
-                int32 damage = int32(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 0) + (6.3875 * m_spellInfo->baseLevel));
-                int32 mana = int32(damage + (m_caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+SPELL_SCHOOL_SHADOW) * spFactor));
+                float coef = 2.2f;
+
+                // Improved Life Tap
+                if(m_caster->HasAura(18183))
+                    coef += 0.1f;
+                else if(m_caster->HasAura(18182))
+                    coef += 0.2f;
+
+                int32 damage = float(m_caster->GetMaxHealth())*0.15f;
+                int32 mana = float(damage)*coef;
 
                 if (unitTarget && (int32(unitTarget->GetHealth()) > damage))
                 {
