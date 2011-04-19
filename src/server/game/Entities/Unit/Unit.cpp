@@ -1384,6 +1384,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
             CastSpell(pVictim, 1604, true);
     }
 
+    // Seal of Righteousness
+    if (GetTypeId() == TYPEID_PLAYER && HasAura(20154))
+        CastSpell(pVictim, 25742, true);
+
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
 

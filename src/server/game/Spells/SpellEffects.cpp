@@ -782,6 +782,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                     break;
                 }
+                // Seal of Righteousness
+                if (m_spellInfo->Id == 25742)
+                {
+                    // damage formula is little wierd - divide weapon damage by 1.8 to be more accurent to tooltip
+                    apply_direct_bonus = false;
+                    damage = (m_caster->ToPlayer()->GetAttackTime(BASE_ATTACK)/1000.0f/1.8f)*0.011f*m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*0.022f*m_caster->GetStat(STAT_INTELLECT);
+                }
                 break;
             }
             case SPELLFAMILY_DEATHKNIGHT:
@@ -5571,6 +5578,14 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, spellId2, true);
                 if (spellId3)
                     m_caster->CastSpell(unitTarget, spellId3, true);
+
+                // Long Arm of the Law
+                if ((m_caster->HasAura(87168) && roll_chance_i(50)) || m_caster->HasAura(87172))
+                {
+                    // If target is at or further than 15 yards (6.0f 2D dist)
+                    if (unitTarget->GetDistance2d(m_caster) >= 6.0f) 
+                        m_caster->CastSpell(m_caster,87173,true);
+                }
                 return;
             }
         }
