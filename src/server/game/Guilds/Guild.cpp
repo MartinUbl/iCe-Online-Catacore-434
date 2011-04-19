@@ -1374,7 +1374,84 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     else
         BroadcastPacket(&data7);
 
+    UpdateGuildNews(session);
+
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_ROSTER)");
+}
+
+void Guild::UpdateGuildNews(WorldSession* session)
+{
+    QueryResult qr = CharacterDatabase.PQuery("SELECT event_type, param, date, playerguid FROM guild_news WHERE guildid=%u",m_id);
+    if(!qr)
+        return;
+
+    uint32 count = qr->GetRowCount();
+
+    std::list<uint32> EventTypeList;
+    std::list<uint32> DateList;
+    std::list<uint64> ParamList;
+    std::list<uint64> GUIDList;
+
+    Field* fd = qr->Fetch();
+    while (fd)
+    {
+        EventTypeList.push_back(fd[0].GetUInt32());
+        ParamList.push_back(fd[1].GetUInt64());
+        DateList.push_back(fd[2].GetUInt64());
+        GUIDList.push_back(fd[3].GetUInt64());
+
+        if (!qr->NextRow())
+            break;
+
+        fd = qr->Fetch();
+    }
+
+    /*
+    Event Types:
+     0 = guild achievement,   param = achievementID
+     1 = player achievement,  param = achievementID
+     2 = boss encounter,      param = ID from DungeonEncounter.dbc
+     3 = epic item loot,      param = item ID
+     4 = epic item craft,     param = item ID
+     5 = epic item purchase,  param = item ID
+     6 = guild level,         param = level
+    */
+
+    WorldPacket data(SMSG_GUILD_NEWS_UPDATE);
+    data << uint32(count);   //count
+
+    // Unknown
+    for (int i = 0; i < count; i++)
+        data << uint32(0);
+
+    // Date and time, unknown for now (wierd structure)
+    for (std::list<uint32>::const_iterator itr = DateList.begin(); itr != DateList.end(); ++itr)
+        data << uint32(*itr);
+
+    // Player GUIDs
+    for (std::list<uint64>::const_iterator itr = GUIDList.begin(); itr != GUIDList.end(); ++itr)
+        data << uint64(*itr);
+
+    // Parameters
+    for (std::list<uint64>::const_iterator itr = ParamList.begin(); itr != ParamList.end(); ++itr)
+        data << uint64(*itr);
+
+    // Event types
+    for (std::list<uint32>::const_iterator itr = EventTypeList.begin(); itr != EventTypeList.end(); ++itr)
+        data << uint32(*itr);
+
+    // Unknown
+    for (int i = 0; i < count; i++)
+        data << uint32(0);
+
+    // Unknown
+    for (int i = 0; i < count; i++)
+        data << uint32(-1);
+
+    if (session)
+        session->SendPacket(&data);
+    else
+        BroadcastPacket(&data);
 }
 
 void Guild::HandleQuery(WorldSession *session)

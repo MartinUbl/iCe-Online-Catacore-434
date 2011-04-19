@@ -726,6 +726,8 @@ public:
     uint64 GetCurrentXP() { return m_xp; }
     uint64 GetNextLevelXP() { return m_nextLevelXP; }
 
+    void UpdateGuildNews(WorldSession* session);
+
     void GainXP(uint64 xp);
     void LevelUp();
 
