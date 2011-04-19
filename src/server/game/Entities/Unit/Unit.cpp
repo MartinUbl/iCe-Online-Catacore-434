@@ -8740,6 +8740,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
                 return false;
             break;
+        case 96263:
+            // Not allow proc when target has more than 30% health
+            if (GetHealthPct() > 30.0f)
+                return false;
+            // Also if cooldown isn't ready, dont allow
+            if (ToPlayer()->HasSpellCooldown(85285))
+                return false;
+            // Add custom cooldown (proc cooldown doesn't work)
+            ToPlayer()->AddSpellCooldown(85285,0,time(NULL)+15);
+            // And set absorb points by formula
+            basepoints0 = 1+ToPlayer()->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*2.5f;
+            break;
     }
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
