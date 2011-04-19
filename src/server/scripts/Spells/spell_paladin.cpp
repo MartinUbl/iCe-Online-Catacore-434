@@ -220,9 +220,78 @@ public:
     }
 };
 
+class npc_pal_consecration: public CreatureScript
+{
+public:
+    npc_pal_consecration(): CreatureScript("npc_pal_consecration") {};
+
+    struct consecrationAI: public Scripted_NoMovementAI
+    {
+        consecrationAI(Creature* c): Scripted_NoMovementAI(c)
+        {
+            // Dummy visual
+            me->CastSpell(me,81298,true);
+            ticktimer = 1000;
+        }
+
+        uint32 ticktimer;
+
+        void DamageTaken(Unit* pAttacker, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(ticktimer <= diff)
+            {
+                CellPair pair(Trinity::ComputeCellPair(me->GetPositionX(), me->GetPositionY()));
+                Cell cell(pair);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                std::list<WorldObject*> objlist;
+                Trinity::AllWorldObjectsInRange check(me,12.0f);
+                Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(me, objlist, check);
+                TypeContainerVisitor<Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange>, GridTypeMapContainer> visitor(searcher);
+
+                cell.Visit(pair, visitor, *(me->GetMap()));
+
+                Unit* creator = me->GetOwner();
+                if(creator)
+                {
+                    int32 ap = creator->GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+                    int32 intel = creator->GetStat(STAT_INTELLECT);
+                    int32 damage = int32(8*0.04f*(intel+ap)*0.04f);
+
+                    SpellEntry* se = (SpellEntry*)sSpellStore.LookupEntry(81297);
+                    if(se)
+                        se->SpellScalingId = 0;
+
+                    for(std::list<WorldObject*>::const_iterator itr = objlist.begin(); itr != objlist.end(); ++itr)
+                    {
+                        if((*itr) && (*itr)->IsInWorld() && ((*itr)->GetTypeId() == TYPEID_UNIT || (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            && ((Unit*)*itr)->IsHostileTo(creator))
+                            creator->CastCustomSpell(me,81297,&damage,0,0,true);
+                    }
+                }
+                else
+                    sLog.outString("Couldn't find creator of Consecration !");
+                ticktimer = 1000;
+            } else ticktimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new consecrationAI(c);
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
     new spell_pal_holy_shock();
+    new npc_pal_consecration();
 }
