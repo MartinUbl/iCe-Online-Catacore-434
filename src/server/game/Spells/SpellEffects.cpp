@@ -2325,6 +2325,29 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
         {
             //multiply by amount of holy power (+1 for unknown purposes)
             addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
+
+            // Guarded by Light talent (if healing self, increase health)
+            if (caster == unitTarget)
+            {
+                if (caster->HasAura(85646))
+                    addhealth *= 1.1f;
+                else if (caster->HasAura(85639))
+                    addhealth *= 1.05f;
+            }
+            // Guarded by Light also allows to proc Holy Shield from Word of Glory
+            if ((caster->HasAura(85646) || caster->HasAura(85639)) && caster->HasAura(20925))
+                caster->CastSpell(caster,87342,true);
+            // and also Guarded by Light rank 2 procs shield that absorbs overhealed health
+            if (caster->HasAura(85646))
+            {
+                int32 missinghealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
+                if (addhealth > missinghealth)
+                {
+                    int32 bp0 = addhealth-missinghealth;
+                    caster->CastCustomSpell(unitTarget, 88063, &bp0, 0, 0, true);
+                }
+            }
+
             //and clear holy power (except if Eternal Glory talent procs)
             if (!((caster->HasAura(87163) && roll_chance_i(15)) ||
                  (caster->HasAura(87164) && roll_chance_i(30))) )
