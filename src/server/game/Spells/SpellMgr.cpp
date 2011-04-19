@@ -1161,6 +1161,10 @@ SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 
         (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
+    // Allow casting healing spells in Spirit of Redemption
+    if(form == 32 && (spellInfo->Effect[0] == SPELL_EFFECT_HEAL || spellInfo->Effect[1] == SPELL_EFFECT_HEAL || spellInfo->Effect[2] == SPELL_EFFECT_HEAL))
+        return SPELL_CAST_OK;
+
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
     if (stanceMask & spellInfo->StancesNot)                 // can explicitly not be casted in this stance
