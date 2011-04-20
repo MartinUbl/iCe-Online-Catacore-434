@@ -1421,7 +1421,7 @@ void Guild::UpdateGuildNews(WorldSession* session)
     data << uint32(count);   //count
 
     // Unknown
-    for (int i = 0; i < count; i++)
+    for (uint32 i = 0; i < count; i++)
         data << uint32(0);
 
     // Date and time, unknown for now (wierd structure)
@@ -1441,11 +1441,11 @@ void Guild::UpdateGuildNews(WorldSession* session)
         data << uint32(*itr);
 
     // Unknown
-    for (int i = 0; i < count; i++)
+    for (uint32 i = 0; i < count; i++)
         data << uint32(0);
 
     // Unknown
-    for (int i = 0; i < count; i++)
+    for (uint32 i = 0; i < count; i++)
         data << uint32(-1);
 
     if (session)
