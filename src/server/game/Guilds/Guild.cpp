@@ -2381,10 +2381,6 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
     // This will be prevent attempt to join many guilds and corrupt guild data integrity
     Player::RemovePetitionsAndSigns(guid, GUILD_CHARTER_TYPE);
 
-    // If player wasn't in this guild before relog, reset guild reputation to zero
-    if (player->GetLastGuildId() != m_id)
-        player->SetReputation(1168,0);
-
     uint32 lowguid = GUID_LOPART(guid);
 
     // If rank was not passed, assing lowest possible rank
@@ -2396,6 +2392,10 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
     {
         pMember->AddFlag(GUILD_MEMBER_FLAG_ONLINE);
         pMember->SetStats(player);
+
+        // If player wasn't in this guild before relog, reset guild reputation to zero
+        if (player->GetLastGuildId() != m_id)
+            player->SetReputation(1168,0);
 
         // Learn our perks to him
         for(int i = 0; i < m_level-1; ++i)
