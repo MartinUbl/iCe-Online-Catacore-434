@@ -182,7 +182,7 @@ public:
     }
 };
 
-// Incanter's Absorption
+// Incanter's Absorption (Mage Ward)
 class spell_mage_incanters_absorbtion_absorb : public SpellScriptLoader
 {
 public:
@@ -196,19 +196,29 @@ public:
         {
             SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED = 44413,
             SPELL_MAGE_INCANTERS_ABSORBTION_R1 = 44394,
+            SPELL_MAGE_INCANTERS_ABSORBTION_R2 = 44395,
         };
 
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             return sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED) 
-                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R1);
+                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R1)
+                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R2);
         }
 
         void Trigger(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
+            if(aurEff->GetId() != 543) // Mage Ward
+                return;
+
             Unit * target = GetTarget();
 
             if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
+            {
+                int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
+                target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+            }
+            else if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R2, EFFECT_0))
             {
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
@@ -227,7 +237,7 @@ public:
     }
 };
 
-// Incanter's Absorption
+// Incanter's Absorption (Mana Shield)
 class spell_mage_incanters_absorbtion_manashield : public SpellScriptLoader
 {
 public:
@@ -241,16 +251,21 @@ public:
         {
             SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED = 44413,
             SPELL_MAGE_INCANTERS_ABSORBTION_R1 = 44394,
+            SPELL_MAGE_INCANTERS_ABSORBTION_R2 = 44395,
         };
 
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             return sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED) 
-                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R1);
+                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R1)
+                && sSpellStore.LookupEntry(SPELL_MAGE_INCANTERS_ABSORBTION_R2);
         }
 
         void Trigger(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
+            if(aurEff->GetId() != 1463) // Mana Shield
+                return;
+
             Unit * target = GetTarget();
 
             if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
@@ -258,6 +273,14 @@ public:
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
             }
+            else if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R2, EFFECT_0))
+            {
+                int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
+                target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+            }
+
+            if (dmgInfo.GetDamage() != 0) // Mana Shield broken
+                target->CastSpell(target, 86261, true); // Knockback to nearby enemies
         }
 
         void Register()
