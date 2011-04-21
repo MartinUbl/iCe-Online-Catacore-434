@@ -415,7 +415,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tame",           SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTameCommand,             "", NULL },
         { "setdeathstate",  SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcSetDeathStateCommand,    "", NULL },
         { "addformation",   SEC_MODERATOR,      false, &ChatHandler::HandleNpcAddFormationCommand,     "", NULL },
-        { "setlink",        SEC_GAMEMASTER,      false, &ChatHandler::HandleNpcSetLinkCommand,          "", NULL },
+        { "setlink",        SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcSetLinkCommand,          "", NULL },
+
+        { "spawncircle",    SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcSpawncircle,             "", NULL },
 
         //{ TODO: fix or remove this commands
         { "addweapon",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleNpcAddWeaponCommand,        "", NULL },
@@ -740,7 +742,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "pet",            SEC_GAMEMASTER,     false, NULL,                                           "", petCommandTable },
         { "loadpath",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReloadAllPaths,             "", NULL },
         { "ticket",         SEC_MODERATOR,      false,  NULL,                                          "", ticketCommandTable },
-        { "opcode",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleOpcodeTestCommand,          "", NULL },
 
 		{ "opcode",         SEC_MODERATOR,      false, &ChatHandler::HandleOpcodeTestCommand,          "", NULL },
 

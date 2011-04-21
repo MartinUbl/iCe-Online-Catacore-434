@@ -195,6 +195,86 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
   return true;
 }
 
+#include "ScriptMgr.h"
+
+bool ChatHandler::HandleNpcSpawncircle(const char* args)
+{
+    std::istringstream arg(args);
+        
+    uint32 entry = 0;
+    uint32 count = 0;
+    float radius = 3.0f;
+    float spawndist = 0;
+
+    arg >> entry;
+    arg >> count;
+    arg >> radius;
+    arg >> spawndist;
+    
+    if (entry == 0 || count == 0 || radius == 0.0f)
+    {
+        PSendSysMessage("Incorrect syntax");
+        return false;
+    }
+    if (count < 2 || count > 10)
+    {
+        PSendSysMessage("Lze spawnit 2-10 najednou");
+        return false;
+    }
+    CreatureInfo const *ci = sObjectMgr.GetCreatureTemplate(entry);
+    if (!ci)
+    {
+        PSendSysMessage("NPC %u neexistuje",entry);
+        return false;
+    }
+
+    float x,y,z;
+    // Plesk
+    for (uint32 i = 0; i < count; i++)
+    {
+        m_session->GetPlayer()->GetClosePoint(x,y,z,1.0f,radius,i*(2*3.141f/count));
+
+        Creature* pCreature = NULL;
+        if(ci->ScriptID)
+            pCreature = sScriptMgr.GetCreatureScriptedClass(ci->ScriptID);
+        if(pCreature == NULL)
+            pCreature = new Creature();
+
+        if (!pCreature->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), m_session->GetPlayer()->GetMap(), m_session->GetPlayer()->GetPhaseMaskForSpawn(), entry, 0, 0, x, y, z, m_session->GetPlayer()->GetAngle(x,y)-3.141f))
+        {
+            delete pCreature;
+            return false;
+        }
+
+        pCreature->SaveToDB(m_session->GetPlayer()->GetMapId(), (1 << m_session->GetPlayer()->GetMap()->GetSpawnMode()), m_session->GetPlayer()->GetPhaseMaskForSpawn());
+
+        uint32 db_guid = pCreature->GetDBTableGUIDLow();
+
+        // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+        pCreature->LoadFromDB(db_guid, m_session->GetPlayer()->GetMap());
+
+        m_session->GetPlayer()->GetMap()->Add(pCreature);
+        sObjectMgr.AddCreatureToGrid(db_guid, sObjectMgr.GetCreatureData(db_guid));
+
+        if (spawndist > 0)
+        {
+            pCreature->SetRespawnRadius((float)spawndist);
+            pCreature->SetDefaultMovementType(RANDOM_MOTION_TYPE);
+            pCreature->GetMotionMaster()->Initialize();
+            if (pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+            {
+                pCreature->setDeathState(JUST_DIED);
+                pCreature->Respawn();
+            }
+
+            WorldDatabase.PExecute("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u",spawndist,RANDOM_MOTION_TYPE,db_guid);
+        }
+    }
+    PSendSysMessage("Byl naspawnen kruh %u NPC %u (%s)",count,entry,ci->Name);
+
+    return true;
+}
+
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
 {
