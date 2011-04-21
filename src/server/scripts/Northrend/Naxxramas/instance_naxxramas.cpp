@@ -173,7 +173,7 @@ public:
             AddMinion(creature, false);
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
             if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
             {

@@ -82,8 +82,11 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
+            if(!add)
+                return;
+
             switch (go->GetEntry())
             {
                 case 192395:

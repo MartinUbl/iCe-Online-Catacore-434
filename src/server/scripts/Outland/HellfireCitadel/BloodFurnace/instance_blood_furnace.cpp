@@ -105,9 +105,6 @@ class instance_blood_furnace : public InstanceMapScript
 
             void OnGameObjectCreate(GameObject* pGo, bool add)
             {
-                if (!add)
-                    return;
-
              if (pGo->GetEntry() == 181766)                //Final exit door
                  Door1GUID = pGo->GetGUID();
              if (pGo->GetEntry() == 181811)               //The Maker Front door

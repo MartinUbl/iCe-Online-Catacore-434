@@ -272,7 +272,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
             switch(go->GetEntry())
             {

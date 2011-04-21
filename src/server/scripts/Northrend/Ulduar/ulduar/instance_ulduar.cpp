@@ -178,7 +178,7 @@ public:
 
          }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
 			if(go->GetGOInfo()->displayId == 8593)
 			{

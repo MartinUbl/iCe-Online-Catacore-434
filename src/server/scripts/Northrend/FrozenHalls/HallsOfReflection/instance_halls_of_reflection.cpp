@@ -177,7 +177,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
             // TODO: init state depending on encounters
             switch(go->GetEntry())

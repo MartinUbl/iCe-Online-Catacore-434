@@ -88,7 +88,7 @@ public:
             }
         }
         
-        void OnGameObjectCreate(GameObject *pGo)
+        void OnGameObjectCreate(GameObject *pGo, bool add)
         {
             switch(pGo->GetEntry())
             {

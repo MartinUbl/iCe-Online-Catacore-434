@@ -76,7 +76,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* go, bool add)
         {
             if (go->GetEntry() == GO_DRAGON_CAGE_DOOR)
             {
