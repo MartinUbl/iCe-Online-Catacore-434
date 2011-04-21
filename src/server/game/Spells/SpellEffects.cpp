@@ -5747,6 +5747,18 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 // Disable spell
                 m_caster->RemoveAurasDueToSpell(87154);
             }
+
+            // Chakra: Serenity - Refresh Renew
+            if (m_spellInfo->Id == 81585)
+            {
+                if (!unitTarget)
+                    return;
+
+                // Direct heals condition handled implicitely
+
+                if (Aura* renew = unitTarget->GetAura(139))
+                    renew->RefreshDuration();
+            }
         }
     }
 

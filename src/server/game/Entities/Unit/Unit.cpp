@@ -14858,6 +14858,10 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry co
 {
     SpellEntry const *spellProto = aura->GetSpellProto();
 
+    // Call hack to handle aura proc of non triggering auras if required
+    if(HandleAuraProcHack(pVictim, aura, procSpell, procFlag, procExtra, attType, isVictim, active))
+        return false;
+
     // Get proc Event Entry
     spellProcEvent = sSpellMgr.GetSpellProcEvent(spellProto->Id);
 
@@ -17273,4 +17277,93 @@ void CharmInfo::SetIsReturning(bool val)
 bool CharmInfo::IsReturning()
 {
     return m_isReturning;
+}
+
+// HandleAuraProcHack in order to proc non triggering auras
+bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active)
+{
+    // Return value: false - continue normal handling : true - do not continue
+
+    SpellEntry const* dummySpell = aura->GetSpellProto();
+
+    // BE CAREFUL ! no foregoing checks.
+    // on melee procSpell = NULL, auras trigger themselves by other aura effects, etc..
+
+    // All aura IDs to be registered here to prevent mistakes and not to handle regular spells
+    switch(dummySpell->Id)
+    {
+    // add case
+    case 14751:
+        break; // Continue handling
+    default:
+        return false; // Escape hack and continue normal way
+        break;
+    }
+
+    switch(dummySpell->SpellFamilyName)
+    {
+    case SPELLFAMILY_PRIEST:
+        {
+            switch(dummySpell->Id)
+            {
+            // Chakra
+            case 14751:
+                {
+                    if(!procSpell)
+                        break;
+
+                    // is caster
+                    if(procFlag &
+                        PROC_FLAG_DONE_MELEE_AUTO_ATTACK |
+                        PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
+                        PROC_FLAG_DONE_RANGED_AUTO_ATTACK |
+                        PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
+                        PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS |
+                        PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG |
+                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
+                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG)
+                    {
+                        // these spells trigger different chakra states
+                        switch(procSpell->Id)
+                        {
+                            // Chakra: Serenity
+                            case 2050:  // Heal
+                            case 2061:  // Flash Heal
+                            case 2060:  // Greater Heal
+                            case 32546: // Binding Heal
+                                CastSpell(this, 81208, true); // Refreshing Renew spell (81585) has its script effect handler
+                                RemoveAurasDueToSpell(81206);
+                                RemoveAurasDueToSpell(81207);
+                                RemoveAurasDueToSpell(81209);
+                                RemoveAurasDueToSpell(14751);
+                                break;
+                            // Chakra: Sanctuary
+                            case 596:   // Prayer of Healing
+                            case 33076: // Prayer of Mending
+                                CastSpell(this, 81206, true);
+                                CastSpell(this, 81207, true);
+                                RemoveAurasDueToSpell(81208);
+                                RemoveAurasDueToSpell(81209);
+                                RemoveAurasDueToSpell(14751);
+                                break;
+                            // Chakra: Chastise
+                            case 585:   // Smite
+                            case 73510: // Mind Spike
+                                CastSpell(this, 81209, true);
+                                RemoveAurasDueToSpell(81206);
+                                RemoveAurasDueToSpell(81207);
+                                RemoveAurasDueToSpell(81208);
+                                RemoveAurasDueToSpell(14751);
+                                break;
+                            default: break;
+                        }
+                    }
+                    break;
+                }
+            default: break;
+            }
+        }
+    default: break;
+    }
+    return true; // Will not continue handling the aura
 }
