@@ -6055,7 +6055,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         // Refresh duration not considering number of charges
                         pEvangelism->RefreshDuration();
                     }
-                    else CastSpell(this, auraid, true); // Cast a new one
+                    else
+                    {
+                        // Cast a new one
+                        CastSpell(this, auraid, true);
+
+                        // Fresh aura has 0 charges, add one
+                        if (Aura* aura = GetAura(auraid))
+                            aura->SetCharges(1);
+                    }
 
                     // Enable Archangel spell (87151)
                     if (Aura* pAura = GetAura(87154))

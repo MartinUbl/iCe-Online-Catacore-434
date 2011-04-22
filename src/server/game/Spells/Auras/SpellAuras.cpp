@@ -1085,17 +1085,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             // Refresh duration not considering number of charges
                             pEvangelism->RefreshDuration();
                         }
-                        else caster->CastSpell(caster, auraid, true); // Cast a new one
-
-                        // If has talent Archangel
-                        //if (caster->HasAura(87151))
+                        else
                         {
-                            // Enable Archangel
-                            if (Aura* pAura = caster->GetAura(87154))
-                                pAura->RefreshDuration();
-                            else
-                                caster->CastSpell(caster, 87154, true);
+                            // Cast a new one
+                            caster->CastSpell(caster, auraid, true);
+
+                            // Fresh aura has 0 charges, add one
+                            if (Aura* aura = caster->GetAura(auraid))
+                                aura->SetCharges(1);
                         }
+
+                        // Enable Archangel
+                        if (Aura* pAura = caster->GetAura(87154))
+                            pAura->RefreshDuration();
+                        else
+                            caster->CastSpell(caster, 87154, true);
                         break;
                     }
                 // Power Word: Shield
