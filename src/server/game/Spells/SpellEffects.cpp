@@ -38,6 +38,7 @@
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "Group.h"
+#include "Guild.h"
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
@@ -2620,6 +2621,10 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)
             player->UpdateCraftSkill(m_spellInfo->Id);
+
+        // Add guild news for crafting epic things
+        if (pItem->GetProto()->Quality == ITEM_QUALITY_EPIC)
+            player->AddGuildNews(GUILD_NEWS_ITEM_CRAFT, pItem->GetEntry());
     }
 
 /*

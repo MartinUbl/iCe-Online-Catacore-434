@@ -1381,12 +1381,16 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 
 void Guild::UpdateGuildNews(WorldSession* session)
 {
-    QueryResult qr = CharacterDatabase.PQuery("SELECT event_type, param, date, playerguid FROM guild_news WHERE guildid=%u",m_id);
+    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+        return;
+
+    QueryResult qr = CharacterDatabase.PQuery("SELECT id, event_type, param, date, playerguid FROM guild_news WHERE guildid=%u",m_id);
     if(!qr)
         return;
 
     uint32 count = qr->GetRowCount();
 
+    std::list<uint32> IDList;
     std::list<uint32> EventTypeList;
     std::list<uint32> DateList;
     std::list<uint64> ParamList;
@@ -1395,10 +1399,11 @@ void Guild::UpdateGuildNews(WorldSession* session)
     Field* fd = qr->Fetch();
     while (fd)
     {
-        EventTypeList.push_back(fd[0].GetUInt32());
-        ParamList.push_back(fd[1].GetUInt64());
-        DateList.push_back(fd[2].GetUInt64());
-        GUIDList.push_back(fd[3].GetUInt64());
+        IDList.push_back(fd[0].GetUInt32());
+        EventTypeList.push_back(fd[1].GetUInt32());
+        ParamList.push_back(fd[2].GetUInt64());
+        DateList.push_back(fd[3].GetUInt64());
+        GUIDList.push_back(fd[4].GetUInt64());
 
         if (!qr->NextRow())
             break;
@@ -1444,14 +1449,46 @@ void Guild::UpdateGuildNews(WorldSession* session)
     for (uint32 i = 0; i < count; i++)
         data << uint32(0);
 
-    // Unknown
-    for (uint32 i = 0; i < count; i++)
-        data << uint32(-1);
+    // Identificator - to avoid double displaying, each news has its own "ID"
+    for (std::list<uint32>::const_iterator itr = IDList.begin(); itr != IDList.end(); ++itr)
+        data << uint32(*itr);
 
     if (session)
         session->SendPacket(&data);
     else
         BroadcastPacket(&data);
+}
+
+void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
+{
+    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+        return;
+
+    if (!pPlayer || type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
+        return;
+
+    // WARNING !
+    // Unknown date formula, use "Sunday 1/1" for all events sice formula is not known
+    uint32 date = 0x0000;
+
+    CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
+        uint32(m_id), uint32(type), uint32(param), uint32(date), uint32(pPlayer->GetGUID()));
+}
+
+void Guild::AddGuildNews(GuildNewsType type, uint64 param)
+{
+    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+        return;
+
+    if (type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
+        return;
+
+    // WARNING !
+    // Unknown date formula, use "Sunday 1/1" for all events sice formula is not known
+    uint32 date = 0x0000;
+
+    CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
+        uint32(m_id), uint32(type), uint32(param), uint32(date), 0);
 }
 
 void Guild::HandleQuery(WorldSession *session)
@@ -3115,6 +3152,8 @@ void Guild::LevelUp()
     uint8 level = m_level + 1;
     m_level = level;
     m_nextLevelXP = sObjectMgr.GetXPForGuildLevel(level);
+
+    AddGuildNews(GUILD_NEWS_GUILD_LEVEL, m_level);
 
     WorldPacket data(SMSG_GUILD_XP_UPDATE, 8*5);
     data << uint64(0x37); // max daily xp

@@ -160,6 +160,17 @@ enum GuildEvents
     GE_GUILDBANK_TEXT_CHANGED       = 0x17,                 // EVENT_GUILDBANK_TEXT_CHANGED
 };
 
+enum GuildNewsType
+{
+    GUILD_NEWS_GUILD_ACHIEVEMENT    = 0x00,
+    GUILD_NEWS_PLAYER_ACHIEVEMENT   = 0x01,
+    GUILD_NEWS_BOSS_ENCOUNTER       = 0x02,
+    GUILD_NEWS_ITEM_LOOT            = 0x03,
+    GUILD_NEWS_ITEM_CRAFT           = 0x04,
+    GUILD_NEWS_ITEM_PURCHASED       = 0x05,
+    GUILD_NEWS_GUILD_LEVEL          = 0x06
+};
+
 enum PetitionTurns
 {
     PETITION_TURN_OK                    = 0,
@@ -727,6 +738,8 @@ public:
     uint64 GetNextLevelXP() { return m_nextLevelXP; }
 
     void UpdateGuildNews(WorldSession* session);
+    void AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param);
+    void AddGuildNews(GuildNewsType type, uint64 param);
 
     void GainXP(uint64 xp);
     void LevelUp();

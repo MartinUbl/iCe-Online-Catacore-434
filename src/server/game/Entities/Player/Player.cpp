@@ -76,6 +76,7 @@
 #include "LFGMgr.h"
 #include <cmath>
 #include "Pet.h"
+#include "Guild.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -19950,6 +19951,18 @@ void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
     CharacterDatabase.CommitTransaction(trans);
 }
 
+void Player::AddGuildNews(uint32 type, uint64 param)
+{
+    // Not in a guild
+    if (!GetGuildId())
+        return;
+
+    Guild* pGuild = sObjectMgr.GetGuildById(GetGuildId());
+
+    if (pGuild)
+        pGuild->AddMemberNews(this, GuildNewsType(type), param);
+}
+
 void Player::LeaveAllArenaTeams(uint64 guid)
 {
     QueryResult result = CharacterDatabase.PQuery("SELECT arena_team_member.arenateamid FROM arena_team_member JOIN arena_team ON arena_team_member.arenateamid = arena_team.arenateamid WHERE guid='%u'", GUID_LOPART(guid));
@@ -23641,6 +23654,12 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
+
+        // Add guild news for this
+        if ((newitem->GetProto()->Quality == ITEM_QUALITY_EPIC || newitem->GetProto()->Quality == ITEM_QUALITY_LEGENDARY ||
+            newitem->GetProto()->Quality == ITEM_QUALITY_ARTIFACT) && (newitem->GetProto()->Class == ITEM_CLASS_ARMOR ||
+            newitem->GetProto()->Class == ITEM_CLASS_WEAPON))
+            AddGuildNews(GUILD_NEWS_ITEM_LOOT, item->itemid);
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);
