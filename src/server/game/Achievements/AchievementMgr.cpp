@@ -736,6 +736,14 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
         sLog.outDetail("AchievementMgr::UpdateAchievementCriteria(%u, %u, %u, %u)", type, miscvalue1, miscvalue2, time);
 
+    // If player has guild, notify also theirs achievement mgr
+    if (GetPlayer()->GetGuildId())
+    {
+        Guild* hisGuild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+        if (hisGuild)
+            hisGuild->GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
+    }
+
     if (!sWorld.getBoolConfig(CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 

@@ -69,6 +69,16 @@ void Guild::SendSaveEmblemResult(WorldSession* session, GuildEmblemError errCode
 
 ///////////////////////////////////////////////////////////////////////////////
 // GuildAchievementMgr
+GuildAchievementMgr::GuildAchievementMgr(Guild* pGuild)
+{
+    m_guild = pGuild;
+    achievementPoints = 0;
+}
+
+GuildAchievementMgr::~GuildAchievementMgr()
+{
+}
+
 void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time)
 {
     if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
@@ -85,7 +95,11 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
         if (!achievement)
             continue;
 
-        //if ((achievement->factionFlag == ACHIEVEMENT_FACTION_HORDE    &&  != HORDE) ||
+        if (!(achievement->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT))
+            continue;
+
+        // TODO: implement faction dependent achievements based on guild faction !
+        //if ((achievement->factionFlag == ACHIEVEMENT_FACTION_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
         //    (achievement->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
         //    continue;
 
@@ -95,10 +109,14 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
 
         switch (type)
         {
-            case 1: // remove this silly placeholder
+            case 125: // for testing - "earn guild level"
+                SetCriteriaProgress(achievementCriteria, m_guild->GetLevel());
                 break;
-            // Not implemented, sorry
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CRITTERS: // for testing - "kill critters"
+                if (unit && unit->GetCreatureType() == CREATURE_TYPE_CRITTER)
+                    SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
             default:
+                // Not implemented, sorry
                 continue;
         }
 
@@ -145,6 +163,9 @@ void GuildAchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type
 
         AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         if (!achievement)
+            continue;
+
+        if (!(achievement->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT))
             continue;
 
         // don't update already completed criteria if not forced or achievement already complete
@@ -1446,7 +1467,7 @@ uint8 Guild::BankMoveItemData::_CanStore(Item* pItem, bool swap)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Guild
-Guild::Guild() : m_id(0), m_leaderGuid(0), m_createdDate(0), m_accountsNumber(0), m_bankMoney(0), m_eventLog(NULL), m_lastXPSave(0)
+Guild::Guild() : m_id(0), m_leaderGuid(0), m_createdDate(0), m_accountsNumber(0), m_bankMoney(0), m_eventLog(NULL), m_lastXPSave(0), m_achievementMgr(this)
 {
     memset(&m_bankEventLog, 0, (GUILD_BANK_MAX_TABS + 1) * sizeof(LogHolder*));
 }

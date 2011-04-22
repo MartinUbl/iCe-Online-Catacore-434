@@ -239,8 +239,12 @@ enum AchievementCriteriaTypes
     // 130 win x rated battlegrounds
     // 131
     // 132 reach x rated battleground rating
-    // 0..132 => 133 criteria types total
-    ACHIEVEMENT_CRITERIA_TYPE_TOTAL = 133,
+    // 133
+    // 134
+    // 135
+    ACHIEVEMENT_CRITERIA_TYPE_KILL_CRITTERS = 136,
+    // 0..136 => 137 criteria types total
+    ACHIEVEMENT_CRITERIA_TYPE_TOTAL = 137,
 };
 
 enum AchievementCriteriaMoreReqType

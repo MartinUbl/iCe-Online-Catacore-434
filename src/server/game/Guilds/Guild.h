@@ -777,6 +777,8 @@ public:
 
     void SendGuildAchievementEarned(const AchievementEntry* achievement);
     void SendGuildCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress);
+    GuildAchievementMgr& GetAchievementMgr() { return m_achievementMgr; };
+    GuildAchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
 
     void GainXP(uint64 xp);
     void LevelUp();
@@ -800,6 +802,8 @@ protected:
     Ranks m_ranks;
     Members m_members;
     BankTabs m_bankTabs;
+
+    GuildAchievementMgr m_achievementMgr;
 
     uint32 m_lastXPSave;
 
