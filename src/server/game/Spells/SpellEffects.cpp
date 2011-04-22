@@ -2454,6 +2454,10 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
         // Healthstone
         else if (m_spellInfo->Id == 6262)
             addhealth = (float(addhealth)/100.0f)*caster->GetMaxHealth();
+        // Divine Touch
+        else if (m_spellInfo->Id == 63544)
+        {
+        }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
