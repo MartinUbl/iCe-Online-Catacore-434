@@ -1517,6 +1517,22 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
         }
     }
 
+    // Rogue: Find Weakness
+    // (applied by Ambush, Garrote, Cheap Shot)
+    if (pVictim)
+    {
+        // Victim is affected by Find Weakness debuff
+        if (Aura* debuff = pVictim->GetAura(91021))
+        {
+            // We are the attacking Rogue, the debuff is ours
+            if (debuff->GetCaster() == this && this != pVictim)
+            {
+                // Bypass percentage of targets armor
+                armor -= armor * debuff->GetEffect(0)->GetAmount() / 100;
+            }
+        }
+    }
+
     // Apply Player CR_ARMOR_PENETRATION rating
     if (GetTypeId() == TYPEID_PLAYER)
     {
@@ -7911,6 +7927,34 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
                         return false;
                     return true;
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch(dummySpell->Id)
+            {
+                // Find Weakness
+                case 51632: // rank #1
+                case 91023: // rank #2
+                {
+                    *handled = true;
+                    // Ambush
+                    if (!procSpell || !pVictim || procSpell->Id != 8676)
+                        return false;
+
+                    if (!(procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)))
+                         return false;
+
+                    // Rank #1 35%, Rank #2 70%
+                    int32 bp0 = dummySpell->Id == 51632 ? 35 : 70;
+                    // Apply debuff
+                    CastCustomSpell(pVictim, 91021, &bp0, NULL, NULL, true);
+                    return false;
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }

@@ -1135,6 +1135,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (Aura* rec = target->GetAura(73651))
                         rec->RefreshDuration();
                 }
+                // Cheap Shot, Garrote
+                if (apply && (GetSpellProto()->Id == 1833 || GetSpellProto()->Id == 703)) //1330
+                {
+                    if (Unit* caster = aurApp->GetBase()->GetCaster())
+                    {
+                        int32 bp0 = 0;
+                        // Find Weakness
+                        if (caster->HasAura(51632)) // Rank #1
+                            bp0 = 35;
+                        else if (caster->HasAura(91023)) // Rank #2
+                            bp0 = 70;
+
+                        if (bp0) // Apply debuff
+                            caster->CastCustomSpell(target, 91021, &bp0, NULL, NULL, true);
+                    }
+                }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 if (!caster)
