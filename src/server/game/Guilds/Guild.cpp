@@ -28,6 +28,7 @@
 #include "Config.h"
 #include "SocialMgr.h"
 #include "Log.h"
+#include "DisableMgr.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -64,6 +65,373 @@ void Guild::SendSaveEmblemResult(WorldSession* session, GuildEmblemError errCode
     session->SendPacket(&data);
 
     sLog.outDebug("WORLD: Sent (MSG_SAVE_GUILD_EMBLEM)");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// GuildAchievementMgr
+void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time)
+{
+    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
+        sLog.outDetail("AchievementMgr::UpdateAchievementCriteria(%u, %u, %u, %u)", type, miscvalue1, miscvalue2, time);
+
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
+    {
+        AchievementCriteriaEntry const *achievementCriteria = (*i);
+        if (sDisableMgr.IsDisabledFor(DISABLE_TYPE_ACHIEVEMENT_CRITERIA, achievementCriteria->ID, NULL))
+            continue;
+
+        AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        if (!achievement)
+            continue;
+
+        //if ((achievement->factionFlag == ACHIEVEMENT_FACTION_HORDE    &&  != HORDE) ||
+        //    (achievement->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
+        //    continue;
+
+        // don't update already completed criteria
+        if (IsCompletedCriteria(achievementCriteria,achievement))
+            continue;
+
+        switch (type)
+        {
+            case 1: // remove this silly placeholder
+                break;
+            // Not implemented, sorry
+            default:
+                continue;
+        }
+
+        if (IsCompletedCriteria(achievementCriteria,achievement))
+            CompletedCriteriaFor(achievement);
+
+        // check again the completeness for SUMM and REQ COUNT achievements,
+        // as they don't depend on the completed criteria but on the sum of the progress of each individual criteria
+        if (achievement->flags & ACHIEVEMENT_FLAG_SUMM)
+        {
+            if (IsCompletedAchievement(achievement))
+                CompletedAchievement(achievement);
+        }
+
+        if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
+        {
+            for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
+                if (IsCompletedAchievement(*itr))
+                    CompletedAchievement(*itr);
+        }
+    }
+}
+
+void GuildAchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress)
+{
+    if (!entry)
+        return;
+
+    if (!progress)
+        return;
+
+    m_guild->SendGuildCriteriaUpdate(entry, progress);
+}
+
+void GuildAchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, bool evenIfCriteriaComplete)
+{
+    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
+        sLog.outDetail("GuildAchievementMgr::ResetAchievementCriteria(%u, %u, %u)", type, miscvalue1, miscvalue2);
+
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
+    {
+        AchievementCriteriaEntry const *achievementCriteria = (*i);
+
+        AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        if (!achievement)
+            continue;
+
+        // don't update already completed criteria if not forced or achievement already complete
+        if ((IsCompletedCriteria(achievementCriteria, achievement) && !evenIfCriteriaComplete) || HasAchieved(achievement))
+            continue;
+
+        for (uint8 j = 0; j < MAX_CRITERIA_REQUIREMENTS; ++j)
+            if (achievementCriteria->additionalRequirements[j].additionalRequirement_type == miscvalue1 &&
+                (!achievementCriteria->additionalRequirements[j].additionalRequirement_value ||
+                achievementCriteria->additionalRequirements[j].additionalRequirement_value == miscvalue2))
+            {
+                RemoveCriteriaProgress(achievementCriteria);
+                break;
+            }
+    }
+}
+
+bool GuildAchievementMgr::HasAchieved(AchievementEntry const* achievement) const
+{
+    return m_completedAchievements.find(achievement->ID) != m_completedAchievements.end();
+}
+
+void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
+{
+    sLog.outDetail("GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
+
+    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement))
+        return;
+
+    // Guilds can earn only guild achievements..obviously..
+    if (!(achievement->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT))
+        return;
+
+    CompletedAchievementData& ca = m_completedAchievements[achievement->ID];
+    ca.date = time(NULL);
+    ca.changed = true;
+
+    if (AchievementEntry const* pAchievement = sAchievementStore.LookupEntry(achievement->ID))
+        achievementPoints += pAchievement->points;
+
+    m_guild->AddGuildNews(GUILD_NEWS_GUILD_ACHIEVEMENT, achievement->ID);
+
+    SendAchievementEarned(achievement);
+
+    // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
+    // TODO: where do set this instead?
+    if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
+        sAchievementMgr.SetRealmCompleted(achievement);
+
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points);
+}
+
+void GuildAchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
+{
+    if (achievement->flags & ACHIEVEMENT_FLAG_HIDDEN)
+        return;
+
+    m_guild->SendGuildAchievementEarned(achievement);
+}
+
+CriteriaProgress* GuildAchievementMgr::GetCriteriaProgress(AchievementCriteriaEntry const* entry)
+{
+    CriteriaProgressMap::iterator iter = m_criteriaProgress.find(entry->ID);
+
+    if (iter == m_criteriaProgress.end())
+        return NULL;
+
+    return &(iter->second);
+}
+
+void GuildAchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* entry, uint32 changeValue, ProgressType ptype)
+{
+    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
+        sLog.outDetail("AchievementMgr::SetCriteriaProgress(%u, %u) for (guild: %u)", entry->ID, changeValue, m_guild->GetId());
+
+    CriteriaProgress* progress = GetCriteriaProgress(entry);
+    if (!progress)
+    {
+        // not create record for 0 counter but allow it for timed achievements
+        // we will need to send 0 progress to client to start the timer
+        if (changeValue == 0 && !entry->timeLimit)
+            return;
+
+        progress = &m_criteriaProgress[entry->ID];
+        progress->counter = changeValue;
+    }
+    else
+    {
+        uint32 newValue = 0;
+        switch (ptype)
+        {
+            case PROGRESS_SET:
+                newValue = changeValue;
+                break;
+            case PROGRESS_ACCUMULATE:
+            {
+                // avoid overflow
+                uint32 max_value = std::numeric_limits<uint32>::max();
+                newValue = max_value - progress->counter > changeValue ? progress->counter + changeValue : max_value;
+                break;
+            }
+            case PROGRESS_HIGHEST:
+                newValue = progress->counter < changeValue ? changeValue : progress->counter;
+                break;
+        }
+
+        // not update (not mark as changed) if counter will have same value
+        if (progress->counter == newValue && !entry->timeLimit)
+            return;
+
+        progress->counter = newValue;
+    }
+
+    progress->changed = true;
+    progress->date = time(NULL); // set the date to the latest update.
+
+    SendCriteriaUpdate(entry, progress);
+}
+
+void GuildAchievementMgr::RemoveCriteriaProgress(const AchievementCriteriaEntry *entry)
+{
+    CriteriaProgressMap::iterator criteriaProgress = m_criteriaProgress.find(entry->ID);
+    if (criteriaProgress == m_criteriaProgress.end())
+        return;
+
+    // TODO: implement sending criteria delete to client
+    //WorldPacket data(SMSG_CRITERIA_DELETED,4);
+    //data << uint32(entry->ID);
+    //m_player->SendDirectMessage(&data);
+
+    m_criteriaProgress.erase(criteriaProgress);
+}
+
+void GuildAchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
+{
+    // counter can never complete
+    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+        return;
+
+    // already completed and stored
+    if (HasAchieved(achievement))
+        return;
+
+    if (IsCompletedAchievement(achievement))
+        CompletedAchievement(achievement);
+}
+
+bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement)
+{
+    // counter can never complete
+    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+        return false;
+
+    if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
+    {
+        // someone on this realm has already completed that achievement
+        if (sAchievementMgr.IsRealmCompleted(achievement))
+            return false;
+    }
+
+    CriteriaProgress const* progress = GetCriteriaProgress(achievementCriteria);
+    if (!progress)
+        return false;
+
+    switch (achievementCriteria->requiredType)
+    {
+        case 1: // remove this silly placeholder
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+
+bool GuildAchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
+{
+    // counter can never complete
+    if (entry->flags & ACHIEVEMENT_FLAG_COUNTER)
+        return false;
+
+    // for achievement with referenced achievement criterias get from referenced and counter from self
+    uint32 achievmentForTestId = entry->refAchievement ? entry->refAchievement : entry->ID;
+    uint32 achievmentForTestCount = entry->count;
+
+    AchievementCriteriaEntryList const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievmentForTestId);
+    if (!cList)
+        return false;
+    uint32 count = 0;
+
+    // For SUMM achievements, we have to count the progress of each criteria of the achievement.
+    // Oddly, the target count is NOT countained in the achievement, but in each individual criteria
+    if (entry->flags & ACHIEVEMENT_FLAG_SUMM)
+    {
+        for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+        {
+            AchievementCriteriaEntry const* criteria = *itr;
+
+            CriteriaProgress const* progress = GetCriteriaProgress(criteria);
+            if (!progress)
+                continue;
+
+            count += progress->counter;
+
+            // for counters, field4 contains the main count requirement
+            if (count >= criteria->raw.count)
+                return true;
+        }
+        return false;
+    }
+
+    // Default case - need complete all or
+    bool completed_all = true;
+    for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+    {
+        AchievementCriteriaEntry const* criteria = *itr;
+
+        bool completed = IsCompletedCriteria(criteria,entry);
+
+        // found an uncompleted criteria, but DONT return false yet - there might be a completed criteria with ACHIEVEMENT_CRITERIA_COMPLETE_FLAG_ALL
+        if (completed)
+            ++count;
+        else
+            completed_all = false;
+
+        // completed as have req. count of completed criterias
+        if (achievmentForTestCount > 0 && achievmentForTestCount <= count)
+           return true;
+    }
+
+    // all criterias completed requirement
+    if (completed_all && achievmentForTestCount == 0)
+        return true;
+
+    return false;
+}
+
+void Guild::SendGuildAchievementEarned(const AchievementEntry* achievement)
+{
+    if (!achievement)
+        return;
+
+    WorldPacket data(SMSG_ACHIEVEMENT_EARNED);
+
+    for(Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        if(Player* pMember = (*itr).second->FindPlayer())
+        {
+            data.clear();
+            data.resize(pMember->GetPackGUID().size()+4+4+4);
+            data.append(pMember->GetPackGUID());
+            data << uint32(achievement->ID);
+            data << uint32(secsToTimeBitFields(time(NULL)));
+            data << uint32(0);
+
+            pMember->GetSession()->SendPacket(&data);
+        }
+    }
+}
+
+void Guild::SendGuildCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress)
+{
+    if (!entry || !progress)
+        return;
+
+    WorldPacket data(SMSG_CRITERIA_UPDATE);
+
+    for(Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        if(Player* pMember = (*itr).second->FindPlayer())
+        {
+            data.clear();
+
+            data << uint32(entry->ID);
+
+            // the counter is packed like a packed Guid
+            data.appendPackGUID(progress->counter);
+
+            data.append(pMember->GetPackGUID());
+            data << uint32(0);              // this are some flags, 1 is for keeping the counter at 0 in client
+            data << uint32(secsToTimeBitFields(progress->date));
+            data << uint32(0);              // time elapsed in seconds
+            data << uint32(0);              // unk
+
+            pMember->GetSession()->SendPacket(&data);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

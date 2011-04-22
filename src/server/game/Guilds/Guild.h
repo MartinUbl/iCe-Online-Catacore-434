@@ -28,6 +28,7 @@
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "AchievementMgr.h"
 
 class Item;
 
@@ -254,6 +255,39 @@ private:
     uint32 m_borderStyle;
     uint32 m_borderColor;
     uint32 m_backgroundColor;
+};
+
+// Class for guild achievement manager
+class GuildAchievementMgr
+{
+    public:
+        GuildAchievementMgr(Guild* pGuild);
+        ~GuildAchievementMgr();
+
+        void CompletedAchievement(AchievementEntry const* achievement);
+        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, bool evenIfCriteriaComplete = false);
+        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
+        bool HasAchieved(AchievementEntry const* achievement) const;
+
+        Guild* GetGuild() { return m_guild; };
+
+    private:
+        enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
+
+        void SendAchievementEarned(AchievementEntry const* achievement);
+
+        void SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress);
+        CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
+        void SetCriteriaProgress(AchievementCriteriaEntry const* entry, uint32 changeValue, ProgressType ptype = PROGRESS_SET);
+        void RemoveCriteriaProgress(AchievementCriteriaEntry const* entry);
+        void CompletedCriteriaFor(AchievementEntry const* achievement);
+        bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
+        bool IsCompletedAchievement(AchievementEntry const* entry);
+
+        Guild* m_guild;
+        CriteriaProgressMap m_criteriaProgress;
+        CompletedAchievementMap m_completedAchievements;
+        uint32 achievementPoints;
 };
 
 // Structure for storing guild bank rights and remaining slots together.
@@ -740,6 +774,9 @@ public:
     void UpdateGuildNews(WorldSession* session);
     void AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param);
     void AddGuildNews(GuildNewsType type, uint64 param);
+
+    void SendGuildAchievementEarned(const AchievementEntry* achievement);
+    void SendGuildCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress);
 
     void GainXP(uint64 xp);
     void LevelUp();

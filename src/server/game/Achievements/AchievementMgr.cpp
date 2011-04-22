@@ -1992,6 +1992,8 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, b
     if (AchievementEntry const* pAchievement = sAchievementStore.LookupEntry(achievement->ID))
         achievementPoints += pAchievement->points;
 
+    GetPlayer()->AddGuildNews(GUILD_NEWS_PLAYER_ACHIEVEMENT, achievement->ID);
+
     SendAchievementEarned(achievement);
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
