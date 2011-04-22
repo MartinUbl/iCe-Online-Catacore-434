@@ -1835,9 +1835,7 @@ void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
     if (!pPlayer || type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
-    // WARNING !
-    // Unknown date formula, use "Sunday 1/1" for all events sice formula is not known
-    uint32 date = 0x0000;
+    uint32 date = secsToTimeBitFields(time(NULL));
 
     CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
         uint32(m_id), uint32(type), uint32(param), uint32(date), uint32(pPlayer->GetGUID()));
@@ -1851,9 +1849,7 @@ void Guild::AddGuildNews(GuildNewsType type, uint64 param)
     if (type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
-    // WARNING !
-    // Unknown date formula, use "Sunday 1/1" for all events sice formula is not known
-    uint32 date = 0x0000;
+    uint32 date = secsToTimeBitFields(time(NULL));
 
     CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
         uint32(m_id), uint32(type), uint32(param), uint32(date), 0);
