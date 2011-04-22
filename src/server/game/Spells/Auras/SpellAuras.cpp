@@ -1050,17 +1050,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastCustomSpell(target, 63544, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
                     }
                 }
-                // Power Word: Shield
-                else if (m_spellProto->SpellFamilyFlags[0] & 0x1 && m_spellProto->SpellFamilyFlags[2] & 0x400 && GetEffect(0))
-                {
-                    // Glyph of Power Word: Shield
-                    if (AuraEffect* glyph = caster->GetAuraEffect(55672,0))
-                    {
-                        // instantly heal m_amount% of the absorb-value
-                        int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount()/100;
-                        caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
-                    }
-                }
                 switch(GetId())
                 {
                 // Mind Flay
@@ -1106,6 +1095,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 pAura->RefreshDuration();
                             else
                                 caster->CastSpell(caster, 87154, true);
+                        }
+                        break;
+                    }
+                // Power Word: Shield
+                case 17:
+                    {
+                        if (GetEffect(0))
+                        {
+                            // Glyph of Power Word: Shield
+                            if (AuraEffect* glyph = caster->GetAuraEffect(55672,0))
+                            {
+                                // instantly heal m_amount% of the absorb-value
+                                int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount() / 100;
+                                caster->CastCustomSpell(target, 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
+                            }
                         }
                         break;
                     }

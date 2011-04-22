@@ -2458,6 +2458,10 @@ void Spell::SpellDamageHeal(SpellEffIndex /*effIndex*/)
         else if (m_spellInfo->Id == 63544)
         {
         }
+        // Glyph of Power Word: Shield
+        else if (m_spellInfo->Id == 56160)
+        {
+        }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
