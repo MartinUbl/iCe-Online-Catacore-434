@@ -1597,6 +1597,32 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 return;
             }
             break;
+        case SPELLFAMILY_PRIEST:
+            // Leap of Faith
+            if (m_spellInfo->Id == 73325)
+            {
+                if(!unitTarget)
+                    return;
+
+                Position pos;
+                Unit* pTarget;
+                GetSummonPosition(effIndex, pos);
+                if (Unit *unit = unitTarget->GetVehicleBase())
+                    pTarget = unit;
+                else
+                    pTarget = unitTarget;
+
+                pTarget->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 10, 1);
+
+                // Body and Soul
+                if (m_caster->HasAura(64127))                  // rank #1
+                    m_caster->CastSpell(pTarget, 64128, true); // Increase speed of the target by 30%
+                else if (m_caster->HasAura(64129))             // rank #2
+                    m_caster->CastSpell(pTarget, 65081, true); // Increase speed of the target by 60%
+
+                return;
+            }
+            break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
