@@ -236,6 +236,8 @@ DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
 
+uint32 DBCFileCount = 0;
+
 static bool LoadDBC_assert_print(uint32 fsize,uint32 rsize, const std::string& filename)
 {
     sLog->outError("Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).",filename.c_str(),fsize,rsize);
@@ -250,7 +252,8 @@ inline void LoadDBC(uint32& availableDbcLocales, StoreProblemList& errlist, DBCS
     // compatibility format and C++ structure sizes
     if(!(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename)))
         return;
-    
+
+    ++DBCFileCount;
     std::string dbc_filename = dbc_path + filename;
     SqlDbc * sql = NULL;
     if (custom_entries)
@@ -285,8 +288,6 @@ inline void LoadDBC(uint32& availableDbcLocales, StoreProblemList& errlist, DBCS
 void LoadDBCStores(const std::string& dataPath)
 {
     std::string dbcPath = dataPath+"dbc/";
-
-    const uint32 DBCFilesCount = 119;
 
     StoreProblemList bad_dbc_files;
     uint32 availableDbcLocales = 0xFFFFFFFF;
@@ -689,9 +690,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bad_dbc_files,sWorldSafeLocsStore,       dbcPath,"WorldSafeLocs.dbc");
 
     // error checks
-    if (bad_dbc_files.size() >= DBCFilesCount)
+    if (bad_dbc_files.size() >= DBCFileCount)
     {
-        sLog->outError("\nIncorrect DataDir value in worldserver.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        sLog->outError("\nIncorrect DataDir value in worldserver.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFileCount,dataPath.c_str());
         exit(1);
     }
     else if (!bad_dbc_files.empty())
@@ -700,7 +701,7 @@ void LoadDBCStores(const std::string& dataPath)
         for (std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
             str += *i + "\n";
 
-        sLog->outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s",(uint32)bad_dbc_files.size(),DBCFilesCount,str.c_str());
+        sLog->outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s",(uint32)bad_dbc_files.size(),DBCFileCount,str.c_str());
         exit(1);
     }
 
@@ -717,7 +718,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
     sLog->outString();
-    sLog->outString(">> Initialized %d data stores", DBCFilesCount);
+    sLog->outString(">> Initialized %d data stores", DBCFileCount);
 }
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction)
