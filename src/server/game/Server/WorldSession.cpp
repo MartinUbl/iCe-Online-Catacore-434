@@ -749,7 +749,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     data >> mi->time;
     data >> mi->pos.PositionXYZOStream();
 
-    if (mi->flags & MOVEMENTFLAG_ONTRANSPORT)
+    if (mi->HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         data.readPackGUID(mi->t_guid);
 
@@ -757,7 +757,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->t_time;
         data >> mi->t_seat;
 
-        if (mi->flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
+        if (mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT))
             data >> mi->t_time2;
 
         if (mi->pos.m_positionX != mi->t_pos.m_positionX)
@@ -765,17 +765,17 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 GetPlayer()->GetTransport()->UpdatePosition(mi);
     }
 
-    if ((mi->flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (mi->flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
+    if (mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (mi->HasExtraMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING)))
     {
         data >> mi->pitch;
     }
 
-    if (mi->flags2 & MOVEMENTFLAG2_INTERPOLATED_TURNING)    // 4.0.6
+    if (mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING))    // 4.0.6
     {
         data >> mi->fallTime;
         data >> mi->j_zspeed;
 
-        if (mi->flags & MOVEMENTFLAG_JUMPING)
+        if (mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
         {
            data >> mi->j_sinAngle;
            data >> mi->j_cosAngle;
@@ -784,7 +784,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     }
 
 
-    if (mi->flags & MOVEMENTFLAG_SPLINE_ELEVATION)
+    if (mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
     {
         data >> mi->splineElevation;
     }
@@ -816,12 +816,12 @@ void WorldSession::WriteMovementInfo(WorldPacket *data, MovementInfo *mi)
         *data << mi->pitch;
     }
 
-    if (mi->flags2 & MOVEMENTFLAG2_INTERPOLATED_TURNING)    // 4.0.6
+    if (mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING))    // 4.0.6
     {
         *data << mi->fallTime;
         *data << mi->j_zspeed;
 
-        if (mi->flags & MOVEMENTFLAG_JUMPING)
+        if (mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
         {
            *data << mi->j_sinAngle;
            *data << mi->j_cosAngle;
