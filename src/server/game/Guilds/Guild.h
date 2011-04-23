@@ -380,7 +380,7 @@ private:
         void ResetTabTimes();
         void ResetMoneyTime();
 
-        inline Player* FindPlayer() const { return sObjectMgr.GetPlayer(m_guid); }
+        inline Player* FindPlayer() const { return sObjectMgr->GetPlayer(m_guid); }
 
         uint32 m_guildId;
         // Fields from characters table

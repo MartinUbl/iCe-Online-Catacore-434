@@ -315,7 +315,7 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
             : _mapEntry(sMapStore.LookupEntry(mapId))
         {
             if (!_mapEntry)
-                sLog.outError("Invalid MapScript for %u; no such map ID.", mapId);
+                sLog->outError("Invalid MapScript for %u; no such map ID.", mapId);
         }
 
     public:
@@ -762,7 +762,7 @@ public:
 };
 
 // Placed here due to ScriptRegistry::AddScript dependency.
-#define sScriptMgr (*ACE_Singleton<ScriptMgr, ACE_Null_Mutex>::instance())
+#define sScriptMgr ACE_Singleton<ScriptMgr, ACE_Null_Mutex>::instance()
 
 // Manages registration, loading, and execution of scripts.
 class ScriptMgr
@@ -1006,7 +1006,7 @@ class ScriptMgr
                     {
                         if (it->second == script)
                         {
-                            sLog.outError("Script '%s' has same memory pointer as '%s'.",
+                            sLog->outError("Script '%s' has same memory pointer as '%s'.",
                                 script->GetName().c_str(), it->second->GetName().c_str());
 
                             return;
@@ -1037,12 +1037,12 @@ class ScriptMgr
                             if (!existing)
                             {
                                 ScriptPointerList[id] = script;
-                                sScriptMgr.IncrementScriptCount();
+                                sScriptMgr->IncrementScriptCount();
                             }
                             else
                             {
                                 // If the script is already assigned -> delete it!
-                                sLog.outError("Script '%s' already assigned with the same script name, so the script can't work.",
+                                sLog->outError("Script '%s' already assigned with the same script name, so the script can't work.",
                                     script->GetName().c_str());
 
                                 ASSERT(false); // Error that should be fixed ASAP.
@@ -1052,7 +1052,7 @@ class ScriptMgr
                         {
                             // The script uses a script name from database, but isn't assigned to anything.
                             if (script->GetName().find("example") == std::string::npos && script->GetName().find("smart") == std::string::npos)
-                                sLog.outErrorDb("Script named '%s' does not have a script name assigned in database.",
+                                sLog->outErrorDb("Script named '%s' does not have a script name assigned in database.",
                                     script->GetName().c_str());
                         }
                     }
@@ -1060,7 +1060,7 @@ class ScriptMgr
                     {
                         // We're dealing with a code-only script; just add it.
                         ScriptPointerList[_scriptIdCounter++] = script;
-                        sScriptMgr.IncrementScriptCount();
+                        sScriptMgr->IncrementScriptCount();
                     }
                 }
 

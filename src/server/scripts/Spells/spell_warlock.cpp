@@ -67,7 +67,7 @@ public:
             {
                 if (targetCreature->isPet())
                 {
-                    CreatureInfo const * ci = sObjectMgr.GetCreatureTemplate(targetCreature->GetEntry());
+                    CreatureInfo const * ci = sObjectMgr->GetCreatureTemplate(targetCreature->GetEntry());
                     switch (ci->family)
                     {
                     case CREATURE_FAMILY_SUCCUBUS:
@@ -172,11 +172,11 @@ public:
                         case WARLOCK_IMPROVED_HEALTHSTONE_R1: rank = 1; break;
                         case WARLOCK_IMPROVED_HEALTHSTONE_R2: rank = 2; break;
                         default:
-                            sLog.outError("Unknown rank of Improved Healthstone id: %d", aurEff->GetId());
+                            sLog->outError("Unknown rank of Improved Healthstone id: %d", aurEff->GetId());
                             break;
                     }
                 }
-                uint8 spellRank = sSpellMgr.GetSpellRank(GetSpellInfo()->Id);
+                uint8 spellRank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
                 if (spellRank > 0 && spellRank <= 8)*/
                     CreateItem(effIndex, 5512);
             }

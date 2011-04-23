@@ -46,7 +46,7 @@ Bag::~Bag()
         {
             if (item->IsInWorld())
             {
-                sLog.outCrash("Item %u (slot %u, bag slot %u) in bag %u (slot %u, bag slot %u, m_bagslot %u) is to be deleted but is still in world.",
+                sLog->outCrash("Item %u (slot %u, bag slot %u) in bag %u (slot %u, bag slot %u, m_bagslot %u) is to be deleted but is still in world.",
                     item->GetEntry(), (uint32)item->GetSlot(), (uint32)item->GetBagSlot(),
                     GetEntry(), (uint32)GetSlot(), (uint32)GetBagSlot(), (uint32)i);
                 item->RemoveFromWorld();
@@ -75,7 +75,7 @@ void Bag::RemoveFromWorld()
 
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    ItemPrototype const * itemProto = sObjectMgr.GetItemPrototype(itemid);
+    ItemPrototype const * itemProto = sObjectMgr->GetItemPrototype(itemid);
 
     if (!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
         return false;

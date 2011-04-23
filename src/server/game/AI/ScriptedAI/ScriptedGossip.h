@@ -87,6 +87,7 @@
 #define GOSSIP_TEXT_MINING              "Mining"
 #define GOSSIP_TEXT_FISHING             "Fishing"
 #define GOSSIP_TEXT_SKINNING            "Skinning"
+#define GOSSIP_TEXT_ARCHAEOLOGY         "Archaeology"
 
 enum eTradeskill
 {
@@ -106,14 +107,16 @@ enum eTradeskill
     TRADESKILL_SKINNING                 = 13,
     TRADESKILL_JEWLCRAFTING             = 14,
     TRADESKILL_INSCRIPTION              = 15,
+    TRADESKILL_ARCHAEOLOGY              = 16,
 
-    TRADESKILL_LEVEL_NONE               = 0,
-    TRADESKILL_LEVEL_APPRENTICE         = 1,
-    TRADESKILL_LEVEL_JOURNEYMAN         = 2,
-    TRADESKILL_LEVEL_EXPERT             = 3,
-    TRADESKILL_LEVEL_ARTISAN            = 4,
-    TRADESKILL_LEVEL_MASTER             = 5,
-    TRADESKILL_LEVEL_GRAND_MASTER       = 6,
+    TRADESKILL_LEVEL_NONE                                      = 0,
+    TRADESKILL_LEVEL_APPRENTICE                                = 1,
+    TRADESKILL_LEVEL_JOURNEYMAN                                = 2,
+    TRADESKILL_LEVEL_EXPERT                                    = 3,
+    TRADESKILL_LEVEL_ARTISAN                                   = 4,
+    TRADESKILL_LEVEL_MASTER                                    = 5,
+    TRADESKILL_LEVEL_GRAND_MASTER                              = 6,
+    TRADESKILL_LEVEL_PROFESSIONAL_ILLUSTRIOUS_GRAND_MASTER     = 7,
 
 // Gossip defines
     GOSSIP_ACTION_TRADE                 = 1,

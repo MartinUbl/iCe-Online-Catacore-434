@@ -82,19 +82,19 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
     const MapEntry* entry = sMapStore.LookupEntry(mapId);
     if (!entry)
     {
-        sLog.outError("InstanceSaveManager::AddInstanceSave: wrong mapid = %d, instanceid = %d!", mapId, instanceId);
+        sLog->outError("InstanceSaveManager::AddInstanceSave: wrong mapid = %d, instanceid = %d!", mapId, instanceId);
         return NULL;
     }
 
     if (instanceId == 0)
     {
-        sLog.outError("InstanceSaveManager::AddInstanceSave: mapid = %d, wrong instanceid = %d!", mapId, instanceId);
+        sLog->outError("InstanceSaveManager::AddInstanceSave: mapid = %d, wrong instanceid = %d!", mapId, instanceId);
         return NULL;
     }
 
     if (difficulty >= (entry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY))
     {
-        sLog.outError("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d, wrong dificalty %u!", mapId, instanceId, difficulty);
+        sLog->outError("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d, wrong dificalty %u!", mapId, instanceId, difficulty);
         return NULL;
     }
 
@@ -112,7 +112,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
         }
     }
 
-    sLog.outDebug("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d", mapId, instanceId);
+    sLog->outDebug("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d", mapId, instanceId);
 
     InstanceSave *save = new InstanceSave(mapId, instanceId, difficulty, resetTime, canReset);
     if (!load)
@@ -172,7 +172,7 @@ void InstanceSave::SaveToDB()
     // save instance data too
     std::string data;
 
-    Map *map = sMapMgr.FindMap(GetMapId(),m_instanceid);
+    Map *map = sMapMgr->FindMap(GetMapId(),m_instanceid);
     if (map)
     {
         ASSERT(map->IsDungeon());
@@ -200,7 +200,7 @@ time_t InstanceSave::GetResetTimeForDB()
 // to cache or not to cache, that is the question
 InstanceTemplate const* InstanceSave::GetTemplate()
 {
-    return sObjectMgr.GetInstanceTemplate(m_mapid);
+    return sObjectMgr->GetInstanceTemplate(m_mapid);
 }
 
 MapEntry const* InstanceSave::GetMapEntry()
@@ -218,8 +218,8 @@ bool InstanceSave::UnloadIfEmpty()
 {
     if (m_playerList.empty() && m_groupList.empty())
     {
-        if (!sInstanceSaveMgr.lock_instLists)
-            sInstanceSaveMgr.RemoveInstanceSave(GetInstanceId());
+        if (!sInstanceSaveMgr->lock_instLists)
+            sInstanceSaveMgr->RemoveInstanceSave(GetInstanceId());
 
         return false;
     }
@@ -259,7 +259,7 @@ void InstanceSaveManager::_DelHelper(const char *fields, const char *table, cons
 void InstanceSaveManager::CleanupAndPackInstances()
 {
     // load reset times and clean expired instances
-    sInstanceSaveMgr.LoadResetTimes();
+    sInstanceSaveMgr->LoadResetTimes();
 
     // Delete invalid character_instance and group_instance references
     CharacterDatabase.DirectExecute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
@@ -296,7 +296,7 @@ void InstanceSaveManager::CleanupAndPackInstances()
     //CharacterDatabase.Query("ALTER TABLE instance DROP COLUMN newid");
     
     // Bake some cookies for click
-    sLog.outString(">> Cleaned up and packed instances");
+    sLog->outString(">> Cleaned up and packed instances");
 }
 
 void InstanceSaveManager::LoadResetTimes()
@@ -361,7 +361,7 @@ void InstanceSaveManager::LoadResetTimes()
     }
 
     // load the global respawn times for raid/heroic instances
-    uint32 diff = sWorld.getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+    uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
     result = CharacterDatabase.Query("SELECT mapid, difficulty, resettime FROM instance_reset");
     if (result)
     {
@@ -375,7 +375,7 @@ void InstanceSaveManager::LoadResetTimes()
             MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, difficulty);
             if (!mapDiff)
             {
-                sLog.outError("InstanceSaveManager::LoadResetTimes: invalid mapid(%u)/difficulty(%u) pair in instance_reset!", mapid, difficulty);
+                sLog->outError("InstanceSaveManager::LoadResetTimes: invalid mapid(%u)/difficulty(%u) pair in instance_reset!", mapid, difficulty);
                 CharacterDatabase.DirectPExecute("DELETE FROM instance_reset WHERE mapid = '%u' AND difficulty = '%u'", mapid,difficulty);
                 continue;
             }
@@ -407,7 +407,7 @@ void InstanceSaveManager::LoadResetTimes()
             continue;
 
         // the reset_delay must be at least one day
-        uint32 period = uint32(((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
+        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
         if (period < DAY)
             period = DAY;
 
@@ -473,7 +473,7 @@ void InstanceSaveManager::ScheduleReset(bool add, time_t time, InstResetEvent ev
             }
 
             if (itr == m_resetTimeQueue.end())
-                sLog.outError("InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event(%d,%d,%d) was not found!", event.type, event.mapid, event.instanceId);
+                sLog->outError("InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event(%d,%d,%d) was not found!", event.type, event.mapid, event.instanceId);
         }
     }
     else
@@ -542,8 +542,8 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
 
 void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
-    sLog.outDebug("InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
-    Map *map = (MapInstanced*)sMapMgr.CreateBaseMap(mapid);
+    sLog->outDebug("InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
+    Map *map = (MapInstanced*)sMapMgr->CreateBaseMap(mapid);
     if (!map->Instanceable())
         return;
 
@@ -558,7 +558,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
     if (iMap && iMap->IsDungeon())
         ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
     else
-        sObjectMgr.DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded
+        sObjectMgr->DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded
 }
 
 void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool warn, time_t resetTime)
@@ -575,7 +575,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, difficulty);
         if (!mapDiff || !mapDiff->resetTime)
         {
-            sLog.outError("InstanceSaveManager::ResetOrWarnAll: not valid difficulty or no reset delay for map %d", mapid);
+            sLog->outError("InstanceSaveManager::ResetOrWarnAll: not valid difficulty or no reset delay for map %d", mapid);
             return;
         }
 
@@ -596,9 +596,9 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         CharacterDatabase.CommitTransaction(trans);
 
         // calculate the next reset time
-        uint32 diff = sWorld.getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+        uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = uint32(((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
+        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
         if (period < DAY)
             period = DAY;
 
@@ -612,7 +612,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
     }
 
     // note: this isn't fast but it's meant to be executed very rarely
-    Map const *map = sMapMgr.CreateBaseMap(mapid);          // _not_ include difficulty
+    Map const *map = sMapMgr->CreateBaseMap(mapid);          // _not_ include difficulty
     MapInstanced::InstancedMaps &instMaps = ((MapInstanced*)map)->GetInstancedMaps();
     MapInstanced::InstancedMaps::iterator mitr;
     uint32 timeLeft;

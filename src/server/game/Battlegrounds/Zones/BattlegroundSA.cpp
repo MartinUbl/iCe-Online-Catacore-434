@@ -29,6 +29,15 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
+// Need to check this data before we but in database these achievements may be outdated for 4.0.6 . 
+//DELETE FROM `disables` WHERE `sourceType` = 4 AND `entry` in (7625,6446,7628);
+//DELETE FROM `achievement_criteria_data` WHERE `criteria_id` in(6446,7625) AND `type`=11;
+//INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES 
+//(6446,11,0,0,'achievement_bg_sa_drop_it'),
+//(7625,11,0,0,'achievement_bg_sa_artillery_veteran'),
+//(7628,11,0,0,'achievement_bg_sa_artillery_expert'),
+//(7628,3,607,0,'');
+
 BattlegroundSA::BattlegroundSA()
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
@@ -68,7 +77,7 @@ bool BattlegroundSA::ResetObjs()
 
     for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
         for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+            if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                 SendTransportsRemove(plr);
 
     uint32 atF = BG_SA_Factions[Attackers];
@@ -161,7 +170,7 @@ bool BattlegroundSA::ResetObjs()
 
         if (!sg)
         {
-            sLog.outError("SOTA: Can't find GY entry %u",BG_SA_GYEntries[i]);
+            sLog->outError("SOTA: Can't find GY entry %u",BG_SA_GYEntries[i]);
             return false;
         }
 
@@ -174,7 +183,7 @@ bool BattlegroundSA::ResetObjs()
         {
             GraveyardStatus[i] = ((Attackers == TEAM_HORDE)? TEAM_ALLIANCE : TEAM_HORDE);
             if (!AddSpiritGuide(i + BG_SA_MAXNPC, sg->x, sg->y, sg->z, BG_SA_GYOrientation[i], ((Attackers == TEAM_HORDE)? ALLIANCE : HORDE)))
-                sLog.outError("SOTA: couldn't spawn GY: %u",i);
+                sLog->outError("SOTA: couldn't spawn GY: %u",i);
         }
     }
 
@@ -251,7 +260,7 @@ bool BattlegroundSA::ResetObjs()
 
     for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
         for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+            if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                 SendTransportInit(plr);
 
     TeleportPlayers();
@@ -270,7 +279,7 @@ void BattlegroundSA::StartShips()
     {
         for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
         {
-            if (Player* p = sObjectMgr.GetPlayer(itr->first))
+            if (Player* p = sObjectMgr->GetPlayer(itr->first))
             {
                 UpdateData data;
                 WorldPacket pkt;
@@ -494,12 +503,22 @@ void BattlegroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
     else
         Battleground::UpdatePlayerScore(Source,type,value, doAddHonor);
 }
+// Future use
+//uint32 BattlegroundSA::GetPlayerDemolisherScore(Player* source)
+//
+//{
+//    BattlegroundScoreMap::iterator itr = m_PlayerScores.find(source->GetGUID());
+//    if (itr == m_PlayerScores.end())                         // player not found...
+//        return 0;
+//    else
+//        return ((BattlegroundSAScore*)itr->second)->demolishers_destroyed;
+//}
 
 void BattlegroundSA::TeleportPlayers()
 {
     for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
     {
-        if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+        if (Player *plr = sObjectMgr->GetPlayer(itr->first))
         {
             // should remove spirit of redemption
             if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
@@ -566,7 +585,7 @@ void BattlegroundSA::HandleKillUnit(Creature* unit, Player* killer)
     if (!unit)
         return;
 
-    if (unit->GetEntry() == 28781)  //Demolisher
+    if (unit->GetEntry() == NPC_DEMOLISHER_SA)
         UpdatePlayerScore(killer, SCORE_DESTROYED_DEMOLISHER, 1);
 }
 
@@ -810,7 +829,7 @@ void BattlegroundSA::EventPlayerUsedGO(Player* Source, GameObject* object)
                 //Achievement Storm the Beach (1310)
                 for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                 {
-                    if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+                    if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                         if (plr->GetTeamId() == Attackers)
                             plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65246);
                 }
@@ -834,7 +853,7 @@ void BattlegroundSA::EventPlayerUsedGO(Player* Source, GameObject* object)
                 //Achievement Storm the Beach (1310)
                 for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                 {
-                    if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+                    if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                         if (plr->GetTeamId() == Attackers && RoundScores[1].winner == Attackers)
                             plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65246);
                 }

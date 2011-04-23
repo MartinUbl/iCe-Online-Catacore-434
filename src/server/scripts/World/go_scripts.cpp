@@ -330,7 +330,7 @@ public:
                     if (Spell)
                         pCreature->CastSpell(pPlayer, Spell, false);
                     else
-                        sLog.outError("TSCR: go_ethereum_prison summoned Creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction());
+                        sLog->outError("TSCR: go_ethereum_prison summoned Creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction());
                 }
             }
         }
@@ -1005,7 +1005,7 @@ public:
         if (!pPrisoner || !pPrisoner->isAlive())
             return true;
 
-        Quest const* qInfo = sObjectMgr.GetQuestTemplate(QUEST_PRISONERS_OF_WYRMSKULL);
+        Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_PRISONERS_OF_WYRMSKULL);
         if (qInfo)
         {
             //TODO: prisoner should help player for a short period of time

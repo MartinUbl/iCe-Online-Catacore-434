@@ -147,20 +147,20 @@ void BattlegroundWS::Update(uint32 diff)
           m_FlagSpellForceTimer += diff;
           if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= 600000)  //10 minutes
           {
-            if (Player * plr = sObjectMgr.GetPlayer(m_FlagKeepers[0]))
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
               plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
-            if (Player * plr = sObjectMgr.GetPlayer(m_FlagKeepers[1]))
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
               plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
             m_FlagDebuffState = 1;
           }
           else if (m_FlagDebuffState == 1 && m_FlagSpellForceTimer >= 900000) //15 minutes
           {
-            if (Player * plr = sObjectMgr.GetPlayer(m_FlagKeepers[0]))
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
             {
               plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
               plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
             }
-            if (Player * plr = sObjectMgr.GetPlayer(m_FlagKeepers[1]))
+            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
             {
               plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
               plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
@@ -228,12 +228,12 @@ void BattlegroundWS::RespawnFlag(uint32 Team, bool captured)
 {
     if (Team == ALLIANCE)
     {
-        sLog.outDebug("Respawn Alliance flag");
+        sLog->outDebug("Respawn Alliance flag");
         m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_BASE;
     }
     else
     {
-        sLog.outDebug("Respawn Horde flag");
+        sLog->outDebug("Respawn Horde flag");
         m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_BASE;
     }
 
@@ -271,7 +271,7 @@ void BattlegroundWS::RespawnFlagAfterDrop(uint32 team)
     if (obj)
         obj->Delete();
     else
-        sLog.outError("unknown droped flag bg, guid: %u",GUID_LOPART(GetDroppedFlagGUID(team)));
+        sLog->outError("unknown droped flag bg, guid: %u",GUID_LOPART(GetDroppedFlagGUID(team)));
 
     SetDroppedFlagGUID(0,team);
     m_BothFlagsKept = false;
@@ -577,7 +577,7 @@ void BattlegroundWS::RemovePlayer(Player *plr, uint64 guid)
     {
         if (!plr)
         {
-            sLog.outError("BattlegroundWS: Removing offline player who has the FLAG!!");
+            sLog->outError("BattlegroundWS: Removing offline player who has the FLAG!!");
             this->SetAllianceFlagPicker(0);
             this->RespawnFlag(ALLIANCE, false);
         }
@@ -588,7 +588,7 @@ void BattlegroundWS::RemovePlayer(Player *plr, uint64 guid)
     {
         if (!plr)
         {
-            sLog.outError("BattlegroundWS: Removing offline player who has the FLAG!!");
+            sLog->outError("BattlegroundWS: Removing offline player who has the FLAG!!");
             this->SetHordeFlagPicker(0);
             this->RespawnFlag(HORDE, false);
         }
@@ -657,7 +657,7 @@ void BattlegroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 4629:                                          // unk4
             break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            sLog->outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -692,25 +692,25 @@ bool BattlegroundWS::SetupBattleground()
         || !AddObject(BG_WS_OBJECT_DOOR_H_4, BG_OBJECT_DOOR_H_4_WS_ENTRY, 950.7952f, 1459.583f, 342.1523f, 0.05235988f, 0, 0, 0.02617695f, 0.9996573f, RESPAWN_IMMEDIATELY)
 */)
     {
-        sLog.outErrorDb("BatteGroundWS: Failed to spawn some object Battleground not created!");
+        sLog->outErrorDb("BatteGroundWS: Failed to spawn some object Battleground not created!");
         return false;
     }
 
     WorldSafeLocsEntry const *sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
     if (!sg || !AddSpiritGuide(WS_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139f, ALLIANCE))
     {
-        sLog.outErrorDb("BatteGroundWS: Failed to spawn Alliance spirit guide! Battleground not created!");
+        sLog->outErrorDb("BatteGroundWS: Failed to spawn Alliance spirit guide! Battleground not created!");
         return false;
     }
 
     sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_HORDE);
     if (!sg || !AddSpiritGuide(WS_SPIRIT_MAIN_HORDE, sg->x, sg->y, sg->z, 3.193953f, HORDE))
     {
-        sLog.outErrorDb("BatteGroundWS: Failed to spawn Horde spirit guide! Battleground not created!");
+        sLog->outErrorDb("BatteGroundWS: Failed to spawn Horde spirit guide! Battleground not created!");
         return false;
     }
 
-    sLog.outDebug("BatteGroundWS: BG objects and spirit guides spawned");
+    sLog->outDebug("BatteGroundWS: BG objects and spirit guides spawned");
 
     return true;
 }
@@ -728,7 +728,7 @@ void BattlegroundWS::Reset()
     m_FlagState[BG_TEAM_HORDE]          = BG_WS_FLAG_STATE_ON_BASE;
     m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
     m_TeamScores[BG_TEAM_HORDE]         = 0;
-    bool isBGWeekend = sBattlegroundMgr.IsBGWeekend(GetTypeID());
+    bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
     m_ReputationCapture = (isBGWeekend) ? 45 : 35;
     m_HonorWinKills = (isBGWeekend) ? 3 : 1;
     m_HonorEndKills = (isBGWeekend) ? 4 : 2;

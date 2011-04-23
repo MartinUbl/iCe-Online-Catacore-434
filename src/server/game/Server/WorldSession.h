@@ -268,9 +268,10 @@ class WorldSession
         bool SendItemInfo(uint32 itemid, WorldPacket data);
         //auction
         void SendAuctionHello(uint64 guid, Creature * unit);
-        void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
+        void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint64 bidError = 0);
         void SendAuctionBidderNotification(uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template);
         void SendAuctionOwnerNotification(AuctionEntry * auction);
+        void SendAuctionRemovedNotification(AuctionEntry * auction);
 
         //Item Enchantment
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
@@ -314,7 +315,7 @@ class WorldSession
         }
         void ResetTimeOutTime()
         {
-            m_timeOutTime = sWorld.getIntConfig(CONFIG_SOCKET_TIMEOUTTIME);
+            m_timeOutTime = sWorld->getIntConfig(CONFIG_SOCKET_TIMEOUTTIME);
         }
         bool IsConnectionIdle() const
         {
@@ -833,6 +834,7 @@ class WorldSession
         void HandleQuestPOIQuery(WorldPacket& recv_data);
         void HandleEjectPasenger(WorldPacket &data);
         void HandleEnterPlayerVehicle(WorldPacket &data);
+        void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
 
     private:
         void ProcessQueryCallbacks();

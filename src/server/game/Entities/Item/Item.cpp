@@ -42,7 +42,7 @@ void AddItemsSetItem(Player*player,Item *item)
 
     if (!set)
     {
-        sLog.outErrorDb("Item set %u for item (id %u) not found, mods not applied.",setid,proto->ItemId);
+        sLog->outErrorDb("Item set %u for item (id %u) not found, mods not applied.",setid,proto->ItemId);
         return;
     }
 
@@ -103,7 +103,7 @@ void AddItemsSetItem(Player*player,Item *item)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(set->spells[x]);
                 if (!spellInfo)
                 {
-                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x],setid);
+                    sLog->outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x],setid);
                     break;
                 }
 
@@ -124,7 +124,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 
     if (!set)
     {
-        sLog.outErrorDb("Item set #%u for item #%u not found, mods not removed.",setid,proto->ItemId);
+        sLog->outErrorDb("Item set #%u for item #%u not found, mods not removed.",setid,proto->ItemId);
         return;
     }
 
@@ -403,7 +403,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
 
-    ItemPrototype const *itemProto = sObjectMgr.GetItemPrototype(itemid);
+    ItemPrototype const *itemProto = sObjectMgr->GetItemPrototype(itemid);
     if (!itemProto)
         return false;
 
@@ -424,11 +424,11 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
     if (!GetUInt32Value(ITEM_FIELD_DURATION))
         return;
 
-    sLog.outDebug("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)",GetEntry(),GetUInt32Value(ITEM_FIELD_DURATION),diff);
+    sLog->outDebug("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)",GetEntry(),GetUInt32Value(ITEM_FIELD_DURATION),diff);
 
     if (GetUInt32Value(ITEM_FIELD_DURATION) <= diff)
     {
-        sScriptMgr.OnItemExpire(owner, GetProto());
+        sScriptMgr->OnItemExpire(owner, GetProto());
         owner->DestroyItem(GetBagSlot(), GetSlot(), true);
         return;
     }
@@ -605,12 +605,12 @@ void Item::DeleteFromInventoryDB(SQLTransaction& trans)
 
 ItemPrototype const *Item::GetProto() const
 {
-    return sObjectMgr.GetItemPrototype(GetEntry());
+    return sObjectMgr->GetItemPrototype(GetEntry());
 }
 
 Player* Item::GetOwner()const
 {
-    return sObjectMgr.GetPlayer(GetOwnerGUID());
+    return sObjectMgr->GetPlayer(GetOwnerGUID());
 }
 
 uint32 Item::GetSkill()
@@ -704,7 +704,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     // item can have not null only one from field values
     if ((itemProto->RandomProperty) && (itemProto->RandomSuffix))
     {
-        sLog.outErrorDb("Item template %u have RandomProperty == %u and RandomSuffix == %u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
+        sLog->outErrorDb("Item template %u have RandomProperty == %u and RandomSuffix == %u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
         return 0;
     }
 
@@ -715,7 +715,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
         ItemRandomPropertiesEntry const *random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
         if (!random_id)
         {
-            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'",randomPropId);
+            sLog->outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'",randomPropId);
             return 0;
         }
 
@@ -728,7 +728,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
         ItemRandomSuffixEntry const *random_id = sItemRandomSuffixStore.LookupEntry(randomPropId);
         if (!random_id)
         {
-            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.",randomPropId);
+            sLog->outErrorDb("Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.",randomPropId);
             return 0;
         }
 
@@ -818,7 +818,7 @@ void Item::AddToUpdateQueueOf(Player *player)
 
     if (player->GetGUID() != GetOwnerGUID())
     {
-        sLog.outDebug("Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        sLog->outDebug("Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
 
@@ -838,7 +838,7 @@ void Item::RemoveFromUpdateQueueOf(Player *player)
 
     if (player->GetGUID() != GetOwnerGUID())
     {
-        sLog.outDebug("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        sLog->outDebug("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
 
@@ -951,7 +951,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         // Special case - accept vellum for armor/weapon requirements
         if ((spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR && proto->IsArmorVellum())
             ||(spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && proto->IsWeaponVellum()))
-            if (sSpellMgr.IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
+            if (sSpellMgr->IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
                 return true;
         
         if (spellInfo->EquippedItemClass != int32(proto->Class))
@@ -980,7 +980,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 
 bool Item::IsTargetValidForItemUse(Unit* pUnitTarget)
 {
-    ConditionList conditions = sConditionMgr.GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_ITEM_REQUIRED_TARGET, GetProto()->ItemId);
+    ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_ITEM_REQUIRED_TARGET, GetProto()->ItemId);
     if (conditions.empty())
         return true;
 
@@ -1183,7 +1183,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
     if (count < 1)
         return NULL;                                        //don't create item at zero count
 
-    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(item);
+    ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(item);
     if (pProto)
     {
         if (count > pProto->GetMaxStackSize())
@@ -1192,7 +1192,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
         ASSERT(count !=0 && "pProto->Stackable == 0 but checked at loading already");
 
         Item *pItem = NewItemOrBag(pProto);
-        if (pItem->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_ITEM), item, player))
+        if (pItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), item, player))
         {
             pItem->SetCount(count);
             return pItem;

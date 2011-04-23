@@ -569,7 +569,7 @@ enum UnitFlags
     UNIT_FLAG_DISABLE_MOVE          = 0x00000004,
     UNIT_FLAG_PVP_ATTACKABLE        = 0x00000008,           // allow apply pvp rules to attackable state in addition to faction dependent state
     UNIT_FLAG_RENAME                = 0x00000010,
-    UNIT_FLAG_PREPARATION           = 0x00000020,           // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
+    UNIT_FLAG_PREPARATION           = 0x00000020,           // don't take reagents for spells with SPELL_ATTR5_NO_REAGENT_WHILE_PREP
     UNIT_FLAG_UNK_6                 = 0x00000040,
     UNIT_FLAG_NOT_ATTACKABLE_1      = 0x00000080,           // ?? (UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1) is NON_PVP_ATTACKABLE
     UNIT_FLAG_OOC_NOT_ATTACKABLE    = 0x00000100,           // 2.0.8 - (OOC Out Of Combat) Can not be attacked when not in combat. Removed if unit for some reason enter combat.
@@ -1906,8 +1906,8 @@ class Unit : public WorldObject
         int32 SpellBaseHealingBonus(SpellSchoolMask schoolMask);
         int32 SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit *pVictim);
         int32 SpellBaseHealingBonusForVictim(SpellSchoolMask schoolMask, Unit *pVictim);
-        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
-        uint32 SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         bool   isSpellBlocked(Unit *pVictim, SpellEntry const *spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   isBlockCritical();
         bool   isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
@@ -2044,10 +2044,10 @@ class Unit : public WorldObject
         bool m_ControlledByPlayer;
 
         bool CheckPlayerCondition(Player* pPlayer);
-        void EnterVehicle(Unit *base, int8 seatId = -1) { EnterVehicle(base->GetVehicleKit(), seatId); }
-        void EnterVehicle(Vehicle *vehicle, int8 seatId = -1);
+        void EnterVehicle(Unit *base, int8 seatId = -1, bool byAura = false) { EnterVehicle(base->GetVehicleKit(), seatId, byAura); }
+        void EnterVehicle(Vehicle *vehicle, int8 seatId = -1, bool byAura = false);
         void ExitVehicle();
-        void ChangeSeat(int8 seatId, bool next = true);
+        void ChangeSeat(int8 seatId, bool next = true, bool byAura = false);
 
         void BuildMovementPacket(ByteBuffer *data) const;
 

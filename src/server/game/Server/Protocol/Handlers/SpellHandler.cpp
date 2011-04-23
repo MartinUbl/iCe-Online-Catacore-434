@@ -95,7 +95,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, castCount: %u, spellId: %u, Item: %u, data length = %i", bagIndex, slot, castCount, spellId, pItem->GetEntry(), (uint32)recvPacket.size());
+    sLog->outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, castCount: %u, spellId: %u, Item: %u, data length = %i", bagIndex, slot, castCount, spellId, pItem->GetEntry(), (uint32)recvPacket.size());
 
     ItemPrototype const *proto = pItem->GetProto();
     if (!proto)
@@ -180,7 +180,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
-    if (!sScriptMgr.OnItemUse(pUser,pItem,targets))
+    if (!sScriptMgr->OnItemUse(pUser,pItem,targets))
     {
         // no script or script not process request by self
         pUser->CastItemUseSpell(pItem,targets,castCount);
@@ -195,7 +195,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDetail("WORLD: CMSG_OPEN_ITEM packet, data length = %i",(uint32)recvPacket.size());
+    sLog->outDetail("WORLD: CMSG_OPEN_ITEM packet, data length = %i",(uint32)recvPacket.size());
 
     Player* pUser = _player;
 
@@ -207,7 +207,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> bagIndex >> slot;
 
-    sLog.outDetail("bagIndex: %u, slot: %u",bagIndex,slot);
+    sLog->outDetail("bagIndex: %u, slot: %u",bagIndex,slot);
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
@@ -227,7 +227,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     if(!(proto->Flags & ITEM_PROTO_FLAG_OPENABLE) && !pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
     {
         pUser->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
-        sLog.outError("Possible hacking attempt: Player %s [guid: %u] tried to open item [guid: %u, entry: %u] which is not openable!", 
+        sLog->outError("Possible hacking attempt: Player %s [guid: %u] tried to open item [guid: %u, entry: %u] which is not openable!", 
                 pUser->GetName(), pUser->GetGUIDLow(), pItem->GetGUIDLow(), proto->ItemId);
         return;
     }
@@ -241,7 +241,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         if (!lockInfo)
         {
             pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL);
-            sLog.outError("WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow(), lockId);
+            sLog->outError("WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow(), lockId);
             return;
         }
 
@@ -269,7 +269,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         }
         else
         {
-            sLog.outError("Wrapped item %u don't have record in character_gifts table and will deleted", pItem->GetGUIDLow());
+            sLog->outError("Wrapped item %u don't have record in character_gifts table and will deleted", pItem->GetGUIDLow());
             pUser->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
             return;
         }
@@ -285,7 +285,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
 
     recv_data >> guid;
 
-    sLog.outDebug("WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
+    sLog->outDebug("WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
 
     // ignore for remote control state
     if (_player->m_mover != _player)
@@ -296,7 +296,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
     if (!obj)
         return;
 
-    if (sScriptMgr.OnGossipHello(_player, obj))
+    if (sScriptMgr->OnGossipHello(_player, obj))
         return;
 
     obj->AI()->GossipHello(_player);
@@ -309,7 +309,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     uint64 guid;
     recvPacket >> guid;
 
-    sLog.outDebug("WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message [in game guid: %u]", GUID_LOPART(guid));
+    sLog->outDebug("WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message [in game guid: %u]", GUID_LOPART(guid));
 
     // ignore for remote control state
     if (_player->m_mover != _player)
@@ -334,7 +334,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     uint8  castCount, castFlags;
     recvPacket >> castCount >> spellId >> glyphIndex >> castFlags;
 
-    sLog.outDebug("WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", castCount, spellId, glyphIndex, castFlags, (uint32)recvPacket.size());
+    sLog->outDebug("WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", castCount, spellId, glyphIndex, castFlags, (uint32)recvPacket.size());
 
     // ignore for remote control state (for player case)
     Unit* mover = _player->m_mover;
@@ -348,7 +348,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %u", spellId);
+        sLog->outError("WORLD: unknown spell id %u", spellId);
         recvPacket.rfinish(); // prevent spam at ignore packet
         return;
     }
@@ -359,7 +359,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             mover->ToPlayer()->SetEmoteState(0);
 
         // not have spell in spellbook or spell passive and not casted by client
-        if ((!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId)) && !IsRaidMarker(spellId))
+        if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
         {
             //cheater? kick? ban?
             recvPacket.rfinish(); // prevent spam at ignore packet
@@ -369,7 +369,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     else
     {
         // not have spell in spellbook or spell passive and not casted by client
-        if (((mover->GetTypeId() == TYPEID_UNIT && !mover->ToCreature()->HasSpell(spellId)) || IsPassiveSpell(spellId)) && !IsRaidMarker(spellId))
+        if ((mover->GetTypeId() == TYPEID_UNIT && !mover->ToCreature()->HasSpell(spellId)) || IsPassiveSpell(spellId))
         {
             //cheater? kick? ban?
             recvPacket.rfinish(); // prevent spam at ignore packet
@@ -401,7 +401,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     // auto-selection buff level base at target level (in spellInfo)
     if (targets.getUnitTarget())
     {
-        SpellEntry const *actualSpellInfo = sSpellMgr.SelectAuraRankForPlayerLevel(spellInfo,targets.getUnitTarget()->getLevel());
+        SpellEntry const *actualSpellInfo = sSpellMgr->SelectAuraRankForPlayerLevel(spellInfo,targets.getUnitTarget()->getLevel());
 
         // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
         if (actualSpellInfo)
@@ -434,8 +434,8 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (!spellInfo)
         return;
 
-    // not allow remove non positive spells and spells with attr SPELL_ATTR_CANT_CANCEL
-    if (!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL))
+    // not allow remove non positive spells and spells with attr SPELL_ATTR0_CANT_CANCEL
+    if (!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR0_CANT_CANCEL))
         return;
 
     // don't allow cancelling passive auras (some of them are visible)
@@ -467,7 +467,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
     {
-        sLog.outError("WORLD: unknown PET spell id %u", spellId);
+        sLog->outError("WORLD: unknown PET spell id %u", spellId);
         return;
     }
 
@@ -475,13 +475,13 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
 
     if (!pet)
     {
-        sLog.outError("Pet %u not exist.", uint32(GUID_LOPART(guid)));
+        sLog->outError("Pet %u not exist.", uint32(GUID_LOPART(guid)));
         return;
     }
 
     if (pet != GetPlayer()->GetGuardianPet() && pet != GetPlayer()->GetCharm())
     {
-        sLog.outError("HandlePetCancelAura.Pet %u isn't pet of player %s", uint32(GUID_LOPART(guid)),GetPlayer()->GetName());
+        sLog->outError("HandlePetCancelAura.Pet %u isn't pet of player %s", uint32(GUID_LOPART(guid)),GetPlayer()->GetName());
         return;
     }
 
@@ -545,7 +545,7 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 
 void WorldSession::HandleSelfResOpcode(WorldPacket & /*recv_data*/)
 {
-    sLog.outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
+    sLog->outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
 
     if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
     {
@@ -572,7 +572,7 @@ void WorldSession::HandleSpellClick(WorldPacket & recv_data)
     if (!unit->IsInWorld())
         return;
 
-    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());
+    SpellClickInfoMapBounds clickPair = sObjectMgr->GetSpellClickInfoMapBounds(unit->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
     {
         if (itr->second.IsFitToRequirements(_player, unit))
@@ -595,7 +595,7 @@ void WorldSession::HandleSpellClick(WorldPacket & recv_data)
 
 void WorldSession::HandleMirrrorImageDataRequest(WorldPacket & recv_data)
 {
-    sLog.outDebug("WORLD: CMSG_GET_MIRRORIMAGE_DATA");
+    sLog->outDebug("WORLD: CMSG_GET_MIRRORIMAGE_DATA");
     uint64 guid;
     recv_data >> guid;
 
@@ -673,5 +673,30 @@ void WorldSession::HandleMirrrorImageDataRequest(WorldPacket & recv_data)
         data << uint32(0);
     }
 
+    SendPacket(&data);
+}
+
+void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
+{
+    sLog->outDebug("WORLD: CMSG_UPDATE_PROJECTILE_POSITION");
+
+    uint64 casterGuid;
+    uint32 spellId;
+    uint8 castCount;
+    float x, y, z;    // Position of missile hit
+
+    recvPacket.readPackGUID(casterGuid);
+    recvPacket >> spellId;
+    recvPacket >> castCount;
+    recvPacket >> x;
+    recvPacket >> y;
+    recvPacket >> z;
+
+    WorldPacket data(SMSG_SET_PROJECTILE_POSITION, 21);
+    data << uint64(casterGuid);
+    data << uint8(castCount);
+    data << float(x);
+    data << float(y);
+    data << float(z);
     SendPacket(&data);
 }

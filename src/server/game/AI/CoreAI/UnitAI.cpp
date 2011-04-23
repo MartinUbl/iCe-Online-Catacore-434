@@ -161,7 +161,7 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
 void UnitAI::DoCast(uint32 spellId)
 {
     Unit *target = NULL;
-    //sLog.outError("aggre %u %u", spellId, (uint32)AISpellInfo[spellId].target);
+    //sLog->outError("aggre %u %u", spellId, (uint32)AISpellInfo[spellId].target);
     switch(AISpellInfo[spellId].target)
     {
         default:
@@ -170,7 +170,7 @@ void UnitAI::DoCast(uint32 spellId)
         case AITARGET_ENEMY:
         {
             const SpellEntry * spellInfo = GetSpellStore()->LookupEntry(spellId);
-            bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR_EX3_PLAYERS_ONLY;
+            bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY;
             //float range = GetSpellMaxRange(spellInfo, false);
             target = SelectTarget(SELECT_TARGET_RANDOM, 0, GetSpellMaxRange(spellInfo, false), playerOnly);
             break;
@@ -180,11 +180,11 @@ void UnitAI::DoCast(uint32 spellId)
         case AITARGET_DEBUFF:
         {
             const SpellEntry * spellInfo = GetSpellStore()->LookupEntry(spellId);
-            bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR_EX3_PLAYERS_ONLY;
+            bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY;
             float range = GetSpellMaxRange(spellInfo, false);
 
             DefaultTargetSelector targetSelector(me, range, playerOnly, -(int32)spellId);
-            if (!(spellInfo->Attributes & SPELL_ATTR_BREAKABLE_BY_DAMAGE)
+            if (!(spellInfo->Attributes & SPELL_ATTR0_BREAKABLE_BY_DAMAGE)
                 && !(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_VICTIM)
                 && targetSelector(me->getVictim()))
                 target = me->getVictim();
@@ -213,7 +213,7 @@ void UnitAI::FillAISpellInfo()
         if (!spellInfo)
             continue;
 
-        if (spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_DEAD)
+        if (spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD)
             AIInfo->condition = AICOND_DIE;
         else if (IsPassiveSpell(i) || GetSpellDuration(spellInfo) == -1)
             AIInfo->condition = AICOND_AGGRO;
