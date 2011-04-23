@@ -256,6 +256,52 @@ public:
     }
 };
 
+// Cure Disease
+// INSERT INTO `spell_script_names` VALUES (528, "spell_pri_cure_disease");
+class spell_pri_cure_disease : public SpellScriptLoader
+{
+    public:
+        spell_pri_cure_disease() : SpellScriptLoader("spell_pri_cure_disease") { }
+
+        class spell_pri_cure_disease_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_cure_disease_SpellScript);
+
+            bool Validate(SpellEntry const * spellEntry)
+            {
+                return true;
+            }
+
+            void HandleDispel(SpellEffIndex /*effIndex*/)
+            {
+                // Body and Soul
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+                if(caster && caster == target)
+                {
+                    if(caster->HasAura(64129))                       // rank #2
+                        caster->CastSpell(caster, 64136, true);      // Remove poison effect
+                    else if (caster->HasAura(64127))                 // rank #1
+                    {
+                        if(urand(0,1))                               // 50% chance
+                            caster->CastSpell(caster, 64136, true);  // Remove poison effect
+                    }
+                }
+            }
+
+            void Register()
+            {
+                // Add handler to the Cure Disease SPELL_EFFECT_DISPEL
+                OnEffect += SpellEffectFn(spell_pri_cure_disease_SpellScript::HandleDispel, EFFECT_0, SPELL_EFFECT_DISPEL);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_pri_cure_disease_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_guardian_spirit();
@@ -263,4 +309,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_pain_and_suffering_proc;
     new spell_pri_penance;
     new spell_pri_reflective_shield_trigger();
+    new spell_pri_cure_disease();
 }
