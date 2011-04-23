@@ -79,7 +79,65 @@ GuildAchievementMgr::~GuildAchievementMgr()
 {
 }
 
-void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time)
+void GuildAchievementMgr::LoadFromDB()
+{
+    QueryResult achievementResult = CharacterDatabase.PQuery("SELECT * FROM guild_achievement WHERE guildid=%u",GetGuild()->GetId());
+    QueryResult criteriaResult = CharacterDatabase.PQuery("SELECT * FROM guild_achievement_progress WHERE guildid=%u",GetGuild()->GetId());
+
+    if (achievementResult)
+    {
+        do
+        {
+            Field* fields = achievementResult->Fetch();
+
+            uint32 achievement_id = fields[0].GetUInt32();
+
+            // don't must happen: cleanup at server startup in sAchievementMgr->LoadCompletedAchievements()
+            if (!sAchievementStore.LookupEntry(achievement_id))
+                continue;
+
+            CompletedAchievementData& ca = m_completedAchievements[achievement_id];
+            ca.date = time_t(fields[1].GetUInt64());
+            ca.changed = false;
+            
+            if (AchievementEntry const* pAchievement = sAchievementStore.LookupEntry(achievement_id))
+                achievementPoints += pAchievement->points;
+        }
+        while (achievementResult->NextRow());
+    }
+
+    if (criteriaResult)
+    {
+        do
+        {
+            Field* fields = criteriaResult->Fetch();
+
+            uint32 id      = fields[0].GetUInt32();
+            uint32 counter = fields[1].GetUInt32();
+            time_t date    = time_t(fields[2].GetUInt64());
+
+            AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(id);
+            if (!criteria)
+            {
+                // we will remove not existed criteria for all characters
+                sLog->outError("Non-existing achievement criteria %u data removed from table `character_achievement_progress`.",id);
+                CharacterDatabase.PExecute("DELETE FROM guild_achievement_progress WHERE criteria = %u",id);
+                continue;
+            }
+
+            if (criteria->timeLimit && time_t(date + criteria->timeLimit) < time(NULL))
+                continue;
+
+            CriteriaProgress& progress = m_criteriaProgress[id];
+            progress.counter = counter;
+            progress.date    = date;
+            progress.changed = false;
+        } 
+        while (criteriaResult->NextRow());
+    }
+}
+
+void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time, Player* player)
 {
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetAchievementCriteriaByType(type);
     for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
@@ -96,9 +154,9 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             continue;
 
         // TODO: implement faction dependent achievements based on guild faction !
-        //if ((achievement->factionFlag == ACHIEVEMENT_FACTION_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
-        //    (achievement->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
-        //    continue;
+        if ((player && achievement->factionFlag == ACHIEVEMENT_FACTION_HORDE    && player->GetTeam() != HORDE) ||
+            (player && achievement->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && player->GetTeam() != ALLIANCE))
+            continue;
 
         // don't update already completed criteria
         if (IsCompletedCriteria(achievementCriteria,achievement))
@@ -106,7 +164,21 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
 
         switch (type)
         {
-            case 125: // for testing - "earn guild level"
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
+                {
+                if (!miscvalue1)
+                    continue;
+                if (achievementCriteria->kill_creature.creatureID != miscvalue1)
+                    continue;
+
+                AchievementCriteriaDataSet const* data = sAchievementMgr->GetCriteriaDataSet(achievementCriteria);
+                if (!data || !data->Meets(player,unit))
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_ACCUMULATE);
+                break;
+                }
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL: // for testing - "earn guild level"
                 SetCriteriaProgress(achievementCriteria, m_guild->GetLevel());
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // for testing - "kill critters"

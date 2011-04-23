@@ -3582,6 +3582,7 @@ void ObjectMgr::LoadGuilds()
             continue;
         }
         AddGuild(pNewGuild);
+        pNewGuild->GetAchievementMgr().LoadFromDB();
     }
     while (result->NextRow());
     sLog->outString();

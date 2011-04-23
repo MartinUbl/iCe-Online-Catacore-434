@@ -741,7 +741,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     {
         Guild* hisGuild = sObjectMgr->GetGuildById(GetPlayer()->GetGuildId());
         if (hisGuild)
-            hisGuild->GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
+            hisGuild->GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time, GetPlayer());
     }
 
     if (!sWorld->getBoolConfig(CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)

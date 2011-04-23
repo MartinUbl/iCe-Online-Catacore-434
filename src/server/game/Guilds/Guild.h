@@ -266,8 +266,11 @@ class GuildAchievementMgr
 
         void CompletedAchievement(AchievementEntry const* achievement);
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, bool evenIfCriteriaComplete = false);
-        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
+        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0, Player* player = NULL);
         bool HasAchieved(AchievementEntry const* achievement) const;
+
+        void LoadFromDB();
+        void SaveToDB();
 
         Guild* GetGuild() { return m_guild; };
 
