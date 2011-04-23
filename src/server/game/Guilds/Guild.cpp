@@ -112,7 +112,7 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             case 125: // for testing - "earn guild level"
                 SetCriteriaProgress(achievementCriteria, m_guild->GetLevel());
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CRITTERS: // for testing - "kill critters"
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // for testing - "kill critters"
                 if (unit && unit->GetCreatureType() == CREATURE_TYPE_CRITTER)
                     SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
             default:
