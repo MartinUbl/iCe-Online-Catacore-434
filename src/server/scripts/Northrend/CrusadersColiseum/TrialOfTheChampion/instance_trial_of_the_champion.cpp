@@ -99,7 +99,7 @@ public:
             return false;
         }
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* creature, bool add)
         {
             Map::PlayerList const &players = instance->GetPlayers();
             uint32 TeamInInstance = 0;

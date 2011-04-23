@@ -160,7 +160,7 @@ public:
             if (go) go->SetGoState(GO_STATE_READY);
         }
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* creature, bool add)
         {
             switch(creature->GetEntry())
             {

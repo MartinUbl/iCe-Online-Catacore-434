@@ -149,7 +149,7 @@ public:
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* creature, bool add)
         {
             switch(creature->GetEntry())
             {

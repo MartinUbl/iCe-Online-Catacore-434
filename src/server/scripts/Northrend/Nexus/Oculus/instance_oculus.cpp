@@ -57,7 +57,7 @@ public:
             uiPlataformUrom = 0;
         }
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* creature, bool add)
         {
             switch(creature->GetEntry())
             {

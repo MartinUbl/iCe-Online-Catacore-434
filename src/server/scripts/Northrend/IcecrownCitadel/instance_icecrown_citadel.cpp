@@ -84,7 +84,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     teamInInstance = player->GetTeam();
             }
 
-            void OnCreatureCreate(Creature* creature)
+            void OnCreatureCreate(Creature* creature, bool add)
             {
                 if (!teamInInstance)
                 {

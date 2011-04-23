@@ -150,7 +150,7 @@ public:
                 uiEncounter[i] = NOT_STARTED;
         }
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* creature, bool add)
         {
             Map::PlayerList const &players = instance->GetPlayers();
             if (!players.isEmpty())
