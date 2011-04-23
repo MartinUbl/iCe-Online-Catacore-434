@@ -81,14 +81,11 @@ GuildAchievementMgr::~GuildAchievementMgr()
 
 void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time)
 {
-    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
-        sLog.outDetail("AchievementMgr::UpdateAchievementCriteria(%u, %u, %u, %u)", type, miscvalue1, miscvalue2, time);
-
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetAchievementCriteriaByType(type);
     for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
     {
         AchievementCriteriaEntry const *achievementCriteria = (*i);
-        if (sDisableMgr.IsDisabledFor(DISABLE_TYPE_ACHIEVEMENT_CRITERIA, achievementCriteria->ID, NULL))
+        if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_ACHIEVEMENT_CRITERIA, achievementCriteria->ID, NULL))
             continue;
 
         AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
@@ -131,7 +128,7 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 CompletedAchievement(achievement);
         }
 
-        if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
+        if (AchievementEntryList const* achRefList = sAchievementMgr->GetAchievementByReferencedId(achievement->ID))
         {
             for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
                 if (IsCompletedAchievement(*itr))
@@ -153,10 +150,7 @@ void GuildAchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* ent
 
 void GuildAchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, bool evenIfCriteriaComplete)
 {
-    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
-        sLog.outDetail("GuildAchievementMgr::ResetAchievementCriteria(%u, %u, %u)", type, miscvalue1, miscvalue2);
-
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetAchievementCriteriaByType(type);
     for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
     {
         AchievementCriteriaEntry const *achievementCriteria = (*i);
@@ -190,7 +184,7 @@ bool GuildAchievementMgr::HasAchieved(AchievementEntry const* achievement) const
 
 void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 {
-    sLog.outDetail("GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
+    sLog->outDetail("GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
 
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement))
         return;
@@ -213,7 +207,7 @@ void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achieveme
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
     // TODO: where do set this instead?
     if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
-        sAchievementMgr.SetRealmCompleted(achievement);
+        sAchievementMgr->SetRealmCompleted(achievement);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT);
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points);
@@ -239,9 +233,6 @@ CriteriaProgress* GuildAchievementMgr::GetCriteriaProgress(AchievementCriteriaEn
 
 void GuildAchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* entry, uint32 changeValue, ProgressType ptype)
 {
-    if ((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
-        sLog.outDetail("AchievementMgr::SetCriteriaProgress(%u, %u) for (guild: %u)", entry->ID, changeValue, m_guild->GetId());
-
     CriteriaProgress* progress = GetCriteriaProgress(entry);
     if (!progress)
     {
@@ -323,7 +314,7 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
     if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
     {
         // someone on this realm has already completed that achievement
-        if (sAchievementMgr.IsRealmCompleted(achievement))
+        if (sAchievementMgr->IsRealmCompleted(achievement))
             return false;
     }
 
@@ -351,7 +342,7 @@ bool GuildAchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     uint32 achievmentForTestId = entry->refAchievement ? entry->refAchievement : entry->ID;
     uint32 achievmentForTestCount = entry->count;
 
-    AchievementCriteriaEntryList const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievmentForTestId);
+    AchievementCriteriaEntryList const* cList = sAchievementMgr->GetAchievementCriteriaByAchievement(achievmentForTestId);
     if (!cList)
         return false;
     uint32 count = 0;
@@ -1770,7 +1761,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 
 void Guild::UpdateGuildNews(WorldSession* session)
 {
-    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+    if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
 
     QueryResult qr = CharacterDatabase.PQuery("SELECT id, event_type, param, date, playerguid FROM guild_news WHERE guildid=%u",m_id);
@@ -1850,7 +1841,7 @@ void Guild::UpdateGuildNews(WorldSession* session)
 
 void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
 {
-    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+    if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
 
     if (!pPlayer || type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
@@ -1864,7 +1855,7 @@ void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
 
 void Guild::AddGuildNews(GuildNewsType type, uint64 param)
 {
-    if (!sWorld.getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+    if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
 
     if (type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)

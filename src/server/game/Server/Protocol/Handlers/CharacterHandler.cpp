@@ -1403,7 +1403,7 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(reforgeID);
     if(!ref_info)
     {
-        sLog.outError("Invalid reforge ID %u received in packet", reforgeID);
+        sLog->outError("Invalid reforge ID %u received in packet", reforgeID);
         return;
     }
 
@@ -1411,12 +1411,12 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     Item* dstItem = GetPlayer()->GetItemByPos(mslot >> 8, mslot & 255);
     if(!dstItem)
     {
-        sLog.outError("Invalid bag slot %u received in reforge packet", slot);
+        sLog->outError("Invalid bag slot %u received in reforge packet", slot);
         return;
     }
 
-    sLog.outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
-    sLog.outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
+    sLog->outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
+    sLog->outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
 
     WorldPacket data(0x451C,1,true);
     data << uint8(0);

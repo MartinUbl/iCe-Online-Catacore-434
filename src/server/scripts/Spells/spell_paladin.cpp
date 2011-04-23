@@ -276,7 +276,7 @@ public:
                     }
                 }
                 else
-                    sLog.outString("Couldn't find creator of Consecration !");
+                    sLog->outString("Couldn't find creator of Consecration !");
                 ticktimer = 1000;
             } else ticktimer -= diff;
         }

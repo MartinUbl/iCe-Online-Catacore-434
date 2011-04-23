@@ -130,20 +130,20 @@ int Master::Run()
     sLog->outString("%s (core-daemon)", _FULLVERSION);
     sLog->outString("<Ctrl-C> to stop.\n");
 
-    sLog.outString( "          CCCCCCC               ");
-    sLog.outString( "        CC                      ");
-    sLog.outString( "   i   C                eeeeee  ");
-    sLog.outString( "       C              eee    eee");
-    sLog.outString( "   i   C              eeeeeeeeee");
-    sLog.outString( "   i   C              ee        ");
-    sLog.outString( "   i    CC            eee    eee");
-    sLog.outString( "   i      CCCCCCC       eeeeee    Online ");
-    sLog.outString( "");
-    sLog.outString( " Developed by: iCe Online GM Team");
-    sLog.outString( " Head developer: Gregory (Cmaranec)");
-    sLog.outString( "");
-    sLog.outString( " Special thanks to: MaNGOS, TrinityCore, CactusEMU, SkyFire");
-    sLog.outString( "");
+    sLog->outString( "          CCCCCCC               ");
+    sLog->outString( "        CC                      ");
+    sLog->outString( "   i   C                eeeeee  ");
+    sLog->outString( "       C              eee    eee");
+    sLog->outString( "   i   C              eeeeeeeeee");
+    sLog->outString( "   i   C              ee        ");
+    sLog->outString( "   i    CC            eee    eee");
+    sLog->outString( "   i      CCCCCCC       eeeeee    Online ");
+    sLog->outString( "");
+    sLog->outString( " Developed by: iCe Online GM Team");
+    sLog->outString( " Head developer: Gregory (Cmaranec)");
+    sLog->outString( "");
+    sLog->outString( " Special thanks to: MaNGOS, TrinityCore, CactusEMU, SkyFire");
+    sLog->outString( "");
 
 #ifdef USE_SFMT_FOR_RNG
     sLog->outString("\n");

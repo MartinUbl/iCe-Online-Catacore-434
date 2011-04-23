@@ -3766,7 +3766,7 @@ void ObjectMgr::LoadGuilds()
                 ++totalGuilds;
         }
     }*/
-    sLog.outString("Skipped due to fucked up handler.");
+    sLog->outString("Skipped due to fucked up handler.");
     // Cleanup
     // Delete orphan guild ranks
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_CLEAN_GUILD_RANKS);

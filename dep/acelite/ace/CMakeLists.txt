@@ -111,7 +111,7 @@ set(ace_STAT_SRCS
   Log_Msg_Callback.cpp
   Log_Msg_IPC.cpp
   Log_Msg_NT_Event_Log.cpp
-  Log_Msg_UNIX_Syslog.cpp
+  Log_Msg_UNIX_SysLog.cpp
   Log_Record.cpp
   Logging_Strategy.cpp
   LSOCK.cpp

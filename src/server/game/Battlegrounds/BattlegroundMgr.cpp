@@ -474,7 +474,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);         // bases asssulted
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);          // bases defended
             case BATTLEGROUND_TP:
-                data->put(extraFileds, 2);                    // count of next fields
+                data->put(extraFields, 2);                    // count of next fields
                 *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagCaptures);
                 *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagReturns);
             case BATTLEGROUND_BG:                                                              // Battle of Gilneas

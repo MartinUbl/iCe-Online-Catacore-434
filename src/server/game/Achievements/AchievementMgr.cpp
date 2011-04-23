@@ -739,7 +739,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     // If player has guild, notify also theirs achievement mgr
     if (GetPlayer()->GetGuildId())
     {
-        Guild* hisGuild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+        Guild* hisGuild = sObjectMgr->GetGuildById(GetPlayer()->GetGuildId());
         if (hisGuild)
             hisGuild->GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
     }

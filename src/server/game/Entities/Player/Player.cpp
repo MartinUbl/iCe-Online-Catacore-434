@@ -19955,7 +19955,7 @@ void Player::AddGuildNews(uint32 type, uint64 param)
     if (!GetGuildId())
         return;
 
-    Guild* pGuild = sObjectMgr.GetGuildById(GetGuildId());
+    Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId());
 
     if (pGuild)
         pGuild->AddMemberNews(this, GuildNewsType(type), param);

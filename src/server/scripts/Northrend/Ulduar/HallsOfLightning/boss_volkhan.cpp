@@ -326,7 +326,7 @@ public:
 					m_bIsStriking = true;
 				}
 				else
-					sLog.outError("npc_volkhanAI: No creature Anvil in 200.0f range, cannot cast Temper");
+					sLog->outError("npc_volkhanAI: No creature Anvil in 200.0f range, cannot cast Temper");
             }
 
             DoMeleeAttackIfReady();

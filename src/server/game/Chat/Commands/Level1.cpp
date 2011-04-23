@@ -221,7 +221,7 @@ bool ChatHandler::HandleNpcSpawncircle(const char* args)
         PSendSysMessage("Lze spawnit 2-10 najednou");
         return false;
     }
-    CreatureInfo const *ci = sObjectMgr.GetCreatureTemplate(entry);
+    CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(entry);
     if (!ci)
     {
         PSendSysMessage("NPC %u neexistuje",entry);
@@ -236,11 +236,11 @@ bool ChatHandler::HandleNpcSpawncircle(const char* args)
 
         Creature* pCreature = NULL;
         if(ci->ScriptID)
-            pCreature = sScriptMgr.GetCreatureScriptedClass(ci->ScriptID);
+            pCreature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
         if(pCreature == NULL)
             pCreature = new Creature();
 
-        if (!pCreature->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), m_session->GetPlayer()->GetMap(), m_session->GetPlayer()->GetPhaseMaskForSpawn(), entry, 0, 0, x, y, z, m_session->GetPlayer()->GetAngle(x,y)-3.141f))
+        if (!pCreature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), m_session->GetPlayer()->GetMap(), m_session->GetPlayer()->GetPhaseMaskForSpawn(), entry, 0, 0, x, y, z, m_session->GetPlayer()->GetAngle(x,y)-3.141f))
         {
             delete pCreature;
             return false;
@@ -254,7 +254,7 @@ bool ChatHandler::HandleNpcSpawncircle(const char* args)
         pCreature->LoadFromDB(db_guid, m_session->GetPlayer()->GetMap());
 
         m_session->GetPlayer()->GetMap()->Add(pCreature);
-        sObjectMgr.AddCreatureToGrid(db_guid, sObjectMgr.GetCreatureData(db_guid));
+        sObjectMgr->AddCreatureToGrid(db_guid, sObjectMgr->GetCreatureData(db_guid));
 
         if (spawndist > 0)
         {

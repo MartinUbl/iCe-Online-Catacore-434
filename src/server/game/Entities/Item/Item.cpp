@@ -1061,7 +1061,7 @@ void Item::SetReforge(uint32 id)
         m_reforgeId = id;
     }
     else
-        sLog.outString("Wrong reforge ID %u", id);
+        sLog->outString("Wrong reforge ID %u", id);
 }
 
 uint32 Item::GetReforge()

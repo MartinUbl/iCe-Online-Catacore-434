@@ -174,7 +174,7 @@ public:
 			{
 				me->AddThreat(pDummyAggro, 1000000);
 				me->Attack(pDummyAggro,false);
-				//sLog.outError("dummy aggro ok");
+				//sLog->outError("dummy aggro ok");
 			}
 		}
 

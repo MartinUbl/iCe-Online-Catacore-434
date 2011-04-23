@@ -36,7 +36,7 @@
 #include "ace/Log_Msg_Callback.h"
 #include "ace/Log_Msg_IPC.h"
 #include "ace/Log_Msg_NT_Event_Log.h"
-#include "ace/Log_Msg_UNIX_Syslog.h"
+#include "ace/Log_Msg_UNIX_SysLog.h"
 #include "ace/Log_Record.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Stack_Trace.h"

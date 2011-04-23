@@ -744,7 +744,7 @@ void WorldSession::HandleBugOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket &recv_data)
 {
-    sLog.outDetail("WORLD: Received CMSG_RETURN_TO_GRAVEYARD");
+    sLog->outDetail("WORLD: Received CMSG_RETURN_TO_GRAVEYARD");
 
     // no data to process, just empty packet
 
@@ -1093,7 +1093,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
                 sLog->outDetail("MISC: Added Item %u into button %u", action, button);
                 break;
             case ACTION_BUTTON_LIST:
-                sLog.outDetail("MISC: Added List %u into button %u", action, button);
+                sLog->outDetail("MISC: Added List %u into button %u", action, button);
                 break;
             default:
                 sLog->outError("MISC: Unknown action button type %u for action %u into button %u", type, action, button);

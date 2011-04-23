@@ -117,7 +117,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
     if (!bg)
     {
-        sLog.outError("Battleground template for BG Type ID %u not found!",bgTypeId_);
+        sLog->outError("Battleground template for BG Type ID %u not found!",bgTypeId_);
         return;
     }
 
@@ -125,7 +125,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),_player->getLevel());
     if (!bracketEntry)
     {
-        sLog.outError("Unexpected level branch branch for player level %u",_player->getLevel());
+        sLog->outError("Unexpected level branch branch for player level %u",_player->getLevel());
         return;
     }
 
@@ -149,7 +149,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data);
-            sLog.outString("Cannot join do BG because of deserter!");
+            sLog->outString("Cannot join do BG because of deserter!");
             return;
         }
 
@@ -159,7 +159,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
-            sLog.outString("Cannot join do BG because of already in random BG queue!");
+            sLog->outString("Cannot join do BG because of already in random BG queue!");
             return;
         }
 
@@ -169,14 +169,14 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_NON_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
-            sLog.outString("Cannot join do BG because of already in non-random queue!");
+            sLog->outString("Cannot join do BG because of already in non-random queue!");
             return;
         }
 
         // check if already in queue
         if (_player->GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
         {
-            sLog.outString("Cannot join do BG because of already in that queue!");
+            sLog->outString("Cannot join do BG because of already in that queue!");
             //player is already in this queue
             return;
         }
@@ -187,7 +187,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             WorldPacket data;
             sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(&data);
-            sLog.outString("Cannot join do BG because of full BG queue slots!");
+            sLog->outString("Cannot join do BG because of full BG queue slots!");
             return;
         }
 
@@ -401,7 +401,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),_player->getLevel());
     if (!bracketEntry)
     {
-        sLog.outError("BattlegroundHandler: Unexpected level bracket request for level %u",_player->getLevel());
+        sLog->outError("BattlegroundHandler: Unexpected level bracket request for level %u",_player->getLevel());
         return;
     }
 
