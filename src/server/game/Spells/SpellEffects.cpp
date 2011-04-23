@@ -647,6 +647,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Reflective Shield
+                else if (m_spellInfo->Id == 33619)
+                {
+                    apply_direct_bonus = false;
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:

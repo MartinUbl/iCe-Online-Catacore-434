@@ -222,11 +222,12 @@ public:
         {
             SPELL_PRI_REFLECTIVE_SHIELD_TRIGGERED = 33619,
             SPELL_PRI_REFLECTIVE_SHIELD_R1 = 33201,
+            SPELL_PRI_REFLECTIVE_SHIELD_R2 = 33202,
         };
 
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
-            return sSpellStore.LookupEntry(SPELL_PRI_REFLECTIVE_SHIELD_TRIGGERED) && sSpellStore.LookupEntry(SPELL_PRI_REFLECTIVE_SHIELD_R1);
+            return sSpellStore.LookupEntry(SPELL_PRI_REFLECTIVE_SHIELD_TRIGGERED) && sSpellStore.LookupEntry(SPELL_PRI_REFLECTIVE_SHIELD_R1) && sSpellStore.LookupEntry(SPELL_PRI_REFLECTIVE_SHIELD_R2);
         }
 
         void Trigger(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
@@ -237,8 +238,14 @@ public:
             Unit * caster = GetCaster();
             if (!caster)
                 return;
-            if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PRI_REFLECTIVE_SHIELD_R1, EFFECT_0))
+
+            AuraEffect* talentAurEff = NULL;
+            if(!(talentAurEff = target->GetAuraEffect(SPELL_PRI_REFLECTIVE_SHIELD_R1, EFFECT_0))) // rank #1
+                talentAurEff = target->GetAuraEffect(SPELL_PRI_REFLECTIVE_SHIELD_R2, EFFECT_0);   // rank #2
+
+            if(talentAurEff)
             {
+                // Cast damage spell on the attacker
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRI_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
             }
