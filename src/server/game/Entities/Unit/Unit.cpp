@@ -16407,7 +16407,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                         return 892;
                 }
             }
-            else if (getRace() == RACE_TROLL)
+            /*else if (getRace() == RACE_TROLL)
             {
                 uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
                 switch (hairColor)
@@ -16446,7 +16446,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                     default: // original - Dark Blue
                         return 33664;
                 }
-            }
+            }*/
             // Based on Skin color
             else if (getRace() == RACE_TAUREN)
             {
@@ -16570,7 +16570,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                         return 2281;
                 }
             }
-            else if (getRace() == RACE_TROLL)
+            /*else if (getRace() == RACE_TROLL)
             {
                 uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
                 switch (hairColor)
@@ -16607,7 +16607,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                     default: // original - Violet
                         return 33653;
                 }
-            }
+            }*/
             // Based on Skin color
             else if (getRace() == RACE_TAUREN)
             {
