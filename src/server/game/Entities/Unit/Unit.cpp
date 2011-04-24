@@ -8605,6 +8605,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else
                 return false;
             break;
+        // Soul Leech
+        case 30295:
+            // Should not proc from Shadow Bolt and Searing Pain
+            if (procSpell->Id == 686 || procSpell->Id == 5676)
+                return false;
+            // Replenishment "proc"
+            CastSpell(this, 57669, true);
+            break;
         default:
             break;
     }
