@@ -662,7 +662,12 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
         {
             // only warlock curses have this
             if (spellInfo->Dispel == DISPEL_CURSE)
-                return SPELL_SPECIFIC_CURSE;
+            {
+                if (spellInfo->Id == 980 || spellInfo->Id == 603)
+                    return SPELL_SPECIFIC_WARLOCK_BANE;
+                else
+                    return SPELL_SPECIFIC_CURSE;
+            }
 
             // Warlock (Demon Armor | Demon Skin | Fel Armor)
             if (spellInfo->SpellFamilyFlags[1] & 0x20000020 || spellInfo->SpellFamilyFlags[2] & 0x00000010)
@@ -763,6 +768,7 @@ bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1,SpellSpecific s
         case SPELL_SPECIFIC_ASPECT:
         case SPELL_SPECIFIC_JUDGEMENT:
         case SPELL_SPECIFIC_WARLOCK_CORRUPTION:
+        case SPELL_SPECIFIC_WARLOCK_BANE:
             return spellSpec1 == spellSpec2;
         default:
             return false;
