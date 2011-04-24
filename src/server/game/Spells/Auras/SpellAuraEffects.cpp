@@ -4827,18 +4827,31 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
 
     Unit *target = aurApp->GetTarget();
 
+    int32 amount = GetAmount();
+
+    switch (GetSpellProto()->Id)
+    {
+        // Bear Form - increase armor by 120% on level >= 40
+        case 5487:
+            if (target->getLevel() >= 40)
+                amount = 120;
+            break;
+        default:
+            break;
+    }
+
     // only players have base stats
     if (target->GetTypeId() != TYPEID_PLAYER)
     {
         //pets only have base armor
         if (target->ToCreature()->isPet() && (GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
-            target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(GetAmount()), apply);
+            target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(amount), apply);
     }
     else
     {
         for (int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL; x++)
             if (GetMiscValue() & int32(1 << x))
-                target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_PCT, float(GetAmount()), apply);
+                target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_PCT, float(amount), apply);
     }
 }
 
