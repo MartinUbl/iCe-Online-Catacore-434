@@ -5078,6 +5078,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     switch(GetSpellProto()->Id)
     {
         case 89744: // Wizardry
+        case 86091: // Nethermancy
             miscValue = STAT_INTELLECT; // +5% intellect istead of strength
             break;
         case 53592: // Touched by the Light
