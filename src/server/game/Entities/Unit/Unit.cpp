@@ -8583,6 +8583,28 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
             break;
         }
+        // Aftermath
+        case 85113: // Rank 1
+        case 85114: // Rank 2
+            // Conflagrate
+            if (procSpell->Id == 17962)
+            {
+                // Should not proc on caster (owner of Aftermath proc aura), only for "sychr pyèo"
+                if (this == target)
+                    return false;
+            }
+            // Rain of Fire
+            else if (procSpell->Id == 42223)
+            {
+                if ((roll_chance_i(12) && auraSpellInfo->Id == 85114) ||
+                    (roll_chance_i(6)  && auraSpellInfo->Id == 85113) )
+                    trigger_spell_id = 85387;
+                else
+                    return false;
+            }
+            else
+                return false;
+            break;
         default:
             break;
     }
@@ -8818,6 +8840,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
                 return false;
             break;
+        // Sacred Shield
         case 96263:
             // Not allow proc when target has more than 30% health
             if (GetHealthPct() > 30.0f)

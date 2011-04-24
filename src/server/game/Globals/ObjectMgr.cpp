@@ -2439,7 +2439,7 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (proto->HolidayId && !sHolidaysStore.LookupEntry(proto->HolidayId))
         {
-            sLog->outErrorDb("Item (Entry: %u) has wrong HolidayId value (%u)", i, proto->HolidayId);
+            //sLog->outErrorDb("Item (Entry: %u) has wrong HolidayId value (%u)", i, proto->HolidayId);
             const_cast<ItemPrototype*>(proto)->HolidayId = 0;
         }
     }
@@ -3807,6 +3807,8 @@ void ObjectMgr::LoadGuildRewards()
     {
         sLog->outString();
         sLog->outString(">> Loaded 0 guild reward definitions");
+
+        return;
     }
 
     uint32 count = 0;
