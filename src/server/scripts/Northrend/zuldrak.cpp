@@ -1161,7 +1161,7 @@ public:
             if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
                 pPlayer->GetCharmerOrOwnerPlayerOrPlayerItself()->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND, pKiller);
 
-            std::string sText = (std::string(pKiller->GetName()) + " is victorious once more!");
+            std::string sText = "You are victorious once more!";
 
             if (Unit* pSummoner = me->ToTempSummon()->GetSummoner())
                 pSummoner->MonsterYell(sText.c_str(),LANG_UNIVERSAL,0);
