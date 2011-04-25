@@ -672,6 +672,26 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->ToCreature()->LowerPlayerDamageReq(health < damage ?  health : damage);
     }
 
+    // Bane of Havoc
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (HasAura(85466))
+        {
+            if (Aura* pAura = GetAura(85466))
+            {
+                if (Unit* pCaster = pAura->GetCaster())
+                {
+                    if (pVictim != pCaster)
+                    {
+                        int32 basepoints0 = damage*0.15f;
+                        if(basepoints0 > 1)
+                            CastCustomSpell(pCaster, 85455, &basepoints0, 0, 0, true);
+                    }
+                }
+            }
+        }
+    }
+
     if (health <= damage)
     {
         sLog->outStaticDebug("DealDamage: victim just died");

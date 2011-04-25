@@ -663,7 +663,7 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
             // only warlock curses have this
             if (spellInfo->Dispel == DISPEL_CURSE)
             {
-                if (spellInfo->Id == 980 || spellInfo->Id == 603)
+                if (spellInfo->Id == 980 || spellInfo->Id == 603 || spellInfo->Id == 80240)
                     return SPELL_SPECIFIC_WARLOCK_BANE;
                 else
                     return SPELL_SPECIFIC_CURSE;

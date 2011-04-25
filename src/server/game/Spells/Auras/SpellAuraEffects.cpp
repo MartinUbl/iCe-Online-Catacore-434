@@ -6419,6 +6419,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
             break;
         case SPELLFAMILY_PRIEST:
             break;
+        case SPELLFAMILY_WARLOCK:
+            // Bane of Havoc tracking spell
+            if (GetId() == 80240 && target && caster)
+            {
+                if (apply)
+                    caster->CastSpell(caster, 85466, true, 0, 0, target->GetGUID());
+                else
+                    caster->RemoveAurasDueToSpell(85466);
+            }
+            break;
         case SPELLFAMILY_DRUID:
         {
             if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))

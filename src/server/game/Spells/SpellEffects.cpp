@@ -469,6 +469,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = (distance > radius) ? 0 : int32(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 0) * distance);
                         break;
                     }
+
+                    // Bane of Havoc damage proc spell
+                    case 85455:
+                        // Don't allow to modify damage with spellpower and so on
+                        apply_direct_bonus = false;
+                        break;
                 }
                 break;
             }
