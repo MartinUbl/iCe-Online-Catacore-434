@@ -2059,8 +2059,17 @@ void ObjectMgr::LoadItemPrototypes()
     // check data correctness
     for (uint32 i = 1; i < sItemStorage.MaxEntry; ++i)
     {
-        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype >(i);
+        ItemPrototype* proto = (ItemPrototype*)sItemStorage.LookupEntry<ItemPrototype >(i);
         ItemEntry const* db2item = sItemStore.LookupEntry(i);
+
+        // Horrible, realy horrible and unclean hack for correct RequiredDisenchantSkill value loading
+        // needs to be fixed in ItemPrototype structure
+        QueryResult DisenchResult = WorldDatabase.PQuery("SELECT RequiredDisenchantSkill FROM item_template WHERE entry=%u",i);
+        if (DisenchResult)
+        {
+            if (Field* pField = DisenchResult->Fetch())
+                proto->RequiredDisenchantSkill = pField[0].GetInt32();
+        }
 
         if (!proto)
             continue;
