@@ -2044,6 +2044,13 @@ void Spell::EffectJump(SpellEffIndex effIndex)
         return;
     }
 
+    // Imp's spell Flee - special case, master should be target for fleeing
+    if (GetSpellInfo()->Id == 93282)
+    {
+        if (m_caster->isPet() && m_caster->ToPet())
+            m_caster->ToPet()->GetOwner()->GetContactPoint(m_caster,x,y,z,CONTACT_DISTANCE);
+    }
+
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
