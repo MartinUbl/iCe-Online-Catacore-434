@@ -7083,7 +7083,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
     GetSession()->SendPacket(&data);
 
     // add honor points
-	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor)* 2.4);
+	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor)); // Why the fuck * 2.4 multiplier?!
 
     //ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, honor, true);
 
@@ -10924,12 +10924,12 @@ void Player::SendCurrencies() const
 	for (PlayerCurrenciesMap::const_iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
 	{
 		const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(itr->first);
-		packet << uint32(itr->second.weekCount / PLAYER_CURRENCY_PRECISION);
+		packet << uint32(itr->second.weekCount);// / PLAYER_CURRENCY_PRECISION);
 		packet << uint8(0);                     // unknown
 		packet << uint32(entry->ID);
 		packet << uint32(sWorld->GetNextWeeklyQuestsResetTime() - 1*WEEK);
 		packet << uint32(_GetCurrencyWeekCap(entry) / PLAYER_CURRENCY_PRECISION);
-		packet << uint32(itr->second.totalCount / PLAYER_CURRENCY_PRECISION);
+		packet << uint32(itr->second.totalCount);// / PLAYER_CURRENCY_PRECISION);
 	}
 
 	GetSession()->SendPacket(&packet);
@@ -11013,8 +11013,8 @@ void Player::ModifyCurrency(uint32 id, int32 count)
 		{
 			WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 			packet << uint32(id);
-			packet << uint32(weekCap ? (newWeekCount / PLAYER_CURRENCY_PRECISION) : 0);
-			packet << uint32(newTotalCount / PLAYER_CURRENCY_PRECISION);
+            packet << uint32(weekCap ? newWeekCount : 0);// / PLAYER_CURRENCY_PRECISION) : 0);
+			packet << uint32(newTotalCount);// / PLAYER_CURRENCY_PRECISION);
 			GetSession()->SendPacket(&packet);
 		}
 	}

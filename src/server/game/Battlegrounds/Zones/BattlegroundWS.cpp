@@ -321,8 +321,9 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
         RewardReputationToTeam(889, m_ReputationCapture, HORDE);
     }
-    //for flag capture is reward 2 honorable kills
-    RewardHonorToTeam(GetBonusHonorFromKill(2), Source->GetTeam());
+    //for flag capture was reward 2 honorable kills
+    //now special reward (40 honor points).. TODO: implement holiday
+    RewardHonorToTeam(BG_WSG_Honor[0][BG_WSG_FLAG_CAP], Source->GetTeam()); //GetBonusHonorFromKill(2)
 
     SpawnBGObject(BG_WS_OBJECT_H_FLAG, BG_WS_FLAG_RESPAWN_TIME);
     SpawnBGObject(BG_WS_OBJECT_A_FLAG, BG_WS_FLAG_RESPAWN_TIME);
