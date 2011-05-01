@@ -2816,12 +2816,12 @@ public:
             if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
             {
                 pPlayer->removeSpell(668);
-                pPlayer->GetSession()->KickPlayer();
+                //pPlayer->GetSession()->KickPlayer();
             }
             else
             {
                 pPlayer->removeSpell(669);
-                pPlayer->GetSession()->KickPlayer();
+                //pPlayer->GetSession()->KickPlayer();
             }
             //return true;
         }
@@ -2830,12 +2830,12 @@ public:
             if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
             {
                 pPlayer->learnSpell(668, false);
-                pPlayer->GetSession()->KickPlayer();
+                //pPlayer->GetSession()->KickPlayer();
             }
             else
             {
                 pPlayer->learnSpell(669, false);
-                pPlayer->GetSession()->KickPlayer();
+                //pPlayer->GetSession()->KickPlayer();
             }
             //return true;
         }
