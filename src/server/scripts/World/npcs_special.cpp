@@ -2796,6 +2796,54 @@ public:
     }
 };
 
+class npc_unmuter: public CreatureScript
+{
+public:
+    npc_unmuter(): CreatureScript("npc_unmuter") { };
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jsem postava z WotLK a nemuzu mluvit (step 1)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jsem postava z WotLK a nemuzu mluvit (step 2)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+        pPlayer->SEND_GOSSIP_MENU(1,pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action)
+    {
+        if(action == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
+            {
+                pPlayer->removeSpell(668);
+                pPlayer->GetSession()->KickPlayer();
+            }
+            else
+            {
+                pPlayer->removeSpell(669);
+                pPlayer->GetSession()->KickPlayer();
+            }
+            //return true;
+        }
+        if(action == GOSSIP_ACTION_INFO_DEF+2)
+        {
+            if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
+            {
+                pPlayer->learnSpell(668, false);
+                pPlayer->GetSession()->KickPlayer();
+            }
+            else
+            {
+                pPlayer->learnSpell(669, false);
+                pPlayer->GetSession()->KickPlayer();
+            }
+            //return true;
+        }
+        pPlayer->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -2829,5 +2877,6 @@ void AddSC_npcs_special()
     new quest_trigger;
     new npc_ring_of_frost;
     new npc_reforger;
+    new npc_unmuter;
 }
 
