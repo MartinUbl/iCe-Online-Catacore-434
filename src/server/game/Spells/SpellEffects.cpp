@@ -2115,6 +2115,17 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     uint8 uiMaxSafeLevel = 0;
     switch (m_spellInfo->Id)
     {
+        case 36563:    // Shadowstep
+            if (Player * plr = unitTarget->ToPlayer())
+            {
+                if (Unit * target = plr->GetSelectedUnit())
+                {
+                    Position pos;
+                    target->GetFirstCollisionPosition(pos, 2.0f, M_PI);
+                    m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
+                }
+            }
+            break;
         case 48129:  // Scroll of Recall
             uiMaxSafeLevel = 40;
         case 60320:  // Scroll of Recall II
@@ -5484,7 +5495,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             if (Creature *oldContainer = dynamic_cast<Creature*>(seat->GetPassenger(1)))
                                 oldContainer->DisappearAndDie();
                             // TODO: a hack, range = 11, should after some time cast, otherwise too far
-                            unitTarget->CastSpell(seat->GetBase(), 62496, true);
+                            m_caster->CastSpell(seat->GetBase(), 62496, true);
                             unitTarget->EnterVehicle(seat, 1);
                         }
                     }
@@ -7423,6 +7434,14 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             }
             else
                 summon->SetDisplayId(1126);
+        }
+        else if (summon->GetEntry() == 1964) // Force of Nature
+        {
+            if (AuraEffect * aurEff = m_caster->GetAuraEffectOfRankedSpell(16836, 2))
+            {
+                int32 value = aurEff->GetAmount();
+                summon->CastCustomSpell(summon, 50419, &value, &value, 0, true);
+            }
         }
 
         summon->AI()->EnterEvadeMode();
