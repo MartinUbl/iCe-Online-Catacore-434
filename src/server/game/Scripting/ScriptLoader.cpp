@@ -544,6 +544,9 @@ void AddSC_shattrath_city();
 void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
 
+// Cataclysm dungeons
+void AddSC_romogg();
+
 // battlegrounds
 
 // outdoor pvp
@@ -570,6 +573,7 @@ void AddScripts()
     AddKalimdorScripts();
     AddOutlandScripts();
     AddNorthrendScripts();
+	AddCataclysmScripts();
     AddBattlegroundScripts();
     AddOutdoorPvPScripts();
     AddCustomScripts();
@@ -1115,6 +1119,11 @@ void AddNorthrendScripts()
     AddSC_crystalsong_forest();
     //AddSC_isle_of_conquest();
 #endif
+}
+
+void AddCataclysmScripts()
+{
+	AddSC_romogg();
 }
 
 void AddOutdoorPvPScripts()
