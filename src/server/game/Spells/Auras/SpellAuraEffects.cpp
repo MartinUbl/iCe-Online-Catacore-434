@@ -1709,6 +1709,22 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 TakenTotalMod = TakenTotalMod > 0.0f ? TakenTotalMod : 0.0f;
 
                 damage = uint32(target->CountPctFromMaxHealth(damage));
+
+                // Blood Craze hackfix
+                if (GetSpellProto()->Id == 16488)
+                {
+                    damage = float(target->CountPctFromMaxHealth(1))*1/5;
+                    TakenTotalMod = 1.0f;
+                } else if (GetSpellProto()->Id == 16490)
+                {
+                    damage = float(target->CountPctFromMaxHealth(2))*1/5;
+                    TakenTotalMod = 1.0f;
+                } else if (GetSpellProto()->Id == 16491)
+                {
+                    damage = float(target->CountPctFromMaxHealth(3))*1/5;
+                    TakenTotalMod = 1.0f;
+                }
+
                 damage = uint32(damage * TakenTotalMod);
             }
             else
