@@ -4261,6 +4261,12 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
             }
         }
     }
+    // Deep Freeze should drop charge of Fingers of Frost
+    if (GetSpellProto()->Id == 44572)
+    {
+        if(Aura* pAura = GetCaster()->GetAura(44544))
+            pAura->DropCharge();
+    }
 
     target->SetControlled(apply, UNIT_STAT_STUNNED);
 }
