@@ -2264,9 +2264,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             switch (GetId())
             {
                 case 49016: // Hysteria
+                {
                     uint32 damage = uint32(target->CountPctFromMaxHealth(1));
                     target->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     break;
+                }
             }
             // Death and Decay
             if (GetSpellProto()->SpellFamilyFlags[0] & 0x20)
@@ -4238,7 +4240,7 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
     // Paladin's spell Holy Wrath
     if (GetSpellProto()->Id == 2812 && apply)
     {
-        if (target->GetTypeId() == TYPEID_UNIT)
+        if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature())
         {
             // Stunns only demons and undeads (with glyph also dragonkins and elementals)
             switch (target->ToCreature()->GetCreatureType())
@@ -4259,6 +4261,11 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
                     target->RemoveAurasDueToSpell(2812);
                     return;
             }
+        }
+        else if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            target->RemoveAurasDueToSpell(2812);
+            return;
         }
     }
     // Deep Freeze should drop charge of Fingers of Frost

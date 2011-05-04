@@ -8650,6 +8650,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Replenishment "proc"
             CastSpell(this, 57669, true);
             break;
+        // Priest - Masochism
+        case 88994:
+        case 88995:
+        {
+            if (damage < GetMaxHealth()*0.1f)
+                return false;
+            break;
+        }
         default:
             break;
     }
