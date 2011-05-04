@@ -1425,6 +1425,14 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 89420:
                         caster->CastSpell(caster, 89653, true);
                         break;
+                    case 1120:   // Drain Soul
+                        // Pandemic - refresh duration of Unstable Affliction
+                        if (caster->HasAura(85100) || (caster->HasAura(85099) && roll_chance_i(50)))
+                        {
+                            if (Aura* pAura = target->GetAura(30108))
+                                pAura->RefreshDuration();
+                        }
+                        break;
                     case 43093:
                     case 31956:
                     case 38801:  // Grievous Wound
