@@ -1711,6 +1711,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 damage = uint32(target->CountPctFromMaxHealth(damage));
 
                 // Blood Craze hackfix
+                // should regenerate 1/2/3% per 5 seconds (1/5 for one second)
                 if (GetSpellProto()->Id == 16488)
                 {
                     damage = float(target->CountPctFromMaxHealth(1))*1/5;

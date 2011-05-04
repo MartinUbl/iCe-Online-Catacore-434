@@ -540,6 +540,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage+= int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
                 }
+                // Cleave damage recalculate
+                else if (m_spellInfo->Id == 845)
+                {
+                    damage = 6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
