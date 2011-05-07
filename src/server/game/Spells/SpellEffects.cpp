@@ -1653,6 +1653,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
+            // Chains of Ice
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x00000004)
+            {
+                if (m_caster->HasAura(50040))
+                    m_caster->CastSpell(unitTarget, 96293, true);
+                else if (m_caster->HasAura(50041))
+                    m_caster->CastSpell(unitTarget, 96294, true);
+            }
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
             {
