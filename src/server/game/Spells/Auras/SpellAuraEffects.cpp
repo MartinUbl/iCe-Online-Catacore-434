@@ -5154,6 +5154,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         case 86091: // Nethermancy
             miscValue = STAT_INTELLECT; // +5% intellect istead of strength
             break;
+        case 50029: // Veteran of the Third War
         case 53592: // Touched by the Light
             miscValue = STAT_STAMINA;
             break;
