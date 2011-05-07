@@ -8642,6 +8642,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else
                 return false;
             break;
+        // Rude Interruption
+        case 61216:
+        case 61221:
+        {
+            // Should proc only from Pummel
+            if (procSpell->Id != 6552)
+                return false;
+            break;
+        }
         // Soul Leech
         case 30295:
             // Should not proc from Shadow Bolt and Searing Pain
