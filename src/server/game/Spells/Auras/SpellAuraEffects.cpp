@@ -1416,7 +1416,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 break;
             }
 
-            // some auras remove at specific health level or more
+            // some auras specific effects (on tick effect, remove when below X health, etc..)
             if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
             {
                 switch (GetId())
@@ -1433,6 +1433,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 pAura->RefreshDuration();
                         }
                         break;
+                    case 8050:   // Flame Shock tick
+                        {
+                            // Reseting cooldown originally done by spell 77762 (Lava Burst!), but it's simplier this way
+                            if ( caster->ToPlayer() && ((caster->HasAura(77755) && roll_chance_i(10)) ||
+                                (caster->HasAura(77756) && roll_chance_i(100))) )
+                                caster->ToPlayer()->RemoveSpellCooldown(51505, true);
+                        }
                     case 43093:
                     case 31956:
                     case 38801:  // Grievous Wound
