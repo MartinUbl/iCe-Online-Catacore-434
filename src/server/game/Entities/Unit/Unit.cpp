@@ -8658,6 +8658,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Die by the Sword
+        case 81913:
+        case 81914:
+        {
+            if (GetHealthPct() > 20.0f)
+                return false;
+            break;
+        }
         default:
             break;
     }
