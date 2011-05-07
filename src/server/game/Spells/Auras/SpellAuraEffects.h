@@ -134,7 +134,7 @@ class AuraEffect
         //  visibility & phases
         void HandleInvisibilityDetect(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleInvisibility(AuraApplication const * aurApp, uint8 mode, bool apply) const;
-        void HandleModTrapLauncher(AuraApplication const * aurApp, uint8 mode, bool apply) const;
+        void HandleModActionButton(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleModCamouflage(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleModStealth(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleSpiritOfRedemption(AuraApplication const * aurApp, uint8 mode, bool apply) const;

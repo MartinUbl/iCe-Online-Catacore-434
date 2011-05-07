@@ -390,7 +390,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //330
     &AuraEffect::HandleNULL,                                      //331
     &AuraEffect::HandleNULL,                                      //332
-    &AuraEffect::HandleModTrapLauncher,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
+    &AuraEffect::HandleModActionButton,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      //334
     &AuraEffect::HandleNULL,                                      //335
     &AuraEffect::HandleNULL,                                      //336
@@ -2966,8 +2966,13 @@ void AuraEffect::HandleInvisibility(AuraApplication const *aurApp, uint8 mode, b
 }
 
 //TODO: Finish this aura
-void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp, uint8 mode, bool apply) const
+void AuraEffect::HandleModActionButton(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {
+    Player* player = aurApp->GetTarget()->ToPlayer();
+
+    // Should be applied only to players
+    if (!player)
+        return;
 }
 
 //TODO: Finish this aura
