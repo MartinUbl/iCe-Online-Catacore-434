@@ -4819,6 +4819,19 @@ void AuraEffect::HandleAuraSchoolAbsorb(AuraApplication const *aurApp, uint8 mod
             }
         }
         break;
+        // Ice Barrier
+        case 11426:
+        {
+            // Shattered Barrier should make player cast freezing spell at remove
+            if (apply)
+                break;
+
+            if (target->HasAura(44745))
+                target->CastSpell(target, 55080, true);
+            else if (target->HasAura(54787))
+                target->CastSpell(target, 83073, true);
+        }
+        break;
     }
 }
 
