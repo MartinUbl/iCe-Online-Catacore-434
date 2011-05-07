@@ -4636,6 +4636,8 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
             break;
         case 18499: // Berserker Rage
+            if (target->HasAura(58096))
+                target->CastSpell(target, 23690, true);
             mechanic = (1 << MECHANIC_FEAR) | (1 << MECHANIC_KNOCKOUT) | (1 << MECHANIC_SAPPED);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, apply);
