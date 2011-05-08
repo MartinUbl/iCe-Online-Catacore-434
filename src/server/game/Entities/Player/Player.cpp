@@ -7228,6 +7228,27 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
+    // Prohibited area teleport - for closed zones
+    if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
+    {
+        switch (newZone)
+        {
+            case 5034: // Uldum
+            case 4922: // Twilight Highlands
+            case 5042: // Deepholm
+            case 5146: // Vash'jir
+            case 5095: // Tol Barad
+            case 5389: // Tol Barad Peninsula
+                // Teleport to somewere in Arathi Highlands
+                if (IsMounted())
+                    Unmount();
+                TeleportTo(0,-1508.51f,-2732.06f,38.4986f,0.0f);
+                break;
+            default:
+                break;
+        }
+    }
+
     // zone changed, so area changed as well, update it
     UpdateArea(newArea);
 
