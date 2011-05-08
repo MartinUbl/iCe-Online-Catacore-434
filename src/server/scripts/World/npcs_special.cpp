@@ -2645,7 +2645,9 @@ public:
         {
             pMap = me->GetMap();
             if(pMap)
+            {
                 m_zoneId = pMap->GetZoneId(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+            }
             else
             {
                 me->Kill(me);
@@ -2692,7 +2694,6 @@ public:
             if(Player* pPlayer = pTarget->ToPlayer())
             {
                 pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5518));
-
                 WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
                 data << uint64(me->GetGUID());
                 data << uint64(pTarget->GetGUID());
@@ -2716,6 +2717,7 @@ public:
 
             if(pGuide = pDoneBy->ToPlayer())
                 m_bIsMoving = FlyMove();
+            else return;
         }
 
         bool FlyMove()
