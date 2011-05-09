@@ -627,6 +627,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Shadow Word: Death - deals damage equal to damage done to caster
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x2))
                 {
+                    // Deals three times as much damage to targets below 25%
+                    if (unitTarget->GetHealthPct() < 25.0f)
+                        damage *= 3;
+
                     int32 back_damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
                     // Pain and Suffering reduces damage
                     if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
