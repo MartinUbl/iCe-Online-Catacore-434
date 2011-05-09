@@ -4838,7 +4838,7 @@ void AuraEffect::HandleAuraSchoolAbsorb(AuraApplication const *aurApp, uint8 mod
                     regain = 0.04*target->GetMaxPower(POWER_MANA);
                 else if(target->HasAura(47535))
                     regain = 0.02*target->GetMaxPower(POWER_MANA);
-                target->CastCustomSpell(target, 47755, &regain, 0, 0, true);
+                target->CastCustomSpell(GetCaster(), 47755, &regain, 0, 0, true);
             }
         }
         break;
