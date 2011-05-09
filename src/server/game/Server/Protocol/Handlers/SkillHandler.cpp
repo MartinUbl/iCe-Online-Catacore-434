@@ -51,6 +51,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     if(spec != ((uint32)-1))
     {
         uint32 specID = 0;
+        uint32 masterySpells[2] = {0,0};
         for(uint32 i = 0; i < sTalentTabStore.GetNumRows(); i++)
         {
             TalentTabEntry const * entry = sTalentTabStore.LookupEntry(i);
@@ -59,6 +60,8 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
                 if(entry->ClassMask == _player->getClassMask() && entry->tabpage == spec)
                 {
                     specID = entry->TalentTabID;
+                    masterySpells[0] = entry->masterySpells[0];
+                    masterySpells[1] = entry->masterySpells[1];
                     break;
                 }
             }
@@ -76,9 +79,14 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 
                 if (!talentInfo || talentInfo->TalentTabID != specID)
                     continue;
-                
+
                 _player->learnSpell(talentInfo->SpellID, false);
-            }    
+            }
+            // Learn dummy Mastery spells
+            // ----- Disabled for now -----
+            //for (int i = 0; i < 2; i ++)
+            //    if (masterySpells[i])
+            //        _player->learnSpell(masterySpells[i], false);
         }
         else if(_player->GetTalentBranchSpec(_player->m_activeSpec) != specID) //cheat
             return;
