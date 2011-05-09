@@ -834,11 +834,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
         m_damage += damage;
     }
-    // Ice Lance - special case (drop charge of Fingers of Frost)
-    if (m_spellInfo->Id == 30455)
+    
+    // Some special cases after damage recount
+    switch (m_spellInfo->Id)
     {
-        if(Aura* pAura = m_caster->GetAura(44544))
-            pAura->DropCharge();
+        // Ice Lance - special case (drop charge of Fingers of Frost)
+        case 30455:
+            if(Aura* pAura = m_caster->GetAura(44544))
+                pAura->DropCharge();
+            break;
+        default:
+            break;
     }
 }
 

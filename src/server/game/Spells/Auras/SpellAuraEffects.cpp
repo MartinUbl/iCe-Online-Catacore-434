@@ -1440,6 +1440,22 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 (caster->HasAura(77756) && roll_chance_i(100))) )
                                 caster->ToPlayer()->RemoveSpellCooldown(51505, true);
                         }
+                    // Shadow Word: Death - self damage spell
+                    case 32409:
+                    {
+                        // Masochism, rank 1 = regain 5% mana
+                        if (target->HasAura(88994))
+                        {
+                            int32 bp0 = 5;
+                            target->CastCustomSpell(target,89007,&bp0,0,0,true);
+                        }
+                        // Masochism, rank 2 = regain 10% mana
+                        else if (target->HasAura(88995))
+                        {
+                            int32 bp0 = 10;
+                            target->CastCustomSpell(target,89007,&bp0,0,0,true);
+                        }
+                    }
                     case 43093:
                     case 31956:
                     case 38801:  // Grievous Wound
@@ -6177,10 +6193,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         newAura->SetStackAmount(newAura->GetSpellProto()->StackAmount);
                     break;
                 case 85416: // Grand Crusader
-                    // wierd, but true - refreshing cooldown of Avenger's Shield on apply
-                    Player* pPlayer = (Player*)caster;
-                    if(pPlayer && pPlayer->HasSpellCooldown(31935))
-                        pPlayer->RemoveSpellCooldown(31935, true);
+                    {
+                        // wierd, but true - refreshing cooldown of Avenger's Shield on apply
+                        Player* pPlayer = (Player*)caster;
+                        if(pPlayer && pPlayer->HasSpellCooldown(31935))
+                            pPlayer->RemoveSpellCooldown(31935, true);
+                    }
                     break;
             }
         }
