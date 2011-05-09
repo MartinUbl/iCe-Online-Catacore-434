@@ -8654,6 +8654,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else
                 return false;
             break;
+        //Impending Victory
+        case 80128:
+        case 80129:
+            // Should proc only from Devastate
+            if (procSpell->Id != 20243 || pVictim->GetHealthPct() > 20.0f)
+                return false;
+            break;
         // Rude Interruption
         case 61216:
         case 61221:

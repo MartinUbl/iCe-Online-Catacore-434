@@ -2615,6 +2615,10 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
     if (m_spellInfo->Id == 59754 && unitTarget == m_caster)
         return;
 
+    // Victory Rush and healing reduction when proc from Impending Victory
+    if (m_spellInfo->Id == 34428 && m_caster->HasAura(82368))
+        damage = 5;
+
     m_healing += m_originalCaster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, unitTarget->CountPctFromMaxHealth(damage), HEAL);
 }
 
