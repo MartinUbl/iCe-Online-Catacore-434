@@ -2645,9 +2645,7 @@ public:
         {
             pMap = me->GetMap();
             if(pMap)
-            {
                 m_zoneId = pMap->GetZoneId(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-            }
             else
             {
                 me->Kill(me);
