@@ -440,6 +440,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = unitTarget->CountPctFromMaxHealth(50);
                         break;
                     }
+                    // Rocket Barrage
+                    case 69041:
+                    {
+                        damage = uint32(1+ m_caster->getLevel() * 2);
+                        break;
+                    }
                     // Tympanic Tantrum
                     case 62775:
                     {
