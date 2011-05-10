@@ -2330,6 +2330,16 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 return;
             }
         }
+        break;
+        case SPELLFAMILY_DRUID:
+        {
+            // Shooting Stars - reset cooldown of Starsurge
+            if (m_spellInfo->Id == 93400 && m_caster->ToPlayer())
+            {
+                m_caster->ToPlayer()->RemoveSpellCooldown(78674, true);
+            }
+        }
+        break;
     }
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
