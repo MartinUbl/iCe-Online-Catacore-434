@@ -8661,6 +8661,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 5308)
                 return false;
             break;
+        // Lambs to the Slaughter
+        case 84583:
+        case 84587:
+        case 84588:
+            // Should proc only from spell Mortal Strike
+            if (procSpell->Id != 12294)
+                return false;
+            break;
         //Impending Victory
         case 80128:
         case 80129:
