@@ -1705,6 +1705,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             switch (m_spellInfo->Id)
             {
+            case 49203: // Hungering Cold
+                m_caster->CastCustomSpell(m_caster, 51209, &bp, NULL, NULL, true);
+                break;
             case 49560: // Death Grip
                 Position pos;
                 GetSummonPosition(effIndex, pos);
