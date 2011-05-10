@@ -6307,6 +6307,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         if (caster)
                             caster->CastCustomSpell(caster, 48210, &m_amount, 0, 0, true, NULL, this);
                     }
+                    // Shadowburn
+                    else if (m_spellProto->Id == 29341)
+                    {
+                        // If the target dies within duration of this 6sec debuff, gain 3 soul shards
+                        if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+                            caster->SetPower(POWER_SOUL_SHARDS,3);
+                    }
                     break;
                 case SPELLFAMILY_DRUID:
                     // Lifebloom
