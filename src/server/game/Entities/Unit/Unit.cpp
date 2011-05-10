@@ -8654,6 +8654,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             else
                 return false;
             break;
+        // Executioner
+        case 20502:
+        case 20503:
+            // Should proc only from spell Execute
+            if (procSpell->Id != 5308)
+                return false;
+            break;
         //Impending Victory
         case 80128:
         case 80129:
