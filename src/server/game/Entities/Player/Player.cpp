@@ -20483,16 +20483,16 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
     if (crItem->ExtendedCost)                            // case for new honor system
     {
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-		for (int i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
-		{
-			if (iece->RequiredItem[i])
-				DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
-		}
+        for (int i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
+        {
+            if (iece->RequiredItem[i])
+                DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
+        }
 
-		for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
-		{
-			if (iece->RequiredCurrency[i])
-				ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i] * count));
+        for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+        {
+            if (iece->RequiredCurrency[i])
+                ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i] * count / PLAYER_CURRENCY_PRECISION));
         }
     }
 
@@ -20605,19 +20605,19 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
 
         // item base price
-		for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
             if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count)))
-			{
-				SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-				return false;
-			}
-		}
+            {
+                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                return false;
+            }
+        }
 
-		// currency price
-		for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+        // currency price
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i]))
+            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / PLAYER_CURRENCY_PRECISION))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
