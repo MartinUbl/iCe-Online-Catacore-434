@@ -2615,6 +2615,204 @@ public:
     }
 };
 
+class npc_outdoor_deathwing_flight : public CreatureScript
+{
+public:
+    npc_outdoor_deathwing_flight() : CreatureScript("npc_outdoor_deathwing_flight") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_outdoor_deathwing_flightAI (pCreature);
+    }
+
+    struct npc_outdoor_deathwing_flightAI  : public ScriptedAI
+    {
+        npc_outdoor_deathwing_flightAI(Creature *c) : ScriptedAI(c) { }
+
+        std::list<uint64> m_lPlayerGUID;
+        Map* pMap;
+        uint32 m_zoneId;
+        uint32 m_uiZoneCheck_Timer;
+        Player* pGuide;
+        bool m_bIsMoving;
+
+        void Reset()
+        {
+            pMap = me->GetMap();
+            if(pMap)
+                m_zoneId = pMap->GetZoneId(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+            else
+            {
+                me->Kill(me);
+                return;
+            }
+
+            me->SetReactState(REACT_PASSIVE);
+            me->setActive(true);
+
+            //me->ApplySpellImmune(0, IMMUNITY_ID, 94644, true); // removes triggering aura as well?
+            me->CastSpell(me, 83508, true);
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            me->SetFlying(true);
+            me->SetSpeed(MOVE_FLIGHT, 7.0f, true);
+
+            HandleLooming(true);
+
+            pGuide = NULL;
+            m_bIsMoving = false;
+
+            m_uiZoneCheck_Timer = 5000;
+        }
+
+        void JustDied(Unit* /*pKiller*/)
+        {
+            HandleLooming(false);
+            me->SetVisibility(VISIBILITY_OFF);
+            me->setActive(false);
+            me->DeleteFromDB();
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* spellInfo)
+        {
+            if(spellInfo->Id != 94644)
+                return;
+
+            if(pTarget == me->ToUnit())
+            {
+                me->RemoveAura(me->GetAura(94644));
+                return;
+            }
+            if(Player* pPlayer = pTarget->ToPlayer())
+            {
+                pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5518));
+
+                WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
+                data << uint64(me->GetGUID());
+                data << uint64(pTarget->GetGUID());
+                data << uint32(spellInfo->Id);
+                pPlayer->SendMessageToSet(&data, true);
+            }
+            me->AddAura(94644, pTarget);
+        }
+
+        void EnterCombat(Unit* /*who*/){}
+
+        void DamageTaken(Unit* pDoneBy, uint32 &damage)
+        {
+            if(pGuide && pDoneBy == pGuide->ToUnit() && damage > 10)
+                return;
+
+            damage = 0;
+
+            if(pGuide || pDoneBy == me->ToUnit())
+                return;
+
+            if(pGuide = pDoneBy->ToPlayer())
+                m_bIsMoving = FlyMove();
+        }
+
+        bool FlyMove()
+        {
+            if(!pGuide)
+                return false;
+
+            Position pos;
+            pGuide->GetPosition(&pos);
+            float dist = me->GetDistance(pos);
+
+            if(dist < 5.0f)
+                return false;
+
+            HandleLooming(true);
+            me->GetMotionMaster()->MovePoint(2, pos);
+
+            for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+            {
+                if(Player* pPlayer = me->GetPlayer(*me, *i))
+                    me->SendMonsterMove(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), uint32(dist/6.8f), pPlayer);
+            }
+            return true;
+        }
+
+        void MovementInform(uint32 /*type*/, uint32 data)
+        {
+            if(data != 2)
+                return;
+
+            m_bIsMoving = FlyMove();
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(m_uiZoneCheck_Timer < diff)
+            {
+                if(pMap)
+                {
+                    uint32 newZoneId = pMap->GetZoneId(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                    if(newZoneId != m_zoneId)
+                    {
+                        m_zoneId = newZoneId;
+                        HandleLooming(false);
+                        HandleLooming(true);
+                    }
+                }
+                if(!m_bIsMoving)
+                    m_bIsMoving = FlyMove();
+
+                m_uiZoneCheck_Timer = 2000;
+            }
+            else m_uiZoneCheck_Timer -= diff;
+        }
+
+        void HandleLooming(bool apply)
+        {
+            if(apply)
+            {
+                if(!pMap)
+                    return;
+
+                Map::PlayerList const &lPlayers = pMap->GetPlayers();
+                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if(Player* pPlayer = itr->getSource())
+                    {
+                        if(pPlayer->GetMap()->GetZoneId(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()) == m_zoneId)
+                        {
+                            if(!pPlayer->HasAura(94656))
+                            {
+                                m_lPlayerGUID.push_back(pPlayer->GetGUID());
+                                pPlayer->CastCustomSpell(pPlayer, 94656, NULL, NULL, NULL, true, 0, 0, me->GetGUID());
+                            }
+
+                            me->setFaction(16);
+                            me->SendUpdateToPlayer(pPlayer); // create/update deathwing for client
+                            me->setFaction(35);
+                            pPlayer->SendAurasForTarget((Unit*)me);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                std::list<uint64> lEraseGUID;
+                for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+                {
+                    if(Player* pPlayer = me->GetPlayer(*me, *i))
+                    {
+                        pPlayer->RemoveAurasDueToSpell(94656);
+                        me->DestroyForPlayer(pPlayer); // destroy deathwing for client
+                        lEraseGUID.push_back(*i);
+                    }
+                }
+                for(std::list<uint64>::const_iterator i = lEraseGUID.begin(); i != lEraseGUID.end(); ++i)
+                    m_lPlayerGUID.remove(*i);
+            }
+        }
+    };
+};
+
 class quest_trigger : public CreatureScript
 {
 public:
@@ -2874,6 +3072,7 @@ void AddSC_npcs_special()
     new npc_locksmith;
     new npc_tabard_vendor;
     new npc_experience;
+    new npc_outdoor_deathwing_flight;
     new quest_trigger;
     new npc_ring_of_frost;
     new npc_reforger;
