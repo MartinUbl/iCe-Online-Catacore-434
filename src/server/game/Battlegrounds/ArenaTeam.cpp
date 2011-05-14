@@ -864,7 +864,16 @@ void ArenaTeam::UpdateMembersConquestPointCap()
         // And notify also player class
         pSource = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(itr->guid));
         if (pSource)
+        {
             pSource->SetConquestPointCap(newcap);
+            if (pSource->IsInWorld() && !pSource->GetSession()->PlayerLoading())
+            {
+                WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
+                packet << uint32(newcap);
+                packet << uint32(CURRENCY_TYPE_CONQUEST_POINTS);
+                pSource->GetSession()->SendPacket(&packet);
+            }
+        }
     }
 }
 
