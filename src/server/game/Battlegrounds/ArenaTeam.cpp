@@ -846,6 +846,7 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
 void ArenaTeam::UpdateMembersConquestPointCap()
 {
     uint32 newcap = 0;
+    uint32 oldcap = 0;
     Player* pSource = NULL;
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
@@ -859,11 +860,13 @@ void ArenaTeam::UpdateMembersConquestPointCap()
         else
             newcap = 1343;
 
+        oldcap = itr->conquest_point_cap;
+
         itr->conquest_point_cap = newcap;
 
-        // And notify also player class
+        // And notify also player class (if new cap is higher than old cap to not scare players)
         pSource = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(itr->guid));
-        if (pSource)
+        if (pSource && newcap > oldcap)
         {
             pSource->SetConquestPointCap(newcap);
             if (pSource->IsInWorld() && !pSource->GetSession()->PlayerLoading())
