@@ -471,6 +471,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_GuildIdInvited = 0;
     m_ArenaTeamIdInvited = 0;
 
+    m_ConquestPointCap = 1343;
+
     m_atLoginFlags = AT_LOGIN_NONE;
 
     mSemaphoreTeleport_Near = false;
@@ -10943,7 +10945,7 @@ uint8 Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec &dest, uint32
     return EQUIP_ERR_INVENTORY_FULL;
 }
 
-void Player::SendCurrencies() const
+void Player::SendCurrencies()
 {
     WorldPacket packet(SMSG_INIT_CURRENCY, 4 + m_currencies.size()*(5*4 + 1));
     packet << uint32(m_currencies.size());
@@ -10955,20 +10957,20 @@ void Player::SendCurrencies() const
         packet << uint8(0);                     // unknown
         packet << uint32(entry->ID);
         packet << uint32(sWorld->GetNextWeeklyQuestsResetTime() - 1*WEEK);
-        packet << uint32(_GetCurrencyWeekCap(entry) / PLAYER_CURRENCY_PRECISION);
+        packet << uint32(_GetCurrencyWeekCap(entry));
         packet << uint32(itr->second.totalCount);
     }
 
     GetSession()->SendPacket(&packet);
 }
 
-uint32 Player::GetCurrency(uint32 id) const
+uint32 Player::GetCurrency(uint32 id)
 {
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
     return itr != m_currencies.end() ? itr->second.totalCount : 0;
 }
 
-bool Player::HasCurrency(uint32 id, uint32 count) const
+bool Player::HasCurrency(uint32 id, uint32 count)
 {
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
     return itr != m_currencies.end() && itr->second.totalCount >= count;
@@ -11052,27 +11054,28 @@ void Player::SetCurrency(uint32 id, uint32 count)
     ModifyCurrency(id, int32(count) - GetCurrency(id));
 }
 
-uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
+uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency)
 {
     uint32 cap = currency->WeekCap;
     switch (currency->ID)
     {
     case CURRENCY_TYPE_CONQUEST_POINTS:
         {
-            // TODO: implement
-            cap = 0;
+            cap = 1343;
+            if (GetConquestPointCap())
+                cap = GetConquestPointCap();
             break;
         }
     case CURRENCY_TYPE_HONOR_POINTS:
         {
-            uint32 honorcap = sWorld->getIntConfig(CONFIG_MAX_HONOR_POINTS) * PLAYER_CURRENCY_PRECISION;
+            uint32 honorcap = sWorld->getIntConfig(CONFIG_MAX_HONOR_POINTS);
             if (honorcap > 0)
                 cap = honorcap;
             break;
         }
     case CURRENCY_TYPE_JUSTICE_POINTS:
         {
-            uint32 justicecap = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS) * PLAYER_CURRENCY_PRECISION;
+            uint32 justicecap = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS);
             if (justicecap > 0)
                 cap = justicecap;
             break;
@@ -11081,7 +11084,7 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
     if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
     {
         WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-        packet << uint32(cap / PLAYER_CURRENCY_PRECISION);
+        packet << uint32(cap);
         packet << uint32(currency->ID);
         GetSession()->SendPacket(&packet);
     }
@@ -16339,7 +16342,7 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
     {
         for (; slot <= 2; ++slot)
         {
-            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating) VALUES (%u, %u, 0, 1500)", GetGUIDLow(), slot);
+            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, 0, 1500, 0, 1343)", GetGUIDLow(), slot);
             SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, 0);
         }
         return;
@@ -16351,9 +16354,11 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
 
         uint32 personalrating = 0;
         uint32 matchmakerrating = 1500;
+        uint32 highestweekrating = 0;
+        uint32 conquestpointcap = 1343;
         if (fields[0].GetUInt8() > slot)
         {
-            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating) VALUES (%u, %u, %u, %u)", GetGUIDLow(), slot, personalrating, matchmakerrating);
+            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, %u, %u, %u, %u)", GetGUIDLow(), slot, personalrating, matchmakerrating, highestweekrating, conquestpointcap);
             SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, personalrating);
             slot++;
             continue;
@@ -16361,6 +16366,8 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
 
         personalrating = fields[1].GetUInt32();
         matchmakerrating = fields[2].GetUInt32();
+        highestweekrating = fields[3].GetUInt32();
+        conquestpointcap = fields[4].GetUInt32();
         SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, personalrating);
         slot++;
     }
@@ -16713,6 +16720,14 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
+
+    // Load conquest point cap.. little hack
+    QueryResult pCapQuery = CharacterDatabase.PQuery("SELECT MAX(conquest_point_cap) FROM character_arena_stats WHERE guid=%lu", GetGUID());
+    if (pCapQuery)
+    {
+        Field* pCapField = pCapQuery->Fetch();
+        SetConquestPointCap(pCapField[0].GetUInt32());
+    }
 
     MapEntry const * mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || !IsPositionValid())
@@ -17903,39 +17918,43 @@ void Player::_LoadWeeklyQuestStatus(PreparedQueryResult result)
 
 void Player::_LoadCurrency(PreparedQueryResult result)
 {
-	//         0         1      2
-	// "SELECT currency, count, thisweek FROM character_currency WHERE guid = '%u'"
+    //         0         1      2
+    // "SELECT currency, count, thisweek FROM character_currency WHERE guid = '%u'"
 
-	if (result)
-	{
-		do
-		{
-			Field *fields = result->Fetch();
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
 
-			uint32 currency_id = fields[0].GetUInt16();
-			uint32 totalCount = fields[1].GetUInt32();
-			uint32 weekCount = fields[2].GetUInt32();
+            uint32 currency_id = fields[0].GetUInt16();
+            uint32 totalCount = fields[1].GetUInt32();
+            uint32 weekCount = fields[2].GetUInt32();
 
-			const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(currency_id);
-			if (!entry)
-			{
-				sLog->outError("Player::_LoadCurrency: %s has not existing currency %u, removing.", GetName(), currency_id);
-				CharacterDatabase.PExecute("DELETE FROM character_currency WHERE currency = '%u'", currency_id);
-				continue;
-			}
+            const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(currency_id);
+            if (!entry)
+            {
+                sLog->outError("Player::_LoadCurrency: %s has not existing currency %u, removing.", GetName(), currency_id);
+                CharacterDatabase.PExecute("DELETE FROM character_currency WHERE currency = '%u'", currency_id);
+                continue;
+            }
 
-			uint32 weekCap = _GetCurrencyWeekCap(entry);
+            uint32 weekCap = _GetCurrencyWeekCap(entry);
 
-			PlayerCurrency cur;
+            PlayerCurrency cur;
 
-			cur.state = PLAYERCURRENCY_UNCHANGED;
-			cur.totalCount = totalCount > entry->TotalCap ? entry->TotalCap : totalCount;
-			cur.weekCount = weekCount > weekCap ? weekCap : weekCount;
+            cur.state = PLAYERCURRENCY_UNCHANGED;
 
-			m_currencies[currency_id] = cur;
-		}
-		while(result->NextRow());
-	}
+            cur.totalCount = totalCount;
+            if (entry->TotalCap > 0 && totalCount > entry->TotalCap)
+                cur.totalCount = entry->TotalCap;
+
+            cur.weekCount = weekCount > weekCap ? (weekCap ? weekCap : weekCount) : weekCount;
+
+            m_currencies[currency_id] = cur;
+        }
+        while(result->NextRow());
+    }
 }
 
 void Player::_LoadSpells(PreparedQueryResult result)

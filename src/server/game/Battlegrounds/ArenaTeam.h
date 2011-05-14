@@ -104,6 +104,8 @@ struct ArenaTeamMember
     uint32 wins_season;
     uint32 personal_rating;
     uint32 matchmaker_rating;
+    uint32 highest_week_rating;
+    uint32 conquest_point_cap;
 
     void ModifyPersonalRating(Player* plr, int32 mod, uint32 slot);
     void ModifyMatchmakerRating(int32 mod, uint32 slot);
@@ -209,6 +211,7 @@ class ArenaTeam
         void OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 teamratingchange = -12);
 
         void UpdateArenaPointsHelper(std::map<uint32, uint32> & PlayerPoints);
+        void UpdateMembersConquestPointCap();
 
         void NotifyStatsChanged();
 

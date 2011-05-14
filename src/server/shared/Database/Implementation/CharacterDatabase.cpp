@@ -92,7 +92,7 @@ bool CharacterDatabaseConnection::Open()
     PrepareStatement(CHAR_LOAD_PLAYER_ACCOUNTDATA, "SELECT type, time, data FROM character_account_data WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_SKILLS, "SELECT skill, value, max FROM character_skills WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?", true);
-    PrepareStatement(CHAR_LOAD_PLAYER_ARENASTATS, "SELECT slot, personal_rating, matchmaker_rating FROM character_arena_stats WHERE guid = ? ORDER BY slot ASC", true);
+    PrepareStatement(CHAR_LOAD_PLAYER_ARENASTATS, "SELECT slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap FROM character_arena_stats WHERE guid = ? ORDER BY slot ASC", true);
     PrepareStatement(CHAR_LOAD_PLAYER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1", true);
 
     PrepareStatement(CHAR_LOAD_ACCOUNT_DATA, "SELECT type, time, data FROM account_data WHERE account = ?");

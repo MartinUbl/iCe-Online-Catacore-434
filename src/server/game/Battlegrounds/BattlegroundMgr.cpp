@@ -170,7 +170,7 @@ void BattlegroundMgr::Update(uint32 diff)
         {
             if (time(NULL) > m_NextAutoDistributionTime)
             {
-                DistributeArenaPoints();
+                DistributeArenaCurrency();
                 m_NextAutoDistributionTime = m_NextAutoDistributionTime + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld->getIntConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
                 sWorld->setWorldState(WS_ARENA_DISTRIBUTION_TIME, uint64(m_NextAutoDistributionTime));
             }
@@ -841,7 +841,7 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
         {
             //TO-DO: FIX ME
             MinLvl = 0;//bl->minlvl;
-            MaxLvl = 80;//bl->maxlvl;
+            MaxLvl = 85;//bl->maxlvl;
         }
 
         start1 = fields[5].GetUInt32();
@@ -928,7 +928,7 @@ void BattlegroundMgr::InitAutomaticArenaPointDistribution()
     sLog->outDebug("Automatic Arena Point Distribution initialized.");
 }
 
-void BattlegroundMgr::DistributeArenaPoints()
+void BattlegroundMgr::DistributeArenaCurrency()
 {
     // used to distribute arena points based on last week's stats
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_START);
@@ -936,14 +936,18 @@ void BattlegroundMgr::DistributeArenaPoints()
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_START);
 
     //temporary structure for storing maximum points to add values for all players
-    std::map<uint32, uint32> PlayerPoints;
+    //std::map<uint32, uint32> PlayerPoints;
 
     //at first update all points for all team members
-    for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
+    /*for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
         if (ArenaTeam * at = team_itr->second)
-            at->UpdateArenaPointsHelper(PlayerPoints);
+            at->UpdateArenaPointsHelper(PlayerPoints);*/
+    //PlayerPoints.clear();
 
-    PlayerPoints.clear();
+    //calculate new conquest point cap for each player
+    for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
+        if (ArenaTeam* at = team_itr->second)
+            at->UpdateMembersConquestPointCap();
 
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_END);
 

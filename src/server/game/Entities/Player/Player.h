@@ -1250,11 +1250,11 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-		void SendCurrencies() const;
-		uint32 GetCurrency(uint32 id) const;
-		bool HasCurrency(uint32 id, uint32 count) const;
-		void SetCurrency(uint32 id, uint32 count);
-		void ModifyCurrency(uint32 id, int32 count);
+        void SendCurrencies();
+        uint32 GetCurrency(uint32 id);
+        bool HasCurrency(uint32 id, uint32 count);
+        void SetCurrency(uint32 id, uint32 count);
+        void ModifyCurrency(uint32 id, int32 count);
 
         void ApplyEquipCooldown(Item * pItem);
         void SetAmmo(uint32 item);
@@ -1805,6 +1805,8 @@ class Player : public Unit, public GridObject<Player>
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(uint64 guid);
+        void SetConquestPointCap(uint32 newcap) { m_ConquestPointCap = newcap; };
+        uint32 GetConquestPointCap() { return m_ConquestPointCap; };
 
         Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
         Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
@@ -2595,8 +2597,8 @@ class Player : public Unit, public GridObject<Player>
 
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
-		PlayerCurrenciesMap m_currencies;
-		uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
+        PlayerCurrenciesMap m_currencies;
+        uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency);
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
@@ -2615,6 +2617,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 m_GuildIdInvited;
         uint32 m_ArenaTeamIdInvited;
+
+        uint32 m_ConquestPointCap;
 
         PlayerMails m_mail;
         PlayerSpellMap m_spells;

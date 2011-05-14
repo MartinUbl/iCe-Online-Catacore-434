@@ -35,6 +35,9 @@ void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
         personal_rating += mod;
     if (plr)
         plr->SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, personal_rating);
+
+    if (personal_rating > highest_week_rating)
+        highest_week_rating = personal_rating;
 }
 
 void ArenaTeamMember::ModifyMatchmakerRating(int32 mod, uint32 /*slot*/)
@@ -109,6 +112,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     uint8 plClass;
     uint32 plPRating;
     uint32 plMMRating;
+    uint32 plPCap;
 
     // arena team is full (can't have more than type * 2 players!)
     if (GetMembersSize() >= GetType() * 2)
@@ -146,6 +150,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     plMMRating = sWorld->getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
     plPRating = 0;
+    plPCap = 1343;
     
     if (sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
         plPRating = sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
@@ -154,9 +159,12 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
+    QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating, conquest_point_cap FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
     if (result)
+    {
         plMMRating = (*result)[0].GetUInt32();
+        plPCap = (*result)[1].GetUInt32();
+    }
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
@@ -172,6 +180,8 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     newmember.wins_week         = 0;
     newmember.personal_rating   = plPRating;
     newmember.matchmaker_rating = plMMRating;
+    newmember.highest_week_rating = plPRating; //same as personal rating
+    newmember.conquest_point_cap = plPCap;
 
     m_members.push_back(newmember);
 
@@ -246,15 +256,19 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
         uint32 player_guid = fields[1].GetUInt32();
 
         QueryResult result = CharacterDatabase.PQuery(
-            "SELECT personal_rating, matchmaker_rating FROM character_arena_stats WHERE guid = '%u' AND slot = '%u'", player_guid, GetSlot());
+            "SELECT personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap FROM character_arena_stats WHERE guid = '%u' AND slot = '%u'", player_guid, GetSlot());
 
         uint32 personalrating = 0;
         uint32 matchmakerrating = 1500;
+        uint32 highestweekrating = 0;
+        uint32 conquestpointcap = 1343;
 
         if (result)
         {
             personalrating = (*result)[0].GetUInt32();
             matchmakerrating = (*result)[1].GetUInt32();
+            highestweekrating = (*result)[2].GetUInt32();
+            conquestpointcap = (*result)[3].GetUInt32();
         }
 
         ArenaTeamMember newmember;
@@ -267,6 +281,8 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
         newmember.Class             = fields[7].GetUInt8();
         newmember.personal_rating   = personalrating;
         newmember.matchmaker_rating = matchmakerrating;
+        newmember.highest_week_rating = highestweekrating;
+        newmember.conquest_point_cap = conquestpointcap;
 
         //check if member exists in characters table
         if (newmember.name.empty())
@@ -360,7 +376,6 @@ void ArenaTeam::Disband(WorldSession *session)
 void ArenaTeam::Roster(WorldSession *session)
 {
     Player *pl = NULL;
-
     uint8 unk308 = 0;
 
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
@@ -781,6 +796,11 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating, int32 te
             mod = GetRatingMod(itr->matchmaker_rating, againstMatchmakerRating, true, true);
             itr->ModifyMatchmakerRating(mod, GetSlot());
 
+            // reward conquest points (new in 4.x)
+            // TODO: verify the coefficient 1/5
+            if (plr)
+                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, itr->conquest_point_cap / 5);
+
             // update personal stats
             itr->games_week +=1;
             itr->games_season +=1;
@@ -823,6 +843,31 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
     }
 }
 
+void ArenaTeam::UpdateMembersConquestPointCap()
+{
+    uint32 newcap = 0;
+    Player* pSource = NULL;
+    for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
+    {
+        // cap is higher than 1343 only if player has rating > 1500
+        if (itr->personal_rating > 1500)
+            newcap = -1.00844494413448 * pow(10.0,-12) * pow(double(itr->personal_rating),5) + 1.2356986230482 * pow(10.0,-8) * pow(double(itr->personal_rating),4)
+                     + -5.94771172066112 * pow(10.0,-5) * pow(double(itr->personal_rating),3) + 0.139443656834417 * pow(double(itr->personal_rating),2) + -156.936920229832 * itr->personal_rating + 68836.3;
+        // formula has maximum in 2985, avoid lower cap for higher ratings
+        else if (itr->personal_rating > 2985)
+            newcap = 3000;
+        else
+            newcap = 1343;
+
+        itr->conquest_point_cap = newcap;
+
+        // And notify also player class
+        pSource = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(itr->guid));
+        if (pSource)
+            pSource->SetConquestPointCap(newcap);
+    }
+}
+
 void ArenaTeam::SaveToDB()
 {
     // save team and member stats to db
@@ -832,7 +877,7 @@ void ArenaTeam::SaveToDB()
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         trans->PAppend("UPDATE arena_team_member SET played_week = '%u', wons_week = '%u', played_season = '%u', wons_season = '%u' WHERE arenateamid = '%u' AND guid = '%u'", itr->games_week, itr->wins_week, itr->games_season, itr->wins_season, m_TeamId, GUID_LOPART(itr->guid));
-        trans->PAppend("REPLACE INTO character_arena_stats (guid,slot,personal_rating,matchmaker_rating) VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(itr->guid), GetSlot(), itr->personal_rating, itr->matchmaker_rating);
+        trans->PAppend("REPLACE INTO character_arena_stats (guid,slot,personal_rating,matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES ('%u', '%u', '%u', '%u', '%u', '%u')", GUID_LOPART(itr->guid), GetSlot(), itr->personal_rating, itr->matchmaker_rating, itr->highest_week_rating, itr->conquest_point_cap);
     }
     CharacterDatabase.CommitTransaction(trans);
 }

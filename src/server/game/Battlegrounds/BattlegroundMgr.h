@@ -88,7 +88,7 @@ class BattlegroundMgr
         uint32 GetPrematureFinishTime() const;
 
         void InitAutomaticArenaPointDistribution();
-        void DistributeArenaPoints();
+        void DistributeArenaCurrency();
         void ToggleArenaTesting();
         void ToggleTesting();
 
