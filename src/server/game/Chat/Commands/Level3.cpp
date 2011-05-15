@@ -293,6 +293,14 @@ bool ChatHandler::HandleReloadOnKillReputationCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadOnKillCurrencyCommand(const char*)
+{
+    sLog->outString("Re-Loading creature award currency definitions...");
+    sObjectMgr->LoadCurrencyOnKill();
+    SendGlobalGMSysMessage("DB table `creature_onkill_currency` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadCreatureTemplateCommand(const char* args)
 {
     if (!*args)

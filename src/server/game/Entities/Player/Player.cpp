@@ -22728,6 +22728,8 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
                     // if is in dungeon then all receive full reputation at kill
                     // rewarded any alive/dead/near_corpse group member
                     pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
+                    // also reward currency
+                    pGroupGuy->RewardCurrency(pVictim);
 
                     // XP updated only for alive group member
                     if (pGroupGuy->isAlive() && not_gray_member_with_max_level &&
@@ -22768,6 +22770,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
         if (!PvP)
         {
             RewardReputation(pVictim,1);
+            RewardCurrency(pVictim);
 
             // handle SPELL_AURA_MOD_XP_PCT auras
             Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(SPELL_AURA_MOD_XP_PCT);

@@ -511,6 +511,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "creature_linked_respawn",     SEC_GAMEMASTER, true,  OldHandler<&ChatHandler::HandleReloadCreatureLinkedRespawnCommand>,   "", NULL },
         { "creature_loot_template",      SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadLootTemplatesCreatureCommand>,   "", NULL },
         { "creature_onkill_reputation",  SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadOnKillReputationCommand>,        "", NULL },
+        { "creature_onkill_currency",    SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadOnKillCurrencyCommand>,          "", NULL },
         { "creature_questrelation",      SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadCreatureQuestRelationsCommand>,  "", NULL },
         { "creature_template",           SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadCreatureTemplateCommand>,        "", NULL },
         //{ "db_script_string",            SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadDbScriptStringCommand>,          "", NULL },
