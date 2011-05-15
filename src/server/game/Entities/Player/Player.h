@@ -2004,6 +2004,7 @@ class Player : public Unit, public GridObject<Player>
         ReputationRank GetReputationRank(uint32 faction_id) const;
         void RewardReputation(Unit *pVictim, float rate);
         void RewardReputation(Quest const *pQuest);
+        void RewardCurrency(Unit *pVictim);
 
         void UpdateSkillsForLevel();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup

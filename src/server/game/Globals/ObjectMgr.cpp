@@ -7209,6 +7209,59 @@ void ObjectMgr::LoadReputationOnKill()
     sLog->outString(">> Loaded %u creature award reputation definitions", count);
 }
 
+void ObjectMgr::LoadCurrencyOnKill()
+{
+    // For reload case
+    mCurOnKill.clear();
+
+    uint32 count = 0;
+
+    //                                                0            1                     2
+    QueryResult result = WorldDatabase.Query("SELECT creature_id, type, amount FROM creature_onkill_currency");
+
+    if (!result)
+    { 
+        sLog->outString();
+        sLog->outErrorDb(">> Loaded 0 creature award currency definitions. DB table `creature_onkill_currency` is empty.");
+        return;
+    }
+
+    do
+    {
+        Field *fields = result->Fetch();
+        
+
+        uint32 creature_id = fields[0].GetUInt32();
+
+        CurrencyOnKillEntry curOnKill;
+        curOnKill.type          = fields[1].GetUInt32();
+        curOnKill.amount        = fields[2].GetInt32();
+
+        if (!GetCreatureTemplate(creature_id))
+        {
+            sLog->outErrorDb("Table `creature_onkill_currency` have data for not existed creature entry (%u), skipped", creature_id);
+            continue;
+        }
+
+        if (curOnKill.type)
+        {
+                       CurrencyTypesEntry const *type = sCurrencyTypesStore.LookupEntry(curOnKill.type);
+            if (!type)
+            {
+                sLog->outErrorDb("Currency (CurrencyTypes.dbc) %u does not exist but is used in `creature_onkill_currency`", curOnKill.type);
+                continue;
+            }
+        }
+
+        mCurOnKill[creature_id] = curOnKill;
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u creature award currency definitions", count);
+}
+
 void ObjectMgr::LoadReputationSpilloverTemplate()
 {
     m_RepSpilloverTemplateMap.clear();                      // for reload case

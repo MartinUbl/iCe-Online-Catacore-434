@@ -446,6 +446,12 @@ struct ReputationOnKillEntry
     bool team_dependent;
 };
 
+struct CurrencyOnKillEntry
+{
+    uint32 type;
+    int32 amount;
+};
+
 struct RepSpilloverTemplate
 {
     uint32 faction[MAX_SPILLOVER_FACTIONS];
@@ -601,6 +607,8 @@ class ObjectMgr
         typedef UNORDERED_MAP<uint32, ReputationOnKillEntry> RepOnKillMap;
         typedef UNORDERED_MAP<uint32, RepSpilloverTemplate> RepSpilloverTemplateMap;
 
+        typedef UNORDERED_MAP<uint32, CurrencyOnKillEntry> CurOnKillMap;
+
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
         typedef std::vector<std::string> ScriptNameMap;
@@ -753,6 +761,14 @@ class ObjectMgr
 
         uint32 GetAreaTriggerScriptId(uint32 trigger_id);
         SpellScriptsBounds GetSpellScriptsBounds(uint32 spell_id);
+
+        CurrencyOnKillEntry const* GetCurrencyOnKillEntry(uint32 id) const
+        {
+            CurOnKillMap::const_iterator itr = mCurOnKill.find(id);
+            if (itr != mCurOnKill.end())
+                return &itr->second;
+            return NULL;
+        }
 
         RepRewardRate const* GetRepRewardRate(uint32 factionId) const
         {
@@ -928,6 +944,8 @@ class ObjectMgr
         void LoadReputationRewardRate();
         void LoadReputationOnKill();
         void LoadReputationSpilloverTemplate();
+
+        void LoadCurrencyOnKill();
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
@@ -1263,6 +1281,8 @@ class ObjectMgr
         RepRewardRateMap    m_RepRewardRateMap;
         RepOnKillMap        mRepOnKill;
         RepSpilloverTemplateMap m_RepSpilloverTemplateMap;
+
+        CurOnKillMap        mCurOnKill;
 
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;

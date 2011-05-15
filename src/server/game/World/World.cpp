@@ -1396,6 +1396,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Vehicle scaling information...");
     sObjectMgr->LoadVehicleScaling();
 
+    sLog->outString("Loading Creature Currency OnKill Data...");
+    sObjectMgr->LoadCurrencyOnKill();
+
     sLog->outString("Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
 

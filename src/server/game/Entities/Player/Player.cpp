@@ -6814,6 +6814,19 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, in
     return int32(rep*percent/100);
 }
 
+void Player::RewardCurrency(Unit *pVictim)
+{
+    if (!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    CurrencyOnKillEntry const* Cur = sObjectMgr->GetCurrencyOnKillEntry(pVictim->ToCreature()->GetCreatureInfo()->Entry);
+
+    if (!Cur)
+        return;
+
+    ModifyCurrency(Cur->type, Cur->amount);
+}
+
 //Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardReputation(Unit *pVictim, float rate)
 {
