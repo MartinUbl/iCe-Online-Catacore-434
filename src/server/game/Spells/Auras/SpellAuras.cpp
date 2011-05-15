@@ -1004,13 +1004,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         else
                             target->AddAura(74396, target);
                     }
-                    case 83301: // Improved Cone of Cold r1 freeze
-                        if(!caster->HasAura(11190)) // r1 talent
-                            target->RemoveAura(83301);
-                    case 83302: // Improved Cone of Cold r2 freeze
-                        if(!caster->HasAura(12489)) // r2 talent
-                            target->RemoveAura(83302);
-
                     default:
                         break;
                 }
