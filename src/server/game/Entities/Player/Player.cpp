@@ -17949,7 +17949,9 @@ void Player::_LoadCurrency(PreparedQueryResult result)
             if (entry->TotalCap > 0 && totalCount > entry->TotalCap)
                 cur.totalCount = entry->TotalCap;
 
-            cur.weekCount = weekCount > weekCap ? (weekCap ? weekCap : weekCount) : weekCount;
+            cur.weekCount = weekCount;
+            if (weekCap > 0 && weekCount > weekCap)
+                cur.weekCount = weekCap;
 
             m_currencies[currency_id] = cur;
         }
