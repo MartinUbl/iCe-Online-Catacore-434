@@ -8863,6 +8863,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Tower of Radiance proc spell
+        case 88852:
+        {
+            // only for spells Flash of Light and Divine Light
+            if (procSpell->Id != 19750 && procSpell->Id != 82326)
+                return false;
+            // and also if target has aura Beacon of Light of this caster
+            if (Aura* pBeacon = pVictim->GetAura(53563))
+                if (pBeacon->GetCaster() == this)
+                    break;
+
+            return false;
+        }
         // Rolling Thunder
         case 88765:
         {
