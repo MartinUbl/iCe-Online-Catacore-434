@@ -38,177 +38,179 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 
 enum
 {
-	SPELL_CALL_FOR_HELP      = 82137,
-	SPELL_QUAKE              = 75272,
-	SPELL_CHAINS_OF_WOE      = 75539,
-	SPELL_SKULLCRACKER       = 75543,
-	SPELL_SKULLCRACKER_H     = 93453,
-	SPELL_WOUNDING_STRIKE    = 75571,
-	SPELL_WOUNDING_STRIKE_H  = 93452,
+    SPELL_CALL_FOR_HELP      = 82137,
+    SPELL_QUAKE              = 75272,
+    SPELL_CHAINS_OF_WOE      = 75539,
+    SPELL_SKULLCRACKER       = 75543,
+    SPELL_SKULLCRACKER_H     = 93453,
+    SPELL_WOUNDING_STRIKE    = 75571,
+    SPELL_WOUNDING_STRIKE_H  = 93452,
 
-	SPELL_CHAINS_OF_WOE_AURA      = 75441,
-	SPELL_CHAINS_OF_WOE_TRIGGERED = 82189,
-	SPELL_CHAINS_OF_WOE_STUN      = 82192,
-	SPELL_CHAINS_OF_WOE_TELEPORT  = 75464,
+    SPELL_CHAINS_OF_WOE_AURA      = 75441,
+    SPELL_CHAINS_OF_WOE_TRIGGERED = 82189,
+    SPELL_CHAINS_OF_WOE_STUN      = 82192,
+    SPELL_CHAINS_OF_WOE_TELEPORT  = 75464,
 
-	MOB_ANGERED_EARTH        = 50376,
-	MOB_CHAINS_OF_WOE        = 40447,
+    MOB_ANGERED_EARTH        = 50376,
+    MOB_CHAINS_OF_WOE        = 40447,
 };
 
 class boss_romogg: public CreatureScript
 {
 public:
-	boss_romogg(): CreatureScript("boss_romogg") {}
-	
-	struct romoggAI: public ScriptedAI
-	{
-		romoggAI(Creature* pCreature): ScriptedAI(pCreature)
-		{
-			pInstance = me->GetInstanceScript();
-			Reset();
-		}
+    boss_romogg(): CreatureScript("boss_romogg") {}
 
-		void Reset()
-		{
-			WoeCast = 0;
-			SkullcrackTimer = 0;
-			ElementalsTimer = 0;
+    struct romoggAI: public ScriptedAI
+    {
+        romoggAI(Creature* pCreature): ScriptedAI(pCreature)
+        {
+            pInstance = me->GetInstanceScript();
+            Reset();
+        }
 
-			QuakeTimer = 9000;
-			StrikeTimer = 7000;
-		}
+        void Reset()
+        {
+            WoeCast = 0;
+            SkullcrackTimer = 0;
+            ElementalsTimer = 0;
 
-		InstanceScript* pInstance;
+            QuakeTimer = 9000;
+            StrikeTimer = 7000;
+        }
 
-		uint32 QuakeTimer;
-		uint32 StrikeTimer;
-		uint32 WoeCast;
-		uint32 SkullcrackTimer;
-		uint32 ElementalsTimer;
+        InstanceScript* pInstance;
 
-		void EnterCombat(Unit* pWho)
-		{
-			me->CastSpell(me,SPELL_CALL_FOR_HELP,false);
-		}
+        uint32 QuakeTimer;
+        uint32 StrikeTimer;
+        uint32 WoeCast;
+        uint32 SkullcrackTimer;
+        uint32 ElementalsTimer;
 
-		void UpdateAI(const uint32 diff)
-		{
-			if (!UpdateVictim())
-				return;
+        void EnterCombat(Unit* pWho)
+        {
+            me->CastSpell(me,SPELL_CALL_FOR_HELP,false);
+        }
 
-			if (me->GetHealthPct() <= 66.6f && WoeCast == 0)
-			{
-				WoeCast = 1;
-				me->CastSpell(me,SPELL_CHAINS_OF_WOE, false);
-				SkullcrackTimer = 3000;
-			}
-			if (me->GetHealthPct() <= 33.3f && WoeCast == 1)
-			{
-				WoeCast = 2;
-				me->CastSpell(me,SPELL_CHAINS_OF_WOE, false);
-				SkullcrackTimer = 3000;
-			}
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			if (SkullcrackTimer)
-			{
-				if (SkullcrackTimer <= diff)
-				{
-					me->CastSpell(me, SPELL_SKULLCRACKER, false);
-					SkullcrackTimer = 0;
-				} else SkullcrackTimer -= diff;
-			}
+            if (me->GetHealthPct() <= 66.6f && WoeCast == 0)
+            {
+                WoeCast = 1;
+                me->CastSpell(me,SPELL_CHAINS_OF_WOE, false);
+                SkullcrackTimer = 3000;
+            }
+            if (me->GetHealthPct() <= 33.3f && WoeCast == 1)
+            {
+                WoeCast = 2;
+                me->CastSpell(me,SPELL_CHAINS_OF_WOE, false);
+                SkullcrackTimer = 3000;
+            }
 
-			if (me->hasUnitState(UNIT_STAT_CASTING))
-				return;
+            if (SkullcrackTimer)
+            {
+                if (SkullcrackTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_SKULLCRACKER, false);
+                    SkullcrackTimer = 0;
+                } else SkullcrackTimer -= diff;
+            }
 
-			if (QuakeTimer <= diff)
-			{
-				me->CastSpell(me, SPELL_QUAKE, false);
-				QuakeTimer = 12000;
-				ElementalsTimer = 3200; //+200 pro rezervu
-			} else QuakeTimer -= diff;
+            if (me->hasUnitState(UNIT_STAT_CASTING))
+                return;
 
-			if (StrikeTimer <= diff)
-			{
-				me->CastSpell(me->getVictim(), SPELL_WOUNDING_STRIKE, false);
-				StrikeTimer = 15000;
-			} else StrikeTimer -= diff;
+            if (QuakeTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_QUAKE, false);
+                QuakeTimer = 12000;
+                ElementalsTimer = 3200; //+200 pro rezervu
+            } else QuakeTimer -= diff;
 
-			if (ElementalsTimer && pInstance)
-			{
-				if (ElementalsTimer <= diff)
-				{
-					Map::PlayerList const& plList = pInstance->instance->GetPlayers();
-					if (!plList.isEmpty())
-					{
-						Position pos;
-						for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-						{
-							itr->getSource()->GetPosition(&pos);
-							Creature* pSpirit = me->SummonCreature(MOB_ANGERED_EARTH,pos,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
-							if (pSpirit)
-								pSpirit->AddThreat(itr->getSource(),1.0f);
-						}
-					}
-					ElementalsTimer = 0;
-				} else ElementalsTimer -= diff;
-			}
+            if (StrikeTimer <= diff)
+            {
+                me->CastSpell(me->getVictim(), SPELL_WOUNDING_STRIKE, false);
+                StrikeTimer = 15000;
+            } else StrikeTimer -= diff;
 
-			DoMeleeAttackIfReady();
-		}
-	};
+            if (ElementalsTimer && pInstance)
+            {
+                if (ElementalsTimer <= diff)
+                {
+                    Map::PlayerList const& plList = pInstance->instance->GetPlayers();
+                    if (!plList.isEmpty())
+                    {
+                        Position pos;
+                        for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                        {
+                            itr->getSource()->GetPosition(&pos);
+                            Creature* pSpirit = me->SummonCreature(MOB_ANGERED_EARTH,pos,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                            if (pSpirit)
+                                pSpirit->AddThreat(itr->getSource(),1.0f);
+                        }
+                    }
+                    ElementalsTimer = 0;
+                } else ElementalsTimer -= diff;
+            }
 
-	CreatureAI* GetAI(Creature* c) const
-	{
-		return new romoggAI(c);
-	}
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new romoggAI(c);
+    }
 };
 
 class mob_chains_of_woe: public CreatureScript
 {
 public:
-	mob_chains_of_woe(): CreatureScript("mob_chains_of_woe") {};
+    mob_chains_of_woe(): CreatureScript("mob_chains_of_woe") {};
 
-	struct chainsAI: public Scripted_NoMovementAI
-	{
-		chainsAI(Creature* c): Scripted_NoMovementAI(c)
-		{
-			Reset();
-		}
+    struct chainsAI: public Scripted_NoMovementAI
+    {
+        chainsAI(Creature* c): Scripted_NoMovementAI(c)
+        {
+            Reset();
+        }
 
-		void Reset()
-		{
-			me->CastSpell(me, SPELL_CHAINS_OF_WOE_TELEPORT, true);
-			me->CastSpell(me, SPELL_CHAINS_OF_WOE_AURA, true);
-		}
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_CHAINS_OF_WOE_TELEPORT, true);
+            me->CastSpell(me, SPELL_CHAINS_OF_WOE_AURA, true);
+        }
 
-		void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
-		{
-			if (spell->Id == SPELL_CHAINS_OF_WOE_TELEPORT && pTarget->GetTypeId() == TYPEID_PLAYER)
-			{
-				float x,y,z;
-				me->GetNearPoint2D(x,y,2.0f,urand(0,6.28f));
-				z = pTarget->GetPositionZ();
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_CHAINS_OF_WOE_TELEPORT && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                float x,y,z;
+                me->GetNearPoint2D(x,y,2.0f,urand(0,6.28f));
+                z = pTarget->GetPositionZ();
 
-				pTarget->ToPlayer()->NearTeleportTo(x,y,z,pTarget->GetOrientation());
-			} else if (spell->Id == SPELL_CHAINS_OF_WOE_TRIGGERED)
-			{
-				if (pTarget->HasAura(SPELL_CHAINS_OF_WOE_STUN))
-					pTarget->GetAura(SPELL_CHAINS_OF_WOE_STUN)->RefreshDuration();
-				else
-					pTarget->CastSpell(pTarget, SPELL_CHAINS_OF_WOE_STUN, true);
-			}
-		}
-	};
+                pTarget->ToPlayer()->NearTeleportTo(x,y,z,pTarget->GetOrientation());
+            }
+            else if (spell->Id == SPELL_CHAINS_OF_WOE_TRIGGERED)
+            {
+                if (pTarget->HasAura(SPELL_CHAINS_OF_WOE_STUN))
+                    pTarget->GetAura(SPELL_CHAINS_OF_WOE_STUN)->RefreshDuration();
+                else
+                    pTarget->CastSpell(pTarget, SPELL_CHAINS_OF_WOE_STUN, true);
+            }
+        }
+    };
 
-	CreatureAI* GetAI(Creature* c) const
-	{
-		return new chainsAI(c);
-	}
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new chainsAI(c);
+    }
 };
 
 void AddSC_romogg()
 {
-	new boss_romogg();
-	new mob_chains_of_woe();
+    new boss_romogg();
+    new mob_chains_of_woe();
 }
+
