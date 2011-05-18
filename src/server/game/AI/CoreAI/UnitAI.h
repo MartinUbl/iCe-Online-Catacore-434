@@ -213,6 +213,8 @@ class UnitAI
         void DoMeleeAttackIfReady();
         bool DoSpellAttackIfReady(uint32 spell);
 
+        static void ModifySpellRadius(uint32 spell, uint32 radiusId, int8 effId = -1);
+
         static AISpellInfoType *AISpellInfo;
         static void FillAISpellInfo();
 

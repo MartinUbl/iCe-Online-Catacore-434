@@ -198,6 +198,22 @@ void UnitAI::DoCast(uint32 spellId)
         me->CastSpell(target, spellId, false);
 }
 
+void UnitAI::ModifySpellRadius(uint32 spell, uint32 radiusId, int8 effId)
+{
+    SpellEntry* sp = (SpellEntry*)sSpellStore.LookupEntry(spell);
+    if (!sp)
+        return;
+
+    if (effId < 0)
+    {
+        sp->EffectRadiusIndex[0] = radiusId;
+        sp->EffectRadiusIndex[1] = radiusId;
+        sp->EffectRadiusIndex[2] = radiusId;
+    }
+    else if (sp->EffectRadiusIndex[effId] != radiusId)
+        sp->EffectRadiusIndex[effId] = radiusId;
+}
+
 #define UPDATE_TARGET(a) {if (AIInfo->target<a) AIInfo->target=a;}
 
 void UnitAI::FillAISpellInfo()
