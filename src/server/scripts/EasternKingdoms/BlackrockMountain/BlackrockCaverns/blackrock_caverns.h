@@ -15,3 +15,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+enum Encounter
+{
+    TYPE_ROMOGG   = 0,
+    TYPE_CORLA    = 1,
+    TYPE_KARSH    = 2,
+    TYPE_BEAUTY   = 3,
+    TYPE_OBSIDIUS = 4,
+    MAX_ENCOUNTER = 5,
+};
+

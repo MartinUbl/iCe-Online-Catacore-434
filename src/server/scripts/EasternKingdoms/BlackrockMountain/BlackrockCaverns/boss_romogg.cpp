@@ -64,6 +64,8 @@ public:
     {
         romoggAI(Creature* pCreature): ScriptedAI(pCreature)
         {
+            ModifySpellRadius(75428, 32, 0);
+            ModifySpellRadius(75272, 32, 0);
             pInstance = me->GetInstanceScript();
             Reset();
         }
@@ -125,7 +127,7 @@ public:
             {
                 me->CastSpell(me, SPELL_QUAKE, false);
                 QuakeTimer = 12000;
-                ElementalsTimer = 3200; //+200 pro rezervu
+                ElementalsTimer = 3000;
             } else QuakeTimer -= diff;
 
             if (StrikeTimer <= diff)
@@ -173,26 +175,41 @@ public:
     {
         chainsAI(Creature* c): Scripted_NoMovementAI(c)
         {
+            //Invisible displayid
+            me->SetDisplayId(16946);
+            //Chains of woe visual radius
+            ModifySpellRadius(82189, 11, 0);
+            pInstance = me->GetInstanceScript();
             Reset();
         }
 
+        InstanceScript* pInstance;
+
         void Reset()
         {
-            me->CastSpell(me, SPELL_CHAINS_OF_WOE_TELEPORT, true);
             me->CastSpell(me, SPELL_CHAINS_OF_WOE_AURA, true);
+
+            if (!pInstance)
+                return;
+
+            //me->CastSpell(me, SPELL_CHAINS_OF_WOE_TELEPORT, true);
+            // Workaround
+            Map::PlayerList const& plList = pInstance->instance->GetPlayers();
+            if (!plList.isEmpty())
+            {
+                float x,y,z;
+                for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                {
+                    me->GetNearPoint2D(x,y,2.0f,urand(0,6.28f));
+                    z = itr->getSource()->GetPositionZ();
+                    itr->getSource()->NearTeleportTo(x,y,z,itr->getSource()->GetOrientation());
+                }
+            }
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
         {
-            if (spell->Id == SPELL_CHAINS_OF_WOE_TELEPORT && pTarget->GetTypeId() == TYPEID_PLAYER)
-            {
-                float x,y,z;
-                me->GetNearPoint2D(x,y,2.0f,urand(0,6.28f));
-                z = pTarget->GetPositionZ();
-
-                pTarget->ToPlayer()->NearTeleportTo(x,y,z,pTarget->GetOrientation());
-            }
-            else if (spell->Id == SPELL_CHAINS_OF_WOE_TRIGGERED)
+            if (spell->Id == SPELL_CHAINS_OF_WOE_TRIGGERED)
             {
                 if (pTarget->HasAura(SPELL_CHAINS_OF_WOE_STUN))
                     pTarget->GetAura(SPELL_CHAINS_OF_WOE_STUN)->RefreshDuration();

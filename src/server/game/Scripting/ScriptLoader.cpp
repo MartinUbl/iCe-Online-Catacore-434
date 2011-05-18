@@ -546,6 +546,7 @@ void AddSC_zangarmarsh();
 
 // Cataclysm dungeons
 void AddSC_romogg();
+void AddSC_instance_blackrock_caverns();
 
 // battlegrounds
 
@@ -1123,7 +1124,8 @@ void AddNorthrendScripts()
 
 void AddCataclysmScripts()
 {
-	AddSC_romogg();
+    AddSC_romogg();
+    AddSC_instance_blackrock_caverns();
 }
 
 void AddOutdoorPvPScripts()
