@@ -2348,6 +2348,18 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 m_caster->ToPlayer()->RemoveSpellCooldown(78674, true);
             }
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Inner Focus
+            if (m_spellInfo->Id == 89485 && m_caster)
+            {
+                // Strength of Soul
+                if (m_caster->HasAura(89488)) // rank #1
+                    m_caster->CastSpell(m_caster, 96266, true);
+                else if (m_caster->HasAura(89489)) // rank #2
+                    m_caster->CastSpell(m_caster, 96267, true);
+            }
+        }
         break;
     }
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -5929,6 +5941,22 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 if (Aura* renew = unitTarget->GetAura(139))
                     renew->RefreshDuration();
+            }
+
+            // Strength of Soul
+            if (m_spellInfo->Id == 89490)
+            {
+                if (!unitTarget)
+                    return;
+
+                if (Aura* debuff = unitTarget->GetAura(6788)) // Decrease duration of Weakened Soul
+                {                                                                   // Rank 2   Rank 1
+                    int32 duration = debuff->GetDuration() - (m_caster->HasAura(89489) ? 4000 : 2000);
+                    if (duration > 0)
+                        debuff->SetDuration(duration);
+                    else
+                        debuff->Remove(AURA_REMOVE_BY_EXPIRE);
+                }
             }
         }
     }
