@@ -6169,6 +6169,28 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                     break;
                 }
+                // Atonement
+                case 14523:
+                case 81749:
+                {
+                    if (!pVictim || this == pVictim || !(procSpell->Id == 585)) // Smite
+                        return false;
+
+                    int32 bp0 = damage * dummySpell->GetSpellEffect(0)->EffectBasePoints / 100;
+                    uint32 spellId = 0;
+
+                    if (procEx & PROC_EX_NORMAL_HIT)
+                        spellId = 81751;
+                    else if (procEx & PROC_EX_CRITICAL_HIT)
+                        spellId = 94472;
+
+                    if (spellId)
+                        CastCustomSpell(pVictim, spellId, &bp0, NULL, NULL, true, 0, triggeredByAura, GetGUID());
+                        // Fails when cast on dummy target
+
+                    return false;
+                    break;
+                }
             }
             break;
         }
@@ -10987,6 +11009,11 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                     return true;     
                             break;
                         }
+                    break;
+                    case SPELLFAMILY_PRIEST:
+                        // Atonement (from crit Smite)
+                        if (spellProto->Id == 94472)
+                            return true; // Will probably add critical bonus
                     break;
                 }
             }

@@ -2521,6 +2521,12 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                  (caster->HasAura(87164) && roll_chance_i(30))) )
                 caster->SetPower(POWER_HOLY_POWER, 0);
         }
+        // Atonement
+        else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472)
+        {
+            if (caster == unitTarget) // If the Priest is healed through Atonement, the effect is reduced in half
+                addhealth = damage / 2;
+        }
         // Vessel of the Naaru (Vial of the Sunwell trinket)
         else if (m_spellInfo->Id == 45064)
         {
