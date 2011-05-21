@@ -1110,10 +1110,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             }
                         }
                         // Body and Soul
+                        if (!target)
+                            break;
                         if (caster->HasAura(64127))                 // rank #1
-                            caster->CastSpell(caster, 64128, true); // Increase speed of the target by 30%
+                            caster->CastSpell(target, 64128, true); // Increase speed of the target by 30%
                         else if (caster->HasAura(64129))            // rank #2
-                            caster->CastSpell(caster, 65081, true); // Increase speed of the target by 60%
+                            caster->CastSpell(target, 65081, true); // Increase speed of the target by 60%
 
                         break;
                     }
