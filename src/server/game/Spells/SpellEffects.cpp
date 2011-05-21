@@ -5609,6 +5609,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         chargesaura->SetCharges(chargesaura->GetCharges() - 1);
                         m_caster->CastSpell(unitTarget, spell_heal, true, NULL, NULL, m_caster->ToTempSummon()->GetSummonerGUID());
                     }
+                    else if (chargesaura && chargesaura->GetCharges() == 1)
+                    {
+                        m_caster->CastSpell(unitTarget, spell_heal, true, NULL, NULL, m_caster->ToTempSummon()->GetSummonerGUID());
+                        m_caster->ToTempSummon()->UnSummon();
+                    }
                     else
                         m_caster->ToTempSummon()->UnSummon();
                     return;

@@ -1991,6 +1991,11 @@ public:
         void Reset()
         {
             DoCast(me, 59907, false); // Spell for Lightwell Charges
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void UpdateAI(const uint32 /*diff*/)
+        {
         }
     };
 
