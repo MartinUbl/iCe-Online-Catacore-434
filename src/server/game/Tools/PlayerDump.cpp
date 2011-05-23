@@ -29,7 +29,8 @@
 #include "ObjectMgr.h"
 #include "AccountMgr.h"
 
-#define DUMP_TABLE_COUNT 26
+#define DUMP_TABLE_COUNT 29
+
 struct DumpTable
 {
     char const* name;
