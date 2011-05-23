@@ -1272,11 +1272,11 @@ enum Opcodes
     SMSG_CAMERA_SHAKE                                = 0x1000F,
     SMSG_UPDATE_ITEM_ENCHANTMENTS                    = 0x020E8, // 4.0.6a 13623
     SMSG_REDIRECT_CLIENT                             = 0x0201B, // 4.0.6a 13623
-    CMSG_REDIRECTION_FAILED                          = 0x1000F,
-    SMSG_UNKNOWN_1295                                = 0x1000B,
-    CMSG_UNKNOWN_1296                                = 0x1000C,
+    CMSG_REDIRECTION_FAILED                          = 0x00509, //
+    SMSG_UNKNOWN_1295                                = 0x10008, //
+    CMSG_UNKNOWN_1296                                = 0x10009, //
     SMSG_FORCE_SEND_QUEUED_PACKETS                   = 0x06EC8, // 4.0.6a 13623
-    CMSG_REDIRECTION_AUTH_PROOF                      = 0x00A91, // 4.0.6a 13623
+    CMSG_REDIRECTION_AUTH_PROOF                      = 0x00E4C, // 4.0.6a 13623
     SMSG_COMBAT_LOG_MULTIPLE                         = 0x033A8, // 4.0.6a 13623
     SMSG_LFG_OPEN_FROM_GOSSIP                        = 0x071EC, // 4.0.6a 13623
     SMSG_UNKNOWN_1302                                = 0x00913, // 4.0.6a 13623
