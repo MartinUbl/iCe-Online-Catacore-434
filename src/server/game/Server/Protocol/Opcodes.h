@@ -1257,7 +1257,7 @@ enum Opcodes
     CMSG_GMRESPONSE_RESOLVE                          = 0x062C8, // 4.0.6a 13623
     SMSG_GMRESPONSE_STATUS_UPDATE                    = 0x00101, // 4.0.6a 13623
     CMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x03FA8, // 4.0.6a 13623
-    SMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x00589, // 4.0.6a 13623 0x618C?
+    SMSG_WORLD_STATE_UI_TIMER_UPDATE                 = 0x0618C, // 4.0.6a 13623 0x5557?
     CMSG_CHAR_RACE_CHANGE                            = 0x06EA4, // 4.0.6a 13623
     SMSG_TALENTS_INVOLUNTARILY_RESET                 = 0x02A84, // 4.0.6a 13623
     SMSG_UNKNOWN_1276                                = 0x1023A, //

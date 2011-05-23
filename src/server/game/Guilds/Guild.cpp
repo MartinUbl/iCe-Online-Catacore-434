@@ -2560,22 +2560,18 @@ void Guild::SendPermissions(WorldSession *session) const
     data7 << uint32(_GetRanksSize());
     for(uint32 i = 0; i < _GetRanksSize(); i++)
     {
-        //data7 << uint32(m_ranks[i].GetId());
         data7 << uint32(i);
         data7 << uint32(i);
         data7 << m_ranks[i].m_name;
         data7 << uint32(m_ranks[i].m_rights);
 
         for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << uint32(m_ranks[i].m_bankMoneyPerDay);
-            //data7 << uint32(0xFFFFFFFF);
-        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << uint32(m_ranks[i].m_rights);
-            //data7 << uint32(0xFFFFFFFF);
+            data7 << uint32(m_ranks[i].GetBankTabRights(j));
 
-        data7 << uint32(0xFFFFFFFF); // GuildBankRightsAndSlots
-        
-        //data7 << (uint32)/*GuildBankRightsAndSlots(i)*/0;
+        for(uint8 j = 0; j < GUILD_BANK_MAX_TABS; j++)
+            data7 << uint32(m_ranks[i].GetBankTabSlotsPerDay(j));
+
+        data7 << uint32(m_ranks[i].GetBankMoneyPerDay());
     }
      session->SendPacket(&data7);
 }
