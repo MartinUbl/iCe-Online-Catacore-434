@@ -394,6 +394,8 @@ struct boss_jormungarAI : public ScriptedAI
         m_uiSpitTimer = urand(15*IN_MILLISECONDS,30*IN_MILLISECONDS);
         m_uiSprayTimer = urand(15*IN_MILLISECONDS,30*IN_MILLISECONDS);
         m_uiSweepTimer = urand(15*IN_MILLISECONDS,30*IN_MILLISECONDS);
+        ModifySpellRadius(SPELL_SWEEP_0, 18, 0); // 15yd radius
+        ModifySpellRadius(SPELL_SWEEP_1, 18, 0); // 15yd radius
     }
 
     void JustDied(Unit* /*pKiller*/)
@@ -410,11 +412,20 @@ struct boss_jormungarAI : public ScriptedAI
         }
     }
 
-    void JustReachedHome()
+    void JustReachedHome() // is hooked but is buggy here. -> EnterEvadeMode() instead
     {
+        //if (m_pInstance && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
+        //    m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+        //me->ForcedDespawn();
+    }
+
+    void EnterEvadeMode()
+    {
+        //CreatureAI::EnterEvadeMode();
         if (m_pInstance && m_pInstance->GetData(TYPE_NORTHREND_BEASTS) != FAIL)
             m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
         me->ForcedDespawn();
+
     }
 
     void KilledUnit(Unit *pWho)
@@ -713,6 +724,8 @@ public:
             m_fTrampleTargetY = 0;
             m_fTrampleTargetZ = 0;
             m_uiStage = 0;
+            ModifySpellRadius(SPELL_TRAMPLE, 9, 0); // Ensure the AOE has correct radius 12yd (id 32) - now extended to 20yd
+            ModifySpellRadius(SPELL_WHIRL, 18, 0); // 15yd radius
         }
 
         void JustDied(Unit* /*pKiller*/)
