@@ -475,7 +475,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = (distance > radius) ? 0 : int32(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 0) * distance);
                         break;
                     }
-
+                    // Burning Metal - multiply damage per stack
+                    case 76002:
+                    {
+                        apply_direct_bonus = false;
+                        // normal version - 1000 per stack
+                        if (Aura* pAura = m_caster->GetAura(75846))
+                        {
+                            damage = 1000*pAura->GetStackAmount();
+                        }
+                        // HC version - 2000 per stack
+                        else if (Aura* pAura = m_caster->GetAura(93567))
+                        {
+                            damage = 2000*pAura->GetStackAmount();
+                        }
+                        break;
+                    }
                     // Bane of Havoc damage proc spell
                     case 85455:
                         // Don't allow to modify damage with spellpower and so on
