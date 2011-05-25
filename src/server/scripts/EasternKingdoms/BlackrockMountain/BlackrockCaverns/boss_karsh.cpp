@@ -109,7 +109,7 @@ class boss_karsh: public CreatureScript
                     if (HeatedArmorApplyTimer <= diff)
                     {
                         // Nahodit stack
-                        me->CastSpell(me, DUNGEON_MODE(SPELL_HEATED_ARMOR,SPELL_HEATED_ARMOR_H), true);
+                        me->CastSpell(me, DUNGEON_MODE(75846,93567), true);
                         // A spell ktery pri kazdem melee utoku spusti damage spell
                         me->CastSpell(me, SPELL_HEATED_ARMOR_DAMAGE_TRIGGER, true);
                         Zaznamenal = false;
@@ -125,7 +125,7 @@ class boss_karsh: public CreatureScript
                 }
 
                 // Pokud prave spadnul buff Heated Armor
-                if (!me->HasAura(DUNGEON_MODE(SPELL_HEATED_ARMOR,SPELL_HEATED_ARMOR_H)) && !Zaznamenal)
+                if (!me->HasAura(DUNGEON_MODE(75846,93567)) && !Zaznamenal)
                 {
                     // Dokolecka naspawnit ohynek
                     int total = 16;
@@ -136,7 +136,7 @@ class boss_karsh: public CreatureScript
                         y = CENTER_Y + RING_DIST*sin(i*2*M_PI/total);
                         z = me->GetPositionZ();
                         if (Creature* pTrigger = me->SummonCreature(90007,x,y,z,0,TEMPSUMMON_TIMED_DESPAWN,8000))
-                            pTrigger->CastSpell(pTrigger,DUNGEON_MODE(SPELL_LAVA_SPOUT,SPELL_LAVA_SPOUT_H),true);
+                            pTrigger->CastSpell(pTrigger,DUNGEON_MODE(76007,93565),true);
                     }
 
                     // Naspawnit tri addy
