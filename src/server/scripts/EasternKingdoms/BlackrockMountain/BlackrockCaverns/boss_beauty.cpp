@@ -120,13 +120,13 @@ class boss_beauty: public CreatureScript
                 {
                     Player* pTarget = SelectFurthestPlayer();
                     if (pTarget)
-                        me->CastSpell(pTarget, DUNGEON_MODE(SPELL_CHARGE,SPELL_CHARGE_H), false);
+                        me->CastSpell(pTarget, DUNGEON_MODE(uint32(SPELL_CHARGE),uint32(SPELL_CHARGE_H)), false);
                     ChargeTimer = urand(16000,20000);
                 } else ChargeTimer -= diff;
 
                 if (FlamebreakTimer <= diff)
                 {
-                    me->CastSpell(me, DUNGEON_MODE(SPELL_FLAMEBREAK,SPELL_FLAMEBREAK_H), false);
+                    me->CastSpell(me, DUNGEON_MODE(uint32(SPELL_FLAMEBREAK),uint32(SPELL_FLAMEBREAK_H)), false);
                     FlamebreakTimer = urand(17000,20000);
                 } else FlamebreakTimer -= diff;
 
@@ -140,7 +140,7 @@ class boss_beauty: public CreatureScript
 
                 if (TerrifyingRoarTimer <= diff)
                 {
-                    me->CastSpell(me, DUNGEON_MODE(SPELL_TERRIFYING_ROAR,SPELL_TERRIFYING_ROAR_H), false);
+                    me->CastSpell(me, DUNGEON_MODE(uint32(SPELL_TERRIFYING_ROAR),uint32(SPELL_TERRIFYING_ROAR_H)), false);
                     TerrifyingRoarTimer = urand(25000,32000);
                 } else TerrifyingRoarTimer -= diff;
 
@@ -209,13 +209,13 @@ class mob_child_of_beauty: public CreatureScript
 
                 if (LavaDroolTimer <= diff)
                 {
-                    me->CastSpell(me, DUNGEON_MODE(SPELL_LAVA_DROOL,SPELL_LAVA_DROOL_H), false);
+                    me->CastSpell(me, DUNGEON_MODE(uint32(SPELL_LAVA_DROOL),uint32(SPELL_LAVA_DROOL_H)), false);
                     LavaDroolTimer = urand(170,200)*100;
                 } else LavaDroolTimer -= diff;
 
                 if (BreathTimer <= diff)
                 {
-                    me->CastSpell(me, DUNGEON_MODE(SPELL_FLAME_BREATH,SPELL_FLAME_BREATH_H), false);
+                    me->CastSpell(me, DUNGEON_MODE(uint32(SPELL_FLAME_BREATH),uint32(SPELL_FLAME_BREATH_H)), false);
                     BreathTimer = urand(100,130)*100;
                 } else BreathTimer -= diff;
 
