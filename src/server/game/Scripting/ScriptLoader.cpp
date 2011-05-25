@@ -547,6 +547,7 @@ void AddSC_zangarmarsh();
 // Cataclysm dungeons
 void AddSC_romogg();
 void AddSC_karsh();
+void AddSC_beauty();
 void AddSC_instance_blackrock_caverns();
 
 // battlegrounds
@@ -1127,6 +1128,7 @@ void AddCataclysmScripts()
 {
     AddSC_romogg();
     AddSC_karsh();
+    AddSC_beauty();
     AddSC_instance_blackrock_caverns();
 }
 

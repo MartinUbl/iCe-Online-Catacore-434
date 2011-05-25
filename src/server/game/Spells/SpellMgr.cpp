@@ -4006,6 +4006,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = 1;
             count++;
             break;
+        case 76665:    // Little Big Flame Breath
+        case 93667:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_PATH;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_PATH;
+            spellInfo->EffectRadiusIndex[0] = 13;
+            spellInfo->AttributesEx |= SPELL_ATTR1_NEGATIVE;
+            break;
         case 51852:    // The Eye of Acherus (no spawn in phase 2 in db)
             spellInfo->EffectMiscValue[0] |= 1;
             count++;
