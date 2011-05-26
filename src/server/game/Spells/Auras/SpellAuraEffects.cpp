@@ -6308,7 +6308,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (m_spellProto->SpellFamilyFlags[1] & 0x40000)
                     {
                         if (caster)
-                            caster->CastCustomSpell(caster, 48210, &m_amount, 0, 0, true, NULL, this);
+                            target->CastCustomSpell(caster, 48210, &m_amount, 0, 0, true, NULL, this, GetCasterGUID());
                     }
                     // Shadowburn
                     else if (m_spellProto->Id == 29341)
