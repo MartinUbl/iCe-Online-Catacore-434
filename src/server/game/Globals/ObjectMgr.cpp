@@ -2064,12 +2064,12 @@ void ObjectMgr::LoadItemPrototypes()
 
         // Horrible, realy horrible and unclean hack for correct RequiredDisenchantSkill value loading
         // needs to be fixed in ItemPrototype structure
-        QueryResult DisenchResult = WorldDatabase.PQuery("SELECT RequiredDisenchantSkill FROM item_template WHERE entry=%u",i);
+        /*QueryResult DisenchResult = WorldDatabase.PQuery("SELECT RequiredDisenchantSkill FROM item_template WHERE entry=%u",i);
         if (DisenchResult)
         {
             if (Field* pField = DisenchResult->Fetch())
                 proto->RequiredDisenchantSkill = pField[0].GetInt32();
-        }
+        }*/
 
         if (!proto)
             continue;
@@ -2433,6 +2433,51 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (proto->GemProperties && !sGemPropertiesStore.LookupEntry(proto->GemProperties))
             sLog->outErrorDb("Item (Entry: %u) has wrong GemProperties (%u)",i,proto->GemProperties);
+
+        if (proto->RequiredDisenchantSkill < -1)
+        {
+            sLog->outErrorDb("Item (Entry: %u) has wrong RequiredDisenchantSkill (%i), set to (-1).",i,proto->RequiredDisenchantSkill);
+            const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
+        }
+        else if (proto->RequiredDisenchantSkill != -1)
+        {
+            if (proto->Quality > ITEM_QUALITY_EPIC || proto->Quality < ITEM_QUALITY_UNCOMMON)
+            {
+                sLog->outErrorDb("Item (Entry: %u) has unexpected RequiredDisenchantSkill (%u) for non-disenchantable quality (%u), reset it.",i,proto->RequiredDisenchantSkill,proto->Quality);
+                const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
+            }
+            else if (proto->Class != ITEM_CLASS_WEAPON && proto->Class != ITEM_CLASS_ARMOR)
+            {
+                // some wrong data in wdb for unused items
+                sLog->outErrorDb("Item (Entry: %u) has unexpected RequiredDisenchantSkill (%u) for non-disenchantable item class (%u), reset it.",i,proto->RequiredDisenchantSkill,proto->Class);
+                const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
+            }
+        }
+
+        if (proto->DisenchantID)
+        {
+            if (proto->Quality > ITEM_QUALITY_EPIC || proto->Quality < ITEM_QUALITY_UNCOMMON)
+            {
+                sLog->outErrorDb("Item (Entry: %u) has wrong quality (%u) for disenchanting, remove disenchanting loot id.",i,proto->Quality);
+                const_cast<ItemPrototype*>(proto)->DisenchantID = 0;
+            }
+            else if (proto->Class != ITEM_CLASS_WEAPON && proto->Class != ITEM_CLASS_ARMOR)
+            {
+                sLog->outErrorDb("Item (Entry: %u) has wrong item class (%u) for disenchanting, remove disenchanting loot id.",i,proto->Class);
+                const_cast<ItemPrototype*>(proto)->DisenchantID = 0;
+            }
+            else if (proto->RequiredDisenchantSkill < 0)
+            {
+                sLog->outErrorDb("Item (Entry: %u) marked as non-disenchantable by RequiredDisenchantSkill == -1, remove disenchanting loot id.",i);
+                const_cast<ItemPrototype*>(proto)->DisenchantID = 0;
+            }
+        }
+        else
+        {
+            // lot DB cases
+            if (proto->RequiredDisenchantSkill >= 0)
+                sLog->outErrorDb("Item (Entry: %u) marked as disenchantable by RequiredDisenchantSkill, but not have disenchanting loot id.",i);
+        }
 
         if (proto->FoodType >= MAX_PET_DIET)
         {
