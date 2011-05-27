@@ -729,7 +729,7 @@ CREATE TABLE `characters` (
   `deleteInfos_Name` varchar(12) DEFAULT NULL,
   `deleteDate` bigint(20) DEFAULT NULL,
   `currentPetSlot` int(10) DEFAULT NULL,
-  `petSlotUsed` int(10) DEFAULT NULL,
+  `petSlotUsed` int(32) DEFAULT NULL,
   PRIMARY KEY (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
