@@ -1345,6 +1345,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Spell Required Data...");
     sSpellMgr->LoadSpellRequired();
 
+    sLog->outString("Loading Spell Rank Data...");
+    sSpellMgr->LoadSpellRanks();
+
     sLog->outString("Loading Spell Group types...");
     sSpellMgr->LoadSpellGroups();
 
