@@ -2005,6 +2005,29 @@ uint32 ObjectMgr::GetPlayerAccountIdByPlayerName(const std::string& name) const
     return 0;
 }
 
+void ObjectMgr::LoadGrandSkillupData()
+{
+    m_GrandSkillup.clear();                                 // need for reload case
+
+    QueryResult result = WorldDatabase.Query("SELECT entry, step FROM spell_grand_skillup;");
+
+    if (!result)
+        return;
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint8 step = fields[1].GetUInt8();
+
+        m_GrandSkillup[entry] = step;
+    } while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %lu grand skillup templates", (unsigned long)m_GrandSkillup.size());
+}
+
 void ObjectMgr::LoadItemLocales()
 {
     mItemLocaleMap.clear();                                 // need for reload case

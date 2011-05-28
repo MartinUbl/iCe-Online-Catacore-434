@@ -617,6 +617,8 @@ class ObjectMgr
 
         typedef std::vector<GuildRewardsEntry*> GuildRewardsVector;
 
+        typedef UNORDERED_MAP<uint32, uint32> GrandSkillupMap;
+
         Player* GetPlayer(const char* name) const { return sObjectAccessor->FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::FindPlayer(guid); }
         Player* GetPlayerByLowGUID(uint32 lowguid) const;
@@ -770,6 +772,14 @@ class ObjectMgr
             return NULL;
         }
 
+        uint32 GetGrandSkillupStep(uint32 id) const
+        {
+            GrandSkillupMap::const_iterator itr = m_GrandSkillup.find(id);
+            if (itr != m_GrandSkillup.end())
+                return itr->second;
+            return 0;
+        }
+
         RepRewardRate const* GetRepRewardRate(uint32 factionId) const
         {
             RepRewardRateMap::const_iterator itr = m_RepRewardRateMap.find(factionId);
@@ -921,6 +931,7 @@ class ObjectMgr
         void LoadMailLevelRewards();
         void LoadVehicleAccessories();
         void LoadVehicleScaling();
+        void LoadGrandSkillupData();
 
         void LoadGossipText();
 
@@ -1294,6 +1305,8 @@ class ObjectMgr
         QuestRelations mGOQuestInvolvedRelations;
         QuestRelations mCreatureQuestRelations;
         QuestRelations mCreatureQuestInvolvedRelations;
+
+        GrandSkillupMap     m_GrandSkillup;
 
         //character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;
