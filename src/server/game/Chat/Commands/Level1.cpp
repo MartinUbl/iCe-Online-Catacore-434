@@ -275,6 +275,14 @@ bool ChatHandler::HandleNpcSpawncircle(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleReloadSpellGrandSkillupCommand(const char* args)
+{
+    sLog->outString("Re-Loading Spell Grand Skillup Templates...");
+    sObjectMgr->LoadGrandSkillupData();
+    SendGlobalGMSysMessage("DB table `spell_grand_skillup` reloaded.");
+    return true;
+}
+
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
 {

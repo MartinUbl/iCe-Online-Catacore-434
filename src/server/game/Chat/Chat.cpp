@@ -581,6 +581,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_target_position",       SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSpellTargetPositionCommand>,     "", NULL },
         { "spell_threats",               SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSpellThreatsCommand>,            "", NULL },
         { "spell_group_stack_rules",     SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSpellGroupStackRulesCommand>,         "", NULL },
+        { "spell_grand_skillup",         SEC_MODERATOR,     true,  OldHandler<&ChatHandler::HandleReloadSpellGrandSkillupCommand>,       "", NULL },
         { "trinity_string",              SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadTrinityStringCommand>,           "", NULL },
         { "auctions",                    SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadAuctionsCommand>,                "", NULL },
         { "waypoint_scripts",            SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadWpScriptsCommand>,               "", NULL },
