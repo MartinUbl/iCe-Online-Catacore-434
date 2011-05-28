@@ -634,9 +634,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         case SPELL_AURA_DUMMY:
             if (!caster)
                 break;
-            // Earth Shield
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellProto->SpellFamilyFlags[1] & 0x400)
-                amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellProto(), GetEffIndex(), amount, SPELL_DIRECT_DAMAGE);
             break;
         case SPELL_AURA_DAMAGE_SHIELD:
             if (!caster)
@@ -2293,7 +2290,6 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                         target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     }
                     break;
-                }
             }
             // Death and Decay
             if (GetSpellProto()->SpellFamilyFlags[0] & 0x20)
