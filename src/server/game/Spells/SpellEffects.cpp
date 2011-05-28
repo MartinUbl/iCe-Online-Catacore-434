@@ -2547,6 +2547,23 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Flash Heal
         else if (m_spellInfo->Id == 2061 && caster->HasAura(88688))
             caster->RemoveAurasDueToSpell(88688); // Surge of Light remove
+        // Chain Heal and Riptide
+        else if (m_spellInfo->Id == 1064 || m_spellInfo->Id == 61295)
+        {
+            // Tidal Waves
+            if (caster->HasAura(51564) || caster->HasAura(51563) || caster->HasAura(51562))
+            {
+                int32 bp0 = 0;
+                Aura* pAura = caster->GetAura(51564);
+                if (!pAura)
+                    pAura = caster->GetAura(51563);
+                if (!pAura)
+                    pAura = caster->GetAura(51562);
+                if (pAura)
+                    bp0 = -pAura->GetSpellProto()->EffectBasePoints[0];
+                caster->CastCustomSpell(caster,53390,&bp0,0,0,true);
+            }
+        }
         // Atonement
         else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472)
         {

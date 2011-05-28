@@ -8529,6 +8529,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Glyph of Backstab (proc only from Backstab)
+        case 56800:
+        {
+            if (procSpell->Id != 53)
+                return false;
+            break;
+        }
         // Deflection
         case 52420:
         {
@@ -8807,6 +8814,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 20233: // Improved Lay on Hands (cast on target)
         {
             target = pVictim;
+            break;
+        }
+        // Denounce (proc only with Holy Shock)
+        case 85509:
+        {
+            if (procSpell->Id != 20473)
+                return false;
             break;
         }
         // Combo points add triggers (need add combopoint only for main target, and after possible combopoints reset)
