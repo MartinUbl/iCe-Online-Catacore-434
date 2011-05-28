@@ -881,8 +881,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     m_damage = float(m_damage)*(1+pOrbs->GetStackAmount()*0.1f);
                     m_caster->RemoveAurasDueToSpell(77487);
-                    //TODO: find spell that increases periodic damage done and cast it
-                    //m_caster->CastSpell(m_caster, , true);
+                    // Empowered Shadows buff for increased DoT damage
+                    m_caster->CastSpell(m_caster, 95799, true);
                 }
         }
         default:
