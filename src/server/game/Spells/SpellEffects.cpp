@@ -2544,6 +2544,9 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                  (caster->HasAura(87164) && roll_chance_i(30))) )
                 caster->SetPower(POWER_HOLY_POWER, 0);
         }
+        // Flash Heal
+        else if (m_spellInfo->Id == 2061 && caster->HasAura(88688))
+            caster->RemoveAurasDueToSpell(88688); // Surge of Light remove
         // Atonement
         else if (m_spellInfo->Id == 81751 || m_spellInfo->Id == 94472)
         {
