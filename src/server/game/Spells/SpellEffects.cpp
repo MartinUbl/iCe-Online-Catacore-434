@@ -660,9 +660,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (back_damage < int32(unitTarget->GetHealth()))
                         m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
                 }
-                // Mind Blast - applies Mind Trauma if:
-                else if (m_spellInfo->SpellFamilyFlags[2] & 0x00002000)
+                // Mind Blast
+                else if (m_spellInfo->Id == 8092)
                 {
+                    // Applies Mind Trauma effect if:
                     // We are in Shadow Form
                     if (m_caster->GetShapeshiftForm() == FORM_SHADOW)
                         // We have Improved Mind Blast
@@ -871,6 +872,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             if(Aura* pAura = m_caster->GetAura(44544))
                 pAura->DropCharge();
             break;
+        case 8092:  // Mind Blast
+        case 73510: // Mind Spike
+        {
+            // Increase damage done by every shadow orb stack
+            if (Aura* pOrbs = m_caster->GetAura(77487))
+                if (pOrbs->GetStackAmount() > 0)
+                {
+                    m_damage = float(m_damage)*(1+pOrbs->GetStackAmount()*0.1f);
+                    m_caster->RemoveAurasDueToSpell(77487);
+                    //TODO: find spell that increases periodic damage done and cast it
+                    //m_caster->CastSpell(m_caster, , true);
+                }
+        }
         default:
             break;
     }

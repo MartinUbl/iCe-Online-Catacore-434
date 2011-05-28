@@ -1430,6 +1430,14 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 pAura->RefreshDuration();
                         }
                         break;
+                    case 15407: // Mind Flay
+                    case 589:   // Shadow Word: Pain
+                    {
+                        // Shadow Orbs proc chance
+                        if (caster->HasAura(95740) && roll_chance_i(10))
+                            caster->CastSpell(caster, 77487, true);
+                        break;
+                    }
                     case 8050:   // Flame Shock tick
                         {
                             // Reseting cooldown originally done by spell 77762 (Lava Burst!), but it's simplier this way
