@@ -76,6 +76,21 @@ class boss_obsidius: public CreatureScript
                 GetCreatureListWithEntryInGrid(ShadowsList, me, NPC_SHADOW_OF_OBSIDIUS, 100.0f);
             }
 
+            void EnterCombat(Unit* pWho)
+            {
+                me->MonsterYell("You come seeking answers? Then have them! Look upon your answer to living!",LANG_UNIVERSAL,0);
+            }
+
+            void KilledUnit(Unit* pWho)
+            {
+                me->MonsterYell("Your kind has no place in the master's world!",LANG_UNIVERSAL,0);
+            }
+
+            void JustDied(Unit* pKiller)
+            {
+                me->MonsterYell("I cannot be destroyed... Only de... layed...",LANG_UNIVERSAL,0);
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
@@ -100,6 +115,7 @@ class boss_obsidius: public CreatureScript
                         {
                             case 1:
                                 {
+                                    me->MonsterYell("Earth can be shaped, molded... You cannot! You are useless!",LANG_UNIVERSAL,0);
                                     uint32 pos = urand(0,2);
                                     std::list<Creature*>::iterator itr = ShadowsList.begin();
                                     for(uint32 i = 0; i < pos; i++)

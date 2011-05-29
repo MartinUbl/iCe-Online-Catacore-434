@@ -90,7 +90,18 @@ public:
 
         void EnterCombat(Unit* pWho)
         {
+            me->MonsterYell("Boss Cho'gall not gonna be happy 'bout dis!",LANG_UNIVERSAL,0);
             me->CastSpell(me,SPELL_CALL_FOR_HELP,false);
+        }
+
+        void KilledUnit(Unit* pVictim)
+        {
+            me->MonsterYell("That what you get! Nothing!",LANG_UNIVERSAL,0);
+        }
+
+        void JustDied(Unit* pKiller)
+        {
+            me->MonsterYell("Rom'ogg...sorry...",LANG_UNIVERSAL,0);
         }
 
         void UpdateAI(const uint32 diff)
@@ -115,6 +126,7 @@ public:
             {
                 if (SkullcrackTimer <= diff)
                 {
+                    me->MonsterYell("Stand still! Rom'ogg crack your skulls!",LANG_UNIVERSAL,0);
                     me->CastSpell(me, SPELL_SKULLCRACKER, false);
                     SkullcrackTimer = 0;
                 } else SkullcrackTimer -= diff;
