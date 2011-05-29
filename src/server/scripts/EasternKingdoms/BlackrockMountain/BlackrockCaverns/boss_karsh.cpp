@@ -119,6 +119,9 @@ class boss_karsh: public CreatureScript
                 {
                     if (HeatedArmorApplyTimer <= diff)
                     {
+                        // Odebrat puvodni buff
+                        if (me->HasAura(SPELL_QUICKSILVER_ARMOR))
+                            me->RemoveAurasDueToSpell(SPELL_QUICKSILVER_ARMOR);
                         // Nahodit stack
                         me->CastSpell(me, DUNGEON_MODE(SPELL_HEATED_ARMOR,SPELL_HEATED_ARMOR_H), true);
                         // A spell ktery pri kazdem melee utoku spusti damage spell
@@ -154,6 +157,9 @@ class boss_karsh: public CreatureScript
                     total = 3;
                     for(int i = 0; i < total; i++)
                         me->CastSpell(me, SPELL_SUMMON_BOUND_FLAMES, true);
+
+                    // Nahodit puvodni buff
+                    me->CastSpell(me, SPELL_QUICKSILVER_ARMOR, true);
 
                     Zaznamenal = true;
                 }
