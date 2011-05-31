@@ -544,6 +544,9 @@ void AddSC_shattrath_city();
 void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
 
+// Cataclysm zones
+void AddSC_deepholm();
+
 // Cataclysm dungeons
 void AddSC_romogg();
 void AddSC_karsh();
@@ -1129,6 +1132,8 @@ void AddNorthrendScripts()
 
 void AddCataclysmScripts()
 {
+    AddSC_deepholm();
+
     AddSC_romogg();
     AddSC_karsh();
     AddSC_beauty();
