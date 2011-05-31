@@ -138,7 +138,7 @@ public:
             if (QuakeTimer <= diff)
             {
                 me->CastSpell(me, SPELL_QUAKE, false);
-                QuakeTimer = 12000;
+                QuakeTimer = DUNGEON_MODE(urand(35000,40000),urand(30000,35000));
                 ElementalsTimer = 3000;
             } else QuakeTimer -= diff;
 

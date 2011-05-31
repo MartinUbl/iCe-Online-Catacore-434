@@ -15,3 +15,11 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+enum Encounters
+{
+    TYPE_ERTAN    = 0,
+    TYPE_ALTAIRUS = 1,
+    TYPE_ASAAD    = 2,
+    MAX_ENCOUNTER = 3,
+};

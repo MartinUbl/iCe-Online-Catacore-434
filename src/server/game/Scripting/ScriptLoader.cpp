@@ -550,6 +550,8 @@ void AddSC_karsh();
 void AddSC_beauty();
 void AddSC_obsidius();
 void AddSC_instance_blackrock_caverns();
+void AddSC_ertan();
+void AddSC_instance_vortex_pinnacle();
 
 // battlegrounds
 
@@ -1132,6 +1134,8 @@ void AddCataclysmScripts()
     AddSC_beauty();
     AddSC_obsidius();
     AddSC_instance_blackrock_caverns();
+    AddSC_ertan();
+    AddSC_instance_vortex_pinnacle();
 }
 
 void AddOutdoorPvPScripts()

@@ -89,6 +89,12 @@ class boss_obsidius: public CreatureScript
             void JustDied(Unit* pKiller)
             {
                 me->MonsterYell("I cannot be destroyed... Only de... layed...",LANG_UNIVERSAL,0);
+                // Zabit vsechny addy
+                if (!ShadowsList.empty())
+                {
+                    for (std::list<Creature*>::const_iterator itr = ShadowsList.begin(); itr != ShadowsList.end(); ++itr)
+                        (*itr)->Kill((*itr));
+                }
             }
 
             void UpdateAI(const uint32 diff)
