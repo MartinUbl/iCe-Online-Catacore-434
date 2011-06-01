@@ -549,6 +549,7 @@ void AddSC_deepholm();
 
 // Cataclysm dungeons
 void AddSC_romogg();
+void AddSC_corla();
 void AddSC_karsh();
 void AddSC_beauty();
 void AddSC_obsidius();
@@ -1135,6 +1136,7 @@ void AddCataclysmScripts()
     AddSC_deepholm();
 
     AddSC_romogg();
+    AddSC_corla();
     AddSC_karsh();
     AddSC_beauty();
     AddSC_obsidius();

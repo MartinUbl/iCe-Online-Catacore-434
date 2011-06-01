@@ -26,3 +26,10 @@ enum Encounter
     MAX_ENCOUNTER = 5,
 };
 
+enum Data64
+{
+    DATA_CORLA,
+    DATA_CORLA_ZEALOT_1,
+    DATA_CORLA_ZEALOT_2,
+    DATA_CORLA_ZEALOT_3,
+};

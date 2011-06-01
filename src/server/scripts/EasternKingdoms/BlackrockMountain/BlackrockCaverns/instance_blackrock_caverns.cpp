@@ -42,10 +42,14 @@ public:
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
+        uint64 m_auiCorla_ZealotGUID[3];
+        uint64 m_uiCorlaGUID;
 
         void Initialize()
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+            memset(&m_auiCorla_ZealotGUID, 0, sizeof(m_auiCorla_ZealotGUID));
+            m_uiCorlaGUID = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -62,11 +66,36 @@ public:
 
         void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {
+            if(!pCreature)
+                return;
+
+            if(pCreature->GetEntry() == 39679) // Corla
+                m_uiCorlaGUID = pCreature->GetGUID();
+
+            if(pCreature->GetEntry() == 50284) // Corla's Zealot
+                m_auiCorla_ZealotGUID[0] ? (m_auiCorla_ZealotGUID[1] ? m_auiCorla_ZealotGUID[2] = pCreature->GetGUID() : m_auiCorla_ZealotGUID[1] = pCreature->GetGUID()) : m_auiCorla_ZealotGUID[0] = pCreature->GetGUID();
         }
 
         uint64 GetData64(uint32 identifier)
         {
-            return 0;
+            switch(identifier)
+            {
+            case DATA_CORLA:
+                return m_uiCorlaGUID;
+                break;
+            case DATA_CORLA_ZEALOT_1:
+                return m_auiCorla_ZealotGUID[0];
+                break;
+            case DATA_CORLA_ZEALOT_2:
+                return m_auiCorla_ZealotGUID[1];
+                break;
+            case DATA_CORLA_ZEALOT_3:
+                return m_auiCorla_ZealotGUID[2];
+                break;
+            default:
+                return 0;
+                break;
+            }
         }
 
         void SetData(uint32 type, uint32 data)
