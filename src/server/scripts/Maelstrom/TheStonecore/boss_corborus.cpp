@@ -19,6 +19,44 @@
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
+enum UsedThings
+{
+    SPELL_CRYSTAL_BARRAGE  = 86881,
+    NPC_CRYSTAL_SHARD      = 49267,
+    SPELL_DAMPENING_WAVE   = 82415,
+    SPELL_DAMPENING_WAVE_H = 92650,
+    NPC_ROCK_BORER         = 43917,
+    SPELL_ROCK_BORE        = 80028,
+    SPELL_ROCK_BORE_H      = 92630,
+};
+
+class boss_corborus: public CreatureScript
+{
+public:
+    boss_corborus(): CreatureScript("boss_corborus") {};
+
+    struct boss_corborusAI: public ScriptedAI
+    {
+        boss_corborusAI(Creature* c): ScriptedAI(c)
+        {
+            pInstance = me->GetInstanceScript();
+            Reset();
+        }
+
+        InstanceScript* pInstance;
+
+        void Reset()
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new boss_corborusAI(c);
+    }
+};
+
 void AddSC_corborus()
 {
+    new boss_corborus();
 }

@@ -15,3 +15,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+enum Encounters
+{
+    TYPE_CORBORUS = 0,
+    TYPE_SLABHIDE = 1,
+    TYPE_OZRUK    = 2,
+    TYPE_AZIL     = 3,
+    MAX_ENCOUNTER = 4,
+};
