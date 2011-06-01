@@ -1609,6 +1609,11 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
                     break;
                 else
                     return false;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_ID:
+                if (GetPlayer()->GetMapId() == achievementCriteria->moreRequirementValue[i])
+                    break;
+                else
+                    return false;
             default:
                 break;
         }
