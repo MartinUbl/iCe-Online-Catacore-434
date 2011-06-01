@@ -1594,6 +1594,25 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
     if (!progress)
         return false;
 
+    // check for additional criteria requirement data
+    for (int i = 0; i < 3; i++)
+    {
+        switch (achievementCriteria->moreRequirement[i])
+        {
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS:
+                if (GetPlayer()->getClass() == achievementCriteria->moreRequirementValue[i])
+                    break;
+                else
+                    return false;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE:
+                if (GetPlayer()->getRace() == achievementCriteria->moreRequirementValue[i])
+                    break;
+                else
+                    return false;
+            default:
+                break;
+        }
+    }
 
     switch (achievementCriteria->requiredType)
     {
