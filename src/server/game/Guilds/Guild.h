@@ -274,6 +274,10 @@ class GuildAchievementMgr
 
         Guild* GetGuild() { return m_guild; };
 
+        // Make it private for making appending to AllAchievementData easier
+        CriteriaProgressMap m_criteriaProgress;
+        CompletedAchievementMap m_completedAchievements;
+
     private:
         enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
 
@@ -288,8 +292,6 @@ class GuildAchievementMgr
         bool IsCompletedAchievement(AchievementEntry const* entry);
 
         Guild* m_guild;
-        CriteriaProgressMap m_criteriaProgress;
-        CompletedAchievementMap m_completedAchievements;
         uint32 achievementPoints;
 };
 

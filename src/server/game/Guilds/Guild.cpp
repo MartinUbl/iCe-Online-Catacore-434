@@ -111,8 +111,8 @@ void GuildAchievementMgr::SaveToDB()
 
 void GuildAchievementMgr::LoadFromDB()
 {
-    QueryResult achievementResult = CharacterDatabase.PQuery("SELECT * FROM guild_achievement WHERE guildid=%u",GetGuild()->GetId());
-    QueryResult criteriaResult = CharacterDatabase.PQuery("SELECT * FROM guild_achievement_progress WHERE guildid=%u",GetGuild()->GetId());
+    QueryResult achievementResult = CharacterDatabase.PQuery("SELECT achievement,date FROM guild_achievement WHERE guildid=%u",GetGuild()->GetId());
+    QueryResult criteriaResult = CharacterDatabase.PQuery("SELECT criteria,counter,date FROM guild_achievement_progress WHERE guildid=%u",GetGuild()->GetId());
 
     if (achievementResult)
     {
