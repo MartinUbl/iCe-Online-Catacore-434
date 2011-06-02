@@ -79,6 +79,36 @@ GuildAchievementMgr::~GuildAchievementMgr()
 {
 }
 
+void GuildAchievementMgr::SaveToDB()
+{
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    if (!m_completedAchievements.empty())
+    {
+        for (CompletedAchievementMap::iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
+        {
+            if (itr->second.changed)
+            {
+                trans->PAppend("DELETE FROM guild_achievement WHERE achievement = %u AND guildid = %u;",itr->first,m_guild->GetId());
+                trans->PAppend("INSERT INTO guild_achievement (guildid, achievement, date) VALUES (%u, %u, %u);",m_guild->GetId(),itr->first,itr->second.date);
+                itr->second.changed = false;
+            }
+        }
+    }
+    if (!m_criteriaProgress.empty())
+    {
+        for (CriteriaProgressMap::iterator itr = m_criteriaProgress.begin(); itr != m_criteriaProgress.end(); ++itr)
+        {
+            if (itr->second.changed)
+            {
+                trans->PAppend("DELETE FROM guild_achievement_progress WHERE criteria = %u AND guildid = %u;",itr->first,m_guild->GetId());
+                trans->PAppend("INSERT INTO guild_achievement_progress (guildid, criteria, counter, date) VALUES (%u, %u, %u, %u);",m_guild->GetId(),itr->first,itr->second.counter,itr->second.date);
+                itr->second.changed = false;
+            }
+        }
+    }
+    CharacterDatabase.CommitTransaction(trans);
+}
+
 void GuildAchievementMgr::LoadFromDB()
 {
     QueryResult achievementResult = CharacterDatabase.PQuery("SELECT * FROM guild_achievement WHERE guildid=%u",GetGuild()->GetId());
@@ -207,6 +237,9 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                     CompletedAchievement(*itr);
         }
     }
+
+    // Commit immediately
+    SaveToDB();
 }
 
 void GuildAchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress)
