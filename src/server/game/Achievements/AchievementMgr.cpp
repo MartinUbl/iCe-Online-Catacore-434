@@ -762,6 +762,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             (achievement->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
             continue;
 
+        // don't update guild achievement criterias for players
+        if (achievement->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT)
+            continue;
+
         // don't update already completed criteria
         if (IsCompletedCriteria(achievementCriteria,achievement))
             continue;

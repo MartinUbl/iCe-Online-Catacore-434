@@ -24014,6 +24014,14 @@ void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 mis
     GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
 }
 
+void Player::UpdateGuildAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1, uint32 miscvalue2, Unit *unit, uint32 time);
+{
+    if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+    {
+        pGuild->GetAchievementMgr().UpdateAchievementCriteria(type,miscvalue1,miscvalue2,unit,time,this);
+    }
+}
+
 void Player::CompletedAchievement(AchievementEntry const* entry, bool ignoreGMAllowAchievementConfig)
 {
     GetAchievementMgr().CompletedAchievement(entry, ignoreGMAllowAchievementConfig);
