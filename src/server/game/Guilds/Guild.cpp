@@ -211,6 +211,20 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL: // for testing - "earn guild level"
                 SetCriteriaProgress(achievementCriteria, m_guild->GetLevel());
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS:
+                SetCriteriaProgress(achievementCriteria, achievementPoints, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_TABARD:
+                SetCriteriaProgress(achievementCriteria, 1);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT:
+                if (m_completedAchievements.find(achievementCriteria->complete_achievement.linkedAchievement) != m_completedAchievements.end())
+                    SetCriteriaProgress(achievementCriteria, 1);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
+                SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
+                break;
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // for testing - "kill critters"
                 if (unit && unit->GetCreatureType() == CREATURE_TYPE_CRITTER)
                     SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
@@ -315,7 +329,7 @@ void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achieveme
         sAchievementMgr->SetRealmCompleted(achievement);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT);
-    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS, achievement->points);
 }
 
 void GuildAchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
