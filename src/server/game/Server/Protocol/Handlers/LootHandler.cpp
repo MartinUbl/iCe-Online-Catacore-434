@@ -27,11 +27,13 @@
 #include "Corpse.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "SpellAuraEffects.h"
 #include "ObjectAccessor.h"
 #include "WorldSession.h"
 #include "LootMgr.h"
 #include "Object.h"
 #include "Group.h"
+#include "Guild.h"
 #include "World.h"
 #include "Util.h"
 
@@ -184,6 +186,18 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
         {
             player->ModifyMoney(pLoot->gold);
             player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, pLoot->gold);
+
+            // Check for MOD_LOOT_MONEY_GAIN for sending bonus money to guild bank
+            if (!player->GetAuraEffectsByType(SPELL_AURA_MOD_LOOT_MONEY_GAIN).empty())
+            {
+                Unit::AuraEffectList const& effList = player->GetAuraEffectsByType(SPELL_AURA_MOD_LOOT_MONEY_GAIN);
+                Guild* pGuild = sObjectMgr->GetGuildById(player->GetGuildId());
+                for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+                {
+                    if (pGuild)
+                        pGuild->DepositBankMoneyFromLoot((*itr)->GetBaseAmount()*pLoot->gold/100);
+                }
+            }
         }
         pLoot->gold = 0;
         pLoot->NotifyMoneyRemoved();

@@ -2412,6 +2412,18 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
     }
 }
 
+void Guild::DepositBankMoneyFromLoot(uint32 amount)
+{
+    if (!_GetPurchasedTabsSize())
+        return;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    // Add money to bank
+    _ModifyBankMoney(trans, amount, true);
+
+    CharacterDatabase.CommitTransaction(trans);
+}
+
 void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 {
     if (!_GetPurchasedTabsSize())

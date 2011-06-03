@@ -718,6 +718,8 @@ public:
     void HandleMemberLogout(WorldSession* session);
     void HandleDisband(WorldSession* session);
 
+    void DepositBankMoneyFromLoot(uint32 amount);
+
     void UpdateMemberData(Player* plr, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* plr, uint32 flag, bool state);
     void SendUpdateRoster(WorldSession* session = NULL);
