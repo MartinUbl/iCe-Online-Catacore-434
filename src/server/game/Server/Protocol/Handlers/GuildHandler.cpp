@@ -501,8 +501,21 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket & recv_data)
     uint8 unk;
     recv_data >> unk;
 
-    if (GetPlayer()->GetGameObjectIfCanInteractWith(GoGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    if (GameObject* pGO = GetPlayer()->GetGameObjectIfCanInteractWith(GoGuid, GAMEOBJECT_TYPE_GUILD_BANK))
     {
+        // Exception for Mobile Banking gameobject Guild Chest
+        // Only members of the same guild as caster can access
+        if (pGO->GetEntry() == 206602 || pGO->GetEntry() == 206603)
+        {
+            if (pGO->GetOwner() && pGO->GetOwner()->ToPlayer() && pGO->GetOwner()->ToPlayer()->GetGuildId())
+            {
+                if (pGO->GetOwner()->ToPlayer()->GetGuildId() != GetPlayer()->GetGuildId())
+                    return;
+            }
+            else
+                return;
+        }
+
         if (Guild* pGuild = _GetPlayerGuild(this))
             pGuild->SendBankTabsInfo(this);
         else 
