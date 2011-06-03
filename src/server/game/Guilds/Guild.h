@@ -268,6 +268,7 @@ class GuildAchievementMgr
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, bool evenIfCriteriaComplete = false);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1 = 0, uint64 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0, Player* player = NULL);
         bool HasAchieved(AchievementEntry const* achievement) const;
+        bool HasAchieved(uint32 achievement) const;
 
         void LoadFromDB();
         void SaveToDB();
@@ -787,6 +788,10 @@ public:
 
     void GainXP(uint64 xp);
     void LevelUp();
+
+    static bool IsListedAsGuildReward(uint32 item);
+    bool IsRewardReachable(Player* pPlayer, uint32 item);
+    static GuildRewardsEntry* GetRewardData(uint32 item);
 
 protected:
     uint32 m_id;

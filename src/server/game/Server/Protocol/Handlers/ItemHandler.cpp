@@ -28,6 +28,7 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Guild.h"
 #include "Item.h"
 #include "UpdateData.h"
 #include "ObjectAccessor.h"
@@ -794,12 +795,28 @@ void WorldSession::SendListInventory(uint64 vendorguid)
                 // player is on. If GM on, display all items.
                 if (!_player->isGameMaster() && ((pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && _player->GetTeam() == ALLIANCE) || (pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && _player->GetTeam() == HORDE)))
                     continue;
-                ++count;
-                if(count == 150)
-                    break; // client can only display 15 pages
 
                 // reputation discount
                 int32 price = crItem->IsGoldRequired(pProto) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
+
+                // If item is listed as guild reward, check whether player is capable to buy
+                if (Guild::IsListedAsGuildReward(pProto->ItemId))
+                {
+                    // If player doesn't have guild, do not display
+                    if (!_player->GetGuildId())
+                        continue;
+                    else
+                    {
+                        // Get price in copper from reward template
+                        if (Guild* pGuild = sObjectMgr->GetGuildById(_player->GetGuildId()))
+                            if (pGuild->IsRewardReachable(_player, pProto->ItemId))
+                                price = Guild::GetRewardData(pProto->ItemId)->price;
+                    }
+                }
+
+                ++count;
+                if(count == 150)
+                    break; // client can only display 15 pages
 
                 data << uint32(vendorslot+1);    // client expects counting to start at 1
                 data << uint32(1); // unknow value 4.0.1, always 1

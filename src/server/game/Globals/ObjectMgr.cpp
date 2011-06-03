@@ -306,7 +306,7 @@ ObjectMgr::~ObjectMgr()
         delete itr->second;
 
     for (GuildRewardsVector::iterator itr = mGuildRewards.begin(); itr != mGuildRewards.end(); ++itr)
-        delete (*itr);
+        delete itr->second;
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
         itr->second.Clear();
@@ -3898,7 +3898,7 @@ void ObjectMgr::LoadGuildRewards()
         ptr->price = fields[1].GetUInt32();
         ptr->achievement = fields[2].GetUInt32();
         ptr->standing = fields[3].GetUInt32();
-        mGuildRewards.push_back(ptr); 
+        mGuildRewards[ptr->item] = ptr;
 
         ++count;
     }while (result->NextRow());

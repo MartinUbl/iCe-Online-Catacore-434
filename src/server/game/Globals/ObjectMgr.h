@@ -615,7 +615,7 @@ class ObjectMgr
 
         typedef std::map<uint32, uint32> CharacterConversionMap;
 
-        typedef std::vector<GuildRewardsEntry*> GuildRewardsVector;
+        typedef UNORDERED_MAP<uint32, GuildRewardsEntry*> GuildRewardsVector;
 
         typedef UNORDERED_MAP<uint32, uint32> GrandSkillupMap;
 

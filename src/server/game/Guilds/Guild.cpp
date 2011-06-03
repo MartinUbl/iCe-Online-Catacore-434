@@ -301,6 +301,11 @@ bool GuildAchievementMgr::HasAchieved(AchievementEntry const* achievement) const
     return m_completedAchievements.find(achievement->ID) != m_completedAchievements.end();
 }
 
+bool GuildAchievementMgr::HasAchieved(uint32 achievement) const
+{
+    return m_completedAchievements.find(achievement) != m_completedAchievements.end();
+}
+
 void GuildAchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 {
     sLog->outDetail("GuildAchievementMgr::CompletedAchievement(%u)", achievement->ID);
@@ -3605,6 +3610,46 @@ void Guild::_BroadcastEvent(GuildEvents guildEvent, const uint64& guid, const ch
     sLog->outDebug("WORLD: Sent SMSG_GUILD_EVENT");
 }
 
+bool Guild::IsListedAsGuildReward(uint32 item)
+{
+    ObjectMgr::GuildRewardsVector const& vec = sObjectMgr->GetGuildRewards();
+    if (vec.find(item) != vec.end())
+        return true;
+
+    return false;
+}
+
+bool Guild::IsRewardReachable(Player* pPlayer, uint32 item)
+{
+    if (!pPlayer || !item)
+        return false;
+
+    ObjectMgr::GuildRewardsVector const& vec = sObjectMgr->GetGuildRewards();
+    ObjectMgr::GuildRewardsVector::const_iterator itr = vec.find(item);
+    // Not found in guild rewards, no reason for disallowing buying. This shouldn't happen
+    if (itr == vec.end() || !itr->second)
+        return true;
+
+    // If player doesn't have enough guild reputation
+    if (pPlayer->GetReputationRank(1168) < ReputationRank(itr->second->standing))
+        return false;
+
+    // If guild has't achieved required achievement
+    if (!GetAchievementMgr().HasAchieved(itr->second->achievement))
+        return false;
+
+    return true;
+}
+
+GuildRewardsEntry* Guild::GetRewardData(uint32 item)
+{
+    ObjectMgr::GuildRewardsVector const& vec = sObjectMgr->GetGuildRewards();
+    ObjectMgr::GuildRewardsVector::const_iterator itr = vec.find(item);
+    if (itr != vec.end() && itr->second)
+        return vec.find(item)->second;
+
+    return NULL;
+}
 
 // Guild Advancement
 void Guild::GainXP(uint64 xp)

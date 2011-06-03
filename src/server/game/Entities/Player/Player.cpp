@@ -20628,6 +20628,37 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
     }
 
+    uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
+
+    // reputation discount
+    if (price)
+        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
+
+    // If item is listed as guild reward, check whether player is capable to buy
+    if (Guild::IsListedAsGuildReward(pProto->ItemId))
+    {
+        // If player doesn't have guild, do not display
+        if (!GetGuildId())
+        {
+            SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+            return false;
+        }
+        else
+        {
+            // Get price in copper from reward template
+            if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+            {
+                if (pGuild->IsRewardReachable(this, pProto->ItemId))
+                    price = Guild::GetRewardData(pProto->ItemId)->price;
+                else
+                {
+                    SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+                    return false;
+                }
+            }
+        }
+    }
+
     if (pProto->RequiredReputationFaction && (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank))
     {
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
@@ -20671,12 +20702,6 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             return false;
         }
     }
-
-    uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
-
-    // reputation discount
-    if (price)
-        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
 
     if (!HasEnoughMoney(price))
     {

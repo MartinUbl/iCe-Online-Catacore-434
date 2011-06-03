@@ -256,11 +256,11 @@ void WorldSession::HandleGuildExperienceOpcode(WorldPacket& recvPacket)
     if (Guild* pGuild = sObjectMgr->GetGuildById(_player->GetGuildId()))
     {
         WorldPacket data(SMSG_GUILD_XP_UPDATE, 8*5);
-	    data << uint64(0x37); // max daily xp
-	    data << uint64(pGuild->GetNextLevelXP()); // next level XP
-	    data << uint64(0x37); // weekly xp
-	    data << uint64(pGuild->GetCurrentXP()); // Curr exp
-	    data << uint64(0); // Today exp (unsupported)
+        data << uint64(0x37); // max daily xp
+        data << uint64(pGuild->GetNextLevelXP()); // next level XP
+        data << uint64(0x37); // weekly xp
+        data << uint64(pGuild->GetCurrentXP()); // Curr exp
+        data << uint64(0); // Today exp (unsupported)
         SendPacket(&data);
     }
 }
@@ -289,24 +289,24 @@ void WorldSession::HandleGuildRewardsOpcode(WorldPacket& recvPacket)
     data << uint32(_player->GetGuildId()) ;
     data << uint32(vec.size()); // counter
 
-    for(uint32 i = 0; i < vec.size(); ++i)
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
         data << uint32(0); // unk (only found 0 in retail logs)
 
-    for(uint32 i = 0; i < vec.size(); ++i)
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
         data << uint32(0); // unk
 
-    for(uint32 i = 0; i < vec.size(); ++i)
-        data << uint64(vec[i]->price); // money price
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+        data << uint64(itr->second->price); // money price
 
-    for(uint32 i = 0; i < vec.size(); ++i)
-        data << uint32(vec[i]->achievement); // Achievement requirement
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+        data << uint32(itr->second->achievement); // Achievement requirement
 
-    for(uint32 i = 0; i < vec.size(); ++i)
-        data << uint32(vec[i]->standing); // // Reputation level (REP_HONORED, REP_FRIENDLY, etc)
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+        data << uint32(itr->second->standing); // // Reputation level (REP_HONORED, REP_FRIENDLY, etc)
         
-    for(uint32 i = 0; i < vec.size(); ++i)
-        data << uint32(vec[i]->item); // item entry
-	SendPacket(&data);
+    for (ObjectMgr::GuildRewardsVector::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+        data << uint32(itr->first); // item entry
+    SendPacket(&data);
 }
 
 // Cata Status: Done
