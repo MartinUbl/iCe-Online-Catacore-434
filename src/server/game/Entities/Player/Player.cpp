@@ -5167,6 +5167,15 @@ void Player::DurabilityPointsLoss(Item* item, int32 points)
     int32 pOldDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
     int32 pNewDurability = pOldDurability - points;
 
+    if (!GetAuraEffectsByType(SPELL_AURA_MOD_DURABILITY_LOSS).empty())
+    {
+        Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_DURABILITY_LOSS);
+        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        {
+            points = (100-(*itr)->GetBaseAmount())*points/100;
+        }
+    }
+
     if (pNewDurability < 0)
         pNewDurability = 0;
     else if (pNewDurability > pMaxDurability)
