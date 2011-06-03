@@ -11008,7 +11008,20 @@ void Player::ModifyCurrency(uint32 id, int32 count)
         return;
 
     const CurrencyTypesEntry* currency = sCurrencyTypesStore.LookupEntry(id);
-    ASSERT(currency);
+    if (!currency)
+        return;
+
+    // Check for auras modifying amount of currency gained
+    if (!GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN).empty())
+    {
+        Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN);
+        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        {
+            // currency id is saved in MiscValue, percentage in BaseAmount
+            if ((*itr)->GetMiscValue() == id)
+                count = (100+(*itr)->GetBaseAmount())*count/100;
+        }
+    }
 
     int32 oldTotalCount = 0;
     int32 oldWeekCount = 0;
