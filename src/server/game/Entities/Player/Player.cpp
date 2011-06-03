@@ -7261,10 +7261,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     {
         switch (newZone)
         {
-            case 5034: // Uldum
-            case 4922: // Twilight Highlands
-            case 5042: // Deepholm
-            case 5146: // Vash'jir
             case 5095: // Tol Barad
             case 5389: // Tol Barad Peninsula
                 // Teleport to somewere in Arathi Highlands
