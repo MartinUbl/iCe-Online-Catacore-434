@@ -23808,7 +23808,8 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
         return true;
     if(v_map == 571 && canNorthrendFly)             // Northrend
         return true;
-    if((v_map == 0 || v_map == 1) && canAzerothFly) // Old World
+                                                    // Old World and new zones
+    if((v_map == 0 || v_map == 1 || v_map == 646) && canAzerothFly)
         return true;
 
     return false;
