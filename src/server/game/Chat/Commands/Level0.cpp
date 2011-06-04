@@ -34,6 +34,18 @@
 #include "revision.h"
 #include "Util.h"
 
+// Here only due to size of this file - quick Edit and continue build
+bool ChatHandler::HandleTestCommand(const char* args)
+{
+    // Fnction ONLY for DEBUG purposes and only for use under DEBUG BUILD !!
+    // No other reason for this function
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    return true;
+}
+
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
     char* cmd = strtok((char*)args, " ");
