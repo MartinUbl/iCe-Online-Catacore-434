@@ -49,3 +49,11 @@ bool WorldDatabaseConnection::Open()
     
     return true;
 }
+
+bool ScriptDatabaseConnection::Open()
+{
+    if (!MySQLConnection::Open())
+        return false;
+
+    return true;
+}

@@ -37,7 +37,19 @@ class WorldDatabaseConnection : public MySQLConnection
         bool Open();
 };
 
+class ScriptDatabaseConnection : public MySQLConnection
+{
+    public:
+        //- Constructors for sync and async connections
+        ScriptDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
+        ScriptDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
+
+        //- Loads databasetype specific prepared statements
+        bool Open();
+};
+
 typedef DatabaseWorkerPool<WorldDatabaseConnection> WorldDatabaseWorkerPool;
+typedef DatabaseWorkerPool<ScriptDatabaseConnection> ScriptDatabaseWorkerPool;
 
 enum WorldDatabaseStatements
 {

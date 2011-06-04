@@ -564,6 +564,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reputation_reward_rate",      SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadReputationRewardRateCommand>,    "", NULL },
         { "reputation_spillover_template",SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadReputationRewardRateCommand>,    "", NULL },
         { "smart_scripts",               SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSmartScripts>,                        "", NULL },
+        { "scriptdb",                    SEC_MODERATOR,     true,  OldHandler<&ChatHandler::HandleReloadScriptsDB>,                      "", NULL },
         { "skill_discovery_template",    SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSkillDiscoveryTemplateCommand>,  "", NULL },
         { "skill_extra_item_template",   SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSkillExtraItemTemplateCommand>,  "", NULL },
         { "skill_fishing_base_level",    SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadSkillFishingBaseLevelCommand>,   "", NULL },

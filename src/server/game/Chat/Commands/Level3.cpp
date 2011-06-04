@@ -65,6 +65,7 @@
 #include "LFGMgr.h"
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
+#include "ScriptDatabase.h"
 
 //reload commands
 bool ChatHandler::HandleReloadAllCommand(const char*)
@@ -1196,6 +1197,14 @@ bool ChatHandler::HandleReloadSmartScripts(const char* /*args*/)
     sLog->outString("Re-Loading Smart Scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
     SendGlobalGMSysMessage("Smart Scripts reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadScriptsDB(const char* /*args*/)
+{
+    sLog->outString("Re-Loading Scripts Database...");
+    sScriptDatabase->LoadDatabase();
+    SendGlobalGMSysMessage("Scripts database reloaded.");
     return true;
 }
 

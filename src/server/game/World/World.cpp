@@ -1789,6 +1789,10 @@ void World::SetInitialWorldSettings()
         sLog->SetLogDB(false);
 
     sLog->outString("WORLD: World initialized");
+
+    sLog->outString("SCRIPTS: Initializing scripts");
+    sScriptMgr->LoadScriptDatabase();
+    sLog->outString("SCRIPTS: Scripts initialized");
 }
 
 void World::DetectDBCLang()

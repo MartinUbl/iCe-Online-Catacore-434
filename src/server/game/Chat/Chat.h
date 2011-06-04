@@ -486,6 +486,7 @@ class ChatHandler
         bool HandleReloadConditions(const char* args);
         bool HandleReloadCreatureText(const char* args);
         bool HandleReloadSmartScripts(const char* args);
+        bool HandleReloadScriptsDB(const char* args);
 
         bool HandleResetAchievementsCommand(const char * args);
         bool HandleResetAllCommand(const char * args);

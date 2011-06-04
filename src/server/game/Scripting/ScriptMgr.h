@@ -780,6 +780,7 @@ class ScriptMgr
         void Initialize();
         void LoadDatabase();
         void FillSpellSummary();
+        void LoadScriptDatabase();
 
         const char* ScriptsVersion() const { return "Integrated Trinity Scripts"; }
 

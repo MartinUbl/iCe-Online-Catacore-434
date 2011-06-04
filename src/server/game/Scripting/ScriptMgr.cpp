@@ -30,6 +30,7 @@
 
 #include "ScriptLoader.h"
 #include "ScriptSystem.h"
+#include "ScriptDatabase.h"
 #include "Transport.h"
 
 // Utility macros to refer to the script registry.
@@ -202,6 +203,11 @@ void ScriptMgr::LoadDatabase()
     sScriptSystemMgr->LoadScriptTexts();
     sScriptSystemMgr->LoadScriptTextsCustom();
     sScriptSystemMgr->LoadScriptWaypoints();
+}
+
+void ScriptMgr::LoadScriptDatabase()
+{
+    sScriptDatabase->LoadDatabase();
 }
 
 struct TSpellSummary

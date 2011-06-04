@@ -397,6 +397,13 @@ bool Master::_StartDB()
         sLog->outError("Cannot connect to world database %s", dbstring.c_str());
         return false;
     }
+    dbstring = sConfig->GetStringDefault("ScriptDatabaseInfo", "");
+    ///- Initialise iCe script database
+    if (!ScriptDatabase.Open(dbstring, 1, 1))
+    {
+        sLog->outError("Cannot connect to script database %s", dbstring.c_str());
+        return false;
+    }
 
     ///- Get character database info from configuration file
     dbstring = sConfig->GetStringDefault("CharacterDatabaseInfo", "");
