@@ -50,6 +50,7 @@ go_bashir_crystalforge
 EndContentData */
 
 #include "ScriptPCH.h"
+#include "ScriptDatabase.h"
 
 /*######
 ## go_cat_figurine
@@ -1186,6 +1187,63 @@ public:
     }
 };
 
+struct PortalCondition
+{
+    uint32 gobjectId;
+    uint32 questId;
+    float x, y, z, o;
+    uint32 mapId;
+};
+
+class go_quest_condition_portal : public GameObjectScript
+{
+public:
+    go_quest_condition_portal() : GameObjectScript("go_quest_condition_portal") { }
+
+    bool OnGossipHello(Player* pPlayer, GameObject *pGo)
+    {
+        GameObjectTeleportCond* pCond = sScriptDatabase->GetGOTeleCond(pGo->GetEntry(), pGo->GetDBTableGUIDLow(), pPlayer->getRace(), pPlayer->getClass());
+        if (pCond)
+        {
+            if (pCond->Item && pPlayer->GetItemCount(pCond->Item) < 1)
+            {
+                if(const ItemPrototype* pProto = sObjectMgr->GetItemPrototype(pCond->Item))
+                    pPlayer->GetSession()->SendNotification("You must own item %s",pProto->Name1);
+                return false;
+            }
+            if (pCond->Level && pPlayer->getLevel() < pCond->Level)
+            {
+                pPlayer->GetSession()->SendNotification("You must be at least level %u",pCond->Level);
+                return false;
+            }
+            if (pCond->Quest && !pPlayer->GetQuestRewardStatus(pCond->Quest))
+            {
+                if(const Quest* pQuest = sObjectMgr->GetQuestTemplate(pCond->Quest))
+                    pPlayer->GetSession()->SendNotification("You have to complete quest %s first",pQuest->GetTitle().c_str());
+                return false;
+            }
+            if (pCond->Spell && !pPlayer->HasSpell(pCond->Spell))
+            {
+                if (const SpellEntry* pSpell = sSpellStore.LookupEntry(pCond->Spell))
+                    pPlayer->GetSession()->SendNotification("You have to know spell %s",pSpell->SpellName);
+                return false;
+            }
+            if (pPlayer->isInCombat())
+            {
+                pPlayer->GetSession()->SendNotification("You are in combat");
+                return false;
+            }
+            if (pPlayer->IsMounted())
+                pPlayer->Unmount();
+
+            pPlayer->TeleportTo(pCond->map, pCond->x, pCond->y, pCond->z, pCond->o);
+            return true;
+        }
+        else
+            return false;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1224,4 +1282,5 @@ void AddSC_go_scripts()
     new go_amberpine_outhouse;
     new go_hive_pod;
     new go_massive_seaforium_charge;
+    new go_quest_condition_portal;
 }
