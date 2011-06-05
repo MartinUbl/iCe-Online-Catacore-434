@@ -43,6 +43,14 @@ bool ChatHandler::HandleTestCommand(const char* args)
     if (!player)
         return false;
 
+    WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE);
+    data << uint64(0);
+    data << uint64(0);
+    data << uint64(0);
+    data << uint64(0);
+    data << uint64(0);
+    m_session->SendPacket(&data);
+
     return true;
 }
 

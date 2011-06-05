@@ -517,14 +517,15 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         data << int32(pQuest->RewRepValue[i]);
 
-    for(int i = 0; i < 4; i++)
-        data << uint32(0);
-
-    for(int i = 0; i < 4; i++)
-        data << uint32(0);
-
     data << uint32(0);
     data << uint32(0);
+
+    // Reward currency ID
+    for(int i = 0; i < 4; i++)
+        data << uint32(pQuest->RewCurrencyId[i]);
+    // Reward currency count
+    for(int i = 0; i < 4; i++)
+        data << uint32(pQuest->RewCurrencyCount[i]);
 
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; ++i)
