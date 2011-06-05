@@ -813,10 +813,10 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     data << uint32(0); // unknow 4.0.1
 
     for(int i = 0; i < 4; i++)
-        data << uint32(0);
+        data << uint32(pQuest->RewCurrencyId[i]);
 
     for(int i = 0; i < 4; i++)
-        data << uint32(0);
+        data << uint32(pQuest->RewCurrencyCount[i]);
 
     data << uint32(0);
     data << uint32(0);

@@ -14965,6 +14965,12 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         }
     }
 
+    for (int i = 0; i < 4; i++)
+    {
+        if (pQuest->RewCurrencyId[i] && pQuest->RewCurrencyCount[i])
+            ModifyCurrency(pQuest->RewCurrencyId[i],pQuest->RewCurrencyCount[i]);
+    }
+
     RewardReputation(pQuest);
 
     uint16 log_slot = FindQuestSlot(quest_id);
@@ -14995,8 +15001,11 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         {
             pGuild->GainXP(XP/4);
             // Give player also 15-30 guild reputation (based on quest level)
-            uint32 rep_val = 15+uint32((float(pQuest->GetQuestLevel())/85.0f)*15.0f);
-            SetReputation(1168,GetReputation(1168)+rep_val);
+            if (pQuest->GetQuestLevel() != 0)
+            {
+                uint32 rep_val = 15+uint32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
+                SetReputation(1168,GetReputation(1168)+rep_val);
+            }
         }
     }
 
