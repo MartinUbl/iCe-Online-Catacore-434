@@ -236,7 +236,7 @@ namespace Trinity
             else if (level <= 79)
                 gain = 163740;
             else if (level <= 85)
-                gain = 300000;
+                gain = 200000;
 
             return gain;
         }
