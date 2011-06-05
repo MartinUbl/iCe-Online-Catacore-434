@@ -2818,6 +2818,54 @@ public:
     };
 };
 
+class npc_thrall_maelstrom : public CreatureScript
+{
+public:
+    npc_thrall_maelstrom() : CreatureScript("npc_thrall_maelstrom") { }
+
+    struct npc_thrall_maelstromAI: public ScriptedAI
+    {
+        npc_thrall_maelstromAI(Creature* c): ScriptedAI(c) { }
+
+        std::list<uint64> m_lPlayerGUID;
+
+        void Reset()
+        {
+            m_lPlayerGUID.clear();
+            me->CastSpell(me, 28892, true);
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            Player* pTarget = who->ToPlayer();
+            if(!pTarget)
+                return;
+
+            uint64 guid = who->GetGUID();
+            for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+            {
+                if(Player* pPlayer = me->GetPlayer(*me, *i))
+                {
+                    if(pPlayer->GetGUID() == guid)
+                        return;
+                }
+            }
+
+            m_lPlayerGUID.push_back(guid);
+
+            WorldPacket data(SMSG_WEATHER, (4+4+4));
+            data << uint32(WEATHER_STATE_HEAVY_RAIN) << float(0.9999f) << uint8(0);
+            pTarget->SendMessageToSet(&data, true);
+
+            pTarget->SendCinematicStart(173);
+        }
+    };
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_thrall_maelstromAI(creature);
+    }
+};
+
 class quest_trigger : public CreatureScript
 {
 public:
@@ -3078,6 +3126,7 @@ void AddSC_npcs_special()
     new npc_tabard_vendor;
     new npc_experience;
     new npc_outdoor_deathwing_flight;
+    new npc_thrall_maelstrom;
     new quest_trigger;
     new npc_ring_of_frost;
     new npc_reforger;
