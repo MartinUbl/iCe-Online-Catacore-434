@@ -189,6 +189,17 @@ namespace Trinity
                 gain = uint32(gain * sWorld->getRate(RATE_XP_KILL));
             }
 
+            // Reduce XP gain for level higher or equal to max in lower expansions
+            if (u->ToCreature() && u->ToCreature()->GetCreatureInfo())
+            {
+                if (u->ToCreature()->GetCreatureInfo()->expansion < 1 && pl->getLevel() >= 60)
+                    gain *= 0.1;
+                else if (u->ToCreature()->GetCreatureInfo()->expansion < 2 && pl->getLevel() >= 70)
+                    gain *= 0.1;
+                else if (u->ToCreature()->GetCreatureInfo()->expansion < 3 && pl->getLevel() >= 80)
+                    gain *= 0.1;
+            }
+
             sScriptMgr->OnGainCalculation(gain, pl, u);
             return gain;
         }
