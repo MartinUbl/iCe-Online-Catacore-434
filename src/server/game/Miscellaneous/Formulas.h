@@ -204,6 +204,85 @@ namespace Trinity
             return gain;
         }
 
+        inline uint32 BattlegroundVictoryXP(uint8 level)
+        {
+            uint32 gain = 0;
+            if (level <= 14)
+                gain = 1960;
+            else if (level <= 19)
+                gain = 3280;
+            else if (level <= 24)
+                gain = 4800;
+            else if (level <= 29)
+                gain = 6440;
+            else if (level <= 34)
+                gain = 8920;
+            else if (level <= 39)
+                gain = 10350;
+            else if (level <= 44)
+                gain = 12480;
+            else if (level <= 49)
+                gain = 13225;
+            else if (level <= 54)
+                gain = 16437;
+            else if (level <= 59)
+                gain = 19987;
+            else if (level <= 64)
+                gain = 43625;
+            else if (level <= 69)
+                gain = 73125;
+            else if (level <= 74)
+                gain = 155570;
+            else if (level <= 79)
+                gain = 163740;
+            else if (level <= 85)
+                gain = 300000;
+
+            return gain;
+        }
+        inline uint32 BattlegroundLossXP(uint8 level)
+        {
+            uint32 gain = BattlegroundVictoryXP(level)/2;
+
+            return gain;
+        }
+        inline uint32 BattlegroundKillXP(uint8 level)
+        {
+            uint32 gain = 0;
+            if (level <= 14)
+                gain = 17;
+            else if (level <= 19)
+                gain = 21;
+            else if (level <= 24)
+                gain = 25;
+            else if (level <= 29)
+                gain = 27;
+            else if (level <= 34)
+                gain = 33;
+            else if (level <= 39)
+                gain = 35;
+            else if (level <= 44)
+                gain = 40;
+            else if (level <= 49)
+                gain = 44;
+            else if (level <= 54)
+                gain = 48;
+            else if (level <= 59)
+                gain = 52;
+            else if (level <= 64)
+                gain = 54;
+            else if (level <= 69)
+                gain = 57;
+            else if (level <= 74)
+                gain = 61;
+            else if (level <= 79)
+                gain = 68;
+            else if (level <= 85)
+                gain = 75;
+
+            return gain;
+        }
+
         inline float xp_in_group_rate(uint32 count, bool isRaid)
         {
             float rate;
