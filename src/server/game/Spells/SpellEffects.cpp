@@ -1714,17 +1714,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 else if (m_caster->HasAura(50041))
                     m_caster->CastSpell(unitTarget, 96294, true);
             }
-            // Death strike
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
-            {
-                uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-                int32 bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->EffectDamageMultiplier[0])));
-                // Improved Death Strike
-                if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
-                    bp = int32(bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
-                return;
-            }
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
             {
@@ -1744,6 +1733,18 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
             case 49203: // Hungering Cold
                 m_caster->CastCustomSpell(m_caster, 51209, &bp, NULL, NULL, true);
+                break;
+            case 49998: // Death Strike (main hand only)
+                {
+                    // THIS IS WOTLK CONCEPTION !!
+                    uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+                    int32 bp = int32(count * m_caster->CountPctFromMaxHealth(5));
+                    // Improved Death Strike
+                    if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
+                        bp = int32(bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);
+                    m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
+                    return;
+                }
                 break;
             case 49560: // Death Grip
                 Position pos;
