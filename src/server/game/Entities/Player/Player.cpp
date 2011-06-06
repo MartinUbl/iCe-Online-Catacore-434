@@ -15003,7 +15003,13 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
             // Give player also 15-30 guild reputation (based on quest level)
             if (pQuest->GetQuestLevel() != 0)
             {
-                uint32 rep_val = 15+uint32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
+                int32 rep_val = 15+int32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
+                if (rep_val < 0)
+                    rep_val = -rep_val;
+                if (rep_val > 30)
+                    rep_val = 30;
+                if (rep_val < 15)
+                    rep_val = 15;
                 SetReputation(1168,GetReputation(1168)+rep_val);
             }
         }
