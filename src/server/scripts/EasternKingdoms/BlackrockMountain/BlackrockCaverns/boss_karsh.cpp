@@ -63,6 +63,7 @@ class boss_karsh: public CreatureScript
         {
             boss_karshAI(Creature* c): ScriptedAI(c)
             {
+                ModifySpellRadius(75083, 32, 0); // mob Conflagration - Burning Heat
                 Reset();
             }
 
