@@ -8367,7 +8367,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         break;
                     }
                     // Blessed Life
-                    case 89023:
+                    case 31828:
+                    case 31829:
                     {
                         cooldown = 8;
                         break;
