@@ -20561,10 +20561,19 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
                 DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
         }
 
+        float CurrencyPrecision = 1.0f;
+
         for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
             if (iece->RequiredCurrency[i])
-                ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i] * count / PLAYER_CURRENCY_PRECISION));
+            {
+                // Honor, Conquest, Valor and Justice points exception - divide by 100
+                if (iece->RequiredCurrency[i] == 390 || iece->RequiredCurrency[i] == 392 || iece->RequiredCurrency[i] == 395 || iece->RequiredCurrency[i] == 396)
+                    CurrencyPrecision = 0.01f;
+                else
+                    CurrencyPrecision = 1.0f;
+                ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] * count * CurrencyPrecision)));
+            }
         }
     }
 
