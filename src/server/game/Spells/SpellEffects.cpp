@@ -446,10 +446,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = uint32(1+ m_caster->getLevel() * 2);
                         break;
                     }
-                    // Tympanic Tantrum
-                    case 62775:
+                    case 56578: // Rapid-Fire Harpoon
+                    case 62775: // Tympanic Tantrum
                     {
-                        damage = unitTarget->CountPctFromMaxHealth(10);
+                        damage = unitTarget->CountPctFromMaxHealth(damage);
                         break;
                     }
                     // Gargoyle Strike
