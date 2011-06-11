@@ -2763,7 +2763,7 @@ float Unit::GetUnitBlockChance() const
     }
 }
 
-float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVictim) const
+float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVictim, SpellEntry const *spell) const
 {
     float crit;
 
@@ -2807,6 +2807,19 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         // Glyph of barkskin
         if (pVictim->HasAura(63057) && pVictim->HasAura(22812))
             crit -= 25.0f;
+    }
+
+    if (spell)
+    {
+        const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
+        if (!pAuraList.empty())
+        {
+            for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
+            {
+                if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->SpellFamilyFlags)
+                    crit += (*itr)->GetBaseAmount();
+            }
+        }
     }
 
     // Apply crit chance from defence skill
@@ -7555,7 +7568,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Wandering Plague
             if (dummySpell->SpellIconID == 1614)
             {
-                if (!roll_chance_f(GetUnitCriticalChance(BASE_ATTACK, pVictim)))
+                if (!roll_chance_f(GetUnitCriticalChance(BASE_ATTACK, pVictim, dummySpell)))
                     return false;
                 basepoints0 = triggerAmount * damage / 100;
                 triggered_spell_id = 50526;
@@ -10940,6 +10953,19 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                 crit_chance = (float)m_baseSpellCritChance;
                 crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
+            // Calculate increased critical strike chance for specific spells by relevant auras
+            if (spellProto)
+            {
+                const Unit::AuraEffectList& pAuraList = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
+                if (!pAuraList.empty())
+                {
+                    for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
+                    {
+                        if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spellProto->SpellFamilyFlags)
+                            crit_chance += (*itr)->GetBaseAmount();
+                    }
+                }
+            }
             // taken
             if (pVictim)
             {
@@ -11069,7 +11095,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         {
             if (pVictim)
             {
-                crit_chance += GetUnitCriticalChance(attackType, pVictim);
+                crit_chance += GetUnitCriticalChance(attackType, pVictim, spellProto);
                 crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
             break;
