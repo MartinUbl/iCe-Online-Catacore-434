@@ -798,6 +798,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->HasAura(57627))           // Charge 6 sec post-affect
                         damage *= 2;
                 }
+                //Kill Command
+                else if (m_spellInfo->Id == 83381)
+                {
+                    damage += ceil(0.35f*float(m_caster->GetOwner()->ToPlayer()->GetTotalAttackPowerValue(RANGED_ATTACK)));
+                }
                 break;
             }
             case SPELLFAMILY_SHAMAN:
