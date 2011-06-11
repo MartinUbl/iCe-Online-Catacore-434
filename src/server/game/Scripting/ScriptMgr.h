@@ -720,6 +720,9 @@ class PlayerScript : public ScriptObject
 
         // Called when a player is binded to an instance
         virtual void OnBindToInstance(Player* /*player*/, Difficulty /*difficulty*/, uint32 /*mapid*/, bool /*permanent*/) { }
+
+        // Called when an aura is applied to player
+        virtual void OnAura(Player* /*player*/, SpellEntry const* /*spellProto*/) { }
 };
 
 class GuildScript : public ScriptObject

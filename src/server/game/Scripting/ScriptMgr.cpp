@@ -1216,6 +1216,11 @@ void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, ui
     FOREACH_SCRIPT(PlayerScript)->OnBindToInstance(player, difficulty, mapid, permanent);
 }
 
+void ScriptMgr::OnPlayerAura(Player* player, SpellEntry const *spellProto)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnAura(player, spellProto);
+}
+
 // Guild
 void ScriptMgr::OnGuildAddMember(Guild *guild, Player *player, uint8& plRank)
 {
