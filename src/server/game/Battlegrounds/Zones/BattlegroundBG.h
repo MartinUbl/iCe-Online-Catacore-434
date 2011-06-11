@@ -25,6 +25,15 @@
 
 class Battleground;
 
+// x, y, z, o, rot0, rot1, rot2, rot3
+const float BG_BG_DoorPositions[2][8] = {
+    {918.876f, 1336.56f, 27.6195f, 2.77481f, 0.0f, 0.0f, 0.983231f, 0.182367f},
+    {1396.15f, 977.014f, 7.43169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f}
+};
+
+// WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
+const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1735, 1736, 1738, 1739, 1740};
+
 class BattlegroundBGScore : public BattlegroundScore
 {
     public:
