@@ -6827,6 +6827,36 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
     if (m_spellInfo->Id == 100)
         m_caster->CastSpell(target, 96273, true);
 
+    // Juggernaut - share cooldown of Charge and Intercept
+    if (m_caster->HasAura(64976))
+    {
+        if (m_spellInfo->Id == 100)
+        {
+            const SpellEntry* pSpell = sSpellStore.LookupEntry(20252);
+            m_caster->ToPlayer()->AddSpellAndCategoryCooldowns(pSpell,0);
+            //m_caster->ToPlayer()->SendCooldownEvent(pSpell);
+            //Since SendCooldownEvent doesn't do what we want, we must send cooldown manually
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+            data << uint64(m_caster->GetGUID());
+            data << uint8(1);
+            data << uint32(20252);
+            data << uint32(15000); // 15 seconds cooldown (as Charge)
+            m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+        }
+        else if (m_spellInfo->Id == 20252)
+        {
+            const SpellEntry* pSpell = sSpellStore.LookupEntry(100);
+            m_caster->ToPlayer()->AddSpellAndCategoryCooldowns(pSpell,0);
+            //And again - manually send cooldown
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+            data << uint64(m_caster->GetGUID());
+            data << uint8(1);
+            data << uint32(100);
+            data << uint32(0);    // 0 means full spell cooldown
+            m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+        }
+    }
+
     // not all charge effects used in negative spells
     if (!IsPositiveSpell(m_spellInfo->Id) && m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->Attack(target, true);
