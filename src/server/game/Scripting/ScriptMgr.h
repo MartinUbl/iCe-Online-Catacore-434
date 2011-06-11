@@ -960,6 +960,7 @@ class ScriptMgr
         void OnPlayerCreate(Player* player);
         void OnPlayerDelete(uint64 guid);
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
+        void OnPlayerAura(Player* player, SpellEntry const* spellProto);
 
     public: /* GuildScript */
         void OnGuildAddMember(Guild *guild, Player *player, uint8& plRank);
