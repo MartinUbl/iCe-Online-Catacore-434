@@ -20726,10 +20726,17 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             }
         }
 
+        float CurrencyPrecision = 1.0f;
+
         // currency price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / PLAYER_CURRENCY_PRECISION))
+            // Honor, Conquest, Valor and Justice points exception - divide by 100
+            if (iece->RequiredCurrency[i] == 390 || iece->RequiredCurrency[i] == 392 || iece->RequiredCurrency[i] == 395 || iece->RequiredCurrency[i] == 396)
+                CurrencyPrecision = 0.01f;
+            else
+                CurrencyPrecision = 1.0f;
+            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], ceil(float(iece->RequiredCurrencyCount[i]) * CurrencyPrecision)))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
