@@ -1476,12 +1476,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     break;
                 }
-                case 82731: // Flame Orb
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
-                    break;
-                }
             }
             break;
         }

@@ -22,6 +22,7 @@
 
 #include "gamePCH.h"
 #include "MagePlayer.h"
+#include "ScriptMgr.h"
 
 class player_mage_scripts : public PlayerScript
 {

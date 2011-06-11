@@ -12280,7 +12280,7 @@ bool Unit::canAttack(Unit const* target, bool force) const
         if (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))
             return false;
 
-    if (!canSeeOrDetect(target))
+    if (!canSeeOrDetect(target,true))
         return false;
 
     return true;

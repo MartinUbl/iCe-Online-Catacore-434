@@ -32,7 +32,7 @@ const float BG_BG_DoorPositions[2][8] = {
 };
 
 // WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
-const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1735, 1736, 1738, 1739, 1740};
+//const uint32 BG_BG_GraveyardIds[5] = {1735, 1736, 1738, 1739, 1740};
 
 class BattlegroundBGScore : public BattlegroundScore
 {
