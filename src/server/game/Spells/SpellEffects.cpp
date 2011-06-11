@@ -910,12 +910,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     // selection by spell entry for dummy buffs
     switch(m_spellInfo->Id)
     {
-        case 21562:         // Power Word: Fortitude
-        case 1126:          // Mark of the Wild
         case 1459:          // Arcane Brillance
         case 61316:         // Dalaran Brillance
-        case 20217:         // Blessing of Kings
-        case 19740:         // Blessing of Might
             m_caster->CastSpell(unitTarget,m_spellInfo->EffectBasePoints[effIndex],true);
             break;
     }
@@ -1617,12 +1613,38 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, damage, true);
                 return;
             }
-            // Skull Bash
-            if (m_spellInfo->Id == 80964 || m_spellInfo->Id == 80965)
+
+            switch(m_spellInfo->Id)
             {
-                // Trigger spell for charge and for interrupt spellcast
-                m_caster->CastSpell(unitTarget, 93983, true);
-                m_caster->CastSpell(unitTarget, 93985, true);
+                case 80964: // Skull Bash (bear)
+                case 80965: // Skull Bash (cat)
+                {
+                    // Trigger spell for charge and for interrupt spellcast
+                    m_caster->CastSpell(unitTarget, 93983, true);
+                    m_caster->CastSpell(unitTarget, 93985, true);
+                    break;
+                }
+                case 1126: // Mark of the Wild
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        bool Continue = false;
+                        uint32 player = 0;
+                        for(std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+                        {
+                            ++player;
+                            if (Continue == false && player > 1)
+                                Continue = true;
+                        }
+                        if (Continue == true)
+                            m_caster->CastSpell(unitTarget, 79061, true); // Mark of the Wild (Raid)
+                        else
+                            m_caster->CastSpell(unitTarget, 79060, true); // Mark of the Wild (Caster)
+                    }
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:
@@ -1666,6 +1688,48 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                     // now let next effect cast spell at each target.
                     return;
+                }
+                case 19740: // Blessing of Might
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        bool Continue = false;
+                        uint32 player = 0;
+                        for(std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+                        {
+                            ++player;
+                            if (Continue == false && player > 1)
+                                Continue = true;
+                        }
+                        if (Continue == true)
+                            m_caster->CastSpell(unitTarget, 79102, true); // Blessing of Might (Raid)
+                        else
+                            m_caster->CastSpell(unitTarget, 79101, true); // Blessing of Might (Caster)
+                    }
+                    break;
+                }
+                case 20217: // Blessing of Kings
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        bool Continue = false;
+                        uint32 player = 0;
+                        for(std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+                        {
+                            ++player;
+                            if (Continue == false && player > 1)
+                                Continue = true;
+                        }
+                        if (Continue == true)
+                            m_caster->CastSpell(unitTarget, 79063, true); // Blessing of Kings (Raid)
+                        else
+                            m_caster->CastSpell(unitTarget, 79062, true); // Blessing of Kings (Caster)
+                    }
+                    break;
                 }
             }
             break;
@@ -1739,6 +1803,27 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->CastSpell(pTarget, 65081, true); // Increase speed of the target by 60%
 
                 return;
+            }
+            if (m_spellInfo->Id == 21562) // Power Word : Fortitude
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    std::list<Unit*> PartyMembers;
+                    m_caster->GetPartyMembers(PartyMembers);
+                    bool Continue = false;
+                    uint32 player = 0;
+                    for(std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
+                    {
+                        ++player;
+                        if (Continue == false && player > 1)
+                            Continue = true;
+                    }
+                    if (Continue == true)
+                        m_caster->CastSpell(unitTarget, 79105, true); // Power Word : Fortitude (Raid)
+                    else
+                        m_caster->CastSpell(unitTarget, 79104, true); // Power Word : Fortitude (Caster)
+                }
+                break;
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
