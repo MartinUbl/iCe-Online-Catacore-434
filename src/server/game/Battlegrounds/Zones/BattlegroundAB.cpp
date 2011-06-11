@@ -637,12 +637,9 @@ void BattlegroundAB::EndBattleground(uint32 winner)
 {
     //win reward
     if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+        RewardHonorToTeam(20, ALLIANCE);
     if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-    //complete map_end rewards (even if no team wins)
-    RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-    RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+        RewardHonorToTeam(20, HORDE);
 
     Battleground::EndBattleground(winner);
 }

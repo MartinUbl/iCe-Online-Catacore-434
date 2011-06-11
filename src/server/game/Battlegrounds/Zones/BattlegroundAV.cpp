@@ -442,38 +442,10 @@ void BattlegroundAV::AddPlayer(Player *plr)
 
 void BattlegroundAV::EndBattleground(uint32 winner)
 {
-    //calculate bonuskills for both teams:
-    //first towers:
-    uint8 kills[2]={0,0}; //0=ally 1=horde
-    uint8 rep[2]={0,0}; //0=ally 1=horde
-    for (BG_AV_Nodes i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_FROSTWOLF_WTOWER; ++i)
-    {
-            if (m_Nodes[i].State == POINT_CONTROLED)
-            {
-                if (m_Nodes[i].Owner == ALLIANCE)
-                {
-                    rep[0]   += BG_AV_REP_SURVIVING_TOWER;
-                    kills[0] += BG_AV_KILL_SURVIVING_TOWER;
-                }
-                else
-                {
-                    rep[0]   += BG_AV_KILL_SURVIVING_TOWER;
-                    kills[1] += BG_AV_KILL_SURVIVING_TOWER;
-                }
-            }
-    }
-
     for (int i=0; i <= 1; i++) //0=ally 1=horde
     {
-        if (m_CaptainAlive[i])
-        {
-            kills[i] += BG_AV_KILL_SURVIVING_CAPTAIN;
-            rep[i]   += BG_AV_REP_SURVIVING_CAPTAIN;
-        }
-        if (rep[i] != 0)
-            RewardReputationToTeam((i == 0)?730:729,rep[i],(i == 0)?ALLIANCE:HORDE);
-        if (kills[i] != 0)
-            RewardHonorToTeam(GetBonusHonor(kills[i]),(i == 0)?ALLIANCE:HORDE);
+        RewardReputationToTeam((i == 0)?730:729,20,(i == 0)?ALLIANCE:HORDE);
+        RewardHonorToTeam(GetBonusHonor(3),(i == 0)?ALLIANCE:HORDE);
     }
 
     //TODO add enterevademode for all attacking creatures
