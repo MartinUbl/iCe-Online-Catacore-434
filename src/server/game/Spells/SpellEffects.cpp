@@ -1783,6 +1783,101 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 return;
             }
+            // Unleash Elements
+            else if (m_spellInfo->Id == 73680 && m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                Player* pPlayer = m_caster->ToPlayer();
+                if (!pPlayer || !unitTarget)
+                    return;
+
+                Item* mainhanditem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_MAINHAND);
+                Item* offhanditem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_OFFHAND);
+                if (!mainhanditem && !offhanditem)
+                    return;
+
+                if (mainhanditem)
+                {
+                    bool done = false;
+                    for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
+                        if (uint32 enchant_id = mainhanditem->GetEnchantmentId(EnchantmentSlot(enchant_slot)))
+                            if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id))
+                            {
+                                switch (enchant_id)
+                                {
+                                case 3021: //Rockbiter
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73684,true);
+                                    done = true;
+                                    break;
+                                case 5:    //Flametongue
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73683,true);
+                                    done = true;
+                                    break;
+                                case 283:  //Windfury
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73681,true);
+                                    done = true;
+                                    break;
+                                case 3345: //Earthliving
+                                    if (unitTarget->IsFriendlyTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73685,true);
+                                    done = true;
+                                    break;
+                                case 2:    //Frostbrand
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73682,true);
+                                    done = true;
+                                    break;
+                                default:
+                                    break;
+                                }
+                                if (done)
+                                    break;
+                            }
+                }
+                if (offhanditem)
+                {
+                    bool done = false;
+                    for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
+                        if (uint32 enchant_id = offhanditem->GetEnchantmentId(EnchantmentSlot(enchant_slot)))
+                            if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id))
+                            {
+                                switch (enchant_id)
+                                {
+                                case 3021: //Rockbiter
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73684,true);
+                                    done = true;
+                                    break;
+                                case 5:    //Flametongue
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73683,true);
+                                    done = true;
+                                    break;
+                                case 283:  //Windfury
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73681,true);
+                                    done = true;
+                                    break;
+                                case 3345: //Earthliving
+                                    if (unitTarget->IsFriendlyTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73685,true);
+                                    done = true;
+                                    break;
+                                case 2:    //Frostbrand
+                                    if (unitTarget->IsHostileTo(m_caster))
+                                        m_caster->CastSpell(unitTarget,73682,true);
+                                    done = true;
+                                    break;
+                                default:
+                                    break;
+                                }
+                                if (done)
+                                    break;
+                            }
+                }
+            }
             break;
         case SPELLFAMILY_PRIEST:
             // Leap of Faith
@@ -4105,58 +4200,6 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
 
     Player* p_caster = (Player*)m_caster;
 
-    // Rockbiter Weapon apply to both weapon
-    if (!itemTarget)
-    return;
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x400000)
-    {
-        uint32 spell_id = 0;
-
-        // enchanting spell selected by calculated damage-per-sec stored in Effect[1] base value
-        // Note: damage calculated (correctly) with rounding int32(float(v)) but
-        // RW enchantments applied damage int32(float(v)+0.5), this create  0..1 difference sometime
-        switch(damage)
-        {
-            // Rank 1
-            case  2: spell_id = 36744; break;               //  0% [ 7% == 2, 14% == 2, 20% == 2]
-            // Rank 2
-            case  4: spell_id = 36753; break;               //  0% [ 7% == 4, 14% == 4]
-            case  5: spell_id = 36751; break;               // 20%
-            // Rank 3
-            case  6: spell_id = 36754; break;               //  0% [ 7% == 6, 14% == 6]
-            case  7: spell_id = 36755; break;               // 20%
-            // Rank 4
-            case  9: spell_id = 36761; break;               //  0% [ 7% == 6]
-            case 10: spell_id = 36758; break;               // 14%
-            case 11: spell_id = 36760; break;               // 20%
-            default:
-                sLog->outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW",damage);
-                return;
-        }
-
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
-        if (!spellInfo)
-        {
-            sLog->outError("Spell::EffectEnchantItemTmp: unknown spell id %i", spell_id);
-            return;
-
-        }
-
-        for (int j = BASE_ATTACK; j <= OFF_ATTACK; ++j)
-        {
-            if (Item* item = p_caster->GetWeaponForAttack(WeaponAttackType(j)))
-            {
-                if (item->IsFitToSpellRequirements(m_spellInfo))
-                {
-                    Spell *spell = new Spell(m_caster, spellInfo, true);
-                    SpellCastTargets targets;
-                    targets.setItemTarget(item);
-                    spell->prepare(&targets);
-                }
-            }
-        }
-        return;
-    }
     if (!itemTarget)
         return;
 
