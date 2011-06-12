@@ -571,6 +571,25 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     damage = uint32 (10 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.437*100/100);  
                 }
+                // Thunder Clap and talent Blood and Thunder
+                else if (m_spellInfo->Id == 6343)
+                {
+                    if ((m_caster->HasAura(84614) && roll_chance_i(50)) || m_caster->HasAura(84615))
+                    {
+                        if (unitTarget->HasAura(94009) && m_caster->ToPlayer())
+                        {
+                            // Go through attackers and if its in range, cast rend
+                            const Unit::AttackerSet &refList = m_caster->ToPlayer()->getAttackers();
+                            if (refList.empty())
+                                break;
+                            for (Unit::AttackerSet::const_iterator itr = refList.begin(); itr != refList.end(); ++itr)
+                            {
+                                if ((*itr)->IsWithinDistInMap(m_caster,6.5f))
+                                    m_caster->CastSpell((*itr),94009,true);
+                            }
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -779,6 +798,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
                             damage += combo*40;
+
+                        // Serrated Blades
+                        if ((m_caster->HasAura(14171) && roll_chance_i(10*combo)) ||
+                            (m_caster->HasAura(14172) && roll_chance_i(20*combo)) )
+                        {
+                            if (Aura* pAura = unitTarget->GetAura(1943))
+                                pAura->RefreshDuration();
+                        }
                     }
                 }
                 break;
