@@ -3781,8 +3781,16 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
 
                     uint32 amount = damage > 0 ? damage : 1;
-                    if (m_spellInfo->Id == 18662) // Curse of Doom
+                    if (m_spellInfo->Id == 18662) // Curse of Doom, Wild Mushroom
                         amount = 1;
+
+                    // Wild Mushroom
+                    if (m_spellInfo->Id == 88747)
+                    {
+                        //Summon only one instead of three (3 is maximum at one time, not at one spell cast)
+                        amount = 1;
+                        //TODO: limit maximum count to 3
+                    }
 
                     for (uint32 count = 0; count < amount; ++count)
                     {

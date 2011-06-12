@@ -3930,6 +3930,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
+        case 779: //Swipe
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CONE_ENEMY;
+            break;
         case 52479: // Gift of the Harvester
             spellInfo->MaxAffectedTargets = 1;
             // a trap always has dst = src?
