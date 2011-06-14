@@ -1272,7 +1272,7 @@ enum Opcodes
     SMSG_CAMERA_SHAKE                                = 0x1000F,
     SMSG_UPDATE_ITEM_ENCHANTMENTS                    = 0x020E8, // 4.0.6a 13623
     SMSG_REDIRECT_CLIENT                             = 0x0201B, // 4.0.6a 13623
-    CMSG_REDIRECTION_FAILED                          = 0x00509, //
+    CMSG_REDIRECTION_FAILED                          = 0x10007, //
     SMSG_UNKNOWN_1295                                = 0x10008, //
     CMSG_UNKNOWN_1296                                = 0x10009, //
     SMSG_FORCE_SEND_QUEUED_PACKETS                   = 0x06EC8, // 4.0.6a 13623
