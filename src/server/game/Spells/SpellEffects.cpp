@@ -3137,15 +3137,51 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
     {
         if (item_id)
         {
-            if (!player->HasItemCount(item_id, 1))
+            if (!player->HasItemCount(item_id, damage))
                 return;
 
             // remove reagent
-            uint32 count = 1;
+            uint32 count = damage;
             player->DestroyItemCount(item_id, count, true);
 
-            // create some random items
-            player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
+            uint16 lootMode = LOOT_MODE_DEFAULT;
+
+            // Special scripts
+            switch(m_spellInfo->Id)
+            {
+            // Transmute: Living Elements
+            case 78866:
+                {
+                    // Zone dependent loot
+                    switch(m_caster->GetZoneId())
+                    {
+                    case 616:
+                        lootMode = LOOT_MODE_HARD_MODE_1; // Hyjal - Fire only
+                        break;
+                    case 5146:
+                        lootMode = LOOT_MODE_HARD_MODE_2; // Vashj'ir - Water only
+                        break;
+                    case 5042:
+                        lootMode = LOOT_MODE_HARD_MODE_3; // Deepholme - Earth only
+                        break;
+                    case 5034:
+                        lootMode = LOOT_MODE_HARD_MODE_4; // Uldum - Air only
+                        break;
+                    default: // all four 25% drop
+                        break;
+                    }
+                    break;
+                }
+            default:
+                break;
+            }
+
+            int i = 0;
+            for(i = 0; i < damage; i++) // for each "placeholder" item created
+            {
+                // create some random items
+                player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell, false, lootMode);
+            }
         }
         else
             player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);    // create some random items
