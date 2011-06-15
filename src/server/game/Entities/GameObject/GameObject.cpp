@@ -300,6 +300,11 @@ void GameObject::Update(uint32 diff)
                             udata.BuildPacket(&packet);
                             caster->ToPlayer()->GetSession()->SendPacket(&packet);
 
+                            // Improvize the animation since CustomAnim doesn't work
+                            Creature* pVisual = SummonTrigger(GetPositionX(),GetPositionY(),GetPositionZ(),0.0f,2000);
+                            if (pVisual)
+                                pVisual->CastSpell(pVisual, 69657, true);
+
                             SendCustomAnim(GetGoAnimProgress());
                         }
 
