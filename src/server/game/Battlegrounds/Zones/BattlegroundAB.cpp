@@ -635,12 +635,6 @@ void BattlegroundAB::Reset()
 
 void BattlegroundAB::EndBattleground(uint32 winner)
 {
-    //win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(20, ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(20, HORDE);
-
     Battleground::EndBattleground(winner);
 }
 

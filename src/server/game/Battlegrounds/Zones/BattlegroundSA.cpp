@@ -877,16 +877,6 @@ void BattlegroundSA::ToggleTimer()
 
 void BattlegroundSA::EndBattleground(uint32 winner)
 {
-    //honor reward for winning
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-    else if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-
-    //complete map_end rewards (even if no team wins)
-    RewardHonorToTeam(GetBonusHonorFromKill(2), ALLIANCE);
-    RewardHonorToTeam(GetBonusHonorFromKill(2), HORDE);
-
     Battleground::EndBattleground(winner);
 }
 

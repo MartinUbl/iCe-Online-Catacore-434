@@ -443,10 +443,7 @@ void BattlegroundAV::AddPlayer(Player *plr)
 void BattlegroundAV::EndBattleground(uint32 winner)
 {
     for (int i=0; i <= 1; i++) //0=ally 1=horde
-    {
         RewardReputationToTeam((i == 0)?730:729,20,(i == 0)?ALLIANCE:HORDE);
-        RewardHonorToTeam(GetBonusHonor(3),(i == 0)?ALLIANCE:HORDE);
-    }
 
     //TODO add enterevademode for all attacking creatures
     Battleground::EndBattleground(winner);

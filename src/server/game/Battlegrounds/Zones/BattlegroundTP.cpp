@@ -651,11 +651,7 @@ void BattlegroundTP::Reset()
 
 void BattlegroundTP::EndBattleground(uint32 winner)
 {
-    //win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(140, ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(140, HORDE);
+    //no win reward since 4.x.x
 
     Battleground::EndBattleground(winner);
 }

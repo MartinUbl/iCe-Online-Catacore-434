@@ -747,11 +747,7 @@ void BattlegroundWS::Reset()
 
 void BattlegroundWS::EndBattleground(uint32 winner)
 {
-    //win reward - 140 honor points as in 4.x.x
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(140, ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(140, HORDE);
+    //there's no win reward sice 4.x.x
 
     Battleground::EndBattleground(winner);
 }
