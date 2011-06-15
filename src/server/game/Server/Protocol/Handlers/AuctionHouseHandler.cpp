@@ -237,7 +237,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = sObjectMgr->GenerateAuctionID();
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
-        AH->auctioneer = 23442;
+        AH->auctioneer = 258134;
     else
         AH->auctioneer = GUID_LOPART(auctioneer);
     AH->item_guidlow = GUID_LOPART(item);

@@ -404,24 +404,6 @@ void AuctionHouseMgr::LoadAuctions()
         aItem->startbid = fields[9].GetUInt32();
         aItem->deposit = fields[10].GetUInt32();
 
-        CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(aItem->auctioneer);
-        if (!auctioneerData)
-        {
-            aItem->DeleteFromDB(trans);
-            sLog->outError("Auction %u has not a existing auctioneer (GUID : %u)", aItem->Id, aItem->auctioneer);
-            delete aItem;
-            continue;
-        }
-
-        CreatureInfo const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
-        if (!auctioneerInfo)
-        {
-            aItem->DeleteFromDB(trans);
-            sLog->outError("Auction %u has not a existing auctioneer (GUID : %u Entry: %u)", aItem->Id, aItem->auctioneer,auctioneerData->id);
-            delete aItem;
-            continue;
-        }
-
         aItem = new AuctionEntry();
         if (!aItem->LoadFromDB(fields))
         {
@@ -795,13 +777,13 @@ bool AuctionEntry::LoadFromDB(Field* fields)
     deposit = fields[10].GetUInt32();
 
     CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(auctioneer);
-    if (!auctioneerData)
+    if (!auctioneerData && auctioneer != 258134)
     {
         sLog->outError("Auction %u has not a existing auctioneer (GUID : %u)", Id, auctioneer);
         return false;
     }
 
-    CreatureInfo const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
+    CreatureInfo const* auctioneerInfo = sObjectMgr->GetCreatureTemplate((auctioneer == 258134)?8661:auctioneerData->id);
     if (!auctioneerInfo)
     {
         sLog->outError("Auction %u has not a existing auctioneer (GUID : %u Entry: %u)", Id, auctioneer, auctioneerData->id);
