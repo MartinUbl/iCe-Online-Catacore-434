@@ -4011,10 +4011,11 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
     Unit *target = aurApp->GetTarget();
     uint32 spellId = (uint32)GetAmount();
     Player *plr = target->ToPlayer();
-    if(plr && spellId < 2)
-    {
-        return;
-    }
+
+    // Hack for Spectral Gryphon used when dead
+    if (GetSpellProto()->Id == 55164)
+        spellId = 86459;
+
     if (apply)
     {
         uint32 creatureEntry = GetMiscValue();
@@ -4062,13 +4063,13 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
 
         target->Mount(display_id, vehicleId, GetMiscValue());
 
-        if(plr)
+        if(plr && spellId)
             plr->CastSpell(plr, spellId, true);
     }
     else
     {
         target->Unmount();
-        if(plr)
+        if(plr && spellId)
             plr->RemoveAurasDueToSpell(spellId);
         //some mounts like Headless Horseman's Mount or broom stick are skill based spell
         // need to remove ALL arura related to mounts, this will stop client crash with broom stick
