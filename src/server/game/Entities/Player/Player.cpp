@@ -11050,14 +11050,13 @@ void Player::ModifyCurrency(uint32 id, int32 count)
     if (newWeekCount < 0)
         newWeekCount = 0;
 
-    if (currency->TotalCap && int32(currency->TotalCap) < newTotalCount)
+    if (currency->TotalCap && int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION) < newTotalCount)
     {
-        int32 delta = newTotalCount - int32(currency->TotalCap);
-        newTotalCount = int32(currency->TotalCap);
+        int32 delta = newTotalCount - int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
+        newTotalCount = int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
         newWeekCount -= delta;
     }
 
-    // TODO: fix conquest points
     uint32 weekCap = _GetCurrencyWeekCap(currency);
     if (weekCap && int32(weekCap) < newTotalCount)
     {
