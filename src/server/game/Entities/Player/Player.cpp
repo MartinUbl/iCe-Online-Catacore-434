@@ -20127,14 +20127,6 @@ void Player::HandleStealthedUnitsDetection()
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= NULL*/, uint32 spellid /*= 0*/)
 {
-    //DK lokace
-    if (GetMapId() != 609)
-    {
-        GetSession()->SendNotification("Byla vyhlasena stavka dopravcu! Je nam lito, dokud nam nezvednou platy, nikam vas neodvezeme.");
-        GetSession()->SendNotification("Unfortunately, local transporters joined Czech transport companies and they are striking for higher pays.");
-        return false;
-    }
-
     if (nodes.size() < 2)
         return false;
 
