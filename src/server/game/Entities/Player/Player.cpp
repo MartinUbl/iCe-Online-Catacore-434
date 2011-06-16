@@ -19417,7 +19417,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
 
     if(mode == PET_SLOT_ACTUAL_PET_SLOT)
         mode = m_currentPetSlot;
-        
+
     if (!pet || pet->GetOwnerGUID() != GetGUID())
         return;
 
@@ -19429,7 +19429,7 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
     pet->CombatStop();
 
     switch(pet->GetEntry())
-        {
+    {
         //warlock pets except imp are removed(?) when logging out
         case 1860:
         case 1863:
@@ -19442,7 +19442,10 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
     // only if current pet in slot
     pet->SavePetToDB(mode);
 
-    SetMinion(pet, false, PET_SLOT_UNK_SLOT);
+    if(pet->getPetType() != HUNTER_PET)
+        SetMinion(pet, false, PET_SLOT_UNK_SLOT);
+    else
+        SetMinion(pet, false, PET_SLOT_ACTUAL_PET_SLOT);
 
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
@@ -19456,6 +19459,11 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
         if (GetGroup())
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
+}
+
+void Player::SendTooManyPets(Player *pl)
+{
+    ChatHandler(pl).PSendSysMessage(LANG_FAILED_NO_PLACE_FOR_PET);
 }
 
 void Player::StopCastingCharm()

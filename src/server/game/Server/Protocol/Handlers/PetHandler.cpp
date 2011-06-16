@@ -684,7 +684,7 @@ void WorldSession::HandlePetAbandon(WorldPacket & recv_data)
                 pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
             }
 
-            _player->RemovePet((Pet*)pet,PET_SLOT_DELETED);
+            _player->RemovePet((Pet*)pet,PET_SLOT_ABANDON);
         }
         else if (pet->GetGUID() == _player->GetCharmGUID())
             _player->StopCastingCharm();
