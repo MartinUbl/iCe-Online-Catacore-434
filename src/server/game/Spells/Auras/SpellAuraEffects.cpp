@@ -4012,10 +4012,6 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
     uint32 spellId = (uint32)GetAmount();
     Player *plr = target->ToPlayer();
 
-    // Hack for Spectral Gryphon used when dead
-    if (GetSpellProto()->Id == 55164)
-        spellId = 86459;
-
     if (apply)
     {
         uint32 creatureEntry = GetMiscValue();
