@@ -502,6 +502,13 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
             else                                            // no items required
                 _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
         }
+
+        Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+        if (!pObject || !pObject->hasInvolvedQuest(quest))
+            return;
+
+        if (pObject->GetTypeId() == TYPEID_UNIT)
+            sScriptMgr->OnQuestComplete(_player, (pObject->ToCreature()), pQuest);
     }
 }
 
