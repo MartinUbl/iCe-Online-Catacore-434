@@ -1498,6 +1498,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
                 if (GetId() == 25771 && target->HasAura(61988) && !target->HasAura(61987))
                     target->RemoveAura(61988);
+                // Guardian of Ancient Kings - Retribution
+                else if (GetId() == 86698)
+                {
+                    target->RemoveAurasDueToSpell(86701);
+                    if(Aura* pAura = target->GetAura(86700)) // Ancient Power
+                    {
+                        target->CastSpell(target, 86704, true); // Ancient Fury
+                        target->RemoveAurasDueToSpell(86700);
+                    }
+                }
+                // Guardian of Ancient Kings (Ancient Healer)
+                else if (GetId() == 86674)
+                {
+                    target->RemoveAurasDueToSpell(86669);
+                }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Blood of the North

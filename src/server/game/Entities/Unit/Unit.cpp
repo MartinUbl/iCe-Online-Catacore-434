@@ -6903,6 +6903,67 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     target = pVictim;
                     break;
                 }
+                // Guardian of Ancient Kings (Ancient Crusader)
+                case 86701:
+                {
+                    if (this == pVictim)
+                        return false;
+
+                    if (procFlag & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS))
+                    {
+                        if(Aura* aura = GetAura(86700))
+                        {
+                            aura->RefreshDuration();
+                            uint8 charges = aura->GetCharges();
+                            if(charges < 20)
+                            {
+                                if(charges < 1)
+                                    ++charges;
+                                aura->SetCharges(++charges);
+                            }
+                        }
+                        else CastSpell(this, 86700, true);
+                    }
+                    return false;
+                    break;
+                }
+                // Guardian of Ancient Kings (Ancient Healer)
+                case 86674:
+                {
+                    if(!ToPlayer())
+                        return false;
+
+                    bool unsummon = false;
+                    if(Aura* aura = GetAura(86674))
+                    {
+                        uint8 charges = aura->GetCharges();
+                        if (--charges)
+                            aura->SetCharges(charges);
+                        else
+                        {
+                            RemoveAurasDueToSpell(86674);
+                            unsummon = true;
+                        }
+                    }
+                    std::list<Unit*> minionList;
+                    ToPlayer()->GetAllMinionsByEntry(minionList, 46499);
+                    if (!minionList.empty())
+                    {
+                        for(std::list<Unit*>::const_iterator itr = minionList.begin(); itr != minionList.end(); ++itr)
+                        {
+                            if(Unit* guardian = *itr)
+                            {
+                                int32 bp0 = damage;         // Heal the same target for the same amount
+                                int32 bp1 = damage / 10;    // Heal nearby targets by 10%
+                                guardian->CastCustomSpell(pVictim, 86678, &bp0, &bp1, NULL, true); // Light of the Ancient Kings
+                                if(unsummon)
+                                    guardian->ToTempSummon()->UnSummon();
+                            }
+                        }
+                    }
+                    return false;
+                    break;
+                }
                 case 71545: // Tiny Abomination in a Jar (Heroic)
                 {
                     if (!pVictim || !pVictim->isAlive())

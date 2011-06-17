@@ -3887,6 +3887,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 71904:                             // Chaos Bane
         case 70492: case 72505:                 // Ooze Eruption
         case 72624: case 72625:                 // Ooze Eruption
+        case 86704:                             // Paladin: Guardian of Ancient Kings: Ancient Fury
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;

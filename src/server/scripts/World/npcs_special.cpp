@@ -2818,6 +2818,156 @@ public:
     };
 };
 
+class guardian_of_ancient_kings_holy : public CreatureScript
+{
+public:
+    guardian_of_ancient_kings_holy() : CreatureScript("guardian_of_ancient_kings_holy") { }
+
+    struct guardian_of_ancient_kings_holyAI: public ScriptedAI
+    {
+        guardian_of_ancient_kings_holyAI(Creature* c) : ScriptedAI(c) { }
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+
+            if (me->isSummon())
+            {
+                if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
+                {
+                    pOwner->CastSpell(pOwner, 86674, true);
+
+                    if (Aura* aura = pOwner->GetAura(86674)) // Init Ancient Healer charges to 5
+                        aura->SetCharges(5);
+                }
+            }
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new guardian_of_ancient_kings_holyAI(creature);
+    }
+};
+
+class guardian_of_ancient_kings_prot : public CreatureScript
+{
+public:
+    guardian_of_ancient_kings_prot() : CreatureScript("guardian_of_ancient_kings_prot") { }
+
+    struct guardian_of_ancient_kings_protAI: public ScriptedAI
+    {
+        guardian_of_ancient_kings_protAI(Creature* c) : ScriptedAI(c)
+        {
+            init = false;
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        bool init;
+        Unit* pOwner;
+        uint32 update_timer;
+
+        void Reset()
+        {
+            if(init)
+            {
+                if (me->isSummon())
+                    if (pOwner = CAST_SUM(me)->GetSummoner())
+                    {
+                        me->CastSpell(pOwner, 86657, true);
+                        me->SetFacingToObject(pOwner);
+                    }
+            }
+            else init = true;
+            update_timer = 1000;
+        }
+        void MoveInLineOfSight(Unit *) {}
+        void AttackStart(Unit *) {}
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(update_timer < diff)
+            {
+                if(pOwner)
+                    me->SetFacingToObject(pOwner);
+                update_timer = 1000;
+            } else update_timer -= diff;
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new guardian_of_ancient_kings_protAI(creature);
+    }
+};
+
+class guardian_of_ancient_kings_ret : public CreatureScript
+{
+public:
+    guardian_of_ancient_kings_ret() : CreatureScript("guardian_of_ancient_kings_ret") { }
+
+    struct guardian_of_ancient_kings_retAI: public ScriptedAI
+    {
+        guardian_of_ancient_kings_retAI(Creature* c) : ScriptedAI(c) { }
+
+        Unit* pOwner;
+
+        void Reset()
+        {
+            if (me->isSummon())
+                pOwner = CAST_SUM(me)->GetSummoner();
+
+            if(pOwner)
+                pOwner->CastSpell(pOwner, 86701, true);
+
+            me->CastSpell(me, 86703, true);
+        }
+
+        void UpdateAI(const uint32 /*diff*/)
+        {
+            if(UpdateVictim())
+            {
+                if (me->isAttackReady())
+                {
+                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    {
+                        me->AttackerStateUpdate(me->getVictim());
+                        me->resetAttackTimer();
+
+                        if(pOwner) // Add charge of Ancient Power to the Owner on dealing damage
+                        {
+                            if(Aura* aura = pOwner->GetAura(86700))
+                            {
+                                aura->RefreshDuration();
+                                uint8 charges = aura->GetCharges();
+                                if(charges < 20)
+                                {
+                                    if(charges < 1)
+                                        ++charges;
+                                    aura->SetCharges(++charges);
+                                }
+                            }
+                            else pOwner->CastSpell(pOwner, 86700, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        void JusdtDied(Unit* /*pKiller*/)
+        {
+            if(pOwner) // End the buff duration and unleash Ancient Power on guardian's death
+                pOwner->RemoveAurasDueToSpell(86698);
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new guardian_of_ancient_kings_retAI(creature);
+    }
+};
+
 class npc_thrall_maelstrom : public CreatureScript
 {
 public:
@@ -3216,6 +3366,9 @@ void AddSC_npcs_special()
     new npc_tabard_vendor;
     new npc_experience;
     new npc_outdoor_deathwing_flight;
+    new guardian_of_ancient_kings_holy;
+    new guardian_of_ancient_kings_prot;
+    new guardian_of_ancient_kings_ret;
     new npc_thrall_maelstrom;
     new quest_trigger;
     new npc_ring_of_frost;

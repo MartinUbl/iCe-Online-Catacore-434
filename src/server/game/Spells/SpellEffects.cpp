@@ -491,6 +491,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    // Paladin: Guardian of Ancient Kings: Ancient Fury
+                    case 86704:
+                    {
+                        if(Aura* pAura = m_caster->GetAura(86700))
+                        {
+                            uint8 charges = pAura->GetCharges();
+                            damage *= charges; // multiply damage by number of charges of Ancient Power
+                        }
+                        break;
+                    }
                     // Bane of Havoc damage proc spell
                     case 85455:
                         // Don't allow to modify damage with spellpower and so on
@@ -1720,6 +1730,24 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
 
                     // now let next effect cast spell at each target.
+                    return;
+                }
+                // Guardian of Ancient Kings
+                case 86150:
+                {
+                    switch(m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()))
+                    {
+                    case 831: // holy
+                        m_caster->CastSpell(m_caster, 86669, true);
+                        break;
+                    case 839: // protection
+                        m_caster->CastSpell(m_caster, 86659, true);
+                        break;
+                    case 855: // retribution
+                        m_caster->CastSpell(m_caster, 86698, true);
+                        break;
+                    default: break;
+                    }
                     return;
                 }
                 case 19740: // Blessing of Might
