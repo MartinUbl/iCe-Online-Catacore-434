@@ -4284,6 +4284,16 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_SPELL_ATTACK;
             count++;
             break;
+        // Spells creating Dreamcloth
+        case 75141:
+        case 75142:
+        case 94743:
+        case 75144:
+        case 75145:
+        case 75146:
+            spellInfo->SpellCooldownsId = 1439; // 7 days CD
+            count++;
+            break;
         case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
         case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
         case 19972: // Entangling Roots (Rank 4) -- Nature's Grasp Proc
