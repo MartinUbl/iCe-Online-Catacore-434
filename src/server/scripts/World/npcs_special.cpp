@@ -2973,10 +2973,10 @@ class npc_tail_receipe_giver : public CreatureScript
 public:
     npc_tail_receipe_giver() : CreatureScript("npc_tail_receipe_giver") { }
     
-    bool OnQuestComplete(Player* pPlayer, Creature* /*pCreature*/, const Quest* pQuest)
+    bool OnQuestReward(Player* pPlayer, Creature* /*pCreature*/, const Quest* pQuest, uint32 /*rew*/)
     {
         if(!pQuest || !pPlayer)
-            return false;
+            return true;
 
         switch(pQuest->GetQuestId())
         {
@@ -3027,7 +3027,7 @@ public:
             break;
         default: break;
         }
-        return true;
+        return false;
     }
 };
 
