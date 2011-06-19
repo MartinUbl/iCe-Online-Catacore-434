@@ -8678,6 +8678,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Blessed Life
+        case 31828:
+        case 31829:
+        {
+            // Check for player origin and for spell cooldown
+            if(!ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+                return false;
+
+            // Add internal cooldown (8 seconds hardcoded value)
+            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+8);
+            break;
+        }
         // Bonus Healing (Crystal Spire of Karabor mace)
         case 40971:
         {
