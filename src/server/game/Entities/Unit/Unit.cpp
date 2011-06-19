@@ -8631,14 +8631,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     return false;
                 break;
             }
-        // Improved Hamstring
-        case 12289:
-        case 12668:
-            {
-                if (!pVictim->HasAura(1715))
-                    return false;
-                break;
-            }
         // Brambles
         case 50419:
         {
@@ -8688,6 +8680,22 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
             // Add internal cooldown (8 seconds hardcoded value)
             ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+8);
+            break;
+        }
+        // Improved Hamstring
+        case 12289:
+        case 12668:
+        {
+            // Check for player origin and for spell cooldown
+            if(!ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+                return false;
+
+            // Add internal cooldown
+            // Rank 1 - 60 seconds, Rank 2 - 30 seconds
+            if (auraSpellInfo->Id == 12289)
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+60);
+            else
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+30);
             break;
         }
         // Bonus Healing (Crystal Spire of Karabor mace)
