@@ -4294,14 +4294,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->SpellCooldownsId = 1439; // 7 days CD
             count++;
             break;
-        case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
-        case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
-        case 19972: // Entangling Roots (Rank 4) -- Nature's Grasp Proc
-        case 19973: // Entangling Roots (Rank 3) -- Nature's Grasp Proc
-        case 19974: // Entangling Roots (Rank 2) -- Nature's Grasp Proc
-        case 19975: // Entangling Roots (Rank 1) -- Nature's Grasp Proc
-        case 27010: // Entangling Roots (Rank 7) -- Nature's Grasp Proc
-        case 53313: // Entangling Roots (Rank 8) -- Nature's Grasp Proc
+        case 19975: // Entangling Roots -- Nature's Grasp Proc
             spellInfo->CastingTimeIndex = 1;
             count++;
             break;
