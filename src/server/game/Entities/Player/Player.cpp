@@ -5822,7 +5822,8 @@ void Player::UpdateRating(CombatRating cr)
         case CR_WEAPON_SKILL_OFFHAND:
         case CR_WEAPON_SKILL_RANGED:
             break;
-        case CR_MASTERY:                                    // Not implemented
+        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
+            UpdateMastery();
             break;
         case CR_EXPERTISE:
             if (affectStats)
@@ -7761,6 +7762,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
             case ITEM_MOD_SPELL_PENETRATION:
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -val, apply);
                 m_spellPenetrationItemMod += apply ? val : -val;
+                break;
+            case ITEM_MOD_MASTERY_RATING:
+                ApplyRatingMod(CR_MASTERY, int32(val), apply);
                 break;
             // deprecated item mods
             case ITEM_MOD_SPELL_HEALING_DONE:
@@ -25361,6 +25365,15 @@ float Player::GetAverageItemLevel()
     }
 
     return ((float)sum) / count;
+}
+
+bool Player::HasMastery()
+{
+    // Spell aura 318 is typical for Mastery auras
+    if (HasAuraType(SPELL_AURA_318))
+        return true;
+    else
+        return false;
 }
 
 void Player::SetInGuild(uint32 GuildId)
