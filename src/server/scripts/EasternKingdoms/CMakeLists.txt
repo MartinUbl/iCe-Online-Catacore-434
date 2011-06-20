@@ -105,6 +105,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_rend_blackhand.cpp
   EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_highlord_omokk.cpp
   EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_the_beast.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockSpire/blackrock_spire.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockSpire/instance_blackrock_spire.cpp
   EasternKingdoms/SunwellPlateau/boss_eredar_twins.cpp
   EasternKingdoms/SunwellPlateau/boss_kiljaeden.cpp
   EasternKingdoms/SunwellPlateau/sunwell_plateau.h
