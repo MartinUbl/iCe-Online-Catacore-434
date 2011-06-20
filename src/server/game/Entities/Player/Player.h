@@ -824,8 +824,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADBANNED               = 29,
     PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS    = 30,
     PLAYER_LOGIN_QUERY_LOADPETSLOT              = 31,
-	PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
-	MAX_PLAYER_LOGIN_QUERY                      = 36
+    PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
+    MAX_PLAYER_LOGIN_QUERY                      = 36
 };
 
 enum PlayerDelayedOperations
@@ -886,6 +886,45 @@ enum CurrencyItems
 {
     ITEM_HONOR_POINTS_ID    = 43308,
     ITEM_ARENA_POINTS_ID    = 43307
+};
+
+enum BranchSpec
+{
+    SPEC_NONE                 = 0,
+    SPEC_DK_BLOOD             = 398,
+    SPEC_DK_FROST             = 399,
+    SPEC_DK_UNHOLY            = 400,
+    SPEC_DRUID_BALANCE        = 752,
+    SPEC_DRUID_FERAL          = 750,
+    SPEC_DRUID_RESTORATION    = 748,
+    SPEC_HUNTER_BEASTMASTERY  = 811,
+    SPEC_HUNTER_MARKSMANSHIP  = 807,
+    SPEC_HUNTER_SURVIVAL      = 809,
+    SPEC_MAGE_ARCANE          = 799,
+    SPEC_MAGE_FIRE            = 851,
+    SPEC_MAGE_FROST           = 823,
+    SPEC_PALADIN_HOLY         = 831,
+    SPEC_PALADIN_PROTECTION   = 839,
+    SPEC_PALADIN_RETRIBUTION  = 855,
+    SPEC_PRIEST_DISCIPLINE    = 760,
+    SPEC_PRIEST_HOLY          = 813,
+    SPEC_PRIEST_SHADOW        = 795,
+    SPEC_ROGUE_ASSASSINATION  = 182,
+    SPEC_ROGUE_COMBAT         = 181,
+    SPEC_ROGUE_SUBTLETY       = 183,
+    SPEC_SHAMAN_ELEMENTAL     = 261,
+    SPEC_SHAMAN_ENHANCEMENT   = 263,
+    SPEC_SHAMAN_RESTORATION   = 262,
+    SPEC_WARLOCK_AFFLICTION   = 871,
+    SPEC_WARLOCK_DEMONOLOGY   = 867,
+    SPEC_WARLOCK_DESTRUCTION  = 865,
+    SPEC_WARRIOR_ARMS         = 746,
+    SPEC_WARRIOR_FURY         = 815,
+    SPEC_WARRIOR_PROTECTION   = 845,
+
+    SPEC_PET_TENACITY         = 409,
+    SPEC_PET_FEROCITY         = 410,
+    SPEC_PET_CUNNING          = 411,
 };
 
 class PlayerTaxi
@@ -1626,7 +1665,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasTalent(uint32 spell_id, uint8 spec) const;
 
         void SetTalentBranchSpec(uint32 branchSpec, uint8 spec) { m_branchSpec[spec] = branchSpec; }
-        uint32 GetTalentBranchSpec(uint8 spec) const { return m_branchSpec[spec]; }
+        uint32 GetTalentBranchSpec(BranchSpec spec) const { return BranchSpec(m_branchSpec[spec]); }
     
         uint32 CalculateTalentsPoints() const;
 
@@ -2569,7 +2608,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadGlyphs(PreparedQueryResult result);
         void _LoadTalents(PreparedQueryResult result);
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
-		void _LoadCurrency(PreparedQueryResult result);
+        void _LoadCurrency(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2589,7 +2628,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveGlyphs(SQLTransaction& trans);
         void _SaveTalents(SQLTransaction& trans);
         void _SaveTalentBranchSpecs(SQLTransaction& trans);
-		void _SaveCurrency();
+        void _SaveCurrency();
         void _SaveStats(SQLTransaction& trans);
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
