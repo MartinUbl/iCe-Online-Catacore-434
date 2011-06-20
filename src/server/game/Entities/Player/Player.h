@@ -1665,8 +1665,8 @@ class Player : public Unit, public GridObject<Player>
         bool HasTalent(uint32 spell_id, uint8 spec) const;
 
         void SetTalentBranchSpec(uint32 branchSpec, uint8 spec) { m_branchSpec[spec] = branchSpec; }
-        uint32 GetTalentBranchSpec(BranchSpec spec) const { return BranchSpec(m_branchSpec[spec]); }
-    
+        BranchSpec GetTalentBranchSpec(uint8 spec) const { return BranchSpec(m_branchSpec[spec]); }
+
         uint32 CalculateTalentsPoints() const;
 
         // Dual Spec

@@ -51,7 +51,6 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     if(spec != ((uint32)-1))
     {
         uint32 specID = 0;
-        uint32 masterySpells[2] = {0,0};
         for(uint32 i = 0; i < sTalentTabStore.GetNumRows(); i++)
         {
             TalentTabEntry const * entry = sTalentTabStore.LookupEntry(i);
@@ -60,8 +59,6 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
                 if(entry->ClassMask == _player->getClassMask() && entry->tabpage == spec)
                 {
                     specID = entry->TalentTabID;
-                    masterySpells[0] = entry->masterySpells[0];
-                    masterySpells[1] = entry->masterySpells[1];
                     break;
                 }
             }
@@ -82,16 +79,20 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 
                 _player->learnSpell(talentInfo->SpellID, false);
             }
-            // Learn dummy Mastery spells
-            // ----- Disabled for now -----
-            //for (int i = 0; i < 2; i ++)
-            //    if (masterySpells[i])
-            //        _player->learnSpell(masterySpells[i], false);
+
+            // Learn dummy mastery spells (mostly for displaying in client)
+            TalentTabEntry const* tabEntry = sTalentTabStore.LookupEntry(specID);
+            if (tabEntry)
+            {
+                for (uint8 i = 0; i < 2; i++)
+                    if (tabEntry->masterySpells[i])
+                        _player->learnSpell(tabEntry->masterySpells[i],false);
+            }
         }
         else if(_player->GetTalentBranchSpec(_player->m_activeSpec) != specID) //cheat
             return;
     }
-    
+
     uint32 talentId, talentRank;
 
     for (uint32 i = 0; i < talentsCount; ++i)
@@ -100,7 +101,6 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 
         _player->LearnTalent(talentId, talentRank, false);
     }
-    
 
     bool inOtherBranch = false;
     uint32 pointInBranchSpec = 0;
@@ -142,7 +142,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     }
     if(inOtherBranch && pointInBranchSpec < 31)
         _player->resetTalents();
-    
+
     _player->SendTalentsInfoData(false);
 }
 

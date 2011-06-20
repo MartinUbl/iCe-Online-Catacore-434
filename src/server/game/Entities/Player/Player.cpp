@@ -4234,11 +4234,20 @@ bool Player::resetTalents(bool no_cost)
     for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
-        
+
         if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(m_activeSpec))
             continue;
-        
+
         removeSpell(talentInfo->SpellID, true);
+
+        // Unlearn dummy mastery spells
+        TalentTabEntry const* tabEntry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(m_activeSpec));
+        if (tabEntry)
+        {
+            for (uint8 i = 0; i < 2; i++)
+                if (tabEntry->masterySpells[i])
+                    removeSpell(tabEntry->masterySpells[i], false);
+        }
     }
     
     m_branchSpec[m_activeSpec] = 0;
@@ -25022,11 +25031,20 @@ void Player::ActivateSpec(uint8 spec)
     for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
-        
+
         if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(m_activeSpec))
             continue;
-        
+
         removeSpell(talentInfo->SpellID, true);
+
+        // Unlearn dummy mastery spells
+        TalentTabEntry const* tabEntry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(m_activeSpec));
+        if (tabEntry)
+        {
+            for (uint8 i = 0; i < 2; i++)
+                if (tabEntry->masterySpells[i])
+                    removeSpell(tabEntry->masterySpells[i], false);
+        }
     }
 
     // set glyphs
@@ -25073,13 +25091,21 @@ void Player::ActivateSpec(uint8 spec)
     for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
-        
+
         if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(spec))
             continue;
-        
+
         learnSpell(talentInfo->SpellID, false);
+        // Learn dummy mastery spells
+        TalentTabEntry const* tabEntry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(spec));
+        if (tabEntry)
+        {
+            for (uint8 i = 0; i < 2; i++)
+                if (tabEntry->masterySpells[i])
+                    learnSpell(tabEntry->masterySpells[i], false);
+        }
     }
-    
+
     // set glyphs
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
@@ -25370,7 +25396,7 @@ float Player::GetAverageItemLevel()
 bool Player::HasMastery()
 {
     // Spell aura 318 is typical for Mastery auras
-    if (HasAuraType(SPELL_AURA_318))
+    if (HasAuraType(SPELL_AURA_MOD_MASTERY))
         return true;
     else
         return false;
