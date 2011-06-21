@@ -4249,9 +4249,9 @@ bool Player::resetTalents(bool no_cost)
                     removeSpell(tabEntry->masterySpells[i], false);
         }
     }
-    
+
     m_branchSpec[m_activeSpec] = 0;
-    
+
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _SaveTalents(trans);
     _SaveTalentBranchSpecs(trans);
