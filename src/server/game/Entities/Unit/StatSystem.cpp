@@ -939,7 +939,7 @@ void Player::UpdateMastery()
                                 case SPEC_HUNTER_MARKSMANSHIP: // NYI
                                 case SPEC_HUNTER_BEASTMASTERY: // NYI
                                 case SPEC_DRUID_RESTORATION:   // NYI
-                                case SPEC_DK_BLOOD:            // NYI
+                                case SPEC_DK_BLOOD:
                                     modifier = 0.0f;
                                     // These specs are handled externally
                                     // Generally these masteries are used as proc chance or direct damage increase

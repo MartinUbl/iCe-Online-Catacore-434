@@ -2020,6 +2020,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
                         bp = int32(bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);
                     m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
+
+                    // Implementation of Blood Shield mastery profficiency
+                    if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DK_BLOOD &&
+                        m_caster->ToPlayer()->HasAura(48263))
+                    {
+                        // 6.25% of amount healed per mastery point, so mastery*6.25 percent
+                        int32 bp0 = bp*(m_caster->ToPlayer()->GetMasteryPoints()*6.25f);
+                        m_caster->CastCustomSpell(m_caster,77535,&bp0,0,0,true);
+                    }
                     return;
                 }
                 break;
