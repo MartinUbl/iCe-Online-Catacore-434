@@ -527,6 +527,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                 }
 
+                // Implementation of Frostburn mage mastery proficiency
+                if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                    m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST &&
+                    damage > 1)
+                {
+                    if (unitTarget && unitTarget->isFrozen())
+                        damage = damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
+                }
+
                 // Cone of Cold
                 if (m_spellInfo->Id == 120)
                 {
