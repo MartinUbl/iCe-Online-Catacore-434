@@ -1779,6 +1779,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     bonus += 0.15f;
                 damage = int32 (damage * bonus);
             }
+            // Priests mastery Echo of Light, increase health by every mastery point by 1.25%
+            else if (m_spellProto->Id == 77489)
+            {
+                if (caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+                    caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY)
+                    damage = damage*(1.0f+(caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f));
+            }
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)

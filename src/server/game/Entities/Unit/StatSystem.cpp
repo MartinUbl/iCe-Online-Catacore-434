@@ -931,7 +931,7 @@ void Player::UpdateMastery()
                                 case SPEC_SHAMAN_ELEMENTAL:
                                 case SPEC_ROGUE_COMBAT:        // NYI
                                 case SPEC_PRIEST_SHADOW:       // NYI
-                                case SPEC_PRIEST_HOLY:         // NYI
+                                case SPEC_PRIEST_HOLY:
                                 case SPEC_PRIEST_DISCIPLINE:   // NYI
                                 case SPEC_PALADIN_HOLY:        // NYI
                                 case SPEC_MAGE_FROST:          // NYI

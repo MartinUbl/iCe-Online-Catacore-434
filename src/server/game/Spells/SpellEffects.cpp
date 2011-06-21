@@ -2827,6 +2827,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
         int32 addhealth = damage;
 
+        // Implementation of Echo of Light mastery profficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY &&
+            addhealth > 1)
+        {
+            // Echo of Light HoT effect, amount of health healed by this spell is handled in periodic tick
+            m_caster->CastSpell(unitTarget, 77489, true);
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
