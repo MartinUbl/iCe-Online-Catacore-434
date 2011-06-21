@@ -860,6 +860,10 @@ void Player::UpdateMastery()
         SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]);
         SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
 
+        // Disable mastery for non-GMs since it's not ready
+        if (GetSession()->GetSecurity() <= SEC_PLAYER)
+            return;
+
         // Update aura base points
         TalentTabEntry const * entry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(m_activeSpec));
         if(entry)
