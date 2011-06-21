@@ -865,6 +865,30 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+
+                // Implementation of Elemental Overload mastery profficiency
+                if ((m_spellInfo->Id == 403 || m_spellInfo->Id == 51505 || m_spellInfo->Id == 421) &&
+                    m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                    m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_ELEMENTAL)
+                {
+                    if (roll_chance_f(m_caster->ToPlayer()->GetMasteryPoints()*2.0f))
+                    {
+                        switch (m_spellInfo->Id)
+                        {
+                            case 403:   // Lightning Bolt
+                                m_caster->CastSpell(unitTarget,45284,true);
+                                break;
+                            case 51505: // Lava Burst
+                                m_caster->CastSpell(unitTarget,77451,true);
+                                break;
+                            case 421:   // Chain Lightning
+                                m_caster->CastSpell(unitTarget,45297,true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
             case SPELLFAMILY_PALADIN:
             {
