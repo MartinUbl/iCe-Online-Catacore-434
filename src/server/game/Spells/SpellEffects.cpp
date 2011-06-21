@@ -946,7 +946,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
         m_damage += damage;
     }
-    
+
     // Some special cases after damage recount
     switch (m_spellInfo->Id)
     {
@@ -963,6 +963,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (pOrbs->GetStackAmount() > 0)
                 {
                     m_damage = float(m_damage)*(1+pOrbs->GetStackAmount()*0.1f);
+
+                    // Implementation of Shadow Orbs Power mastery proficiency
+                    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
+                        m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&
+                        m_damage > 1)
+                    {
+                        m_damage = m_damage*(1.0f+(m_caster->ToPlayer()->GetMasteryPoints()*1.4f/100.0f));
+                    }
+
                     m_caster->RemoveAurasDueToSpell(77487);
                     // Empowered Shadows buff for increased DoT damage
                     m_caster->CastSpell(m_caster, 95799, true);
