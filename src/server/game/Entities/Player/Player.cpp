@@ -7274,7 +7274,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Prohibited area teleport - for closed zones
     if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
     {
-        switch (newZone)
+        /*switch (newZone)
         {
             case 5095: // Tol Barad
             case 5389: // Tol Barad Peninsula
@@ -7285,7 +7285,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 break;
             default:
                 break;
-        }
+        }*/
     }
 
     // zone changed, so area changed as well, update it
