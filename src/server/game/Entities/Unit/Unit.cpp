@@ -1469,6 +1469,24 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
 
+    // Implementation of "extra attacks" mastery proficiencies
+    if (ToPlayer() && ToPlayer()->HasMastery() && damageInfo->damage > 1)
+    {
+        // Implementation of Main Gauche rogue combat mastery proficiency
+        if (damageInfo->attackType == BASE_ATTACK && ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_COMBAT)
+        {
+            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.0f))
+                CastSpell(pVictim, 86392, true);
+        }
+
+        // Implementation of Strikes of Opportunity warrior arms mastery proficiency
+        if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
+        {
+            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
+                CastSpell(pVictim, 76858, true);
+        }
+    }
+
     // Do effect if any damage done to target
     if (damageInfo->damage)
     {

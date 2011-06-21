@@ -925,11 +925,11 @@ void Player::UpdateMastery()
                                 case SPEC_DK_FROST:
                                     modifier = 2.0f;
                                     break;
-                                case SPEC_WARRIOR_ARMS:        // NYI
+                                case SPEC_WARRIOR_ARMS:
                                 case SPEC_WARLOCK_DEMONOLOGY:  // NYI
                                 case SPEC_SHAMAN_RESTORATION:  // NYI
                                 case SPEC_SHAMAN_ELEMENTAL:
-                                case SPEC_ROGUE_COMBAT:        // NYI
+                                case SPEC_ROGUE_COMBAT:
                                 case SPEC_PRIEST_SHADOW:
                                 case SPEC_PRIEST_HOLY:
                                 case SPEC_PRIEST_DISCIPLINE:   // NYI
