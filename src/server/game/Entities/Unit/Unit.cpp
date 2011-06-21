@@ -1485,6 +1485,13 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
             if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
                 CastSpell(pVictim, 76858, true);
         }
+
+        // Implementation of Wild Quiver hunter marksmanship mastery proficiency
+        if (damageInfo->attackType == RANGED_ATTACK && ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_HUNTER_MARKSMANSHIP)
+        {
+            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*1.8f))
+                CastSpell(pVictim, 76663, true);
+        }
     }
 
     // Do effect if any damage done to target
