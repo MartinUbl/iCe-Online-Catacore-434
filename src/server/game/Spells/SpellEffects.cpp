@@ -2707,8 +2707,8 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget,1776,true);
                 return;
             }
+            break;
         }
-        break;
         case SPELLFAMILY_DRUID:
         {
             // Shooting Stars - reset cooldown of Starsurge
@@ -2716,6 +2716,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             {
                 m_caster->ToPlayer()->RemoveSpellCooldown(78674, true);
             }
+            break;
         }
         case SPELLFAMILY_PRIEST:
         {
@@ -2728,8 +2729,16 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 else if (m_caster->HasAura(89489)) // rank #2
                     m_caster->CastSpell(m_caster, 96267, true);
             }
+            // Implementation of Priests discipline mastery proficiency
+            if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_DISCIPLINE)
+            {
+                if (m_spellAura->GetSpellProto()->Effect[effIndex] == SPELL_AURA_SCHOOL_ABSORB)
+                    if (m_spellAura->GetEffect(effIndex))
+                        m_spellAura->GetEffect(effIndex)->ChangeAmount(m_spellAura->GetEffect(effIndex)->GetAmount()+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
+            }
+            break;
         }
-        break;
     }
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);

@@ -857,8 +857,11 @@ void Player::UpdateMastery()
 {
     if (HasMastery())
     {
-        SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]);
-        SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
+        // Base value for all levels
+        float BaseMastery = 8.0f;
+
+        SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]+BaseMastery);
+        SetFloatValue(PLAYER_MASTERY, GetMasteryPoints()+BaseMastery);
 
         // Disable mastery for non-GMs since it's not ready
         if (GetSession()->GetSecurity() <= SEC_PLAYER)
@@ -936,7 +939,7 @@ void Player::UpdateMastery()
                                 case SPEC_ROGUE_COMBAT:
                                 case SPEC_PRIEST_SHADOW:
                                 case SPEC_PRIEST_HOLY:
-                                case SPEC_PRIEST_DISCIPLINE:   // NYI
+                                case SPEC_PRIEST_DISCIPLINE:
                                 case SPEC_PALADIN_HOLY:
                                 case SPEC_MAGE_FROST:
                                 case SPEC_MAGE_ARCANE:
@@ -960,6 +963,11 @@ void Player::UpdateMastery()
                 }
             }
         }
+    }
+    else
+    {
+        SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, 0);
+        SetFloatValue(PLAYER_MASTERY, 0);
     }
 }
 
