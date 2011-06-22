@@ -273,7 +273,7 @@ void WorldSession::HandleGMSurveySubmit(WorldPacket& recv_data)
 
 void WorldSession::HandleReportLag(WorldPacket& recv_data)
 {
-    // just put the lag report into the database...
+    // just put the lag report into console...
     // can't think of anything else to do with it
     uint32 lagType, mapId;
     float x, y, z;
@@ -283,17 +283,7 @@ void WorldSession::HandleReportLag(WorldPacket& recv_data)
     recv_data >> y;
     recv_data >> z;
 
-    // build and execute query
-    std::ostringstream os;
-    os << "INSERT INTO lag_reports (player, lag_type, map, posX, posY, posZ) VALUES (";
-    os << GetPlayer()->GetGUID() << ", ";
-    os << lagType << ", ";
-    os << mapId << ", ";
-    os << x << ", ";
-    os << y << ", ";
-    os << z << ");";
-
-    CharacterDatabase.Execute(os.str().c_str());
+    sLog->outError("Lag report: GUID %u, lagType %u, mapId %u, x: %f, y: %f, z: %f",GetPlayer()->GetGUIDLow(),lagType,mapId,x,y,z);
 }
 
 void WorldSession::HandleGMResponseResolve(WorldPacket& /*recvPacket*/)
