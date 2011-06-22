@@ -930,7 +930,7 @@ void Player::UpdateMastery()
                                     modifier = 2.0f;
                                     break;
                                 case SPEC_WARRIOR_ARMS:
-                                case SPEC_WARLOCK_DEMONOLOGY:  // NYI
+                                case SPEC_WARLOCK_DEMONOLOGY:
                                 case SPEC_SHAMAN_RESTORATION:  // NYI
                                 case SPEC_SHAMAN_ELEMENTAL:
                                 case SPEC_ROGUE_COMBAT:
@@ -941,7 +941,7 @@ void Player::UpdateMastery()
                                 case SPEC_MAGE_FROST:
                                 case SPEC_MAGE_ARCANE:         // NYI
                                 case SPEC_HUNTER_MARKSMANSHIP:
-                                case SPEC_HUNTER_BEASTMASTERY: // NYI
+                                case SPEC_HUNTER_BEASTMASTERY:
                                 case SPEC_DRUID_RESTORATION:   // NYI
                                 case SPEC_DK_BLOOD:
                                     modifier = 0.0f;
@@ -1510,6 +1510,29 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
                 mindamage = mindamage * 0.75f;
                 maxdamage = maxdamage * 0.75f;
                 break;
+        }
+    }
+
+    // Implementation of Beast Mastery hunter mastery proficiency
+    if (isHunterPet() && m_owner && m_owner->ToPlayer())
+    {
+        Player* pOwner = m_owner->ToPlayer();
+        if (pOwner && pOwner->HasMastery() &&
+            pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_HUNTER_BEASTMASTERY)
+        {
+            mindamage = mindamage * (pOwner->GetMasteryPoints()*1.7f/100.0f);
+            maxdamage = maxdamage * (pOwner->GetMasteryPoints()*1.7f/100.0f);
+        }
+    }
+    // Implementation of Demonology warlock mastery proficiency
+    if (HasUnitTypeMask(UNIT_MASK_MINION) && m_owner && m_owner->ToPlayer())
+    {
+        Player* pOwner = m_owner->ToPlayer();
+        if (pOwner && pOwner->HasMastery() &&
+            pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+        {
+            mindamage = mindamage * (pOwner->GetMasteryPoints()*2.0f/100.0f);
+            maxdamage = maxdamage * (pOwner->GetMasteryPoints()*2.0f/100.0f);
         }
     }
 
