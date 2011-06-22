@@ -1,109 +1,161 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006-2011 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
-/*
-UPDATE instance_template SET script='instance_the_stonecore' WHERE map=725;
-*/
+#define MAX_ENCOUNTER     4
 
-class instance_the_stonecore: public InstanceMapScript
+class instance_the_stonecore : public InstanceMapScript
 {
 public:
-    instance_the_stonecore(): InstanceMapScript("instance_the_stonecore", 725) { }
+    instance_the_stonecore() : InstanceMapScript("instance_the_stonecore", 725) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
-        return new instance_the_stonecore_InstanceMapScript(pMap);
+        return new instance_the_stonecore_InstanceMapScript(map);
     }
 
     struct instance_the_stonecore_InstanceMapScript : public InstanceScript
     {
-        instance_the_stonecore_InstanceMapScript(Map* pMap): InstanceScript(pMap)
-        {
-            Initialize();
-        }
+        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map) {};
 
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string str_data;
+        uint64 uiCorborus;
+        uint64 uiSlabhide;
+        uint64 uiOzruk;
+        uint64 uiHighPriestessAzil;
+        uint32 uiTeamInInstance;
+        uint32 uiEncounter[MAX_ENCOUNTER];
 
         void Initialize()
         {
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                 uiEncounter[i] = NOT_STARTED;
+ 
+             uiCorborus = 0;
+             uiSlabhide = 0;
+             uiOzruk = 0;
+             uiHighPriestessAzil = 0;
+
         }
 
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
-            return false;
-        }
-
-        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
-        {
+                if (uiEncounter[i] == IN_PROGRESS)
+                    return true;
+ 
+             return false;
         }
 
         void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {
+            Map::PlayerList const &players = instance->GetPlayers();
+
+            if (!players.isEmpty())
+            {
+                if (Player* pPlayer = players.begin()->getSource())
+                    uiTeamInInstance = pPlayer->GetTeam();
+            }
+
+            switch(pCreature->GetEntry())
+            {
+                case BOSS_CORBORUS:
+                    uiCorborus = pCreature->GetGUID();
+                    break;
+                case BOSS_SLABHIDE:
+                    uiSlabhide = pCreature->GetGUID();
+                    break;
+                case BOSS_OZRUK:
+                    uiOzruk = pCreature->GetGUID();
+                    break;
+                case BOSS_HIGH_PRIESTESS_AZIL:
+                    uiHighPriestessAzil = pCreature->GetGUID();
+                    break;
+            }
         }
 
         uint64 GetData64(uint32 identifier)
         {
+            switch(identifier)
+            {
+                case DATA_CORBORUS:                    return uiCorborus;
+                case DATA_SLABHIDE:                    return uiSlabhide;
+                case DATA_OZRUK:                    return uiOzruk;
+                case DATA_HIGH_PRIESTESS_AZIL:        return uiHighPriestessAzil;
+            }
+
             return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
-            switch (type)
+            switch(type)
             {
-                case TYPE_CORBORUS:
-                case TYPE_SLABHIDE:
-                case TYPE_OZRUK:
-                case TYPE_AZIL:
-                    m_auiEncounter[type] = data;
+                case DATA_CORBORUS_EVENT:
+                    uiEncounter[0] = data;
                     break;
-                default:
+                case DATA_SLABHIDE_EVENT:
+                    uiEncounter[1] = data;
+                    break;
+                case DATA_OZRUK_EVENT:
+                    uiEncounter[2] = data;
+                    break;
+                case DATA_HIGH_PRIESTESS_AZIL_EVENT:
+                    uiEncounter[3] = data;
                     break;
             }
 
             if (data == DONE)
-            {
-                OUT_SAVE_INST_DATA;
-
-                std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
-
-                str_data = saveStream.str();
-
-                SaveToDB();
-                OUT_SAVE_INST_DATA_COMPLETE;
-            }
+               SaveToDB();
         }
 
         uint32 GetData(uint32 type)
         {
+            switch(type)
+            {
+                case DATA_CORBORUS_EVENT:                return uiEncounter[0];
+                case DATA_SLABHIDE_EVENT:                return uiEncounter[1];
+                case DATA_OZRUK_EVENT:                    return uiEncounter[2];
+                case DATA_HIGH_PRIESTESS_AZIL_EVENT:    return uiEncounter[3];
+            }
+
             return 0;
         }
 
         std::string GetSaveData()
         {
+            OUT_SAVE_INST_DATA;
+
+            std::string str_data;
+
+            std::ostringstream saveStream;
+            saveStream << "P S " << uiEncounter[0] << " " << uiEncounter[1]  << " " << uiEncounter[2]  << " " << uiEncounter[3];
+
+            str_data = saveStream.str();
+
+            OUT_SAVE_INST_DATA_COMPLETE;
             return str_data;
         }
 
@@ -116,16 +168,34 @@ public:
             }
 
             OUT_LOAD_INST_DATA(in);
+
+            char dataHead1, dataHead2;
+            uint16 data0, data1, data2, data3;
+
             std::istringstream loadStream(in);
-            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as IN_PROGRESS - reset it instead.
-                    m_auiEncounter[i] = NOT_STARTED;
+            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3;
+
+            if (dataHead1 == 'P' && dataHead2 == 'S')
+            {
+                uiEncounter[0] = data0;
+                uiEncounter[1] = data1;
+                uiEncounter[2] = data2;
+                uiEncounter[3] = data3;
+
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    if (uiEncounter[i] == IN_PROGRESS)
+                        uiEncounter[i] = NOT_STARTED;
+
+            } 
+            else OUT_LOAD_INST_DATA_FAIL;
+
             OUT_LOAD_INST_DATA_COMPLETE;
         }
     };
 };
 
+
 void AddSC_instance_the_stonecore()
 {
+    new instance_the_stonecore();
 }

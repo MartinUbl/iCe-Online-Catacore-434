@@ -25,7 +25,6 @@ enum UsedThings
     NPC_CRYSTAL_SHARD      = 49267,
     SPELL_DAMPENING_WAVE   = 82415,
     SPELL_DAMPENING_WAVE_H = 92650,
-    NPC_ROCK_BORER         = 43917,
     SPELL_ROCK_BORE        = 80028,
     SPELL_ROCK_BORE_H      = 92630,
 };
