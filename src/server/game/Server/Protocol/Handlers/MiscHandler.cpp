@@ -730,16 +730,11 @@ void WorldSession::HandleBugOpcode(WorldPacket & recv_data)
     recv_data >> typelen >> type;
 
     if (suggestion == 0)
-        sLog->outDebug("WORLD: Received CMSG_BUG [Bug Report]");
+        sLog->outError("WORLD: Received CMSG_BUG [Bug Report]");
     else
-        sLog->outDebug("WORLD: Received CMSG_BUG [Suggestion]");
+        sLog->outError("WORLD: Received CMSG_BUG [Suggestion]");
 
-    sLog->outDebug("%s", type.c_str());
-    sLog->outDebug("%s", content.c_str());
-
-    CharacterDatabase.escape_string(type);
-    CharacterDatabase.escape_string(content);
-    CharacterDatabase.PExecute ("INSERT INTO bugreport (type,content) VALUES('%s', '%s')", type.c_str(), content.c_str());
+    sLog->outError("%s, %s", type.c_str(), content.c_str());
 }
 
 void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket &recv_data)
