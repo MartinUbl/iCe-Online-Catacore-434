@@ -113,7 +113,7 @@ class boss_anraphet : public CreatureScript
                    return;
                 events.Update(uiDiff);
 
-                while(eventId == events.ExecuteEvent())
+                while(eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
                     {
