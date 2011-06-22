@@ -939,7 +939,7 @@ void Player::UpdateMastery()
                                 case SPEC_PRIEST_DISCIPLINE:   // NYI
                                 case SPEC_PALADIN_HOLY:
                                 case SPEC_MAGE_FROST:
-                                case SPEC_MAGE_ARCANE:         // NYI
+                                case SPEC_MAGE_ARCANE:
                                 case SPEC_HUNTER_MARKSMANSHIP:
                                 case SPEC_HUNTER_BEASTMASTERY:
                                 case SPEC_DRUID_RESTORATION:   // NYI
