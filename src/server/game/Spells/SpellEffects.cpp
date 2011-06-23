@@ -5059,13 +5059,30 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     if (totalDamagePercentMod != 1.0f)
         weaponDamage = int32(weaponDamage * totalDamagePercentMod);
 
-
     // prevent negative damage
     uint32 eff_damage = uint32(weaponDamage > 0 ? weaponDamage : 0);
 
     // Add melee damage bonuses (also check for negative)
     m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
     m_damage+= eff_damage;
+
+    // Custom after damage calculation spell bonuses
+    switch (m_spellInfo->Id)
+    {
+        case 53385: // Divine Storm
+        case 35395: // Crusader Strike
+        case 85256: // Templar's Verdict
+            // Implementation of Hand of Light mastery proficiency
+            if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_RETRIBUTION)
+            {
+                float mastp = m_caster->ToPlayer()->GetMasteryPoints();
+                float coef = mastp*2.1f/100.0f;
+                int32 bp0 = coef*float(m_damage);//float(m_damage)*(m_caster->ToPlayer()->GetMasteryPoints()*2.1f/100.0f);
+                m_caster->CastCustomSpell(unitTarget,96172,&bp0,0,0,true);
+            }
+            break;
+    }
 }
 
 void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
