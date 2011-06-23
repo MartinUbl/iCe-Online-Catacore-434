@@ -858,10 +858,11 @@ void Player::UpdateMastery()
     if (HasMastery())
     {
         // Base value for all levels
+        // When changing this, don't forget to modify value in GetMasteryPoints, which is automatically +8
         float BaseMastery = 8.0f;
 
         SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]+BaseMastery);
-        SetFloatValue(PLAYER_MASTERY, GetMasteryPoints()+BaseMastery);
+        SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
 
         // Update aura base points
         TalentTabEntry const * entry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(m_activeSpec));
