@@ -2893,6 +2893,9 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             //multiply by amount of holy power (+1 for unknown purposes)
             addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
 
+            // Apply spell power bonus
+            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
             // Guarded by Light talent (if healing self, increase health)
             if (caster == unitTarget)
             {
