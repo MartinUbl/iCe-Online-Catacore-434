@@ -3392,6 +3392,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
             break;
         case 63375:                                         // Improved Stormstrike
         case 68082:                                         // Glyph of Seal of Command
+        case 20167:                                         // Seal of Insight
             damage = damage * unitTarget->GetCreateMana() / 100;
             break;
         case 48542:                                         // Revitalize
