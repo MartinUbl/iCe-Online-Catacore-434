@@ -6945,6 +6945,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                                 if(charges < 1)
                                     ++charges;
                                 aura->SetCharges(++charges);
+                                aura->SetStackAmount(charges);
                             }
                         }
                         else CastSpell(this, 86700, true);

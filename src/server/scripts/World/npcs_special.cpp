@@ -2946,6 +2946,7 @@ public:
                                     if(charges < 1)
                                         ++charges;
                                     aura->SetCharges(++charges);
+                                    aura->SetStackAmount(charges);
                                 }
                             }
                             else pOwner->CastSpell(pOwner, 86700, true);
