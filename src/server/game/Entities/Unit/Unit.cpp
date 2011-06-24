@@ -8707,6 +8707,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+8);
             break;
         }
+        // Will of the Necropolis
+        case 52284:
+        case 81163:
+        case 81164:
+        {
+            // Check for player origin, health percentage and for spell cooldown
+            if(!HealthBelowPct(30) || !ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+                return false;
+
+            // Add internal cooldown (45 seconds hardcoded value)
+            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+45);
+            break;
+        }
         // Improved Hamstring
         case 12289:
         case 12668:
