@@ -30,6 +30,7 @@ enum Spells
     SPELL_DUMMY_VISUAL              = 75649,
 
     SPELL_EVOLUTION                 = 75697,
+    SPELL_EVOLUTION_H               = 87378,
     SPELL_TWILIGHT_EVOLUTION        = 75732,
     SPELL_KNEELING_IN_SUPPLICATION  = 75608,
     SPELL_ZEALOT_VISUAL             = 95564,
@@ -327,7 +328,11 @@ public:
                     if(pBeamTarget)
                     {
                         // Add evolution aura Charge to preselected target (target of the beam)
-                        if(Aura* aura = pBeamTarget->GetAura(SPELL_EVOLUTION))
+                        Aura* aura = pBeamTarget->GetAura(SPELL_EVOLUTION);
+                        if(!aura)
+                            aura = pBeamTarget->GetAura(SPELL_EVOLUTION_H);
+
+                        if(aura)
                         {
                             aura->SetCharges(aura->GetCharges() + 1);
                             aura->RefreshDuration();
