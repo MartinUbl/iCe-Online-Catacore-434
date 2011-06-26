@@ -5211,23 +5211,26 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     int32 miscValue = GetMiscValue();
 
-    if (miscValue < -1 || miscValue > 4)
-    {
-        sLog->outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
-        return;
-    }
-
     // Custom handling for Cataclysm spells with non-relevant data in DBC
     switch(GetSpellProto()->Id)
     {
         case 89744: // Wizardry
         case 86091: // Nethermancy
-            miscValue = STAT_INTELLECT; // +5% intellect istead of strength
+            miscValue = STAT_INTELLECT;
             break;
         case 50029: // Veteran of the Third War
         case 53592: // Touched by the Light
             miscValue = STAT_STAMINA;
             break;
+        case 84729: // Into the Wilderness
+            miscValue = STAT_AGILITY;
+            break;
+    }
+
+    if (miscValue < -1 || miscValue > 4)
+    {
+        sLog->outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        return;
     }
 
     //save current and max HP before applying aura

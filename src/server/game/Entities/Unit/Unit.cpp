@@ -2851,6 +2851,26 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         }
     }
 
+    if (GetTypeId() == TYPEID_PLAYER && spell)
+    {
+        Player* pCaster = (Player*)this;
+        // Careful Aim hunter's talent
+        if (pCaster->HasAura(34482) || pCaster->HasAura(34483))
+        {
+            if (pVictim->GetHealthPct() > 80.0f)
+            {
+                // Steady Shot, Cobra Shot, Aimed Shot and Aimed Shot (Master Marksman)
+                if (spell->Id == 56641 || spell->Id == 77767 || spell->Id == 19434 || spell->Id == 82928)
+                {
+                    if (pCaster->HasAura(34482))
+                        crit += 30.0f;
+                    else
+                        crit += 60.0f;
+                }
+            }
+        }
+    }
+
     // Apply crit chance from defence skill
     crit += (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
 
@@ -8648,6 +8668,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Entrapment
+        case 19387:
+        case 19184:
+            // Hacked elsewhere
+            return false;
+            break;
         // Deflection
         case 52420:
         {
