@@ -2292,6 +2292,21 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
             break;
         }
+        // Snake Trap
+        case 57879:
+        {
+            originalCaster = m_originalCaster;
+            // Entrapment
+            if (m_originalCaster)
+            {
+                // Snake Trap and Ice Trap
+                if (m_originalCaster->HasAura(19184))
+                    m_originalCaster->CastSpell(m_caster,19185,true);
+                else if (m_originalCaster->HasAura(19387))
+                    m_originalCaster->CastSpell(m_caster,64803,true);
+            }
+            break;
+        }
         // Vanish (not exist)
         case 18461:
         {
@@ -2389,10 +2404,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // Empower Rune Weapon
         case 53258:
             return; // skip, hack-added in spell effect
-        // Snake Trap
-        case 57879:
-            originalCaster = m_originalCaster;
-            break;
         // Coldflame
         case 33801:
             return; // just make the core stfu
@@ -2444,6 +2455,20 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
 
     float x, y, z;
     m_targets.m_dstPos.GetPosition(x, y, z);
+
+    // Hunter talent Entrapment exception
+    if (triggered_spell_id == 13810)
+    {
+        if (m_originalCaster)
+        {
+            // Snake Trap and Ice Trap
+            if (m_originalCaster->HasAura(19184))
+                m_originalCaster->CastSpell(x,y,z,19185,true);
+            else if (m_originalCaster->HasAura(19387))
+                m_originalCaster->CastSpell(x,y,z,64803,true);
+        }
+    }
+
     m_caster->CastSpell(x, y, z, spellInfo->Id, true, m_CastItem, 0, m_originalCasterGUID);
 }
 
