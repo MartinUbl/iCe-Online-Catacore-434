@@ -558,6 +558,8 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
 
     std::string enchants = fields[6].GetString();    
     _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
+    // Reforge is stored in slot 8
+    m_reforgeId = GetEnchantmentId(REFORGING_ENCHANTMENT_SLOT);
     SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[7].GetInt32());
     // recalculate suffix factor
     if (GetItemRandomPropertyId() < 0)
@@ -1035,31 +1037,141 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     SetState(ITEM_CHANGED, GetOwner());
 }
 
-void Item::SetReforge(uint32 id)
+
+void Player::ApplyReforge(Item *item, bool apply)
 {
-    if (id == 0 || id == m_reforgeId)
+    // Modify stats only if item is equipped
+    if (!item || !item->IsEquipped())
         return;
 
-    //TODO: send it to client
+    uint32 reforge_id = item->GetEnchantmentId(REFORGING_ENCHANTMENT_SLOT);
+    if (!reforge_id)
+        return;
+
+    ItemReforgeEntry const *pReforge = sItemReforgeStore.LookupEntry(reforge_id);
+    if (!pReforge)
+        return;
+
+    const ItemPrototype* proto = item->GetProto();
+    if (!proto)
+        return;
+
+    // Only items with item level 200 or higher could be reforged
+    if (proto->ItemLevel < 200)
+        return;
+
+    // Get source stat/rating amount from item
+    uint32 srcstatamount = 0;
+    for (int j = 0; j < MAX_ITEM_PROTO_STATS; j++)
+    {
+        if (proto->ItemStat[j].ItemStatType == pReforge->source_stat)
+            srcstatamount = proto->ItemStat[j].ItemStatValue;
+    }
+
+    // Get stat/rating bonus
+    float srcstat_mod = srcstatamount * pReforge->source_mod;
+    float newstat_mod = srcstat_mod * pReforge->new_mod;
+
+    // NOTE
+    // Implemented only values present in ItemReforge.dbc
+    // with new patch there is a chance for adding new entrys to that DBC
+    // so they need to be implemented here!
+
+    // Apply new stat/rating bonus
+    switch (pReforge->new_stat)
+    {
+        case ITEM_MOD_SPIRIT:
+            HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, newstat_mod, apply);
+            ApplyStatBuffMod(STAT_SPIRIT, newstat_mod, apply);
+            break;
+        case ITEM_MOD_DODGE_RATING:
+            ApplyRatingMod(CR_DODGE, newstat_mod, apply);
+            break;
+        case ITEM_MOD_PARRY_RATING:
+            ApplyRatingMod(CR_PARRY, newstat_mod, apply);
+            break;
+        case ITEM_MOD_HIT_RATING:
+            ApplyRatingMod(CR_HIT_MELEE, newstat_mod, apply);
+            ApplyRatingMod(CR_HIT_RANGED, newstat_mod, apply);
+            ApplyRatingMod(CR_HIT_SPELL, newstat_mod, apply);
+            break;
+        case ITEM_MOD_CRIT_RATING:
+            ApplyRatingMod(CR_CRIT_MELEE, newstat_mod, apply);
+            ApplyRatingMod(CR_CRIT_RANGED, newstat_mod, apply);
+            ApplyRatingMod(CR_CRIT_SPELL, newstat_mod, apply);
+            break;
+        case ITEM_MOD_HASTE_RATING:
+            ApplyRatingMod(CR_HASTE_MELEE, newstat_mod, apply);
+            ApplyRatingMod(CR_HASTE_RANGED, newstat_mod, apply);
+            ApplyRatingMod(CR_HASTE_SPELL, newstat_mod, apply);
+            break;
+        case ITEM_MOD_EXPERTISE_RATING:
+            ApplyRatingMod(CR_EXPERTISE, newstat_mod, apply);
+            break;
+        case ITEM_MOD_MASTERY_RATING:
+            ApplyRatingMod(CR_MASTERY, newstat_mod, apply);
+            break;
+    }
+
+    // And take source stat/rating bonus
+    switch (pReforge->source_stat)
+    {
+        case ITEM_MOD_SPIRIT:
+            HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, -srcstat_mod, apply);
+            ApplyStatBuffMod(STAT_SPIRIT, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_DODGE_RATING:
+            ApplyRatingMod(CR_DODGE, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_PARRY_RATING:
+            ApplyRatingMod(CR_PARRY, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_HIT_RATING:
+            ApplyRatingMod(CR_HIT_MELEE, -srcstat_mod, apply);
+            ApplyRatingMod(CR_HIT_RANGED, -srcstat_mod, apply);
+            ApplyRatingMod(CR_HIT_SPELL, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_CRIT_RATING:
+            ApplyRatingMod(CR_CRIT_MELEE, -srcstat_mod, apply);
+            ApplyRatingMod(CR_CRIT_RANGED, -srcstat_mod, apply);
+            ApplyRatingMod(CR_CRIT_SPELL, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_HASTE_RATING:
+            ApplyRatingMod(CR_HASTE_MELEE, -srcstat_mod, apply);
+            ApplyRatingMod(CR_HASTE_RANGED, -srcstat_mod, apply);
+            ApplyRatingMod(CR_HASTE_SPELL, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_EXPERTISE_RATING:
+            ApplyRatingMod(CR_EXPERTISE, -srcstat_mod, apply);
+            break;
+        case ITEM_MOD_MASTERY_RATING:
+            ApplyRatingMod(CR_MASTERY, -srcstat_mod, apply);
+            break;
+    }
+}
+
+void Item::SetReforge(uint32 id)
+{
+    if (id == m_reforgeId)
+        return;
 
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(id);
-    if (ref_info)
+    if (ref_info || id == 0)
     {
-        uint32 srcstatamount = 0;
-        for (int j = 0; j < 10; j++)
-            if (GetProto()->ItemStat[j].ItemStatType == ref_info->source_stat)
-                srcstatamount = GetProto()->ItemStat[j].ItemStatValue;
+        if (id != 0)
+            SetEnchantment(REFORGING_ENCHANTMENT_SLOT,id,0,0);
 
-        SetFlag(ITEM_FIELD_FLAGS,ITEM_FLAG_UNK26);
+        if (GetOwner())
+            GetOwner()->ApplyReforge(this, (id == 0)?false:true);
 
-        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1, 2813);
-        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_DURATION_OFFSET, -1);
-        //SetUInt32Value(ITEM_FIELD_ENCHANTMENT_14_1+ENCHANTMENT_CHARGES_OFFSET, -1);
+        if (id == 0)
+            SetEnchantment(REFORGING_ENCHANTMENT_SLOT,id,0,0);
+
         SetState(ITEM_CHANGED, GetOwner());
         m_reforgeId = id;
     }
     else
-        sLog->outString("Wrong reforge ID %u", id);
+        sLog->outError("Wrong reforge ID %u", id);
 }
 
 uint32 Item::GetReforge()

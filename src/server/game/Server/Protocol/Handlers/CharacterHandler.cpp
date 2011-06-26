@@ -1411,7 +1411,7 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     recvPacket >> slot >> reforgeID >> guid >> unk2;
 
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(reforgeID);
-    if(!ref_info)
+    if(!ref_info && reforgeID != 0)
     {
         sLog->outError("Invalid reforge ID %u received in packet", reforgeID);
         return;
@@ -1425,11 +1425,34 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         return;
     }
 
-    sLog->outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
+    const ItemPrototype* pProto = dstItem->GetProto();
+    if (!pProto || pProto->ItemLevel < 200)
+    {
+        if (!pProto)
+            sLog->outError("Invalid item for reforging - not exist or proto doesnt exist");
+        SendNotification("The item level is not high enough!");
+        return;
+    }
+
+    // Check for money
+    if (pProto->SellPrice > GetPlayer()->GetMoney())
+    {
+        sLog->outDebug("Player doesn't have enough money for reforge item");
+        SendNotification("You don't have enought money!");
+        return;
+    }
+
+    // And take money equal to sell price
+    GetPlayer()->ModifyMoney(-pProto->SellPrice);
+
+    if (ref_info)
+        sLog->outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
+    else
+        sLog->outDebug("Removing reforge from item");
     sLog->outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
 
     WorldPacket data(0x451C,1,true);
-    data << uint8(0);
+    data << uint8(reforgeID); //is that true? 0 in all cases
     SendPacket(&data);
 
     dstItem->SetReforge(reforgeID);

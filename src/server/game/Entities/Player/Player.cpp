@@ -7572,6 +7572,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     ApplyItemEquipSpell(item,apply);
     ApplyEnchantment(item, apply);
+    ApplyReforge(item, apply);
 
     sLog->outDebug("_ApplyItemMods complete.");
 }
@@ -8347,6 +8348,7 @@ void Player::_RemoveAllItemMods()
 
             ApplyItemEquipSpell(m_items[i], false);
             ApplyEnchantment(m_items[i], false);
+            ApplyReforge(m_items[i], false);
         }
     }
 
@@ -8417,6 +8419,7 @@ void Player::_ApplyAllItemMods()
 
             ApplyItemEquipSpell(m_items[i],true);
             ApplyEnchantment(m_items[i], true);
+            ApplyReforge(m_items[i], true);
         }
     }
 
@@ -12344,7 +12347,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                         else
                         {
                             pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_0);
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
+                            // Here is the place where reforge is stored, so don't remove if has reforge
+                            //pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
                         }
 
                         UpdateExpertise(BASE_ATTACK);
