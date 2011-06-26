@@ -1435,7 +1435,7 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     }
 
     // Check for money
-    if (pProto->SellPrice > GetPlayer()->GetMoney())
+    if (pProto->SellPrice > GetPlayer()->GetMoney() && reforgeID != 0)
     {
         sLog->outDebug("Player doesn't have enough money for reforge item");
         SendNotification("You don't have enought money!");
@@ -1443,7 +1443,8 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     }
 
     // And take money equal to sell price
-    GetPlayer()->ModifyMoney(-pProto->SellPrice);
+    if (reforgeID != 0)
+        GetPlayer()->ModifyMoney(-pProto->SellPrice);
 
     if (ref_info)
         sLog->outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
