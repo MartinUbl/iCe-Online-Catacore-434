@@ -1241,8 +1241,8 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     uint32 talent_points = 0x29;
     uint32 guid_size = plr->GetPackGUID().wpos();
-    WorldPacket data(SMSG_INSPECT_TALENT, guid_size+4+talent_points, true);
-    data.append(plr->GetPackGUID());
+    WorldPacket data(SMSG_INSPECT_TALENT, guid_size+4+talent_points, false);
+    data << plr->GetGUID();
 
     if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
     {
@@ -1256,6 +1256,13 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     }
 
     plr->BuildEnchantmentsInfoData(&data);
+
+    // Unknown 4.0.x data fields, maybe guild related?
+    data << uint64(0);
+    data << uint32(0);
+    data << uint64(0);
+    data << uint32(0);
+
     SendPacket(&data);
 }
 
