@@ -49,7 +49,7 @@ void SendTestPacket(uint32 opcodeID, Player* plr)
 {
     //Basic SMSG_FORCE_* opcode.
     WorldPacket data;
-    data.Initialize(opcodeID, (8+4+4));
+    data.Initialize(opcodeID, (8+4+4), true);
     data.append(plr->GetPackGUID());
     data << uint32(0);
     data << float(100.0f);
@@ -190,7 +190,10 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
     }
         
     PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
-    SendTestPacket(testopcode++, m_session->GetPlayer());
+    if (strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+        SendTestPacket(testopcode, m_session->GetPlayer());
+
+    testopcode++;
 
   return true;
 }
