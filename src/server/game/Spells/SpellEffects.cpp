@@ -2067,9 +2067,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             case 49998: // Death Strike (main hand only)
                 {
-                    // THIS IS WOTLK CONCEPTION !!
-                    uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-                    int32 bp = int32(count * m_caster->CountPctFromMaxHealth(5));
+                    // Heal for 20% of the damage sustained in 5 preceding seconds
+                    bp = int32(m_caster->GetDamageTakenHistory(5) * 20 / 100);
+                    // Minimum of 7% total health
+                    int32 min = int32(m_caster->CountPctFromMaxHealth(7));
+                    bp = bp > min ? bp : min;
                     // Improved Death Strike
                     if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
                         bp = int32(bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);

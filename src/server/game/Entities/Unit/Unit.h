@@ -2084,6 +2084,8 @@ class Unit : public WorldObject
         TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
         const TempSummon* ToTempSummon() const { if (isSummon()) return reinterpret_cast<const TempSummon*>(this); else return NULL; }
 
+        uint32 GetDamageTakenHistory(uint32 seconds);
+
     protected:
         explicit Unit ();
 
@@ -2201,6 +2203,9 @@ class Unit : public WorldObject
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
 
         bool HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active); // Hack in order to proc non triggering auras if required
+
+        std::list<uint64> m_lDamageTakenHistory;
+        void SaveDamageTakenHistory(uint32 damage);
 };
 
 namespace Trinity
