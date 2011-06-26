@@ -67,6 +67,7 @@
 #include "Vehicle.h"
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
+#include "ScriptedCreature.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -6857,6 +6858,36 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         default: return;
     }
 
+    float o = m_caster->GetOrientation();
+
+    // Special case - Archaeology, spell Survey
+    // TODO: implement DB tables for this and get list of creatures here and compare them with DB data for specific char
+    if (m_spellInfo->Id == 80451)
+    {
+        Creature* pNearest = GetClosestCreatureWithEntry(m_caster, 2, 50.0f);
+        if (pNearest)
+        {
+            o = m_caster->GetAngle(pNearest);
+            go_id = 4510101;
+        }
+        else
+        {
+            pNearest = GetClosestCreatureWithEntry(m_caster, 2, 100.0f);
+            if (pNearest)
+            {
+                o = m_caster->GetAngle(pNearest);
+                go_id = 4510102;
+            }
+            else
+            {
+                pNearest = GetClosestCreatureWithEntry(m_caster, 2, 50000.0f);
+                if (pNearest)
+                    o = m_caster->GetAngle(pNearest);
+                go_id = 4510103;
+            }
+        }
+    }
+
     uint64 guid = m_caster->m_ObjectSlot[slot];
     if (guid != 0)
     {
@@ -6886,7 +6917,7 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
 
     Map *map = m_caster->GetMap();
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
-        m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        m_caster->GetPhaseMask(), x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
     {
         delete pGameObj;
         return;
