@@ -1471,6 +1471,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         break;
                     */
+                    // Spirit of Redemption - linked auras
+                    case 27792:
+                    case 27795:
+                    case 27827:
+                        {
+                            caster->RemoveAurasDueToSpell(27792);
+                            caster->RemoveAurasDueToSpell(27795);
+                            break;
+                        }
                     // Evangelism / Dark Evangelism rank 2
                     case 81661:
                     case 87118:
