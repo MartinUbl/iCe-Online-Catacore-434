@@ -1764,6 +1764,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
 
+            // Warrior's Second Wind
+            if (m_spellProto->Id == 29841 || m_spellProto->Id == 29842)
+            {
+                // Heal 3% max health (instead of 3)
+                damage = caster->CountPctFromMaxHealth(damage);
+            }
             if (m_spellProto->Id == 774)
             {
                 float bonus = 1.0f;
