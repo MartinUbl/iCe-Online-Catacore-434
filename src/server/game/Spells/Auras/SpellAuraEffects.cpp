@@ -6142,6 +6142,26 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
 
                     break;
                 }
+                // Focus Fire
+                case 82692:
+                {
+                    Unit* pPet = Unit::GetUnit(*GetCaster(),GetCaster()->GetPetGUID());
+                    if (pPet)
+                    {
+                        // Restore 4 focus to pet
+                        pPet->ModifyPower(POWER_FOCUS,+4);
+
+                        // Modify aura stacks
+                        if (Aura* pAura = pPet->GetAura(19615))
+                        {
+                            aurApp->GetBase()->SetStackAmount(pAura->GetStackAmount());
+                            pPet->RemoveAurasDueToSpell(19615);
+                        }
+                        else
+                            GetCaster()->RemoveAurasDueToSpell(GetSpellProto()->Id);
+                    }
+                    break;
+                }
                 case 37096:                                     // Blood Elf Illusion
                 {
                     if (caster)
