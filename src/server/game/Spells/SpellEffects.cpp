@@ -4126,6 +4126,23 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             if (pOwner->GetAura(56249))
                 pOwner->CastCustomSpell(pOwner, 19658, &heal_amount, NULL, NULL, true);
     }
+
+    switch(m_spellInfo->Id)
+    {
+    // Priest Dispell Magic (the actual ability ID - not real dispell ?? )
+    case 527:
+        {
+            // Glyph of Dispel Magic
+            if (m_caster->HasAura(55677) && unitTarget && unitTarget->IsFriendlyTo(m_caster))
+            {
+                // Heal the taget for 3% of their max health
+                int32 bp0 = unitTarget->CountPctFromMaxHealth(3);
+                m_caster->CastCustomSpell(unitTarget, 56131, &bp0, NULL, NULL, true);
+            }
+            break;
+        }
+    default: break;
+    }
 }
 
 void Spell::EffectDualWield(SpellEffIndex /*effIndex*/)
