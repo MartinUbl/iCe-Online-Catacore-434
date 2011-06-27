@@ -183,6 +183,7 @@ class InstanceScript : public ZoneScript
         virtual bool SetBossState(uint32 id, EncounterState state);
         EncounterState GetBossState(uint32 id) const { return id < bosses.size() ? bosses[id].state : TO_BE_DECIDED; }
         const BossBoundaryMap * GetBossBoundary(uint32 id) const { return id < bosses.size() ? &bosses[id].boundary : NULL; }
+        uint32 GetBossNumber() { return bosses.size(); }
 
         // Achievement criteria additional requirements check
         // NOTE: not use this if same can be checked existed requirement types from AchievementCriteriaRequirementType
