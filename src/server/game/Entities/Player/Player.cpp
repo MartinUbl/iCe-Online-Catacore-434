@@ -23606,6 +23606,12 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
     return cooldown;
 }
 
+void Player::SetRuneCooldown(uint8 index, uint32 cooldown)
+{
+    m_runes->runes[index].Cooldown = cooldown;
+    m_runes->SetRuneState(index, (cooldown == 0) ? true : false);
+}
+
 void Player::RemoveRunesByAuraEffect(AuraEffect const * aura)
 {
     for (uint8 i = 0; i < MAX_RUNES; ++i)
