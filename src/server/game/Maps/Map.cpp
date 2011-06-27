@@ -2324,6 +2324,24 @@ bool InstanceMap::Add(Player *player)
                 mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
             }
 
+            // Not sure where put this
+            // It lets player know, that if he kills boss, he will be bound to this instance
+            /*uint32 count = GetInstanceScript()->GetBossNumber();
+            if (count)
+            {
+                uint32 bossescompleted = 0;
+                for (uint32 i = 0; i < count; i++)
+                    if (GetInstanceScript()->GetBossState(i) == DONE)
+                        bossescompleted |= 1 << i;
+
+                WorldPacket data(SMSG_ENTERED_INSTANCE_IN_PROGRESS, 4+4+1+1, true);
+                data << uint32(0);               // unk
+                data << uint32(bossescompleted); // completed boss mask
+                data << uint8(0);                // unk
+                data << uint8(1);                // some kind of switch, 1 probably means new save
+                player->SendMessageToSet(&data,true);
+            }*/
+
             // check for existing instance binds
             InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
             if (playerBind && playerBind->perm)
