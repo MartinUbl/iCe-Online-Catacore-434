@@ -153,6 +153,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_REWARDS_LIST,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_EVENT,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_COMMAND_RESULT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_ACHIEVEMENT_MEMBER,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_MESSAGECHAT_SAY,                         STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_YELL,                        STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_CHANNEL,                     STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
@@ -1286,4 +1287,5 @@ void InitOpcodeTable()
     OPCODE( SMSG_REFORGING_OPEN,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REFORGE,                                 STATUS_LOGGEDIN, &WorldSession::HandleItemReforge               );
     OPCODE( SMSG_REFORGING_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_ENTERED_INSTANCE_IN_PROGRESS,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };

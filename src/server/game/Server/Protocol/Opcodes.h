@@ -151,6 +151,7 @@ enum Opcodes
     SMSG_GUILD_NEWS_UPDATE                           = 0x0485E, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_XP_UPDATE                             = 0x0440E, // 4.0.6a 13623
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
+    SMSG_GUILD_ACHIEVEMENT_MEMBER                    = 0x0414E, // 4.0.6a 13623, unimplemented, name from client (wowerror)
     CMSG_MESSAGECHAT_SAY                             = 0x0002A, // 4.0.6a 13623
     CMSG_MESSAGECHAT_YELL                            = 0x00802, // 4.0.6a 13623
     CMSG_MESSAGECHAT_CHANNEL                         = 0x00821, // 4.0.6a 13623
@@ -1172,7 +1173,7 @@ enum Opcodes
     SMSG_THREAT_REMOVE                               = 0x029E0, // 4.0.6a 13623
     SMSG_THREAT_CLEAR                                = 0x0FFC8, // 4.0.6a 13623
     SMSG_CONVERT_RUNE                                = 0x0B4AC, // 4.0.6a 13623
-    SMSG_RESYNC_RUNES                                = 0x101E9, //
+    SMSG_RESYNC_RUNES                                = 0x0F8E4, // 4.0.6a 13623
     SMSG_ADD_RUNE_POWER                              = 0x101EA, //
     CMSG_START_QUEST                                 = 0x00613, // 4.0.6a 13623
     CMSG_REMOVE_GLYPH                                = 0x101EC, //
@@ -1269,7 +1270,7 @@ enum Opcodes
     SMSG_CORPSE_NOT_IN_INSTANCE                      = 0x031E4, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID1                   = 0x035EC, // 4.0.6a 13623
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2                   = 0x029C4, // 4.0.6a 13623
-    SMSG_CAMERA_SHAKE                                = 0x1000F,
+    SMSG_CAMERA_SHAKE                                = 0x0A2E4, // 4.0.6a 13623
     SMSG_UPDATE_ITEM_ENCHANTMENTS                    = 0x020E8, // 4.0.6a 13623
     SMSG_REDIRECT_CLIENT                             = 0x0201B, // 4.0.6a 13623
     CMSG_REDIRECTION_FAILED                          = 0x10007, //
@@ -1304,15 +1305,11 @@ enum Opcodes
     CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x00A13, // 4.0.6a 13623
     SMSG_REFORGING_OPEN                              = 0x00C5C, // 4.0.6a 13623
     CMSG_REFORGE                                     = 0x00313, // 4.0.6a 13623
-    SMSG_REFORGING_RESULT                            = 0x1025D, //
+    SMSG_REFORGING_RESULT                            = 0x0451C, // 4.0.6a 13623
+    SMSG_ENTERED_INSTANCE_IN_PROGRESS                = 0x07488, // 4.0.6a 13623
     NUM_MSG_TYPES                                    = 0x20000  // last unknown opcode + 1.
 };
 
-/*
-NOTES:
-0x0C5C open reforging -> 0x0313 "Reforge" button
-0x490C open pvp menu (bgs, arenas, conquests)
-*/
 extern void InitOpcodeTable();
 
 /// Player state
