@@ -146,6 +146,8 @@ class MapManager
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
+        MapUpdater * GetMapUpdater() { return &m_updater; }
+
     private:
         // debugging code, should be deleted some day
         void checkAndCorrectGridStatesArray();              // just for debugging to find some memory overwrites
