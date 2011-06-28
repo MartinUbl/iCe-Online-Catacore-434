@@ -1767,8 +1767,8 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             // Warrior's Second Wind
             if (m_spellProto->Id == 29841 || m_spellProto->Id == 29842)
             {
-                // Heal 3% max health (instead of 3)
-                damage = caster->CountPctFromMaxHealth(damage);
+                // Heal 2/5% max health over total ticks (instead of 2/5 hp per tick)
+                damage = caster->CountPctFromMaxHealth(damage) / GetTotalTicks();
             }
             if (m_spellProto->Id == 774)
             {
