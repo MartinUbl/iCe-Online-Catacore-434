@@ -423,6 +423,203 @@ public:
     }
 };
 
+/*#####
+## Ahune (Slave Pens - Summer Fire Festival) // OJaaaa iCelike
+#####*/
+
+enum Ahune {
+    SPELL_AHUNE_SHIELD  = 45954,
+    SPELL_FROSTBOLT     = 55802,
+    SPELL_BITTER_BLAST  = 46406,
+    SPELL_EXPLOSION     = 68000,
+    SPELL_ENRAGE        = 47008,
+    NPC_SUMMON          = 25756,
+    MODEL_AHUNE         = 23344,
+    MODEL_CORE          = 23447,
+    GO_LOOT             = 187892,
+};
+class boss_ahune : public CreatureScript
+{
+public:
+    boss_ahune() : CreatureScript("boss_ahune") { }
+
+    struct boss_ahuneAI: public Scripted_NoMovementAI
+    {
+        boss_ahuneAI(Creature* c): Scripted_NoMovementAI(c)
+        {
+            me->CastSpell(me, 45938, true); // floor visual
+        }
+
+        bool mPhaseCore;
+        uint32 phase_timer;
+        uint32 frostbolt_timer;
+
+        void InitializeAI()
+        {
+            Scripted_NoMovementAI::InitializeAI();
+        }
+
+        void Reset()
+        {
+            mPhaseCore = false;
+            phase_timer = 60000;
+            frostbolt_timer = 5000;
+            me->CastSpell(me, SPELL_AHUNE_SHIELD, true);
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) { }
+
+        void EnterCombat(Unit* /*pTarget*/)
+        {
+            SummonAdds();
+        }
+
+        void JustDied(Unit* /*pKiller*/)
+        {
+            me->SetDisplayId(MODEL_AHUNE);
+            me->SummonGameObject(GO_LOOT, me->GetPositionX(), me->GetPositionY() + 15, me->GetPositionZ(), 0, 0, 0, 0, 0, 0);
+            
+
+            if(Map* pMap = me->GetMap()) // achievement. for exactly the group is in the map.
+            {
+                if (!pMap->IsDungeon()) return;
+
+                Map::PlayerList const &lPlayers = pMap->GetPlayers();
+                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if(Player* pPlayer = itr->getSource())
+                        pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(263));
+                }
+            }
+        }
+
+        void SummonedCreatureDespawn(Creature* /*pSummon*/)
+        {
+            if(mPhaseCore)
+                return;
+
+            SummonAdds();
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!UpdateVictim())
+                return;
+
+            if(phase_timer < diff)
+            {
+                if(mPhaseCore)
+                {
+                    mPhaseCore = false;
+                    phase_timer = 60000;
+                    me->CastSpell(me, SPELL_AHUNE_SHIELD, true);
+                    me->CastSpell(me, 46402, true); // Ahune Resurfaces
+                    me->SetDisplayId(MODEL_AHUNE);
+                    SummonAdds();
+                }
+                else
+                {
+                    mPhaseCore = true;
+                    phase_timer = 20000;
+                    me->RemoveAurasDueToSpell(SPELL_AHUNE_SHIELD);
+                    me->SetDisplayId(MODEL_CORE);
+                }
+            } else phase_timer -= diff;
+
+            if(mPhaseCore)
+                return;
+
+            if(frostbolt_timer < diff)
+            {
+                if(Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    me->CastSpell(pTarget, SPELL_FROSTBOLT, false);
+                frostbolt_timer = 4000;
+            } else frostbolt_timer -= diff;
+
+        }
+
+        void SummonAdds()
+        {
+            if(!me->isAlive() || !UpdateVictim())
+                return;
+            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() + 2, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+                pSummon->AI()->AttackStart(me->getVictim());
+            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() - 2, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+                pSummon->AI()->AttackStart(me->getVictim());
+        }
+
+    };
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new boss_ahuneAI(creature);
+    }
+};
+
+class mob_ahune : public CreatureScript
+{
+public:
+    mob_ahune() : CreatureScript("mob_ahune") { }
+
+    struct mob_ahuneAI: public ScriptedAI
+    {
+        mob_ahuneAI(Creature* c): ScriptedAI(c)
+        {
+            me->setFaction(14);
+            Reset();
+        }
+
+        uint32 enrage_timer;
+        uint32 blast_timer;
+        uint32 explosion_timer;
+        bool enrage;
+
+        void Reset()
+        {
+            bool enrage = false;
+            enrage_timer = 13000;
+            blast_timer = 2000;
+            explosion_timer = 1000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(!UpdateVictim())
+                me->ForcedDespawn();
+
+            if(enrage == true)
+            {
+                if(explosion_timer < diff)
+                {
+                    me->CastSpell(me, SPELL_EXPLOSION, false);
+                    explosion_timer = 1000;
+                } else explosion_timer -= diff;
+            }
+            else
+            {
+                if(enrage_timer < diff)
+                {
+                    me->CastSpell(me, SPELL_ENRAGE, true);
+                    enrage = true;
+                } else enrage_timer -= diff;
+
+                if(blast_timer < diff)
+                {
+                    if(Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                        me->CastSpell(pTarget, SPELL_BITTER_BLAST, false);
+                    blast_timer = 3000;
+                } else blast_timer -= diff;
+            }
+            DoMeleeAttackIfReady();
+        }
+
+
+    };
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new mob_ahuneAI(creature);
+    }
+};
+
 /*######
 ## AddSC
 ######*/
@@ -435,4 +632,6 @@ void AddSC_zangarmarsh()
     new npc_mortog_steamhead();
     new npc_kayra_longmane();
     new npc_timothy_daniels();
+    new boss_ahune();
+    new mob_ahune();
 }
