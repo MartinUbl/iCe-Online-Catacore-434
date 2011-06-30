@@ -1173,6 +1173,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->SetSpeed(MOVE_RUN, 1.6f, true);
                     }
                 }
+                // Inquisition
+                if(GetId() == 84963)
+                {
+                    if(caster)
+                    {
+                        SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1));
+                        caster->SetPower(POWER_HOLY_POWER, 0);
+                    }
+                }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 if (!caster)
