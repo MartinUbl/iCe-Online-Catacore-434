@@ -575,7 +575,7 @@ public:
 
         void Reset()
         {
-            bool enrage = false;
+            enrage = false;
             enrage_timer = 13000;
             blast_timer = 2000;
             explosion_timer = 1000;
