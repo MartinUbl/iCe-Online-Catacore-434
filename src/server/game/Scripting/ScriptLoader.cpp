@@ -563,6 +563,9 @@ void AddSC_obsidius();
 void AddSC_instance_blackrock_caverns();
 void AddSC_ertan();
 void AddSC_instance_vortex_pinnacle();
+void AddSC_conclave_of_wind();
+void AddSC_alakir();
+void AddSC_instance_throne_of_the_four_winds();
 
 // battlegrounds
 
@@ -1157,6 +1160,9 @@ void AddCataclysmScripts()
     AddSC_instance_blackrock_caverns();
     AddSC_ertan();
     AddSC_instance_vortex_pinnacle();
+    AddSC_conclave_of_wind();
+    AddSC_alakir();
+    AddSC_instance_throne_of_the_four_winds();
 }
 
 void AddOutdoorPvPScripts()
