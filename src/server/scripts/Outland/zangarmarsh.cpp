@@ -432,7 +432,7 @@ enum Ahune {
     SPELL_FROSTBOLT     = 55802,
     SPELL_BITTER_BLAST  = 46406,
     SPELL_EXPLOSION     = 68000,
-    SPELL_ENRAGE        = 47008,
+    SPELL_ENRAGE        = 72525,
     NPC_SUMMON          = 25756,
     MODEL_AHUNE         = 23344,
     MODEL_CORE          = 23447,
@@ -520,7 +520,7 @@ public:
                 else
                 {
                     mPhaseCore = true;
-                    phase_timer = 20000;
+                    phase_timer = 25000;
                     me->RemoveAurasDueToSpell(SPELL_AHUNE_SHIELD);
                     me->SetDisplayId(MODEL_CORE);
                 }
@@ -542,9 +542,9 @@ public:
         {
             if(!me->isAlive() || !UpdateVictim())
                 return;
-            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() + 2, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() + 8, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
                 pSummon->AI()->AttackStart(me->getVictim());
-            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() - 2, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+            if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() - 8, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
                 pSummon->AI()->AttackStart(me->getVictim());
         }
 
@@ -576,9 +576,10 @@ public:
         void Reset()
         {
             enrage = false;
-            enrage_timer = 13000;
+            enrage_timer = 17000;
             blast_timer = 2000;
-            explosion_timer = 1000;
+            explosion_timer = 8000;
+            me->SetSpeed(MOVE_RUN, 0.7f);
         }
 
         void UpdateAI(const uint32 diff)
