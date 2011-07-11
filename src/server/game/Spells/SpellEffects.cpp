@@ -31,6 +31,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Player.h"
+#include "Chat.h"
 #include "SkillExtraItems.h"
 #include "Unit.h"
 #include "Spell.h"
@@ -6640,16 +6641,82 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     if (pTarget->isInFlight())
         return;
 
-    pTarget->TeleportTo(pTarget->GetStartPosition(), unitTarget == m_caster ? TELE_TO_SPELL : 0);
-    // homebind location is loaded always
-    // pTarget->TeleportTo(pTarget->m_homebindMapId,pTarget->m_homebindX,pTarget->m_homebindY,pTarget->m_homebindZ,pTarget->GetOrientation(), (unitTarget == m_caster ? TELE_TO_SPELL : 0));
-
-    // Stuck spell trigger Hearthstone cooldown
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(8690);
-    if (!spellInfo)
+    /* share cooldown with hearthstone and astral recall */
+    if (pTarget->HasSpellCooldown(8690) && (!pTarget->HasSpell(556) || pTarget->HasSpellCooldown(556))) {
+        SendCastResult(SPELL_FAILED_NOT_READY);
         return;
-    Spell spell(pTarget, spellInfo, true, 0);
-    spell.SendSpellCooldown();
+    }
+
+    /* reset stats, auras, ... */
+    ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pTarget->getClass());
+    if (cEntry)
+    {
+        uint8 powertype = cEntry->powerType;
+
+        /* which spells to preserve through spell reset */
+        uint32 preserve_spells_table[] = {
+            15007,  // Ressurection Sickness
+            26013,  // Deserter
+        };
+        std::vector<uint32> preserve_spells;
+
+        for (int i = 0; i < sizeof(preserve_spells_table)/sizeof(uint32); i++)
+            if (pTarget->HasAura(preserve_spells_table[i]))
+                preserve_spells.push_back(preserve_spells_table[i]);
+
+        pTarget->SetShapeshiftForm(FORM_NONE);
+
+        pTarget->RemoveAllAuras();
+
+        pTarget->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
+        pTarget->SetFloatValue(UNIT_FIELD_COMBATREACH, DEFAULT_COMBAT_REACH);
+        pTarget->setFactionForRace(pTarget->getRace());
+        pTarget->SetUInt32Value(UNIT_FIELD_BYTES_0, ((pTarget->getRace()) | (pTarget->getClass() << 8) | (pTarget->getGender() << 16) | (powertype << 24)));
+        pTarget->InitDisplayIds();
+        pTarget->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
+        pTarget->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+        pTarget->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));  //-1 == default
+
+        pTarget->InitRunes();
+        pTarget->InitStatsForLevel(true);
+        pTarget->UpdateAllStats();
+        pTarget->InitTaxiNodesForLevel();
+        pTarget->InitGlyphsForLevel();
+        pTarget->InitTalentForLevel();
+
+        while (!preserve_spells.empty()) {
+            pTarget->CastSpell(pTarget, preserve_spells.back(), true);
+            preserve_spells.pop_back();
+        }
+    }
+
+    /* disabled, causes server crash, probably due to unavailability of m_mapId
+     * when the save occurs (and player is already log out) */
+#if 0
+    /* save the player, update new position
+     * and force logout without saving current position
+     * NOTE: sMapMgr->GetZoneId() has no "orientation", so we can't use WorldLocation */
+    WorldLocation loc = pTarget->GetStartPosition();
+    pTarget->SaveToDB();
+    pTarget->SavePositionInDB(loc.m_mapId, loc.m_positionX, loc.m_positionY, loc.m_positionZ, loc.m_orientation, sMapMgr->GetZoneId(loc.m_mapId, loc.m_positionX, loc.m_positionY, loc.m_positionZ), pTarget->GetGUID());
+    pTarget->GetSession()->LogoutPlayer(false);
+#endif
+
+    /* trigger 30min hearthstone cooldown, 15min astral recall */
+    pTarget->AddSpellCooldown(8690, 0, time(NULL)+1800);
+    if (pTarget->HasSpell(556))
+        pTarget->AddSpellCooldown(556, 0, time(NULL)+900);
+
+    /* doesn't work (??) */
+    //WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
+    //data << uint32(8690);
+    //data << uint64(pTarget->GetGUID());
+    //pTarget->GetSession()->SendPacket(&data);
+
+    pTarget->TeleportTo(pTarget->GetStartPosition(), unitTarget == m_caster ? TELE_TO_SPELL : 0);
+
+    ChatHandler(pTarget->GetSession()).PSendSysMessage("Vsechny aury resetovany, pro obnoveni pasivnich abilit proved relog (napis /logout).\n");
+    ChatHandler(pTarget->GetSession()).PSendSysMessage("All auras have been re-set, please relog the character (using /logout) to restore passive abilities.\n");
 }
 
 void Spell::EffectSummonPlayer(SpellEffIndex /*effIndex*/)
