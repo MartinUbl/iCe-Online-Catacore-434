@@ -909,6 +909,10 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
             uint32 item_id = oEntry->ItemId[j];
 
+            /* skip "Scourgestone", unknown hearthstone-like DK start item */
+            if (item_id == 40582)
+                continue;
+
             // just skip, reported in ObjectMgr::LoadItemPrototypes
             ItemPrototype const* iProto = sObjectMgr->GetItemPrototype(item_id);
             if (!iProto)
