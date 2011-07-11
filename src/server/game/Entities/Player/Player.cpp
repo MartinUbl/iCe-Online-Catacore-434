@@ -21309,10 +21309,65 @@ void Player::ReportedAfkBy(Player* reporter)
 WorldLocation Player::GetStartPosition() const
 {
     PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
+
+    float posX = info->positionX;
+    float posY = info->positionY;
+    float posZ = info->positionZ;
+    float angle = info->orientation;
     uint32 mapId = info->mapId;
-    if (getClass() == CLASS_DEATH_KNIGHT && HasSpell(50977))
-        mapId = 0;
-    return WorldLocation(mapId, info->positionX, info->positionY, info->positionZ, 0);
+
+    /* use quest teleport exit coords for new DKs (all races) */
+    switch (getClass()) {
+    case CLASS_DEATH_KNIGHT:
+        if (GetQuestStatus(13166) == QUEST_STATUS_COMPLETE) {
+            switch (GetTeam()) {
+            case ALLIANCE:
+                posX = -8833.38;
+                posY = 628.628;
+                posZ = 95;
+                angle = 0.484155;
+                mapId = 0;
+                break;
+            case HORDE:
+                posX = 1570;
+                posY = -4397;
+                posZ = 16;
+                angle = 0;
+                mapId = 1;
+                break;
+            default:
+                break;
+            }
+        }
+        break;
+    default:
+        /* use quest teleport exit coords for non-DK worgen/goblin players */
+        switch (getRace()) {
+        case RACE_WORGEN:
+            if (GetQuestStatus(14434) == QUEST_STATUS_COMPLETE) {
+                posX = 8177.32;
+                posY = 1002.43;
+                posZ = 7.65618;
+                angle = 6.09463;
+                mapId = 1;
+            }
+            break;
+        case RACE_GOBLIN:
+            if (GetQuestStatus(25266) == QUEST_STATUS_COMPLETE) {
+                posX = 1470.67;
+                posY = -5012.07;
+                posZ = 11.7606;
+                angle = 0;
+                mapId = 1;
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+
+    return WorldLocation(mapId, posX, posY, posZ, angle);
 }
 
 bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool is3dDistance) const
