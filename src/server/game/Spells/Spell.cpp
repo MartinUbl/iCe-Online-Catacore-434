@@ -5542,6 +5542,34 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
+            case SPELL_EFFECT_JUMP:
+            case SPELL_EFFECT_JUMP_DEST:
+            {
+                /* disallow large Z-level teleports (max = target distance / 5) */
+                float tx, ty, tz;
+                if (m_targets.HasDst())
+                    m_targets.m_dstPos.GetPosition(tx, ty, tz);
+                else if (m_targets.getUnitTarget())
+                    m_targets.getUnitTarget()->GetPosition(tx, ty, tz);
+                else if (m_targets.getGOTarget())
+                    m_targets.getGOTarget()->GetPosition(tx, ty, tz);
+                else
+                    break;
+
+                if (!m_caster->IsWithinLOS(tx, ty, tz))
+                    return SPELL_FAILED_LINE_OF_SIGHT;
+
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
+                        if (bg->GetStatus() != STATUS_IN_PROGRESS)
+                            return SPELL_FAILED_TRY_AGAIN;
+
+                float xydist = m_caster->GetExactDist2d(tx, ty);
+                if ((m_caster->GetPositionZ() - tz > (xydist + 10.0f) / 5.0f) ||
+                    (tz - m_caster->GetPositionZ() > xydist / 5.0f))
+                    return SPELL_FAILED_OUT_OF_RANGE;
+                break;
+            }
             case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
             {
                 if (m_targets.getUnitTarget() == m_caster)
