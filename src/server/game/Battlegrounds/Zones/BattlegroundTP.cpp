@@ -31,6 +31,17 @@
 #include "World.h"
 #include "WorldPacket.h"
 
+// these variables aren't used outside of this file, so declare them only here
+enum BG_TP_Rewards
+{
+    BG_TP_WIN = 0,
+    BG_TP_FLAG_CAP,
+    BG_TP_REWARD_NUM
+};
+
+uint32 BG_TP_Honor[BG_TP_REWARD_NUM]
+    = {10,40};
+
 BattlegroundTP::BattlegroundTP()
 {
     m_BgCreatures.resize(BG_CREATURES_MAX_TP);
@@ -60,19 +71,34 @@ void BattlegroundTP::Update(uint32 diff)
                 if (GetTeamScore(HORDE) == 0)        // No one scored - result is tie
                     EndBattleground(NULL);
                 else                                 // Horde has more points and thus wins
+                {
+                    RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], HORDE);
                     EndBattleground(HORDE);
+                }
             }
 
             else if (GetTeamScore(HORDE) == 0)
+            {
+                RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], ALLIANCE);
                 EndBattleground(ALLIANCE);           // Alliance has > 0, Horde has 0, alliance wins
+            }
 
             else if (GetTeamScore(HORDE) == GetTeamScore(ALLIANCE)) // Team score equal, winner is team that scored the last flag
+            {
+                RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], m_LastFlagCaptureTeam);
                 EndBattleground(m_LastFlagCaptureTeam);
+            }
 
             else if (GetTeamScore(HORDE) > GetTeamScore(ALLIANCE))  // Last but not least, check who has the higher score
+            {
+                RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], HORDE);
                 EndBattleground(HORDE);
+            }
             else
+            {
+                RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], ALLIANCE);
                 EndBattleground(ALLIANCE);
+            }
         }
         else if (GetStartTime() > uint32(m_minutesElapsed * MINUTE * IN_MILLISECONDS))
         {
@@ -255,8 +281,7 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(BG_TP_SOUND_FLAG_CAPTURED_HORDE);
         RewardReputationToTeam(889, m_ReputationCapture, HORDE);
     }
-    //for flag capture is reward 2 honorable kills
-    RewardHonorToTeam(GetBonusHonorFromKill(2), Source->GetTeam());
+    RewardHonorToTeam(BG_TP_Honor[BG_TP_FLAG_CAP], Source->GetTeam());
 
     SpawnBGObject(BG_TP_OBJECT_H_FLAG, BG_TP_FLAG_RESPAWN_TIME);
     SpawnBGObject(BG_TP_OBJECT_A_FLAG, BG_TP_FLAG_RESPAWN_TIME);
@@ -288,8 +313,7 @@ void BattlegroundTP::EventPlayerCapturedFlag(Player *Source)
         UpdateWorldState(TP_HORDE_FLAGS_SHOW, 1);
         UpdateWorldState(TP_TIME_DISPLAY, 0);
 
-        //TODO: implement!
-        //RewardHonorToTeam(BG_WSG_Honor[m_HonorMode][BG_WSG_WIN], winner);
+        RewardHonorToTeam(BG_TP_Honor[BG_TP_WIN], winner);
         EndBattleground(winner);
     }
     else
@@ -641,9 +665,8 @@ void BattlegroundTP::Reset()
     m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
     m_TeamScores[BG_TEAM_HORDE]         = 0;
     bool isBGWeekend = false;//sBattlegroundMgr.IsBGWeekend(GetTypeID());
-    m_ReputationCapture = (isBGWeekend) ? 45 : 35;
-    m_HonorWinKills = (isBGWeekend) ? 3 : 1;
-    m_HonorEndKills = (isBGWeekend) ? 4 : 2;
+    //m_ReputationCapture = (isBGWeekend) ? 45 : 35;
+    m_ReputationCapture = 35;
     // For WorldState
     m_minutesElapsed                    = 0;
     m_LastFlagCaptureTeam               = 0;
