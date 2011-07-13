@@ -5545,6 +5545,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_JUMP:
             case SPELL_EFFECT_JUMP_DEST:
             {
+                /* allow quest-based jumps */
+                if (m_spellInfo->Id == 4336)
+                    break;
+
                 /* disallow large Z-level teleports (max = target distance / 5) */
                 float tx, ty, tz;
                 if (m_targets.HasDst())
