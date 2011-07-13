@@ -635,6 +635,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
 
     if (selectionWeights)
     {
+#if 0
         if (!selectionWeights->size())
            return NULL;
         uint32 Weight = 0;
@@ -659,6 +660,16 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 break;
             }
         }
+#endif
+        BattlegroundTypeId avail_RBGs[] = {
+            BATTLEGROUND_WS,
+            BATTLEGROUND_AB,
+            BATTLEGROUND_EY,
+            BATTLEGROUND_TP,
+        };
+
+        bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+
         bg_template = GetBattlegroundTemplate(bgTypeId);
         if (!bg_template)
         {

@@ -99,6 +99,20 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
 
+    /* force random bg */
+    if (_player->getLevel() >= 80) {
+        switch (bgTypeId) {
+            case BATTLEGROUND_WS:
+            case BATTLEGROUND_AB:
+            case BATTLEGROUND_EY:
+            case BATTLEGROUND_TP:
+                bgTypeId = BATTLEGROUND_RB;
+                break;
+            default:
+                break;
+        }
+    }
+
     // can do this, since it's battleground, not arena
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, 0);
     BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
@@ -163,7 +177,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             return;
         }
 
-        if (_player->InBattlegroundQueue() && bgTypeId == BATTLEGROUND_RB)
+        if ((_player->InBattlegroundQueue() || _player->getLevel() < 80) && bgTypeId == BATTLEGROUND_RB)
         {
             //player is already in queue, can't start random queue
             WorldPacket data;
