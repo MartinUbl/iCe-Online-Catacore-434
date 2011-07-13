@@ -34,23 +34,15 @@
 #include "WorldPacket.h"
 
 // these variables aren't used outside of this file, so declare them only here
-enum BG_WSG_Rewards
+enum BG_WS_Rewards
 {
-    BG_WSG_WIN = 0,
-    BG_WSG_FLAG_CAP,
-    BG_WSG_MAP_COMPLETE,
-    BG_WSG_REWARD_NUM
+    BG_WS_WIN = 0,
+    BG_WS_FLAG_CAP,
+    BG_WS_REWARD_NUM
 };
 
-uint32 BG_WSG_Honor[BG_HONOR_MODE_NUM][BG_WSG_REWARD_NUM] = {
-    {20,40,40}, // normal honor
-    {60,40,80}  // holiday
-};
-
-uint32 BG_WSG_Reputation[BG_HONOR_MODE_NUM][BG_WSG_REWARD_NUM] = {
-    {0,35,0}, // normal honor
-    {0,45,0}  // holiday
-};
+uint32 BG_WS_Honor[BG_WS_REWARD_NUM]
+    = {10,40};
 
 BattlegroundWS::BattlegroundWS()
 {
@@ -78,21 +70,36 @@ void BattlegroundWS::Update(uint32 diff)
             if (GetTeamScore(ALLIANCE) == 0)
             {
                 if (GetTeamScore(HORDE) == 0)        // No one scored - result is tie
-                    EndBattleground(NULL);
+                    EndBattleground(3);
                 else                                 // Horde has more points and thus wins
+                {
+                    RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], HORDE);
                     EndBattleground(HORDE);
+                }
             }
 
             else if (GetTeamScore(HORDE) == 0)
+            {
+                RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], ALLIANCE);
                 EndBattleground(ALLIANCE);           // Alliance has > 0, Horde has 0, alliance wins
+            }
 
             else if (GetTeamScore(HORDE) == GetTeamScore(ALLIANCE)) // Team score equal, winner is team that scored the last flag
+            {
+                RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], m_LastFlagCaptureTeam);
                 EndBattleground(m_LastFlagCaptureTeam);
+            }
 
             else if (GetTeamScore(HORDE) > GetTeamScore(ALLIANCE))  // Last but not least, check who has the higher score
+            {
+                RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], HORDE);
                 EndBattleground(HORDE);
+            }
             else
+            {
+                RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], ALLIANCE);
                 EndBattleground(ALLIANCE);
+            }
         }
         else if (GetStartTime() > uint32(m_minutesElapsed * MINUTE * IN_MILLISECONDS))
         {
@@ -323,7 +330,7 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
     }
     //for flag capture was reward 2 honorable kills
     //now special reward (40 honor points).. TODO: implement holiday
-    RewardHonorToTeam(BG_WSG_Honor[0][BG_WSG_FLAG_CAP], Source->GetTeam()); //GetBonusHonorFromKill(2)
+    RewardHonorToTeam(BG_WS_Honor[BG_WS_FLAG_CAP], Source->GetTeam());
 
     SpawnBGObject(BG_WS_OBJECT_H_FLAG, BG_WS_FLAG_RESPAWN_TIME);
     SpawnBGObject(BG_WS_OBJECT_A_FLAG, BG_WS_FLAG_RESPAWN_TIME);
@@ -355,7 +362,7 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         UpdateWorldState(BG_WS_FLAG_STATE_HORDE, 1);
         UpdateWorldState(BG_WS_STATE_TIMER_ACTIVE, 0);
 
-        RewardHonorToTeam(BG_WSG_Honor[m_HonorMode][BG_WSG_WIN], winner);
+        RewardHonorToTeam(BG_WS_Honor[BG_WS_WIN], winner);
         EndBattleground(winner);
     }
     else
