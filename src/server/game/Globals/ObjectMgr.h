@@ -629,6 +629,23 @@ class ObjectMgr
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
+        float GetFatalDepthForZone(uint32 zoneId)
+        {
+            switch (zoneId) {
+                case 5031:  // Twin Peaks BG
+                    return -100.0f;
+                case 5146:  // Vashj'ir
+                case 5145:  // - Abyssal Depths
+                case 4815:  // - Kelp'Thar Forest
+                case 5144:  // - Shimmering Expanse
+                    return -3000.0f;
+                default:
+                    break;
+            }
+
+            return -500.0f;
+        }
+
         Group * GetGroupByGUID(uint32 guid) const;
         void AddGroup(Group* group) { mGroupSet.insert(group); }
         void RemoveGroup(Group* group) { mGroupSet.erase(group); }
