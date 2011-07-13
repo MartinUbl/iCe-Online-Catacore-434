@@ -34,10 +34,15 @@
 #include "Util.h"
 
 // these variables aren't used outside of this file, so declare them only here
-uint32 BG_EY_HonorScoreTicks[BG_HONOR_MODE_NUM] = {
-    330, // normal honor
-    200  // holiday
+enum BG_EY_Rewards
+{
+    BG_EY_WIN = 0,
+    BG_EY_TICK,
+    BG_EY_REWARD_NUM
 };
+
+uint32 BG_EY_Honor[BG_EY_REWARD_NUM]
+    = {10,30};
 
 BattlegroundEY::BattlegroundEY()
 {
@@ -132,11 +137,20 @@ void BattlegroundEY::StartingEventOpenDoors()
 void BattlegroundEY::AddPoints(uint32 Team, uint32 Points)
 {
     BattlegroundTeamId team_index = GetTeamIndexByTeamId(Team);
-    m_TeamScores[team_index] += Points;
-    m_HonorScoreTics[team_index] += Points;
+
+    // prevent >1600 cheat
+    if (m_TeamScores[team_index] + Points > BG_EY_MAX_TEAM_SCORE) {
+        if (m_HonorScoreTics[team_index] + Points > BG_EY_MAX_TEAM_SCORE - m_TeamScores[team_index])
+            m_HonorScoreTics[team_index] = BG_EY_MAX_TEAM_SCORE - m_TeamScores[team_index];
+        m_TeamScores[team_index] = BG_EY_MAX_TEAM_SCORE;
+    } else {
+        m_TeamScores[team_index] += Points;
+        m_HonorScoreTics[team_index] += Points;
+    }
+
     if (m_HonorScoreTics[team_index] >= m_HonorTics)
     {
-        RewardHonorToTeam(GetBonusHonorFromKill(1), Team);
+        RewardHonorToTeam(BG_EY_Honor[BG_EY_TICK], Team);
         m_HonorScoreTics[team_index] -= m_HonorTics;
     }
     UpdateTeamScore(Team);
@@ -285,6 +299,7 @@ void BattlegroundEY::UpdateTeamScore(uint32 Team)
     if (score >= BG_EY_MAX_TEAM_SCORE)
     {
         score = BG_EY_MAX_TEAM_SCORE;
+        RewardHonorToTeam(BG_EY_Honor[BG_EY_WIN], Team);
         EndBattleground(Team);
     }
 
@@ -525,7 +540,8 @@ void BattlegroundEY::Reset()
     m_PointAddingTimer = 0;
     m_TowerCapCheckTimer = 0;
     bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
-    m_HonorTics = (isBGWeekend) ? BG_EY_EYWeekendHonorTicks : BG_EY_NotEYWeekendHonorTicks;
+    //m_HonorTics = (isBGWeekend) ? BG_EY_EYWeekendHonorTicks : BG_EY_NotEYWeekendHonorTicks;
+    m_HonorTics = BG_EY_NotEYWeekendHonorTicks;
 
     for (uint8 i = 0; i < EY_POINTS_MAX; ++i)
     {
@@ -757,8 +773,8 @@ void BattlegroundEY::EventTeamCapturedPoint(Player *Source, uint32 Point)
     //aura should only apply to players who have accupied the node, set correct faction for trigger
     if (trigger)
     {
-        trigger->setFaction(Team == ALLIANCE ? 84 : 83);
-        trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
+        //trigger->setFaction(Team == ALLIANCE ? 84 : 83);
+        //trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
     }
 }
 
