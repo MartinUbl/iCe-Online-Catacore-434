@@ -34,10 +34,15 @@
 #include "Util.h"
 
 // these variables aren't used outside of this file, so declare them only here
-uint32 BG_AB_HonorScoreTicks[BG_HONOR_MODE_NUM] = {
-    330, // normal honor
-    200  // holiday
+enum BG_AB_Rewards
+{
+    BG_AB_WIN = 0,
+    BG_AB_TICK,
+    BG_AB_REWARD_NUM
 };
+
+uint32 BG_AB_Honor[BG_AB_REWARD_NUM]
+    = {10,30};
 
 uint32 BG_AB_ReputationScoreTicks[BG_HONOR_MODE_NUM] = {
     200, // normal honor
@@ -142,7 +147,7 @@ void BattlegroundAB::Update(uint32 diff)
                 }
                 if (m_HonorScoreTics[team] >= m_HonorTics)
                 {
-                    RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
+                    RewardHonorToTeam(BG_AB_Honor[BG_AB_TICK], (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
                     m_HonorScoreTics[team] -= m_HonorTics;
                 }
                 if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
@@ -169,11 +174,22 @@ void BattlegroundAB::Update(uint32 diff)
             }
         }
 
+        uint32 winner = 0;
+
         // Test win condition
         if (m_TeamScores[BG_TEAM_ALLIANCE] >= BG_AB_MAX_TEAM_SCORE)
-            EndBattleground(ALLIANCE);
-        if (m_TeamScores[BG_TEAM_HORDE] >= BG_AB_MAX_TEAM_SCORE)
-            EndBattleground(HORDE);
+            winner = ALLIANCE;
+        else if (m_TeamScores[BG_TEAM_HORDE] >= BG_AB_MAX_TEAM_SCORE)
+            winner = HORDE;
+
+        // draw
+        if (winner && m_TeamScores[BG_TEAM_ALLIANCE] == m_TeamScores[BG_TEAM_HORDE])
+            EndBattleground(3);
+
+        if (winner) {
+            RewardHonorToTeam(BG_AB_Honor[BG_AB_WIN], winner);
+            EndBattleground(winner);
+        }
     }
 }
 
@@ -615,8 +631,10 @@ void BattlegroundAB::Reset()
     m_ReputationScoreTics[BG_TEAM_HORDE]    = 0;
     m_IsInformedNearVictory                 = false;
     bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
-    m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
-    m_ReputationTics = (isBGWeekend) ? BG_AB_ABBGWeekendReputationTicks : BG_AB_NotABBGWeekendReputationTicks;
+    //m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
+    m_HonorTics = BG_AB_NotABBGWeekendHonorTicks;
+    //m_ReputationTics = (isBGWeekend) ? BG_AB_ABBGWeekendReputationTicks : BG_AB_NotABBGWeekendReputationTicks;
+    m_ReputationTics = BG_AB_NotABBGWeekendReputationTicks;
     m_TeamScores500Disadvantage[BG_TEAM_ALLIANCE] = false;
     m_TeamScores500Disadvantage[BG_TEAM_HORDE]    = false;
 
