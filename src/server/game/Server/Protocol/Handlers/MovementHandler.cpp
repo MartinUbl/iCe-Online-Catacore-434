@@ -373,7 +373,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-        if (movementInfo.pos.GetPositionZ() < sObjectMgr->GetFatalDepthForZone(plMover->GetZoneId()))
+        if (movementInfo.pos.GetPositionZ() < sObjectMgr->GetFatalDepthForZone(plMover->GetZoneId()) || movementInfo.pos.GetPositionZ() > 10000.0f)
         {
             if (!(plMover->InBattleground()
                 && plMover->GetBattleground()
