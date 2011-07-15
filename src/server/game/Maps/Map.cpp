@@ -1639,6 +1639,43 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
     }
 }
 
+/* advanced, meaningful and not-bugged version of Map::GetHeight */
+float Map::GetHeight2(float x, float y, float z) const
+{
+    /* input z is important for caves (or under-bridges, ..), because
+     * one X,Y can have MULTIPLE Z points !!! (ie. under/on the bridge)
+     * - make an algorithm that looks both up and down to find a nearest
+     *   surface and return it's height */
+
+    float height;
+
+    /* increase input Z a little, just enough for all the VMAP
+     * inaccurate cases (tiny bumps) that would make the calculation wrong
+     * -- this is because of the vmgr->getHeight algorithm that checks
+     *    beneath current position and if there's a valid height point,
+     *    it would use that one instead of the one we want (which is
+     *    ie. 0.013yd above the current position */
+    /* NOTE: this is ONLY for the calculation, returned height will be exact */
+    z += 2.0f;
+
+    /* use vmap object if it's available for this x,y */
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    if (!vmgr)
+        height = VMAP_INVALID_HEIGHT_VALUE;
+    else
+        height = vmgr->getHeight(GetId(), x, y, z, 5000.0f);
+
+    /* use grid height if vmap object doesn't exist */
+    if (height == VMAP_INVALID_HEIGHT_VALUE)
+        if (GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+            height = gmap->getHeight(x,y);
+
+    if (height == -500.000000f)
+        height = INVALID_HEIGHT;
+
+    return height;
+}
+
 inline bool IsOutdoorWMO(uint32 mogpFlags, int32 /*adtId*/, int32 /*rootId*/, int32 /*groupId*/, WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
 {
     bool outdoor = true;
