@@ -924,6 +924,9 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
 
             if (!team) team = plr->GetTeam();
 
+            plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
+            plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
             // if arena, remove the specific arena auras
             if (isArena())
             {
@@ -1110,6 +1113,8 @@ void Battleground::AddPlayer(Player* plr)
         if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
         {
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
+            plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
+            plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
             plr->ResetAllPowers();
         }
         WorldPacket teammate;
@@ -1119,8 +1124,11 @@ void Battleground::AddPlayer(Player* plr)
     }
     else
     {
-        if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        if (GetStatus() == STATUS_WAIT_JOIN) {                 // not started yet
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
+            plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
+            plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+        }
     }
 
     plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);

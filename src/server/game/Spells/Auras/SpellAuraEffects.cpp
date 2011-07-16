@@ -3626,6 +3626,12 @@ void AuraEffect::HandleAuraModScale(AuraApplication const *aurApp, uint8 mode, b
 
     Unit *target = aurApp->GetTarget();
 
+    /* silently ignore shrinking size changes in BG instead of prohibiting
+     * the entire spell (ie. in Spell::CheckCast()) */
+    if (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->InBattleground())
+        if ((float)GetAmount() < 1.0f)
+            return;
+
     target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,(float)GetAmount(),apply);
 }
 
