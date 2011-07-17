@@ -5336,19 +5336,35 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const *aurApp, uint
         return;
 
     Unit *target = aurApp->GetTarget();
+    int32 amount = GetAmount();
+
+    switch (GetSpellProto()->Id)
+    {
+        // Increase percents of health instead of health value
+        case 22842: // Frenzied Regeneration
+            amount = apply ?
+                  (target->GetMaxHealth()*(amount/100.0f))
+                : (target->GetMaxHealth()-(target->GetMaxHealth()*(100.0f/(100.0f+amount))));
+
+            // Special case - if health < 30%, increase to that value. We can be sure, that it won't be
+            // higher than maxhealth+30%, so we can increase health now
+            if (apply && target->GetHealth() < (target->GetMaxHealth()+amount)*0.3f)
+                target->SetHealth(target->GetMaxHealth()*0.3f);
+            break;
+    }
 
     if (apply)
     {
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
-        target->ModifyHealth(GetAmount());
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(amount), apply);
+        target->ModifyHealth(amount);
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
+        if (int32(target->GetHealth()) > amount)
+            target->ModifyHealth(-amount);
         else
             target->SetHealth(1);
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(amount), apply);
     }
 }
 
