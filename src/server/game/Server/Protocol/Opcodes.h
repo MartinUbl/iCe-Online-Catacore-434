@@ -681,7 +681,7 @@ enum Opcodes
     CMSG_LOOT_ROLL                                   = 0x0BDA8, // 4.0.6a 13623
     SMSG_LOOT_START_ROLL                             = 0x0EB84, // 4.0.6a 13623
     SMSG_LOOT_ROLL                                   = 0x066A8, // 4.0.6a 13623
-    CMSG_LOOT_MASTER_GIVE                            = 0x100DA, //
+    CMSG_LOOT_MASTER_GIVE                            = 0x03BA4, // 4.0.6a 13623
     SMSG_LOOT_MASTER_LIST                            = 0x0ECC4, // 4.0.6a 13623
     SMSG_SET_FORCED_REACTIONS                        = 0x100DB, //
     SMSG_SPELL_FAILED_OTHER                          = 0x0E7A4, // 4.0.6a 13623
