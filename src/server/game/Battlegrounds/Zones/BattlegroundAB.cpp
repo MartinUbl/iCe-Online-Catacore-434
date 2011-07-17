@@ -412,7 +412,7 @@ void BattlegroundAB::_NodeOccupied(uint8 node,Team team)
     if (trigger)
     {
         trigger->setFaction(team == ALLIANCE ? 84 : 83);
-        trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
+        //trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
     }
 }
 
