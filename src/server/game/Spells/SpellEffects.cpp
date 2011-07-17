@@ -1692,6 +1692,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     SendCastResult(SPELL_FAILED_FIZZLE);
                 return;
             }
+            // Soul Link activation
+            else if (m_spellInfo->Id == 19028)
+            {
+                // Trigger linked spell
+                unitTarget->CastSpell(unitTarget,25228,true);
+            }
             break;
         case SPELLFAMILY_DRUID:
             // Starfall
