@@ -452,7 +452,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellTargetRestrictionsStore, dbcPath,"SpellTargetRestrictions.dbc"/*, &CustomSpellTargetRestrictionsEntryfmt, &CustomSpellTargetRestrictionsEntryIndex*/);
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellTotemsStore,         dbcPath,"SpellTotems.dbc"/*, &CustomSpellTotemsEntryfmt, &CustomSpellTotemsEntryIndex*/);
     LoadDBC(availableDbcLocales,bad_dbc_files,sTrueSpellStore,           dbcPath,"Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);
-    
+
+    sSpellMgr->LoadCustomSpells();
+
     for(uint32 i = 1; i < sSpellEffectStore.GetNumRows(); ++i)
     {
         if(SpellEffectEntry const *spellEffect = sSpellEffectStore.LookupEntry(i))

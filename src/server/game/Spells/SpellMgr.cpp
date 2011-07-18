@@ -3615,6 +3615,33 @@ void SpellMgr::LoadSpellRanks()
     sLog->outString();
 }
 
+#define INIT_NEW_SPELLENTRY(a,b) {a=new SpellEntry_n();memset(a,0,sizeof(SpellEntry_n));a->Id=b;}
+#define INSERT_SPELLENTRY(a) {sTrueSpellStore.indexTable[a->Id]=a;}
+
+//create new spells that isn't present in DBC and is needed for gameplay
+void SpellMgr::LoadCustomSpells()
+{
+    SpellEntry_n* pSpell;
+
+    /*
+        HOW DOES IT WORK?
+
+        INIT_NEW_SPELLENTRY(a,b) - inits new space for spell to variable a and sets id from variable b
+        INSERT_SPELLENTRY(a) - inserts new spell to array of all spells
+
+        in most cases, additional things are needed to set, because this is only SpellEntry_n structure
+        which is raw structure from DBC. The whole SpellEntry structure access is available in
+        function LoadSpellCustomAttr
+    */
+
+    // Demonic Circle: Summon (caster aura state, allows casting of teleporting spell)
+    INIT_NEW_SPELLENTRY(pSpell,62388);
+    pSpell->CastingTimeIndex = 1;
+    pSpell->DurationIndex = 21;
+    pSpell->rangeIndex = 1;
+    INSERT_SPELLENTRY(pSpell);
+}
+
 // set data in core for now
 void SpellMgr::LoadSpellCustomAttr()
 {
@@ -3767,6 +3794,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 82661: //Aspect of the Fox
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
+            break;
+        case 62388: //Demonic Circle: Summon (caster aura spell)
+            spellInfo->EquippedItemClass = -1;
+            spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
             break;
         case 87934: //Serpent Spread
         case 87935:
