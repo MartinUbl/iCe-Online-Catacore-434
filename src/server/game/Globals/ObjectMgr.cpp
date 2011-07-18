@@ -6517,6 +6517,51 @@ AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
     return NULL;
 }
 
+bool ObjectMgr::IsFlatGround(Map *tmap, float x, float y, float z)
+{
+    /* get 8 points of an octagon on a circle with 0.5yd radius
+     * around position x,y
+     * if the highest point is 0.9yd higher than the lowest one
+     * (which is ~45 degrees, given 0.5yd radius), ground is not flat */
+    float point[8];
+    float radius = 0.5f;
+    float minmax_dist = 0.9f;
+
+    float px, py;
+    int i;
+    for (i = 0; i < 8; i++) {
+        px = x + (radius * sin(i*45));
+        py = y + (radius * cos(i*45));
+        point[i] = tmap->GetHeight2(px, py, z);
+        if (point[i] < -20000.0f)
+            return false;
+    }
+
+    float max = -20000.0f, min = 20000.0f;
+    for (i = 0; i < 8; i++) {
+        if (point[i] > max)
+            max = point[i];
+        if (point[i] < min)
+            min = point[i];
+    }
+
+    /* if max is too far from min */
+    if (max - min > minmax_dist)
+        return false;
+
+    float avg = 0;
+    for (i = 0; i < 8; i++)
+        avg += point[i];
+    avg /= 8;
+
+    /* if octagon center is more than 'radius' away from it's pos */
+    float center_z = tmap->GetHeight2(x, y, z);
+    if (fabs(center_z - avg) > radius)
+        return false;
+
+    return true;
+}
+
 void ObjectMgr::SetHighestGuids()
 {
     QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");

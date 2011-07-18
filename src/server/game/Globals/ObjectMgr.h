@@ -778,6 +778,8 @@ class ObjectMgr
         AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
 
+        bool IsFlatGround(Map *tmap, float x, float y, float z);
+
         uint32 GetAreaTriggerScriptId(uint32 trigger_id);
         SpellScriptsBounds GetSpellScriptsBounds(uint32 spell_id);
 
