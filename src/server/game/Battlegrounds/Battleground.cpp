@@ -488,6 +488,11 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                 {
                     plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
                     plr->ResetAllPowers();
+
+                    /* teleport to team start point */
+                    float sx, sy, sz, so;
+                    GetTeamStartLoc(plr->GetTeam(), sx, sy, sz, so);
+                    plr->GetMotionMaster()->MoveJump(sx, sy, sz, 10.0f, 5.0f);
                 }
             // Announce BG starting
             if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
