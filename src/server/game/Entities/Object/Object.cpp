@@ -1530,6 +1530,81 @@ bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, 
     return fabs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
 }
 
+bool WorldObject::HasFlatPathTo(Position *dst)
+{
+    /* on a path between this object and dst position, select a series
+     * of N points (N being distance/1yd) and determine whether
+     * the path is flat enough for whatever we need this function to */
+
+    /* use only x,y distance, z is irrelevant */
+    float distance = GetExactDist2d(dst);
+
+    /* just a number of points (int)
+     * for distance ie. 2-2.9yd, use 4 points (incl. start + end) */
+    int numpoints = (int)distance + 2;
+
+    /* start + path[total-2] + end */
+    //float pointX[numpoints];
+    //float pointY[numpoints];
+    float pointZ[numpoints];
+    /* distance between points can therefore be only < 1.0f,
+     * it's extremes shrinking with larger distances */
+    float pointdist = distance / (numpoints-1);
+
+    int i;
+
+    float px, py;
+    for (i = 0; i < numpoints; i++) {
+        //pointX[i] = GetPositionX() + ((dst->GetPositionX() - GetPositionX()) * ((float)i/(float)(numpoints-1)));
+        //pointY[i] = GetPositionY() + ((dst->GetPositionY() - GetPositionY()) * ((float)i/(float)(numpoints-1)));
+        px = GetPositionX() + ((dst->GetPositionX() - GetPositionX()) * ((float)i/(float)(numpoints-1)));
+        py = GetPositionY() + ((dst->GetPositionY() - GetPositionY()) * ((float)i/(float)(numpoints-1)));
+        pointZ[i] = GetPositionZ() + ((dst->GetPositionZ() - GetPositionZ()) * ((float)i/(float)(numpoints-1)));
+        /* adjust height to nearest ground level */
+        //pointZ[i] = GetMap()->GetHeight2(pointX[i], pointY[i], pointZ[i]);
+        pointZ[i] = GetMap()->GetHeight2(px, py, pointZ[i]);
+    }
+
+    /* if any of the points has invalid height, fail */
+    for (i = 0; i < numpoints; i++)
+        if (pointZ[i] == INVALID_HEIGHT)
+            return false;
+
+    /* excluded algorithms:
+     *
+     * --- height difference ---
+     * 1: find minimum and maximum and compare them against algo 2
+     * 2: use height difference (calculated from an angle, say, 45 degrees)
+     *    between source and destination
+     * 3: if the height diff between any two points on the path is larger than
+     *    the x,y distance between those points (eg. if the angle between
+     *    point N and point N+1 is 45 (or more) degrees up/down), remember that
+     *    - if it happens again, the path is not really flat
+     *
+     * --- valley detection ---
+     * 4: remember the amount of increased/decreased height between points
+     *    and if both (and only both) of those totals are above 1/5 of the total
+     *    distance between start/end, then there's a valley on the path
+     * 5: look for a point A with a negative fatal (>4yd) height difference against
+     *    a previous one - if such point is found, remember it and look for
+     *    another point B, which is at most 3yd below A (and still below A+0.5)
+     *    - if point B is found, compare it's distance to point A with a regular
+     *      player jump distance (around 5yd)
+     *      - if within that range, look for another fatal point,
+     *      - else ... well, the valley is just too wide
+     */
+
+    /* used algorithm: very simplistic, allow any negative jump (down)
+     * if no point N on the path is higher than point N-1 by more than
+     * the x,y distance between those points (eg. 45 degrees)
+     * - apply the same rule on positive jumps */
+    for (i = 1; i < numpoints; i++)
+        if (pointZ[i] - pointZ[i-1] > pointdist)
+            return false;
+
+    return true;
+}
+
 bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDist(target, distance) && HasInArc(arc, target);
