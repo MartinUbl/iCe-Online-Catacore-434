@@ -5549,29 +5549,42 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_spellInfo->Id == 4336)
                     break;
 
-                /* disallow large Z-level teleports (max = target distance / 5) */
-                float tx, ty, tz;
+                /* do these checks only on players */
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                /* get destination position */
+                Position *dpos;
                 if (m_targets.HasDst())
-                    m_targets.m_dstPos.GetPosition(tx, ty, tz);
+                    dpos = dynamic_cast<Position*>(&m_targets.m_dstPos);
                 else if (m_targets.getUnitTarget())
-                    m_targets.getUnitTarget()->GetPosition(tx, ty, tz);
+                    dpos = dynamic_cast<Position*>(m_targets.getUnitTarget());
                 else if (m_targets.getGOTarget())
-                    m_targets.getGOTarget()->GetPosition(tx, ty, tz);
+                    dpos = dynamic_cast<Position*>(m_targets.getGOTarget());
                 else
                     break;
 
-                if (!m_caster->IsWithinLOS(tx, ty, tz))
+                /* allow only within-LOS jumps */
+                if (!m_caster->IsWithinLOS(dpos->GetPositionX(), dpos->GetPositionY(), dpos->GetPositionZ()))
                     return SPELL_FAILED_LINE_OF_SIGHT;
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
-                        if (bg->GetStatus() != STATUS_IN_PROGRESS)
-                            return SPELL_FAILED_TRY_AGAIN;
+                /* not before BG starts */
+                if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
+                    if (bg->GetStatus() != STATUS_IN_PROGRESS)
+                        return SPELL_FAILED_TRY_AGAIN;
 
-                float xydist = m_caster->GetExactDist2d(tx, ty);
-                if ((m_caster->GetPositionZ() - tz > (xydist + 10.0f) / 5.0f) ||
-                    (tz - m_caster->GetPositionZ() > xydist / 5.0f))
+                /* no jumps while falling */
+                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+                    return SPELL_FAILED_FALLING;
+
+                /* destination must stand on flat ground (in players map) */
+                if (!sObjectMgr->IsFlatGround(m_caster->GetMap(), dpos->GetPositionX(), dpos->GetPositionY(), dpos->GetPositionZ()))
                     return SPELL_FAILED_OUT_OF_RANGE;
+
+                /* flat path between player and destination required */
+                if (!m_caster->HasFlatPathTo(dpos))
+                    return SPELL_FAILED_OUT_OF_RANGE;
+
                 break;
             }
             case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
