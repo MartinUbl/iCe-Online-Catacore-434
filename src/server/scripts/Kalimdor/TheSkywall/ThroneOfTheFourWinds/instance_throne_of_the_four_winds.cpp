@@ -57,16 +57,16 @@ public:
             if(!who)
                 return;
 
-            if(me->GetDistance(who) > 13.0f)
+            if(me->GetDistance(who) > 12.0f || who->hasUnitState(UNIT_STAT_JUMPING))
                 return;
 
             if(m_pInstance)
                 if(m_pInstance->GetData(TYPE_CONCLAVE) == SPECIAL) // Ultimate ability in progress
                     return;
 
-            if(who->ToPlayer() && !who->HasAura(89771))
+            Unit* pOwner = who->GetOwner();
+            if(who->ToPlayer() || (pOwner && pOwner->ToPlayer()))
             {
-                who->CastSpell(who, 89771, true); // add aura not to retrigger jumping (8 sec)
                 float x = targetPos.GetPositionX() + (who->GetPositionX() - me->GetPositionX())/2;
                 float y = targetPos.GetPositionY() + (who->GetPositionY() - me->GetPositionY())/2;
                 float z = targetPos.GetPositionZ();
