@@ -47,26 +47,26 @@ enum eGOs
 
 const Position BridgePos[]=
 {
-    {-238.1f, 871.9f, 193.9f}, // South -> West
-    {-238.2f, 766.1f, 193.9f}, // South -> East
-    {-107.2f, 631.1f, 193.9f}, // East  -> South
-    {-2.2f, 631.4f, 193.9f},   // East  -> North
-    {132.5f, 762.1f, 193.9f},  // North -> East
-    {132.4f, 867.8f, 193.9f},  // North -> West
-    {2.1f, 1001.8f, 193.9f},   // West  -> North
-    {-103.6f, 1002.4f, 193.9f},// West  -> South
+    {-238.1f, 871.9f, 193.9f, 0.0f}, // South -> West
+    {-238.2f, 766.1f, 193.9f, 0.0f}, // South -> East
+    {-107.2f, 631.1f, 193.9f, 0.0f}, // East  -> South
+    {-2.2f, 631.4f, 193.9f, 0.0f},   // East  -> North
+    {132.5f, 762.1f, 193.9f, 0.0f},  // North -> East
+    {132.4f, 867.8f, 193.9f, 0.0f},  // North -> West
+    {2.1f, 1001.8f, 193.9f, 0.0f},   // West  -> North
+    {-103.6f, 1002.4f, 193.9f, 0.0f},// West  -> South
 };
 
 const Position BridgeTarget[]=
 {
-    {-83.5f, 1022.5f, 196.5f}, // South -> West
-    {-87.6f, 611.6f, 196.5f},  // South -> East
-    {-258.1f, 785.8f, 196.5f}, // East  -> South
-    {152.4f, 781.8f, 196.5f},  // East  -> North
-    {-22.1f, 611.3f, 196.5f},  // North -> East
-    {-17.7f, 1021.9f, 196.5f}, // North -> West
-    {152.8f, 847.8f, 196.5f},  // West  -> North
-    {-257.8f, 852.2f, 196.5f}, // West  -> South
+    {-83.5f, 1022.5f, 196.5f, 0.0f}, // South -> West
+    {-87.6f, 611.6f, 196.5f, 0.0f},  // South -> East
+    {-258.1f, 785.8f, 196.5f, 0.0f}, // East  -> South
+    {152.4f, 781.8f, 196.5f, 0.0f},  // East  -> North
+    {-22.1f, 611.3f, 196.5f, 0.0f},  // North -> East
+    {-17.7f, 1021.9f, 196.5f, 0.0f}, // North -> West
+    {152.8f, 847.8f, 196.5f, 0.0f},  // West  -> North
+    {-257.8f, 852.2f, 196.5f, 0.0f}, // West  -> South
 };
 
 #endif

@@ -57,26 +57,26 @@ public:
             if(!who)
                 return;
 
-            if(me->GetDistance(who) > 13.0f || me->GetDistanceZ(who) > 1.0f)
+            if(me->GetDistance(who) > 13.0f)
                 return;
 
             if(m_pInstance)
                 if(m_pInstance->GetData(TYPE_CONCLAVE) == SPECIAL) // Ultimate ability in progress
                     return;
 
-            if(who->ToPlayer() && !who->HasAura(85740))
+            if(who->ToPlayer() && !who->HasAura(89771))
             {
-                who->CastSpell(who, 85740, true); // add aura not to retrigger jumping
+                who->CastSpell(who, 89771, true); // add aura not to retrigger jumping (8 sec)
                 float x = targetPos.GetPositionX() + (who->GetPositionX() - me->GetPositionX())/2;
                 float y = targetPos.GetPositionY() + (who->GetPositionY() - me->GetPositionY())/2;
-                float z = targetPos.GetPositionZ() + (who->GetPositionZ() - me->GetPositionZ())/2;
+                float z = targetPos.GetPositionZ();
                 who->GetMotionMaster()->MoveJump(x, y, z, 30.0f, 9.0f);
             }
         }
 
-        void SetType(int type)
+        void DoAction(const int32 param)
         {
-            targetPos = BridgeTarget[type];
+            targetPos = BridgeTarget[param];
         }
     };
 };
@@ -116,13 +116,6 @@ public:
             m_Nezir_GUID = 0;
             m_Rohash_GUID = 0;
             m_Alakir_GUID = 0;
-
-            // Summon Bridge NPCs and set their Type
-            for(int i = 0; i < 8; i++)
-            {
-                if(TempSummon* pBridge = instance->SummonCreature(NPC_BRIDGE, BridgePos[i]))
-                    CAST_AI(npc_four_winds_bridge::npc_four_winds_bridgeAI, pBridge->AI())->SetType(i);
-            }
         }
 
         bool IsEncounterInProgress() const
@@ -137,8 +130,17 @@ public:
         {
             switch(pGO->GetEntry())
             {
-            case GO_BRIDGE:     m_Bridge_GUID = pGO->GetGUID();     break;
-            case GO_CENTER:     m_Center_GUID = pGO->GetGUID();     break;
+            case GO_BRIDGE:
+                m_Bridge_GUID = pGO->GetGUID();
+                break;
+            case GO_CENTER:
+                for(int i = 0; i < 8; i++) // Summon Bridge NPCs and set their target position
+                {
+                    if(TempSummon* pBridge = pGO->SummonCreature(NPC_BRIDGE, BridgePos[i]))
+                        pBridge->AI()->DoAction(i);
+                }
+                m_Center_GUID = pGO->GetGUID();
+                break;
             default: break;
             }
         }
@@ -201,7 +203,7 @@ UPDATE `gameobject_template` SET data1='0' WHERE entry IN (4510135,4510136,45101
 INSERT INTO creature_template
   (entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, modelid4, name, subname, IconName, gossip_menu_id, minlevel, maxlevel, exp, faction_A, faction_H, npcflag, speed_walk, speed_run, scale, rank, mindmg, maxdmg, dmgschool, attackpower, dmg_multiplier, baseattacktime, rangeattacktime, unit_class, unit_flags, dynamicflags, family, trainer_type, trainer_spell, trainer_class, trainer_race, minrangedmg, maxrangedmg, rangedattackpower, type, type_flags, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, InhabitType, Health_mod, Mana_mod, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName, WDBVerified)
 VALUES
-  (80000, 0, 0, 0, 210, 0, 987, 0, 0, 0, "Four Winds Bridge", "", "NULL", 0, 24, 25, 0, 21, 21, 0, 1, 1, 1, 0, 35, 48, 0, 86, 1, 2000, 0, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 47, "", 1, 3, 1.02, 1, 1, 0, 884, 1129, 0, 0, 0, 0, 0, 1, 3, 8388624, 0, "npc_four_winds_bridge", 12340);
+  (80000, 0, 0, 0, 0, 0, 987, 0, 0, 0, "Four Winds Bridge", "", "NULL", 0, 1, 1, 0, 21, 21, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 2000, 0, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 1, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 8388624, 0, "npc_four_winds_bridge", 12340);
 
 INSERT INTO gameobject
   (id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state)
