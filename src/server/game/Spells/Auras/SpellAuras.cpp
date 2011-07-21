@@ -1096,6 +1096,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastSpell(caster, 87154, true);
                         break;
                     }
+                // Dispersion
+                case 47585:
+                    {
+                        // apply snare and movement impairing effects immunity
+                        caster->CastSpell(caster, 63230, true);
+                        break;
+                    }
                 // Power Word: Shield
                 case 17:
                     {
