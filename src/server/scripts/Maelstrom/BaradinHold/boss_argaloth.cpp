@@ -16,29 +16,16 @@
 */
 
 #include"ScriptPCH.h"
-#include"WorldPacket.h"
 #include"baradin_hold.h"
-#include"ScriptMgr.h"
-#include"ScriptedCreature.h"
-#include"SpellScript.h"
-#include"SpellAuraEffects.h"
 
 enum Spells
 {
     SPELL_BERSERK              = 47008,
     SPELL_CONSUMING_DARKNESS   = 88954,
-    H_SPELL_CONSUMING_DARKNESS = 95173,
+//  H_SPELL_CONSUMING_DARKNESS = 95173, // unused
     SPELL_FEL_FIRESTORM        = 88972,
     SPELL_METEOR_SLASH         = 88942,
     H_SPELL_METEOR_SLASH       = 95172,
-};
-
-enum Events
-{
-    EVENT_BERSERK,
-    EVENT_CONSUMING_DARKNESS,
-    EVENT_FEL_FIRESTORM,
-    EVENT_METEOR_SLASH,
 };
 
 class boss_argaloth: public CreatureScript
@@ -58,22 +45,28 @@ public:
         }
 
         InstanceScript *pInstance;
-        EventMap events;
-        bool fs_flag;
-        uint32 bsk;
-        bool enrage_flag;
-        bool check_in;
-        float curr_health;
+
+        bool berserk;
+        uint32 berserk_timer;
+        uint32 darkness_timer;
+        uint32 meteor_timer;
+        uint32 update_timer;
+        uint32 firestorm_progress;
+        uint8 firestorm_count;
+
 
         void Reset()
         {
-            bsk = 300000; // 5 min Enrage Timer
-            events.Reset();
-            if (pInstance && (pInstance->GetData(DATA_ARGALOTH_EVENT) != DONE &&  !check_in))
-                pInstance->SetData(DATA_ARGALOTH_EVENT, NOT_STARTED);
+            berserk = false;
+            berserk_timer = 300000; // 5 min Enrage Timer
+            darkness_timer = 15000;
+            meteor_timer = 9000;
+            update_timer = 1000;
+            firestorm_progress = 0;
+            firestorm_count = 0;
 
-            enrage_flag = false;
-            check_in = false;
+            if (pInstance && pInstance->GetData(DATA_ARGALOTH_EVENT) != DONE)
+                pInstance->SetData(DATA_ARGALOTH_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*Ent*/)
@@ -88,54 +81,71 @@ public:
                 pInstance->SetData(DATA_ARGALOTH_EVENT, DONE);
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            curr_health = me->GetHealthPct();
-            events.Update(uiDiff);
-
-            while (uint32 eventId = events.ExecuteEvent())
+            // pure butchery
+            if (berserk)
             {
-                switch(eventId)
-                {
-                    case EVENT_CONSUMING_DARKNESS:
-                        if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                            DoCast(me->getVictim(), SPELL_CONSUMING_DARKNESS);
-                        events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, urand(12000, 14000));
-                        break;
-                    case EVENT_METEOR_SLASH:
-                        DoCast(me->getVictim(), SPELL_METEOR_SLASH);
-                        events.ScheduleEvent(EVENT_METEOR_SLASH, 21000);
-                        break;
-                    case SPELL_FEL_FIRESTORM:
-                        if (curr_health < 66.0 && (fs_flag == false))
-                        {
-                            DoCast(me->getVictim(), SPELL_FEL_FIRESTORM);
-                            fs_flag = true;
-                        }
-                                               
-                        if (curr_health < 33.0 && (fs_flag == false))
-                        {
-                            DoCast(me->getVictim(), SPELL_FEL_FIRESTORM);
-                            fs_flag = true;
-                        }
-                        break;
-                    case EVENT_BERSERK:
-                        if(!enrage_flag && bsk <= uiDiff)
-                        {
-                            DoCast(me, SPELL_BERSERK);
-                            enrage_flag = true;
-                            events.ScheduleEvent(EVENT_BERSERK, 300000);
-                        }
-                        else
-                            bsk -= uiDiff;
-                        break;
-                }
+                DoMeleeAttackIfReady();
+                return;
             }
+
+            // Berserk timer
+            if (berserk_timer < diff)
+            {
+                berserk = true;
+                me->CastSpell(me, SPELL_BERSERK, true);
+            } else berserk_timer -= diff;
+
+            // Stop the rest of AI while channeling
+            if (firestorm_progress > diff)
+            {
+                firestorm_progress -= diff;
+                return;
+            } else firestorm_progress = 0;
+
+            // Channel Fel Firestorm on 66 and 33 %
+            if (update_timer < diff)
+            {
+                float health_pct = me->GetHealthPct();
+                if ((health_pct < 66.0f && firestorm_count < 1)
+                    || (health_pct < 33.0f && firestorm_count < 2))
+                {
+                    me->CastSpell(me, SPELL_FEL_FIRESTORM, false); // spell NEEDS FIX
+                    firestorm_progress = 18000;
+                    firestorm_count++;
+                    update_timer = 1000;
+                    return;
+                }
+                update_timer = 1000;
+            } else update_timer -= diff;
+
+            // Meteor Slash timer
+            if (meteor_timer < diff)
+            {
+                me->CastSpell(me, RAID_MODE(SPELL_METEOR_SLASH,H_SPELL_METEOR_SLASH), false);
+                meteor_timer = 15000;
+            } else meteor_timer -= diff;
+
+            // Consuming Darknes timer. RaidMode-dependent count of DoTs
+            if (darkness_timer < diff)
+            {
+                for (int i = 0; i < RAID_MODE(3,8); i++) // add check not to afflict the same target (does not stack) ?
+                {
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    {
+                        me->CastSpell(pTarget, SPELL_CONSUMING_DARKNESS, false);
+                        me->AddAura(SPELL_CONSUMING_DARKNESS, pTarget); // Aura needs to be applied manually
+                    }
+                }
+                darkness_timer = urand(12000,14000);
+            } else darkness_timer -= diff;
+
+            // White damage
             DoMeleeAttackIfReady();
-            
         }
      };
 };
