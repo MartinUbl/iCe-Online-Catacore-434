@@ -33,6 +33,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
+#include "SpellAuras.h"
 
 // Here only due to size of this file - quick Edit and continue build
 bool ChatHandler::HandleTestCommand(const char* args)

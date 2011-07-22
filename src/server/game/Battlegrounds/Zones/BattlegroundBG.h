@@ -27,12 +27,35 @@
 
 class Battleground;
 
+enum BG_BG_WorldStates
+{
+    BG_BG_OP_OCCUPIED_BASES_HORDE       = 1778,
+    BG_BG_OP_OCCUPIED_BASES_ALLY        = 1779,
+    BG_BG_OP_RESOURCES_ALLY             = 1776,
+    BG_BG_OP_RESOURCES_HORDE            = 1777,
+    BG_BG_OP_RESOURCES_MAX              = 1780,
+    BG_BG_OP_RESOURCES_WARNING          = 1955
+};
+
+const uint32 BG_BG_OP_NODESTATES[3] =    {1767, 1782, 1772};
+
+const uint32 BG_BG_OP_NODEICONS[3]  =    {1842, 1846, 1845};
+
 enum BG_BG_NodeObjectId
 {
+    BG_BG_OBJECTID_NODE_BANNER_0    = 180087,       // Lighthouse banner
+    BG_BG_OBJECTID_NODE_BANNER_1    = 180088,       // Waterworks banner
+    BG_BG_OBJECTID_NODE_BANNER_2    = 180089,       // Mine banner
+    /*
     BG_BG_OBJECTID_NODE_BANNER_0    = 205557,       // Lighthouse banner
     BG_BG_OBJECTID_NODE_BANNER_1    = 208782,       // Mine banner
     BG_BG_OBJECTID_NODE_BANNER_2    = 208785,       // Watterworks banner
+    */
 };
+
+// Difference between each node banner object entry
+const uint32 NodeEntryNumDiff[3] = {0,1,2};
+//const uint32 NodeEntryNumDiff[3] = {0,3225,3228};
 
 enum BG_BG_ObjectType
 {
@@ -52,10 +75,21 @@ enum BG_BG_ObjectType
 /* Object id templates from DB */
 enum BG_BG_ObjectTypes
 {
-    // BG_BG_OBJECTID_BANNER_A             =
-    // BG_BG_OBJECTID_BANNER_CONT_A        =
-    // BG_BG_OBJECTID_BANNER_H             =
-    // BG_BG_OBJECTID_BANNER_CONT_H        =
+    BG_BG_OBJECTID_BANNER_A             = 180058,
+    BG_BG_OBJECTID_BANNER_CONT_A        = 180059,
+    BG_BG_OBJECTID_BANNER_H             = 180060,
+    BG_BG_OBJECTID_BANNER_CONT_H        = 180061,
+    /*
+    BG_BG_OBJECTID_BANNER_A             = 208718,
+    BG_BG_OBJECTID_BANNER_CONT_A        = 208724,
+    BG_BG_OBJECTID_BANNER_H             = 208727,
+    BG_BG_OBJECTID_BANNER_CONT_H        = 208754,
+    */
+
+    // Same as in AB
+    BG_BG_OBJECTID_AURA_A               = 180100,
+    BG_BG_OBJECTID_AURA_H               = 180101,
+    BG_BG_OBJECTID_AURA_C               = 180102,
 
     BG_BG_OBJECTID_GATE_A               = 205496,
     BG_BG_OBJECTID_GATE_H               = 207178
@@ -108,10 +142,18 @@ enum BG_BG_Sounds
     BG_BG_SOUND_NEAR_VICTORY            = 8456
 };
 
+// Old AB ones: 122 assault, 123 defend
 enum BG_BG_Objectives
 {
-    BG_OBJECTIVE_ASSAULT_BASE           = 122,
-    BG_OBJECTIVE_DEFEND_BASE            = 123
+    BG_OBJECTIVE_ASSAULT_BASE           = 370,
+    BG_OBJECTIVE_DEFEND_BASE            = 371,
+};
+
+// x, y, z, o
+const float BG_BG_NodePositions[BG_BG_DYNAMIC_NODES_COUNT][4] = {
+    {1057.805176f, 1278.395630f, 3.1747f, 1.907216f},     // lighthouse (Z: 8.923970)
+    {980.161499f, 948.649292f, 12.720972f, 5.903179f},     // waterworks (Z: 18.470242)
+    {1251.07886f, 958.236f, 5.656674f, 2.826648f},         // mine (Z: 11.405944)
 };
 
 // x, y, z, o, rot0, rot1, rot2, rot3
@@ -124,7 +166,30 @@ const uint32 BG_BG_TickIntervals[4] = {0, 12000, 6000, 1000};
 const uint32 BG_BG_TickPoints[4] = {0, 10, 10, 30};
 
 // WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
-const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1735, 1736, 1738, 1739, 1740};
+const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1736, 1738, 1735, 1740, 1739};
+
+/*
+// x, y, z, o
+const float BG_AB_BuffPositions[BG_AB_DYNAMIC_NODES_COUNT][4] = {
+    {1185.71f, 1185.24f, -56.36f, 2.56f},                   // stables
+    {990.75f, 1008.18f, -42.60f, 2.43f},                    // blacksmith
+    {817.66f, 843.34f, -56.54f, 3.01f},                     // farm
+    {807.46f, 1189.16f, 11.92f, 5.44f},                     // lumber mill
+    {1146.62f, 816.94f, -98.49f, 6.14f}                     // gold mine
+};
+*/
+
+// x, y, z, o
+const float BG_BG_SpiritGuidePos[BG_BG_ALL_NODES_COUNT][4] = {
+    {1036.422607f, 1341.375854f, 11.536129f, 4.885175f},                   // lighthouse
+    {885.384888f, 936.318176f, 24.379227f, 0.490875f},                    // waterworks
+    {1252.441895f, 831.479004f, 27.789499f, 1.582577f},                     // mine
+//    {775.17f, 1206.40f, 15.79f, 1.90f},                     // lumber mill
+//    {1207.48f, 787.00f, -83.36f, 5.51f},                    // gold mine
+    {911.930969f, 1345.247681f, 27.939629f, 4.05266f},                   // alliance starting base
+    {1399.523804f, 971.404175f, 7.441012f, 1.083854f}                      // horde starting base
+};
+
 
 struct BG_BG_BannerTimer
 {
@@ -160,10 +225,44 @@ class BattlegroundBG : public Battleground
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleground();
         void EndBattleground(uint32 winner);
+        virtual void Reset();
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor = true);
 
+        virtual void FillInitialWorldStates(WorldPacket& data);
+
+        /* Nodes occupying */
+        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
+
     private:
+        /* Gameobject spawning/despawning */
+        void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
+        void _DelBanner(uint8 node, uint8 type, uint8 teamIndex);
+        void _SendNodeUpdate(uint8 node);
+
+        /* Creature spawning/despawning */
+        void _NodeOccupied(uint8 node,Team team);
+        void _NodeDeOccupied(uint8 node);
+
+        int32 _GetNodeNameId(uint8 node);
+
+        /* Nodes info:
+            0: neutral
+            1: ally contested
+            2: horde contested
+            3: ally occupied
+            4: horde occupied     */
+        uint8               m_Nodes[BG_BG_DYNAMIC_NODES_COUNT];
+        uint8               m_prevNodes[BG_BG_DYNAMIC_NODES_COUNT];
+        BG_BG_BannerTimer   m_BannerTimers[BG_BG_DYNAMIC_NODES_COUNT];
+        uint32              m_NodeTimers[BG_BG_DYNAMIC_NODES_COUNT];
+        uint32              m_lastTick[BG_TEAMS_COUNT];
+        uint32              m_HonorScoreTics[BG_TEAMS_COUNT];
+        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
+        bool                m_IsInformedNearVictory;
+        uint32              m_HonorTics;
+        uint32              m_ReputationTics;
 };
 #endif

@@ -8966,6 +8966,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 4710:
             NumberOfFields = 28;
             break;
+        case 5449:
+            NumberOfFields = 32;
+            break;
          default:
             NumberOfFields = 12;
             break;
@@ -9498,6 +9501,18 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0x923) << uint32(0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
                 data << uint32(4247) << uint32(0x0);
                 data << uint32(4248) << uint32(0x0);
+            }
+            break;
+        case 5449:                                          // Battle for Gilneas
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_BG)
+                bg->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(1779) << uint32(0);          // 7 alliance bases
+                data << uint32(1778) << uint32(0);          // 8 horde bases
+                data << uint32(1776) << uint32(0);          // 9 alliance resources
+                data << uint32(1777) << uint32(0);          // 10 horde resources
+                data << uint32(1780) << uint32(2000);       // 11 max resources
             }
             break;
         default:
