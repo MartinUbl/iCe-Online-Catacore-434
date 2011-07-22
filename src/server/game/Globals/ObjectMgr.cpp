@@ -6559,6 +6559,10 @@ bool ObjectMgr::IsFlatGround(Map *tmap, float x, float y, float z)
     if (fabs(center_z - avg) > radius)
         return false;
 
+    /* if the destination is on a non-vmap object (ie. mailbox) */
+    if (fabs(z - center_z) > radius)
+        return false;
+
     return true;
 }
 
