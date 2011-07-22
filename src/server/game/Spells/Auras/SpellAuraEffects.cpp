@@ -4912,7 +4912,7 @@ void AuraEffect::HandleAuraSchoolAbsorb(AuraApplication const *aurApp, uint8 mod
         case 11426:
         {
             // Shattered Barrier should make player cast freezing spell at remove
-            if (apply)
+            if (apply || aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
                 break;
 
             if (target->HasAura(44745))
