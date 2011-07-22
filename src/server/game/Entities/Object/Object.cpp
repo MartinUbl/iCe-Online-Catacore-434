@@ -1544,8 +1544,8 @@ bool WorldObject::HasFlatPathTo(Position *dst)
     int numpoints = (int)distance + 2;
 
     /* start + path[total-2] + end */
-    //float pointX[numpoints];
-    //float pointY[numpoints];
+    float pointX[numpoints];
+    float pointY[numpoints];
     float pointZ[numpoints];
     /* distance between points can therefore be only < 1.0f,
      * it's extremes shrinking with larger distances */
@@ -1553,17 +1553,16 @@ bool WorldObject::HasFlatPathTo(Position *dst)
 
     int i;
 
-    float px, py;
     for (i = 0; i < numpoints; i++) {
-        //pointX[i] = GetPositionX() + ((dst->GetPositionX() - GetPositionX()) * ((float)i/(float)(numpoints-1)));
-        //pointY[i] = GetPositionY() + ((dst->GetPositionY() - GetPositionY()) * ((float)i/(float)(numpoints-1)));
-        px = GetPositionX() + ((dst->GetPositionX() - GetPositionX()) * ((float)i/(float)(numpoints-1)));
-        py = GetPositionY() + ((dst->GetPositionY() - GetPositionY()) * ((float)i/(float)(numpoints-1)));
+        pointX[i] = GetPositionX() + ((dst->GetPositionX() - GetPositionX()) * ((float)i/(float)(numpoints-1)));
+        pointY[i] = GetPositionY() + ((dst->GetPositionY() - GetPositionY()) * ((float)i/(float)(numpoints-1)));
         pointZ[i] = GetPositionZ() + ((dst->GetPositionZ() - GetPositionZ()) * ((float)i/(float)(numpoints-1)));
-        /* adjust height to nearest ground level */
-        //pointZ[i] = GetMap()->GetHeight2(pointX[i], pointY[i], pointZ[i]);
-        pointZ[i] = GetMap()->GetHeight2(px, py, pointZ[i]);
     }
+
+    /* adjust height to nearest ground level
+     * - be smart, leave source/destination intact to avoid cheating */
+    for (i = 1; i < numpoints-1; i++)
+        pointZ[i] = GetMap()->GetHeight2(pointX[i], pointY[i], pointZ[i]);
 
     /* if any of the points has invalid height, fail */
     for (i = 0; i < numpoints; i++)
