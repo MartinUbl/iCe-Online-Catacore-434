@@ -2770,7 +2770,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             {
                 if (m_spellAura->GetSpellProto()->Effect[effIndex] == SPELL_AURA_SCHOOL_ABSORB)
                     if (m_spellAura->GetEffect(effIndex))
-                        m_spellAura->GetEffect(effIndex)->ChangeAmount(m_spellAura->GetEffect(effIndex)->GetAmount()+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
+                        m_spellAura->GetEffect(effIndex)->ChangeAmount(m_spellAura->GetEffect(effIndex)->GetAmount()*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f));
             }
             break;
         }
