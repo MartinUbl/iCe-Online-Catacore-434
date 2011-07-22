@@ -531,13 +531,22 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 case SPELLFAMILY_MAGE:
                     // Ice Barrier
-                    if (GetSpellProto()->SpellFamilyFlags[1] & 0x1 && GetSpellProto()->SpellFamilyFlags[2] & 0x8)
+                    if (m_spellProto->Id == 11426)
                     {
                         // +80.68% from sp bonus
                         DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
-                        // Glyph of Ice Barrier: its weird having a SPELLMOD_ALL_EFFECTS here but its blizzards doing :)
-                        // Glyph of Ice Barrier is only applied at the spell damage bonus because it was already applied to the base value in CalculateSpellDamage
                         DoneActualBenefit = float(caster->ApplyEffectModifiers(GetSpellProto(), m_effIndex, (int32)DoneActualBenefit));
+                        DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
+
+                        // Now we work with total amount
+                        DoneActualBenefit += (float)amount;
+
+                        // Glyph of Ice Barrier
+                        if (AuraEffect const* pAurEff = caster->GetAuraEffect(63095, EFFECT_0, caster->GetGUID()))
+                            DoneActualBenefit *= (100.0f + pAurEff->GetAmount()) / 100.0f;
+
+                        amount = (int32)DoneActualBenefit;
+                        return amount;
                     }
                     // Fire Ward
                     else if(GetSpellProto()->SpellFamilyFlags[0] & 0x8 && GetSpellProto()->SpellFamilyFlags[2] & 0x8)
