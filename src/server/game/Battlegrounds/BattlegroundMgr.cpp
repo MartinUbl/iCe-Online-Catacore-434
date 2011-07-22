@@ -433,10 +433,16 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                         data->put(extraFields, 2);                                                      // count of next fields
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);          // bases asssulted
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);           // bases defended
+                        break;
                     case 726:                                   // TP
                         data->put(extraFields, 2);
                         *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagCaptures);
                         *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagReturns);
+                        break;
+                    case 761:                                   // BG
+                        data->put(extraFields, 2);                                                      // count of next fields
+                        *data << uint32(((BattlegroundBGScore*)itr2->second)->BasesAssaulted);          // bases asssulted
+                        *data << uint32(((BattlegroundBGScore*)itr2->second)->BasesDefended);           // bases defended
                         break;
                     default:
                         data->put(extraFields, 0);                                                      // count of next fields
@@ -480,7 +486,9 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                 *data << uint32(((BattlegroundTPScore*)itr2->second)->FlagReturns);
                 break;
             case BATTLEGROUND_BG:                                                              // Battle of Gilneas
-                data->put(extraFields, 0);                                                     // count of next fields
+                data->put(extraFields, 2);                                                     // count of next fields
+                *data << uint32(((BattlegroundBGScore*)itr2->second)->BasesAssaulted);         // bases asssulted
+                *data << uint32(((BattlegroundBGScore*)itr2->second)->BasesDefended);          // bases defended
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
