@@ -196,8 +196,8 @@ void BattlegroundBG::StartingEventCloseDoors()
     // despawn banners, auras and buffs
     for (int obj = BG_BG_OBJECT_BANNER_NEUTRAL; obj < BG_BG_DYNAMIC_NODES_COUNT * 8; ++obj)
         SpawnBGObject(obj, RESPAWN_ONE_DAY);
-    //for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT * 3; ++i)
-    //    SpawnBGObject(BG_BG_OBJECT_SPEEDBUFF_STABLES + i, RESPAWN_ONE_DAY);
+    for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT * 3; ++i)
+        SpawnBGObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + i, RESPAWN_ONE_DAY);
 
     // Starting doors
     DoorClose(BG_BG_OBJECT_GATE_A);
@@ -215,12 +215,12 @@ void BattlegroundBG::StartingEventOpenDoors()
     // spawn neutral banners
     for (int banner = BG_BG_OBJECT_BANNER_NEUTRAL, i = 0; i < 5; banner += 8, ++i)
         SpawnBGObject(banner, RESPAWN_IMMEDIATELY);
-    /*for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
+    for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {
         //randomly select buff to spawn
         uint8 buff = urand(0, 2);
-        SpawnBGObject(BG_BG_OBJECT_SPEEDBUFF_STABLES + buff + i * 3, RESPAWN_IMMEDIATELY);
-    }*/
+        SpawnBGObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + buff + i * 3, RESPAWN_IMMEDIATELY);
+    }
     DoorOpen(BG_BG_OBJECT_GATE_A);
     DoorOpen(BG_BG_OBJECT_GATE_H);
 }
@@ -592,14 +592,14 @@ bool BattlegroundBG::SetupBattleground()
         sLog->outErrorDb("BatteGroundBG: Failed to spawn door object Battleground not created!");
         return false;
     }
-    //buffs (TODO)
-    /*for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
+
+    for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {
-        if (!AddObject(BG_BG_OBJECT_SPEEDBUFF_STABLES + 3 * i, Buff_Entries[0], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_STABLES + 3 * i + 1, Buff_Entries[1], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
-            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_STABLES + 3 * i + 2, Buff_Entries[2], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
+        if (!AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
+            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
             sLog->outErrorDb("BatteGroundBG: Failed to spawn buff object!");
-    }*/
+    }
 
     return true;
 }

@@ -59,6 +59,7 @@ const uint32 NodeEntryNumDiff[3] = {0,1,2};
 
 enum BG_BG_ObjectType
 {
+    // 8 objects for each base, 3 bases, 3*8 objects = 24
     BG_BG_OBJECT_BANNER_NEUTRAL          = 0,
     BG_BG_OBJECT_BANNER_CONT_A           = 1,
     BG_BG_OBJECT_BANNER_CONT_H           = 2,
@@ -67,9 +68,21 @@ enum BG_BG_ObjectType
     BG_BG_OBJECT_AURA_ALLY               = 5,
     BG_BG_OBJECT_AURA_HORDE              = 6,
     BG_BG_OBJECT_AURA_CONTESTED          = 7,
-    BG_BG_OBJECT_GATE_A                  = 24,
-    BG_BG_OBJECT_GATE_H                  = 25,
-    BG_BG_OBJECT_MAX                     = 26,
+
+    // buffs
+    BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE    = 24,
+    BG_BG_OBJECT_REGENBUFF_LIGHTHOUSE    = 25,
+    BG_BG_OBJECT_BERSERKBUFF_LIGHTHOUSE  = 26,
+    BG_BG_OBJECT_SPEEDBUFF_WATERWORKS    = 27,
+    BG_BG_OBJECT_REGENBUFF_WATERWORKS    = 28,
+    BG_BG_OBJECT_BERSERKBUFF_WATERWORKS  = 29,
+    BG_BG_OBJECT_SPEEDBUFF_MINE          = 30,
+    BG_BG_OBJECT_REGENBUFF_MINE          = 31,
+    BG_BG_OBJECT_BERSERKBUFF_MINE        = 32,
+
+    BG_BG_OBJECT_GATE_A                  = 33,
+    BG_BG_OBJECT_GATE_H                  = 34,
+    BG_BG_OBJECT_MAX                     = 35,
 };
 
 /* Object id templates from DB */
@@ -151,7 +164,7 @@ enum BG_BG_Objectives
 
 // x, y, z, o
 const float BG_BG_NodePositions[BG_BG_DYNAMIC_NODES_COUNT][4] = {
-    {1057.805176f, 1278.395630f, 3.1747f, 1.907216f},     // lighthouse (Z: 8.923970)
+    {1057.805176f, 1278.395630f, 3.1747f, 1.907216f},      // lighthouse (Z: 8.923970)
     {980.161499f, 948.649292f, 12.720972f, 5.903179f},     // waterworks (Z: 18.470242)
     {1251.07886f, 958.236f, 5.656674f, 2.826648f},         // mine (Z: 11.405944)
 };
@@ -168,26 +181,20 @@ const uint32 BG_BG_TickPoints[4] = {0, 10, 10, 30};
 // WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
 const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1736, 1738, 1735, 1740, 1739};
 
-/*
 // x, y, z, o
-const float BG_AB_BuffPositions[BG_AB_DYNAMIC_NODES_COUNT][4] = {
-    {1185.71f, 1185.24f, -56.36f, 2.56f},                   // stables
-    {990.75f, 1008.18f, -42.60f, 2.43f},                    // blacksmith
-    {817.66f, 843.34f, -56.54f, 3.01f},                     // farm
-    {807.46f, 1189.16f, 11.92f, 5.44f},                     // lumber mill
-    {1146.62f, 816.94f, -98.49f, 6.14f}                     // gold mine
+const float BG_BG_BuffPositions[BG_BG_DYNAMIC_NODES_COUNT][4] = {
+    {1097.806885f, 1293.072876f, 6.328900f, 3.776195f},               // lighthouse
+    {990.798767f, 984.346558f, 13.008142f, 3.988254f},                // waterworks
+    {1205.644409f, 1014.332764f, 6.314735f, 5.756184f},               // mine
 };
-*/
 
 // x, y, z, o
 const float BG_BG_SpiritGuidePos[BG_BG_ALL_NODES_COUNT][4] = {
-    {1036.422607f, 1341.375854f, 11.536129f, 4.885175f},                   // lighthouse
-    {885.384888f, 936.318176f, 24.379227f, 0.490875f},                    // waterworks
-    {1252.441895f, 831.479004f, 27.789499f, 1.582577f},                     // mine
-//    {775.17f, 1206.40f, 15.79f, 1.90f},                     // lumber mill
-//    {1207.48f, 787.00f, -83.36f, 5.51f},                    // gold mine
-    {911.930969f, 1345.247681f, 27.939629f, 4.05266f},                   // alliance starting base
-    {1399.523804f, 971.404175f, 7.441012f, 1.083854f}                      // horde starting base
+    {1036.422607f, 1341.375854f, 11.536129f, 4.885175f},              // lighthouse
+    {885.384888f, 936.318176f, 24.379227f, 0.490875f},                // waterworks
+    {1252.441895f, 831.479004f, 27.789499f, 1.582577f},               // mine
+    {911.930969f, 1345.247681f, 27.939629f, 4.05266f},                // alliance starting base
+    {1399.523804f, 971.404175f, 7.441012f, 1.083854f}                 // horde starting base
 };
 
 
