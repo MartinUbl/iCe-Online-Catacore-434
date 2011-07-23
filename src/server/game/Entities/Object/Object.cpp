@@ -1544,9 +1544,9 @@ bool WorldObject::HasFlatPathTo(Position *dst)
     int numpoints = (int)distance + 2;
 
     /* start + path[total-2] + end */
-    float pointX[numpoints];
-    float pointY[numpoints];
-    float pointZ[numpoints];
+    std::vector<float> pointX(numpoints);
+    std::vector<float> pointY(numpoints);
+    std::vector<float> pointZ(numpoints);
     /* distance between points can therefore be only < 1.0f,
      * it's extremes shrinking with larger distances */
     float pointdist = distance / (numpoints-1);

@@ -6530,8 +6530,8 @@ bool ObjectMgr::IsFlatGround(Map *tmap, float x, float y, float z)
     float px, py;
     int i;
     for (i = 0; i < 8; i++) {
-        px = x + (radius * sin(i*45));
-        py = y + (radius * cos(i*45));
+        px = x + (radius * sin((double)i*45));
+        py = y + (radius * cos((double)i*45));
         point[i] = tmap->GetHeight2(px, py, z);
         if (point[i] < -20000.0f)
             return false;
