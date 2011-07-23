@@ -43,8 +43,7 @@ enum BG_BG_Rewards
     BG_BG_REWARD_NUM
 };
 
-uint32 BG_BG_Honor[BG_BG_REWARD_NUM]
-    = {10,30};
+uint32 BG_BG_Honor[BG_BG_REWARD_NUM] = {10,30};
 
 BattlegroundBG::BattlegroundBG()
 {
@@ -136,16 +135,10 @@ void BattlegroundBG::Update(uint32 diff)
                 m_lastTick[team] -= BG_BG_TickIntervals[points];
                 m_TeamScores[team] += BG_BG_TickPoints[points];
                 m_HonorScoreTics[team] += BG_BG_TickPoints[points];
-                m_ReputationScoreTics[team] += BG_BG_TickPoints[points];
-                // Does BfG BG give some reputation?
-                /*if (m_ReputationScoreTics[team] >= m_ReputationTics)
-                {
-                    (team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
-                    m_ReputationScoreTics[team] -= m_ReputationTics;
-                }*/
+
                 if (m_HonorScoreTics[team] >= m_HonorTics)
                 {
-                    // We dont know if this BG gives honor every tick, so leave it be unrewarded
+                    // We dont know if this BG gives honor every tick, so leave it unrewarded
                     //RewardHonorToTeam(BG_BG_Honor[BG_BG_TICK], (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
                     m_HonorScoreTics[team] -= m_HonorTics;
                 }
@@ -165,9 +158,6 @@ void BattlegroundBG::Update(uint32 diff)
                     UpdateWorldState(BG_BG_OP_RESOURCES_ALLY, m_TeamScores[team]);
                 if (team == BG_TEAM_HORDE)
                     UpdateWorldState(BG_BG_OP_RESOURCES_HORDE, m_TeamScores[team]);
-                // update achievement flags
-                // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
-                uint8 otherTeam = (team + 1) % BG_TEAMS_COUNT;
             }
         }
 
@@ -328,7 +318,7 @@ void BattlegroundBG::FillInitialWorldStates(WorldPacket& data)
     data << uint32(BG_BG_OP_RESOURCES_HORDE)    << uint32(m_TeamScores[BG_TEAM_HORDE]);
 
     // other unknown
-    data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
+    data << uint32(0x745) << uint32(0x2);           // 1861 unk
 }
 
 void BattlegroundBG::_SendNodeUpdate(uint8 node)
@@ -367,8 +357,6 @@ void BattlegroundBG::_NodeOccupied(uint8 node,Team team)
             ++capturedNodes;
     }
 
-    // +7 in following code? Battleground specific number?
-
     if(node >= BG_BG_DYNAMIC_NODES_COUNT)//only dynamic nodes, no start points
         return;
     Creature* trigger = GetBGCreature(node+BG_BG_ALL_NODES_COUNT);//0-4 spirit guides
@@ -381,7 +369,7 @@ void BattlegroundBG::_NodeOccupied(uint8 node,Team team)
     if (trigger)
     {
         trigger->setFaction(team == ALLIANCE ? 84 : 83);
-        //trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
+        trigger->CastSpell(trigger, SPELL_HONORABLE_DEFENDER_25Y, false);
     }
 }
 
@@ -571,6 +559,7 @@ void BattlegroundBG::UpdatePlayerScore(Player *Source, uint32 type, uint32 value
 
 bool BattlegroundBG::SetupBattleground()
 {
+    // Spawn banners
     for (int i = 0 ; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {
         if (!AddObject(BG_BG_OBJECT_BANNER_NEUTRAL + 8*i,BG_BG_OBJECTID_NODE_BANNER_0 + NodeEntryNumDiff[i],BG_BG_NodePositions[i][0],BG_BG_NodePositions[i][1],BG_BG_NodePositions[i][2],BG_BG_NodePositions[i][3], 0, 0, sin(BG_BG_NodePositions[i][3]/2), cos(BG_BG_NodePositions[i][3]/2),RESPAWN_ONE_DAY)
@@ -582,25 +571,29 @@ bool BattlegroundBG::SetupBattleground()
             || !AddObject(BG_BG_OBJECT_AURA_HORDE + 8*i,BG_BG_OBJECTID_AURA_H,BG_BG_NodePositions[i][0],BG_BG_NodePositions[i][1],BG_BG_NodePositions[i][2],BG_BG_NodePositions[i][3], 0, 0, sin(BG_BG_NodePositions[i][3]/2), cos(BG_BG_NodePositions[i][3]/2),RESPAWN_ONE_DAY)
             || !AddObject(BG_BG_OBJECT_AURA_CONTESTED + 8*i,BG_BG_OBJECTID_AURA_C,BG_BG_NodePositions[i][0],BG_BG_NodePositions[i][1],BG_BG_NodePositions[i][2],BG_BG_NodePositions[i][3], 0, 0, sin(BG_BG_NodePositions[i][3]/2), cos(BG_BG_NodePositions[i][3]/2),RESPAWN_ONE_DAY))
         {
-            sLog->outErrorDb("BatteGroundBG: Failed to spawn some object Battleground not created!");
+            sLog->outErrorDb("BattegroundBG: Failed to spawn some object. Battleground not created!");
             return false;
         }
     }
+
+    // Spawn doors and gates
     if (!AddObject(BG_BG_OBJECT_GATE_A,BG_BG_OBJECTID_GATE_A,BG_BG_DoorPositions[0][0],BG_BG_DoorPositions[0][1],BG_BG_DoorPositions[0][2],BG_BG_DoorPositions[0][3],BG_BG_DoorPositions[0][4],BG_BG_DoorPositions[0][5],BG_BG_DoorPositions[0][6],BG_BG_DoorPositions[0][7],RESPAWN_IMMEDIATELY)
         || !AddObject(BG_BG_OBJECT_GATE_H,BG_BG_OBJECTID_GATE_H,BG_BG_DoorPositions[1][0],BG_BG_DoorPositions[1][1],BG_BG_DoorPositions[1][2],BG_BG_DoorPositions[1][3],BG_BG_DoorPositions[1][4],BG_BG_DoorPositions[1][5],BG_BG_DoorPositions[1][6],BG_BG_DoorPositions[1][7],RESPAWN_IMMEDIATELY))
     {
-        sLog->outErrorDb("BatteGroundBG: Failed to spawn door object Battleground not created!");
+        sLog->outErrorDb("BattegroundBG: Failed to spawn door object. Battleground not created!");
         return false;
     }
 
+    // Spawn buffs
     for (int i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {
         if (!AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i, Buff_Entries[0], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
             || !AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 1, Buff_Entries[1], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
             || !AddObject(BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE + 3 * i + 2, Buff_Entries[2], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], 0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2), RESPAWN_ONE_DAY))
-            sLog->outErrorDb("BatteGroundBG: Failed to spawn buff object!");
+            sLog->outErrorDb("BattegroundBG: Failed to spawn buff object. Battleground created anyways.");
     }
 
+    // all went ok
     return true;
 }
 
@@ -615,14 +608,11 @@ void BattlegroundBG::Reset()
     m_lastTick[BG_TEAM_HORDE]               = 0;
     m_HonorScoreTics[BG_TEAM_ALLIANCE]      = 0;
     m_HonorScoreTics[BG_TEAM_HORDE]         = 0;
-    m_ReputationScoreTics[BG_TEAM_ALLIANCE] = 0;
-    m_ReputationScoreTics[BG_TEAM_HORDE]    = 0;
     m_IsInformedNearVictory                 = false;
     bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
+    // TODO: find and implement bonus honor at BG weekend
     //m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
     //m_HonorTics = BG_AB_NotABBGWeekendHonorTicks;
-    //m_ReputationTics = (isBGWeekend) ? BG_AB_ABBGWeekendReputationTicks : BG_AB_NotABBGWeekendReputationTicks;
-    //m_ReputationTics = BG_AB_NotABBGWeekendReputationTicks;
 
     for (uint8 i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {
@@ -644,14 +634,8 @@ WorldSafeLocsEntry const* BattlegroundBG::GetClosestGraveYard(Player* player)
     // Is there any occupied node for this team?
     std::vector<uint8> nodes;
     for (uint8 i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
-    {
-        sLog->outString("i: %u, m_Nodes[i]: %u, teamindex: %u",i,m_Nodes[i],teamIndex);
         if (m_Nodes[i] == teamIndex + 3)
-        {
-            sLog->outString("DaDaDa");
             nodes.push_back(i);
-        }
-    }
 
     WorldSafeLocsEntry const* good_entry = NULL;
     // If so, select the closest node to place ghost on
@@ -664,7 +648,6 @@ WorldSafeLocsEntry const* BattlegroundBG::GetClosestGraveYard(Player* player)
         for (uint8 i = 0; i < nodes.size(); ++i)
         {
             WorldSafeLocsEntry const*entry = sWorldSafeLocsStore.LookupEntry(BG_BG_GraveyardIds[nodes[i]]);
-            sLog->outString("i: %u, node: %u",i,nodes[i]);
             if (!entry)
                 continue;
             float dist = (entry->x - plr_x)*(entry->x - plr_x)+(entry->y - plr_y)*(entry->y - plr_y);

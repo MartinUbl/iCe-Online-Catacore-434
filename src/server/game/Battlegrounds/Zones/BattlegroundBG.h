@@ -38,7 +38,6 @@ enum BG_BG_WorldStates
 };
 
 const uint32 BG_BG_OP_NODESTATES[3] =    {1767, 1782, 1772};
-
 const uint32 BG_BG_OP_NODEICONS[3]  =    {1842, 1846, 1845};
 
 enum BG_BG_NodeObjectId
@@ -54,7 +53,9 @@ enum BG_BG_NodeObjectId
 };
 
 // Difference between each node banner object entry
+// its due to for loop for spawning base blank node banners
 const uint32 NodeEntryNumDiff[3] = {0,1,2};
+// We use banner IDs from Arathi Basin, original BfG banners and entry diffs commented out
 //const uint32 NodeEntryNumDiff[3] = {0,3225,3228};
 
 enum BG_BG_ObjectType
@@ -164,9 +165,9 @@ enum BG_BG_Objectives
 
 // x, y, z, o
 const float BG_BG_NodePositions[BG_BG_DYNAMIC_NODES_COUNT][4] = {
-    {1057.805176f, 1278.395630f, 3.1747f, 1.907216f},      // lighthouse (Z: 8.923970)
-    {980.161499f, 948.649292f, 12.720972f, 5.903179f},     // waterworks (Z: 18.470242)
-    {1251.07886f, 958.236f, 5.656674f, 2.826648f},         // mine (Z: 11.405944)
+    {1057.805176f, 1278.395630f, 3.1747f, 1.907216f},                 // lighthouse
+    {980.161499f, 948.649292f, 12.720972f, 5.903179f},                // waterworks
+    {1251.07886f, 958.236f, 5.656674f, 2.826648f},                    // mine
 };
 
 // x, y, z, o, rot0, rot1, rot2, rot3
@@ -176,7 +177,7 @@ const float BG_BG_DoorPositions[2][8] = {
 };
 
 const uint32 BG_BG_TickIntervals[4] = {0, 12000, 6000, 1000};
-const uint32 BG_BG_TickPoints[4] = {0, 10, 10, 30};
+const uint32 BG_BG_TickPoints[4]    = {0, 10, 10, 30};
 
 // WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
 const uint32 BG_BG_GraveyardIds[BG_BG_ALL_NODES_COUNT] = {1736, 1738, 1735, 1740, 1739};
@@ -196,7 +197,6 @@ const float BG_BG_SpiritGuidePos[BG_BG_ALL_NODES_COUNT][4] = {
     {911.930969f, 1345.247681f, 27.939629f, 4.05266f},                // alliance starting base
     {1399.523804f, 971.404175f, 7.441012f, 1.083854f}                 // horde starting base
 };
-
 
 struct BG_BG_BannerTimer
 {
@@ -267,9 +267,7 @@ class BattlegroundBG : public Battleground
         uint32              m_NodeTimers[BG_BG_DYNAMIC_NODES_COUNT];
         uint32              m_lastTick[BG_TEAMS_COUNT];
         uint32              m_HonorScoreTics[BG_TEAMS_COUNT];
-        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
         bool                m_IsInformedNearVictory;
         uint32              m_HonorTics;
-        uint32              m_ReputationTics;
 };
 #endif
