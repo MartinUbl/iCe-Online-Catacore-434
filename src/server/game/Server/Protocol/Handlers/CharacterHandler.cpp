@@ -1444,7 +1444,7 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
 
     // And take money equal to sell price
     if (reforgeID != 0)
-        GetPlayer()->ModifyMoney(-pProto->SellPrice);
+        GetPlayer()->ModifyMoney(-int32(pProto->SellPrice));
 
     if (ref_info)
         sLog->outDebug("ID: %u, stat: %u, mod: %f, new: %u, newmod: %f",reforgeID, ref_info->source_stat, ref_info->source_mod, ref_info->new_stat, ref_info->new_mod);
