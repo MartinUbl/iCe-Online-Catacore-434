@@ -4087,6 +4087,7 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_RUNE_LIST)                   // rune cooldowns list
     {
+        // Probably wrong data managing here - we need hack (after packet sending)
         uint8 v1 = m_runesState;
         uint8 v2 = m_caster->ToPlayer()->GetRunesState();
         data << uint8(v1);                                  // runes state before
@@ -4094,8 +4095,8 @@ void Spell::SendSpellGo()
         for (uint8 i = 0; i < MAX_RUNES; ++i)
         {
             uint8 m = (1 << i);
-            if (m & v1)                                      // usable before...
-                if (!(m & v2))                               // ...but on cooldown now...
+            if (m & v1)                                     // usable before...
+                if (!(m & v2))                              // ...but on cooldown now...
                     data << uint8(0);                       // some unknown byte (time?)
         }
     }
@@ -4121,6 +4122,12 @@ void Spell::SendSpellGo()
     }
 
     m_caster->SendMessageToSet(&data, true);
+
+    // Maybe hack, but necessary
+    // Resync all runes after any rune usage - otherwise all rune cooldowns are refreshed
+    // Must be here (after SMSG_SPELL_GO is sent), because of CAST_FLAG_RUNE_LIST
+    if (castFlags & CAST_FLAG_RUNE_LIST)
+        m_caster->ToPlayer()->ResyncRunes(MAX_RUNES);
 }
 
 void Spell::WriteAmmoToPacket(WorldPacket * data)
