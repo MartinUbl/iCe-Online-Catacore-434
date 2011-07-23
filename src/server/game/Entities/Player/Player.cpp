@@ -460,6 +460,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_guildId = 0;
     m_lastGuildId = 0;
 
+    m_lastBattlegroundTypeId = 0;
+
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
     m_groupUpdateMask = 0;

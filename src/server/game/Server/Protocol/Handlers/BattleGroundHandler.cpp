@@ -85,6 +85,12 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     recv_data >> unk2;                                      // unknown (added in 4.0.0)
     recv_data >> unk3;                                      // unknown (added in 4.0.0)
 
+    // Cliend sends value 0 for "last joined battleground". We must handle it this way.
+    if (bgTypeId_ == 0)
+        bgTypeId_ = GetPlayer()->GetLastBattlegroundTypeId();
+    else
+        GetPlayer()->SetLastBattlegroundTypeId(bgTypeId_);
+
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
         sLog->outError("Battleground: invalid bgtype (%u) received. possible cheater? player guid %u",bgTypeId_,_player->GetGUIDLow());

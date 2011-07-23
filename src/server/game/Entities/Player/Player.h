@@ -1829,6 +1829,9 @@ class Player : public Unit, public GridObject<Player>
 
         void AddGuildNews(uint32 type, uint64 param);
 
+        void SetLastBattlegroundTypeId(uint32 value) { m_lastBattlegroundTypeId = value; }
+        uint32 GetLastBattlegroundTypeId() { return m_lastBattlegroundTypeId; }
+
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
         {
@@ -2676,6 +2679,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint64 m_comboTarget;
         int8 m_comboPoints;
+
+        uint32 m_lastBattlegroundTypeId;
 
         WorldSafeLocsEntry* m_graveyard;
 
