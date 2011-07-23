@@ -21340,17 +21340,17 @@ WorldLocation Player::GetStartPosition() const
         if (GetQuestStatus(13166) == QUEST_STATUS_COMPLETE) {
             switch (GetTeam()) {
             case ALLIANCE:
-                posX = -8833.38;
-                posY = 628.628;
-                posZ = 95;
-                angle = 0.484155;
+                posX = -8833.38f;
+                posY = 628.628f;
+                posZ = 95.0f;
+                angle = 0.484155f;
                 mapId = 0;
                 break;
             case HORDE:
-                posX = 1570;
-                posY = -4397;
-                posZ = 16;
-                angle = 0;
+                posX = 1570.0f;
+                posY = -4397.0f;
+                posZ = 16.0f;
+                angle = 0.0f;
                 mapId = 1;
                 break;
             default:
@@ -21363,19 +21363,19 @@ WorldLocation Player::GetStartPosition() const
         switch (getRace()) {
         case RACE_WORGEN:
             if (GetQuestStatus(14434) == QUEST_STATUS_COMPLETE) {
-                posX = 8177.32;
-                posY = 1002.43;
-                posZ = 7.65618;
-                angle = 6.09463;
+                posX = 8177.32f;
+                posY = 1002.43f;
+                posZ = 7.65618f;
+                angle = 6.09463f;
                 mapId = 1;
             }
             break;
         case RACE_GOBLIN:
             if (GetQuestStatus(25266) == QUEST_STATUS_COMPLETE) {
-                posX = 1470.67;
-                posY = -5012.07;
-                posZ = 11.7606;
-                angle = 0;
+                posX = 1470.67f;
+                posY = -5012.07f;
+                posZ = 11.7606f;
+                angle = 0.0f;
                 mapId = 1;
             }
             break;
