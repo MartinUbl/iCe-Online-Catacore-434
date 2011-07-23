@@ -674,6 +674,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
             BATTLEGROUND_AB,
             BATTLEGROUND_EY,
             BATTLEGROUND_TP,
+            BATTLEGROUND_BG,
         };
 
         bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
