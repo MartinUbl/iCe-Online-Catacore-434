@@ -443,13 +443,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setdeathstate",  SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcSetDeathStateCommand>,    "", NULL },
         { "addformation",   SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleNpcAddFormationCommand>,     "", NULL },
         { "setlink",        SEC_GAMEMASTER,      false, OldHandler<&ChatHandler::HandleNpcSetLinkCommand>,          "", NULL },
-
-        //{ TODO: fix or remove this commands
-        { "addweapon",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleNpcAddWeaponCommand>,        "", NULL },
-        { "name",           SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcNameCommand>,             "", NULL },
-        { "subname",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcSubNameCommand>,          "", NULL },
-        //}
-
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
