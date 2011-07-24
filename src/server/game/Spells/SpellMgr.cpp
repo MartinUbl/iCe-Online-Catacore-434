@@ -3615,7 +3615,7 @@ void SpellMgr::LoadSpellRanks()
     sLog->outString();
 }
 
-#define INIT_NEW_SPELLENTRY(a,b) {a=new SpellEntry_n();memset(a,0,sizeof(SpellEntry_n));a->Id=b;}
+#define INIT_NEW_SPELLENTRY(a,b) {a=new SpellEntry_n();memset(a,0,sizeof(SpellEntry_n));a->Id=b;a->SpellName="Custom Spell";}
 #define INSERT_SPELLENTRY(a) {sTrueSpellStore.indexTable[a->Id]=a;}
 
 //create new spells that isn't present in DBC and is needed for gameplay
@@ -3636,6 +3636,7 @@ void SpellMgr::LoadCustomSpells()
 
     // Demonic Circle: Summon (caster aura state, allows casting of teleporting spell)
     INIT_NEW_SPELLENTRY(pSpell,62388);
+    pSpell->SpellName = "Demonic Circle: Summon (enabler)";
     pSpell->CastingTimeIndex = 1;
     pSpell->DurationIndex = 21;
     pSpell->rangeIndex = 1;
