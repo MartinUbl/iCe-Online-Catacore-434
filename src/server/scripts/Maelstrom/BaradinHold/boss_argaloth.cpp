@@ -39,7 +39,7 @@ public:
     }
     struct boss_argalothAI: public ScriptedAI
     {
-        boss_argalothAI(Creature* pCreature) : ScriptedAI(pCreature)
+        boss_argalothAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(pCreature)
         {
             pInstance = pCreature->GetInstanceScript();
         }
@@ -53,6 +53,7 @@ public:
         uint32 update_timer;
         uint32 firestorm_progress;
         uint8 firestorm_count;
+        SummonList Summons;
 
 
         void Reset()
@@ -64,6 +65,7 @@ public:
             update_timer = 1000;
             firestorm_progress = 0;
             firestorm_count = 0;
+            Summons.DespawnAll();
 
             if (pInstance && pInstance->GetData(DATA_ARGALOTH_EVENT) != DONE)
                 pInstance->SetData(DATA_ARGALOTH_EVENT, NOT_STARTED);
@@ -71,6 +73,7 @@ public:
 
         void EnterCombat(Unit* /*Ent*/)
         {
+            DoZoneInCombat(me);
             if (pInstance)
                 pInstance->SetData(DATA_ARGALOTH_EVENT, IN_PROGRESS);
         }
@@ -105,7 +108,11 @@ public:
             {
                 firestorm_progress -= diff;
                 return;
-            } else firestorm_progress = 0;
+            } else
+            {
+                firestorm_progress = 0;
+                Summons.DespawnAll();
+            }
 
             // Channel Fel Firestorm on 66 and 33 %
             if (update_timer < diff)
@@ -115,7 +122,7 @@ public:
                     || (health_pct < 33.0f && firestorm_count < 2))
                 {
                     me->CastSpell(me, SPELL_FEL_FIRESTORM, false); // spell NEEDS FIX
-                    firestorm_progress = 18000;
+                    firestorm_progress = 19500;
                     firestorm_count++;
                     update_timer = 1000;
                     return;
@@ -129,6 +136,9 @@ public:
                 me->CastSpell(me, RAID_MODE(SPELL_METEOR_SLASH,H_SPELL_METEOR_SLASH), false);
                 meteor_timer = 15000;
             } else meteor_timer -= diff;
+
+            if (me->hasUnitState(UNIT_STAT_CASTING))
+                return;
 
             // Consuming Darknes timer. RaidMode-dependent count of DoTs
             if (darkness_timer < diff)
@@ -147,10 +157,74 @@ public:
             // White damage
             DoMeleeAttackIfReady();
         }
+
+        void JustSummoned(Creature* pSummon)
+        {
+            if (!pSummon)
+                return;
+
+            Summons.Summon(pSummon);
+        }
+
+        void DoAction(const int32 /*param*/)
+        {
+            if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                pTarget->CastSpell(pTarget, 88996, true, 0, 0, me->GetGUID());
+        }
      };
 };
+
+class mob_argaloth_fel_flames: public CreatureScript
+{
+public:
+    mob_argaloth_fel_flames() : CreatureScript("mob_argaloth_fel_flames") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+       return new mob_argaloth_fel_flamesAI(pCreature);
+    }
+    struct mob_argaloth_fel_flamesAI: public Scripted_NoMovementAI
+    {
+        mob_argaloth_fel_flamesAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        {
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        bool fire;
+        uint32 aura_timer;
+
+        void InitializeAI() { Scripted_NoMovementAI::InitializeAI(); }
+
+        void Reset()
+        {
+            fire = false;
+            aura_timer = 1000;
+        }
+
+        void EnterCombat(Unit* /*pWho*/) { }
+        void DamageTaken(Unit* /*pDoneBy*/, uint32 &damage) { damage = 0; }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (fire)
+                return;
+
+            if (aura_timer < diff)
+            {
+                me->AddAura(88999, me);
+                fire = true;
+            } else aura_timer -= diff;
+        }
+    };
+};
+
+/* SQL
+UPDATE `creature_template` SET ScriptName='mob_argaloth_fel_flames', scale=0.5, modelid1=16946, faction_A=14, faction_H=14, minlevel=85, maxlevel=85 WHERE entry=47829;
+*/
 
 void AddSC_boss_argaloth()
 {
     new boss_argaloth();
+    new mob_argaloth_fel_flames();
 }

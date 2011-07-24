@@ -2675,6 +2675,14 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                 caster->CastSpell(triggerTarget, triggerSpellId, true, NULL, NULL, caster->GetGUID());
                 return;
             }
+            // Fel Firestorm (Argaloth)
+            case 88972:
+            {
+                caster->ToCreature()->AI()->DoAction(1); // Fel Flames targeted on players
+                if (urand(0,1)) // add several Fel Flames placed randomly
+                    return;
+                break;
+            }
         }
     }
 
