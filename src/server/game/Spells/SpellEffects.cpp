@@ -3264,6 +3264,103 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         // Add guild news for crafting epic things
         if (pItem->GetProto()->Quality == ITEM_QUALITY_EPIC)
             player->AddGuildNews(GUILD_NEWS_ITEM_CRAFT, pItem->GetEntry());
+
+        /* activate craft spell cooldown */
+        std::vector<uint32> cd_spells;
+        uint32 cd_time = 0;
+
+        switch (m_spellInfo->Id) {
+
+            /* 6 days + to midnight */
+            case 75146:  // tailor: Dream of Azshara
+            case 75142:  // tailor: Dream of Deepholm
+            case 75144:  // tailor: Dream of Hyjal
+            case 75145:  // tailor: Dream of Ragnaros
+            case 75141:  // tailor: Dream of Skywall
+                cd_spells.push_back(m_spellInfo->Id);
+                cd_time = 518400 + sObjectMgr->SecsToMidnight();
+                break;
+
+            /* 2 days + to midnight */
+            case 60893:  // alch: Northrend Alchemy Research
+                cd_spells.push_back(m_spellInfo->Id);
+                cd_time = 172800 + sObjectMgr->SecsToMidnight();
+                break;
+
+            /* at midnight */
+            case 61288:  // inscr: Minor Inscription Research
+            case 61177:  // inscr: Nothernd Inscription Research
+            case 89244:  // inscr: Forged Documents
+            case 55208:  // mining: Smelt Titansteel
+            case 73478:  // jewel: Fire Prism
+            case 62242:  // jewel: Icy Prism
+            case 47280:  // jewel: Brilliant Glass
+                cd_spells.push_back(m_spellInfo->Id);
+                cd_time = sObjectMgr->SecsToMidnight();
+                break;
+
+            /* special: alchemy transmute, shared cooldown */
+            // vanilla - iron to gold, mithril to truesilver
+            case 11479:  case 11480:
+            // vanilla - elemental transmutes
+            case 17564: case 17562: case 17563: case 17565:
+            case 17560: case 17561: case 17566: case 17559:
+            // tbc - primal transmutes
+            case 28569: case 28568: case 28567: case 28566:
+            case 28581: case 28580: case 28582: case 28584:
+            case 28583: case 28585:
+            // wotlk - eternal transmutes
+            case 53784: case 53783: case 53780: case 53779:
+            case 53771: case 53773: case 53774: case 53775:
+            case 53782: case 53781: case 53776: case 53777:
+            // wotlk - epic gems
+            case 66659: case 66663: case 66660: case 66664:
+            case 66662: case 66658:
+            // cata - truegold, pyrium, living elements
+            case 80243: case 80244: case 78866:
+            {
+                cd_spells.push_back(11479); cd_spells.push_back(11480);
+                cd_spells.push_back(17564); cd_spells.push_back(17562);
+                cd_spells.push_back(17563); cd_spells.push_back(17565);
+                cd_spells.push_back(17560); cd_spells.push_back(17561);
+                cd_spells.push_back(17566); cd_spells.push_back(17559);
+                cd_spells.push_back(28569); cd_spells.push_back(28568);
+                cd_spells.push_back(28567); cd_spells.push_back(28566);
+                cd_spells.push_back(28581); cd_spells.push_back(28580);
+                cd_spells.push_back(28582); cd_spells.push_back(28584);
+                cd_spells.push_back(28583); cd_spells.push_back(28585);
+                cd_spells.push_back(53784); cd_spells.push_back(53783);
+                cd_spells.push_back(53780); cd_spells.push_back(53779);
+                cd_spells.push_back(53771); cd_spells.push_back(53773);
+                cd_spells.push_back(53774); cd_spells.push_back(53775);
+                cd_spells.push_back(53782); cd_spells.push_back(53781);
+                cd_spells.push_back(53776); cd_spells.push_back(53777);
+                cd_spells.push_back(66659); cd_spells.push_back(66663);
+                cd_spells.push_back(66660); cd_spells.push_back(66664);
+                cd_spells.push_back(66662); cd_spells.push_back(66658);
+                cd_spells.push_back(80243); cd_spells.push_back(80244);
+                cd_spells.push_back(78866);
+                cd_time = sObjectMgr->SecsToMidnight();
+                break;
+            }
+            default:
+                break;
+        }
+
+        while (!cd_spells.empty()) {
+            player->AddSpellCooldown(cd_spells.back(), 0, time(NULL)+cd_time);
+            cd_spells.pop_back();
+        }
+
+        /* send only one packet for current spell */
+        if (cd_time) {
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+            data << uint64(player->GetGUID());
+            data << uint8(1);
+            data << uint32(m_spellInfo->Id);
+            data << uint32(cd_time);    // 0 means full spell cooldown
+            player->GetSession()->SendPacket(&data);
+        }
     }
 
 /*
