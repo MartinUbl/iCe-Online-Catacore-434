@@ -1245,6 +1245,8 @@ class ObjectMgr
             return GossipMenuItemsMapBoundsNonConst(m_mGossipMenuItemsMap.lower_bound(uiMenuId),m_mGossipMenuItemsMap.upper_bound(uiMenuId));
         }
 
+        time_t SecsToMidnight();
+
         // for wintergrasp only
         GraveYardMap        mGraveYardMap;
 

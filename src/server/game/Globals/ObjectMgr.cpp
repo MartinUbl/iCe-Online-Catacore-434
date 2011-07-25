@@ -435,6 +435,21 @@ CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
     return sCreatureStorage.LookupEntry<CreatureInfo>(id);
 }
 
+time_t ObjectMgr::SecsToMidnight()
+{
+    time_t stamp = time(NULL);
+    struct tm time_struct = *localtime(&stamp);
+
+    time_struct.tm_sec = 0;
+    time_struct.tm_min = 0;
+    time_struct.tm_hour = 0;
+    time_struct.tm_mday += 1;
+
+    time_t to_midnight = mktime(&time_struct) - stamp;
+
+    return to_midnight;
+}
+
 void ObjectMgr::AddLocaleString(std::string& s, LocaleConstant locale, StringVector& data)
 {
     if (!s.empty())
