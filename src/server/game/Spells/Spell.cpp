@@ -5600,6 +5600,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             case SPELL_EFFECT_JUMP:
             case SPELL_EFFECT_JUMP_DEST:
+            case SPELL_EFFECT_CHARGE:
+            case SPELL_EFFECT_CHARGE_DEST:
             {
                 /* allow quest-based jumps */
                 if (m_spellInfo->Id == 4336)
@@ -5629,7 +5631,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (bg->GetStatus() != STATUS_IN_PROGRESS)
                         return SPELL_FAILED_TRY_AGAIN;
 
-                /* no jumps while falling */
+                /* not while falling */
                 if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
                     return SPELL_FAILED_FALLING;
 
