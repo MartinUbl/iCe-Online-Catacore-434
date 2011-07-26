@@ -2056,8 +2056,8 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     pet->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     pet->InitStatsForLevel(getLevel());
 
-    //only slot 100, as it's not hunter pet.
-    SetMinion(pet, true, PET_SLOT_OTHER_PET);
+    // Slot 100 for other pets than hunters and warlocks
+    SetMinion(pet, true, (slotID == PET_SLOT_UNK_SLOT) ? PET_SLOT_OTHER_PET : slotID);
 
     switch(petType)
     {

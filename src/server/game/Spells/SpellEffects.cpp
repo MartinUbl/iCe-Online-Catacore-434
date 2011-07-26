@@ -4607,8 +4607,26 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
     uint32 petentry = m_spellInfo->EffectMiscValue[effIndex];
     
     PetSlot slot = (PetSlot)m_spellInfo->EffectBasePoints[effIndex];
-    if(petentry)
-        slot = PET_SLOT_UNK_SLOT;
+    switch (petentry)
+    {
+        case 0:    // any hunter pet
+            break;
+        case 416:  // Imp
+            slot = PET_SLOT_HUNTER_FIRST;
+            break;
+        case 1860: // Voidwalker
+            slot = (PetSlot)(PET_SLOT_HUNTER_FIRST+1);
+            break;
+        case 1863: // Succubus
+            slot = (PetSlot)(PET_SLOT_HUNTER_FIRST+2);
+            break;
+        case 417:  // Felhunter
+            slot = (PetSlot)(PET_SLOT_HUNTER_FIRST+3);
+            break;
+        default:
+            slot = PET_SLOT_UNK_SLOT;
+            break;
+    }
     
     if (!owner)
     {

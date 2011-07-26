@@ -1659,8 +1659,8 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data)
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
     //     8                9               10                     11                     12                     13                    14
     //    "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-    //    15                    16                   17                     18                   19               20                     21
-    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_banned.guid, character_declinedname.genitive "
+    //    15                    16               17                     18                         19
+    //    "characters.at_login, characters.data, character_banned.guid, characters.currentPetSlot, character_declinedname.genitive "
 
     Field *fields = result->Fetch();
 
@@ -1714,7 +1714,7 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data)
         char_flags |= CHARACTER_FLAG_GHOST;
     if (atLoginFlags & AT_LOGIN_RENAME)
         char_flags |= CHARACTER_FLAG_RENAME;
-    if (fields[20].GetUInt32())
+    if (fields[17].GetUInt32())
         char_flags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
 
     QueryResult pRes = CharacterDatabase.PQuery("SELECT guid FROM character_cata_banned WHERE guid = %u;", guid);
@@ -1723,7 +1723,7 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data)
 
     if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {
-        if (!fields[21].GetString().empty())
+        if (!fields[19].GetString().empty())
             char_flags |= CHARACTER_FLAG_DECLINED;
     }
     else
@@ -1744,31 +1744,39 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data)
     // First login
     *p_data << uint8(atLoginFlags & AT_LOGIN_FIRST ? 1 : 0);
 
-    // Pets info
-    {
-        uint32 petDisplayId = 0;
-        uint32 petLevel   = 0;
-        uint32 petFamily  = 0;
+    uint32 petDisplayId = 0;
+    uint32 petLevel   = 0;
+    uint32 petFamily  = 0;
 
-        // show pet at selection character in character list only for non-ghost character
-        if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
+    // Pets info
+    uint32 petSlot = fields[18].GetUInt32();
+    if (petSlot < PET_SLOT_HUNTER_LAST)
+    {
+        QueryResult pPetRes = CharacterDatabase.PQuery("SELECT modelid,level,entry FROM character_pet WHERE owner = %u AND slot = %u LIMIT 1;", guid, petSlot);
+        if(pPetRes && pPetRes->GetRowCount() > 0)
         {
-            uint32 entry = fields[16].GetUInt32();
-            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
-            if (cInfo)
+            Field* pFields = pPetRes->Fetch();
+
+            // show pet at selection character in character list only for non-ghost character
+            if (!(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
             {
-                petDisplayId = fields[17].GetUInt32();
-                petLevel     = fields[18].GetUInt32();
-                petFamily    = cInfo->family;
+                uint32 entry = pFields[2].GetUInt32();
+                CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+                if (cInfo)
+                {
+                    petDisplayId = pFields[0].GetUInt32();
+                    petLevel     = pFields[1].GetUInt32();
+                    petFamily    = cInfo->family;
+                }
             }
         }
-
-        *p_data << uint32(petDisplayId);
-        *p_data << uint32(petLevel);
-        *p_data << uint32(petFamily);
     }
 
-    Tokens data(fields[19].GetString(), ' ');
+    *p_data << uint32(petDisplayId);
+    *p_data << uint32(petLevel);
+    *p_data << uint32(petFamily);
+
+    Tokens data(fields[16].GetString(), ' ');
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
     {
         uint32 visualbase = slot * 2;

@@ -384,9 +384,6 @@ void Pet::SavePetToDB(PetSlot mode)
         // pet will lost anyway at restore temporary unsummoned
         if (getPetType() == HUNTER_PET)
             return;
-
-        // for warlock case
-        mode = PET_SLOT_OTHER_PET;
     }
 
     uint32 curhealth = GetHealth();
