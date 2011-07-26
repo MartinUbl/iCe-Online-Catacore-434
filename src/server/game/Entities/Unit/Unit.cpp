@@ -1173,6 +1173,24 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
             return;
     }
 
+    // Implementation of Wild Quiver hunter marksmanship mastery proficiency
+    if ((damageInfo->SpellID == 75 ||    // Auto-shot spell
+         damageInfo->SpellID == 3044 ||  // Arcane Shot
+         damageInfo->SpellID == 56641 || // Steady Shot
+         damageInfo->SpellID == 19434 || // Aimed Shot
+         damageInfo->SpellID == 82928 || // Aimed Shot (Master Marksman)
+         damageInfo->SpellID == 53209 )  // Chimera Shot
+        &&
+        ToPlayer() && ToPlayer()->HasMastery() &&
+        ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_HUNTER_MARKSMANSHIP)
+    {
+        if (roll_chance_f(ToPlayer()->GetMasteryPoints()*1.8f))
+        {
+            int32 bp0 = damageInfo->damage;
+            CastCustomSpell(pVictim, 76663, &bp0, 0, 0, true);
+        }
+    }
+
     // Call default DealDamage
     CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->absorb, BASE_ATTACK, MELEE_HIT_NORMAL);
     DealDamage(pVictim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchoolMask(damageInfo->schoolMask), spellProto, durabilityLoss);
@@ -1488,13 +1506,6 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
         {
             if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
                 CastSpell(pVictim, 76858, true);
-        }
-
-        // Implementation of Wild Quiver hunter marksmanship mastery proficiency
-        if (damageInfo->attackType == RANGED_ATTACK && ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_HUNTER_MARKSMANSHIP)
-        {
-            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*1.8f))
-                CastSpell(pVictim, 76663, true);
         }
     }
 

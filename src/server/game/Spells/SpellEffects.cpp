@@ -4773,6 +4773,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     float totalDamagePercentMod  = 1.0f;                    // applied to final bonus+weapon damage
     int32 fixed_bonus = 0;
     int32 spell_bonus = 0;                                  // bonus specific for spell
+    bool damage_bonus = true;                               // count damage bonus?
 
     switch (m_spellInfo->SpellFamilyName)
     {
@@ -4975,6 +4976,10 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         }
                     break;
                 }
+                case 76663: // Wild Quiver mastery proc
+                    // Disable damage bonus calculation (causes double calculation)
+                    damage_bonus = false;
+                    break;
                 default:
                     break;
             }
@@ -5122,7 +5127,8 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     uint32 eff_damage = uint32(weaponDamage > 0 ? weaponDamage : 0);
 
     // Add melee damage bonuses (also check for negative)
-    m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
+    if (damage_bonus)
+        m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
     m_damage+= eff_damage;
 
     // Custom after damage calculation spell bonuses
