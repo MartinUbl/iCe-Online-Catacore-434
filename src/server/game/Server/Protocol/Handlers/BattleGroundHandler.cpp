@@ -112,6 +112,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
             case BATTLEGROUND_AB:
             case BATTLEGROUND_EY:
             case BATTLEGROUND_TP:
+            case BATTLEGROUND_BG:
                 bgTypeId = BATTLEGROUND_RB;
                 break;
             default:
