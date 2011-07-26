@@ -5692,8 +5692,20 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const * aurApp, uint8 mo
 
     Unit *target = aurApp->GetTarget();
 
-    target->ApplyAttackTimePercentMod(BASE_ATTACK,   (float)GetAmount(), apply);
-    target->ApplyAttackTimePercentMod(OFF_ATTACK,    (float)GetAmount(), apply);
+    float amount = GetAmount();
+
+    // Rogue's Slice and Dice
+    if (GetSpellProto()->Id == 5171 && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* caster = (Player*)(GetCaster());
+
+        // Implementation of subtlety rogue's Executioneer mastery
+        if (caster && caster->HasMastery() && caster->GetTalentBranchSpec(caster->GetActiveSpec()) == SPEC_ROGUE_SUBTLETY)
+            amount = amount * (1.0f+caster->GetMasteryPoints()*2.5f/100.0f);
+    }
+
+    target->ApplyAttackTimePercentMod(BASE_ATTACK,   amount, apply);
+    target->ApplyAttackTimePercentMod(OFF_ATTACK,    amount, apply);
 }
 
 void AuraEffect::HandleAuraModRangedHaste(AuraApplication const *aurApp, uint8 mode, bool apply) const
