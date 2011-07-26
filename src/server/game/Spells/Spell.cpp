@@ -5555,6 +5555,49 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
+            case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
+            {
+                if (m_targets.getUnitTarget() == m_caster)
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
+            case SPELL_EFFECT_REDIRECT_THREAT:
+            {
+                if (m_spellInfo->Id == 57934 && m_targets.getUnitTarget() &&
+                    m_targets.getUnitTarget()->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
+            case SPELL_EFFECT_LEAP_BACK:
+            {
+                // Spell 781 (Disengage) requires player to be in combat
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 781 && !m_caster->isInCombat())
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+                Unit* target = m_targets.getUnitTarget();
+                if (m_caster == target && m_caster->hasUnitState(UNIT_STAT_ROOT))
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        return SPELL_FAILED_ROOTED;
+                    else
+                        return SPELL_FAILED_DONT_REPORT;
+                }
+                break;
+            }
+            case SPELL_EFFECT_TALENT_SPEC_SELECT:
+                // can't change during already started arena/battleground
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
+                        if (bg->GetStatus() == STATUS_IN_PROGRESS)
+                            return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                break;
+            default:
+                break;
+        }
+
+        /* custom check switch */
+        switch(m_spellInfo->Effect[i])
+        {
             case SPELL_EFFECT_JUMP:
             case SPELL_EFFECT_JUMP_DEST:
             {
@@ -5600,42 +5643,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
-            case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
-            {
-                if (m_targets.getUnitTarget() == m_caster)
-                    return SPELL_FAILED_BAD_TARGETS;
-                break;
-            }
-            case SPELL_EFFECT_REDIRECT_THREAT:
-            {
-                if (m_spellInfo->Id == 57934 && m_targets.getUnitTarget() &&
-                    m_targets.getUnitTarget()->GetTypeId() != TYPEID_PLAYER)
-                    return SPELL_FAILED_BAD_TARGETS;
-                break;
-            }
-            case SPELL_EFFECT_LEAP_BACK:
-            {
-                // Spell 781 (Disengage) requires player to be in combat
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 781 && !m_caster->isInCombat())
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
-                Unit* target = m_targets.getUnitTarget();
-                if (m_caster == target && m_caster->hasUnitState(UNIT_STAT_ROOT))
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        return SPELL_FAILED_ROOTED;
-                    else
-                        return SPELL_FAILED_DONT_REPORT;
-                }
-                break;
-            }
-            case SPELL_EFFECT_TALENT_SPEC_SELECT:
-                // can't change during already started arena/battleground
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
-                        if (bg->GetStatus() == STATUS_IN_PROGRESS)
-                            return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                break;
             default:
                 break;
         }
