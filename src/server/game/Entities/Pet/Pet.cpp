@@ -952,6 +952,9 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 case 510: // mage Water Elemental
                 {
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
+                    SetModifierValue(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(m_owner->GetStat(STAT_INTELLECT)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
+                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
                     break;
                 }
                 case 1964: //force of nature
