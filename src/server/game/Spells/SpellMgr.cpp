@@ -3924,6 +3924,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 40810: case 43267: case 43268:     // Saber Lash
         case 42384:                             // Brutal Swipe
         case 45150:                             // Meteor Slash
+        case 88942: case 95172:                 // Meteor Slash (Argaloth)
         case 64422: case 64688:                 // Sonic Screech
         case 72373:                             // Shared Suffering
         case 71904:                             // Chaos Bane
