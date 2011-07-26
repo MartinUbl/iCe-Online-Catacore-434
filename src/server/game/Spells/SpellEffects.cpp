@@ -2768,12 +2768,14 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     m_caster->CastSpell(m_caster, 96267, true);
             }
             // Implementation of Priests discipline mastery proficiency
-            if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-                m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_DISCIPLINE)
+            if (m_spellAura->HasEffectType(SPELL_AURA_SCHOOL_ABSORB))
             {
-                if (m_spellAura->GetSpellProto()->Effect[effIndex] == SPELL_AURA_SCHOOL_ABSORB)
-                    if (m_spellAura->GetEffect(effIndex))
-                        m_spellAura->GetEffect(effIndex)->ChangeAmount(m_spellAura->GetEffect(effIndex)->GetAmount()*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f));
+                if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+                    m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_DISCIPLINE)
+                {
+                    if (AuraEffect* aurEff = m_spellAura->GetEffect(effIndex))
+                        aurEff->ChangeAmount(aurEff->GetAmount()*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f));
+                }
             }
             break;
         }
