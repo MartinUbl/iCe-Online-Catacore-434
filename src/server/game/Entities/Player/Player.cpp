@@ -5344,6 +5344,21 @@ void Player::RepopAtGraveyard()
 
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
+    /* special exclusion for plantaz (jail) map */
+    if (GetMapId() == 746) {
+        GameTele const *gtele = sObjectMgr->GetGameTele("plantaz");
+        if (!gtele)
+            return;
+
+        if (!isAlive()) {
+            ResurrectPlayer(0.5f);
+            SpawnCorpseBones();
+        }
+
+        TeleportTo(gtele->mapId, gtele->position_x, gtele->position_y, gtele->position_z, gtele->orientation);
+        return;
+    }
+
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < sObjectMgr->GetFatalDepthForZone(GetZoneId()))
     {
