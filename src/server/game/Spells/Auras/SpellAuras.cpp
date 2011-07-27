@@ -1126,6 +1126,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                         break;
                     }
+                // Resurrection Sickness for special iCe purposes
+                // weirdly SPELLFAMILY_PRIEST
+                case 15007:
+                    if (target->GetMapId() == 746)  // Banana Plantation (jail map)
+                    {
+                        SetMaxDuration(-1);         // duration: persistant
+                        RefreshDuration();
+                    }
+                    break;
                 default: break;
                 }
                 break;
