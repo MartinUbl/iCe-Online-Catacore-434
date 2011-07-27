@@ -6789,7 +6789,6 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
         uint32 preserve_spells_table[] = {
             15007,  // Ressurection Sickness
             26013,  // Deserter
-            91218,  // Plantaz aura
         };
         std::vector<uint32> preserve_spells;
 
