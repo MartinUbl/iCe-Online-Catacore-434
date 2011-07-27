@@ -1116,13 +1116,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->CastCustomSpell(target, 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
                             }
                         }
-                        // Body and Soul
                         if (!target)
                             break;
+
+                        // Body and Soul
                         if (caster->HasAura(64127))                 // rank #1
                             caster->CastSpell(target, 64128, true); // Increase speed of the target by 30%
                         else if (caster->HasAura(64129))            // rank #2
                             caster->CastSpell(target, 65081, true); // Increase speed of the target by 60%
+
+                        // Holy Walk (Gladiator 4/5 set bonus)
+                        if (caster->HasAura(33333) && caster == target)
+                            target->CastSpell(target, 96219, true);      // Suppress movement speed reduction when cast on self
 
                         break;
                     }
