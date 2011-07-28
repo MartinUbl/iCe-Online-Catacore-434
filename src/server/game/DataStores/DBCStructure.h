@@ -537,13 +537,13 @@ struct AreaTableEntry
     // helpers
     bool IsSanctuary() const
     {
-        switch (mapid) {
-            case 609:  // Ebon Hold
-            case 746:  // Uldum Phase Oasis - plantaz
-                return true;
-            default:
-                break;
-        }
+        if (mapid == 609)
+            return true;
+
+        // Uldum Phase Oasis - plantaz
+        if (mapid == 746)
+            return true;
+
         return (flags & AREA_FLAG_SANCTUARY);
     }
 };
