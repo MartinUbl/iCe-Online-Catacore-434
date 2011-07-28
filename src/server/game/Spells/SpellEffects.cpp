@@ -6318,74 +6318,33 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         case SPELLFAMILY_PALADIN:
         {
             // Judgement (seal trigger)
-            if (m_spellInfo->Category == SPELLCATEGORY_JUDGEMENT)
+            if (m_spellInfo->Id == 20271)
             {
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
-                uint32 spellId1 = 0;
-                uint32 spellId2 = 0;
-                uint32 spellId3 = 0;
 
-                // Judgement self add switch
-                switch (m_spellInfo->Id)
-                {
-                    case 53407: spellId1 = 20184; break;    // Judgement of Justice
-                    case 20271:                             // Judgement of Light
-                    case 57774: spellId1 = 20185; break;    // Judgement of Light
-                    case 53408: spellId1 = 20186; break;    // Judgement of Wisdom
-                    default:
-                        sLog->outError("Unsupported Judgement (seal trigger) spell (Id: %u) in Spell::EffectScriptEffect",m_spellInfo->Id);
-                        return;
-                }
-                // all seals have aura dummy in 2 effect
+                uint32 spellId = 54158; // Judgement
+
+                // Seal of Righteousness and Seal of Truth have triggered spell ID in the third effect (dummy)
                 Unit::AuraApplicationMap & sealAuras = m_caster->GetAppliedAuras();
                 for (Unit::AuraApplicationMap::iterator iter = sealAuras.begin(); iter != sealAuras.end();)
                 {
-                    switch (iter->first)
-                    {
-                        // Heart of the Crusader
-                        case 20335: // Rank 1
-                            spellId3 = 21183;
-                            break;
-                        case 20336: // Rank 2
-                            spellId3 = 54498;
-                            break;
-                        case 20337: // Rank 3
-                            spellId3 = 54499;
-                            break;
-                    }
                     Aura * aura = iter->second->GetBase();
                     if (IsSealSpell(aura->GetSpellProto()))
                     {
                         if (AuraEffect * aureff = aura->GetEffect(2))
                             if (aureff->GetAuraType() == SPELL_AURA_DUMMY)
                             {
+                                // Judgement of Righteousness, Judgement of Truth
                                 if (sSpellStore.LookupEntry(aureff->GetAmount()))
-                                    spellId2 = aureff->GetAmount();
-                                break;
+                                    spellId = aureff->GetAmount();
                             }
-                        if (!spellId2)
-                        {
-                            switch (iter->first)
-                            {
-                                // Seal of light, Seal of wisdom, Seal of justice
-                                case 20165:
-                                case 20166:
-                                case 20164:
-                                    spellId2 = 54158;
-                            }
-                        }
                         break;
                     }
                     else
                         ++iter;
                 }
-                if (spellId1)
-                    m_caster->CastSpell(unitTarget, spellId1, true);
-                if (spellId2)
-                    m_caster->CastSpell(unitTarget, spellId2, true);
-                if (spellId3)
-                    m_caster->CastSpell(unitTarget, spellId3, true);
+                m_caster->CastSpell(unitTarget, spellId, true);
 
                 // Long Arm of the Law
                 if ((m_caster->HasAura(87168) && roll_chance_i(50)) || m_caster->HasAura(87172))

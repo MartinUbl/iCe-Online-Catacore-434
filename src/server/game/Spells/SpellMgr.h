@@ -274,10 +274,20 @@ inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
 
 inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
-    //Collection of all the seal family flags. No other paladin spell has any of those.
-    return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-        (spellInfo->SpellFamilyFlags[1] & 0x26000C00
-        || spellInfo->SpellFamilyFlags[0] & 0x0A000000);
+    if (!spellInfo)
+        return false;
+
+    switch(spellInfo->Id)
+    {
+    case 20154: // Seal of Righteousness
+    case 20164: // Seal of Justice
+    case 20165: // Seal of Insight
+    case 31801: // Seal of Truth
+        return true;
+    default:
+        return false;
+    }
+    return false;
 }
 
 inline bool IsElementalShield(SpellEntry const *spellInfo)
