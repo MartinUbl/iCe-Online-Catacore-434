@@ -141,6 +141,7 @@ Battleground::Battleground()
     m_ClientInstanceID  = 0;
     m_EndTime           = 0;
     m_LastResurrectTime = 0;
+    m_LastPvPOnTime     = 0;
     m_BracketId         = BG_BRACKET_ID_FIRST;
     m_InvitedAlliance   = 0;
     m_InvitedHorde      = 0;
@@ -253,6 +254,7 @@ void Battleground::Update(uint32 diff)
 
     _ProcessOfflineQueue();
     _ProcessRessurect(diff);
+    _ProcessPvPOn(diff);
 
     if (GetStatus() == STATUS_IN_PROGRESS && !isArena() && sBattlegroundMgr->GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
         _ProcessProgress(diff);
@@ -388,6 +390,20 @@ inline void Battleground::_ProcessProgress(uint32 diff)
         }
         m_PrematureCountDownTimer = newtime;
     }
+}
+
+inline void Battleground::_ProcessPvPOn(uint32 diff)
+{
+    m_LastPvPOnTime += diff;
+
+    /* set pvp on for all players each second */
+    if (m_LastPvPOnTime < 1000)
+        return;
+
+    m_LastPvPOnTime = 0;
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        if (Player *plr = sObjectMgr->GetPlayer(itr->first))
+            plr->SetPvP(true);
 }
 
 inline void Battleground::_ProcessJoin(uint32 diff)

@@ -605,6 +605,7 @@ class Battleground
         void _ProcessOfflineQueue();
         void _ProcessRessurect(uint32 diff);
         void _ProcessProgress(uint32 diff);
+        void _ProcessPvPOn(uint32 diff);
         void _ProcessLeave(uint32 diff);
         void _ProcessJoin(uint32 diff);
 
@@ -639,6 +640,7 @@ class Battleground
         uint32 m_ResetStatTimer;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         uint32 m_LastResurrectTime;
+        uint32 m_LastPvPOnTime;
         BattlegroundBracketId m_BracketId;
         uint8  m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
         bool   m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattlegroundMgr.BGFreeSlotQueue[bgTypeId] deque
