@@ -5635,6 +5635,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
                     return SPELL_FAILED_FALLING;
 
+                /* exclude flat ground for charge when not in BG */
+                if (!m_caster->ToPlayer()->InBattleground()) {
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_CHARGE ||
+                        m_spellInfo->Effect[i] == SPELL_EFFECT_CHARGE_DEST)
+                        break;
+                }
+
                 /* destination must stand on flat ground (in players map) */
                 if (!sObjectMgr->IsFlatGround(m_caster->GetMap(), dpos->GetPositionX(), dpos->GetPositionY(), dpos->GetPositionZ()))
                     return SPELL_FAILED_OUT_OF_RANGE;
