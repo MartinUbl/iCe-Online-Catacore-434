@@ -8695,6 +8695,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Hacked elsewhere
             return false;
             break;
+        // Incite
+        case 50685:
+        case 50686:
+        case 50687:
+            // Should proc only on critical hit
+            if (!(procEx & PROC_EX_CRITICAL_HIT))
+                return false;
+            // And also cannot proc from self bonus
+            if (HasAura(86627))
+                return false;
+            break;
         // Deflection
         case 52420:
         {
