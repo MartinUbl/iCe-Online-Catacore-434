@@ -1221,6 +1221,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
+            case SPELLFAMILY_WARRIOR:
+                {
+                    uint32 entry = GetId();
+                    if (entry == 12880 || entry == 14201 || entry == 14202)
+                        caster->ModifyAuraState(AURA_STATE_ENRAGE, apply);
+                }
+                break;
             case SPELLFAMILY_DEATHKNIGHT:
                 if (!caster)
                     break;
