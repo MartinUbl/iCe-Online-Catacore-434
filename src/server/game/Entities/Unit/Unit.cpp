@@ -11366,6 +11366,10 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
 
 uint32 Unit::SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim)
 {
+    // Victory Rush - effect 2 - heal should not crit. Cannot be made in other way. Hack.
+    if (spellProto->Id == 34428)
+        return damage;
+
     // Calculate critical bonus
     int32 crit_bonus;
     switch(spellProto->DmgClass)
