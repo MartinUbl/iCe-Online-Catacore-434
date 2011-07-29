@@ -3476,6 +3476,49 @@ public:
     }
 };
 
+class npc_jailer: public CreatureScript
+{
+   public:
+       npc_jailer(): CreatureScript("npc_jailer") {};
+
+       struct npc_jailerAI: public ScriptedAI
+       {
+           npc_jailerAI(Creature* c): ScriptedAI(c)
+           {
+               Reset();
+           }
+
+           uint32 casovac;
+
+           void Reset()
+           {
+               casovac = 6000;
+           }
+
+           void UpdateAI(const uint32 diff)
+           {
+               if (casovac <= diff)
+               {
+                   switch(urand(0,1))
+                   {
+                       case 0:
+                           me->MonsterYell("Do you like bananas?",LANG_UNIVERSAL,0);
+                           break;
+                       case 1:
+                           me->MonsterYell("Come to me! I need bananas!",LANG_UNIVERSAL,0);
+                           break;
+                   }
+                   casovac = 6000;
+               } else casovac -= diff;
+           }
+       };
+
+       CreatureAI* GetAI(Creature* c) const
+       {
+           return new npc_jailerAI(c);
+       }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3518,5 +3561,6 @@ void AddSC_npcs_special()
     new npc_unmuter;
     new npc_flame_orb;
     new npc_power_word_barrier;
+    new npc_jailer;
 }
 
