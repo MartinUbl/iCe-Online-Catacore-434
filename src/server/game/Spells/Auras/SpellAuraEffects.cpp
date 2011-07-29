@@ -1419,6 +1419,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 89420:
                         caster->CastSpell(caster, 89653, true);
                         break;
+                    case 703:    // Garrote
+                    case 1943:   // Rupture
+                        // Venomous Wounds
+                        if ((caster->HasAura(79133) && roll_chance_i(30)) ||
+                            (caster->HasAura(79134) && roll_chance_i(60)))
+                        {
+                            caster->CastSpell(target, 79136, true);
+                            int32 bp0 = 10;
+                            caster->CastCustomSpell(caster, 51637, &bp0, 0, 0, true);
+                        }
+                        break;
                     case 1120:   // Drain Soul
                         // Pandemic - refresh duration of Unstable Affliction
                         if (caster->HasAura(85100) || (caster->HasAura(85099) && roll_chance_i(50)))

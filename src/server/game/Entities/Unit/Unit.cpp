@@ -15734,6 +15734,22 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
     // Proc auras on death - must be before aura/combat remove
     pVictim->ProcDamageAndSpell(NULL, PROC_FLAG_DEATH, PROC_FLAG_NONE, PROC_EX_NONE, 0, BASE_ATTACK, 0);
 
+    // Rogues talent Venomous Wounds shall grant Rupture ability to regain energy on targets death
+    if (pVictim->HasAura(1943))
+    {
+        Aura* pAura = pVictim->GetAura(1943);
+        if (pAura)
+        {
+            Unit* pCaster = pAura->GetCaster();
+            if (pCaster && (pCaster->HasAura(79133) || pCaster->HasAura(79134)))
+            {
+                float duration_mod = float(pAura->GetDuration()) / float(pAura->GetMaxDuration());
+                int32 bp0 = 25.0f*duration_mod;
+                pCaster->CastCustomSpell(pCaster, 51637, &bp0, 0, 0, true);
+            }
+        }
+    }
+
     // if talent known but not triggered (check priest class for speedup check)
     bool SpiritOfRedemption = false;
     if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_PRIEST)
