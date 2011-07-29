@@ -3958,6 +3958,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         }
     }*/
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player::GUIDTimestampMap* tsMap = m_caster->ToPlayer()->GetSummonMapFor(entry);
+        if (tsMap && tsMap->size() >= GetMaxActiveSummons(entry))
+            m_caster->ToPlayer()->DespawnOldestSummon(entry);
+    }
+
     TempSummon *summon = NULL;
 
     switch (properties->Category)
@@ -4082,6 +4089,10 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         }
                         ExecuteLogEffectSummonObject(effIndex, summon);
                     }
+
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
+
                     return;
                 }
             }//switch
@@ -4117,6 +4128,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         summon->SetCreatorGUID(m_originalCaster->GetGUID());
         ExecuteLogEffectSummonObject(effIndex, summon);
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
     }
 }
 
@@ -8199,6 +8213,18 @@ void Spell::EffectWMOChange(SpellEffIndex effIndex)
                 gameObjTarget->Rebuild();
                 break;
         }
+    }
+}
+
+uint32 Spell::GetMaxActiveSummons(uint32 entry)
+{
+    switch (entry)
+    {
+        // Wild Mushroom
+        case 47649:
+            return 3;
+        default:
+            return (uint32)(-1);
     }
 }
 
