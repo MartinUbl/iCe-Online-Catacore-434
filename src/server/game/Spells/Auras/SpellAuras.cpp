@@ -1178,6 +1178,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastCustomSpell(target, 91021, &bp0, NULL, NULL, true);
                     }
                 }
+                // Blind
+                if (apply && (GetSpellProto()->Id == 2094))
+                {
+                    if (Unit* caster = aurApp->GetBase()->GetCaster())
+                    {
+                        // Glyph of Blind
+                        if (caster->HasAura(91299))
+                        {
+                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        }
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN: // Speed of Light (talent)
                 if(GetId() == 82327)
