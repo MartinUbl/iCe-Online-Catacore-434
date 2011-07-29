@@ -681,6 +681,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Searing Pain
+                else if (m_spellInfo->Id == 5676)
+                {
+                    if (m_caster->HasAura(74434) && !m_caster->HasAura(79440))
+                    {
+                        //m_caster->CastSpell(m_caster, 79440, true);
+                        Aura* pAura = m_caster->AddAura(79440, m_caster);
+                        pAura->SetCharges(2);
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:

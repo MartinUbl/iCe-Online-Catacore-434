@@ -389,7 +389,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //329
     &AuraEffect::HandleNULL,                                      //330
     &AuraEffect::HandleNULL,                                      //331
-    &AuraEffect::HandleNULL,                                      //332
+    &AuraEffect::HandleModActionButton,                           //332
     &AuraEffect::HandleModActionButton,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      //334
     &AuraEffect::HandleNULL,                                      //335

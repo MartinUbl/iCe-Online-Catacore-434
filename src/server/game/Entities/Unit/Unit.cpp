@@ -11253,6 +11253,20 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         if (spellProto->Id == 94472)
                             return true; // Will probably add critical bonus
                     break;
+                    case SPELLFAMILY_WARLOCK:
+                        // Searing Pain and Soulburn proficiency
+                        if (spellProto->Id == 5676 && HasAura(74434) && HasAura(79440) && ToPlayer())
+                        {
+                            if (Aura* pAura = GetAura(79440))
+                            {
+                                if (pAura->GetCharges() == 2)
+                                {
+                                    pAura->SetCharges(1);
+                                    return true;
+                                }
+                            }
+                        }
+                    break;
                 }
             }
             break;
