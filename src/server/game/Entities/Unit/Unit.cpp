@@ -8702,6 +8702,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (HasAura(86627))
                 return false;
             break;
+        // Hold the Line
+        case 84604:
+        case 84621:
+            if (!(procEx & PROC_EX_PARRY))
+                return false;
+            break;
         // Deflection
         case 52420:
         {
@@ -14625,6 +14631,15 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                         ModifyAuraState(AURA_STATE_DEFENSE, true);
                         StartReactiveTimer(REACTIVE_DEFENSE);
                     }
+
+                    if (procExtra & PROC_EX_PARRY && GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Hold the Line "on parry" proc
+                        if (HasAura(84604))
+                            CastSpell(this, 84619, true);
+                        else if (HasAura(84621))
+                            CastSpell(this, 84620, true);
+                    }
                 }
                 // if and victim block attack
                 if (procExtra & PROC_EX_BLOCK)
@@ -14640,6 +14655,15 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 {
                     this->ToPlayer()->AddComboPoints(pTarget, 1);
                     StartReactiveTimer(REACTIVE_OVERPOWER);
+                }
+
+                if (procExtra & PROC_EX_PARRY && GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Hold the Line "on parry" proc
+                    if (HasAura(84604))
+                        CastSpell(this, 84619, true);
+                    else if (HasAura(84621))
+                        CastSpell(this, 84620, true);
                 }
             }
         }
