@@ -1014,10 +1014,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 48020: // Demonic Circle
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             if (GameObject* obj = target->GetGameObject(48018))
-                {
-                  target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation());
-                  target->ToPlayer()->RemoveMovementImpairingAuras();
-                }
+                            {
+                                // Soulburn: Demonic Circle
+                                if (target->HasAura(74434))
+                                    target->CastSpell(target, 79438, true);
+
+                                target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation());
+                                target->ToPlayer()->RemoveMovementImpairingAuras();
+                            }
                         break;
                 }
                 break;
