@@ -3796,6 +3796,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
             break;
+        case 77223: // Enhaced Elements (bad spellfamily name and flags)
+            // probably Blizzard's mistake
+            spellInfo->SpellClassOptionsId = 7443;
+            spellInfo->EffectSpellClassMask[0].Set(0x06200000,0x00001106,0xB610020F);
+            count++;
+            break;
         case 62388: //Demonic Circle: Summon (caster aura spell)
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
