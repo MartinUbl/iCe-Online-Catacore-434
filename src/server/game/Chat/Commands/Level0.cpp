@@ -44,17 +44,6 @@ bool ChatHandler::HandleTestCommand(const char* args)
     if (!player)
         return false;
 
-    uint32 count = 6;
-
-    WorldPacket data(SMSG_RESYNC_RUNES, 4 + count * 2);
-    data << uint32(count);
-    for (uint32 i = 0; i < count; ++i)
-    {
-        data << uint8(player->GetCurrentRune(i));                   // rune type
-        data << uint8(255 - (player->GetRuneCooldown(i) * 51));     // passed cooldown time (0-255)
-    }
-    player->GetSession()->SendPacket(&data);
-
     return true;
 }
 
