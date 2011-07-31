@@ -3996,6 +3996,14 @@ void Spell::SendSpellStart()
     if (m_spellInfo->runeCostID && m_spellInfo->powerType == POWER_RUNE)
         castFlags |= CAST_FLAG_UNKNOWN_19;
 
+    // Check whether spell has effect HEAL
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
+        {
+            castFlags |= CAST_FLAG_HEAL_VALUE;
+            break;
+        }
+
     WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
     if (m_CastItem)
         data.append(m_CastItem->GetPackGUID());
@@ -4016,9 +4024,25 @@ void Spell::SendSpellStart()
     if (castFlags & CAST_FLAG_AMMO)
         WriteAmmoToPacket(&data);
 
-    if (castFlags & CAST_FLAG_UNKNOWN_31)
+    if (castFlags & CAST_FLAG_UNKNOWN_27)
     {
         data << uint32(0);
+        data << uint32(0);
+    }
+
+    if (castFlags & CAST_FLAG_HEAL_VALUE)
+    {
+        uint32 healvalue = 0;
+        if (m_targets.getUnitTarget())
+        {
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
+                {
+                    healvalue = uint32(CalculateDamage(i, m_targets.getUnitTarget()));
+                    break;
+                }
+        }
+        data << uint32(healvalue);
         data << uint8(0);
     }
 
