@@ -9956,15 +9956,23 @@ void Spell::EffectCastButtons(SpellEffIndex effIndex)
         if (!spell_id)
             continue;
 
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+        if (!spellInfo)
+            continue;
+
+        if (!p_caster->HasSpell(spell_id) || p_caster->HasSpellCooldown(spell_id))
+            continue;
+
         // It may occur, that the same spell is selected
         // when we do it, it would cause indefinite recursion
         if (spell_id == m_spellInfo->Id)
             continue;
 
-        if (p_caster->HasSpellCooldown(spell_id))
-            continue;
+        // Valid totem spells only have the first TotemCategory field set, so only check this
+        if (p_caster->getClass() == CLASS_SHAMAN)
+            if (spellInfo->TotemCategory[0] < TC_EARTH_TOTEM || spellInfo->TotemCategory[0] > TC_WATER_TOTEM)
+                continue;
 
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
         uint32 cost = CalculatePowerCost(spellInfo, m_caster, GetSpellSchoolMask(spellInfo));
 
         if (m_caster->GetPower(POWER_MANA) < cost)
