@@ -167,6 +167,102 @@ public:
 
 };
 
+/////////////////////////////////////////////////////////////////////////////////////
+// Velkej Gregovo Stonetalon Mountains event                                       //
+/////////////////////////////////////////////////////////////////////////////////////
+
+class StonetalonBombMapScript: public WorldMapScript
+{
+    public:
+        StonetalonBombMapScript(): WorldMapScript("stonetalon_bomb_map", 731)
+        {
+        }
+
+        Player* pLeaders[2];
+        std::vector<Player*> PlayerMap[2];
+
+        void OnCreate(Map* pMap)
+        {
+            for (int i = 0; i < 1; i++)
+            {
+                pLeaders[i] = NULL;
+                PlayerMap[i].clear();
+            }
+        }
+
+        void MakeLeader(TeamId team, Player* pPlayer)
+        {
+            pLeaders[team] = pPlayer;
+            pPlayer->CastSpell(pPlayer, 50771, true);
+            pPlayer->CastSpell(pPlayer, 37964, true);
+        }
+
+        void MakeNewLeader(TeamId team)
+        {
+            if (PlayerMap[team].empty())
+            {
+                pLeaders[team] = NULL;
+                return;
+            }
+
+            uint32 which = urand(0,PlayerMap[team].size()-1);
+            if (PlayerMap[team][which])
+                pLeaders[team] = PlayerMap[team][which];
+            else
+                pLeaders[team] = NULL;
+        }
+
+        void DeletePlayerFromList(Player* pPlayer)
+        {
+            if (!pPlayer)
+                return;
+
+            //std::list<Player*>::const_iterator itr = PlayerMap[pPlayer->GetTeamId()].find(pPlayer);
+            //if (itr != PlayerMap[pPlayer->GetTeamId()].end())
+            //    PlayerMap[pPlayer->GetTeamId()].erase(itr);
+        }
+
+        void OnPlayerEnter(Map* pMap, Player* pPlayer)
+        {
+            if (pPlayer)
+            {
+                if (pPlayer->HasAura(50771) && pPlayer != pLeaders[pPlayer->GetTeamId()])
+                    pPlayer->RemoveAurasDueToSpell(50771);
+
+                PlayerMap[pPlayer->GetTeamId()].push_back(pPlayer);
+
+                if (pPlayer->GetTeamId() == TEAM_HORDE)
+                {
+                    // HORDE
+                    if (!pLeaders[TEAM_HORDE])
+                    {
+                        MakeLeader(TEAM_HORDE, pPlayer);
+                    }
+                    pPlayer->NearTeleportTo(2047.04382f, 1172.4026f, 321.5933f, 4.32f);
+                }
+                else
+                {
+                    // ALLIANCE
+                    if (!pLeaders[TEAM_ALLIANCE])
+                    {
+                        MakeLeader(TEAM_ALLIANCE, pPlayer);
+                    }
+                    pPlayer->NearTeleportTo(2074.0258f, 1601.9565f, 341.2546f, 2.39f);
+                }
+            }
+        }
+
+        void OnPlayerLeave(Map* pMap, Player* pPlayer)
+        {
+            if (pPlayer)
+            {
+                DeletePlayerFromList(pPlayer);
+
+                if (pPlayer == pLeaders[pPlayer->GetTeamId()])
+                    MakeNewLeader(pPlayer->GetTeamId());
+            }
+        }
+};
 
 /*######
 ## AddSC
@@ -176,4 +272,5 @@ void AddSC_stonetalon_mountains()
 {
     new npc_braug_dimspirit();
     new npc_kaya_flathoof();
+    new StonetalonBombMapScript();
 }
