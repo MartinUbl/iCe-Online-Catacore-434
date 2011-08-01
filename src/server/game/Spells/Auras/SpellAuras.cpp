@@ -205,8 +205,8 @@ void AuraApplication::ClientUpdate(bool remove)
     uint32 flags = m_flags;
     if (aura->GetMaxDuration() > 0)
         flags |= AFLAG_DURATION;
-    //if (aura->IsModActionButton())
-    //    flags |= AFLAG_MOD_AB;
+    if (aura->IsModActionButton())
+        flags |= AFLAG_MOD_AB;
     data << uint8(flags);
     data << uint8(aura->GetCasterLevel());
     data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
@@ -220,31 +220,14 @@ void AuraApplication::ClientUpdate(bool remove)
         data << uint32(aura->GetDuration());
     }
 
-    // Don't know how exactly is this done
-    // Decompile says, that these fields are taken only for effect indexes
-    // specified in flags (AFLAG_EFF_INDEX_0,..), but client freezes in a lot of cases
-    // Research:
-    /*
-     Hot Streak (48108):
-           flag & AFLAG_MOD_AB
-           data << uint32(92315)
-        works well
-     Trap Launcher (77769):
-           flag & AFLAG_MOD_AB
-           data << uint32(60192)
-           data << uint32(82939)
-           data << uint32(82941)
-        works well
-     others untested
-    */
-    /*if (flags & AFLAG_MOD_AB)
+    if (flags & AFLAG_MOD_AB)
     {
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
         {
-            if (uint32 id = aura->GetActionButtonSpellForEffect(i))
-                data << uint32(id);
+            if ( (1 << i) & flags )
+                data << uint32(aura->GetActionButtonSpellForEffect(i));
         }
-    }*/
+    }
 
     m_target->SendMessageToSet(&data, true);
 }
@@ -828,8 +811,13 @@ bool Aura::IsModActionButton() const
         case 77769: // Trap Launcher
         case 82946: // Trap Launcher (second?)
         case 82926: // Fire! (Master Marksman proc)
-        case 91713: // Nether Ward
             return true;
+        case 687:   // Demon Armor - condition for talent Nether Ward
+        case 28176: // Fel Armor
+            if (GetCaster()->HasAura(91713))
+                return true;
+            else
+                return false;
         case 94338: // Eclipse (Solar) - condition for talent Sunfire
             if (GetCaster()->HasAura(93401))
                 return true;
@@ -872,6 +860,10 @@ uint8 Aura::GetModActionButtonEffectMask() const
         case 77769: // Trap Launcher
             effMask |= (1 << 0) | (1 << 1) | (1 << 2);
             break;
+        case 687:   // Demon Armor
+        case 28176: // Fel Armor
+            effMask |= 1 << 2;
+            break;
         default:
             return 0;
     }
@@ -900,7 +892,8 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
         case 94338: // Eclipse (Solar)
         case 84728: // Frostfire Orb Override
             return GetSpellProto()->EffectBasePoints[effIndex];
-        case 91713: // Nether Ward
+        case 687: // Demon Armor
+        case 28176: // Fel Armor
             return 91711;
         default:
             return 0;
