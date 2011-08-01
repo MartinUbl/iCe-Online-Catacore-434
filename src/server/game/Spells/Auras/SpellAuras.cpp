@@ -200,10 +200,13 @@ void AuraApplication::ClientUpdate(bool remove)
     ASSERT(m_target->GetVisibleAura(m_slot));
 
     Aura const * aura = GetBase();
+
     data << uint32(aura->GetId());
     uint32 flags = m_flags;
     if (aura->GetMaxDuration() > 0)
         flags |= AFLAG_DURATION;
+    //if (aura->IsModActionButton())
+    //    flags |= AFLAG_MOD_AB;
     data << uint8(flags);
     data << uint8(aura->GetCasterLevel());
     data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
@@ -217,8 +220,31 @@ void AuraApplication::ClientUpdate(bool remove)
         data << uint32(aura->GetDuration());
     }
 
-    if (flags & AFLAG_UNK2)
-        sLog->outError("Unhandled flag in AuraApplication::ClientUpdate. Will result in the aura being handled incorrectly on client side.");
+    // Don't know how exactly is this done
+    // Decompile says, that these fields are taken only for effect indexes
+    // specified in flags (AFLAG_EFF_INDEX_0,..), but client freezes in a lot of cases
+    // Research:
+    /*
+     Hot Streak (48108):
+           flag & AFLAG_MOD_AB
+           data << uint32(92315)
+        works well
+     Trap Launcher (77769):
+           flag & AFLAG_MOD_AB
+           data << uint32(60192)
+           data << uint32(82939)
+           data << uint32(82941)
+        works well
+     others untested
+    */
+    /*if (flags & AFLAG_MOD_AB)
+    {
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        {
+            if (uint32 id = aura->GetActionButtonSpellForEffect(i))
+                data << uint32(id);
+        }
+    }*/
 
     m_target->SendMessageToSet(&data, true);
 }
@@ -788,6 +814,100 @@ bool Aura::ModStackAmount(int32 num)
     return false;
 }
 
+bool Aura::IsModActionButton() const
+{
+    // Mostly spells with aura #332 or #333
+    // Some spells with these auras does not modify action bar spells, no idea how to decide which does.
+    // Otherwise some spells without these aura types do modify AB
+    switch (GetSpellProto()->Id)
+    {
+        case 48108: // Hot Streak
+        case 74434: // Soulburn
+        case 81021: // Stampede (Cat Form)
+        case 81022: // Stampede (Bear Form)
+        case 77769: // Trap Launcher
+        case 82946: // Trap Launcher (second?)
+        case 82926: // Fire! (Master Marksman proc)
+        case 91713: // Nether Ward
+            return true;
+        case 94338: // Eclipse (Solar) - condition for talent Sunfire
+            if (GetCaster()->HasAura(93401))
+                return true;
+            else
+                return false;
+        case 92294: // Frostfire Orb Override - condition for talent Frostfire Orb
+            if (GetCaster()->HasAura(84726) || GetCaster()->HasAura(84727) || GetCaster()->HasAura(84728))
+                return true;
+            else
+                return false;
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+uint8 Aura::GetModActionButtonEffectMask() const
+{
+    uint8 effMask = 0;
+    // Effect mask for mod action button procedure
+    // every OR has bit mover equal to its spell effect index (even spell effect index 0)
+    switch (GetSpellProto()->Id)
+    {
+        case 48108: // Hot Streak
+        case 94338: // Eclipse (Solar)
+        case 91713: // Nether Ward
+        case 92294: // Frostfire Orb Override
+            effMask |= 1 << 0;
+            break;
+        case 74434: // Soulburn
+        case 82926: // Fire! (Master Marksman proc)
+            effMask |= 1 << 1;
+            break;
+        case 81021: // Stampede (Cat Form)
+        case 81022: // Stampede (Bear Form)
+        case 82946: // Trap Launcher (second?)
+            effMask |= (1 << 0) | (1 << 1);
+            break;
+        case 77769: // Trap Launcher
+            effMask |= (1 << 0) | (1 << 1) | (1 << 2);
+            break;
+        default:
+            return 0;
+    }
+
+    return effMask;
+}
+
+uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
+{
+    // Some spells has new spell ID in their BasePoints for specific effect index
+    // Some not...
+
+    // If supplied effIndex doesn't modify action button, skip
+    if (!((1 << effIndex) & GetModActionButtonEffectMask()))
+        return 0;
+
+    switch (GetSpellProto()->Id)
+    {
+        case 48108: // Hot Streak
+        case 74434: // Soulburn
+        case 81021: // Stampede (Cat Form)
+        case 81022: // Stampede (Bear Form)
+        case 77769: // Trap Launcher
+        case 82946: // Trap Launcher (second?)
+        case 82926: // Fire! (Master Marksman proc)
+        case 94338: // Eclipse (Solar)
+        case 84728: // Frostfire Orb Override
+            return GetSpellProto()->EffectBasePoints[effIndex];
+        case 91713: // Nether Ward
+            return 91711;
+        default:
+            return 0;
+    }
+
+    return 0;
+}
 
 bool Aura::IsPassive() const
 {

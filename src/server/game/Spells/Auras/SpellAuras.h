@@ -138,6 +138,10 @@ class Aura
 
         uint8 GetCasterLevel() const { return m_casterLevel; }
 
+        uint8 GetModActionButtonEffectMask() const;
+        uint32 GetActionButtonSpellForEffect(uint8 effIndex) const;
+        bool IsModActionButton() const;
+
         bool IsPassive() const;
         bool IsDeathPersistent() const;
         bool IsRemovedOnShapeLost(Unit * target) const { return (GetCasterGUID() == target->GetGUID() && m_spellProto->Stances && !(m_spellProto->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && !(m_spellProto->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT)); }
