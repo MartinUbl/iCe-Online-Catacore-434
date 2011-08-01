@@ -611,23 +611,6 @@ void ScriptMgr::OnMapUpdate(Map* map, uint32 diff)
     SCR_MAP_END;
 }
 
-void ScriptMgr::OnKill(Map* map, Unit* killer, Unit* victim)
-{
-    ASSERT(map);
-
-    SCR_MAP_BGN_CUSTOM(WorldMapScript, map, itr, end, entry);
-        itr->second->OnKill(map, killer, victim);
-    SCR_MAP_END_CUSTOM;
-
-    SCR_MAP_BGN(InstanceMapScript, map, itr, end, entry, IsDungeon);
-        itr->second->OnKill((InstanceMap*)map, killer, victim);
-    SCR_MAP_END;
-
-    SCR_MAP_BGN(BattlegroundMapScript, map, itr, end, entry, IsBattleground);
-        itr->second->OnKill((BattlegroundMap*)map, killer, victim);
-    SCR_MAP_END;
-}
-
 #undef SCR_MAP_BGN
 #undef SCR_MAP_END
 

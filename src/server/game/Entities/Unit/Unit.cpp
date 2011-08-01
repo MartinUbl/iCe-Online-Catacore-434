@@ -15679,10 +15679,6 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
             pPet->AI()->KilledUnit(pVictim);
     }
 
-    // Let ScriptMgr let know to every MapScript, that kill occured
-    if (GetMap())
-        sScriptMgr->OnKill(GetMap(), this, pVictim);
-
     // find player: owner of controlled `this` or `this` itself maybe
     Player *player = GetCharmerOrOwnerPlayerOrPlayerItself();
     Creature *creature = pVictim->ToCreature();

@@ -341,9 +341,6 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
         // Called when a player leaves the map.
         virtual void OnPlayerLeave(TMap* /*map*/, Player* /*player*/) { }
 
-        // Called when some unit kills another
-        virtual void OnKill(TMap* /*map*/, Unit* /*killer*/, Unit* /*victim*/) { }
-
         // Called on every map update tick.
         virtual void OnUpdate(TMap* /*map*/, uint32 /*diff*/) { }
 };
@@ -839,7 +836,6 @@ class ScriptMgr
         void OnPlayerEnterMap(Map* map, Player* player);
         void OnPlayerLeaveMap(Map* map, Player* player);
         void OnMapUpdate(Map* map, uint32 diff);
-        void OnKill(Map* map, Unit* killer, Unit* victim);
 
     public: /* InstanceMapScript */
 
