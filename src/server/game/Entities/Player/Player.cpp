@@ -22335,6 +22335,8 @@ void Player::SendAurasForTarget(Unit *target)
         uint32 flags = auraApp->GetFlags();
         if (aura->GetMaxDuration() > 0)
             flags |= AFLAG_DURATION;
+        if (aura->IsModActionButton())
+            flags |= AFLAG_MOD_AB;
         data << uint8(flags);
         // level
         data << uint8(aura->GetCasterLevel());
@@ -22348,6 +22350,15 @@ void Player::SendAurasForTarget(Unit *target)
         {
             data << uint32(aura->GetMaxDuration());
             data << uint32(aura->GetDuration());
+        }
+
+        if (flags & AFLAG_MOD_AB)
+        {
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+            {
+                if ( (1 << i) & flags )
+                    data << uint32(aura->GetActionButtonSpellForEffect(i));
+            }
         }
     }
 
