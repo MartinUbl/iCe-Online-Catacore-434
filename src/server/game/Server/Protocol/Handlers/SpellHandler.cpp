@@ -328,11 +328,46 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
 
+const uint32 ModABSpellMap[][3] = {
+//   OriginalSpellID,  ModifyABAura,  SpellEffectIndex
+    {11366,            48108,         0}, // Hot Streak
+    {689,              74434,         1}, // Soulburn
+    {6785,             81021,         0}, // Stampede (Cat Form)
+    {6785,             81022,         1}, // Stampede (Bear Form)
+    {1499,             77769,         0}, // Trap Launcher
+    {13813,            77769,         1},
+    {13809,            77769,         2},
+    {13795,            82946,         0}, // Trap Launcher (second?)
+    {34600,            82946,         1},
+    {19434,            82926,         1}, // Fire! (Master Marksman proc)
+    {6229,             687,           2}, // Demon Armor - condition for talent Nether Ward
+    {6229,             28176,         2}, // Fel Armor
+    {8921,             94338,         0}, // Eclipse (Solar) - condition for talent Sunfire
+};
+
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId, glyphIndex;
     uint8  castCount, castFlags;
     recvPacket >> castCount >> spellId >> glyphIndex >> castFlags;
+
+    // Player don't know modified AB spell, so we must set the handler to ignore it
+    bool IgnoreDontKnowSpell = false;
+    // Modify action button if aura is present
+    // Client does NOT modify spell IDs, only spell icons
+    for (uint16 i = 0; i < sizeof(ModABSpellMap)/(sizeof(uint32)*3); i++)
+    {
+        if (spellId == ModABSpellMap[i][0] && _player->HasAura(ModABSpellMap[i][1]))
+        {
+            if (uint32 id = _player->GetAura(ModABSpellMap[i][1])->GetActionButtonSpellForEffect(ModABSpellMap[i][2]))
+            {
+                spellId = id;
+                IgnoreDontKnowSpell = true;
+            }
+        }
+        if (IgnoreDontKnowSpell)
+            break;
+    }
 
     sLog->outDebug("WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", castCount, spellId, glyphIndex, castFlags, (uint32)recvPacket.size());
 
@@ -359,7 +394,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             mover->ToPlayer()->SetEmoteState(0);
 
         // not have spell in spellbook or spell passive and not casted by client
-        if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
+        if ((!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId)) && !IgnoreDontKnowSpell)
         {
             //cheater? kick? ban?
             recvPacket.rfinish(); // prevent spam at ignore packet

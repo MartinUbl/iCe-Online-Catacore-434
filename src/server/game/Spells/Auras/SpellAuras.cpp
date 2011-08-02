@@ -802,6 +802,10 @@ bool Aura::IsModActionButton() const
     // Mostly spells with aura #332 or #333
     // Some spells with these auras does not modify action bar spells, no idea how to decide which does.
     // Otherwise some spells without these aura types do modify AB
+
+    // IMPORTANT NOTE:
+    // Don't forget to add new spell ID that modifies spell bar to field in WorldSession::HandleCastSpellOpcode !
+
     switch (GetSpellProto()->Id)
     {
         case 48108: // Hot Streak
@@ -889,9 +893,10 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
         case 77769: // Trap Launcher
         case 82946: // Trap Launcher (second?)
         case 82926: // Fire! (Master Marksman proc)
-        case 94338: // Eclipse (Solar)
         case 84728: // Frostfire Orb Override
             return GetSpellProto()->EffectBasePoints[effIndex];
+        case 94338: // Eclipse (Solar)
+            return 93402;
         case 687: // Demon Armor
         case 28176: // Fel Armor
             return 91711;
