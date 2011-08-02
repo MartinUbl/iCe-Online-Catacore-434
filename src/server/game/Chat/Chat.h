@@ -544,7 +544,7 @@ class ChatHandler
 
         bool HandleHelpCommand(const char* args);
         bool HandleCommandsCommand(const char* args);
-        bool HandleStartCommand(const char* args);
+        bool HandleUnstuckCommand(const char* args);
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
         bool HandlePetResetCommand(const char* args);

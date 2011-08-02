@@ -77,7 +77,7 @@ bool ChatHandler::HandleAccountCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleStartCommand(const char* /*args*/)
+bool ChatHandler::HandleUnstuckCommand(const char* /*args*/)
 {
     Player *chr = m_session->GetPlayer();
 
@@ -93,13 +93,6 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
         SendSysMessage(LANG_YOU_IN_COMBAT);
         SetSentErrorMessage(true);
         return false;
-    }
-
-    if ((chr->isDead()) || (chr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)))
-    {
-    // if player is dead and stuck, send ghost to graveyard
-    chr->RepopAtGraveyard();
-    return true;
     }
 
     // cast spell Stuck
