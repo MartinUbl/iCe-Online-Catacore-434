@@ -3792,6 +3792,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_DST_TARGET_ENEMY;
             count++;
             break;
+        case 82928: // Aimed Shot! casting time fix
+            spellInfo->CastingTimeIndex = 1;
+            count++;
+            break;
         case 82661: //Aspect of the Fox
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;

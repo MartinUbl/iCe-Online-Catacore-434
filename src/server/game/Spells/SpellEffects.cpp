@@ -538,6 +538,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
                 }
 
+                // spell Pyroblast! from Hot Streak talent - remove aura state
+                if (m_spellInfo->Id == 92315 && m_caster->HasAura(48108))
+                    m_caster->RemoveAurasDueToSpell(48108);
+
                 // Cone of Cold
                 if (m_spellInfo->Id == 120)
                 {
@@ -5066,9 +5070,13 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     break;
                 }
                 case 19434: // Aimed Shot
+                case 82928: // Aimed Shot (Master Marksman)
                 {
                     // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
                     shotMod = 0.724f;
+                    // Remove Master Marksman proc spell "Fire!"
+                    if (m_caster->HasAura(82926))
+                        m_caster->RemoveAurasDueToSpell(82926);
                     break;
                 }
                 case 77767: // Cobra Shot

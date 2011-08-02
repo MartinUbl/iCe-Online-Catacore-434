@@ -6221,6 +6221,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     break;
                 }
+                // Ready, Set, Aim... (Master Marksman proc)
+                case 82925:
+                {
+                    // "After reaching 5 stacks, your next Aimed Shot will cost no focus and blah blah blah"
+                    if (aurApp->GetBase()->GetStackAmount() > 4)
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(82925);
+                        GetCaster()->CastSpell(GetCaster(), 82926, true);
+                    }
+                    break;
+                }
                 case 37096:                                     // Blood Elf Illusion
                 {
                     if (caster)
