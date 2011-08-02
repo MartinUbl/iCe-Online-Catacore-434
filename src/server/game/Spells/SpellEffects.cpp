@@ -6769,6 +6769,11 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
 
         pTarget->RemoveAllAuras();
 
+        if (!pTarget->isAlive()) {
+            pTarget->ResurrectPlayer(0.1f);
+            pTarget->SpawnCorpseBones();
+        }
+
         pTarget->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
         pTarget->SetFloatValue(UNIT_FIELD_COMBATREACH, DEFAULT_COMBAT_REACH);
         pTarget->setFactionForRace(pTarget->getRace());
