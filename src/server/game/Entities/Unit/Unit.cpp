@@ -9021,6 +9021,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
             break;
         }
+        // Ready, Steady, Aim...
+        case 82925:
+        {
+            // Only when Steady-shooting
+            if (procSpell->Id != 56641)
+                return false;
+            break;
+        }
         // Denounce (proc only with Holy Shock)
         case 85509:
         {
