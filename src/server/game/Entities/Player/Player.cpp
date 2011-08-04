@@ -24125,6 +24125,21 @@ uint8 Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_sl
             return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
     }
 
+    static const uint32 alch_trinkets[] =
+        {35748,35749,35750,35751,   // tbc
+         44322,44323,44324,         // wotlk
+         68775,68776,68777,58483};  // cata
+
+    /* check for unique-equipped alch trinkets */
+    for (int i = 0; i < sizeof(alch_trinkets)/sizeof(uint32); i++) {
+        if (itemProto->ItemId == alch_trinkets[i]) {
+            for (i = 0; i < sizeof(alch_trinkets)/sizeof(uint32); i++)
+                if (HasItemOrGemWithIdEquipped(alch_trinkets[i], 1, except_slot))
+                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+            break;
+        }
+    }
+
     // check unique-equipped limit
     if (itemProto->ItemLimitCategory)
     {
