@@ -465,7 +465,7 @@ class Battleground
             BattlegroundTeamId idx = GetTeamIndexByTeamId(TeamID);
             X = m_TeamStartLocX[idx];
             Y = m_TeamStartLocY[idx];
-            Z = m_TeamStartLocZ[idx];
+            Z = m_TeamStartLocZ[idx] + 3.0f;
             O = m_TeamStartLocO[idx];
         }
 
