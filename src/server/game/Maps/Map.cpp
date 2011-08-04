@@ -1649,6 +1649,12 @@ float Map::GetHeight2(float x, float y, float z) const
 
     float height;
 
+    /* use GetHeight when available to overcome VMap imperfections
+       (GetHeight has algorithms to "detect" those) */
+    height = GetHeight(x, y, z, true);
+    if (height > INVALID_HEIGHT)
+       return height;
+
     /* increase input Z a little, just enough for all the VMAP
      * inaccurate cases (tiny bumps) that would make the calculation wrong
      * -- this is because of the vmgr->getHeight algorithm that checks
