@@ -359,10 +359,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         if (spellId == ModABSpellMap[i][0] && _player->HasAura(ModABSpellMap[i][1]))
         {
-            if (uint32 id = _player->GetAura(ModABSpellMap[i][1])->GetActionButtonSpellForEffect(ModABSpellMap[i][2]))
+            if (_player->GetAura(ModABSpellMap[i][1])->IsModActionButton())
             {
-                spellId = id;
-                IgnoreDontKnowSpell = true;
+                if (uint32 id = _player->GetAura(ModABSpellMap[i][1])->GetActionButtonSpellForEffect(ModABSpellMap[i][2]))
+                {
+                    spellId = id;
+                    IgnoreDontKnowSpell = true;
+                }
             }
         }
         if (IgnoreDontKnowSpell)
