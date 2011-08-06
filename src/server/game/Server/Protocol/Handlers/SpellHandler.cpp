@@ -343,6 +343,7 @@ const uint32 ModABSpellMap[][3] = {
     {6229,             687,           2}, // Demon Armor - condition for talent Nether Ward
     {6229,             28176,         2}, // Fel Armor
     {8921,             94338,         0}, // Eclipse (Solar) - condition for talent Sunfire
+    {86121,            86211,         0}, // Soul Swap
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)

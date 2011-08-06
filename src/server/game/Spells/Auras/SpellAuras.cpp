@@ -815,6 +815,7 @@ bool Aura::IsModActionButton() const
         case 77769: // Trap Launcher
         case 82946: // Trap Launcher (second?)
         case 82926: // Fire! (Master Marksman proc)
+        case 86211: // Soul Swap (marker)
             return true;
         case 687:   // Demon Armor - condition for talent Nether Ward
         case 28176: // Fel Armor
@@ -850,6 +851,7 @@ uint8 Aura::GetModActionButtonEffectMask() const
         case 94338: // Eclipse (Solar)
         case 91713: // Nether Ward
         case 92294: // Frostfire Orb Override
+        case 86211: // Soul Swap (marker)
             effMask |= 1 << 0;
             break;
         case 74434: // Soulburn
@@ -894,6 +896,7 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
         case 82946: // Trap Launcher (second?)
         case 82926: // Fire! (Master Marksman proc)
         case 84728: // Frostfire Orb Override
+        case 86211: // Soul Swap (marker)
             return GetSpellProto()->EffectBasePoints[effIndex];
         case 94338: // Eclipse (Solar)
             return 93402;

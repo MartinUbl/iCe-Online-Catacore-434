@@ -695,6 +695,86 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         pAura->SetCharges(2);
                     }
                 }
+                // Soul Swap
+                else if (m_spellInfo->Id == 86121)
+                {
+                    int32 bp0 = 0;
+                    std::list<uint32> DoTList;
+                    Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    {
+                        if ((*i)->GetCaster() == m_caster)
+                        {
+                            DoTList.push_back((*i)->GetId());
+                            // Hardcoded values, sorry, our spellsystem doesnt support something like that
+                            switch ((*i)->GetId())
+                            {
+                                case 172:   // Corruption
+                                    bp0 |= 1 << 0;
+                                    break;
+                                case 603:   // Bane of Doom
+                                    bp0 |= 1 << 1;
+                                    break;
+                                case 980:   // Bane of Agony
+                                    bp0 |= 1 << 2;
+                                    break;
+                                case 27243: // Seed of Corruption
+                                    bp0 |= 1 << 3;
+                                    break;
+                                case 27285: // Seed of Corruption #2
+                                    bp0 |= 1 << 4;
+                                    break;
+                                case 30108: // Unstable Affliction
+                                    bp0 |= 1 << 5;
+                                    break;
+                                //case 80240: // Bane of Havoc
+                                //    bp0 |= 1 << 6;
+                                //    break;
+                            }
+                        }
+                    }
+                    if (!DoTList.empty())
+                    {
+                        for (std::list<uint32>::const_iterator itr = DoTList.begin(); itr != DoTList.end(); ++itr)
+                            unitTarget->RemoveAurasDueToSpell((*itr));
+                    }
+                    // Cast spell which changes AB spell to Exhale one
+                    Aura* pMarkAura = unitTarget->AddAura(86211, m_caster);//m_caster->CastCustomSpell(m_caster, 86211, &bp0, 0, 0, true);
+                    if (pMarkAura)
+                        pMarkAura->GetEffect(0)->SetAmount(bp0);
+                    // ..and cast visual
+                    unitTarget->CastSpell(m_caster, 92795, true);
+                }
+                // Soul Swap Exhale
+                else if (m_spellInfo->Id == 86213)
+                {
+                    Aura* pMarkAura = m_caster->GetAura(86211);
+                    if (!pMarkAura)
+                        return;
+
+                    if (pMarkAura->GetCaster() == unitTarget)
+                        return;
+
+                    // -100% cast time
+                    m_caster->CastSpell(m_caster, 92794, true);
+
+                    int32 bp0 = pMarkAura->GetEffect(0)->GetAmount();
+                    if (bp0 & (1 << 0))
+                        m_caster->CastSpell(unitTarget, 172, true);
+                    if (bp0 & (1 << 1))
+                        m_caster->CastSpell(unitTarget, 603, true);
+                    if (bp0 & (1 << 2))
+                        m_caster->CastSpell(unitTarget, 980, true);
+                    if (bp0 & (1 << 3))
+                        m_caster->CastSpell(unitTarget, 27243, true);
+                    if (bp0 & (1 << 4))
+                        m_caster->CastSpell(unitTarget, 27285, true);
+                    if (bp0 & (1 << 5))
+                        m_caster->CastSpell(unitTarget, 30108, true);
+
+                    // And return back old Soul Swap spell
+                    m_caster->RemoveAurasDueToSpell(86211);
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:
