@@ -6376,8 +6376,30 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_WARLOCK:
         {
-            if (m_spellInfo->Id == 6201)
+            if (m_spellInfo->Id == 6201) // Create Healthstone
                 m_caster->CastSpell(m_caster, 34130, true);
+            else if (m_spellInfo->Id == 77801) // Demon Soul
+            {
+                Unit* pPet = Unit::GetUnit(*m_caster,m_caster->GetPetGUID());
+                if (!pPet)
+                    return;
+
+                uint32 ChosenSpell = 0;
+
+                if (pPet->GetEntry() == 416)        // Imp
+                    ChosenSpell = 79459;
+                else if (pPet->GetEntry() == 1860)  // Voidwalker
+                    ChosenSpell = 79464;
+                else if (pPet->GetEntry() == 1863)  // Succubus
+                    ChosenSpell = 79463;
+                else if (pPet->GetEntry() == 417)   // Felhunter
+                    ChosenSpell = 79460;
+                else if (pPet->GetEntry() == 30146) // Felguard
+                    ChosenSpell = 79462;
+
+                if (ChosenSpell)
+                    m_caster->CastSpell(m_caster, ChosenSpell, true);
+            }
             return;
         }
         case SPELLFAMILY_HUNTER:
