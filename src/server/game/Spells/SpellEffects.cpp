@@ -2316,6 +2316,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
             break;
         }
+        // Dark Intent
+        case 85767:
+        {
+            // Cast also on self
+            unitTarget->CastSpell(m_caster, 85767, true);
+            break;
+        }
         // Snake Trap
         case 57879:
         {
