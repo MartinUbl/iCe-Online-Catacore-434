@@ -3514,7 +3514,7 @@ class npc_jailer: public CreatureScript
                            me->MonsterYell("Venku zadna pravda neni!",LANG_UNIVERSAL,0);
                            break;
                        case 4:
-                           me->MonsterYell("Zivot bez bolesti nemá smysl.",LANG_UNIVERSAL,0);
+                           me->MonsterYell("Zivot bez bolesti nema smysl.",LANG_UNIVERSAL,0);
                            break;
                        case 5:
                            me->MonsterSay("Switch: Tos podelal!",LANG_UNIVERSAL,0);
@@ -3532,6 +3532,271 @@ class npc_jailer: public CreatureScript
        {
            return new npc_jailerAI(c);
        }
+};
+
+class boss_event_jarmila: public CreatureScript
+{
+    public:
+        boss_event_jarmila(): CreatureScript("boss_event_jarmila") {}
+
+        struct boss_event_jarmilaAI: public ScriptedAI
+        {
+            boss_event_jarmilaAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 QuakeTimer;
+            uint32 FearTimer;
+            uint8 JumpPhase;
+            uint32 JumpTimer;
+            Unit* JumpTarget;
+            Creature* MyPet;
+            uint32 FeedPetTimer;
+            uint32 RandomShotTimer;
+            uint32 SmashTimer;
+            uint32 ThunderclapTimer;
+
+            void Reset()
+            {
+                QuakeTimer = 5000;
+                FearTimer = 12000;
+                JumpPhase = 0;
+                JumpTimer = 0;
+                me->setPowerType(POWER_MANA);
+                MyPet = NULL;
+                FeedPetTimer = 5000;
+                RandomShotTimer = 2000;
+                SmashTimer = 6000;
+                ThunderclapTimer = 1000;
+            }
+
+            void EnterCombat(Unit* pWho)
+            {
+                me->MonsterYell("I served the master.. but it wasn't enough!",LANG_UNIVERSAL,0);
+                me->CastSpell(me, 37964, true);
+                me->CastSpell(me, 72148, true);
+            }
+
+            void SummonedCreatureDespawn(Creature* pCreature)
+            {
+                if (pCreature->GetEntry() == 99902)
+                    MyPet = NULL;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (JumpPhase < 1 || JumpPhase > 35)
+                {
+                    if (QuakeTimer <= diff)
+                    {
+                        if (ThunderclapTimer < 3000)
+                            ThunderclapTimer += 3000;
+
+                        int32 bp0 = 35000;
+                        me->CastCustomSpell(me->getVictim(), 55101, &bp0, 0, 0, false);
+                        QuakeTimer = 25000;
+                    } else QuakeTimer -= diff;
+
+                    if (ThunderclapTimer <= diff)
+                    {
+                        ThunderclapTimer = urand(5000,15000);
+                    } else ThunderclapTimer -= diff;
+
+                    if (JumpPhase > 35)
+                    {
+                        if (SmashTimer <= diff)
+                        {
+                            if (QuakeTimer < 4000)
+                                QuakeTimer += 4000;
+                            if (ThunderclapTimer < 4000)
+                                ThunderclapTimer += 4000;
+
+                            me->CastSpell(me, 62339, false);
+
+                            SmashTimer = urand(10000,15000);
+                        } else SmashTimer -= diff;
+                    }
+                }
+
+                if (me->GetHealthPct() > 50.0f && me->GetHealthPct() < 75.0f)
+                {
+                    if (FearTimer <= diff)
+                    {
+                        if (Unit* plTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            me->CastSpell(plTarget, 12542, false);
+                        FearTimer = urand(14000,18000);
+                    } else FearTimer -= diff;
+                }
+
+                if (me->GetHealthPct() < 50.0f && JumpPhase == 0)
+                {
+                    me->MonsterYell("I can jump high and high. And you?",LANG_UNIVERSAL,0);
+                    JumpPhase = 1;
+                    if (JumpTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                    {
+                        me->getThreatManager().resetAllAggro();
+                        me->AddThreat(JumpTarget, 100000.0f);
+                        me->GetMotionMaster()->MoveJump(JumpTarget->GetPositionX(),JumpTarget->GetPositionY(),JumpTarget->GetPositionZ(),20.0f,10.0f);
+                        JumpTimer = 2000;
+                    }
+                    me->LoadEquipment(99901);
+                    me->setPowerType(POWER_RUNIC_POWER);
+                    me->SetMaxPower(POWER_RUNIC_POWER, 1000);
+                    me->SetPower(POWER_RUNIC_POWER, 1000);
+                }
+                if (JumpPhase > 0 && JumpPhase <= 20)
+                {
+                    if (JumpTimer <= diff)
+                    {
+                        if (JumpTarget)
+                        {
+                            if ((JumpPhase % 2) > 0)
+                            {
+                                me->CastSpell(JumpTarget, 36093, true);
+                                me->ModifyPower(POWER_RUNIC_POWER, -100);
+                                JumpPhase++;
+                                JumpTimer = 500;
+                            }
+                            else
+                            {
+                                JumpPhase++;
+                                if (JumpTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
+                                {
+                                    me->getThreatManager().resetAllAggro();
+                                    me->AddThreat(JumpTarget, 100000.0f);
+                                    me->GetMotionMaster()->MoveJump(JumpTarget->GetPositionX(),JumpTarget->GetPositionY(),JumpTarget->GetPositionZ(),20.0f,10.0f);
+                                    JumpTimer = 2000;
+                                }
+                            }
+                        }
+                    } else JumpTimer -= diff;
+                }
+                if (JumpPhase > 20 && JumpPhase < 25) //moje degenerace, jen pro sichr
+                {
+                    JumpPhase = 30;
+                    me->LoadEquipment(0);
+                    me->setPowerType(POWER_FOCUS);
+                    me->SetMaxPower(POWER_FOCUS,200);
+                    me->SetPower(POWER_FOCUS,200);
+                    me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->Clear();
+                    me->StopMoving();
+                    DoStartNoMovement(me->getVictim());
+                    me->GetMotionMaster()->MoveIdle();
+                    MyPet = me->SummonCreature(99902,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,10000);
+                }
+                if (JumpPhase == 30)
+                {
+                    if (FeedPetTimer <= diff)
+                    {
+                        me->MonsterYell("Let the storm be with you, Stormbite!",0,0);
+                        if (MyPet)
+                        {
+                            me->CastSpell(MyPet, 52202, true);
+                            MyPet->SetPower(POWER_FOCUS,100);
+                            me->DealHeal(MyPet,MyPet->GetMaxHealth()*0.1f);
+                        }
+                        FeedPetTimer = urand(15000,20000);
+                    } else FeedPetTimer -= diff;
+
+                    if (RandomShotTimer <= diff)
+                    {
+                        RandomShotTimer = 1000;
+                        Unit* plTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true);
+                        if (plTarget)
+                        {
+                            me->Attack(plTarget, false);
+                            int32 bp0 = 10000;
+                            switch (urand(0,2))
+                            {
+                                case 0:
+                                default:
+                                    // Aimed Shot
+                                    bp0 = 25500;
+                                    me->CastCustomSpell(plTarget, 59243, &bp0, 0, 0, false);
+                                    RandomShotTimer = 4500;
+                                    break;
+                                case 1:
+                                    // Arcane Shot
+                                    bp0 = 10000;
+                                    me->CastCustomSpell(plTarget, 69989, &bp0, 0, 0, false);
+                                    RandomShotTimer = 1000;
+                                    break;
+                                case 2:
+                                    // Explosive Shot
+                                    me->CastSpell(plTarget, 71126, true);
+                                    RandomShotTimer = 3500;
+                                    break;
+                            }
+                        }
+                    } else RandomShotTimer -= diff;
+                }
+                if (me->GetHealthPct() < 25.0f && JumpPhase < 40)
+                {
+                    JumpPhase = 40;
+                    me->CastSpell(me, 71599, true);
+                    me->SetDisplayId(29792);
+                    me->CastSpell(me, 69491, true);
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new boss_event_jarmilaAI(c);
+        }
+};
+
+class boss_event_jarmila_pet: public CreatureScript
+{
+    public:
+        boss_event_jarmila_pet(): CreatureScript("boss_event_jarmila_pet") {}
+
+        struct boss_event_jarmila_petAI: ScriptedAI
+        {
+            boss_event_jarmila_petAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 FatalBiteTimer;
+
+            void Reset()
+            {
+                me->setPowerType(POWER_FOCUS);
+                me->SetMaxPower(POWER_FOCUS,100);
+                me->SetPower(POWER_FOCUS,100);
+
+                FatalBiteTimer = 2000;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (FatalBiteTimer <= diff)
+                {
+                    int32 bp0 = 25000;
+                    me->CastCustomSpell(me->getVictim(), 54663, &bp0, 0, 0, false);
+                    me->ModifyPower(POWER_FOCUS,-35);
+                    FatalBiteTimer = urand(6000,12000);
+                } else FatalBiteTimer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new boss_event_jarmila_petAI(c);
+        }
 };
 
 void AddSC_npcs_special()
@@ -3577,5 +3842,7 @@ void AddSC_npcs_special()
     new npc_flame_orb;
     new npc_power_word_barrier;
     new npc_jailer;
+    new boss_event_jarmila;
+    new boss_event_jarmila_pet;
 }
 
