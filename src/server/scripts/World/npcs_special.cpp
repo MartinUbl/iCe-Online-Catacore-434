@@ -3492,14 +3492,14 @@ class npc_jailer: public CreatureScript
 
            void Reset()
            {
-               casovac = 6000;
+               casovac = 30000;
            }
 
            void UpdateAI(const uint32 diff)
            {
                if (casovac <= diff)
                {
-                   switch(urand(0,1))
+                   switch(urand(0,6))
                    {
                        case 0:
                            me->MonsterYell("Do you like bananas?",LANG_UNIVERSAL,0);
@@ -3507,8 +3507,23 @@ class npc_jailer: public CreatureScript
                        case 1:
                            me->MonsterYell("Come to me! I need bananas!",LANG_UNIVERSAL,0);
                            break;
+                       case 2:
+                           me->MonsterYell("All work and no play makes Jack a dull boy.",LANG_UNIVERSAL,0);
+                           break;
+                       case 3:
+                           me->MonsterYell("Venku zadna pravda neni!",LANG_UNIVERSAL,0);
+                           break;
+                       case 4:
+                           me->MonsterYell("Zivot bez bolesti nemá smysl.",LANG_UNIVERSAL,0);
+                           break;
+                       case 5:
+                           me->MonsterSay("Switch: Tos podelal!",LANG_UNIVERSAL,0);
+                           break;
+                       case 6:
+                           me->MonsterYell("Vsichni jsou mrtvi, Dave",LANG_UNIVERSAL,0);
+                           break;
                    }
-                   casovac = 6000;
+                   casovac = 30000;
                } else casovac -= diff;
            }
        };
