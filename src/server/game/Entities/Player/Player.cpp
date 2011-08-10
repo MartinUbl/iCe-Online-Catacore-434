@@ -11110,9 +11110,13 @@ void Player::ModifyCurrency(uint32 id, int32 count)
 
     if (currency->TotalCap && int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION) < newTotalCount)
     {
-        int32 delta = newTotalCount - int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
-        newTotalCount = int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
-        newWeekCount -= delta;
+        if (((id == 396 || id == 395 || id == 392) && int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION) < newTotalCount)
+            || int32(currency->TotalCap) < newTotalCount)
+        {
+            int32 delta = newTotalCount - int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
+            newTotalCount = int32(currency->TotalCap / PLAYER_CURRENCY_PRECISION);
+            newWeekCount -= delta;
+        }
     }
 
     uint32 weekCap = _GetCurrencyWeekCap(currency);
