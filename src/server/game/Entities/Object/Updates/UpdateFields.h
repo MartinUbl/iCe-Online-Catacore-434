@@ -506,7 +506,7 @@ enum EUnitFields
     PLAYER_GLYPHS_ENABLED                     = UNIT_END + 0x04E9, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_PET_SPELL_POWER                    = UNIT_END + 0x04EA, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_RESEARCHING_1                = UNIT_END + 0x04EB, // Size: 8, Type: TWO_SHORT, Flags: PRIVATE
-    PLAYER_FIELD_RESERACH_SITE_1              = UNIT_END + 0x04F3, // Size: 8, Type: TWO_SHORT, Flags: PRIVATE
+    PLAYER_FIELD_RESEARCH_SITE_1              = UNIT_END + 0x04F3, // Size: 8, Type: TWO_SHORT, Flags: PRIVATE
     PLAYER_PROFESSION_SKILL_LINE_1            = UNIT_END + 0x04FB, // Size: 2, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_UI_HIT_MODIFIER              = UNIT_END + 0x04FD, // Size: 1, Type: FLOAT, Flags: PRIVATE
     PLAYER_FIELD_UI_SPELL_HIT_MODIFIER        = UNIT_END + 0x04FE, // Size: 1, Type: FLOAT, Flags: PRIVATE
