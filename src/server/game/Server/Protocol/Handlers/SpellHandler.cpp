@@ -344,6 +344,7 @@ const uint32 ModABSpellMap[][3] = {
     {6229,             28176,         2}, // Fel Armor
     {8921,             94338,         0}, // Eclipse (Solar) - condition for talent Sunfire
     {86121,            86211,         0}, // Soul Swap
+    {77606,            77616,         0}, // Dark Simulacrum
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
@@ -353,7 +354,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     recvPacket >> castCount >> spellId >> glyphIndex >> castFlags;
 
     // Player don't know modified AB spell, so we must set the handler to ignore it
+    // Also we can make some spells as triggered (i.e. Dark Simulacrum does it)
     bool IgnoreDontKnowSpell = false;
+    bool SetTriggered = false;
     // Modify action button if aura is present
     // Client does NOT modify spell IDs, only spell icons
     for (uint16 i = 0; i < sizeof(ModABSpellMap)/(sizeof(uint32)*3); i++)
@@ -366,6 +369,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 {
                     spellId = id;
                     IgnoreDontKnowSpell = true;
+
+                    // Dark Simulacrum makes spell cast as triggered
+                    if (ModABSpellMap[i][1] == 77616)
+                    {
+                        SetTriggered = true;
+                        _player->RemoveAurasDueToSpell(77616);
+                    }
                 }
             }
         }
@@ -447,7 +457,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell *spell = new Spell(mover, spellInfo, false);
+    Spell *spell = new Spell(mover, spellInfo, SetTriggered);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets);

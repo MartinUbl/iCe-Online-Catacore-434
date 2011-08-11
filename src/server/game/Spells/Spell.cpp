@@ -4604,6 +4604,17 @@ void Spell::TakePower()
     //if (GetSpellInfo()->Id == 85673 && m_caster->GetPower(POWER_HOLY_POWER) > 0)
     //    return;
 
+    // Dark Simulacrum - proc on any mana-taking spell
+    if (powerType == POWER_MANA && m_caster->HasAura(77606))
+    {
+        Aura* pAura = m_caster->GetAura(77606);
+        if (pAura && pAura->GetCaster())
+        {
+            int32 bp0 = GetSpellInfo()->Id;
+            pAura->GetCaster()->CastCustomSpell(pAura->GetCaster(), 77616, &bp0, 0, 0, true);
+        }
+    }
+
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
     else
