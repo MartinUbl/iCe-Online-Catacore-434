@@ -3482,6 +3482,14 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode, 
 
     Unit *target = aurApp->GetTarget();
 
+    // Dark Transformation
+    if (GetSpellProto()->Id == 63560)
+    {
+        // Remove casterauraspell and all stacks of Shadow Infusion
+        GetCaster()->RemoveAurasDueToSpell(93426);
+        target->RemoveAurasDueToSpell(91342);
+    }
+
     if (apply)
     {
         // special case (spell specific functionality)
@@ -5968,6 +5976,20 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const *aurApp, uint8
         for (int i = 0; i < MAX_ATTACK; ++i)
             if (Item* pItem = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true))
                 target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(pItem,WeaponAttackType(i),this,apply);
+    }
+
+    // DK - Shadow Infusion
+    if (GetSpellProto()->Id == 91342 && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Dark Transformation is available after 5 stacks are reached
+        // also unapply when aura fades
+        if (apply)
+        {
+            if (GetBase()->GetStackAmount() > 4 && GetCaster() && GetCaster()->ToPlayer()->HasSpell(63560) && !GetCaster()->HasAura(93426))
+                GetCaster()->CastSpell(GetCaster(),93426,true);
+        }
+        else
+            GetCaster()->RemoveAurasDueToSpell(93426);
     }
 
     // GetMiscValue() is bitmask of spell schools
