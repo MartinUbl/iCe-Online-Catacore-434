@@ -11264,6 +11264,17 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                 return true;
                             break;
                         }
+                        // Word of Glory (Last Word talent)
+                        else if (spellProto->Id == 85673)
+                        {
+                            if (pVictim->GetHealthPct() < 35.0f)
+                            {
+                                if (HasAura(20234))
+                                    crit_chance += 30.0f;
+                                else if (HasAura(20235))
+                                    crit_chance += 60.0f;
+                            }
+                        }
                     break;
                     case SPELLFAMILY_SHAMAN:
                         // Lava Burst
