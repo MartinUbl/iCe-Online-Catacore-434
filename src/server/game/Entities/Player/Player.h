@@ -1851,6 +1851,10 @@ class Player : public Unit, public GridObject<Player>
         void SetConquestPointCap(uint32 newcap) { m_ConquestPointCap = newcap; };
         uint32 GetConquestPointCap() { return m_ConquestPointCap; };
 
+        // Research mechanisms (Archaeology)
+        uint16 GetResearchSite(uint8 slot);
+        void SetResearchSite(uint8 slot, uint16 siteId);
+
         Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
         Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
         Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }

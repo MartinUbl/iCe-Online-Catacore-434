@@ -25502,6 +25502,25 @@ void Player::_LoadRandomBGStatus(PreparedQueryResult result)
         m_IsBGRandomWinner = true;
 }
 
+uint16 Player::GetResearchSite(uint8 slot)
+{
+    if (slot < 8)
+        return GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+slot, 0);
+    else
+        return 0;
+}
+
+void Player::SetResearchSite(uint8 slot, uint16 siteId)
+{
+    if (slot > 7)
+    {
+        sLog->outError("Trying to set research site %u in slot %u (must be in range 0-7)",siteId,slot);
+        return;
+    }
+
+    SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+slot, 0, siteId);
+}
+
 float Player::GetAverageItemLevel()
 {
     float sum = 0;
