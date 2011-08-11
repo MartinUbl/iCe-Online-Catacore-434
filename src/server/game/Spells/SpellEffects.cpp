@@ -3636,6 +3636,11 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         case 48542:                                         // Revitalize
             damage = damage * unitTarget->GetMaxPower(power) / 100;
             break;
+        case 50422: // Scent of Blood
+            if (Aura* pAura = unitTarget->GetAura(50421))
+                if (pAura->ModStackAmount(-1))
+                    pAura->Remove(AURA_REMOVE_BY_EXPIRE);
+            break;
         default:
             break;
     }
