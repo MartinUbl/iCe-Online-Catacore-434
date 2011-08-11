@@ -2219,11 +2219,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 else
                 {
                     targets.setDst(*m_caster);
-                    // Corpse not found - take reagents (only not triggered cast can take them)
-                    triggered = false;
+                    triggered = true;
                 }
                 // Remove cooldown - summon spellls have category
-                m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+                m_caster->ToPlayer()->RemoveSpellCategoryCooldown(m_spellInfo->Category,true);
                 spell_id = 48289;
                 break;
             // Raise dead - take reagents and trigger summon spells
