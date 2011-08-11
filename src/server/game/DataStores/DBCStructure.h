@@ -1391,6 +1391,38 @@ struct RandomPropertiesPointsEntry
     uint32    UncommonPropertiesPoints[5];                  // 12-16
 };
 
+struct ResearchBranchEntry
+{
+    uint32      Id;                                         // 0
+    DBCString   name;                                       // 1
+    //DBCString unk0;                                       // 2 unknown, always "Dwarf"
+    uint32      currencyId;                                 // 3 currency for this branch (fragment)
+    //DBCString iconName;                                   // 4
+    uint32      keyStoneId;                                 // 5
+};
+
+struct ResearchProjectEntry
+{
+    uint32      Id;                                         // 0
+    DBCString   name;                                       // 1
+    //DBCString description;                                // 2
+    //DBCString unk0;                                       // 3 empty or filled with debug data
+    uint32      researchBranch;                             // 4 (ResearchBranch.dbc)
+    uint32      craftSpell;                                 // 5
+    uint32      keyStonesNeeded;                            // 6
+    //DBCString iconName;                                   // 7
+    uint32      fragmentsNeeded;                            // 8
+};
+
+struct ResearchSiteEntry
+{
+    uint32      Id;                                         // 0
+    uint32      mapId;                                      // 1
+    //uint32    unk0;                                       // 2
+    DBCString   name;                                       // 3
+    //uint32    unk1;                                       // 4 unknown, always 177
+};
+
 struct ScalingStatDistributionEntry
 {
     uint32  Id;                                             // 0

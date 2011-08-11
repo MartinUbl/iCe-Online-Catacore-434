@@ -166,6 +166,10 @@ DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
 
 DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 
+DBCStorage <ResearchBranchEntry> sResearchBranchStore(ResearchBranchfmt);
+DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectsfmt);
+DBCStorage <ResearchSiteEntry> sResearchSiteStore(ResearchSitesfmt);
+
 DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
 DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore(SpellItemEnchantmentConditionfmt);
 DBCStorage <SpellEntry> sSpellStore(True_SpellEntryfmt);
@@ -435,6 +439,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bad_dbc_files,sSkillLineStore,           dbcPath,"SkillLine.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSkillLineAbilityStore,    dbcPath,"SkillLineAbility.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSoundEntriesStore,        dbcPath,"SoundEntries.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sResearchBranchStore,      dbcPath,"ResearchBranch.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sResearchProjectStore,     dbcPath,"ResearchProject.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sResearchSiteStore,        dbcPath,"ResearchSite.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellAuraOptionsStore,    dbcPath,"SpellAuraOptions.dbc"/*, &CustomSpellAuraOptionsEntryfmt, &CustomSpellAuraOptionsEntryIndex*/);
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellAuraRestrictionsStore, dbcPath,"SpellAuraRestrictions.dbc"/*, &CustomSpellAuraRestrictionsEntryfmt, &CustomSpellAuraRestrictionsEntryIndex*/);
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellCastingRequirementsStore, dbcPath,"SpellCastingRequirements.dbc"/*, &CustomSpellCastingRequirementsEntryfmt, &CustomSpellCastingRequirementsEntryIndex*/);
