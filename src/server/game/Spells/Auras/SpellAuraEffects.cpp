@@ -1413,6 +1413,18 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             // some auras specific effects (on tick effect, remove when below X health, etc..)
             if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
             {
+                // Everlasting Affliction: Drain Life and Drain Soul has chance to refresh duration of Corruption
+                if (GetId() == 689 || GetId() == 1120)
+                {
+                    if ((caster->HasAura(47201) && roll_chance_i(33)) ||
+                        (caster->HasAura(47202) && roll_chance_i(66)) ||
+                        (caster->HasAura(47203)))
+                    {
+                        if (Aura* pAura = target->GetAura(172))
+                            pAura->RefreshDuration();
+                    }
+                }
+
                 switch (GetId())
                 {
                     case 689:    // Drain Life
@@ -6165,6 +6177,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
             // Arcane Missiles
             if (m_spellProto->Id == 5143)
                 caster->RemoveAurasDueToSpell(79808); // removes Arcane Missiles enabler spell
+
+            // Everlasting Affliction: Haunt has chance to refresh duration of Corruption
+            if (m_spellProto->Id == 48181)
+            {
+                if ((caster->HasAura(47201) && roll_chance_i(33)) ||
+                    (caster->HasAura(47202) && roll_chance_i(66)) ||
+                    (caster->HasAura(47203)))
+                {
+                    if (Aura* pAura = target->GetAura(172))
+                        pAura->RefreshDuration();
+                }
+            }
 
             // Overpower
             if (caster && m_spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR &&
