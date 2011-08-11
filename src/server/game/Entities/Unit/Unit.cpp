@@ -8691,6 +8691,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Hacked elsewhere
             return false;
             break;
+        // Shadow Infusion
+        case 49572:
+            // Should proc only from Death Coil (dmg and heal)
+            if (procSpell->Id != 47632 && procSpell->Id != 47632)
+                return false;
+            break;
         // Incite
         case 50685:
         case 50686:
