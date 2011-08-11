@@ -832,8 +832,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     {
         if ((m_owner->getClass() == CLASS_WARLOCK)
             || (m_owner->getClass() == CLASS_SHAMAN)        // Fire Elemental
-            || (m_owner->getClass() == CLASS_PRIEST)        // Shadowfiend
-            || (m_owner->getClass() == CLASS_DEATH_KNIGHT)) // Risen Ghoul
+            || (m_owner->getClass() == CLASS_PRIEST))        // Shadowfiend
             petType = SUMMON_PET;
         else if (m_owner->getClass() == CLASS_HUNTER)
         {
@@ -1005,6 +1004,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
+                    break;
+                }
+                case 26125: // Risen Ghoul
+                {
+                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.45f);  // Bonus Stamina (45% of player stamina)
+                    SetModifierValue(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(m_owner->GetStat(STAT_STRENGTH)) * 0.70f);
+                    SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, GetModifierValue(UNIT_MOD_STAT_STRENGTH, BASE_VALUE)*2.0f);
                     break;
                 }
                 case 29264: // Feral Spirit
