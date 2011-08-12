@@ -164,12 +164,16 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
     data << uint32(view_trade->GetMoney());                 // trader gold
     data << uint32(view_trade->GetSpell());                 // spell casted on lowest slot item*/
 
+    uint32 stackcount;
+    uint32 id;
     for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
     {
-        uint32 id = 0;
+        id = 0;
+        stackcount = 0;
         if (Item* item = view_trade->GetItem(TradeSlots(i)))
         {
             id = item->GetProto()->ItemId;
+            stackcount = view_trade->GetItem(TradeSlots(i))->GetCount();
         }
         data << uint32(0);
         data << uint64(0);
@@ -183,7 +187,7 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
         data << uint32(0);
         data << uint8(i);   // trade slot number
         data << uint32(0);
-        data << uint32(0);
+        data << uint32(stackcount);
         data << uint32(0);
         data << uint32(0);
         data << uint32(0);
