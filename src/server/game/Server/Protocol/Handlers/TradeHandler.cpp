@@ -145,89 +145,61 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
     data << uint64(view_trade->GetMoney());                 // trader gold
     data << uint32(view_trade->GetSpell());                 // spell casted on lowest slot item
 
-    /*WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 1+4+4+4+4+4+7*(1+4+4+4+4+8+4+4+4+4+8+4+4+4+4+4+4));
-    
-    data << uint32(0);
-    data << uint32(0);
-    data << uint8(1);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);  // trade ID? has to match what we sent in TRADE_STATUS for TRADE_STATUS_OPEN_WINDOW
-    data << uint32(TRADE_SLOT_COUNT); // slot count
-    data << uint64(view_trade->GetMoney()); // trade money
-    data << uint32(0);*/
-    // old structure. meaning of new structure fields has to be researched
-    /*data << uint8(trader_data);                             // 1 means traders data, 0 means own
-    data << uint32(0);                                      // added in 2.4.0, this value must be equal to value from TRADE_STATUS_OPEN_WINDOW status packet (different value for different players to block multiple trades?)
-    data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number?, = next field in most cases
-    data << uint32(TRADE_SLOT_COUNT);                       // trade slots count/number?, = prev field in most cases
-    data << uint32(view_trade->GetMoney());                 // trader gold
-    data << uint32(view_trade->GetSpell());                 // spell casted on lowest slot item*/
+    struct
+    {
+        uint32 randomproperty;
+        uint64 itemcreator;
+        uint32 enchantment[5];
+        uint32 id;
+        uint32 durability[2];  //0 = actual, 1 = max
+        uint8 wrapped;
+        uint64 giftcreator;
+        uint32 lockId;
+        uint32 stackcount;
+        uint32 suffixfactor;
+        uint32 reforgeId;
+    } tradeItemData;
 
-    uint32 stackcount;
-    uint32 id;
     for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
     {
-        id = 0;
-        stackcount = 0;
+        // zero-fill prepared structure
+        memset(&tradeItemData, 0, sizeof(tradeItemData));
         if (Item* item = view_trade->GetItem(TradeSlots(i)))
         {
-            id = item->GetProto()->ItemId;
-            stackcount = view_trade->GetItem(TradeSlots(i))->GetCount();
+            tradeItemData.randomproperty = item->GetItemRandomPropertyId();
+            tradeItemData.itemcreator = item->GetUInt64Value(ITEM_FIELD_CREATOR);
+            tradeItemData.id = item->GetProto()->ItemId;
+            tradeItemData.durability[0] = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+            tradeItemData.durability[1] = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+            tradeItemData.wrapped = item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED) ? 1 : 0;
+            tradeItemData.giftcreator = item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR);
+            tradeItemData.lockId = item->GetProto()->LockID;
+            tradeItemData.stackcount = item->GetCount();
+            tradeItemData.suffixfactor = item->GetItemSuffixFactor();
+            tradeItemData.reforgeId = item->GetReforge();
+
+            tradeItemData.enchantment[0] = item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
+            for (uint8 j = SOCK_ENCHANTMENT_SLOT; j < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++j)
+                tradeItemData.enchantment[j-SOCK_ENCHANTMENT_SLOT+1] = item->GetEnchantmentId(EnchantmentSlot(j));
         }
-        data << uint32(0);
-        data << uint64(0);
-        data << uint32(0);
-        data << uint32(id);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint8(0);
-        data << uint64(0);
-        data << uint32(0);
-        data << uint8(i);   // trade slot number
-        data << uint32(0);
-        data << uint32(stackcount);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-
-        // old structure
-        /*data << uint8(i);                                  // trade slot number, if not specified, then end of packet
-
-        if (Item* item = view_trade->GetItem(TradeSlots(i)))
-        {
-            //32+64+32+32+32+32+32+8+64+32+8+32+32+32+32+32+32+32
-            //.text:00416100 (IDA debug)
-
-            //data << uint64(item->GetUInt64Value(ITEM_FIELD_CREATOR)); //where to put?
-
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(item->GetProto()->ItemId);       // entry
-            data << uint32(item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED) ? 1 : 0);
-            data << uint64(item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR));
-            data << uint32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
-            for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
-                data << uint32(item->GetEnchantmentId(EnchantmentSlot(enchant_slot)));
-            data << uint16(0); //unk !
-            data << uint32(item->GetCount());               // stack count
-            data << uint32(item->GetItemSuffixFactor());    // SuffixFactor
-            data << uint32(item->GetItemRandomPropertyId());// random properties id
-            data << uint32(item->GetProto()->LockID);       // lock id
-            data << uint32(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
-                                                            // durability
-            data << uint32(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
-        }
-        else
-        {
-            for (uint8 j = 0; j < 18; ++j)
-                data << uint32(0);
-        }*/
+        data << uint32(tradeItemData.randomproperty);   // random property id
+        data << uint64(tradeItemData.itemcreator);      // item creator (Made by <Name>)
+        data << uint32(tradeItemData.enchantment[0]);   // enchantment
+        data << uint32(tradeItemData.id);               // item entry
+        data << uint32(tradeItemData.enchantment[1]);   // enchantment
+        data << uint32(tradeItemData.durability[0]);    // durability
+        data << uint32(0);                              // unk 4.0.6a
+        data << uint8(tradeItemData.wrapped);           // wrapped gift (0 / 1)
+        data << uint64(tradeItemData.giftcreator);      // gift creator (Gift from <Name>)
+        data << uint32(tradeItemData.lockId);           // lock Id
+        data << uint8(i);                               // trade slot number
+        data << uint32(tradeItemData.durability[1]);    // max durability
+        data << uint32(tradeItemData.stackcount);       // stack count
+        data << uint32(tradeItemData.suffixfactor);     // SuffixFactor
+        data << uint32(tradeItemData.enchantment[2]);   // enchantment
+        data << uint32(tradeItemData.enchantment[3]);   // enchantment
+        data << uint32(tradeItemData.enchantment[4]);   // enchantment
+        data << uint32(tradeItemData.reforgeId);        // ID of reforge
     }
     SendPacket(&data);
 }
