@@ -5186,14 +5186,14 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     break;
                 }
                 case 3044: // Arcane Shot
-                case 63741: // Chimera Shot
+                case 53209: // Chimera Shot
                 {
                     // "An instant shot that causes % weapon damage plus (RAP * 0.0483)+289 as Arcane damage."
                     if (m_spellInfo->SpellFamilyFlags[0] & 0x800)
                         shotMod = 0.0483f;
 
                     // "An instant shot that causes ranged weapon damage plus RAP*0.732+1620, refreshing the duration of  your Serpent Sting and healing you for 5% of your total health."
-                    if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
+                    if (m_spellInfo->Id == 53209)
                         shotMod = 0.732f;
 
                     // Marked for Death 1,2
