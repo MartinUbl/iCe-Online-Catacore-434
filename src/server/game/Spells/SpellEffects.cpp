@@ -7597,6 +7597,19 @@ void Spell::EffectLeapBack(SpellEffIndex effIndex)
         //1891: Disengage
         m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
     }
+
+    // Disengage, talent Posthaste
+    if (m_spellInfo->Id == 781)
+    {
+        int32 bp0 = 0;
+        if (m_caster->HasAura(83560))
+            bp0 = 30;
+        else if (m_caster->HasAura(83558))
+            bp0 = 15;
+
+        if (bp0)
+            m_caster->CastCustomSpell(m_caster, 83559, &bp0, 0, 0, true);
+    }
 }
 
 void Spell::EffectQuestClear(SpellEffIndex effIndex)
