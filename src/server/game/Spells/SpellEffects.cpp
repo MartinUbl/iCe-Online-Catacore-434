@@ -5055,6 +5055,15 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         if (item->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                             totalDamagePercentMod *= 1.5f;
             }
+            // Ambush
+            else if (m_spellInfo->Id == 8676)
+            {
+                // 1.447 damage multiplier with daggers
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
+                        if (item->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                            totalDamagePercentMod *= 1.447f;
+            }
             // Mutilate (for each hand)
             else if (m_spellInfo->SpellFamilyFlags[1] & 0x6)
             {
