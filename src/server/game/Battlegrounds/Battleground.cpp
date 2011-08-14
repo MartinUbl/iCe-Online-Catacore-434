@@ -948,10 +948,12 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             plr->RemoveAurasByType(SPELL_AURA_MOD_SCALE);
             plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
+            /* remove negative auras on BG/arena leave */
+            plr->RemoveArenaAuras(true);
+
             // if arena, remove the specific arena auras
             if (isArena())
             {
-                plr->RemoveArenaAuras(true);                // removes debuffs / dots etc., we don't want the player to die after porting out
                 bgTypeId=BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
@@ -1109,10 +1111,12 @@ void Battleground::AddPlayer(Player* plr)
     if(plr->getClass() == CLASS_DRUID)
         plr->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
+    /* remove temporary enchantments on BG/arena enter */
+    plr->RemoveArenaEnchantments(TEMP_ENCHANTMENT_SLOT);
+
     // add arena specific auras
     if (isArena())
     {
-        plr->RemoveArenaEnchantments(TEMP_ENCHANTMENT_SLOT);
         if (team == ALLIANCE)                                // gold
         {
             if (plr->GetTeam() == HORDE)
