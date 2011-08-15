@@ -816,14 +816,25 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     Loot &l = lv.loot;
 
     uint8 itemsShown = 0;
+    uint8 currenciesShown = 0;
 
     //gold
     b << uint32(l.gold);
 
     size_t count_pos = b.wpos();                            // pos of item count byte
-
     b << uint8(0);                                          // item count placeholder
-    b << uint8(0);                                          // unk 4.0.x
+
+    size_t currency_count_pos = b.wpos();
+    b << uint8(0);                                          // currency count placeholder
+
+    /*
+    Research for currency loot:
+      if currency count is > 0, then after items are inserted into packet, currencies is next
+      Structure:
+        uint8  position (equiv for 'i' in items, dont know if it is increased by items (slot type) or not
+        uint32 currencyId (currency ID)
+        uint32 count (count of currency tokens)
+    */
 
     switch (lv.permission)
     {
@@ -961,8 +972,9 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         }
     }
 
-    //update number of items shown
+    //update number of items and currencies shown
     b.put<uint8>(count_pos,itemsShown);
+    b.put<uint8>(currency_count_pos,currenciesShown);
 
     return b;
 }
