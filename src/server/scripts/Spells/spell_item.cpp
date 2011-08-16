@@ -193,6 +193,83 @@ public:
     }
 };
 
+// http://www.wowhead.com/item=58149 Flask of Enhancement
+// 79637 Flask of Enhancement
+enum eFlaskOfEnhancementSpells
+{
+    SPELL_FLASK_OF_ENHANCEMENT_STR = 79638,
+    SPELL_FLASK_OF_ENHANCEMENT_AGI = 79639,
+    SPELL_FLASK_OF_ENHANCEMENT_INT = 79640,
+};
+
+class spell_item_flask_of_enhancement : public SpellScriptLoader
+{
+public:
+    spell_item_flask_of_enhancement() : SpellScriptLoader("spell_item_flask_of_enhancement") { }
+
+    class spell_item_flask_of_enhancement_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_item_flask_of_enhancement_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(SPELL_FLASK_OF_ENHANCEMENT_STR))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_FLASK_OF_ENHANCEMENT_AGI))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_FLASK_OF_ENHANCEMENT_INT))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (pCaster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            std::vector<uint32> possibleSpells;
+            switch (pCaster->getClass())
+            {
+                case CLASS_WARLOCK:
+                case CLASS_MAGE:
+                case CLASS_PRIEST:
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
+                    break;
+                case CLASS_DEATH_KNIGHT:
+                case CLASS_WARRIOR:
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_STR);
+                    break;
+                case CLASS_ROGUE:
+                case CLASS_HUNTER:
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
+                    break;
+                case CLASS_DRUID:
+                case CLASS_PALADIN:
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_STR);
+                    break;
+                case CLASS_SHAMAN:
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
+                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
+                    break;
+            }
+
+            pCaster->CastSpell(pCaster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, NULL);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_item_flask_of_enhancement_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_flask_of_enhancement_SpellScript();
+    }
+};
+
 // http://www.wowhead.com/item=10645 Gnomish Death Ray
 // 13280 Gnomish Death Ray
 enum eGnomishDeathRay
@@ -762,6 +839,7 @@ void AddSC_item_spell_scripts()
 
     new spell_item_deviate_fish();
     new spell_item_flask_of_the_north();
+    new spell_item_flask_of_enhancement();
     new spell_item_gnomish_death_ray();
     new spell_item_make_a_wish();
     new spell_item_mingos_fortune_generator();
