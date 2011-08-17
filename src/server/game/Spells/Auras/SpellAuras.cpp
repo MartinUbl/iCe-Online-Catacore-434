@@ -235,6 +235,19 @@ void AuraApplication::ClientUpdate(bool remove)
         }
     }
 
+    // If we still haven't got basepoint replacement
+    if (bptype == BP_NONE)
+    {
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        {
+            if (aura->GetEffect(i) && aura->GetEffect(i)->GetAmount())
+            {
+                bptype = BP_AMOUNT;
+                flags |= AFLAG_BASEPOINT;
+            }
+        }
+    }
+
     data << uint8(flags);
     data << uint8(aura->GetCasterLevel());
     data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
@@ -261,6 +274,9 @@ void AuraApplication::ClientUpdate(bool remove)
                         break;
                     case BP_MOUNT_CAPATIBILITY:
                         data << uint32(idx);
+                        break;
+                    case BP_AMOUNT:
+                        data << uint32(aura->GetEffect(i) ? aura->GetEffect(i)->GetAmount() : 0);
                         break;
                     default:
                         data << uint32(0);

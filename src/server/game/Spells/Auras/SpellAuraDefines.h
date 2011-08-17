@@ -43,7 +43,7 @@ enum AuraBasepointType
     BP_NONE                 = 0,
     BP_MOD_ACTION_BUTTON    = 1,
     BP_MOUNT_CAPATIBILITY   = 2,
-    BP_HEALING_OVER_TIME    = 3, // Not yet implemented
+    BP_AMOUNT               = 3,
 };
 
 enum AuraEffectHandleModes
