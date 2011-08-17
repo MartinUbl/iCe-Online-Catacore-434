@@ -626,6 +626,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     break;
             }
             break;
+        case SPELL_AURA_SCHOOL_HEAL_ABSORB:
+            if (caster)
+            {
+                // Necrotic Strike
+                if (GetSpellProto()->Id == 73975)
+                    return (0.75f * caster->GetTotalAttackPowerValue(BASE_ATTACK));
+            }
+            break;
         case SPELL_AURA_MANA_SHIELD:
             m_canBeRecalculated = false;
             if (!caster)
