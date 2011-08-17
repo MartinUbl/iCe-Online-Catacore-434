@@ -5035,6 +5035,9 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
             }
+            // Overpower - fix bad spell modifiers
+            else if (m_spellInfo->Id == 7384)
+                totalDamagePercentMod *= 1.62337f;
             break;
         }
         case SPELLFAMILY_ROGUE:
