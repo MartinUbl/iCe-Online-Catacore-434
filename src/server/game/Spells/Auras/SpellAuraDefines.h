@@ -34,8 +34,16 @@ enum AURA_FLAGS
     AFLAG_CASTER            = 0x08,
     AFLAG_POSITIVE          = 0x10,
     AFLAG_DURATION          = 0x20,
-    AFLAG_MOD_AB            = 0x40,
+    AFLAG_BASEPOINT         = 0x40,
     AFLAG_NEGATIVE          = 0x80
+};
+
+enum AuraBasepointType
+{
+    BP_NONE                 = 0,
+    BP_MOD_ACTION_BUTTON    = 1,
+    BP_MOUNT_CAPATIBILITY   = 2,
+    BP_HEALING_OVER_TIME    = 3, // Not yet implemented
 };
 
 enum AuraEffectHandleModes

@@ -205,8 +205,36 @@ void AuraApplication::ClientUpdate(bool remove)
     uint32 flags = m_flags;
     if (aura->GetMaxDuration() > 0)
         flags |= AFLAG_DURATION;
+
+    AuraBasepointType bptype = BP_NONE;
+
+    int32 idx = 0;
     if (aura->IsModActionButton())
-        flags |= AFLAG_MOD_AB;
+    {
+        bptype = BP_MOD_ACTION_BUTTON;
+        flags |= AFLAG_BASEPOINT;
+    }
+    else
+    {
+        idx = aura->GetSpellProto()->GetEffectMiscValueB(0);
+        if (aura->GetCasterGUID() == GetTarget()->GetGUID())
+        {
+            if (m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (aura->GetSpellProto()->Id == 87840)
+                    idx = m_target->ToPlayer()->GetMountCapabilityIndex(230);
+                else
+                    idx = m_target->ToPlayer()->GetMountCapabilityIndex(idx);
+
+                if (idx)
+                {
+                    bptype = BP_MOUNT_CAPATIBILITY;
+                    flags |= AFLAG_BASEPOINT;
+                }
+            }
+        }
+    }
+
     data << uint8(flags);
     data << uint8(aura->GetCasterLevel());
     data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
@@ -220,12 +248,25 @@ void AuraApplication::ClientUpdate(bool remove)
         data << uint32(aura->GetDuration());
     }
 
-    if (flags & AFLAG_MOD_AB)
+    if (flags & AFLAG_BASEPOINT)
     {
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
         {
             if ( (1 << i) & flags )
-                data << uint32(aura->GetActionButtonSpellForEffect(i));
+            {
+                switch (bptype)
+                {
+                    case BP_MOD_ACTION_BUTTON:
+                        data << uint32(aura->GetActionButtonSpellForEffect(i));
+                        break;
+                    case BP_MOUNT_CAPATIBILITY:
+                        data << uint32(idx);
+                        break;
+                    default:
+                        data << uint32(0);
+                        break;
+                }
+            }
         }
     }
 

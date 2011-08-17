@@ -22340,7 +22340,7 @@ void Player::SendAurasForTarget(Unit *target)
         if (aura->GetMaxDuration() > 0)
             flags |= AFLAG_DURATION;
         if (aura->IsModActionButton())
-            flags |= AFLAG_MOD_AB;
+            flags |= AFLAG_BASEPOINT;
         data << uint8(flags);
         // level
         data << uint8(aura->GetCasterLevel());
@@ -22356,7 +22356,7 @@ void Player::SendAurasForTarget(Unit *target)
             data << uint32(aura->GetDuration());
         }
 
-        if (flags & AFLAG_MOD_AB)
+        if (flags & AFLAG_BASEPOINT)
         {
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
             {
@@ -25548,6 +25548,39 @@ bool Player::HasMastery()
         return true;
     else
         return false;
+}
+
+uint32 Player::GetMountCapabilityIndex(uint32 amount)
+{
+    const MountTypeEntry *type = sMountTypeStore.LookupEntry(amount);
+    if(!type)
+        return 0;
+
+    uint32 plrskill = GetSkillValue(SKILL_RIDING);
+    uint32 map = GetVirtualMapForMapAndZone(GetMapId(), GetZoneId());
+    uint32 maxSkill = 0;
+    uint32 index = 0;
+
+    for(int i = 0; i < MAX_MOUNT_TYPE_COLUMN; i++)
+    {
+        const MountCapabilityEntry *cap = sMountCapabilityStore.LookupEntry(type->capabilities[i]);
+        if(!cap)
+            continue;
+
+        if(cap->map != -1 && cap->map != map)
+            continue;
+
+        if(cap->reqSkillLevel > plrskill || cap->reqSkillLevel <= maxSkill)
+            continue;
+
+        if(cap->reqSpell && !HasSpell(cap->reqSpell))
+            continue;
+
+        maxSkill = cap->reqSkillLevel;
+        index = type->capabilities[i];
+    }
+
+    return index;
 }
 
 void Player::SetInGuild(uint32 GuildId)

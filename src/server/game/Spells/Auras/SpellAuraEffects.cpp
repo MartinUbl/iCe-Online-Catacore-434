@@ -4117,17 +4117,25 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (GetSpellProto()->Effect[i] == SPELL_EFFECT_SUMMON && GetSpellProto()->EffectMiscValue[i] == GetMiscValue())
                     display_id = 0;
+
+            target->Mount(display_id, vehicleId, GetMiscValue());
         }
         else
-            target->ToPlayer()->setInWorgenForm();
-
-        target->Mount(display_id, vehicleId, GetMiscValue());
+        {
+            plr->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+            target->SetDisplayId(plr->getGender() == GENDER_FEMALE ? 29423 : 29422);
+            target->Mount(plr->getGender() == GENDER_FEMALE ? 29423 : 29422, 0, GetMiscValue());
+        }
 
         if(plr && spellId)
             plr->CastSpell(plr, spellId, true);
     }
     else
     {
+        // Running Wild - we need to change displayId back to normal
+        if (target->GetDisplayId() == 29423 || target->GetDisplayId() == 29422)
+            target->DeMorph();
+
         target->Unmount();
         if(plr && spellId)
             plr->RemoveAurasDueToSpell(spellId);
@@ -4136,6 +4144,13 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         // and never endless flying after using Headless Horseman's Mount
         if (mode & AURA_EFFECT_HANDLE_REAL)
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+        // It is safer to unset flying after dismounting
+        WorldPacket data(12);
+        data.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
+        data.append(target->GetPackGUID());
+        data << uint32(0);                                      // unknown
+        target->SendMessageToSet(&data, true);
     }
 }
 

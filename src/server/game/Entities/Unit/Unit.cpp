@@ -3911,6 +3911,10 @@ void Unit::RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId)
 
 void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura * except, bool negative, bool positive)
 {
+    // Hack for Running Wild spell not removing
+    if (auraType == SPELL_AURA_MOUNTED && HasAura(87840))
+        RemoveAurasDueToSpell(87840);
+
     for (AuraEffectList::iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
         Aura * aura = (*iter)->GetBase();
