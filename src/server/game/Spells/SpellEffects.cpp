@@ -3024,7 +3024,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             // Illuminated Healing absorb value and spellcast
             int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f);
-            m_caster->CastCustomSpell(unitTarget, 76669, &bp0, 0, 0, true);
+            m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
         }
 
         // Word of Glory (paladin holy talent)
