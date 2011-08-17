@@ -524,8 +524,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->getClass() == CLASS_MAGE && m_caster->getLevel() >= 3
                         && m_spellInfo->Id != 7268 && roll_chance_i(40))
                     {
-                        if (!m_caster->HasAura(79808))
-                            m_caster->CastSpell(m_caster, 79808, true); // Arcane Missiles Aurastate
+                        if (!m_caster->HasAura(79683))
+                            m_caster->CastSpell(m_caster, 79683, true); // Arcane Missiles Aurastate
                     }
                 }
 
