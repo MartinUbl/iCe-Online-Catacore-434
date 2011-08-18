@@ -5674,9 +5674,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 break;
             }
-            // Arcane Missiles!
-            if (dummySpell->Id == 79683)
-                return false;
 
             // Hot Streak
             if (dummySpell->SpellIconID == 2999)
