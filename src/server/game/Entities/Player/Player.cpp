@@ -4034,6 +4034,9 @@ void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
 
 void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
 {
+    /* disabled, causes profession cooldowns to be reset */
+    return;
+
     // remove cooldowns on spells that have <= 10 min CD
 
     SpellCooldowns::iterator itr, next;
