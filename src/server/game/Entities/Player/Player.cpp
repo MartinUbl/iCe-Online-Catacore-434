@@ -501,7 +501,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
     m_isInWater = false;
-    m_pvpOnTimer = 0;
+    m_pvpOnTimer = (uint32)(-1);
     m_drunkTimer = 0;
     m_drunk = 0;
     m_restTime = 0;
