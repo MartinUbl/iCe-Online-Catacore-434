@@ -501,6 +501,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
     m_isInWater = false;
+    m_pvpOnTimer = 0;
     m_drunkTimer = 0;
     m_drunk = 0;
     m_restTime = 0;
@@ -1343,6 +1344,8 @@ void Player::Update(uint32 p_time)
     CheckDuelDistance(now);
 
     UpdateAfkReport(now);
+
+    UpdatePvPOnTimer(p_time);
 
     if (isCharmed())
         if (Unit *charmer = GetCharmer())
@@ -19408,6 +19411,21 @@ void Player::UpdateAfkReport(time_t currTime)
         m_bgData.bgAfkReportedCount = 0;
         m_bgData.bgAfkReportedTimer = currTime+5*MINUTE;
     }
+}
+
+/* forces pvp-on */
+void Player::UpdatePvPOnTimer(time_t diff)
+{
+    /* disable for lower levels */
+    if (getLevel() < 80)
+        return;
+
+    /* each minute */
+    if (m_pvpOnTimer >= 60000) {
+        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP);
+        SetPvP(true);
+    } else
+        m_pvpOnTimer += diff;
 }
 
 void Player::UpdateContestedPvP(uint32 diff)

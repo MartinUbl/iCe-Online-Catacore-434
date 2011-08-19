@@ -1790,6 +1790,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
         void UpdateAfkReport(time_t currTime);
+        void UpdatePvPOnTimer(time_t diff);
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
@@ -2753,6 +2754,8 @@ class Player : public Unit, public GridObject<Player>
         bool   m_DailyQuestChanged;
         bool   m_WeeklyQuestChanged;
         time_t m_lastDailyQuestTime;
+
+        uint32 m_pvpOnTimer;
 
         uint32 m_drunkTimer;
         uint16 m_drunk;
