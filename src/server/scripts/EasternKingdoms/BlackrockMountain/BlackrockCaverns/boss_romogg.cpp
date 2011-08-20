@@ -64,7 +64,8 @@ public:
     {
         romoggAI(Creature* pCreature): ScriptedAI(pCreature)
         {
-            ModifySpellRadius(75428, 32, 0);
+            ModifySpellRadius(75428, 32, 0); // The Skullcracker normal
+            ModifySpellRadius(93454, 32, 0); // The Skullcracker heroic (effIndex 0 only)
             ModifySpellRadius(75272, 32, 0);
             pInstance = me->GetInstanceScript();
             Reset();
