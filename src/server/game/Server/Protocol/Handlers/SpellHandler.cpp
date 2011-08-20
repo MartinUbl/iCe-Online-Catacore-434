@@ -447,6 +447,24 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     targets.read(recvPacket, mover);
     HandleClientCastFlags(recvPacket, castFlags, targets);
 
+    // Archaeology spellcasts defines also reagents used to solve archeology project
+    uint32 keyStonesCount = 0;
+    if (spellInfo->researchProjectId > 0)
+    {
+        uint32 reagentCount, reagentId, reagentTypeCount;
+        uint8 reagentType;
+
+        // Client sends all data from cast, we take only count of keystones he put into interface
+        // reagentType 1 = currency, reagentType 2 = item
+        recvPacket >> reagentCount;
+        for (uint8 i = 0; i < reagentCount; i++)
+        {
+            recvPacket >> reagentType >> reagentId >> reagentTypeCount;
+            if (reagentType == 2)
+                keyStonesCount = reagentTypeCount;
+        }
+    }
+
     // auto-selection buff level base at target level (in spellInfo)
     if (targets.getUnitTarget())
     {
@@ -460,6 +478,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     Spell *spell = new Spell(mover, spellInfo, SetTriggered);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
+    spell->m_keyStonesCount = keyStonesCount;
     spell->prepare(&targets);
 }
 

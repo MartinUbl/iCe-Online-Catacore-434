@@ -502,6 +502,7 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
     focusObject = NULL;
     m_cast_count = 0;
     m_glyphIndex = 0;
+    m_keyStonesCount = 0;
     m_preCastSpell = 0;
     m_triggeredByAuraSpell  = NULL;
     m_spellAura = NULL;
@@ -4790,6 +4791,31 @@ void Spell::TakeReagents()
     if (p_caster->CanNoReagentCast(m_spellInfo))
         return;
 
+    // Archaeology project check - reagents / keystones
+    if (m_spellInfo->researchProjectId)
+    {
+        // Use "invalid target" to disallow casting of spells with bad data
+        // should not happen, but who knows...
+        ResearchProjectEntry const* pProject = sResearchProjectStore.LookupEntry(m_spellInfo->researchProjectId);
+        if (!pProject)
+            return;
+
+        ResearchBranchEntry const* pBranch = sResearchBranchStore.LookupEntry(pProject->researchBranch);
+        if (!pBranch)
+            return;
+
+        // Disallow using more than maximum keystones
+        if (pProject->keyStonesNeeded < m_keyStonesCount)
+            m_keyStonesCount = pProject->keyStonesNeeded;
+
+        // Calculate real currency cost of solving
+        // each keystone supersedes 12 fragments
+        uint32 realCurrencyCost = pProject->fragmentsNeeded - m_keyStonesCount*12;
+
+        m_caster->ToPlayer()->ModifyCurrency(pBranch->currencyId, -realCurrencyCost);
+        m_caster->ToPlayer()->DestroyItemCount(pBranch->keyStoneId, m_keyStonesCount, true);
+    }
+
     for (uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
     {
         if (m_spellInfo->Reagent[x] <= 0)
@@ -4899,6 +4925,38 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (SpellSteal == 0)
                 return SPELL_FAILED_NOTHING_TO_STEAL;
         }
+    }
+
+    // Archaeology project check - reagents / keystones
+    if (m_spellInfo->researchProjectId)
+    {
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasSpell(m_spellInfo->Id))
+        {
+            // Use "invalid target" to disallow casting of spells with bad data
+            // should not happen, but who knows...
+            ResearchProjectEntry const* pProject = sResearchProjectStore.LookupEntry(m_spellInfo->researchProjectId);
+            if (!pProject)
+                return SPELL_FAILED_BAD_TARGETS;
+
+            ResearchBranchEntry const* pBranch = sResearchBranchStore.LookupEntry(pProject->researchBranch);
+            if (!pBranch)
+                return SPELL_FAILED_BAD_TARGETS;
+
+            // Disallow using more than maximum keystones
+            if (pProject->keyStonesNeeded < m_keyStonesCount)
+                m_keyStonesCount = pProject->keyStonesNeeded;
+
+            // Calculate real currency cost of solving
+            // each keystone supersedes 12 fragments
+            uint32 realCurrencyCost = pProject->fragmentsNeeded - m_keyStonesCount*12;
+
+            // Continue only if caster has needed items and currencies
+            if (m_caster->ToPlayer()->GetCurrency(pBranch->currencyId) < realCurrencyCost ||
+                m_caster->ToPlayer()->GetItemCount(pBranch->keyStoneId, false) < m_keyStonesCount)
+                return SPELL_FAILED_REAGENTS;
+        }
+        else
+            return SPELL_FAILED_ERROR;
     }
 
     // check death state

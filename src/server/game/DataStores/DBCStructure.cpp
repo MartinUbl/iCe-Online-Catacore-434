@@ -66,6 +66,7 @@ SpellEntry::SpellEntry(SpellEntry_n const* spell)
     SpellReagentsId = spell->SpellReagentsId;
     SpellTargetRestrictionsId = spell->SpellTargetRestrictionsId;
     SpellTotemsId = spell->SpellTotemsId;
+    researchProjectId = spell->researchProjectId;
     
     LoadSpellAddons();
 }

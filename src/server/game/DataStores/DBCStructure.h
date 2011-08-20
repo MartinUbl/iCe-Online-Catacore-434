@@ -1812,7 +1812,7 @@ struct SpellEntry_n //Structure of the true Spell.dbc
     uint32 SpellReagentsId;                                 // 42       SpellReagents.dbc
     uint32 SpellTargetRestrictionsId;                       // 44       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 45       SpellTotems.dbc
-    //uint32 unk2;                                          // 46
+    uint32 researchProjectId;                               // 46       ResearchProject.dbc
 };
 
 struct SpellEntry
@@ -1861,7 +1861,7 @@ struct SpellEntry
     uint32 SpellReagentsId;                                 // 42       SpellReagents.dbc
     uint32 SpellTargetRestrictionsId;                       // 44       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 45       SpellTotems.dbc
-    //uint32 unk2;                                          // 46
+    uint32 researchProjectId;                               // 46       ResearchProject.dbc
     
     //SpellAuraOptionsEntry
         uint32    StackAmount;
