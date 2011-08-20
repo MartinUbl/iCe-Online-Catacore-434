@@ -198,6 +198,73 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
   return true;
 }
 
+bool ChatHandler::HandleArchaeologyCommand(const char* args)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    if (uint16 value = atoi(args))
+        player->SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1, 0, value);
+    else
+    {
+        PSendSysMessage("Usage: .archaeology #id");
+        PSendSysMessage("#id means archaeology digsite ID from ResearchSite.dbc");
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleResearchingCommand(const char* args)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    if (uint16 value = atoi(args))
+        player->SetUInt16Value(PLAYER_FIELD_RESEARCHING_1, 0, value);
+    else
+    {
+        PSendSysMessage("Usage: .researching #id");
+        PSendSysMessage("#id means archaeology project ID from ResearchProject.dbc");
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleNpcSetSite(const char* args)
+{
+    if (!*args)
+        return false;
+
+    uint32 siteId = (uint32) atoi((char*)args);
+
+    ResearchSiteEntry const* pSite = sResearchSiteStore.LookupEntry(siteId);
+    Creature *pCreature = getSelectedCreature();
+
+    if (!pCreature || pCreature->GetEntry() != 2)
+    {
+        PSendSysMessage("Jako cil musi byt NPC s ID 2 !");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (pSite)
+        WorldDatabase.PQuery("REPLACE INTO creature_archaeology_assign VALUES ('%u', '%u')", pCreature->GetDBTableGUIDLow(), siteId);
+    else if (siteId == 0)
+        WorldDatabase.PQuery("DELETE FROM creature_archaeology_assign WHERE guid='%u'", pCreature->GetDBTableGUIDLow());
+    else
+    {
+        PSendSysMessage("Neco se pokazilo! Nejspis spatne siteId.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage("NPC %u bylo prirazeno k %u (%s)",pCreature->GetDBTableGUIDLow(), siteId, pSite->name);
+
+    return true;
+}
+
 #include "ScriptMgr.h"
 
 bool ChatHandler::HandleNpcSpawncircle(const char* args)

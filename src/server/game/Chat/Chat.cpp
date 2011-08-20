@@ -414,6 +414,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand npcCommandTable[] =
     {
         { "spawncircle",    SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcSpawncircle>,             "", NULL },
+        { "setsite",        SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleNpcSetSite>,                 "", NULL },
         { "add",            SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcAddCommand>,              "", NULL },
         { "additem",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcAddVendorItemCommand>,    "", NULL },
         { "addmove",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcAddMoveCommand>,          "", NULL },
@@ -765,6 +766,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "ticket",         SEC_MODERATOR,      false,  NULL,                                          "", ticketCommandTable },
 
         { "opcode",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleOpcodeTestCommand>,          "", NULL },
+        { "archaeology",    SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleArchaeologyCommand>,         "", NULL },
+        { "researching",    SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleResearchingCommand>,         "", NULL },
 
         { "aura",           SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleAuraCommand>,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnAuraCommand>,              "", NULL },
