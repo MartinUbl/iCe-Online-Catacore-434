@@ -1991,6 +1991,13 @@ public:
         void Reset()
         {
             DoCast(me, 59907, false); // Spell for Lightwell Charges
+
+            // Glyph of Lightwell (+5 charges)
+            if(Unit* pOwner = me->GetOwner())
+                if(AuraEffect* glyph = pOwner->GetAuraEffect(55673, 0))
+                    if(Aura * chargesaura = me->GetAura(59907))
+                        chargesaura->SetCharges(chargesaura->GetCharges() + glyph->GetAmount());
+
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
