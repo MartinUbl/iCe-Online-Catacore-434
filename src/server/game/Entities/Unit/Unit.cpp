@@ -8953,6 +8953,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Strength of Soul (Discipline Priest)
+        case 89488:
+        case 89489:
+        {
+            if (procSpell->SpellIconID == 2818) // Do not proc from Penance
+                return false;
+            break;
+        }
         default:
             break;
     }
