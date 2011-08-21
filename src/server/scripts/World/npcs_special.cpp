@@ -1993,7 +1993,7 @@ public:
             DoCast(me, 59907, false); // Spell for Lightwell Charges
 
             // Glyph of Lightwell (+5 charges)
-            if(Unit* pOwner = me->GetOwner())
+            if(Unit* pOwner = me->ToTempSummon()->GetSummoner())
                 if(AuraEffect* glyph = pOwner->GetAuraEffect(55673, 0))
                     if(Aura * chargesaura = me->GetAura(59907))
                         chargesaura->SetCharges(chargesaura->GetCharges() + glyph->GetAmount());
