@@ -504,7 +504,7 @@ public:
         {
             if (summon->GetCreatureInfo()->Entry == FLAME_OF_AZZINOTH)
             {
-                for (uint8 i = 0; i < 2; ++i)
+                for (uint8 i = 0; i < 2; i++)
                     if (summon->GetGUID() == FlameGUID[i])
                         FlameGUID[i] = 0;
 
@@ -560,7 +560,7 @@ public:
 
             pInstance->SetData(DATA_ILLIDANSTORMRAGEEVENT, DONE); // Completed
 
-            for (uint8 i = DATA_GAMEOBJECT_ILLIDAN_DOOR_R; i < DATA_GAMEOBJECT_ILLIDAN_DOOR_L + 1; ++i)
+            for (uint8 i = DATA_GAMEOBJECT_ILLIDAN_DOOR_R; i <= DATA_GAMEOBJECT_ILLIDAN_DOOR_L; i++)
                 pInstance->HandleGameObject(pInstance->GetData64(i), true);
         }
 
@@ -728,14 +728,14 @@ public:
             DoPlaySoundToSet(me, SOUND_EYE_BLAST);
 
             float distx, disty, dist[2];
-            for (uint8 i = 0; i < 2; ++i)
+            for (uint8 i = 0; i < 2; i++)
             {
                 distx = EyeBlast[i].x - HoverPosition[HoverPoint].x;
                 disty = EyeBlast[i].y - HoverPosition[HoverPoint].y;
                 dist[i] = distx * distx + disty * disty;
             }
             Locations initial = EyeBlast[dist[0] < dist[1] ? 0 : 1];
-            for (uint8 i = 0; i < 2; ++i)
+            for (uint8 i = 0; i < 2; i++)
             {
                 distx = GlaivePosition[i].x - HoverPosition[HoverPoint].x;
                 disty = GlaivePosition[i].y - HoverPosition[HoverPoint].y;
@@ -762,7 +762,7 @@ public:
             me->MonsterYell(SAY_SUMMONFLAMES, LANG_UNIVERSAL, 0);
             DoPlaySoundToSet(me, SOUND_SUMMONFLAMES);
 
-            for (uint8 i = 0; i < 2; ++i)
+            for (uint8 i = 0; i < 2; i++)
             {
                 if (GETUNIT(Glaive, GlaiveGUID[i]))
                 {
@@ -852,7 +852,7 @@ public:
                 Timer[EVENT_FLIGHT_SEQUENCE] = 0;
                 break;
             case 8://glaive return
-                for (uint8 i = 0; i < 2; ++i)
+                for (uint8 i = 0; i < 2; i++)
                 {
                     if (GlaiveGUID[i])
                     {
@@ -870,7 +870,7 @@ public:
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                 me->StopMoving();
                 me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
-                for (uint8 i = 0; i < 2; ++i)
+                for (uint8 i = 0; i < 2; i++)
                 {
                     if (GlaiveGUID[i])
                     {
@@ -950,7 +950,7 @@ public:
                 return;
 
             Event = EVENT_NULL;
-            for (int32 i = 1; i <= MaxTimer[Phase]; ++i)
+            for (int32 i = 1; i <= MaxTimer[Phase]; i++)
             {
                 if (Timer[i]) // Event is enabled
                 {
@@ -1294,7 +1294,7 @@ public:
                 return;
 
             Event = EVENT_MAIEV_NULL;
-            for (uint8 i = 1; i <= MaxTimer; ++i)
+            for (uint8 i = 1; i <= MaxTimer; i++)
                 if (Timer[i])
                 {
                     if (Timer[i] <= diff)
@@ -1411,14 +1411,14 @@ public:
                 {
                     pInstance->HandleGameObject(GateGUID, false);
 
-                    for (uint8 i = 0; i < 2; ++i)
+                    for (uint8 i = 0; i < 2; i++)
                         pInstance->HandleGameObject(DoorGUID[i], false);
                     //JustCreated = false;
                 }else
                 {//open all doors, raid wiped
                     pInstance->HandleGameObject(GateGUID, true);
                     WalkCount = 1;//skip first wp
-                    for (uint8 i = 0; i < 2; ++i)
+                    for (uint8 i = 0; i < 2; i++)
                         pInstance->HandleGameObject(DoorGUID[i], true);
                 }
             }
@@ -1493,7 +1493,7 @@ public:
                 return;
 
             pInstance->SetData(DATA_ILLIDANSTORMRAGEEVENT, IN_PROGRESS);
-            for (uint8 i = 0; i < 2; ++i)
+            for (uint8 i = 0; i < 2; i++)
                 pInstance->HandleGameObject(DoorGUID[i], false);
             if (GETCRE(Illidan, IllidanGUID))
             {
@@ -1526,7 +1526,7 @@ public:
                 DoCast(Channel, SPELL_AKAMA_DOOR_FAIL);
             }
 
-            for (uint8 i = 0; i < 2; ++i)
+            for (uint8 i = 0; i < 2; i++)
                 if (Creature* Spirit = me->SummonCreature(i ? SPIRIT_OF_OLUM : SPIRIT_OF_UDALO, SpiritSpawns[i].x, SpiritSpawns[i].y, SpiritSpawns[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
                 {
                     Spirit->SetVisibility(VISIBILITY_OFF);
@@ -1693,7 +1693,7 @@ public:
             switch(WalkCount)
             {
             case 6:
-                for (uint8 i = 0; i < 2; ++i)
+                for (uint8 i = 0; i < 2; i++)
                     if (pInstance)
                         pInstance->HandleGameObject(DoorGUID[i], true);
                 break;
@@ -1848,7 +1848,7 @@ void boss_illidan_stormrage::boss_illidan_stormrageAI::Reset()
     }
 
     MaievGUID = 0;
-    for (uint8 i = 0; i < 2; ++i)
+    for (uint8 i = 0; i < 2; i++)
     {
         FlameGUID[i] = 0;
         GlaiveGUID[i] = 0;
