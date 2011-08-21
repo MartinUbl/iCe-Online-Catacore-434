@@ -2822,6 +2822,51 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             ++itr;
                     }
                     break;
+                case SPELLFAMILY_PALADIN:
+                    // Holy Wrath - affect only demons and undeads (with glyph also dragonkins and elementals)
+                    if (m_spellInfo->Id == 2812)
+                    {
+                        // Modify unit target list only for stun effect, damage should be dealt to anyone
+                        if (m_spellInfo->EffectApplyAuraName[i] != SPELL_AURA_MOD_STUN)
+                            break;
+
+                        // Iterate through target list and exclude specific
+                        for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                        {
+                            if ((*itr)->GetTypeId() == TYPEID_PLAYER)
+                                itr = unitList.erase(itr);
+                            else if ((*itr)->GetTypeId() == TYPEID_UNIT)
+                            {
+                                switch ((*itr)->ToCreature()->GetCreatureType())
+                                {
+                                    // Demons and undeads should be affected always
+                                    case CREATURE_TYPE_DEMON:
+                                    case CREATURE_TYPE_UNDEAD:
+                                        ++itr;
+                                        continue;
+                                    // Dragonkins and elementals only if player has Glyph of Holy Wrath
+                                    case CREATURE_TYPE_DRAGONKIN:
+                                    case CREATURE_TYPE_ELEMENTAL:
+                                        if (m_caster->HasAura(56420))
+                                        {
+                                            ++itr;
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            itr = unitList.erase(itr);
+                                            continue;
+                                        }
+                                    default:
+                                        itr = unitList.erase(itr);
+                                        continue;
+                                }
+                            }
+                            else
+                                ++itr;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -4812,7 +4857,7 @@ void Spell::TakeReagents()
         // each keystone supersedes 12 fragments
         uint32 realCurrencyCost = pProject->fragmentsNeeded - m_keyStonesCount*12;
 
-        m_caster->ToPlayer()->ModifyCurrency(pBranch->currencyId, -realCurrencyCost);
+        m_caster->ToPlayer()->ModifyCurrency(pBranch->currencyId, -int32(realCurrencyCost));
         m_caster->ToPlayer()->DestroyItemCount(pBranch->keyStoneId, m_keyStonesCount, true);
     }
 

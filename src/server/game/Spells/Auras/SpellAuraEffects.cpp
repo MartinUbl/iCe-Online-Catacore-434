@@ -4385,37 +4385,6 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
 
     Unit *target = aurApp->GetTarget();
 
-    // Paladin's spell Holy Wrath
-    if (GetSpellProto()->Id == 2812 && apply)
-    {
-        if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature())
-        {
-            // Stunns only demons and undeads (with glyph also dragonkins and elementals)
-            switch (target->ToCreature()->GetCreatureType())
-            {
-                case CREATURE_TYPE_DEMON:
-                case CREATURE_TYPE_UNDEAD:
-                    break;
-                case CREATURE_TYPE_DRAGONKIN:
-                case CREATURE_TYPE_ELEMENTAL:
-                    if (GetCaster()->HasAura(56420))
-                        break;
-                    else
-                    {
-                        target->RemoveAurasDueToSpell(2812);
-                        return;
-                    }
-                default:
-                    target->RemoveAurasDueToSpell(2812);
-                    return;
-            }
-        }
-        else if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            target->RemoveAurasDueToSpell(2812);
-            return;
-        }
-    }
     // Deep Freeze should drop charge of Fingers of Frost
     if (GetSpellProto()->Id == 44572)
     {
