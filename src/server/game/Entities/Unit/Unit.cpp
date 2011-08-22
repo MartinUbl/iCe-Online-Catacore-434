@@ -3277,14 +3277,15 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
             }
             // Update periodic timers from the previous aura
             // ToDo Fix me
-            /*for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
                 AuraEffect *existingEff = foundAura->GetEffect(i);
                 AuraEffect *newEff = aura->GetEffect(i);
                 if (!existingEff || !newEff)
                     continue;
-                newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
-            }*/
+                if (existingEff->IsPeriodic() && newEff->IsPeriodic())
+                    newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
+            }
 
             // Use the new one to replace the old one
             // This is the only place where AURA_REMOVE_BY_STACK should be used
