@@ -836,9 +836,13 @@ void Map::MoveAllCreaturesInMoveList()
         // calculate cells
         CellPair new_val = Trinity::ComputeCellPair(cm.x, cm.y);
         Cell new_cell(new_val);
+        EnsureGridLoaded(new_cell);
+
+        // some checks, i think it's not necessary, but who knows..
+        NGridType *grid = getNGrid(new_cell.GridX(), new_cell.GridY());
 
         // do move or do move to respawn or remove creature if previous all fail
-        if (CreatureCellRelocation(c,new_cell))
+        if (grid && CreatureCellRelocation(c,new_cell))
         {
             // update pos
             c->Relocate(cm.x, cm.y, cm.z, cm.ang);
@@ -864,6 +868,10 @@ void Map::MoveAllCreaturesInMoveList()
 
 bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
 {
+    NGridType* grid = getNGrid(new_cell.GridX(), new_cell.GridY());
+    if (!grid)
+        return false;
+
     Cell const& old_cell = c->GetCurrentCell();
     if (!old_cell.DiffGrid(new_cell))                       // in same grid
     {
