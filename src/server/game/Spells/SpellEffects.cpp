@@ -976,7 +976,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
                     m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_ELEMENTAL)
                 {
-                    if (roll_chance_f(m_caster->ToPlayer()->GetMasteryPoints()*2.0f))
+                    int32 chance = m_caster->ToPlayer()->GetMasteryPoints()*2.0f;
+                    if (roll_chance_i(chance))
                     {
                         switch (m_spellInfo->Id)
                         {
