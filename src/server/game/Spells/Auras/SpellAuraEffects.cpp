@@ -727,6 +727,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Innervate
             else if (m_spellProto->Id == 29166)
                 amount = int32(GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / (GetTotalTicks() * 100.0f));
+            // Judgements of the Wise
+            else if (m_spellProto->Id == 31930)
+                amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / 100;
             // Owlkin Frenzy
             else if (m_spellProto->Id == 48391)
                 amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / 100;
@@ -2036,17 +2039,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 return;
 
             uint32 amount = m_amount;
-
-            switch(GetId())
-            {
-                // Judgements of the Wise
-                case 31930:
-                    // Effect says 30 mana per sec. Correction to 3% of base mana per sec.
-                    amount = (m_amount * target->GetCreateMana()) / ((GetBase()->GetMaxDuration() / 1000) * 100);
-                    break;
-                default:
-                    break;
-            }
 
             SpellPeriodicAuraLogInfo pInfo(this, amount, 0, 0, 0, 0.0f, false);
             target->SendPeriodicAuraLog(&pInfo);
