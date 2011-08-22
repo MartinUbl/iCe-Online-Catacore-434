@@ -836,6 +836,12 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             }  
             break;
         }
+        case SPELL_AURA_MOD_STAT:
+        {
+            if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself() && GetId() == 16191)
+                amount = caster->GetCharmerOrOwnerPlayerOrPlayerItself()->GetStat(STAT_SPIRIT)*4.0f;
+            break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
