@@ -1403,6 +1403,26 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
+            case SPELLFAMILY_HUNTER:
+                {
+                    // Serpent Sting
+                    if (GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
+                    {
+                        if (AuraEffect* pEff = GetEffect(0))
+                        {
+                            int32 bp0 = pEff->GetAmount() * (float(GetMaxDuration()) / float(pEff->GetAmplitude()));
+                            // Improved Serpent Sting - deal % of total damage done
+                            if (caster->HasAura(82834))      // rank 2
+                                bp0 *= 0.3f;
+                            else if (caster->HasAura(19464)) // rank 1
+                                bp0 *= 0.15f;
+
+                            if (bp0)
+                                caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
+                        }
+                    }
+                }
+                break;
             case SPELLFAMILY_WARRIOR:
                 {
                     uint32 entry = GetId();
