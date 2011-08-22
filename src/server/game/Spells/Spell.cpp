@@ -5913,7 +5913,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOUNTED:
             {
-                if (m_caster->IsInWater())
+                // Not castable while swimming - exception for MountCapabilities 231 and 232 - these are underwater mounts
+                if (m_caster->IsInWater() && m_spellInfo->EffectMiscValueB[i] != 231 && m_spellInfo->EffectMiscValueB[i] != 232)
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
