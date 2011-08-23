@@ -228,6 +228,14 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // for testing - "kill critters"
                 if (unit && unit->GetCreatureType() == CREATURE_TYPE_CRITTER)
                     SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL:
+                if (miscvalue1 && miscvalue1 != achievementCriteria->reach_skill_level.skillID)
+                    continue;
+                if (!miscvalue2)
+                    miscvalue2 = player ? player->GetSkillValue(miscvalue1) : 0;
+                SetCriteriaProgress(achievementCriteria, miscvalue2);
+                break;
             default:
                 // Not implemented, sorry
                 continue;
@@ -448,8 +456,10 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
 
     switch (achievementCriteria->requiredType)
     {
-        case 1: // remove this silly placeholder
-            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
+            return progress->counter >= achievementCriteria->kill_creature.creatureCount;
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL:
+            return progress->counter >= achievementCriteria->reach_skill_level.skillLevel;
         default:
             break;
     }
