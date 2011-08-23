@@ -635,6 +635,13 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     sWorld->IncreasePlayerCount();
 
+    for (uint8 i = 0; i < 8; i++)
+    {
+        m_researchSites.site_creature[i] = 0;
+        m_researchSites.site_dig_count[i] = 0;
+    }
+    m_researchProjects.clear();
+
     m_ChampioningFaction = 0;
 
     for (uint8 i = 0; i < MAX_POWERS; ++i)
@@ -17183,6 +17190,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 	_LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
     _LoadTalentBranchSpecs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS));
     _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
+    _LoadArchaeologyData();
 
     _LoadGlyphs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADGLYPHS));
     _LoadAuras(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
@@ -18086,6 +18094,63 @@ void Player::_LoadCurrency(PreparedQueryResult result)
     }
 }
 
+void Player::_LoadArchaeologyData()
+{
+    QueryResult result = CharacterDatabase.PQuery(
+        "SELECT research_cr_1, research_cr_2, research_cr_3, research_cr_4, research_cr_5, research_cr_6, \
+        research_cr_7, research_cr_8, site_count_1, site_count_2, site_count_3, site_count_4, site_count_5, \
+        site_count_6, site_count_7, site_count_8 FROM character_research_site WHERE guid='%u';", GetGUIDLow());
+
+    if (result)
+    {
+        for (uint8 i = 0; i < 8; i++)
+            m_researchSites.site_creature[i] = (*result)[i].GetUInt32();
+
+        for (uint8 i = 0; i < 8; i++)
+            m_researchSites.site_dig_count[i] = (*result)[i+8].GetUInt32();
+    }
+
+    QueryResult sites_result = WorldDatabase.PQuery("SELECT site_id FROM creature_archaeology_assign WHERE guid IN (%u, %u, %u, %u, %u, %u, %u, %u);",
+        m_researchSites.site_creature[0], m_researchSites.site_creature[1], m_researchSites.site_creature[2], m_researchSites.site_creature[3],
+        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7]);
+
+    if (sites_result)
+    {
+        uint8 site_pos = 0;
+        do
+        {
+            SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+site_pos, 0, (*sites_result)[0].GetUInt32());
+            site_pos++;
+            if (site_pos >= 8)
+                break;
+        } while (sites_result->NextRow());
+    }
+
+    QueryResult proj_result = CharacterDatabase.PQuery("SELECT project, completed_count, completed_date, active \
+                                                        FROM character_research_project WHERE guid='%u';", GetGUIDLow());
+
+    if (proj_result)
+    {
+        uint8 proj_pos = 0;
+        do
+        {
+            ResearchProjectsElem temp;
+            temp.project_id      = (*proj_result)[0].GetUInt32();
+            temp.completed_count = (*proj_result)[1].GetUInt32();
+            temp.completed_date  = (*proj_result)[2].GetUInt32();
+            temp.active          = (*proj_result)[3].GetUInt8();
+
+            if (temp.active)
+            {
+                SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+proj_pos, 0, temp.project_id);
+                proj_pos++;
+            }
+
+            m_researchProjects.push_back(temp);
+        } while (proj_result->NextRow());
+    }
+}
+
 void Player::_LoadSpells(PreparedQueryResult result)
 {
     //QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
@@ -18701,6 +18766,7 @@ void Player::SaveToDB()
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveGlyphs(trans);
     _SaveCurrency();
+    _SaveArchaeologyData();
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
@@ -19129,6 +19195,28 @@ void Player::_SaveCurrency()
 		}
 
 	}
+}
+
+void Player::_SaveArchaeologyData()
+{
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    trans->PAppend("REPLACE INTO character_research_site VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+        GetGUIDLow(), m_researchSites.site_creature[0], m_researchSites.site_creature[1], m_researchSites.site_creature[2], m_researchSites.site_creature[3],
+        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7],
+        m_researchSites.site_dig_count[0], m_researchSites.site_dig_count[1], m_researchSites.site_dig_count[2], m_researchSites.site_dig_count[3],
+        m_researchSites.site_dig_count[4], m_researchSites.site_dig_count[5], m_researchSites.site_dig_count[6], m_researchSites.site_dig_count[7]);
+
+    if (!m_researchProjects.empty())
+    {
+        for (std::list<ResearchProjectsElem>::const_iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
+        {
+            trans->PAppend("REPLACE INTO character_research_project VALUES (%u, %u, %u, %u, %u);",
+                GetGUIDLow(), itr->project_id, itr->completed_count, itr->completed_date, itr->active);
+        }
+    }
+
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 // save player stats -- only for external usage

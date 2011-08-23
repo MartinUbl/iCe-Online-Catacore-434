@@ -2621,6 +2621,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
+        void _LoadArchaeologyData();
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2642,6 +2643,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveTalentBranchSpecs(SQLTransaction& trans);
         void _SaveCurrency();
         void _SaveStats(SQLTransaction& trans);
+        void _SaveArchaeologyData();
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -2746,6 +2748,25 @@ class Player : public Unit, public GridObject<Player>
 
         typedef std::list<Channel*> JoinedChannelsList;
         JoinedChannelsList m_channels;
+
+        /*********************************************************/
+        /***                  Archaeology                      ***/
+        /*********************************************************/
+        typedef struct
+        {
+            uint64 site_creature[8];
+            uint8 site_dig_count[8];
+        } ResearchSites_t;
+        ResearchSites_t m_researchSites;
+
+        typedef struct
+        {
+            uint32 project_id;
+            uint32 completed_count;
+            uint64 completed_date;
+            uint8 active;
+        } ResearchProjectsElem;
+        std::list<ResearchProjectsElem> m_researchProjects;
 
         uint8 m_cinematic;
 
