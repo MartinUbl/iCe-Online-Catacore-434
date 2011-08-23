@@ -1406,7 +1406,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_HUNTER:
                 {
                     // Serpent Sting
-                    if (GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
+                    if (caster && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
                     {
                         if (AuraEffect* pEff = GetEffect(0))
                         {
