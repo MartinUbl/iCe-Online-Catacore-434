@@ -263,8 +263,23 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                             if (((Pet*)pet)->getPetType() == HUNTER_PET)
                                 GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED);
                             else
+                            {
+                                // Warlock pets should be also removed from active slot
+                                switch(pet->GetEntry())
+                                {
+                                    case 416:
+                                    case 1860:
+                                    case 1863:
+                                    case 417:
+                                    case 17252:
+                                        GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED, false);
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 //dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
                                 pet->setDeathState(CORPSE);
+                            }
                         }
                         else if (pet->HasUnitTypeMask(UNIT_MASK_MINION))
                         {
