@@ -108,7 +108,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
         return;
 
     if (GetPlayer()->m_Controlled.size() == 1)
-        HandlePetActionHelper(pet, guid1, spellid, flag, guid2);
+        HandlePetActionHelper(pet, guid1, spellid, flag, guid2, pos_x, pos_y, pos_z);
     else
     {
         //If a pet is dismissed, m_Controlled will change
@@ -117,7 +117,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
             if ((*itr)->GetEntry() == pet->GetEntry() && (*itr)->isAlive())
                 controlled.push_back(*itr);
         for (std::vector<Unit*>::iterator itr = controlled.begin(); itr != controlled.end(); ++itr)
-            HandlePetActionHelper(*itr, guid1, spellid, flag, guid2);
+            HandlePetActionHelper(*itr, guid1, spellid, flag, guid2, pos_x, pos_y, pos_z);
     }
 }
 
@@ -148,7 +148,7 @@ void WorldSession::HandlePetStopAttack(WorldPacket &recv_data)
     pet->AttackStop();
 }
 
-void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid, uint16 flag, uint64 guid2)
+void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid, uint16 flag, uint64 guid2, float pos_x, float pos_y, float pos_z)
 {
     CharmInfo *charmInfo = pet->GetCharmInfo();
     if (!charmInfo)
@@ -271,6 +271,9 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                             ((Minion*)pet)->UnSummon();
                         }
                     }
+                    break;
+                case COMMAND_MOVETO:                       // Spell Move To, action 4
+                    pet->GetMotionMaster()->MovePoint(0, pos_x, pos_y, pos_z);
                     break;
                 default:
                     sLog->outError("WORLD: unknown PET flag Action %i and spellid %i.", uint32(flag), spellid);
