@@ -1624,14 +1624,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
-                   case 48018: // Demonic Circle
+                    case 48018: // Demonic Circle
                         // Do not remove GO when aura is removed by stack
                         // to prevent remove GO added by new spell
                         // old one is already removed
                         if (removeMode != AURA_REMOVE_BY_STACK)
                             target->RemoveGameObject(GetId(), true);
                         target->RemoveAura(62388);
-                    break;
+                        break;
+                    case 30108: // Unstable Affliction - damage and silence after dispel
+                        if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
+                            caster->CastSpell(target, 31117, true);
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
