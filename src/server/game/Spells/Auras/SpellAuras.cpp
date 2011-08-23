@@ -877,10 +877,7 @@ bool Aura::IsModActionButton() const
             return true;
         case 687:   // Demon Armor - condition for talent Nether Ward
         case 28176: // Fel Armor
-            if (GetCaster()->HasAura(91713))
-                return true;
-            else
-                return false;
+            return true;
         case 94338: // Eclipse (Solar) - condition for talent Sunfire
             if (GetCaster()->HasAura(93401))
                 return true;
@@ -963,7 +960,10 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
             return 93402;
         case 687: // Demon Armor
         case 28176: // Fel Armor
-            return 91711;
+            if (GetCaster()->HasAura(91713))
+                return 91711;
+            else
+                return 6229;
         default:
             return 0;
     }
