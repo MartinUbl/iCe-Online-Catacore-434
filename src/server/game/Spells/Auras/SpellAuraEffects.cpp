@@ -1370,7 +1370,9 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
        default:
            break;
     }
-    GetBase()->CallScriptEffectUpdatePeriodicHandlers(this);
+
+    if (GetBase())
+        GetBase()->CallScriptEffectUpdatePeriodicHandlers(this);
 }
 
 bool AuraEffect::IsPeriodicTickCrit(Unit *target, Unit const *caster) const
