@@ -21009,10 +21009,36 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
         // Now we have cooldown data (if found any), time to apply mods
         if (rec > 0)
+        {
             ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, rec, spell);
 
+            // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
+            const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
+            if (!pAuraList.empty())
+            {
+                for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->m_spellInfo->SpellFamilyFlags)
+                        rec *= ((*itr)->GetBaseAmount() / 100.0f) * GetFloatValue(UNIT_MOD_CAST_SPEED);
+                }
+            }
+        }
+
         if (catrec > 0)
+        {
             ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, catrec, spell);
+
+            // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
+            const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
+            if (!pAuraList.empty())
+            {
+                for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->m_spellInfo->SpellFamilyFlags)
+                        catrec *= ((*itr)->GetBaseAmount() / 100.0f) * GetFloatValue(UNIT_MOD_CAST_SPEED);
+                }
+            }
+        }
 
         // replace negative cooldowns by 0
         if (rec < 0) rec = 0;
