@@ -5276,7 +5276,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             //Mutilate no longer requires you be behind the target as of patch 3.0.3
             && (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags[1] & 0x200000))
             //Exclusion for Throw: Facing limitation was added in 3.2.x, but that shouldn't be
-            && (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags[0] & 0x00000001)))
+            && (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags[0] & 0x00000001))
+            //Ravage! (Stampede) - feral druid
+            && (!(m_spellInfo->Id == 81170)))
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_BEHIND;

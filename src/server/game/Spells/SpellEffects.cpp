@@ -2384,6 +2384,36 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
     Unit* originalCaster = NULL;
 
+    const SpellEntry* baseSpellInfo = this->GetSpellInfo();
+    if (baseSpellInfo)
+    {
+        switch(baseSpellInfo->Id)
+        {
+        case 49376: // Feral Charge (Cat form)
+            // Stampede
+            if (m_caster->HasAura(78893))
+            {
+                m_caster->CastSpell(m_caster, 89140, true); // Ravage! (Stampede) enabler spell: Demonic Rebirth Marker
+                m_caster->CastSpell(m_caster, 81022, true); // rank 2
+            }
+            else if (m_caster->HasAura(78892))
+            {
+                m_caster->CastSpell(m_caster, 89140, true); // Ravage! (Stampede) enabler spell: Demonic Rebirth Marker
+                m_caster->CastSpell(m_caster, 81021, true); // rank 1
+            }
+            break;
+        case 16979: // Feral Charge (Bear form)
+            // Stampede
+            if (m_caster->HasAura(78893))
+                m_caster->CastSpell(m_caster, 81017, true); // rank 2
+            else if (m_caster->HasAura(78892))
+                m_caster->CastSpell(m_caster, 81016, true); // rank 1
+            break;
+        default:
+            break;
+        }
+    }
+
     // special cases
     switch(triggered_spell_id)
     {
@@ -5152,6 +5182,13 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 {
                     totalDamagePercentMod *= float((rendAndTear->GetAmount() + 100.0f) / 100.0f);
                 }
+            }
+            // Ravage! (Stampede)
+            else if (m_spellInfo->Id == 81107)
+            {
+                m_caster->RemoveAurasDueToSpell(89140); // enabler spell
+                m_caster->RemoveAurasDueToSpell(81021); // Stampede buff rank 1
+                m_caster->RemoveAurasDueToSpell(81022); // Stampede buff rank 2
             }
             break;
         }
