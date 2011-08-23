@@ -2502,9 +2502,13 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             case TARGET_UNIT_CONE_ENEMY:
             case TARGET_UNIT_CONE_ENEMY_UNKNOWN:
             case TARGET_UNIT_AREA_PATH:
-                if (m_spellInfo->Id == 2643 || m_spellInfo->Id == 122 || m_spellInfo->Id == 81297) // Multi-Shot, Frost Nova and Consecration Radius fix
+                if (m_spellInfo->Id == 2643      // Multi-Shot
+                    || m_spellInfo->Id == 122    // Frost Nova
+                    || m_spellInfo->Id == 81297  // Consecration
+                    || m_spellInfo->Id == 779    // Swipe  (Bear form)
+                    || m_spellInfo->Id == 77758) // Thrash (Bear form)
                 {
-                    radius = 8;
+                    radius = 8; // 8yd
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }

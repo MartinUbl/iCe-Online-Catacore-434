@@ -3984,8 +3984,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
-        case 779: //Swipe
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CONE_ENEMY;
+        case 779:   // Swipe  (Bear form)
+        case 62078: // Swipe  (Cat  form)
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY;
+            count++;
+            break;
+        case 77758: // Thrash (Bear form)
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY;
+            count++;
             break;
         case 52479: // Gift of the Harvester
             spellInfo->MaxAffectedTargets = 1;
