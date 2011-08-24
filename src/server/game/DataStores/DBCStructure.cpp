@@ -26,6 +26,16 @@
 #include "DBCStructure.h"
 #include "DBCStores.h"
 
+ResearchProjectEntry::ResearchProjectEntry(ResearchProjectEntry_True const* project)
+{
+    Id = project->Id;
+    name = project->name;
+    fragmentsNeeded = project->fragmentsNeeded;
+    keyStonesNeeded = project->keyStonesNeeded;
+    researchBranch = project->researchBranch;
+    craftSpell = project->craftSpell;
+}
+
 SpellEntry::SpellEntry(SpellEntry_n const* spell)
 {
     Id = spell->Id;

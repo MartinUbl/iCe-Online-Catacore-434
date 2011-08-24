@@ -156,6 +156,7 @@ extern DBCStorage <SkillLineEntry>               sSkillLineStore;
 extern DBCStorage <SkillLineAbilityEntry>        sSkillLineAbilityStore;
 extern DBCStorage <SoundEntriesEntry>            sSoundEntriesStore;
 extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;
+extern DBCStorage <ResearchProjectEntry_True>    sTrueResearchProjectStore;
 extern DBCStorage <ResearchProjectEntry>         sResearchProjectStore;
 extern DBCStorage <ResearchSiteEntry>            sResearchSiteStore;
 extern DBCStorage <SpellCastTimesEntry>          sSpellCastTimesStore;

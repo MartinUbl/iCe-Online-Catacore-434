@@ -167,6 +167,7 @@ DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
 DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 
 DBCStorage <ResearchBranchEntry> sResearchBranchStore(ResearchBranchfmt);
+DBCStorage <ResearchProjectEntry_True> sTrueResearchProjectStore(ResearchProjects_Truefmt);
 DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectsfmt);
 DBCStorage <ResearchSiteEntry> sResearchSiteStore(ResearchSitesfmt);
 
@@ -440,7 +441,43 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bad_dbc_files,sSkillLineAbilityStore,    dbcPath,"SkillLineAbility.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSoundEntriesStore,        dbcPath,"SoundEntries.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sResearchBranchStore,      dbcPath,"ResearchBranch.dbc");
-    LoadDBC(availableDbcLocales,bad_dbc_files,sResearchProjectStore,     dbcPath,"ResearchProject.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sTrueResearchProjectStore, dbcPath,"ResearchProject.dbc");
+
+    // Load custom data for Research Projects - insert required skill
+    sResearchProjectStore.Clear();
+    sResearchProjectStore.nCount = sTrueResearchProjectStore.nCount;
+    sResearchProjectStore.fieldCount = strlen(sResearchProjectStore.fmt);
+    sResearchProjectStore.indexTable = new ResearchProjectEntry*[sResearchProjectStore.nCount];
+    for (uint32 i = 0; i < sTrueResearchProjectStore.GetNumRows(); ++i)
+    {
+        ResearchProjectEntry_True* project = sTrueResearchProjectStore.LookupEntryNoConst(i);
+        if(project)
+        {
+            ResearchProjectEntry* newproject = new ResearchProjectEntry(project);
+            sResearchProjectStore.SetEntry(i, newproject);
+
+            // Default minimum skill needed is 1
+            newproject->skillNeeded = 1;
+        }
+        else
+        {
+            sResearchProjectStore.indexTable[i] = NULL;
+        }
+    }
+    QueryResult projQuery = WorldDatabase.Query("SELECT project_id, minskill FROM research_project;");
+    if (projQuery && projQuery->GetRowCount() > 0)
+    {
+        do
+        {
+            ResearchProjectEntry* project = sResearchProjectStore.LookupEntryNoConst((*projQuery)[0].GetUInt32());
+            if (project)
+                project->skillNeeded = (*projQuery)[1].GetUInt32();
+        }
+        while (projQuery->NextRow());
+    }
+    else
+        sLog->outError("Could not load custom research project data, table 'research_project' doesnt exist or is empty.");
+
     LoadDBC(availableDbcLocales,bad_dbc_files,sResearchSiteStore,        dbcPath,"ResearchSite.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellAuraOptionsStore,    dbcPath,"SpellAuraOptions.dbc"/*, &CustomSpellAuraOptionsEntryfmt, &CustomSpellAuraOptionsEntryIndex*/);
     LoadDBC(availableDbcLocales,bad_dbc_files,sSpellAuraRestrictionsStore, dbcPath,"SpellAuraRestrictions.dbc"/*, &CustomSpellAuraRestrictionsEntryfmt, &CustomSpellAuraRestrictionsEntryIndex*/);

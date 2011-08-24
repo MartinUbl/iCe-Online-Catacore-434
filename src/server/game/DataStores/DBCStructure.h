@@ -1401,6 +1401,18 @@ struct ResearchBranchEntry
     uint32      keyStoneId;                                 // 5
 };
 
+struct ResearchProjectEntry_True
+{
+    uint32      Id;                                         // 0
+    DBCString   name;                                       // 1
+    //DBCString description;                                // 2
+    //DBCString unk0;                                       // 3 empty or filled with debug data
+    uint32      researchBranch;                             // 4 (ResearchBranch.dbc)
+    uint32      craftSpell;                                 // 5
+    uint32      keyStonesNeeded;                            // 6
+    //DBCString iconName;                                   // 7
+    uint32      fragmentsNeeded;                            // 8
+};
 struct ResearchProjectEntry
 {
     uint32      Id;                                         // 0
@@ -1412,6 +1424,10 @@ struct ResearchProjectEntry
     uint32      keyStonesNeeded;                            // 6
     //DBCString iconName;                                   // 7
     uint32      fragmentsNeeded;                            // 8
+
+    uint32      skillNeeded;                                // 9 - custom entry loaded from research_project
+
+    ResearchProjectEntry(ResearchProjectEntry_True const*);
 };
 
 struct ResearchSiteEntry

@@ -1297,7 +1297,8 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
-        uint32 GetDigCreatureSlot(uint8 slot) { if (slot > 8) return 0; return m_researchSites.site_creature[slot]; };
+        uint32 GetDigCreatureSlot(uint8 slot) { if (slot >= 8) return 0; return m_researchSites.site_creature[slot]; };
+        void SetNewResearchProject(uint8 slot);
 
         void ApplyEquipCooldown(Item * pItem);
         void SetAmmo(uint32 item);

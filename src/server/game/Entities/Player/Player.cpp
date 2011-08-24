@@ -11235,6 +11235,89 @@ void Player::DiggedCreature(uint64 guidlow)
     }
 }
 
+void Player::SetNewResearchProject(uint8 slot)
+{
+    if (slot >= 9 || GetSkillValue(SKILL_ARCHAEOLOGY) < 1)
+        return;
+
+    uint32 skill = GetSkillValue(SKILL_ARCHAEOLOGY);
+    uint32 currProjId = 0;
+    uint32 currProjBranch = 0;
+    if (slot < 8)
+        currProjId = GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+slot, 0);
+    else if (slot >= 8 && slot < 16)
+        currProjId = GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(slot-8), 1);
+    else
+        currProjId = 0;
+
+    ResearchProjectEntry const* project = sResearchProjectStore.LookupEntry(currProjId);
+    if (project)
+    {
+        ResearchBranchEntry const* branch = sResearchBranchStore.LookupEntry(project->researchBranch);
+        if (!branch)
+            return;
+
+        currProjBranch = project->researchBranch;
+    }
+    else
+    {
+        currProjId = 0;
+
+        // Assume that slots goes one by one and select branch ID with this
+        if (slot >= 0 && slot < 8) //0-7 assign to branch 1-8
+            currProjBranch = slot+1;
+        else if (slot == 8)
+            currProjBranch = 27;
+        else
+            currProjBranch = 29;
+    }
+
+    std::vector<uint32> allCapableBranchProjects;
+    allCapableBranchProjects.clear(); // You never know, what's going to fuck up next...
+
+    for (uint32 i = 0; i < sResearchProjectStore.GetNumRows(); i++)
+    {
+        ResearchProjectEntry const* project = sResearchProjectStore.LookupEntry(i);
+        if (project && project->researchBranch == currProjBranch && project->skillNeeded <= skill)
+            allCapableBranchProjects.push_back(project->Id);
+    }
+
+    if (allCapableBranchProjects.size() > 0)
+    {
+        uint16 newProjectId = allCapableBranchProjects[urand(0,allCapableBranchProjects.size()-1)];
+        if (newProjectId)
+        {
+            bool found = false;
+            for (std::list<ResearchProjectsElem>::iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
+            {
+                if (itr->project_id == newProjectId)
+                {
+                    found = true;
+                    itr->active = 1;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                ResearchProjectsElem newProject;
+                newProject.project_id = newProjectId;
+                newProject.active = 1;
+                newProject.completed_count = 0;
+                newProject.completed_date = 0;
+                m_researchProjects.push_back(newProject);
+            }
+            if (slot < 8)
+                SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+slot, 0, newProjectId);
+            else if (slot >= 8 && slot < 16)
+                SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(slot-8), 1, newProjectId);
+
+            ResearchProjectEntry const* newProject = sResearchProjectStore.LookupEntry(newProjectId);
+            if (newProject)
+                learnSpell(newProject->craftSpell, false);
+        }
+    }
+}
+
 uint32 Player::GetCurrency(uint32 id)
 {
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
@@ -18323,12 +18406,35 @@ void Player::_LoadArchaeologyData()
 
             if (temp.active)
             {
-                SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+proj_pos, 0, temp.project_id);
+                if (proj_pos < 8)
+                    SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+proj_pos, 0, temp.project_id);
+                else
+                    SetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(proj_pos-8), 1, temp.project_id);
                 proj_pos++;
             }
 
             m_researchProjects.push_back(temp);
         } while (proj_result->NextRow());
+
+        // At the end, we must have 9 projects, if not, generate all new
+        if (proj_pos < 8)
+        {
+            // Set all projects as inactive
+            for (std::list<ResearchProjectsElem>::iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
+                itr->active = 0;
+            // And generate new
+            for (uint8 i = 0; i < 9; i++)
+                SetNewResearchProject(i);
+        }
+    }
+    else
+    {
+        // We haven't got any active project, probably, so clear it also in our enum
+        for (std::list<ResearchProjectsElem>::iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
+            itr->active = 0;
+        // If we haven't got any project, generate some
+        for (uint8 i = 0; i < 9; i++)
+            SetNewResearchProject(i);
     }
 
     // If we don't have archaeology, do not assign site ids
@@ -19483,7 +19589,7 @@ void Player::_SaveArchaeologyData()
     {
         for (std::list<ResearchProjectsElem>::const_iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
         {
-            trans->PAppend("REPLACE INTO character_research_project VALUES (%u, %u, %u, %u, %u);",
+            trans->PAppend("REPLACE INTO character_research_project VALUES (%u, %u, %u, " UI64FMTD ", %u);",
                 GetGUIDLow(), itr->project_id, itr->completed_count, itr->completed_date, itr->active);
         }
     }
