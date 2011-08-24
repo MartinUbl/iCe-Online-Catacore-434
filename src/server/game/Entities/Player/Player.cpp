@@ -11235,7 +11235,7 @@ void Player::DiggedCreature(uint64 guidlow)
     }
 }
 
-void Player::SetNewResearchProject(uint8 slot)
+void Player::SetNewResearchProject(uint8 slot, bool completed)
 {
     if (slot >= 9 || GetSkillValue(SKILL_ARCHAEOLOGY) < 1)
         return;
@@ -11278,7 +11278,7 @@ void Player::SetNewResearchProject(uint8 slot)
     for (uint32 i = 0; i < sResearchProjectStore.GetNumRows(); i++)
     {
         ResearchProjectEntry const* project = sResearchProjectStore.LookupEntry(i);
-        if (project && project->researchBranch == currProjBranch && project->skillNeeded <= skill)
+        if (project && project->researchBranch == currProjBranch && project->skillNeeded <= skill && project->Id != currProjId)
             allCapableBranchProjects.push_back(project->Id);
     }
 
@@ -11294,7 +11294,17 @@ void Player::SetNewResearchProject(uint8 slot)
                 {
                     found = true;
                     itr->active = 1;
-                    break;
+                }
+                else if (itr->project_id == currProjId)
+                {
+                    // "deactivate" old project
+                    itr->active = 0;
+                    if (completed)
+                    {
+                        if (itr->completed_count == 0)
+                            itr->completed_date = time(NULL);
+                        itr->completed_count += 1;
+                    }
                 }
             }
             if (!found)

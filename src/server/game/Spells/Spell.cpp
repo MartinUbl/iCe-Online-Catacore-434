@@ -4859,6 +4859,32 @@ void Spell::TakeReagents()
 
         m_caster->ToPlayer()->ModifyCurrency(pBranch->currencyId, -int32(realCurrencyCost));
         m_caster->ToPlayer()->DestroyItemCount(pBranch->keyStoneId, m_keyStonesCount, true);
+
+        // Change project in archaeology interface and in our stores
+        // Also increment count of times project completed and write data
+        uint8 slot = 255;
+        for (uint8 i = 0; i < 16; i++) // iterate through all 16 project data fields (2x8)
+        {
+            if (i < 8)
+            {
+                if (m_caster->ToPlayer()->GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+i, 0) == pProject->Id)
+                {
+                    slot = i;
+                    break;
+                }
+            }
+            else //if (i >= 8 && i < 16)
+            {
+                if (m_caster->ToPlayer()->GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(i-8), 1) == pProject->Id)
+                {
+                    slot = i;
+                    break;
+                }
+            }
+        }
+
+        if (slot < 16)
+            m_caster->ToPlayer()->SetNewResearchProject(slot, true);
     }
 
     for (uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
