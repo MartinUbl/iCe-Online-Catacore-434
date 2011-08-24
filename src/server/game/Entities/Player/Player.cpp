@@ -8905,7 +8905,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
 void Player::SendNotifyLootMoneyRemoved()
 {
-    WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 0);
+    WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 2, true);
     GetSession()->SendPacket(&data);
 }
 
@@ -24315,6 +24315,19 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
     if (!item)
     {
         SendEquipError(EQUIP_ERR_ALREADY_LOOTED, NULL, NULL);
+        return;
+    }
+
+    // We are about to loot currency
+    if (item->itemid < 0)
+    {
+        uint32 currencyId = abs(item->itemid);
+        if (!item->is_looted)
+            ModifyCurrency(currencyId, item->count);
+
+        item->is_looted = true;
+        SendNotifyLootItemRemoved(lootSlot);
+
         return;
     }
 

@@ -107,7 +107,7 @@ class ConditionMgr;
 
 struct LootStoreItem
 {
-    uint32  itemid;                                         // id of the item
+    int32  itemid;                                          // id of the item
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
     uint16  lootmode;
@@ -118,13 +118,13 @@ struct LootStoreItem
 
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
-    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, uint16 _lootmode, uint8 _group, int32 _mincountOrRef, uint8 _maxcount)
+    LootStoreItem(int32 _itemid, float _chanceOrQuestChance, uint16 _lootmode, uint8 _group, int32 _mincountOrRef, uint8 _maxcount)
         : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef), lootmode(_lootmode),
         group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount)
          {}
 
     bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
-    bool IsValid(LootStore const& store, uint32 entry) const;
+    bool IsValid(LootStore const& store, int32 entry) const;
                                                             // Checks correctness of values
 };
 
@@ -132,7 +132,7 @@ typedef std::set<uint32> AllowedLooterSet;
 
 struct LootItem
 {
-    uint32  itemid;
+    int32   itemid;
     uint32  randomSuffix;
     int32   randomPropertyId;
     ConditionList conditions;                               // additional loot condition

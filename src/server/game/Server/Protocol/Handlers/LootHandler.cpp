@@ -222,6 +222,70 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
         GetPlayer()->InterruptNonMeleeSpells(false);
 }
 
+void WorldSession::HandleLootCurrencyOpcode(WorldPacket & recv_data)
+{
+    sLog->outDebug("WORLD: CMSG_LOOT_CURRENCY");
+    Player* player = GetPlayer();
+    uint64 lguid = player->GetLootGUID();
+    Loot* loot = NULL;
+    uint8 lootSlot = 0;
+
+    recv_data >> lootSlot;
+
+    if (IS_GAMEOBJECT_GUID(lguid))
+    {
+        GameObject *go = player->GetMap()->GetGameObject(lguid);
+
+        // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
+        if (!go || ((go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE)))
+        {
+            player->SendLootRelease(lguid);
+            return;
+        }
+
+        loot = &go->loot;
+    }
+    else if (IS_ITEM_GUID(lguid))
+    {
+        Item *pItem = player->GetItemByGuid(lguid);
+
+        if (!pItem)
+        {
+            player->SendLootRelease(lguid);
+            return;
+        }
+
+        loot = &pItem->loot;
+    }
+    else if (IS_CORPSE_GUID(lguid))
+    {
+        Corpse *bones = ObjectAccessor::GetCorpse(*player, lguid);
+        if (!bones)
+        {
+            player->SendLootRelease(lguid);
+            return;
+        }
+
+        loot = &bones->loot;
+    }
+    else
+    {
+        Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
+
+        bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass() == CLASS_ROGUE && pCreature->lootForPickPocketed);
+
+        if (!ok_loot || !pCreature->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        {
+            player->SendLootRelease(lguid);
+            return;
+        }
+
+        loot = &pCreature->loot;
+    }
+
+    player->StoreLootItem(lootSlot, loot);
+}
+
 void WorldSession::HandleLootReleaseOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug("WORLD: CMSG_LOOT_RELEASE");

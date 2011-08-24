@@ -370,6 +370,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_RESURRECT_REQUEST,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_RESURRECT_RESPONSE,                      STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode   );
     OPCODE( CMSG_LOOT,                                    STATUS_LOGGEDIN, &WorldSession::HandleLootOpcode                );
+    OPCODE( CMSG_LOOT_CURRENCY,                           STATUS_LOGGEDIN, &WorldSession::HandleLootCurrencyOpcode        );
     OPCODE( CMSG_LOOT_MONEY,                              STATUS_LOGGEDIN, &WorldSession::HandleLootMoneyOpcode           );
     OPCODE( CMSG_LOOT_RELEASE,                            STATUS_LOGGEDIN, &WorldSession::HandleLootReleaseOpcode         );
     OPCODE( SMSG_LOOT_RESPONSE,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

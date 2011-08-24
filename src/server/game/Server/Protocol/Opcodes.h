@@ -371,6 +371,7 @@ enum Opcodes
     SMSG_RESURRECT_REQUEST                           = 0x0F3A0, // 4.0.6a 13623
     CMSG_RESURRECT_RESPONSE                          = 0x0BBE8, // 4.0.6a 13623
     CMSG_LOOT                                        = 0x0FCEC, // 4.0.6a 13623
+    CMSG_LOOT_CURRENCY                               = 0x00991, // 4.0.6a 13623
     CMSG_LOOT_MONEY                                  = 0x079E0, // 4.0.6a 13623
     CMSG_LOOT_RELEASE                                = 0x03CE8, // 4.0.6a 13623
     SMSG_LOOT_RESPONSE                               = 0x0F38C, // 4.0.6a 13623

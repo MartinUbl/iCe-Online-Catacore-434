@@ -116,7 +116,7 @@ void LootStore::LoadLootTable()
             Field *fields = result->Fetch();
 
             uint32 entry               = fields[0].GetUInt32();
-            uint32 item                = fields[1].GetUInt32();
+            int32 item                 = fields[1].GetInt32();
             float  chanceOrQuestChance = fields[2].GetFloat();
             uint16 lootmode            = fields[3].GetUInt16();
             uint8  group               = fields[4].GetUInt8();
@@ -264,7 +264,7 @@ bool LootStoreItem::Roll(bool rate) const
 }
 
 // Checks correctness of values
-bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
+bool LootStoreItem::IsValid(LootStore const& store, int32 entry) const
 {
     if (group >= 1 << 7)                                     // it stored in 7 bit field
     {
@@ -280,11 +280,25 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 
     if (mincountOrRef > 0)                                  // item (quest or non-quest) entry, maybe grouped
     {
-        ItemPrototype const *proto = sObjectMgr->GetItemPrototype(itemid);
-        if (!proto)
+        if (itemid >= 0)
         {
-            sLog->outErrorDb("Table '%s' entry %d item %d: item entry not listed in `item_template` - skipped", store.GetName(), entry, itemid);
-            return false;
+            // Is item loot
+            ItemPrototype const *proto = sObjectMgr->GetItemPrototype(itemid);
+            if (!proto)
+            {
+                sLog->outErrorDb("Table '%s' entry %d item %d: item entry not listed in `item_template` - skipped", store.GetName(), entry, itemid);
+                return false;
+            }
+        }
+        else
+        {
+            // Is currency loot
+            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(abs(itemid));
+            if (!entry)
+            {
+                sLog->outErrorDb("Table '%s' entry %d currency %d: currency does not exist - skipped", store.GetName(), entry, abs(itemid));
+                return false;
+            }
         }
 
         if (chance == 0 && group == 0)                      // Zero chance is allowed for grouped entries only
@@ -844,7 +858,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             // blocked rolled items and quest items, and !ffa items
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (!l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
                 {
                     uint8 slot_type;
 
@@ -872,7 +886,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         {
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (!l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
                 {
                     if (l.roundRobinPlayer != 0 && lv.viewer->GetGUID() != l.roundRobinPlayer)
                         // item shall not be displayed.
@@ -904,7 +918,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
 
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (!l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
                 {
                     b << uint8(i) << l.items[i];
                     b << uint8(slot_type);
@@ -926,7 +940,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         for (QuestItemList::const_iterator qi = q_list->begin() ; qi != q_list->end(); ++qi)
         {
             LootItem &item = l.quest_items[qi->index];
-            if (!qi->is_looted && !item.is_looted)
+            if (item.itemid >= 0 && !qi->is_looted && !item.is_looted)
             {
                 b << uint8(l.items.size() + (qi - q_list->begin()));
                 b << item;
@@ -944,7 +958,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         for (QuestItemList::const_iterator fi = ffa_list->begin() ; fi != ffa_list->end(); ++fi)
         {
             LootItem &item = l.items[fi->index];
-            if (!fi->is_looted && !item.is_looted)
+            if (item.itemid >= 0 && !fi->is_looted && !item.is_looted)
             {
                 b << uint8(fi->index);
                 b << item;
@@ -962,13 +976,25 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         for (QuestItemList::const_iterator ci = conditional_list->begin() ; ci != conditional_list->end(); ++ci)
         {
             LootItem &item = l.items[ci->index];
-            if (!ci->is_looted && !item.is_looted)
+            if (item.itemid >= 0 && !ci->is_looted && !item.is_looted)
             {
                 b << uint8(ci->index);
                 b << item;
                 b << uint8(slotType);
                 ++itemsShown;
             }
+        }
+    }
+
+    // Insert currencies here
+    for (uint8 i = 0; i < l.items.size(); ++i)
+    {
+        if (l.items[i].itemid < 0 && !l.items[i].is_looted)
+        {
+            b << uint8(i);
+            b << uint32(abs(l.items[i].itemid));
+            b << uint32(l.items[i].count);
+            ++currenciesShown;
         }
     }
 
