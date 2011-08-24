@@ -7215,33 +7215,112 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         default: return;
     }
 
+    float x, y, z;
+    // If dest location if present
+    if (m_targets.HasDst())
+        m_targets.m_dstPos.GetPosition(x, y, z);
+    // Summon in random point all other units if location present
+    else
+        m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+
     float o = m_caster->GetOrientation();
 
     // Special case - Archaeology, spell Survey
-    // TODO: implement DB tables for this and get list of creatures here and compare them with DB data for specific char
-    if (m_spellInfo->Id == 80451)
+    if (m_spellInfo->Id == 80451 && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Creature* pNearest = GetClosestCreatureWithEntry(m_caster, 2, 50.0f);
+        Creature* pNearest = NULL;
+        float distance = -1.0f;
+        uint64 guid = 0;
+        for (uint8 i = 0; i < 8; i++)
+        {
+            guid = MAKE_NEW_GUID(m_caster->ToPlayer()->GetDigCreatureSlot(i), 2, HIGHGUID_UNIT);
+            Creature* pTemp = Creature::GetCreature(*m_caster, guid);
+            if (!pTemp || pTemp->GetMapId() != m_caster->GetMapId())
+                continue;
+
+            if (pTemp->GetDistance2d(m_caster) < distance || distance < 0.0f)
+            {
+                pNearest = pTemp;
+                distance = pTemp->GetDistance2d(m_caster);
+            }
+        }
+
         if (pNearest)
         {
-            o = m_caster->GetAngle(pNearest);
-            go_id = 4510101;
-        }
-        else
-        {
-            pNearest = GetClosestCreatureWithEntry(m_caster, 2, 100.0f);
-            if (pNearest)
+            // TODO: confirm distances
+            if (distance < 5.0f)
             {
-                o = m_caster->GetAngle(pNearest);
+                // We digged out fragment
+                QueryResult res = WorldDatabase.PQuery("SELECT type FROM research_site WHERE site IN (SELECT site_id \
+                                                       FROM creature_archaeology_assign WHERE guid='%u');",pNearest->GetGUIDLow());
+                if (res)
+                {
+                    uint32 type = (*res)[0].GetUInt32();
+                    switch (type)
+                    {
+                        case 1:  // Dwarf
+                            go_id = 204282;
+                            break;
+                        case 2:  // Draenei
+                            go_id = 207188;
+                            break;
+                        case 3:  // Fossil
+                            go_id = 206836;
+                            break;
+                        case 4:  // Night Elf
+                            go_id = 203071;
+                            break;
+                        case 5:  // Nerubian
+                            go_id = 203078;
+                            break;
+                        case 6:  // Orc
+                            go_id = 207187;
+                            break;
+                        case 7:  // Tol'vir
+                            go_id = 207190;
+                            break;
+                        case 8:  // Troll
+                            go_id = 202655;
+                            break;
+                        case 27: // Vrykul
+                            go_id = 207189;
+                            break;
+                        default: // Other or not listed
+                            sLog->outError("Not listed siteId %u for creature %u", type, pNearest->GetGUIDLow());
+                            break;
+                    }
+                }
+                x = pNearest->GetPositionX();
+                y = pNearest->GetPositionY();
+                z = pNearest->GetPositionZ();
+                m_caster->ToPlayer()->DiggedCreature(pNearest->GetGUIDLow());
+            }
+            else if (distance < 50.0f)
+            {
+                // Green tool
+                int32 mult = int32(urand(0,2))-1;
+                o = m_caster->GetAngle(pNearest) + mult*M_PI/16;
+                go_id = 4510101;
+            }
+            else if (distance < 100.0f)
+            {
+                // Yellow tool
+                int32 mult = int32(urand(0,6))-3;
+                o = m_caster->GetAngle(pNearest) + mult*M_PI/16;
                 go_id = 4510102;
             }
             else
             {
-                pNearest = GetClosestCreatureWithEntry(m_caster, 2, 50000.0f);
-                if (pNearest)
-                    o = m_caster->GetAngle(pNearest);
+                // Red tool
+                int32 mult = int32(urand(0,8))-4;
+                o = m_caster->GetAngle(pNearest) + mult*M_PI/16;
                 go_id = 4510103;
             }
+        }
+        else
+        {
+            // Use red tool if no creature in range (should not happen)
+            go_id = 4510103;
         }
     }
 
@@ -7263,14 +7342,6 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
     }
 
     GameObject* pGameObj = new GameObject;
-
-    float x, y, z;
-    // If dest location if present
-    if (m_targets.HasDst())
-        m_targets.m_dstPos.GetPosition(x, y, z);
-    // Summon in random point all other units if location present
-    else
-        m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
 
     Map *map = m_caster->GetMap();
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,

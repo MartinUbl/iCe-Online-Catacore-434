@@ -1297,6 +1297,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
+        uint32 GetDigCreatureSlot(uint8 slot) { if (slot > 8) return 0; return m_researchSites.site_creature[slot]; };
 
         void ApplyEquipCooldown(Item * pItem);
         void SetAmmo(uint32 item);
@@ -2757,7 +2758,7 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
         typedef struct
         {
-            uint64 site_creature[8];
+            uint32 site_creature[8];
             uint8 site_dig_count[8];
         } ResearchSites_t;
         ResearchSites_t m_researchSites;
