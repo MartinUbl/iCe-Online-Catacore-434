@@ -11062,6 +11062,36 @@ void Player::SendCurrencies()
     GetSession()->SendPacket(&packet);
 }
 
+void Player::SendCompletedArtifacts()
+{
+    WorldPacket data(SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE, 200, true);
+
+    uint32 count = 0;
+
+    size_t count_pos = data.wpos();
+    data << uint32(0);
+
+    for (std::list<ResearchProjectsElem>::const_iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
+    {
+        if (itr->completed_count > 0)
+        {
+            data << itr->completed_date;
+            data << itr->project_id;
+            data << itr->completed_count;
+            count++;
+        }
+    }
+
+    data.put<uint32>(count_pos, count);
+
+    GetSession()->SendPacket(&data);
+}
+
+void Player::DiggedCreature(uint64 guidlow)
+{
+    // Placeholder for accumulating dig count and getting new siteId if site digged out
+}
+
 uint32 Player::GetCurrency(uint32 id)
 {
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);

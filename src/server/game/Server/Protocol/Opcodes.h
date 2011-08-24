@@ -1303,6 +1303,7 @@ enum Opcodes
     CMSG_WORLD_LOGIN                                 = 0x08508, // 4.0.6a 13623
     CMSG_RETURN_TO_GRAVEYARD                         = 0x00593, // 4.0.6a 13623
     CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x00A13, // 4.0.6a 13623
+    SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE          = 0x0044E, // 4.0.6a 13623
     SMSG_REFORGING_OPEN                              = 0x00C5C, // 4.0.6a 13623
     CMSG_REFORGE                                     = 0x00313, // 4.0.6a 13623
     SMSG_REFORGING_RESULT                            = 0x0451C, // 4.0.6a 13623

@@ -1284,6 +1284,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_UNKNOWN_1310,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_RETURN_TO_GRAVEYARD,                     STATUS_LOGGEDIN, &WorldSession::HandleMoveToGraveyard           );
     OPCODE( CMSG_QUERY_COMPLETED_ARTIFACTS,               STATUS_LOGGEDIN, &WorldSession::HandleQueryCompletedArtifacts   );
+    OPCODE( SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE,      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_REFORGING_OPEN,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REFORGE,                                 STATUS_LOGGEDIN, &WorldSession::HandleItemReforge               );
     OPCODE( SMSG_REFORGING_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

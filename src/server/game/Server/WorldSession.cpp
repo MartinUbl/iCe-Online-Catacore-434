@@ -521,8 +521,8 @@ void WorldSession::HandleMoveToGraveyard(WorldPacket &recv_data)
 
 void WorldSession::HandleQueryCompletedArtifacts(WorldPacket& recvPacket)
 {
-    //TODO: Implement
-    return;
+    if (GetPlayer())
+        GetPlayer()->SendCompletedArtifacts();
 }
 
 void WorldSession::SendNotification(const char *format,...)
