@@ -11156,12 +11156,16 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                     switch((*i)->GetMiscValue())
                     {
                         // Shatter
-                        case  911: modChance+= 16;
-                        case  910: modChance+= 17;
-                        case  849: modChance+= 17;
+                        case  911:
                             if (!pVictim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
-                            crit_chance+=modChance;
+                            if ((*i)->GetSpellProto())
+                            {
+                                if ((*i)->GetSpellProto()->Id == 11170)
+                                    crit_chance *= 2;
+                                else if ((*i)->GetSpellProto()->Id == 12982)
+                                    crit_chance *= 3;
+                            }
                             break;
                         case 7917: // Glyph of Shadowburn
                             if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
