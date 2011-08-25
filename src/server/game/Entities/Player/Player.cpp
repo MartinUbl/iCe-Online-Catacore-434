@@ -6027,6 +6027,10 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
                 return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator,gathering_skill_gain);
             else
                 return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)),gathering_skill_gain);
+        case SKILL_ARCHAEOLOGY:
+            // In archaeology - if skill is below 50, you gain skill point with 100% chance
+            if (SkillValue < 50)
+                return UpdateSkillPro(SkillId, 1000, 1);
     }
     return false;
 }

@@ -333,6 +333,11 @@ void WorldSession::DoLootRelease(uint64 lguid)
             {
                 uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
                 uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
+                uint32 go_lock = go->GetGOInfo()->chest.lockId;
+
+                // All archaeology finds has this lockId
+                if (go_lock == 1859)
+                    go->SetLootState(GO_JUST_DEACTIVATED);
 
                 // only vein pass this check
                 if (go_min != 0 && go_max > go_min)
@@ -404,6 +409,15 @@ void WorldSession::DoLootRelease(uint64 lguid)
                 }
                 else
                     loot->roundRobinPlayer = 0;
+            }
+
+            if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+            {
+                uint32 go_lock = go->GetGOInfo()->chest.lockId;
+
+                // All archaeology finds has this lockId
+                if (go_lock == 1859)
+                    go->SetLootState(GO_JUST_DEACTIVATED);
             }
         }
     }
