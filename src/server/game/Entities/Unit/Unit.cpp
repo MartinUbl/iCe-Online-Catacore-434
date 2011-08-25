@@ -1711,7 +1711,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             ignoredResistance += float(player->GetSpellPenetrationItemMod());
         float victimResistance = baseVictimResistance + ignoredResistance;
 
-        static const uint32 BOSS_LEVEL = 83;
+        static const uint32 BOSS_LEVEL = 88;
         static const float BOSS_RESISTANCE_CONSTANT = 510.0;
         uint32 level = getLevel();
         float resistanceConstant = 0.0f;
