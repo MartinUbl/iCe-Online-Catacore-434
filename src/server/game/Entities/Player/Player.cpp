@@ -24487,7 +24487,8 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
             ModifyCurrency(currencyId, item->count);
 
         item->is_looted = true;
-        SendNotifyLootItemRemoved(lootSlot);
+        --loot->unlootedCount;
+        loot->NotifyItemRemoved(lootSlot);
 
         return;
     }
