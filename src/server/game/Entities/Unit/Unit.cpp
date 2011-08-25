@@ -1699,7 +1699,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
     if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0)
     {
         float baseVictimResistance = float(pVictim->GetResistance(GetFirstSchoolInMask(schoolMask)));
-        if (spellInfo->Id == 44614)
+        if (spellInfo && spellInfo->Id == 44614)
         {
             float frostresist = pVictim->GetResistance(SPELL_SCHOOL_FROST);
             float fireresist = pVictim->GetResistance(SPELL_SCHOOL_FIRE);
