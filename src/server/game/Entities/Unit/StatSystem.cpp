@@ -1409,6 +1409,14 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
         }
+        //water elementals benefit from mage's frost damage
+        else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
+        {
+            int32 frost = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
+            if (frost < 0)
+                frost = 0;
+            SetBonusDamage(int32(frost * 0.4f));
+        }
         //demons benefit from warlocks shadow or fire damage
         else if (isPet())
         {
@@ -1419,14 +1427,6 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                 maximum = 0;
             SetBonusDamage(int32(maximum * 0.15f));
             bonusAP = maximum * 0.57f;
-        }
-        //water elementals benefit from mage's frost damage
-        else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
-        {
-            int32 frost = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
-            if (frost < 0)
-                frost = 0;
-            SetBonusDamage(int32(frost * 0.4f));
         }
     }
 

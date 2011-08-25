@@ -947,6 +947,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             {
                 case 510: // mage Water Elemental
                 {
+                    if (m_owner->getLevel() > 80)
+                    {
+                        SetCreateHealth(14900+9200.0f*(m_owner->getLevel()-80)/5.0f);
+                        SetCreateMana(9800+6200.0f*(m_owner->getLevel()-80)/5.0f);
+                    }
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
                     SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
                     SetModifierValue(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(m_owner->GetStat(STAT_INTELLECT)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
