@@ -635,7 +635,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     sWorld->IncreasePlayerCount();
 
-    for (uint8 i = 0; i < 8; i++)
+    for (uint8 i = 0; i < MAX_DIGSITES; i++)
     {
         m_researchSites.site_creature[i] = 0;
         m_researchSites.site_dig_count[i] = 0;
@@ -11098,7 +11098,7 @@ void Player::DiggedCreature(uint64 guidlow)
 {
     // At first, get position in struct and accumulate dig count
     uint8 pos = 255;
-    for (uint8 i = 0; i < 8; i++)
+    for (uint8 i = 0; i < MAX_DIGSITES; i++)
     {
         if (m_researchSites.site_creature[i] == guidlow)
         {
@@ -11108,7 +11108,7 @@ void Player::DiggedCreature(uint64 guidlow)
         }
     }
 
-    if (pos >= 8)
+    if (pos >= MAX_DIGSITES)
     {
         sLog->outError("Player tries to dig creature which is not in his diglist. Skipping.");
         return;
@@ -11119,9 +11119,11 @@ void Player::DiggedCreature(uint64 guidlow)
     if (m_researchSites.site_dig_count[pos] >= 3)
         new_digsite = true;
 
-    QueryResult sites_result = WorldDatabase.PQuery("SELECT site_id FROM creature_archaeology_assign WHERE guid IN (%u, %u, %u, %u, %u, %u, %u, %u);",
+    QueryResult sites_result = WorldDatabase.PQuery("SELECT site_id FROM creature_archaeology_assign WHERE guid IN (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
         m_researchSites.site_creature[0], m_researchSites.site_creature[1], m_researchSites.site_creature[2], m_researchSites.site_creature[3],
-        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7]);
+        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7],
+        m_researchSites.site_creature[8], m_researchSites.site_creature[9], m_researchSites.site_creature[10], m_researchSites.site_creature[11],
+        m_researchSites.site_creature[12], m_researchSites.site_creature[13], m_researchSites.site_creature[14], m_researchSites.site_creature[15]);
     std::vector<uint32> active_sites;
     do
     {
@@ -11132,11 +11134,16 @@ void Player::DiggedCreature(uint64 guidlow)
     QueryResult result;
     if (new_digsite)
     {
-        // 0-3 azeroth, 4-7 outlands
-        if (pos >= 4 && getLevel() >= 58)
-            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE (minlevel >= 58 AND minlevel < 68) AND minlevel < '%u';",getLevel());
+        // 0-3 eastern kingdoms, 4-7 outlands, 8-11 kalimdor, 12-15 northrend
+        if (pos >= 12)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=571 AND minlevel <= '%u';",getLevel());
+        else if (pos >= 8 && pos <= 11)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=1 AND minlevel <= '%u';",getLevel());
+        else if (pos >= 4 && pos <= 7 && getLevel() >= 58)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=530 AND minlevel <= '%u';",getLevel());
         else if (pos < 4)
-            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE (minlevel < 58 OR minlevel >= 68) AND minlevel < '%u';",getLevel());
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=0 AND minlevel <= '%u';",getLevel());
+
     }
     if (!new_digsite || !result || result->GetRowCount() < 1)
         result = WorldDatabase.PQuery("SELECT site_id FROM creature_archaeology_assign WHERE guid='%u';", guidlow);
@@ -11222,7 +11229,7 @@ void Player::DiggedCreature(uint64 guidlow)
                 break;
             }
 
-            for (uint8 i = 0; i < 8; i++)
+            for (uint8 i = 0; i < MAX_DIGSITES; i++)
             {
                 if (m_researchSites.site_creature[i] == guids[randompos])
                 {
@@ -11235,7 +11242,11 @@ void Player::DiggedCreature(uint64 guidlow)
         if (!found)
             return;
 
-        SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+pos, 0, site_id);
+        if (pos < 8)
+            SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+pos, 0, site_id);
+        else
+            SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+(pos-8), 1, site_id);
+
         m_researchSites.site_creature[pos] = guids[randompos];
         if (new_digsite)
             m_researchSites.site_dig_count[pos] = 0;
@@ -18371,22 +18382,26 @@ void Player::_LoadArchaeologyData()
 {
     QueryResult result = CharacterDatabase.PQuery(
         "SELECT research_cr_1, research_cr_2, research_cr_3, research_cr_4, research_cr_5, research_cr_6, \
-        research_cr_7, research_cr_8, site_count_1, site_count_2, site_count_3, site_count_4, site_count_5, \
-        site_count_6, site_count_7, site_count_8 FROM character_research_site WHERE guid='%u';", GetGUIDLow());
+        research_cr_7, research_cr_8, research_cr_9, research_cr_10, research_cr_11, research_cr_12, research_cr_13, \
+        research_cr_14, research_cr_15, research_cr_16, site_count_1, site_count_2, site_count_3, site_count_4, \
+        site_count_5, site_count_6, site_count_7, site_count_8, site_count_9, site_count_10, site_count_11, \
+        site_count_12, site_count_13, site_count_14, site_count_15, site_count_16 FROM character_research_site WHERE guid='%u';", GetGUIDLow());
 
     // At first we need to load creature guids assigned to sites and count of succesfull Suver casts (dig count)
     if (result)
     {
-        for (uint8 i = 0; i < 8; i++)
+        for (uint8 i = 0; i < MAX_DIGSITES; i++)
             m_researchSites.site_creature[i] = (*result)[i].GetUInt32();
 
-        for (uint8 i = 0; i < 8; i++)
-            m_researchSites.site_dig_count[i] = (*result)[i+8].GetUInt32();
+        for (uint8 i = 0; i < MAX_DIGSITES; i++)
+            m_researchSites.site_dig_count[i] = (*result)[i+MAX_DIGSITES].GetUInt32();
     }
 
-    QueryResult sites_result = WorldDatabase.PQuery("SELECT guid, site_id FROM creature_archaeology_assign WHERE guid IN (%u, %u, %u, %u, %u, %u, %u, %u);",
+    QueryResult sites_result = WorldDatabase.PQuery("SELECT guid, site_id FROM creature_archaeology_assign WHERE guid IN (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
         m_researchSites.site_creature[0], m_researchSites.site_creature[1], m_researchSites.site_creature[2], m_researchSites.site_creature[3],
-        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7]);
+        m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7],
+        m_researchSites.site_creature[8], m_researchSites.site_creature[9], m_researchSites.site_creature[10], m_researchSites.site_creature[11],
+        m_researchSites.site_creature[12], m_researchSites.site_creature[13], m_researchSites.site_creature[14], m_researchSites.site_creature[15]);
 
     // Next we need to load digsite IDs to be displayed to player
     // Also we must ensure that they are in same slot as its creature
@@ -18395,13 +18410,20 @@ void Player::_LoadArchaeologyData()
         uint8 site_pos = 0;
         do
         {
-            for (uint8 i = 0; i < 8; i++)
+            for (uint8 i = 0; i < MAX_DIGSITES; i++)
+            {
                 if (m_researchSites.site_creature[i] == (*sites_result)[0].GetUInt32())
-                    SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+i, 0, (*sites_result)[1].GetUInt32());
+                {
+                    if (i < 8)
+                        SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+i, 0, (*sites_result)[1].GetUInt32());
+                    else
+                        SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+(i-8), 1, (*sites_result)[1].GetUInt32());
+                }
+            }
 
-            // Limit count to 8
+            // Limit count to 16
             site_pos++;
-            if (site_pos >= 8)
+            if (site_pos >= MAX_DIGSITES)
                 break;
         } while (sites_result->NextRow());
     }
@@ -18459,17 +18481,23 @@ void Player::_LoadArchaeologyData()
         return;
 
     // If doesn't have any sites, assign a few
-    for (uint8 j = 0; j < 8; j++)
+    for (uint8 j = 0; j < MAX_DIGSITES; j++)
     {
-        if (GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+j, 0) != 0)
+        if (j < 8 && GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+j, 0) != 0)
+            continue;
+        if (j >= 8 && GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+(j-8), 1) != 0)
             continue;
 
         QueryResult result;
-        // 0-3 azeroth, 4-7 outlands
-        if (j >= 4 && getLevel() >= 58)
-            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE (minlevel >= 58 AND minlevel < 68) AND minlevel < '%u';",getLevel());
+        // 0-3 eastern kingdoms, 4-7 outland, 8-11 kalimdor, 12-15 northrend
+        if (j >= 12)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=571 AND minlevel < '%u';",getLevel());
+        else if (j >= 8 && j <= 11)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=1 AND minlevel < '%u';",getLevel());
+        else if (j >= 4 && j <= 7)
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=530 AND minlevel < '%u';",getLevel());
         else if (j < 4)
-            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE (minlevel < 58 OR minlevel >= 68) AND minlevel < '%u';",getLevel());
+            result = WorldDatabase.PQuery("SELECT site FROM research_site WHERE map=0 AND minlevel < '%u';",getLevel());
 
         if (!result)
             return;
@@ -18481,7 +18509,6 @@ void Player::_LoadArchaeologyData()
             if (!result->NextRow())
                 break;
         }
-        sLog->outString("Got %u new capatibilities for site_id", site_ids.size());
 
         bool found = false;
         int32 randompos = 0;
@@ -18503,9 +18530,10 @@ void Player::_LoadArchaeologyData()
                     break;
                 }
 
-                for (uint8 i = 0; i < 8; i++)
+                for (uint8 i = 0; i < MAX_DIGSITES; i++)
                 {
-                    if (GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+i, 0) == site_ids[randompos])
+                    if ((i < 8 && GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+i, 0) == site_ids[randompos]) || 
+                        (i >= 8 && GetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+(i-8), 1) == site_ids[randompos]))
                     {
                         found = false;
                         break;
@@ -18535,13 +18563,15 @@ void Player::_LoadArchaeologyData()
             if (!guids_res->NextRow())
                 break;
         }
-        sLog->outString("Got %u new guid capatibilities",guids.size());
 
         if (guids.size() > 0)
         {
             m_researchSites.site_creature[j] = guids[urand(0,guids.size()-1)];
             m_researchSites.site_dig_count[j] = 0;
-            SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+j, 0, site_id);
+            if (j < 8)
+                SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+j, 0, site_id);
+            else
+                SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+(j-8), 1, site_id);
         }
     }
 }
@@ -19596,11 +19626,15 @@ void Player::_SaveArchaeologyData()
 {
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
-    trans->PAppend("REPLACE INTO character_research_site VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+    trans->PAppend("REPLACE INTO character_research_site VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
         GetGUIDLow(), m_researchSites.site_creature[0], m_researchSites.site_creature[1], m_researchSites.site_creature[2], m_researchSites.site_creature[3],
         m_researchSites.site_creature[4], m_researchSites.site_creature[5], m_researchSites.site_creature[6], m_researchSites.site_creature[7],
+        m_researchSites.site_creature[8], m_researchSites.site_creature[9], m_researchSites.site_creature[10], m_researchSites.site_creature[11],
+        m_researchSites.site_creature[12], m_researchSites.site_creature[13], m_researchSites.site_creature[14], m_researchSites.site_creature[15],
         m_researchSites.site_dig_count[0], m_researchSites.site_dig_count[1], m_researchSites.site_dig_count[2], m_researchSites.site_dig_count[3],
-        m_researchSites.site_dig_count[4], m_researchSites.site_dig_count[5], m_researchSites.site_dig_count[6], m_researchSites.site_dig_count[7]);
+        m_researchSites.site_dig_count[4], m_researchSites.site_dig_count[5], m_researchSites.site_dig_count[6], m_researchSites.site_dig_count[7],
+        m_researchSites.site_dig_count[8], m_researchSites.site_dig_count[9], m_researchSites.site_dig_count[10], m_researchSites.site_dig_count[11],
+        m_researchSites.site_dig_count[12], m_researchSites.site_dig_count[13], m_researchSites.site_dig_count[14], m_researchSites.site_dig_count[15]);
 
     if (!m_researchProjects.empty())
     {

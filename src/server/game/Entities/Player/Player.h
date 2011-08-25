@@ -702,6 +702,8 @@ enum TradeSlots
     TRADE_SLOT_NONTRADED        = 6
 };
 
+#define MAX_DIGSITES 16
+
 enum TransferAbortReason
 {
     TRANSFER_ABORT_NONE                     = 0x00,
@@ -1297,7 +1299,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
-        uint32 GetDigCreatureSlot(uint8 slot) { if (slot >= 8) return 0; return m_researchSites.site_creature[slot]; };
+        uint32 GetDigCreatureSlot(uint8 slot) { if (slot >= MAX_DIGSITES) return 0; return m_researchSites.site_creature[slot]; };
         void SetNewResearchProject(uint8 slot, bool completed = false);
 
         void ApplyEquipCooldown(Item * pItem);
@@ -2759,8 +2761,8 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
         typedef struct
         {
-            uint32 site_creature[8];
-            uint8 site_dig_count[8];
+            uint32 site_creature[MAX_DIGSITES];
+            uint8 site_dig_count[MAX_DIGSITES];
         } ResearchSites_t;
         ResearchSites_t m_researchSites;
 

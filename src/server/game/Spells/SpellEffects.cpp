@@ -7231,7 +7231,7 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         Creature* pNearest = NULL;
         float distance = -1.0f;
         uint64 guid = 0;
-        for (uint8 i = 0; i < 8; i++)
+        for (uint8 i = 0; i < MAX_DIGSITES; i++)
         {
             guid = MAKE_NEW_GUID(m_caster->ToPlayer()->GetDigCreatureSlot(i), 2, HIGHGUID_UNIT);
             Creature* pTemp = Creature::GetCreature(*m_caster, guid);
