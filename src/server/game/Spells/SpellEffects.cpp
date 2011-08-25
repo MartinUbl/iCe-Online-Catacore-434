@@ -529,15 +529,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                 }
 
-                // Implementation of Frostburn mage mastery proficiency
-                if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-                    m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST &&
-                    damage > 1)
-                {
-                    if (unitTarget && unitTarget->isFrozen())
-                        damage = damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
-                }
-
                 // spell Pyroblast! from Hot Streak talent - remove aura state
                 if (m_spellInfo->Id == 92315 && m_caster->HasAura(48108))
                     m_caster->RemoveAurasDueToSpell(48108);
@@ -1090,6 +1081,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             float manapct = float(m_caster->GetPower(POWER_MANA)) / float(m_caster->GetMaxPower(POWER_MANA));
             // multiplier formula: 1 + (mastery*1.5*(%mana remain)/100)
             m_damage = m_damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*1.5f*manapct/100.0f);
+        }
+
+        // Implementation of Frostburn mage mastery proficiency
+        if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST &&
+            damage > 1)
+        {
+            if (unitTarget && unitTarget->isFrozen())
+                m_damage = m_damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
         }
     }
 }
