@@ -21535,7 +21535,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
             // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
             const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
-            if (!pAuraList.empty())
+            if (!pAuraList.empty() && spell)
             {
                 for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
                 {
@@ -21551,7 +21551,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
             // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
             const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
-            if (!pAuraList.empty())
+            if (!pAuraList.empty() && spell)
             {
                 for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
                 {
