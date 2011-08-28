@@ -75,8 +75,8 @@ Object::Object() : m_PackGUID(sizeof(uint64)+1)
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
 
-    m_uint32Values      = 0;
-    m_uint32Values_mirror = 0;
+    m_uint32Values      = NULL;
+    _changedFields      = NULL;
     m_valuesCount       = 0;
 
     m_inWorld           = false;
@@ -118,17 +118,17 @@ Object::~Object()
     }
 
     delete [] m_uint32Values;
-    delete [] m_uint32Values_mirror;
+    delete [] _changedFields;
 
 }
 
 void Object::_InitValues()
 {
-    m_uint32Values = new uint32[ m_valuesCount ];
+    m_uint32Values = new uint32[m_valuesCount];
     memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
 
-    m_uint32Values_mirror = new uint32[ m_valuesCount ];
-    memset(m_uint32Values_mirror, 0, m_valuesCount*sizeof(uint32));
+    _changedFields = new bool[m_valuesCount];
+    memset(_changedFields, 0, sizeof(_changedFields));
 
     m_objectUpdated = false;
 }
@@ -871,7 +871,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
 
 void Object::ClearUpdateMask(bool remove)
 {
-    memcpy(m_uint32Values_mirror, m_uint32Values, m_valuesCount*sizeof(uint32));
+    memset(_changedFields, 0, sizeof(_changedFields));
 
     if (m_objectUpdated)
     {
@@ -912,7 +912,7 @@ bool Object::LoadValues(const char* data)
     return true;
 }
 
-void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
+void Object::_LoadIntoDataField(char const* data, uint32 startOffset, uint32 count)
 {
     if (!data)
         return;
@@ -923,21 +923,23 @@ void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
         return;
 
     for (uint32 index = 0; index < count; ++index)
+    {
         m_uint32Values[startOffset + index] = atol(tokens[index]);
+        _changedFields[startOffset + index] = true;
+    }
 }
 
 void Object::_SetUpdateBits(UpdateMask *updateMask, Player* target) const
 {
-    uint32 *value = m_uint32Values;
-    uint32 *mirror = m_uint32Values_mirror;
+    bool* indexes = _changedFields;
 
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
         valuesCount = PLAYER_END_NOT_SELF;
-    
-    for (uint16 index = 0; index < valuesCount; ++index, ++value, ++mirror)
+
+    for (uint16 index = 0; index < valuesCount; ++index, ++indexes)
     {
-        if (*mirror != *value)
+        if (*indexes)
             updateMask->SetBit(index);
     }
 }
@@ -961,9 +963,10 @@ void Object::SetInt32Value(uint16 index, int32 value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if (m_int32Values[ index ] != value)
+    if (m_int32Values[index] != value)
     {
-        m_int32Values[ index ] = value;
+        m_int32Values[index] = value;
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -980,9 +983,10 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if (m_uint32Values[ index ] != value)
+    if (m_uint32Values[index] != value)
     {
-        m_uint32Values[ index ] = value;
+        m_uint32Values[index] = value;
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -999,16 +1003,19 @@ void Object::UpdateUInt32Value(uint16 index, uint32 value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    m_uint32Values[ index ] = value;
+    m_uint32Values[index] = value;
+    _changedFields[index] = true;
 }
 
 void Object::SetUInt64Value(uint16 index, const uint64 &value)
 {
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));
-    if (*((uint64*)&(m_uint32Values[ index ])) != value)
+    if (*((uint64*)&(m_uint32Values[index])) != value)
     {
-        m_uint32Values[ index ] = *((uint32*)&value);
-        m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
+        m_uint32Values[index] = *((uint32*)&value);
+        m_uint32Values[index + 1] = *(((uint32*)&value) + 1);
+        _changedFields[index] = true;
+        _changedFields[index + 1] = true;
 
         if (m_inWorld)
         {
@@ -1026,8 +1033,10 @@ bool Object::AddUInt64Value(uint16 index, const uint64 &value)
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , true));
     if (value && !*((uint64*)&(m_uint32Values[index])))
     {
-        m_uint32Values[ index ] = *((uint32*)&value);
-        m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
+        m_uint32Values[index] = *((uint32*)&value);
+        m_uint32Values[index + 1] = *(((uint32*)&value) + 1);
+        _changedFields[index] = true;
+        _changedFields[index + 1] = true;
 
         if (m_inWorld)
         {
@@ -1047,8 +1056,10 @@ bool Object::RemoveUInt64Value(uint16 index, const uint64 &value)
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , true));
     if (value && *((uint64*)&(m_uint32Values[index])) == value)
     {
-        m_uint32Values[ index ] = 0;
-        m_uint32Values[ index + 1 ] = 0;
+        m_uint32Values[index] = 0;
+        m_uint32Values[index + 1] = 0;
+        _changedFields[index] = true;
+        _changedFields[index + 1] = true;
 
         if (m_inWorld)
         {
@@ -1067,9 +1078,10 @@ void Object::SetFloatValue(uint16 index, float value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
-    if (m_floatValues[ index ] != value)
+    if (m_floatValues[index] != value)
     {
-        m_floatValues[ index ] = value;
+        m_floatValues[index] = value;
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1092,10 +1104,11 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
         return;
     }
 
-    if (uint8(m_uint32Values[ index ] >> (offset * 8)) != value)
+    if (uint8(m_uint32Values[index] >> (offset * 8)) != value)
     {
-        m_uint32Values[ index ] &= ~uint32(uint32(0xFF) << (offset * 8));
-        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 8));
+        m_uint32Values[index] &= ~uint32(uint32(0xFF) << (offset * 8));
+        m_uint32Values[index] |= uint32(uint32(value) << (offset * 8));
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1118,10 +1131,11 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
         return;
     }
 
-    if (uint16(m_uint32Values[ index ] >> (offset * 16)) != value)
+    if (uint16(m_uint32Values[index] >> (offset * 16)) != value)
     {
-        m_uint32Values[ index ] &= ~uint32(uint32(0xFFFF) << (offset * 16));
-        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 16));
+        m_uint32Values[index] &= ~uint32(uint32(0xFFFF) << (offset * 16));
+        m_uint32Values[index] |= uint32(uint32(value) << (offset * 16));
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1185,12 +1199,13 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 void Object::SetFlag(uint16 index, uint32 newFlag)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-    uint32 oldval = m_uint32Values[ index ];
+    uint32 oldval = m_uint32Values[index];
     uint32 newval = oldval | newFlag;
 
     if (oldval != newval)
     {
-        m_uint32Values[ index ] = newval;
+        m_uint32Values[index] = newval;
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1205,13 +1220,16 @@ void Object::SetFlag(uint16 index, uint32 newFlag)
 
 void Object::RemoveFlag(uint16 index, uint32 oldFlag)
 {
+    ASSERT(m_uint32Values);
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-    uint32 oldval = m_uint32Values[ index ];
+
+    uint32 oldval = m_uint32Values[index];
     uint32 newval = oldval & ~oldFlag;
 
     if (oldval != newval)
     {
-        m_uint32Values[ index ] = newval;
+        m_uint32Values[index] = newval;
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1234,9 +1252,10 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
         return;
     }
 
-    if (!(uint8(m_uint32Values[ index ] >> (offset * 8)) & newFlag))
+    if (!(uint8(m_uint32Values[index] >> (offset * 8)) & newFlag))
     {
-        m_uint32Values[ index ] |= uint32(uint32(newFlag) << (offset * 8));
+        m_uint32Values[index] |= uint32(uint32(newFlag) << (offset * 8));
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1259,9 +1278,10 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
         return;
     }
 
-    if (uint8(m_uint32Values[ index ] >> (offset * 8)) & oldFlag)
+    if (uint8(m_uint32Values[index] >> (offset * 8)) & oldFlag)
     {
-        m_uint32Values[ index ] &= ~uint32(uint32(oldFlag) << (offset * 8));
+        m_uint32Values[index] &= ~uint32(uint32(oldFlag) << (offset * 8));
+        _changedFields[index] = true;
 
         if (m_inWorld)
         {
@@ -1843,7 +1863,7 @@ void WorldObject::SendPlaySound(uint32 Sound, bool OnlySelf)
 
 void Object::ForceValuesUpdateAtIndex(uint32 i)
 {
-    m_uint32Values_mirror[i] = GetUInt32Value(i) + 1; // makes server think the field changed
+    _changedFields[i] = true;
     if (m_inWorld)
     {
         if (!m_objectUpdated)
