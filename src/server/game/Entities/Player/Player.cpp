@@ -4306,6 +4306,7 @@ bool Player::resetTalents(bool no_cost)
 
     //FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
     RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+    m_currentPetSlot = PET_SLOT_DELETED;
     /* when prev line will dropped use next line
     if (Pet* pet = GetPet())
     {
