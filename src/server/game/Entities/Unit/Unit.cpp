@@ -12780,12 +12780,12 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 
                 main_speed_mod = std::max(main_speed_mod, owner_speed_mod);
             }
-            else if (IsMounted())
+            else if (IsMounted() || GetShapeshiftForm() > FORM_NONE)
             {
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS);
             }
-            else             // Use not mount (shapeshift for example) auras (should stack)
+            else             // Use not mount nor shapeshift auras (should stack)
                 main_speed_mod  = GetTotalAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) + GetTotalAuraModifier(SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED);
 
             non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK))/100.0f;

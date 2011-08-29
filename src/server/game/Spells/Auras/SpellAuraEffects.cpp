@@ -2836,12 +2836,12 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             spellId2 = 69366;
             break;
         case FORM_FLIGHT:
-            spellId = 33948;
+            //spellId = 33948;
             spellId2 = 34764;
             break;
         case FORM_FLIGHT_EPIC:
             spellId  = 40122;
-            spellId2 = 40121;
+            //spellId2 = 40121;
             break;
         case FORM_METAMORPHOSIS:
             spellId  = 54817;
@@ -2866,6 +2866,27 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             break;
         default:
             break;
+    }
+
+    // Replace speed spell with spell from MountCapabilityStore identified by index from DBC
+    if (target && target->GetTypeId() == TYPEID_PLAYER)
+    {
+        SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetMiscValue());
+        if (ssEntry)
+        {
+            uint32 capabilityIndex = target->ToPlayer()->GetMountCapabilityIndex(ssEntry->mountTypeIndex);
+            if (capabilityIndex)
+            {
+                MountCapabilityEntry const* mcEntry = sMountCapabilityStore.LookupEntry(capabilityIndex);
+                if (mcEntry)
+                {
+                    if (apply)
+                        target->CastSpell(target, mcEntry->spell, true, NULL, this);
+                    else
+                        target->RemoveAurasDueToSpell(mcEntry->spell);
+                }
+            }
+        }
     }
 
     if (apply)
