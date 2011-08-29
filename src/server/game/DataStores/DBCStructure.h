@@ -1756,9 +1756,9 @@ struct SpellScalingEntry
 struct SpellShapeshiftEntry
 {
     uint32    Id;                                           // 0        m_ID
-    uint32    Stances;                                      // 1        m_shapeshiftMask
+    uint32    StancesNot;                                   // 1        m_shapeshiftExclude
     // uint32 unk_320_2;                                    // 2        3.2.0
-    uint32    StancesNot;                                   // 3        m_shapeshiftExclude
+    uint32    Stances;                                      // 3        m_shapeshiftMask
     // uint32 unk_320_3;                                    // 4        3.2.0
     // uint32    StanceBarOrder;                            // 5        m_stanceBarOrder not used
 };
@@ -1804,7 +1804,7 @@ struct SpellEntry_n //Structure of the true Spell.dbc
     uint32    SpellIconID;                                  // 18       m_spellIconID
     uint32    activeIconID;                                 // 19       m_activeIconID
     DBCString SpellName;                                    // 20       m_name_lang
-    uint32 SpellShapeshiftId;                               // 21       SpellShapeshift.dbc
+    //DBCString SpellNote;                                  // 21       m_spell_note not used (Rank 1, Special Ability,..)
     //DBCString Description;                                // 22       m_description_lang not used
     //DBCString ToolTip;                                    // 23       m_auraDescription_lang not used
     uint32    SchoolMask;                                   // 24       m_schoolMask
@@ -1826,6 +1826,7 @@ struct SpellEntry_n //Structure of the true Spell.dbc
     uint32 SpellLevelsId;                                   // 40       SpellLevels.dbc
     uint32 SpellPowerId;                                    // 41       SpellPower.dbc
     uint32 SpellReagentsId;                                 // 42       SpellReagents.dbc
+    uint32 SpellShapeshiftId;                               // 43       SpellShapeshift.dbc
     uint32 SpellTargetRestrictionsId;                       // 44       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 45       SpellTotems.dbc
     uint32 researchProjectId;                               // 46       ResearchProject.dbc
@@ -1853,7 +1854,7 @@ struct SpellEntry
     uint32    SpellIconID;                                  // 18       m_spellIconID
     uint32    activeIconID;                                 // 19       m_activeIconID
     DBCString SpellName;                                    // 20       m_name_lang
-    uint32 SpellShapeshiftId;                               // 21       SpellShapeshift.dbc
+    //DBCString SpellNote;                                  // 21       m_spell_note not used (Rank 1, Special Ability,..)
     //DBCString Description;                                // 22       m_description_lang not used
     //DBCString ToolTip;                                    // 23       m_auraDescription_lang not used
     uint32    SchoolMask;                                   // 24       m_schoolMask
@@ -1875,6 +1876,7 @@ struct SpellEntry
     uint32 SpellLevelsId;                                   // 40       SpellLevels.dbc
     uint32 SpellPowerId;                                    // 41       SpellPower.dbc
     uint32 SpellReagentsId;                                 // 42       SpellReagents.dbc
+    uint32 SpellShapeshiftId;                               // 43       SpellShapeshift.dbc
     uint32 SpellTargetRestrictionsId;                       // 44       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 45       SpellTotems.dbc
     uint32 researchProjectId;                               // 46       ResearchProject.dbc
