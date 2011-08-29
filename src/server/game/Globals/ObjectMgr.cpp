@@ -470,12 +470,9 @@ void ObjectMgr::LoadCreatureLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -510,12 +507,9 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint16 menuId   = fields[0].GetUInt16();
         uint16 id       = fields[1].GetUInt16();
@@ -546,12 +540,9 @@ void ObjectMgr::LoadPointOfInterestLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -1239,21 +1230,14 @@ void ObjectMgr::LoadCreatureLinkedRespawn()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 linked respawns. DB table `creature_linked_respawn` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 guid = fields[0].GetUInt32();
         uint32 linkedGuid = fields[1].GetUInt32();
@@ -1310,10 +1294,6 @@ void ObjectMgr::LoadCreatures()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 creature. DB table `creature` is empty.");
         return;
@@ -1335,15 +1315,9 @@ void ObjectMgr::LoadCreatures()
                 if (GetMapDifficultyData(i,Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
-    //TODO: remove this
-    //sGameEventMgr->mGameEventCreatureGuids.resize(52*2-1);
-
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
@@ -1657,13 +1631,13 @@ uint32 ObjectMgr::AddCreData(uint32 entry, uint32 /*team*/, uint32 mapId, float 
             CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(entry);
             if (!ci)
                 return 0;
-            
+
             Creature* creature = NULL;
             if(ci->ScriptID)
                 creature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
             if(creature == NULL)
                 creature = new Creature();
-            
+
             if (!creature->LoadFromDB(guid, map))
             {
                 sLog->outError("AddCreature: cannot add creature entry %u to map", entry);
@@ -1690,10 +1664,6 @@ void ObjectMgr::LoadGameobjects()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
         return;
@@ -1707,12 +1677,9 @@ void ObjectMgr::LoadGameobjects()
                 if (GetMapDifficultyData(i,Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
@@ -1860,21 +1827,14 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 creature respawn time.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 loguid       = fields[0].GetUInt32();
         uint64 respawn_time = fields[1].GetUInt64();
@@ -1901,21 +1861,14 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 gameobject respawn time.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 loguid       = fields[0].GetUInt32();
         uint64 respawn_time = fields[1].GetUInt64();
@@ -2052,12 +2005,9 @@ void ObjectMgr::LoadItemLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
