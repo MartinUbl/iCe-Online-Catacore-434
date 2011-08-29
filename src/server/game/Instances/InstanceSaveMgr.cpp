@@ -269,8 +269,8 @@ void InstanceSaveManager::CleanupAndPackInstances()
     CharacterDatabase.DirectExecute("DELETE i.* FROM instance AS i LEFT JOIN character_instance AS ci ON i.id = ci.instance LEFT JOIN group_instance AS gi ON i.id = gi.instance WHERE ci.guid IS NULL AND gi.guid IS NULL");
 
     // Delete invalid references to instance
-    WorldDatabase.DirectExecute("DELETE tmp.* FROM creature_respawn   AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
-    WorldDatabase.DirectExecute("DELETE tmp.* FROM gameobject_respawn AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
+    CharacterDatabase.DirectExecute("DELETE tmp.* FROM creature_respawn   AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
+    CharacterDatabase.DirectExecute("DELETE tmp.* FROM gameobject_respawn AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
     CharacterDatabase.DirectExecute("DELETE tmp.* FROM character_instance AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
     CharacterDatabase.DirectExecute("DELETE tmp.* FROM group_instance     AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
 
@@ -279,22 +279,22 @@ void InstanceSaveManager::CleanupAndPackInstances()
     CharacterDatabase.DirectExecute("UPDATE characters AS tmp LEFT JOIN instance ON tmp.instance_id = instance.id SET tmp.instance_id = 0 WHERE tmp.instance_id > 0 AND instance.id IS NULL");
 
     // Create new index
-    //CharacterDatabase.DirectExecute("ALTER TABLE instance ADD newid INT UNSIGNED AUTO_INCREMENT, ADD INDEX(newid)");
+    CharacterDatabase.DirectExecute("ALTER TABLE instance ADD newid INT UNSIGNED AUTO_INCREMENT, ADD INDEX(newid)");
 
     // Update old ids
     CharacterDatabase.DirectExecute("UPDATE corpse                  AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
     CharacterDatabase.DirectExecute("UPDATE character_instance      AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
     CharacterDatabase.DirectExecute("UPDATE group_instance          AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
     CharacterDatabase.DirectExecute("UPDATE characters              AS tmp LEFT JOIN instance ON tmp.instance_id = instance.id SET tmp.instance_id = instance.newid WHERE tmp.instance_id > 0");
-    WorldDatabase.DirectExecute("UPDATE creature_respawn        AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
-    WorldDatabase.DirectExecute("UPDATE gameobject_respawn      AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
+    CharacterDatabase.DirectExecute("UPDATE creature_respawn        AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
+    CharacterDatabase.DirectExecute("UPDATE gameobject_respawn      AS tmp LEFT JOIN instance ON tmp.instance    = instance.id SET tmp.instance    = instance.newid WHERE tmp.instance    > 0");
 
     // Update instance too
     CharacterDatabase.Query("UPDATE instance SET id = newid");
 
     // Finally drop the no longer needed column
-    //CharacterDatabase.Query("ALTER TABLE instance DROP COLUMN newid");
-    
+    CharacterDatabase.Query("ALTER TABLE instance DROP COLUMN newid");
+
     // Bake some cookies for click
     sLog->outString(">> Cleaned up and packed instances");
 }
@@ -336,7 +336,7 @@ void InstanceSaveManager::LoadResetTimes()
         while (result->NextRow());
 
         // update reset time for normal instances with the max creature respawn time + X hours
-        result = WorldDatabase.Query("SELECT MAX(respawntime), instance FROM creature_respawn WHERE instance > 0 GROUP BY instance");
+        result = CharacterDatabase.Query("SELECT MAX(respawntime), instance FROM creature_respawn WHERE instance > 0 GROUP BY instance");
         if (result)
         {
             do

@@ -54,6 +54,12 @@ bool CharacterDatabaseConnection::Open()
     PrepareStatement(CHAR_GET_BANINFO_LIST, "SELECT bandate, unbandate, bannedby, banreason FROM character_banned WHERE guid = ? ORDER BY unbandate");
     PrepareStatement(CHAR_GET_BANNED_NAME, "SELECT characters.name FROM characters, character_banned WHERE character_banned.guid = ? AND character_banned.guid = characters.guid");
 
+    PrepareStatement(CHAR_DEL_CREATURE_RESPAWN_TIME, "DELETE FROM creature_respawn WHERE guid = ? AND instance = ?", true);
+    PrepareStatement(CHAR_ADD_CREATURE_RESPAWN_TIME, "REPLACE INTO creature_respawn VALUES (?, ?, ?)", true);
+    PrepareStatement(CHAR_DEL_GAMEOBJECT_RESPAWN_TIMES, "DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP()");
+    PrepareStatement(CHAR_DEL_GO_RESPAWN_TIME, "DELETE FROM gameobject_respawn WHERE guid = ? AND instance = ?", true);
+    PrepareStatement(CHAR_ADD_GO_RESPAWN_TIME, "REPLACE INTO gameobject_respawn VALUES (?, ?, ?)", true);
+
     PrepareStatement(CHAR_LOAD_PLAYER, "SELECT guid, account,name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
         "position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
         "resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask,"
