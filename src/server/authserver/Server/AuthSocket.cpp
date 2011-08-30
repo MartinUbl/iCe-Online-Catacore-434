@@ -858,7 +858,18 @@ bool AuthSocket::_HandleRealmList()
             pkt << lock;
         pkt << i->second.color;
         pkt << i->first;
-        pkt << i->second.address;
+
+        /* if client's remote address is in the same /16 subnet
+         * ("172.27." = 7 chars) as the server's address,
+         * return the internal server address */
+        /* PS: don't fuck with std::string.compare(), it fights back too hard */
+        std::string gmvpn_server = "172.27.0.1";
+        gmvpn_server.append(strchr(i->second.address.c_str(),':'));  // append original port
+        if (memcmp(socket().get_remote_address().c_str(), gmvpn_server.c_str(), 6)==0)
+            pkt << gmvpn_server;
+        else
+            pkt << i->second.address;
+
         pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;
