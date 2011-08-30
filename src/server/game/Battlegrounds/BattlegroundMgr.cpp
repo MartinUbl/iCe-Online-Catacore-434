@@ -669,15 +669,30 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
             }
         }
 #endif
-        BattlegroundTypeId avail_RBGs[] = {
-            BATTLEGROUND_WS,
-            BATTLEGROUND_AB,
-            BATTLEGROUND_EY,
-            BATTLEGROUND_TP,
-            BATTLEGROUND_BG,
-        };
+        // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
+        // We must select different list of BGs in our custom system
+        if (bracketEntry->minLevel == 85)
+        {
+            BattlegroundTypeId avail_RBGs[] = {
+                BATTLEGROUND_WS,
+                BATTLEGROUND_AB,
+                BATTLEGROUND_EY,
+                BATTLEGROUND_TP,
+                BATTLEGROUND_BG,
+            };
 
-        bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+        }
+        else
+        {
+            BattlegroundTypeId avail_RBGs[] = {
+                BATTLEGROUND_WS,
+                BATTLEGROUND_AB,
+                BATTLEGROUND_EY,
+            };
+
+            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+        }
 
         bg_template = GetBattlegroundTemplate(bgTypeId);
         if (!bg_template)
