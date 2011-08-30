@@ -148,7 +148,8 @@ enum Opcodes
     SMSG_GUILD_REWARDS_LIST                          = 0x00C4C, // 4.0.6a 13623
     SMSG_GUILD_TRADESKILL_UPDATE                     = 0x0454E, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_MAX_DAILY_XP                          = 0x0441C, // 4.0.6a 13623
-    SMSG_GUILD_NEWS_UPDATE                           = 0x0485E, // 4.0.6a 13623, unimplemented
+    SMSG_GUILD_NEWS_UPDATE                           = 0x0485E, // 4.0.6a 13623
+    SMSG_GUILD_GROUP_UPDATE                          = 0x0450C, // 4.0.6a 13623, unimplemented
     SMSG_GUILD_XP_UPDATE                             = 0x0440E, // 4.0.6a 13623
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
     SMSG_GUILD_ACHIEVEMENT_MEMBER                    = 0x0414E, // 4.0.6a 13623, unimplemented, name from client (wowerror)
@@ -722,7 +723,7 @@ enum Opcodes
     CMSG_MOVE_SPLINE_DONE                            = 0x069E8, // 4.0.6a 13623
     CMSG_MOVE_FALL_RESET                             = 0x100E6, //
     SMSG_INSTANCE_SAVE_CREATED                       = 0x0BBC4, // 4.0.6a 13623
-    SMSG_RAID_INSTANCE_INFO                          = 0x100E7, // 4.0.6a 13623
+    SMSG_RAID_INSTANCE_INFO                          = 0x0A18C, // 4.0.6a 13623
     CMSG_REQUEST_RAID_INFO                           = 0x03DE4, // 4.0.6a 13623 
     CMSG_MOVE_TIME_SKIPPED                           = 0x0E180, // 4.0.6a 13623
     CMSG_MOVE_FEATHER_FALL_ACK                       = 0x06EA8, // 4.0.6a 13623
