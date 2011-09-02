@@ -551,6 +551,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     else if(m_caster->HasAura(83050) && !m_caster->HasAura(83239))
                         m_caster->CastSpell(m_caster,83239,true);
                 }
+                // Freeze (Water Elemental ability)
+                else if (m_spellInfo->Id == 33395)
+                {
+                    Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!pOwner)
+                        break;
+
+                    // Talent Improved Freeze
+                    if ((pOwner->HasAura(86259) && roll_chance_i(33)) ||
+                        (pOwner->HasAura(86260) && roll_chance_i(66)) ||
+                        (pOwner->HasAura(86314)))
+                    {
+                        // 2x cast of Fingers of Frost (faster than verifying of
+                        // aura presence / adding / modifying stack)
+                        pOwner->CastSpell(pOwner, 44544, true);
+                        pOwner->CastSpell(pOwner, 44544, true);
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_WARRIOR:
