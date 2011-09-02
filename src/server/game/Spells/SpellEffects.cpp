@@ -3128,10 +3128,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             uint32 holy_power = caster->GetPower(POWER_HOLY_POWER) + 1; // One was taken as cost
 
-            addhealth = holy_power * damage;
-
-            if (effIndex > EFFECT_0) // Consume all Holy Power at the end
-                caster->SetPower(POWER_HOLY_POWER, 0);
+            addhealth *= holy_power;
         }
         // Flash Heal
         else if (m_spellInfo->Id == 2061 && caster->HasAura(88688))

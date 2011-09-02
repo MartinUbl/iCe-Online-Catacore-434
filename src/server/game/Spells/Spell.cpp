@@ -3937,6 +3937,16 @@ void Spell::finish(bool ok)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
     }
 
+    // Special case for Holy Power taking spells which takes all charges for greater healing
+    switch (m_spellInfo->Id)
+    {
+        case 85222: // Light of Dawn
+            m_caster->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        default:
+            break;
+    }
+
     // Stop Attack for some spells
     if (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET)
         m_caster->AttackStop();
