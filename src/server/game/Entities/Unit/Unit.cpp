@@ -2858,6 +2858,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
             crit -= 25.0f;
     }
 
+    // If origin is spell
     if (spell)
     {
         const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
@@ -2867,6 +2868,21 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
             {
                 if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->SpellFamilyFlags)
                     crit += (*itr)->GetBaseAmount();
+            }
+        }
+    }
+    else // If not spell (pure melee / ranged attack)
+    {
+        if (pVictim)
+        {
+            // Blood Presence
+            if (pVictim->HasAura(48263))
+            {
+                // Improved Blood Presence, both ranks
+                if (pVictim->HasAura(50365))
+                    crit -= 3.0f;
+                else if (pVictim->HasAura(50371))
+                    crit -= 6.0f;
             }
         }
     }
