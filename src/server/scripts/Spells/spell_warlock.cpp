@@ -298,6 +298,34 @@ public:
     }
 };
 
+class npc_hand_of_guldan: public CreatureScript
+{
+    public:
+        npc_hand_of_guldan(): CreatureScript("npc_hand_of_guldan") { };
+
+        struct npc_hand_of_guldanAI: public Scripted_NoMovementAI
+        {
+            npc_hand_of_guldanAI(Creature* c): Scripted_NoMovementAI(c)
+            {
+                Reset();
+            }
+
+            void Reset()
+            {
+                me->CastSpell(me, 85526, true);
+                me->CastSpell(me, 86000, true);
+            }
+
+            void AttackStart(Unit* pWho) { return; };
+            void Aggro(Unit* pWho) { return; };
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_hand_of_guldanAI(c);
+        };
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_demonic_empowerment();
@@ -305,4 +333,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_create_healthstone();
     new spell_warl_seed_of_corruption();
     new spell_warl_shadow_bite();
+    new npc_hand_of_guldan();
 }

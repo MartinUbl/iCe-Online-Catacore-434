@@ -6254,6 +6254,28 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (caster)
                         caster->CastSpell(caster, 13138, true, NULL, this);
                     break;
+                case 86000:   // Curse of Gul'dan
+                {
+                    if (caster)
+                    {
+                        Player* pOwner = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+                        if (!GetBase())
+                            break;
+                        if (GetBase()->GetDuration() < 14000)
+                            break;
+
+                        // Aura of Foreboding
+                        // TODO: make it work, probably due to bad targetting
+                        // Maybe we should try to modify targetA and B in LoadCustomAttr to SELF and SELF
+                        if (pOwner->HasAura(89605))
+                            pOwner->CastSpell(target, 93987, true);
+                        else if (pOwner->HasAura(89604))
+                            pOwner->CastSpell(target, 93974, true);
+                    }
+                    break;
+                }
                 case 34026:   // kill command
                 {
                     Unit *pet = target->GetGuardianPet();

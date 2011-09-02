@@ -2906,6 +2906,14 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         }
     }
 
+    // Hand of Gul'dan increases crit chance of warlocks minions
+    if (pVictim->HasAura(86000) && GetTypeId() == TYPEID_UNIT)
+    {
+        Player* pOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (pOwner && pOwner->getClass() == CLASS_WARLOCK)
+            crit += 10.0f;
+    }
+
     // Apply crit chance from defence skill
     crit += (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
 
@@ -11281,6 +11289,13 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                     return true;
                                 }
                             }
+                        }
+                        // Hand of Gul'dan increases crit chance of warlocks minions
+                        if (pVictim->HasAura(86000) && GetTypeId() == TYPEID_UNIT)
+                        {
+                            Player* pOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
+                            if (pOwner && pOwner->getClass() == CLASS_WARLOCK)
+                                crit_chance += 10.0f;
                         }
                     break;
                 }
