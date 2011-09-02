@@ -784,6 +784,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // And return back old Soul Swap spell
                     m_caster->RemoveAurasDueToSpell(86211);
                 }
+                // Soul Fire
+                else if (m_spellInfo->Id == 6353)
+                {
+                    // Improved Soul Fire talent
+                    int32 bp0 = 0;
+                    if (m_caster->HasAura(18119))
+                        bp0 = 4;
+                    else if (m_caster->HasAura(18120))
+                        bp0 = 8;
+
+                    if (bp0)
+                        m_caster->CastCustomSpell(m_caster, 85383, &bp0, 0, 0, true);
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:
@@ -6548,6 +6561,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 if (ChosenSpell)
                     m_caster->CastSpell(m_caster, ChosenSpell, true);
+            }
+            // Cremation (both ranks, triggered spell)
+            else if (m_spellInfo->Id == 89603)
+            {
+                // chance calculated in spell effect (this spell is triggered with this chance)
+                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348) : NULL;
+
+                if (pImmolate)
+                    pImmolate->RefreshDuration();
             }
             return;
         }
