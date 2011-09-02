@@ -5405,14 +5405,18 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const *aurApp, uint
     {
         // Increase percents of health instead of health value
         case 22842: // Frenzied Regeneration
+        case 79437: // Soulburn: Healthstone
             amount = apply ?
                   (target->GetMaxHealth()*(amount/100.0f))
                 : (target->GetMaxHealth()-(target->GetMaxHealth()*(100.0f/(100.0f+amount))));
 
-            // Special case - if health < 30%, increase to that value. We can be sure, that it won't be
-            // higher than maxhealth+30%, so we can increase health now
-            if (apply && target->GetHealth() < (target->GetMaxHealth()+amount)*0.3f)
-                target->SetHealth(target->GetMaxHealth()*0.3f);
+            if (GetSpellProto()->Id == 22842)
+            {
+                // Special case - if health < 30%, increase to that value. We can be sure, that it won't be
+                // higher than maxhealth+30%, so we can increase health now
+                if (apply && target->GetHealth() < (target->GetMaxHealth()+amount)*0.3f)
+                    target->SetHealth(target->GetMaxHealth()*0.3f);
+            }
             break;
     }
 
