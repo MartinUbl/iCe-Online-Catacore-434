@@ -791,11 +791,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Applies Mind Trauma effect if:
                     // We are in Shadow Form
                     if (m_caster->GetShapeshiftForm() == FORM_SHADOW)
-                        // We have Improved Mind Blast
-                        if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST,95,0))
+                    {
+                        float chance = 0.0f;
+
+                        if (m_caster->HasAura(15273))
+                            chance = 33.0f;
+                        else if (m_caster->HasAura(15312))
+                            chance = 66.0f;
+                        else if (m_caster->HasAura(15313))
+                            chance = 100.0f;
+
+                        // We have Improved Mind Blast (chance > 0)
+                        if (chance > 0)
                             // Chance has been successfully rolled
-                            if (roll_chance_i(aurEff->GetAmount()))
+                            if (chance == 100.0f || roll_chance_f(chance))
                                 m_caster->CastSpell(unitTarget, 48301, true);
+                    }
                 }
                 // Improved Mind Blast (Mind Blast in shadow form bonus)
                 else if (m_caster->GetShapeshiftForm() == FORM_SHADOW && (m_spellInfo->SpellFamilyFlags[0] & 0x00002000))
