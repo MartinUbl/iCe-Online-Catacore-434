@@ -4345,10 +4345,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_SPELL_ATTACK;
             count++;
             break;
-        case 76663: // Wild Quiver
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
-            count++;
-            break;
         case 19975: // Entangling Roots -- Nature's Grasp Proc
             spellInfo->CastingTimeIndex = 1;
             count++;

@@ -5278,10 +5278,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         }
                     break;
                 }
-                case 76663: // Wild Quiver mastery proc
-                    // Disable damage bonus calculation (causes double calculation)
-                    damage_bonus = false;
-                    break;
                 default:
                     break;
             }

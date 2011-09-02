@@ -1182,8 +1182,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     {
         if (roll_chance_f(ToPlayer()->GetMasteryPoints()*1.8f))
         {
-            int32 bp0 = damageInfo->damage;
-            CastCustomSpell(pVictim, 76663, &bp0, 0, 0, true);
+            CastSpell(pVictim, 76663, true);
         }
     }
 
