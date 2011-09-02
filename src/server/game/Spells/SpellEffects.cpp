@@ -796,6 +796,75 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                     if (bp0)
                         m_caster->CastCustomSpell(m_caster, 85383, &bp0, 0, 0, true);
+
+                    // Burning Embers talent
+                    bp0 = 0;
+                    if (m_caster->HasAura(85112))
+                        bp0 = 30;
+                    else if (m_caster->HasAura(91986))
+                        bp0 = 15;
+
+                    // We must calculate maximal basepoints manually
+                    int32 maxbp = m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
+                    if (bp0 == 30)
+                        maxbp *= 0.85f;
+                    else
+                        maxbp *= 0.425f;
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    if (pSpell)
+                    {
+                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // - the lower of them
+                        SpellScaling pScaling(m_caster->getLevel(), pSpell);
+                        maxbp = (maxbp + pScaling.avg[1])/7;
+                        bp0 *= damage/100;
+                        if (bp0 > maxbp)
+                            bp0 = maxbp;
+                        // If we already have aura like this, only refresh if damage is lower
+                        if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
+                            unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
+                            unitTarget->GetAura(85421)->RefreshDuration();
+                        else
+                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                    }
+                }
+                // Imps Firebolt
+                else if (m_spellInfo->Id == 3110)
+                {
+                    Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!pOwner)
+                        break;
+
+                    // Burning Embers talent
+                    int32 bp0 = 0;
+                    if (pOwner->HasAura(85112))
+                        bp0 = 30;
+                    else if (pOwner->HasAura(91986))
+                        bp0 = 15;
+
+                    // We must calculate maximal basepoints manually
+                    int32 maxbp = pOwner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
+                    if (bp0 == 30)
+                        maxbp *= 0.85f;
+                    else
+                        maxbp *= 0.425f;
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    if (pSpell)
+                    {
+                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // - the lower of them
+                        SpellScaling pScaling(pOwner->getLevel(), pSpell);
+                        maxbp = (maxbp + pScaling.avg[1])/7;
+                        bp0 *= damage/100;
+                        if (bp0 > maxbp)
+                            bp0 = maxbp;
+                        // If we already have aura like this, only refresh if damage is lower
+                        if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
+                            unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
+                            unitTarget->GetAura(85421)->RefreshDuration();
+                        else
+                        pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                    }
                 }
                 break;
             }
