@@ -3330,7 +3330,13 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
         // Healthstone
         else if (m_spellInfo->Id == 6262)
+        {
             addhealth = (float(addhealth)/100.0f)*caster->GetMaxHealth();
+
+            // Soulburn: Healthstone
+            if (caster->HasAura(74434))
+                caster->CastSpell(caster, 79437, true);
+        }
         // Divine Touch
         else if (m_spellInfo->Id == 63544)
         {
@@ -6639,6 +6645,26 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 if (pImmolate)
                     pImmolate->RefreshDuration();
+            }
+            // Fel Flame (increase duration part)
+            else if (m_spellInfo->Id == 77799)
+            {
+                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348) : NULL;
+                Aura* pUnstableAffliction = unitTarget ? unitTarget->GetAura(30108) : NULL;
+                if (pUnstableAffliction)
+                {
+                    if (pUnstableAffliction->GetDuration()+6000 > pUnstableAffliction->GetMaxDuration())
+                        pUnstableAffliction->RefreshDuration();
+                    else
+                        pUnstableAffliction->SetDuration(pUnstableAffliction->GetDuration()+6000);
+                }
+                if (pImmolate)
+                {
+                    if (pImmolate->GetDuration()+6000 > pImmolate->GetMaxDuration())
+                        pImmolate->RefreshDuration();
+                    else
+                        pImmolate->SetDuration(pImmolate->GetDuration()+6000);
+                }
             }
             return;
         }
