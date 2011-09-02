@@ -6935,7 +6935,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
                 AccessRequirement const *pAccessRequirement = sObjectMgr->GetAccessRequirement(pMap->GetId(), ((InstanceMap*)pMap)->GetDifficulty());
                 if (pAccessRequirement)
                 {
-                    if (!pMap->IsRaid() && pAccessRequirement->levelMin == 80)
+                    if (!pMap->IsRaid() && (pAccessRequirement->levelMin == 80 || pAccessRequirement->levelMin == 85))
                         ChampioningFaction = GetChampioningFaction();
                 }
             }
