@@ -628,6 +628,18 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
+                // Shadow Bolt, Incinerate and Hand of Gul'dan
+                if (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521)
+                {
+                    // Impending Doom talent
+                    if ((m_caster->HasAura(85108) && roll_chance_i(15)) ||
+                        (m_caster->HasAura(85107) && roll_chance_i(10)) ||
+                        (m_caster->HasAura(85106) && roll_chance_i(5)))
+                    {
+                        // TODO: find way to modify cooldown
+                    }
+                }
+
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
                 {

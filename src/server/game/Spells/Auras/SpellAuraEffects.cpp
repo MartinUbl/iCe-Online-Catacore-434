@@ -1448,6 +1448,20 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 89420:
                         caster->CastSpell(caster, 89653, true);
                         break;
+                    case 603:    // Bane of Doom
+                        {
+                            uint32 chance = 20;
+                            if (caster->HasAura(85108))
+                                chance += 30;
+                            else if (caster->HasAura(85107))
+                                chance += 20;
+                            else if (caster->HasAura(85106))
+                                chance += 10;
+
+                            if (roll_chance_i(chance))
+                                caster->CastSpell(caster, 18662, true);
+                        }
+                        break;
                     case 703:    // Garrote
                     case 1943:   // Rupture
                         // Venomous Wounds
