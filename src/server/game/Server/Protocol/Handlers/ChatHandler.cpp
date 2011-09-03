@@ -642,6 +642,20 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            /* process krcma-specific checks */
+            if (stricmp(channel.c_str(), "krcma")==0) {
+                /* DB-based filter */
+                for (std::vector<std::string>::iterator itr = sObjectMgr->krcma_filter_keywords.begin(); itr != sObjectMgr->krcma_filter_keywords.end(); ++itr)
+                    if (msg.find(*itr) != std::string::npos)
+                        return;
+
+                /* repeating messages */
+                if (_player->krcma_lastmsg == msg)
+                    return;
+                else
+                    _player->krcma_lastmsg = msg;
+            }
+
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
             {
 

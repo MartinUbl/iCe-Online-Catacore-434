@@ -857,6 +857,14 @@ bool ChatHandler::HandleReloadItemSetNamesCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadKrcmaFilterCommand(const char*)
+{
+    sLog->outString("Re-Loading krcma filter rules...");
+    sObjectMgr->LoadKrcmaFilter();
+    SendGlobalGMSysMessage("DB table `krcma_filter` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGossipScriptsCommand(const char* arg)
 {
     if (sWorld->IsScriptScheduled())

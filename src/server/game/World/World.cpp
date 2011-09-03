@@ -1632,6 +1632,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading faction change reputation pairs...");
     sObjectMgr->LoadFactionChangeReputations();
 
+    sLog->outString("Loading krcma filter rules...");
+    sObjectMgr->LoadKrcmaFilter();
+
     sLog->outString("Loading GM tickets...");
     sTicketMgr->LoadGMTickets();
 

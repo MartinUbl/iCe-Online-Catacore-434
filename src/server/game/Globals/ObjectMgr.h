@@ -1262,10 +1262,13 @@ class ObjectMgr
         CharacterConversionMap factionchange_spells;
         CharacterConversionMap factionchange_reputations;
 
+        std::vector<std::string> krcma_filter_keywords;
+
         void LoadFactionChangeAchievements();
         void LoadFactionChangeItems();
         void LoadFactionChangeSpells();
         void LoadFactionChangeReputations();
+        void LoadKrcmaFilter();
 
     protected:
 

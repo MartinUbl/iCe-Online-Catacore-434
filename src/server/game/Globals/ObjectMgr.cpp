@@ -9524,3 +9524,30 @@ void ObjectMgr::LoadFactionChangeReputations()
     sLog->outString();
     sLog->outString(">> Loaded %u faction change reputation pairs.", counter);
 }
+
+void ObjectMgr::LoadKrcmaFilter()
+{
+    QueryResult result = WorldDatabase.Query("SELECT keyword FROM krcma_filter");
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outString(">> Loaded 0 krcma filter rules, table `krcma_filter` is empty.");
+        return;
+    }
+
+    uint32 counter = 0;
+    do
+    {
+        Field *fields = result->Fetch();
+
+        krcma_filter_keywords.clear();
+        krcma_filter_keywords.push_back(fields[0].GetString());
+
+        ++counter;
+    }
+    while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u krcma filter rules.", counter);
+}
