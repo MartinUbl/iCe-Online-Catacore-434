@@ -1189,6 +1189,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     m_caster->CastSpell(m_caster, 95799, true);
                 }
         }
+        // Frostbolt (mage)
+        case 116:
+        {
+            // Frostbolt is involved in some other things, so we must ensure that mage is the caster
+            if (!m_caster || !unitTarget || m_caster->getClass() != CLASS_MAGE)
+                break;
+
+            // talent Shatter - target must be frozen
+            if (unitTarget->isFrozen())
+            {
+                if (m_caster->HasAura(11170))
+                    m_damage *= 1.1f;
+                else if (m_caster->HasAura(12982))
+                    m_damage *= 1.2f;
+            }
+        }
         default:
             break;
     }
