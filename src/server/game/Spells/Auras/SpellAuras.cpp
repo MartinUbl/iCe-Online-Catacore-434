@@ -1859,6 +1859,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             }
             break;
+        case SPELLFAMILY_DRUID:
+            {
+                // Tree of Life, passive auras
+                if (GetId() == 33891)
+                {
+                    // Tree of Life (passive)
+                    if (apply)
+                    {
+                        target->CastSpell(target, 81097, true);
+                        target->CastSpell(target, 81098, true);
+                    }
+                    else
+                    {
+                        target->RemoveAurasDueToSpell(81097);
+                        target->RemoveAurasDueToSpell(81098);
+                    }
+                }
+            }
         case SPELLFAMILY_HUNTER:
             switch(GetId())
             {
