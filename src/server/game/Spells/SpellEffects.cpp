@@ -3197,6 +3197,20 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
         }
 
+        // Implementation of Symbiosis mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_RESTORATION &&
+            addhealth > 1)
+        {
+            // Symbiosis increases potency of healing if target already affected by some of HoT spells
+            if (m_caster->HasAura(94447) || m_caster->HasAura(33763) || m_caster->HasAura(8936) ||
+                m_caster->HasAura(774) || m_caster->HasAura(48438))
+            {
+                addhealth += addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
+            }
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {

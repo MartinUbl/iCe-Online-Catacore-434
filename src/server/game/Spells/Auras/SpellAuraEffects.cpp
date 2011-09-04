@@ -737,6 +737,33 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         case SPELL_AURA_PERIODIC_HEAL:
             if (!caster)
                 break;
+            // Implementation of Symbiosis mastery proficiency
+            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+                caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_RESTORATION &&
+                amount > 1 && GetBase() && GetBase()->GetUnitOwner())
+            {
+                Unit* target = GetBase()->GetUnitOwner();
+                // Increase with every aura
+                uint8 counter = 0;
+                if (target->HasAura(94447))
+                    counter++;
+                if (target->HasAura(33763))
+                    counter++;
+                if (target->HasAura(8936))
+                    counter++;
+                if (target->HasAura(774))
+                    counter++;
+                if (target->HasAura(48438))
+                    counter++;
+
+                // Do not increase if only reapplying effect without any other HoT effects active
+                // ..or if we don't have any effect
+                if ((counter == 0) || (counter == 1 && target->HasAura(GetSpellProto()->Id)))
+                    break;
+
+                amount *= 1.0f+caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f;
+            }
             break;
         case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
             if (!caster)
