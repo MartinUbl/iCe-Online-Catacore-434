@@ -3211,6 +3211,20 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
         }
 
+        // Implementation of Deep Healing mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_RESTORATION &&
+            addhealth > 1)
+        {
+            // Mastery gives 2.5% per mastery point
+            float masterybonus = m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f;
+            // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
+            float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
+
+            addhealth += addhealth*masterybonus*healthcoef;
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
