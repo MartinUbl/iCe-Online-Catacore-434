@@ -3268,6 +3268,25 @@ bool ChatHandler::HandleCharacterChangeFactionCommand(const char * args)
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '64' WHERE guid = %u", GUID_LOPART(target_guid));
     }
 
+    if (target->GetTeamId() == TEAM_ALLIANCE)
+    {
+        if (target->getRace() == RACE_WORGEN)
+        {
+            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = %u AND spell IN (68976,68992,94293,68978,87840,68996,68975)", target->GetGUIDLow());
+            CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = %u AND quest IN (SELECT entry FROM cata_world.quest_template WHERE ZoneOrSort IN (4714)", target->GetGUIDLow());
+        }
+        CharacterDatabase.PExecute("UPDATE character_queststatus SET quest = '262450' WHERE guid = %u AND quest = '26245'", target->GetGUIDLow());
+    }
+    else
+    {
+        if (target->getRace() == RACE_GOBLIN)
+        {
+            CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = %u AND quest IN (SELECT entry FROM cata_world.quest_template WHERE ZoneOrSort in (4720,4737)", target->GetGUIDLow());
+            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = %u AND spell IN (69044,69045,69046,69041,69070,69042)", target->GetGUIDLow());
+        }
+        CharacterDatabase.PExecute("UPDATE character_queststatus SET quest = '26245' WHERE guid = %u AND quest = '262450'", target->GetGUIDLow());
+    }
+
     return true;
 }
 
