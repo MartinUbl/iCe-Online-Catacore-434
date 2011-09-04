@@ -1210,27 +1210,18 @@ void SpellMgr::LoadSpellTargetPositions()
 
     uint32 count = 0;
 
-    //                                                0   1           2                  3                  4                  5
+    //                                               0   1           2                  3                  4                  5
     QueryResult result = WorldDatabase.Query("SELECT id, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM spell_target_position");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell target coordinates", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 Spell_ID = fields[0].GetUInt32();
 
@@ -1355,24 +1346,19 @@ void SpellMgr::LoadSpellProcEvents()
 
     uint32 count = 0;
 
-    //                                                0      1           2                3                 4                 5                 6          7       8        9             10
+    //                                               0      1           2                3                 4                 5                 6          7       8        9             10
     QueryResult result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded %u spell proc event conditions", count);
         return;
     }
 
-    
     uint32 customProc = 0;
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -1421,12 +1407,10 @@ void SpellMgr::LoadSpellBonusess()
 {
     mSpellBonusMap.clear();                             // need for reload case
     uint32 count = 0;
-    //                                                0      1             2          3         4
+    //                                               0      1             2          3         4
     QueryResult result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus, ap_bonus, ap_dot_bonus FROM spell_bonus_data");
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded %u spell bonus data", count);
         return;
@@ -1435,7 +1419,7 @@ void SpellMgr::LoadSpellBonusess()
     do
     {
         Field *fields = result->Fetch();
-        
+
         uint32 entry = fields[0].GetUInt32();
 
         const SpellEntry *spell = sSpellStore.LookupEntry(entry);
@@ -1614,29 +1598,20 @@ void SpellMgr::LoadSpellGroups()
 
     uint32 count = 0;
 
-    //                                                       0   1
+    //                                               0   1
     QueryResult result = WorldDatabase.Query("SELECT id, spell_id FROM spell_group");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell group definitions", count);
         return;
     }
-
-    
 
     std::set<uint32> groups;
 
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 group_id = fields[0].GetUInt32();
         if (group_id <= SPELL_GROUP_DB_RANGE_MIN && group_id >= SPELL_GROUP_CORE_RANGE_MAX)
@@ -1704,27 +1679,18 @@ void SpellMgr::LoadSpellGroupStackRules()
 
     uint32 count = 0;
 
-    //                                                       0         1
+    //                                               0         1
     QueryResult result = WorldDatabase.Query("SELECT group_id, stack_rule FROM spell_group_stack_rules");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell group stack rules", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 group_id = fields[0].GetUInt32();
         uint8 stack_rule = fields[1].GetUInt32();
@@ -1757,27 +1723,18 @@ void SpellMgr::LoadSpellThreats()
 
     uint32 count = 0;
 
-    //                                                0      1
+    //                                               0      1
     QueryResult result = WorldDatabase.Query("SELECT entry, Threat FROM spell_threat");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u aggro generating spells", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 entry = fields[0].GetUInt32();
         uint16 Threat = fields[1].GetUInt16();
@@ -2065,8 +2022,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spell
         if (IsPositiveEffect(spellInfo->Id, i) && (
             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY ||
-            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID
-))
+            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID))
         {
             needRankSelection = true;
             break;
@@ -2136,13 +2092,10 @@ void SpellMgr::LoadSpellLearnSpells()
 {
     mSpellLearnSpells.clear();                              // need for reload case
 
-    //                                                  0      1        2
+    //                                               0      1        2
     QueryResult result = WorldDatabase.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 spell learn spells");
         sLog->outErrorDb("`spell_learn_spell` table is empty!");
@@ -2151,10 +2104,8 @@ void SpellMgr::LoadSpellLearnSpells()
 
     uint32 count = 0;
 
-    
     do
     {
-        
         Field *fields = result->Fetch();
 
         uint32 spell_id = fields[0].GetUInt32();
@@ -2250,22 +2201,14 @@ void SpellMgr::LoadSpellPetAuras()
     QueryResult result = WorldDatabase.Query("SELECT spell, effectId, pet, aura FROM spell_pet_auras");
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell pet auras", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 spell = fields[0].GetUInt32();
         uint8 eff = fields[1].GetUInt8();
@@ -2316,12 +2259,8 @@ void SpellMgr::LoadPetLevelupSpellMap()
     uint32 count = 0;
     uint32 family_count = 0;
 
-    
-
     for (uint32 i = 0; i < sCreatureFamilyStore.GetNumRows(); ++i)
     {
-        
-
         CreatureFamilyEntry const *creatureFamily = sCreatureFamilyStore.LookupEntry(i);
         if (!creatureFamily)                                     // not exist
             continue;
@@ -2452,8 +2391,6 @@ void SpellMgr::LoadPetDefaultSpells()
     // different summon spells
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
     {
-        
-
         SpellEntry const* spellEntry = sSpellStore.LookupEntry(i);
         if (!spellEntry)
             continue;
@@ -2597,27 +2534,19 @@ void SpellMgr::LoadSpellAreas()
 
     uint32 count = 0;
 
-    //                                                  0     1         2              3               4           5          6        7       8
+    //                                               0      1     2            3                   4          5           6         7       8
     QueryResult result = WorldDatabase.Query("SELECT spell, area, quest_start, quest_start_active, quest_end, aura_spell, racemask, gender, autocast FROM spell_area");
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell area requirements", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 spell = fields[0].GetUInt32();
         SpellArea spellArea;
@@ -3394,25 +3323,18 @@ void SpellMgr::LoadSpellEnchantProcData()
 
     uint32 count = 0;
 
-    //                                                  0         1           2         3
+    //                                               0      1             2          3
     QueryResult result = WorldDatabase.Query("SELECT entry, customChance, PPMChance, procEx FROM spell_enchant_proc_data");
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell enchant proc event conditions", count);
         return;
     }
 
-    
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         uint32 enchantId = fields[0].GetUInt32();
 
@@ -3443,13 +3365,11 @@ void SpellMgr::LoadSpellRequired()
     mSpellsReqSpell.clear();                                   // need for reload case
     mSpellReq.clear();                                         // need for reload case
 
+    //                                               0         1
     QueryResult result = WorldDatabase.Query("SELECT spell_id, req_spell from spell_required");
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 spell required records");
         sLog->outErrorDb("`spell_required` table is empty!");
@@ -3457,10 +3377,8 @@ void SpellMgr::LoadSpellRequired()
     }
     uint32 rows = 0;
 
-    
     do
     {
-        
         Field *fields = result->Fetch();
 
         uint32 spell_id =  fields[0].GetUInt32();
@@ -3504,6 +3422,7 @@ void SpellMgr::LoadSpellRanks()
 
     mSpellChains.clear();                                   // need for reload case
 
+    //                                               0               1         2
     QueryResult result = WorldDatabase.Query("SELECT first_spell_id, spell_id, rank from spell_ranks ORDER BY first_spell_id , rank");
 
     if (!result)
@@ -3958,7 +3877,7 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
             count++;
             break;
-        case 64844: // Divine Hymn 
+        case 64844: // Divine Hymn
         case 64904: // Hymn of Hope
             spellInfo->AttributesEx &= ~SPELL_ATTR1_NEGATIVE;
             ++count;
@@ -4458,24 +4377,18 @@ void SpellMgr::LoadSpellLinked()
     mSpellLinkedMap.clear();    // need for reload case
     uint32 count = 0;
 
-    //                                                0              1             2
+    //                                               0              1             2
     QueryResult result = WorldDatabase.Query("SELECT spell_trigger, spell_effect, type FROM spell_linked_spell");
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded %u linked spells", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         int32 trigger = fields[0].GetInt32();
         int32 effect =  fields[1].GetInt32();
