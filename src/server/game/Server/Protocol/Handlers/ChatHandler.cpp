@@ -646,7 +646,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (stricmp(channel.c_str(), "krcma")==0) {
                 /* DB-based filter */
                 for (std::vector<std::string>::iterator itr = sObjectMgr->krcma_filter_keywords.begin(); itr != sObjectMgr->krcma_filter_keywords.end(); ++itr)
-                    if (msg.find(*itr) != std::string::npos)
+                    if (strstr(msg.c_str(), (*itr).c_str()))
                         return;
 
                 /* repeating messages */
