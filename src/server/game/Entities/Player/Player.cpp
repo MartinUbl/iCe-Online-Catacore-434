@@ -11422,7 +11422,7 @@ void Player::ModifyCurrency(uint32 id, int32 count)
     }
 
     uint32 weekCap = _GetCurrencyWeekCap(currency);
-    if (weekCap && int32(weekCap) < newTotalCount)
+    if (weekCap && int32(weekCap) < newWeekCount)
     {
         int32 delta = newWeekCount - int32(weekCap);
         newWeekCount = int32(weekCap);
