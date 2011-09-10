@@ -972,15 +972,6 @@ void BattlegroundMgr::DistributeArenaCurrency()
 
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_START);
 
-    //temporary structure for storing maximum points to add values for all players
-    //std::map<uint32, uint32> PlayerPoints;
-
-    //at first update all points for all team members
-    /*for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
-        if (ArenaTeam * at = team_itr->second)
-            at->UpdateArenaPointsHelper(PlayerPoints);*/
-    //PlayerPoints.clear();
-
     //calculate new conquest point cap for each player
     for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
         if (ArenaTeam* at = team_itr->second)
