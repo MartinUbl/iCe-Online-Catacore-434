@@ -77,17 +77,21 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     bool isPremade = false;
     Group * grp = NULL;
 
+    recv_data >> joinAsGroup;                               // joinAsGroup (0 = false, 128 = true)
     recv_data >> unk0;                                      // unknown (changed in 4.0.0)
-    recv_data >> unk1;                                      // unknown (changed in 4.0.0)
     recv_data >> bgTypeId_;                                 // battleground type id (DBC id)
     //recv_data >> instanceId;                              // instance id, 0 if First Available selected (removed 4.0.0 ?)
-    recv_data >> joinAsGroup;                               // join as group
+    recv_data >> unk1;                                      // unknown (changed in 4.0.0)
     recv_data >> unk2;                                      // unknown (added in 4.0.0)
     recv_data >> unk3;                                      // unknown (added in 4.0.0)
 
     // Cliend sends value 0 for "last joined battleground". We must handle it this way.
     if (bgTypeId_ == 0)
+    {
         bgTypeId_ = GetPlayer()->GetLastBattlegroundTypeId();
+        if (bgTypeId_ == 0)
+            bgTypeId_ = BATTLEGROUND_RB;
+    }
     else
         GetPlayer()->SetLastBattlegroundTypeId(bgTypeId_);
 
@@ -153,7 +157,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     GroupJoinBattlegroundResult err;
 
     // check queue conditions
-    if (!joinAsGroup)
+    if (joinAsGroup == 0)
     {
         if (GetPlayer()->isUsingLfg())
         {
