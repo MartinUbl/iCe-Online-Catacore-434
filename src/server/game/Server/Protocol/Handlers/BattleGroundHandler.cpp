@@ -244,7 +244,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         GroupQueueInfo * ginfo = NULL;
         uint32 avgTime = 0;
 
-        if (err > 0)
+        if (err == ERR_BATTLEGROUND_NONE)
         {
             sLog->outDebug("Battleground: the following players are joining as group:");
             ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
@@ -258,7 +258,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
             WorldPacket data;
 
-            if (err <= 0)
+            if (err != 1)
             {
                 sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
                 member->GetSession()->SendPacket(&data);
