@@ -377,7 +377,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //317 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleNULL,                                      //318
     &AuraEffect::HandleModMeleeSpeedPct,                          //319 This is actually mod haste (?)
-    &AuraEffect::HandleNULL,                                      //320
+    &AuraEffect::HandleModRangedSpeedPct,                         //320
     &AuraEffect::HandleNULL,                                      //321
     &AuraEffect::HandleNoImmediateEffect,                         //322 InterfereTargetting
     &AuraEffect::HandleNULL,                                      //323
@@ -5761,6 +5761,17 @@ void AuraEffect::HandleModMeleeRangedSpeedPct(AuraApplication const *aurApp, uin
 
     target->ApplyAttackTimePercentMod(BASE_ATTACK,(float)GetAmount(),apply);
     target->ApplyAttackTimePercentMod(OFF_ATTACK,(float)GetAmount(),apply);
+    target->ApplyAttackTimePercentMod(RANGED_ATTACK, (float)GetAmount(), apply);
+}
+
+void AuraEffect::HandleModRangedSpeedPct(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+    float amount = GetAmount();
+
     target->ApplyAttackTimePercentMod(RANGED_ATTACK, (float)GetAmount(), apply);
 }
 
