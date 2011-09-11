@@ -7419,10 +7419,12 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
 
     float o = m_caster->GetOrientation();
+    int32 duration = GetSpellDuration(m_spellInfo);
 
     // Special case - Archaeology, spell Survey
     if (m_spellInfo->Id == 80451 && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        duration = 60000; // 1 minute
         Creature* pNearest = NULL;
         float distance = -1.0f;
         uint64 guid = 0;
@@ -7547,7 +7549,6 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
     }
 
     //pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-    int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/IN_MILLISECONDS : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
     m_caster->AddGameObject(pGameObj);
