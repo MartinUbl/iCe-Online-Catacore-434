@@ -869,6 +869,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 amount = caster->GetCharmerOrOwnerPlayerOrPlayerItself()->GetStat(STAT_SPIRIT)*4.0f;
             break;
         }
+        case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
+        {
+            // Aspect of the Hawk - increase by larger amount
+            // Hack, probably not properly added from Blizzard
+            if (GetId() == 13165)
+                amount *= 3.1348f;
+            break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -5877,14 +5885,15 @@ void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const *aurApp, u
         return;
 
     Unit *target = aurApp->GetTarget();
+    float amount = GetAmount();
 
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
 
-    if(float(GetAmount()) > 0.f)
-        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_VALUE, float(GetAmount()), apply);
+    if(amount > 0.f)
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_VALUE, float(amount), apply);
     else
-        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(amount), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const *aurApp, uint8 mode, bool apply) const
