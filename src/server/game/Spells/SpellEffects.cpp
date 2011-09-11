@@ -1733,9 +1733,26 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             break;
         }
         case SPELLFAMILY_HUNTER:
-            // steady shot focus effect (it has its own skill for this)
+            // Steady Shot
             if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
+            {
+                // focus effect (it has its own skill for this)
                 m_caster->CastSpell(m_caster,77443,true);
+
+                // Improved Steady Shot proc
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetHistorySpell(2) == 56641)
+                {
+                    int32 bp0 = 0;
+                    if (AuraEffect* pEffect = m_caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3409, EFFECT_0))
+                    {
+                        bp0 = pEffect->GetAmount();
+                        m_caster->CastCustomSpell(m_caster, 53220, &bp0, 0, 0, true);
+                        // Avoid double proc (1-1-0-0 = proc, next cast 1-1-1-0 = proc, etc..)
+                        m_caster->ToPlayer()->AddNonTriggeredSpellcastHistory(sSpellStore.LookupEntry(53220));
+                    }
+                }
+            }
+            // Camouflage
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
                 m_caster->CastSpell(m_caster,51755,true);
             break;
