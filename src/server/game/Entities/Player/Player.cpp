@@ -642,6 +642,9 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     }
     m_researchProjects.clear();
 
+    for (uint8 i = 0; i < 4; i++)
+        m_nonTriggeredSpellcastHistory[i] = 0;
+
     m_ChampioningFaction = 0;
 
     for (uint8 i = 0; i < MAX_POWERS; ++i)
@@ -26157,6 +26160,27 @@ void Player::SetResearchSite(uint8 slot, uint16 siteId)
     }
 
     SetUInt16Value(PLAYER_FIELD_RESEARCH_SITE_1+slot, 0, siteId);
+}
+
+void Player::AddNonTriggeredSpellcastHistory(const SpellEntry* spell, uint32 specialValue)
+{
+    if (!spell)
+        return;
+
+    uint64 newHistoryRecord = ((uint64(specialValue) << 32) | uint64(spell->Id));
+
+    for (uint8 i = 0; i < 3; i++)
+        m_nonTriggeredSpellcastHistory[i] = m_nonTriggeredSpellcastHistory[i+1];
+
+    m_nonTriggeredSpellcastHistory[3] = newHistoryRecord;
+}
+
+uint64 Player::GetHistorySpell(uint8 slot)
+{
+    if (slot > 3)
+        return 0;
+
+    return m_nonTriggeredSpellcastHistory[slot];
 }
 
 float Player::GetAverageItemLevel()

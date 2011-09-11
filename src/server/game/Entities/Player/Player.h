@@ -2564,11 +2564,18 @@ class Player : public Unit, public GridObject<Player>
 
         float GetAverageItemLevel();
 
+        void AddNonTriggeredSpellcastHistory(const SpellEntry* spell, uint32 specialValue = 0);
+        // Only for use in current Update tick! Pointer can (and probably will) expire with next spellcast
+        uint64 GetHistorySpell(uint8 slot);
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
         float m_powerFraction[MAX_POWERS];
         uint32 m_contestedPvPTimer;
+
+        //32bits for entry, 32bits for special cases
+        uint64 m_nonTriggeredSpellcastHistory[4];
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

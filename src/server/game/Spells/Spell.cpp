@@ -3431,6 +3431,10 @@ void Spell::cast(bool skipCheck)
         // Powers have to be taken before SendSpellGo
         TakePower();
         TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
+        // Also add spellcast history to player class
+        // TODO: add hit outcome (crit/miss/parry/..) to specialValue
+        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->ToPlayer()->AddNonTriggeredSpellcastHistory(GetSpellInfo(), 0);
     }
     else if (Item* targetItem = m_targets.getItemTarget())
     {
