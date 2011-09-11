@@ -2588,6 +2588,11 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             break;
         }
         // Vanish (not exist)
+        case 11327:
+        {
+            triggered_spell_id = 1784;
+            break;
+        }
         case 18461:
         {
             unitTarget->RemoveMovementImpairingAuras();
@@ -2597,15 +2602,11 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            // See if we already are stealthed. If so, we're done.
-            if (unitTarget->HasAura(1784))
-                return;
-
             // Reset cooldown on stealth if needed
             if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                 unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-            triggered_spell_id = 1784;
+            triggered_spell_id = 11327;
             break;
         }
         // Demonic Empowerment -- succubus

@@ -3400,7 +3400,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
     if (apply)
     {
         // remove other shapeshift before applying a new one
-        target->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT, 0, GetBase());
+        // exception for Vanish - should trigger two shapeshifting spells
+        if (GetBase()->GetSpellProto()->Id != 11327)
+            target->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT, 0, GetBase());
 
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
@@ -3461,16 +3463,21 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
     }
     else
     {
-        if (modelid > 0)
-            target->SetDisplayId(target->GetNativeDisplayId());
-        target->SetByteValue(UNIT_FIELD_BYTES_2, 3, FORM_NONE);
-        if (target->getClass() == CLASS_DRUID)
+        // Exception for Vanish (will not be removing Stealth)
+        // removing Vanish will also unapply Stealth, so this is fine
+        if (GetBase()->GetSpellProto()->Id != 11327)
         {
-            target->setPowerType(POWER_MANA);
-            // Remove movement impairing effects also when shifting out
-            target->RemoveMovementImpairingAuras();
+            if (modelid > 0)
+                target->SetDisplayId(target->GetNativeDisplayId());
+            target->SetByteValue(UNIT_FIELD_BYTES_2, 3, FORM_NONE);
+            if (target->getClass() == CLASS_DRUID)
+            {
+                target->setPowerType(POWER_MANA);
+                // Remove movement impairing effects also when shifting out
+                target->RemoveMovementImpairingAuras();
+            }
+            target->SetShapeshiftForm(FORM_NONE);
         }
-        target->SetShapeshiftForm(FORM_NONE);
 
         switch(form)
         {
