@@ -11474,16 +11474,18 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency)
         }
     case CURRENCY_TYPE_HONOR_POINTS:
         {
-            uint32 honorcap = sWorld->getIntConfig(CONFIG_MAX_HONOR_POINTS);
+            /*uint32 honorcap = sWorld->getIntConfig(CONFIG_MAX_HONOR_POINTS);
             if (honorcap > 0)
-                cap = honorcap;
+                cap = honorcap;*/
+            cap = 0;
             break;
         }
     case CURRENCY_TYPE_JUSTICE_POINTS:
         {
-            uint32 justicecap = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS);
+            /*uint32 justicecap = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS);
             if (justicecap > 0)
-                cap = justicecap;
+                cap = justicecap;*/
+            cap = 0;
             break;
         }
     }
