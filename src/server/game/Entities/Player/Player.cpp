@@ -1624,8 +1624,6 @@ void Player::setDeathState(DeathState s)
 
         // drunken state is cleared on death
         SetDrunkValue(0);
-        // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
-        ClearComboPoints();
 
         clearResurrectRequestData();
 
@@ -1648,6 +1646,8 @@ void Player::setDeathState(DeathState s)
         GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
         GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
     }
+    if (s == ALIVE)
+        ClearComboPoints(); // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
 
     Unit::setDeathState(s);
 
