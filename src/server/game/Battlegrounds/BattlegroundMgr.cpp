@@ -313,17 +313,17 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     if((type & 128) != 0)
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 1; i >= 0; --i)
-        {
-            uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
-            uint32 pointsGained = bg->m_ArenaTeamRatingChanges[i] > 0 ? bg->m_ArenaTeamRatingChanges[i] : 0;
-            uint32 MatchmakerRating = bg->m_ArenaTeamMMR[i];
+        uint32 pointsLost_t1 = bg->m_ArenaTeamRatingChanges[0] < 0 ? abs(bg->m_ArenaTeamRatingChanges[0]) : 0;
+        uint32 pointsGained_t1 = bg->m_ArenaTeamRatingChanges[0] > 0 ? bg->m_ArenaTeamRatingChanges[0] : 0;
+        uint32 pointsLost_t2 = bg->m_ArenaTeamRatingChanges[1] < 0 ? abs(bg->m_ArenaTeamRatingChanges[1]) : 0;
+        uint32 pointsGained_t2 = bg->m_ArenaTeamRatingChanges[1] > 0 ? bg->m_ArenaTeamRatingChanges[1] : 0;
 
-            *data << uint32(pointsLost);        // Rating Lost
-            *data << uint32(pointsGained);      // Rating gained
-            *data << uint32(MatchmakerRating);  // Matchmaking Value
-            sLog->outDebug("rating change: %d", bg->m_ArenaTeamRatingChanges[i]);
-        }
+        *data << uint32(bg->m_ArenaTeamMMR[1]); // Matchmaker rating - t2
+        *data << uint32(bg->m_ArenaTeamMMR[0]); // Matchmaker rating - t1
+        *data << uint32(pointsLost_t2);         // rating after - t2
+        *data << uint32(pointsLost_t1);         // rating after - t1
+        *data << uint32(pointsGained_t2);       // rating before - t2
+        *data << uint32(pointsGained_t1);       // rating before - t1
     }
 
     size_t wpos = data->wpos();
