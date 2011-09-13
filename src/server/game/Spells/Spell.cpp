@@ -1294,6 +1294,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
         caster->DealDamageMods(damageInfo.target,damageInfo.damage,&damageInfo.absorb);
 
+        // Interrupt even if all damage has beed absorbed
+        if (damageInfo.target && damageInfo.absorb > 0 && damageInfo.absorb+damageInfo.resist >= damageInfo.damage)
+            damageInfo.target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
+
         // Send log damage message to client
         caster->SendSpellNonMeleeDamageLog(&damageInfo);
 
