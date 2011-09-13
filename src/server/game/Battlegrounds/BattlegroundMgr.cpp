@@ -699,9 +699,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         }
         else
         {
-            // Is these checks really necessary?
-            // TODO: test
-            /*BattlegroundTypeId avail_RBGs[] = {
+            BattlegroundTypeId avail_RBGs[] = {
                 BATTLEGROUND_NA, // Nagrand Arena
                 BATTLEGROUND_BE, // Blade's Edge Arena
                 BATTLEGROUND_RL, // Ruins of Lordaeron
@@ -709,7 +707,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 BATTLEGROUND_DS, // Dalaran Severs
             };
 
-            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];*/
+            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
         }
 
         bg_template = GetBattlegroundTemplate(bgTypeId);
