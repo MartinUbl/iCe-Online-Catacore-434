@@ -669,29 +669,47 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
             }
         }
 #endif
-        // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
-        // We must select different list of BGs in our custom system
-        if (bracketEntry->minLevel == 85)
+        // We must differ arenas, because of they are using the same function to create instance
+        if (bgTypeId != BATTLEGROUND_AA)
         {
-            BattlegroundTypeId avail_RBGs[] = {
-                BATTLEGROUND_WS,
-                BATTLEGROUND_AB,
-                BATTLEGROUND_EY,
-                BATTLEGROUND_TP,
-                BATTLEGROUND_BG,
-            };
+            // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
+            // We must select different list of BGs in our custom system
+            if (bracketEntry->minLevel == 85)
+            {
+                BattlegroundTypeId avail_RBGs[] = {
+                    BATTLEGROUND_WS,
+                    BATTLEGROUND_AB,
+                    BATTLEGROUND_EY,
+                    BATTLEGROUND_TP,
+                    BATTLEGROUND_BG,
+                };
 
-            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+                bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+            }
+            else
+            {
+                BattlegroundTypeId avail_RBGs[] = {
+                    BATTLEGROUND_WS,
+                    BATTLEGROUND_AB,
+                    BATTLEGROUND_EY,
+                };
+
+                bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+            }
         }
         else
         {
-            BattlegroundTypeId avail_RBGs[] = {
-                BATTLEGROUND_WS,
-                BATTLEGROUND_AB,
-                BATTLEGROUND_EY,
+            // Is these checks really necessary?
+            // TODO: test
+            /*BattlegroundTypeId avail_RBGs[] = {
+                BATTLEGROUND_NA, // Nagrand Arena
+                BATTLEGROUND_BE, // Blade's Edge Arena
+                BATTLEGROUND_RL, // Ruins of Lordaeron
+                BATTLEGROUND_RV, // Ring of Valor
+                BATTLEGROUND_DS, // Dalaran Severs
             };
 
-            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];*/
         }
 
         bg_template = GetBattlegroundTemplate(bgTypeId);
