@@ -4268,6 +4268,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 1;
             count++;
             break;
+        case 18395: // Dismounting Shot
+            spellInfo->rangeIndex = 13;    /* unlimited range */
+            spellInfo->DurationIndex = 1;  /* 10s duration */
+            spellInfo->Effect[1] = 0;      /* no stun */
+            count++;
+            break;
         default:
             break;
         }
