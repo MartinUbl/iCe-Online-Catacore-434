@@ -12323,8 +12323,20 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
 
 void Unit::Unmount()
 {
-    if (!IsMounted())
+    if (!IsMounted() && !IsMountedShape())
         return;
+
+    /* remove druid flying/travel forms
+     * (needs to be called before IsMounted) */
+    switch (GetShapeshiftForm()) {
+        case FORM_FLIGHT:
+        case FORM_FLIGHT_EPIC:
+        case FORM_TRAVEL:
+            RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+            return;
+        default:
+            break;
+    }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
 

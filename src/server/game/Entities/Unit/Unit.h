@@ -1354,6 +1354,17 @@ class Unit : public WorldObject
         void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, 2,flags); }
 
         bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT); }
+        bool IsMountedShape() const {
+            switch (GetShapeshiftForm()) {
+                case FORM_FLIGHT:
+                case FORM_FLIGHT_EPIC:
+                case FORM_TRAVEL:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount();
