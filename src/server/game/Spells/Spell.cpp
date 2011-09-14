@@ -6013,6 +6013,25 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            case SPELL_AURA_MOD_SHAPESHIFT:
+            {
+                /* disallow druid fly/travel forms while having mount immunity */
+                ShapeshiftForm form = ShapeshiftForm(m_spellInfo->EffectMiscValue[i]);
+                switch (form) {
+                    case FORM_FLIGHT:
+                    case FORM_FLIGHT_EPIC:
+                    case FORM_TRAVEL:
+                        {    
+                        SpellImmuneList const& mechanicList = m_caster->m_spellImmune[IMMUNITY_MECHANIC];
+                        for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+                            if (itr->type == MECHANIC_MOUNT)
+                                return SPELL_FAILED_IMMUNE;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
             default:
                 break;
         }

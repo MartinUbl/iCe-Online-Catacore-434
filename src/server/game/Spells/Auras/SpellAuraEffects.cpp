@@ -4865,6 +4865,11 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
 
     if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
         target->RemoveAurasWithMechanic(mechanic, AURA_REMOVE_BY_DEFAULT, GetId());
+
+    /* cancel druid fly/travel forms as well
+     * (Unit::Unmount() does nothing when called on a non-druid unmounted player */
+    if (apply && GetMiscValue() == MECHANIC_MOUNT)
+        target->Unmount();
 }
 
 void AuraEffect::HandleAuraModEffectImmunity(AuraApplication const *aurApp, uint8 mode, bool apply) const
