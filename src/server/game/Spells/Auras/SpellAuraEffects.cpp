@@ -3166,6 +3166,16 @@ void AuraEffect::HandleModActionButton(AuraApplication const *aurApp, uint8 mode
     // Should be applied only to players
     if (!player)
         return;
+
+    // Trap Launcher
+    if (GetSpellProto()->Id == 77769)
+    {
+        // Add also spell for Immolation and Snake traps
+        if (apply)
+            player->CastSpell(player, 82946, true);
+        else
+            player->RemoveAurasDueToSpell(82946);
+    }
 }
 
 //TODO: Finish this aura
