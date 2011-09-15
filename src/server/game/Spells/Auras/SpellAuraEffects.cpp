@@ -1606,19 +1606,22 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         damage += (damage + 1) / 2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
                     // 5..8 ticks have normal tick damage
                 }
-                if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
+
+                switch (GetId())
                 {
-                    switch (GetId())
-                    {
-                        case 70911: // Unbound Plague
-                        case 72854: // Unbound Plague
-                        case 72855: // Unbound Plague
-                        case 72856: // Unbound Plague
-                            damage *= uint32(pow(1.25f, int32(m_tickNumber)));
-                            break;
-                        default:
-                            break;
-                    }
+                    case 70911: // Unbound Plague
+                    case 72854: // Unbound Plague
+                    case 72855: // Unbound Plague
+                    case 72856: // Unbound Plague
+                        damage *= uint32(pow(1.25f, int32(m_tickNumber)));
+                        break;
+                    case 1120:  // Drain Soul
+                        // If target is under 25% health, cause four times normal damage
+                        if (target->GetHealthPct() <= 25.0f)
+                            damage *= 2;
+                        break;
+                    default:
+                        break;
                 }
 
             }
