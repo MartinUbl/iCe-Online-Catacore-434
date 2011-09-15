@@ -5115,6 +5115,13 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
         case 5487:
             if (target->getLevel() >= 40)
                 amount = 120;
+            // Thick Hide increases armor percentage by an additional 26/52/78%
+            if (target->HasAura(16931))
+                amount += 78;
+            else if (target->HasAura(16930))
+                amount += 52;
+            else if (target->HasAura(16929))
+                amount += 26;
             break;
         default:
             break;
