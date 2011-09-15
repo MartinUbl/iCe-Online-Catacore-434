@@ -1060,6 +1060,10 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     if (!isAlive() || isGameMaster())
         return 0;
 
+    // Exception for Ruins of Lordaeron Arena (there's a slime)
+    if (GetMapId() == 572)
+        return 0;
+
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
     uint32 resist = 0;
