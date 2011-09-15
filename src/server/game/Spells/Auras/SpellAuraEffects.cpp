@@ -3790,7 +3790,7 @@ void AuraEffect::HandleAuraCloneCaster(AuraApplication const *aurApp, uint8 mode
             return;
 
         // Set display id (probably for portrait?)
-        target->SetDisplayId(caster->GetDisplayId());
+        target->SetDisplayId(caster->GetNativeDisplayId());
         target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE);
     }
     else
