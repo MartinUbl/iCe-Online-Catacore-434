@@ -9,6 +9,7 @@ set(scripts_STAT_SRCS
   World/chat_log.cpp
   World/go_scripts.cpp
   World/guards.cpp
+  World/guards_swog.cpp
   World/item_scripts.cpp
   World/mob_generic_creature.cpp
   World/npc_innkeeper.cpp
