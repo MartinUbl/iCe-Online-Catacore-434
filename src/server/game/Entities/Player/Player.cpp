@@ -4054,9 +4054,6 @@ void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
 
 void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
 {
-    /* disabled, causes profession cooldowns to be reset */
-    return;
-
     // remove cooldowns on spells that have <= 10 min CD
 
     SpellCooldowns::iterator itr, next;
@@ -4067,8 +4064,12 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
         // check if spellentry is present and if the cooldown is less or equal to 10 min
         if (entry &&
+            // Reset only class specific spells
+            ((entry->SpellFamilyName >= SPELLFAMILY_MAGE && entry->SpellFamilyName <= SPELLFAMILY_SHAMAN)
+             || entry->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT) &&
             entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
-            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS)
+            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
+            itr->second.end <= time(NULL)+10*MINUTE)
         {
             // remove & notify
             RemoveSpellCooldown(itr->first, true);
