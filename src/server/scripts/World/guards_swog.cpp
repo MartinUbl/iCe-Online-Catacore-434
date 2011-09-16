@@ -75,10 +75,25 @@ static struct quotes reached_home_quotes[] = {
     {true, "I've got balls of steel!"},
 };
 
+static bool aiactive(void)
+{
+    time_t stamp = time(NULL);
+    struct tm time_struct = *localtime(&stamp);
+
+    /* active only for 23:00 - 14:59 */
+    if (time_struct.tm_hour > 22 || time_struct.tm_hour < 15)
+        return true;
+
+    return false;
+}
+
 static void doquote(int chance_pct, struct quotes *ptr, int size, Creature *me)
 {
     int numquotes;
     int i;
+
+    if (!aiactive())
+        return;
 
     if (urand(0,99) >= chance_pct)
         return;
@@ -133,6 +148,10 @@ static bool flee_for_assistance(Creature *c, float searchradius)
     if (!helper)
         return false;
 
+    /* caugth a flying guard, probably */
+    if (fabs(c->GetPositionZ() - helper->GetPositionZ()) > 40.0f)
+        return false;
+
     c->GetMotionMaster()->Clear();
     c->GetMotionMaster()->MoveSeekAssistance(helper->GetPositionX(), helper->GetPositionY(), helper->GetPositionZ());
 
@@ -159,20 +178,30 @@ struct guards_swogAI : public ScriptedAI
     }
 
     void EnterCombat(Unit *who) {
-        doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
+        if (!aiactive())
+            return;
+
+        /* 1% chance of "death grip"-like pull */
+        if (urand(0,99) < 1 && !who->IsMounted() && !who->IsMountedShape()) {
+            me->CastSpell(who, 49576, true);
+            me->MonsterYell("Come to meet your maker!", LANG_UNIVERSAL, 0);
+        } else {
+            doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
+        }
     }
 
     void KilledUnit(Unit *who) {
-        doquote(20, kill_quotes, sizeof(kill_quotes), me);
+        doquote(30, kill_quotes, sizeof(kill_quotes), me);
     }
 
     void JustDied(Unit *who) {
-        doquote(20, death_quotes, sizeof(death_quotes), me);
+        doquote(10, death_quotes, sizeof(death_quotes), me);
         Reset();
 
         if (Player* pKiller = who->GetCharmerOrOwnerPlayerOrPlayerItself()) {
             me->SendZoneUnderAttackMessage(pKiller);
-            pKiller->RewardHonor(NULL,1,1);  /* add symbolic 1 honor */
+            if (aiactive())
+                pKiller->RewardHonor(NULL,1,1);  /* add symbolic 1 honor */
         }
     }
 
@@ -193,7 +222,7 @@ struct guards_swogAI : public ScriptedAI
             std::ostringstream report;
             report << "SWOGAI  ";
             report << me->GetGUIDLow();
-            report << "  reporting to duty, ";
+            report << (aiactive() ? "  reporting to duty, " : "  in sleep mode, ");
             report << ((who->getGender() == GENDER_MALE) ? "sir!" : "madame!");
             me->MonsterSay(report.str().c_str(), LANG_UNIVERSAL, 0);
             me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
@@ -231,7 +260,7 @@ void guards_swogAI::MoveInLineOfSight(Unit* who)
         me->CastSpell(who, 18395, false);  /* Dismounting Shot */
         dismounted.push_back(std::make_pair(0, who));
 
-        doquote(20, shoot_quotes, sizeof(shoot_quotes), me);
+        doquote(10, shoot_quotes, sizeof(shoot_quotes), me);
     }
 }
 
@@ -263,39 +292,32 @@ void guards_swogAI::UpdateAI(const uint32 diff)
 
     /* do one of several possible actions on low health
      * but only once each 60 seconds (== ie. potion cooldown) */
-    if (me->GetHealthPct() < lowhp_percent && lowhp_timer >= 60000) {
+    if (me->GetHealthPct() < lowhp_percent && lowhp_timer >= 60000 && aiactive()) {
         lowhp_timer = 0;
-        switch (urand(0,6)) {
+        switch (urand(0,5)) {
 
-            /* first possible action: drink potion/heal and flee */
+            /* first possible action: look for assistance, if none found, despawn */
             case 0:
-            case 1:  /* two times the chance */
-                if (urand(0,1)) {
-                    me->CastSpell(me, 78989, false);  /* potion, 21000 hp */
-                } else {
-                    const int32 bp = 21000;
-                    me->CastCustomSpell(me, 10577, &bp, 0, 0, true);  /* spell, 21000 hp */
-                }
-
+            case 1:  /* twice the chance */
                 /* look around 60yd for assistance */
                 if (flee_for_assistance(me, 60.0f)) {
+                    if (urand(0,1)) {
+                        me->CastSpell(me, 78989, false);  /* potion, 21000 hp */
+                    } else {
+                        const int32 bp = 21000;
+                        me->CastCustomSpell(me, 10577, &bp, 0, 0, true);  /* spell, 21000 hp */
+                    }
                     doquote(20, flee_quotes, sizeof(flee_quotes), me);
-                    break;
                 } else {
-                    /* do not break, fall down to despawn if no assistent is found */
-                }
-
-            /* second possible action: despawn */
-            case 2:
-                if (me->getFaction() == 11) {
-                    /* alliance: simulate paladin - divine shield + HS */
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->CastSpell(me, 40733, true);  /* infinite divine shield */
-                    me->CastSpell(me, 8690, false);  /* normal hearthstone */
-                    me->ForcedDespawn(10300);  /* 10sec = HS cast time */
-                } else {
-                    /* horde/other: simulate a coward - flee away (very fast) */
-                    if (Unit *target = me->getVictim()) {
+                    /* no helper found, run/teleport away */
+                    if (me->getFaction() == 11) {
+                        /* alliance: simulate paladin - divine shield + HS */
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->CastSpell(me, 40733, true);  /* infinite divine shield */
+                        me->CastSpell(me, 8690, false);  /* normal hearthstone */
+                        me->ForcedDespawn(10300);  /* 10sec = HS cast time */
+                    } else {
+                        /* horde/other: simulate a coward - flee away (very fast) */
                         me->RemoveAllAuras();
                         me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
                         me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
@@ -303,45 +325,43 @@ void guards_swogAI::UpdateAI(const uint32 diff)
                         me->CastSpell(me, 66179, true);  /* visual + speed (but insufficient) */
                         me->SetSpeed(MOVE_RUN, 3.0f);
                         me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveFleeing(target, 0);
+                        me->GetMotionMaster()->MoveFleeing(me->getVictim(), 0);
+                        me->ForcedDespawn(2000);  /* ~2sec = ~visible range  */
                     }
-                    me->ForcedDespawn(2000);  /* ~2sec = ~visible range  */
+                    doquote(20, flee_quotes, sizeof(flee_quotes), me);
                 }
-                doquote(20, flee_quotes, sizeof(flee_quotes), me);
                 break;
 
             /* third possible action: boost (full hp / superhaste) */
-            case 3:
+            case 2:
                 if (urand(0,1)) {
                     me->CastSpell(me, 64460, true);  /* instant full hp + visual */
                 } else {
                     const int32 bp = 200;
                     me->CastCustomSpell(me, 57060, &bp, 0, 0, true);  /* +200% attack speed */
                 }
-                doquote(20, aggro_quotes, sizeof(aggro_quotes), me);
+                doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
                 break;
 
             /* fourth possible action: supress current victim (dispellable) */
-            case 4:
-                if (Unit *target = me->getVictim()) {
-                    /* if top victim is spellcaster, use silence, else cripple */
-                    if (target->GetMaxPower(POWER_MANA)) {
-                        SpellEntry *wrentry = sSpellStore.LookupEntryNoConst(38913);
-                        if (!wrentry)
-                            break;
-                        /* not my idea! don't flame me for this blasphemy! */
-                        uint32 oldindex = wrentry->DurationIndex;
-                        wrentry->DurationIndex = 1;
-                        me->CastSpell(target, wrentry, true);  /* 10sec silence */
-                        wrentry->DurationIndex = oldindex;
-                    } else {
-                        me->CastSpell(target, 41281, true);  /* triggered (instant) cripple */
-                    }
+            case 3:
+                /* if top victim is spellcaster, use silence, else cripple */
+                if (me->getVictim()->GetMaxPower(POWER_MANA)) {
+                    SpellEntry *wrentry = sSpellStore.LookupEntryNoConst(38913);
+                    if (!wrentry)
+                        break;
+                    /* not my idea! don't flame me for this blasphemy! */
+                    uint32 oldindex = wrentry->DurationIndex;
+                    wrentry->DurationIndex = 1;
+                    me->CastSpell(me->getVictim(), wrentry, true);  /* 10sec silence */
+                    wrentry->DurationIndex = oldindex;
+                } else {
+                    me->CastSpell(me->getVictim(), 41281, true);  /* triggered (instant) cripple */
                 }
                 break;
 
             /* fifth possible action: nasty AoE */
-            case 5:
+            case 4:
                 if (me->getFaction() == 11) {
                     /* alliance: simulate paladin - consecration */
                     const int32 bp = 10000;
@@ -354,9 +374,28 @@ void guards_swogAI::UpdateAI(const uint32 diff)
                 }
                 break;
 
-            /* sixth possible action: do nothing */
-            case 6:
+            /* sixth possible action: call all same-entry npcs to assist "me" */
+            case 5:
+                {
+                    std::list<Creature*> friends;
+                    me->GetCreatureListWithEntryInGrid(friends, me->GetEntry(), 40.0f);
+                    if (friends.empty())
+                        break;
+
+                    for (std::list<Creature*>::const_iterator cfriend = friends.begin(); cfriend != friends.end(); ++cfriend)
+                        if (!(*cfriend)->isInCombat())
+                            (*cfriend)->AI()->AttackStart(me->getVictim());
+                }
+
+                me->getVictim()->CastSpell(me->getVictim(), 59908, true);  /* nice ebon blade mark, selfcast! */
+                doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
                 break;
+
+            /* seventh possible action: do nothing */
+            /* DISABLED: occurs on sixth possible action
+             *           when there's no friend found
+            case 6:
+                break; */
 
             default:
                 break;
