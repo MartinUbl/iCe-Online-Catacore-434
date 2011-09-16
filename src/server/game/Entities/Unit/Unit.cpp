@@ -11327,6 +11327,18 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                 crit_chance += rendAndTear->GetAmount();
                             break;
                         }
+                        // Ravage
+                        else if (spellProto->Id == 6785 || spellProto->Id == 81170)
+                        {
+                            // Predatory Strikes talent
+                            if (pVictim && pVictim->GetHealthPct() > 80.0f)
+                            {
+                                if (HasAura(16974))       // Rank 2
+                                    crit_chance += 50.0f;
+                                else if (HasAura(16972))  // Rank 1
+                                    crit_chance += 25.0f;
+                            }
+                        }
                     break;
                     case SPELLFAMILY_PALADIN:
                         // Judgement of Command proc always crits on stunned target
