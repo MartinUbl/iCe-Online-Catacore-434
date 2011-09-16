@@ -3032,11 +3032,13 @@ void Unit::_UpdateAutoRepeatSpell()
     //check "realtime" interrupts
     if ((GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving()) || IsNonMeleeSpellCasted(false,false,true,m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == 75))
     {
-        // cancel wand shoot
+        // cancel wand shoot (exception for auto shot - it can be casted while moving
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
+        {
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-        m_AutoRepeatFirstCast = true;
-        return;
+            m_AutoRepeatFirstCast = true;
+            return;
+        }
     }
 
     //apply delay (Auto Shot (spellID 75) not affected)
@@ -3225,6 +3227,13 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withI
 
 bool Unit::CanCastWhileWalking(const SpellEntry * const sp)
 {
+    if (!sp)
+        return false;
+
+    // Auto Shot should not be interrupted nor forbidden to cast when moving
+    if (sp->Id == 75)
+        return true;
+
     AuraEffectList alist = GetAuraEffectsByType(SPELL_AURA_WALK_AND_CAST);
     for (AuraEffectList::const_iterator i = alist.begin(); i != alist.end(); ++i)
     {
