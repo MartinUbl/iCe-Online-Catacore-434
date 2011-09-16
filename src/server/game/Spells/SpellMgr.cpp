@@ -1949,6 +1949,19 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
     // random damage
     if (caster)
     {
+        // Pet abilities, probably hack, but who knows
+        switch (spellEntry->Id)
+        {
+            case 17253: // Bite
+            case 16827: // Claw
+            case 49966: // Smack
+            {
+                uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                value += ap*0.4f*0.2f;
+                break;
+            }
+        }
+
         // bonus amount from combo points
         if  (caster->m_movedPlayer)
         {
