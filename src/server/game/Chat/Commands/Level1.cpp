@@ -750,6 +750,15 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     uint32 have_map = Map::ExistMap(obj->GetMapId(),gx,gy) ? 1 : 0;
     uint32 have_vmap = Map::ExistVMap(obj->GetMapId(),gx,gy) ? 1 : 0;
 
+#ifdef ACE_WIN32
+    FILE *GPSOut = fopen("gps.txt","a");
+    if (GPSOut)
+    {
+        fprintf(GPSOut, "%ff, %ff, %ff, %ff", obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+        fclose(GPSOut);
+    }
+#endif
+
     if(have_vmap)
     {
         if(map->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
