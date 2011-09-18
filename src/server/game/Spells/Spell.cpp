@@ -5354,6 +5354,22 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (mapEntry->IsBattleArena())
                 return SPELL_FAILED_NOT_IN_ARENA;
 
+    // Special cases for spells which cannot be casted in arenas
+    if (MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
+        if (mapEntry->IsBattleArena())
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 2825:  // Bloodlust
+                case 32182: // Heroism
+                case 80353: // Time Warp
+                case 90355: // Ancient Hysteria
+                    return SPELL_FAILED_NOT_IN_ARENA;
+                default:
+                    break;
+            }
+        }
+
     // zone check
     if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->isGameMaster())
     {
