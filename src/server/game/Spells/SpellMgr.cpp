@@ -3773,14 +3773,17 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 44543: //Fingers of Frost rank 1
             spellInfo->procChance = 7;
+            spellInfo->EffectSpellClassMask[0] = flag96(0x4088, 0x1000, 0x802A0);
             count++;
             break;
         case 44545: //Fingers of Frost rank 2
             spellInfo->procChance = 14;
+            spellInfo->EffectSpellClassMask[0] = flag96(0x4088, 0x1000, 0x802A0);
             count++;
             break;
         case 83074: //Fingers of Frost rank 3
             spellInfo->procChance = 20;
+            spellInfo->EffectSpellClassMask[0] = flag96(0x4088, 0x1000, 0x802A0);
             count++;
             break;
         case 81782: // Power Word : Barrier
@@ -4001,13 +4004,6 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 44544:    // Fingers of Frost
             spellInfo->EffectSpellClassMask[0] = flag96(685904631, 1151048, 0);
-            spellInfo->procCharges = 2;
-            spellInfo->StackAmount = 0;
-            count++;
-            break;
-        case 74396:    // Fingers of Frost visual buff
-            spellInfo->procCharges = 2;
-            spellInfo->StackAmount = 0;
             count++;
             break;
         case 28200:    // Ascendance (Talisman of Ascendance trinket)

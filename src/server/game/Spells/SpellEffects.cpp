@@ -1164,7 +1164,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         // Ice Lance - special case (drop charge of Fingers of Frost)
         case 30455:
             if(Aura* pAura = m_caster->GetAura(44544))
-                pAura->DropCharge();
+                if (pAura->ModStackAmount(-1))
+                    m_caster->RemoveAurasDueToSpell(44544);
             break;
         case 8092:  // Mind Blast
         case 73510: // Mind Spike

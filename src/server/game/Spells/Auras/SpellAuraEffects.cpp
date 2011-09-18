@@ -4486,7 +4486,8 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
     if (GetSpellProto()->Id == 44572 && caster && apply)
     {
         if(Aura* pAura = caster->GetAura(44544))
-            pAura->DropCharge();
+            if (pAura->ModStackAmount(-1))
+                caster->RemoveAurasDueToSpell(44544);
     }
 
     target->SetControlled(apply, UNIT_STAT_STUNNED);
