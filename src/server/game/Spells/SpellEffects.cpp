@@ -3449,6 +3449,20 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
+        // Nature's Blessing (after all calculating)
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
+        {
+            if (unitTarget->HasAura(974)) // must have Earth Shield
+            {
+                if (caster->HasAura(30869))
+                    addhealth *= 1.18f;
+                else if (caster->HasAura(30868))
+                    addhealth *= 1.12f;
+                else if (caster->HasAura(30867))
+                    addhealth *= 1.06f;
+            }
+        }
+
         m_damage -= addhealth;
     }
 }
