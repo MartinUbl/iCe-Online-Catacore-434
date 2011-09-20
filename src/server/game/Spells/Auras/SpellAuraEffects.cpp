@@ -2414,7 +2414,8 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             }
             else if (GetId() == 73920) // Healing Rain
             {
-                caster->CastSpell(target, 73921, true);
+                if (caster && target)
+                    caster->CastSpell(target, 73921, true);
                 break;
             }
             break;
