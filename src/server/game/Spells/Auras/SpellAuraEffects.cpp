@@ -2314,6 +2314,13 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->SetPower(POWER_RAGE, rage-mod);
                     break;
                 }
+                // Efflorescence
+                case 81262:
+                {
+                    int32 bp0 = GetAmount();
+                    caster->CastCustomSpell(target, 81269, &bp0, 0, 0, true);
+                    break;
+                }
                 // Force of Nature
                 case 33831:
                     break;

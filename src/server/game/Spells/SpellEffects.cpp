@@ -3368,6 +3368,18 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             if (!caster->HasAura(54824))
                 unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
+            // Efflorescence
+            int32 bp0 = 0;
+            if (caster->HasAura(34151))
+                bp0 = addhealth*0.04f;
+            else if (caster->HasAura(81274))
+                bp0 = addhealth*0.08f;
+            else if (caster->HasAura(81275))
+                bp0 = addhealth*0.12f;
+
+            if (bp0)
+                unitTarget->CastCustomSpell(unitTarget, 81262, &bp0, &bp0, &bp0, true);
+
             //addhealth += tickheal * tickcount;
             //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
         }
@@ -3807,7 +3819,7 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
         dynObj->GetMap()->Add(dynObj);
 
         if (Aura * aura = Aura::TryCreate(m_spellInfo, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
-        {    
+        {
             m_spellAura = aura;
             m_spellAura->_RegisterForTargets();
         }

@@ -3743,6 +3743,21 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
             break;
+        case 81262: // Efflorescence
+        case 83504: // Healing Rain
+            // Change aura dummy for aura periodic dummy, we need to trigger spells periodically
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
+            spellInfo->EffectApplyAuraName[1] = 0;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DST_CASTER;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_AREA_ALLY_DST;
+            if (spellInfo->Id == 81262)
+                spellInfo->EffectAmplitude[0] = 1000;
+            else if (spellInfo->Id == 83504)
+                spellInfo->EffectAmplitude[0] = 2000;
+            else
+                spellInfo->EffectAmplitude[0] = 1000;
+            count++;
+            break;
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;

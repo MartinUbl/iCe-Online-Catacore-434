@@ -9201,6 +9201,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             basepoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100.0f);
             break;
         }
+        // Efflorescence - must be triggered with value --> handled elsewhere
+        case 81262:
+            return false;
         // Body and Soul
         case 64128:
         case 65081:
