@@ -1085,6 +1085,31 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                 }
 
+                // Focused Insight - on every shock spell
+                if (m_spellInfo->Id == 8056 || m_spellInfo->Id == 8050 || m_spellInfo->Id == 8042)
+                {
+                    int32 manamod = 0;
+                    int32 effmod = 0;
+                    if (m_caster->HasAura(77796))
+                    {
+                        manamod = m_powerCost*0.75f;
+                        effmod = 30;
+                    }
+                    else if (m_caster->HasAura(77795))
+                    {
+                        manamod = m_powerCost*0.50f;
+                        effmod = 20;
+                    }
+                    else if (m_caster->HasAura(77794))
+                    {
+                        manamod = m_powerCost*0.25f;
+                        effmod = 10;
+                    }
+
+                    if (manamod > 0 && effmod > 0)
+                        m_caster->CastCustomSpell(m_caster, 77800, &manamod, &effmod, &effmod, true);
+                }
+
                 // Implementation of Elemental Overload mastery profficiency
                 if ((m_spellInfo->Id == 403 || m_spellInfo->Id == 51505 || m_spellInfo->Id == 421) &&
                     m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
