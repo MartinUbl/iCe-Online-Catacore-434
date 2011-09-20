@@ -331,6 +331,10 @@ Unit *PetAI::SelectNextTarget()
     // Default
     else return NULL;
 
+    // Check pets LoS
+    if (!target || !me->IsWithinLOSInMap(target))
+        return NULL;
+
     return target;
 }
 
