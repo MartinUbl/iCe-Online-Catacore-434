@@ -769,6 +769,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
+        // Nature's Ward
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->getClass() == CLASS_DRUID
+            && pVictim->ToPlayer()->GetSpellCooldownDelay(45281) == 0
+            && (pVictim->GetMaxHealth()*0.5f) >= pVictim->GetHealth()-damage)
+        {
+            if (pVictim->HasAura(33882) || (pVictim->HasAura(33881) && roll_chance_i(50) ))
+            {
+                pVictim->CastSpell(pVictim, 774, true);
+                pVictim->ToPlayer()->AddSpellCooldown(45281, 0, time(NULL)+6);
+            }
+        }
+
         pVictim->ModifyHealth(- (int32)damage);
 
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
