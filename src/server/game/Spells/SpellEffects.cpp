@@ -3400,7 +3400,17 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         }
         // Lifebloom - final heal coef multiplied by original DoT stack
         else if (m_spellInfo->Id == 33778)
+        {
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL, m_spellValue->EffectBasePoints[1]);
+
+            // Gift of the Earthmother
+            if (caster->HasAura(51181))
+                addhealth *= 1.15f;
+            else if (caster->HasAura(51180))
+                addhealth *= 1.10f;
+            else if (caster->HasAura(51179))
+                addhealth *= 1.05f;
+        }
         // Riptide - increase healing done by Chain Heal
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x100)
         {
