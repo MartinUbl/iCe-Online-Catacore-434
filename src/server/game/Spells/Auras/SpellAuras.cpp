@@ -1411,6 +1411,33 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
+            case SPELLFAMILY_DRUID:
+                {
+                    // Rejuvenation
+                    if (caster && target && GetId() == 774)
+                    {
+                        // Gift of the Earthmother
+                        int32 bp0 = 0;
+                        if (caster->HasAura(51181))
+                            bp0 = 15;
+                        else if (caster->HasAura(51180))
+                            bp0 = 10;
+                        else if (caster->HasAura(51179))
+                            bp0 = 5;
+
+                        AuraEffect* pEff = aurApp->GetBase()->GetEffect(0);
+
+                        if (!pEff || bp0 <= 0)
+                            break;
+
+                        uint32 pheal = pEff->GetAmount() > 0 ? pEff->GetAmount()*4 : 0;
+                        pheal = caster->SpellHealingBonus(target, GetSpellProto(), 0, pheal, DOT);
+                        bp0 = bp0*pheal/100;
+                        caster->CastCustomSpell(target, 64801, &bp0, 0, 0, true);
+                        break;
+                    }
+                }
+                break;
             case SPELLFAMILY_WARRIOR:
                 {
                     uint32 entry = GetId();
