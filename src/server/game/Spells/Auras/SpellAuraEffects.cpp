@@ -2412,6 +2412,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->RemoveAurasDueToSpell(52179);
                 break;
             }
+            else if (GetId() == 73920) // Healing Rain
+            {
+                caster->CastSpell(target, 73921, true);
+                break;
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             switch (GetId())
