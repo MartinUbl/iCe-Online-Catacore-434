@@ -1878,11 +1878,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Tree of Life (passive)
                     if (apply)
                     {
+                        // +15% heal, +120% armor
+                        target->CastSpell(target, 5420, true);
+                        // instant Regrowth and Ent. Roots, +30% dmg Wrath, +200% dmg Ent. Roots
                         target->CastSpell(target, 81097, true);
+                        // -50% Wrath cast time, and dummy Lifebloom aura, don't care.. :-P
                         target->CastSpell(target, 81098, true);
                     }
                     else
                     {
+                        target->RemoveAurasDueToSpell(5420);
                         target->RemoveAurasDueToSpell(81097);
                         target->RemoveAurasDueToSpell(81098);
                     }
