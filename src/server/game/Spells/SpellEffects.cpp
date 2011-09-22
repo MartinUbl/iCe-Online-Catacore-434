@@ -1257,6 +1257,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 m_damage = m_damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
         }
     }
+
+    // Lightning Bolt
+    if (m_caster && m_spellInfo->Id == 403)
+    {
+        // Telluric Currents
+        int32 bp0 = 0;
+        if (m_caster->HasAura(82988))
+            bp0 = 40*m_damage/100;
+        else if (m_caster->HasAura(82984))
+            bp0 = 20*m_damage/100;
+
+        if (bp0)
+            m_caster->CastCustomSpell(m_caster, 82987, &bp0, 0, 0, true);
+    }
 }
 
 void Spell::EffectDummy(SpellEffIndex effIndex)
