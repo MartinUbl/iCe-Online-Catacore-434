@@ -2622,6 +2622,19 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
             break;
         }
+        case 91565:
+        {
+            // Feral Aggression
+            // more CastSpell is faster than finding an aura and modifying stack count
+            if (m_caster->HasAura(16859))
+            {
+                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+            }
+            else if (m_caster->HasAura(16858))
+                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+            break;
+        }
         // Dark Intent
         case 85767:
         {
