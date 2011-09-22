@@ -6379,6 +6379,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     break;
                 }
+                case 33763:   // Lifebloom
+                {
+                    if (!caster)
+                        break;
+
+                    // talent Revitalize
+                    if (caster->HasAura(48539) || caster->HasAura(48544))
+                        caster->CastSpell(caster, 57669, true);
+                    break;
+                }
                 case 34026:   // kill command
                 {
                     Unit *pet = target->GetGuardianPet();
