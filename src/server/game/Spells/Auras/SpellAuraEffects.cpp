@@ -1890,6 +1890,16 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY)
                     damage = damage*(1.0f+(caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f));
             }
+            // Malfurion's Gift - proc from Lifebloom
+            else if (m_spellProto->Id == 33763)
+            {
+                if (caster &&
+                    ((caster->HasAura(92363) && roll_chance_i(2))
+                    || (caster->HasAura(92364) && roll_chance_i(4))))
+                {
+                    caster->CastSpell(caster, 16870, true);
+                }
+            }
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
