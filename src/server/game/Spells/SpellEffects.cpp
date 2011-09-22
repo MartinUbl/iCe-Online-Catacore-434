@@ -3269,6 +3269,20 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             addhealth += addhealth*masterybonus*healthcoef;
         }
 
+        // Empowered Touch talent (procs from Regrowth, Nourish and Healing Touch)
+        if (unitTarget && m_caster && (m_spellInfo->Id == 8936 || m_spellInfo->Id == 50464 || m_spellInfo->Id == 5185)
+            && unitTarget->HasAura(33763))
+        {
+            // Rank 1 (50%) and 2 (100%)
+            if ((m_caster->HasAura(33879) && roll_chance_i(50))
+                || m_caster->HasAura(33880))
+            {
+                Aura* pAura = unitTarget->GetAura(33763);
+                if (pAura)
+                    pAura->RefreshDuration();
+            }
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
