@@ -2021,6 +2021,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     // Trigger spell for charge and for interrupt spellcast
                     m_caster->CastSpell(unitTarget, 93983, true);
                     m_caster->CastSpell(unitTarget, 93985, true);
+
+                    // Brutal Impact talent
+                    if (m_caster->HasAura(16941))
+                        m_caster->CastSpell(unitTarget, 82365, true);
+                    else if (m_caster->HasAura(16940))
+                        m_caster->CastSpell(unitTarget, 82364, true);
                     break;
                 }
                 case 1126: // Mark of the Wild
