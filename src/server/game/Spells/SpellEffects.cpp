@@ -4662,6 +4662,16 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     if (success_list.empty())
         return;
 
+    // Cleanse Spirit
+    if (m_spellInfo->Id == 51886)
+    {
+        // Cleansing Waters - set m_healing (originally not used for this purpose, will be set to 0 after handling)
+        if (m_caster->HasAura(86959))
+            m_healing = 86961;
+        else if (m_caster->HasAura(86962))
+            m_healing = 86958;
+    }
+
     WorldPacket dataSuccess(SMSG_SPELLDISPELLOG, 8+8+4+1+4+damage*5);
     // Send packet header
     dataSuccess.append(unitTarget->GetPackGUID());         // Victim GUID
