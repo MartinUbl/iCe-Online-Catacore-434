@@ -2423,6 +2423,49 @@ class Player : public Unit, public GridObject<Player>
         void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
+        typedef UNORDERED_MAP<uint64, uint64> GUIDTimestampMap;
+        typedef UNORDERED_MAP<uint32, GUIDTimestampMap> SummonMap;
+
+        SummonMap m_summonMap;
+
+        GUIDTimestampMap* GetSummonMapFor(uint32 entry)
+        {
+            SummonMap::iterator itr = m_summonMap.find(entry);
+            if (itr != m_summonMap.end())
+                return &((*itr).second);
+
+            return NULL;
+        }
+        void AddSummonToMap(uint32 entry, uint64 guid, uint64 timestamp)
+        {
+            SummonMap::iterator itr = m_summonMap.find(entry);
+            if (itr != m_summonMap.end())
+                (*itr).second[guid] = timestamp;
+            else
+                m_summonMap[entry][guid] = timestamp;
+        }
+        void DespawnOldestSummon(uint32 entry)
+        {
+            SummonMap::iterator itr = m_summonMap.find(entry);
+            if (itr != m_summonMap.end())
+            {
+                GUIDTimestampMap::iterator ittd = (*itr).second.end();
+                for (GUIDTimestampMap::iterator itr2 = (*itr).second.begin(); itr2 != (*itr).second.end(); ++itr2)
+                {
+                    if (ittd == (*itr).second.end() || (*itr2).second < (*ittd).second)
+                        ittd = itr2;
+                }
+                if (ittd != (*itr).second.end())
+                {
+                    if (Creature* pOldest = Creature::GetCreature(*this, (*ittd).first))
+                    {
+                        pOldest->ForcedDespawn();
+                        (*itr).second.erase(ittd);
+                    }
+                }
+            }
+        }
+
         bool isUsingLfg();
 
         typedef std::set<uint32> DFQuestsDoneList;
