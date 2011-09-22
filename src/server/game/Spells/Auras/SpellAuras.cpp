@@ -1928,6 +1928,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
                     }
                 }
+
+                // Tiger's Fury, Berserk with Primal Madness talent
+                if (GetId() == 5217 || GetId() == 50334)
+                {
+                    if (apply)
+                    {
+                        if (caster->HasAura(80317))
+                            caster->CastSpell(caster, 80886, true);
+                        else if (caster->HasAura(80316))
+                            caster->CastSpell(caster, 80879, true);
+                    }
+                    else
+                    {
+                        if ((GetId() == 5217 && !caster->HasAura(50334)) ||
+                            (GetId() == 50334 && !caster->HasAura(5217)))
+                        {
+                            caster->RemoveAurasDueToSpell(80879);
+                            caster->RemoveAurasDueToSpell(80886);
+                        }
+                    }
+                }
             }
         case SPELLFAMILY_HUNTER:
             switch(GetId())
