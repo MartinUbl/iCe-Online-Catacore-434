@@ -332,8 +332,8 @@ const uint32 ModABSpellMap[][3] = {
 //   OriginalSpellID,  ModifyABAura,  SpellEffectIndex
     {11366,            48108,         0}, // Hot Streak
     {689,              74434,         1}, // Soulburn
-    {6785,             81021,         0}, // Stampede (Cat Form)
-    {6785,             81022,         1}, // Stampede (Bear Form)
+    {6785,             81021,         0}, // Stampede (Cat Form) rank 1
+    {6785,             81022,         0}, // Stampede (Cat Form) rank 2
     {1499,             77769,         0}, // Trap Launcher
     {13813,            77769,         1},
     {13809,            77769,         2},

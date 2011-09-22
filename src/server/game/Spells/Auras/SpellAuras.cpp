@@ -908,14 +908,14 @@ uint8 Aura::GetModActionButtonEffectMask() const
         case 92294: // Frostfire Orb Override
         case 86211: // Soul Swap (marker)
         case 77616: // Dark Simulacrum
+        case 81021: // Stampede (Cat Form)
+        case 81022: // Stampede (Bear Form)
             effMask |= 1 << 0;
             break;
         case 74434: // Soulburn
         case 82926: // Fire! (Master Marksman proc)
             effMask |= 1 << 1;
             break;
-        case 81021: // Stampede (Cat Form)
-        case 81022: // Stampede (Bear Form)
         case 82946: // Trap Launcher (second?)
             effMask |= (1 << 0) | (1 << 1);
             break;

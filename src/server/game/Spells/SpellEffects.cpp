@@ -5512,7 +5512,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 }
             }
             // Ravage! (Stampede)
-            else if (m_spellInfo->Id == 81107)
+            else if (m_spellInfo->Id == 81170)
             {
                 m_caster->RemoveAurasDueToSpell(89140); // enabler spell
                 m_caster->RemoveAurasDueToSpell(81021); // Stampede buff rank 1

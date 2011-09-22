@@ -3770,6 +3770,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;
             break;
+        case 81170: // Stampede
+            spellInfo->Attributes &= ~SPELL_ATTR0_ONLY_STEALTHED;
+            count++;
+            break;
         case 49838: // Stop Time
         case 50526: // Wandering Plague
         case 52916: // Honor Among Thieves
