@@ -3514,6 +3514,13 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 else if (caster->HasAura(30867))
                     addhealth *= 1.06f;
             }
+
+            // Healing Wave + Glyph of Healing Wave
+            if (m_spellInfo->Id == 331 && m_caster->HasAura(55440))
+            {
+                int32 bp0 = addhealth*0.2f;
+                m_caster->CastCustomSpell(m_caster, 55533, &bp0, 0, 0, true);
+            }
         }
 
         m_damage -= addhealth;
