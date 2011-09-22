@@ -1892,6 +1892,42 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->RemoveAurasDueToSpell(81098);
                     }
                 }
+                // Enrage and King of the Jungle talent
+                else if (GetId() == 5229)
+                {
+                    if (apply)
+                    {
+                        int32 bp0 = 0;
+                        if (caster->HasAura(48495))
+                            bp0 = 15;
+                        else if (caster->HasAura(48494))
+                            bp0 = 10;
+                        else if (caster->HasAura(48492))
+                            bp0 = 5;
+
+                        if (bp0)
+                            caster->CastCustomSpell(caster, 51185, &bp0, 0, 0, true);
+                    }
+                    else
+                        caster->RemoveAurasDueToSpell(51185);
+                }
+                // Tiger's Fury and King of the Jungle talent
+                else if (GetId() == 5217)
+                {
+                    if (apply)
+                    {
+                        int32 bp0 = 0;
+                        if (caster->HasAura(48495))
+                            bp0 = 60;
+                        else if (caster->HasAura(48494))
+                            bp0 = 40;
+                        else if (caster->HasAura(48492))
+                            bp0 = 20;
+
+                        if (bp0)
+                            caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
+                    }
+                }
             }
         case SPELLFAMILY_HUNTER:
             switch(GetId())
