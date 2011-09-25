@@ -382,14 +382,16 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                 switch (GetShapeshiftForm())
                 {
                     case FORM_CAT:
-                        val2 = getLevel() * 2.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) - 20.0f + m_baseFeralAP; break;
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
-                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f + m_baseFeralAP; break;
+                        val2 = (getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f + m_baseFeralAP) * 1.25f;
+                        break;
                     case FORM_MOONKIN:
-                        val2 = getLevel() * 1.5f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f + m_baseFeralAP; break;
+                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f + m_baseFeralAP;
+                        break;
                     default:
-                        val2 = GetStat(STAT_STRENGTH) * 2.0f - 20.0f; break;
+                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
+                        break;
                 }
                 break;
             }
