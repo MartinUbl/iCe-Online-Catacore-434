@@ -5747,6 +5747,17 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 m_caster->CastCustomSpell(unitTarget,96172,&bp0,0,0,true);
             }
             break;
+        case 53351: // Kill Shot
+            // Glyph of Kill shot
+            if (m_caster && m_caster->ToPlayer()          // is a player
+                && m_caster->HasAura(63067)               // has the glyph
+                && !m_caster->HasAura(90967)              // glyph is not on cooldown
+                && unitTarget->GetHealth() > m_damage)      // target is not killed
+            {
+                m_caster->CastSpell(m_caster, 90967, true); // Cast cooldown reset dummy spell (+ cooldown)
+                m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
+            }
+            break;
     }
 }
 

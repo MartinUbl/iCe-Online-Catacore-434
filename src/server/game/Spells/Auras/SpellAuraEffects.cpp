@@ -6584,6 +6584,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     caster->CastSpell(target, finalSpelId, true, NULL, this);
             }
 
+            // Dummy spell cooldown reset aura (500 ms)
+            if (m_spellProto->Id == 77691)
+            {
+                // Glyph of Kill Shot cooldown removal
+                if (caster->HasAura(90967))
+                    caster->ToPlayer()->RemoveSpellCooldown(53351, true);
+            }
+
             switch(m_spellProto->SpellFamilyName)
             {
                 case SPELLFAMILY_GENERIC:
