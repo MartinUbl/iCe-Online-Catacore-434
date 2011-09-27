@@ -6996,6 +6996,17 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Earthquake
+            if (m_spellInfo->Id == 77478)
+            {
+                // 10% chance to stun (knockdown) enemies
+                if (roll_chance_i(10))
+                    m_caster->CastSpell(unitTarget, 77505, true);
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             // Shattering Throw
