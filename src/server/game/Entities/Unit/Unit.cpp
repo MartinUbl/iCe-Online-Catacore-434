@@ -14757,6 +14757,22 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                     StartReactiveTimer(REACTIVE_OVERPOWER);
                 }
 
+                // Leader of the Pack
+                if (procExtra & PROC_EX_CRITICAL_HIT && GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (HasAura(17007)
+                        && (GetShapeshiftForm() == FORM_CAT || GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_DIREBEAR)
+                        && !ToPlayer()->HasSpellCooldown(34299))
+                    {
+                        int32 bp0 = GetMaxHealth()*0.04f;
+                        CastCustomSpell(this, 34299, &bp0, 0, 0, true);
+                        bp0 = GetMaxPower(POWER_MANA)*0.08f;
+                        CastCustomSpell(this, 68285, &bp0, 0, 0, true);
+
+                        ToPlayer()->AddSpellCooldown(34299, 0, time(NULL)+6);
+                    }
+                }
+
                 if (procExtra & PROC_EX_PARRY && GetTypeId() == TYPEID_PLAYER)
                 {
                     // Hold the Line "on parry" proc
