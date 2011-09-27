@@ -715,6 +715,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 // we're getting total damage on aura apply, change it to be damage per tick
                 amount = int32((float)amount / GetTotalTicks());
             }
+            // Explosive Shot (Explosive Shit sounds also nice :-P)
+            else if (GetId() == 53301)
+            {
+                amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
+            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
