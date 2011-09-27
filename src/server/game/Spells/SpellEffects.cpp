@@ -3109,6 +3109,14 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            // Impact - reset cooldown of Fire Blast
+            if (m_spellInfo->Id == 64343)
+            {
+                m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
+            }
+        }
         case SPELLFAMILY_PRIEST:
         {
             // Inner Focus
