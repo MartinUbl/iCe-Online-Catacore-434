@@ -843,6 +843,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Imps Firebolt
                 else if (m_spellInfo->Id == 3110)
                 {
+                    // Damage fix
+                    damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.657f*0.5f;
+
                     Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
                     if (!pOwner)
                         break;
