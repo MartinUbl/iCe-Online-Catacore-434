@@ -8289,6 +8289,9 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
             // Shiv has 100% chance to apply the poison
             if (FindCurrentSpellBySpellId(5938) && e_slot == TEMP_ENCHANTMENT_SLOT)
                 chance = 100.0f;
+            // Windwalk increased chance
+            if (pEnchant->spellid[s] == 74243 && chance < 6.0f)
+                chance *= 2.25f;
 
             if (roll_chance_f(chance))
             {
