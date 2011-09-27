@@ -18077,6 +18077,7 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
     case 14751:
     case 53576:
     case 53569:
+    case 44445:
         break; // Continue handling
     default:
         return false; // Escape hack and continue normal way
@@ -18154,6 +18155,15 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
             return true;
         }
         break;
+    case SPELLFAMILY_MAGE:
+        // Hot Streak
+        if (dummySpell->Id == 44445 && procExtra & PROC_EX_CRITICAL_HIT)
+        {
+            // Procs only from several spells
+            if (procSpell->SpellFamilyFlags & flag96(0x1008, 0x1000, 0x400013))
+                if (roll_chance_i(33))
+                    CastSpell(this, 48108, true);
+        }
     default: break;
     }
     return true; // Will not continue handling the aura
