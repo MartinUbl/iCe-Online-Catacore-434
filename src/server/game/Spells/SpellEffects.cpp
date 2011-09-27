@@ -712,6 +712,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Soul Swap
                 else if (m_spellInfo->Id == 86121)
                 {
+                    if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasSpellCooldown(94229))
+                    {
+                        // Maybe a little hack, but works
+                        SendCastResult(SPELL_FAILED_NOT_READY);
+                        m_caster->ModifyPower(POWER_MANA, m_powerCost);
+                        damage = 0;
+                        return;
+                    }
+
                     int32 bp0 = 0;
                     std::list<uint32> DoTList;
                     Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
@@ -747,7 +756,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             }
                         }
                     }
-                    if (!DoTList.empty())
+                    // Remove DoTs only if caster doesnt have Glyph of Soul Swap
+                    if (!DoTList.empty() && !m_caster->HasAura(56226))
                     {
                         for (std::list<uint32>::const_iterator itr = DoTList.begin(); itr != DoTList.end(); ++itr)
                             unitTarget->RemoveAurasDueToSpell((*itr));
@@ -758,6 +768,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         pMarkAura->GetEffect(0)->SetAmount(bp0);
                     // ..and cast visual
                     unitTarget->CastSpell(m_caster, 92795, true);
+
+                    // Glyph of Soul Swap also makes this spell to have cooldown
+                    //m_caster->CastSpell(m_caster, 94229, true);
+                    m_caster->ToPlayer()->AddSpellCooldown(94229, 0, time(NULL)+30);
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
