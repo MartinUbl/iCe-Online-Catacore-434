@@ -878,6 +878,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
                     }
                 }
+                // Lash of Pain (succubus)
+                else if (m_spellInfo->Id == 7814 && m_caster->ToPet())
+                    damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.612f*0.5f;
+                // Whiplash (succubus)
+                else if (m_spellInfo->Id == 6360 && m_caster->ToPet())
+                    damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.85f*0.5f;
                 break;
             }
             case SPELLFAMILY_PRIEST:

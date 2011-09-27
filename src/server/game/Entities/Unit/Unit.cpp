@@ -8724,6 +8724,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (!(procEx & PROC_EX_PARRY))
                 return false;
             break;
+        // Protector of the Innocent
+        case 20138:
+        case 20139:
+        case 20140:
+            // Cannot proc when healing self
+            if (this == pVictim)
+                return false;
+            break;
         // Deflection
         case 52420:
         {
