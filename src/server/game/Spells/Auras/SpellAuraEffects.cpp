@@ -5370,12 +5370,16 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     Unit *target = aurApp->GetTarget();
 
     int32 miscValue = GetMiscValue();
+    float amount = (float)GetAmount();
 
     // Custom handling for Cataclysm spells with non-relevant data in DBC
     switch(GetSpellProto()->Id)
     {
         case 89744: // Wizardry
         case 86091: // Nethermancy
+        case 17003: // Heart of the Wild (rank 1)
+        case 17004: //                   (rank 2)
+        case 17005: //                   (rank 3)
             miscValue = STAT_INTELLECT;
             break;
         case 50029: // Veteran of the Third War
@@ -5384,6 +5388,14 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
             break;
         case 84729: // Into the Wilderness
             miscValue = STAT_AGILITY;
+            break;
+        case 1178:  // Bear Form (passive) - bonus from HotW
+            if (target->HasAura(17005))
+                amount += 6.0f;
+            else if (target->HasAura(17004))
+                amount += 4.0f;
+            else if (target->HasAura(17003))
+                amount += 2.0f;
             break;
     }
 
@@ -5402,9 +5414,9 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         // exception for spell Mark of the Wild (increase all stats except spirit)
         if (miscValue == i || miscValue == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT))
         {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
+            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
-                target->ApplyStatPercentBuffMod(Stats(i), (float)GetAmount(), apply);
+                target->ApplyStatPercentBuffMod(Stats(i), amount, apply);
         }
     }
 

@@ -385,6 +385,17 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
                         val2 = (getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f + m_baseFeralAP) * 1.25f;
+
+                        // Cat Form profit of Heart of the Wild
+                        if (GetShapeshiftForm() == FORM_CAT)
+                        {
+                            if (HasAura(17005))
+                                val2 *= 1.10f;
+                            else if (HasAura(17004))
+                                val2 *= 1.07f;
+                            else if (HasAura(17003))
+                                val2 *= 1.03f;
+                        }
                         break;
                     case FORM_MOONKIN:
                         val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f + m_baseFeralAP;
