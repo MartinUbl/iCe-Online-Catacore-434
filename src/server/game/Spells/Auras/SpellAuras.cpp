@@ -1270,6 +1270,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastSpell(caster, 87154, true);
                         break;
                     }
+                // Fade
+                case 586:
+                    {
+                        if (caster && caster->ToPlayer())
+                        {
+                            // Phantasm
+                            if (caster->HasAura(47570) || (caster->HasAura(47569) && roll_chance_i(50)))
+                                caster->RemoveMovementImpairingAuras();
+                        }
+                    }
                 // Dispersion
                 case 47585:
                     {
