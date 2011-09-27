@@ -5385,6 +5385,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         case 17003: // Heart of the Wild (rank 1)
         case 17004: //                   (rank 2)
         case 17005: //                   (rank 3)
+        case 89745: // Mysticism
             miscValue = STAT_INTELLECT;
             break;
         case 50029: // Veteran of the Third War
