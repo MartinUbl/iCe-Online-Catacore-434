@@ -2021,6 +2021,13 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         if (duration > 0)
             pet->SetDuration(duration);
 
+        // Regenerate health and mana of non-hunter pets
+        if (pet && !pet->isHunterPet())
+        {
+            pet->SetHealth(pet->GetMaxHealth());
+            pet->SetPower(pet->getPowerType(), pet->GetMaxPower(pet->getPowerType()));
+        }
+
         return NULL;
     }
 
