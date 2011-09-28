@@ -3743,6 +3743,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
             break;
+        case 87427: // Shadowy Apparition Visual
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            count++;
+            break;
         case 81262: // Efflorescence
             // Change aura dummy for aura periodic dummy, we need to trigger spells periodically
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;

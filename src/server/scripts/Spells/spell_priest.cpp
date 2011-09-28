@@ -309,6 +309,54 @@ class spell_pri_cure_disease : public SpellScriptLoader
         }
 };
 
+class mob_shadowy_apparition: public CreatureScript
+{
+    public:
+        mob_shadowy_apparition(): CreatureScript("mob_shadowy_apparition") {};
+
+        struct mob_shadowy_apparitionAI: public ScriptedAI
+        {
+            mob_shadowy_apparitionAI(Creature* c): ScriptedAI(c)
+            {
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                // If we doesn't have target, kill us
+                if (!UpdateVictim())
+                {
+                    me->Kill(me);
+                    me->ForcedDespawn(100);
+                    return;
+                }
+                // If we are not moving towards our target, do it
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+
+                if (me->isAttackReady())
+                {
+                    // If we are within range melee the target
+                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    {
+                        me->CastSpell(me, 87529, true);
+                        if (me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        {
+                            me->CastSpell(me->getVictim(), 87532, true, 0, 0, me->GetCharmerOrOwnerPlayerOrPlayerItself()->GetGUID());
+                            me->Kill(me);
+                            me->ForcedDespawn(100);
+                        }
+                        me->resetAttackTimer();
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new mob_shadowy_apparitionAI(c);
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_guardian_spirit();
@@ -317,4 +365,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_penance;
     new spell_pri_reflective_shield_trigger();
     new spell_pri_cure_disease();
+    new mob_shadowy_apparition;
 }

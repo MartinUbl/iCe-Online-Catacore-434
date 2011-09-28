@@ -1521,8 +1521,14 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 pAura->RefreshDuration();
                         }
                         break;
-                    case 15407: // Mind Flay
                     case 589:   // Shadow Word: Pain
+                        // Shadowy Apparition
+                        if ((caster->HasAura(78204) && (roll_chance_i(12) || (caster->isMoving() && roll_chance_i(60))))
+                            || (caster->HasAura(78203) && (roll_chance_i(8) || (caster->isMoving() && roll_chance_i(40))))
+                            || (caster->HasAura(78202) && (roll_chance_i(4) || (caster->isMoving() && roll_chance_i(20)))))
+                            caster->CastSpell(target, 87212, true, 0, 0, target->GetGUID());
+                        // do not break, also should proc Shadow Orbs
+                    case 15407: // Mind Flay
                     {
                         // Shadow Orbs proc chance
                         if (caster->HasAura(95740) && roll_chance_i(10))

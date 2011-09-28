@@ -4394,6 +4394,32 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     Position pos;
     GetSummonPosition(effIndex, pos);
 
+    // Shadowy Apparition - summon pos is original casters pos
+    if (entry == 46954 && m_originalCaster)
+    {
+        if (m_originalCaster->ToPlayer())
+        {
+            Player::GUIDTimestampMap* tsMap = m_originalCaster->ToPlayer()->GetSummonMapFor(entry);
+            if (tsMap && tsMap->size() >= GetMaxActiveSummons(entry))
+            {
+                Player::GUIDTimestampMap::iterator ittd = tsMap->end();
+                for (Player::GUIDTimestampMap::iterator itr2 = tsMap->begin(); itr2 != tsMap->end(); ++itr2)
+                {
+                    if (ittd == tsMap->end() || (*itr2).second < (*ittd).second)
+                        ittd = itr2;
+                }
+                if (ittd != tsMap->end())
+                {
+                    Creature* pOldest = Creature::GetCreature(*m_originalCaster, (*ittd).first);
+                    if (!pOldest)
+                        tsMap->erase(ittd);
+                }
+                return;
+            }
+        }
+        m_originalCaster->GetPosition(&pos);
+    }
+
     /*//totem must be at same Z in case swimming caster and etc.
         if (fabs(z - m_caster->GetPositionZ()) > 5)
             z = m_caster->GetPositionZ();
@@ -5776,7 +5802,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             if (m_caster && m_caster->ToPlayer()          // is a player
                 && m_caster->HasAura(63067)               // has the glyph
                 && !m_caster->HasAura(90967)              // glyph is not on cooldown
-                && unitTarget->GetHealth() > m_damage)      // target is not killed
+                && int32(unitTarget->GetHealth()) > m_damage)      // target is not killed
             {
                 m_caster->CastSpell(m_caster, 90967, true); // Cast cooldown reset dummy spell (+ cooldown)
                 m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
@@ -5960,6 +5986,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 41054: // Copy Weapon
                     m_caster->CastSpell(unitTarget, damage, false);
                     break;
+                case 87212: // Shadowy Apparition
+                {
+                    if (!unitTarget || !m_originalCaster)
+                        break;
+
+                    int32 bp0 = 1; // count = 1
+                    m_originalCaster->CastCustomSpell(m_originalCaster, 87426, &bp0, 0, 0, true, 0, 0, unitTarget->GetGUID());
+                    break;
+                }
                 case 55693:                                 // Remove Collapsing Cave Aura
                     if (!unitTarget)
                         return;
@@ -8858,6 +8893,9 @@ uint32 Spell::GetMaxActiveSummons(uint32 entry)
         // Wild Mushroom
         case 47649:
             return 3;
+        // Shadowy Apparition
+        case 46954:
+            return 4;
         default:
             return (uint32)(-1);
     }
@@ -8910,6 +8948,10 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
         Position pos;
         GetSummonPosition(i, pos, radius, count);
 
+        // Shadowy Apparition - summon pos is original casters pos
+        if (entry == 46954 && m_originalCaster)
+            m_originalCaster->GetPosition(&pos);
+
         TempSummon *summon = map->SummonCreature(entry, pos, properties, duration, caster);
         if (!summon)
             return;
@@ -8917,10 +8959,10 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             ((Guardian*)summon)->InitStatsForLevel(level);
 
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst())
+        if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst() && entry != 46954)
             ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
-        if (summon->GetEntry() == 27893)
+        if (summon->GetEntry() == 27893) // Rune Weapon
         {
             if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
             {
@@ -8940,6 +8982,25 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
         }
 
         summon->AI()->EnterEvadeMode();
+
+        if (summon->GetEntry() == 46954) // Shadowy Apparition (here due to threat list)
+        {
+            if (m_originalCaster && m_caster && m_originalCaster->isAlive() && m_caster->isAlive())
+            {
+                summon->SetSpeed(MOVE_RUN, 0.3f);
+                summon->CastSpell(summon, 87427, true);
+                summon->SetDisplayId(m_originalCaster->GetDisplayId());
+                // Have to clone the caster, doesnt work as intended
+                //m_originalCaster->CastSpell(summon, 87213, true);
+                summon->getThreatManager().clearReferences();
+                summon->getThreatManager().addThreat(m_caster, 100000.0f);
+                summon->Attack(m_caster, true);
+                summon->GetMotionMaster()->MoveChase(m_caster);
+
+                if (m_originalCaster->ToPlayer())
+                    m_originalCaster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
+            }
+        }
 
         ExecuteLogEffectSummonObject(i, summon);
     }
