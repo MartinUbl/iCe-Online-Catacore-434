@@ -18160,7 +18160,9 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         if (dummySpell->Id == 44445 && procExtra & PROC_EX_CRITICAL_HIT)
         {
             // Procs only from several spells
-            if (procSpell->SpellFamilyFlags & flag96(0x1008, 0x1000, 0x400013))
+            if (procSpell->SpellFamilyFlags[0] & 0x400013
+                || procSpell->SpellFamilyFlags[1] & 0x1000
+                || procSpell->SpellFamilyFlags[2] & 0x1008)
                 if (roll_chance_i(33))
                     CastSpell(this, 48108, true);
         }
