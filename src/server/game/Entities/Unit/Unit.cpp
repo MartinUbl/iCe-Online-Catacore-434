@@ -18157,7 +18157,7 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         break;
     case SPELLFAMILY_MAGE:
         // Hot Streak
-        if (dummySpell->Id == 44445 && procExtra & PROC_EX_CRITICAL_HIT)
+        if (dummySpell->Id == 44445 && procExtra & PROC_EX_CRITICAL_HIT && procSpell != NULL)
         {
             // Procs only from several spells
             if (procSpell->SpellFamilyFlags[0] & 0x400013
