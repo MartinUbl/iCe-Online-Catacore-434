@@ -21610,6 +21610,7 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
     SpellCooldown sc;
     sc.end = end_time;
+    sc.milliseconds = 0;
     sc.itemid = itemid;
     m_spellCooldowns[spellid] = sc;
 }
@@ -21627,7 +21628,16 @@ void Player::ModifySpellCooldown(uint32 spell_id, int32 mod, bool update)
         return;
     }
 
-    m_spellCooldowns[spell_id].end += floor(float(mod)/IN_MILLISECONDS);
+    m_spellCooldowns[spell_id].end += mod/IN_MILLISECONDS;
+    if (mod % IN_MILLISECONDS > 0)
+    {
+        m_spellCooldowns[spell_id].milliseconds += mod%IN_MILLISECONDS;
+        if (abs(m_spellCooldowns[spell_id].milliseconds) >= 1000)
+        {
+            m_spellCooldowns[spell_id].end += m_spellCooldowns[spell_id].milliseconds/IN_MILLISECONDS;
+            m_spellCooldowns[spell_id].milliseconds += m_spellCooldowns[spell_id].milliseconds%IN_MILLISECONDS;
+        }
+    }
 
     if (update)
     {

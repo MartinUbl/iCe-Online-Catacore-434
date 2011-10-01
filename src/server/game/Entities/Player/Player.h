@@ -156,6 +156,7 @@ typedef std::list<SpellModifier*> SpellModList;
 struct SpellCooldown
 {
     time_t end;
+    uint16 milliseconds;
     uint16 itemid;
 };
 
@@ -1723,7 +1724,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasSpellCooldown(uint32 spell_id) const
         {
             SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
-            return itr != m_spellCooldowns.end() && itr->second.end > time(NULL);
+            return itr != m_spellCooldowns.end() && itr->second.end > (time(NULL) - ceil(float(itr->second.milliseconds)/IN_MILLISECONDS));
         }
         uint32 GetSpellCooldownDelay(uint32 spell_id) const
         {
