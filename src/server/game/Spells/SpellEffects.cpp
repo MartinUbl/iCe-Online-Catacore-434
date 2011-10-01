@@ -1126,6 +1126,18 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_caster->CastCustomSpell(m_caster, 77800, &manamod, &effmod, &effmod, true);
                 }
 
+                // Lightning Bolt and Chain Lightning
+                if (m_spellInfo->Id == 403 || m_spellInfo->Id == 421)
+                {
+                    // talent Feedback - modify cooldown of Elemental Mastery
+                    if (m_caster->HasAura(86185))
+                        m_caster->ToPlayer()->ModifySpellCooldown(16166, -3000, true);
+                    else if (m_caster->HasAura(86184))
+                        m_caster->ToPlayer()->ModifySpellCooldown(16166, -2000, true);
+                    else if (m_caster->HasAura(86183))
+                        m_caster->ToPlayer()->ModifySpellCooldown(16166, -1000, true);
+                }
+
                 // Implementation of Elemental Overload mastery profficiency
                 if ((m_spellInfo->Id == 403 || m_spellInfo->Id == 51505 || m_spellInfo->Id == 421) &&
                     m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
