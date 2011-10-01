@@ -3427,6 +3427,10 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
             // remove movement slowing effects
             target->RemoveAurasWithMechanic((1 << MECHANIC_SNARE));
 
+            // Disentanglement (what a wierd name) allows to clear all movement imparing things (root,..)
+            if (target->HasAura(96429))
+                target->RemoveMovementImpairingAuras();
+
             // and polymorphic affects
             if (target->IsPolymorphed())
                 target->RemoveAurasDueToSpell(target->getTransForm());
@@ -3514,6 +3518,10 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
                 target->setPowerType(POWER_MANA);
                 // Remove movement slowing effects also when shifting out
                 target->RemoveAurasWithMechanic((1 << MECHANIC_SNARE));
+
+                // Disentanglement
+                if (target->HasAura(96429))
+                    target->RemoveMovementImpairingAuras();
             }
             target->SetShapeshiftForm(FORM_NONE);
         }
