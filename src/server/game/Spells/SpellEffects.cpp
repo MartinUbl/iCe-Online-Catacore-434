@@ -958,6 +958,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     apply_direct_bonus = false;
                 }
+                // Smite
+                else if (m_spellInfo->Id == 585)
+                {
+                    // Train of Thought
+                    if (m_caster->HasAura(92297) || (m_caster->HasAura(92295) && roll_chance_i(50)))
+                        m_caster->ToPlayer()->ModifySpellCooldown(47540, -500, true);
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
@@ -3579,6 +3586,13 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 int32 bp0 = addhealth*0.2f;
                 m_caster->CastCustomSpell(m_caster, 55533, &bp0, 0, 0, true);
             }
+        }
+        // Greater Heal
+        else if (m_spellInfo->Id == 2060)
+        {
+            // Train of Thought
+            if (m_caster->ToPlayer() && (m_caster->HasAura(92297) || (m_caster->HasAura(92295) && roll_chance_i(50))))
+                m_caster->ToPlayer()->ModifySpellCooldown(89485, -5000, true);
         }
 
         m_damage -= addhealth;
