@@ -681,7 +681,9 @@ void Aura::_ApplyEffectForTargets(uint8 effIndex)
         if (GetApplicationOfTarget((*itr)->GetGUID()))
         {
             // owner has to be in world, or effect has to be applied to self
-            ASSERT((!GetOwner()->IsInWorld() && GetOwner() == *itr) || GetOwner()->IsInMap(*itr));
+            if (!((!GetOwner()->IsInWorld() && GetOwner() == *itr) || GetOwner()->IsInMap(*itr)))
+                return;
+
             (*itr)->_ApplyAuraEffect(this, effIndex);
         }
     }
