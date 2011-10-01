@@ -1259,6 +1259,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             {
                                 // Add charge
                                 pEvangelism->SetCharges(++charges);
+                                pEvangelism->SetStackAmount(charges);
                             }
                             // Refresh duration not considering number of charges
                             pEvangelism->RefreshDuration();
@@ -1270,7 +1271,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                             // Fresh aura has 0 charges, add one
                             if (Aura* aura = caster->GetAura(auraid))
+                            {
                                 aura->SetCharges(1);
+                                aura->SetStackAmount(1);
+                            }
                         }
 
                         // Enable Archangel
