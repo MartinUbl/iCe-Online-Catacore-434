@@ -1643,6 +1643,16 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (crit)
                 damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
 
+            // Mind Flay critical
+            if (crit && m_spellProto->Id == 15407 && caster->ToPlayer())
+            {
+                // Sin and Punishment
+                if (caster->HasAura(87100))
+                    caster->ToPlayer()->ModifySpellCooldown(34433, -10000, true);
+                else if (caster->HasAura(87099))
+                    caster->ToPlayer()->ModifySpellCooldown(34433, -5000, true);
+            }
+
             int32 dmg = damage;
             caster->ApplyResilience(target, &dmg);
             damage = dmg;
