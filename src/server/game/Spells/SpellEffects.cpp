@@ -1216,6 +1216,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (pOrbs->GetStackAmount() > 0)
                 {
                     m_damage = float(m_damage)*(1+pOrbs->GetStackAmount()*0.1f);
+                    int32 es_bp0 = 10;
 
                     // Implementation of Shadow Orbs Power mastery proficiency
                     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
@@ -1223,12 +1224,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&
                         m_damage > 1)
                     {
-                        m_damage = m_damage*(1.0f+(m_caster->ToPlayer()->GetMasteryPoints()*1.4f/100.0f));
+                        m_damage = m_damage*(1.0f+(m_caster->ToPlayer()->GetMasteryPoints()*1.45f/100.0f));
+                        es_bp0 += ceil(m_caster->ToPlayer()->GetMasteryPoints()*1.45f);
                     }
 
                     m_caster->RemoveAurasDueToSpell(77487);
+
                     // Empowered Shadows buff for increased DoT damage
-                    m_caster->CastSpell(m_caster, 95799, true);
+                    m_caster->CastCustomSpell(m_caster, 95799, &es_bp0, 0, 0, true);
                 }
         }
         // Frostbolt (mage)
