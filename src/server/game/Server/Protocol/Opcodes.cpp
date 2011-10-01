@@ -734,7 +734,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_INSPECT_HONOR_STATS,                     STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode   );
     OPCODE( SMSG_INSPECT_HONOR_STATS,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEMASTER_HELLO,                      STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterHelloOpcode   );
-    OPCODE( CMSG_MOVE_START_SWIM_CHEAT,                   STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_MOVE_START_SWIM_CHEAT,                   STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           );
     OPCODE( CMSG_MOVE_STOP_SWIM_CHEAT,                    STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_FORCE_WALK_SPEED_CHANGE,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_WALK_SPEED_CHANGE_ACK,             STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );

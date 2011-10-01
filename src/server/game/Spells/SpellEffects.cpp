@@ -8094,11 +8094,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
             return;
     }
 
-    float ratio = m_caster->GetCombatReach() / std::max(unitTarget->GetCombatReach(), 1.0f);
-    if (ratio < 1.0f)
-        ratio = ratio * ratio * ratio * 0.1f; // volume = length^3
-    else
-        ratio = 0.1f; // dbc value ratio
+    float ratio = 0.1f; // dbc value ratio
     float speedxy = float(m_spellInfo->EffectMiscValue[effIndex]) * ratio;
     float speedz = float(damage) * ratio;
     if (speedxy < 0.1f && speedz < 0.1f)
