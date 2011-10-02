@@ -3905,6 +3905,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 70492: case 72505:                 // Ooze Eruption
         case 72624: case 72625:                 // Ooze Eruption
         case 86704:                             // Paladin: Guardian of Ancient Kings: Ancient Fury
+        case 86367: case 93135: case 93136:     // Conclave of Wind: Nezir:
+        case 93137:                             // Sleet Storm (4 heroic entries)
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;
@@ -3956,6 +3958,25 @@ void SpellMgr::LoadSpellCustomAttr()
         case 77758: // Thrash (Bear form)
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY;
+            count++;
+            break;
+        case 85425: // Conclave of Wind: Anshal: Nurture triggered summoning spells
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_2;
+            count++;
+            break;
+        case 86282: // Conclave of Wind: Anshal:
+        case 93120: // Ravenous Creeper:
+        case 93121: // Toxic Spores
+        case 93122: // 4 difficulty entries
+            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            count++;
+            break;
+        case 85483: // Conclave of Wind:
+        case 93138: // Rohash:
+        case 93139: // Wind Blast
+        case 93140: // 4 difficulty entries
+            // target 104
+            spellInfo->EffectImplicitTargetA[1] = spellInfo->EffectImplicitTargetA[0];
             count++;
             break;
         case 52479: // Gift of the Harvester

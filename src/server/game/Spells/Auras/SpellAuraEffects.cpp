@@ -2286,6 +2286,34 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                          veh->CastSpell(target, 62475, true);
                 }
                 break;
+
+            /* Conclave of Wind enrage abilities */
+            case 85576: case 93181: case 93182: case 93183: // Withering Winds (Anshal)
+            {
+                int32 coef;
+                coef = int32((time(NULL) - GetBase()->GetApplyTime()));
+                int32 bp0 = GetAmount() * coef;
+                if(Unit* caster = GetCaster())
+                    caster->CastCustomSpell(caster, 93168, &bp0, NULL, NULL, true, NULL, this, GetCasterGUID());
+            }
+            break;
+            case 85578: case 93147: case 93148: case 93149: // Chilling Winds (Nezir)
+            {
+                int32 coef = int32((time(NULL) - GetBase()->GetApplyTime()));
+                int32 bp0 = GetAmount() * coef;
+                if(Unit* caster = GetCaster())
+                    caster->CastCustomSpell(caster, 93163, &bp0, NULL, NULL, true, NULL, this, GetCasterGUID());
+            }
+            break;
+            case 85573: case 93190: case 93191: case 93192: // Deafening Winds (Rohash)
+            {
+                int32 coef = int32((time(NULL) - GetBase()->GetApplyTime()));
+                int32 bp0 = GetAmount() * coef;
+                if(Unit* caster = GetCaster())
+                    caster->CastCustomSpell(caster, 93166, &bp0, NULL, NULL, true, NULL, this, GetCasterGUID());
+            }
+            break;
+
             case 64821: // Fuse Armor (Razorscale)
                 if (GetBase()->GetStackAmount() == GetSpellProto()->StackAmount)
                 {

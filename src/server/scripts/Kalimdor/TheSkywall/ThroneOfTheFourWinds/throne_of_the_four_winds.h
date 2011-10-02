@@ -25,16 +25,22 @@ enum Data
     TYPE_CONCLAVE,
     TYPE_ALAKIR,
     MAX_ENCOUNTER,
+    TYPE_CONCL_HELPER,
+    TYPE_CONCL_TARGETS,
 };
 
 enum eCreatures
 {
     NPC_BRIDGE              = 80000,
+    SUMMON_ICEPATCH         = 46186,
+    SUMMON_BREEZE           = 46246,
+    SUMMON_TORNADO          = 46207,
+    SUMMON_CREEPER_TRIGGER  = 45813,
+    SUMMON_RAVENOUS_CREEPER = 45812,
 
     NPC_ANSHAL              = 45870,
     NPC_NEZIR               = 45871,
     NPC_ROHASH              = 45872,
-    NPC_CONCLAVE_CONTROL    = 0,
 
     NPC_ALAKIR              = 46753,
 };

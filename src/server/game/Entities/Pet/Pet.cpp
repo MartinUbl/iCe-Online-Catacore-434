@@ -617,6 +617,17 @@ void Creature::Regenerate(Powers power)
             return;
     }
 
+    // Some creatures need to have no regen for AI purposes
+    switch(GetEntry())
+    {
+    case 45870: // Anshal
+    case 45871: // Nezir
+    case 45872: // Rohash
+        return;
+    default:
+        break;
+    }
+
     // Apply modifiers (if any).
     AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)

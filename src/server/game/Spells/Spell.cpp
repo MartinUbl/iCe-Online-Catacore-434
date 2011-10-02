@@ -2532,12 +2532,58 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 86133 // Tornado (conclave: rohash)
+                    || m_spellInfo->Id == 93141
+                    || m_spellInfo->Id == 93142
+                    || m_spellInfo->Id == 93143)
+                {
+                    radius = 4.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 86367 // Sleet Storm (conclave: nezir)
+                    || m_spellInfo->Id == 93135
+                    || m_spellInfo->Id == 93136
+                    || m_spellInfo->Id == 93137
+                    || m_spellInfo->Id == 86487 // Hurricane (conclave: rohash)
+                    || m_spellInfo->Id == 93144
+                    || m_spellInfo->Id == 93145
+                    || m_spellInfo->Id == 93146
+                    || m_spellInfo->Id == 93060 // Storm Shield (conclave: rohash) damage spells
+                    || m_spellInfo->Id == 93066)
+                {
+                    radius = 90.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 86111 // Ice Patch AOE (conclave: nezir)
+                    || m_spellInfo->Id == 93129
+                    || m_spellInfo->Id == 93130
+                    || m_spellInfo->Id == 93131
+                    || m_spellInfo->Id == 86282 // Toxic Spores (conclave: anshal: ravenous creeper)
+                    || m_spellInfo->Id == 93120
+                    || m_spellInfo->Id == 93121
+                    || m_spellInfo->Id == 93122)
+                {
+                    radius = 10.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
             case TARGET_UNIT_AREA_ALLY_SRC:
             case TARGET_UNIT_AREA_ALLY_DST:
             case TARGET_UNIT_CONE_ALLY:
+                if (m_spellInfo->Id == 84651 // Zephyr (conclave: anshal)
+                    || m_spellInfo->Id == 93117
+                    || m_spellInfo->Id == 93118
+                    || m_spellInfo->Id == 93119)
+                {
+                    radius = 90.0f;
+                    targetType = SPELL_TARGETS_ALLY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, true);
                 targetType = SPELL_TARGETS_ALLY;
                 break;
