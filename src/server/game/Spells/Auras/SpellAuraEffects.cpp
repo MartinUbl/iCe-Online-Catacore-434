@@ -4623,7 +4623,12 @@ void AuraEffect::HandleModPossess(AuraApplication const *aurApp, uint8 mode, boo
     if (apply)
         target->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp);
     else
+    {
         target->RemoveCharmedBy(caster);
+
+        if (!target->ToPlayer()->m_movedPlayer)
+            target->ToPlayer()->SetMover(target);
+    }
 }
 
 // only one spell has this aura
