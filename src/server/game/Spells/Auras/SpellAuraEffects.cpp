@@ -2326,9 +2326,9 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
         case SPELLFAMILY_MAGE:
         {
             // Mirror Image
-            if (GetId() == 55342)
+            //if (GetId() == 55342)
                 // Set name of summons to name of caster
-                target->CastSpell((Unit *)NULL, m_spellProto->EffectTriggerSpell[m_effIndex], true);
+                //target->CastSpell((Unit *)NULL, m_spellProto->EffectTriggerSpell[m_effIndex], true);
             break;
         }
         case SPELLFAMILY_WARLOCK:
