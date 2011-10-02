@@ -1753,6 +1753,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         break;
                     */
+                    // Shadow Word: Death - back damage
+                    // aura fades before the periodic tick happens
+                    case 32409:
+                        {
+                            if(AuraEffect* aurEff = GetEffect(EFFECT_0))
+                                if(AuraApplication* application = GetApplicationOfTarget(caster->GetGUID()))
+                                    aurEff->PeriodicTick(application, caster); // manually add tick at aura remove
+                            break;
+                        }
                     // Spirit of Redemption - linked auras
                     case 27792:
                     case 27795:
