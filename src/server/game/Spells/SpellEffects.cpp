@@ -3299,55 +3299,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
         int32 addhealth = damage;
 
-        // Implementation of Echo of Light mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY &&
-            addhealth > 1)
-        {
-            // Echo of Light HoT effect, amount of health healed by this spell is handled in periodic tick
-            m_caster->CastSpell(unitTarget, 77489, true);
-        }
-
-        // Implementation of Illuminated Healing mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_HOLY &&
-            addhealth > 1)
-        {
-            // Illuminated Healing absorb value and spellcast
-            int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f);
-            m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
-        }
-
-        // Implementation of Symbiosis mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_RESTORATION &&
-            addhealth > 1)
-        {
-            // Symbiosis increases potency of healing if target already affected by some of HoT spells
-            if (m_caster->HasAura(94447) || m_caster->HasAura(33763) || m_caster->HasAura(8936) ||
-                m_caster->HasAura(774) || m_caster->HasAura(48438))
-            {
-                addhealth += addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
-            }
-        }
-
-        // Implementation of Deep Healing mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_RESTORATION &&
-            addhealth > 1)
-        {
-            // Mastery gives 2.5% per mastery point
-            float masterybonus = m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f;
-            // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
-            float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
-
-            addhealth += addhealth*masterybonus*healthcoef;
-        }
-
         // Empowered Touch talent (procs from Regrowth, Nourish and Healing Touch)
         if (unitTarget && m_caster && (m_spellInfo->Id == 8936 || m_spellInfo->Id == 50464 || m_spellInfo->Id == 5185)
             && unitTarget->HasAura(33763))
@@ -3562,6 +3513,59 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
+        /**** Mastery System for healing spells**************/
+
+        // Implementation of Echo of Light mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY &&
+            addhealth > 1)
+        {
+            // Echo of Light HoT effect
+            int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
+            m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
+        }
+
+        // Implementation of Illuminated Healing mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_HOLY &&
+            addhealth > 1)
+        {
+            // Illuminated Healing absorb value and spellcast
+            int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f);
+            m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
+        }
+
+        // Implementation of Symbiosis mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_RESTORATION &&
+            addhealth > 1)
+        {
+            // Symbiosis increases potency of healing if target already affected by some of HoT spells
+            if (m_caster->HasAura(94447) || m_caster->HasAura(33763) || m_caster->HasAura(8936) ||
+                m_caster->HasAura(774) || m_caster->HasAura(48438))
+            {
+                addhealth += addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
+            }
+        }
+
+        // Implementation of Deep Healing mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
+            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_RESTORATION &&
+            addhealth > 1)
+        {
+            // Mastery gives 2.5% per mastery point
+            float masterybonus = m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f;
+            // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
+            float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
+
+            addhealth += addhealth*masterybonus*healthcoef;
+        }
+        /****************************************************/
 
         // Remove Grievious bite if fully healed
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
