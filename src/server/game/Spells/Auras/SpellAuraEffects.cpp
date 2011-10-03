@@ -4626,7 +4626,7 @@ void AuraEffect::HandleModPossess(AuraApplication const *aurApp, uint8 mode, boo
     {
         target->RemoveCharmedBy(caster);
 
-        if (!target->ToPlayer()->m_movedPlayer)
+        if (target && target->ToPlayer() && !target->ToPlayer()->m_movedPlayer)
             target->ToPlayer()->SetMover(target);
     }
 }
