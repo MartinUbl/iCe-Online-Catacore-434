@@ -1443,7 +1443,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
-            if (!caster)
+            if (!caster || !target)
                 break;
 
             if (!target->isAlive())
