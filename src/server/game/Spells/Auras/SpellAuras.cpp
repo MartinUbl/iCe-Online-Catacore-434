@@ -1477,13 +1477,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
-            case SPELLFAMILY_WARRIOR:
-                {
-                    uint32 entry = GetId();
-                    if (entry == 12880 || entry == 14201 || entry == 14202)
-                        caster->ModifyAuraState(AURA_STATE_ENRAGE, apply);
-                }
-                break;
             case SPELLFAMILY_DEATHKNIGHT:
                 if (!caster)
                     break;
@@ -2025,6 +2018,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
+            // Blood Presence
+            if (GetId() == 48263)
+            {
+                // Blood Presence enables using of various abilities such as Rune Strike
+                caster->ModifyAuraState(AURA_STATE_DEFENSE, apply);
+            }
+
             if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_PRESENCE)
             {
                 AuraEffect *bloodPresenceAura=0;  // healing by damage done
@@ -2115,6 +2115,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->RemoveAurasDueToSpell(49772);
                     }
                 }
+            }
+            break;
+        case SPELLFAMILY_WARRIOR:
+            {
+                uint32 entry = GetId();
+                // Enrage
+                if (entry == 12880 || entry == 14201 || entry == 14202)
+                    caster->ModifyAuraState(AURA_STATE_ENRAGE, apply);
             }
             break;
         case SPELLFAMILY_WARLOCK:
