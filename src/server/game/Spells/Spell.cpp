@@ -4735,6 +4735,10 @@ void Spell::TakePower()
         }
     }
 
+    // spell Zealotry doesnt consume holypower, only needs 3 od them to be cast
+    if (GetSpellInfo()->Id == 85696)
+        return;
+
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
     else
