@@ -1406,12 +1406,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 // Inquisition
-                if(GetId() == 84963)
+                else if(GetId() == 84963)
                 {
                     if(caster)
                     {
                         SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1));
                         caster->SetPower(POWER_HOLY_POWER, 0);
+                    }
+                }
+                // Avenging Wrath
+                else if (GetId() == 31884)
+                {
+                    if (caster)
+                    {
+                        if (apply)
+                        {
+                            // Sanctified Wrath
+                            if (caster->HasAura(53376) || caster->HasAura(90286) || caster->HasAura(53375))
+                                caster->CastSpell(caster, 57318, true);
+                        }
+                        else
+                            caster->RemoveAurasDueToSpell(57318);
                     }
                 }
                 break;
