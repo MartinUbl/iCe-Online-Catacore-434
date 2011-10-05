@@ -2252,6 +2252,9 @@ bool Aura::CallScriptEffectPeriodicHandlers(AuraEffect const * aurEff, AuraAppli
     bool preventDefault = false;
     for(std::list<AuraScript *>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end() ; ++scritr)
     {
+        if (!(*scritr))
+            continue;
+
         (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_PERIODIC, aurApp);
         std::list<AuraScript::EffectPeriodicHandler>::iterator effEndItr = (*scritr)->OnEffectPeriodic.end(), effItr = (*scritr)->OnEffectPeriodic.begin();
         for(; effItr != effEndItr ; ++effItr)
