@@ -18065,6 +18065,10 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
 {
     // Return value: false - continue normal handling : true - do not continue
 
+    // Check for ordinal things
+    if (!aura || !aura->GetSpellProto())
+        return false;
+
     SpellEntry const* dummySpell = aura->GetSpellProto();
 
     // BE CAREFUL ! no foregoing checks.
