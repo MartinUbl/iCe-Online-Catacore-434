@@ -1615,6 +1615,14 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
     uint32 newdamage = 0;
     float armor = float(pVictim->GetArmor());
 
+    // decrease enemy armor effectiveness by SPELL_AURA_BYPASS_ARMOR
+    int32 auraEffectivenessReduction = 0;
+    AuraEffectList const & reductionAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_BYPASS_ARMOR);
+    for (AuraEffectList::const_iterator i = reductionAuras.begin(); i != reductionAuras.end(); ++i)
+        if ((*i)->GetCasterGUID() == GetGUID())
+            auraEffectivenessReduction += (*i)->GetAmount();
+    armor = CalculatePctN(armor, 100 - std::min(auraEffectivenessReduction, 100));
+
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
 
@@ -1659,22 +1667,6 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
                     armor = floor(float(armor) * (float(100 - (*itr)->GetAmount()) / 100.0f));
                     break;
                 }
-            }
-        }
-    }
-
-    // Rogue: Find Weakness
-    // (applied by Ambush, Garrote, Cheap Shot)
-    if (pVictim)
-    {
-        // Victim is affected by Find Weakness debuff
-        if (Aura* debuff = pVictim->GetAura(91021))
-        {
-            // We are the attacking Rogue, the debuff is ours
-            if (debuff->GetCaster() == this && this != pVictim)
-            {
-                // Bypass percentage of targets armor
-                armor -= armor * debuff->GetEffect(0)->GetAmount() / 100;
             }
         }
     }
