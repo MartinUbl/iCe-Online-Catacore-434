@@ -994,6 +994,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->HasAura(78785)) // Blessing of the Grove rank 2
                         damage = int32 (damage * 0.06f);
                 }
+                // Starsurge
+                else if (m_spellInfo->Id == 78674)
+                {
+                    // Glyph of Starsurge
+                    if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(62971))
+                        m_caster->ToPlayer()->ModifySpellCooldown(48505, -5000, true);
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
