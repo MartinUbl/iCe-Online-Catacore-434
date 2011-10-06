@@ -5914,7 +5914,7 @@ void Player::SetRegularAttackTime()
     for (uint8 i = 0; i < MAX_ATTACK; ++i)
     {
         Item *tmpitem = GetWeaponForAttack(WeaponAttackType(i), true);
-        if (tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->Block)
+        if (tmpitem && !tmpitem->IsBroken() && !tmpitem->GetProto()->Block)
         {
             ItemPrototype const *proto = tmpitem->GetProto();
             if (proto->Delay)
