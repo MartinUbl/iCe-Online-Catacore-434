@@ -1045,6 +1045,30 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if (m_caster->HasAura(37169))
                             damage += ((Player*)m_caster)->GetComboPoints()*40;
                     }
+
+                    // Cut to the Chase
+                    if (m_caster->HasAura(51667) ||
+                        (m_caster->HasAura(51665) && roll_chance_i(67)) ||
+                        (m_caster->HasAura(51664) && roll_chance_i(33)))
+                    {
+                        if (Aura* pAura = m_caster->GetAura(5171))
+                        {
+                            uint32 duration = 21000;
+
+                            // Improved Slice and Dice
+                            if (m_caster->HasAura(14166))
+                                duration *= 1.5f;
+                            else if (m_caster->HasAura(14165))
+                                duration *= 1.25f;
+
+                            // Glyph of Slice and Dice
+                            if (m_caster->HasAura(56810))
+                                duration += 6000;
+
+                            pAura->SetMaxDuration(duration);
+                            pAura->SetDuration(duration);
+                        }
+                    }
                 }
                 // Eviscerate
                 else if ((m_spellInfo->SpellFamilyFlags[0] & 0x00020000) && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1064,6 +1088,30 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         {
                             if (Aura* pAura = unitTarget->GetAura(1943))
                                 pAura->RefreshDuration();
+                        }
+                    }
+
+                    // Cut to the Chase
+                    if (m_caster->HasAura(51667) ||
+                        (m_caster->HasAura(51665) && roll_chance_i(67)) ||
+                        (m_caster->HasAura(51664) && roll_chance_i(33)))
+                    {
+                        if (Aura* pAura = m_caster->GetAura(5171))
+                        {
+                            uint32 duration = 21000;
+
+                            // Improved Slice and Dice
+                            if (m_caster->HasAura(14166))
+                                duration *= 1.5f;
+                            else if (m_caster->HasAura(14165))
+                                duration *= 1.25f;
+
+                            // Glyph of Slice and Dice
+                            if (m_caster->HasAura(56810))
+                                duration += 6000;
+
+                            pAura->SetMaxDuration(duration);
+                            pAura->SetDuration(duration);
                         }
                     }
                 }
