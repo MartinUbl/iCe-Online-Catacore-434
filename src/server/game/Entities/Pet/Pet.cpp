@@ -111,7 +111,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     if(slotID == PET_SLOT_ACTUAL_PET_SLOT)
         slotID = owner->m_currentPetSlot;
-    
+
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult result;
@@ -166,7 +166,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         m_loading = false;
         return false;
     }
-    
+
     PetType pet_type = PetType(fields[18].GetUInt8());
     if (pet_type == HUNTER_PET)
     {
@@ -176,6 +176,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             m_loading = false;
             return false;
         }
+    }
+    else if (pet_type == SUMMON_PET && summon_spell_id && !owner->HasSpell(summon_spell_id))
+    {
+        // pet is summon but owner has no summon spell (e.g.: Water Elemental)
+        m_loading = false;
+        return false;
     }
 
     uint32 pet_number = fields[0].GetUInt32();
