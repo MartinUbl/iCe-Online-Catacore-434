@@ -629,14 +629,18 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             case SPELLFAMILY_WARLOCK:
             {
                 // Shadow Bolt, Incinerate and Hand of Gul'dan
-                if (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521)
+                if (m_caster->ToPlayer()
+                    && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521))
                 {
                     // Impending Doom talent
                     if ((m_caster->HasAura(85108) && roll_chance_i(15)) ||
                         (m_caster->HasAura(85107) && roll_chance_i(10)) ||
                         (m_caster->HasAura(85106) && roll_chance_i(5)))
                     {
-                        // TODO: find way to modify cooldown
+                        // Modify cooldown of Metamorphosis and linked spells
+                        m_caster->ToPlayer()->ModifySpellCooldown(47241, -15000, true);
+                        m_caster->ToPlayer()->ModifySpellCooldown(54817, -15000, true);
+                        m_caster->ToPlayer()->ModifySpellCooldown(54879, -15000, true);
                     }
                 }
 
