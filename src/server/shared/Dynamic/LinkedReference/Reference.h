@@ -24,7 +24,6 @@
 #define _REFERENCE_H
 
 #include "Dynamic/LinkedList.h"
-#include "Logging/Log.h"
 
 //=====================================================
 
@@ -37,19 +36,16 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         // Tell our refTo (target) object that we have a link
         virtual void targetObjectBuildLink()
         {
-            sLog->outError("Called virtual method targetObjectBuildLink() with no candidate!");
         }
 
         // Tell our refTo (taget) object, that the link is cut
         virtual void targetObjectDestroyLink()
         {
-            sLog->outError("Called virtual method targetObjectDestroyLink() with no candidate!");
         }
 
         // Tell our refFrom (source) object, that the link is cut (Target destroyed)
         virtual void sourceObjectDestroyLink()
         {
-            sLog->outError("Called virtual method sourceObjectDestroyLink() with no candidate!");
         }
     public:
         Reference() { iRefTo = NULL; iRefFrom = NULL; }
