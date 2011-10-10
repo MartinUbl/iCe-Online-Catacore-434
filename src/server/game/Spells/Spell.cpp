@@ -1203,8 +1203,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         }
     }
 
-    // Do not take combo points on dodge and miss
+    // Do not take combo points on dodge and miss and some special cases
     if (m_needComboPoints && m_targets.getUnitTargetGUID() == target->targetGUID)
+    {
+        // When miss or dodge
         if (missInfo != SPELL_MISS_NONE)
         {
             m_needComboPoints = false;
@@ -1216,6 +1218,13 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
                     (missInfo == SPELL_MISS_PARRY))
                     m_caster->ToPlayer()->RestoreSpellMods(this, 14177);
         }
+
+        // Special cases
+        // Improved Expose Armor
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 8647 &&
+            ((m_caster->HasAura(14168) && roll_chance_i(50)) || m_caster->HasAura(14169)))
+            m_needComboPoints = false;
+    }
 
     // Trigger info was not filled in spell::preparedatafortriggersystem - we do it now
     if (canEffectTrigger && !procAttacker && !procVictim)
