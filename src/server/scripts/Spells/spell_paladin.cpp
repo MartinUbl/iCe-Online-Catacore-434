@@ -70,35 +70,20 @@ public:
 
         void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
-            Unit * pVictim = GetTarget();
-            int32 remainingHealth = pVictim->GetHealth() - dmgInfo.GetDamage();
-            uint32 allowedHealth = pVictim->CountPctFromMaxHealth(35);
-            // If damage kills us
-            if (remainingHealth <= 0 && !pVictim->ToPlayer()->HasSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL))
-            {
-                // Cast healing spell, completely avoid damage
-                absorbAmount = dmgInfo.GetDamage();
+            Unit * target = GetTarget();
 
-                uint32 defenseSkillValue = pVictim->GetDefenseSkillValue();
-                // Max heal when defense skill denies critical hits from raid bosses
-                // Formula: max defense at level + 140 (raiting from gear)
-                uint32 reqDefForMaxHeal  = pVictim->getLevel() * 5 + 140;
-                float pctFromDefense = (defenseSkillValue >= reqDefForMaxHeal)
-                    ? 1.0f
-                    : float(defenseSkillValue) / float(reqDefForMaxHeal);
-
-                int32 healAmount = int32(pVictim->CountPctFromMaxHealth(uint32(healPct * pctFromDefense)));
-                pVictim->CastCustomSpell(pVictim, PAL_SPELL_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff);
-                pVictim->ToPlayer()->AddSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL, 0, time(NULL) + 120);
-            }
-            else if (remainingHealth < int32(allowedHealth))
+            // we carry on
+            if (dmgInfo.GetDamage() < target->GetHealth())
             {
-                // Reduce damage that brings us under 35% (or full damage if we are already under 35%) by x%
-                uint32 damageToReduce = (pVictim->GetHealth() < allowedHealth)
-                    ? dmgInfo.GetDamage()
-                    : allowedHealth - remainingHealth;
-                absorbAmount = CalculatePctN(damageToReduce, absorbPct);
+                absorbAmount = CalculatePctN(dmgInfo.GetDamage(), absorbPct);
+                return;
             }
+
+            // damage kills us
+            int32 healAmount = int32(target->CountPctFromMaxHealth(healPct));
+            target->CastCustomSpell(target, PAL_SPELL_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true);
+            absorbAmount = dmgInfo.GetDamage();
+            Remove(AURA_REMOVE_BY_ENEMY_SPELL);
         }
 
         void Register()
