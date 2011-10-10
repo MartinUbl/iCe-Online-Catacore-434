@@ -3136,7 +3136,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             target->RemoveAurasDueToSpell(spellId2);
 
         // Improved Barkskin - apply/remove armor bonus due to shapeshift
-        if (Player *pl=target->ToPlayer())
+        if (Player* pl = target->ToPlayer())
         {
             if (pl->HasSpell(63410) || pl->HasSpell(63411))
             {
@@ -3543,6 +3543,15 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
     }
     else
     {
+        // Primal Madness energy buff removal - need to remove before setPowerType method
+        if (Player* pl = target->ToPlayer())
+        {
+            if (pl->HasAura(80879)) // Rank 1
+                pl->RemoveAurasDueToSpell(80879);
+            if (pl->HasAura(80886)) // Rank 2
+                pl->RemoveAurasDueToSpell(80886);
+        }
+
         // Exception for Vanish (will not be removing Stealth)
         // removing Vanish will also unapply Stealth, so this is fine
         if (GetBase()->GetSpellProto()->Id != 11327)
