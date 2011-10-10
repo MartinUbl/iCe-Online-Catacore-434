@@ -3877,6 +3877,11 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
             count++;
             break;
+        case 74522: // Skinning (Grandmaster)
+            // Because of bug in DBC, we need to set basepoints manually
+            spellInfo->EffectBasePoints[1] = 7;
+            count++;
+            break;
         case 46841: // Escape to the Isle of Quel'Danas
             // not sure why this is needed
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
