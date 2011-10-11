@@ -4091,6 +4091,19 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
                 if (pAura->ModStackAmount(-1))
                     pAura->Remove(AURA_REMOVE_BY_EXPIRE);
             break;
+        case 5405:  // Replenish Mana (mage's Mana Gem)
+        {
+            // Improved Mana Gem
+            int32 bp0 = 0;
+            if (m_caster->HasAura(31584))
+                bp0 = 0.01f*m_caster->GetMaxPower(POWER_MANA);
+            else if (m_caster->HasAura(31585))
+                bp0 = 0.02f*m_caster->GetMaxPower(POWER_MANA);
+
+            if (bp0)
+                m_caster->CastCustomSpell(m_caster, 83098, &bp0, &bp0, 0, true);
+            break;
+        }
         default:
             break;
     }
