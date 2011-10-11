@@ -2154,6 +2154,39 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->RemoveAurasDueToSpell(200000);
                 }
             }
+            // Curse of Weakness
+            else if (GetSpellProto()->Id == 702 && caster && caster->ToPlayer() && target)
+            {
+                if (apply)
+                {
+                    // Jinx, casting CotW bonus
+                    int32 bp0 = 0;
+                    if (caster->HasAura(85479))
+                        bp0 = -10;
+                    else if (caster->HasAura(18179))
+                        bp0 = -5;
+
+                    if (bp0 != 0)
+                    {
+                        if (target->getPowerType() == POWER_RUNIC_POWER)
+                            caster->CastCustomSpell(target, 85541, &bp0, 0, 0, true);
+                        else if (target->getPowerType() == POWER_FOCUS)
+                            caster->CastCustomSpell(target, 85542, &bp0, 0, 0, true);
+                        else if (target->getPowerType() == POWER_ENERGY)
+                            caster->CastCustomSpell(target, 85540, &bp0, 0, 0, true);
+                        else if (target->getPowerType() == POWER_RAGE)
+                            caster->CastCustomSpell(target, 85539, &bp0, 0, 0, true);
+                    }
+                }
+                else
+                {
+                    // Remove all possible Jinxes
+                    target->RemoveAurasDueToSpell(85539);
+                    target->RemoveAurasDueToSpell(85540);
+                    target->RemoveAurasDueToSpell(85541);
+                    target->RemoveAurasDueToSpell(85542);
+                }
+            }
             break;
     }
 }
