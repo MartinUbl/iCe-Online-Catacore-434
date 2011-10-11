@@ -1429,10 +1429,9 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
         damageInfo->damage = 0;
 
     // Druids Savage Roar increases white dmg by percentage
-    if (this->ToPlayer() && HasAura(52610))
-        if (AuraEffect* buff = GetAuraEffect(52610, EFFECT_1))
-            damageInfo->damage += damageInfo->damage * buff->GetAmount() / 100;
-
+    int32 mod = GetTotalAuraModifier(SPELL_AURA_344);
+    if (ToPlayer() && mod != 0)
+        damageInfo->damage += damageInfo->damage * mod / 100;
 }
 
 void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
