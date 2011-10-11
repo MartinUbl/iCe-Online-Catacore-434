@@ -1203,6 +1203,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                         }
                         break;
+                    case 1490: // Curse of the Elements
+                        if (!caster || !caster->ToPlayer())
+                            break;
+
+                        // Jinx, casting Jinx: Curse of the Elements
+                        if (caster->HasAura(85479))
+                            caster->CastSpell(target, 86105, true);
+                        else if (caster->HasAura(18179))
+                            caster->CastSpell(target, 85547, true);
+                        break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
