@@ -4744,6 +4744,26 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     if (dispelMask & (1 << DISPEL_DISEASE) && unitTarget->HasAura(50536))
         dispelMask &= ~(1 << DISPEL_DISEASE);
 
+    // Cleanse (paladin)
+    if (m_spellInfo->Id == 4987 && effIndex == EFFECT_0)
+    {
+        // Acts of Sacrifice also removes one movement imparing effect
+        if (m_caster->HasAura(85795) || m_caster->HasAura(85446))
+        {
+            uint32 mechanic_mask = (1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT);
+            Unit::AuraApplicationMap const& auraMap = m_caster->GetAppliedAuras();
+            for (Unit::AuraApplicationMap::const_iterator iter = auraMap.begin(); iter != auraMap.end(); ++iter)
+            {
+                Aura const* aura = iter->second->GetBase();
+                if (GetAllSpellMechanicMask(aura->GetSpellProto()) & mechanic_mask)
+                {
+                    m_caster->RemoveAurasDueToSpell(aura->GetId());
+                    break;
+                }
+            }
+        }
+    }
+
     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
     for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
