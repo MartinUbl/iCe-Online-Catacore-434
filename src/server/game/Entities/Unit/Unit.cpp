@@ -557,6 +557,16 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (damagetype != NODAMAGE)
     {
+        // Improved Polymorph - needs to be handled before Polymorph removal
+        if (ToPlayer() && (HasAura(11210) || HasAura(12592)) && pVictim->HasAura(118) && !HasAura(87515))
+        {
+            CastSpell(this, 87515, true); // Cooldown marker
+            if (HasAura(11210))
+                CastSpell(pVictim, 83046, true);
+            else if (HasAura(12592))
+                CastSpell(pVictim, 83047, true);
+        }
+
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
         pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto ? spellProto->Id : 0);
 
