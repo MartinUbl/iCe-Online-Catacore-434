@@ -5626,6 +5626,22 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 if (found)
                     totalDamagePercentMod *= 1.2f;          // 120% if poisoned
             }
+            // Backstab
+            else if (m_spellInfo->Id == 53)
+            {
+                if (m_caster && m_caster->ToPlayer() && unitTarget && unitTarget->GetHealthPct() < 35.0f)
+                {
+                    // Murderous Intent
+                    int32 bp0 = 0;
+                    if (m_caster->HasAura(14159))
+                        bp0 = 30;
+                    else if (m_caster->HasAura(14158))
+                        bp0 = 15;
+
+                    if (bp0)
+                        m_caster->CastCustomSpell(m_caster, 79132, &bp0, 0, 0, true);
+                }
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:
