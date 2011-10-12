@@ -1447,12 +1447,38 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
             //Wrath
             case 5176:
                 if(EclipseLeft)
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE,-13);
+
+                    if (!((DruidPlayer*)m_caster)->IsEclipseDriverLeft())
+                        break;
+                    // talent Euphoria - generate 2x eclipse
+                    int32 bp0 = -13;
+                    if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
+                        ((m_caster->HasAura(81062) && roll_chance_i(24))
+                        || (m_caster->HasAura(81061) && roll_chance_i(12))))
+                    {
+                        // Doesn't work as intended, leave alone and modify manually
+                        //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    }
+                }
                 break;
             //Starfire
             case 2912:
                 if(!EclipseLeft)
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE, 20);
+
+                    if (((DruidPlayer*)m_caster)->IsEclipseDriverLeft())
+                        break;
+                    // talent Euphoria - generate 2x eclipse
+                    int32 bp0 = 20;
+                    if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
+                        ((m_caster->HasAura(81062) && roll_chance_i(24))
+                        || (m_caster->HasAura(81061) && roll_chance_i(12))))
+                        m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                }
                 break;
             //Starsurge
             case 78674:

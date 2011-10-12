@@ -14064,12 +14064,32 @@ void Unit::SetPower(Powers power, int32 val)
             //run solar eclipse
             CastSpell(this, 48517, true);
             pPlayerDruid->TurnEclipseDriver(true);
+
+            // Euphoria
+            int32 bp0 = 0;
+            if (HasAura(81062))
+                bp0 = 16;
+            else if (HasAura(81061))
+                bp0 = 8;
+
+            if (bp0)
+                CastCustomSpell(this, 81070, &bp0, 0, 0, true);
         }
         else if(val <= -100 && !HasAura(48518))
         {
             //run lunar eclipse
             CastSpell(this, 48518, true);
             pPlayerDruid->TurnEclipseDriver(false);
+
+            // Euphoria
+            int32 bp0 = 0;
+            if (HasAura(81062))
+                bp0 = 16;
+            else if (HasAura(81061))
+                bp0 = 8;
+
+            if (bp0)
+                CastCustomSpell(this, 81070, &bp0, 0, 0, true);
         }
         else if(val >= 0 && !pPlayerDruid->IsEclipseDriverLeft() && HasAura(48518))
         {
