@@ -3635,6 +3635,16 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
             target->SetShapeshiftForm(FORM_NONE);
         }
 
+        // Stealth also sets duration of Overkill ability
+        if (GetBase()->GetSpellProto()->Id == 1784)
+        {
+            if (Aura* pOverkill = target->GetAura(58427))
+            {
+                pOverkill->SetMaxDuration(20000);
+                pOverkill->SetDuration(20000);
+            }
+        }
+
         switch(form)
         {
             // Nordrassil Harness - bonus
