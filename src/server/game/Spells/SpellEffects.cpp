@@ -2760,12 +2760,17 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             }
             break;
         }
-        // Vanish (not exist)
+        // Vanish (change Stealth with nonexisting Vanish)
         case 11327:
         {
+            // Reset cooldown on stealth if needed
+            if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
+                unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
+
             triggered_spell_id = 1784;
             break;
         }
+        // Vanish (not exist, change with Stealth - needs stealth to be cast)
         case 18461:
         {
             unitTarget->RemoveMovementImpairingAuras();
@@ -2774,10 +2779,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             // If this spell is given to an NPC, it must handle the rest using its own AI
             if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
-
-            // Reset cooldown on stealth if needed
-            if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
-                unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
             triggered_spell_id = 11327;
             break;
