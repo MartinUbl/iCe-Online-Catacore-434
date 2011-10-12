@@ -5000,6 +5000,7 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
                     target->ToPlayer()->GetSession()->SendPacket(&data);
                 }
             }
+            break;
         case 7744: // Will of the Forsaken
             // Shares cooldown with PvP Trinket (undead)
             if (target->ToPlayer() && target->ToPlayer()->GetSpellCooldownDelay(42292) < 30)
