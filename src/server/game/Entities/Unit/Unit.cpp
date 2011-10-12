@@ -15032,10 +15032,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                     break;
             }
         }
-        // Vanish - do not break stealth if has triggered aura
+        // Vanish - does not break stealth if has triggered aura
         if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 11327)
             takeCharges = false;
-        if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 1784 && pTarget->HasAura(11327))
+        if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 1784 && (HasAura(11327) || pTarget->HasAura(11327)))
             takeCharges = false;
 
         // Remove charge (aura can be removed by triggers)
