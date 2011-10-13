@@ -6318,7 +6318,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const *aurApp, uint8
     }
 
     // DK - Shadow Infusion
-    if (GetSpellProto()->Id == 91342 && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+    if (GetCaster() && GetSpellProto() && GetSpellProto()->Id == 91342 && GetCaster()->GetTypeId() == TYPEID_PLAYER)
     {
         // Dark Transformation is available after 5 stacks are reached
         // also unapply when aura fades
