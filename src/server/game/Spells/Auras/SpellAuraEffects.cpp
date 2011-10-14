@@ -6508,7 +6508,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 caster->RemoveAurasDueToSpell(79808); // removes Arcane Missiles enabler spell
 
             // Everlasting Affliction: Haunt has chance to refresh duration of Corruption
-            if (m_spellProto->Id == 48181)
+            if (caster && m_spellProto->Id == 48181)
             {
                 if ((caster->HasAura(47201) && roll_chance_i(33)) ||
                     (caster->HasAura(47202) && roll_chance_i(66)) ||
