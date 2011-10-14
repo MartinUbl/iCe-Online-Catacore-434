@@ -1604,6 +1604,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             if ( caster->ToPlayer() && ((caster->HasAura(77755) && roll_chance_i(10)) ||
                                 (caster->HasAura(77756) && roll_chance_i(20))) )
                                 caster->ToPlayer()->RemoveSpellCooldown(51505, true);
+                            break;
                         }
                     // Shadow Word: Death - self damage spell
                     case 32409:
@@ -1620,6 +1621,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             int32 bp0 = 10;
                             target->CastCustomSpell(target,89007,&bp0,0,0,true);
                         }
+                        break;
                     }
                     case 43093:
                     case 31956:
