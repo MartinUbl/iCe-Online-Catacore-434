@@ -902,23 +902,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PRIEST:
             {
-                // Shadow Word: Death - deals damage equal to damage done to caster
-                if ((m_spellInfo->SpellFamilyFlags[1] & 0x2))
-                {
-                    // Deals three times as much damage to targets below 25%
-                    if (unitTarget->GetHealthPct() < 25.0f)
-                        damage *= 3;
-
-                    int32 back_damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
-                    // Pain and Suffering reduces damage
-                    if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
-                        back_damage -= aurEff->GetAmount() * back_damage / 100;
-
-                    if (back_damage < int32(unitTarget->GetHealth()))
-                        m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
-                }
                 // Mind Blast
-                else if (m_spellInfo->Id == 8092)
+                if (m_spellInfo->Id == 8092)
                 {
                     // Applies Mind Trauma effect if:
                     // We are in Shadow Form
@@ -1228,6 +1213,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                break;
             }
             case SPELLFAMILY_PALADIN:
             {
@@ -1311,6 +1297,31 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Empowered Shadows buff for increased DoT damage
                     m_caster->CastCustomSpell(m_caster, 95799, &es_bp0, 0, 0, true);
                 }
+            break;
+        }
+        // Shadow Word: Death
+        case 32379:
+        {
+            // Deals three times as much damage to targets below 25%
+            if (unitTarget->GetHealthPct() < 25.0f)
+                m_damage *= 3;
+
+            // Target is not killed
+            if (m_damage < int32(unitTarget->GetHealth()))
+            {
+                // Deals damage equal to damage done to caster
+                int32 back_damage = m_damage;
+                // Pain and Suffering reduces damage
+                if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
+                    back_damage -= aurEff->GetAmount() * back_damage / 100;
+                m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
+
+                if (unitTarget->GetHealthPct() < 25.0f)
+                {
+                    //TODO: Glyph of Shadow Word: Death
+                }
+            }
+            break;
         }
         // Frostbolt (mage)
         case 116:
@@ -1327,6 +1338,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_caster->HasAura(12982))
                     m_damage *= 1.2f;
             }
+            break;
         }
         default:
             break;
