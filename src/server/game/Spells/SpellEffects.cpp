@@ -3519,7 +3519,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 bp0 = addhealth*0.12f;
 
             if (bp0)
-                unitTarget->CastCustomSpell(unitTarget, 81262, &bp0, &bp0, &bp0, true);
+                unitTarget->CastCustomSpell(unitTarget, 81262, &bp0, &bp0, &bp0, true, 0, 0, caster->GetGUID());
 
             //addhealth += tickheal * tickcount;
             //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
