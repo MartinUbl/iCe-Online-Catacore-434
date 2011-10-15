@@ -88,8 +88,10 @@ void InitOpcodeTable()
     OPCODE( CMSG_GUILD_QUERY,                             STATUS_AUTHED,   &WorldSession::HandleGuildQueryOpcode          );
     OPCODE( SMSG_GUILD_QUERY_RESPONSE,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_COMMENTATOR_START_WARGAME,               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( SMSG_ITEM_QUERY_SINGLE_RESPONSE,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_ITEM_QUERY_MULTIPLE_RESPONSE,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_DB_REPLY,                                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_HOTFIX_NOTIFY_BLOP,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_HOTFIX_NOTIFY,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_REQUEST_HOTFIX,                          STATUS_AUTHED,   &WorldSession::HandleRequestHotFixOpcode       );
     OPCODE( CMSG_PAGE_TEXT_QUERY,                         STATUS_LOGGEDIN, &WorldSession::HandlePageTextQueryOpcode       );
     OPCODE( SMSG_PAGE_TEXT_QUERY_RESPONSE,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_QUEST_QUERY,                             STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT, &WorldSession::HandleQuestQueryOpcode );
