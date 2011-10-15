@@ -4995,6 +4995,7 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
         case 42292: // PvP trinket
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_DISARM, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SILENCE, apply);
+            mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
             // Shares cooldown with Will of the Forsaken (undead)
             if (target->ToPlayer() && target->HasSpell(7744) && target->ToPlayer()->GetSpellCooldownDelay(7744) < 30)
