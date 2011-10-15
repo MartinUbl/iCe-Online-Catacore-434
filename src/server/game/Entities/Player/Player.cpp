@@ -26034,17 +26034,24 @@ void Player::SendRefundInfo(Item *item)
     }
 
     WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
-    data << uint64(item->GetGUID());                    // item guid
-    data << uint32(item->GetPaidMoney());               // money cost
-    //data << uint32(iece->reqhonorpoints);               // honor point cost
-    //data << uint32(iece->reqarenapoints);               // arena point cost
-    for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i)                       // item cost data
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i) // item cost data
     {
-        data << uint32(iece->RequiredCurrency[i]);
-        data << uint32(iece->RequiredCurrencyCount[i]);
+        data << uint32(iece->RequiredItemCount[i]);
+        data << uint32(iece->RequiredItem[i]);
     }
-    data << uint32(0);
+    data << uint32(0); // unknown
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i) // item cost data
+    {
+        uint32 currencycount = iece->RequiredCurrencyCount[i];
+        uint32 currencyid = iece->RequiredCurrency[i];
+        if (currencyid == 396 || currencyid == 395 || currencyid == 392)
+            currencycount = currencycount / PLAYER_CURRENCY_PRECISION;
+        data << uint32(currencycount);
+        data << uint32(currencyid);
+    }
     data << uint32(GetTotalPlayedTime() - item->GetPlayedTime());
+    data << uint64(item->GetGUID());
+    data << uint64(item->GetPaidMoney());
     GetSession()->SendPacket(&data);
 }
 
@@ -26082,9 +26089,10 @@ void Player::RefundItem(Item *item)
     if (item->IsRefundExpired())    // item refund has expired
     {
         item->SetNotRefundable(this);
-        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4);
-        data << uint64(item->GetGUID());             // Guid
-        data << uint32(10);                          // Error!
+        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1+8+1);
+        data << uint8(0x00);              // refund failed
+        data << uint64(item->GetGUID());  // guid
+        data << uint8(1);                 // cannot be refunded
         GetSession()->SendPacket(&data);
         return;
     }
@@ -26104,10 +26112,10 @@ void Player::RefundItem(Item *item)
     }
 
     bool store_error = false;
-	for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
     {
-		uint32 count = iece->RequiredCurrency[i];
-		uint32 itemid = iece->RequiredCurrencyCount[i];
+        uint32 count = iece->RequiredItem[i];
+        uint32 itemid = iece->RequiredItemCount[i];
 
         if (count && itemid)
         {
@@ -26123,24 +26131,64 @@ void Player::RefundItem(Item *item)
 
     if (store_error)
     {
-        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4);
-        data << uint64(item->GetGUID());                 // Guid
-        data << uint32(10);                              // Error!
+        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1+8+1);
+        data << uint8(0x00);               // refund failed
+        data << uint64(item->GetGUID());   // guid
+        data << uint8(9);                  // bags are full
         GetSession()->SendPacket(&data);
         return;
     }
 
-    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 8+4+4+4+4+4*4+4*4);
-    data << uint64(item->GetGUID());                    // item guid
-    data << uint32(0);                                  // 0, or error code
-    data << uint32(item->GetPaidMoney());               // money cost
-    //data << uint32(iece->reqhonorpoints);               // honor point cost
-    //data << uint32(iece->reqarenapoints);               // arena point cost
-    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)  // item cost data
+    store_error = false; // reuse variable
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
     {
-		data << uint32(iece->RequiredCurrency[i]);
-		data << uint32(iece->RequiredCurrencyCount[i]);
+        uint32 currencyid = iece->RequiredCurrency[i];
+        uint32 currencycount = iece->RequiredCurrencyCount[i];
+        if (currencyid == 396 || currencyid == 395 || currencyid == 392)
+            currencycount = currencycount / PLAYER_CURRENCY_PRECISION;
+
+        if (currencyid && currencycount)
+        {
+            const CurrencyTypesEntry* currency = sCurrencyTypesStore.LookupEntry(currencyid);
+            if (!currency)
+                continue;
+
+            uint32 totalCap = currency->TotalCap;
+            if (currencyid == 396 || currencyid == 395 || currencyid == 392)
+                totalCap = totalCap / PLAYER_CURRENCY_PRECISION;
+            if (totalCap && GetCurrency(currencyid) + currencycount > totalCap)
+            {
+                store_error = true;
+                break;
+            }
+        }
     }
+
+    if (store_error)
+    {
+        WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1+8+1);
+        data << uint8(0x00);              // failed
+        data << uint64(item->GetGUID());  // guid
+        data << uint8(10);                // currency refund would exceed cap
+        GetSession()->SendPacket(&data);
+        return;
+    }
+
+    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1+8+4*4+4+4*4+4);
+    data << uint8(0x80);                                     // success
+    data << uint64(item->GetGUID());                         // item guid
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)      // item cost data
+    {
+        data << uint32(iece->RequiredItemCount[i]);
+        data << uint32(iece->RequiredItem[i]);
+    }
+    data << uint32(item->GetPaidMoney());
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i) // currency cost data
+    {
+        data << uint32(iece->RequiredCurrencyCount[i]);
+        data << uint32(iece->RequiredCurrency[i]);
+    }
+    data << uint32(0); // no error
     GetSession()->SendPacket(&data);
 
     // Delete any references to the refund data
@@ -26150,10 +26198,10 @@ void Player::RefundItem(Item *item)
     DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
     // Grant back extendedcost items
-    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
     {
-		uint32 count = iece->RequiredCurrencyCount[i];
-		uint32 itemid = iece->RequiredCurrency[i];
+        uint32 count = iece->RequiredItemCount[i];
+        uint32 itemid = iece->RequiredItem[i];
         if (count && itemid)
         {
             ItemPosCountVec dest;
@@ -26161,6 +26209,19 @@ void Player::RefundItem(Item *item)
             ASSERT(msg == EQUIP_ERR_OK) /// Already checked before
             Item* it = StoreNewItem(dest, itemid, true);
             SendNewItem(it, count, true, false, true);
+        }
+    }
+
+    // Grant back extendedcost currency
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+    {
+        uint32 count = iece->RequiredCurrencyCount[i];
+        uint32 currid = iece->RequiredCurrency[i];
+        if (currid == 396 || currid == 395 || currid == 392)
+            count = count / PLAYER_CURRENCY_PRECISION;
+        if (count && currid)
+        {
+            ModifyCurrency(currid, count);
         }
     }
 
