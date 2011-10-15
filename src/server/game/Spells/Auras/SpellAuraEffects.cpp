@@ -720,69 +720,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
             }
-            // Corruption
-            else if (GetId() == 172)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 1.2f / 6.0f; // 6.0f = duration / amplitude
-                }
-            }
-            // Bane of Agony
-            else if (GetId() == 980)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 1.2f / 12.0f; // 12.0f = duration / amplitude
-                }
-            }
-            // Unstable Affliction
-            else if (GetId() == 30108)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 1.0f / 5.0f; // 5.0f = duration / amplitude
-                }
-            }
-            // Immolate
-            else if (GetId() == 348)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
-                    amount += spellPower * 1.0f / 5.0f; // 5.0f = duration / amplitude
-                }
-            }
-            // Shadowflame
-            else if (GetId() == 47960)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 0.667f; // 6.67% per tick
-                }
-            }
-            // Seed of Corruption
-            else if (GetId() == 27243)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 0.25; // 25% per tick
-                }
-            }
-            // Drain Life and Drain Life: Soulburn
-            else if (GetId() == 689 || GetId() == 89420)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint32 spellPower = int32(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-                    amount += spellPower * 0.143f; // 14.30% per tick
-                }
-            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
