@@ -1548,17 +1548,75 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
                         break;
                     case 589:   // Shadow Word: Pain
+                        {
                         // Shadowy Apparition
                         if ((caster->HasAura(78204) && (roll_chance_i(12) || (caster->isMoving() && roll_chance_i(60))))
                             || (caster->HasAura(78203) && (roll_chance_i(8) || (caster->isMoving() && roll_chance_i(40))))
                             || (caster->HasAura(78202) && (roll_chance_i(4) || (caster->isMoving() && roll_chance_i(20)))))
                             caster->CastSpell(target, 87212, true, 0, 0, target->GetGUID());
-                        // do not break, also should proc Shadow Orbs
+                        
+                        // Shadow Orbs proc chance
+                        if (caster->HasAura(95740) && roll_chance_i(10))
+                            caster->CastSpell(caster, 77487, true);
+
+                        break;
+                        }
                     case 15407: // Mind Flay
                     {
                         // Shadow Orbs proc chance
                         if (caster->HasAura(95740) && roll_chance_i(10))
                             caster->CastSpell(caster, 77487, true);
+
+                        // Dark Evangelism
+                        // Player has the talent
+                        uint32 auraid = 0;
+                        if(caster->HasAura(81659)) // Rank 1
+                        {
+                            auraid = 87117;
+                            // Override Evangelism (holy)
+                            caster->RemoveAurasDueToSpell(81660);
+                        }
+                        else if(caster->HasAura(81662)) // Rank 2
+                        {
+                            auraid = 87118;
+                            // Override Evangelism (holy)
+                            caster->RemoveAurasDueToSpell(81661);
+                        }
+                        else
+                            break;
+
+                        // Aura is already active
+                        if (Aura* pEvangelism = caster->GetAura(auraid))
+                        {
+                            uint8 charges = pEvangelism->GetCharges();
+                            if (charges < 5)
+                            {
+                                // Add charge
+                                pEvangelism->SetCharges(++charges);
+                                pEvangelism->SetStackAmount(charges);
+                            }
+                            // Refresh duration not considering number of charges
+                            pEvangelism->RefreshDuration();
+                        }
+                        else
+                        {
+                            // Cast a new one
+                            caster->CastSpell(caster, auraid, true);
+
+                            // Fresh aura has 0 charges, add one
+                            if (Aura* aura = caster->GetAura(auraid))
+                            {
+                                aura->SetCharges(1);
+                                aura->SetStackAmount(1);
+                            }
+                        }
+
+                        // Enable Archangel
+                        if (Aura* pAura = caster->GetAura(87154))
+                            pAura->RefreshDuration();
+                        else
+                            caster->CastSpell(caster, 87154, true);
+
                         break;
                     }
                     case 8050:   // Flame Shock tick

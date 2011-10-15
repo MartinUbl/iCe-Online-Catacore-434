@@ -1240,60 +1240,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
-                // Mind Flay
-                case 15407:
-                    {
-                        // Dark Evangelism
-                        // Player has the talent
-                        uint32 auraid = 0;
-                        if(caster->HasAura(81659)) // Rank 1
-                        {
-                            auraid = 87117;
-                            // Override Evangelism (holy)
-                            caster->RemoveAurasDueToSpell(81660);
-                        }
-                        else if(caster->HasAura(81662)) // Rank 2
-                        {
-                            auraid = 87118;
-                            // Override Evangelism (holy)
-                            caster->RemoveAurasDueToSpell(81661);
-                        }
-                        else
-                            break;
-
-                        // Aura is already active
-                        if (Aura* pEvangelism = caster->GetAura(auraid))
-                        {
-                            uint8 charges = pEvangelism->GetCharges();
-                            if (charges < 5)
-                            {
-                                // Add charge
-                                pEvangelism->SetCharges(++charges);
-                                pEvangelism->SetStackAmount(charges);
-                            }
-                            // Refresh duration not considering number of charges
-                            pEvangelism->RefreshDuration();
-                        }
-                        else
-                        {
-                            // Cast a new one
-                            caster->CastSpell(caster, auraid, true);
-
-                            // Fresh aura has 0 charges, add one
-                            if (Aura* aura = caster->GetAura(auraid))
-                            {
-                                aura->SetCharges(1);
-                                aura->SetStackAmount(1);
-                            }
-                        }
-
-                        // Enable Archangel
-                        if (Aura* pAura = caster->GetAura(87154))
-                            pAura->RefreshDuration();
-                        else
-                            caster->CastSpell(caster, 87154, true);
-                        break;
-                    }
                 // Fade
                 case 586:
                     {
