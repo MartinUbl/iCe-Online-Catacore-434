@@ -1796,7 +1796,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     // Currently unknown and not needed.
     uint32 totalBytesToSend = uint32(uint32(m_members.size()) / uint32(8)) + 1;
     for(uint32 i = 0; i < totalBytesToSend; ++i)
-        data << uint8(0);
+        data << uint8(0xFF);
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         data << itr->second->GetPublicNote();
@@ -1869,7 +1869,8 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     {
         if(itr->second->IsOnline())
             data << float(0);
-        else data << float(float(::time(NULL) - itr->second->GetLogoutTime()) / DAY);
+        else
+            data << float(float(time(NULL) - itr->second->GetLogoutTime()) / DAY);
     }
 
     if (session)
