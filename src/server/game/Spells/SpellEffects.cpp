@@ -503,6 +503,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    // Tyrande's favorite doll - Release mana: aoe damage
+                    case 92601:
+                        if (AuraEffect* storedmana = m_caster->GetAuraEffect(92596, EFFECT_0))
+                        {
+                            damage = storedmana->GetAmount();
+                            apply_direct_bonus = false;
+                        }
+                        else return;
+                        break;
                     // Bane of Havoc damage proc spell
                     case 85455:
                         // Don't allow to modify damage with spellpower and so on
@@ -4109,6 +4118,14 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         case 68082:                                         // Glyph of Seal of Command
         case 20167:                                         // Seal of Insight
             damage = damage * unitTarget->GetCreateMana() / 100;
+            break;
+        case 92601:                                         // Tyrande's favorite doll - Release mana: restore mana
+            if (AuraEffect* storedmana = m_caster->GetAuraEffect(92596, EFFECT_0))
+            {
+                damage = storedmana->GetAmount();
+                m_caster->RemoveAurasDueToSpell(92596);
+            }
+            else return;
             break;
         case 48542:                                         // Revitalize
             damage = damage * unitTarget->GetMaxPower(power) / 100;

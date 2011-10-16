@@ -7102,6 +7102,37 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     return false;
                     break;
                 }
+                // Tyrande's favorite doll - capture mana
+                case 92272:
+                {
+                    if (effIndex != EFFECT_0 || !procSpell || getPowerType() != POWER_MANA)
+                        return false;
+
+                    // maximum of mana stored
+                    int32 maxmana = 0;
+                    if (AuraEffect* maximum = GetAuraEffect(92272, EFFECT_1))
+                        maxmana = maximum->GetAmount();
+
+                    // mana to store (% of manacost)
+                    int32 addmana = (procSpell->GetManaCostPercentage() * GetCreateMana() / 100) * triggerAmount / 100;
+                    addmana = addmana > maxmana ? maxmana : addmana;
+                    if (addmana <= 0)
+                        return false;
+
+                    // some mana already stored
+                    if (AuraEffect* manastored = GetAuraEffect(92596, EFFECT_0))
+                    {
+                        int32 newmana = manastored->GetAmount() + addmana;
+                        newmana = newmana > maxmana ? maxmana : newmana;
+                        manastored->ChangeAmount(newmana);
+                        // update value at client
+                        manastored->GetBase()->SetNeedClientUpdateForTargets();
+                    }
+                    else // new application needed
+                        CastCustomSpell(this, 92596, &addmana, NULL, NULL, true);
+
+                    break;
+                }
                 case 71545: // Tiny Abomination in a Jar (Heroic)
                 {
                     if (!pVictim || !pVictim->isAlive())
