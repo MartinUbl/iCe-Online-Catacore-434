@@ -15602,6 +15602,9 @@ bool Unit::InitTamedPet(Pet * pet, uint8 level, uint32 spell_id)
 
 bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const *& spellProcEvent)
 {
+    if (!aura || !aura->GetSpellProto())
+        return false;
+
     SpellEntry const *spellProto = aura->GetSpellProto();
 
     // Call hack to handle aura proc of non triggering auras if required
