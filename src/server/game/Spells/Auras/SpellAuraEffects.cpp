@@ -333,7 +333,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleUnused,                                    //273 clientside
     &AuraEffect::HandleNoImmediateEffect,                         //274 SPELL_AURA_CONSUME_NO_AMMO implemented in spell::CalculateDamageDoneForAllTargets
     &AuraEffect::HandleNoImmediateEffect,                         //275 SPELL_AURA_MOD_IGNORE_SHAPESHIFT Use SpellClassMask for spell select
-    &AuraEffect::HandleNULL,                                      //276 mod damage % mechanic?
+    &AuraEffect::HandleNoImmediateEffect,                         //276 SPELL_AURA_MOD_DAMAGE_MECHANIC implemented in CalculateAmount
     &AuraEffect::HandleNoImmediateEffect,                         //277 SPELL_AURA_MOD_ABILITY_AFFECTED_TARGETS implemented in spell::settargetmap
     &AuraEffect::HandleAuraModDisarm,                             //278 SPELL_AURA_MOD_DISARM_RANGED disarm ranged weapon
     &AuraEffect::HandleNoImmediateEffect,                         //279 SPELL_AURA_INITIALIZE_IMAGES
@@ -622,6 +622,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         return amount;
                     }
                     break;
+                case SPELLFAMILY_DRUID:
+                    // Savage Defense
+                    if (m_spellProto->Id == 62606)
+                    {
+                        // Savage Defender druid's feral mastery proficiency
+                        if (caster && caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+                            caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_FERAL)
+                        {
+                            // Each points increases damage absorbed by 4.0%
+                            amount *= (1+float(caster->ToPlayer()->GetMasteryPoints())*4.0f/100.0f);
+                        }
+                    }
                 default:
                     break;
             }
@@ -921,6 +933,20 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
     {
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
         amount += (int32)DoneActualBenefit;
+    }
+
+    if (caster)
+    {
+        // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC
+        Unit::AuraEffectList const& effList = caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
+        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        {
+            if ((*itr) && (GetSpellProto()) && (*itr)->GetMiscValue() == GetSpellProto()->Mechanic)
+            {
+                if ((*itr)->GetAmount())
+                    amount *= 1+((*itr)->GetAmount()/100.0f);
+            }
+        }
     }
 
     GetBase()->CallScriptEffectCalcAmountHandlers(const_cast<AuraEffect const *>(this), amount, m_canBeRecalculated);

@@ -1380,6 +1380,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         if (bp0)
             m_caster->CastCustomSpell(m_caster, 82987, &bp0, 0, 0, true);
     }
+
+    if (m_caster && m_spellInfo)
+    {
+        // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC
+        Unit::AuraEffectList const& effList = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
+        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        {
+            if ((*itr) && (*itr)->GetMiscValue() == m_spellInfo->Mechanic)
+            {
+                if ((*itr)->GetAmount())
+                    m_damage *= (1+(*itr)->GetAmount()/100.0f);
+            }
+        }
+    }
 }
 
 void Spell::EffectDummy(SpellEffIndex effIndex)
