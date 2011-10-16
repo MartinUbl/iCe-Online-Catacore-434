@@ -847,8 +847,9 @@ void Player::UpdateMastery()
         TalentTabEntry const * entry = sTalentTabStore.LookupEntry(GetTalentBranchSpec(m_activeSpec));
         if(entry)
         {
-            for(uint8 masteryId = 0; masteryId < 1; masteryId++)
+            for(uint8 masteryId = 0; masteryId <= 1; masteryId++)
             {
+                uint32 masteryspell = entry->masterySpells[masteryId];
                 if (Aura* pAura = GetAura(entry->masterySpells[masteryId]))
                 {
                     for(uint8 i = 0; i < 3; i++)
