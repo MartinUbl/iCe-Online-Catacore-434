@@ -155,6 +155,7 @@ enum Opcodes
     SMSG_GUILD_XP_UPDATE                             = 0x0440E, // 4.0.6a 13623
     SMSG_GUILD_COMMAND_RESULT                        = 0x023C0, // 4.0.6a 13623
     SMSG_GUILD_ACHIEVEMENT_MEMBER                    = 0x0414E, // 4.0.6a 13623, unimplemented, name from client (wowerror)
+    SMSG_GUILD_PARTY_STATE_UPDATE                    = 0x0450C, // 4.0.6a 13623 structure: uint8(isGuildGroup << 7) uint32(numGuildRequired) uint32(numGuildPresent) float(xpMultiplier) NOTE: xpMultiplier/100.0f
     CMSG_MESSAGECHAT_SAY                             = 0x0002A, // 4.0.6a 13623
     CMSG_MESSAGECHAT_YELL                            = 0x00802, // 4.0.6a 13623
     CMSG_MESSAGECHAT_CHANNEL                         = 0x00821, // 4.0.6a 13623
@@ -490,7 +491,7 @@ enum Opcodes
     SMSG_LOG_XPGAIN                                  = 0x0B880, // 4.0.6a 13623
     SMSG_AURACASTLOG                                 = 0x10080, //
     CMSG_RECLAIM_CORPSE                              = 0x07CC8, // 4.0.6a 13623
-    CMSG_WRAP_ITEM                                   = 0x06E54, //
+    CMSG_WRAP_ITEM                                   = 0x07CC4, // 4.0.6a 13623
     SMSG_LEVELUP_INFO                                = 0x0B9C4, // 4.0.6a 13623
     MSG_MINIMAP_PING                                 = 0x0C475, //
     SMSG_RESISTLOG                                   = 0x10084, //
@@ -532,7 +533,7 @@ enum Opcodes
     CMSG_GM_NUKE                                     = 0x1008F, //
     MSG_RANDOM_ROLL                                  = 0x0B7A4, // 4.0.6a 13623
     SMSG_ENVIRONMENTALDAMAGELOG                      = 0x0E1C8, // 4.0.6a 13623
-    CMSG_PLAYER_DIFFICULTY_CHANGE                    = 0x07E5D, //
+    CMSG_PLAYER_DIFFICULTY_CHANGE                    = 0x03F88, // 4.0.6a 13623
     SMSG_RWHOIS                                      = 0x071C8, // 4.0.6a 13623
     SMSG_LFG_PLAYER_REWARD                           = 0x02C88, // 4.0.6a 13623
     SMSG_LFG_TELEPORT_DENIED                         = 0x0EAA0, // 4.0.6a 13623
@@ -586,6 +587,8 @@ enum Opcodes
     CMSG_BATTLEFIELD_LIST                            = 0x00508, // 4.0.6a 13623
     SMSG_BATTLEFIELD_LIST                            = 0x0490C, // 4.0.6a 13623
     CMSG_BATTLEFIELD_JOIN                            = 0x00C91, // 4.0.6a 13623
+    CMSG_JOIN_RATED_BATTLEFIELD                      = 0x00591, // 4.0.6a 13623
+    SMSG_PVP_RATED_STATS_UPDATE                      = 0x0015E, // 4.0.6a 13623
     SMSG_JOINED_BATTLEGROUND_QUEUE                   = 0x0090E, // 4.0.6a 13623
     CMSG_REQUEST_RATED_BG_INFO                       = 0x08501, // 4.0.6a 13623
     CMSG_REQUEST_PVP_OPTIONS_ENABLED                 = 0x00188, // 4.0.6a 13623
@@ -759,7 +762,7 @@ enum Opcodes
     SMSG_WARDEN_DATA                                 = 0x0F8A0, // 4.0.6a 13623
     CMSG_WARDEN_DATA                                 = 0x02F84, // 4.0.6a 13623
     SMSG_GROUP_JOINED_BATTLEGROUND                   = 0x00D1E, // 4.0.6a 13623
-	CMSG_BATTLEGROUND_PLAYER_POSITIONS               = 0x00293, // 4.0.6a 13623
+    CMSG_BATTLEGROUND_PLAYER_POSITIONS               = 0x00293, // 4.0.6a 13623
     SMSG_BATTLEGROUND_PLAYER_POSITIONS               = 0x0045C, // 4.0.6a 13623
     CMSG_PET_STOP_ATTACK                             = 0x10100, //
     SMSG_BINDER_CONFIRM                              = 0x033C4, // 4.0.6a 13623
