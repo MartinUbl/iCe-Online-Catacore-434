@@ -6575,6 +6575,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (caster)
                         caster->CastSpell(caster, 13138, true, NULL, this);
                     break;
+                case 91565:   // Faerie Fire
+                    // break stealth and invisibility
+                    target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    target->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+                    break;
                 case 86000:   // Curse of Gul'dan
                 {
                     if (caster)
