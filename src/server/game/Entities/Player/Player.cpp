@@ -22130,7 +22130,11 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
         if (!m_mover->canDetectInvisibilityOf(u))
             if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
-                return false;
+            {
+                // Mage's Invisibility - can see other players
+                if (!HasAura(32612))
+                    return false;
+            }
     }
 
     // GM invisibility checks early, invisibility if any detectable, so if not stealth then visible
