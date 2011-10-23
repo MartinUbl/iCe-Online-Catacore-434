@@ -154,7 +154,7 @@ public:
 
         bool Load()
         {
-            absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
+            absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself());
             return true;
         }
 
@@ -166,9 +166,9 @@ public:
         void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
         {
             SpellEntry const * talentSpell = sSpellStore.LookupEntry(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
-            amount = SpellMgr::CalculateSpellEffectAmount(talentSpell, EFFECT_0, GetCaster());
+            amount = SpellMgr::CalculateSpellEffectAmount(talentSpell, EFFECT_0, GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself());
             // assume caster is a player here
-            if (Unit * caster = GetCaster())
+            if (Unit* caster = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
                  amount += int32(2 * caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK));
         }
 
