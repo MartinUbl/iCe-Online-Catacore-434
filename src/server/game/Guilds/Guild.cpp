@@ -1023,8 +1023,8 @@ void Guild::BankTab::SendText(const Guild* pGuild, WorldSession* session) const
 
     if (session)
         session->SendPacket(&data);
-    else
-        pGuild->BroadcastPacket(&data);
+    //else
+    //    pGuild->BroadcastPacket(&data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1787,8 +1787,26 @@ void Guild::OnPlayerStatusChange(Player* plr, uint32 flag, bool state)
 // HANDLE CLIENT COMMANDS
 void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 {
+    // iCe Online hack
+    // we are using item ID 3767 to stop sending roster due to lags
+    if (session && session->GetPlayer() && session->GetPlayer()->GetItemCount(3767) > 0)
+    {
+        WorldPacket data(SMSG_GUILD_ROSTER);
+        data << m_motd;
+        data << uint32(0);
+        data << m_info;
+
+        // To make sure we havent skipped anything
+        data << uint64(0);
+        data << uint64(0);
+        data << uint64(0);
+
+        session->SendPacket(&data);
+        return;
+    }
+
     // Guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4 + m_motd.length() + 1 + m_info.length() + 1 + 2 + 4 + 2 + _GetRanksSize() * 100));
+    WorldPacket data(SMSG_GUILD_ROSTER, (4 + m_motd.length() + 1 + m_info.length() + 1 + 2 + 4 + 2 + _GetRanksSize() * 100), true);
     data << m_motd;
     data << uint32(m_members.size());
 
@@ -1875,8 +1893,8 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 
     if (session)
         session->SendPacket(&data);
-    else 
-        BroadcastPacket(&data);
+    //else 
+    //    BroadcastPacket(&data);
 
     // TODO !
     WorldPacket data7(SMSG_GUILD_RANK);
@@ -1982,8 +2000,8 @@ void Guild::UpdateGuildNews(WorldSession* session)
 
     if (session)
         session->SendPacket(&data);
-    else
-        BroadcastPacket(&data);
+    //else
+    //    BroadcastPacket(&data);
 }
 
 void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
@@ -2942,6 +2960,22 @@ void Guild::BroadcastPacketToRank(WorldPacket *packet, uint8 rankId) const
 
 void Guild::BroadcastPacket(WorldPacket *packet) const
 {
+    // Roster will be sent only to players which is supposed to receive it
+    if (packet->GetOpcode() == SMSG_MULTIPLE_PACKETS || packet->GetOpcode() == SMSG_GUILD_EVENT)
+    {
+        for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
+            if (Player *player = itr->second->FindPlayer())
+            {
+                if (player->GetItemCount(3767) > 0)
+                    continue;
+
+                player->GetSession()->SendPacket(packet);
+            }
+        }
+        return;
+    }
+
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (Player *player = itr->second->FindPlayer())
             player->GetSession()->SendPacket(packet);
