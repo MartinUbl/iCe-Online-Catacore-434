@@ -9011,6 +9011,110 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             break;
     }
 
+    // Cataclysm trinket proc internal cooldown
+    if (ToPlayer())
+    {
+        switch (auraSpellInfo->Id)
+        {
+            // 60 second cooldown
+            case 91137: // Tears of Blood
+            case 91140: // Tears of Blood (Heroic)
+            case 92056: // Gear Detector
+            case 90892: // Stonemother's Kiss
+            case 92054: // Grace of the Herald, Hearth of the Vile
+            case 92088: // Grace of the Herald (Heroic)
+            case 92164: // Porcelain Crab, Harrison's Insignia of Panache, Schnottz's Medallion of Command
+            case 92175: // Porcelain Crab (Heroic)
+            case 90886: // Witching Hourglass
+            case 90888: // Witching Hourglass (Heroic)
+            case 92070: // Key to the Endless Chamber
+            case 92093: // Key to the Endless Chamber (Heroic)
+            case 91142: // Rainsong
+            case 91144: // Rainsong (Heroic)
+            case 90897: // Tendrils of Burrowing Dark
+            case 90899: // Tendrils of Burrowing Dark (Heroic)
+            case 91353: // Shrine-Cleansing Purifier, Tank-Commander Insignia
+            case 95878: // Talisman of Sinister Order
+            case 90990: // Anhuur's Hymnal
+            case 90993: // Anhuur's Hymnal (Heroic)
+            case 91148: // Blood of Isiset
+            case 91150: // Blood of Isiset (Heroic)
+            case 91361: // Heart of Solace
+            case 91365: // Heart of Solace (Heroic)
+            case 92097: // Left Eye of Rajh
+            case 92095: // Left Eye of Rajh (Heroic)
+            case 91369: // Right Eye of Rajh
+            case 91366: // Right Eye of Rajh (Heroic)
+            case 92209: // Throngus's Finger
+            case 92207: // Throngus's Finger (Heroic)
+            case 92217: // Gladiator's Insignia of Victory
+            case 92219: // Gladiator's Insignia of Dominance
+            case 92221: // Gladiator's Insignia of Conquest
+            case 85024: // Gladiator's Insignia of Dominance
+            case 85011: // Gladiator's Insignia of Conquest
+            case 99722: // Gladiator's Insignia of Victory
+            case 99720: // Gladiator's Insignia of Dominance
+            case 99718: // Gladiator's Insignia of Conquest
+            case 99749: // Gladiator's Insignia of Conquest
+            case 99743: // Gladiator's Insignia of Dominance
+            case 99747: // Gladiator's Insignia of Victory
+            case 91011: // Bell of Enraging Resonance
+            case 91822: // Crushing Weight
+            case 92343: // Crushing Weight (Heroic)
+            case 92127: // Essence of the Cyclone
+            case 92353: // Essence of the Cyclone (Heroic)
+            case 91186: // Fall of Mortality
+            case 92333: // Fall of Mortality (Heroic)
+            case 91817: // Heart of Rage
+            case 92346: // Heart of Rage (Heroic)
+            case 91193: // Mandala of Stirring Patterns
+            case 92125: // Prestor's Talisman of Machination
+            case 92350: // Prestor's Talisman of Machination (Heroic)
+            case 91048: // Stump of Time
+            case 92236: // Symbiotic Worm
+            case 92356: // Symbiotic Worm (Heroic)
+            case 91025: // Theralion's Mirror
+            case 92322: // Theralion's Mirror (Heroic)
+            case 92114: // Unheeded Warning
+            case 92319: // Bell of Enraging Resonance
+            case 96967: // Eye of Blazing Power
+            case 97137: // Eye of Blazing Power (Heroic)
+            case 96947: // Spidersilk Spindle
+            case 97130: // Spidersilk Spindle (Heroic)
+            case 96910: // The Hungerer
+            case 97126: // The Hungerer (Heroic)
+            case 101288:// Coren's Chilled Chromium Coaster
+            case 100309:// Dwyer's Caber
+            case 101292:// Mithril Stopwatch
+            case 101290:// Petrified Pickled Egg
+                // If has cooldown, do not proc. Little hack maybe, but can proc from other things
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                    return false;
+
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+60);
+                break;
+            // 30 second cooldown
+            case 92180: // Leaden Despair
+            case 92185: // Leaden Despair (Heroic)
+            case 91080: // Harmlight Totem
+            case 92234: // Bedrock Talisman
+            case 91833: // Fury of Angerforge
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                    return false;
+
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+30);
+                break;
+            // 20 second cooldown
+            case 90998: // Sorrowsong
+            case 91003: // Sorrowsong (Heroic)
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                    return false;
+
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+20);
+                break;
+        }
+    }
+
     // Sword Specialization
     if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && auraSpellInfo->SpellIconID == 1462 && procSpell)
     {
