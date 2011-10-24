@@ -1691,7 +1691,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     damage = damageReductedArmor;
                 }
 
-                // Curse of Agony damage-per-tick calculation
+                // Bane of Agony damage-per-tick calculation
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags[0] & 0x400) && GetSpellProto()->SpellIconID == 544)
                 {
                     uint32 totalTick = GetTotalTicks();
@@ -3770,8 +3770,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode, 
     if (GetSpellProto()->Id == 63560)
     {
         // Remove casterauraspell and all stacks of Shadow Infusion
-        GetCaster()->RemoveAurasDueToSpell(93426);
-        target->RemoveAurasDueToSpell(91342);
+        if (GetCaster())
+            GetCaster()->RemoveAurasDueToSpell(93426);
+        if (target)
+            target->RemoveAurasDueToSpell(91342);
     }
 
     if (apply)
