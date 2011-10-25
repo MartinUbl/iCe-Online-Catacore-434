@@ -633,6 +633,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Shield Slam
+                else if (m_spellInfo->Id == 23922)
+                {
+                    // manual implementation due to avoid overpowering already overpowered class
+                    damage += m_spellInfo->ap_bonus*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
