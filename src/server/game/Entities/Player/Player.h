@@ -1934,7 +1934,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateMastery();
         bool HasMastery();
         // Mastery points are always +8 - starting bonus
-        float GetMasteryPoints() { return CaclulateMasteryFromMasteryRating(m_baseRatingValue[CR_MASTERY])+8.0f; }
+        float GetMasteryPoints() { return CaclulateMasteryFromMasteryRating(m_baseRatingValue[CR_MASTERY])+GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY); }
         float CaclulateMasteryFromMasteryRating(int32 curr_rating)  { return float(curr_rating * 0.0055779569892473); }
         int32 CaclulateMasteryRatingFromMastery(float curr_mastery) { return int32(curr_mastery / 0.0055779569892473); }
 

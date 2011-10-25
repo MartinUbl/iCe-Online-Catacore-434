@@ -375,7 +375,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
     &AuraEffect::HandleNoImmediateEffect,                         //316 SPELL_AURA_PERIODIC_HASTE implemented in AuraEffect::CalculatePeriodic
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //317 SPELL_AURA_MOD_SPELL_POWER_PCT
-    &AuraEffect::HandleNULL,                                      //318
+    &AuraEffect::HandleAuraModMastery,                            //318 SPELL_AURA_MOD_MASTERY
     &AuraEffect::HandleModMeleeSpeedPct,                          //319 This is actually mod haste (?)
     &AuraEffect::HandleModRangedSpeedPct,                         //320
     &AuraEffect::HandleNULL,                                      //321
@@ -5642,6 +5642,18 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         uint32 newHPValue = target->CountPctFromMaxHealth(int32(100.0f * curHPValue / maxHPValue));
         target->SetHealth(newHPValue);
     }
+}
+
+void AuraEffect::HandleAuraModMastery(AuraApplication const *aurApp, uint8 mode, bool /*apply*/) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    // When applying auras like this, we need to update mastery and mastery rating immediately
+    if (target->ToPlayer())
+        target->ToPlayer()->UpdateMastery();
 }
 
 void AuraEffect::HandleAuraModResistenceOfStatPercent(AuraApplication const *aurApp, uint8 mode, bool /*apply*/) const
