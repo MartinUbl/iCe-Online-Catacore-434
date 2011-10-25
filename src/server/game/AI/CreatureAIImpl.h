@@ -541,7 +541,7 @@ inline bool CreatureAI::UpdateVictim()
             AttackStart(victim);
         return me->getVictim();
     }
-    else if (me->getThreatManager().isThreatListEmpty())
+    else if (me->getThreatManager().isThreatListEmpty() && !me->isTotem())
     {
         EnterEvadeMode();
         return false;
