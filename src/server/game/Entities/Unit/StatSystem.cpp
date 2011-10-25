@@ -837,8 +837,9 @@ void Player::UpdateMastery()
     if (HasMastery())
     {
         // Base value for all levels
-        // When changing this, don't forget to modify value in GetMasteryPoints, which is automatically +8
-        float BaseMastery = GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY);//8.0f;
+        float BaseMastery = GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY);
+        if (BaseMastery < 0.0f)
+            BaseMastery = 0.0f;
 
         SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]+BaseMastery);
         SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
