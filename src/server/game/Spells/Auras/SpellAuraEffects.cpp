@@ -5634,7 +5634,8 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         // exception for spell Mark of the Wild (increase all stats except spirit)
-        if (miscValue == i || miscValue == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT))
+        if (miscValue == i || miscValue == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT)
+            || (GetSpellProto()->Id == 79061 && i != STAT_SPIRIT))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
