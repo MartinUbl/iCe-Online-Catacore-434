@@ -1812,7 +1812,7 @@ struct SpellEntry_n //Structure of the true Spell.dbc
     //uint32    spellMissileID;                             // 26       m_spellMissileID not used
     //uint32  spellDescriptionVariableID;                   // 27       3.2.0
     uint32  SpellDifficultyId;                              // 28       m_spellDifficultyID - id from SpellDifficulty.dbc
-    //float unk_f1;                                         // 29
+    float  ap_bonus;                                        // 29       attack power bonus
     uint32 SpellScalingId;                                  // 30       SpellScaling.dbc
     uint32 SpellAuraOptionsId;                              // 31       SpellAuraOptions.dbc
     uint32 SpellAuraRestrictionsId;                         // 32       SpellAuraRestrictions.dbc
@@ -1862,7 +1862,7 @@ struct SpellEntry
     //uint32    spellMissileID;                             // 26       m_spellMissileID not used
     //uint32  spellDescriptionVariableID;                   // 27       3.2.0
     uint32  SpellDifficultyId;                              // 28       m_spellDifficultyID - id from SpellDifficulty.dbc
-    //float unk_f1;                                         // 29
+    float  ap_bonus;                                        // 29       attack power bonus
     uint32 SpellScalingId;                                  // 30       SpellScaling.dbc
     uint32 SpellAuraOptionsId;                              // 31       SpellAuraOptions.dbc
     uint32 SpellAuraRestrictionsId;                         // 32       SpellAuraRestrictions.dbc

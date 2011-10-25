@@ -62,6 +62,7 @@ SpellEntry::SpellEntry(SpellEntry_n const* spell)
     SchoolMask = spell->SchoolMask;
     runeCostID = spell->runeCostID;
     SpellDifficultyId = spell->SpellDifficultyId;
+    ap_bonus = spell->ap_bonus;
     SpellScalingId = spell->SpellScalingId;
     SpellAuraOptionsId = spell->SpellAuraOptionsId;
     SpellAuraRestrictionsId = spell->SpellAuraRestrictionsId;
