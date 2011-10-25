@@ -1235,10 +1235,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                     break;
                 }
-                // Shield of Righteousness
+                // Shield of the Righteous
                 if (m_spellInfo->Id == 53600)
                 {
-                    if(m_caster->GetPower(POWER_HOLY_POWER) > 0)
+                    // silently added bonus from Blizzard
+                    damage += 0.1f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    if (m_caster->GetPower(POWER_HOLY_POWER) > 0)
                     {
                         damage *= m_caster->GetPower(POWER_HOLY_POWER)*3.0f;
                         m_caster->SetPower(POWER_HOLY_POWER,0);
