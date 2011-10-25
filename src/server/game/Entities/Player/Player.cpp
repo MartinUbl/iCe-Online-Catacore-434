@@ -11371,7 +11371,7 @@ bool Player::HasCurrency(uint32 id, uint32 count)
     return itr != m_currencies.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count)
+void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
 {
     if (!count)
         return;
@@ -11430,7 +11430,7 @@ void Player::ModifyCurrency(uint32 id, int32 count)
     }
 
     uint32 weekCap = _GetCurrencyWeekCap(currency);
-    if (weekCap && int32(weekCap) < newWeekCount)
+    if (!ignoreweekcap && weekCap && int32(weekCap) < newWeekCount)
     {
         int32 delta = newWeekCount - int32(weekCap);
         newWeekCount = int32(weekCap);
@@ -11446,7 +11446,8 @@ void Player::ModifyCurrency(uint32 id, int32 count)
             itr->second.state = PLAYERCURRENCY_CHANGED;
 
         itr->second.totalCount = newTotalCount;
-        itr->second.weekCount = newWeekCount;
+        if (!ignoreweekcap)
+            itr->second.weekCount = newWeekCount;
 
         // probably excessive checks
         if (IsInWorld() && !GetSession()->PlayerLoading())
@@ -26225,7 +26226,7 @@ void Player::RefundItem(Item *item)
             count = count / PLAYER_CURRENCY_PRECISION;
         if (count && currid)
         {
-            ModifyCurrency(currid, count);
+            ModifyCurrency(currid, count, true);
         }
     }
 

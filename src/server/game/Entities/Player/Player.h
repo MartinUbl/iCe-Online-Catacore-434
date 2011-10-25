@@ -1298,7 +1298,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetCurrency(uint32 id);
         bool HasCurrency(uint32 id, uint32 count);
         void SetCurrency(uint32 id, uint32 count);
-        void ModifyCurrency(uint32 id, int32 count);
+        void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false);
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
