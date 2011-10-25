@@ -1204,6 +1204,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_caster->ToPlayer()->ModifySpellCooldown(16166, -1000, true);
                 }
 
+                // Frost Shock
+                if (m_spellInfo->Id == 8056)
+                {
+                    // Frozen Power affects only targets further than 15y
+                    if (m_caster && unitTarget && !unitTarget->IsWithinDistInMap(m_caster, 15.0f))
+                    {
+                        if (m_caster->HasAura(63374) || (m_caster->HasAura(63373) && roll_chance_i(50)))
+                            m_caster->CastSpell(unitTarget, 63685, true);
+                    }
+                }
+
                 // Implementation of Elemental Overload mastery profficiency
                 if ((m_spellInfo->Id == 403 || m_spellInfo->Id == 51505 || m_spellInfo->Id == 421) &&
                     m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
