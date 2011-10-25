@@ -1005,6 +1005,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(62971))
                         m_caster->ToPlayer()->ModifySpellCooldown(48505, -5000, true);
                 }
+                // Lacerate
+                else if (m_spellInfo->Id == 33745)
+                {
+                    if (m_caster)
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0766f;
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
