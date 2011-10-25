@@ -5591,34 +5591,18 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
     Unit *target = aurApp->GetTarget();
 
     int32 miscValue = GetMiscValue();
+    int32 miscB = GetMiscValueB();
     float amount = (float)GetAmount();
 
-    // Custom handling for Cataclysm spells with non-relevant data in DBC
-    switch(GetSpellProto()->Id)
+    // Bear Form (passive) - bonus from HotW
+    if (GetSpellProto()->Id == 1178)
     {
-        case 89744: // Wizardry
-        case 86091: // Nethermancy
-        case 17003: // Heart of the Wild (rank 1)
-        case 17004: //                   (rank 2)
-        case 17005: //                   (rank 3)
-        case 89745: // Mysticism
-            miscValue = STAT_INTELLECT;
-            break;
-        case 50029: // Veteran of the Third War
-        case 53592: // Touched by the Light
-            miscValue = STAT_STAMINA;
-            break;
-        case 84729: // Into the Wilderness
-            miscValue = STAT_AGILITY;
-            break;
-        case 1178:  // Bear Form (passive) - bonus from HotW
-            if (target->HasAura(17005))
-                amount += 6.0f;
-            else if (target->HasAura(17004))
-                amount += 4.0f;
-            else if (target->HasAura(17003))
-                amount += 2.0f;
-            break;
+        if (target->HasAura(17005))
+            amount += 6.0f;
+        else if (target->HasAura(17004))
+            amount += 4.0f;
+        else if (target->HasAura(17003))
+            amount += 2.0f;
     }
 
     if (miscValue < -1 || miscValue > 4)
@@ -5633,9 +5617,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        // exception for spell Mark of the Wild (increase all stats except spirit)
-        if (miscValue == i || miscValue == -1 || (GetSpellProto()->Id == 79060 && i != STAT_SPIRIT)
-            || (GetSpellProto()->Id == 79061 && i != STAT_SPIRIT))
+        if ((miscValue == i && (miscB & (1 << i))) || miscValue == -1 || (miscB & (1 << i)))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
