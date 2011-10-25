@@ -4667,6 +4667,12 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
             if (pAura->ModStackAmount(-1))
                 caster->RemoveAurasDueToSpell(44544);
     }
+    // Ring of Frost should apply immunity to target after removal
+    if (GetSpellProto()->Id == 82691 && target && !apply)
+    {
+        // Immunity spell (dummy, but script doesn't apply effect on targets with this aura)
+        target->CastSpell(target, 91264, true);
+    }
 
     target->SetControlled(apply, UNIT_STAT_STUNNED);
 }
