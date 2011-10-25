@@ -95,7 +95,7 @@ static void doquote(int chance_pct, struct quotes *ptr, int size, Creature *me)
     if (!aiactive())
         return;
 
-    if (urand(0,99) >= chance_pct)
+    if (urand(0,99) >= uint32(chance_pct))
         return;
 
     numquotes = size / sizeof(struct quotes);

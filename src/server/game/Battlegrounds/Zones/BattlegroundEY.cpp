@@ -140,7 +140,7 @@ void BattlegroundEY::AddPoints(uint32 Team, uint32 Points)
 
     // prevent >1600 cheat
     if (m_TeamScores[team_index] + Points > BG_EY_MAX_TEAM_SCORE) {
-        if (m_HonorScoreTics[team_index] + Points > BG_EY_MAX_TEAM_SCORE - m_TeamScores[team_index])
+        if (m_HonorScoreTics[team_index] + Points > BG_EY_MAX_TEAM_SCORE - uint32(m_TeamScores[team_index]))
             m_HonorScoreTics[team_index] = BG_EY_MAX_TEAM_SCORE - m_TeamScores[team_index];
         m_TeamScores[team_index] = BG_EY_MAX_TEAM_SCORE;
     } else {
