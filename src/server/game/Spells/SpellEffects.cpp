@@ -7109,7 +7109,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     ChosenSpell = 79463;
                 else if (pPet->GetEntry() == 417)   // Felhunter
                     ChosenSpell = 79460;
-                else if (pPet->GetEntry() == 30146) // Felguard
+                else if (pPet->GetEntry() == 17252) // Felguard
                     ChosenSpell = 79462;
 
                 if (ChosenSpell)
