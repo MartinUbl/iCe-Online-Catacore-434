@@ -1011,6 +1011,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster)
                         damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0766f;
                 }
+                // Maul
+                else if (m_spellInfo->Id == 6807)
+                {
+                    if (m_caster)
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.24f;
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
