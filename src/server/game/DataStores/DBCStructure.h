@@ -832,6 +832,18 @@ struct DestructibleModelDataEntry
     //uint32  Unk5;
 };
 
+struct DungeonEncounterEntry
+{
+    uint32    id;                                           // 0
+    uint32    mapId;                                        // 1
+    uint32    difficulty;                                   // 2
+    uint32    unk0;                                         // 3 probably related to next field, multiplied value?
+    uint32    encounterMapPosition;                         // 4
+    DBCString name;                                         // 5
+    uint32    unk1;                                         // 6
+    uint32    unk2;                                         // 7 all zeros
+};
+
 struct DurabilityCostsEntry
 {
     uint32    Itemlvl;                                      // 0
