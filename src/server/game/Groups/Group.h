@@ -199,6 +199,9 @@ class Group
         void   UpdateLooterGuid(WorldObject* pLootedObject, bool ifneed = false);
         void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
+        uint32 GetGuildMembersCount(uint32 guildId);
+
+        void   OnGroupSlain(Unit* pVictim);
 
         // Dungeon Finder
         void   SetLfgRoles(uint64& guid, const uint8 roles)

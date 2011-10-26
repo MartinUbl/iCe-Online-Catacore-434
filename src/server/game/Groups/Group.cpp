@@ -1034,6 +1034,36 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
     delete roll;
 }
 
+uint32 Group::GetGuildMembersCount(uint32 guildId)
+{
+    if (m_memberSlots.empty())
+        return 0;
+
+    uint32 count = 0;
+
+    for(Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+    {
+        if (Player* player = sObjectMgr->GetPlayer(itr->guid))
+            if (player->GetGuildId() == guildId)
+                count++;
+    }
+
+    return count;
+}
+
+void Group::OnGroupSlain(Unit* pVictim)
+{
+    // Raid group
+    if (m_groupType & GROUPTYPE_RAID)
+    {
+        //
+    }
+    else // Dungeon group
+    {
+        //
+    }
+}
+
 void Group::SetTargetIcon(uint8 id, uint64 whoGuid, uint64 targetGuid)
 {
     if (id >= TARGETICONCOUNT)
