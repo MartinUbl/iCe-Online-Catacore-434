@@ -1197,7 +1197,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                     case 6358: // Seduction (succubus)
                         // Glyph of Seduction
-                        if (caster->GetCharmerOrOwnerPlayerOrPlayerItself() && caster->GetCharmerOrOwnerPlayerOrPlayerItself()->HasAura(56250))
+                        if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself() && caster->GetCharmerOrOwnerPlayerOrPlayerItself()->HasAura(56250))
                         {
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
