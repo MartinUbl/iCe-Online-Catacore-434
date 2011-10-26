@@ -3885,6 +3885,8 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         if (pItem->GetProto()->Quality == ITEM_QUALITY_EPIC)
             player->AddGuildNews(GUILD_NEWS_ITEM_CRAFT, pItem->GetEntry());
 
+        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, pItem->GetProto()->Quality, pItem->GetProto()->ItemLevel);
+
         /* activate craft spell cooldown */
         std::vector<uint32> cd_spells;
         uint32 cd_time = 0;

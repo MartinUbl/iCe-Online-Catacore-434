@@ -189,8 +189,17 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             continue;
 
         // don't update already completed criteria
-        if (IsCompletedCriteria(achievementCriteria,achievement))
+        if (IsCompletedCriteria(achievementCriteria,achievement) && HasAchieved(achievement->ID))
             continue;
+
+        // Check for universal morerequirement types and values
+        for (uint8 i = 0; i < 3; i++)
+        {
+            // guild reputation
+            if (player && achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_GUILD_REP
+                && player->GetReputation(1168) < achievementCriteria->moreRequirementValue[i])
+                continue;
+        }
 
         switch (type)
         {
@@ -221,6 +230,7 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 if (m_completedAchievements.find(achievementCriteria->complete_achievement.linkedAchievement) != m_completedAchievements.end())
                     SetCriteriaProgress(achievementCriteria, 1);
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
                 SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
@@ -235,6 +245,58 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 if (!miscvalue2)
                     miscvalue2 = player ? player->GetSkillValue(miscvalue1) : 0;
                 SetCriteriaProgress(achievementCriteria, miscvalue2);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD:
+                // Check for item level and quality supplied in miscvalues
+                for (uint8 i = 0; i < 3; i++)
+                {
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_QUALITY_EQUIPPED
+                        && miscvalue1 < achievementCriteria->moreRequirementValue[i])
+                        continue;
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_LEVEL
+                        && miscvalue2 < achievementCriteria->moreRequirementValue[i])
+                        continue;
+                }
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY:
+                if (!miscvalue1)
+                    continue;
+                SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_HK_RACE:
+                // HKs will count only for player kills
+                if (!unit || !unit->ToPlayer())
+                    continue;
+
+                // check for morerequirement
+                for (uint8 i = 0; i < 3; i++)
+                {
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS2
+                        && unit->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
+                        continue;
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_LEVEL2
+                        && unit->ToPlayer()->getLevel() < achievementCriteria->moreRequirementValue[i])
+                        continue;
+                }
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
+                // Wierd, but true. We need to check more reqs for class and race
+                if (!player || player->getLevel() < achievementCriteria->reach_level.level)
+                    continue;
+
+                // check for morerequirement
+                for (uint8 i = 0; i < 3; i++)
+                {
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS
+                        && unit->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
+                        continue;
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE2
+                        && unit->ToPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
+                        continue;
+                }
+                SetCriteriaProgress(achievementCriteria, player->getLevel());
                 break;
             default:
                 // Not implemented, sorry
@@ -458,8 +520,24 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
     {
         case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
             return progress->counter >= achievementCriteria->kill_creature.creatureCount;
+        case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT:
+            return progress->counter >= 1;
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL:
             return progress->counter >= achievementCriteria->reach_skill_level.skillLevel;
+        case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
+            return progress->counter >= achievementCriteria->raw.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST:
+            return progress->counter >= achievementCriteria->complete_daily_quest.questCount;
+        case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD:
+            return progress->counter >= achievementCriteria->raw.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY:
+            return progress->counter >= achievementCriteria->loot_money.goldInCopper;
+        case ACHIEVEMENT_CRITERIA_TYPE_HK_RACE:
+            return progress->counter >= achievementCriteria->hk_race.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
+            return progress->counter >= achievementCriteria->raw.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
+            return progress->counter >= achievementCriteria->reach_level.level;
         default:
             break;
     }
@@ -533,15 +611,12 @@ void Guild::SendGuildAchievementEarned(const AchievementEntry* achievement)
     if (!achievement)
         return;
 
-    WorldPacket data(SMSG_ACHIEVEMENT_EARNED);
-
     for(Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         if(Player* pMember = (*itr).second->FindPlayer())
         {
-            data.clear();
-            data.resize(pMember->GetPackGUID().size()+4+4+4);
-            data.append(pMember->GetPackGUID());
+            WorldPacket data(SMSG_ACHIEVEMENT_EARNED);
+            data.appendPackGUID(pMember->GetGUID());
             data << uint32(achievement->ID);
             data << uint32(secsToTimeBitFields(time(NULL)));
             data << uint32(0);

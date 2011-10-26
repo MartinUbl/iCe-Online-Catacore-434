@@ -786,6 +786,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
 
                 // reputation discount
                 int32 price = crItem->IsGoldRequired(pProto) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
+                bool available = true;
 
                 // If item is listed as guild reward, check whether player is capable to buy
                 if (Guild::IsListedAsGuildReward(pProto->ItemId))
@@ -797,8 +798,12 @@ void WorldSession::SendListInventory(uint64 vendorguid)
                     {
                         // Get price in copper from reward template
                         if (Guild* pGuild = sObjectMgr->GetGuildById(_player->GetGuildId()))
+                        {
                             if (pGuild->IsRewardReachable(_player, pProto->ItemId))
                                 price = Guild::GetRewardData(pProto->ItemId)->price;
+                            else
+                                available = false;
+                        }
                     }
                 }
 
@@ -815,7 +820,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
                 data << uint32(pProto->MaxDurability);
                 data << uint32(pProto->BuyCount);
                 data << uint32(crItem->ExtendedCost);
-                data << uint8(0); // unk 4.0.1
+                data << uint8(available? 0x00 : 0xFF); // 4.0.1, means availability (if not, item is displayed as red)
             }
         }
     }
