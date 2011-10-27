@@ -117,6 +117,35 @@ enum RemoveMethod
     GROUP_REMOVEMETHOD_LEAVE   = 2,
 };
 
+enum GroupGuildProfit
+{
+    GROUP_MEMBERS_DUNGEON_PROFIT         = 3,
+    GROUP_MEMBERS_DUNGEON_PROFIT_LOW_MIN = 3,
+    GROUP_MEMBERS_DUNGEON_PROFIT_LOW_MAX = 3,
+    GROUP_MEMBERS_DUNGEON_PROFIT_MED_MIN = 4,
+    GROUP_MEMBERS_DUNGEON_PROFIT_MED_MAX = 4,
+    GROUP_MEMBERS_DUNGEON_PROFIT_HIGH_MIN= 5,
+    GROUP_MEMBERS_DUNGEON_PROFIT_HIGH_MAX= 5,
+    GROUP_MEMBERS_10MAN_PROFIT           = 8,
+    GROUP_MEMBERS_10MAN_PROFIT_LOW_MIN   = 8,
+    GROUP_MEMBERS_10MAN_PROFIT_LOW_MAX   = 8,
+    GROUP_MEMBERS_10MAN_PROFIT_MED_MIN   = 9,
+    GROUP_MEMBERS_10MAN_PROFIT_MED_MAX   = 9,
+    GROUP_MEMBERS_10MAN_PROFIT_HIGH_MIN  = 10,
+    GROUP_MEMBERS_10MAN_PROFIT_HIGH_MAX  = 10,
+    GROUP_MEMBERS_25MAN_PROFIT           = 20,
+    GROUP_MEMBERS_25MAN_PROFIT_LOW_MIN   = 20,
+    GROUP_MEMBERS_25MAN_PROFIT_LOW_MAX   = 21,
+    GROUP_MEMBERS_25MAN_PROFIT_MED_MIN   = 22,
+    GROUP_MEMBERS_25MAN_PROFIT_MED_MAX   = 23,
+    GROUP_MEMBERS_25MAN_PROFIT_HIGH_MIN  = 24,
+    GROUP_MEMBERS_25MAN_PROFIT_HIGH_MAX  = 25,
+};
+
+#define GROUP_GUILD_PROFIT_LOW   0.50f
+#define GROUP_GUILD_PROFIT_MED   1.00f
+#define GROUP_GUILD_PROFIT_HIGH  1.25f
+
 #define GROUP_UPDATE_FLAGS_COUNT          20
                                                                 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
@@ -200,6 +229,8 @@ class Group
         void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
         uint32 GetGuildMembersCount(uint32 guildId);
+        bool   IsGuildGroup(uint32 guildId);
+        float  GetGuildProfitCoef(uint32 guildId);
 
         void   OnGroupSlain(Unit* pVictim);
 

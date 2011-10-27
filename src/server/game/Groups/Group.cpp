@@ -38,6 +38,7 @@
 #include "MapInstanced.h"
 #include "Util.h"
 #include "LFGMgr.h"
+#include "Guild.h"
 
 Group::Group() : m_leaderGuid(0), m_groupType(GROUPTYPE_NORMAL), m_bgGroup(NULL),
 m_lootMethod(FREE_FOR_ALL), m_looterGuid(0), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
@@ -1044,23 +1045,189 @@ uint32 Group::GetGuildMembersCount(uint32 guildId)
     for(Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
         if (Player* player = sObjectMgr->GetPlayer(itr->guid))
-            if (player->GetGuildId() == guildId)
+            if (player->GetGuildId() == guildId && player->GetMap() && (player->GetMap()->IsDungeon() || player->GetMap()->IsRaid()))
                 count++;
     }
 
     return count;
 }
 
+bool Group::IsGuildGroup(uint32 guildId)
+{
+    // For players without guild
+    if (guildId == 0)
+        return false;
+
+    // Guild members present
+    uint32 gmembers = GetGuildMembersCount(guildId);
+    // Min group size for profit
+    uint32 guildprofit = GROUP_MEMBERS_DUNGEON_PROFIT;
+    if (isRaidGroup())
+    {
+        if (m_raidDifficulty == RAID_DIFFICULTY_10MAN_NORMAL ||
+            m_raidDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
+        else
+            guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
+    }
+
+    return (gmembers >= guildprofit);
+}
+
+float Group::GetGuildProfitCoef(uint32 guildId)
+{
+    // Guild members present
+    uint32 gmembers = GetGuildMembersCount(guildId);
+    // Min group size for profit
+    uint32 guildprofit = GROUP_MEMBERS_DUNGEON_PROFIT;
+    if (isRaidGroup())
+    {
+        if (m_raidDifficulty == RAID_DIFFICULTY_10MAN_NORMAL ||
+            m_raidDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
+        else
+            guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
+    }
+
+    if (guildprofit == GROUP_MEMBERS_DUNGEON_PROFIT)
+    {
+        if (gmembers >= GROUP_MEMBERS_DUNGEON_PROFIT_LOW_MIN && gmembers <= GROUP_MEMBERS_DUNGEON_PROFIT_LOW_MAX)
+            return GROUP_GUILD_PROFIT_LOW;
+        if (gmembers >= GROUP_MEMBERS_DUNGEON_PROFIT_MED_MIN && gmembers <= GROUP_MEMBERS_DUNGEON_PROFIT_MED_MAX)
+            return GROUP_GUILD_PROFIT_MED;
+        if (gmembers >= GROUP_MEMBERS_DUNGEON_PROFIT_HIGH_MIN && gmembers <= GROUP_MEMBERS_DUNGEON_PROFIT_HIGH_MAX)
+            return GROUP_GUILD_PROFIT_HIGH;
+    }
+    if (guildprofit == GROUP_MEMBERS_10MAN_PROFIT)
+    {
+        if (gmembers >= GROUP_MEMBERS_10MAN_PROFIT_LOW_MIN && gmembers <= GROUP_MEMBERS_10MAN_PROFIT_LOW_MAX)
+            return GROUP_GUILD_PROFIT_LOW;
+        if (gmembers >= GROUP_MEMBERS_10MAN_PROFIT_MED_MIN && gmembers <= GROUP_MEMBERS_10MAN_PROFIT_MED_MAX)
+            return GROUP_GUILD_PROFIT_MED;
+        if (gmembers >= GROUP_MEMBERS_10MAN_PROFIT_HIGH_MIN && gmembers <= GROUP_MEMBERS_10MAN_PROFIT_HIGH_MAX)
+            return GROUP_GUILD_PROFIT_HIGH;
+    }
+    if (guildprofit == GROUP_MEMBERS_25MAN_PROFIT)
+    {
+        if (gmembers >= GROUP_MEMBERS_25MAN_PROFIT_LOW_MIN && gmembers <= GROUP_MEMBERS_25MAN_PROFIT_LOW_MAX)
+            return GROUP_GUILD_PROFIT_LOW;
+        if (gmembers >= GROUP_MEMBERS_25MAN_PROFIT_MED_MIN && gmembers <= GROUP_MEMBERS_25MAN_PROFIT_MED_MAX)
+            return GROUP_GUILD_PROFIT_MED;
+        if (gmembers >= GROUP_MEMBERS_25MAN_PROFIT_HIGH_MIN && gmembers <= GROUP_MEMBERS_25MAN_PROFIT_HIGH_MAX)
+            return GROUP_GUILD_PROFIT_HIGH;
+    }
+
+    return 0.0f;
+}
+
 void Group::OnGroupSlain(Unit* pVictim)
 {
+    uint32 guildXP = 0;
+
+    // Set unmultiplied value of guild XP awarded (100%)
     // Raid group
-    if (m_groupType & GROUPTYPE_RAID)
+    if (isRaidGroup())
     {
-        //
+        switch (pVictim->GetEntry())
+        {
+            // Baradin Hold
+            case 47120: // Argaloth
+            // Throne of the Four Winds
+            case 45870: // Conclave: Anshal
+            case 45871: // Conclave: Nazir
+            case 45872: // Conclave: Rohash
+            case 46753: // Al'Akir
+                guildXP = 78700;
+                break;
+        }
     }
     else // Dungeon group
     {
-        //
+        switch (pVictim->GetEntry())
+        {
+            // Blackrock Caverns
+            case 39665: // Rom'ogg Bonecrusher
+            case 39679: // Corla, Herald of Twilight
+            case 39698: // Karsh Steelbender
+            case 39700: // Beauty
+            case 39705: // Ascendant Lord Obsidius
+            // Throne of the Tides
+            case 40586: // Lady Naz'jar
+            case 40765: // Commander Ulthok
+            case 40825: // Erunak Stonespeaker
+            case 40788: // Mindbender Shur'sha
+            case 42172: // Ozumat
+                guildXP = 11400;
+                break;
+            // The Stonecore
+            case 43438: // Corborus
+            case 43214: // Slabhide
+            case 42188: // Ozruk
+            case 42333: // High Priestess Azil
+            // Vortex Pinnacle
+            case 43878: // Grand Vizier Ertan
+            case 43873: // Altairus
+            case 43875: // Asaad
+                guildXP = 18200;
+                break;
+            // Grim Batol
+            case 39625: // General Umbriss
+            case 40177: // Forgemaster Throngus
+            case 40319: // Drahga Shadowburner
+            case 40484: // Erudax
+            // Halls of Origination
+            case 39425: // Temple Guardian Anhuur
+            case 39428: // Earthrager Ptah
+            case 39788: // Anraphet
+            case 39587: // Isiset
+            case 39731: // Ammunae
+            case 39732: // Setesh
+            case 39378: // Rajh
+            // Lost City of the Tol'vir
+            case 44577: // General Husam
+            case 43612: // High Propher Barim
+            case 49045: // Augh
+            case 44819: // Siamat
+                guildXP = 24800;
+                break;
+            // Special cases for heroic-only XP rewarding creatures / bosses
+            // Shadowfang Keep
+            case 46962: // Baron Ashbury
+            case 3887:  // Baron Silverlaine
+            case 4278:  // Commander Springvale
+            case 46963: // Lord Walden
+            case 46964: // Lord Godfrey
+            // Deadmines
+            case 47162: // Glubtok
+            case 47296: // Helix Gearbreaker
+            case 43778: // Foe Reaper 5000
+            case 47626: // Admiral Ripsnarl
+            case 47739: // "Captain" Cookie
+            case 49541: // Vanessa VanCleef
+                guildXP = 1;
+                // Will be set to 37200 afterwards, we must set to non-zero value to pass the check
+                break;
+        }
+
+        // For all creatures which passed the switch, we set heroic amount of XP if we are on heroic
+        if (guildXP > 0 && GetDungeonDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+            guildXP = 37200;
+
+        // If we are not on heroic and slaying heroic-only awarding boss, fuck off
+        if (guildXP == 1)
+            guildXP = 0;
+    }
+
+    if (guildXP > 0)
+    {
+        for(Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        {
+            if (Player* player = sObjectMgr->GetPlayer(itr->guid))
+                if (player->GetMap() && (player->GetMap()->IsDungeon() || player->GetMap()->IsRaid()))
+                    if (IsGuildGroup(player->GetGuildId()))
+                        if (Guild* pGuild = sObjectMgr->GetGuildById(player->GetGuildId()))
+                            pGuild->GainXP(guildXP * GetGuildProfitCoef(pGuild->GetId()));
+        }
     }
 }
 
@@ -1180,6 +1347,33 @@ void Group::SendUpdate()
         }
 
         player->GetSession()->SendPacket(&data);
+
+        // Guild members present
+        uint32 gmembers = GetGuildMembersCount(player->GetGuildId());
+        // Max group size
+        uint32 maxgsize = 5;
+        uint32 guildprofit = GROUP_MEMBERS_DUNGEON_PROFIT;
+        if (isRaidGroup())
+        {
+            if (m_raidDifficulty == RAID_DIFFICULTY_10MAN_NORMAL ||
+                m_raidDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            {
+                maxgsize = 10;
+                guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
+            }
+            else
+            {
+                maxgsize = 25;
+                guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
+            }
+        }
+
+        WorldPacket guilddata(SMSG_GUILD_GROUP_UPDATE, 1+4+4+4, true);
+        guilddata << uint8( (gmembers >= guildprofit) ? 0x80 : 0x00 ); // value is 1 << 7 if it is guild group
+        guilddata << uint32(gmembers);                                 // members of guild present (also online)
+        guilddata << uint32(maxgsize);                                 // unknown
+        guilddata << float(GetGuildProfitCoef(player->GetGuildId()));  // % of guild profit
+        player->GetSession()->SendPacket(&guilddata);
     }
 }
 

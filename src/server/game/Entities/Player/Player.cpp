@@ -22643,6 +22643,10 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 
+    // Also update group to allow profit from i.e. guild runs
+    if (Group* pGroup = GetGroup())
+        pGroup->SendUpdate();
+
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
     {
@@ -23552,6 +23556,9 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
         uint32 sum_level = 0;
         Player* member_with_max_level = NULL;
         Player* not_gray_member_with_max_level = NULL;
+
+        // For i.e. guild run of dungeon
+        pGroup->OnGroupSlain(pVictim);
 
         pGroup->GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level,not_gray_member_with_max_level);
 
@@ -26049,7 +26056,7 @@ void Player::SendRefundInfo(Item *item)
     {
         uint32 currencycount = iece->RequiredCurrencyCount[i];
         uint32 currencyid = iece->RequiredCurrency[i];
-        if (currencyid == 396 || currencyid == 395 || currencyid == 392)
+        if (currencyid == 396 || currencyid == 395 || currencyid == 392 || currencyid == 390)
             currencycount = currencycount / PLAYER_CURRENCY_PRECISION;
         data << uint32(currencycount);
         data << uint32(currencyid);
@@ -26149,7 +26156,7 @@ void Player::RefundItem(Item *item)
     {
         uint32 currencyid = iece->RequiredCurrency[i];
         uint32 currencycount = iece->RequiredCurrencyCount[i];
-        if (currencyid == 396 || currencyid == 395 || currencyid == 392)
+        if (currencyid == 396 || currencyid == 395 || currencyid == 392 || currencyid == 390)
             currencycount = currencycount / PLAYER_CURRENCY_PRECISION;
 
         if (currencyid && currencycount)
@@ -26222,7 +26229,7 @@ void Player::RefundItem(Item *item)
     {
         uint32 count = iece->RequiredCurrencyCount[i];
         uint32 currid = iece->RequiredCurrency[i];
-        if (currid == 396 || currid == 395 || currid == 392)
+        if (currid == 396 || currid == 395 || currid == 392 || currid == 390)
             count = count / PLAYER_CURRENCY_PRECISION;
         if (count && currid)
         {
