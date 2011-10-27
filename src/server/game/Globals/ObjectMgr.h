@@ -656,6 +656,7 @@ class ObjectMgr
         std::string GetGuildNameById(uint32 guildId) const;
         void AddGuild(Guild* pGuild);
         void RemoveGuild(uint32 guildId);
+        void ResetGuildDailyXPCap();
 
         ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
         ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;

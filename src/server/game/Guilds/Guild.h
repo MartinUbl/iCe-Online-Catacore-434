@@ -231,6 +231,8 @@ enum GuildEmblemError
     ERR_GUILDEMBLEM_INVALIDVENDOR         = 5
 };
 
+#define GUILD_DAILY_XP_CAP 6246000
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Emblem info
 class EmblemInfo
@@ -778,6 +780,7 @@ public:
     uint8 GetLevel() { return m_level; }
     uint64 GetCurrentXP() { return m_xp; }
     uint64 GetNextLevelXP() { return m_nextLevelXP; }
+    uint64 GetTodayXP() { return m_todayXP; }
 
     void UpdateGuildNews(WorldSession* session);
     void AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param);
@@ -790,6 +793,7 @@ public:
 
     void GainXP(uint64 xp);
     void LevelUp();
+    void ResetDailyXPCap();
 
     static bool IsListedAsGuildReward(uint32 item);
     bool IsRewardReachable(Player* pPlayer, uint32 item);
@@ -806,6 +810,7 @@ protected:
     uint8 m_level;
     uint64 m_xp;
     uint64 m_nextLevelXP;
+    uint64 m_todayXP;
 
     EmblemInfo m_emblemInfo;
     uint32 m_accountsNumber;

@@ -2820,6 +2820,17 @@ bool Guild::LoadFromDB(Field* fields)
 
     m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(m_level);
 
+    QueryResult xpcapquery = CharacterDatabase.PQuery("SELECT today_xp FROM guild_advancement WHERE guildid = '%u'",m_id);
+    if (xpcapquery && xpcapquery->GetRowCount() > 0)
+    {
+        Field* xpfields = xpcapquery->Fetch();
+        if (xpfields)
+        {
+            // Load today XP cap to variable
+            m_todayXP = xpfields[0].GetUInt64();
+        }
+    }
+
     _CreateLogHolders();
     return true;
 }
@@ -3820,6 +3831,12 @@ void Guild::GainXP(uint64 xp)
         return;
     if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL))
         return;
+    if ((m_todayXP + xp) > GUILD_DAILY_XP_CAP)
+    {
+        xp = (GUILD_DAILY_XP_CAP - m_todayXP);
+        if (xp == 0)
+            return;
+    }
 
     uint64 new_xp = m_xp + xp;
     uint64 nextLvlXP = GetNextLevelXP();
@@ -3836,7 +3853,14 @@ void Guild::GainXP(uint64 xp)
         }
     }
 
+    m_todayXP += xp;
     m_xp = new_xp;
+    SaveXP();
+}
+
+void Guild::ResetDailyXPCap()
+{
+    m_todayXP = 0;
     SaveXP();
 }
 
@@ -3856,7 +3880,7 @@ void Guild::LevelUp()
     data << uint64(GetNextLevelXP()); // next level XP
     data << uint64(0x37); // weekly xp
     data << uint64(GetCurrentXP()); // Curr exp
-    data << uint64(0); // Today exp (not supported yet)
+    data << uint64(GetTodayXP()); // Today exp (not supported yet)
 
     // Find perk to gain
     uint32 spellId = 0;
@@ -3886,5 +3910,7 @@ void Guild::SaveXP()
         stmt->setUInt32(1, uint32(m_level));
         stmt->setUInt32(2, m_id);
         CharacterDatabase.Execute(stmt);
+
+        CharacterDatabase.PExecute("REPLACE INTO guild_advancement VALUES (%u,"UI64FMTD")",m_id,m_todayXP);
     }
 }

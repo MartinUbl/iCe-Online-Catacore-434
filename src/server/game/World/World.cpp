@@ -1938,9 +1938,11 @@ void World::Update(uint32 diff)
     _UpdateGameTime();
 
     /// Handle daily quests reset time
+    /// Also reset daily guild cap at this time
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
+        sObjectMgr->ResetGuildDailyXPCap();
         m_NextDailyQuestReset += DAY;
     }
 

@@ -260,7 +260,7 @@ void WorldSession::HandleGuildExperienceOpcode(WorldPacket& recvPacket)
         data << uint64(pGuild->GetNextLevelXP()); // next level XP
         data << uint64(0x37); // weekly xp
         data << uint64(pGuild->GetCurrentXP()); // Curr exp
-        data << uint64(0); // Today exp (unsupported)
+        data << uint64(pGuild->GetTodayXP()); // Today exp (unsupported)
         SendPacket(&data);
     }
 }
@@ -270,7 +270,7 @@ void WorldSession::HandleGuildMaxExperienceOpcode(WorldPacket& recvPacket)
     recvPacket.read_skip<uint64>();
 
     WorldPacket data(SMSG_GUILD_MAX_DAILY_XP, 8);
-    data << uint64(67800000); // Constant value for now
+    data << uint64(GUILD_DAILY_XP_CAP);
     SendPacket(&data);
 }
 

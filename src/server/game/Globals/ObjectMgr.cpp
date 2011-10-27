@@ -387,6 +387,15 @@ void ObjectMgr::RemoveGuild(uint32 guildId)
         mGuildMap[guildId] = NULL;
 }
 
+void ObjectMgr::ResetGuildDailyXPCap()
+{
+    for (ObjectMgr::GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
+    {
+        if ((*itr))
+            (*itr)->ResetDailyXPCap();
+    }
+}
+
 // Arena teams collection
 ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
 {
