@@ -290,10 +290,10 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 for (uint8 i = 0; i < 3; i++)
                 {
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS
-                        && unit->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
+                        && player->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
                         continue;
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE2
-                        && unit->ToPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
+                        && player->ToPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
                         continue;
                 }
                 SetCriteriaProgress(achievementCriteria, player->getLevel());
