@@ -2820,6 +2820,8 @@ bool Guild::LoadFromDB(Field* fields)
 
     m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(m_level);
 
+    m_todayXP = 0;
+
     QueryResult xpcapquery = CharacterDatabase.PQuery("SELECT today_xp FROM guild_advancement WHERE guildid = '%u'",m_id);
     if (xpcapquery && xpcapquery->GetRowCount() > 0)
     {
@@ -3830,6 +3832,8 @@ void Guild::GainXP(uint64 xp)
     if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
     if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL))
+        return;
+    if (m_todayXP >= GUILD_DAILY_XP_CAP)
         return;
     if ((m_todayXP + xp) > GUILD_DAILY_XP_CAP)
     {
