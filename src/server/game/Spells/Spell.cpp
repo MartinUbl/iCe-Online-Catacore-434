@@ -5144,6 +5144,30 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_ERROR;
     }
 
+    // Check for valid hunter pet spells
+    if (m_caster && m_caster->isPet() && m_caster->ToPet() && m_caster->ToPet()->isHunterPet())
+    {
+        static const uint32 validPetSpells[] = {55749, 90355, 50433, 65220, 17253, 93433, 16827, 50541,
+            35387, 1742, 50256, 24423, 50285, 75447, 34889, 54644, 92380, 92380, 24604, 35290, 2649,
+            93434, 89446, 53397, 88680, 58604, 24844, 54680, 50479, 50245, 24450, 26090, 90364, 50518,
+            94019, 93435, 50318, 26064, 49966, 91644, 50519, 90361, 90328, 50274, 57386, 56626, 50498,
+            50271, 90309, 35346, 94022};
+
+        bool valid = false;
+
+        for (uint32 i = 0; i < sizeof(validPetSpells)/sizeof(uint32); i++)
+        {
+            if (m_spellInfo->Id == validPetSpells[i])
+            {
+                valid = true;
+                break;
+            }
+        }
+
+        if (!valid)
+            return SPELL_FAILED_NOT_KNOWN;
+    }
+
     // check death state
     if (!m_IsTriggeredSpell && !m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !(m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD))
         return SPELL_FAILED_CASTER_DEAD;
