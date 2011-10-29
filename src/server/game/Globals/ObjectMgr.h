@@ -794,9 +794,17 @@ class ObjectMgr
 
         uint32 GetGrandSkillupStep(uint32 id) const
         {
+            // At first grab our SQL data
             GrandSkillupMap::const_iterator itr = m_GrandSkillup.find(id);
             if (itr != m_GrandSkillup.end())
                 return itr->second;
+
+            // If not present, grab the original
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+                if (SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j))
+                    if (pAbility->spellId == id)
+                        return pAbility->grandSkillup;
+
             return 0;
         }
 
