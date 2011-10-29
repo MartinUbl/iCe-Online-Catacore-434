@@ -3651,7 +3651,10 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                         SetSkill(pSkill->id, GetSkillStep(pSkill->id), 1, GetMaxSkillValueForLevel());
                         break;
                     case SKILL_RANGE_MONO:
-                        SetSkill(pSkill->id, GetSkillStep(pSkill->id), 1, 1);
+                        if (pSkill->id == SKILL_RUNEFORGING)
+                            SetSkill(pSkill->id, GetSkillStep(pSkill->id), 300, 300);
+                        else
+                            SetSkill(pSkill->id, GetSkillStep(pSkill->id), 1, 1);
                         break;
                     default:
                         break;
