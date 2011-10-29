@@ -554,6 +554,7 @@ void AddSC_zangarmarsh();
 
 // Cataclysm zones
 void AddSC_deepholm();
+void AddSC_vashjir();
 
 // Cataclysm dungeons
 void AddSC_romogg();
@@ -1155,6 +1156,7 @@ void AddNorthrendScripts()
 void AddCataclysmScripts()
 {
     AddSC_deepholm();
+    AddSC_vashjir();
 
     AddSC_romogg();
     AddSC_corla();
