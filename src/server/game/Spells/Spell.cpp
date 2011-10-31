@@ -5147,7 +5147,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // Check for valid hunter pet spells
     if (m_caster && m_caster->isPet() && m_caster->ToPet() && m_caster->ToPet()->isHunterPet())
     {
-        if (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC || m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER)
+        if (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC && m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER)
             return SPELL_FAILED_NOT_KNOWN;
     }
 
