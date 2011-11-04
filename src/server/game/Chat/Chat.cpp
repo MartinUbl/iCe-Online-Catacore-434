@@ -1186,7 +1186,9 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *table, const char* text,
 int ChatHandler::ParseCommands(const char* text)
 {
     ASSERT(text);
-    ASSERT(*text);
+
+    if(!(*text))
+        return 0;
 
     std::string fullcmd = text;
 
