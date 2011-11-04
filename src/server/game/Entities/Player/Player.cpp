@@ -22135,8 +22135,8 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         if (!m_mover->canDetectInvisibilityOf(u))
             if (!(u->GetTypeId() == TYPEID_PLAYER && !IsHostileTo(u) && IsGroupVisibleFor(const_cast<Player*>(u->ToPlayer()))))
             {
-                // Mage's Invisibility - can see other players
-                if (!HasAura(32612))
+                // Mage's Invisibility, Rogue's Killing Spree - can see other players
+                if (!HasAura(32612) && !HasAura(69107))
                     return false;
             }
     }

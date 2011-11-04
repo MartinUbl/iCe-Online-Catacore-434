@@ -1312,6 +1312,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (Aura* rec = target->GetAura(73651))
                         rec->RefreshDuration();
                 }
+                // Killing Spree
+                else if (GetId() == 51690)
+                {
+                    if (caster)
+                        caster->CastSpell(caster, 69107, true);
+                }
                 // Cheap Shot, Garrote
                 if (apply && (GetSpellProto()->Id == 1833 || GetSpellProto()->Id == 703)) //1330
                 {
