@@ -1546,7 +1546,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 66: // Invisibility
                         if (removeMode != AURA_REMOVE_BY_EXPIRE)
                             break;
+                        // Force Water Elemental to also cast his Invisibility
+                        if (target->GetPetGUID())
+                            if (Unit* pPet = Unit::GetUnit(*target, target->GetPetGUID()))
+                                if (pPet && pPet->ToPet() && pPet->ToPet()->GetEntry() == 510)
+                                    pPet->CastSpell(pPet, 96243, true);
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
+                        target->CombatStop(); // Drop all threat
+                        break;
+                    case 32612: // Invisibility (real invisible mod aura)
+                        // Force Water Elemental to also remove his Invisibility
+                        if (target->GetPetGUID())
+                            if (Unit* pPet = Unit::GetUnit(*target, target->GetPetGUID()))
+                                if (pPet && pPet->ToPet() && pPet->ToPet()->GetEntry() == 510)
+                                    pPet->RemoveAurasDueToSpell(96243);
                         break;
                     case 44401: //Missile Barrage
                     case 48108: //Hot Streak

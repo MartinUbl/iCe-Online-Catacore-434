@@ -1390,7 +1390,9 @@ bool Creature::canSeeOrDetect(Unit const* u, bool detect, bool /*inVisibleList*/
 
     // invisible aura
     if ((m_invisibilityMask || u->m_invisibilityMask) && !canDetectInvisibilityOf(u))
-        return false;
+        // Mage's Pet's Invisibility
+        if (!HasAura(96243))
+            return false;
 
     // unit got in stealth in this moment and must ignore old detected state
     //if (m_Visibility == VISIBILITY_GROUP_NO_DETECT)
