@@ -1176,6 +1176,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->CastSpell(caster, spellId, true);
                         }
                         break;
+                    case 12472: // Icy Veins
+                        // Glyph of Icy Veins
+                        if (caster->HasAura(56374))
+                        {
+                            caster->RemoveAurasWithMechanic((1 << MECHANIC_SNARE));
+                            Unit::AuraEffectList const& auraList = caster->GetAuraEffectsByType(SPELL_AURA_HASTE_SPELLS);
+                            if (!auraList.empty())
+                            {
+                                for (Unit::AuraEffectList::const_iterator itr = auraList.begin(); itr != auraList.end();)
+                                {
+                                    Aura* aura = (*itr)->GetBase();
+                                    int32 amount = (*itr)->GetAmount();
+
+                                    ++itr;
+                                    if (aura && amount < 0)
+                                        aura->Remove();
+                                }
+                            }
+                        }
                     default:
                         break;
                 }
