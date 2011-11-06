@@ -5857,6 +5857,16 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             spell_bonus += int32((shotMod*m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)));
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Felstorm (felguard)
+            if (m_spellInfo->Id == 89753 && m_caster->ToPet())
+                spell_bonus += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.231f;
+            // Legion Strike (felguard)
+            else if (m_spellInfo->Id == 30213 && m_caster->ToPet())
+                spell_bonus += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.264f;
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Plague Strike
