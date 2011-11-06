@@ -6602,12 +6602,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                             break;
 
                         // Aura of Foreboding
-                        // TODO: make it work, probably due to bad targetting
-                        // Maybe we should try to modify targetA and B in LoadCustomAttr to SELF and SELF
                         if (pOwner->HasAura(89605))
-                            pOwner->CastSpell(target, 93987, true);
+                            caster->CastSpell(caster, 93987, true);
                         else if (pOwner->HasAura(89604))
-                            pOwner->CastSpell(target, 93974, true);
+                            caster->CastSpell(caster, 93974, true);
                     }
                     break;
                 }
