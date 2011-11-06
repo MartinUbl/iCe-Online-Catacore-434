@@ -913,6 +913,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Whiplash (succubus)
                 else if (m_spellInfo->Id == 6360 && m_caster->ToPet())
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.85f*0.5f;
+                // Torment (voidwalker)
+                else if (m_spellInfo->Id == 3716 && m_caster->ToPet())
+                    damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.512f*0.5f;
                 break;
             }
             case SPELLFAMILY_PRIEST:
