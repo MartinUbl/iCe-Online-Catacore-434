@@ -46,6 +46,7 @@ public:
         enum Spell
         {
             ROG_SPELL_CHEAT_DEATH_COOLDOWN = 31231,
+            ROG_SPELL_CHEAT_DEATH_DAMAGE_REDUCE = 45182,
         };
 
         bool Validate(SpellEntry const * /*spellEntry*/)
@@ -77,6 +78,8 @@ public:
 
             target->CastSpell(target, ROG_SPELL_CHEAT_DEATH_COOLDOWN, true);
             target->ToPlayer()->AddSpellCooldown(ROG_SPELL_CHEAT_DEATH_COOLDOWN, 0, time(NULL) + 60);
+
+            target->CastSpell(target, ROG_SPELL_CHEAT_DEATH_DAMAGE_REDUCE, true);
 
             uint32 health10 = target->CountPctFromMaxHealth(10);
 
