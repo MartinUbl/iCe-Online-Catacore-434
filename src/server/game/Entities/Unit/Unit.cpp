@@ -6610,6 +6610,18 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 32747;
                     break;
                 }
+                // Honor Among Thieves
+                case 51701:
+                case 51700:
+                case 51698:
+                {
+                    uint32 pchance = SpellMgr::CalculateSpellEffectAmount(dummySpell, EFFECT_0);
+
+                    if (roll_chance_i(pchance))
+                        if (triggeredByAura && triggeredByAura->GetCaster() && triggeredByAura->GetCaster()->isAlive()
+                            && triggeredByAura->GetCaster()->getVictim())
+                            triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster()->getVictim(), 51699, true);
+                }
             }
             // Cut to the Chase
             if (dummySpell->SpellIconID == 2909)
