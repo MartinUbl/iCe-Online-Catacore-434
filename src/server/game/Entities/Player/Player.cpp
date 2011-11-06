@@ -25259,6 +25259,10 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
     if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
         delete NewPet;
 
+    // Hackfix for reapplying Soul Link
+    if (HasAura(25228))
+        NewPet->CastSpell(this, 25228, true);
+
     m_temporaryUnsummonedPetNumber = 0;
 }
 
