@@ -1508,8 +1508,8 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         if (pOwner && pOwner->HasMastery() &&
             pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_HUNTER_BEASTMASTERY)
         {
-            mindamage = mindamage * (pOwner->GetMasteryPoints()*1.7f/100.0f);
-            maxdamage = maxdamage * (pOwner->GetMasteryPoints()*1.7f/100.0f);
+            mindamage = mindamage * (1+(pOwner->GetMasteryPoints()*1.7f/100.0f));
+            maxdamage = maxdamage * (1+(pOwner->GetMasteryPoints()*1.7f/100.0f));
         }
     }
     // Implementation of Demonology warlock mastery proficiency
@@ -1519,8 +1519,8 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         if (pOwner && pOwner->HasMastery() &&
             pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
         {
-            mindamage = mindamage * (pOwner->GetMasteryPoints()*2.0f/100.0f);
-            maxdamage = maxdamage * (pOwner->GetMasteryPoints()*2.0f/100.0f);
+            mindamage = mindamage * (1+(pOwner->GetMasteryPoints()*2.0f/100.0f));
+            maxdamage = maxdamage * (1+(pOwner->GetMasteryPoints()*2.0f/100.0f));
         }
     }
 
