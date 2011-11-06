@@ -25,8 +25,7 @@ enum Data
     TYPE_CONCLAVE,
     TYPE_ALAKIR,
     MAX_ENCOUNTER,
-    TYPE_CONCL_HELPER,
-    TYPE_CONCL_TARGETS,
+    TYPE_CONCL_DEAD,
 };
 
 enum eCreatures

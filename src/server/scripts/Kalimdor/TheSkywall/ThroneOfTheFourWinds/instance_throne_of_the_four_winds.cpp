@@ -98,7 +98,7 @@ public:
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 m_conclDeadCount;
-        uint32 m_conclTargetsCount;
+        uint32 m_conclInactiveCount;
 
         uint32 m_playerUpdate_Timer;
 
@@ -121,8 +121,11 @@ public:
 
         void Initialize()
         {
+            m_auiEncounter[TYPE_CONCLAVE] = 0;
+            m_auiEncounter[TYPE_ALAKIR] = 0;
+
             m_conclDeadCount = 0;
-            m_conclTargetsCount = 0;
+            m_conclInactiveCount = 0;
 
             m_playerUpdate_Timer = 2000;
 
@@ -141,7 +144,6 @@ public:
             p_Rohash = NULL;
 
             m_power = 10;
-            m_auiEncounter[TYPE_CONCL_HELPER] = 0;
 
             m_summons.clear();
         }
@@ -156,7 +158,10 @@ public:
 
         void OnGameObjectCreate(GameObject* pGO, bool add)
         {
-            // GO_BRIDGE and GO_CENTER are similar the same, one having "bridges", second Alakirs center platform
+            if(!add || !pGO)
+                return;
+
+            // GO_BRIDGE and GO_CENTER are nearly the same, one having "bridges", second Alakir's center platform
             switch(pGO->GetEntry())
             {
             case GO_BRIDGE:
@@ -176,32 +181,46 @@ public:
 
         void OnCreatureCreate(Creature* pCreature, bool add)
         {
-            if(!add || !pCreature)
+            if(!pCreature)
                 return;
 
-            // save important GUIDs. Conclave bosses pointers are used on every update
-            switch(pCreature->GetEntry())
+            if(add)
             {
-            case NPC_ANSHAL:            m_Anshal_GUID = pCreature->GetGUID();
-                                        p_Anshal = pCreature;
-                                        break;
-            case NPC_NEZIR:             m_Nezir_GUID = pCreature->GetGUID();
-                                        p_Nezir = pCreature;
-                                        break;
-            case NPC_ROHASH:            m_Rohash_GUID = pCreature->GetGUID();
-                                        p_Rohash = pCreature;
-                                        break;
-            case NPC_ALAKIR:            m_Alakir_GUID = pCreature->GetGUID();
-                                        break;
-            // AI summon entries to be listed here in order to be deleted on Conclave evade, etc.
-            case SUMMON_ICEPATCH:
-            case SUMMON_BREEZE:
-            case SUMMON_TORNADO:
-            case SUMMON_CREEPER_TRIGGER:
-            case SUMMON_RAVENOUS_CREEPER:
-                                        m_summons.push_back(pCreature->GetGUID());
-                                        break;
-            default: break;
+                // save important GUIDs. Conclave bosses pointers are used on every update
+                switch(pCreature->GetEntry())
+                {
+                case NPC_ANSHAL:            m_Anshal_GUID = pCreature->GetGUID();
+                                            p_Anshal = pCreature;
+                                            break;
+                case NPC_NEZIR:             m_Nezir_GUID = pCreature->GetGUID();
+                                            p_Nezir = pCreature;
+                                            break;
+                case NPC_ROHASH:            m_Rohash_GUID = pCreature->GetGUID();
+                                            p_Rohash = pCreature;
+                                            break;
+                case NPC_ALAKIR:            m_Alakir_GUID = pCreature->GetGUID();
+                                            break;
+                // AI summon entries to be listed here in order to be deleted on Conclave evade, etc.
+                case SUMMON_ICEPATCH:
+                case SUMMON_BREEZE:
+                case SUMMON_TORNADO:
+                case SUMMON_CREEPER_TRIGGER:
+                case SUMMON_RAVENOUS_CREEPER:
+                                            m_summons.push_back(pCreature->GetGUID());
+                                            break;
+                default: break;
+                }
+            }
+            else // creature removed
+            {
+                switch(pCreature->GetEntry())
+                {
+                // null pointers to conclave bosses not to call updates later
+                case NPC_ANSHAL: p_Anshal = NULL; break;
+                case NPC_NEZIR:  p_Nezir  = NULL; break;
+                case NPC_ROHASH: p_Rohash = NULL; break;
+                default: break;
+                }
             }
         }
 
@@ -209,31 +228,15 @@ public:
         {
             switch(uiType)
             {
-            case TYPE_CONCL_HELPER:
-                (uiData == DONE) ? m_conclDeadCount++ : m_conclDeadCount--;
-                break;
-            case TYPE_CONCL_TARGETS:
-                (uiData == SPECIAL) ? m_conclTargetsCount++ : m_conclTargetsCount--;
-                if(m_conclTargetsCount == 3)
-                    SetData(TYPE_CONCLAVE, NOT_STARTED);
-                break;
+            case TYPE_CONCL_DEAD: // count of bosses of conclave that gather strength right now
+                (uiData == SPECIAL) ? m_conclDeadCount++ : m_conclDeadCount--;
+                return;
             case TYPE_CONCLAVE:
+
                 m_auiEncounter[TYPE_CONCLAVE] = uiData;
+
                 if(uiData == DONE)
                 {
-                    // kill all bosses (while they are casting Gather Strength)
-                    if(p_Anshal) p_Anshal->Kill(p_Anshal);
-                    if(p_Nezir) p_Nezir->Kill(p_Nezir);
-                    if(p_Rohash) p_Rohash->Kill(p_Rohash);
-
-                    // Despawn all summons
-                    while (!m_summons.empty())
-                    {
-                        Creature *summon = instance->GetCreature(*m_summons.begin());
-                        if (summon)
-                            summon->DisappearAndDie();
-                        m_summons.erase(m_summons.begin());
-                    }
                     // Alakir yell
                     if(Creature* alakir = instance->GetCreature(m_Alakir_GUID))
                         DoScriptText(-1850526, alakir);
@@ -241,27 +244,19 @@ public:
                 }
                 else if(uiData == NOT_STARTED)
                 {
+                    // case of wipe: evade + reset
                     if(p_Anshal) p_Anshal->AI()->EnterEvadeMode();
                     if(p_Nezir) p_Nezir->AI()->EnterEvadeMode();
                     if(p_Rohash) p_Rohash->AI()->EnterEvadeMode();
                     m_conclDeadCount = 0;
-                    m_conclTargetsCount = 0;
+                    m_conclInactiveCount = 0;
                     m_power = 10;
-                    
-                    // Despawn all summons
-                    while (!m_summons.empty())
-                    {
-                        Creature *summon = instance->GetCreature(*m_summons.begin());
-                        if (summon)
-                            summon->DisappearAndDie();
-                        m_summons.erase(m_summons.begin());
-                    }
                 }
                 else if(uiData == IN_PROGRESS)
                 {
-                    if(p_Anshal) p_Anshal->AI()->DoZoneInCombat(p_Anshal);
-                    if(p_Nezir) p_Nezir->AI()->DoZoneInCombat(p_Nezir);
-                    if(p_Rohash) p_Rohash->AI()->DoZoneInCombat(p_Rohash);
+                    if(p_Anshal) conclave_DoZoneInCombat(p_Anshal);
+                    if(p_Nezir) conclave_DoZoneInCombat(p_Nezir);
+                    if(p_Rohash) conclave_DoZoneInCombat(p_Rohash);
                 }
                 else if(uiData == SPECIAL)
                 {
@@ -298,13 +293,27 @@ public:
                 break;
             default: break;
             }
+
+            // Boss data DONE and NOT_STARTED must not return from the function
+            if (uiData == DONE)
+            {
+                // save instance progress to database
+                SaveToDB();
+                DespawnAllSummons();
+            }
+            else if (uiData == NOT_STARTED)
+            {
+                // despawn all summons
+                DespawnAllSummons();
+            }
+
         }
 
         uint32 GetData(uint32 uiType)
         {
             switch(uiType)
             {
-            case TYPE_CONCL_HELPER:     return m_conclDeadCount;
+            case TYPE_CONCL_DEAD:       return m_conclDeadCount;
             case TYPE_CONCLAVE:         return m_auiEncounter[TYPE_CONCLAVE];
             case TYPE_ALAKIR:           return m_auiEncounter[TYPE_ALAKIR];
             default: return 0;
@@ -325,12 +334,35 @@ public:
 
         void Update(uint32 diff)
         {
+
+            // no need to update while no players are inside. hoped to prevent server from crashing.
+            Map::PlayerList const &PlList = instance->GetPlayers();
+            if (PlList.isEmpty())
+                return;
+
+            // update Conclave bosses during encounter
             UpdateConclave(diff);
 
             // timed players position check
             if(m_playerUpdate_Timer < diff)
             {
-                CheckPlayerPosition();
+                for(Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                    if(Player* player = itr->getSource())
+                    {
+                        if(!player->isAlive())
+                            continue;
+                        // teleport player if under critical Z
+                        if(m_auiEncounter[TYPE_CONCLAVE] == DONE)
+                        {
+                            if(player->GetPositionZ() < 172.0f)
+                                player->NearTeleportTo(-108.3f, 817.3f, 188.0f, 6.28f, false); // Al'akir's platform coords
+                        }
+                        else
+                        {
+                            if(player->GetPositionZ() < 186.0f)
+                                player->NearTeleportTo(-291.2f, 819.0f, 196.5f, 6.28f, false); // Instance entrance coords
+                        }
+                    }
 
                 m_playerUpdate_Timer = 2000;
             } else m_playerUpdate_Timer -= diff;
@@ -338,22 +370,25 @@ public:
 
         void UpdateConclave(uint32 diff)
         {
+            if(!p_Anshal || !p_Nezir || !p_Rohash)
+                return;
+
             if(m_auiEncounter[TYPE_CONCLAVE] == IN_PROGRESS)
             {
                 if(m_conclUpdate_Timer < diff)
                 {
                     m_power++;
-                    // Set Power
-                    if(p_Anshal) p_Anshal->AI()->DoAction(m_power);
-                    if(p_Nezir) p_Nezir->AI()->DoAction(m_power);
-                    if(p_Rohash) p_Rohash->AI()->DoAction(m_power);
+                    // increase power
+                    p_Anshal->AI()->DoAction(m_power);
+                    p_Nezir->AI()->DoAction(m_power);
+                    p_Rohash->AI()->DoAction(m_power);
                     if(m_power == 90)
                     {
                         SetData(TYPE_CONCLAVE, SPECIAL);
                         // Do Ultimate
-                        if(p_Anshal) p_Anshal->AI()->DoAction(666);
-                        if(p_Nezir) p_Nezir->AI()->DoAction(666);
-                        if(p_Rohash) p_Rohash->AI()->DoAction(666);
+                        p_Anshal->AI()->DoAction(666);
+                        p_Nezir->AI()->DoAction(666);
+                        p_Rohash->AI()->DoAction(666);
                     }
                     m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
                 } else m_conclUpdate_Timer -= diff;
@@ -363,9 +398,10 @@ public:
                 if(m_conclUpdate_Timer < diff)
                 {
                     m_power = m_power-3;
-                    if(p_Anshal) p_Anshal->AI()->DoAction(m_power);
-                    if(p_Nezir) p_Nezir->AI()->DoAction(m_power);
-                    if(p_Rohash) p_Rohash->AI()->DoAction(m_power);
+                    // decrease power
+                    p_Anshal->AI()->DoAction(m_power);
+                    p_Nezir->AI()->DoAction(m_power);
+                    p_Rohash->AI()->DoAction(m_power);
                     if(m_power == 0)
                         SetData(TYPE_CONCLAVE, IN_PROGRESS);
                     m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
@@ -374,28 +410,89 @@ public:
             else
                 return;
 
-            if(p_Anshal) p_Anshal->AI()->DoAction(667);  // unlock
-            if(p_Nezir) p_Nezir->AI()->DoAction(667);
-            if(p_Rohash) p_Rohash->AI()->DoAction(667);
+            // evade if threat lists are empty (wipe)
+            if(p_Anshal->getThreatManager().getThreatList().empty() &&
+                p_Nezir->getThreatManager().getThreatList().empty() &&
+                p_Rohash->getThreatManager().getThreatList().empty())
+                SetData(TYPE_CONCLAVE, NOT_STARTED);
 
-            if(p_Anshal) p_Anshal->AI()->UpdateAI(diff); // UpdateAI (locked from ScriptMgr calls dependent on grid system)
-            if(p_Nezir) p_Nezir->AI()->UpdateAI(diff);   // locks self
-            if(p_Rohash) p_Rohash->AI()->UpdateAI(diff);
+            p_Anshal->AI()->DoAction(667);  // unlock
+            p_Nezir->AI()->DoAction(667);
+            p_Rohash->AI()->DoAction(667);
+
+            p_Anshal->AI()->UpdateAI(diff); // UpdateAI (locked from ScriptMgr calls dependent on grid system)
+            p_Nezir->AI()->UpdateAI(diff);   // locks self
+            p_Rohash->AI()->UpdateAI(diff);
         }
 
-        void CheckPlayerPosition()
+        void conclave_DoZoneInCombat(Creature* creature)
         {
-            Map::PlayerList const& plList = instance->GetPlayers();
-            if (!plList.isEmpty())
+            Map::PlayerList const &PlList = instance->GetPlayers();
+            if (PlList.isEmpty())
+                return;
+
+            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
             {
-                for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-                    if(Player* player = itr->getSource())
+                if (Player* pPlayer = i->getSource())
+                {
+                    if (pPlayer->isGameMaster())
+                        continue;
+
+                    // add threat to all players in the instance
+                    if (pPlayer->isAlive())
                     {
-                        // return player to the entrance if under critical Z
-                        if(player->GetPositionZ() < (m_auiEncounter[TYPE_CONCLAVE] == DONE ? 175.0f : 190.0f))
-                            player->NearTeleportTo(-301.5f, 807.2f, 196.5f, 6.28f, false);
+                        creature->SetInCombatWith(pPlayer);
+                        pPlayer->SetInCombatWith(creature);
+                        creature->AddThreat(pPlayer, 1.0f);
                     }
+                }
             }
+        }
+
+        void DespawnAllSummons()
+        {
+            while (!m_summons.empty())
+            {
+                Creature *summon = instance->GetCreature(*m_summons.begin());
+                if (summon)
+                    summon->DisappearAndDie();
+                m_summons.erase(m_summons.begin());
+            }
+        }
+
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+            std::ostringstream stream;
+            stream << m_auiEncounter[0] << " "  << m_auiEncounter[1];
+            char* out = new char[stream.str().length() + 1];
+            strcpy(out, stream.str().c_str());
+            if (out)
+            {
+                OUT_SAVE_INST_DATA_COMPLETE;
+                return out;
+            }
+            return NULL;
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            std::istringstream loadStream(in);
+            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (m_auiEncounter[i] != DONE)
+                    m_auiEncounter[i] = NOT_STARTED;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
         }
     };
 };

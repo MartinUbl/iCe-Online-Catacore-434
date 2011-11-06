@@ -19,16 +19,20 @@
 #include "ScriptPCH.h"
 #include "throne_of_the_four_winds.h"
 
-// loot modes nor feign deaht flag are not needed
 
 struct npc_conclave_bossAI : public ScriptedAI
 {
 public:
     npc_conclave_bossAI(Creature *c) : ScriptedAI(c)
     {
-        //c->SetLootMode(0); // no loot
         c->SetReactState(REACT_DEFENSIVE);
         pInstance = c->GetInstanceScript();
+
+        // immunity to Toxic Spores
+        c->ApplySpellImmune(0, IMMUNITY_ID, 86282, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 93120, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 93121, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 93122, true);
     }
 
     bool alive;
@@ -69,7 +73,6 @@ public:
         alive = true;
         lock = true;
 
-        //me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         AurasCleanup();
     }
@@ -103,6 +106,7 @@ public:
 
     void EnterEvadeMode()
     {
+        // not to evade on my own. (start ultimate ability while no targets present on my platform)
         if(pInstance)
         {
             uint32 data = pInstance->GetData(TYPE_CONCLAVE);
@@ -141,23 +145,40 @@ public:
         me->RemoveAurasDueToSpell(93149);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32 &damage)
+    void DamageTaken(Unit* pDoneBy, uint32 &damage)
     {
-        if(alive && damage >= me->GetHealth())
+        if(!alive)
+        {
+            damage = 0;
+        }
+        else if(damage >= me->GetHealth())
         {
             damage = 0;
             if(pInstance)
             {
-                if(pInstance->GetData(TYPE_CONCL_HELPER)+1 == 3)// two of conclave have already died and have not ressed yet
-                                                                // third will be added on SetData DONE
+                if(pInstance->GetData(TYPE_CONCL_DEAD)+1 == 3) // two of conclave have already died and have not ressed yet
+                                                               // third will be added on SetData DONE
                 {
-                    //me->SetLootMode(LOOT_MODE_DEFAULT); // set loot
+                    // instance binding + loot
+                    if(Map* map = me->GetMap())
+                    {
+                        // kill all bosses (they are Gathering Strenght)
+                        if(Creature* anshal = map->GetCreature(pInstance->GetData64(NPC_ANSHAL)))
+                            pDoneBy->Kill(anshal);
+                        if(Creature* nezir = map->GetCreature(pInstance->GetData64(NPC_NEZIR)))
+                            pDoneBy->Kill(nezir);
+                        if(Creature* rohash = map->GetCreature(pInstance->GetData64(NPC_ROHASH)))
+                            pDoneBy->Kill(rohash);
+                    }
+
                     pInstance->SetData(TYPE_CONCLAVE, DONE);
+                    return;
                 }
                 else
                 {
                     TeleHome();
                     AurasCleanup();
+
                     switch(me->GetEntry())
                     {
                     case NPC_ANSHAL: DoScriptText(-1850515, me); break;
@@ -165,14 +186,15 @@ public:
                     case NPC_ROHASH: DoScriptText(-1850519, me); break;
                     default: break;
                     }
-                    //me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->CastSpell(me, 86307, false); // Gather Strength (1 minute ressurection timer)
+                    me->SetHealth(1);
                     me->AI()->DoAction(0); // set power to 0
+
+                    alive = false;
+                    pInstance->SetData(TYPE_CONCL_DEAD, SPECIAL); // may call EnterEvadeMode() and Reset() in effect
                 }
-                pInstance->SetData(TYPE_CONCL_HELPER, DONE);
             }
-            alive = false;
         }
     }
 
@@ -192,10 +214,9 @@ public:
 
         if(platform_check_timer < diff)
         {
+            // no target has been hit by Distance Checker spell. no valid targets are present on the platform then.
             valid_targets = false;
             conclave_NoPlayersOnPlatform();
-            if(pInstance)
-                pInstance->SetData(TYPE_CONCL_TARGETS, SPECIAL);
         } else platform_check_timer -= diff;
     }
 
@@ -210,19 +231,17 @@ public:
 
                 AurasCleanup();
                 valid_targets = true;
-                if(pInstance)
-                    pInstance->SetData(TYPE_CONCL_TARGETS, IN_PROGRESS);
             }
+            // reset / extend timer of valid targets expiration
             platform_check_timer = 3000;
         }
 
         if(pTarget == (Unit *)me && spellInfo && spellInfo->Id == 86307) // Gather Strength
         {
-            //me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             alive = true;
             if(pInstance)
-                pInstance->SetData(TYPE_CONCL_HELPER, IN_PROGRESS);
+                pInstance->SetData(TYPE_CONCL_DEAD, IN_PROGRESS);
         }
     }
 
@@ -236,6 +255,39 @@ public:
             return true;
         }
     }
+
+    bool UpdateVictim()
+    {
+        if(!me->isInCombat())
+            return false;
+
+        // not to attack invalid target out of the platform
+        // (could happen if there still were valid targets but top aggro target changed platform etc.)
+
+        for(int i = 0; i < 10; i++) // max 10 times not to freeze here
+                                    // 10 should be sufficient. if not, we could loose 1 or 2 updates
+        {
+            if(Unit *victim = me->SelectVictim())
+            {
+                if(me->GetDistance(victim) > 60.0f)
+                {
+                    // select someone else on next cycle
+                    me->getThreatManager().modifyThreatPercent(victim, -99.99f);
+                    me->RemoveAurasByType(SPELL_AURA_MOD_TAUNT, victim->GetGUID());
+                }
+                // target is on our platform
+                else
+                {
+                    AttackStart(victim);
+                    return me->getVictim();
+                }
+            }
+            else
+                return false;
+        }
+        return false;
+    }
+
 };
 
 // overloaded AIs
@@ -567,8 +619,8 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                             {
                                 if(pPlayer->isAlive())
                                     pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY()+10.0f, 217.0f, pPlayer->GetOrientation());
-                                pPlayer->SetUInt64Value(PLAYER_FARSIGHT, 0);
                             }
+                            pPlayer->SetUInt64Value(PLAYER_FARSIGHT, 0);
                         }
                     }
                 }
@@ -957,6 +1009,9 @@ UPDATE `creature_template` SET Scriptname="npc_ravenous_creeper_conclave", facti
 
 INSERT INTO `creature_template_addon` (entry, path_id, mount, bytes1, bytes2, emote, auras) VALUES
 (45870, 0, 0, 0, 0, 417, NULL), (45871, 0, 0, 0, 0, 417, NULL), (45872, 0, 0, 0, 0, 417, NULL);
+
+UPDATE `creature_template` SET flags_extra=1 WHERE entry IN (45871, 50098, 50108, 50118, 45872, 50095, 50105, 50115, 45870, 50103, 50113, 50123);
+UPDATE `creature_template` SET mechanic_immune_mask=653213695 WHERE entry IN (45871, 50098, 50108, 50118, 45872, 50095, 50105, 50115, 45870, 50103, 50113, 50123);
 
 
 INSERT INTO `script_texts`
