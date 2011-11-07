@@ -19,6 +19,39 @@
 #include "ScriptPCH.h"
 #include "blackwing_descent.h"
 
+class boss_magmaw: public CreatureScript
+{
+public:
+    boss_magmaw(): CreatureScript("boss_magmaw") {};
+
+    struct boss_magmawAI: public Scripted_NoMovementAI
+    {
+        boss_magmawAI(Creature* c): Scripted_NoMovementAI(c)
+        {
+            me->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+            Reset();
+        }
+
+        void Reset()
+        {
+            // Just for being sure that we arrive at homepoint even visual
+            me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new boss_magmawAI(c);
+    }
+};
+
 void AddSC_magmaw()
 {
+    new boss_magmaw();
 }
+
+/**** SQL:
+
+UPDATE creature_template SET ScriptName='boss_magmaw' WHERE entry=41570;
+
+*/
