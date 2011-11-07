@@ -17151,9 +17151,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             SetArenaTeamInfoField(arena_slot, ArenaTeamInfoType(j), 0);
     }
 
-	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, fields[45].GetUInt32());
-    SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[46].GetUInt16());
-    SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[47].GetUInt16());
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, fields[43].GetUInt32());
+    SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[44].GetUInt16());
+    SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[45].GetUInt16());
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
