@@ -9435,12 +9435,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 20167:
             // 15% of base mana when triggered by Judgement
             if (procSpell)
+            {
                 if (procSpell->Id == 54158)
                 {
                     int basepoints1 = triggerAmount;
                     CastCustomSpell(this,trigger_spell_id,NULL,&basepoints1,NULL,true,castItem,triggeredByAura);
-                    return true;
+                    return false;
                 }
+            }
+            // do not proc on non-melee hit
+            else if (!(procFlags & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS)))
+            {
+                return false;
+            }
             break;
     }
 
