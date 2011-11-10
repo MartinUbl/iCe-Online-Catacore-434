@@ -5259,23 +5259,6 @@ void AuraEffect::HandleAuraSchoolAbsorb(AuraApplication const *aurApp, uint8 mod
 
     switch(GetSpellProto()->Id)
     {
-        // Power Word: Shield (talent Rapture)
-        case 17:
-        {
-            // Rapture procs only when dispelled or removed when full absorb
-            if(aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
-            {
-                int32 regain = 0;
-                if(target->HasAura(47537))
-                    regain = 0.06*target->GetMaxPower(POWER_MANA);
-                else if(target->HasAura(47536))
-                    regain = 0.04*target->GetMaxPower(POWER_MANA);
-                else if(target->HasAura(47535))
-                    regain = 0.02*target->GetMaxPower(POWER_MANA);
-                target->CastCustomSpell(GetCaster(), 47755, &regain, 0, 0, true);
-            }
-        }
-        break;
         // Ice Barrier
         case 11426:
         {
