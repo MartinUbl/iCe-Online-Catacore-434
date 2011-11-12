@@ -3879,7 +3879,10 @@ void Guild::LevelUp()
     m_level = level;
     m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(level);
 
+    // Send guild news about new level
     AddGuildNews(GUILD_NEWS_GUILD_LEVEL, m_level);
+    // And update achievement criteria - mgr will take guild level, no need to supply it as miscvalue
+    m_achievementMgr.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL);
 
     WorldPacket data(SMSG_GUILD_XP_UPDATE, 8*5);
     data << uint64(0x37);             // max daily xp
