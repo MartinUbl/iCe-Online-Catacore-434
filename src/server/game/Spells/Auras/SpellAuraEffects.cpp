@@ -6872,6 +6872,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     {
                         case 59628: // Tricks of the Trade
                             caster->SetReducedThreatPercent(0, 0);
+                            caster->RemoveAurasDueToSpell(57934); // remove the triggering spell
                             break;
                         case 57934: // Tricks of the Trade
                             if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
