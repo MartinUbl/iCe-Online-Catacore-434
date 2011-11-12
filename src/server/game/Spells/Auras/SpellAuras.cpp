@@ -552,6 +552,10 @@ void Aura::UpdateTargetMap(Unit * caster, bool apply)
 
     m_updateTargetMapInterval = UPDATE_TARGET_MAP_INTERVAL;
 
+    // Wierd exception for Gouge application not-applying immediately
+    if (m_spellProto->Id == 1776)
+        m_updateTargetMapInterval = 0;
+
     // fill up to date target list
     //       target, effMask
     std::map<Unit *, uint8> targets;
