@@ -820,15 +820,15 @@ enum SpellEffects
     SPELL_EFFECT_163                       = 163,
     SPELL_EFFECT_REMOVE_AURA               = 164,
     SPELL_EFFECT_165                       = 165,
-    SPELL_EFFECT_166                       = 166,
+    SPELL_EFFECT_GAIN_CURRENCY             = 166,
     SPELL_EFFECT_167                       = 167,
-    SPELL_EFFECT_168                       = 168,
+    SPELL_EFFECT_CONTROL_PET               = 168,
     SPELL_EFFECT_169                       = 169,
     SPELL_EFFECT_170                       = 170,
-    SPELL_EFFECT_171                       = 171,
-    SPELL_EFFECT_172                       = 172,
-    SPELL_EFFECT_173                       = 173,
-    SPELL_EFFECT_174                       = 174,
+    SPELL_EFFECT_SUMMON_OBJECT_WILD_2      = 171,
+    SPELL_EFFECT_MASS_RESURRECTION         = 172,
+    SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT  = 173,
+    SPELL_EFFECT_APPLY_AURA_FORCED         = 174,
     TOTAL_SPELL_EFFECTS                    = 175
 };
 

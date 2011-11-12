@@ -245,7 +245,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //170
     &Spell::EffectNULL,                                     //171
     &Spell::EffectNULL,                                     //172
-    &Spell::EffectNULL,                                     //173
+    &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
     &Spell::EffectNULL,                                     //174
 };
 
@@ -9397,6 +9397,14 @@ void Spell::EffectRechargeManaGem(SpellEffIndex /*effIndex*/)
             pItem->SetSpellCharges(x,pProto->Spells[x].SpellCharges);
         pItem->SetState(ITEM_CHANGED,player);
     }
+}
+
+void Spell::EffectActivateGuildBankSlot(SpellEffIndex effIndex)
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // TODO: Do
 }
 
 void Spell::EffectBind(SpellEffIndex effIndex)
