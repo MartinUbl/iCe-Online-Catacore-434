@@ -15396,7 +15396,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
                     rep_val = 30;
                 if (rep_val < 15)
                     rep_val = 15;
-                SetReputation(1168,GetReputation(1168)+rep_val);
+                SetReputation(FACTION_GUILD,GetReputation(FACTION_GUILD)+rep_val);
             }
         }
     }

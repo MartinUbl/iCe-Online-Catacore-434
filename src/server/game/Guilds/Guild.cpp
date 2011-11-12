@@ -197,7 +197,7 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
         {
             // guild reputation
             if (player && achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_GUILD_REP
-                && player->GetReputation(1168) < achievementCriteria->moreRequirementValue[i])
+                && player->GetReputation(FACTION_GUILD) < achievementCriteria->moreRequirementValue[i])
                 continue;
         }
 
@@ -217,7 +217,7 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_ACCUMULATE);
                 break;
                 }
-            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL: // for testing - "earn guild level"
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
                 SetCriteriaProgress(achievementCriteria, m_guild->GetLevel());
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS:
@@ -235,7 +235,8 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
                 SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // for testing - "kill critters"
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
+                // for testing - "kill critters" - actually it is stored in morerequirement
                 if (unit && unit->GetCreatureType() == CREATURE_TYPE_CRITTER)
                     SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
                 break;
@@ -3102,7 +3103,7 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
 
         // If player wasn't in this guild before relog, reset guild reputation to zero
         if (player->GetLastGuildId() != m_id)
-            player->SetReputation(1168,0);
+            player->SetReputation(FACTION_GUILD,0);
 
         // Learn our perks to him
         for(int i = 0; i < m_level-1; ++i)
@@ -3805,7 +3806,7 @@ bool Guild::IsRewardReachable(Player* pPlayer, uint32 item)
         return true;
 
     // If player doesn't have enough guild reputation
-    if (pPlayer->GetReputationRank(1168) < ReputationRank(itr->second->standing))
+    if (pPlayer->GetReputationRank(FACTION_GUILD) < ReputationRank(itr->second->standing))
         return false;
 
     // If guild has't achieved required achievement
@@ -3881,11 +3882,11 @@ void Guild::LevelUp()
     AddGuildNews(GUILD_NEWS_GUILD_LEVEL, m_level);
 
     WorldPacket data(SMSG_GUILD_XP_UPDATE, 8*5);
-    data << uint64(0x37); // max daily xp
-    data << uint64(GetNextLevelXP()); // next level XP
-    data << uint64(0x37); // weekly xp
-    data << uint64(GetCurrentXP()); // Curr exp
-    data << uint64(GetTodayXP()); // Today exp (not supported yet)
+    data << uint64(0x37);             // max daily xp
+    data << uint64(GetNextLevelXP()); // next level xp
+    data << uint64(0x37);             // weekly xp
+    data << uint64(GetCurrentXP());   // Current xp
+    data << uint64(GetTodayXP());     // Today xp
 
     // Find perk to gain
     uint32 spellId = 0;

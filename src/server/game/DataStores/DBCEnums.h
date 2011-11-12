@@ -386,7 +386,7 @@ enum MapTypes                                               // Lua_IsInInstance
     MAP_ARENA           = 4                                 // arena
 };
 
-enum AbilytyLearnType
+enum AbilityLearnType
 {
     ABILITY_LEARNED_ON_GET_PROFESSION_SKILL     = 1,
     ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL  = 2
@@ -478,10 +478,13 @@ enum SummonPropFlags
 
 enum CurrencyTypes
 {
-	CURRENCY_TYPE_CONQUEST_POINTS                = 390,
+    CURRENCY_TYPE_CONQUEST_POINTS                = 390,
     CURRENCY_TYPE_HONOR_POINTS                   = 392,
     CURRENCY_TYPE_JUSTICE_POINTS                 = 395,
     CURRENCY_TYPE_VALOR_POINTS                   = 396,
 };
+
+// Faction used for Guild reputation counting
+#define FACTION_GUILD 1168
 
 #endif

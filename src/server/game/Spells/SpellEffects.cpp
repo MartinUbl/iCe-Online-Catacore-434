@@ -7305,7 +7305,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             if (m_spellInfo->Id == 83958)
             {
                 // Allow only if player has friendly or better reputation rank
-                if (m_caster && m_caster->ToPlayer() && m_caster->ToPlayer()->GetReputationRank(1168) >= REP_FRIENDLY)
+                if (m_caster && m_caster->ToPlayer() && m_caster->ToPlayer()->GetReputationRank(FACTION_GUILD) >= REP_FRIENDLY)
                 {
                     // Cast summoning spell
                     if (m_caster->ToPlayer()->GetTeamId() == TEAM_ALLIANCE)
