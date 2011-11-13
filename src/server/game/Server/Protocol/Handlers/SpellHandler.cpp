@@ -345,6 +345,7 @@ const uint32 ModABSpellMap[][3] = {
     {8921,             94338,         0}, // Eclipse (Solar) - condition for talent Sunfire
     {86121,            86211,         0}, // Soul Swap
     {77606,            77616,         0}, // Dark Simulacrum
+    {88625,            81206,         2}, // Chakra: Sanctuary
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
