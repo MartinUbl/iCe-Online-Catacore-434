@@ -1573,6 +1573,16 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         if (caster->HasAura(95740) && roll_chance_i(10))
                             caster->CastSpell(caster, 77487, true);
 
+                        // Pain and Suffering
+                        if ((caster->HasAura(47581) && roll_chance_i(60))
+                            || (caster->HasAura(47580) && roll_chance_i(30)))
+                        {
+                            // refresh duration of SW:Pain
+                            Aura* dot = target->GetAura(589);
+                            if (dot)
+                                dot->RefreshDuration();
+                        }
+
                         // Dark Evangelism
                         // Player has the talent
                         uint32 auraid = 0;
