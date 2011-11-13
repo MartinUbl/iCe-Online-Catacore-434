@@ -3566,6 +3566,14 @@ void SpellMgr::LoadCustomSpells()
     pSpell->DurationIndex = 21;
     pSpell->rangeIndex = 1;
     INSERT_SPELLENTRY(pSpell);
+
+    // Ozumat Heroic Kill Credit (for satisfying achievement criteria)
+    INIT_NEW_SPELLENTRY(pSpell,95673);
+    pSpell->SpellName = "Ozumat Heroic Kill Credit";
+    pSpell->CastingTimeIndex = 1;
+    pSpell->DurationIndex = 21;
+    pSpell->rangeIndex = 1;
+    INSERT_SPELLENTRY(pSpell);
 }
 
 // set data in core for now
@@ -3736,6 +3744,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+            break;
+        case 95673: // Ozumat Heroic Kill Credit
+            spellInfo->EquippedItemClass = -1;
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             break;
         case 87934: //Serpent Spread
         case 87935:
