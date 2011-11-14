@@ -5811,16 +5811,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 11119:
                 case 11120:
                 case 12846:
-                case 12847:
-                case 12848:
                 {
                     switch (dummySpell->Id)
                     {
-                        case 11119: basepoints0 = int32(0.04f*damage); break;
-                        case 11120: basepoints0 = int32(0.08f*damage); break;
-                        case 12846: basepoints0 = int32(0.12f*damage); break;
-                        case 12847: basepoints0 = int32(0.16f*damage); break;
-                        case 12848: basepoints0 = int32(0.20f*damage); break;
+                        case 11119: basepoints0 = int32(0.13f*damage); break;
+                        case 11120: basepoints0 = int32(0.26f*damage); break;
+                        case 12846: basepoints0 = int32(0.40f*damage); break;
                         default:
                             sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                             return false;
@@ -18143,6 +18139,9 @@ uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIn
         amount += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
         break;
     }
+
+    if (amount < 0)
+        amount = 0;
 
     return amount;
 }
