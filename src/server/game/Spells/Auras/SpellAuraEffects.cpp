@@ -1578,7 +1578,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             || (caster->HasAura(47580) && roll_chance_i(30)))
                         {
                             // refresh duration of SW:Pain
-                            Aura* dot = target->GetAura(589);
+                            Aura* dot = target->GetAura(589, caster->GetGUID());
                             if (dot)
                                 dot->RefreshDuration();
                         }
