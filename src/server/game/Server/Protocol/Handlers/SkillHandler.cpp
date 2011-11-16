@@ -88,6 +88,8 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
                     if (tabEntry->masterySpells[i])
                         _player->learnSpell(tabEntry->masterySpells[i],false);
             }
+
+            _player->UpdateMastery();
         }
         else if(_player->GetTalentBranchSpec(_player->m_activeSpec) != specID) //cheat
             return;

@@ -25935,6 +25935,8 @@ void Player::ActivateSpec(uint8 spec)
                 if (tabEntry->masterySpells[i])
                     learnSpell(tabEntry->masterySpells[i], false);
         }
+
+        UpdateMastery();
     }
 
     // set glyphs
