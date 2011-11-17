@@ -1296,6 +1296,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += m_damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.035f);
                 }
+                // Death Coil - disable adding bonus
+                else if (m_spellInfo->Id == 47632)
+                    apply_direct_bonus = false;
                 break;
             }
         }
@@ -2524,12 +2527,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
                 if (m_caster->IsFriendlyTo(unitTarget))
                 {
-                    int32 bp = (985 + damage) * 3.5;
+                    int32 bp = (damage+0.3f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 3.5 + 1;
                     m_caster->CastCustomSpell(unitTarget, 47633, &bp, NULL, NULL, true);
                 }
                 else
                 {
-                    int32 bp = 985 + damage;
+                    int32 bp = damage+0.408f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     m_caster->CastCustomSpell(unitTarget, 47632, &bp, NULL, NULL, true);
                 }
                 return;
