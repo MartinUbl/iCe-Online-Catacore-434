@@ -826,7 +826,7 @@ void Battleground::EndBattleground(uint32 winner)
             }
 
             uint32 xp = Trinity::XP::BattlegroundVictoryXP(plr->getLevel());
-            if (xp)
+            if (xp && !isArena())
                 plr->GiveXP(xp, NULL);
 
             plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
@@ -837,7 +837,7 @@ void Battleground::EndBattleground(uint32 winner)
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
 
             uint32 xp = Trinity::XP::BattlegroundLossXP(plr->getLevel());
-            if (xp)
+            if (xp && !isArena())
                 plr->GiveXP(xp, NULL);
         }
 
