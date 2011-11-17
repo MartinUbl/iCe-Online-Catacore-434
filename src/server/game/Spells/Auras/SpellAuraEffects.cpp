@@ -6383,6 +6383,10 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const *aurApp, uint8
             // For show in client
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,GetAmount()/100.0f,apply);
+            else if (!target->CanModifyStats())
+            {
+                target->UpdateAttackPowerAndDamage(false);
+            }
         }
     }
 
