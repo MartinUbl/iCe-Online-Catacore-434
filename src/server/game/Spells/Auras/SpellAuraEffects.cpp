@@ -1028,7 +1028,13 @@ void AuraEffect::CalculatePeriodic(Unit *caster, bool create)
             }
             // and periodic time of auras affected by SPELL_AURA_PERIODIC_HASTE
             else if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellProto) || m_spellProto->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            {
+                float baseticks = GetBase()->GetDuration() / m_amplitude;
+                // The act of rounding bonus ticks.. very funny joke from Blizzard Entertainment
+                float hasteticks = int32((baseticks / caster->GetFloatValue(UNIT_MOD_CAST_SPEED))+0.5);
+
+                m_amplitude = int32(m_amplitude * (baseticks/hasteticks));
+            }
         }
     }
 
