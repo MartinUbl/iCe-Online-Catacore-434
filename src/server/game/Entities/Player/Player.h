@@ -333,8 +333,6 @@ struct RuneInfo
     uint8 BaseRune;
     uint8 CurrentRune;
     uint32 Cooldown;
-    uint32 MaxCooldown;
-    bool CooldownRunning;
     AuraEffect const * ConvertAura;
 };
 
@@ -2576,8 +2574,6 @@ class Player : public Unit, public GridObject<Player>
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
         RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
         uint32 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
-        uint32 GetRuneMaxCooldown(uint8 index) const { return m_runes->runes[index].MaxCooldown; }
-        bool IsRuneCooldownRunning(uint8 index) const { return m_runes->runes[index].CooldownRunning; }
         uint32 GetRuneBaseCooldown(uint8 index);
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
         RuneType GetLastUsedRune() { return m_runes->lastUsedRune; }

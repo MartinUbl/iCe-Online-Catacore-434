@@ -24402,43 +24402,13 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
             cooldown = cooldown*(100-(*i)->GetAmount())/100;
     }
 
-    // Haste affects also rune cooldown
-    cooldown = cooldown / (2-GetFloatValue(UNIT_MOD_CAST_SPEED));
-
     return cooldown;
 }
 
 void Player::SetRuneCooldown(uint8 index, uint32 cooldown)
 {
-    uint8 otherrune = 0;
-    if (index % 2)
-        otherrune = index-1;
-    else
-        otherrune = index+1;
-
-    if (cooldown < m_runes->runes[index].Cooldown && !m_runes->runes[index].CooldownRunning)
-        return;
-
-    // Set max cooldown only when initiating cooldown
-    if (m_runes->runes[index].Cooldown == 0 && cooldown > 0)
-    {
-        m_runes->runes[index].MaxCooldown = cooldown;
-        m_runes->runes[index].CooldownRunning = true;
-    }
-
     m_runes->runes[index].Cooldown = cooldown;
     m_runes->SetRuneState(index, (cooldown == 0) ? true : false);
-
-    if (m_runes->runes[otherrune].CooldownRunning)
-        m_runes->runes[index].CooldownRunning = false;
-
-    // If cooldown has passed
-    if (cooldown == 0)
-    {
-        m_runes->runes[index].CooldownRunning = false;
-        if (m_runes->runes[otherrune].Cooldown > 0 && !m_runes->runes[otherrune].CooldownRunning)
-            m_runes->runes[otherrune].CooldownRunning = true;
-    }
 }
 
 void Player::RemoveRunesByAuraEffect(AuraEffect const * aura)
@@ -24481,17 +24451,12 @@ void Player::ConvertRune(uint8 index, RuneType newType)
 
 void Player::ResyncRunes(uint8 count)
 {
-    uint32 maxcooldown = RUNE_COOLDOWN;
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + count * 2);
     data << uint32(count);
     for (uint32 i = 0; i < count; ++i)
     {
-        maxcooldown = GetRuneMaxCooldown(i);
-        if (maxcooldown == 0)
-            maxcooldown = RUNE_COOLDOWN;
-
         data << uint8(GetCurrentRune(i));                          // rune type
-        data << uint8(255 - 255*GetRuneCooldown(i)/maxcooldown); // passed cooldown (0-255, real cooldown is 10000-0)
+        data << uint8(255 - 255*GetRuneCooldown(i)/RUNE_COOLDOWN); // passed cooldown (0-255, real cooldown is 10000-0)
     }
     GetSession()->SendPacket(&data);
 }
