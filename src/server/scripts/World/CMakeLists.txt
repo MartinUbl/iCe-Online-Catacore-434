@@ -7,6 +7,7 @@ set(scripts_STAT_SRCS
   World/boss_taerar.cpp
   World/boss_ysondre.cpp
   World/chat_log.cpp
+  World/cs_bf.cpp
   World/go_scripts.cpp
   World/guards.cpp
   World/guards_swog.cpp

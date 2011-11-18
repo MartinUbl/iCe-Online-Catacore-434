@@ -426,6 +426,9 @@ void WorldSession::LogoutPlayer(bool Save)
             }
         }
 
+        // Removes player from battlefield queues
+        sBattlefieldMgr.HandlePlayerLogout(_player);
+
         // Repop at GraveYard or other player far teleport will prevent saving player because of not present map
         // Teleport player immediately for correct player save
         while (_player->IsBeingTeleportedFar())

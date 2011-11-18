@@ -49,7 +49,8 @@ Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleI
     // Set inmunities since db ones are rewritten with player's ones
     switch (GetVehicleInfo()->m_ID)
     {
-        case 160:
+        case 160: // Isle of Conquest Turret
+        case 244: // Wintergrasp Turret
             me->SetControlled(true, UNIT_STAT_ROOT);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
@@ -452,6 +453,20 @@ void Vehicle::Dismiss()
     me->SendObjectDeSpawnAnim(me->GetGUID());
     me->CombatStop();
     me->AddObjectToRemoveList();
+}
+
+void Vehicle::TeleportVehicle(float x, float y, float z, float ang)
+{
+    vehiclePlayers.clear();
+    for(int8 i = 0; i < 8; i++)
+        if (Unit* player = GetPassenger(i))
+            vehiclePlayers.insert(player->GetGUID());
+
+    RemoveAllPassengers(); // this can unlink Guns from Siege Engines
+    me->NearTeleportTo(x, y, z, ang);
+    for (GuidSet::const_iterator itr = vehiclePlayers.begin(); itr != vehiclePlayers.end(); ++itr)
+        if (Unit* plr = sObjectAccessor->FindUnit(*itr))
+            plr->NearTeleportTo(x, y, z, ang);
 }
 
 uint16 Vehicle::GetExtraMovementFlagsForBase() const

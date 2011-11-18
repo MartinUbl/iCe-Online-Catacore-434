@@ -27,6 +27,7 @@
 #include "GroupRefManager.h"
 #include "DBCEnums.h"
 #include "Battleground.h"
+#include "../../Battlefield/BattlefieldMgr.h"
 
 #include <map>
 #include <vector>
@@ -267,6 +268,7 @@ class Group
         bool isLFGGroup()  const { return m_groupType & GROUPTYPE_LFG; }
         bool isRaidGroup() const { return m_groupType & GROUPTYPE_RAID; }
         bool isBGGroup()   const { return m_bgGroup != NULL; }
+        bool isBFGroup()   const; 
         bool IsCreated()   const { return GetMembersCount() > 0; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         const uint64& GetGUID() const { return m_guid; }
@@ -345,6 +347,7 @@ class Group
         
         // some additional raid methods
         void SetBattlegroundGroup(Battleground *bg) { m_bgGroup = bg; }
+        void SetBattlefieldGroup(Battlefield* bf);
         GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
 
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
@@ -525,12 +528,13 @@ class Group
         Difficulty          m_dungeonDifficulty;
         Difficulty          m_raidDifficulty;
         Battleground*       m_bgGroup;
+        Battlefield*        m_bfGroup; 
         uint64              m_targetIcons[TARGETICONCOUNT];
         LootMethod          m_lootMethod;
         uint64              m_looterGuid;
         Rolls               RollId;
         ItemQualities       m_lootThreshold;
-		BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
+        BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST

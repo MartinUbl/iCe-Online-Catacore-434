@@ -1384,6 +1384,14 @@ enum GameObjectDynamicLowFlags
     GO_DYNFLAG_LO_SPARKLE           = 0x08,                 // makes GO sparkle
 };
 
+enum GameObjectDestructibleState
+{
+    GO_DESTRUCTIBLE_INTACT      = 0,
+    GO_DESTRUCTIBLE_DAMAGED     = 1,
+    GO_DESTRUCTIBLE_DESTROYED   = 2,
+    GO_DESTRUCTIBLE_REBUILDING  = 3,
+};
+
 enum TextEmotes
 {
     TEXTEMOTE_AGREE                = 1,

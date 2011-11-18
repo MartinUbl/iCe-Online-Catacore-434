@@ -1768,6 +1768,12 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
     if (_player->isInFlight())
         return;
 
+    if(Battlefield* bf = sBattlefieldMgr.GetBattlefieldToZoneId(_player->GetZoneId()))
+    {
+        // bf->PlayerAskToLeave(_player); FIXME
+        return;
+    }
+
     AreaTableEntry const *atEntry = GetAreaEntryByAreaID(_player->GetAreaId());
     if (!atEntry || !(atEntry->flags & AREA_FLAG_OUTDOOR_PVP2))
         return;

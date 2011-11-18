@@ -41,6 +41,7 @@ class Channel;
 class ChatCommand;
 class Creature;
 class CreatureAI;
+class GameObjectAI;
 class DynamicObject;
 class GameObject;
 class Guild;
@@ -473,6 +474,12 @@ class GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
 
         // Called when the gameobject is destroyed (destructible buildings only).
         virtual void OnDestroyed(Player* /*player*/, GameObject* /*go*/, uint32 /*eventId*/) { }
+
+        // Called when the game object is damaged (destructible buildings only).
+        virtual void OnDamaged(Player* /*player*/, GameObject* /*go*/, uint32 /*eventId*/) { }
+
+        // Called when a GameObjectAI object is needed for the object.
+        virtual GameObjectAI* GetAI(GameObject* /*gameobject*/) const { return NULL; }
 };
 
 class AreaTriggerScript : public ScriptObject
@@ -873,7 +880,9 @@ class ScriptMgr
         bool OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 opt);
         uint32 GetDialogStatus(Player* player, GameObject* go);
         void OnGameObjectDestroyed(Player* player, GameObject* go, uint32 eventId);
+        void OnGameObjectDamaged(Player* player, GameObject* go, uint32 eventId);
         void OnGameObjectUpdate(GameObject* go, uint32 diff);
+        GameObjectAI* GetGameObjectAI(GameObject* gameobject);
 
     public: /* AreaTriggerScript */
 

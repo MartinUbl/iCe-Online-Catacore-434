@@ -9052,71 +9052,35 @@ void Spell::EffectRedirectThreat(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectWMODamage(SpellEffIndex /*effIndex*/)
 {
-    if (gameObjTarget && gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-    {
-        Unit *caster = m_originalCaster;
-        if (!caster)
-            return;
+    if (!gameObjTarget)
+        return;
 
-        // Do not allow damage if hp is 0
-        if (gameObjTarget->GetGOValue()->building.health == 0)
-            return;
+    Unit* caster = m_originalCaster;
+    if (!caster)
+        return;
 
-        FactionTemplateEntry const *casterft, *goft;
-        casterft = caster->getFactionTemplateEntry();
-        goft = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FACTION));
-        // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
-        if ((casterft && goft && !casterft->IsFriendlyTo(*goft)) || !goft)
-        {
-            gameObjTarget->TakenDamage(uint32(damage), caster);
-            WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8+8+8+4+4);
-            data.append(gameObjTarget->GetPackGUID());
-            data.append(caster->GetPackGUID());
-            if (Unit *who = caster->GetCharmerOrOwner())
-                data.append(who->GetPackGUID());
-            else
-                data << uint8(0);
-            data << uint32(damage);
-            data << uint32(m_spellInfo->Id);
-            gameObjTarget->SendMessageToSet(&data, false);
-        }
-    }
+    FactionTemplateEntry const* casterFaction = caster->getFactionTemplateEntry();
+    FactionTemplateEntry const* targetFaction = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FACTION));
+    // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
+    if ((casterFaction && targetFaction && !casterFaction->IsFriendlyTo(*targetFaction)) || !targetFaction)
+        gameObjTarget->ModifyHealth(-damage, caster, GetSpellInfo()->Id);
 }
 
 void Spell::EffectWMORepair(SpellEffIndex /*effIndex*/)
 {
-    if (gameObjTarget && gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-        gameObjTarget->Rebuild();
+    if (!gameObjTarget)
+        return;
+
+    gameObjTarget->ModifyHealth(damage, m_caster);
 }
 
 void Spell::EffectWMOChange(SpellEffIndex effIndex)
 {
-    if (gameObjTarget && gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-    {
-        Unit* caster = m_originalCaster;
-        if (!caster)
-            return;
+    if (!gameObjTarget || !m_originalCaster)
+        return;
 
-        int ChangeType = m_spellInfo->EffectMiscValue[effIndex];
-        switch (ChangeType)
-        {
-            case 0: // intact
-                if (gameObjTarget->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED))
-                    gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                if (gameObjTarget->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
-                    gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-                break;
-            case 1: // damaged
-                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                break;
-            case 2: // destroyed
-                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-                break;
-            case 3: // rebuild
-                gameObjTarget->Rebuild();
-                break;
-        }
-    }
+    Player* player = m_originalCaster->GetCharmerOrOwnerPlayerOrPlayerItself();
+    gameObjTarget->SetDestructibleState(GameObjectDestructibleState(m_spellInfo->EffectMiscValue[effIndex]), player, true);
 }
 
 uint32 Spell::GetMaxActiveSummons(uint32 entry)
@@ -9330,6 +9294,7 @@ void Spell::EffectPlayerNotification(SpellEffIndex /*effIndex*/)
         case 58730: // Restricted Flight Area
         case 58600: // Restricted Flight Area
             unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
+            unitTarget->PlayDirectSound(9417); // Fel Reaver sound
             break;
     }
 }

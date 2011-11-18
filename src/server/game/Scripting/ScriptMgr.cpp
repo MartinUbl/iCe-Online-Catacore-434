@@ -761,6 +761,14 @@ Creature* ScriptMgr::GetCreatureScriptedClass(uint32 scriptID)
     return tmpscript->GetCreatureScriptedClass();
 }
 
+GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* gameobject)
+{
+    ASSERT(gameobject);
+
+    GET_SCRIPT_RET(GameObjectScript, gameobject->GetScriptId(), tmpscript, NULL);
+    return tmpscript->GetAI(gameobject);
+}
+
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);
@@ -845,6 +853,14 @@ void ScriptMgr::OnGameObjectDestroyed(Player* player, GameObject* go, uint32 eve
 
     GET_SCRIPT(GameObjectScript, go->GetScriptId(), tmpscript);
     tmpscript->OnDestroyed(player, go, eventId);
+}
+
+void ScriptMgr::OnGameObjectDamaged(Player* player, GameObject* go, uint32 eventId)
+{
+    ASSERT(go);
+
+    GET_SCRIPT(GameObjectScript, go->GetScriptId(), tmpscript);
+    tmpscript->OnDamaged(player, go, eventId);
 }
 
 void ScriptMgr::OnGameObjectUpdate(GameObject* go, uint32 diff)
