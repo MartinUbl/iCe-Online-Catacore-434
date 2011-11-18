@@ -55,6 +55,8 @@ Battlefield::Battlefield()
 
     m_uiKickAfkTimer           = 1000;
 
+    m_updateQueueTimer         = 10000;
+
     m_LastResurectTimer        = 30 * IN_MILLISECONDS;
     m_StartGroupingTimer       = 0;
     m_StartGrouping            = false;
@@ -162,6 +164,28 @@ bool Battlefield::Update(uint32 diff)
         }
         else
             m_uiKickAfkTimer -= diff;
+
+        // Update queue, invite players if possible
+        if (m_updateQueueTimer <= diff)
+        {
+            if (!m_PlayersInQueue[0].empty() && !m_PlayersInQueue[1].empty())
+            {
+                uint32 HowMuch = (m_PlayersInQueue[0].size() > m_PlayersInQueue[1].size()) ? m_PlayersInQueue[1].size() : m_PlayersInQueue[0].size();
+                Player* pTemp = NULL;
+                for (uint8 team = 0; team < BG_TEAMS_COUNT; team++)
+                {
+                    for (GuidSet::const_iterator itr = m_PlayersInQueue[team].begin(); itr != m_PlayersInQueue[team].end(); ++itr)
+                    {
+                        pTemp = sObjectMgr->GetPlayer(*itr);
+                        if (pTemp)
+                            InvitePlayerToWar(pTemp);
+                    }
+                }
+            }
+            m_updateQueueTimer = 10000;
+        }
+        else
+            m_updateQueueTimer -= diff;
 
         //Here kick player witch dont have accept invitation to join the war when time is end (time of windows)
         if (m_uiKickDontAcceptTimer <= diff)
@@ -403,6 +427,11 @@ void Battlefield::PlayerAcceptInviteToWar(Player *player)
         player->GetSession()->SendBfEntered(m_BattleId);
         m_PlayersInWar[player->GetTeamId()].insert(player->GetGUID());
         m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
+
+        // !!!
+        // Is this right?
+        m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+
         //Remove player AFK
         if (player->isAFK())
             player->ToggleAFK();

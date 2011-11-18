@@ -367,6 +367,8 @@ protected:
     GraveYardVect m_GraveYardList;                          // Vector witch contain the different GY of the battle
     uint32 m_LastResurectTimer;                             // Timer for resurect player every 30 sec
 
+    uint32 m_updateQueueTimer;                              // Timer used for updating and inviting players from queue
+
     uint32 m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
     bool m_StartGrouping;                                   // bool for know if all players in area has been invited
 
