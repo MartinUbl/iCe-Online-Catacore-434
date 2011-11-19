@@ -18215,7 +18215,7 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
                 questStatusData.m_rewarded = (fields[2].GetUInt8() > 0);
                 questStatusData.m_explored = (fields[3].GetUInt8() > 0);
 
-                time_t quest_time = time_t(fields[3].GetUInt32());
+                time_t quest_time = time_t(fields[4].GetUInt32());
 
                 if (pQuest->HasFlag(QUEST_TRINITY_FLAGS_TIMED) && !GetQuestRewardStatus(quest_id) &&  questStatusData.m_status != QUEST_STATUS_NONE)
                 {

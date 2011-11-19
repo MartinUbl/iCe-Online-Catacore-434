@@ -812,16 +812,19 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket.read(digest, 2);
 
     recvPacket >> m_addonSize;
-    uint8 * tableauAddon = new uint8[m_addonSize];
     WorldPacket packetAddon;
-    for(uint32 i = 0; i < m_addonSize; i++)
+    if (m_addonSize > 0)
     {
-        uint8 ByteSize = 0;
-        recvPacket >> ByteSize;
-        tableauAddon[i] = ByteSize;
-        packetAddon << ByteSize;
+        uint8 * tableauAddon = new uint8[m_addonSize];
+        for(uint32 i = 0; i < m_addonSize; i++)
+        {
+            uint8 ByteSize = 0;
+            recvPacket >> ByteSize;
+            tableauAddon[i] = ByteSize;
+            packetAddon << ByteSize;
+        }
+        delete tableauAddon;
     }
-    delete tableauAddon;
 
     recvPacket >> accountName;
    

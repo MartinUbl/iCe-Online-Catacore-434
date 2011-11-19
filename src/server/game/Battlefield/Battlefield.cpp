@@ -263,7 +263,7 @@ void Battlefield::InvitePlayerToQueue(Player *player)
         return;
     }
 
-    if (m_PlayersInQueue[player->GetTeam()].size() <= m_MinPlayer || m_PlayersInQueue[player->GetTeam() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE].size() >= m_MinPlayer)
+    if (m_PlayersInQueue->size() == 0 || m_PlayersInQueue[player->GetTeam()].size() <= m_MinPlayer || m_PlayersInQueue[player->GetTeam() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE].size() >= m_MinPlayer)
         player->GetSession()->SendBfInvitePlayerToQueue(m_BattleId);
 }
 
