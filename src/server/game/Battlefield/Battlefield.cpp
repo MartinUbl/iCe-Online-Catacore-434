@@ -922,8 +922,9 @@ Creature *Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
     }
 
     //Create creature
+    uint32 db_guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
     Creature* creature = new Creature;
-    if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
+    if (!creature->Create(db_guid, map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
     {
         sLog->outError("Can't create creature entry: %u", entry);
         delete creature;
@@ -958,8 +959,9 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
         return 0;
 
     // Create gameobject
+    uint32 db_lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
     GameObject* go = new GameObject;
-    if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, map, PHASEMASK_NORMAL, x, y, z, o, 0, 0, 0, 0, 100, GO_STATE_READY))
+    if (!go->Create(db_lowGUID, entry, map, PHASEMASK_NORMAL, x, y, z, o, 0, 0, 0, 0, 100, GO_STATE_READY))
     {
         sLog->outErrorDb("Gameobject template %u not found in database! Battleground not created!", entry);
         sLog->outError("Cannot create gameobject template %u! Battleground not created!", entry);
@@ -967,9 +969,12 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
         return NULL;
     }
 
+    go->SetSpawnedByDefault(false);
+
     // Add in the world
     map->Add(go);
     go->setActive(true);
+
     return go;
 }
 

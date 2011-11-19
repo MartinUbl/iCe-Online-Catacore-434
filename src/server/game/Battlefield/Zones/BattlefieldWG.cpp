@@ -253,7 +253,7 @@ bool BattlefieldWG::Update(uint32 diff)
                 }
     }
 
-    for (uint8 team = 0; team < 2; ++team)
+    /*for (uint8 team = 0; team < 2; ++team)
         for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
                 for (BfCapturePointMap::iterator cp_itr = m_capturePoints.begin(); cp_itr != m_capturePoints.end(); ++cp_itr)
@@ -264,7 +264,7 @@ bool BattlefieldWG::Update(uint32 diff)
                         player->RemoveAurasDueToSpell((*cp_itr).second->GetTeamId() == TEAM_ALLIANCE ? SPELL_HORDE_CONTROLS_FACTORY_PHASE_SHIFT : SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE_SHIFT);
                         break;
                     }
-                }
+                }*/
 
     return m_return;
 }
@@ -534,7 +534,7 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
         m_vehicles[team].clear();
     }
 
-    if (!endbytimer)
+    /*if (!endbytimer)
     {
         for (uint8 team = 0; team < 2; ++team)
         {
@@ -547,7 +547,7 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
                 }
             }
         }
-    }
+    }*/
 
     if (!endbytimer)
     {                                                       // win alli/horde
