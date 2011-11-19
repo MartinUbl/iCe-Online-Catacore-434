@@ -149,6 +149,8 @@ void WorldSession::HandleBfEntryInviteResponse(WorldPacket & recv_data)
     {
         if (_player->GetZoneId() == Bf->GetZoneId())
             Bf->KickPlayerFromBf(_player->GetGUID());
+
+        Bf->AskToLeaveQueue(_player);
     }
 }
 

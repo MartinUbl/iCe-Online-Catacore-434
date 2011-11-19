@@ -168,20 +168,43 @@ bool Battlefield::Update(uint32 diff)
         // Update queue, invite players if possible
         if (m_updateQueueTimer <= diff)
         {
-            if (!m_PlayersInQueue[0].empty() && !m_PlayersInQueue[1].empty())
+            uint8 queueteam = (m_PlayersInQueue[TEAM_ALLIANCE].size() > m_PlayersInQueue[TEAM_HORDE].size()) ? TEAM_HORDE : TEAM_ALLIANCE;
+            uint8 queueteam_other = (queueteam == TEAM_HORDE) ? TEAM_ALLIANCE : TEAM_HORDE;
+
+            uint8 team = (m_PlayersInWar[TEAM_ALLIANCE].size() > m_PlayersInWar[TEAM_HORDE].size()) ? TEAM_HORDE : TEAM_ALLIANCE;
+            uint32 howMuch = abs(int32(m_PlayersInWar[TEAM_HORDE].size() - m_PlayersInWar[TEAM_ALLIANCE].size())) + m_PlayersInQueue[queueteam].size();
+            if (!m_PlayersInQueue[team].empty())
             {
-                uint32 HowMuch = (m_PlayersInQueue[0].size() > m_PlayersInQueue[1].size()) ? m_PlayersInQueue[1].size() : m_PlayersInQueue[0].size();
                 Player* pTemp = NULL;
-                for (uint8 team = 0; team < BG_TEAMS_COUNT; team++)
+                uint32 i = 0;
+                for (GuidSet::const_iterator itr = m_PlayersInQueue[team].begin(); itr != m_PlayersInQueue[team].end(); ++itr)
                 {
-                    for (GuidSet::const_iterator itr = m_PlayersInQueue[team].begin(); itr != m_PlayersInQueue[team].end(); ++itr)
-                    {
-                        pTemp = sObjectMgr->GetPlayer(*itr);
-                        if (pTemp)
-                            InvitePlayerToWar(pTemp);
-                    }
+                    if (i >= howMuch)
+                        break;
+
+                    pTemp = sObjectMgr->GetPlayer(*itr);
+                    if (pTemp)
+                        InvitePlayerToWar(pTemp);
+                    i++;
                 }
             }
+
+            if (!m_PlayersInQueue[queueteam_other].empty())
+            {
+                Player* pTemp = NULL;
+                uint32 i = 0;
+                for (GuidSet::const_iterator itr = m_PlayersInQueue[queueteam_other].begin(); itr != m_PlayersInQueue[queueteam_other].end(); ++itr)
+                {
+                    if (i >= m_PlayersInQueue[queueteam].size())
+                        break;
+
+                    pTemp = sObjectMgr->GetPlayer(*itr);
+                    if (pTemp)
+                        InvitePlayerToWar(pTemp);
+                    i++;
+                }
+            }
+
             m_updateQueueTimer = 10000;
         }
         else
@@ -271,6 +294,8 @@ void Battlefield::InvitePlayerInZoneToWar()
         {
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
+                if (player->IsBeingTeleported() || player->GetZoneId() != m_ZoneId)
+                    continue;
                 if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()))
                     continue;
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
@@ -413,6 +438,9 @@ void Battlefield::AskToLeaveQueue(Player *player)
 {
     // Remove player from queue
     m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+    // And from other things like war and invited queue
+    m_PlayersInWar[player->GetTeamId()].erase(player->GetGUID());
+    m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
     player->GetSession()->SendBfLeaveMessage(m_BattleId);
 }
 
