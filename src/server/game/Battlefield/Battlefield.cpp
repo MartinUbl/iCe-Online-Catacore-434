@@ -1080,7 +1080,7 @@ bool BfCapturePoint::Update(uint32 diff)
 
     for (uint8 team = 0; team < 2; ++team)
     {
-        if (!m_activePlayers[team].empty())
+        if (!m_activePlayers->empty() && !m_activePlayers[team].empty())
             for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)
                 if (Player* player = ObjectAccessor::FindPlayer(*itr))
                     if (!m_capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
@@ -1187,7 +1187,7 @@ void BfCapturePoint::SendUpdateWorldState(uint32 field, uint32 value)
 {
     for (uint8 team = 0; team < 2; ++team)
     {
-        if (!m_activePlayers[team].empty())
+        if (!m_activePlayers->empty() && !m_activePlayers[team].empty())
             for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)  // send to all players present in the area
                 if (Player* player = ObjectAccessor::FindPlayer(*itr))
                     player->SendUpdateWorldState(field, value);
@@ -1210,7 +1210,7 @@ void BfCapturePoint::SendObjectiveComplete(uint32 id, uint64 guid)
     }
 
     // send to all players present in the area
-    if (!m_activePlayers[team].empty())
+    if (!m_activePlayers->empty() && !m_activePlayers[team].empty())
         for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
                 player->KilledMonsterCredit(id, guid);
