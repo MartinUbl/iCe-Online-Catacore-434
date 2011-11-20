@@ -4160,6 +4160,19 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_INTERRUPT;
             count++;
             break;
+        // interruptable npc abilities:
+        case 75823:             // Dark Command
+        case 76813: case 91437: // Healing Wave
+        case 82362: case 87374: // Shadow Strike
+        case 82632:             // Rising Flames
+        case 88357: case 93988: // Lightning Blast
+        case 82752: case 92509: // Hydro Lance
+        case 92510: case 92511:
+        case 83718: case 92541: // Harden Skin
+        case 92542: case 92543:
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            count++;
+            break;
         case 61607: // Mark of Blood
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             ++count;
