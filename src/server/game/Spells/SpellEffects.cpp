@@ -7335,14 +7335,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 // sumarize all the mages fire DoTs applied on the target
                 for (Unit::AuraEffectList::const_iterator itr = dot_list.begin(); itr != dot_list.end(); ++itr)
-                    if(AuraEffect const *dot_eff = itr._Mynode()->_Myval)
+                    if(AuraEffect const *dot_eff = *itr)
                     {
                         if (dot_eff->GetCasterGUID() != caster_guid)
                             continue;
                         SpellEntry const *dot_spell = dot_eff->GetSpellProto();
                         if (!dot_spell)
                             continue;
-                        if (!(const uint32 (dot_spell->SchoolMask) &= SPELL_SCHOOL_MASK_FIRE))
+                        uint32 dot_schoolmask = dot_spell->SchoolMask;
+                        if (!(dot_schoolmask &= SPELL_SCHOOL_MASK_FIRE))
                             continue;
 
                         int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dot_eff->GetEffIndex(), dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
