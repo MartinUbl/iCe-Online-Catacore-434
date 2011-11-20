@@ -7318,6 +7318,44 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 88306, true);
                 }
             }
+
+            // Combustion
+            if (m_spellInfo->Id == 11129)
+            {
+                if (!m_caster || !unitTarget)
+                    return;
+
+                int32 dot_sum = 0;
+
+                uint64 caster_guid = m_caster->GetGUID();
+                Unit::AuraEffectList const &dot_list = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+
+                if (dot_list.empty())
+                    return;
+
+                // sumarize all the mages fire DoTs applied on the target
+                for (Unit::AuraEffectList::const_iterator itr = dot_list.begin(); itr != dot_list.end(); ++itr)
+                    if(AuraEffect const *dot_eff = itr._Mynode()->_Myval)
+                    {
+                        if (dot_eff->GetCasterGUID() != caster_guid)
+                            continue;
+                        SpellEntry const *dot_spell = dot_eff->GetSpellProto();
+                        if (!dot_spell)
+                            continue;
+                        if (!(const uint32 (dot_spell->SchoolMask) &= SPELL_SCHOOL_MASK_FIRE))
+                            continue;
+
+                        int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dot_eff->GetEffIndex(), dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
+
+                        dot_sum += dot_tick * dot_eff->GetTotalTicks();
+                    }
+
+                dot_sum = dot_sum / 10;
+
+                // apply a new DoT. amount is equal to the sum above
+                if (dot_sum > 0)
+                    m_caster->CastCustomSpell(unitTarget, 83853, &dot_sum, NULL, NULL, true);
+            }
         }
         case SPELLFAMILY_PRIEST:
         {

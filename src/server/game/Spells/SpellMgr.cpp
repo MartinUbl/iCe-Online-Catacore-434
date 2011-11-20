@@ -4276,6 +4276,8 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 63675: // Improved Devouring Plague
+        case 83853: // Combustion
+        case 12654: // Ignite
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
             count++;
             break;
