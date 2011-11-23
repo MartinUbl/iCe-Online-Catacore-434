@@ -20878,6 +20878,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
 
+    m_taxi.AddTaxiDestination(sourcenode);
+
     for (uint32 i = 1; i < nodes.size(); ++i)
     {
         uint32 path, cost;

@@ -273,8 +273,6 @@ void FlightPathMovementGenerator::Finalize(Player & player)
     float z = 0;
     i_destinationHolder.GetLocationNow(player.GetBaseMap(), x, y, z);
     player.SetPosition(x, y, z, player.GetOrientation());
-
-    player.CleanupAfterTaxiFlight();
 }
 
 bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)

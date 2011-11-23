@@ -62,7 +62,7 @@ void WorldSession::SendTaxiStatus(uint64 guid)
 
 	sLog->outDebug("WORLD: current location %u ",curloc);
 
-	WorldPacket data(SMSG_TAXINODE_STATUS, 9);
+	WorldPacket data(SMSG_TAXINODE_STATUS, 9, true);
 	data << guid;
 	data << uint8(GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc) ? 1 : 0);
 	SendPacket(&data);
