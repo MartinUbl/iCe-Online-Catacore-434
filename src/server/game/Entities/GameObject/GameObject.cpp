@@ -1828,6 +1828,8 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
 
     Player* player = attackerOrHealer->GetCharmerOrOwnerPlayerOrPlayerItself();
 
+    EventInform(GetGOInfo()->building.damageEvent);
+
     // dealing damage, send packet
     // TODO: is there any packet for healing?
     if (change < 0 && player)

@@ -413,7 +413,7 @@ class BattlefieldWG : public Battlefield
         void PromotePlayer(Player *killer);
 
         void UpdateTenacity();
-        void ProcessEvent(WorldObject *obj, uint32 eventId);
+        void ProcessEvent(GameObject *obj, uint32 eventId);
 
     protected:
         bool m_CanClickOnOrb;

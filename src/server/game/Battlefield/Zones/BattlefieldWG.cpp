@@ -287,18 +287,6 @@ void BattlefieldWG::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_gui
 
 void BattlefieldWG::OnBattleStart()
 {
-    // Spawn titan relic
-    m_relic = SpawnGameObject(BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC, 5440.0f, 2840.8f, 430.43f, 0);
-    if (m_relic)
-    {
-        // Update faction of relic, only attacker can click on
-        m_relic->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetAttackerTeam()]);
-        // Set in use (not allow to click on before last door is broken)
-        m_relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-    }
-    else
-        sLog->outError("WG: Failed to spawn titan relic.");
-
     // Update tower visibility and update faction
     for (GuidSet::const_iterator itr = CanonList.begin(); itr != CanonList.end(); ++itr)
     {
@@ -351,6 +339,18 @@ void BattlefieldWG::OnBattleStart()
     UpdateCounterVehicle(true);
     // Send start warning to all players
     SendWarningToAllInZone(BATTLEFIELD_WG_TEXT_START);
+
+    // Spawn titan relic
+    m_relic = SpawnGameObject(BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC, 5440.0f, 2840.8f, 430.43f, 0);
+    if (m_relic)
+    {
+        // Update faction of relic, only attacker can click on
+        m_relic->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetAttackerTeam()]);
+        // Set in use (not allow to click on before last door is broken)
+        m_relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    }
+    else
+        sLog->outError("WG: Failed to spawn titan relic.");
 }
 
 void BattlefieldWG::UpdateCounterVehicle(bool init)
@@ -985,30 +985,25 @@ void BattlefieldWG::AddBrokenTower(TeamId team)
     }
 }
 
-void BattlefieldWG::ProcessEvent(WorldObject *obj, uint32 eventId)
+void BattlefieldWG::ProcessEvent(GameObject *obj, uint32 eventId)
 {
     if (!obj || !IsWarTime())
         return;
 
-    // We handle only gameobjects here
-    GameObject* go = obj->ToGameObject();
-    if (!go)
-        return;
-
     // On click on titan relic
-    if (go->GetEntry() == BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC)
+    if (obj->GetEntry() == BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC)
     {
         // Check that the door is break
         if (m_CanClickOnOrb)
             EndBattle(false);
         else // if door is not break, respawn relic.
-            m_relic->SetRespawnTime(RESPAWN_IMMEDIATELY);
+            obj->SetRespawnTime(RESPAWN_IMMEDIATELY);
     }
 
     // if destroy or damage event, search the wall/tower and update worldstate/send warning message
     for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
     {
-        if (go->GetEntry() == (*itr)->m_Build->GetEntry())
+        if (obj->GetEntry() == (*itr)->m_Build->GetEntry())
         {
             if ((*itr)->m_Build->GetGOInfo()->building.damagedEvent == eventId)
                 (*itr)->Damaged();
