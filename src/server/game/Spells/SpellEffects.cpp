@@ -2219,6 +2219,32 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 88751: // Wild Mushroom: Detonate
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player* pPlayer = m_caster->ToPlayer();
+                        Player::GUIDTimestampMap* Mushrooms = pPlayer->GetSummonMapFor(47649);
+                        if (!Mushrooms->empty())
+                        {
+                            uint32 counter = 0;
+                            Creature* pTemp = NULL;
+                            for (Player::GUIDTimestampMap::iterator itr = Mushrooms->begin(); itr != Mushrooms->end(); ++itr)
+                            {
+                                pTemp = Creature::GetCreature(*pPlayer, (*itr).first);
+                                if (pTemp)
+                                {
+                                    if (counter <= 2)
+                                        pTemp->CastSpell(pTemp, 78777, true, 0, 0, m_caster->GetGUID());
+                                    pTemp->Kill(pTemp);
+                                    counter++;
+                                }
+                            }
+                            Mushrooms->clear();
+                        }
+                    }
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:
@@ -4732,15 +4758,16 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
 
                     uint32 amount = damage > 0 ? damage : 1;
-                    if (m_spellInfo->Id == 18662) // Curse of Doom, Wild Mushroom
-                        amount = 1;
 
-                    // Wild Mushroom
-                    if (m_spellInfo->Id == 88747)
+                    // Spell specific summon counts - "damage" is often set to maximum summon count at a time, so we need to set it manually
+                    switch (m_spellInfo->Id)
                     {
-                        //Summon only one instead of three (3 is maximum at one time, not at one spell cast)
-                        amount = 1;
-                        //TODO: limit maximum count to 3
+                        case 18662: // Curse of Doom
+                        case 88747: // Wild Mushroom
+                            amount = 1;
+                            break;
+                        default:
+                            break;
                     }
 
                     for (uint32 count = 0; count < amount; ++count)
