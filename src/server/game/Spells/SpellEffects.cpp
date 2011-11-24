@@ -4299,6 +4299,10 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
 
     uint32 gain = damage * maxPower / 100;
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);
+
+    // Revitalize - add cooldown, which was not set by default
+    if (m_spellInfo->Id == 81094 && m_caster->ToPlayer())
+        m_caster->ToPlayer()->AddSpellCooldown(81094, 0, time(NULL)+12); // 12 seconds
 }
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
