@@ -138,8 +138,7 @@ void BattlegroundBG::Update(uint32 diff)
 
                 if (m_HonorScoreTics[team] >= m_HonorTics)
                 {
-                    // We dont know if this BG gives honor every tick, so leave it unrewarded
-                    //RewardHonorToTeam(BG_BG_Honor[BG_BG_TICK], (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
+                    RewardHonorToTeam(BG_BG_Honor[BG_BG_TICK], (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
                     m_HonorScoreTics[team] -= m_HonorTics;
                 }
                 if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_BG_WARNING_NEAR_VICTORY_SCORE)
@@ -611,8 +610,7 @@ void BattlegroundBG::Reset()
     m_IsInformedNearVictory                 = false;
     bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
     // TODO: find and implement bonus honor at BG weekend
-    //m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
-    //m_HonorTics = BG_AB_NotABBGWeekendHonorTicks;
+    m_HonorTics = (isBGWeekend) ? BG_BG_BGBGWeekendHonorTicks : BG_BG_NotBGBGWeekendHonorTicks;
 
     for (uint8 i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
     {

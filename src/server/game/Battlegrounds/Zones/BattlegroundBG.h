@@ -205,6 +205,11 @@ struct BG_BG_BannerTimer
     uint8       teamIndex;
 };
 
+#define BG_BG_NotBGBGWeekendHonorTicks      330
+#define BG_BG_BGBGWeekendHonorTicks         200
+#define BG_BG_NotBGBGWeekendReputationTicks 200
+#define BG_BG_BGBGWeekendReputationTicks    150
+
 class BattlegroundBGScore : public BattlegroundScore
 {
     public:
