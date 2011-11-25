@@ -152,6 +152,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_AREA_ALLY_SRC:
             case TARGET_UNIT_AREA_ENTRY_SRC:
             case TARGET_UNIT_AREA_PARTY_SRC:
+            case TARGET_UNIT_AREA_PARTY_SRC_2:
             case TARGET_GAMEOBJECT_AREA_SRC:
                 SpellTargetType[i] = TARGET_TYPE_AREA_SRC;
                 break;
@@ -168,6 +169,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_CONE_ENEMY_UNKNOWN:
             case TARGET_UNIT_AREA_PATH:
             case TARGET_GAMEOBJECT_AREA_PATH:
+            case TARGET_DEST_UNK_110: // Unknown target selecting, surely cone, but probably cone modified by some criterias
                 SpellTargetType[i] = TARGET_TYPE_AREA_CONE;
                 break;
             case TARGET_DST_CASTER:
@@ -244,6 +246,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_AREA_ENTRY_SRC:
             case TARGET_UNIT_AREA_PARTY_DST:
             case TARGET_UNIT_AREA_PARTY_SRC:
+            case TARGET_UNIT_AREA_PARTY_SRC_2:
             case TARGET_UNIT_PARTY_TARGET:
             case TARGET_UNIT_PARTY_CASTER:
             case TARGET_UNIT_CONE_ENEMY:
@@ -252,6 +255,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_AREA_PATH:
             case TARGET_GAMEOBJECT_AREA_PATH:
             case TARGET_UNIT_RAID_CASTER:
+            case TARGET_DEST_UNK_110:
                 IsAreaEffectTarget[i] = true;
                 break;
             default:

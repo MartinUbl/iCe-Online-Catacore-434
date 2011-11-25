@@ -2789,6 +2789,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 {
                     case TARGET_UNIT_AREA_PARTY_SRC:
                     case TARGET_UNIT_AREA_PARTY_DST:
+                    case TARGET_UNIT_AREA_PARTY_SRC_2:
                         m_caster->GetPartyMemberInDist(unitList, radius); //fix me
                         break;
                     case TARGET_UNIT_PARTY_TARGET:

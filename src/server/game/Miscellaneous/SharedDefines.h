@@ -1273,6 +1273,11 @@ enum Targets
     TARGET_UNK_AREA_UNK_DST_107        = 107, // not enough info - only generic spells avalible
     TARGET_GAMEOBJECT_AREA_PATH        = 108,
     TARGET_DEST_UNK_110                = 110, // some kind of traj?
+    TARGET_DEST_UNK_112                = 112, // Unused, only one spell
+    TARGET_DEST_UNK_117                = 117, // same as above, only one testing spell
+    TARGET_DEST_UNK_118                = 118, // same as above
+    TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // i.e. Mass Ressurection
+    TARGET_DEST_UNK_120                = 120, // some generic spells
     TOTAL_SPELL_TARGETS
 };
 
@@ -2269,10 +2274,10 @@ enum QuestSort
     QUEST_SORT_EPIC                = 1,
     QUEST_SORT_WAILING_CAVERNS_OLD = 21,
     QUEST_SORT_SEASONAL            = 22,
-    QUEST_SORT_UNDERCITY_OLD       = 23,
+    QUEST_SORT_CATACLYSM           = 23,
     QUEST_SORT_HERBALISM           = 24,
     QUEST_SORT_BATTLEGROUNDS       = 25,
-    QUEST_SORT_ULDAMN_OLD          = 41,
+    QUEST_SORT_DAY_OF_THE_DEAD     = 41,
     QUEST_SORT_WARLOCK             = 61,
     QUEST_SORT_WARRIOR             = 81,
     QUEST_SORT_SHAMAN              = 82,
@@ -2285,7 +2290,7 @@ enum QuestSort
     QUEST_SORT_LEATHERWORKING      = 182,
     QUEST_SORT_ENGINERING          = 201,
     QUEST_SORT_TREASURE_MAP        = 221,
-    QUEST_SORT_SUNKEN_TEMPLE_OLD   = 241,
+    QUEST_SORT_TOURNAMENT          = 241,
     QUEST_SORT_HUNTER              = 261,
     QUEST_SORT_PRIEST              = 262,
     QUEST_SORT_DRUID               = 263,
@@ -3013,7 +3018,9 @@ enum SpellFamilyNames
     // 14 - unused
     SPELLFAMILY_DEATHKNIGHT = 15,
     // 16 - unused
-    SPELLFAMILY_PET         = 17
+    SPELLFAMILY_PET         = 17,
+    // 18-49 - unused
+    SPELLFAMILY_MINIGAME    = 50
 };
 
 // stored in character_pet.slot

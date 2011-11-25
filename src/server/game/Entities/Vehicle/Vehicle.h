@@ -31,12 +31,22 @@ class Unit;
 
 enum PowerType
 {
-    POWER_STEAM                                  = 61,
     POWER_PYRITE                                 = 41,
+    POWER_STEAM                                  = 61,
     POWER_HEAT                                   = 101,
     POWER_OOZE                                   = 121,
     POWER_BLOOD                                  = 141,
-    POWER_WRATH                                  = 142
+    POWER_WRATH                                  = 142,
+    POWER_TYPE_UNK_1                             = 143,
+    POWER_TYPE_UNK_2                             = 144,
+    POWER_TYPE_UNK_3                             = 145,
+    POWER_TYPE_UNK_4                             = 146,
+    POWER_TYPE_UNK_5                             = 147,
+    POWER_TYPE_UNK_6                             = 148,
+    POWER_TYPE_UNK_7                             = 149,
+    POWER_TYPE_UNK_8                             = 150,
+    POWER_TYPE_UNK_9                             = 151,
+    POWER_TYPE_UNK_10                            = 153,
 };
 
 enum VehicleFlags
