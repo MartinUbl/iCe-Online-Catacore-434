@@ -2224,8 +2224,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         Player* pPlayer = m_caster->ToPlayer();
-                        Player::GUIDTimestampMap* Mushrooms = pPlayer->GetSummonMapFor(47649);
-                        if (!Mushrooms->empty())
+                        Player::GUIDTimestampMap* Mushrooms = pPlayer ? pPlayer->GetSummonMapFor(47649) : NULL;
+                        if (Mushrooms && !Mushrooms->empty())
                         {
                             uint32 counter = 0;
                             Creature* pTemp = NULL;
