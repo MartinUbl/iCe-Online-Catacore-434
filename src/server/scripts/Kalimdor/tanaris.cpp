@@ -649,7 +649,18 @@ public:
 
 };
 
+class npc_dead_lootable_creatures: public CreatureScript
+{
+public:
+    npc_dead_lootable_creatures() : CreatureScript("npc_dead_lootable_creatures") { }
 
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (pPlayer->GetQuestStatus(25672) == QUEST_STATUS_INCOMPLETE)
+            pPlayer->AddItem(55226,1);
+        return true;
+    }
+};
 
 void AddSC_tanaris()
 {
@@ -660,4 +671,5 @@ void AddSC_tanaris()
     new npc_stone_watcher_of_norgannon();
     new npc_OOX17();
     new npc_tooga();
+    new npc_dead_lootable_creatures();
 }

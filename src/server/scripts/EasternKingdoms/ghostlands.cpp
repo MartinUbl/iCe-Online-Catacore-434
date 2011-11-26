@@ -256,6 +256,27 @@ public:
 
 };
 
+#define Quest_Deactivate_Anowyn 9169
+
+class item_controlling_orb: public ItemScript
+{
+public:
+    item_controlling_orb(): ItemScript("item_controlling_orb") { }
+
+    bool OnUse(Player* pPlayer, Item* /*pItem*/, const SpellCastTargets & /*pTargets*/)
+    {
+        if (pPlayer->GetQuestStatus(Quest_Deactivate_Anowyn) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        if (GameObject* ptower = pPlayer->FindNearestGameObject(181359,11.0f))
+        {
+            ptower->SetGoState(GO_STATE_READY);
+            pPlayer->CompleteQuest(Quest_Deactivate_Anowyn);
+            return true;
+        }
+        return false;
+    }
+};
 
 void AddSC_ghostlands()
 {
@@ -263,4 +284,5 @@ void AddSC_ghostlands()
     new npc_budd_nedreck();
     new npc_rathis_tomber();
     new npc_ranger_lilatha();
+    new item_controlling_orb();
 }
