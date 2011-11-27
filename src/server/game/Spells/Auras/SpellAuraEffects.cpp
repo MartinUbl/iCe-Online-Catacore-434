@@ -741,29 +741,44 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
+            {
+            Aura * base = GetBase();
+            Unit * owner = base->GetUnitOwner();
+            if (!base || !owner)
+                break;
+
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
             {
                 // Replenishment (0.25% from max)
                 // Infinite Replenishment
                 if (m_spellProto->SpellIconID == 3184 && m_spellProto->SpellVisual[0] == 12495)
-                    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 25 / 10000;
+                {
+                    amount = owner->GetMaxPower(POWER_MANA) * 25 / 10000;
+                    break;
+                }
             }
             switch(m_spellProto->Id)
             {
             // Innervate
             case 29166:
-                amount = int32(GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * amount / (GetTotalTicks() * 100.0f));
+                {
+                int32 total_ticks = GetTotalTicks();
+                if (total_ticks > 0)
+                    amount = int32(owner->GetMaxPower(POWER_MANA) * amount / (total_ticks * 100.0f));
                 break;
+                }
             // Judgements of the Wise
             case 31930:
-                amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / (GetTotalTicks() * 100);
+                {
+                int32 total_ticks = GetTotalTicks();
+                if (total_ticks > 0)
+                    amount = int32(owner->GetCreatePowers(POWER_MANA) * amount / (total_ticks * 100.0f));
                 break;
-            // Owlkin Frenzy
-            case 48391:
-                amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / 100;
-                break;
+                }
+            default: break;
             }
             break;
+            }
         case SPELL_AURA_PERIODIC_HEAL:
             if (!caster)
                 break;
