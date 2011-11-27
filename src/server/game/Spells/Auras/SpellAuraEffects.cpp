@@ -748,15 +748,21 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 if (m_spellProto->SpellIconID == 3184 && m_spellProto->SpellVisual[0] == 12495)
                     amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 25 / 10000;
             }
+            switch(m_spellProto->Id)
+            {
             // Innervate
-            else if (m_spellProto->Id == 29166)
+            case 29166:
                 amount = int32(GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * amount / (GetTotalTicks() * 100.0f));
+                break;
             // Judgements of the Wise
-            else if (m_spellProto->Id == 31930)
-                amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / 100;
+            case 31930:
+                amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / (GetTotalTicks() * 100);
+                break;
             // Owlkin Frenzy
-            else if (m_spellProto->Id == 48391)
+            case 48391:
                 amount = GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA) * amount / 100;
+                break;
+            }
             break;
         case SPELL_AURA_PERIODIC_HEAL:
             if (!caster)
