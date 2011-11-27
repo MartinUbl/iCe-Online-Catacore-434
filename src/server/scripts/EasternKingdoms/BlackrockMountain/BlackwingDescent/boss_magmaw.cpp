@@ -19,6 +19,30 @@
 #include "ScriptPCH.h"
 #include "blackwing_descent.h"
 
+enum Spells
+{
+    SPELL_MAGMA_SPIT = 78068,
+    SPELL_LAVA_SPEW = 77690,
+    SPELL_PILLAR_OF_FLAME_TRIGGER_AURA = 78006,
+    SPELL_PILLAR_OF_FLAME_TRIGGERED = 78010,
+    SPELL_PILLAR_OF_FLAME_THROW = 77971,
+    SPELL_MANGLE = 89773,
+
+    // Lava Parasite
+    SPELL_PARASITIC_INFECTION_1 = 78941,
+    SPELL_PARASITIC_INFECTION_2 = 91913,
+    SPELL_PARASITIC_INFECTION_3 = 94678,
+    SPELL_PARASITIC_INFECTION_4 = 94679,
+    // TODO: on unapply spawn more small shits
+};
+
+enum NPCs
+{
+    NPC_MAGMAW = 41570,
+    NPC_PILLAR_OF_FLAME = 41843,
+    NPC_LAVA_PARASITE = 42321,
+}
+
 class boss_magmaw: public CreatureScript
 {
 public:
@@ -53,5 +77,6 @@ void AddSC_magmaw()
 /**** SQL:
 
 UPDATE creature_template SET ScriptName='boss_magmaw' WHERE entry=41570;
+REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES (32679, 8, 0, 2, 0);
 
 */
