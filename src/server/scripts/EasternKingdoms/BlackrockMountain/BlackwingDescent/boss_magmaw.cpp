@@ -38,7 +38,6 @@ enum Spells
 
 enum NPCs
 {
-    NPC_MAGMAW = 41570,
     NPC_PILLAR_OF_FLAME = 41843,
     NPC_LAVA_PARASITE = 42321,
 }
