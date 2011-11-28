@@ -40,7 +40,7 @@ enum NPCs
 {
     NPC_PILLAR_OF_FLAME = 41843,
     NPC_LAVA_PARASITE = 42321,
-}
+};
 
 class boss_magmaw: public CreatureScript
 {
