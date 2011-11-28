@@ -743,8 +743,10 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         case SPELL_AURA_PERIODIC_ENERGIZE:
             {
             Aura * base = GetBase();
+            if (!base || base->GetType() != UNIT_AURA_TYPE)
+                break;
             Unit * owner = base->GetUnitOwner();
-            if (!base || !owner)
+            if (!owner)
                 break;
 
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
