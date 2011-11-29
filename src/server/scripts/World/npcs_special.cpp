@@ -3399,7 +3399,8 @@ public:
 
 enum eFlameOrb
 {
-    SPELL_FLAME_ORB_DAMAGE          = 86719,
+    SPELL_FLAME_ORB_DAMAGE_VISUAL   = 86719,
+    SPELL_FLAME_ORB_DAMAGE          = 82739,
     FLAME_ORB_DISTANCE              = 120
 };
 
@@ -3414,10 +3415,13 @@ public:
         {
             x = me->GetPositionX();
             y = me->GetPositionY();
-            z = me->GetOwner()->GetPositionZ()+2;
+            if(Unit* owner = me->GetOwner())
+            {
+                z = me->GetOwner()->GetPositionZ()+2;
+                angle = me->GetOwner()->GetAngle(me);
+            }
             o = me->GetOrientation();
             me->NearTeleportTo(x, y, z, o, true);
-            angle = me->GetOwner()->GetAngle(me);
             newx = me->GetPositionX() + FLAME_ORB_DISTANCE/2 * cos(angle);
             newy = me->GetPositionY() + FLAME_ORB_DISTANCE/2 * sin(angle);
             CombatCheck = false;
@@ -3468,7 +3472,11 @@ public:
             if (uiDamageTimer <= diff)
             {
                 if (Unit* target = me->SelectNearestTarget(20))
-                    DoCast(target, SPELL_FLAME_ORB_DAMAGE);
+                {
+                    me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
+                    if(Unit* owner = me->GetOwner())
+                        owner->CastSpell(target, SPELL_FLAME_ORB_DAMAGE, true);
+                }
 
                 uiDamageTimer = 1*IN_MILLISECONDS;
             }

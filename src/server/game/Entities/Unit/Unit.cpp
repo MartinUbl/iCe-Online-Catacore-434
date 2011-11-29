@@ -10774,21 +10774,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if (Unit *owner = GetOwner())
             return owner->SpellDamageBonus(pVictim, spellProto, effIndex, pdamage, damagetype);
 
-    // Other spells that get damage bonus from owner
-    switch(spellProto->Id)
-    {
-    case 82739: // Flame Orb - damage (linked to dummy spell 86719)
-    case 95969: // Frostfire Orb - damage (not implemented)
-    case 84721: // Frostfire Orb - damage (not implemented)
-        {
-        if (Unit *owner = GetOwner())
-            return owner->SpellDamageBonus(pVictim, spellProto, effIndex, pdamage, damagetype);
-        else
-            return pdamage;
-        }
-    default: break;
-    }
-
     // Taken/Done total percent damage auras
     float DoneTotalMod = 1.0f;
     float ApCoeffMod = 1.0f;
