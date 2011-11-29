@@ -584,8 +584,8 @@ void InitOpcodeTable()
     OPCODE( SMSG_BATTLEFIELD_LIST,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
     OPCODE( CMSG_JOIN_RATED_BATTLEFIELD,                  STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
-    OPCODE( CMSG_REQUEST_RATED_BG_INFO,                   STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
-    OPCODE( CMSG_REQUEST_PVP_OPTIONS_ENABLED,             STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_REQUEST_RATED_BG_INFO,                   STATUS_LOGGEDIN, &WorldSession::HandleRequestRatedBGInfo        );
+    OPCODE( CMSG_REQUEST_PVP_OPTIONS_ENABLED,             STATUS_LOGGEDIN, &WorldSession::HandleRequestPvPOptions         );
     OPCODE( CMSG_TAXICLEARNODE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXIENABLENODE,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_ITEM_TEXT_QUERY,                         STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery             );

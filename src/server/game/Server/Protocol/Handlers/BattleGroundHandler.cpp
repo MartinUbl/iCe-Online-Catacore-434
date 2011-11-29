@@ -716,6 +716,16 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket & recv_data)
 }
 
 
+void WorldSession::HandleRequestRatedBGInfo(WorldPacket &recv_data)
+{
+    // TODO: implement
+}
+
+void WorldSession::HandleRequestPvPOptions(WorldPacket &recv_data)
+{
+    // TODO: implement
+}
+
 void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
 {
     sLog->outDebug("WORLD: CMSG_BATTLEMASTER_JOIN_ARENA");
