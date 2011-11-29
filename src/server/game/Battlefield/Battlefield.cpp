@@ -969,11 +969,8 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
         return NULL;
     }
 
-    go->SetSpawnedByDefault(false);
-
     // Add in the world
     map->Add(go);
-    go->setActive(true);
 
     return go;
 }

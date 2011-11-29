@@ -56,6 +56,8 @@ bool BattlefieldWG::SetupBattlefield()
 
     m_tenacityStack = 0;
 
+    m_relic = NULL;
+
     KickPosition.Relocate(5728.117f, 2714.346f, 697.733f, 0);
     KickPosition.m_mapId = m_MapId;
 
