@@ -1590,18 +1590,26 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             || (caster->HasAura(78203) && (roll_chance_i(8) || (caster->isMoving() && roll_chance_i(40))))
                             || (caster->HasAura(78202) && (roll_chance_i(4) || (caster->isMoving() && roll_chance_i(20)))))
                             caster->CastSpell(target, 87212, true, 0, 0, target->GetGUID());
-                        
-                        // Shadow Orbs proc chance
-                        if (caster->HasAura(95740) && roll_chance_i(10))
-                            caster->CastSpell(caster, 77487, true);
 
-                        break;
+                        // no break;
                         }
                     case 15407: // Mind Flay
                     {
-                        // Shadow Orbs proc chance
-                        if (caster->HasAura(95740) && roll_chance_i(10))
-                            caster->CastSpell(caster, 77487, true);
+                        // Shadow Orbs proc chance (shared with SW:P)
+                        if (caster->HasAura(95740))
+                        {
+                            int chance = 10;
+                            if (caster->HasAura(33191)) // Harnessed Shadows r1
+                                chance = 14;
+                            if (caster->HasAura(78228)) // Harnessed Shadows r2
+                                chance = 18;
+                            if (roll_chance_i(chance))
+                                caster->CastSpell(caster, 77487, true);
+                        }
+
+                        // Case other than Mind Flay --> break;
+                        if (GetId() != 15407)
+                            break;
 
                         // Pain and Suffering
                         if ((caster->HasAura(47581) && roll_chance_i(60))

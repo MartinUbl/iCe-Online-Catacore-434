@@ -8989,6 +8989,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Priest - Harnessed Shadows
+        case 33191:
+        case 78228:
+        {
+            // Shadow Orbs should proc from crit only
+            if (!(procEx & PROC_EX_CRITICAL_HIT))
+                return false;
+            break;
+        }
         // Die by the Sword
         case 81913:
         case 81914:
