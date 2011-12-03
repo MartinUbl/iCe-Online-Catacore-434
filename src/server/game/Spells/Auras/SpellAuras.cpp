@@ -1561,6 +1561,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             }
                         }
                         break;
+                    case 91296: case 91308: // Corrupted Egg Shell (trinket)
+                        if (target->getPowerType() != POWER_MANA)
+                            break;
+                        if (caster)
+                        {
+                            uint32 base_points = (GetId() == 91296 ? 5040 : 5700); // normal / heroic
+                            caster->EnergizeBySpell(target, GetId(), base_points, POWER_MANA);
+                        }
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:

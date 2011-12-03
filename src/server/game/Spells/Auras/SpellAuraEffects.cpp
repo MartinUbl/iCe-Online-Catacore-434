@@ -2425,6 +2425,15 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                          veh->CastSpell(target, 62475, true);
                 }
                 break;
+            case 91296: case 91308: // Corrupted Egg Shell (trinket)
+                if(target->getPowerType() != POWER_MANA)
+                    break;
+                if(Unit* caster = GetCaster())
+                {
+                    uint32 base_points = (GetId() == 91296 ? 420 : 475); // normal / heroic
+                    caster->EnergizeBySpell(target, GetId(), base_points, POWER_MANA);
+                }
+                break;
 
             /* Conclave of Wind enrage abilities */
             case 85576: case 93181: case 93182: case 93183: // Withering Winds (Anshal)
