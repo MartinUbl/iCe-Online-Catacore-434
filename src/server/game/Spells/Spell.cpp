@@ -2635,6 +2635,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             case TARGET_UNIT_AREA_ENTRY_DST:
             case TARGET_UNIT_AREA_ENTRY_SRC:
             case TARGET_UNIT_CONE_ENTRY: // fix me
+                if (m_spellInfo->Id == 91858 // Overcharged Power Generator
+                    || m_spellInfo->Id == 79629 // Power Generator
+                    || m_spellInfo->Id == 91555 // (+ difficulty entries)
+                    || m_spellInfo->Id == 91556
+                    || m_spellInfo->Id == 91557)
+                {
+                    // AI purposes
+                    radius = 12.0f;
+                    targetType = SPELL_TARGETS_ANY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, IsPositiveSpell(m_spellInfo->Id));
                 targetType = SPELL_TARGETS_ENTRY;
                 break;
