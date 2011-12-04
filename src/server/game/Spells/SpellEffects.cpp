@@ -1065,6 +1065,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             damage += ((Player*)m_caster)->GetComboPoints()*40;
                     }
 
+                    // Revealing strike bonus damage
+                    Aura* revealing = unitTarget->GetAura(84617, m_caster->GetGUID());
+                    if (revealing)
+                    {
+                        float bonus = 0.35;                     // adds 35% bonus
+                        if (m_caster->HasAura(56814))           // glyph of revealing strike adds additional 10% bonus
+                            bonus += 0.10;
+
+                        damage *= 1 + bonus;
+
+                        revealing->Remove();
+                    }
+
                     // Cut to the Chase
                     if (m_caster->HasAura(51667) ||
                         (m_caster->HasAura(51665) && roll_chance_i(67)) ||
@@ -1108,6 +1121,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             if (Aura* pAura = unitTarget->GetAura(1943))
                                 pAura->RefreshDuration();
                         }
+                    }
+
+                    // Revealing strike bonus damage
+                    Aura* revealing = unitTarget->GetAura(84617, m_caster->GetGUID());
+                    if (revealing)
+                    {
+                        float bonus = 0.35;                     // adds 35% bonus
+                        if (m_caster->HasAura(56814))           // glyph of revealing strike adds additional 10% bonus
+                            bonus += 0.10;
+
+                        damage *= 1 + bonus;
+
+                        revealing->Remove();
                     }
 
                     // Cut to the Chase
@@ -3317,6 +3343,25 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 if (!IsTriggered())
                     m_caster->CastSpell(unitTarget,1776,true);
                 return;
+            }
+            if (m_spellInfo->Id == 408 || m_spellInfo->Id == 8647)   //Kidney Shot and Expose Armor
+            {
+                // check whether the target has a Revealing Strike debuff
+                Aura *revealing = unitTarget->GetAura(84617, m_caster->GetGUID());
+
+                if(revealing)
+                {
+                    int duration = m_spellAura->GetDuration();   // get original duration (without revealing strike)
+
+                    float bonus = 0.35;                          // adds 35% bonus
+                    if(m_caster->HasAura(56814))                 // glyph of revealing strike adds additional 10% bonus
+                        bonus += 0.10;
+
+                    duration *= 1 + bonus;
+                    m_spellAura->SetDuration(duration);
+                    m_spellAura->SetMaxDuration(duration);
+                    revealing->Remove();                         // remove the revealing strike debuff
+                }
             }
             break;
         }

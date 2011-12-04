@@ -688,6 +688,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 uint8 cp = caster->ToPlayer()->GetComboPoints();
                 if (cp > 5) cp = 5;
                 amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
+
+                //revealing strike increases the damage done by 35%
+                Aura* revealing = caster->getVictim()->GetAura(84617, caster->GetGUID());
+                if (revealing)
+                {
+                    float bonus = 0.35;                     // adds 35% bonus
+                    if (caster->HasAura(56814))             // glyph of revealing strike adds an additional 10% bonus
+                        bonus += 0.10;
+
+                    amount *= 1 + bonus;
+                    revealing->Remove();                    // remove the revealing strike debuff
+                }
             }
             // Rip
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x00800000 && GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
