@@ -8998,6 +8998,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Glyph of Aimed Shot (crits restore focus)
+        case 56824:
+        {
+            // Should proc from crit only
+            if (!(procEx & PROC_EX_CRITICAL_HIT))
+                return false;
+            // Shoul proc from Aimed Shot and Aimed Shot! (Master Marksman) only
+            if (procSpell->Id != 19434 && procSpell->Id != 82928)
+                return false;
+            break;
+        }
         // Die by the Sword
         case 81913:
         case 81914:
