@@ -18146,20 +18146,23 @@ void Unit::OutDebugInfo() const
 
 uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIndex) const
 {
-    uint32 amount = 0;
+    int32 amount = 0; // Signed type needed
+
     AuraEffectList const& DoTAuras = GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
     for (AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
     {
         if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
             continue;
+        // Negative value can be added
         amount += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
         break;
     }
 
+    // Chack value
     if (amount < 0)
         amount = 0;
 
-    return amount;
+    return uint32(amount); // Type conversion
 }
 
 bool Unit::IsVisionObscured(Unit* pVictim)
