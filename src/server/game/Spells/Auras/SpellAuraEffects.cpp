@@ -6967,7 +6967,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (GetSpellProto()->SpellFamilyFlags[1] & 0x10)
                     {
                         // Final heal only on dispelled or duration end
-                        if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
+                        if (target && aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
                             return;
 
                         // final heal
@@ -6977,7 +6977,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case SPELLFAMILY_PRIEST:
                     // Vampiric Touch
-                    if (m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
+                    if (caster && m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
                     {
                         // Sin and Punishment
                         if ((caster->HasAura(87099) && roll_chance_i(50)) || caster->HasAura(87100))
@@ -6986,12 +6986,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case SPELLFAMILY_HUNTER:
                     // Misdirection
-                    if (GetId() == 34477)
+                    if (GetId() == 34477 && target)
                         target->SetReducedThreatPercent(0, 0);
                     break;
                 case SPELLFAMILY_DEATHKNIGHT:
                     // Summon Gargoyle (will start feeding gargoyle)
-                    if (GetId() == 61777)
+                    if (GetId() == 61777 && target)
                         target->CastSpell(target, m_spellProto->EffectTriggerSpell[m_effIndex], true);
                     break;
                 default:
