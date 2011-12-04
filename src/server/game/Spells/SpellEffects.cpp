@@ -1134,6 +1134,29 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+
+                // Eviscerate and Envenom
+                if (m_spellInfo->Id == 2098 || m_spellInfo->Id == 32645)
+                {
+                    // Restless Blades
+                    if (m_caster)
+                    {
+                        uint32 minusSecs = 0;
+                        if (m_caster->HasAura(79096))
+                            minusSecs = 2*m_caster->ToPlayer()->GetComboPoints();
+                        else if (m_caster->HasAura(79095))
+                            minusSecs = 1*m_caster->ToPlayer()->GetComboPoints();
+
+                        // If present, modify cooldown of some spells
+                        if (minusSecs)
+                        {
+                            m_caster->ToPlayer()->ModifySpellCooldown(13750, -minusSecs*1000, true); // Adrenaline Rush
+                            m_caster->ToPlayer()->ModifySpellCooldown(2983 , -minusSecs*1000, true); // Sprint
+                            m_caster->ToPlayer()->ModifySpellCooldown(51690, -minusSecs*1000, true); // Killing Spree
+                            m_caster->ToPlayer()->ModifySpellCooldown(73981, -minusSecs*1000, true); // Redirect
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_HUNTER:

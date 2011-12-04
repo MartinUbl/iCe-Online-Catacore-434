@@ -1370,6 +1370,28 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                     }
                 }
+                // Rupture
+                if (GetSpellProto()->Id == 1943)
+                {
+                    // Restless Blades
+                    if (Unit* caster = aurApp->GetBase()->GetCaster())
+                    {
+                        uint32 minusSecs = 0;
+                        if (caster->HasAura(79096))
+                            minusSecs = 2*caster->ToPlayer()->GetComboPoints();
+                        else if (caster->HasAura(79095))
+                            minusSecs = 1*caster->ToPlayer()->GetComboPoints();
+
+                        // If present, modify cooldown of some spells
+                        if (minusSecs)
+                        {
+                            caster->ToPlayer()->ModifySpellCooldown(13750, -minusSecs*1000, true); // Adrenaline Rush
+                            caster->ToPlayer()->ModifySpellCooldown(2983 , -minusSecs*1000, true); // Sprint
+                            caster->ToPlayer()->ModifySpellCooldown(51690, -minusSecs*1000, true); // Killing Spree
+                            caster->ToPlayer()->ModifySpellCooldown(73981, -minusSecs*1000, true); // Redirect
+                        }
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN: // Speed of Light (talent)
                 if(GetId() == 82327)
