@@ -2011,6 +2011,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 caster->ModifyAuraState(AURA_STATE_DEFENSE, apply);
             }
 
+            // Blood and Frost Presence
+            if (GetId() == 48263 || GetId() == 48266)
+            {
+                if (apply)
+                {
+                    // Improved Unholy Presence - increase movement speed in other stances
+                    int32 bp0 = 0;
+                    if (caster && caster->HasAura(50392))
+                        bp0 = 15;
+                    else if (caster && caster->HasAura(50391))
+                        bp0 = 8;
+
+                    if (bp0)
+                        caster->CastCustomSpell(caster, 63622, &bp0, 0, 0, true);
+                }
+                else
+                    caster->RemoveAurasDueToSpell(63622);
+            }
+
             if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_PRESENCE)
             {
                 AuraEffect *bloodPresenceAura=0;  // healing by damage done
