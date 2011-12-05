@@ -2947,6 +2947,11 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             triggered_spell_id = 7870;
             break;
         }
+        // Ebon Plague
+        case 40515:
+            // not existing spell for increasing magic damage taken
+            // TODO: find it or create it!
+            return;
         // just skip
         case 23770:                                         // Sayge's Dark Fortune of *
             // not exist, common cooldown can be implemented in scripts if need.

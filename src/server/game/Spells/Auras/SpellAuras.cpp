@@ -1512,10 +1512,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         uint32 spellId = 0;
                         switch (aurEff->GetId())
                         {
-                            // Ebon Plague
-                            case 51161: spellId = 51735; break;
-                            case 51160: spellId = 51734; break;
-                            case 51099: spellId = 51726; break;
                             // Crypt Fever
                             case 49632: spellId = 50510; break;
                             case 49631: spellId = 50509; break;

@@ -4191,9 +4191,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->DurationIndex = 21;
             count++;
             break;
-        case 51735: // Ebon Plague
-        case 51734:
-        case 51726:
+        case 65142: // Ebon Plague
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->SpellFamilyFlags[2] = 0x10;
             count++;

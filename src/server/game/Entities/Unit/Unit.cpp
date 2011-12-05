@@ -7593,6 +7593,18 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Ebon Plaguebringer
+            if (dummySpell->Id == 51160 || dummySpell->Id == 51099)
+            {
+                if (!target || !target->isAlive() || !procSpell)
+                    return false;
+
+                // Proc from Plague Strike, Icy Touch, Chains of Ice and Outbreak
+                if (procSpell->Id != 45462 && procSpell->Id != 45477 && procSpell->Id != 45524 && procSpell->Id != 77575)
+                    return false;
+
+                triggered_spell_id = 65142;
+            }
             // Blood-Caked Strike - Blood-Caked Blade
             if (dummySpell->SpellIconID == 138)
             {
