@@ -9113,14 +9113,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+60);
                 break;
-            // 45 second cooldown
-            case 89088: // Darkmoon Card: Volcano
-            case 89086: // Darkmoon Card: Hurricane
-                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
-                    return false;
-
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+45);
-                break;
             // 30 second cooldown
             case 92180: // Leaden Despair
             case 92185: // Leaden Despair (Heroic)
