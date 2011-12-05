@@ -8833,6 +8833,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
             // Add internal cooldown (45 seconds hardcoded value)
             ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+45);
+
+            // Also reset cooldown on Rune Tap if any
+            ToPlayer()->RemoveSpellCooldown(48982, true);
             break;
         }
         // Improved Hamstring
