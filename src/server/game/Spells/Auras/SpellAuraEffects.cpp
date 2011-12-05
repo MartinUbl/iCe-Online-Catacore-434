@@ -693,9 +693,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 Aura* revealing = caster->getVictim()->GetAura(84617, caster->GetGUID());
                 if (revealing)
                 {
-                    float bonus = 0.35;                     // adds 35% bonus
+                    float bonus = 0.35f;                     // adds 35% bonus
                     if (caster->HasAura(56814))             // glyph of revealing strike adds an additional 10% bonus
-                        bonus += 0.10;
+                        bonus += 0.10f;
 
                     amount *= 1 + bonus;
                     revealing->Remove();                    // remove the revealing strike debuff
@@ -7096,12 +7096,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 }
                 case 57723: // Exhaustion
                 case 57724: // Sated
+                case 80354: // Temporal Displacement
+                case 95809: // Insanity
                 {
-                    switch(GetId())
-                    {
-                        case 57723: target->ApplySpellImmune(GetId(), IMMUNITY_ID, 32182, apply); break; // Heroism
-                        case 57724: target->ApplySpellImmune(GetId(), IMMUNITY_ID, 2825, apply);  break; // Bloodlust
-                    }
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 32182, apply); // Heroism
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 2825, apply);  // Bloodlust
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 80353, apply); // Time Warp
+                    target->ApplySpellImmune(GetId(), IMMUNITY_ID, 90355, apply); // Ancient Hysteria
                     break;
                 }
                 // WotLK championing tabards
