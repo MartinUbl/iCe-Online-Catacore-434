@@ -1677,6 +1677,14 @@ void Spell::DoTriggersOnSpellHit(Unit *unit)
             // set duration equal to triggering spell
             if (roll_chance_i(i->second))
             {
+                // Disallow applying on self (i.e. when logging in)
+                if (   i->first->Id == 81325 || i->first->Id == 81326  // Brittle Bones
+                    || i->first->Id == 50434 || i->first->Id == 50435  // Chilblains
+                    || i->first->Id == 81130 || i->first->Id == 96265) // Scarlet Fever
+                {
+                    if (unit == m_caster)
+                        continue;
+                }
                 m_caster->CastSpell(unit, i->first, true);
                 sLog->outDebug("Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->first->Id);
             }
