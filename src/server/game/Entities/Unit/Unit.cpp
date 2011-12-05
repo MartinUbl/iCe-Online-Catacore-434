@@ -5132,7 +5132,7 @@ bool Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, uint32 /*damage*/, AuraE
     Unit* target = pVictim;
     int32 basepoints0 = 0;
 
-    switch(triggeredByAuraSpell->SpellFamilyName)
+    /*switch(triggeredByAuraSpell->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
         {
@@ -5151,7 +5151,7 @@ bool Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, uint32 /*damage*/, AuraE
                 }
             }
         }
-    }
+    }*/
 
     // processed charge only counting case
     if (!triggered_spell_id)
@@ -9214,6 +9214,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
             break;
         }
+        case 54648: // Focus Magic
+        {
+            if (triggeredByAura && triggeredByAura->GetCaster() && (procEx & PROC_EX_CRITICAL_HIT))
+            {
+                target = triggeredByAura->GetCaster();
+                target->CastSpell(target, trigger_spell_id, true);
+                return true;
+            }
+            else
+                return false;
+            break;
+        }
         // Revitalize
         case 81094:
         {
@@ -10843,7 +10855,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
         switch ((*i)->GetMiscValue())
         {
-            case 4920: // Molten Fury
+            case 12368: // Molten Fury
             case 4919:
             case 6917: // Death's Embrace
             case 6926:
