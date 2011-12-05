@@ -8815,6 +8815,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
             // Also reset cooldown on Rune Tap if any
             ToPlayer()->RemoveSpellCooldown(48982, true);
+            CastSpell(this, 96171, true);
             break;
         }
         // Improved Hamstring
