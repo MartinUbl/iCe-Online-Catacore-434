@@ -7386,6 +7386,25 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 55095, true);
                 }
             }
+            // Festering Strike
+            else if (m_spellInfo->Id == 85948)
+            {
+                // increase duration of certain auras
+                uint32 affectAuras[] = {55078, 55095, 45524};
+                Aura* tmp = NULL;
+                for (uint8 i = 0; i < sizeof(affectAuras)/sizeof(uint32); i++)
+                {
+                    tmp = unitTarget->GetAura(affectAuras[i], m_caster->GetGUID());
+                    if (tmp)
+                    {
+                        // Do not allow exceed maximum duration
+                        if (tmp->GetDuration()+m_spellInfo->EffectBasePoints[effIndex]*1000 > tmp->GetMaxDuration())
+                            tmp->RefreshDuration();
+                        else
+                            tmp->SetDuration(tmp->GetDuration()+m_spellInfo->EffectBasePoints[effIndex]*1000);
+                    }
+                }
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
