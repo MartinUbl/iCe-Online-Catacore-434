@@ -8411,6 +8411,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     if ( !(auraSpellInfo->procFlags == 0x1140) )
                         return false;
 
+                    // Allow proc only from Multi-Shot
+                    if (procSpell->Id != 2643)
+                        return false;
+
                     switch (auraSpellInfo->Id)
                     {
                         case 87934:     trigger_spell_id = 88453; break;
