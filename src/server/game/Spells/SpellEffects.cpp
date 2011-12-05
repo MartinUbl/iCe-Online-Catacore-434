@@ -2427,12 +2427,21 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
                 if (!unitTarget)
                     return;
-                // Restorative Totems
+
                 if (Unit *owner = m_caster->GetOwner())
+                {
+                    // Restorative Totems
                     if (AuraEffect *dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
                         damage += damage * dummy->GetAmount() / 100;
 
-                    m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
+                    // Soothing Rains
+                    if (owner->HasAura(16187))
+                        damage *= 1.25f;
+                    else if (owner->HasAura(16205))
+                        damage *= 1.50f;
+                }
+
+                m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
             }
             // Mana Spring Totem

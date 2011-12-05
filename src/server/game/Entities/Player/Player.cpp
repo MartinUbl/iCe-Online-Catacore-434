@@ -7840,9 +7840,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
                 else
                     HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(val), apply);
                 break;
-//            case ITEM_MOD_FERAL_ATTACK_POWER:
-//                ApplyFeralAPBonus(int32(val), apply);
-//                break;
             case ITEM_MOD_MANA_REGENERATION:
                 ApplyManaRegenBonus(int32(val), apply);
                 break;
@@ -7922,24 +7919,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
 
     if (CanUseAttackType(attType))
         _ApplyWeaponDamage(slot, proto, ssv, apply);
-
-    int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
-
-    // Apply feral bonus from ScalingStatValue if set
-    if (ssv)
-    {
-        if (int32 feral_bonus = ssv->getFeralBonus(proto->ScalingStatValue))
-            ApplyFeralAPBonus(feral_bonus, apply);
-    }
-    // Druids get feral AP bonus from weapon dps (lso use DPS from ScalingStatValue)
-    if (getClass() == CLASS_DRUID)
-    {
-        int32 feral_bonus = proto->getFeralBonus(extraDPS);
-        if (feral_bonus > 0)
-            ApplyFeralAPBonus(feral_bonus, apply);
-    }
-
- }
+}
 
 void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto, ScalingStatValuesEntry const *ssv, bool apply) 
 {
@@ -14262,10 +14242,6 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                                 HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(enchant_amount), apply);
                             sLog->outDebug("+ %u RANGED_ATTACK_POWER", enchant_amount);
                             break;
-//                        case ITEM_MOD_FERAL_ATTACK_POWER:
-//                            ApplyFeralAPBonus(enchant_amount, apply);
-//                            sLog->outDebug("+ %u FERAL_ATTACK_POWER", enchant_amount);
-//                            break;
                         case ITEM_MOD_MANA_REGENERATION:
                             ApplyManaRegenBonus(enchant_amount, apply);
                             sLog->outDebug("+ %u MANA_REGENERATION", enchant_amount);
@@ -21574,36 +21550,10 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
         // Now we have cooldown data (if found any), time to apply mods
         if (rec > 0)
-        {
             ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, rec, spell);
 
-            // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
-            const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
-            if (!pAuraList.empty() && spell)
-            {
-                for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
-                {
-                    if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->m_spellInfo->SpellFamilyFlags)
-                        rec *= ((*itr)->GetBaseAmount() / 100.0f) * GetFloatValue(UNIT_MOD_CAST_SPEED);
-                }
-            }
-        }
-
         if (catrec > 0)
-        {
             ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, catrec, spell);
-
-            // Aura 347 makes haste modify cooldown with percentage supported as BasePoints
-            const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
-            if (!pAuraList.empty() && spell)
-            {
-                for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
-                {
-                    if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->m_spellInfo->SpellFamilyFlags)
-                        catrec *= ((*itr)->GetBaseAmount() / 100.0f) * GetFloatValue(UNIT_MOD_CAST_SPEED);
-                }
-            }
-        }
 
         // replace negative cooldowns by 0
         if (rec < 0) rec = 0;

@@ -17590,6 +17590,11 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                         modelid = formEntry->modelID_A;
                 }
             }
+
+            // Glyph of Arctic Wolf
+            if (form == FORM_GHOSTWOLF && HasAura(58135))
+                modelid = 27312;
+
             return modelid;
         }
     }
