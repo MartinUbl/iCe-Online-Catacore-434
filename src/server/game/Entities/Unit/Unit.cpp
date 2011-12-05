@@ -11392,7 +11392,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                     for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
                     {
                         if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spellProto->SpellFamilyFlags)
-                            crit_chance += (*itr)->GetBaseAmount();
+                            crit_chance += (*itr)->GetAmount();
                     }
                 }
             }
