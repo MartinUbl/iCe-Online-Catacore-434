@@ -1428,11 +1428,6 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     }
     else // Impossible get negative result but....
         damageInfo->damage = 0;
-
-    // Druids Savage Roar increases white dmg by percentage
-    int32 mod = GetTotalAuraModifier(SPELL_AURA_344);
-    if (ToPlayer() && mod != 0)
-        damageInfo->damage += damageInfo->damage * mod / 100;
 }
 
 void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
@@ -9025,6 +9020,31 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Sudden Doom
+        case 49018:
+        case 49529:
+        case 49530:
+        {
+            if(GetTypeId() != TYPEID_PLAYER)
+                return false;
+            if (!ToPlayer()->GetWeaponForAttack(BASE_ATTACK))
+                return false;
+
+            // Select chance based on weapon speed
+            float speed = ToPlayer()->GetWeaponForAttack(BASE_ATTACK)->GetProto()->Delay / 1000;
+
+            int32 modifier = 1;
+
+            if(auraSpellInfo->Id == 49530) // Rank 3
+                modifier = 4;
+            else if(auraSpellInfo->Id == 49529) // Rank 2
+                modifier = 3;
+
+            // ToDo: Check this, its based on a wowhead comment
+            if(!roll_chance_f(speed * modifier))
+                return false;
+            break;
+        }
         default:
             break;
     }
@@ -12225,6 +12245,21 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     float TakenTotalMod = 1.0f;
 
     // ..done
+    // SPELL_AURA_MOD_AUTOATTACK_DAMAGE
+    if (!spellProto)
+    {
+        AuraEffectList const & autoattackDamage = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE);
+        for (AuraEffectList::const_iterator i = autoattackDamage.begin(); i != autoattackDamage.end(); ++i)
+        {
+            int32 amount = (*i)->GetAmount();
+            if ((*i)->GetSpellProto()->EquippedItemClass == -1)
+                AddPctN(DoneTotalMod, amount);
+            else if (!((*i)->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellProto()->EquippedItemSubClassMask == 0))
+                AddPctN(DoneTotalMod, amount);
+        }
+    }
+
+
     // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE included in weapon damage
     // SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT  included in weapon damage
 
