@@ -3813,7 +3813,9 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 76189: // Crepuscular Veil
+        case 1978:  // Serpent Sting
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            count++;
             break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
