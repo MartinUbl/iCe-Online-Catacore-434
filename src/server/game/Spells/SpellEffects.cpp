@@ -9172,9 +9172,11 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
 
         for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
-            if (plr->GetRuneCooldown(i) && (plr->GetCurrentRune(i) == RUNE_FROST ||  plr->GetCurrentRune(i) == RUNE_DEATH))
+            if (plr->GetRuneCooldown(i))
                 plr->SetRuneCooldown(i, 0);
         }
+
+        plr->ResyncRunes(MAX_RUNES);
     }
 }
 
