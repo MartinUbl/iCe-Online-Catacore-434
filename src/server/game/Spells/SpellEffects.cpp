@@ -2007,7 +2007,20 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
             {
                 // focus effect (it has its own skill for this)
-                m_caster->CastSpell(m_caster,77443,true);
+                SpellEntry const* energizeSpell = sSpellStore.LookupEntry(77443);
+                if (energizeSpell)
+                {
+                    int32 bp0 = energizeSpell->EffectBasePoints[0];
+                    if (unitTarget && unitTarget->GetHealthPct() <= 25.0f)
+                    {
+                        // Termination
+                        if (m_caster->HasAura(83490))
+                            bp0 += 6;
+                        else if (m_caster->HasAura(83489))
+                            bp0 += 3;
+                    }
+                    m_caster->CastCustomSpell(m_caster,77443,&bp0,0,0,true);
+                }
 
                 // Improved Steady Shot proc
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetHistorySpell(2) == 56641)
@@ -7320,7 +7333,21 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             // cobra shot focus effect + add 6 seconds to serpent sting
             if (m_spellInfo->SpellFamilyFlags[2] & 0x400000)
             {
-                m_caster->CastSpell(m_caster,91954,true);
+                SpellEntry const* energizeSpell = sSpellStore.LookupEntry(91954);
+                if (energizeSpell)
+                {
+                    int32 bp0 = energizeSpell->EffectBasePoints[0];
+                    if (unitTarget && unitTarget->GetHealthPct() <= 25.0f)
+                    {
+                        // Termination
+                        if (m_caster->HasAura(83490))
+                            bp0 += 6;
+                        else if (m_caster->HasAura(83489))
+                            bp0 += 3;
+                    }
+                    m_caster->CastCustomSpell(m_caster,91954,&bp0,0,0,true);
+                }
+
                 if (unitTarget->GetAura(1978))
                     unitTarget->GetAura(1978)->SetDuration((unitTarget->GetAura(1978)->GetDuration() + 6000), true);
             }
