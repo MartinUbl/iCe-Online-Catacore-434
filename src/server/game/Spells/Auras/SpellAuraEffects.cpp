@@ -6148,6 +6148,10 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const * aurApp, uint8 mo
 
     target->ApplyAttackTimePercentMod(BASE_ATTACK,   amount, apply);
     target->ApplyAttackTimePercentMod(OFF_ATTACK,    amount, apply);
+
+    // And update ratings too, to reflect everything i.e. on rune regeneration speed
+    if (target->ToPlayer())
+        target->ToPlayer()->UpdateRating(CR_HASTE_MELEE);
 }
 
 void AuraEffect::HandleAuraModRangedHaste(AuraApplication const *aurApp, uint8 mode, bool apply) const
