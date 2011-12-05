@@ -1348,6 +1348,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Death Coil - disable adding bonus
                 else if (m_spellInfo->Id == 47632)
                     apply_direct_bonus = false;
+                // Howling Blast
+                else if (m_spellInfo->Id == 49184)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.44f);
+                    apply_direct_bonus = false;
+                }
                 break;
             }
         }
