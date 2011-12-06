@@ -690,15 +690,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
 
                 //revealing strike increases the damage done by 35%
-                Aura* revealing = caster->getVictim()->GetAura(84617, caster->GetGUID());
-                if (revealing)
+                if (GetBase()->GetUnitOwner())
                 {
-                    float bonus = 0.35f;                     // adds 35% bonus
-                    if (caster->HasAura(56814))             // glyph of revealing strike adds an additional 10% bonus
-                        bonus += 0.10f;
+                    Aura* revealing = GetBase()->GetUnitOwner()->GetAura(84617, caster->GetGUID());
+                    if (revealing)
+                    {
+                        float bonus = 0.35f;                     // adds 35% bonus
+                        if (caster->HasAura(56814))             // glyph of revealing strike adds an additional 10% bonus
+                            bonus += 0.10f;
 
-                    amount *= 1 + bonus;
-                    revealing->Remove();                    // remove the revealing strike debuff
+                        amount *= 1 + bonus;
+                        revealing->Remove();                    // remove the revealing strike debuff
+                    }
                 }
             }
             // Rip
