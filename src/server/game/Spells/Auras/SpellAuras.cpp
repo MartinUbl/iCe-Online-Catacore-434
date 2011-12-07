@@ -1180,6 +1180,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->CastSpell(caster, spellId, true);
                         }
                         break;
+                    case 45438: // Ice Block
+                        // Glyph of Ice Block
+                        if (caster && caster->ToPlayer() && caster->HasAura(56372))
+                            caster->ToPlayer()->RemoveSpellCooldown(122, true);
+                        break;
                     case 12472: // Icy Veins
                         // Glyph of Icy Veins
                         if (caster->HasAura(56374))
