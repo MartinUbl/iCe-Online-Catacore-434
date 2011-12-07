@@ -17589,6 +17589,10 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
             if (form == FORM_GHOSTWOLF && HasAura(58135))
                 modelid = 27312;
 
+            // Glyph of the Treant
+            if (form == FORM_TREE && HasAura(95212))
+                modelid = 864;
+
             return modelid;
         }
     }
