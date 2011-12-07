@@ -971,6 +971,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 break;
             }
         }
+        case SPELL_AURA_ADD_FLAT_MODIFIER:
+            // Glyph of Chains of Ice
+            if (GetId() == 58620)
+            {
+                if (caster)
+                    amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f;
+            }
+            break;
         default:
             break;
     }
