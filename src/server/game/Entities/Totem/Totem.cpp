@@ -126,6 +126,10 @@ void Totem::InitSummon()
     // Some totems can have both instant effect and passive spell
     if (GetSpell(1))
         CastSpell(this, GetSpell(1), true);
+
+    // Glyph of Healing Stream Totem adds new passive spell
+    if (GetEntry() == 3527 && GetOwner() && GetOwner()->HasAura(55456))
+        CastSpell(this, 8185, true);
 }
 
 void Totem::UnSummon()
