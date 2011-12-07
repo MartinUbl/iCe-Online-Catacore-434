@@ -981,9 +981,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+                    int32 energy = 0;
+
+                    // Glyph of Ferocious Bite
+                    if (!m_caster->HasAura(67598))
+                        energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+
                     damage += int32(m_caster->ToPlayer()->GetComboPoints() * ap * 0.109f);
-                    damage *= (1.0f+float(energy)/35.0f);
+
+                    // Convert extra energy up to 35 to damage by up to 100% (it means 100%+energy/35*100%)
+                    if (energy > 0)
+                        damage *= (1.0f+float(energy)/35.0f);
 
                     // Done with calculation
                     apply_direct_bonus = false;
@@ -3592,6 +3600,23 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
             // Apply spell power bonus
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
+            // Selfless Healer
+            if (caster != unitTarget)
+            {
+                int32 bpmod = 0;
+                if (caster->HasAura(85804))
+                    bpmod = 2;
+                else if (caster->HasAura(85803))
+                    bpmod = 1;
+
+                if (bpmod)
+                {
+                    addhealth *= 1.0f+bpmod*0.25f;
+                    bpmod *= 2*(caster->GetPower(POWER_HOLY_POWER)+1);
+                    caster->CastCustomSpell(caster, 90811, &bpmod, 0, 0, true);
+                }
+            }
 
             // Guarded by Light talent (if healing self, increase health)
             if (caster == unitTarget)

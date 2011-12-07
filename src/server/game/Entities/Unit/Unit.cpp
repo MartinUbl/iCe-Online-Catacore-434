@@ -6853,6 +6853,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             }
             switch (dummySpell->Id)
             {
+                // Selfless Healer - handled in Word of Glory code
+                case 85804:
+                case 85803:
+                    return false;
                 // Heart of the Crusader
                 case 20335: // rank 1
                     triggered_spell_id = 21183;
@@ -8721,6 +8725,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 50687:
             // Should proc only on critical hit
             if (!(procEx & PROC_EX_CRITICAL_HIT))
+                return false;
+            // Should proc only from Heroic Strike
+            if (!procSpell || procSpell->Id != 78)
                 return false;
             // And also cannot proc from self bonus
             if (HasAura(86627))
