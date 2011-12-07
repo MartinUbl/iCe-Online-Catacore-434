@@ -3650,6 +3650,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             uint32 holy_power = caster->GetPower(POWER_HOLY_POWER) + 1; // One was taken as cost
 
+            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
             addhealth *= holy_power;
         }
         // Flash Heal
