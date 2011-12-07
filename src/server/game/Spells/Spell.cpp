@@ -4784,10 +4784,10 @@ void Spell::TakePower()
         return;
     }
 
-    // WHAT THE FUCK? I wont drink alcohol anymore
-    // Terrible hack for Word of Glory not taking holy power when Sacred Light procs
-    //if (GetSpellInfo()->Id == 85673 && m_caster->GetPower(POWER_HOLY_POWER) > 0)
-    //    return;
+    // Terrible hack for Word of Glory not taking holy power when Eternal Glory procs
+    // Holy power is taken in Word of Glory handler (Spell::SpellDamageHeal)
+    if (GetSpellInfo()->Id == 85673 && m_caster->GetPower(POWER_HOLY_POWER) > 0)
+        return;
 
     // Dark Simulacrum - proc on any mana-taking spell
     if (powerType == POWER_MANA && m_caster->HasAura(77606))
@@ -5307,7 +5307,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
             return SPELL_FAILED_TARGET_AURASTATE;
 
-        if (!m_IsTriggeredSpell && target == m_caster && m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_TARGET_SELF)
+        if (!m_IsTriggeredSpell && target == m_caster && m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_TARGET_SELF && m_spellInfo->Id != 70940)
             return SPELL_FAILED_BAD_TARGETS;
 
         bool non_caster_target = target != m_caster && !sSpellMgr->IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
