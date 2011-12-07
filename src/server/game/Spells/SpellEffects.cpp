@@ -981,10 +981,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + m_spellInfo->EffectDamageMultiplier[effIndex];
-                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -30));
-                    damage += int32(energy * multiple);
-                    damage += int32(m_caster->ToPlayer()->GetComboPoints() * ap * 7 / 100);
+                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+                    damage += int32(m_caster->ToPlayer()->GetComboPoints() * ap * 0.109f);
+                    damage *= (1.0f+float(energy)/35.0f);
+
+                    // Done with calculation
+                    apply_direct_bonus = false;
                 }
                 // Wrath
                 else if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)
@@ -1108,7 +1110,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
                     {
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
+                        damage += int32(ap * combo * 0.091f);
+
+                        // We are done with damage calculation
+                        apply_direct_bonus = false;
 
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
