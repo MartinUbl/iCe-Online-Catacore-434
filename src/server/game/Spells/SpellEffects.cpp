@@ -1069,9 +1069,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     Aura* revealing = unitTarget->GetAura(84617, m_caster->GetGUID());
                     if (revealing)
                     {
-                        float bonus = 0.35;                     // adds 35% bonus
+                        float bonus = 0.35f;                     // adds 35% bonus
                         if (m_caster->HasAura(56814))           // glyph of revealing strike adds additional 10% bonus
-                            bonus += 0.10;
+                            bonus += 0.10f;
 
                         damage *= 1 + bonus;
 
@@ -1127,9 +1127,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     Aura* revealing = unitTarget->GetAura(84617, m_caster->GetGUID());
                     if (revealing)
                     {
-                        float bonus = 0.35;                     // adds 35% bonus
+                        float bonus = 0.35f;                     // adds 35% bonus
                         if (m_caster->HasAura(56814))           // glyph of revealing strike adds additional 10% bonus
-                            bonus += 0.10;
+                            bonus += 0.10f;
 
                         damage *= 1 + bonus;
 
@@ -1167,7 +1167,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Restless Blades
                     if (m_caster)
                     {
-                        uint32 minusSecs = 0;
+                        int32 minusSecs = 0;
                         if (m_caster->HasAura(79096))
                             minusSecs = 2*m_caster->ToPlayer()->GetComboPoints();
                         else if (m_caster->HasAura(79095))
@@ -3386,9 +3386,9 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 {
                     int duration = m_spellAura->GetDuration();   // get original duration (without revealing strike)
 
-                    float bonus = 0.35;                          // adds 35% bonus
+                    float bonus = 0.35f;                          // adds 35% bonus
                     if(m_caster->HasAura(56814))                 // glyph of revealing strike adds additional 10% bonus
-                        bonus += 0.10;
+                        bonus += 0.10f;
 
                     duration *= 1 + bonus;
                     m_spellAura->SetDuration(duration);
@@ -5793,9 +5793,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
             }
-            // Overpower - fix bad spell modifiers
-            else if (m_spellInfo->Id == 7384)
-                totalDamagePercentMod *= 1.62337f;
             break;
         }
         case SPELLFAMILY_ROGUE:
