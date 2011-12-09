@@ -4364,7 +4364,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (damage < 0)
         return;
 
-    if (unitTarget->GetMaxPower(power) == 0)
+    if (power != POWER_SCRIPTED && unitTarget->GetMaxPower(power) == 0)
         return;
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
