@@ -1381,7 +1381,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Restless Blades
                     if (Unit* caster = aurApp->GetBase()->GetCaster())
                     {
-                        uint32 minusSecs = 0;
+                        int32 minusSecs = 0;
                         if (caster->HasAura(79096))
                             minusSecs = 2*caster->ToPlayer()->GetComboPoints();
                         else if (caster->HasAura(79095))
