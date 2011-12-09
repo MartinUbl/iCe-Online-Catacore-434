@@ -3817,6 +3817,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        case 44824: // Flying Reindeer
+            // iCelike casting time fix - 1.5seconds like other mounts
+            spellInfo->CastingTimeIndex = 16;
+            count++;
+            break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
             spellInfo->EffectRadiusIndex[1] = 8;
