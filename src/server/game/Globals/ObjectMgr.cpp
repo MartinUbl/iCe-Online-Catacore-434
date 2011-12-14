@@ -2059,15 +2059,6 @@ void ObjectMgr::LoadItemPrototypes()
         ItemPrototype* proto = (ItemPrototype*)sItemStorage.LookupEntry<ItemPrototype >(i);
         ItemEntry const* db2item = sItemStore.LookupEntry(i);
 
-        // Horrible, realy horrible and unclean hack for correct RequiredDisenchantSkill value loading
-        // needs to be fixed in ItemPrototype structure
-        /*QueryResult DisenchResult = WorldDatabase.PQuery("SELECT RequiredDisenchantSkill FROM item_template WHERE entry=%u",i);
-        if (DisenchResult)
-        {
-            if (Field* pField = DisenchResult->Fetch())
-                proto->RequiredDisenchantSkill = pField[0].GetInt32();
-        }*/
-
         if (!proto)
             continue;
 
@@ -2528,12 +2519,9 @@ void ObjectMgr::LoadItemSetNameLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -2577,7 +2565,6 @@ void ObjectMgr::LoadItemSetNames()
         do
         {
             Field *fields = result->Fetch();
-            
 
             uint32 entry = fields[0].GetUInt32();
             if (itemSetItems.find(entry) == itemSetItems.end())
@@ -2603,9 +2590,6 @@ void ObjectMgr::LoadItemSetNames()
     }
     else
     {
-        
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 item set names. DB table `item_set_names` is empty.");
     }
@@ -2645,21 +2629,14 @@ void ObjectMgr::LoadVehicleAccessories()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 LoadVehicleAccessor. DB table `vehicle_accessory` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 uiEntry       = fields[0].GetUInt32();
         uint32 uiAccessory   = fields[1].GetUInt32();
@@ -2697,19 +2674,14 @@ void ObjectMgr::LoadVehicleScaling()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 vehicle scaling entries. DB table `vehicle_scaling_info` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 vehicleEntry       = fields[0].GetUInt32();
         float baseItemLevel       = fields[1].GetFloat();
@@ -2743,15 +2715,11 @@ void ObjectMgr::LoadPetLevelInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u level pet stats definitions", count);
             sLog->outErrorDb("Error loading `pet_levelstats` table or empty table.");
             return;
         }
-
-        
 
         do
         {
@@ -2799,7 +2767,6 @@ void ObjectMgr::LoadPetLevelInfo()
                 pLevelInfo->stats[i] = fields[i+4].GetUInt16();
             }
 
-            
             ++count;
         }
         while (result->NextRow());
@@ -2896,15 +2863,11 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u player create definitions", count);
             sLog->outErrorDb("Error loading `playercreateinfo` table or empty table.");
             exit(1);
         }
-
-        
 
         do
         {
@@ -2969,7 +2932,6 @@ void ObjectMgr::LoadPlayerInfo()
             pInfo->displayId_m = rEntry->model_m;
             pInfo->displayId_f = rEntry->model_f;
 
-            
             ++count;
         }
         while (result->NextRow());
@@ -2988,17 +2950,11 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u custom player create items", count);
         }
         else
         {
-            
-
             do
             {
                 Field* fields = result->Fetch();
@@ -3046,7 +3002,6 @@ void ObjectMgr::LoadPlayerInfo()
                 else
                     PlayerCreateInfoAddItemHelper(current_race, current_class, item_id, amount);
 
-                
                 ++count;
             }
             while (result->NextRow());
@@ -3070,16 +3025,12 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u player create spells", count);
             sLog->outErrorDb("Error loading player starting spells or empty table.");
         }
         else
         {
-            
-
             do
             {
                 Field* fields = result->Fetch();
@@ -3111,7 +3062,6 @@ void ObjectMgr::LoadPlayerInfo()
                 else
                     playerInfo[current_race][current_class].spell.push_back(fields[2].GetUInt32());
 
-                
                 ++count;
             }
             while (result->NextRow());
@@ -3131,16 +3081,12 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u player create actions", count);
             sLog->outErrorDb("Error loading `playercreateinfo_action` table or empty table.");
         }
         else
         {
-            
-
             do
             {
                 Field* fields = result->Fetch();
@@ -3162,7 +3108,6 @@ void ObjectMgr::LoadPlayerInfo()
                 PlayerInfo* pInfo = &playerInfo[current_race][current_class];
                 pInfo->action.push_back(PlayerCreateInfoAction(fields[2].GetUInt8(),fields[3].GetUInt32(),fields[4].GetUInt8()));
 
-                
                 ++count;
             }
             while (result->NextRow());
@@ -3182,15 +3127,11 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u level health/mana definitions", count);
             sLog->outErrorDb("Error loading `player_classlevelstats` table or empty table.");
             exit(1);
         }
-
-        
 
         do
         {
@@ -3267,15 +3208,11 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u level stats definitions", count);
             sLog->outErrorDb("Error loading `player_levelstats` table or empty table.");
             exit(1);
         }
-
-        
 
         do
         {
@@ -3320,7 +3257,6 @@ void ObjectMgr::LoadPlayerInfo()
                 pLevelInfo->stats[i] = fields[i+3].GetUInt8();
             }
 
-            
             ++count;
         }
         while (result->NextRow());
@@ -3358,7 +3294,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             if (sWorld->getIntConfig(CONFIG_EXPANSION) < 3 && (race == RACE_GOBLIN || race == RACE_WORGEN))
                 continue;
-            
+
             // fatal error if no level 1 data
             if (!pInfo->levelInfo || pInfo->levelInfo[0].stats[0] == 0)
             {
@@ -3392,15 +3328,11 @@ void ObjectMgr::LoadPlayerInfo()
 
         if (!result)
         {
-            
-
             sLog->outString();
             sLog->outString(">> Loaded %u xp for level definitions", count);
             sLog->outErrorDb("Error loading `player_xp_for_level` table or empty table.");
             exit(1);
         }
-
-        
 
         do
         {
@@ -3893,11 +3825,6 @@ void ObjectMgr::LoadArenaTeams()
 
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u arenateam definitions", count);
         return;
@@ -3909,13 +3836,10 @@ void ObjectMgr::LoadArenaTeams()
         "SELECT arenateamid,member.guid,played_week,wons_week,played_season,wons_season,name,class "
         "FROM arena_team_member member LEFT JOIN characters chars on member.guid = chars.guid ORDER BY member.arenateamid ASC");
 
-    
-
     do
     {
         //Field *fields = result->Fetch();
 
-        
         ++count;
 
         ArenaTeam *newArenaTeam = new ArenaTeam;
@@ -3955,18 +3879,13 @@ void ObjectMgr::LoadGroups()
     QueryResult result = CharacterDatabase.PQuery("SELECT leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raiddifficulty, guid FROM groups");
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 group definitions");
         return;
     }
 
-    
     do
     {
-        
         fields = result->Fetch();
         ++count;
         group = new Group;
@@ -4109,9 +4028,6 @@ void ObjectMgr::LoadQuests()
         " FROM quest_template");
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded 0 quests definitions");
         sLog->outErrorDb("`quest_template` table is empty!");
@@ -4121,10 +4037,9 @@ void ObjectMgr::LoadQuests()
     // create multimap previous quest for each existed quest
     // some quests can have many previous maps set by NextQuestId in previous quest
     // for example set of race quests can lead to single not race specific quest
-    
+
     do
     {
-        
         Field *fields = result->Fetch();
 
         Quest *newQuest = new Quest(fields);
@@ -4778,12 +4693,9 @@ void ObjectMgr::LoadQuestLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -4851,20 +4763,13 @@ void ObjectMgr::LoadScripts(ScriptsType type)
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u script definitions", count);
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
         ScriptInfo tmp;
         tmp.type      = type;
@@ -5299,20 +5204,14 @@ void ObjectMgr::LoadSpellScriptNames()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u spell script names", count);
         return;
     }
 
-    
-
     do
     {
         ++count;
-        
 
         Field *fields = result->Fetch();
 
@@ -5466,12 +5365,9 @@ void ObjectMgr::LoadPageTextLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -5538,9 +5434,6 @@ void ObjectMgr::LoadGossipText()
     int count = 0;
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u npc texts", count);
         return;
@@ -5548,16 +5441,12 @@ void ObjectMgr::LoadGossipText()
 
     int cic;
 
-    
-
     do
     {
         ++count;
         cic = 0;
 
         Field *fields = result->Fetch();
-
-        
 
         uint32 Text_ID    = fields[cic++].GetUInt32();
         if (!Text_ID)
@@ -5606,12 +5495,9 @@ void ObjectMgr::LoadNpcTextLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -5767,20 +5653,14 @@ void ObjectMgr::LoadQuestAreaTriggers()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u quest trigger points", count);
         return;
     }
 
-    
-
     do
     {
         ++count;
-        
 
         Field *fields = result->Fetch();
 
@@ -5830,20 +5710,14 @@ void ObjectMgr::LoadTavernAreaTriggers()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u tavern triggers", count);
         return;
     }
 
-    
-
     do
     {
         ++count;
-        
 
         Field *fields = result->Fetch();
 
@@ -5872,20 +5746,14 @@ void ObjectMgr::LoadAreaTriggerScripts()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u areatrigger scripts", count);
         return;
     }
 
-    
-
     do
     {
         ++count;
-        
 
         Field *fields = result->Fetch();
 
@@ -6020,20 +5888,14 @@ void ObjectMgr::LoadGraveyardZones()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u graveyard-zone links", count);
         return;
     }
 
-    
-
     do
     {
         ++count;
-        
 
         Field *fields = result->Fetch();
 
@@ -6284,23 +6146,14 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     QueryResult result = WorldDatabase.Query("SELECT id,  target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u area trigger teleport definitions", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         ++count;
 
@@ -6352,23 +6205,14 @@ void ObjectMgr::LoadAccessRequirements()
     QueryResult result = WorldDatabase.Query("SELECT mapid, difficulty, level_min, level_max, item, item2, quest_done_A, quest_done_H, completed_achievement, quest_failed_text FROM access_requirement");
     if (!result)
     {
-
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u access requirement definitions", count);
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-
-        
 
         ++count;
 
@@ -6741,12 +6585,9 @@ void ObjectMgr::LoadGameObjectLocales()
     if (!result)
         return;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 entry = fields[0].GetUInt32();
 
@@ -6994,21 +6835,13 @@ void ObjectMgr::LoadExplorationBaseXP()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u BaseXP definitions", count);
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
         uint8 level  = fields[0].GetUInt8();
         uint32 basexp = fields[1].GetUInt32();
@@ -7047,10 +6880,6 @@ void ObjectMgr::LoadPetNames()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u pet name parts", count);
         return;
@@ -7060,8 +6889,6 @@ void ObjectMgr::LoadPetNames()
 
     do
     {
-        
-
         Field *fields = result->Fetch();
         std::string word = fields[0].GetString();
         uint32 entry     = fields[1].GetUInt32();
@@ -7086,9 +6913,6 @@ void ObjectMgr::LoadPetNumber()
         Field *fields = result->Fetch();
         m_hiPetNumber = fields[0].GetUInt32()+1;
     }
-
-    
-    
 
     sLog->outString();
     sLog->outString(">> Loaded the max pet number: %d", m_hiPetNumber-1);
@@ -7124,21 +6948,13 @@ void ObjectMgr::LoadCorpses()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u corpses", count);
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
 
         uint32 guid = fields[16].GetUInt32();
@@ -7236,21 +7052,14 @@ void ObjectMgr::LoadReputationOnKill()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 creature award reputation definitions. DB table `creature_onkill_reputation` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 creature_id = fields[0].GetUInt32();
 
@@ -7307,11 +7116,11 @@ void ObjectMgr::LoadCurrencyOnKill()
 
     uint32 count = 0;
 
-    //                                                0            1                     2
+    //                                                0            1    2
     QueryResult result = WorldDatabase.Query("SELECT creature_id, type, amount FROM creature_onkill_currency");
 
     if (!result)
-    { 
+    {
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 creature award currency definitions. DB table `creature_onkill_currency` is empty.");
         return;
@@ -7320,7 +7129,6 @@ void ObjectMgr::LoadCurrencyOnKill()
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 creature_id = fields[0].GetUInt32();
 
@@ -7474,21 +7282,14 @@ void ObjectMgr::LoadPointsOfInterest()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 point_id = fields[0].GetUInt32();
 
@@ -7545,8 +7346,6 @@ void ObjectMgr::LoadQuestPOI()
 
         do
         {
-            
-
             Field *fields = points->Fetch();
 
             uint32 questId            = fields[0].GetUInt32();
@@ -7565,7 +7364,6 @@ void ObjectMgr::LoadQuestPOI()
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 questId            = fields[0].GetUInt32();
         uint32 id                 = fields[1].GetUInt32();
@@ -7598,21 +7396,14 @@ void ObjectMgr::LoadNPCSpellClickSpells()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 spellclick spells. DB table `npc_spellclick_spells` is empty.");
         return;
     }
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         uint32 npc_entry = fields[0].GetUInt32();
         CreatureInfo const* cInfo = GetCreatureTemplate(npc_entry);
@@ -7714,7 +7505,7 @@ void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t
         RemoveCreatureRespawnTime(loguid, instance);
         return;
     }
-    
+
     // This function can be called from various map threads concurrently
     {
         m_CreatureRespawnTimesMtx.acquire();
@@ -7762,7 +7553,7 @@ void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
         RemoveGORespawnTime(loguid, instance);
         return;
     }
-    
+
     // This function can be called from different map threads concurrently
     {
         m_GORespawnTimesMtx.acquire();
@@ -7859,16 +7650,10 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map, std::string table,
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 quest relations from %s, table is empty.", table.c_str());
         return;
     }
-
-    
 
     PooledQuestRelation* poolRelationMap = go ? &sPoolMgr->mQuestGORelation : &sPoolMgr->mQuestCreatureRelation;
     if (starter)
@@ -7876,8 +7661,6 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map, std::string table,
 
     do
     {
-        
-
         uint32 id     = result->Fetch()[0].GetUInt32();
         uint32 quest  = result->Fetch()[1].GetUInt32();
         uint32 poolId = result->Fetch()[2].GetUInt32();
@@ -7966,20 +7749,14 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u reserved player names", count);
         return;
     }
 
-    
-
     Field* fields;
     do
     {
-        
         fields = result->Fetch();
         std::string name= fields[0].GetString();
 
@@ -8244,10 +8021,6 @@ bool ObjectMgr::LoadTrinityStrings(char const* table, int32 min_value, int32 max
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         if (min_value == MIN_TRINITY_STRING_ID)              // error only in case internal strings
             sLog->outErrorDb(">> Loaded 0 trinity strings. DB table `%s` is empty. Cannot continue.",table);
@@ -8258,12 +8031,9 @@ bool ObjectMgr::LoadTrinityStrings(char const* table, int32 min_value, int32 max
 
     uint32 count = 0;
 
-    
-
     do
     {
         Field *fields = result->Fetch();
-        
 
         int32 entry = fields[0].GetInt32();
 
@@ -8331,21 +8101,13 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `skill_fishing_base_level`, table is empty!");
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
         uint32 entry  = fields[0].GetUInt32();
         int32 skill   = fields[1].GetInt32();
@@ -8434,21 +8196,13 @@ void ObjectMgr::LoadGameTele()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `game_tele`, table is empty!");
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
 
         uint32 id         = fields[0].GetUInt32();
@@ -8564,21 +8318,13 @@ void ObjectMgr::LoadMailLevelRewards()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `mail_level_reward`, table is empty!");
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
 
         uint8 level           = fields[0].GetUInt8();
@@ -8783,21 +8529,14 @@ void ObjectMgr::LoadVendors()
     QueryResult result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor ORDER BY entry, slot ASC");
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `npc_vendor`, table is empty!");
         return;
     }
 
-    
-
     uint32 count = 0;
     do
     {
-        
         Field* fields = result->Fetch();
 
         uint32 entry        = fields[0].GetUInt32();
@@ -8835,23 +8574,15 @@ void ObjectMgr::LoadNpcTextId()
     QueryResult result = WorldDatabase.Query("SELECT npc_guid, textid FROM npc_gossip");
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `npc_gossip`, table is empty!");
         return;
     }
 
-    
-
     uint32 count = 0;
     uint32 guid,textid;
     do
     {
-        
-
         Field* fields = result->Fetch();
 
         guid   = fields[0].GetUInt32();
@@ -8885,23 +8616,15 @@ void ObjectMgr::LoadGossipMenu()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `gossip_menu`, table is empty!");
         return;
     }
 
-    
-
     uint32 count = 0;
 
     do
     {
-        
-
         Field* fields = result->Fetch();
 
         GossipMenus gMenu;
@@ -8936,16 +8659,10 @@ void ObjectMgr::LoadGossipMenuItems()
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded gossip_menu_option, table is empty!");
         return;
     }
-
-    
 
     uint32 count = 0;
 
@@ -8956,8 +8673,6 @@ void ObjectMgr::LoadGossipMenuItems()
 
     do
     {
-        
-
         Field* fields = result->Fetch();
 
         GossipMenuItems gMenuItem;
@@ -9163,20 +8878,15 @@ void ObjectMgr::LoadScriptNames()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outErrorDb(">> Loaded empty set of Script Names!");
         return;
     }
 
-    
-
     uint32 count = 1;
 
     do
     {
-        
         m_scriptNames.push_back((*result)[0].GetString());
         ++count;
     }
@@ -9317,14 +9027,11 @@ void ObjectMgr::LoadCreatureClassLevelStats()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 creature base stats. DB table `creature_classlevelstats` is empty.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
@@ -9356,7 +9063,6 @@ void ObjectMgr::LoadCreatureClassLevelStats()
 
         m_creatureBaseStatsMap[MAKE_PAIR16(Level, Class)] = stats;
 
-        
         ++counter;
     }
     while (result->NextRow());
@@ -9384,14 +9090,11 @@ void ObjectMgr::LoadFactionChangeAchievements()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 faction change achievement pairs. DB table `player_factionchange_achievement` is empty.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
@@ -9408,7 +9111,6 @@ void ObjectMgr::LoadFactionChangeAchievements()
         else
             factionchange_achievements[alliance] = horde;
 
-        
         ++counter;
     }
     while (result->NextRow());
@@ -9423,14 +9125,11 @@ void ObjectMgr::LoadFactionChangeItems()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 faction change item pairs. DB table `player_factionchange_items` is empty.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
@@ -9447,7 +9146,6 @@ void ObjectMgr::LoadFactionChangeItems()
         else
             factionchange_items[alliance] = horde;
 
-        
         ++counter;
     }
     while (result->NextRow());
@@ -9462,14 +9160,11 @@ void ObjectMgr::LoadFactionChangeSpells()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 faction change spell pairs. DB table `player_factionchange_spells` is empty.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
@@ -9486,7 +9181,6 @@ void ObjectMgr::LoadFactionChangeSpells()
         else
             factionchange_spells[alliance] = horde;
 
-        
         ++counter;
     }
     while (result->NextRow());
@@ -9501,14 +9195,11 @@ void ObjectMgr::LoadFactionChangeReputations()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 faction change reputation pairs. DB table `player_factionchange_reputations` is empty.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
@@ -9525,7 +9216,6 @@ void ObjectMgr::LoadFactionChangeReputations()
         else
             factionchange_reputations[alliance] = horde;
 
-        
         ++counter;
     }
     while (result->NextRow());
