@@ -34,11 +34,8 @@ enum Spells
     SPELL_POINT_OF_VULNERABILITY = 79011,
 
     // Lava Parasite
-    SPELL_PARASITIC_INFECTION_1 = 78941,
-    SPELL_PARASITIC_INFECTION_2 = 91913,
-    SPELL_PARASITIC_INFECTION_3 = 94678,
-    SPELL_PARASITIC_INFECTION_4 = 94679,
-    // TODO: on unapply spawn more small shits
+    SPELL_PARASITIC_INFECTION = 78941,
+    SPELL_PARASITIC_INFECTION_10SEC_TRIGGER = 78079,
 };
 
 enum NPCs
@@ -93,7 +90,7 @@ public:
             if (pHead)
             {
                 pHead->ExitVehicle();
-                //pHead->Relocate(0,0,0);
+                pHead->Relocate(-307.228363f,-45.881611f,212.010483f);
                 pWho->Kill(pHead);
             }
         }
@@ -164,6 +161,11 @@ public:
             me->CastSpell(me, SPELL_PILLAR_OF_FLAME_VISUAL, false);
         }
 
+        void AttackStart(Unit* who)
+        {
+            return;
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (ExplodeTimer <= diff)
@@ -190,16 +192,75 @@ public:
     }
 };
 
+class mob_lava_worm_magmaw: public CreatureScript
+{
+public:
+    mob_lava_worm_magmaw(): CreatureScript("mob_lava_worm_magmaw") {};
+
+    struct mob_lava_worm_magmawAI: public ScriptedAI
+    {
+        mob_lava_worm_magmawAI(Creature* c): ScriptedAI(c)
+        {
+            Reset();
+        }
+
+        uint32 ApplyTimer;
+
+        void Reset()
+        {
+            ApplyTimer = 0;
+        }
+
+        void DamageDealt(Unit* pVictim, uint32 &damage, DamageEffectType type)
+        {
+            if (type == DIRECT_DAMAGE && pVictim && pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (ApplyTimer == 0)
+                {
+                    DoCastVictim(SPELL_PARASITIC_INFECTION);
+                    DoCastVictim(SPELL_PARASITIC_INFECTION_10SEC_TRIGGER);
+                    ApplyTimer = 1000;
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+            {
+                ApplyTimer = 0;
+                return;
+            }
+
+            if (ApplyTimer <= diff)
+            {
+                ApplyTimer = 0;
+            }
+            else
+                ApplyTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new mob_lava_worm_magmawAI(c);
+    }
+};
+
 void AddSC_magmaw()
 {
     new boss_magmaw();
     new mob_pillar_of_flame_magmaw();
+    new mob_lava_worm_magmaw();
 }
 
 /**** SQL:
 
 UPDATE creature_template SET vehicleId=781,ScriptName='boss_magmaw' WHERE entry=41570;
-UPDATE creature_template SET modelid1=16946,modelid3=0,unit_flags=2,faction_A=14,faction_H=14,ScriptName='mob_pillar_of_flame_magmaw' WHERE entry=41843;
+UPDATE creature_template SET modelid1=16946,modelid2=0,modelid3=0,modelid4=0,unit_flags=2,faction_A=14,faction_H=14,ScriptName='mob_pillar_of_flame_magmaw' WHERE entry=41843;
+UPDATE creature_template SET ScriptName='mob_lava_worm_magmaw' WHERE entry IN (41806,42321);
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES (32679, 15, 15, 2, 0);
 DELETE FROM creature_template_addon WHERE entry=42347;
 

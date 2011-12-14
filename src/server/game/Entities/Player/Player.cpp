@@ -19154,7 +19154,7 @@ void Player::SaveToDB()
 
     ss << GetHealth();
 
-    for (uint32 i = 0; i < MAX_POWERS; ++i)
+    for (uint32 i = 0; i < MAX_POWERS-1; ++i)
         ss << ", " << GetPower(Powers(i));
     ss << ", ";
     ss << GetSession()->GetLatency();
