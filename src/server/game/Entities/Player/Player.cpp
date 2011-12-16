@@ -19684,7 +19684,7 @@ void Player::_SaveStats(SQLTransaction& trans)
         "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) VALUES ("
         << GetGUIDLow() << ", "
         << GetMaxHealth() << ", ";
-    for (uint8 i = 0; i < MAX_POWERS; ++i)
+    for (uint8 i = 0; i < MAX_POWERS-1; ++i)
         ss << GetMaxPower(Powers(i)) << ", ";
     for (uint8 i = 0; i < MAX_STATS; ++i)
         ss << GetStat(Stats(i)) << ", ";
