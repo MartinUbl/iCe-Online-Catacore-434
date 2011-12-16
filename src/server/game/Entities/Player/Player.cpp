@@ -17555,7 +17555,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     // restore remembered power/health values (but not more max values)
     uint32 savedHealth = fields[50].GetUInt32();
     SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
-    for (uint8 i = 0; i < MAX_POWERS; ++i)
+    for (uint8 i = 0; i < MAX_POWERS-1; ++i)
     {
         uint32 savedPower = fields[51+i].GetUInt32();
         SetPower(Powers(i),savedPower > GetMaxPower(Powers(i)) ? GetMaxPower(Powers(i)) : savedPower);
