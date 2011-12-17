@@ -4890,6 +4890,10 @@ void Player::BuildPlayerRepop()
         CastSpell(this, 20584, true);
     CastSpell(this, 8326, true);
 
+    // guild perk The Quick and the Dead
+    if (HasAura(83950))
+        CastSpell(this, 84559, true);
+
     // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_WATER_WALK
     // there must be SMSG.STOP_MIRROR_TIMER
     // there we must send 888 opcode
@@ -4950,6 +4954,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     if (getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
+
+    // guild perk The Quick and the Dead
+    RemoveAurasDueToSpell(84559);
 
     setDeathState(ALIVE);
 
