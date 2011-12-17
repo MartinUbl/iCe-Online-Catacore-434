@@ -3804,6 +3804,14 @@ void ObjectMgr::LoadGuildRewards()
         ptr->price = fields[1].GetUInt32();
         ptr->achievement = fields[2].GetUInt32();
         ptr->standing = fields[3].GetUInt32();
+
+        // Check the validity of that item
+        if (!sObjectMgr->GetItemPrototype(ptr->item))
+        {
+            delete ptr;
+            continue;
+        }
+
         mGuildRewards[ptr->item] = ptr;
 
         ++count;
