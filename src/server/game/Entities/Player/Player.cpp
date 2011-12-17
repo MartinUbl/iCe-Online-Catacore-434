@@ -21566,6 +21566,20 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         recTime    = rec ? curTime+rec/IN_MILLISECONDS : catrecTime;
     }
 
+    // Apply cooldown modify auras
+    Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_341);
+    if (!auraList.empty())
+    {
+        for (Unit::AuraEffectList::const_iterator itr = auraList.begin(); itr != auraList.end(); ++itr)
+        {
+            if ((*itr)->GetMiscValue() == spellInfo->Category)
+            {
+                catrecTime += ((*itr)->GetAmount()/1000);
+                recTime += ((*itr)->GetAmount()/1000);
+            }
+        }
+    }
+
     // self spell cooldown
     if (recTime > 0)
         AddSpellCooldown(spellInfo->Id, itemId, recTime);
