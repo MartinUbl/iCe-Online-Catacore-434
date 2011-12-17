@@ -1137,6 +1137,19 @@ void Group::OnGroupSlain(Unit* pVictim)
             case 45871: // Conclave: Nazir
             case 45872: // Conclave: Rohash
             case 46753: // Al'Akir
+            // Blackwing Descent
+            case 41570: // Magmaw
+            case 41378: // Maloriak
+            case 41442: // Atramedes
+            case 43296: // Chimaeron
+            case 41376: // Nefarian
+            // The Bastion of Twilight
+            case 44600: // Halfus
+            case 45993: // Theralion
+            case 45992: // Valiona
+            case 43735: // Elementium Monstrosity
+            case 43324: // Cho'gall
+            case 45213: // Sinestra
                 guildXP = 78700;
                 break;
         }
