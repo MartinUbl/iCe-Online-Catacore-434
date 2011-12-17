@@ -21569,7 +21569,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     // Apply cooldown modify auras
     int32 catrecMod = 0;
     int32 recMod = 0;
-    Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_341);
+    Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_MOD_COOLDOWN_NATIVE);
     if (!auraList.empty())
     {
         for (Unit::AuraEffectList::const_iterator itr = auraList.begin(); itr != auraList.end(); ++itr)
@@ -21578,6 +21578,20 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
             {
                 catrecMod = (*itr)->GetAmount();
                 recMod = (*itr)->GetAmount();
+            }
+        }
+    }
+
+    float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
+    Unit::AuraEffectList const& auraHasteList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
+    if (!auraHasteList.empty())
+    {
+        for (Unit::AuraEffectList::const_iterator itr = auraHasteList.begin(); itr != auraHasteList.end(); ++itr)
+        {
+            if ((*itr)->IsAffectedOnSpell(spellInfo))
+            {
+                catrecMod += -((*itr)->GetAmount()/100.0f*haste*catrec);
+                recMod += -((*itr)->GetAmount()/100.0f*haste*rec);
             }
         }
     }
@@ -21598,10 +21612,6 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
                     continue;
 
                 AddSpellCooldown(*i_scset, itemId, catrecTime);
-
-                // And also modify cooldown of every spell in category if needed
-                if (catrecMod != 0)
-                    ModifySpellCooldown(spellInfo->Id, catrecMod, true);
             }
         }
     }
@@ -21609,6 +21619,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     // And finally modify spell cooldown in client too if needed
     if (recMod != 0)
         ModifySpellCooldown(spellInfo->Id, recMod, true);
+    if (catrecMod != 0)
+        ModifySpellCooldown(spellInfo->Id, catrecMod, true);
 }
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
