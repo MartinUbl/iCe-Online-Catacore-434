@@ -21280,9 +21280,12 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
 
     uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
 
+    float discountMod = GetReputationPriceDiscount(pCreature);
+    discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
+
     // reputation discount
     if (price)
-        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
+        price = uint32(floor(price * discountMod));
 
     // If item is listed as guild reward, check whether player is capable to buy
     if (Guild::IsListedAsGuildReward(pProto->ItemId))

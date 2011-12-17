@@ -771,6 +771,8 @@ void WorldSession::SendListInventory(uint64 vendorguid)
 
     float discountMod = _player->GetReputationPriceDiscount(pCreature);
 
+    discountMod -= _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
+
     for (uint32 vendorslot = 0; vendorslot < numitems; ++vendorslot )
     {
         if (VendorItem const* crItem = vItems->GetItem(vendorslot))
