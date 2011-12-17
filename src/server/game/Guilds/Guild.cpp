@@ -192,6 +192,18 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
         if (IsCompletedCriteria(achievementCriteria,achievement) && HasAchieved(achievement->ID))
             continue;
 
+        // Check for guild group if needed
+        if (achievement->flags & ACHIEVEMENT_FLAG_NEEDS_GUILD_GROUP)
+        {
+            // If not valid or not in group
+            if (!player || !player->GetGroup())
+                continue;
+
+            // If not in guild group, gtfo of this handler
+            if (!player->GetGroup()->IsGuildGroup(player->GetGuildId()))
+                continue;
+        }
+
         // Check for universal morerequirement types and values
         bool moreReqMeets = true;
         for (uint8 i = 0; i < 3; i++)
@@ -217,7 +229,12 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                     continue;
 
                 AchievementCriteriaDataSet const* data = sAchievementMgr->GetCriteriaDataSet(achievementCriteria);
-                if (!data || !data->Meets(player,unit))
+                if (!data)
+                {
+                    if (!unit || unit->GetTypeId() != TYPEID_UNIT)
+                        continue;
+                }
+                else if (!data->Meets(player,unit))
                     continue;
 
                 SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_ACCUMULATE);
