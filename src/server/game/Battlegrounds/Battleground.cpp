@@ -33,6 +33,7 @@
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
+#include "Guild.h"
 #include "Language.h"
 #include "MapManager.h"
 #include "Object.h"
@@ -796,7 +797,38 @@ void Battleground::EndBattleground(uint32 winner)
                 // update achievement BEFORE personal rating update
                 ArenaTeamMember* member = winner_arena_team->GetMember(plr->GetGUID());
                 if (member)
+                {
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
+
+                    // Earn guild XP if in guild party
+                    if (Player* pPlayer = sObjectMgr->GetPlayer(member->guid))
+                    {
+                        if (pPlayer->GetGuildId() > 0)
+                        {
+                            Guild* pGuild = sObjectMgr->GetGuildById(pPlayer->GetGuildId());
+                            if (Group* pGroup = pPlayer->GetGroup())
+                            {
+                                uint32 guildMemberCount = pGroup->GetGuildMembersCount(pPlayer->GetGuildId());
+                                switch (winner_arena_team->GetType())
+                                {
+                                    case ARENA_TEAM_5v5:
+                                        if (guildMemberCount < 5)
+                                            break;
+                                    case ARENA_TEAM_3v3:
+                                        if (guildMemberCount < 3)
+                                            break;
+                                    case ARENA_TEAM_2v2:
+                                        if (guildMemberCount < 2)
+                                            break;
+
+                                        if (pGuild)
+                                            pGuild->GainXP(12400);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 winner_arena_team->MemberWon(plr,loser_matchmaker_rating, winner_change);
             }
