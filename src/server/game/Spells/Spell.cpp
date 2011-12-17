@@ -41,6 +41,7 @@
 #include "Spell.h"
 #include "DynamicObject.h"
 #include "Group.h"
+#include "Guild.h"
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
@@ -5171,6 +5172,35 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
         else
             return SPELL_FAILED_ERROR;
+    }
+
+    // Check add guild bank condition
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+    {
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT)
+        {
+            // Caster needs to be player
+            if (!m_caster->ToPlayer())
+                return SPELL_FAILED_ERROR;
+
+            // ..and also is needed to be in a guild
+            if (m_caster->ToPlayer()->GetGuildId() == 0)
+                return SPELL_FAILED_ERROR;
+
+            // ..and also the guild must exist
+            Guild* pGuild = sObjectMgr->GetGuildById(m_caster->ToPlayer()->GetGuildId());
+            if (!pGuild)
+                return SPELL_FAILED_ERROR;
+
+            // ..and also the caster has to be guild master
+            if (pGuild->GetLeaderGUID() != m_caster->GetGUID())
+                return SPELL_FAILED_ERROR;
+
+            // ..and also can not buy slot which is already bought
+            // (minus 1 because of buying 7th slot which is in fact at 6th position in 0..6 array)
+            if (pGuild->_GetPurchasedTabsSize() != m_spellInfo->EffectBasePoints[i]-1)
+                return SPELL_FAILED_ERROR;
+        }
     }
 
     // Check for valid hunter pet spells

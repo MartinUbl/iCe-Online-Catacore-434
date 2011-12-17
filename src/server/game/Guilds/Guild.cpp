@@ -43,6 +43,9 @@ inline uint32 _GetGuildBankTabPrice(uint8 tabId)
         case 3: return 1000;
         case 4: return 2500;
         case 5: return 5000;
+        // Slot 6 and 7 are added by item, which can be bought from vendors
+        case 6: return 0;
+        case 7: return 0;
         default: return 0;
     }
 }
@@ -2312,7 +2315,8 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
         return;
 
     uint32 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
-    if (!tabCost)
+    // tabs 6 and 7 (7 and 8 in game numbering) is bought by items and has no cost at all)
+    if (!tabCost && tabId != 6 && tabId != 7)
         return;
 
     Player* player = session->GetPlayer();

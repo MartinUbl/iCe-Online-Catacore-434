@@ -799,6 +799,8 @@ public:
     bool IsRewardReachable(Player* pPlayer, uint32 item);
     static GuildRewardsEntry* GetRewardData(uint32 item);
 
+    inline uint8 _GetPurchasedTabsSize() const { return uint8(m_bankTabs.size()); }
+
 protected:
     uint32 m_id;
     std::string m_name;
@@ -835,7 +837,6 @@ private:
     inline bool _HasRankRight(Player* player, uint32 right) const { return (_GetRankRights(player->GetRank()) & right) != GR_RIGHT_EMPTY; }
     inline uint8 _GetLowestRankId() const { return uint8(m_ranks.size() - 1); }
 
-    inline uint8 _GetPurchasedTabsSize() const { return uint8(m_bankTabs.size()); }
     inline BankTab* GetBankTab(uint8 tabId) { return tabId < m_bankTabs.size() ? m_bankTabs[tabId] : NULL; }
     inline const BankTab* GetBankTab(uint8 tabId) const { return tabId < m_bankTabs.size() ? m_bankTabs[tabId] : NULL; }
 

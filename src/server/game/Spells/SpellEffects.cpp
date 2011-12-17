@@ -9613,7 +9613,19 @@ void Spell::EffectActivateGuildBankSlot(SpellEffIndex effIndex)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // TODO: Do
+    // Some organization
+    Player* pPlayer = m_caster->ToPlayer();
+    if (!pPlayer || pPlayer->GetGuildId() == 0)
+        return;
+
+    // If not in guild, gtfo
+    Guild* pGuild = sObjectMgr->GetGuildById(pPlayer->GetGuildId());
+    if (!pGuild)
+        return;
+
+    // Finally.. buy it!
+    // (minus 1 because of buying 7th slot which is in fact at 6th position in 0..6 array)
+    pGuild->HandleBuyBankTab(pPlayer->GetSession(), GetSpellInfo()->EffectBasePoints[effIndex]-1);
 }
 
 void Spell::EffectBind(SpellEffIndex effIndex)
