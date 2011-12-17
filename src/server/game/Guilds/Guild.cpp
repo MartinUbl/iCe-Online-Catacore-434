@@ -193,13 +193,19 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
             continue;
 
         // Check for universal morerequirement types and values
+        bool moreReqMeets = true;
         for (uint8 i = 0; i < 3; i++)
         {
             // guild reputation
             if (player && achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_GUILD_REP
                 && player->GetReputation(FACTION_GUILD) < achievementCriteria->moreRequirementValue[i])
+            {
+                moreReqMeets = false;
                 continue;
+            }
         }
+        if (!moreReqMeets)
+            continue;
 
         switch (type)
         {
@@ -2804,7 +2810,7 @@ bool Guild::LoadFromDB(Field* fields)
     m_emblemInfo.LoadFromDB(fields);
     m_info          = fields[8].GetString();
     m_motd          = fields[9].GetString();
-    m_createdDate   = fields[10].GetUInt32(); //64 bits?
+    m_createdDate   = fields[10].GetUInt64();
     m_bankMoney     = fields[11].GetUInt64();
 
     uint8 purchasedTabs = uint8(fields[12].GetUInt32());
