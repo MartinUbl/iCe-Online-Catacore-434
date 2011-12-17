@@ -286,6 +286,24 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
     uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
+    // Implementation of guild perk G-Mail
+    // Mails between members of same guild arrives instantly
+    if (deliver_delay > 0 && pl && receive)
+        if (pl->GetGuildId() == receive->GetGuildId() && pl->HasAura(83951))
+            deliver_delay = 0;
+
+    if (deliver_delay > 0 && pl && !receive)
+    {
+        if (QueryResult resultt = CharacterDatabase.PQuery("SELECT guildid FROM guild_member WHERE guid = '%u'", GUID_LOPART(rc)))
+        {
+            Field *fields = resultt->Fetch();
+            uint32 guildid = fields[0].GetUInt32();
+
+            if (guildid == pl->GetGuildId() && pl->HasAura(83951))
+                deliver_delay = 0;
+        }
+    }
+
     // will delete item or place to receiver mail list
     draft
         .AddMoney(money)
