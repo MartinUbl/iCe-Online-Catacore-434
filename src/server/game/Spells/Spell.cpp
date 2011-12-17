@@ -3590,8 +3590,6 @@ void Spell::cast(bool skipCheck)
         CalculateDamageDoneForAllTargets();
 
     // CAST SPELL
-    SendSpellCooldown();
-
     PrepareScriptHitHandlers();
 
     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -3612,6 +3610,8 @@ void Spell::cast(bool skipCheck)
 
     // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
     SendSpellGo();
+
+    SendSpellCooldown();
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if ((m_spellInfo->speed > 0.0f && !IsChanneledSpell(m_spellInfo)) || m_spellInfo->Id == 14157)

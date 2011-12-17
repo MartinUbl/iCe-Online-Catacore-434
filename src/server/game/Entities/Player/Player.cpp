@@ -21567,6 +21567,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     }
 
     // Apply cooldown modify auras
+    int32 catrecMod = 0;
+    int32 recMod = 0;
     Unit::AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_341);
     if (!auraList.empty())
     {
@@ -21574,8 +21576,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         {
             if ((*itr)->GetMiscValue() == spellInfo->Category)
             {
-                catrecTime += ((*itr)->GetAmount()/1000);
-                recTime += ((*itr)->GetAmount()/1000);
+                catrecMod = (*itr)->GetAmount();
+                recMod = (*itr)->GetAmount();
             }
         }
     }
@@ -21596,9 +21598,17 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
                     continue;
 
                 AddSpellCooldown(*i_scset, itemId, catrecTime);
+
+                // And also modify cooldown of every spell in category if needed
+                if (catrecMod != 0)
+                    ModifySpellCooldown(spellInfo->Id, catrecMod, true);
             }
         }
     }
+
+    // And finally modify spell cooldown in client too if needed
+    if (recMod != 0)
+        ModifySpellCooldown(spellInfo->Id, recMod, true);
 }
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
