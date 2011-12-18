@@ -244,7 +244,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //169
     &Spell::EffectNULL,                                     //170
     &Spell::EffectNULL,                                     //171
-    &Spell::EffectNULL,                                     //172
+    &Spell::EffectResurrect,                                //172 SPELL_EFFECT_MASS_RESURRECT
     &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
     &Spell::EffectNULL,                                     //174
 };
@@ -8326,7 +8326,7 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
     if (pTarget && m_caster->ToPlayer())
     {
         if (pTarget->GetGuildId() == m_caster->ToPlayer()->GetGuildId())
-            percentMod = m_caster->GetTotalAuraModifier(SPELL_AURA_340);
+            percentMod = m_caster->GetTotalAuraModifier(SPELL_AURA_MOD_RESURRECT_STATS);
     }
 
     uint32 health = pTarget->CountPctFromMaxHealth(damage + percentMod);
