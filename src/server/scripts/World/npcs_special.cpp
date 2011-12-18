@@ -3417,7 +3417,7 @@ public:
         {
             x = me->GetPositionX();
             y = me->GetPositionY();
-            if((Unit* owner = me->GetOwner()) != NULL)
+            if(Unit* owner = me->GetOwner())
             {
                 z = owner->GetPositionZ()+2;
                 angle = owner->GetAngle(me);

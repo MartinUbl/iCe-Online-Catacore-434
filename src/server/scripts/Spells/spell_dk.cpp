@@ -269,9 +269,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             AuraEffect * GetGlyphScourgeStrikeAuraEffect(uint32 diseaseId, Unit::AuraEffectList const & auras)
             {
                 for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                    if (diseaseId == ((*itr)->GetAmount() >> 4))
+                    if (int32(diseaseId) == ((*itr)->GetAmount() >> 4))
                         return (*itr);
-    
+
                 return NULL;
             }
 
