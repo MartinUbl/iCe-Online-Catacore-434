@@ -116,12 +116,12 @@ class boss_lockmaw : public CreatureScript
                             events.ScheduleEvent(EVENT_DUST_FLAIL, urand(6000, 10000));
                             break;
                         case EVENT_VISCOUS_POISON:
-                            if ((Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true)) != NULL)
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
                                 DoCast(target, SPELL_VISCOUS_POISON);
                                 events.ScheduleEvent(EVENT_VISCOUS_POISON, 2000);
                             break;
                         case EVENT_SCENT_OF_BLOOD:
-                            if ((Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true)) != NULL)
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
                                 DoCast(target, SPELL_SCENT_OF_BLOOD);
                                 for(uint8 i=0; i<4; i++)
                                 {
