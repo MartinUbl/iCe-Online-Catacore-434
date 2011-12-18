@@ -3818,7 +3818,7 @@ void ObjectMgr::LoadGuildRewards()
     }while (result->NextRow());
 
     sLog->outString();
-    sLog->outString(">> Loaded %u guild reward definitions.");
+    sLog->outString(">> Loaded %u guild reward definitions.", count);
 }
 
 void ObjectMgr::LoadArenaTeams()

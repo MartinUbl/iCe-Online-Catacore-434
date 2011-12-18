@@ -291,8 +291,8 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                     return;
 
                 uint32 diseases = 0;
-                int32 extratime, maxtime;
-                AuraEffect const * aurEffA;
+                int32 extratime = 0, maxtime = 0;
+                AuraEffect const * aurEffA = NULL;
 
                 Unit::AuraEffectList aurasA;
                 GetGlyphScourgeStrikeAuraEffects(caster, caster, aurasA);

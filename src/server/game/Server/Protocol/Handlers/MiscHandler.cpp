@@ -1770,7 +1770,7 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
 
     if(Battlefield* bf = sBattlefieldMgr.GetBattlefieldToZoneId(_player->GetZoneId()))
     {
-        // bf->PlayerAskToLeave(_player); FIXME
+        bf->AskToLeaveQueue(_player);
         return;
     }
 

@@ -14300,6 +14300,8 @@ void Unit::SetPower(Powers power, int32 val)
             if(val > 3)
                 val = 3;
             break;
+        default:
+            break;
     }
 
     uint32 maxPower = GetMaxPower(power);
