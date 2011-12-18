@@ -7,7 +7,7 @@ typedef std::list< std::pair<uint32,Unit*> > DismountedPair;
 
 struct quotes {
     bool yell;  /* false = say ; true = yell */
-    char *text;
+    const char *text;
 };
 
 static struct quotes respawn_quotes[] = {
