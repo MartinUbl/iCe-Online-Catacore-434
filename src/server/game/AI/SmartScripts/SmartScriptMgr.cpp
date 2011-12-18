@@ -37,8 +37,6 @@
 
 void SmartWaypointMgr::LoadFromDB()
 {
-    uint32 oldMSTime = getMSTime();
-
     waypoint_map.clear();
 
     PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_LOAD_SMARTAI_WP);
@@ -91,14 +89,12 @@ void SmartWaypointMgr::LoadFromDB()
     }
     while (result->NextRow());
 
-    sLog->outString(">> Loaded %u SmartAI waypoint paths (total %u waypoints) in %u ms", count, total);
+    sLog->outString(">> Loaded %u SmartAI waypoint paths (total %u waypoints)", count, total);
     sLog->outString();
 }
 
 void SmartAIMgr::LoadSmartAIFromDB()
 {
-    uint32 oldMSTime = getMSTime();
-
     for (uint8 i = 0; i < SMART_SCRIPT_TYPE_MAX; i++)
         mEventMap[i].clear();  //Drop Existing SmartAI List
 
@@ -223,7 +219,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
     }
     while (result->NextRow());
 
-    sLog->outString(">> Loaded %u SmartAI scripts in %u ms", count);
+    sLog->outString(">> Loaded %u SmartAI scripts", count);
     sLog->outString();
 }
 

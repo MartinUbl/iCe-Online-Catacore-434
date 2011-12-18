@@ -2720,7 +2720,7 @@ public:
             if(pGuide || pDoneBy == me->ToUnit())
                 return;
 
-            if(pGuide = pDoneBy->ToPlayer())
+            if((pGuide = pDoneBy->ToPlayer()) != NULL)
                 m_bIsMoving = FlyMove();
             else return;
         }
@@ -2880,11 +2880,13 @@ public:
             if(init)
             {
                 if (me->isSummon())
-                    if (pOwner = CAST_SUM(me)->GetSummoner())
+                {
+                    if ((pOwner = CAST_SUM(me)->GetSummoner()) != NULL)
                     {
                         me->CastSpell(pOwner, 86657, true);
                         me->SetFacingToObject(pOwner);
                     }
+                }
             }
             else init = true;
             update_timer = 1000;
@@ -3415,10 +3417,10 @@ public:
         {
             x = me->GetPositionX();
             y = me->GetPositionY();
-            if(Unit* owner = me->GetOwner())
+            if((Unit* owner = me->GetOwner()) != NULL)
             {
-                z = me->GetOwner()->GetPositionZ()+2;
-                angle = me->GetOwner()->GetAngle(me);
+                z = owner->GetPositionZ()+2;
+                angle = owner->GetAngle(me);
             }
             o = me->GetOrientation();
             me->NearTeleportTo(x, y, z, o, true);
@@ -3651,7 +3653,7 @@ class boss_event_jarmila: public CreatureScript
                 {
                     me->MonsterYell("I can jump high and high. And you?",LANG_UNIVERSAL,0);
                     JumpPhase = 1;
-                    if (JumpTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                    if ((JumpTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true)) != NULL)
                     {
                         me->getThreatManager().resetAllAggro();
                         me->AddThreat(JumpTarget, 100000.0f);
@@ -3679,7 +3681,7 @@ class boss_event_jarmila: public CreatureScript
                             else
                             {
                                 JumpPhase++;
-                                if (JumpTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true))
+                                if ((JumpTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0, 100.0f, true)) != NULL)
                                 {
                                     me->getThreatManager().resetAllAggro();
                                     me->AddThreat(JumpTarget, 100000.0f);

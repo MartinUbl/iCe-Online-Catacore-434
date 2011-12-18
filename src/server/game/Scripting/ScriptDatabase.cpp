@@ -30,7 +30,7 @@ void ScriptDatabaseMgr::LoadDatabase()
     m_GOTeleCond.clear();
     // Cleared
 
-    sLog->outString("");
+    sLog->outString();
 
     // Load our storages
     sLog->outString("Loading Gameobject Teleport Condition...");
@@ -39,7 +39,7 @@ void ScriptDatabaseMgr::LoadDatabase()
     {
         Field* pField = NULL;
         uint32 count = 0;
-        for (int i = 0; i < res->GetRowCount(); i++)
+        for (uint64 i = 0; i < res->GetRowCount(); i++)
         {
             pField = res->Fetch();
 
@@ -69,5 +69,5 @@ void ScriptDatabaseMgr::LoadDatabase()
 
     // Finished loading
 
-    sLog->outString("");
+    sLog->outString();
 }

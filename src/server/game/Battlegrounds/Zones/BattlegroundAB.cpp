@@ -630,10 +630,7 @@ void BattlegroundAB::Reset()
     m_ReputationScoreTics[BG_TEAM_ALLIANCE] = 0;
     m_ReputationScoreTics[BG_TEAM_HORDE]    = 0;
     m_IsInformedNearVictory                 = false;
-    bool isBGWeekend = sBattlegroundMgr->IsBGWeekend(GetTypeID());
-    //m_HonorTics = (isBGWeekend) ? BG_AB_ABBGWeekendHonorTicks : BG_AB_NotABBGWeekendHonorTicks;
     m_HonorTics = BG_AB_NotABBGWeekendHonorTicks;
-    //m_ReputationTics = (isBGWeekend) ? BG_AB_ABBGWeekendReputationTicks : BG_AB_NotABBGWeekendReputationTicks;
     m_ReputationTics = BG_AB_NotABBGWeekendReputationTicks;
     m_TeamScores500Disadvantage[BG_TEAM_ALLIANCE] = false;
     m_TeamScores500Disadvantage[BG_TEAM_HORDE]    = false;

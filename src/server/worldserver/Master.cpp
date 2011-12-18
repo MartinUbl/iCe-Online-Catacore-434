@@ -138,12 +138,12 @@ int Master::Run()
     sLog->outString( "   i   C              ee        ");
     sLog->outString( "   i    CC            eee    eee");
     sLog->outString( "   i      CCCCCCC       eeeeee    Online ");
-    sLog->outString( "");
+    sLog->outString( );
     sLog->outString( " Developed by: iCe Online GM Team");
     sLog->outString( " Head developer: Gregory (Cmaranec)");
-    sLog->outString( "");
+    sLog->outString( );
     sLog->outString( " Special thanks to: MaNGOS, TrinityCore, CactusEMU, SkyFire");
-    sLog->outString( "");
+    sLog->outString( );
 
 #ifdef USE_SFMT_FOR_RNG
     sLog->outString("\n");

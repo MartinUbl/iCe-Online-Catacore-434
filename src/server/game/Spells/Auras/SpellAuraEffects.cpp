@@ -994,7 +994,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         Unit::AuraEffectList const& effList = caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
         for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
         {
-            if ((*itr) && (GetSpellProto()) && (*itr)->GetMiscValue() == GetSpellProto()->Mechanic)
+            if ((*itr) && (GetSpellProto()) && (*itr)->GetMiscValue() == int32(GetSpellProto()->Mechanic))
             {
                 if ((*itr)->GetAmount())
                     amount *= 1+((*itr)->GetAmount()/100.0f);
@@ -6110,7 +6110,7 @@ void AuraEffect::HandleModRangedSpeedPct(AuraApplication const *aurApp, uint8 mo
     Unit *target = aurApp->GetTarget();
     float amount = GetAmount();
 
-    target->ApplyAttackTimePercentMod(RANGED_ATTACK, (float)GetAmount(), apply);
+    target->ApplyAttackTimePercentMod(RANGED_ATTACK, amount, apply);
 }
 
 void AuraEffect::HandleModCombatSpeedPct(AuraApplication const *aurApp, uint8 mode, bool apply) const

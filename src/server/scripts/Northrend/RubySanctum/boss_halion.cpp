@@ -919,7 +919,7 @@ public:
 
                 float m_diff = (p_RealHP - p_TwilightHP);
 
-                uint8 buffnum;
+                uint8 buffnum = 0;
 
                 if (m_diff <= Buff[0].diff) buffnum = 0;
                 else for (uint8 i = 0; i < 11; i++)
@@ -1147,7 +1147,7 @@ public:
             MovementStarted = true;
             m_direction = ((float)pInstance->GetData(DATA_ORB_DIRECTION)/1000 + m_delta);
             if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
-            if (focus = me->GetMap()->GetCreature(pInstance->GetData64(NPC_ORB_ROTATION_FOCUS)))
+            if ((focus = me->GetMap()->GetCreature(pInstance->GetData64(NPC_ORB_ROTATION_FOCUS))) != NULL)
                 focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
                 else me->ForcedDespawn();
 //        sLog->outDebug("EventMGR: creature %u go to move point %u ",me->GetEntry(),id);

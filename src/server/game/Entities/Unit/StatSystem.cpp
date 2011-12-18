@@ -847,7 +847,6 @@ void Player::UpdateMastery()
         {
             for(uint8 masteryId = 0; masteryId <= 1; masteryId++)
             {
-                uint32 masteryspell = entry->masterySpells[masteryId];
                 if (Aura* pAura = GetAura(entry->masterySpells[masteryId]))
                 {
                     for(uint8 i = 0; i < 3; i++)

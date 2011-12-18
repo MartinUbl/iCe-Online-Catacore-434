@@ -96,7 +96,7 @@ class boss_earthrager_ptah : public CreatureScript
                    return;
                 events.Update(uiDiff);
 
-                while(eventId = events.ExecuteEvent())
+                while((eventId = events.ExecuteEvent()) != 0)
                 {
                     switch(eventId)
                     {

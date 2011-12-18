@@ -8099,7 +8099,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                 {
                     if (this->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
                         return false;
-                    RuneType rune = this->ToPlayer()->GetLastUsedRune();
+
                     AuraEffect * aurEff = triggeredByAura->GetEffect(0);
                     if (!aurEff)
                         return false;
@@ -11428,7 +11428,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                 {
                     if (!((*i)->IsAffectedOnSpell(spellProto)))
                         continue;
-                    int32 modChance=0;
+
                     switch((*i)->GetMiscValue())
                     {
                         // Shatter
@@ -14207,7 +14207,7 @@ void Unit::SetMaxHealth(uint32 val)
 
 void Unit::SetPower(Powers power, int32 val)
 {
-    if (GetPower(power) == val)
+    if (GetPower(power) == uint32(val))
         return;
 
     // Special case for eclipse power (druid system)
@@ -18335,14 +18335,14 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
 
                     // is caster
                     if(procFlag &
-                        PROC_FLAG_DONE_MELEE_AUTO_ATTACK |
+                        (PROC_FLAG_DONE_MELEE_AUTO_ATTACK |
                         PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
                         PROC_FLAG_DONE_RANGED_AUTO_ATTACK |
                         PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
                         PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS |
                         PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG |
                         PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
-                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG)
+                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG))
                     {
                         // these spells trigger different chakra states
                         switch(procSpell->Id)

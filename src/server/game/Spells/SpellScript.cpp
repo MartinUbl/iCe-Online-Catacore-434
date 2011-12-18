@@ -449,7 +449,7 @@ int32 SpellScript::GetFinalDamage()
 {
     if (!IsInAfterHitPhase())
     {
-        sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetFinalDamage was called while spell not in after-hit phase!", m_scriptName, m_scriptSpellId);
+        sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetFinalDamage was called while spell not in after-hit phase!", ((m_scriptName != NULL) ? m_scriptName->c_str() : "-"), m_scriptSpellId);
         return 0;
     }
     return m_spell->m_final_damage;

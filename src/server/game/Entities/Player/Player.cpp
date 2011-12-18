@@ -1997,7 +1997,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (duel && GetMapId() != mapid && GetMap()->GetGameObject(GetUInt64Value(PLAYER_DUEL_ARBITER)))
         DuelComplete(DUEL_FLED);
 
-    if (GetMapId() == mapid && !m_transport || (GetTransport() && GetMapId() == 628))
+    if ((GetMapId() == mapid && !m_transport) || (GetTransport() && GetMapId() == 628))
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
@@ -4279,7 +4279,7 @@ bool Player::resetTalents(bool no_cost)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
 
-        if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(m_activeSpec))
+        if (!talentInfo || talentInfo->TalentTabID != uint32(GetTalentBranchSpec(m_activeSpec)))
             continue;
 
         removeSpell(talentInfo->SpellID, true);
@@ -11402,7 +11402,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
         for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
         {
             // currency id is saved in MiscValue, percentage in BaseAmount
-            if ((*itr)->GetMiscValue() == id)
+            if ((*itr)->GetMiscValue() == int32(id))
                 count = (100+(*itr)->GetBaseAmount())*count/100;
         }
     }
@@ -21584,7 +21584,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     {
         for (Unit::AuraEffectList::const_iterator itr = auraList.begin(); itr != auraList.end(); ++itr)
         {
-            if ((*itr)->GetMiscValue() == spellInfo->Category)
+            if ((*itr)->GetMiscValue() == int32(spellInfo->Category))
             {
                 catrecMod = (*itr)->GetAmount();
                 recMod = (*itr)->GetAmount();
@@ -24856,8 +24856,10 @@ uint8 Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_sl
          68775,68776,68777,58483};  // cata
 
     /* check for unique-equipped alch trinkets */
-    for (int i = 0; i < sizeof(alch_trinkets)/sizeof(uint32); i++) {
-        if (itemProto->ItemId == alch_trinkets[i]) {
+    for (uint32 i = 0; i < sizeof(alch_trinkets)/sizeof(uint32); i++)
+    {
+        if (itemProto->ItemId == alch_trinkets[i])
+        {
             for (i = 0; i < sizeof(alch_trinkets)/sizeof(uint32); i++)
                 if (HasItemOrGemWithIdEquipped(alch_trinkets[i], 1, except_slot))
                     return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
@@ -24971,9 +24973,8 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank, bool one)
 
     if (!talentTabInfo)
         return;
-    
 
-    if(one && talentTabInfo->TalentTabID != GetTalentBranchSpec(m_activeSpec))
+    if(one && talentTabInfo->TalentTabID != uint32(GetTalentBranchSpec(m_activeSpec)))
     {
         uint32 pointInBranchSpec = 0;
         for(PlayerTalentMap::iterator itr = m_talents[m_activeSpec]->begin(); itr != m_talents[m_activeSpec]->end(); itr++)
@@ -24992,7 +24993,7 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank, bool one)
                         }
                     if(thisrank != -1)
                     {
-                        if(thisTalent->TalentTab == GetTalentBranchSpec(m_activeSpec))
+                        if(thisTalent->TalentTab == uint32(GetTalentBranchSpec(m_activeSpec)))
                         {
                             int8 curtalent_maxrank = -1;
                             for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
@@ -25886,7 +25887,7 @@ void Player::ActivateSpec(uint8 spec)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
 
-        if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(m_activeSpec))
+        if (!talentInfo || talentInfo->TalentTabID != uint32(GetTalentBranchSpec(m_activeSpec)))
             continue;
 
         removeSpell(talentInfo->SpellID, true);
@@ -25946,7 +25947,7 @@ void Player::ActivateSpec(uint8 spec)
     {
         TalentTreePrimarySpellsEntry const *talentInfo = sTalentTreePrimarySpellsStore.LookupEntry(i);
 
-        if (!talentInfo || talentInfo->TalentTabID != GetTalentBranchSpec(spec))
+        if (!talentInfo || talentInfo->TalentTabID != uint32(GetTalentBranchSpec(spec)))
             continue;
 
         learnSpell(talentInfo->SpellID, false);
@@ -26376,7 +26377,7 @@ uint32 Player::GetMountCapabilityIndex(uint32 amount)
         if(!cap)
             continue;
 
-        if(cap->map != -1 && cap->map != map)
+        if(cap->map != uint32(-1) && cap->map != map)
             continue;
 
         if(cap->reqSkillLevel > plrskill || cap->reqSkillLevel <= maxSkill)

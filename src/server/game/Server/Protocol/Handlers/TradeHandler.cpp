@@ -538,14 +538,14 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         {
             if (_player->GetSession()->GetSecurity() > SEC_PLAYER && my_trade->GetMoney() > 0)
             {
-                sLog->outCommand(_player->GetSession()->GetAccountId(),"GM %s (Account: %u) give money (Amount: %u) to player: %s (Account: %u)",
+                sLog->outCommand(_player->GetSession()->GetAccountId(),"GM %s (Account: %u) give money (Amount: " UI64FMTD ") to player: %s (Account: %u)",
                     _player->GetName(), _player->GetSession()->GetAccountId(),
                     my_trade->GetMoney(),
                     trader->GetName(), trader->GetSession()->GetAccountId());
             }
             if (trader->GetSession()->GetSecurity() > SEC_PLAYER && his_trade->GetMoney() > 0)
             {
-                sLog->outCommand(trader->GetSession()->GetAccountId(),"GM %s (Account: %u) give money (Amount: %u) to player: %s (Account: %u)",
+                sLog->outCommand(trader->GetSession()->GetAccountId(),"GM %s (Account: %u) give money (Amount: " UI64FMTD ") to player: %s (Account: %u)",
                     trader->GetName(), trader->GetSession()->GetAccountId(),
                     his_trade->GetMoney(),
                     _player->GetName(), _player->GetSession()->GetAccountId());

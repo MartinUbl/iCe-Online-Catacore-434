@@ -65,7 +65,7 @@ public:
             uiAmmunae = 0;
             uiSetesh = 0;
             uiRajh = 0;
-            uint64 OriginationElevatorGUID = 0;
+            OriginationElevatorGUID = 0;
 
             for(uint8 i=0; i<ENCOUNTERS; ++i)
                 uiEncounter[i] = NOT_STARTED;

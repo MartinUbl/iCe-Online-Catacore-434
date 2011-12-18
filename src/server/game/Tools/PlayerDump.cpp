@@ -536,14 +536,6 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                 }
                 else if (!changenth(line, 3, name.c_str())) // characters.name
                     ROLLBACK(DUMP_FILE_BROKEN);
-
-                const char null[5] = "NULL";
-                /*if (!changenth(line, 71, null))             // characters.deleteInfos_Account
-                    ROLLBACK(DUMP_FILE_BROKEN);
-                if (!changenth(line, 72, null))             // characters.deleteInfos_Name
-                    ROLLBACK(DUMP_FILE_BROKEN);
-                if (!changenth(line, 73, null))             // characters.deleteDate
-                    ROLLBACK(DUMP_FILE_BROKEN);*/
                 break;
             }
             case DTT_CHAR_TABLE:
@@ -663,7 +655,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     }
 
     char delst[10000];
-    sprintf(delst,"DELETE FROM character_spell WHERE guid = %u AND spell NOT IN (48778, 60025, 43688, 16056, 66906, 63844, 67466, 66907, 61230, 60116, 60114, \
+    sprintf(delst,"DELETE FROM character_spell WHERE guid = %s AND spell NOT IN (48778, 60025, 43688, 16056, 66906, 63844, 67466, 66907, 61230, 60116, 60114, \
                     61229, 40192, 59567, 41514, 51412, 58953, 71342, 22719, 59650, 35022, 16055, 59976, 26656, 17461, 64977, 470  , 60118, \
                     60119, 48027, 22718, 59788, 59785, 22720, 22721, 22717, 22723, 22724, 64658, 74856, 72808, 61996, 59568, 35020, 10969, \
                     59996, 25953, 39803, 17463, 64656, 32244, 50869, 43899, 59569, 34406, 458  , 18990, 6899 , 17464, 6654 , 58615, 75614, \
@@ -705,7 +697,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     trans->Append(delst);
 
     char flagst[500];
-    sprintf(flagst,"UPDATE characters SET at_login=256,xp=0 WHERE guid = %u;",newguid);
+    sprintf(flagst,"UPDATE characters SET at_login=256,xp=0 WHERE guid = %s;",newguid);
 
     trans->Append(flagst);
 

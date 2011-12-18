@@ -97,7 +97,7 @@ public:
             for(int i = 0; i < 3; i++)
             {
                 ZealotGUID = 0;
-                if(ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i))
+                if((ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i)) != 0)
                 {
                     Creature* pZealot = me->GetCreature(*me, ZealotGUID);
                     if(pZealot)
@@ -124,7 +124,7 @@ public:
             for(int i = 0; i < 3; i++)
             {
                 ZealotGUID = 0;
-                if(ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i))
+                if((ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i)) != 0)
                 {
                     Creature* pZealot = me->GetCreature(*me, ZealotGUID);
                     if(pZealot)
@@ -149,7 +149,7 @@ public:
             for(int i = 0; i < 3; i++)
             {
                 ZealotGUID = 0;
-                if(ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i))
+                if((ZealotGUID = pInstance->GetData64(DATA_CORLA_ZEALOT_1+i)) != 0)
                 {
                     Creature* pZealot = me->GetCreature(*me, ZealotGUID);
                     if(pZealot)

@@ -1201,11 +1201,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             case SPELLFAMILY_HUNTER:
             {   // Rapid Recuperation
                 if (m_caster->HasAura(3045))
-                      if (m_caster->HasAura(53228)) 			   // Rank 1
+                {
+                      if (m_caster->HasAura(53228))   // Rank 1
                           m_caster->CastSpell(m_caster,53230,true);
-                    else
-                      if (m_caster->HasAura(53232)) 			   // Rank 2
+                      else if (m_caster->HasAura(53232))   // Rank 2
                           m_caster->CastSpell(m_caster,54227,true);
+                }
 
                 //Gore
                 if (m_spellInfo->SpellIconID == 1578)
@@ -1507,7 +1508,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         Unit::AuraEffectList const& effList = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
         for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
         {
-            if ((*itr) && (*itr)->GetMiscValue() == m_spellInfo->Mechanic)
+            if ((*itr) && (*itr)->GetMiscValue() == int32(m_spellInfo->Mechanic))
             {
                 if ((*itr)->GetAmount())
                     m_damage *= (1+(*itr)->GetAmount()/100.0f);
@@ -2509,7 +2510,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bool done = false;
                     for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
                         if (uint32 enchant_id = mainhanditem->GetEnchantmentId(EnchantmentSlot(enchant_slot)))
-                            if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id))
+                            if (sSpellItemEnchantmentStore.LookupEntry(enchant_id) != NULL)
                             {
                                 switch (enchant_id)
                                 {
@@ -2550,7 +2551,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bool done = false;
                     for (uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
                         if (uint32 enchant_id = offhanditem->GetEnchantmentId(EnchantmentSlot(enchant_slot)))
-                            if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id))
+                            if (sSpellItemEnchantmentStore.LookupEntry(enchant_id) != NULL)
                             {
                                 switch (enchant_id)
                                 {
@@ -6562,7 +6563,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE) || !pArea)
+                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -6610,7 +6611,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE) || !pArea)
+                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -7051,7 +7052,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->GetPosition(x, y, z);
                     uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
                     AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE) || !pArea)
+                    if (!pArea || (canFly && (pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
                         canFly = false;
 
                     switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
@@ -7828,7 +7829,7 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
         };
         std::vector<uint32> preserve_spells;
 
-        for (int i = 0; i < sizeof(preserve_spells_table)/sizeof(uint32); i++)
+        for (uint32 i = 0; i < sizeof(preserve_spells_table)/sizeof(uint32); i++)
             if (pTarget->HasAura(preserve_spells_table[i]))
                 preserve_spells.push_back(preserve_spells_table[i]);
 

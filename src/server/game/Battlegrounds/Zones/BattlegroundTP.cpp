@@ -664,8 +664,6 @@ void BattlegroundTP::Reset()
     m_FlagState[BG_TEAM_HORDE]          = BG_TP_FLAG_STATE_ON_BASE;
     m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
     m_TeamScores[BG_TEAM_HORDE]         = 0;
-    bool isBGWeekend = false;//sBattlegroundMgr.IsBGWeekend(GetTypeID());
-    //m_ReputationCapture = (isBGWeekend) ? 45 : 35;
     m_ReputationCapture = 35;
     // For WorldState
     m_minutesElapsed                    = 0;

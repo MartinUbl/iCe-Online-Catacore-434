@@ -294,8 +294,8 @@ bool LootStoreItem::IsValid(LootStore const& store, int32 entry) const
         else
         {
             // Is currency loot
-            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(abs(itemid));
-            if (!entry)
+            CurrencyTypesEntry const* centry = sCurrencyTypesStore.LookupEntry(abs(itemid));
+            if (!centry)
             {
                 sLog->outErrorDb("Table '%s' entry %d currency %d: currency does not exist - skipped", store.GetName(), entry, abs(itemid));
                 return false;
@@ -1413,7 +1413,7 @@ bool LootTemplate::addConditionItem(Condition* cond)
     {
         for (LootStoreItemList::iterator i = Entries.begin(); i != Entries.end(); ++i)
         {
-            if (i->itemid == cond->mSourceEntry)
+            if (i->itemid == int32(cond->mSourceEntry))
             {
                 i->conditions.push_back(cond);
                 return true;
@@ -1429,7 +1429,7 @@ bool LootTemplate::addConditionItem(Condition* cond)
             {
                 for (LootStoreItemList::iterator i = itemList->begin(); i != itemList->end(); ++i)
                 {
-                    if ((*i).itemid == cond->mSourceEntry)
+                    if ((*i).itemid == int32(cond->mSourceEntry))
                     {
                         (*i).conditions.push_back(cond);
                         return true;
@@ -1441,7 +1441,7 @@ bool LootTemplate::addConditionItem(Condition* cond)
             {
                 for (LootStoreItemList::iterator i = itemList->begin(); i != itemList->end(); ++i)
                 {
-                    if ((*i).itemid == cond->mSourceEntry)
+                    if ((*i).itemid == int32(cond->mSourceEntry))
                     {
                         (*i).conditions.push_back(cond);
                         return true;
@@ -1457,7 +1457,7 @@ bool LootTemplate::isReference(uint32 id)
 {
     for (LootStoreItemList::const_iterator ieItr = Entries.begin(); ieItr != Entries.end(); ++ieItr)
     {
-        if (ieItr->itemid == id && ieItr->mincountOrRef < 0)
+        if (ieItr->itemid == int32(id) && ieItr->mincountOrRef < 0)
             return true;
     }
     return false;//not found or not reference

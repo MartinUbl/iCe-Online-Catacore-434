@@ -136,7 +136,7 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
             break;
         fd = qr->Fetch();
     }
-    PSendSysMessage("Nalezeno %u petu",PetEntrys.size());
+    PSendSysMessage("Nalezeno %u petu",uint32(PetEntrys.size()));
     // Pokud jsme nenasli zadneho peta, vratime se, protoze by proces zfailoval (begin == end)
     if(PetEntrys.size() < 1)
     {

@@ -130,7 +130,7 @@ class boss_temple_guardian_anhuur : public CreatureScript
 
                 events.Update(uiDiff);
                 
-                while(eventId = events.ExecuteEvent())
+                while((eventId = events.ExecuteEvent()) != 0)
                 {
                     switch(eventId)
                     {

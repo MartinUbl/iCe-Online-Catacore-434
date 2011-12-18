@@ -28,8 +28,6 @@
 
 void CreatureTextMgr::LoadCreatureTexts()
 {
-    uint32 oldMSTime = getMSTime();
-
     mTextMap.clear(); // for reload case
     mTextRepeatMap.clear(); //reset all currently used temp texts
 
@@ -106,7 +104,7 @@ void CreatureTextMgr::LoadCreatureTexts()
         ++textCount;
     } while (result->NextRow());
 
-    sLog->outString(">> Loaded %u creature texts for %u creatures in %u ms", textCount, creatureCount);
+    sLog->outString(">> Loaded %u creature texts for %u creatures", textCount, creatureCount);
     sLog->outString();
 }
 

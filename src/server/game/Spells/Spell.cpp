@@ -5117,7 +5117,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (Target != m_caster && !Target->IsFriendlyTo(m_caster))
         {
             int SpellSteal = 0;
-            bool Continue = false;
             Unit::AuraMap const& auras = Target->GetOwnedAuras();
             for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {

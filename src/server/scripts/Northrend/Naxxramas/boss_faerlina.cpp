@@ -266,7 +266,6 @@ public:
 			if(ResetAggroTimer <= diff)
 			{
 				// wait a bit with aggro reset if enrage is imminent
-				Creature* boss = GetClosestCreatureWithEntry(me,15953,200.0f);
 				Unit* FutureTarget = SelectRandomPlayer(100.0f);
 				me->getThreatManager().clearReferences();
 				if(FutureTarget)

@@ -1801,7 +1801,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 else if (GetId() == 86698)
                 {
                     target->RemoveAurasDueToSpell(86701);
-                    if(Aura* pAura = target->GetAura(86700)) // Ancient Power
+                    if(target->HasAura(86700)) // Ancient Power
                     {
                         target->CastSpell(target, 86704, true); // Ancient Fury
                         target->RemoveAurasDueToSpell(86700);

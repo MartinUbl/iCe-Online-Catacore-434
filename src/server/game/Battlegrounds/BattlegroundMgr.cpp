@@ -335,7 +335,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     }
 
     uint32 flagCounter = 0;
-    uint8 updateFlags;
+    uint8 updateFlags = 0;
     Battleground::BattlegroundScoreMap::const_iterator itr2 = bg->GetPlayerScoresBegin();
     for (Battleground::BattlegroundScoreMap::const_iterator itr = itr2; itr != bg->GetPlayerScoresEnd();)
     {

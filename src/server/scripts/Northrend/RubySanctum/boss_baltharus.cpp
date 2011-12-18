@@ -104,14 +104,14 @@ public:
             m_uiEnevatingTimer = urand(10*IN_MILLISECONDS,25*IN_MILLISECONDS);
             m_uiSaberLashTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
 
-            if (pDummyTarget = me->GetMap()->GetCreature( pInstance->GetData64(NPC_BALTHARUS_TARGET)))
+            if ((pDummyTarget = me->GetMap()->GetCreature( pInstance->GetData64(NPC_BALTHARUS_TARGET))) != NULL)
             {
                 if (!pDummyTarget->isAlive()) pDummyTarget->Respawn();
 
                 pDummyTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 pDummyTarget->GetMotionMaster()->MoveIdle();
             }
-            else if (pDummyTarget = me->SummonCreature(NPC_BALTHARUS_TARGET, SpawnLoc[0].x, SpawnLoc[0].y, SpawnLoc[0].z, 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 1000))
+            else if ((pDummyTarget = me->SummonCreature(NPC_BALTHARUS_TARGET, SpawnLoc[0].x, SpawnLoc[0].y, SpawnLoc[0].z, 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 1000)) != NULL)
             {
                 pDummyTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 pDummyTarget->GetMotionMaster()->MoveIdle();

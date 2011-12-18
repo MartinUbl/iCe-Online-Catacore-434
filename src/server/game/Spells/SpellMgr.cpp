@@ -3446,8 +3446,6 @@ void SpellMgr::LoadSpellRequired()
 
 void SpellMgr::LoadSpellRanks()
 {
-    uint32 oldMSTime = getMSTime();
-
     mSpellChains.clear();                                   // need for reload case
 
     //                                               0               1         2

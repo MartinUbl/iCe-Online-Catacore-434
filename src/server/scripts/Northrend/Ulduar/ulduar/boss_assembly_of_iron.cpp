@@ -175,7 +175,7 @@ void CallBosses(InstanceScript* pInstance, uint32 caller, Unit *who)
     
     for (uint8 i = 0; i < 3; ++i)
     {
-        if (caller == DATA_STEELBREAKER+i) continue;
+        if (caller == uint32(DATA_STEELBREAKER+i)) continue;
         uint64 guid = pInstance->GetData64(DATA_STEELBREAKER+i);
         if (!guid) return;
         if (Creature* m_boss = pInstance->instance->GetCreature(guid))
@@ -441,16 +441,16 @@ public:
                         uint32 choice = urand(0,2);
 
                         if (!pInstance) break;
-                    
+
                         bosschoosed = me->GetCreature(*me, pInstance->GetData64(DATA_STEELBREAKER+choice));
 
                         if (!bosschoosed || !bosschoosed->isAlive())
                         {
-                            choice = ((choice == 2) ? 0 : choice++);
+                            choice = ((choice == 2) ? 0 : (choice+1));
                             bosschoosed = me->GetCreature(*me, pInstance->GetData64(DATA_STEELBREAKER+choice));
                             if (!bosschoosed || !bosschoosed->isAlive())
                             {
-                                choice = ((choice == 2) ? 0 : choice++);
+                                choice = ((choice == 2) ? 0 : (choice+1));
                                 bosschoosed = me->GetCreature(*me, pInstance->GetData64(DATA_STEELBREAKER+choice));
                             }
                         }

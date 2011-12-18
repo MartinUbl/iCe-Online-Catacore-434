@@ -59,65 +59,10 @@ void SendTestPacket(uint32 opcodeID, Player* plr)
 bool ChatHandler::HandleOpcodeTestCommand(const char* args)
 {
     std::istringstream arg(args);
-        
+
     std::string command;
     arg >> command;
 
-    if (command == "roster")
-    {
-        WorldPacket data(SMSG_GUILD_EVENT, 10);
-        int ev;
-        arg >> ev;
-        data << uint8(ev);
-        data << uint8(0);
-
-        /*if (param3)
-            data << param1 << param2 << param3;
-        else if (param2)
-            data << param1 << param2;
-        else if (param1)
-            data << param1;
-
-        if (guid)
-            data << uint64(guid);*/
-        m_session->SendPacket(&data);
-        PSendSysMessage("Sending GUILD EVENT %u", ev);
-        return true;
-    }
-
-    if (command == "aura")
-    {
-        int id;
-        arg >> id;
-
-        WorldPacket data(SMSG_AURA_UPDATE, 100);
-        data.append(m_session->GetPlayer()->GetPackGUID());
-        uint8 slot;
-        Unit::VisibleAuraMap const * visibleAuras = m_session->GetPlayer()->GetVisibleAuras();
-        // lookup for free slots in units visibleAuras
-        Unit::VisibleAuraMap::const_iterator itr = visibleAuras->find(0);
-        for (uint32 freeSlot = 0; freeSlot < MAX_AURAS; ++itr , ++freeSlot)
-        {
-                if (itr == visibleAuras->end() || itr->first != freeSlot)
-                {
-                    slot = freeSlot;
-                    break;
-                }
-            }
-        data << uint8(slot); // slot
-
-        data << uint32(id);
-        data << uint8(16); // flags
-        data << uint8(85); // caster lvl
-        data << uint8(1); // stack charges
-
-        data.appendPackGUID(m_session->GetPlayer()->GetGUID());
-
-        m_session->SendPacket(&data);
-        PSendSysMessage("Sent");
-        return true;
-    }
-    
     if (command == "reset")
     {
         uint32 opcode = 0;
@@ -127,7 +72,7 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
         testopcode = opcode;
         return true;
     }
-        
+
     if (command == "jump")
     {
         uint32 jump = 0;
@@ -135,7 +80,7 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
             arg >> std::hex >> jump;
         if (jump == 0)
             jump = 0xFF;
-        
+
         sLog->outString("Performing opcode jump!");
         for (uint32 i = 0; i < jump; i++)
         {
@@ -146,11 +91,11 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
             }
             testopcode++;
         }
-        
+
         PSendSysMessage("Opcodes: 0x%.4X - 0x%.4X",testopcode-jump,testopcode);
         return true;
     }
-        
+
     if (command == "jumpback")
     {
         uint32 jump = 0;
@@ -158,37 +103,37 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
             arg >> std::hex >> jump;
         if (jump == 0)
             jump = 0xFF;
-            
+
         PSendSysMessage("Performing opcode jumpback!(0x%.4X)", jump);
         testopcode = testopcode - jump;
         return true;
     }
-    
+
     if (command == "repeat")
     {
         PSendSysMessage("Opcode: 0x%.4X",testopcode);
         SendTestPacket(testopcode, m_session->GetPlayer());
         return true;
     }
-    
+
     if (command == "back")
     {
         PSendSysMessage("Opcode: 0x%.4X",--testopcode);
         return true;
     }
-    
+
     if( command == "send")
     {
         if(arg.eof())
             return false;
         uint32 opcode;
         arg >> std::hex >> opcode;
-    
+
         PSendSysMessage("Opcode: 0x%.4X - %s",opcode,LookupOpcodeName(opcode));
         SendTestPacket(opcode, m_session->GetPlayer());
         return true;
     }
-        
+
     PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
     if (strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
         SendTestPacket(testopcode, m_session->GetPlayer());

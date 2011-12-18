@@ -91,7 +91,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 
             _player->UpdateMastery();
         }
-        else if(_player->GetTalentBranchSpec(_player->m_activeSpec) != specID) //cheat
+        else if(uint32(_player->GetTalentBranchSpec(_player->m_activeSpec)) != specID) //cheat
             return;
     }
 
@@ -122,7 +122,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
                     }
                 if(thisrank != -1)
                 {
-                    if(thisTalent->TalentTab == _player->GetTalentBranchSpec(_player->m_activeSpec))
+                    if(thisTalent->TalentTab == uint32(_player->GetTalentBranchSpec(_player->m_activeSpec)))
                     {
                         int8 curtalent_maxrank = -1;
                         for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)

@@ -56,7 +56,7 @@ public:
             // Aby nam nespadnul
             me->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
             Reset();
-            if (pHead = me->SummonCreature(42347, 0,0,0))
+            if ((pHead = me->SummonCreature(42347, 0,0,0)) != NULL)
             {
                 me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
                 pHead->EnterVehicle(me, 1, false);

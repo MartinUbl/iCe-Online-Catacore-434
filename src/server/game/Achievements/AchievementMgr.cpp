@@ -432,7 +432,7 @@ void AchievementMgr::Reset()
 void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, bool evenIfCriteriaComplete)
 {
     if ((sLog->GetLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
-        sLog->outDetail("AchievementMgr::ResetAchievementCriteria(%u, %u, %u)", type, miscvalue1, miscvalue2);
+        sLog->outDetail("AchievementMgr::ResetAchievementCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscvalue1, miscvalue2);
 
     if (!sWorld->getBoolConfig(CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
@@ -734,7 +734,7 @@ static const uint32 achievIdForDungeon[][4] =
 void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time)
 {
     if ((sLog->GetLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES) == 0)
-        sLog->outDetail("AchievementMgr::UpdateAchievementCriteria(%u, %u, %u, %u)", type, miscvalue1, miscvalue2, time);
+        sLog->outDetail("AchievementMgr::UpdateAchievementCriteria(%u, " UI64FMTD ", " UI64FMTD ", %u)", type, miscvalue1, miscvalue2, time);
 
     // If player has guild, notify also theirs achievement mgr
     if (GetPlayer()->GetGuildId())
@@ -1552,6 +1552,21 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_EARNED_PVP_TITLE:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             case ACHIEVEMENT_CRITERIA_TYPE_TOTAL:
+            // 4.x new, not implemented
+            case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
+            case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
+            case ACHIEVEMENT_CRITERIA_TYPE_SPENT_GOLD_GUILD_REPAIRS:
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL: // Implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD: // Implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS: // Should be implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS: // Implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_TABARD:
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD: // Should be implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD: // Implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // Implemented in GuildAchievementMgr
                 break;                                   // Not implemented yet :(
         }
 
