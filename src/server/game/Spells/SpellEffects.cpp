@@ -8312,6 +8312,12 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
                 return;
             }
             break;
+        // Mass Resurrection
+        case 83968:
+            // debuff Recently Mass Resurrected
+            if (unitTarget->HasAura(95223))
+                return;
+            m_caster->CastSpell(unitTarget, 95223, true);
         default:
             break;
     }
