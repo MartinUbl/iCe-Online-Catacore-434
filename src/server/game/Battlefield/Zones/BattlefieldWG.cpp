@@ -182,6 +182,10 @@ bool BattlefieldWG::SetupBattlefield()
     {
         GameObject* go = SpawnGameObject(WGPortalDefenderData[i].entry, WGPortalDefenderData[i].x, WGPortalDefenderData[i].y, WGPortalDefenderData[i].z, WGPortalDefenderData[i].o);
         DefenderPortalList.insert(go);
+        DefenderPortals[go->GetGUID()].m_positionX = WGPortalDefenderData[i].targetX;
+        DefenderPortals[go->GetGUID()].m_positionY = WGPortalDefenderData[i].targetY;
+        DefenderPortals[go->GetGUID()].m_positionZ = WGPortalDefenderData[i].targetZ;
+        DefenderPortals[go->GetGUID()].m_orientation = WGPortalDefenderData[i].targetO;
         go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
     }
 
@@ -461,13 +465,13 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
 
     if (!endbytimer)
     {
-        WinHonor = 3000 + 400 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 100 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
-        LossHonor = 1000 + 400 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 100 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
+        WinHonor = 200 + 20 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
+        LossHonor = 50 + 10 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
     }
     else
     {
-        WinHonor = 3000 + 400 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 100 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
-        LossHonor = 1000 + 400 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 100 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
+        WinHonor = 200 + 20 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
+        LossHonor = 50 + 10 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
     }
 
     for (GuidSet::const_iterator itr = m_PlayersInWar[GetDefenderTeam()].begin(); itr != m_PlayersInWar[GetDefenderTeam()].end(); ++itr)
@@ -679,6 +683,12 @@ void BattlefieldWG::OnCreatureCreate(Creature *creature, bool add)
                 }
         }
     }
+}
+
+void BattlefieldWG::TeleportDefenderWithPortal(Player* player, uint64 portalGUID)
+{
+    if (DefenderPortals.find(portalGUID) != DefenderPortals.end())
+        player->TeleportTo(player->GetMapId(), DefenderPortals[portalGUID].m_positionX, DefenderPortals[portalGUID].m_positionY, DefenderPortals[portalGUID].m_positionZ, DefenderPortals[portalGUID].m_orientation, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
 // Called when player kill a unit in wg zone

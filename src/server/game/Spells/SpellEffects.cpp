@@ -54,6 +54,9 @@
 #include "Battleground.h"
 #include "BattlegroundEY.h"
 #include "BattlegroundWS.h"
+#include "BattlefieldMgr.h"
+#include "Battlefield.h"
+#include "BattlefieldWG.h"
 #include "OutdoorPvPMgr.h"
 #include "Language.h"
 #include "SocialMgr.h"
@@ -3252,6 +3255,20 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     m_targets.setDst(389.57f,-832.38f,48.65f,3.00f,628);
                 else
                     m_targets.setDst(1174.85f,-763.24f,48.72f,6.26f,628);
+            }
+        case 46613: // Wintergrasp Defender Portal spell
+        case 54640:
+        case 54643:
+            {
+                if (Player* pTarget = unitTarget->ToPlayer())
+                {
+                    if (Battlefield* pBf = sBattlefieldMgr.GetBattlefieldToZoneId(pTarget->GetZoneId()))
+                        if (pBf->GetTypeId() == BATTLEFIELD_WG)
+                            if (GameObject* pPortal = GetClosestGameObjectWithEntry(pTarget, 190763, 10.0f))
+                                ((BattlefieldWG*)pBf)->TeleportDefenderWithPortal(pTarget, pPortal->GetGUID());
+                }
+                // Let it BF handle, not this handler
+                return;
             }
             break;
     }

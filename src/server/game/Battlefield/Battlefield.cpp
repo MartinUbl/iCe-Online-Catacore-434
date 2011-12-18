@@ -432,6 +432,9 @@ void Battlefield::PlayerAcceptInviteToQueue(Player *player)
     m_PlayersInQueue[player->GetTeamId()].insert(player->GetGUID());
     // Send notification
     player->GetSession()->SendBfQueueInviteResponse(m_BattleId, m_ZoneId, IsWarTime(), true);
+
+    if (!IsWarTime())
+        player->GetSession()->SendNotification("Battle begins in %u minutes %u seconds!", m_Timer/IN_MILLISECONDS/60, (m_Timer/IN_MILLISECONDS)%60);
 }
 // Called in WorldSession::HandleBfExitRequest
 void Battlefield::AskToLeaveQueue(Player *player)

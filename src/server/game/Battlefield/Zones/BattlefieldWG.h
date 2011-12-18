@@ -40,6 +40,7 @@ struct BfWGGameObjectBuilding;
 struct BfWGWorkShopData;
 
 typedef std::set<GameObject *>GameObjectSet;
+typedef std::map<uint64,Position> DefenderPortalMap;
 typedef std::set<BfWGGameObjectBuilding *> GameObjectBuilding;
 typedef std::set<BfWGWorkShopData *> WorkShop;
 //typedef std::set<BfCapturePointWG *> CapturePointSet; unused ?
@@ -409,6 +410,8 @@ class BattlefieldWG : public Battlefield
         void SendInitWorldStatesTo(Player* player);
         void SendInitWorldStatesToAll();
 
+        void TeleportDefenderWithPortal(Player* player, uint64 portalGUID);
+
         void HandleKill(Player *killer, Unit *victim);
         void PromotePlayer(Player *killer);
 
@@ -424,6 +427,7 @@ class BattlefieldWG : public Battlefield
         WorkShop WorkShopList;
         GuidSet CanonList;
         GameObjectSet DefenderPortalList;
+        DefenderPortalMap DefenderPortals;
         GameObjectSet m_KeepGameObject[2];
         GuidSet m_vehicles[2];
         GuidSet m_PlayersIsSpellImu;        // Player is dead
@@ -787,25 +791,30 @@ struct BfWGWGTeleporterData
     float y;
     float z;
     float o;
+
+    float targetX;
+    float targetY;
+    float targetZ;
+    float targetO;
 };
 
 #define WG_MAX_TELEPORTER 12
 const BfWGWGTeleporterData WGPortalDefenderData[WG_MAX_TELEPORTER] =
 {
     // Player teleporter
-    { 190763, 5153.41f, 2901.35f, 409.191f, -0.069f },
-    { 190763, 5268.70f, 2666.42f, 409.099f, -0.715f },
-    { 190763, 5197.05f, 2944.81f, 409.191f, 2.3387f },
-    { 190763, 5196.67f, 2737.34f, 409.189f, -2.932f },
-    { 190763, 5314.58f, 3055.85f, 408.862f, 0.5410f },
-    { 190763, 5391.28f, 2828.09f, 418.675f, -2.164f },
-    { 190763, 5153.93f, 2781.67f, 409.246f, 1.6580f },
-    { 190763, 5311.44f, 2618.93f, 409.092f, -2.373f },
-    { 190763, 5269.21f, 3013.84f, 408.828f, -1.762f },
-    { 190763, 5401.62f, 2853.66f, 418.674f, 2.6354f },
+    { 190763, 5153.41f, 2901.35f, 409.191f, -0.069f,      5189.96f, 2906.926f, 411.99f, 5.49f},
+    { 190763, 5268.70f, 2666.42f, 409.099f, -0.715f,      5307.58f, 2659.637f, 411.99f, 5.49f},
+    { 190763, 5197.05f, 2944.81f, 409.191f, 2.3387f,      5189.96f, 2906.926f, 411.99f, 5.49f},
+    { 190763, 5196.67f, 2737.34f, 409.189f, -2.932f,      5191.96f, 2774.807f, 411.99f, 0.71f},
+    { 190763, 5314.58f, 3055.85f, 408.862f, 0.5410f,      5305.57f, 3021.257f, 411.99f, 5.54f},
+    { 190763, 5391.28f, 2828.09f, 418.675f, -2.164f,      5406.14f, 2829.935f, 420.00f, 0.02f}, // portal dovnitr
+    { 190763, 5153.93f, 2781.67f, 409.246f, 1.6580f,      5192.52f, 2775.270f, 411.99f, 0.82f},
+    { 190763, 5311.44f, 2618.93f, 409.092f, -2.373f,      5307.58f, 2658.732f, 411.99f, 0.82f},
+    { 190763, 5269.21f, 3013.84f, 408.828f, -1.762f,      5306.12f, 3020.725f, 411.99f, 5.56f},
+    { 190763, 5401.62f, 2853.66f, 418.674f, 2.6354f,      5390.01f, 2850.260f, 420.00f, 3.28f},
     // Vehicle teleporter
-    { 192951, 5314.51f, 2703.69f, 408.550f, -0.890f },
-    { 192951, 5316.25f, 2977.04f, 408.539f, -0.820f },
+    { 192951, 5314.51f, 2703.69f, 408.550f, -0.890f,      5249.86f, 2702.903f, 410.10f, 3.27f},
+    { 192951, 5316.25f, 2977.04f, 408.539f, -0.820f,      5247.42f, 2978.592f, 410.10f, 3.34f},
 };
 
 // *********************************************************
