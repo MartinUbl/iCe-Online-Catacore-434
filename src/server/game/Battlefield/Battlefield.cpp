@@ -436,12 +436,27 @@ void Battlefield::PlayerAcceptInviteToQueue(Player *player)
 // Called in WorldSession::HandleBfExitRequest
 void Battlefield::AskToLeaveQueue(Player *player)
 {
+    bool sendLeaveMessage = false;
     // Remove player from queue
-    m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+    if (m_PlayersInQueue[player->GetTeamId()].find(player->GetGUID()) != m_PlayersInQueue[player->GetTeamId()].end())
+    {
+        m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+        sendLeaveMessage = true;
+    }
     // And from other things like war and invited queue
-    m_PlayersInWar[player->GetTeamId()].erase(player->GetGUID());
-    m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
-    player->GetSession()->SendBfLeaveMessage(m_BattleId);
+    if (m_PlayersInWar[player->GetTeamId()].find(player->GetGUID()) != m_PlayersInWar[player->GetTeamId()].end())
+    {
+        m_PlayersInWar[player->GetTeamId()].erase(player->GetGUID());
+        sendLeaveMessage = true;
+    }
+    if (m_InvitedPlayers[player->GetTeamId()].find(player->GetGUID()) != m_InvitedPlayers[player->GetTeamId()].end())
+    {
+        m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
+        sendLeaveMessage = true;
+    }
+
+    if (sendLeaveMessage)
+        player->GetSession()->SendBfLeaveMessage(m_BattleId);
 }
 
 // Called in WorldSession::HandleBfEntryInviteResponse

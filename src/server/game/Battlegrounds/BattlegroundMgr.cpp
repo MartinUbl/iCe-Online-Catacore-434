@@ -1025,7 +1025,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
 
-    *data << uint8(0xFF);       // unk flags 1 << 7, 1 << 6, 1 << 5
+    *data << uint8(0xFF);       // unk flags 1 << 7, 1 << 6, 1 << 5, 1 << 4
     *data << uint8(0x31);       // unk
     *data << uint32(win_kills); // Call to arms win honor bonus
     *data << uint64(guid);      // battlemaster guid?
