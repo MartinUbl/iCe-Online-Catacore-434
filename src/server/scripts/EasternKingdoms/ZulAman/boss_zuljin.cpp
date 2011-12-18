@@ -154,6 +154,9 @@ class boss_zuljin : public CreatureScript
             boss_zuljinAI(Creature *c) : ScriptedAI(c), Summons(me)
             {
                 pInstance = c->GetInstanceScript();
+
+                for (uint8 i = 0; i < 4; i++)
+                    SpiritGUID[i] = 0;
             }
             InstanceScript *pInstance;
 
@@ -188,6 +191,9 @@ class boss_zuljin : public CreatureScript
             {
                 if (pInstance)
                     pInstance->SetData(DATA_ZULJINEVENT, NOT_STARTED);
+
+                for (uint8 i = 0; i < 4; i++)
+                    SpiritGUID[i] = 0;
 
                 Phase = 0;
 

@@ -79,6 +79,9 @@ class boss_akilzon : public CreatureScript
                 if (TempSpell)
                     TempSpell->EffectBasePoints[1] = 49;//disable bugged lightning until fixed in core
                 pInstance = c->GetInstanceScript();
+
+                for (uint8 i = 0; i < 8; ++i)
+                    BirdGUIDs[i] = 0;
             }
             InstanceScript *pInstance;
 

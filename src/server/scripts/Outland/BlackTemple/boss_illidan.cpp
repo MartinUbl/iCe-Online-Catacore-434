@@ -475,6 +475,8 @@ public:
             SpellEntry *TempSpell = GET_SPELL(SPELL_SHADOWFIEND_PASSIVE);
             if (TempSpell)
                 TempSpell->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
+
+            AkamaGUID = 0;
         }
 
         InstanceScript* pInstance;

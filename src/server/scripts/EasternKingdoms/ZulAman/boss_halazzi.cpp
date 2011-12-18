@@ -91,6 +91,8 @@ class boss_halazzi : public CreatureScript
                 SpellEntry *TempSpell = GET_SPELL(SPELL_LIGHTNING);
                 if (TempSpell && TempSpell->CastingTimeIndex != 5)
                     TempSpell->CastingTimeIndex = 5; // 2000 ms casting time
+
+                LynxGUID = 0;
             }
 
             InstanceScript *pInstance;
