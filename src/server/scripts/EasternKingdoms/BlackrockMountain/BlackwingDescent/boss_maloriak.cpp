@@ -299,7 +299,7 @@ public:
             {
                 if (uiConsuming_Flames <= diff)
                 {
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast( SPELL_CONSUMING_FLAMES);
                     uiConsuming_Flames = 15000;
                 } else uiConsuming_Flames -= diff;
@@ -318,14 +318,14 @@ public:
             {
                 if (uiBitingChill<= diff)
                 {
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast (SPELL_BITTING_CHILL);
                     uiBitingChill= 17000;
                 } else uiBitingChill-= diff;
 
                 if (uiFlashFreeze<= diff)
                 {
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast (SPELL_FLASH_FREEZE);
                     uiFlashFreeze= 19000;
                 } else uiFlashFreeze-= diff;
@@ -345,7 +345,7 @@ public:
 
                 if (uiDebilitatingSlime<= diff)
                 {
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0,0,false))
+                    if (SelectTarget(SELECT_TARGET_RANDOM, 0,0,false))
                         DoCast (SPELL_DEBILITATING_SLIME);
                     uiDebilitatingSlime= 18000;
                 } else uiDebilitatingSlime-= diff;
