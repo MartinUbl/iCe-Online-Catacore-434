@@ -8321,8 +8321,16 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
     if (pTarget->isRessurectRequested())       // already have one active request
         return;
 
-    uint32 health = pTarget->CountPctFromMaxHealth(damage);
-    uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
+    uint32 percentMod = 0;
+    // Auras which increases percentage of health and mana player is resurrected with
+    if (pTarget && m_caster->ToPlayer())
+    {
+        if (pTarget->GetGuildId() == m_caster->ToPlayer()->GetGuildId())
+            percentMod = m_caster->GetTotalAuraModifier(SPELL_AURA_340);
+    }
+
+    uint32 health = pTarget->CountPctFromMaxHealth(damage + percentMod);
+    uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * (damage + percentMod) / 100;
 
     ExecuteLogEffectResurrect(effIndex, pTarget);
 
