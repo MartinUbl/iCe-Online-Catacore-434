@@ -588,6 +588,11 @@ void AddSC_outdoorpvp_zm();
 // player
 void AddSC_chat_log();
 
+// custom
+void AddSC_custom_events();
+void AddSC_workarounds();
+void AddSC_ice_vanoce();
+
 #endif
 
 void AddScripts()
@@ -601,7 +606,7 @@ void AddScripts()
     AddKalimdorScripts();
     AddOutlandScripts();
     AddNorthrendScripts();
-	AddCataclysmScripts();
+    AddCataclysmScripts();
     AddBattlegroundScripts();
     AddOutdoorPvPScripts();
     AddCustomScripts();
@@ -1208,7 +1213,11 @@ void AddBattlegroundScripts()
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
-    /* This is where custom scripts should be added. */
+
+    // custom
+    AddSC_custom_events();
+    AddSC_workarounds();
+    AddSC_ice_vanoce();
 
 #endif
 }
