@@ -8181,8 +8181,8 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
             if (distance < 5.0f)
             {
                 // We digged out fragment
-                QueryResult res = WorldDatabase.PQuery("SELECT type FROM research_site rs LEFT JOIN creature_archaeology_assign ca \
-                                                       ON (rs.site=ca.site_id) WHERE ca.guid='%u');",pNearest->GetGUIDLow());
+                QueryResult res = WorldDatabase.PQuery("SELECT type FROM research_site WHERE site IN (SELECT site_id \
+                                                       FROM creature_archaeology_assign WHERE guid='%u');",pNearest->GetGUIDLow());
                 if (res)
                 {
                     uint32 type = (*res)[0].GetUInt32();
