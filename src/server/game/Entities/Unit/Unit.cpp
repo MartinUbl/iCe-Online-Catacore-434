@@ -6816,7 +6816,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 return false;
             }
             // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
+            if (dummySpell->Id == 31878)
             {
                 target = this;
                 triggered_spell_id = 31930;
