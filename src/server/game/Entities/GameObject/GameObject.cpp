@@ -1666,7 +1666,13 @@ void GameObject::SendCustomAnim(uint32 anim)
 
 bool GameObject::IsInRange(float x, float y, float z, float radius) const
 {
-    GameObjectDisplayInfoEntry const * info = sGameObjectDisplayInfoStore.LookupEntry(GetUInt32Value(GAMEOBJECT_DISPLAYID));
+    uint32 displayId = GetUInt32Value(GAMEOBJECT_DISPLAYID);
+
+    // Get native displayId for destructible buildings due to their indestructibility
+    if (GetGOInfo()->type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+        displayId = GetGOInfo()->displayId;
+
+    GameObjectDisplayInfoEntry const * info = sGameObjectDisplayInfoStore.LookupEntry(displayId);
     if (!info)
         return IsWithinDist3d(x, y, z, radius);
 
