@@ -1867,7 +1867,8 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
 void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player* eventInvoker /*= NULL*/, bool setHealth /*= false*/)
 {
     // the user calling this must know he is already operating on destructible gameobject
-    ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
+    if (GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+        return;
 
     switch (state)
     {
