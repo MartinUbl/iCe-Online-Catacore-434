@@ -44,6 +44,11 @@ enum NPCs
     NPC_LAVA_PARASITE = 42321,
 };
 
+#define PINCER_USERS_10M 3
+#define PINCER_USERS_25M 6
+
+#define PINCER_USERS RAID_MODE(PINCER_USERS_10M, PINCER_USERS_25M, PINCER_USERS_10M, PINCER_USERS_25M)
+
 class boss_magmaw: public CreatureScript
 {
 public:
@@ -70,6 +75,7 @@ public:
         uint32 PillarOfFlameTimer;
         Creature* pHead;
         uint32 DeExposeTimer;
+        uint64 PincerUserGUIDs[PINCER_USERS_25M];
 
         void Reset()
         {
