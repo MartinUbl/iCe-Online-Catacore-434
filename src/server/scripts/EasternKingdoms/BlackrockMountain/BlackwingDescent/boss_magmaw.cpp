@@ -44,6 +44,14 @@ enum NPCs
     NPC_LAVA_PARASITE = 42321,
 };
 
+#define PINCER_COUNT 4
+static const Position PincerPos[PINCER_COUNT] = {
+    {-314.6449f, -43.6197f, 211.8921f, 0.8f},
+    {-311.0326f, -46.6951f, 211.9754f, 0.8f},
+    {-313.0673f, -48.5738f, 212.0910f, 0.8f},
+    {-316.3784f, -46.3259f, 212.0263f, 0.8f},
+};
+
 #define PINCER_USERS_10M 3
 #define PINCER_USERS_25M 6
 
@@ -73,6 +81,9 @@ public:
         uint32 MagmaSpitTimer;
         uint32 LavaSpewTimer;
         uint32 PillarOfFlameTimer;
+        uint32 SpawnPincerTimer;
+        uint32 DespawnPincerTimer;
+        GameObject* pPincers[PINCER_COUNT];
         Creature* pHead;
         uint32 DeExposeTimer;
         uint64 PincerUserGUIDs[PINCER_USERS_25M];
@@ -89,6 +100,12 @@ public:
             LavaSpewTimer = 12000;
             PillarOfFlameTimer = 35000;
             DeExposeTimer = 0;
+            SpawnPincerTimer = 5000;
+            DespawnPincerTimer = 0;
+            for (uint8 i = 0; i < PINCER_USERS_25M; i++)
+                PincerUserGUIDs[i] = 0;
+            for (uint8 i = 0; i < PINCER_COUNT; i++)
+                pPincers[i] = NULL;
         }
 
         void JustDied(Unit* pWho)
@@ -101,8 +118,91 @@ public:
             }
         }
 
+        bool HasUsedPincer(uint64 guid)
+        {
+            for (uint8 i = 0; i < PINCER_USERS_25M; i++)
+            {
+                if (PincerUserGUIDs[i] == guid)
+                    return true;
+            }
+            return false;
+        }
+
+        uint8 UsedPincersNum()
+        {
+            uint8 result = 0;
+            for (uint8 i = 0; i < PINCER_USERS_25M; i++)
+            {
+                if (PincerUserGUIDs[i] > 0)
+                    result++;
+            }
+            return result;
+        }
+
+        uint8 GetFreePincerGUIDPos()
+        {
+            for (uint8 i = 0; i < PINCER_USERS_25M; i++)
+            {
+                if (PincerUserGUIDs[i] == 0)
+                    return i;
+            }
+            return 255;
+        }
+
+        void CheckChains()
+        {
+            if (UsedPincersNum() >= PINCER_USERS)
+            {
+                DeExposeTimer = 38000;
+                DespawnPincerTimer = 6000;
+                me->CastSpell(me, SPELL_IMPALE_SELF, false);
+                if (pHead)
+                {
+                    pHead->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                    pHead->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+        }
+
+        bool AddPincerUser(uint64 guid)
+        {
+            if (DeExposeTimer > 0)
+                return false;
+            if (HasUsedPincer(guid))
+                return false;
+
+            if (UsedPincersNum() < PINCER_USERS)
+            {
+                uint8 pos = GetFreePincerGUIDPos();
+                if (pos >= PINCER_USERS_25M)
+                    return false;
+
+                PincerUserGUIDs[pos] = guid;
+                CheckChains();
+                return true;
+            }
+            CheckChains(); // projistotu
+            return false;
+        }
+
         void UpdateAI(const uint32 diff)
         {
+            if (DespawnPincerTimer)
+            {
+                if (DespawnPincerTimer <= diff)
+                {
+                    for (uint8 i = 0; i < PINCER_COUNT; i++)
+                    {
+                        if (pPincers[i])
+                            pPincers[i]->Delete();
+                        pPincers[i] = NULL;
+                    }
+                    DespawnPincerTimer = 0;
+                }
+                else
+                    DespawnPincerTimer -= diff;
+            }
+
             if (!UpdateVictim())
                 return;
 
@@ -133,6 +233,30 @@ public:
                 }
                 else
                     PillarOfFlameTimer -= diff;
+
+                if (SpawnPincerTimer <= diff)
+                {
+                    for (uint8 i = 0; i < PINCER_COUNT; i++)
+                        pPincers[i] = me->getVictim()->SummonGameObject(800001, PincerPos[i].m_positionX, PincerPos[i].m_positionY, PincerPos[i].m_positionZ, PincerPos[i].m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                    DespawnPincerTimer = 15000;
+                    SpawnPincerTimer = 45000;
+                }
+                else
+                    SpawnPincerTimer -= diff;
+            }
+            else
+            {
+                if (DeExposeTimer <= diff)
+                {
+                    if (pHead)
+                    {
+                        pHead->RemoveAllAuras();
+                        me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
+                        pHead->addUnitState(UNIT_STAT_UNATTACKABLE);
+                        pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    }
+                    DeExposeTimer = 0;
+                } else DeExposeTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
@@ -255,11 +379,38 @@ public:
     }
 };
 
+class go_magmaw_spike: public GameObjectScript
+{
+public:
+    go_magmaw_spike(): GameObjectScript("go_magmaw_spike") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        Creature* pBoss = GetClosestCreatureWithEntry(pPlayer, 41570, 100.0f, true);
+        if (!pBoss)
+            return false;
+
+        if (((boss_magmaw::boss_magmawAI*)pBoss->GetAI())->AddPincerUser(pPlayer->GetGUID()))
+        {
+            // chain visual
+            Creature* pTrigger = pPlayer->SummonCreature(90007, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
+            if (pTrigger)
+            {
+                pTrigger->SetReactState(REACT_PASSIVE);
+                pTrigger->CastSpell(pBoss, 54324, false);
+            }
+        }
+
+        return true;
+    }
+};
+
 void AddSC_magmaw()
 {
     new boss_magmaw();
     new mob_pillar_of_flame_magmaw();
     new mob_lava_worm_magmaw();
+    new go_magmaw_spike();
 }
 
 /**** SQL:
@@ -269,5 +420,7 @@ UPDATE creature_template SET modelid1=16946,modelid2=0,modelid3=0,modelid4=0,uni
 UPDATE creature_template SET ScriptName='mob_lava_worm_magmaw' WHERE entry IN (41806,42321);
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`, `gender`, `modelid_other_gender`) VALUES (32679, 15, 15, 2, 0);
 DELETE FROM creature_template_addon WHERE entry=42347;
+
+REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES (800001, 10, 10268, 'Chain Spike', '', 'Chaining', '', 31, 6553600, 0.3, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1327, '', 'go_magmaw_spike', 13623);
 
 */
