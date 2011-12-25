@@ -6137,6 +6137,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 pVictim->CastSpell(pVictim,57669,true,castItem,triggeredByAura);
                 return true;                                // no hidden cooldown
             }
+            // Glyph of Spirit Tap
+            if (dummySpell->Id == 63237)
+            {
+                target = this;
+                triggered_spell_id = 81301;
+            }
             // Divine Aegis
             if (dummySpell->SpellIconID == 2820)
             {
