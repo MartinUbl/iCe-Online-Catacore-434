@@ -4796,6 +4796,14 @@ void Spell::TakePower()
     if (GetSpellInfo()->Id == 85673 && m_caster->GetPower(POWER_HOLY_POWER) > 0)
         return;
 
+    // spell Zealotry doesnt consume holypower, only needs 3 od them to be cast
+    if (GetSpellInfo()->Id == 85696)
+        return;
+
+    // If have Divine Purpose buff and spell is supposed to take holy power, return. Buff removal handled in every spell handler
+    if (powerType == POWER_HOLY_POWER && m_caster->HasAura(90174))
+        return;
+
     // Dark Simulacrum - proc on any mana-taking spell
     if (powerType == POWER_MANA && m_caster->HasAura(77606))
     {
@@ -4806,10 +4814,6 @@ void Spell::TakePower()
             pAura->GetCaster()->CastCustomSpell(pAura->GetCaster(), 77616, &bp0, 0, 0, true);
         }
     }
-
-    // spell Zealotry doesnt consume holypower, only needs 3 od them to be cast
-    if (GetSpellInfo()->Id == 85696)
-        return;
 
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);

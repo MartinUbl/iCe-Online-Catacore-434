@@ -6822,6 +6822,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 return false;
             }
+            // Divine Purpose
+            if (dummySpell->Id == 86172 || dummySpell->Id == 85117)
+            {
+                target = this;
+                triggered_spell_id = 90174;
+            }
             // Judgements of the Bold
             if (dummySpell->Id == 89901)
             {

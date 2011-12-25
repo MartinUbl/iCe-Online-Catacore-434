@@ -1422,6 +1422,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     if(caster)
                     {
+                        uint32 holypower = caster->GetPower(POWER_HOLY_POWER) + 1;
+                        if (caster->HasAura(90174))
+                        {
+                            holypower = 3;
+                            caster->RemoveAurasDueToSpell(90174);
+                        }
                         SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1));
                         caster->SetPower(POWER_HOLY_POWER, 0);
                     }

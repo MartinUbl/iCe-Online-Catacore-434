@@ -1340,7 +1340,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += 0.1f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     if (m_caster->GetPower(POWER_HOLY_POWER) > 0)
                     {
-                        damage *= m_caster->GetPower(POWER_HOLY_POWER)*3.0f;
+                        uint32 holypower = m_caster->GetPower(POWER_HOLY_POWER);
+                        // Divine Purpose effect
+                        if (m_caster->HasAura(90174))
+                        {
+                            holypower = 2;
+                            m_caster->RemoveAurasDueToSpell(90174);
+                        }
+                        damage *= holypower*3.0f;
                         m_caster->SetPower(POWER_HOLY_POWER,0);
                     }
                     break;
@@ -3613,8 +3620,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
-            //multiply by amount of holy power (+1 for unknown purposes)
-            addhealth *= caster->GetPower(POWER_HOLY_POWER)+1;
+            //multiply by amount of holy power (+1 because TakePower takes 1 holy power to cast)
+            uint32 holypower = caster->GetPower(POWER_HOLY_POWER);
+            // Divine Purpose effect
+            if (caster->HasAura(90174))
+            {
+                holypower = 3;
+                caster->RemoveAurasDueToSpell(90174);
+            }
+
+            addhealth *= holypower;
 
             // Apply spell power bonus
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
@@ -3631,7 +3646,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 if (bpmod)
                 {
                     addhealth *= 1.0f+bpmod*0.25f;
-                    bpmod *= 2*(caster->GetPower(POWER_HOLY_POWER)+1);
+                    bpmod *= 2*holypower;
                     caster->CastCustomSpell(caster, 90811, &bpmod, 0, 0, true);
                 }
             }
@@ -3666,10 +3681,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Light of Dawn
         else if (m_spellInfo->Id == 85222)
         {
-            uint32 holy_power = caster->GetPower(POWER_HOLY_POWER) + 1; // One was taken as cost
+            uint32 holypower = caster->GetPower(POWER_HOLY_POWER) + 1;
+            // Divine Purpose effect
+            if (caster->HasAura(90174))
+            {
+                holypower = 3;
+                caster->RemoveAurasDueToSpell(90174);
+            }
 
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-            addhealth *= holy_power;
+            addhealth *= holypower;
         }
         // Flash Heal
         else if (m_spellInfo->Id == 2061 && caster->HasAura(88688))
