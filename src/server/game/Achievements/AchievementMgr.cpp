@@ -1228,6 +1228,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     }
                 }
 
+                // Hack for Razorfen Kraul unexplorable zone (dunno why)
+                if (achievementCriteria->ID == 14074)
+                    matchFound = true;
+
                 if (matchFound)
                     SetCriteriaProgress(achievementCriteria, 1);
                 break;
