@@ -1690,10 +1690,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->RemoveGameObject(GetId(), true);
                         target->RemoveAura(62388);
                         break;
-                    case 30108: // Unstable Affliction - damage and silence after dispel
-                        if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
-                            caster->CastSpell(target, 31117, true);
-                        break;
                     default:
                         break;
                 }
