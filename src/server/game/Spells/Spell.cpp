@@ -1291,7 +1291,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     {
         if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER
             && !m_caster->ToPlayer()->HasSpellCooldown(m_healing))
-            m_caster->CastSpell(m_caster, m_healing, true);
+            m_caster->CastSpell(unitTarget, m_healing, true);
 
         m_healing = 0;
     }
