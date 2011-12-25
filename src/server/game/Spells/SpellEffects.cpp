@@ -3709,7 +3709,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     pAura = caster->GetAura(51562);
                 if (pAura)
                     bp0 = -pAura->GetSpellProto()->EffectBasePoints[0];
-                caster->CastCustomSpell(caster,53390,&bp0,0,0,true);
+                caster->CastCustomSpell(caster,53390,&bp0,&bp0,0,true);
             }
 
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
