@@ -3854,6 +3854,17 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
                 // backfire damage and silence
                 dispeller->CastSpell(dispeller, 31117, true, NULL, NULL, aura->GetCasterGUID());
             }
+            // Vampiric Touch (+ Sin and Punishment talent of original caster)
+            else if (aura->GetSpellProto()->Id == 34914 && aura->GetCaster())
+            {
+                Player* caster = aura->GetCaster()->ToPlayer();
+                if (caster)
+                {
+                    // Sin and Punishment
+                    if ((caster->HasAura(87099) && roll_chance_i(50)) || caster->HasAura(87100))
+                        dispeller->CastSpell(dispeller, 87204, true);
+                }
+            }
             // Flame Shock
             if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (aura->GetSpellProto()->SpellFamilyFlags[0] & 0x10000000))
             {
