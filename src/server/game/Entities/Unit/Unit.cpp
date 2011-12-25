@@ -6822,14 +6822,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 return false;
             }
-            // Judgements of the Wise, of the Bold and of the Just
-            if (dummySpell->Id == 31878 || dummySpell->Id == 89899 || dummySpell->Id == 89901)
+            // Judgements of the Bold
+            if (dummySpell->Id == 89901)
+            {
+                target = this;
+                triggered_spell_id = 89906;
+            }
+            // Judgements of the Wise
+            if (dummySpell->Id == 31878)
             {
                 target = this;
                 triggered_spell_id = 31930;
-                // replenishment
-                CastSpell(this,57669,true, castItem, triggeredByAura);
-                break;
             }
             // Sanctified Wrath
             if (dummySpell->SpellIconID == 3029)

@@ -7328,6 +7328,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (unitTarget->GetDistance2d(m_caster) >= 6.0f) 
                         m_caster->CastSpell(m_caster,87173,true);
                 }
+
+                // Communion
+                if (m_caster->HasAura(31876))
+                {
+                    // replenishment
+                    m_caster->CastSpell(m_caster, 57669, true);
+                }
                 return;
             }
         }
