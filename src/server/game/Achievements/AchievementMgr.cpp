@@ -1548,6 +1548,31 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_SET);
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
+            {
+                // checking for quality and branch
+                // miscvalue1 = quality, miscvalue2 = branch
+
+                bool passed = false;
+                for (uint8 i = 0; i < 3; i++)
+                {
+                    // check for quality and branch (type)
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_FRAGMENT_QUALITY)
+                        if (achievementCriteria->moreRequirementValue[i] == miscvalue1)
+                            passed = true;
+
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_FRAGMENT_TYPE)
+                        if (achievementCriteria->moreRequirementValue[i] == miscvalue2)
+                            passed = true;
+                }
+
+                if (!passed)
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
             }
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
@@ -1565,7 +1590,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             case ACHIEVEMENT_CRITERIA_TYPE_EARNED_PVP_TITLE:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
-            case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
             case ACHIEVEMENT_CRITERIA_TYPE_TOTAL:
@@ -1765,6 +1789,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= achievementCriteria->use_lfg.dungeonsComplete;
         case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
             return progress->counter >= achievementCriteria->own_currency.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
+            return progress->counter >= achievementCriteria->archaeology.count;
         // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:

@@ -4078,6 +4078,20 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
 
         player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, pItem->GetProto()->Quality, pItem->GetProto()->ItemLevel);
 
+        // Check if it was archaeology project, and update proper criterias
+        if (m_spellInfo->researchProjectId > 0)
+        {
+            ResearchProjectEntry const* pProj = sResearchProjectStore.LookupEntry(m_spellInfo->researchProjectId);
+            if (pProj)
+            {
+                // We send miscvalue1 value 1 for uncommon and better items, 0 for poor and normal
+                if (pItem->GetProto()->Quality > ITEM_QUALITY_NORMAL)
+                    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY, 1, pProj->researchBranch);
+                else
+                    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY, 0, pProj->researchBranch);
+            }
+        }
+
         /* activate craft spell cooldown */
         std::vector<uint32> cd_spells;
         uint32 cd_time = 0;
