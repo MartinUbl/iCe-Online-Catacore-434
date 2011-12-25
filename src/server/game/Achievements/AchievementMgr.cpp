@@ -1539,6 +1539,16 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
+            {
+                if (!miscvalue1 || !miscvalue2)
+                    continue;
+
+                if (miscvalue1 != achievementCriteria->own_currency.currencyId)
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_SET);
+            }
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_SPELLPOWER:
@@ -1555,23 +1565,23 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             case ACHIEVEMENT_CRITERIA_TYPE_EARNED_PVP_TITLE:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
-            case ACHIEVEMENT_CRITERIA_TYPE_TOTAL:
-            // 4.x new, not implemented
             case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
-            case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
-            case ACHIEVEMENT_CRITERIA_TYPE_SPENT_GOLD_GUILD_REPAIRS:
-            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL: // Implemented in GuildAchievementMgr
-            case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD: // Implemented in GuildAchievementMgr
-            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
-            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS: // Should be implemented in GuildAchievementMgr
-            case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS: // Implemented in GuildAchievementMgr
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING:
-            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_TABARD:
-            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD: // Should be implemented in GuildAchievementMgr
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD: // Implemented in GuildAchievementMgr
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD: // Implemented in GuildAchievementMgr
+            case ACHIEVEMENT_CRITERIA_TYPE_TOTAL:
                 break;                                   // Not implemented yet :(
+            // guild achievement criterias only
+            case ACHIEVEMENT_CRITERIA_TYPE_SPENT_GOLD_GUILD_REPAIRS:
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
+            case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS:
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS:
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_TABARD:
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
+                break;
         }
 
         if (IsCompletedCriteria(achievementCriteria,achievement))
@@ -1753,6 +1763,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= 9000;
         case ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS:
             return progress->counter >= achievementCriteria->use_lfg.dungeonsComplete;
+        case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
+            return progress->counter >= achievementCriteria->own_currency.count;
         // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:

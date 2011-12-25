@@ -11455,6 +11455,11 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
     // if we change total, we must change week
     //ASSERT(((newTotalCount-oldTotalCount) != 0) == ((newWeekCount-oldWeekCount) != 0));
 
+    if (id == 396 || id == 395 || id == 392 || id == 390)
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE, id, newTotalCount*PLAYER_CURRENCY_PRECISION);
+    else
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE, id, newTotalCount);
+
     if (newTotalCount != oldTotalCount)
     {
         if(itr->second.state != PLAYERCURRENCY_NEW)

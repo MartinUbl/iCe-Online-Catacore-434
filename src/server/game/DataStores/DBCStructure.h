@@ -93,6 +93,13 @@ struct AchievementCriteriaEntry
             uint32  winCount;                               // 4
         } win_bg;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY            = 3
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+        } archaeology;
+
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
         struct
         {
@@ -133,6 +140,13 @@ struct AchievementCriteriaEntry
             uint32  zoneID;                                 // 3
             uint32  questCount;                             // 4
         } complete_quests_in_zone;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE       = 12
+        struct
+        {
+            uint32  currencyId;                             // 3
+            uint32  count;                                  // 4
+        } own_currency;
 
         // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST   = 14
         struct
