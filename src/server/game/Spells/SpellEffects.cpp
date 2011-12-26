@@ -9651,6 +9651,11 @@ void Spell::EffectCastButtons(SpellEffIndex effIndex)
         if (!spell_id)
             continue;
 
+        // It may occur, that the same spell is selected
+        // when we do it, it would cause indefinite recursion
+        if (spell_id == m_spellInfo->Id)
+            continue;
+
         if (p_caster->HasSpellCooldown(spell_id))
             continue;
 
