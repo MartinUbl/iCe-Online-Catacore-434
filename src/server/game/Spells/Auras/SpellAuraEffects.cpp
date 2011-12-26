@@ -784,8 +784,8 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     amount = int32(owner->GetMaxPower(POWER_MANA) * amount / (total_ticks * 100.0f));
                 break;
                 }
-            // Judgements of the Wise
-            case 31930:
+            case 31930: // Judgements of the Wise
+            case 89906: // Judgements of the Bold
                 {
                 int32 total_ticks = GetTotalTicks();
                 if (total_ticks > 0)
