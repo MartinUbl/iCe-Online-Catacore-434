@@ -698,7 +698,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (aura)
                     {
                         uint32 pdamage = aura->GetAmount() > 0 ? aura->GetAmount() : 0;
-                        pdamage = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellProto(), effIndex, pdamage, DOT, aura->GetBase()->GetStackAmount());
+                        pdamage = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellProto(), aura->GetEffIndex(), pdamage, DOT, aura->GetBase()->GetStackAmount());
                         uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
                         uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellProto()) / aura->GetSpellProto()->EffectAmplitude[2]);
                         damage += pdamage * baseTotalTicks * pct_dir / 100;
