@@ -2043,6 +2043,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 AuraEffect *frostPresenceAura=0;  // increased health
                 AuraEffect *unholyPresenceAura=0; // increased movement speed, faster rune recovery
 
+                // Consume all runic power when switching presences
+                caster->SetPower(POWER_RUNIC_POWER, 0);
+
                 // Improved Presences
                 Unit::AuraEffectList const& vDummyAuras = target->GetAuraEffectsByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraEffectList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
