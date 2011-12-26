@@ -615,7 +615,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Execute
                 else if (m_spellInfo->Id == 5308)
                 {
-                    damage = uint32 (10 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.437*100/100);  
+                    float availableRage = m_caster->GetPower(POWER_RAGE);
+                    if (availableRage > 20.0f)
+                        availableRage = 20.0f;
+                    damage = uint32 (10 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.437f*(1.0f+availableRage/20.0f));
+
+                    m_caster->ModifyPower(POWER_RAGE, -int32(availableRage));
+
+                    apply_direct_bonus = false;
                 }
                 // Thunder Clap and talent Blood and Thunder
                 else if (m_spellInfo->Id == 6343)
