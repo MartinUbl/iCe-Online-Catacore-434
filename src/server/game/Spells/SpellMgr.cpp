@@ -3920,6 +3920,14 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
             count++;
             break;
+        case 88287: // Massive Crash (boss spell) and ranks
+        case 91914:
+        case 91921:
+        case 91922:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
+            count++;
+            break;
         case 74522: // Skinning (Grandmaster)
             // Because of bug in DBC, we need to set basepoints manually
             spellInfo->EffectBasePoints[1] = 7;

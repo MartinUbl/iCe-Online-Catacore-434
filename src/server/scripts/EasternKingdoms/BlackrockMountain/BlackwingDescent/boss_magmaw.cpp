@@ -27,15 +27,21 @@ enum Spells
     SPELL_PILLAR_OF_FLAME_EXPLOSION = 77970, // 4 seconds after spawning
     SPELL_PILLAR_OF_FLAME_VISUAL = 78017, //flaming circle
     SPELL_MANGLE = 89773,
+    SPELL_SWELTERING_ARMOR = 78199,
     SPELL_IMPALE_SELF = 77907, // used for exposing self
     SPELL_LAVA_SPLASH_VISUAL = 79461,
+    SPELL_MASSIVE_CRASH_DUMMY = 88253,
+    SPELL_MASSIVE_CRASH_EFFECT = 88287,
+
+    SPELL_MAGMA_SPIT_ENRAGE = 78068,
+    SPELL_MOLTEN_TANTRUM = 78403,
 
     SPELL_POINT_OF_VULNERABILITY_SHARE_DMG = 79010,
     SPELL_POINT_OF_VULNERABILITY = 79011,
 
     // Lava Parasite
     SPELL_PARASITIC_INFECTION = 78941,
-    SPELL_PARASITIC_INFECTION_10SEC_TRIGGER = 78079,
+    SPELL_PARASITIC_INFECTION_10SEC_TRIGGER = 78097,
 };
 
 enum NPCs
@@ -83,10 +89,17 @@ public:
         uint32 PillarOfFlameTimer;
         uint32 SpawnPincerTimer;
         uint32 DespawnPincerTimer;
+        uint32 MangleTimer;
+        //uint32 EatTimer;
+        //uint32 DeEatTimer;
+        uint32 CrashTimer;
         GameObject* pPincers[PINCER_COUNT];
         Creature* pHead;
         uint32 DeExposeTimer;
         uint64 PincerUserGUIDs[PINCER_USERS_25M];
+        bool enraged;
+
+        //Player* pInVehicle;
 
         void Reset()
         {
@@ -96,16 +109,23 @@ public:
 
         void EnterCombat(Unit* pWho)
         {
+            //pInVehicle = NULL;
             MagmaSpitTimer = 15000;
             LavaSpewTimer = 12000;
             PillarOfFlameTimer = 35000;
             DeExposeTimer = 0;
-            SpawnPincerTimer = 5000;
+            SpawnPincerTimer = 0;
             DespawnPincerTimer = 0;
+            MangleTimer = 0;
+            CrashTimer = 30000;
+            //EatTimer = 0;
+            //DeEatTimer = 0;
             for (uint8 i = 0; i < PINCER_USERS_25M; i++)
                 PincerUserGUIDs[i] = 0;
             for (uint8 i = 0; i < PINCER_COUNT; i++)
                 pPincers[i] = NULL;
+
+            enraged = false;
         }
 
         void JustDied(Unit* pWho)
@@ -156,6 +176,8 @@ public:
                 DeExposeTimer = 38000;
                 DespawnPincerTimer = 6000;
                 me->CastSpell(me, SPELL_IMPALE_SELF, false);
+                /*if (pInVehicle)
+                    pInVehicle->ExitVehicle();*/
                 if (pHead)
                 {
                     pHead->clearUnitState(UNIT_STAT_UNATTACKABLE);
@@ -185,6 +207,12 @@ public:
             return false;
         }
 
+        void SpellHit(Unit* pCaster, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_MASSIVE_CRASH_DUMMY)
+                me->CastSpell(me, SPELL_MASSIVE_CRASH_EFFECT, true);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (DespawnPincerTimer)
@@ -206,12 +234,22 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (DeExposeTimer == 0)
+            if (DeExposeTimer == 0 && !me->HasAura(88253))
             {
                 if (MagmaSpitTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_MAGMA_SPIT, false);
-                    MagmaSpitTimer = urand(12000, 15000);
+                    if (me->getVictim()->GetDistance(me) > 17.5f)
+                    {
+                        enraged = true;
+                        me->CastSpell(me->getVictim(), SPELL_MAGMA_SPIT_ENRAGE, false);
+                        MagmaSpitTimer = urand(6000, 9000);
+                    }
+                    else
+                    {
+                        enraged = false;
+                        me->CastSpell(me->getVictim(), SPELL_MAGMA_SPIT, false);
+                        MagmaSpitTimer = urand(8000, 13000);
+                    }
                 }
                 else
                     MagmaSpitTimer -= diff;
@@ -229,37 +267,102 @@ public:
                     Unit* pRandom = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (pRandom)
                         me->SummonCreature(NPC_PILLAR_OF_FLAME, pRandom->GetPositionX(), pRandom->GetPositionY(), pRandom->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 8500);
-                    PillarOfFlameTimer = urand(32000, 35000);
+                    PillarOfFlameTimer = urand(22000, 32000);
                 }
                 else
                     PillarOfFlameTimer -= diff;
 
-                if (SpawnPincerTimer <= diff)
+                if (SpawnPincerTimer)
                 {
-                    for (uint8 i = 0; i < PINCER_COUNT; i++)
-                        pPincers[i] = me->getVictim()->SummonGameObject(800001, PincerPos[i].m_positionX, PincerPos[i].m_positionY, PincerPos[i].m_positionZ, PincerPos[i].m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 0);
-                    DespawnPincerTimer = 15000;
-                    SpawnPincerTimer = 45000;
+                    if (SpawnPincerTimer <= diff)
+                    {
+                        for (uint8 i = 0; i < PINCER_COUNT; i++)
+                            pPincers[i] = me->getVictim()->SummonGameObject(800001, PincerPos[i].m_positionX, PincerPos[i].m_positionY, PincerPos[i].m_positionZ, PincerPos[i].m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                        DespawnPincerTimer = 10000;
+                        SpawnPincerTimer = 0;
+                    }
+                    else
+                        SpawnPincerTimer -= diff;
+                }
+
+                if (MangleTimer)
+                {
+                    if (MangleTimer <= diff)
+                    {
+                        me->CastSpell(me->getVictim(), SPELL_MANGLE, false);
+                        me->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, false);
+                        MangleTimer = 0;
+                        //EatTimer = 5000;
+                        SpawnPincerTimer = 5000;
+
+                        // burn the ground!
+                    }
+                    else
+                        MangleTimer -= diff;
+                }
+
+                if (CrashTimer <= diff)
+                {
+                    me->CastSpell(me, SPELL_MASSIVE_CRASH_DUMMY, false);
+                    MangleTimer = 2000;
+                    CrashTimer = 60000;
                 }
                 else
-                    SpawnPincerTimer -= diff;
+                    CrashTimer -= diff;
+
+                /*if (EatTimer)
+                {
+                    if (EatTimer <= diff)
+                    {
+                        me->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, false);
+                        if (me->getVictim()->ToPlayer())
+                        {
+                            me->getVictim()->ToPlayer()->EnterVehicle(me, 0);
+                            pInVehicle = me->getVictim()->ToPlayer();
+                        }
+
+                        // SPRAY the room!
+
+                        EatTimer = 0;
+                        DeEatTimer = 10000;
+                    }
+                    else
+                        EatTimer -= diff;
+                }
+
+                if (DeEatTimer)
+                {
+                    if (DeEatTimer <= diff)
+                    {
+                        if (pInVehicle)
+                            pInVehicle->ExitVehicle();
+                        pInVehicle = NULL;
+                        DeEatTimer = 0;
+                    }
+                    else
+                        DeEatTimer -= diff;
+                }*/
             }
             else
             {
-                if (DeExposeTimer <= diff)
+                if (DeExposeTimer)
                 {
-                    if (pHead)
+                    if (DeExposeTimer <= diff)
                     {
-                        pHead->RemoveAllAuras();
-                        me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
-                        pHead->addUnitState(UNIT_STAT_UNATTACKABLE);
-                        pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    }
-                    DeExposeTimer = 0;
-                } else DeExposeTimer -= diff;
+                        if (pHead)
+                        {
+                            pHead->RemoveAllAuras();
+                            me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
+                            pHead->addUnitState(UNIT_STAT_UNATTACKABLE);
+                            pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                        DeExposeTimer = 0;
+                    } else DeExposeTimer -= diff;
+                }
             }
 
-            DoMeleeAttackIfReady();
+            if (DeExposeTimer == 0 && !me->HasAura(88253))
+                DoMeleeAttackIfReady();
         }
     };
 
