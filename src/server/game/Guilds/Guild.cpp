@@ -1915,14 +1915,14 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
 
     // Packed uint8 - each bit resembles some flag.
     // Currently unknown and not needed.
-    uint32 totalBytesToSend = uint32(uint32(m_members.size()) / uint32(8)) + 1;
+    uint32 totalBytesToSend = uint32(ceil(float(m_members.size()) / uint32(8)));
     for(uint32 i = 0; i < totalBytesToSend; ++i)
         data << uint8(0x00);
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         data << itr->second->GetPublicNote();
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        data << uint64(0); // unk uint64
+        data << uint64(0); // week activity?
 
     data << m_info;
 
@@ -1946,7 +1946,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         data << itr->second->GetOfficerNote();
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        data << uint64(0); // unk
+        data << uint64(0); // total activity?
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         data << uint8(0); // unk
@@ -1984,7 +1984,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     }
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        data << uint32(0); // unk
+        data << uint32(0); // guild rep to exalted?
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
@@ -1999,7 +1999,6 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     //else 
     //    BroadcastPacket(&data);
 
-    // TODO !
     WorldPacket data7(SMSG_GUILD_RANK);
     data7 << uint32(_GetRanksSize());
     for(uint32 i = 0; i < _GetRanksSize(); i++)
