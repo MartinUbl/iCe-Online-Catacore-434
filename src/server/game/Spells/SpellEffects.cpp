@@ -4425,7 +4425,9 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (level_diff > 0)
         damage -= level_multiplier * level_diff;
 
-    if (damage < 0)
+    // Some exceptions for POWER_SCRIPTED, because its universal and not-really power, only some kind of marker
+
+    if (damage < 0 && power != POWER_SCRIPTED)
         return;
 
     if (power != POWER_SCRIPTED && unitTarget->GetMaxPower(power) == 0)

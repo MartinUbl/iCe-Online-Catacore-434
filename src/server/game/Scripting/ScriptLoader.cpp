@@ -573,6 +573,7 @@ void AddSC_instance_throne_of_the_four_winds();
 void AddSC_boss_argaloth();
 void AddSC_instance_baradin_hold();
 void AddSC_magmaw();
+void AddSC_atramedes();
 void AddSC_instance_blackwing_descent();
 
 // battlegrounds
@@ -1184,6 +1185,7 @@ void AddCataclysmScripts()
     AddSC_instance_baradin_hold();
 
     AddSC_magmaw();
+    AddSC_atramedes();
     AddSC_instance_blackwing_descent();
 }
 

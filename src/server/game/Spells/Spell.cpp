@@ -2629,6 +2629,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 88824)
+                {
+                    radius = 100.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
@@ -2887,6 +2893,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             maxSize = 10;
                             power = POWER_MANA;
                             break;
+                        case 88824: // Sound Bar
+                        {
+                            // Exclude targets with Sound Bar aura already applied
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                            {
+                                if ((*itr)->HasAura(88824))
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                        }
                         default:
                             break;
                     }

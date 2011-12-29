@@ -22,10 +22,13 @@
 
 enum Encounter
 {
-    BOSS_MAGMAW,
+    BOSS_MAGMAW = 0,
     BOSS_OMNITRON_DEFENSE_SYSTEM,
     BOSS_MALORIAK,
-    // ... TODO: doplnit
+    BOSS_ATRAMEDES,
+    BOSS_CHIMAERON,
+    BOSS_NEFARIAN,
+    MAX_ENCOUNTER
 };
 
 enum SharedSpells
