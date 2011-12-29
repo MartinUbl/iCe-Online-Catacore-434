@@ -221,14 +221,6 @@ Unit::~Unit()
 
     ASSERT(!m_duringRemoveFromWorld);
     ASSERT(!m_attacking);
-    ASSERT(m_attackers.empty());
-    ASSERT(m_sharedVision.empty());
-    ASSERT(m_Controlled.empty());
-    ASSERT(m_appliedAuras.empty());
-    ASSERT(m_ownedAuras.empty());
-    ASSERT(m_removedAuras.empty());
-    ASSERT(m_gameObj.empty());
-    ASSERT(m_dynObj.empty());
 }
 
 void Unit::Update(uint32 p_time)
