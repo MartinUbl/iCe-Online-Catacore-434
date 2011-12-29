@@ -82,8 +82,8 @@ bool Player::UpdateStats(Stats stat)
             UpdateAllCritPercentages();
             UpdateDodgePercentage();
             break;
-        case STAT_STAMINA:   
-            UpdateMaxHealth(); 
+        case STAT_STAMINA:
+            UpdateMaxHealth();
             break;
         case STAT_INTELLECT:
             UpdateMaxPower(POWER_MANA);
@@ -1395,6 +1395,15 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             if (frost < 0)
                 frost = 0;
             SetBonusDamage(int32(frost * 0.4f));
+        }
+        // warlock's infernal benefits from owner's fire spell power
+        else if (GetEntry() == 89)
+        {
+            int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            if (fire < 0)
+                fire = 0;
+            SetBonusDamage(int32(fire * 0.15f));
+            bonusAP = fire * 0.57f;
         }
         //demons benefit from warlocks shadow or fire damage
         else if (isPet())
