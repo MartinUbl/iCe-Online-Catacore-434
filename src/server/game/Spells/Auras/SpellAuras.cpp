@@ -1448,6 +1448,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
+            case SPELLFAMILY_SHAMAN:
+                {
+                    // Spirit Walk
+                    if (caster && target && GetId() == 58876)
+                    {
+                        // Removes snares and roots.
+                        target->RemoveMovementImpairingAuras();
+                        break;
+                    }
+                }
+                break;
             case SPELLFAMILY_HUNTER:
                 {
                     // Serpent Sting
