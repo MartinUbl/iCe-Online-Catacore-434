@@ -88,20 +88,14 @@ void LFGMgr::LoadDungeonEncounters()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 dungeon encounter lfg associations. DB table `lfg_dungeon_encounters` is empty!");
         return;
     }
 
-    
-
     Field* fields = NULL;
     do
     {
-        
         fields = result->Fetch();
         uint32 achievementId = fields[0].GetUInt32();
         uint32 dungeonId = fields[1].GetUInt32();
@@ -156,7 +150,6 @@ void LFGMgr::LoadRewards()
     Field* fields = NULL;
     do
     {
-        
         fields = result->Fetch();
         uint32 dungeonId = fields[0].GetUInt32();
         uint32 maxLevel = fields[1].GetUInt8();
@@ -1815,11 +1808,11 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
 
     uint64 guid = player->GetGUID();
     uint64 gguid = player->GetGroup()->GetGUID();
-    uint32 gDungeonId = GetDungeon(gguid);     
+    uint32 gDungeonId = GetDungeon(gguid);
     if (gDungeonId != dungeonId)
     {
         sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] Finished dungeon %u but group queued for %u. Ignoring", guid, dungeonId, gDungeonId);    
-        return;    
+        return;
     }
 
     if (GetState(guid) == LFG_STATE_FINISHED_DUNGEON)
