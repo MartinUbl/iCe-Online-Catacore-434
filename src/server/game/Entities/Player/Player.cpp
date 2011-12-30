@@ -7347,21 +7347,87 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
-    // Prohibited area teleport - for closed zones
+    // Prohibited area teleport
     if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
     {
-        /*switch (newZone)
+        if (IsMounted())
+            Unmount();
+        if (GetSession()->GetPlayer()->getLevel() < 58)
         {
-            case 5095: // Tol Barad
-            case 5389: // Tol Barad Peninsula
-                // Teleport to somewere in Arathi Highlands
-                if (IsMounted())
-                    Unmount();
-                TeleportTo(0,-1508.51f,-2732.06f,38.4986f,0.0f);
-                break;
-            default:
-                break;
-        }*/
+            switch(newZone)
+            {
+                case 3522: // Blade's Edge Mountains
+                case 3483: // Hellfire Peninsula
+                case 3518: // Nagrand
+                case 3523: // Netherstorm
+                case 3520: // Shadowmoon Valley
+                case 3703: // Shattrath City
+                case 3519: // Terokkar Forest
+                case 3521: // Zangarmarsh
+                    TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
+                    if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
+                        GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+
+                    GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                    GetSession()->SendNotification("You must be at least level 58 for enter");
+                    break;
+                default:
+                    break;
+            }
+         }
+         if (GetSession()->GetPlayer()->getLevel() < 68)
+         {
+             switch(newZone)
+             {
+                 case 2817: // Crystalsong Forest
+                 case 4395: // Dalaran
+                 case 65:   // Dragonblight
+                 case 394:  // Grizzly Hills
+                 case 495:  // Howling Fjord
+                 case 4742: // Hrothgar's Landing
+                 case 210:  // Icecrown
+                 case 3711: // Sholazar Basin
+                 case 67:   // The Storm Peaks
+                 case 4197: // Wintergrasp
+                 case 66:   // Zul'Drak
+                 case 3537: // Borean Tundra
+                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
+                     if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
+                         GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+
+                     GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                     GetSession()->SendNotification("You must be at least level 68 for enter");
+                     break;
+                 default:
+                     break;
+             }
+         }
+         if (GetSession()->GetPlayer()->getLevel() < 80)
+         {
+             switch(newZone)
+             {
+                 case 5042: // Deepholm
+                 case 616:  // Mount Hyjal
+                 case 5416: // The Maelstrom
+                 case 5095: // Tol Barad
+                 case 5389: // Tol Barad Peninsula
+                 case 4922: // Twilight Highlands
+                 case 5034: // Uldum
+                 case 5146: // Vashj'ir
+                 case 5145: // Vashj'ir: Abyssal Depths
+                 case 4815: // Vashj'ir: Kelp'thar Forest
+                 case 5144: // Vashj'ir: Shimmering Expanse
+                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
+                     if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
+                         GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+
+                     GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                     GetSession()->SendNotification("You must be at least level 80 for enter");
+                     break;
+                 default:
+                     break;
+             }
+         }
     }
 
     // zone changed, so area changed as well, update it
