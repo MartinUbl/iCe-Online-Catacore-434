@@ -17579,6 +17579,20 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                 return 2281;
             else
                 return 2289;
+        case FORM_MOONKIN:
+            switch (getRace())
+            {
+                case RACE_TROLL:
+                    return 37174;
+                case RACE_WORGEN:
+                    return 37173;
+                case RACE_NIGHTELF:
+                    return 15374;
+                case RACE_TAUREN:
+                default:
+                    return 15375;
+            }
+            break;
         case FORM_FLIGHT:
             if (Player::TeamForRace(getRace()) == ALLIANCE)
                 return 20857;
