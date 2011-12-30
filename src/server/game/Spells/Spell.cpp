@@ -2685,6 +2685,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ALLY;
                     break;
                 }
+                if (m_spellInfo->Id == 86452) // Holy Radiance
+                {
+                    radius = 20.0f;
+                    targetType = SPELL_TARGETS_ALLY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, true);
                 targetType = SPELL_TARGETS_ALLY;
                 break;
