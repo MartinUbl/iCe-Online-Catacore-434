@@ -12355,6 +12355,20 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     if (spellProto)
         switch(spellProto->SpellFamilyName)
         {
+            case SPELLFAMILY_SHAMAN:
+                // Improved Lava Lash - damage increase by X% for every stack of Searing Flames
+                if (spellProto->Id == 60103)
+                {
+                    float bonusApp = 0.0f;
+                    if (HasAura(77701))
+                        bonusApp = 0.2f;
+                    else if (HasAura(77700))
+                        bonusApp = 0.1f;
+
+                    if (Aura* pAura = pVictim->GetAura(77661))
+                        DoneTotalMod += bonusApp * pAura->GetStackAmount();
+                }
+                break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Glacier Rot
                 if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
