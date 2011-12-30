@@ -3813,6 +3813,10 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 76189: // Crepuscular Veil
         case 1978:  // Serpent Sting
+        case 2818:  // Deadly Poison
+        case 84617: // Revealing Strike
+        case 86346: // Colossus Smash
+        case 91021: // Find Weakness
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
