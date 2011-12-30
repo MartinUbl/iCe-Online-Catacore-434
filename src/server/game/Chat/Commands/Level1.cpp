@@ -298,6 +298,134 @@ bool ChatHandler::HandleReloadSpellGrandSkillupCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleBanankyCommandAdd(const char* args)
+{
+    if (!args)
+    {
+        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char* chname = strtok((char*)args, " ");
+    char* pocet = strtok(NULL, " ");
+    char* duvod = strtok(NULL, "");
+
+    if (!chname)
+    {
+        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!pocet)
+    {
+        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!duvod)
+    {
+        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname);
+    Player* target = sObjectMgr->GetPlayer(pguid);
+
+    if (target) // if online
+    {
+        if (HasLowerSecurity(target, 0))
+            return false;
+        ScriptDatabase.PExecute("INSERT INTO ice_bananky VALUES (%u,'%s','%s','%s',0)", GUID_LOPART(pguid), chname, pocet, duvod); // Save to DB
+        target->GetSession()->SendNotification("You have been teleported to banana's field. You have to collect %s bananas. reason: %s", pocet, duvod);
+        PSendSysMessage("Hrac %s (guid: %u) byl poslan na plantaz s poctem bananku %s a duvodem: %s", chname, GUID_LOPART(pguid), pocet, duvod); // Send SysMessage
+        target->TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f);
+    }
+    else // if offline
+    {
+        if (HasLowerSecurity(target, pguid))
+            return false;
+        ScriptDatabase.PExecute("INSERT INTO ice_bananky VALUES (%u,'%s','%s','%s',0)", GUID_LOPART(pguid), chname, pocet, duvod); // Save to DB
+        PSendSysMessage("Hrac %s (offline) (guid: %u) byl poslan na plantaz s poctem bananku %s a duvodem: %s", chname, GUID_LOPART(pguid), pocet, duvod); // Send SysMessage
+        CharacterDatabase.PExecute("UPDATE characters SET position_x='-10936.1',position_y='-400.671',position_z='23.1415',map='746' where guid = %u", GUID_LOPART(pguid)); // Save to DB if offline
+    }
+
+    return true;
+
+}
+bool ChatHandler::HandleBanankyCommandBlist(const char *args)
+{
+    uint64 guid;
+    std::string name;
+    uint32 count;
+    std::string duvod;
+    int16 done;
+
+    QueryResult result = ScriptDatabase.PQuery("SELECT guid, name, count, duvod, done FROM ice_bananky WHERE done='0'");
+
+    if (result)
+    {
+        PSendSysMessage("guid, name, count, reason, done");
+
+        do
+        {
+            Field *fields = result->Fetch();
+            guid = fields[0].GetUInt64();
+            name = fields[1].GetString();
+            count = fields[2].GetUInt32();
+            duvod = fields[3].GetString();
+            done = fields[4].GetInt16();
+
+            PSendSysMessage("| " UI64FMTD " | %s | %u | %s | %i |", guid, name.c_str(), count, duvod.c_str(), done);
+
+        }
+        while (result->NextRow());
+    }
+    else
+    {
+        PSendSysMessage("Zadny hrac neni na plantazi.");
+    }
+
+    return true;
+}
+bool ChatHandler::HandleBanankyCommandList(const char *args)
+{
+    uint64 guid;
+    std::string name;
+    uint32 count;
+    std::string duvod;
+    int16 done;
+
+    QueryResult result = ScriptDatabase.PQuery("SELECT guid, name, count, duvod, done FROM ice_bananky WHERE done='1'");
+
+    if (result)
+    {
+        PSendSysMessage("guid, name, count, reason, done");
+
+        do
+        {
+            Field *fields = result->Fetch();
+            guid = fields[0].GetUInt64();
+            name = fields[1].GetString();
+            count = fields[2].GetUInt32();
+            duvod = fields[3].GetString();
+            done = fields[4].GetInt16();
+
+            PSendSysMessage("| " UI64FMTD " | %s | %u | %s | %i |", guid, name.c_str(), count, duvod.c_str(), done);
+
+        }
+        while (result->NextRow());
+    }
+    else
+    {
+        PSendSysMessage("Zadny hrac nenalezen.");
+    }
+
+    return true;
+}
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
 {

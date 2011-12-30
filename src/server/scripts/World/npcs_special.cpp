@@ -3816,6 +3816,54 @@ class boss_event_jarmila_pet: public CreatureScript
         }
 };
 
+class npc_odevzdavac: public CreatureScript
+{
+    public:
+        npc_odevzdavac(): CreatureScript("npc_odevzdavac") {}
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I want to give you bananas.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->SEND_GOSSIP_MENU(1,pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 uiAction)
+        {
+            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+            {
+                 QueryResult pocet = ScriptDatabase.PQuery("SELECT count FROM ice_bananky WHERE guid = %u", pPlayer->GetGUID()); // select punishment count
+
+                 uint32 counter = 0;
+                 if (pocet != NULL)
+                 {
+                     Field* field = pocet->Fetch();
+                     counter = field[0].GetUInt32();
+                 }
+
+                 if (pPlayer->GetItemCount(54619) >= counter)
+                 {
+                       pPlayer->GetSession()->SendNotification("Ok, your punishment is finished.");
+                       pPlayer->RemoveAurasDueToSpell(15007); // Remove Ressurect Sickness
+                       ScriptDatabase.PExecute("UPDATE ice_bananky SET done = 1 WHERE guid = %u", pPlayer->GetGUID()); // SET done = 1
+
+                       if (pPlayer->GetTeamId() == TEAM_ALLIANCE) // If Alliance
+                           pPlayer->TeleportTo(0,-8833.38f,628.628f,95.0f,0.0f); // Teleport to Stormwind
+                       else // If Horde
+                           pPlayer->TeleportTo(1,1571.49f,-4398.65f,16.0f,0.0f); // Teleport to Orgrimmar
+
+                       pPlayer->DestroyItemCount(54619, pPlayer->GetItemCount(54619), true); // Remove all bananas
+
+                 }
+                 else // If not item count
+                 {
+                     pPlayer->GetSession()->SendNotification("You must own %u bananas.",counter);
+                 }
+            }
+            return true;
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3861,5 +3909,6 @@ void AddSC_npcs_special()
     new npc_jailer;
     new boss_event_jarmila;
     new boss_event_jarmila_pet;
+    new npc_odevzdavac;
 }
 

@@ -7427,7 +7427,22 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                  default:
                      break;
              }
-         }
+        }
+        if (GetSession()->GetPlayer()->GetMapId() == 746) // Special for Plantaz
+        {
+            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurect Sickness)
+            QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
+            uint32 counter = 0;
+            std::string duvod;
+            if (result != NULL) // if result not null
+            {
+                Field* field = result->Fetch();
+                counter = field[0].GetUInt32();
+                duvod = field[1].GetString();
+            }
+            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
+            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
+        }
     }
 
     // zone changed, so area changed as well, update it

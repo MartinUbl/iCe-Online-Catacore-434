@@ -614,6 +614,11 @@ class ChatHandler
         // Achievement commands
         bool HandleAchievementAddCommand(const char* args);
 
+        // Bananky command
+        bool HandleBanankyCommandAdd(const char* args);
+        bool HandleBanankyCommandList(const char* args);
+        bool HandleBanankyCommandBlist(const char* args);
+
         // GM ticket command handlers
         bool HandleGMTicketListCommand(const char* args);
         bool HandleGMTicketListOnlineCommand(const char* args);

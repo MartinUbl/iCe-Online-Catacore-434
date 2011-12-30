@@ -732,10 +732,19 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                            "", NULL }
     };
 
+    static ChatCommand banankyCommandTable[] = // Bananky Command
+    {
+        { "add",            SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandAdd>, "", NULL },
+        { "list",           SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandList>, "", NULL },
+        { "blist",          SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandBlist>, "", NULL },
+        { NULL,             0,                  false, NULL,                                                "", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  false, NULL,                                           "", achievementCommandTable},
+        { "bananky",        SEC_MODERATOR,      true,  NULL,                                           "", banankyCommandTable  },
         { "gm",             SEC_MODERATOR,      true,  NULL,                                           "", gmCommandTable       },
         { "npc",            SEC_MODERATOR,      false, NULL,                                           "", npcCommandTable      },
         { "go",             SEC_MODERATOR,      false, NULL,                                           "", goCommandTable       },
