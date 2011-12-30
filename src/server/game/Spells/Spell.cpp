@@ -2629,9 +2629,44 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
-                if (m_spellInfo->Id == 88824)
+                if (m_spellInfo->Id == 88824) // Sound Bar
                 {
                     radius = 100.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 93041 // Absolute Zero
+                    || m_spellInfo->Id == 78201
+                    || m_spellInfo->Id == 78206
+                    || m_spellInfo->Id == 78208
+                    || m_spellInfo->Id == 93042
+                    || m_spellInfo->Id == 93043)
+                {
+                    radius = 5.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 77615 // Debilitating Slime
+                    || m_spellInfo->Id == 77602
+                    || m_spellInfo->Id == 77948
+                    || m_spellInfo->Id == 92910)
+                {
+                    radius = 80.0f;
+                    targetType = SPELL_TARGETS_ANY;
+                    break;
+                }
+                if (m_spellInfo->Id == 77908 // Arcane Storm
+                    || m_spellInfo->Id == 57473
+                    || m_spellInfo->Id == 77908
+                    || m_spellInfo->Id == 89160
+                    || m_spellInfo->Id == 89161
+                    || m_spellInfo->Id == 92961
+                    || m_spellInfo->Id == 92962
+                    || m_spellInfo->Id == 92963
+                    || m_spellInfo->Id == 78225 // Acid Nova
+                    || m_spellInfo->Id == 93013)
+                {
+                    radius = 80.0f;
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
