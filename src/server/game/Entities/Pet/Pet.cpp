@@ -629,6 +629,10 @@ void Creature::Regenerate(Powers power)
     case 45870: // Anshal
     case 45871: // Nezir
     case 45872: // Rohash
+    case 42179: // Electron
+    case 42166: // Arcanotron
+    case 42178: // Magmatron
+    case 42180: // Toxitron
         return;
     default:
         break;

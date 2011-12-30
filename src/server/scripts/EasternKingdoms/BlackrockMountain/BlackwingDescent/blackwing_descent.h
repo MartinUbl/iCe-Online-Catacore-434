@@ -23,7 +23,7 @@
 enum Encounter
 {
     BOSS_MAGMAW = 0,
-    BOSS_OMNITRON_DEFENSE_SYSTEM,
+    BOSS_OMNOTRON_DEFENSE_SYSTEM,
     BOSS_MALORIAK,
     BOSS_ATRAMEDES,
     BOSS_CHIMAERON,
@@ -41,12 +41,12 @@ enum SharedSpells
 enum Data
 {
     //Encounters
-    DATA_MAGMAW                  = 0,
-    DATA_OMNOTRON_DEFENSE_SYSTEM = 1,
-    DATA_MALORIAK                = 2,
-    DATA_ATRAMEDES               = 3,
-    DATA_CHIMAERON               = 4,
-    DATA_NEFARIAN                = 5,
+    DATA_MAGMAW                  = BOSS_MAGMAW,
+    DATA_OMNOTRON_DEFENSE_SYSTEM = BOSS_OMNOTRON_DEFENSE_SYSTEM,
+    DATA_MALORIAK                = BOSS_MALORIAK,
+    DATA_ATRAMEDES               = BOSS_ATRAMEDES,
+    DATA_CHIMAERON               = BOSS_CHIMAERON,
+    DATA_NEFARIAN                = BOSS_NEFARIAN,
     //Additional Entities
     DATA_ARCANOTRON_GUID         = 6,
     DATA_ELECTRON_GUID           = 7,

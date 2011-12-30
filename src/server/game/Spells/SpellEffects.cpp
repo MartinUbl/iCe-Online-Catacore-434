@@ -2029,6 +2029,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     unitTarget->Kill(unitTarget);
                     return;
                 }
+                case 78741: // Activated!
+                {
+                    // Triggered spells doesn't take energy, so we must handle it this way
+                    if (m_caster)
+                        m_caster->ModifyPower(POWER_ENERGY, -1);
+                    return;
+                }
             }
 
             break;

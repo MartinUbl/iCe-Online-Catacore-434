@@ -30,9 +30,19 @@ public:
 
         uint32 auiEncounter[MAX_ENCOUNTER];
 
+        uint64 ElectronGUID;
+        uint64 ToxitronGUID;
+        uint64 ArcantronGUID;
+        uint64 MagmatronGUID;
+
         void Initialize()
         {
             memset(&auiEncounter, 0, sizeof(auiEncounter));
+
+            ElectronGUID  = 0;
+            ToxitronGUID  = 0;
+            ArcantronGUID = 0;
+            MagmatronGUID = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -43,12 +53,15 @@ public:
             return false;
         }
 
-        void OnCreatureCreate(Creature* creature, bool add)
+        void OnCreatureCreate(Creature* pCreature, bool add)
         {
-            /*switch(creature->GetEntry())
+            switch(pCreature->GetEntry())
             {
-
-            }*/
+                case NPC_ELECTRON:        ElectronGUID  = pCreature->GetGUID(); break;
+                case NPC_TOXITRON:        ToxitronGUID  = pCreature->GetGUID(); break;
+                case NPC_ARCANOTRON:      ArcantronGUID = pCreature->GetGUID(); break;
+                case NPC_MAGMATRON:       MagmatronGUID = pCreature->GetGUID(); break;
+            }
         }
 
         void OnGameObjectCreate(GameObject* go, bool add)
@@ -59,9 +72,15 @@ public:
             //
         }
 
-
-        uint64 GetData64(uint32 identifier)
+        uint64 GetData64(uint32 type)
         {
+            switch(type)
+            {
+                case DATA_ELECTRON_GUID:                 return ElectronGUID;
+                case DATA_TOXITRON_GUID:                 return ToxitronGUID;
+                case DATA_ARCANOTRON_GUID:               return ArcantronGUID;
+                case DATA_MAGMATRON_GUID:                return MagmatronGUID;
+            }
             return 0;
         }
 
