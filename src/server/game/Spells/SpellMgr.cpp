@@ -886,9 +886,10 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             if (spellId == 34074)
                 return true;
             break;
-        case SPELLFAMILY_SHAMAN:
-            if (spellId == 30708)
-                return false;
+        case SPELLFAMILY_ROGUE:
+            // Envenom (buff is positive effect but because of the damage effect its being counted as a negative effect)
+            if (spellId == 32645)
+                return true;
             break;
         default:
             break;
