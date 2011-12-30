@@ -1493,6 +1493,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastCustomSpell(target, 64801, &bp0, 0, 0, true);
                         break;
                     }
+                    // Shooting Stars - reset cooldown of Starsurge
+                    if (GetId() == 93400 && caster && caster->ToPlayer())
+                        caster->ToPlayer()->RemoveSpellCooldown(78674, true);
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
