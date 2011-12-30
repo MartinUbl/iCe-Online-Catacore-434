@@ -204,20 +204,26 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recv_data
             data << uint32(qRew->XPValue(GetPlayer()));
             data << uint32(reward->reward[done].variableMoney);
             data << uint32(reward->reward[done].variableXP);
-            data << uint8(qRew->GetRewItemsCount());
-            if (qRew->GetRewItemsCount())
+
+            uint8 currCount = 0;
+            for (uint8 k = 0; k < QUEST_REWARDS_COUNT; k++)
+                if (qRew->RewCurrencyId[k] > 0)
+                    currCount++;
+
+            data << uint8(currCount);
+            if (currCount)
             {
-                ItemPrototype const* iProto = NULL;
                 for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
                 {
-                    if (!qRew->RewItemId[i])
+                    if (!qRew->RewCurrencyId[i])
                         continue;
 
-                    iProto = ObjectMgr::GetItemPrototype(qRew->RewItemId[i]);
-
-                    data << uint32(qRew->RewItemId[i]);
-                    data << uint32(iProto ? iProto->DisplayInfoID : 0);
-                    data << uint32(qRew->RewItemCount[i]);
+                    data << uint32(qRew->RewCurrencyId[i]);
+                    data << uint32(0); // unk?
+                    if (qRew->RewCurrencyId[i] == 396 || qRew->RewCurrencyId[i] == 395 || qRew->RewCurrencyId[i] == 392)
+                        data << uint32(qRew->RewCurrencyCount[i] * PLAYER_CURRENCY_PRECISION);
+                    else
+                        data << uint32(qRew->RewCurrencyCount[i]);
                 }
             }
         }

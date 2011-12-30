@@ -148,15 +148,10 @@ void LFGMgr::LoadRewards()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
         return;
     }
-
-    
 
     Field* fields = NULL;
     do
