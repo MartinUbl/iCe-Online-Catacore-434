@@ -3627,9 +3627,11 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             //multiply by amount of holy power (+1 because TakePower takes 1 holy power to cast)
             uint32 holypower = caster->GetPower(POWER_HOLY_POWER);
+            bool takePower = true;
             // Divine Purpose effect
             if (caster->HasAura(90174))
             {
+                takePower = false;
                 holypower = 3;
                 caster->RemoveAurasDueToSpell(90174);
             }
@@ -3681,7 +3683,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             //and clear holy power (except if Eternal Glory talent procs)
             if (!((caster->HasAura(87163) && roll_chance_i(15)) ||
                  (caster->HasAura(87164) && roll_chance_i(30))) )
-                caster->SetPower(POWER_HOLY_POWER, 0);
+            {
+                if (takePower)
+                    caster->SetPower(POWER_HOLY_POWER, 0);
+            }
         }
         // Light of Dawn
         else if (m_spellInfo->Id == 85222)
@@ -5979,6 +5984,14 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             else if (m_spellInfo->Id == 85256)
             {
                 uint32 realholypower = m_caster->GetPower(POWER_HOLY_POWER)+1;
+                bool takePower = true;
+                // Divine Purpose effect
+                if (m_caster->HasAura(90174))
+                {
+                    takePower = false;
+                    realholypower = 3;
+                    m_caster->RemoveAurasDueToSpell(90174);
+                }
                 switch(realholypower)
                 {
                     case 1:
@@ -5992,7 +6005,8 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         totalDamagePercentMod *= 1.0f+(235.0f/30.0f); // 225%
                         break;
                 }
-                m_caster->SetPower(POWER_HOLY_POWER,0);
+                if (takePower)
+                    m_caster->SetPower(POWER_HOLY_POWER,0);
             }
             break;
         }
