@@ -7400,32 +7400,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                      break;
              }
          }
-         if (GetSession()->GetPlayer()->getLevel() < 80)
-         {
-             switch(newZone)
-             {
-                 case 5042: // Deepholm
-                 case 616:  // Mount Hyjal
-                 case 5416: // The Maelstrom
-                 case 5095: // Tol Barad
-                 case 5389: // Tol Barad Peninsula
-                 case 4922: // Twilight Highlands
-                 case 5034: // Uldum
-                 case 5146: // Vashj'ir
-                 case 5145: // Vashj'ir: Abyssal Depths
-                 case 4815: // Vashj'ir: Kelp'thar Forest
-                 case 5144: // Vashj'ir: Shimmering Expanse
-                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
-                     if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
-                         GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
-
-                     GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
-                     GetSession()->SendNotification("You must be at least level 80 for enter");
-                     break;
-                 default:
-                     break;
-             }
-        }
         if (GetSession()->GetPlayer()->GetMapId() == 746) // Special for Plantaz
         {
             AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurect Sickness)
