@@ -23130,6 +23130,32 @@ void Player::SendAurasForTarget(Unit *target)
         }
     }
 
+    // Ugly hack for sending passive auras update to max slot
+    // MAY CAUSE INCONSTISTENCE
+    if (target == this)
+    {
+        // We can use the same slots for auras, which won't ever apear both at one time at one target
+
+        // Firestarter
+        if (HasAura(86914))
+        {
+            data << uint8(128);                           // slot
+            data << uint32(86914);                        // id
+            data << uint8(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
+            data << uint8(getLevel());                    // level
+            data << uint8(1);                             // stack amount
+        }
+        // Inferno
+        if (HasAura(85105))
+        {
+            data << uint8(128);                           // slot
+            data << uint32(85105);                        // id
+            data << uint8(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
+            data << uint8(getLevel());                    // level
+            data << uint8(1);                             // stack amount
+        }
+    }
+
     GetSession()->SendPacket(&data);
 }
 
@@ -25515,6 +25541,8 @@ void Player::SendTalentsInfoData(bool pet)
     else
         BuildPlayerTalentsInfoData(&data);
     GetSession()->SendPacket(&data);
+
+    SendAurasForTarget(this);
 }
 
 void Player::BuildEnchantmentsInfoData(WorldPacket *data)
