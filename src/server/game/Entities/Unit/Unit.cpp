@@ -4076,10 +4076,7 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
         if (spell->getState() == SPELL_STATE_CASTING
             && (spell->m_spellInfo->ChannelInterruptFlags & flag)
             && spell->m_spellInfo->Id != except)
-        {
-            if (!CanCastWhileWalking(spell->GetSpellInfo()))
-                InterruptNonMeleeSpells(false);
-        }
+            InterruptNonMeleeSpells(false);
 
     UpdateInterruptMask();
 }
@@ -5745,8 +5742,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 break;
             }
 
-            // Improved Hot Streak
-            if (dummySpell->SpellIconID == 2999 && dummySpell->Id != 44445)
+            // Hot Streak
+            if (dummySpell->SpellIconID == 2999)
             {
                 if (effIndex != 0)
                     return false;
