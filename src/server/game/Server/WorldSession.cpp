@@ -189,23 +189,26 @@ bool WorldSession::Update(uint32 diff)
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed
     WorldPacket* packet;
-    //! Delete packet after processing by default
-    bool deletePacket = true;
     while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet))
     {
-        #if defined WINVER
-        switch(packet->GetOpcode())
-        {
-            case 0x03FA8:
-            case 0x0A8AC:
-            case 0x022EC:
-                break;
-            default:
-                sLog->outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
-                break;
-        }
-        #endif
+        /*#if 1
+        sLog->outError("MOEP: %s (0x%.4X)",
+                        LookupOpcodeName(packet->GetOpcode()),
+                        packet->GetOpcode());
+        #endif*/
 
+#if defined WINVER
+		switch(packet->GetOpcode())
+		{
+			case 0x03FA8:
+			case 0x0A8AC:
+			case 0x022EC:
+				break;
+			default:
+				sLog->outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+				break;
+		}
+#endif
         if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
             sLog->outError("SESSION: received non-existed opcode %s (0x%.4X)",
@@ -225,15 +228,8 @@ bool WorldSession::Update(uint32 diff)
                         if (!_player)
                         {
                             // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-                            //! If player didn't log out a while ago, it means packets are being sent while the server does not recognize
-                            //! the client to be in world yet. We will re-add the packets to the bottom of the queue and process them later.
                             if (!m_playerRecentlyLogout)
-                            {
-                                //! Because checking a bool is faster than reallocating memory
-                                deletePacket = false;
-                                //! Re-enqueue
-                                QueuePacket(packet);
-                            }
+                                LogUnexpectedOpcode(packet, "the player has not logged in yet");
                         }
                         else if (_player->IsInWorld())
                         {
@@ -251,7 +247,7 @@ bool WorldSession::Update(uint32 diff)
                         }
                         else
                         {
-                            // not expected _player or must checked in packet handler
+                            // not expected _player or must checked in packet hanlder
                             sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                             (this->*opHandle.handler)(*packet);
                             if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
@@ -301,10 +297,10 @@ bool WorldSession::Update(uint32 diff)
                                           packet->GetOpcode());
                         }
                         break;
-                    case STATUS_UNHANDLED:
-                        sLog->outDebug("SESSION: received not handled opcode %s (0x%.4X)",
-                            LookupOpcodeName(packet->GetOpcode()),
-                            packet->GetOpcode());
+                    case STATUS_UNHANDLED:    
+                        sLog->outDebug("SESSION: received not handled opcode %s (0x%.4X)",    
+                            LookupOpcodeName(packet->GetOpcode()),    
+                            packet->GetOpcode());    
                         break;
                 }
             }
@@ -320,8 +316,7 @@ bool WorldSession::Update(uint32 diff)
             }
         }
 
-        if (deletePacket)
-            delete packet;
+        delete packet;
     }
 
     ProcessQueryCallbacks();
