@@ -138,7 +138,6 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             me->setPowerType(POWER_ENERGY);
-            ElectronGUID = 0;
         }
         InstanceScript* pInstance;
         uint32 Spawned;
@@ -146,10 +145,6 @@ public:
         uint32 pToxitron;
         uint32 uiArcaneAnnihilator;
         uint32 uiPowerGenerator;
-        uint64 ElectronGUID;
-        uint64 ToxitronGUID;
-        uint64 ArcanotronGUID;
-        uint64 MagmatronGUID;
         bool Shield;
         bool Recharge;
 
@@ -176,7 +171,7 @@ public:
                 for (std::list<Creature*>::iterator itr = BossList.begin(); itr !=BossList.end(); ++itr)
                 {
                     uint64 ElectronGUID = 0;
-                    uint64 ToxintronGUID = 0;
+                    uint64 ToxitronGUID = 0;
                     uint64 ArcanotronGUID = 0;
                     uint64 MagmatronGUID = 0;
 
@@ -298,10 +293,6 @@ public:
         uint32 uiChemicalBomb;
         uint32 uiPoisonProtocol;
         uint32 uiPoisonSoakedShell;
-        uint64 ToxitronGUID;
-        uint64 ElectronGUID;
-        uint64 MagmatronGUID;
-        uint64 ArcanotronGUID;
 
         void Reset()
         {
@@ -324,7 +315,7 @@ public:
                 for (std::list<Creature*>::iterator itr = BossList.begin(); itr !=BossList.end(); ++itr)
                 {
                     uint64 ElectronGUID = 0;
-                    uint64 ToxintronGUID = 0;
+                    uint64 ToxitronGUID = 0;
                     uint64 ArcanotronGUID = 0;
                     uint64 MagmatronGUID = 0;
 
@@ -380,7 +371,7 @@ public:
             if (uiChemicalBomb <= diff)
             {
                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                DoCast(SPELL_CHEMICAL_BOMB);
+                    DoCast(pTarget, SPELL_CHEMICAL_BOMB);
                 uiChemicalBomb = urand(9000,10000);
             }
             else
@@ -389,7 +380,7 @@ public:
             if (uiPoisonProtocol <= diff)
             {
                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                DoCast(SPELL_POISON_PROTOCOL);
+                    DoCast(pTarget, SPELL_POISON_PROTOCOL);
                 uiPoisonProtocol = urand(15000,19000);
             }
             else
@@ -436,10 +427,6 @@ public:
         uint32 uiLightningConductor;
         uint32 uiUnstableShield;
         uint32 uiElectricalDischarge;
-        uint64 ToxitronGUID;
-        uint64 ElectronGUID;
-        uint64 MagmatronGUID;
-        uint64 ArcanotronGUID;
 
         void Reset()
         {
@@ -463,7 +450,7 @@ public:
                 for (std::list<Creature*>::iterator itr = BossList.begin(); itr !=BossList.end(); ++itr)
                 {
                     uint64 ElectronGUID = 0;
-                    uint64 ToxintronGUID = 0;
+                    uint64 ToxitronGUID = 0;
                     uint64 ArcanotronGUID = 0;
                     uint64 MagmatronGUID = 0;
 
@@ -551,11 +538,6 @@ public:
         }
         InstanceScript* pInstance;
 
-        uint64 ToxitronGUID;
-        uint64 ElectronGUID;
-        uint64 MagmatronGUID;
-        uint64 ArcanotronGUID;
-
         void Reset()
         {
             if (pInstance)
@@ -575,7 +557,7 @@ public:
                 for (std::list<Creature*>::iterator itr = BossList.begin(); itr !=BossList.end(); ++itr)
                 {
                     uint64 ElectronGUID = 0;
-                    uint64 ToxintronGUID = 0;
+                    uint64 ToxitronGUID = 0;
                     uint64 ArcanotronGUID = 0;
                     uint64 MagmatronGUID = 0;
 
