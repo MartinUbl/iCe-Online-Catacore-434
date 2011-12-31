@@ -7350,8 +7350,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Prohibited area teleport
     if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
     {
-        if (IsMounted())
-            Unmount();
         if (GetSession()->GetPlayer()->getLevel() < 58)
         {
             switch(newZone)
