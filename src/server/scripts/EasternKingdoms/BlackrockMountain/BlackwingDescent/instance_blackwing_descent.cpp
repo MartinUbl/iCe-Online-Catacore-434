@@ -55,6 +55,9 @@ public:
 
         void OnCreatureCreate(Creature* pCreature, bool add)
         {
+            if (!add)
+                return;
+
             switch(pCreature->GetEntry())
             {
                 case NPC_ELECTRON:        ElectronGUID  = pCreature->GetGUID(); break;
