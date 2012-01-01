@@ -3832,7 +3832,7 @@ class npc_odevzdavac: public CreatureScript
         {
             if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
             {
-                 QueryResult pocet = ScriptDatabase.PQuery("SELECT count FROM ice_bananky WHERE guid = %u", pPlayer->GetGUID()); // select punishment count
+                 QueryResult pocet = ScriptDatabase.PQuery("SELECT count FROM ice_bananky WHERE guid = %u AND done = 0", pPlayer->GetGUID()); // select punishment count
 
                  uint32 counter = 0;
                  if (pocet != NULL)
