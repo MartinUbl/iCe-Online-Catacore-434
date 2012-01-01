@@ -488,10 +488,13 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
     if (!rdungeonEntry || !sdungeonEntry || !qRew)
         return;
 
-    uint8 itemNum = uint8(qRew ? qRew->GetRewItemsCount() : 0);
+    uint8 currCount = 0;
+    for (uint8 k = 0; k < QUEST_REWARDS_COUNT; k++)
+        if (qRew->RewCurrencyId[k] > 0)
+            currCount++;
 
     sLog->outDebug("SMSG_LFG_PLAYER_REWARD [" UI64FMTD "] rdungeonEntry: %u - sdungeonEntry: %u - done: %u", GetPlayer()->GetGUID(), rdungeonEntry, sdungeonEntry, done);
-    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + itemNum * (4 + 4 + 4));
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + currCount * (4 + 4 + 4));
     data << uint32(rdungeonEntry);                         // Random Dungeon Finished
     data << uint32(sdungeonEntry);                         // Dungeon Finished
     data << uint8(done);
@@ -500,20 +503,20 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
     data << uint32(qRew->XPValue(GetPlayer()));
     data << uint32(reward->reward[done].variableMoney);
     data << uint32(reward->reward[done].variableXP);
-    data << uint8(itemNum);
-    if (itemNum)
+    data << uint8(currCount);
+    if (currCount)
     {
-        ItemPrototype const* iProto = NULL;
         for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         {
-            if (!qRew->RewItemId[i])
+            if (!qRew->RewCurrencyId[i])
                 continue;
 
-            iProto = ObjectMgr::GetItemPrototype(qRew->RewItemId[i]);
-
-            data << uint32(qRew->RewItemId[i]);
-            data << uint32(iProto ? iProto->DisplayInfoID : 0);
-            data << uint32(qRew->RewItemCount[i]);
+            data << uint32(qRew->RewCurrencyId[i]);
+            data << uint32(0); // unk?
+            if (qRew->RewCurrencyId[i] == 396 || qRew->RewCurrencyId[i] == 395 || qRew->RewCurrencyId[i] == 392)
+                data << uint32(qRew->RewCurrencyCount[i] * PLAYER_CURRENCY_PRECISION);
+            else
+                data << uint32(qRew->RewCurrencyCount[i]);
         }
     }
     SendPacket(&data);
