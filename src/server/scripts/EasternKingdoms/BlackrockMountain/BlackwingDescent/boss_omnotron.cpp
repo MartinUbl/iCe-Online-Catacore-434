@@ -432,8 +432,6 @@ public:
                     available.push_back(BossEncounters(i));
             }
 
-            sLog->outString("Available: %u", available.size());
-
             if (available.empty())
                 return E_MAX;
 
