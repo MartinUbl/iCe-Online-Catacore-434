@@ -745,7 +745,7 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  false, NULL,                                           "", achievementCommandTable},
-        { "bananky",        SEC_MODERATOR,      true,  NULL,                                           "", banankyCommandTable  },
+        { "plantaz",        SEC_MODERATOR,      true,  NULL,                                           "", banankyCommandTable  },
         { "gm",             SEC_MODERATOR,      true,  NULL,                                           "", gmCommandTable       },
         { "npc",            SEC_MODERATOR,      false, NULL,                                           "", npcCommandTable      },
         { "go",             SEC_MODERATOR,      false, NULL,                                           "", goCommandTable       },
