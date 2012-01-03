@@ -80,7 +80,7 @@ namespace Trinity
                 data << uint64(target_guid);
                 data << uint32(strlen(text) + 1);
                 data << text;
-                data << uint8 (_source ? _source->chatTag() : uint8(0));
+                data << uint8 (_source ? _source->GetChatTag() : uint8(0));
             }
 
             ChatMsg _msgtype;
@@ -113,7 +113,7 @@ namespace Trinity
                 data << uint64(target_guid);
                 data << uint32(strlen(str) + 1);
                 data << str;
-                data << uint8 (_source ? _source->chatTag() : uint8(0));
+                data << uint8 (_source ? _source->GetChatTag() : uint8(0));
             }
 
         private:

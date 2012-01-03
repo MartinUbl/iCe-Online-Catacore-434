@@ -118,6 +118,16 @@ struct PlayerTalent
     uint8 spec             : 8;
 };
 
+enum PlayerChatTag
+{
+    CHAT_TAG_NONE       = 0x00,
+    CHAT_TAG_AFK        = 0x01,
+    CHAT_TAG_DND        = 0x02,
+    CHAT_TAG_GM         = 0x04,
+    CHAT_TAG_UNK        = 0x08, // Probably battleground commentator
+    CHAT_TAG_DEV        = 0x10,
+};
+
 enum PlayerCurrencyState
 {
     PLAYERCURRENCY_UNCHANGED = 0,
@@ -1129,7 +1139,7 @@ class Player : public Unit, public GridObject<Player>
         bool ToggleDND();
         bool isAFK() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); }
         bool isDND() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); }
-        uint8 chatTag() const;
+        uint8 GetChatTag() const;
         std::string afkMsg;
         std::string dndMsg;
 

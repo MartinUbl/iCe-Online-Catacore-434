@@ -251,6 +251,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand gmCommandTable[] =
     {
         { "chat",           SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleGMChatCommand>,              "", NULL },
+        { "dev",            SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleGMDevCommand>,               "", NULL },
         { "fly",            SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleGMFlyCommand>,               "", NULL },
         { "ingame",         SEC_PLAYER,         true,  OldHandler<&ChatHandler::HandleGMListIngameCommand>,        "", NULL },
         { "list",           SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleGMListFullCommand>,          "", NULL },
@@ -1983,7 +1984,7 @@ void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint
     *data << uint32(messageLength);
     *data << message;
     if (session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
-        *data << uint8(session->GetPlayer()->chatTag());
+        *data << uint8(session->GetPlayer()->GetChatTag());
     else
         *data << uint8(0);
 }

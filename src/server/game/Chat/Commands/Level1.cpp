@@ -738,6 +738,39 @@ bool ChatHandler::HandleGMChatCommand(const char* args)
     return false;
 }
 
+// Enables or disables developer mode
+bool ChatHandler::HandleGMDevCommand(const char* args)
+{
+    if (!*args)
+    {
+        if (m_session->GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+            m_session->SendNotification("Dev mode ON");
+        else
+            m_session->SendNotification("Dev mode OFF");
+        return true;
+    }
+
+    std::string argstr = (char*)args;
+
+    if (argstr == "on")
+    {
+        m_session->GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
+        m_session->SendNotification("Dev mode ON");
+        return true;
+    }
+
+    if (argstr == "off")
+    {
+        m_session->GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER);
+        m_session->SendNotification("Dev mode OFF");
+        return true;
+    }
+
+    PSendSysMessage("Spatne parametry - pouzij bud ON nebo OFF");
+    SetSentErrorMessage(true);
+    return false;
+}
+
 //Enable\Dissable Invisible mode
 bool ChatHandler::HandleGMVisibleCommand(const char* args)
 {
