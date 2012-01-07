@@ -5825,7 +5825,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     basepoints0 = basepoints0 / 2;
 
                     triggered_spell_id = 12654;
-                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
+                    //basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
                     break;
                 }
                 // Glyph of Ice Block
