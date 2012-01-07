@@ -18443,14 +18443,22 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         break;
     case SPELLFAMILY_MAGE:
         // Hot Streak
-        if (dummySpell->Id == 44445 && procExtra & PROC_EX_CRITICAL_HIT && procSpell != NULL)
+        if (dummySpell->Id == 44445
+            && procExtra & PROC_EX_CRITICAL_HIT
+            && procSpell != NULL
+            && !(procFlag & PROC_FLAG_DONE_PERIODIC))
         {
             // Procs only from several spells
-            if (procSpell->SpellFamilyFlags[0] & 0x400013
-                || procSpell->SpellFamilyFlags[1] & 0x1000
-                || procSpell->SpellFamilyFlags[2] & 0x1008)
+            if (procSpell->Id == 133      // Fireball
+                || procSpell->Id == 44614 // Frostfire Bolt
+                || procSpell->Id == 2948  // Scorch
+                || procSpell->Id == 11366 // Pyroblast
+                || procSpell->Id == 92315 // Pyroblast!
+                || procSpell->Id == 2136) // Fire Blast
+            {
                 if (roll_chance_i(33))
                     CastSpell(this, 48108, true);
+            }
         }
     default: break;
     }
