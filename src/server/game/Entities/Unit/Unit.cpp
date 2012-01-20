@@ -1727,7 +1727,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
 
         static const uint32 BOSS_LEVEL = 88;
         static const float BOSS_RESISTANCE_CONSTANT = 510.0;
-        uint32 level = pVictim->getLevel();
+        uint32 level = getLevel();
         float resistanceConstant = 0.0f;
 
         if (level == BOSS_LEVEL)
@@ -6634,7 +6634,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (roll_chance_i(pchance))
                         if (triggeredByAura && triggeredByAura->GetCaster() && triggeredByAura->GetCaster()->isAlive()
                             && triggeredByAura->GetCaster()->getVictim())
-                            triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster()->getVictim(), 51699, true);
+                        {
+                            if (triggeredByAura->GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (!triggeredByAura->GetCaster()->ToPlayer()->HasSpellCooldown(51699))
+                                {
+                                    triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster()->getVictim(), 51699, true);
+                                    triggeredByAura->GetCaster()->ToPlayer()->AddSpellCooldown(51699, 0, time(NULL)+2);
+                                }
+                            }
+                        }
                 }
             }
             // Cut to the Chase
