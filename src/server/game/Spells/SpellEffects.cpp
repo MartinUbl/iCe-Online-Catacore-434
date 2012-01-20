@@ -5964,6 +5964,22 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         m_caster->CastCustomSpell(m_caster, 79132, &bp0, 0, 0, true);
                 }
             }
+            // Main Gauche bonus attack
+            else if (m_spellInfo->Id == 86392)
+            {
+                // Combat Potency energy gain chance
+                if (m_caster && roll_chance_i(20))
+                {
+                    Aura* pPotency = m_caster->GetAura(35551);
+                    if (!pPotency)
+                        pPotency = m_caster->GetAura(35550);
+                    if (!pPotency)
+                        pPotency = m_caster->GetAura(35541);
+
+                    if (pPotency)
+                        m_caster->CastSpell(m_caster, pPotency->GetSpellProto()->EffectTriggerSpell[0], true);
+                }
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:
