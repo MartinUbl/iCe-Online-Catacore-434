@@ -1344,7 +1344,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 else if (GetId() == 51690)
                 {
                     if (caster)
-                        caster->CastSpell(caster, 69107, true);
+                    {
+                        caster->CastSpell(caster, 69107, true); // invisibility aura
+                        caster->CastSpell(caster, 61851, true); // + damage aura
+                    }
                 }
                 // Cheap Shot, Garrote
                 if (apply && (GetSpellProto()->Id == 1833 || GetSpellProto()->Id == 703)) //1330
