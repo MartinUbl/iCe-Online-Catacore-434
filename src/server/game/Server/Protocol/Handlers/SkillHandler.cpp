@@ -95,6 +95,8 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
             return;
     }
 
+    _player->CheckArmorSpecialization();
+
     uint32 talentId, talentRank;
 
     for (uint32 i = 0; i < talentsCount; ++i)

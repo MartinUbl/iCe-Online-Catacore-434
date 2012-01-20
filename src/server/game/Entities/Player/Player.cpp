@@ -12679,6 +12679,210 @@ Item* Player::EquipItem(uint16 pos, Item *pItem, bool update)
     return pItem;
 }
 
+void Player::CheckArmorSpecialization()
+{
+    // special Armor type Specialization (all leather, mail and plate classes)
+    if (HasSpell(86530) /* druid */ || HasSpell(86531) /* rogue */ || HasSpell(86528) /* hunter */ || HasSpell(86529) /* shaman */ ||
+        HasSpell(86524) /* deathknight */ || HasSpell(86525) /* paladin */ || HasSpell(86526) /* warrior */)
+    {
+        int32 sameSub = ITEM_SUBCLASS_ARMOR_MISC;
+        Item* pTemp = NULL;
+        for (uint32 i = EQUIPMENT_SLOT_HEAD; i <= EQUIPMENT_SLOT_HANDS; i++)
+        {
+            // Exclude neck and shirt because of non-classified armor subclass
+            if (i == EQUIPMENT_SLOT_NECK || i == EQUIPMENT_SLOT_BODY)
+                continue;
+
+            pTemp = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (pTemp)
+            {
+                if (sameSub == ITEM_SUBCLASS_ARMOR_MISC)
+                    sameSub = pTemp->GetProto()->SubClass;
+                else if (sameSub == pTemp->GetProto()->SubClass)
+                    continue;
+                else
+                {
+                    sameSub = ITEM_SUBCLASS_ARMOR_MISC;
+                    break;
+                }
+            }
+            else
+            {
+                sameSub = ITEM_SUBCLASS_ARMOR_MISC;
+                break;
+            }
+        }
+
+        uint32 spell1 = 0;
+        uint32 spell2 = 0;
+
+        // Druid - Leather Specialization
+        if (HasSpell(86530))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_LEATHER)
+            {
+                RemoveAurasDueToSpell(86093);
+                RemoveAurasDueToSpell(86096);
+                RemoveAurasDueToSpell(86097);
+                RemoveAurasDueToSpell(86104);
+            }
+            else
+            {
+                switch (GetTalentBranchSpec(GetActiveSpec()))
+                {
+                    case SPEC_DRUID_BALANCE:
+                        spell1 = 86093;
+                        break;
+                    case SPEC_DRUID_FERAL:
+                        spell1 = 86096;
+                        spell2 = 86097;
+                        break;
+                    case SPEC_DRUID_RESTORATION:
+                        spell1 = 86104;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Rogue - Leather Specialization
+        if (HasSpell(86531))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_LEATHER)
+                RemoveAurasDueToSpell(86092);
+            else
+                spell1 = 86092;
+        }
+
+        // Hunter - Mail Specialization
+        if (HasSpell(86528))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_MAIL)
+                RemoveAurasDueToSpell(86538);
+            else
+                spell1 = 86538;
+        }
+
+        // Shaman - Mail Specialization
+        if (HasSpell(86529))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_MAIL)
+            {
+                RemoveAurasDueToSpell(86108);
+                RemoveAurasDueToSpell(86099);
+                RemoveAurasDueToSpell(86100);
+            }
+            else
+            {
+                switch (GetTalentBranchSpec(GetActiveSpec()))
+                {
+                    case SPEC_SHAMAN_ELEMENTAL:
+                        spell1 = 86108;
+                        break;
+                    case SPEC_SHAMAN_ENHANCEMENT:
+                        spell1 = 86099;
+                        break;
+                    case SPEC_SHAMAN_RESTORATION:
+                        spell1 = 86100;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Death Knight - Plate Specialization
+        if (HasSpell(86524))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_PLATE)
+            {
+                RemoveAurasDueToSpell(86537);
+                RemoveAurasDueToSpell(86536);
+                RemoveAurasDueToSpell(86113);
+            }
+            else
+            {
+                switch (GetTalentBranchSpec(GetActiveSpec()))
+                {
+                    case SPEC_DK_BLOOD:
+                        spell1 = 86537;
+                        break;
+                    case SPEC_DK_FROST:
+                        spell1 = 86536;
+                        break;
+                    case SPEC_DK_UNHOLY:
+                        spell1 = 86113;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Paladin - Plate Specialization
+        if (HasSpell(86525))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_PLATE)
+            {
+                RemoveAurasDueToSpell(86103);
+                RemoveAurasDueToSpell(86102);
+                RemoveAurasDueToSpell(86539);
+            }
+            else
+            {
+                switch (GetTalentBranchSpec(GetActiveSpec()))
+                {
+                    case SPEC_PALADIN_HOLY:
+                        spell1 = 86103;
+                        break;
+                    case SPEC_PALADIN_PROTECTION:
+                        spell1 = 86102;
+                        break;
+                    case SPEC_PALADIN_RETRIBUTION:
+                        spell1 = 86539;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Warrior - Plate Specialization
+        if (HasSpell(86526))
+        {
+            if (sameSub != ITEM_SUBCLASS_ARMOR_PLATE)
+            {
+                RemoveAurasDueToSpell(86110);
+                RemoveAurasDueToSpell(86101);
+                RemoveAurasDueToSpell(86535);
+            }
+            else
+            {
+                switch (GetTalentBranchSpec(GetActiveSpec()))
+                {
+                    case SPEC_WARRIOR_ARMS:
+                        spell1 = 86110;
+                        break;
+                    case SPEC_WARRIOR_FURY:
+                        spell1 = 86101;
+                        break;
+                    case SPEC_WARRIOR_PROTECTION:
+                        spell1 = 86535;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (spell1 != 0 && !HasAura(spell1))
+            CastSpell(this, spell1, true);
+        if (spell2 != 0 && !HasAura(spell2))
+            CastSpell(this, spell2, true);
+    }
+}
+
 void Player::QuickEquipItem(uint16 pos, Item *pItem)
 {
     if (pItem)
@@ -12737,6 +12941,9 @@ void Player::VisualizeItem(uint8 slot, Item *pItem)
         SetVisibleItemSlot(slot, pItem);
 
     pItem->SetState(ITEM_CHANGED, this);
+
+    if (slot < EQUIPMENT_SLOT_END)
+        CheckArmorSpecialization();
 }
 
 void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
@@ -13436,6 +13643,9 @@ void Player::SwapItem(uint16 src, uint16 dst)
             AutoUnequipOffhandIfNeed();
         }
 
+        if (IsEquipmentPos(src))
+            CheckArmorSpecialization();
+
         return;
     }
 
@@ -13656,6 +13866,9 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     AutoUnequipOffhandIfNeed();
+
+    if (IsEquipmentPos(src))
+        CheckArmorSpecialization();
 }
 
 void Player::AddItemToBuyBackSlot(Item *pItem)
@@ -17618,6 +17831,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     //apply all stat bonuses from items and auras
     SetCanModifyStats(true);
     UpdateAllStats();
+
+    // Check for armor specialization condition as well
+    CheckArmorSpecialization();
 
     // restore remembered power/health values (but not more max values)
     uint32 savedHealth = fields[50].GetUInt32();
