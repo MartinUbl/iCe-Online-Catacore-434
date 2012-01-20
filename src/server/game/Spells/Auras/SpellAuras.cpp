@@ -1962,6 +1962,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
 
+                // Vengeance for druids - remove at bear form unapply
+                if (GetId() == 5487 && !apply && caster && caster->HasAura(76691))
+                    caster->RemoveAurasDueToSpell(76691);
+
                 // Tiger's Fury, Berserk with Primal Madness talent
                 if (GetId() == 5217 || GetId() == 50334)
                 {

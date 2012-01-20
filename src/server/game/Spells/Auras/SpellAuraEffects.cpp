@@ -2492,6 +2492,33 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->RemoveAura(64821);
                 }
                 break;
+
+            case 76691: // Vengeance (multi-class talent bonus)
+            {
+                AuraEffect* pFrst = GetBase()->GetEffect(EFFECT_0);
+                AuraEffect* pScnd = GetBase()->GetEffect(EFFECT_1);
+
+                if (!pFrst || !pScnd)
+                {
+                    caster->RemoveAurasDueToSpell(76691);
+                    break;
+                }
+
+                // drops 0.1f/15 of maxhealth every 2 seconds (so it will remove whole 10% of max health after 30secs)
+                int32 dropamount = GetAmount()/15.0f;
+
+                if (pFrst->GetAmount() > dropamount && pScnd->GetAmount() > dropamount)
+                {
+                    pFrst->ChangeAmount(pFrst->GetAmount()-dropamount);
+                    pScnd->ChangeAmount(pScnd->GetAmount()-dropamount);
+
+                    GetBase()->SetNeedClientUpdateForTargets();
+                }
+                else
+                    caster->RemoveAurasDueToSpell(76691);
+
+                break;
+            }
         }
         break;
         case SPELLFAMILY_MAGE:

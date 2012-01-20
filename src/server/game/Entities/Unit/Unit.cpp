@@ -7860,6 +7860,41 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             break;
     }
 
+    // Vengeance (shared handler for 4 spells)
+    if (dummySpell && (dummySpell->Id == 93098 || dummySpell->Id == 93099 || dummySpell->Id == 84840 || dummySpell->Id == 84839))
+    {
+        if (Aura* pVengeance = GetAura(76691))
+        {
+            AuraEffect* pFrst = pVengeance->GetEffect(EFFECT_0);
+            AuraEffect* pScnd = pVengeance->GetEffect(EFFECT_1);
+            AuraEffect* pThrd = pVengeance->GetEffect(EFFECT_2);
+            if (!pFrst || !pScnd || !pThrd)
+                return true;
+
+            int32 bp = damage*0.05f;
+
+            if (pFrst->GetAmount()+bp >= GetMaxHealth()*0.1f)
+                bp = GetMaxHealth()*0.1f - pFrst->GetAmount();
+
+            pFrst->ChangeAmount(pFrst->GetAmount()+bp);
+            pScnd->ChangeAmount(pScnd->GetAmount()+bp);
+
+            if (pFrst->GetAmount() > pThrd->GetAmount())
+                pThrd->SetAmount(pFrst->GetAmount());
+
+            pVengeance->SetNeedClientUpdateForTargets();
+        }
+        else
+        {
+            int32 bp = damage*0.05f;
+            CastCustomSpell(this, 76691, &bp, &bp, &bp, true);
+        }
+
+        ToPlayer()->AddSpellCooldown(76691,0,time(NULL) + cooldown);
+        // we handled everything, leave
+        return true;
+    }
+
     // if not handled by custom case, get triggered spell from dummySpell proto
     if (!triggered_spell_id)
         triggered_spell_id = dummySpell->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
