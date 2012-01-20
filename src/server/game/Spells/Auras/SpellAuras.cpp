@@ -1451,10 +1451,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_SHAMAN:
                 {
                     // Spirit Walk
-                    if (caster && target && GetId() == 58876)
+                    if (caster && target && GetId() == 58875)
                     {
                         // Removes snares and roots.
                         target->RemoveMovementImpairingAuras();
+                        target->CastSpell(target, 58876, true);
                         break;
                     }
                 }
