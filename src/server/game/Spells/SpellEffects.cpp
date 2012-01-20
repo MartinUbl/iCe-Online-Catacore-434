@@ -2997,6 +2997,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // Vanish (not exist, change with Stealth - needs stealth to be cast)
         case 18461:
         {
+            unitTarget->CombatStop(true);
             unitTarget->RemoveMovementImpairingAuras();
             unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
 
