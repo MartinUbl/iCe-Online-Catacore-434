@@ -6029,7 +6029,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             case SPELL_EFFECT_JUMP:
             case SPELL_EFFECT_JUMP_DEST:
-            case SPELL_EFFECT_CHARGE:
             case SPELL_EFFECT_CHARGE_DEST:
             {
                 /* allow quest-based jumps */
