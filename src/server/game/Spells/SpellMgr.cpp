@@ -4390,6 +4390,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 15237: // Holy Nova
             spellInfo->EffectRadiusIndex[0] = 13;
+            spellInfo->EffectRadiusIndex[1] = 13;
             count++;
             break;
         case 74434: // Soulburn
