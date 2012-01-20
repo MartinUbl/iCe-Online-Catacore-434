@@ -1183,6 +1183,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                else if (m_spellInfo->Id == 79136)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        damage += 0.176f*((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK);
+                }
 
                 // Eviscerate and Envenom
                 if (m_spellInfo->Id == 2098 || m_spellInfo->Id == 32645)
