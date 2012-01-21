@@ -12685,7 +12685,7 @@ void Player::CheckArmorSpecialization()
     if (HasSpell(86530) /* druid */ || HasSpell(86531) /* rogue */ || HasSpell(86528) /* hunter */ || HasSpell(86529) /* shaman */ ||
         HasSpell(86524) /* deathknight */ || HasSpell(86525) /* paladin */ || HasSpell(86526) /* warrior */)
     {
-        int32 sameSub = ITEM_SUBCLASS_ARMOR_MISC;
+        uint32 sameSub = ITEM_SUBCLASS_ARMOR_MISC;
         Item* pTemp = NULL;
         for (uint32 i = EQUIPMENT_SLOT_HEAD; i <= EQUIPMENT_SLOT_HANDS; i++)
         {
