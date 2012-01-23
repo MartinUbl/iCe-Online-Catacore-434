@@ -316,13 +316,13 @@ public:
     {
         sharedAI(Creature* c): ScriptedAI(c)
         {
-            if(me->GetEntry() == 8403) //Jeremiah
+            if (me->GetEntry() == 8403) //Jeremiah
             {
                 CriteriaKiss = CRITERIA_KISS_JEREMIAH;
                 CriteriaHandful = CRITERIA_HANDFUL_ON_JEREMIAH;
                 AchievementId = ACHIEVEMENT_FLIRT_WITH_DISASTER_H;
             }
-            else if(me->GetEntry() == 9099) //Sraaz
+            else if (me->GetEntry() == 9099) //Sraaz
             {
                 CriteriaKiss = CRITERIA_KISS_SRAAZ;
                 CriteriaHandful = CRITERIA_HANDFUL_ON_SRAAZ;
@@ -336,9 +336,9 @@ public:
 
         bool HavePerfume(Player* pPlayer)
         {
-            for(int i = 0; i < (sizeof(PerfumeIds)/sizeof(uint32)); i++)
+            for (uint32 i = 0; i < uint32(sizeof(PerfumeIds)/sizeof(uint32)); i++)
             {
-                if(pPlayer->HasAura(PerfumeIds[i]))
+                if (pPlayer->HasAura(PerfumeIds[i]))
                     return true;
             }
             return false;
@@ -346,10 +346,10 @@ public:
 
         void ReceiveEmote(Player* pPlayer, uint32 text_emote)
         {
-            if(pPlayer->GetDrunkValue() < 0xFFF || !HavePerfume(pPlayer))
+            if (pPlayer->GetDrunkValue() < 0xFFF || !HavePerfume(pPlayer))
                 return;
 
-            if(text_emote == TEXTEMOTE_KISS)
+            if (text_emote == TEXTEMOTE_KISS)
             {
                 pPlayer->GetAchievementMgr().SetCriteriaProgress(CriteriaKiss, AchievementId, 1, PROGRESS_SET);
             }
@@ -359,10 +359,10 @@ public:
         {
             Player* pPlayer = (Player*)caster;
 
-            if(!pPlayer || pPlayer->GetDrunkValue() < 0xFFF || !HavePerfume(pPlayer))
+            if (!pPlayer || pPlayer->GetDrunkValue() < 0xFFF || !HavePerfume(pPlayer))
                 return;
 
-            if(spell->Id == 27571)
+            if (spell->Id == 27571)
                 pPlayer->GetAchievementMgr().SetCriteriaProgress(CriteriaHandful, AchievementId, 1, PROGRESS_SET);
         }
     };
