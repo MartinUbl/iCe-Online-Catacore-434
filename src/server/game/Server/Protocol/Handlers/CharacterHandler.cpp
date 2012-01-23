@@ -1759,6 +1759,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     case RACE_UNDEAD_PLAYER:
     case RACE_TROLL:
     case RACE_BLOODELF:
+    case RACE_GOBLIN:
         team = BG_TEAM_HORDE;
         break;
     default:
@@ -1788,6 +1789,9 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
         case RACE_NIGHTELF:
             trans->PAppend("INSERT INTO `character_skills` (guid, skill, value, max) VALUES (%u, 113, 300, 300)", GUID_LOPART(guid));
             break;
+        case RACE_WORGEN:
+            trans->PAppend("INSERT INTO `character_skills` (guid, skill, value, max) VALUES (%u, 791, 300, 300)", GUID_LOPART(guid));
+            break;
         }
     }
     else if (team == BG_TEAM_HORDE)
@@ -1806,6 +1810,9 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
             break;
         case RACE_BLOODELF:
             trans->PAppend("INSERT INTO `character_skills` (guid, skill, value, max) VALUES (%u, 137, 300, 300)", GUID_LOPART(guid));
+            break;
+        case RACE_GOBLIN:
+            trans->PAppend("INSERT INTO `character_skills` (guid, skill, value, max) VALUES (%u, 792, 300, 300)", GUID_LOPART(guid));
             break;
         }
     }
@@ -1876,6 +1883,11 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
                         quests << uint32(qinfo->GetQuestId());
                         quests << ",";
                     }
+
+                    // Transaction for Portal quests
+                    trans->PAppend("UPDATE character_queststatus SET quest = '262450' WHERE guid = '%u' AND quest = '26245'", GUID_LOPART(guid)); // Deepholm
+                    trans->PAppend("UPDATE character_queststatus SET quest = '27537' WHERE guid = '%u' AND quest = '26784", GUID_LOPART(guid)); // Twilight Highlands
+                    trans->PAppend("UPDATE character_queststatus SET quest = '14482' WHERE guid = '%u' AND quest = '25924'", GUID_LOPART(guid)); // Vashj'ir
                 }
                 else // if (team == BG_TEAM_HORDE)
                 {
@@ -1884,6 +1896,11 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
                         quests << uint32(qinfo->GetQuestId());
                         quests << ",";
                     }
+
+                    // Transaction for Portal quests
+                    trans->PAppend("UPDATE character_queststatus SET quest = '26245' WHERE guid = '%u' AND quest = '262450'", GUID_LOPART(guid)); // Deepholm
+                    trans->PAppend("UPDATE character_queststatus SET quest = '26784' WHERE guid = '%u' AND quest = '27537'", GUID_LOPART(guid)); // Twilight Highlands
+                    trans->PAppend("UPDATE character_queststatus SET quest = '25924' WHERE guid = '%u' AND quest = '14482'", GUID_LOPART(guid)); // Vashj'ir
                 }
             }
 
@@ -1915,11 +1932,23 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
         {
             trans->PAppend("INSERT INTO `character_homebind` VALUES (%u,0,1519,-8867.68,673.373,97.9034)",GUID_LOPART(guid));
             Player::SavePositionInDB(0, -8867.68f, 673.373f, 97.9034f, 0.0f, 1519, GUID_LOPART(guid));
+
+            if (race == RACE_WORGEN) // for Worgen
+            {
+                trans->PAppend("INSERT INTO `character_homebind` VALUES (%u,654,4714,-1451.53,1403.35,35.5561)",GUID_LOPART(guid));
+                Player::SavePositionInDB(654, -1451.53f, 1403.35f, 35.5561f, 0.0f, 4714, GUID_LOPART(guid));
+            }
         }
         else
         {
             trans->PAppend("INSERT INTO `character_homebind` VALUES (%u,1,1637,1633.33,-4439.11,15.7588)",GUID_LOPART(guid));
             Player::SavePositionInDB(1, 1633.33f, -4439.11f, 15.7588f, 0.0f, 1637, GUID_LOPART(guid));
+
+            if (race  == RACE_GOBLIN) // for Goblin
+            {
+                trans->PAppend("INSERT INTO `character_homebind` VALUES (%u,648,4737,-8423.81,1361.3,104.671)",GUID_LOPART(guid));
+                Player::SavePositionInDB(648, -8423.81f, 1361.3f, 104.671f, 0.0f, 4737, GUID_LOPART(guid));
+            }
         }
 
         // Achievement conversion
