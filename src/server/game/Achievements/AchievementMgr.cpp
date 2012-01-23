@@ -1917,6 +1917,20 @@ CriteriaProgress* AchievementMgr::GetCriteriaProgress(AchievementCriteriaEntry c
     return &(iter->second);
 }
 
+//Used by scripts
+void AchievementMgr::SetCriteriaProgress(uint32 entry, uint32 achievementEntry, uint32 changeValue, ProgressType ptype)
+{
+    AchievementCriteriaEntry const *centry = sAchievementCriteriaStore.LookupEntry(entry);
+    AchievementEntry const *aentry = sAchievementStore.LookupEntry(achievementEntry);
+    if(!centry)
+        return;
+
+    SetCriteriaProgress(centry, changeValue, ptype);
+
+    if (IsCompletedCriteria(centry,aentry))
+        CompletedCriteriaFor(aentry);
+}
+
 void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* entry, uint32 changeValue, ProgressType ptype)
 {
     // Don't allow to cheat - doing timed achievements without timer active
