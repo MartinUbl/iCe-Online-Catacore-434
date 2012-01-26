@@ -5399,6 +5399,93 @@ void Player::RepopAtGraveyard()
         return;
     }
 
+    // Vashj'ir GraveYard fix
+    switch (GetAreaId())
+    {
+        case 4966: // Biel'aran Ridge
+        case 5173: // The Severed Span
+        case 5247: // The Tidebreaker
+        case 5248: // Voldrin's Hold
+        case 5249: // Stygian Bounty
+        case 5250: // Galerek's Remorse
+        case 5251: // The Iron Reaper
+        case 5252: // The Intrepid
+            TeleportTo(0, -7227.220215f, 4284.520020f, -274.369995f, 0.0f); // GY ID - 1725
+            break;
+        case 5004: // Throne of the Tides
+        case 5579: // Throne of the Tides (entrace)
+        case 4738: // Abyssal Maw
+            TeleportTo(0, -5587.100098f, 5456.669922f, -1799.194092f, 0.0f); // GY ID - 1778
+            break;
+        case 4962: // Nespirah
+        case 5005: // Silver Tide Hollow
+        case 5007: // Ruins of Thelserai Temple
+        case 5008: // Shimmering Grotto
+        case 4955: // The Lightless Reaches
+        case 4961: // Silver Tide Trench
+        case 4963: // Glimmerdeep Gorge
+            TeleportTo(0, -6117.809082f, 4115.200195f, -510.901398f, 0.0f); // GY ID - 1722
+            break;
+        case 5053: // Gurboggle's Ledge
+        case 5055: // Gnaws' Boneyard
+        case 5059: // The Clutch
+        case 5058: // Deepmist Grotto
+        case 5054: // The Skeletal Reef
+        case 4815:// Kelp'thar Forest
+            TeleportTo(0, -5001.810059f, 3444.669922f, -126.063004f, 0.0f); // GY ID - 1723
+            break;
+        case 5047: // Abyssal Breach
+        case 4975: // Tenebrous Cavern
+        case 4974: // Underlight Canyon
+        case 5102: // Nightmare Depths
+        case 5107: // Sira'kess Front
+        case 5134: // Seabrush
+        case 5145: // Abyssal Depths
+        case 5105: // Pincer X2
+        case 5106: // The Verne
+            TeleportTo(0, -6296.770020f, 6046.689941f, -789.137268f, 0.0f); // GY ID - 1745
+            break;
+        case 4976: // Darkbreak Cove
+        case 4977: // Korthun's End
+        case 5135: // Abandoned Reef
+        case 5710: // The Lightless Reaches
+            TeleportTo(0, -6819.247559f, 6120.800293f, -617.401917f, 0.0f); // GY ID - 1746
+            break;
+        case 5051: // Seafarer's Tomb
+        case 5057: // Smuggler's Scar
+        case 5052: // Legion's Fate
+        case 4953: // Kelp'thar Forest
+        case 5012: // The Briny Cutter
+        case 5030: // Shallow's End
+        case 5056: // The Immortal Coil
+        case 5070: // Budd's Dig
+        case 5071: // Gorrok's Lament
+        case 5711: // The Lightless Reaches
+            TeleportTo(0, -4631.298828f, 3796.622803f, -120.853119f, 0.0f); // GY ID - 1724
+            break;
+        case 4971: // L'ghorek
+        case 5100: // Promontory Point
+        case 5101: // Deepfin Ridge
+        case 5103: // The Scalding Chasm
+        case 5104: // The Undershell
+        case 5507: // The Cerebrillum
+            TeleportTo(0, -5845.369629f, 6797.732422f, -1016.566772f, 0.0f); // GY ID - 1747
+            break;
+        case 4970: // Legion's Rest
+        case 4969: // Tranquil Wash
+        case 4967: // Ruins of Vashj'ir
+        case 4968: // Quel'Dormir Terrace
+        case 5089: // Quel'Dormir Gardens
+        case 5124: // Quel'Dormir Temple
+        case 5090: // Nar'shola Terrace
+        case 5144: // Shimmering Expanse
+        case 5146: // Vashj'ir
+            TeleportTo(0, -6800.419922f, 4561.220215f, -604.364014f, 0.0f); // GY ID - 1721
+            break;
+        default:      
+            break;
+    }
+
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < sObjectMgr->GetFatalDepthForZone(GetZoneId()))
     {
