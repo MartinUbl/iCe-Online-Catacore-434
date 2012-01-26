@@ -7404,8 +7404,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
          }
         if (GetSession()->GetPlayer()->GetMapId() == 746) // Special for Plantaz
         {
-            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurect Sickness)
-            QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
+            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurection Sickness)
+            QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
             uint32 counter = 0;
             std::string duvod;
             if (result != NULL) // if result not null
@@ -7416,6 +7416,15 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             }
             ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
             ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
+        }
+
+        Aura* aur = GetAura(15007);
+
+        if (aur && aur->IsPermanent() && GetSession()->GetPlayer()->GetMapId() != 746) // Exiting Plantaz
+        {
+            TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f); // Plantaz
+            GetSession()->SendNotification("Nemuzes se portovat z plantazee, dokud nebudes mit splneny svuj trest!"); // Czech
+            GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
         }
     }
 
