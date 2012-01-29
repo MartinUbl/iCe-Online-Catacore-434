@@ -93,12 +93,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
     recv_data >> guid >> menuId >> gossipListId;
 
     if (_player->PlayerTalkClass->GossipOptionCoded(gossipListId))
-    {
-        // recheck
-        sLog->outBasic("reading string");
         recv_data >> code;
-        sLog->outBasic("string read: %s", code.c_str());
-    }
 
     Creature *unit = NULL;
     GameObject *go = NULL;
