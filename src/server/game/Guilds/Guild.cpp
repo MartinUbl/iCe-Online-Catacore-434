@@ -2114,10 +2114,15 @@ void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
     if (!pPlayer || type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
+    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
+    if (!result)
+        return;
+
+    uint32 new_id = (*result)[0].GetUInt32() + 1;
     uint32 date = secsToTimeBitFields(time(NULL));
 
-    CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
-        uint32(m_id), uint32(type), uint32(param), uint32(date), uint32(pPlayer->GetGUID()));
+    CharacterDatabase.PQuery("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
+        uint32(new_id), uint32(m_id), uint32(type), uint32(param), uint32(date), uint32(pPlayer->GetGUID()));
 }
 
 void Guild::AddGuildNews(GuildNewsType type, uint64 param)
@@ -2128,10 +2133,15 @@ void Guild::AddGuildNews(GuildNewsType type, uint64 param)
     if (type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
+    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
+    if (!result)
+        return;
+
+    uint32 new_id = (*result)[0].GetUInt32() + 1;
     uint32 date = secsToTimeBitFields(time(NULL));
 
-    CharacterDatabase.PQuery("INSERT INTO guild_news (guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u)",
-        uint32(m_id), uint32(type), uint32(param), uint32(date), 0);
+    CharacterDatabase.PQuery("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
+        uint32(new_id), uint32(m_id), uint32(type), uint32(param), uint32(date), 0);
 }
 
 void Guild::HandleQuery(WorldSession *session)
