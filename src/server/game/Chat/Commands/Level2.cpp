@@ -4579,3 +4579,67 @@ bool ChatHandler::HandleTitlesCurrentCommand(const char* args)
 
     return true;
 }
+bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
+{
+    if (!*args) // if command empty
+    {
+        SendSysMessage("Syntaxe prikazu je \n .reset archaeology <jmeno>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char* chname = strtok((char*)args, " ");
+
+    if (!chname)
+    {
+        SendSysMessage("Syntaxe prikazu je \n .reset archaeology <jmeno>");
+        SetSentErrorMessage(true);
+        return false;
+    }
+    
+    uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname); // Get player GUID by Name
+    Player* target = sObjectMgr->GetPlayer(pguid); // Get Player by GUID
+    uint32 counter = 0;
+
+    if (target) // check if is player online
+    {
+        if (HasLowerSecurity(target, 0)) // Security Check
+            return false;
+        SendSysMessage("Hrac musi byt offline!");
+        SetSentErrorMessage(true);
+        return false;
+    }
+    else // if player offline
+    {
+        if (HasLowerSecurity(target, pguid)) // Security Check
+            return false;
+
+        QueryResult activeres = CharacterDatabase.PQuery("SELECT count(active) FROM character_research_project WHERE guid = %u AND active = 1",GUID_LOPART(pguid)); // Result query
+
+        if (activeres) // If result OK
+        {
+            Field *fields = activeres->Fetch();
+
+            counter = fields[0].GetUInt32();
+        }
+        else
+        {
+            SendSysMessage("Hrac nema zadny aktivni projekt.");
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (counter >= 10) // if is active list > 10.. continue
+        {
+            CharacterDatabase.PExecute("UPDATE character_research_project SET active = 0 WHERE guid = %u",GUID_LOPART(pguid));
+            PSendSysMessage("Hotovo, hrac byl resetovan.");
+        }
+        else // if not.. fuck off
+        {
+            SendSysMessage("Hrac je podvodnik, takze Fuck Off :-P");
+            SetSentErrorMessage(true);
+            return false;
+        }
+    }
+    return true;
+}

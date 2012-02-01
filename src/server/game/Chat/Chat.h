@@ -336,6 +336,7 @@ class ChatHandler
 
         bool HandleOpcodeTestCommand(const char* args);
         bool HandleArchaeologyCommand(const char* args);
+        bool HandleResetArchaeologyCommand(const char* args);
         bool HandleResearchingCommand(const char* args);
         bool HandleNpcSpawncircle(const char* args);
         bool HandleNpcSetSite(const char* args);
