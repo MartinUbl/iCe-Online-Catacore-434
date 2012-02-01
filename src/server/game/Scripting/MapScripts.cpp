@@ -33,6 +33,7 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "MapRefManager.h"
+#include "AchievementMgr.h"
 
 /// Put scripts in the execution queue
 void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, Object* target)
@@ -478,16 +479,34 @@ void Map::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_FIELD_SET:
-                // Source or target must be Creature.
-                if (Creature *cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                switch (step.script->FieldSet.type) // Type for Creature
                 {
-                    // Validate field number.
-                    if (step.script->FieldSet.FieldID <= OBJECT_FIELD_ENTRY || step.script->FieldSet.FieldID >= cSource->GetValuesCount())
-                        sLog->outError("%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
-                            step.script->GetDebugInfo().c_str(), step.script->FieldSet.FieldID,
-                            cSource->GetValuesCount(), cSource->GetTypeId(), cSource->GetEntry(), cSource->GetGUIDLow());
-                    else
-                        cSource->SetUInt32Value(step.script->FieldSet.FieldID, step.script->FieldSet.FieldValue);
+                    case SF_FIELD_TYPE_CREATURE:
+                        // Source or target must be Creature.
+                        if (Creature *cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                        {
+                            // Validate field number.
+                            if (step.script->FieldSet.FieldID <= OBJECT_FIELD_ENTRY || step.script->FieldSet.FieldID >= cSource->GetValuesCount())
+                                sLog->outError("%s wrong field %u (max count: %u) in object (TypeId: %u, Entry: %u, GUID: %u) specified, skipping.",
+                                    step.script->GetDebugInfo().c_str(), step.script->FieldSet.FieldID,
+                                    cSource->GetValuesCount(), cSource->GetTypeId(), cSource->GetEntry(), cSource->GetGUIDLow());
+                            else
+                                cSource->SetUInt32Value(step.script->FieldSet.FieldID, step.script->FieldSet.FieldValue);
+                        }
+                        break;
+                    case SF_FIELD_TYPE_PLAYER: // Type for Payer
+                        // Source or target must be Player.
+                        if (Player* pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                        {
+                             // Validate field number.
+                            if (step.script->FieldSet.FieldID <= OBJECT_FIELD_ENTRY || step.script->FieldSet.FieldID >= pSource->GetValuesCount())
+                                return;
+                            else
+                                pSource->SetUInt32Value(step.script->FieldSet.FieldID, step.script->FieldSet.FieldValue);
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 break;
 
@@ -932,6 +951,100 @@ void Map::ScriptsProcess()
                 // Source must be Player.
                 if (Player *pSource = _GetScriptPlayer(source, true, step.script))
                     pSource->SendMovieStart(step.script->PlayMovie.MovieID);
+                break;
+            // iCe only
+            case SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT:
+                // Source or Target must be Player.
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                {
+                    AchievementEntry const* entry = sAchievementStore.LookupEntry(step.script->Achiev.AchievementID);
+                    AchievementCriteriaEntryList const* cList = sAchievementMgr->GetAchievementCriteriaByAchievement(entry->ID);
+                    if (!cList)
+                        return;
+
+                    uint32 counter = 0;
+                    for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+                    {
+                        AchievementCriteriaEntry const* criteria = *itr;
+                        CriteriaProgress const* progress = pSource->GetAchievementMgr().GetCriteriaProgress(criteria);
+                        if (!progress)
+                            continue;
+
+                        if (pSource->GetAchievementMgr().IsCompletedCriteria(criteria,entry))
+                            counter += 1;
+                    }
+                    if (counter >= step.script->Achiev.Criteria_count)
+                    {
+                        pSource->CompletedAchievement(entry);
+                        return;
+                    }
+                }
+                break;
+            case SCRIPT_COMMAND_LEARN_SPELL:
+                // Source or Target must be Player.
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                    pSource->learnSpell(step.script->LearnSpell.SpellID, false);
+                break;
+            case SCRIPT_COMMAND_SUMMON_TO_PLAYER:
+            {
+                // Source must be WorldObject (Creature / GameObject).
+                GameObject* uObject = NULL;
+                Creature* uCreature = NULL;
+                switch (step.script->SummonOnPlayer.type)
+                {
+                    case SF_SUMMON_TYPE_CREATURE:
+                        uCreature= dynamic_cast<Creature*>(source);
+                        break;
+                    case SF_SUMMON_TYPE_OBJECT:
+                        uObject = dynamic_cast<GameObject*>(source);
+                        break;
+                    default:
+                       uCreature= dynamic_cast<Creature*>(source);
+                       break;
+                }
+                if (WorldObject* pSummoner = _GetScriptWorldObject(source, true, step.script))
+                {
+                    if (step.script->SummonOnPlayer.type == SF_SUMMON_TYPE_CREATURE)
+                        pSummoner->SummonCreature(step.script->SummonOnPlayer.entry,0.0f,0.0f,0.0f,0.0f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->SummonOnPlayer.despawn*IN_MILLISECONDS);
+                    else if (step.script->SummonOnPlayer.type == SF_SUMMON_TYPE_OBJECT)
+                        pSummoner->SummonGameObject(step.script->SummonOnPlayer.entry,pSummoner->GetPositionX(),pSummoner->GetPositionY(),pSummoner->GetPositionZ(),0.0f,0,0,0,0,step.script->SummonOnPlayer.despawn*IN_MILLISECONDS);
+                }
+            }
+                break;
+            case SCRIPT_COMMAND_CHANGE_FACTION:
+                // Source or Target must be Creature.
+                if (Creature *cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script))
+                {
+                    if (cSource->isAlive())
+                    {
+                        cSource->setFaction(step.script->ChangeFaction.faction);
+                        cSource->AddAura(85474,cSource);
+                    }
+                }
+                break;
+            case SCRIPT_COMMAND_GIVE_CURRENCY:
+                // Source or Target must be Player.
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                    pSource->ModifyCurrency(step.script->GiveCurrency.currency_id,urand(step.script->GiveCurrency.mincount,step.script->GiveCurrency.maxcount));
+                break;
+            case SCRIPT_COMMAND_GIVE_SKILL:
+                // Source or Target must be Player
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                {
+                    uint32 skillid = step.script->GiveSkill.skill_id;
+                    uint32 skillvalue = step.script->GiveSkill.value;
+                    uint16 GetSkillValue = pSource->GetSkillValue(skillid);
+                    if (GetSkillValue < pSource->GetMaxSkillValue(skillid))
+                        pSource->SetSkill(skillid,pSource->GetSkillStep(skillid),GetSkillValue+skillvalue,pSource->GetMaxSkillValue(skillid));
+                }
+                break;
+            case SCRIPT_COMMAND_MODIFY_REPUTATION:
+                // Source or Target must be Player
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                {
+                    if (pSource->GetReputationRank(step.script->ModRep.faction_id) < 7)
+                        pSource->SetReputation(step.script->ModRep.faction_id,pSource->GetReputation(step.script->ModRep.faction_id)+step.script->ModRep.value);
+                }
                 break;
 
             default:

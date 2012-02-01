@@ -6923,6 +6923,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     caster->ToPlayer()->RemoveSpellCooldown(53351, true);
             }
 
+            if (m_spellProto->Id == 85474 && caster->GetTypeId() == TYPEID_UNIT) // [DND] Hide text (unused)
+            {
+                CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(caster->GetEntry());
+                caster->setFaction(cInfo->faction_A);
+            }
+
             switch(m_spellProto->SpellFamilyName)
             {
                 case SPELLFAMILY_GENERIC:

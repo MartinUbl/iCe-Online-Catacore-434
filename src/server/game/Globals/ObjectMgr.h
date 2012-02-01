@@ -121,6 +121,14 @@ enum eScriptFlags
 
     // Orientation flags
     SF_ORIENTATION_FACE_TARGET  = 0x1,
+    
+    // SummonOnPlayer flags
+    SF_SUMMON_TYPE_CREATURE = 0,
+    SF_SUMMON_TYPE_OBJECT = 1,
+    
+    // Field Set flags
+    SF_FIELD_TYPE_CREATURE = 0,
+    SF_FIELD_TYPE_PLAYER = 1,
 };
 
 struct ScriptInfo
@@ -153,8 +161,9 @@ struct ScriptInfo
 
         struct                      // SCRIPT_COMMAND_FIELD_SET (2)
         {
-            uint32 FieldID;         // datalong
-            uint32 FieldValue;      // datalong2
+            uint8 type;             // datalong
+            uint32 FieldID;         // datalong2
+            uint32 FieldValue;      // dataint
         } FieldSet;
 
         struct                      // SCRIPT_COMMAND_MOVE_TO (3)
@@ -306,6 +315,48 @@ struct ScriptInfo
         {
             uint32 MovieID;         // datalong
         } PlayMovie;
+
+        struct                      // SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT (35)
+        {
+            uint32 AchievementID;   // datalong
+            uint32 Criteria_count;  // datalong2
+        } Achiev;
+
+        struct                     // SCRIPT_COMMAND_LEARN_SPELL (36)
+        {
+            uint32 SpellID;        // datalong
+        } LearnSpell;
+
+        struct                      // SCRIPT_COMMAND_SUMMON_TO_PLAYER (37)
+        {
+            uint8 type;        // datalong
+            uint32 entry;       // datalong2
+            uint32 despawn;     // dataint
+        } SummonOnPlayer;
+
+        struct                  // SCRIPT_COMMAND_CHANGE_FACTION (38)
+        {
+            uint8 faction;    // datalong
+        } ChangeFaction;
+
+        struct                  // SCRIPT_COMMAND_GIVE_CURRENCY (39)
+        {
+            uint32 currency_id; // datalong
+            int32 mincount; // datalong2
+            int32 maxcount; // dataint
+        } GiveCurrency;
+
+        struct                 // SCRIPT_COMMAND_GIVE_SKILL (40)
+        {
+            uint32 skill_id; // datalong
+            uint32 value;   // datalong2
+        } GiveSkill;
+
+        struct              // SCRIPT_COMMAND_MODIFY_REPUTATION (41)
+        {
+            uint32 faction_id; // datalong
+            uint32 value;      // datalong2
+        } ModRep;
     };
 
     std::string GetDebugInfo() const;

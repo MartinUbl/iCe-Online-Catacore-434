@@ -1136,6 +1136,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->RemoveSpellCooldown(20252, true);
                         break;
+                    case 85474: // [DND] Hide text (unused)
+                        if (target->GetTypeId() == TYPEID_UNIT)
+                        {
+                            SetMaxDuration(-1);   // duration: persistant
+                            RefreshDuration();
+                        }
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:

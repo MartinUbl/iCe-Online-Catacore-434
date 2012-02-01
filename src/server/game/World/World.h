@@ -469,7 +469,7 @@ enum ScriptCommands
 {
     SCRIPT_COMMAND_TALK                  = 0,                // source/target = Creature, target = any, datalong = talk type (0=say, 1=whisper, 2=yell, 3=emote text, 4=boss emote text), datalong2 & 1 = player talk (instead of creature), dataint = string_id
     SCRIPT_COMMAND_EMOTE                 = 1,                // source/target = Creature, datalong = emote id, datalong2 = 0: set emote state; > 0: play emote state
-    SCRIPT_COMMAND_FIELD_SET             = 2,                // source/target = Creature, datalong = field id, datalog2 = value
+    SCRIPT_COMMAND_FIELD_SET             = 2,                // source/target = Creature, Player, datalong = type id, datalong2 = field id, dataint = value
     SCRIPT_COMMAND_MOVE_TO               = 3,                // source/target = Creature, datalong2 = time to reach, x/y/z = destination
     SCRIPT_COMMAND_FLAG_SET              = 4,                // source/target = Creature, datalong = field id, datalog2 = bitmask
     SCRIPT_COMMAND_FLAG_REMOVE           = 5,                // source/target = Creature, datalong = field id, datalog2 = bitmask
@@ -496,7 +496,16 @@ enum ScriptCommands
     SCRIPT_COMMAND_EQUIP                 = 31,               // soucre = Creature, datalong = equipment id
     SCRIPT_COMMAND_MODEL                 = 32,               // source = Creature, datalong = model id
     SCRIPT_COMMAND_CLOSE_GOSSIP          = 33,               // source = Player
-    SCRIPT_COMMAND_PLAYMOVIE             = 34                // source = Player, datalong = movie id
+    SCRIPT_COMMAND_PLAYMOVIE             = 34,               // source = Player, datalong = movie id
+
+    // iCe only
+    SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT  = 35,               // source = player, datalong = achievement id, datalong2 = required criteria count
+    SCRIPT_COMMAND_LEARN_SPELL           = 36,               // source = player, datalong = spell id
+    SCRIPT_COMMAND_SUMMON_TO_PLAYER      = 37,               // source = player, datalong = creature/gameobject id, datalong2 = despawn delay
+    SCRIPT_COMMAND_CHANGE_FACTION        = 38,               // source = creature, datalong = new faction
+    SCRIPT_COMMAND_GIVE_CURRENCY         = 39,               // source = player, datalong = currency_id, datalong2 = mincount, dataint = maxcount
+    SCRIPT_COMMAND_GIVE_SKILL            = 40,               // source = player, datalong = skill_id, datalong2 = value
+    SCRIPT_COMMAND_MODIFY_REPUTATION     = 41                // source = player, datalong = rep_id, datalong2 = value
 };
 
 /// Storage class for commands issued for delayed execution

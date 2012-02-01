@@ -277,13 +277,13 @@ class AchievementMgr
         void StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry, uint32 timeLost = 0);
         void RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);   // used for quest and scripted timed achievements
         uint32 GetAchievementPoints() { return achievementPoints; }
+        CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
+        bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
     private:
         void SendAchievementEarned(AchievementEntry const* achievement);
         void SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted);
-        CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
         void RemoveCriteriaProgress(AchievementCriteriaEntry const* entry);
         void CompletedCriteriaFor(AchievementEntry const* achievement);
-        bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
         bool IsCompletedAchievement(AchievementEntry const* entry);
         //void CompleteAchievementsWithRefs(AchievementEntry const* entry);
 

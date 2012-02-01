@@ -130,6 +130,14 @@ std::string GetScriptCommandName(ScriptCommands command)
         case SCRIPT_COMMAND_MODEL: res = "SCRIPT_COMMAND_MODEL"; break;
         case SCRIPT_COMMAND_CLOSE_GOSSIP: res = "SCRIPT_COMMAND_CLOSE_GOSSIP"; break;
         case SCRIPT_COMMAND_PLAYMOVIE: res = "SCRIPT_COMMAND_PLAYMOVIE"; break;
+        // iCe only
+        case SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT: res = "SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT"; break;
+        case SCRIPT_COMMAND_LEARN_SPELL: res = "SCRIPT_COMMAND_LEARN_SPELL"; break;
+        case SCRIPT_COMMAND_SUMMON_TO_PLAYER: res = "SCRIPT_COMMAND_SUMMON_TO_PLAYER"; break;
+        case SCRIPT_COMMAND_CHANGE_FACTION: res = "SCRIPT_COMMAND_CHANGE_FACTION"; break;
+        case SCRIPT_COMMAND_GIVE_CURRENCY: res = "SCRIPT_COMMAND_GIVE_CURRENCY"; break;
+        case SCRIPT_COMMAND_GIVE_SKILL: res = "SCRIPT_COMMAND_GIVE_SKILL"; break;
+        case SCRIPT_COMMAND_MODIFY_REPUTATION: res = "SCRIPT_COMMAND_MODIFY_REPUTATION"; break;
         default:
         {
             char sz[32];
