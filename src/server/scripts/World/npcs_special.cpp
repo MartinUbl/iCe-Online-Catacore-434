@@ -3972,7 +3972,7 @@ class npc_gh: public CreatureScript
                         if (pPlayer->HasEnoughMoney(1000*GOLD)) // Check, if player has 1K gold
                         {
                             std::string old_pw = password.c_str();
-                            ScriptDatabase.PExecute("UPDATE gh_system SET password = '%s' WHERE guildid = %s", code, pPlayer->GetGuildId());
+                            ScriptDatabase.PExecute("UPDATE gh_system SET password = '%s' WHERE guildid = %u", code, pPlayer->GetGuildId());
                             pPlayer->ModifyMoney(-1000*GOLD);
                             ChatHandler(pPlayer).PSendSysMessage("Modified 1000g money.");
                             pPlayer->GetSession()->SendNotification("Okay, password was changed from %s to %s", old_pw.c_str(), code);
