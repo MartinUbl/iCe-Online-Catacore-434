@@ -9243,12 +9243,12 @@ void ObjectMgr::LoadKrcmaFilter()
         return;
     }
 
+    krcma_filter_keywords.clear();
     uint32 counter = 0;
     do
     {
         Field *fields = result->Fetch();
 
-        krcma_filter_keywords.clear();
         krcma_filter_keywords.push_back(fields[0].GetString());
 
         ++counter;
