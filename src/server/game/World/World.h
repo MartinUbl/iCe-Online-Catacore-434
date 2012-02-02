@@ -505,7 +505,7 @@ enum ScriptCommands
     SCRIPT_COMMAND_CHANGE_FACTION        = 38,               // source = creature, datalong = new faction
     SCRIPT_COMMAND_GIVE_CURRENCY         = 39,               // source = player, datalong = currency_id, datalong2 = mincount, dataint = maxcount
     SCRIPT_COMMAND_GIVE_SKILL            = 40,               // source = player, datalong = skill_id, datalong2 = value
-    SCRIPT_COMMAND_MODIFY_REPUTATION     = 41                // source = player, datalong = rep_id, datalong2 = value
+    SCRIPT_COMMAND_SET_REPUTATION        = 41                // source = player, datalong = rep_id, datalong2 = type, dataint = value
 };
 
 /// Storage class for commands issued for delayed execution

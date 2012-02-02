@@ -978,6 +978,12 @@ void Map::ScriptsProcess()
                         pSource->CompletedAchievement(entry);
                         return;
                     }
+
+                    if (step.script->Achiev.Criteria_count == 0)
+                    {
+                        pSource->CompletedAchievement(entry);
+                        return;
+                    }
                 }
                 break;
             case SCRIPT_COMMAND_LEARN_SPELL:
@@ -1043,7 +1049,12 @@ void Map::ScriptsProcess()
                 if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                 {
                     if (pSource->GetReputationRank(step.script->ModRep.faction_id) < 7)
-                        pSource->SetReputation(step.script->ModRep.faction_id,pSource->GetReputation(step.script->ModRep.faction_id)+step.script->ModRep.value);
+                    {
+                        if (step.script->ModRep.type == 0)
+                            pSource->SetReputation(step.script->ModRep.faction_id,pSource->GetReputation(step.script->ModRep.faction_id)+step.script->ModRep.value);
+                        else if (step.script->ModRep.type == 1)
+                            pSource->SetReputation(step.script->ModRep.faction_id,step.script->ModRep.value);
+                    }
                 }
                 break;
 

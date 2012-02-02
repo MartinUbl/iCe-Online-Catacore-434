@@ -355,7 +355,8 @@ struct ScriptInfo
         struct              // SCRIPT_COMMAND_MODIFY_REPUTATION (41)
         {
             uint32 faction_id; // datalong
-            uint32 value;      // datalong2
+            uint32 type;      // datalong2
+            uint32 value;    // dataint
         } ModRep;
     };
 

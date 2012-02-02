@@ -137,7 +137,7 @@ std::string GetScriptCommandName(ScriptCommands command)
         case SCRIPT_COMMAND_CHANGE_FACTION: res = "SCRIPT_COMMAND_CHANGE_FACTION"; break;
         case SCRIPT_COMMAND_GIVE_CURRENCY: res = "SCRIPT_COMMAND_GIVE_CURRENCY"; break;
         case SCRIPT_COMMAND_GIVE_SKILL: res = "SCRIPT_COMMAND_GIVE_SKILL"; break;
-        case SCRIPT_COMMAND_MODIFY_REPUTATION: res = "SCRIPT_COMMAND_MODIFY_REPUTATION"; break;
+        case SCRIPT_COMMAND_SET_REPUTATION: res = "SCRIPT_COMMAND_SET_REPUTATION"; break;
         default:
         {
             char sz[32];
