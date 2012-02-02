@@ -1044,7 +1044,7 @@ void Map::ScriptsProcess()
                         pSource->SetSkill(skillid,pSource->GetSkillStep(skillid),GetSkillValue+skillvalue,pSource->GetMaxSkillValue(skillid));
                 }
                 break;
-            case SCRIPT_COMMAND_MODIFY_REPUTATION:
+            case SCRIPT_COMMAND_SET_REPUTATION:
                 // Source or Target must be Player
                 if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                 {
