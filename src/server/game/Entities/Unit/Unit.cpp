@@ -620,6 +620,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
+    // interrupt player in BG if he is trying to take a flag
+    if (Player *pl = pVictim->ToPlayer())
+    {
+        if (pl->InBattleground() &&
+            (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE))
+        {
+            Spell *activeSpell = pl->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+            if (activeSpell && activeSpell->m_spellInfo && activeSpell->m_spellInfo->Id == 21651)
+                pl->InterruptNonMeleeSpells(false);
+        }
+    }
+
     if (!damage)
     {
         // Rage from absorbed damage
