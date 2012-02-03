@@ -8825,13 +8825,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        // Sacred Shield
-        case 85285:
-            {
-                if (!HealthBelowPct(30))
-                    return false;
-                break;
-            }
         // Brambles
         case 50419:
         {
@@ -9525,14 +9518,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             break;
         // Sacred Shield
         case 96263:
-            // Not allow proc when target has more than 30% health
-            if (GetHealthPct() > 30.0f)
+            // Not allow proc when target has under 30% health, or that damage would not reduce him under 30% health
+            if (GetHealthPct() < 30.0f || GetMaxHealth()*0.3f < (GetHealth()-damage))
                 return false;
             // Also if cooldown isn't ready, dont allow
             if (ToPlayer()->HasSpellCooldown(85285))
                 return false;
             // Add custom cooldown (proc cooldown doesn't work)
-            ToPlayer()->AddSpellCooldown(85285,0,time(NULL)+15);
+            ToPlayer()->AddSpellCooldown(85285,0,time(NULL)+30);
             // And set absorb points by formula
             basepoints0 = 1+ToPlayer()->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*2.5f;
             break;
