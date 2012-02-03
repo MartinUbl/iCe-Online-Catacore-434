@@ -15330,6 +15330,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 1784 && (HasAura(11327) || pTarget->HasAura(11327)))
             takeCharges = false;
 
+        // Glyph of Lightning Shield - don't allow dropping under 3 charges of Lightning Shield
+        if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 324 && HasAura(55448) && i->aura->GetCharges() <= 3)
+            takeCharges = false;
+
         // Remove charge (aura can be removed by triggers)
         if (useCharges && takeCharges)
             i->aura->DropCharge();
