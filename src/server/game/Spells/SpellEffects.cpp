@@ -1645,6 +1645,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         unitTarget->CastSpell(unitTarget, 96229, true);
                     break;
                 }
+                case 84348: // Invisibility Field
+                {
+                    if (!unitTarget || unitTarget->isInCombat())
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 82820, true);
+                }
                 case 17251:                                 // Spirit Healer Res
                 {
                     if (!unitTarget || !m_originalCaster)
