@@ -1651,6 +1651,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 82820, true);
+                    break;
+                }
+                case 82626: // Grounded Plasma Shield
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 82627, true);
+                    break;
                 }
                 case 17251:                                 // Spirit Healer Res
                 {
