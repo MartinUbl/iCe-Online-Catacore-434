@@ -1628,6 +1628,23 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     return;
                 }
+                case 82174: // Synapse Springs
+                {
+                    if (!unitTarget || !unitTarget->ToPlayer())
+                        return;
+
+                    float intel = unitTarget->ToPlayer()->GetStat(STAT_INTELLECT);
+                    float agi = unitTarget->ToPlayer()->GetStat(STAT_AGILITY);
+                    float str = unitTarget->ToPlayer()->GetStat(STAT_STRENGTH);
+
+                    if (intel > agi && intel > str)
+                        unitTarget->CastSpell(unitTarget, 96230, true);
+                    else if (agi > intel && agi > str)
+                        unitTarget->CastSpell(unitTarget, 96228, true);
+                    else
+                        unitTarget->CastSpell(unitTarget, 96229, true);
+                    break;
+                }
                 case 17251:                                 // Spirit Healer Res
                 {
                     if (!unitTarget || !m_originalCaster)
