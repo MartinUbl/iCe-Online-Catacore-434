@@ -7617,14 +7617,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 // Lightning Shield
                 if (AuraEffect const * aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_SHAMAN, 0x400, 0, 0))
                 {
-                    uint32 spell = sSpellMgr->GetSpellWithRank(26364, sSpellMgr->GetSpellRank(aurEff->GetId()));
-
                     // custom cooldown processing case
-                    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(spell))
-                        ToPlayer()->RemoveSpellCooldown(spell);
+                    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(26364))
+                        ToPlayer()->RemoveSpellCooldown(26364);
 
-                    CastSpell(target, spell, true, castItem, triggeredByAura);
-                    aurEff->GetBase()->DropCharge();
+                    CastSpell(target, 26364, true, castItem, triggeredByAura);
                     return true;
                 }
                 return false;
