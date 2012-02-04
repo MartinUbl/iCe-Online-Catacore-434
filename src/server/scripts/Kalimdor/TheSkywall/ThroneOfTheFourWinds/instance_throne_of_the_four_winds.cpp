@@ -186,7 +186,7 @@ public:
 
             if(add)
             {
-                // save important GUIDs. Conclave bosses pointers are used on every update
+                // save important GUIDs; Conclave bosses pointers are used on every update
                 switch(pCreature->GetEntry())
                 {
                 case NPC_ANSHAL:            m_Anshal_GUID = pCreature->GetGUID();
@@ -206,6 +206,13 @@ public:
                 case SUMMON_TORNADO:
                 case SUMMON_CREEPER_TRIGGER:
                 case SUMMON_RAVENOUS_CREEPER:
+                // Al'akir AI summons
+                case SUMMON_SQUALL_VORTEX:
+                case SUMMON_SQUALL_VORTEX_VEH:
+                case SUMMON_ICE_STORM:
+                case SUMMON_ICE_STORM_GROUND:
+                case SUMMON_LIGHTNING_CLOUDS:
+                case SUMMON_LIGHTNING_CLOUDS_EX:
                                             m_summons.push_back(pCreature->GetGUID());
                                             break;
                 default: break;
@@ -239,7 +246,10 @@ public:
                 {
                     // Alakir yell
                     if(Creature* alakir = instance->GetCreature(m_Alakir_GUID))
+                    {
                         DoScriptText(-1850526, alakir);
+                        alakir->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    }
 
                 }
                 else if(uiData == NOT_STARTED)
@@ -251,6 +261,9 @@ public:
                     m_conclDeadCount = 0;
                     m_conclInactiveCount = 0;
                     m_power = 10;
+
+                    if(Creature* alakir = instance->GetCreature(m_Alakir_GUID))
+                        alakir->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 }
                 else if(uiData == IN_PROGRESS)
                 {
@@ -290,6 +303,41 @@ public:
                 break;
             case TYPE_ALAKIR:
                 m_auiEncounter[TYPE_ALAKIR] = uiData;
+                if(uiData == NOT_STARTED)
+                {
+                    // refresh center platform
+                    if(GameObject* pGO = instance->GetGameObject(m_Center_GUID))
+                    {
+                        pGO->SetPhaseMask(1, false);
+                        Map::PlayerList const& plrList = instance->GetPlayers();
+                        if (!plrList.isEmpty())
+                            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                            {
+                                if(Player* pPlayer = itr->getSource())
+                                    pGO->SendUpdateToPlayer(pPlayer);
+                            }
+                    }
+                }
+                else if(uiData == SPECIAL) // third phase start
+                {
+                    // destroy center platform
+                    if(GameObject* pGO = instance->GetGameObject(m_Center_GUID))
+                    {
+                        DespawnAllSummons(); // despawns all summons, Stormlings excluded
+
+                        // destroy platform animation ?
+
+                        // despawn platform with no animation (there is no animation)
+                        pGO->SetPhaseMask(2, false);
+                        Map::PlayerList const& plrList = instance->GetPlayers();
+                        if (!plrList.isEmpty())
+                            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                            {
+                                if(Player* pPlayer = itr->getSource())
+                                    pGO->DestroyForPlayer(pPlayer, false);
+                            }
+                    }
+                }
                 break;
             default: break;
             }
@@ -354,8 +402,14 @@ public:
                         // teleport player if under critical Z
                         if(m_auiEncounter[TYPE_CONCLAVE] == DONE)
                         {
-                            if(player->GetPositionZ() < 172.0f)
+                            if(player->GetPositionZ() < 166.0f)
+                            {
                                 player->NearTeleportTo(-108.3f, 817.3f, 188.0f, 6.28f, false); // Al'akir's platform coords
+                                if(m_auiEncounter[TYPE_ALAKIR] == DONE)
+                                    player->CastSpell(player, 82724, true); // aura Eye of the Storm grants flying
+                                //else if(m_auiEncounter[TYPE_ALAKIR] == IN_PROGRESS)
+                                //    player->CastSpell(player, xxx, true); // add stun for a while in order to delay player and prevent them from attacking
+                            }
                         }
                         else
                         {

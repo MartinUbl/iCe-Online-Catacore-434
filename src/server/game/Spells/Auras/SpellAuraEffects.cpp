@@ -1794,6 +1794,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         if (target->GetHealthPct() <= 25.0f)
                             damage *= 2;
                         break;
+                    case 88427: // Electrocute (Al'akir)
+                        damage = (10000 + urand(0,4000)) * m_tickNumber;
+                        break;
                     default:
                         break;
                 }

@@ -418,6 +418,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             return;
                         break;
                     }
+                    case 89667: // lightning rod (al'akir)
+                    case 93293:
+                    case 93294:
+                    case 93295:
+                    {
+                        // damages all allies within 20yd horizontally and 5yd vertically
+                        float dist_z = unitTarget->GetPositionZ() - m_caster->GetPositionZ();
+                        if (dist_z < -5.0f || dist_z > 5.0f)
+                            return;
+                        break;
+                    }
                     case 33671: // gruul's shatter
                     case 50811: // krystallus shatter ( Normal )
                     case 61547: // krystallus shatter ( Heroic )

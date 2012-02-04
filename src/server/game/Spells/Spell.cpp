@@ -2604,9 +2604,23 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     || m_spellInfo->Id == 93145
                     || m_spellInfo->Id == 93146
                     || m_spellInfo->Id == 93060 // Storm Shield (conclave: rohash) damage spells
-                    || m_spellInfo->Id == 93066)
+                    || m_spellInfo->Id == 93066
+                    || m_spellInfo->Id == 87770 // Wind Burst (al'akir)
+                    || m_spellInfo->Id == 93261
+                    || m_spellInfo->Id == 93262
+                    || m_spellInfo->Id == 93263
+                    || m_spellInfo->Id == 88301 // Acid Rain (al'akir) DoT
+                    || m_spellInfo->Id == 93279
+                    || m_spellInfo->Id == 93280
+                    || m_spellInfo->Id == 93281)
                 {
                     radius = 90.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 87873) // Static Shock (al'akir)
+                {
+                    radius = 45.0f;
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
@@ -2617,9 +2631,22 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     || m_spellInfo->Id == 86282 // Toxic Spores (conclave: anshal: ravenous creeper)
                     || m_spellInfo->Id == 93120
                     || m_spellInfo->Id == 93121
-                    || m_spellInfo->Id == 93122)
+                    || m_spellInfo->Id == 93122
+                    || m_spellInfo->Id == 87908 // Stormling debuff (al'akir)
+                    || m_spellInfo->Id == 93270
+                    || m_spellInfo->Id == 93271
+                    || m_spellInfo->Id == 93272)
                 {
                     radius = 10.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 89588 // Lightning Clouds damage (al'akir)
+                    || m_spellInfo->Id == 93297
+                    || m_spellInfo->Id == 93298
+                    || m_spellInfo->Id == 93299)
+                {
+                    radius = 20.0f;
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
@@ -2670,6 +2697,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 88858
+                    || m_spellInfo->Id == 93286
+                    || m_spellInfo->Id == 93287
+                    || m_spellInfo->Id == 93288)
+                {
+                    radius = 200.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
@@ -2685,7 +2721,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ALLY;
                     break;
                 }
-                if (m_spellInfo->Id == 86452) // Holy Radiance
+                if (m_spellInfo->Id == 86452  // Holy Radiance
+                    || m_spellInfo->Id == 89667 // Lightning Rod damage (Al'akir)
+                    || m_spellInfo->Id == 93293
+                    || m_spellInfo->Id == 93294
+                    || m_spellInfo->Id == 93295)
                 {
                     radius = 20.0f;
                     targetType = SPELL_TARGETS_ALLY;

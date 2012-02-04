@@ -30,18 +30,25 @@ enum Data
 
 enum eCreatures
 {
-    NPC_BRIDGE              = 80000,
-    SUMMON_ICEPATCH         = 46186,
-    SUMMON_BREEZE           = 46246,
-    SUMMON_TORNADO          = 46207,
-    SUMMON_CREEPER_TRIGGER  = 45813,
-    SUMMON_RAVENOUS_CREEPER = 45812,
-
-    NPC_ANSHAL              = 45870,
-    NPC_NEZIR               = 45871,
-    NPC_ROHASH              = 45872,
-
-    NPC_ALAKIR              = 46753,
+    NPC_BRIDGE                  = 80000,
+    // Conclave:
+    NPC_ANSHAL                  = 45870,
+    NPC_NEZIR                   = 45871,
+    NPC_ROHASH                  = 45872,
+    SUMMON_ICEPATCH             = 46186,
+    SUMMON_BREEZE               = 46246,
+    SUMMON_TORNADO              = 46207,
+    SUMMON_CREEPER_TRIGGER      = 45813,
+    SUMMON_RAVENOUS_CREEPER     = 45812,
+    // Al'akir:
+    NPC_ALAKIR                  = 46753,
+    SUMMON_SQUALL_VORTEX        = 48855,
+    SUMMON_SQUALL_VORTEX_VEH    = 48852,
+    SUMMON_ICE_STORM            = 46973,
+    SUMMON_ICE_STORM_GROUND     = 46766,
+    SUMMON_STORMLING            = 47175,
+    SUMMON_LIGHTNING_CLOUDS     = 48190,
+    SUMMON_LIGHTNING_CLOUDS_EX  = 48196,
 };
 
 enum eGOs

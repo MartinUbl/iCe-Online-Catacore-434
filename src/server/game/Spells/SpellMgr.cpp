@@ -2866,6 +2866,8 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             case SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED:
             case SPELL_AURA_FLY:
             {
+                if (spellInfo->Id == 82724 && map_id == 754) // Eye of the Storm spell - TotFW instance
+                    break;
                 if (player && !player->IsKnowHowFlyIn(map_id, zone_id))
                     return SPELL_FAILED_INCORRECT_AREA;
             }
@@ -4391,6 +4393,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 15237: // Holy Nova
             spellInfo->EffectRadiusIndex[0] = 13;
             spellInfo->EffectRadiusIndex[1] = 13;
+            count++;
+            break;
+        case 87904: // Feedback (Al'akir)
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             count++;
             break;
         case 74434: // Soulburn
