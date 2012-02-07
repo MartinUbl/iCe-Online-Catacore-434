@@ -6410,6 +6410,10 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         m_hiCreatureGuid = (*result)[0].GetUInt32()+1;
 
+    result = CharacterDatabase.Query("SELECT MAX(id) FROM character_pet");
+    if (result)
+        m_hiPetGuid = (*result)[0].GetUInt32()+1;
+
     result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
     if (result)
         m_hiItemGuid = (*result)[0].GetUInt32()+1;
