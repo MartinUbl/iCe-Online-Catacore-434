@@ -174,8 +174,6 @@ void TicketMgr::_UpdateGMTicket(GM_Ticket &ticket)
     std::ostringstream ss;
     ss << "UPDATE gm_tickets SET ";
 
-    "playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment, completed, escalated, viewed) VALUES (";
-
     ss << "playerGuid = " << ticket.playerGuid << ", ";
     ss << "name = '" << name << "', ";
     ss << "message = '" << msg << "', ";
