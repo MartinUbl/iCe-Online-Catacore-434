@@ -19873,10 +19873,9 @@ void Player::_SaveAuras(SQLTransaction& trans)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_AURA);
         stmt->setUInt32(index++, GetGUIDLow());
         stmt->setUInt64(index++, itr->second->GetCasterGUID());
-        stmt->setUInt64(index++, itr->second->GetCastItemGUID());
         stmt->setUInt32(index++, itr->second->GetId());
         stmt->setUInt8(index++, effMask);
-        stmt->setUInt8(index++, recalculateMask);       
+        stmt->setUInt8(index++, recalculateMask);
         stmt->setUInt8(index++, itr->second->GetStackAmount());
         stmt->setInt32(index++, damage[0]);
         stmt->setInt32(index++, damage[1]);
