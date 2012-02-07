@@ -19413,7 +19413,7 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
 
-void Player::SaveToDB()
+bool Player::CreateInDB()
 {
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
@@ -19422,14 +19422,11 @@ void Player::SaveToDB()
     if (IsBeingTeleportedFar())
     {
         ScheduleDelayedOperation(DELAYED_SAVE_PLAYER);
-        return;
+        return false;
     }
 
     // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
-
-    sLog->outDebug("The value of player %s at save: ", m_name.c_str());
-    outDebugValues();
 
     std::string sql_name = m_name;
     CharacterDatabase.escape_string(sql_name);
@@ -19437,7 +19434,7 @@ void Player::SaveToDB()
     //TODO: drop ammoid
     //      drop stable_slots
     std::ostringstream ss;
-    ss << "REPLACE INTO characters (guid,account,name,race,class,gender,level,xp,money,playerBytes,playerBytes2,playerFlags,"
+    ss << "INSERT INTO characters (guid,account,name,race,class,gender,level,xp,money,playerBytes,playerBytes2,playerFlags,"
         "map, instance_id, instance_mode_mask, position_x, position_y, position_z, orientation, "
         "taximask, online, cinematic, "
         "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, "
@@ -19519,7 +19516,7 @@ void Player::SaveToDB()
 
     ss << m_taxi.SaveTaxiDestinationsToString() << "', ";
 
-    ss << uint32(0) /*GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS)*/ << ", ";
+    ss << uint32(0) << ", ";
 
     ss << GetUInt16Value(PLAYER_FIELD_KILLS, 0) << ", ";
 
@@ -19554,7 +19551,7 @@ void Player::SaveToDB()
 
     ss << "',";
 
-    ss << uint32(0) /*GetUInt32Value(PLAYER_AMMO_ID)*/ << ", '";
+    ss << uint32(0) << ", '";
     for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)
     {
         ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << " ";
@@ -19604,6 +19601,197 @@ void Player::SaveToDB()
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
 
+    return true;
+}
+
+void Player::SaveToDB()
+{
+    // delay auto save at any saves (manual, in code, or autosave)
+    m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
+
+    //lets allow only players in world to be saved
+    if (IsBeingTeleportedFar())
+    {
+        ScheduleDelayedOperation(DELAYED_SAVE_PLAYER);
+        return;
+    }
+
+    // first save/honor gain after midnight will also update the player's honor fields
+    UpdateHonorFields();
+
+    std::string sql_name = m_name;
+    CharacterDatabase.escape_string(sql_name);
+
+    std::ostringstream ss;
+    ss << "UPDATE characters SET "
+        << "account = " << GetSession()->GetAccountId() << ", "
+        << "name = '" << sql_name << "', "
+        << "race = " << uint32(getRace()) << ", "
+        << "class = " << uint32(getClass()) << ", "
+        << "gender = " << uint32(getGender()) << ", "
+        << "level = " << uint32(getLevel()) << ", "
+        << "xp = " << GetUInt32Value(PLAYER_XP) << ", "
+        << "money = " << GetMoney() << ", "
+        << "playerBytes = " << GetUInt32Value(PLAYER_BYTES) << ", "
+        << "playerBytes2 = " << GetUInt32Value(PLAYER_BYTES_2) << ", "
+        << "playerFlags = " << GetUInt32Value(PLAYER_FLAGS) << ", ";
+
+    if (!IsBeingTeleported())
+    {
+        ss << "map = " << GetMapId() << ", "
+           << "instance_id = " << (uint32)GetInstanceId() << ", "
+           << "instance_mode_mask = " << uint32(uint8(GetDungeonDifficulty()) | uint8(GetRaidDifficulty()) << 4) << ", "
+           << "position_x = " << finiteAlways(GetPositionX()) << ", "
+           << "position_y = " << finiteAlways(GetPositionY()) << ", "
+           << "position_z = " << finiteAlways(GetPositionZ()) << ", "
+           << "orientation = " << finiteAlways(GetOrientation()) << ", ";
+    }
+    else
+    {
+        ss << "map = " << GetTeleportDest().GetMapId() << ", "
+           << "instance_id = 0, "
+           << "instance_mode_mask = " << uint32(uint8(GetDungeonDifficulty()) | uint8(GetRaidDifficulty()) << 4) << ", "
+           << "position_x = " << finiteAlways(GetTeleportDest().GetPositionX()) << ", "
+           << "position_y = " << finiteAlways(GetTeleportDest().GetPositionY()) << ", "
+           << "position_z = " << finiteAlways(GetTeleportDest().GetPositionZ()) << ", "
+           << "orientation = " << finiteAlways(GetTeleportDest().GetOrientation()) << ", ";
+    }
+
+    ss << "taximask = ";
+    ss << m_taxi << ", ";                                   // string with TaxiMaskSize numbers
+
+    ss << "online = " << (IsInWorld() ? 1 : 0) << ", ";
+
+    ss << "cinematic = " << uint32(m_cinematic) << ", ";
+
+    ss << "totaltime = " << m_Played_time[PLAYED_TIME_TOTAL] << ", ";
+    ss << "leveltime = " << m_Played_time[PLAYED_TIME_LEVEL] << ", ";
+
+    ss << "rest_bonus = " << finiteAlways(m_rest_bonus) << ", ";
+    ss << "logout_time = " << (uint64)time(NULL) << ", ";
+    ss << "is_logout_resting = " << (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0) << ", ";
+                                                            //save, far from tavern/city
+                                                            //save, but in tavern/city
+    ss << "resettalents_cost = " << m_resetTalentsCost << ", ";
+    ss << "resettalents_time = " << (uint64)m_resetTalentsTime << ", ";
+
+    ss << "trans_x = " << finiteAlways(m_movementInfo.t_pos.GetPositionX()) << ", ";
+    ss << "trans_y = " << finiteAlways(m_movementInfo.t_pos.GetPositionY()) << ", ";
+    ss << "trans_z = " << finiteAlways(m_movementInfo.t_pos.GetPositionZ()) << ", ";
+    ss << "trans_o = " << finiteAlways(m_movementInfo.t_pos.GetOrientation()) << ", ";
+
+    ss << "transguid = ";
+    if (m_transport)
+        ss << m_transport->GetGUIDLow();
+    else
+        ss << "0";
+    ss << ", ";
+
+    ss << "extra_flags = " << m_ExtraFlags << ", ";
+
+    // TODO: drop stable_slots
+    ss << "stable_slots = " << uint32(0) << ", ";
+
+    ss << "at_login = " << uint32(m_atLoginFlags) << ", ";
+
+    ss << "zone = " << GetZoneId() << ", ";
+
+    ss << "death_expire_time = " << (uint64)m_deathExpireTime << ", ";
+
+    ss << "taxi_path = '" << m_taxi.SaveTaxiDestinationsToString() << "', ";
+
+    // zero value for now - maybe it should be stored only as achievement criteria (statistic)?
+    ss << "totalKills = " << uint32(0) << ", ";
+
+    ss << "todayKills = " << GetUInt16Value(PLAYER_FIELD_KILLS, 0) << ", ";
+
+    ss << "yesterdayKills = " << GetUInt16Value(PLAYER_FIELD_KILLS, 1) << ", ";
+
+    ss << "chosenTitle = " << GetUInt32Value(PLAYER_CHOSEN_TITLE) << ", ";
+
+    ss << "watchedFaction = " << GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX) << ", ";
+
+    ss << "drunk = " << (uint16)(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE) << ", ";
+
+    ss << "health = " << GetHealth();
+
+    for (uint32 i = 0; i < MAX_POWERS-1; ++i)
+        ss << ", " << "power" << (i+1) << " = " << GetPower(Powers(i));
+    ss << ", ";
+    ss << "latency = " << GetSession()->GetLatency();
+    ss << ", ";
+    ss << "speccount = " << uint32(m_specsCount);
+    ss << ", ";
+    ss << "activespec = " << uint32(m_activeSpec) << ", ";
+    ss << "exploredZones = '";
+    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
+    {
+        ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i) << " ";
+    }
+
+    ss << "', ";
+    ss << "equipmentCache = '";
+    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i )
+    {
+        ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << " ";
+    }
+
+    ss << "',";
+
+    // TODO: drop ammoId
+    ss << "ammoId = 0, ";
+    ss << "knownTitles = '";
+
+    for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)
+    {
+        ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << " ";
+    }
+
+    ss << "',";
+    ss << "actionBars = " << uint32(GetByteValue(PLAYER_FIELD_BYTES, 2)) << ", ";
+
+    ss << "currentPetSlot = " << m_currentPetSlot << ", ";
+    ss << "petSlotUsed = " << m_petSlotUsed;
+
+    ss << " WHERE guid = " << GetGUIDLow() << ";";
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    trans->Append(ss.str().c_str());
+
+    if (m_mailsUpdated)                                     //save mails only when needed
+        _SaveMail(trans);
+
+    _SaveBGData(trans);
+    _SaveInventory(trans);
+    _SaveQuestStatus(trans);
+    _SaveDailyQuestStatus(trans);
+    _SaveWeeklyQuestStatus(trans);
+    _SaveTalents(trans);
+    _SaveTalentBranchSpecs(trans);
+    _SaveSpells(trans);
+    _SaveSpellCooldowns(trans);
+    _SaveActions(trans);
+    _SaveAuras(trans);
+    _SaveSkills(trans);
+    m_achievementMgr.SaveToDB(trans);
+    m_reputationMgr.SaveToDB(trans);
+    _SaveEquipmentSets(trans);
+    GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
+    _SaveGlyphs(trans);
+    _SaveCurrency();
+    _SaveArchaeologyData();
+
+    // check if stats should only be saved on logout
+    // save stats can be out of transaction
+    if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
+        _SaveStats(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    // save pet (hunter pet level and experience and all type pets health/mana).
+    if (Pet* pet = GetPet())
+        pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state

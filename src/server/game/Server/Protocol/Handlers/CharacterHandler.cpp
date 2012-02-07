@@ -612,8 +612,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
 
     pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login
 
-    // Player created, save it now
-    pNewChar->SaveToDB();
+    // Player created, save it now by special method for creating (INSERT instead of UPDATE)
+    pNewChar->CreateInDB();
     charcount+=1;
 
     LoginDatabase.PExecute("REPLACE INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);

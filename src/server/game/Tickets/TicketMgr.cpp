@@ -128,19 +128,21 @@ void TicketMgr::AddOrUpdateGMTicket(GM_Ticket &ticket, bool create)
         m_GMTicketList.push_back(&ticket);
         if (ticket.closed == 0)
             m_openTickets++;
-    }
 
-    _AddOrUpdateGMTicket(ticket);
+        _AddGMTicket(ticket);
+    }
+    else
+        _UpdateGMTicket(ticket);
 }
 
-void TicketMgr::_AddOrUpdateGMTicket(GM_Ticket &ticket)
+void TicketMgr::_AddGMTicket(GM_Ticket &ticket)
 {
     std::string msg(ticket.message), name(ticket.name), comment(ticket.comment);
     CharacterDatabase.escape_string(msg);
     CharacterDatabase.escape_string(name);
     CharacterDatabase.escape_string(comment);
     std::ostringstream ss;
-    ss << "REPLACE INTO gm_tickets (guid, playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment, completed, escalated, viewed) VALUES (";
+    ss << "INSERT INTO gm_tickets (guid, playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment, completed, escalated, viewed) VALUES (";
     ss << ticket.guid << ", ";
     ss << ticket.playerGuid << ", '";
     ss << name << "', '";
@@ -157,6 +159,40 @@ void TicketMgr::_AddOrUpdateGMTicket(GM_Ticket &ticket)
     ss << (ticket.completed ? 1 : 0) << ", ";
     ss << uint32(ticket.escalated) << ", ";
     ss << (ticket.viewed ? 1 : 0) << ");";
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    trans->Append(ss.str().c_str());
+    CharacterDatabase.CommitTransaction(trans);
+}
+
+void TicketMgr::_UpdateGMTicket(GM_Ticket &ticket)
+{
+    std::string msg(ticket.message), name(ticket.name), comment(ticket.comment);
+    CharacterDatabase.escape_string(msg);
+    CharacterDatabase.escape_string(name);
+    CharacterDatabase.escape_string(comment);
+    std::ostringstream ss;
+    ss << "UPDATE gm_tickets SET ";
+
+    "playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment, completed, escalated, viewed) VALUES (";
+
+    ss << "playerGuid = " << ticket.playerGuid << ", ";
+    ss << "name = '" << name << "', ";
+    ss << "message = '" << msg << "', ";
+    ss << "createtime = " << ticket.createtime << ", ";
+    ss << "map = " << ticket.map << ", ";
+    ss << "posX = " << ticket.pos_x << ", ";
+    ss << "posY = " << ticket.pos_y << ", ";
+    ss << "posZ = " << ticket.pos_z << ", ";
+    ss << "timestamp = " << ticket.timestamp << ", ";
+    ss << "closed = " << ticket.closed << ", ";
+    ss << "assignedto = " << ticket.assignedToGM << ", ";
+    ss << "comment = '" << comment << "', ";
+    ss << "completed = " << (ticket.completed ? 1 : 0) << ", ";
+    ss << "escalated = " << uint32(ticket.escalated) << ", ";
+    ss << "viewed = " << (ticket.viewed ? 1 : 0) << " ";
+
+    ss << "WHERE guid = " << ticket.guid << ";";
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     trans->Append(ss.str().c_str());
@@ -180,7 +216,7 @@ void TicketMgr::RemoveGMTicket(GM_Ticket *ticket, int64 source, bool permanently
             if (source != 0)
                 m_openTickets--;
 
-            _AddOrUpdateGMTicket(*(*i));
+            _UpdateGMTicket(*(*i));
         }
 }
 

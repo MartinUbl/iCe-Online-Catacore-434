@@ -130,7 +130,8 @@ public:
     }
 
     void AddOrUpdateGMTicket(GM_Ticket &ticket, bool create = false);
-    void _AddOrUpdateGMTicket(GM_Ticket &ticket);
+    void _AddGMTicket(GM_Ticket &ticket);
+    void _UpdateGMTicket(GM_Ticket &ticket);
     void RemoveGMTicket(uint64 ticketGuid, int64 source = -1, bool permanently = false);
     void RemoveGMTicket(GM_Ticket *ticket, int64 source = -1, bool permanently = false);
     uint64 GenerateGMTicketId();

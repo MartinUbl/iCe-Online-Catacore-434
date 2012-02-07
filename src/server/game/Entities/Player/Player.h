@@ -1545,6 +1545,7 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
 
         void SaveToDB();
+        bool CreateInDB();
         void SaveInventoryAndGoldToDB(SQLTransaction& trans);                    // fast save function for item/money cheating preventing
         void SaveGoldToDB(SQLTransaction& trans);
 

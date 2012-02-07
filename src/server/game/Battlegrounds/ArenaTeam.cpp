@@ -889,7 +889,7 @@ void ArenaTeam::SaveToDB()
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         trans->PAppend("UPDATE arena_team_member SET played_week = '%u', wons_week = '%u', played_season = '%u', wons_season = '%u' WHERE arenateamid = '%u' AND guid = '%u'", itr->games_week, itr->wins_week, itr->games_season, itr->wins_season, m_TeamId, GUID_LOPART(itr->guid));
-        trans->PAppend("REPLACE INTO character_arena_stats (guid,slot,personal_rating,matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES ('%u', '%u', '%u', '%u', '%u', '%u')", GUID_LOPART(itr->guid), GetSlot(), itr->personal_rating, itr->matchmaker_rating, itr->highest_week_rating, itr->conquest_point_cap);
+        trans->PAppend("UPDATE character_arena_stats SET personal_rating = '%u',matchmaker_rating = '%u',highest_week_rating = '%u', conquest_point_cap = '%u' WHERE guid = '%u' AND slot = '%u';", itr->personal_rating, itr->matchmaker_rating, itr->highest_week_rating, itr->conquest_point_cap, GUID_LOPART(itr->guid), GetSlot());
     }
     CharacterDatabase.CommitTransaction(trans);
 }
