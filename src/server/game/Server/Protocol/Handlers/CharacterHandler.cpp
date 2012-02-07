@@ -618,16 +618,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
 
     LoginDatabase.PExecute("REPLACE INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
 
-    QueryResult result2 = CharacterDatabase.PQuery("SELECT id FROM character_pet ORDER BY id DESC LIMIT 1");
-    uint32 pet_id = 1;
-    if (result2)
-    {
-        Field* fields = result2->Fetch();
-        pet_id = fields[0].GetUInt32();
-        pet_id += 1;
-    }
-    else 
-        pet_id = 1;
+    uint32 pet_id = sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
 
     if (class_ == CLASS_WARLOCK)
     {
