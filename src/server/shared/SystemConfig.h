@@ -28,23 +28,4 @@
 #include "Define.h"
 #include "revision.h"
 
-#define _PACKAGENAME "G-Core/SkyFireEMU "
-#define _CODENAME "COLD_DAY_IN_HELL"
-
-#if TRINITY_ENDIAN == TRINITY_BIGENDIAN
-# define _ENDIAN_STRING "big-endian"
-#else
-# define _ENDIAN_STRING "little-endian"
-#endif
-
-#if PLATFORM == PLATFORM_WINDOWS
-# ifdef _WIN64
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Win64," _ENDIAN_STRING ")"
-# else
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Win32," _ENDIAN_STRING ")"
-# endif
-#else
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Unix," _ENDIAN_STRING ")"
-#endif
-#endif
-
+#define _FULLVERSION "G-Core - a custom icewow emu based on TC/Skyfire"
