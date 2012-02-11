@@ -436,29 +436,6 @@ void Log::outString()
     fflush(stdout);
 }
 
-#ifndef WIN32
-void Log::outExtern( const char* str, ... )
-{
-    return;
-}
-#else
-#include <windows.h>
-void Log::outExtern( const char* str, ... )
-{
-    char dest[1024];
-    va_list ap;
-    va_start(ap,str);
-    vsnprintf(dest,1024,str,ap);
-    va_end(ap);
-
-    std::string* strp = new std::string(dest);
-
-    HWND handle = FindWindow(NULL,TEXT("Logger"));
-    if(handle)
-        SendMessage(handle,WM_USER+5,0,(LPARAM)(&*strp));
-}
-#endif
-
 void Log::outCrash(const char * err, ...)
 {
     if (!err)
@@ -679,6 +656,9 @@ void Log::outBasic(const char * str, ...)
     fflush(stdout);
 }
 
+// #define USE_DEBUG_FUNC 1
+
+#ifdef USE_DEBUG_FUNC
 void Log::outDetail(const char * str, ...)
 {
     if (!str)
@@ -724,7 +704,13 @@ void Log::outDetail(const char * str, ...)
 
     fflush(stdout);
 }
+#else
+void Log::outDetail(const char * str, ...)
+{
+}
+#endif
 
+#ifdef USE_DEBUG_FUNC
 void Log::outDebugInLine(const char * str, ...)
 {
     if (!str)
@@ -749,7 +735,13 @@ void Log::outDebugInLine(const char * str, ...)
         }
     }
 }
+#else
+void Log::outDebugInLine(const char * str, ...)
+{
+}
+#endif
 
+#ifdef USE_DEBUG_FUNC
 void Log::outDebug(const char * str, ...)
 {
     if (!str)
@@ -794,7 +786,13 @@ void Log::outDebug(const char * str, ...)
     }
     fflush(stdout);
 }
+#else
+void Log::outDebug(const char * str, ...)
+{
+}
+#endif
 
+#ifdef USE_DEBUG_FUNC
 void Log::outStaticDebug(const char * str, ...)
 {
     if (!str)
@@ -839,6 +837,11 @@ void Log::outStaticDebug(const char * str, ...)
     }
     fflush(stdout);
 }
+#else
+void Log::outStaticDebug(const char * str, ...)
+{
+}
+#endif
 
 void Log::outStringInLine(const char * str, ...)
 {
