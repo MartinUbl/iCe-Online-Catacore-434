@@ -2925,6 +2925,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Frost Nova / Freeze (Water Elemental)
             if (spellproto->SpellIconID == 193)
                 return DIMINISHING_CONTROL_ROOT;
+            // Ring of Frost
+            if (spellproto->Id == 82691)
+                return DIMINISHING_POLYMORPH;
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -2937,10 +2940,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_FEAR_BLIND;
             // Cheap Shot
             else if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return DIMINISHING_CHEAPSHOT_POUNCE;
+                return DIMINISHING_CONTROL_STUN;
             // Kidney Shot
             else if (spellproto->SpellFamilyFlags[0] & 0x200000)
-                return DIMINISHING_CHEAPSHOT_POUNCE;
+                return DIMINISHING_CONTROL_STUN;
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
@@ -2966,7 +2969,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         {
             // Pounce
             if (spellproto->SpellFamilyFlags[0] & 0x20000)
-                return DIMINISHING_CHEAPSHOT_POUNCE;
+                return DIMINISHING_CONTROL_STUN;
             // Cyclone
             else if (spellproto->SpellFamilyFlags[1] & 0x20)
                 return DIMINISHING_CYCLONE;
