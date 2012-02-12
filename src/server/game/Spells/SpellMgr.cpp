@@ -3819,6 +3819,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 84617: // Revealing Strike
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
+        case 89299: case 92953: // Twilight Spit
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
@@ -3971,6 +3972,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 86704:                             // Paladin: Guardian of Ancient Kings: Ancient Fury
         case 86367: case 93135: case 93136:     // Conclave of Wind: Nezir:
         case 93137:                             // Sleet Storm (4 heroic entries)
+        case 77679: case 92968: case 92969:     // Scorching Blast
+        case 92970:                             // (4 heroic entries)
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;
