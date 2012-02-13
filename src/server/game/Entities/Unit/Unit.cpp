@@ -9180,6 +9180,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             case 100309:// Dwyer's Caber
             case 101292:// Mithril Stopwatch
             case 101290:// Petrified Pickled Egg
+            case 85034: // Vicious Gladiator's Insignia of Victory
                 // If has cooldown, do not proc. Little hack maybe, but can proc from other things
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                     return false;
