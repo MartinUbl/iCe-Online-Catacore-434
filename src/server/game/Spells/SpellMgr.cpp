@@ -3593,6 +3593,15 @@ void SpellMgr::LoadCustomSpells()
     pSpell->DurationIndex = 21;
     pSpell->rangeIndex = 1;
     INSERT_SPELLENTRY(pSpell);
+    
+    // Tribunal of Ages Kill Credit (for satisfying achievement criteria)
+    
+    INIT_NEW_SPELLENTRY(pSpell,59046);
+    pSpell->SpellName = "Tribunal of Ages Kill Credit";
+    pSpell->CastingTimeIndex = 1;
+    pSpell->DurationIndex = 21;
+    pSpell->rangeIndex = 1;
+    INSERT_SPELLENTRY(pSpell);
 }
 
 // set data in core for now
@@ -3765,6 +3774,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
             break;
         case 95673: // Ozumat Heroic Kill Credit
+            spellInfo->EquippedItemClass = -1;
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            break;
+        case 59046: // Tribunal of Ages Kill Credit
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
