@@ -4423,6 +4423,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[1] = 0;      /* no stun */
             count++;
             break;
+        case 95529: // Bounce Achievement Aura
+            spellInfo->StackAmount = 20;
+            count++;
+            break;
         default:
             break;
         }
