@@ -1624,6 +1624,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->EnergizeBySpell(target, GetId(), base_points, POWER_MANA);
                         }
                         break;
+                    case 43681: // Inactive (Report AFK)
+                        if (removeMode == AURA_REMOVE_BY_EXPIRE)
+                            caster->ToPlayer()->LeaveBattleground(); // Leave Battleground
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
