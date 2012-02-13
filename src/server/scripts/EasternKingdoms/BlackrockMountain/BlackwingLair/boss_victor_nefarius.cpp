@@ -111,6 +111,7 @@ public:
     struct boss_victor_nefariusAI : public ScriptedAI
     {
         boss_victor_nefariusAI(Creature *c) : ScriptedAI(c)
+
         {
             NefarianGUID = 0;
             switch (urand(0,19))
@@ -207,7 +208,6 @@ public:
         uint32 DrakType1;
         uint32 DrakType2;
         uint64 NefarianGUID;
-        uint32 NefCheckTime;
 
         void Reset()
         {
@@ -217,7 +217,6 @@ public:
             FearTimer = 8000;
             ResetTimer = 900000;                                //On official it takes him 15 minutes(900 seconds) to reset. We are only doing 1 minute to make testing easier
             NefarianGUID = 0;
-            NefCheckTime = 2000;
 
             me->SetUInt32Value(UNIT_NPC_FLAGS,1);
             me->setFaction(35);
@@ -245,6 +244,18 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
+        }
+
+        void SummonedCreatureDespawn(Creature* c)
+        {
+            if (c && c->GetEntry() == CREATURE_NEFARIAN)
+                me->SetVisibility(VISIBILITY_ON);
+        }
+
+        void SummonedCreatureDies(Creature* c)
+        {
+            if (c && c->GetEntry() == CREATURE_NEFARIAN)
+                me->ForcedDespawn();
         }
 
         void MoveInLineOfSight(Unit *who)
@@ -352,29 +363,13 @@ public:
                             Nefarian->AI()->AttackStart(pTarget);
                             Nefarian->setFaction(103);
                             NefarianGUID = Nefarian->GetGUID();
+                            me->SetVisibility(VISIBILITY_OFF);
                         }
                         else sLog->outError("TSCR: Blackwing Lair: Unable to spawn nefarian properly.");
                     }
 
                     AddSpawnTimer = 4000;
                 } else AddSpawnTimer -= diff;
-            }
-            else if (NefarianGUID)
-            {
-                if (NefCheckTime <= diff)
-                {
-                    Unit* Nefarian = Unit::GetCreature((*me),NefarianGUID);
-
-                    //If nef is dead then we die to so the players get out of combat
-                    //and cannot repeat the event
-                    if (!Nefarian || !Nefarian->isAlive())
-                    {
-                        NefarianGUID = 0;
-                        me->ForcedDespawn();
-                    }
-
-                    NefCheckTime = 2000;
-                } else NefCheckTime -= diff;
             }
         }
     };

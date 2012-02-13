@@ -118,6 +118,12 @@ public:
             DoZoneInCombat();
         }
 
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
+            me->ForcedDespawn();
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (DespawnTimer <= diff)
