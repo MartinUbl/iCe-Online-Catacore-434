@@ -529,6 +529,9 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
+    /* spread initial manual save a bit */
+    m_lastManualSave = m_logintime + urand(0,m_nextSave/2000);
+
     m_temporaryUnsummonedPetNumber = 0;
     //cache for UNIT_CREATED_BY_SPELL to allow
     //returning reagents for temporarily removed pets

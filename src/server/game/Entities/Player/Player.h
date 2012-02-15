@@ -2346,6 +2346,9 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
 
+        time_t GetLastManualSave() const { return m_lastManualSave; }
+        void   SetLastManualSave(time_t timer) { m_lastManualSave = timer; }
+
         // Recall position
         uint32 m_recallMap;
         float  m_recallX;
@@ -2739,6 +2742,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 m_team;
         uint32 m_nextSave;
+        uint32 m_lastManualSave;
         time_t m_speakTime;
         uint32 m_speakCount;
         Difficulty m_dungeonDifficulty;

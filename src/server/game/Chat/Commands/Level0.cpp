@@ -206,14 +206,31 @@ bool ChatHandler::HandleSaveCommand(const char* /*args*/)
     if (m_session->GetSecurity() > SEC_PLAYER)
     {
         player->SaveToDB();
-        SendSysMessage(LANG_PLAYER_SAVED);
+        SendSysMessage("Player saved (GM).");
         return true;
     }
 
-    // save if the player has last been saved over 20 seconds ago
-    uint32 save_interval = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
-    if (save_interval == 0 || (save_interval > 20*IN_MILLISECONDS && player->GetSaveTimer() <= save_interval - 20*IN_MILLISECONDS))
-        player->SaveToDB();
+    /* disallow player-induced save sooner than PlayerSaveInterval/2,
+     * ie. PlayerSaveInterval (config) = 900sec,
+     * allow manual save each 450sec + reset the timer */
+    uint32 PlayerSaveInterval = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
+    if (PlayerSaveInterval > 0) {
+
+        time_t now = time(NULL);
+        time_t diff = now - player->GetLastManualSave();
+
+        if (diff >= PlayerSaveInterval/2000) {  /* 2000 = x / 2 / 1000 (ms->sec) */
+            player->SetLastManualSave(now);
+            player->SaveToDB();                 /* SaveToDB also resets autosave timer */
+            SendSysMessage("Player saved.");
+            return true;
+
+        } else {
+            diff = PlayerSaveInterval/2000 - diff;
+            PSendSysMessage("Player NOT saved, wait %lu seconds.", (unsigned long)diff);
+            return true;
+        }
+    }
 
     return true;
 }
