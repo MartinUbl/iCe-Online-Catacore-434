@@ -1323,6 +1323,8 @@ class ObjectMgr
                 value = data[loc_idx];
         }
 
+        bool SimilarStrings(std::string haystack, std::string needle);
+
         CharacterConversionMap factionchange_achievements;
         CharacterConversionMap factionchange_items;
         CharacterConversionMap factionchange_spells;

@@ -650,10 +650,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                         return;
 
                 /* repeating messages */
-                if (_player->krcma_lastmsg == msg)
-                    return;
-                else
-                    _player->krcma_lastmsg = msg;
+                if (_player->krcma_lastmsg.length() > msg.length()) {
+                    if (sObjectMgr->SimilarStrings(_player->krcma_lastmsg, msg))
+                        return;
+                } else {
+                    if (sObjectMgr->SimilarStrings(msg, _player->krcma_lastmsg))
+                        return;
+                }
+
+                _player->krcma_lastmsg = msg;
             }
 
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))

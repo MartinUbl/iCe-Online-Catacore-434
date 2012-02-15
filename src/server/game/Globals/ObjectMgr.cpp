@@ -467,6 +467,70 @@ time_t ObjectMgr::SecsToMidnight()
     return to_midnight;
 }
 
+bool ObjectMgr::SimilarStrings(std::string haystack, std::string needle)
+{
+    /* this function tries to guess whether a needle is similar
+     * to haystack - whenever it is, return true
+     * -- used mostly for duplicity detection */
+
+    /* examples for the following conditions:
+     *
+     * 1st one protects against two identical subsequent messages:
+     * "some long msg"
+     * "some long msg"
+     *
+     * 2nd one kicks legitimate messages out of similarity detection:
+     * "some long msg"
+     * "another unrelated message"
+     *
+     * 3rd one protects against additions to needle (making haystack):
+     * "some long msg"
+     * "some long msg !!!"
+     * or ".some long msg"
+     * while still allowing needle in the haystack:
+     * "msg"
+     * "some long msg with some addition" is valid
+     *
+     * 4th one protects against repeating needle in the haystack:
+     * "some long msg"
+     * "some long msg some long msg xx some long msgx some long msg"
+     * which results to haylen = 7 (7 < 59/2),
+     * while allowing repetitive needle be part of a larger haystack:
+     * "long msg"
+     * "long msg is not alone, there is also another long msg here"
+     * where haylen = 42 (42 !< 58/2)
+     */
+
+    /* if haystack is actually needle, both are similar */
+    if (haystack == needle)
+        return true;
+
+    /* needle must be part of haystack */
+    if (haystack.find(needle) == std::string::npos)
+        return false;
+
+    /* if haystack is just needle with some sugar, that is
+     * if len(haystack) - len(needle) is less than, say, len(needle),
+     * then haystack and needle are similar */
+    if (haystack.length() - needle.length() < needle.length())
+        return true;
+
+    /* do a deeper search for multiple needles - start with len(haystack)
+     * and substract len(needle) for each occurence of needle
+     * -- that should give us the actual amount of hay, which should be no less
+     *    than one half of the haystack, otherwise haystack is basically ton of needles */
+    size_t haylen = haystack.length();
+    size_t pos = 0;
+    while ((pos = haystack.find(needle, pos)) != std::string::npos) {
+        haylen -= needle.length();
+        pos++;
+    }
+    if (haylen < haystack.length()/2)
+        return true;
+
+    return false;
+}
+
 void ObjectMgr::AddLocaleString(std::string& s, LocaleConstant locale, StringVector& data)
 {
     if (!s.empty())
