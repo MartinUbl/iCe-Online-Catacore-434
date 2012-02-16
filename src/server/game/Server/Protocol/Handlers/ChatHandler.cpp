@@ -657,8 +657,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     if (sObjectMgr->SimilarStrings(msg, _player->krcma_lastmsg))
                         return;
                 }
-
                 _player->krcma_lastmsg = msg;
+
+                /* remove icon-like constructs */
+                size_t first, last;
+                if ((first = msg.find_first_of('{')) != std::string::npos)
+                    if ((last = msg.find_last_of('}')) != std::string::npos)
+                        msg.erase(first, last-first+1);
             }
 
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
