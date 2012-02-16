@@ -61,9 +61,6 @@ if( UNIX )
   find_package(BZip2)
 endif()
 
-# Find revision ID and hash of the sourcetree
-include(cmake/genrev.cmake)
-
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 

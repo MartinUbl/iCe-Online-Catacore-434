@@ -26,7 +26,6 @@
 #define TRINITY_SYSTEMCONFIG_H
 
 #include "Define.h"
-#include "revision.h"
 
 #define _FULLVERSION "G-Core - a custom icewow emu based on TC/Skyfire"
 

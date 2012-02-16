@@ -17,7 +17,6 @@
  */
 
 #include "resource.h"
-#include "revision.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -53,8 +52,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_SYS_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION FILEVER
- PRODUCTVERSION PRODUCTVER
+// FILEVERSION FILEVER
+// PRODUCTVERSION PRODUCTVER
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -70,12 +69,12 @@ BEGIN
         BLOCK "080004b0"
         BEGIN
             VALUE "FileDescription", "authserver"
-            VALUE "FileVersion", STRFILEVER
+            //VALUE "FileVersion", STRFILEVER
             VALUE "InternalName", "authserver"
             VALUE "LegalCopyright", "Copyright (C) 2008-2010"
             VALUE "OriginalFilename", "authserver.exe"
             VALUE "ProductName", "authserver"
-            VALUE "ProductVersion", STRPRODUCTVER
+            //VALUE "ProductVersion", STRPRODUCTVER
         END
     END
     BLOCK "VarFileInfo"

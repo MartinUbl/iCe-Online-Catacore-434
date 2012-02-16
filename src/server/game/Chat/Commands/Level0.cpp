@@ -31,7 +31,6 @@
 #include "Language.h"
 #include "AccountMgr.h"
 #include "SystemConfig.h"
-#include "revision.h"
 #include "Util.h"
 #include "SpellAuras.h"
 

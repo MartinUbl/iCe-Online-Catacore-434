@@ -744,11 +744,6 @@ class World
 
         LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
 
-        //used World DB version
-        void LoadDBVersion();
-        char const* GetDBVersion() const { return m_DBVersion.c_str(); }
-        char const* GetCreatureEventAIVersion() const { return m_CreatureEventAIVersion.c_str(); }
-
         void RecordTimeDiff(const char * text, ...);
 
         void LoadAutobroadcasts();
@@ -847,10 +842,6 @@ class World
         //sessions that are added async
         void AddSession_(WorldSession* s);
         ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
-
-        //used versions
-        std::string m_DBVersion;
-        std::string m_CreatureEventAIVersion;
 
         std::list<std::string> m_Autobroadcasts;
 
