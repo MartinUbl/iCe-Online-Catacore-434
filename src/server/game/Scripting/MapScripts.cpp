@@ -974,16 +974,10 @@ void Map::ScriptsProcess()
                             counter += 1;
                     }
                     if (counter >= step.script->Achiev.Criteria_count)
-                    {
                         pSource->CompletedAchievement(entry);
-                        return;
-                    }
 
                     if (step.script->Achiev.Criteria_count == 0)
-                    {
                         pSource->CompletedAchievement(entry);
-                        return;
-                    }
                 }
                 break;
             case SCRIPT_COMMAND_LEARN_SPELL:
