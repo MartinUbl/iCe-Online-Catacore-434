@@ -4436,6 +4436,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->StackAmount = 20;
             count++;
             break;
+        case 24347: // Master Angler
+            // Because of bug in DBC, we need to set MiscValue manually
+            spellInfo->EffectMiscValue[0] = 11374; // Changing fish instead pig :D
+            count++;
+            break;
         default:
             break;
         }
