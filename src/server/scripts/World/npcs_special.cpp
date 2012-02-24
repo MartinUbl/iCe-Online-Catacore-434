@@ -3991,6 +3991,68 @@ class npc_gh: public CreatureScript
             return true;
         }
 };
+class npc_areatrigger_completer: public CreatureScript
+{
+    public:
+        npc_areatrigger_completer(): CreatureScript("npc_areatrigger_completer") {}
+
+        struct npc_areatrigger_completerAI: ScriptedAI
+        {
+            npc_areatrigger_completerAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 quest; // Quest def
+            float dist; // Distance def
+
+            void Reset()
+            {
+                me->SetVisibility(VISIBILITY_OFF); // Set Creature invisible for Players
+
+                QueryResult qResult = WorldDatabase.PQuery("SELECT quest,distance FROM creature_areatrigger_completer WHERE guid = %u", me->GetDBTableGUIDLow());
+
+                if (qResult != NULL)
+                {
+                    Field* fields = qResult->Fetch();
+                    quest = fields[0].GetUInt32(); // Quest assign
+                    dist = fields[1].GetFloat(); // Distance assign
+                }
+                else // If query is empty.. set to 0
+                    quest = 0;
+            }
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                Player* pl = who->ToPlayer(); // Player searching
+
+                if (!pl) // If player exist
+                    return;
+
+                if (me->GetDistance(who) > dist) // limiting distance
+                    return;
+
+                Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest); // Quest Gather
+
+                if (!qInfo) // If quest exist
+                    return;
+
+                if (qInfo->HasFlag(QUEST_FLAGS_EXPLORATION) && qInfo->HasFlag(QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT)) // if Quest Has QuestFlag = QUEST_FLAGS_EXPLORATION and SpecialFlag = QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT
+                {
+                    if (qInfo && pl->GetQuestStatus(quest) == QUEST_STATUS_INCOMPLETE) // If Quest Status = QUEST_STATUS_INCOMPLETE
+                        pl->CompleteQuest(quest); // Complete Quest
+                }
+            }
+
+            void UpdateAI(const uint32 diff){} // not used now
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_areatrigger_completerAI(c);
+        }
+};
+
 
 void AddSC_npcs_special()
 {
@@ -4039,5 +4101,5 @@ void AddSC_npcs_special()
     new boss_event_jarmila_pet;
     new npc_odevzdavac;
     new npc_gh;
+    new npc_areatrigger_completer;
 }
-
