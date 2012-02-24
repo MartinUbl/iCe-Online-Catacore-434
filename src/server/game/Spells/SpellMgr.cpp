@@ -627,13 +627,6 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
                 uint32 firstSpell = sSpellMgr->GetFirstSpellInChain(spellInfo->Id);
                 switch (firstSpell)
                 {
-                    case 8118: // Strength
-                    case 8099: // Stamina
-                    case 8112: // Spirit
-                    case 8096: // Intellect
-                    case 8115: // Agility
-                    case 8091: // Armor
-                        return SPELL_SPECIFIC_SCROLL;
                     case 12880: // Enrage (Enrage)
                     case 57518: // Enrage (Wrecking Crew)
                         return SPELL_SPECIFIC_WARRIOR_ENRAGE;
