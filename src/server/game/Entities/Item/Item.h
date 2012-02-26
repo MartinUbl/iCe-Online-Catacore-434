@@ -166,6 +166,7 @@ enum EnchantmentSlot
     SOCK_ENCHANTMENT_SLOT_3         = 4,
     BONUS_ENCHANTMENT_SLOT          = 5,
     PRISMATIC_ENCHANTMENT_SLOT      = 6,                    // added at apply special permanent enchantment
+    ENCH_SLOT_UNK_0                 = 7,                    // probably related to new ench types (tinker?)
     REFORGING_ENCHANTMENT_SLOT      = 8,
     MAX_INSPECTED_ENCHANTMENT_SLOT  = 9,                    // need some research, 9 is the right value
 
@@ -174,7 +175,16 @@ enum EnchantmentSlot
     PROP_ENCHANTMENT_SLOT_2         = 9,                    // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_3         = 10,                   // used with RandomProperty
     PROP_ENCHANTMENT_SLOT_4         = 11,                   // used with RandomProperty
-    MAX_ENCHANTMENT_SLOT            = 12
+
+    ENCH_SLOT_UNK_1                 = 12,                   // probably moved PROP ench slots
+    ENCH_SLOT_UNK_2                 = 13,                   //
+
+    /* Enchantments slots should not overlap. Because of tons of items in database, we have to use some hacks to prevent
+     * losing enchants on that items and also to make it work. We will probably need to move new enchant types to other
+     * fields where possible
+     */
+
+    MAX_ENCHANTMENT_SLOT            = 14
 };
 
 #define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)
