@@ -1894,7 +1894,7 @@ bool SpellMgr::IsSkillTypeSpell(uint32 spellId, SkillType type) const
 }
 
 // basepoints provided here have to be valid basepoints (use SpellMgr::CalculateSpellEffectBaseAmount)
-int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster, int32 const * effBasePoints, Unit const * /*target*/)
+int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster, int32 const * effBasePoints, Unit const * target)
 {
     float basePointsPerLevel = spellEntry->EffectRealPointsPerLevel[effIndex];
     int32 basePoints = effBasePoints ? *effBasePoints : spellEntry->EffectBasePoints[effIndex];
@@ -1904,7 +1904,26 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
     float comboPointScaling = 0.00f;
     if (caster)
     {
-        SpellScaling values(caster->getLevel(), spellEntry);
+        uint8 level = caster->getLevel();
+
+        // There are several spells, such as buffs, which should scale by target level, not caster
+        // Unfortunately, we haven't found any generic way to implement that
+        if (target
+            && (spellEntry->Id == 79104    // Power Word: Fortitude
+                || spellEntry->Id == 79105 // Power Word: Fortitude - raid-wide
+                || spellEntry->Id == 79057 // Arcane Brillance
+                || spellEntry->Id == 79058 // Arcane Brillance - raid-wide
+                || spellEntry->Id == 79060 // Mark of the Wild
+                || spellEntry->Id == 79061 // Mark of the Wild - raid-wide
+                || spellEntry->Id == 79101 // Blessing of Might
+                || spellEntry->Id == 79102 // Blessing of Might - raid-wide
+                || spellEntry->Id == 79062 // Blessing of Kings
+                || spellEntry->Id == 79063 // Blessing of Kings - raid-wide
+                )
+            )
+            level = target->getLevel();
+
+        SpellScaling values(level, spellEntry);
         if (values.canScale && (int32)values.min[effIndex] != 0)
         {
             basePoints = (int32)values.min[effIndex];

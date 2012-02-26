@@ -460,7 +460,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
 {
     int32 amount;
     // default amount calculation
-    amount = SpellMgr::CalculateSpellEffectAmount(m_spellProto, m_effIndex, caster, &m_baseAmount, NULL);
+    amount = SpellMgr::CalculateSpellEffectAmount(m_spellProto, m_effIndex, caster, &m_baseAmount, GetBase() ? GetBase()->GetUnitOwner() : NULL);
 
     // check item enchant aura cast
     if (!amount && caster)

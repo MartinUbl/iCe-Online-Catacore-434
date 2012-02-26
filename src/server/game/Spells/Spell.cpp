@@ -5206,8 +5206,9 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     uint8 eff = m_spellInfo->Effect[i];
 
-    //we do not need DamageMultiplier here.
-    damage = CalculateDamage(i, NULL);
+    // we do not need DamageMultiplier here.
+    // we will also supply at least unit target, because of spell scaling and buff scaling by target, not caster
+    damage = CalculateDamage(i, pUnitTarget);
 
     bool preventDefault = CallScriptEffectHandlers((SpellEffIndex)i);
 
