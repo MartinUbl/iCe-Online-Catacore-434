@@ -54,6 +54,7 @@
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "GameObjectAI.h"
+#include "Guild.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 {
@@ -1252,11 +1253,16 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     plr->BuildEnchantmentsInfoData(&data);
 
-    // Unknown 4.0.x data fields, maybe guild related?
-    data << uint64(0);
-    data << uint32(0);
-    data << uint64(0);
-    data << uint32(0);
+    if (uint32 guildId = plr->GetGuildId())
+    {
+        if (Guild* guild = sObjectMgr->GetGuildById(guildId))
+        {
+            data << uint64(guild->GetId());
+            data << uint32(guild->GetLevel());
+            data << uint64(plr->GetGUID());
+            data << uint32(guild->GetMembersCount());
+        }
+    }
 
     SendPacket(&data);
 }
