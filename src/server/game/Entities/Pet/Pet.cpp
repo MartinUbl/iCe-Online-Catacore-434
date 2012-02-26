@@ -1089,6 +1089,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
                 }
+                case 50675: // Ebon Imp (from Bane of Doom)
+                {
+                    // Mostly custom values, who cares about these stupid little imps
+                    SetCreateHealth(petlevel*petlevel/2);
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.05f)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.10f)));
+                    break;
+                }
             }
             break;
         }
