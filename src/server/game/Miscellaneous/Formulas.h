@@ -208,35 +208,35 @@ namespace Trinity
         {
             uint32 gain = 0;
             if (level <= 14)
-                gain = 1960;
+                gain = 653;
             else if (level <= 19)
-                gain = 3280;
+                gain = 1093;
             else if (level <= 24)
-                gain = 4800;
+                gain = 1600;
             else if (level <= 29)
-                gain = 6440;
+                gain = 2146;
             else if (level <= 34)
-                gain = 8920;
+                gain = 2973;
             else if (level <= 39)
-                gain = 10350;
+                gain = 3450;
             else if (level <= 44)
-                gain = 12480;
+                gain = 4160;
             else if (level <= 49)
-                gain = 13225;
+                gain = 4408;
             else if (level <= 54)
-                gain = 16437;
+                gain = 5479;
             else if (level <= 59)
-                gain = 19987;
+                gain = 6662;
             else if (level <= 64)
-                gain = 43625;
+                gain = 14541;
             else if (level <= 69)
-                gain = 73125;
+                gain = 24375;
             else if (level <= 74)
-                gain = 155570;
+                gain = 51856;
             else if (level <= 79)
-                gain = 163740;
+                gain = 54580;
             else if (level <= 85)
-                gain = 200000;
+                gain = 70000;
 
             return gain;
         }
