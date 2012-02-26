@@ -18495,7 +18495,7 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         }
     case SPELLFAMILY_PALADIN:
         // Infusion of Light
-        if ((dummySpell->Id == 53576 || dummySpell->Id == 53569) && procExtra & PROC_EX_CRITICAL_HIT)
+        if ((dummySpell->Id == 53576 || dummySpell->Id == 53569) && procExtra & PROC_EX_CRITICAL_HIT && procSpell && procSpell->Id == 25914)
         {
             CastSpell(this, dummySpell->EffectTriggerSpell[0], true);
             return true;
