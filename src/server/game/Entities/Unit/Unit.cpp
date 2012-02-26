@@ -11043,12 +11043,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             }
 
             // Torment the weak
-            if (spellProto->SpellFamilyFlags[0]&0x20200021 || spellProto->SpellFamilyFlags[1]& 0x9000)
+            if (spellProto->SchoolMask & SPELL_SCHOOL_MASK_ARCANE)
                 if (pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
                 {
                     AuraEffectList const& mDumyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
                     for (AuraEffectList::const_iterator i = mDumyAuras.begin(); i != mDumyAuras.end(); ++i)
-                        if ((*i)->GetSpellProto()->SpellIconID == 3263)
+                        if ((*i)->GetSpellProto()->SpellIconID == 2215)
                         {
                             DoneTotalMod *= float((*i)->GetAmount() + 100.f) / 100.f;
                             break;
