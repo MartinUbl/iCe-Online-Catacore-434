@@ -5483,7 +5483,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!pEnchant)
             return;
-
+        
         // item can be in trade slot and have owner diff. from caster
         Player* item_owner = itemTarget->GetOwner();
         if (!item_owner)
@@ -5497,20 +5497,13 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
         }
 
-        EnchantmentSlot slot = PERM_ENCHANTMENT_SLOT;
-
-        // Engineering tinkers - they should be active at one time with other enchants. We use unk slot to not break anything
-        // take a look at EnchantmentSlot enum and comments there - i explained there why we use these slots
-        if (pEnchant->type[0] == 7)
-            slot = ENCH_SLOT_UNK_1;
-
         // remove old enchanting before applying new if equipped
-        item_owner->ApplyEnchantment(itemTarget,slot,false);
+        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
 
-        itemTarget->SetEnchantment(slot, enchant_id, 0, 0);
+        itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
 
         // add new enchanting if equipped
-        item_owner->ApplyEnchantment(itemTarget,slot,true);
+        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
 
         itemTarget->SetSoulboundTradeable(NULL, item_owner, false);
     }
