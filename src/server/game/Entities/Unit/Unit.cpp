@@ -6651,6 +6651,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             }
                         }
                 }
+                // Bandit's Guile
+                case 84652:
+                case 84653:
+                case 84654:
+                {
+                    triggered_spell_id = 84748;
+                    target = this;
+                    originalCaster = pVictim->GetGUID();
+
+                    break;
+                }
             }
             // Cut to the Chase
             if (dummySpell->SpellIconID == 2909)

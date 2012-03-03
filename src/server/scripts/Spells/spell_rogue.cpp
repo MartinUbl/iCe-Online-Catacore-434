@@ -347,6 +347,137 @@ public:
     }
 };
 
+class spell_rog_bandits_guile : public SpellScriptLoader
+{
+public:
+    spell_rog_bandits_guile(): SpellScriptLoader("spell_rog_bandits_guile") {}
+
+    class spell_rog_bandits_guile_AuraScript : public AuraScript
+    {
+    public:
+        PrepareAuraScript(spell_rog_bandits_guile_AuraScript)
+        enum Spells
+        {
+            BUFF1 = 84745,
+            BUFF2 = 84746,
+            BUFF3 = 84747
+        };
+
+        Player *caster;
+        Unit *target;
+        Unit *prevTarget;
+        int charges;
+        int insight;
+        Aura *buffIns;      // 84745 - 7
+        Aura *buff;         // 84748
+
+        bool Validate(SpellEntry const *)
+        {
+            return sSpellStore.LookupEntry(BUFF1) && sSpellStore.LookupEntry(BUFF2) && sSpellStore.LookupEntry(BUFF3);
+        }
+
+        bool Load()
+        {
+            caster = GetOwner()->ToPlayer();
+            if(!caster)
+                return false;
+
+            buff = caster->GetAura(84748);
+            if (buff)
+            {
+                prevTarget = buff->GetCaster();
+                buffIns = caster->GetAura(buff->GetEffect(1)->GetAmount());
+                if(buffIns)
+                    insight = buffIns->GetSpellProto()->Id;
+                else
+                    insight = 0;
+                charges = buff->GetCharges();
+            }
+            else
+            {
+                prevTarget = NULL;
+                buffIns = NULL;
+                insight = 0;
+                charges = 1;
+            }
+
+            return true;
+        }
+
+        void Unload()
+        {
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes mode)
+        {
+            Aura *b = aurEff->GetBase();
+            target = aurEff->GetCaster();
+            AuraEffect *pFrst = NULL, *pScnd = NULL;
+
+            pFrst = b->GetEffect(0);
+            pScnd = b->GetEffect(1);
+
+            if (!pFrst || !pScnd)
+                return;
+
+            if (!buff || target != prevTarget)
+            {
+                b->SetCharges(1);
+                pFrst->ChangeAmount(0);
+                pScnd->ChangeAmount(0);
+                if (buffIns)
+                    buffIns->Remove();
+            }
+            else if (insight == BUFF3)
+            {
+                pFrst->ChangeAmount(30);
+                pScnd->ChangeAmount(BUFF3);
+            }
+            else
+            {
+                charges++;
+
+                if (charges == 4)
+                {
+                    charges = 0;
+                    if (buffIns)
+                        buffIns->Remove();
+
+                    switch (insight)
+                    {
+                        case 0: insight = BUFF1; break;
+                        case BUFF1: insight = BUFF2; break;
+                        case BUFF2: insight = BUFF3; break;
+                    }
+                    caster->CastSpell(caster, insight, true);
+                }
+                else
+                {
+                    b->SetCharges(charges);
+                    if(insight)
+                        buffIns->RefreshDuration();
+                }
+                int bonus = 0;
+                if (insight)
+                     bonus = (insight - BUFF1 + 1) * 10;
+
+                pFrst->ChangeAmount(bonus);
+                pScnd->ChangeAmount(insight);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_bandits_guile_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_343, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_rog_bandits_guile_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -354,4 +485,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_prey_on_the_weak();
     new spell_rog_shiv();
     new spell_rog_deadly_poison();
+    new spell_rog_bandits_guile();
 }
