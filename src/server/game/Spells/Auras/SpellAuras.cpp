@@ -1211,6 +1211,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 }
                             }
                         }
+                        break;
+                    case 120: // Cone of Cold
+                        // Improved Cone of Cold
+                        if(caster->HasAura(12489))
+                            target->CastSpell(target,83302,true);
+                        else if(caster->HasAura(11190))
+                            target->CastSpell(target,83301,true);
+                        break;
                     default:
                         break;
                 }

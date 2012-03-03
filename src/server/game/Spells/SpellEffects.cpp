@@ -556,17 +556,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (m_spellInfo->Id == 92315 && m_caster->HasAura(48108))
                     m_caster->RemoveAurasDueToSpell(48108);
 
-                // Cone of Cold
-                if (m_spellInfo->Id == 120)
-                {
-                    // Improved Cone of Cold
-                    if(m_caster->HasAura(12489))
-                        unitTarget->CastSpell(unitTarget,83302,true);
-                    else if(m_caster->HasAura(11190))
-                        unitTarget->CastSpell(unitTarget,83301,true);
-                }
                 // Frostbolt
-                else if (m_spellInfo->Id == 116)
+                if (m_spellInfo->Id == 116)
                 {
                     // Early Frost
                     if(m_caster->HasAura(83049) && !m_caster->HasAura(83162))
