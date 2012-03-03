@@ -801,6 +801,11 @@ public:
     static GuildRewardsEntry* GetRewardData(uint32 item);
 
     inline uint8 _GetPurchasedTabsSize() const { return uint8(m_bankTabs.size()); }
+    int32 GetMemberRankId(const uint64& guid) const
+    {
+        Members::const_iterator itr = m_members.find(GUID_LOPART(guid));
+        return itr != m_members.end() ? itr->second->GetRankId() : -1;
+    }
 
 protected:
     uint32 m_id;

@@ -5305,8 +5305,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!pGuild)
                 return SPELL_FAILED_ERROR;
 
-            // ..and also the caster has to be guild master
-            if (pGuild->GetLeaderGUID() != m_caster->GetGUID())
+            // ..and also the caster has to be guild master (rank 0)
+            int32 rankId = pGuild->GetMemberRankId(m_caster->GetGUID());
+            if (rankId != 0)
                 return SPELL_FAILED_ERROR;
 
             // ..and also can not buy slot which is already bought
