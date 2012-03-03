@@ -2627,6 +2627,19 @@ class Player : public Unit, public GridObject<Player>
         // Only for use in current Update tick! Pointer can (and probably will) expire with next spellcast
         uint64 GetHistorySpell(uint8 slot);
 
+        std::set<UnitAura*> const& GetMyAuras() const
+        {
+            return m_aurasOwned;
+        }
+        void AddMyAura(UnitAura* aurApp)
+        {
+            m_aurasOwned.insert(aurApp);
+        }
+        void RemoveMyAura(UnitAura* aurApp)
+        {
+            m_aurasOwned.erase(m_aurasOwned.find(aurApp));
+        }
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
@@ -2851,6 +2864,8 @@ class Player : public Unit, public GridObject<Player>
         bool   m_DailyQuestChanged;
         bool   m_WeeklyQuestChanged;
         time_t m_lastDailyQuestTime;
+
+        std::set<UnitAura*> m_aurasOwned;
 
         uint32 m_pvpOnTimer;
 

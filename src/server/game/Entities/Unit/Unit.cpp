@@ -3330,6 +3330,8 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
 {
     ASSERT(!m_cleanupDone);
     m_ownedAuras.insert(AuraMap::value_type(aura->GetId(), aura));
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        caster->ToPlayer()->AddMyAura(aura);
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
     if (!aura->IsPassive() && aura->GetId() != 44413)
@@ -3488,6 +3490,9 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
     // Remove all pointers from lists here to prevent possible pointer invalidation on spellcast/auraapply/auraremove
     m_appliedAuras.erase(i);
+
+    if (aura->GetType() == UNIT_AURA_TYPE && caster && caster->GetTypeId() == TYPEID_PLAYER)
+        caster->ToPlayer()->RemoveMyAura((UnitAura*)aura);
 
     if (aura->GetSpellProto()->AuraInterruptFlags)
     {
