@@ -15763,23 +15763,23 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
     // If the player has a guild, it should gain 1/4 of his experience.
     // Despite of him being at max level or not.
-    if (sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED) && XP > 0)
+    if (sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
     {
-        if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+        if (XP > 0)
+            if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+                pGuild->GainXP(XP/4);
+
+        // Give player also 15-30 guild reputation (based on quest level)
+        if (pQuest->GetQuestLevel() != 0 && (XP > 0 || pQuest->IsDailyOrWeekly()))
         {
-            pGuild->GainXP(XP/4);
-            // Give player also 15-30 guild reputation (based on quest level)
-            if (pQuest->GetQuestLevel() != 0)
-            {
-                int32 rep_val = 15+int32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
-                if (rep_val < 0)
-                    rep_val = -rep_val;
-                if (rep_val > 30)
-                    rep_val = 30;
-                if (rep_val < 15)
-                    rep_val = 15;
-                SetReputation(FACTION_GUILD,GetReputation(FACTION_GUILD)+rep_val);
-            }
+            int32 rep_val = 15+int32((abs(float(pQuest->GetQuestLevel()))/85.0f)*15.0f);
+            if (rep_val < 0)
+                rep_val = -rep_val;
+            if (rep_val > 30)
+                rep_val = 30;
+            if (rep_val < 15)
+                rep_val = 15;
+            SetReputation(FACTION_GUILD,GetReputation(FACTION_GUILD)+rep_val);
         }
     }
 
