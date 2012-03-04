@@ -2010,6 +2010,10 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
             //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
     }
 
+    // Skinning, step for 525 maxskill
+    if (spellEntry->Id == 74522)
+        value = 7;
+
     return value;
 }
 
