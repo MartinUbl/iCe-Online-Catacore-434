@@ -3872,27 +3872,23 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
                 Unit * caster = aura->GetCaster();
                 if (caster)
                 {
-                    uint32 triggeredSpellId = 0;
+                    int32 bp0 = 0;
                     // Lava Flows
                     if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3087, 0))
                     {
                         switch(aurEff->GetId())
                         {
                             case 51482: // Rank 3
-                                triggeredSpellId = 65264;
-                                break;
                             case 51481: // Rank 2
-                                triggeredSpellId = 65263;
-                                break;
                             case 51480: // Rank 1
-                                triggeredSpellId = 64694;
+                                bp0 = aurEff->GetAmount();
                                 break;
                             default:
-                                sLog->outError("Aura::HandleAuraSpecificMods: Unknown rank of Lava Flows (%d) found", aurEff->GetId());
+                                break;
                         }
                     }
-                    if (triggeredSpellId)
-                        caster->CastSpell(caster, triggeredSpellId, true);
+                    if (bp0)
+                        caster->CastCustomSpell(caster, 65264, &bp0, 0, 0, true);
                 }
             }
             return;
