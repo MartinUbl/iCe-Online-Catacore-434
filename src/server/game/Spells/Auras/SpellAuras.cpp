@@ -1293,6 +1293,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->RemoveMovementImpairingAuras();
                         }
                     }
+                    break;
                 // Dispersion
                 case 47585:
                     {
