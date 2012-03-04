@@ -6662,8 +6662,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 84654:
                 {
                     triggered_spell_id = 84748;
-                    target = this;
-                    originalCaster = pVictim->GetGUID();
+                    target = pVictim;
+                    originalCaster = GetGUID();
 
                     break;
                 }

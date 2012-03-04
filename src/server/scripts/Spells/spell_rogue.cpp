@@ -363,9 +363,8 @@ public:
             BUFF3 = 84747
         };
 
-        Player *caster;
+        Unit *caster;
         Unit *target;
-        Unit *prevTarget;
         int charges;
         int insight;
         Aura *buffIns;      // 84745 - 7
@@ -378,16 +377,19 @@ public:
 
         bool Load()
         {
-            caster = GetOwner()->ToPlayer();
+            caster = GetCaster();
             if(!caster)
                 return false;
 
-            buff = caster->GetAura(84748);
+            if (GetOwner() && GetOwner()->ToUnit())
+                buff = GetOwner()->ToUnit()->GetAura(84748);
+            else
+                buff = NULL;
+
             if (buff)
             {
-                prevTarget = buff->GetCaster();
                 buffIns = caster->GetAura(buff->GetEffect(1)->GetAmount());
-                if(buffIns)
+                if (buffIns)
                     insight = buffIns->GetSpellProto()->Id;
                 else
                     insight = 0;
@@ -395,7 +397,6 @@ public:
             }
             else
             {
-                prevTarget = NULL;
                 buffIns = NULL;
                 insight = 0;
                 charges = 1;
@@ -411,7 +412,10 @@ public:
         void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes mode)
         {
             Aura *b = aurEff->GetBase();
-            target = aurEff->GetCaster();
+            if (!b)
+                return;
+
+            target = aurEff->GetBase()->GetUnitOwner();
             AuraEffect *pFrst = NULL, *pScnd = NULL;
 
             pFrst = b->GetEffect(0);
@@ -420,7 +424,7 @@ public:
             if (!pFrst || !pScnd)
                 return;
 
-            if (!buff || target != prevTarget)
+            if (!buff)
             {
                 b->SetCharges(1);
                 pFrst->ChangeAmount(0);

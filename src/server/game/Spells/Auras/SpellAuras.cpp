@@ -1831,6 +1831,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else if (caster->HasAura(79123)) // rank 1
                         caster->CastSpell(target, 79124, true);
                 }
+                else if (GetId() == 84748) // Bandit's Guile
+                {
+                    if (caster && removeMode != AURA_REMOVE_BY_STACK)
+                    {
+                        // Remove also dummy auras from player when removing main effect
+                        caster->RemoveAurasDueToSpell(84745);
+                        caster->RemoveAurasDueToSpell(84746);
+                        caster->RemoveAurasDueToSpell(84747);
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
