@@ -131,6 +131,9 @@ class spell_rog_preparation : public SpellScriptLoader
                 {
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
 
+                    if (!spellInfo)
+                        continue;
+
                     if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
                     {
                         if (spellInfo->Id == 36554 ||                                                // Cold Blood, Shadowstep
