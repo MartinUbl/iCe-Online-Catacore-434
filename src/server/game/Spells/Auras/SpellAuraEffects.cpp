@@ -991,13 +991,104 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         amount += (int32)DoneActualBenefit;
     }
 
-    if (caster)
+    if (caster && GetSpellProto() && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        TalentTabEntry const * entry = sTalentTabStore.LookupEntry(caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()));
+        if(entry)
+        {
+            for(uint8 masteryId = 0; masteryId <= 1; masteryId++)
+            {
+                if (GetSpellProto()->Id == entry->masterySpells[masteryId])
+                {
+                    BranchSpec spec = caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec());
+                    float modifier = 0.0f;
+
+                    switch (spec)
+                    {
+                        case SPEC_WARRIOR_PROTECTION:
+                            modifier = 1.5f;
+                            break;
+                        case SPEC_WARRIOR_FURY:
+                            modifier = 5.6f;
+                            break;
+                        case SPEC_WARLOCK_DESTRUCTION:
+                            modifier = 1.35f;
+                            break;
+                        case SPEC_WARLOCK_AFFLICTION:
+                            modifier = 1.63f;
+                            break;
+                        case SPEC_SHAMAN_ENHANCEMENT:
+                        case SPEC_ROGUE_SUBTLETY:
+                            modifier = 2.5f;
+                            break;
+                        case SPEC_ROGUE_ASSASSINATION:
+                            modifier = 3.5f;
+                            break;
+                        case SPEC_PALADIN_RETRIBUTION:
+                            modifier = 2.1f;
+                            break;
+                        case SPEC_PALADIN_PROTECTION:
+                            modifier = 2.25f;
+                            break;
+                        case SPEC_MAGE_FIRE:
+                            modifier = 2.8f;
+                            break;
+                        case SPEC_HUNTER_SURVIVAL:
+                            modifier = 1.0f;
+                            break;
+                        case SPEC_DRUID_FERAL:
+                            if (masteryId == 0)
+                                break;
+                            else if (masteryId == 1)
+                                modifier = 3.1f;
+                            break;
+                        case SPEC_DRUID_BALANCE:
+                            modifier = 2.0f;
+                            break;
+                        case SPEC_DK_UNHOLY:
+                            modifier = 2.5f;
+                            break;
+                        case SPEC_DK_FROST:
+                            modifier = 2.0f;
+                            break;
+                        case SPEC_WARRIOR_ARMS:
+                        case SPEC_WARLOCK_DEMONOLOGY:
+                        case SPEC_SHAMAN_RESTORATION:
+                        case SPEC_SHAMAN_ELEMENTAL:
+                        case SPEC_ROGUE_COMBAT:
+                        case SPEC_PRIEST_SHADOW:
+                        case SPEC_PRIEST_HOLY:
+                        case SPEC_PRIEST_DISCIPLINE:
+                        case SPEC_PALADIN_HOLY:
+                        case SPEC_MAGE_FROST:
+                        case SPEC_MAGE_ARCANE:
+                        case SPEC_HUNTER_MARKSMANSHIP:
+                        case SPEC_HUNTER_BEASTMASTERY:
+                        case SPEC_DRUID_RESTORATION:
+                        case SPEC_DK_BLOOD:
+                            modifier = 0.0f;
+                            // These specs are handled externally
+                            // Generally these masteries are used as proc chance or direct damage increase
+                            break;
+                        default:
+                            sLog->outError("AuraEffect::CalculateAmount: Unknown branchSpec %u",spec);
+                            break;
+                    }
+
+                    // And modify amount by new calculated value
+                    amount = caster->ToPlayer()->GetMasteryPoints()*modifier;
+                }
+            }
+        }
+    }
+
+    if (caster && GetSpellProto() && amount != 0)
     {
         // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC
         Unit::AuraEffectList const& effList = caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
         for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
         {
-            if ((*itr) && (GetSpellProto()) && (*itr)->GetMiscValue() == int32(GetSpellProto()->Mechanic))
+            if ((*itr) && (*itr)->GetMiscValue() == int32(GetSpellProto()->Mechanic))
             {
                 if ((*itr)->GetAmount())
                     amount *= 1+((*itr)->GetAmount()/100.0f);
