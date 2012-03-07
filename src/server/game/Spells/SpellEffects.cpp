@@ -6128,7 +6128,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
                     shotMod = 0.724f;
                     // Remove Master Marksman proc spell "Fire!"
-                    if (m_caster->HasAura(82926))
+                    if (m_caster->HasAura(82926) && m_spellInfo->Id == 82928)
                         m_caster->RemoveAurasDueToSpell(82926);
                     break;
                 }
