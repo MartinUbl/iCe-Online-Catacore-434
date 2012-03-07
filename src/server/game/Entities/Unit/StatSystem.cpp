@@ -383,7 +383,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_CAT:
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
-                        val2 = (getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f) * 1.25f + m_baseFeralAP;
+                        val2 = (getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f) * 1.25f;
 
                         // Cat Form profit of Heart of the Wild
                         if (GetShapeshiftForm() == FORM_CAT)
@@ -397,7 +397,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                         }
                         break;
                     default:
-                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f + m_baseFeralAP;
+                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
                         break;
                 }
                 break;
