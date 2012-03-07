@@ -125,34 +125,20 @@ class spell_rog_preparation : public SpellScriptLoader
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                //immediately finishes the cooldown on certain Rogue abilities
-                const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
-                for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
+                // immediately finishes the cooldown on certain Rogue abilities
+
+                // Shadowstep, Vanish, Sprint
+                static const uint32 spellMap[] = {36554, 1856, 2983};
+                // Kick, Dismantle, Smoke Bomb
+                static const uint32 glyphSpellMap[] = {1766, 51722, 76577};
+
+                for (uint32 i = 0; i < sizeof(spellMap)/sizeof(uint32); i++)
+                    caster->ToPlayer()->RemoveSpellCooldown(spellMap[i], true);
+
+                if (caster->HasAura(ROGUE_SPELL_GLYPH_OF_PREPARATION))
                 {
-                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-
-                    if (!spellInfo)
-                        continue;
-
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-                    {
-                        if (spellInfo->Id == 36554 ||                                                // Cold Blood, Shadowstep
-                            spellInfo->Id == 1856 || spellInfo->Id == 2983)                          // Vanish, Sprint
-                            caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
-                        else if (caster->HasAura(ROGUE_SPELL_GLYPH_OF_PREPARATION))
-                        {
-                            if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_DISMANTLE || // Dismantle
-                                spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_KICK ||       // Kick
-                                spellInfo->Id == 76577)                                              // Smoke Bomb
-                                caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
-                            else
-                                ++itr;
-                        }
-                        else
-                            ++itr;
-                    }
-                    else
-                        ++itr;
+                    for (uint32 i = 0; i < sizeof(glyphSpellMap)/sizeof(uint32); i++)
+                        caster->ToPlayer()->RemoveSpellCooldown(glyphSpellMap[i], true);
                 }
             }
 
