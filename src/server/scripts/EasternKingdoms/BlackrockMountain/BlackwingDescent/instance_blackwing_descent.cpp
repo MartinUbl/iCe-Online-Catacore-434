@@ -19,6 +19,7 @@
 #include "ScriptPCH.h"
 #include "blackwing_descent.h"
 
+#define MAX_ENCOUNTER    7
 class instance_blackwing_descent : public InstanceMapScript
 {
 public:
@@ -30,19 +31,25 @@ public:
 
         uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint64 ElectronGUID;
-        uint64 ToxitronGUID;
-        uint64 ArcantronGUID;
-        uint64 MagmatronGUID;
+        uint64 MaloriakGUID;
+        uint64 AtramedesGUID;
+        uint64 ChimaeronGUID;
+        uint64 MagmawGUID;
+        uint64 OmnotronDefenceMatrixGUID;
+        uint64 Nefarian1GUID;
+        uint64 Nefarian2GUID;
 
         void Initialize()
         {
             memset(&auiEncounter, 0, sizeof(auiEncounter));
 
-            ElectronGUID  = 0;
-            ToxitronGUID  = 0;
-            ArcantronGUID = 0;
-            MagmatronGUID = 0;
+            MaloriakGUID = 0;
+            AtramedesGUID = 0;
+            ChimaeronGUID = 0;
+            MagmawGUID = 0;
+            OmnotronDefenceMatrixGUID = 0;
+            Nefarian1GUID = 0;
+            Nefarian2GUID = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -60,10 +67,39 @@ public:
 
             switch(pCreature->GetEntry())
             {
-                case NPC_ELECTRON:        ElectronGUID  = pCreature->GetGUID(); break;
-                case NPC_TOXITRON:        ToxitronGUID  = pCreature->GetGUID(); break;
-                case NPC_ARCANOTRON:      ArcantronGUID = pCreature->GetGUID(); break;
-                case NPC_MAGMATRON:       MagmatronGUID = pCreature->GetGUID(); break;
+                case 41378: // Maloriak
+                    MaloriakGUID = pCreature->GetGUID();
+                    break;
+                case 41442: // Atramedes
+                    AtramedesGUID = pCreature->GetGUID();
+                    break;
+                case 43296: // Chimaeron
+                    ChimaeronGUID = pCreature->GetGUID();
+                    break;
+                case 121050: // Magmaw
+                    MagmawGUID = pCreature->GetGUID();
+                    break;
+                case 121060: // Omnotron Defence Matrix
+                    OmnotronDefenceMatrixGUID = pCreature->GetGUID();
+                    break;
+                case 41376: // Nefarian 1
+                    Nefarian1GUID = pCreature->GetGUID();
+                    if (auiEncounter[1] == DONE
+                        || auiEncounter[2] == DONE
+                        || auiEncounter[3] == DONE
+                        || auiEncounter[4] == DONE
+                        || auiEncounter[5] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 41379: // Nefarian 2
+                    Nefarian2GUID = pCreature->GetGUID();
+                    if (auiEncounter[1] == DONE
+                        || auiEncounter[2] == DONE
+                        || auiEncounter[3] == DONE
+                        || auiEncounter[4] == DONE
+                        || auiEncounter[5] == DONE)
+                        pCreature->setFaction(14);
+                    break;
             }
         }
 
@@ -71,27 +107,57 @@ public:
         {
             if(!add)
                 return;
-
-            //
         }
 
         uint64 GetData64(uint32 type)
         {
             switch(type)
             {
-                case DATA_ELECTRON_GUID:                 return ElectronGUID;
-                case DATA_TOXITRON_GUID:                 return ToxitronGUID;
-                case DATA_ARCANOTRON_GUID:               return ArcantronGUID;
-                case DATA_MAGMATRON_GUID:                return MagmatronGUID;
+                case DATA_MALORIAK_GUID:                return MaloriakGUID;
+                case DATA_ATRAMEDES_GUID:               return AtramedesGUID;
+                case DATA_CHIMAERON_GUID:               return ChimaeronGUID;
+                case DATA_MAGMAW_GUID:                  return MagmawGUID;
+                case DATA_DEFENSE_SYSTEM_GUID:          return OmnotronDefenceMatrixGUID;
+                case DATA_NEFARIAN1:                    return Nefarian2GUID;
+                case DATA_NEFARIAN2:                    return Nefarian2GUID;
             }
             return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
+            switch (type)
+            {
+                case DATA_MALORIAK_GUID:
+                    auiEncounter[1] = data;
+                    break;
+                case DATA_ATRAMEDES_GUID:
+                    auiEncounter[2] = data;
+                    break;
+                case DATA_CHIMAERON_GUID:
+                    auiEncounter[3] = data;
+                    break;
+                case DATA_DEFENSE_SYSTEM_GUID:
+                    auiEncounter[4] = data;
+                    break;
+                case DATA_MAGMAW_GUID:
+                    auiEncounter[5] = data;
+                    break;
+            }
             if (data == DONE)
             {
+                if (Creature* nef = this->instance->GetCreature(Nefarian1GUID))
+                    nef->setFaction(14);
+                if (Creature* nef2 = this->instance->GetCreature(Nefarian2GUID))
+                    nef2->setFaction(14);
+
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[0];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
+
                 SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
             }
         }
 

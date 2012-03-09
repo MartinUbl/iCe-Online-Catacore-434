@@ -20,17 +20,6 @@
 #ifndef DEF_BLACKWING_DESCENT_H
 #define DEF_BLACKWING_DESCENT_H
 
-enum Encounter
-{
-    BOSS_MAGMAW = 0,
-    BOSS_OMNOTRON_DEFENSE_SYSTEM,
-    BOSS_MALORIAK,
-    BOSS_ATRAMEDES,
-    BOSS_CHIMAERON,
-    BOSS_NEFARIAN,
-    MAX_ENCOUNTER
-};
-
 enum SharedSpells
 {
     SPELL_BERSERK1               = 26662,
@@ -41,12 +30,12 @@ enum SharedSpells
 enum Data
 {
     //Encounters
-    DATA_MAGMAW                  = BOSS_MAGMAW,
-    DATA_OMNOTRON_DEFENSE_SYSTEM = BOSS_OMNOTRON_DEFENSE_SYSTEM,
-    DATA_MALORIAK                = BOSS_MALORIAK,
-    DATA_ATRAMEDES               = BOSS_ATRAMEDES,
-    DATA_CHIMAERON               = BOSS_CHIMAERON,
-    DATA_NEFARIAN                = BOSS_NEFARIAN,
+    DATA_MAGMAW,
+    DATA_OMNOTRON_DEFENSE_SYSTEM,
+    DATA_MALORIAK,
+    DATA_ATRAMEDES,
+    DATA_CHIMAERON,
+    DATA_NEFARIAN,
     //Additional Entities
     DATA_ARCANOTRON_GUID         = 6,
     DATA_ELECTRON_GUID           = 7,
@@ -54,6 +43,13 @@ enum Data
     DATA_TOXITRON_GUID           = 9,
     DATA_ONYXIA_GUID             = 10,
     DATA_BILE_O_TRON_800         = 11,
+    DATA_MALORIAK_GUID           = 41378,
+    DATA_ATRAMEDES_GUID          = 41442,
+    DATA_CHIMAERON_GUID          = 43296,
+    DATA_MAGMAW_GUID            = 121050,
+    DATA_DEFENSE_SYSTEM_GUID    = 121060,
+    DATA_NEFARIAN1              = 41376,
+    DATA_NEFARIAN2              = 41379
 };
 
 enum Creaturess
