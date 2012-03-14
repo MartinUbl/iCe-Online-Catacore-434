@@ -192,6 +192,7 @@ void AddSC_stratholme();
 void AddSC_sunken_temple();                  // Sunken Temple
 void AddSC_instance_sunken_temple();
 void AddSC_instance_sunwell_plateau();       //Sunwell Plateau
+void AddSC_instance_bastion_of_twilight();      // The Bastion of Twilight
 void AddSC_boss_kalecgos();
 void AddSC_boss_brutallus();
 void AddSC_boss_felmyst();
@@ -790,6 +791,7 @@ void AddEasternKingdomsScripts()
     AddSC_sunken_temple();                  // Sunken Temple
     AddSC_instance_sunken_temple();
     AddSC_instance_sunwell_plateau();       //Sunwell Plateau
+    AddSC_instance_bastion_of_twilight();   // The Bastion of Twilight
     AddSC_boss_kalecgos();
     AddSC_boss_brutallus();
     AddSC_boss_felmyst();

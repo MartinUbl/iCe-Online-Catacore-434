@@ -19,6 +19,202 @@
 #include "ScriptPCH.h"
 #include "bastion_of_twilight.h"
 
+#define MAX_ENCOUNTER    6
+
+class instance_bastion_of_twilight : public InstanceMapScript
+{
+public:
+    instance_bastion_of_twilight() : InstanceMapScript("instance_bastion_of_twilight", 671) { }
+
+    struct instance_bastion_of_twilight_InstanceScript : public InstanceScript
+    {
+        instance_bastion_of_twilight_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+
+        uint32 auiEncounter[MAX_ENCOUNTER];
+
+        uint64 HalfusGUID;
+        uint64 ValionaGUID;
+        uint64 CouncilGUID;
+        uint64 ChogallGUID;
+        uint64 SinestraGUID;
+        uint64 GOfloorGUID;
+
+        void Initialize()
+        {
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
+
+            HalfusGUID = 0;
+            ValionaGUID = 0;
+            CouncilGUID = 0;
+            ChogallGUID = 0;
+            SinestraGUID = 0;
+            GOfloorGUID = 0;
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS) return true;
+
+            return false;
+        }
+
+        void OnGameObjectCreate(GameObject* go, bool add)
+        {
+            if(!add)
+                return;
+
+            if (go->GetEntry() == 402097)
+                GOfloorGUID = go->GetGUID();
+        }
+
+        void OnCreatureCreate(Creature* pCreature, bool add)
+        {
+            if (!add)
+                return;
+
+            if (this->instance->IsHeroic() /* Only for Heroic Mode */ && pCreature->GetEntry() == 41379 /* Chogall */)
+            {
+                ChogallGUID = pCreature->GetGUID();
+                if (auiEncounter[1] == DONE // Halfus
+                    && auiEncounter[2] == DONE // Valiona
+                    && auiEncounter[3] == DONE // Council
+                    && auiEncounter[4] == DONE) // Chogall
+                    if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
+                        go->SetGoState(GO_STATE_ACTIVE);
+            }
+
+            switch (pCreature->GetEntry())
+            {
+                case 44600: // Halfus
+                    HalfusGUID = pCreature->GetGUID();
+                    break;
+                case 45992: // Valiona
+                    ValionaGUID = pCreature->GetGUID();
+                    break;
+                case 43735: // Council
+                    CouncilGUID = pCreature->GetGUID();
+                    break;
+                case 45213: // Sinestra
+                    SinestraGUID = pCreature->GetGUID();
+                    break;
+            }
+
+        }
+
+        uint64 GetData64(uint32 type)
+        {
+            switch(type)
+            {
+                case DATA_HALFUS:
+                    return HalfusGUID;
+                    break;
+                case DATA_VALIONA:
+                    return ValionaGUID;
+                    break;
+                case DATA_COUNCIL:
+                    return CouncilGUID;
+                    break;
+                case DATA_CHOGALL:
+                    return ChogallGUID;
+                    break;
+                case DATA_SINESTRA:
+                    return SinestraGUID;
+                    break;
+            }
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            switch (type)
+            {
+                case DATA_HALFUS:
+                    auiEncounter[1] = data;
+                    break;
+                case DATA_VALIONA:
+                    auiEncounter[2] = data;
+                    break;
+                case DATA_COUNCIL:
+                    auiEncounter[3] = data;
+                    break;
+                case DATA_CHOGALL:
+                    auiEncounter[4] = data;
+                    break;
+                case DATA_SINESTRA:
+                    auiEncounter[5] = data;
+                    break;
+            }
+
+            if (auiEncounter[1] == DONE // Halfus
+                && auiEncounter[2] == DONE // Valiona
+                && auiEncounter[3] == DONE // Council
+                && auiEncounter[4] == DONE) // Chogall
+            {
+                if (this->instance->IsHeroic())
+                    if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
+                        go->SetGoState(GO_STATE_ACTIVE);
+            }
+
+            if (data == DONE)
+            {
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[0];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            return 0;
+        }
+
+       std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << auiEncounter[0];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            std::istringstream loadStream(in);
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+    };
+
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_bastion_of_twilight_InstanceScript(map);
+    }
+};
+
 void AddSC_instance_bastion_of_twilight()
 {
+    new instance_bastion_of_twilight();
 }

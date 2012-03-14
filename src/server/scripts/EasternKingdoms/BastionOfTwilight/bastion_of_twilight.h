@@ -15,3 +15,11 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+enum data
+{
+    DATA_HALFUS     = 44600,
+    DATA_VALIONA    = 45992,
+    DATA_COUNCIL    = 43735,
+    DATA_CHOGALL    = 43324,
+    DATA_SINESTRA   = 45213
+};
