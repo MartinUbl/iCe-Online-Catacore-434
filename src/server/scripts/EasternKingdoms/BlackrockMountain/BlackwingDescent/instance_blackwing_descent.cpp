@@ -85,19 +85,19 @@ public:
                 case 41376: // Nefarian 1
                     Nefarian1GUID = pCreature->GetGUID();
                     if (auiEncounter[1] == DONE
-                        || auiEncounter[2] == DONE
-                        || auiEncounter[3] == DONE
-                        || auiEncounter[4] == DONE
-                        || auiEncounter[5] == DONE)
+                        && auiEncounter[2] == DONE
+                        && auiEncounter[3] == DONE
+                        && auiEncounter[4] == DONE
+                        && auiEncounter[5] == DONE)
                         pCreature->setFaction(14);
                     break;
                 case 41379: // Nefarian 2
                     Nefarian2GUID = pCreature->GetGUID();
                     if (auiEncounter[1] == DONE
-                        || auiEncounter[2] == DONE
-                        || auiEncounter[3] == DONE
-                        || auiEncounter[4] == DONE
-                        || auiEncounter[5] == DONE)
+                        && auiEncounter[2] == DONE
+                        && auiEncounter[3] == DONE
+                        && auiEncounter[4] == DONE
+                        && auiEncounter[5] == DONE)
                         pCreature->setFaction(14);
                     break;
             }
