@@ -4464,6 +4464,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 11374; // Changing fish instead pig :D
             count++;
             break;
+        case 43681: // Inactive (Spell for AFK Reporter)
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_REFLECTED;
+            count++;
+            break;
         default:
             break;
         }

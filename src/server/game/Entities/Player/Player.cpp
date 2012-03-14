@@ -22547,16 +22547,26 @@ void Player::ReportedAfkBy(Player* reporter)
     if (!bg || bg != reporter->GetBattleground() || GetTeam() != reporter->GetTeam())
         return;
 
-    // check if player has 'Idle' or 'Inactive' debuff
-    if (m_bgData.bgAfkReporter.find(reporter->GetGUIDLow()) == m_bgData.bgAfkReporter.end() && !HasAura(43680) && !HasAura(43681) && reporter->CanReportAfkDueToLimit())
+    // check if player has 'Inactive' debuff
+    if (m_bgData.bgAfkReporter.find(reporter->GetGUIDLow()) == m_bgData.bgAfkReporter.end() && !HasAura(43681) && reporter->CanReportAfkDueToLimit())
     {
         m_bgData.bgAfkReporter.insert(reporter->GetGUIDLow());
         m_bgData.bgAfkReportedCount = m_bgData.bgAfkReporter.size();
+
+        ChatHandler(this).PSendSysMessage("You have been reported by player %s as Away, count %u",reporter->GetName(),m_bgData.bgAfkReportedCount);
+        GetSession()->SendNotification("You have been reported by player %s as Away", reporter->GetName());
+
+        if (m_bgData.bgAfkReportedCount >= 1) // Send Report Message
+            for (Battleground::BattlegroundPlayerMap::const_iterator itr = bg->GetPlayers().begin(); itr != bg->GetPlayers().end(); ++itr)
+                if (Player* player = sObjectMgr->GetPlayer(itr->first))
+                    if (player->GetTeam() == reporter->GetTeam()) // Send Message to Player Team
+                        player->GetSession()->SendNotification("Player %s has been reported as Away by %s",this->GetName(),reporter->GetName());
+
         // 3 players have to complain to apply debuff
         if (m_bgData.bgAfkReportedCount >= 3)
         {
-            // cast 'Idle' spell
-            CastSpell(this, 43680, true);
+            // cast 'Inactive' spell
+            CastSpell(this, 43681, true);
             m_bgData.bgAfkReporter.clear();
         }
     }
