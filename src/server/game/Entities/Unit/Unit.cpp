@@ -6146,14 +6146,31 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Divine Aegis
             if (dummySpell->SpellIconID == 2820)
             {
+                bool crit = (procEx & PROC_EX_CRITICAL_HIT);
+                bool PoH = (procSpell->Id == 596);
+
+                if(!crit && !PoH)
+                    return false;
+
+                if(crit && PoH)
+                    triggerAmount *= 2;
+
                 // Multiple effects stack, so let's try to find this aura.
                 int32 bonus = 0;
                 if (AuraEffect *aurEff = target->GetAuraEffect(47753, 0))
                     bonus = aurEff->GetAmount();
 
                 basepoints0 = damage * triggerAmount/100 + bonus;
-                if (basepoints0 > target->getLevel() * 125)
-                    basepoints0 = target->getLevel() * 125;
+
+                if (ToPlayer() && ToPlayer()->HasMastery() &&
+                    ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_DISCIPLINE)
+                {
+                    // Calculate amount with mastery also - needs to be there due to problems with absorb cap of this talent
+                    basepoints0 *= 1.0f+ToPlayer()->GetMasteryPoints()*2.5f/100.0f;
+                }
+
+                if (basepoints0 > (0.4f * target->GetMaxHealth()))
+                    basepoints0 = 0.4f * target->GetMaxHealth();
 
                 triggered_spell_id = 47753;
                 break;

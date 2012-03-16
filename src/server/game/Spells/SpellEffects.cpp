@@ -3511,7 +3511,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     m_caster->CastSpell(m_caster, 96267, true);
             }
             // Implementation of Priests discipline mastery proficiency
-            if (m_spellAura->HasEffectType(SPELL_AURA_SCHOOL_ABSORB))
+            if (m_spellAura->HasEffectType(SPELL_AURA_SCHOOL_ABSORB) && m_spellInfo->Id != 47753) // exclude Divine Aegis (handled elsewhere)
             {
                 if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
                     m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_DISCIPLINE)
