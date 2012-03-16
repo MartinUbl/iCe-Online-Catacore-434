@@ -542,3 +542,17 @@ uint32 SpellEntry::GetEffectApplyAuraNameByIndex(uint32 index) const
     SpellEffectEntry const* effect = GetSpellEffect(index);
     return effect ? effect->EffectApplyAuraName : 0;
 }
+
+bool SpellEntry::AppliesAuraType(uint32 type) const
+{
+    if (type >= TOTAL_AURAS)
+        return false;
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (Effect[i] == SPELL_EFFECT_APPLY_AURA && EffectApplyAuraName[i] == type)
+            return true;
+    }
+
+    return false;
+}

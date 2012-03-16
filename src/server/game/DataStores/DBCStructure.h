@@ -1906,13 +1906,13 @@ struct SpellEntry
     uint32 SpellTargetRestrictionsId;                       // 44       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 45       SpellTotems.dbc
     uint32 researchProjectId;                               // 46       ResearchProject.dbc
-    
+
     //SpellAuraOptionsEntry
         uint32    StackAmount;
         uint32    procChance;
         uint32    procCharges;
         uint32    procFlags;
-    
+
     //SpellAuraRestrictionsEntry
         uint32    CasterAuraState;
         uint32    TargetAuraState;
@@ -1922,12 +1922,12 @@ struct SpellEntry
         uint32    targetAuraSpell;
         uint32    excludeCasterAuraSpell;
         uint32    excludeTargetAuraSpell;
-    
+
     // SpellCastingRequirementsEntry
         uint32    FacingCasterFlags;
         int32     AreaGroupId;
         uint32    RequiresSpellFocus;
-    
+
     // SpellCategoriesEntry
         uint32    Category;
         uint32    DmgClass;
@@ -1935,16 +1935,16 @@ struct SpellEntry
         uint32    Mechanic;
         uint32    PreventionType;
         uint32    StartRecoveryCategory;
-    
+
     // SpellClassOptionsEntry
         flag96    SpellFamilyFlags;
         uint32    SpellFamilyName;
-    
+
     // SpellCooldownsEntry
         uint32    CategoryRecoveryTime;
         uint32    RecoveryTime;
         uint32    StartRecoveryTime;
-    
+
     // SpellEffectEntry
         uint32    Effect[3];
         float     EffectValueMultiplier[3];
@@ -1966,32 +1966,32 @@ struct SpellEntry
         uint32    EffectTriggerSpell[3];
         uint32    EffectImplicitTargetA[3];
         uint32    EffectImplicitTargetB[3];
-    
+
     // SpellEquippedItemsEntry
         int32     EquippedItemClass;
         int32     EquippedItemInventoryTypeMask;
         int32     EquippedItemSubClassMask;
-    
+
     // SpellInterruptsEntry
         uint32    AuraInterruptFlags;
         uint32    ChannelInterruptFlags;
         uint32    InterruptFlags;
-    
+
     // SpellLevelsEntry
         uint32    baseLevel;
         uint32    maxLevel;
         uint32    spellLevel;
-    
+
     // SpellPowerEntry
         uint32    manaCost;
         uint32    manaCostPerlevel;
         uint32    ManaCostPercentage;
         uint32    manaPerSecond;
-    
+
     // SpellReagentsEntry
         int32     Reagent[8];
         uint32    ReagentCount[8];
-    
+
     // SpellScalingEntry
         uint32    ct_min;
         uint32    ct_max;
@@ -2002,29 +2002,29 @@ struct SpellEntry
         float     coefOther[3];   
         float     base_coef;
         uint32    base_level_coef;
-    
+
     // SpellShapeshiftEntry
         uint32    Stances;
         uint32    StancesNot;
-    
+
     // SpellTargetRestrictionsEntry
         uint32    MaxAffectedTargets;
         uint32    MaxTargetLevel;
         uint32    TargetCreatureType;
         uint32    Targets;
-    
+
     // SpellTotemsEntry
         uint32    TotemCategory[2];    // 162-163  m_requiredTotemCategoryID
         uint32    Totem[2];                      // 52-53    m_totem
-    
+
     // helpers
     int32 CalculateSimpleValue(uint32 eff) const;
     uint32 const* GetEffectSpellClassMask(uint32 eff) const;
-    
+
     // Load references to other structs
     SpellEntry(SpellEntry_n const*);
     void LoadSpellAddons();
-    
+
     // struct access functions
     SpellAuraOptionsEntry const* GetSpellAuraOptions() const;
     SpellAuraRestrictionsEntry const* GetSpellAuraRestrictions() const;
@@ -2042,7 +2042,7 @@ struct SpellEntry
     SpellShapeshiftEntry const* GetSpellShapeshift() const;
     SpellTargetRestrictionsEntry const* GetSpellTargetRestrictions() const;
     SpellTotemsEntry const* GetSpellTotems() const;
-    
+
     // single fields
     uint32 GetManaCost() const;
     uint32 GetPreventionType() const;
@@ -2084,12 +2084,15 @@ struct SpellEntry
     uint32 GetCasterAuraState() const;
     uint32 GetTargets() const;
     uint32 GetEffectApplyAuraNameByIndex(uint32 index) const;
-    
+
+    // some additional helper functions
+    bool AppliesAuraType(uint32 type) const;
+
 private:
     // prevent creating custom entries (copy data from original in fact)
     SpellEntry(SpellEntry const&);                      // DON'T must have implementation
 };
-    
+
 typedef std::set<uint32> SpellCategorySet;
 typedef std::map<uint32,SpellCategorySet > SpellCategoryStore;
 typedef std::set<uint32> PetFamilySpellsSet;
