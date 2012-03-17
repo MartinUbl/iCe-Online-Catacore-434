@@ -408,7 +408,7 @@ public:
                                 if(m_auiEncounter[TYPE_ALAKIR] == DONE)
                                     player->CastSpell(player, 82724, true); // aura Eye of the Storm grants flying
                                 //else if(m_auiEncounter[TYPE_ALAKIR] == IN_PROGRESS)
-                                //    player->CastSpell(player, xxx, true); // add stun for a while in order to delay player and prevent them from attacking
+                                //    player->CastSpell(player, xxx, true); // stun: delay the player
                             }
                         }
                         else

@@ -19,19 +19,22 @@
 #include "ScriptPCH.h"
 #include "throne_of_the_four_winds.h"
 
-
-// TODO:
-//critical:
-// extend bounding radius in phase 3
-//to be done:
-// correct timers based on test feedback
-// Relentless Storm - not implemented yet
-//obsolete:
-// lightning clouds dummy visual range to cca 20 (spells: 89583, 89592)
-// Squall Line: wrong Vehicle Kit ID; omega speed; direction?
-// destroy platform animation
-// Lightning Strike visuals
-// Al'akir equip id: sword
+/*
+ TODO:
+critical:
+ --
+to be done:
+ correct timers based on test feedback
+obsolete:
+ lightning clouds dummy visual range to cca 20 (spells: 89583, 89592)
+ Squall Line: wrong Vehicle Kit ID; omega speed; direction?
+ destroy platform animation
+ Lightning Strike visuals
+ Al'akir equip id: sword
+workarond-ed:
+ return to platform - port
+ Relentless Storm
+*/
 
 enum Stuff
 {
@@ -66,11 +69,10 @@ enum Stuff
     SPELL_RELENTLESS_STORM_VISUAL = 88866,
     SPELL_LIGHTNING_CLOUDS        = 89564,
     SPELL_LIGHTNING_CLOUDS_DMG    = 89587,
-
-    // Relentless Storm ? - not implemented yet
-    SPELL_RELENTLESS_STORM_VEHICLE= 89104, // ?
-    NPC_RELENTLESS_STORM          = 47807, // ?
-
+    NPC_ALAKIR_LARGE_MODEL        = 48233,
+    //// Relentless Storm ? - workaround-ed
+    //SPELL_RELENTLESS_STORM_VEHICLE= 89104,
+    //NPC_RELENTLESS_STORM          = 47807,
 
     GO_HEART_OF_WIND              = 207891,
 };
@@ -117,11 +119,9 @@ class boss_alakir: public CreatureScript
             uint32 staticShockTimer;
             uint32 acidRainTimer;
             uint32 stormlingTimer;
-            uint32 lightningTimer;
-            uint32 lightningRodTimer;
-            uint32 lightningCloudTimer;
 
             uint64 m_relentless_guid;
+            uint64 m_large_model_guid;
 
             void Reset()
             {
@@ -136,10 +136,8 @@ class boss_alakir: public CreatureScript
                 staticShockTimer = 2000;
                 acidRainTimer = 2000;
                 stormlingTimer = 6000;
-                lightningTimer = 3000;
-                lightningRodTimer = 9000;
-                lightningCloudTimer = 15000;
 
+                m_large_model_guid = 0;
                 DespawnStormlings();
 
                 for (uint32 i = 0; i < SL_COUNT; i++)
@@ -149,9 +147,9 @@ class boss_alakir: public CreatureScript
                     instance->SetData(TYPE_ALAKIR, NOT_STARTED);
 
                 me->SetFlying(false);
+                me->SetVisibility(VISIBILITY_ON);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 
-                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 35.0f); // implicit value of native model
-                // client update
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -170,8 +168,6 @@ class boss_alakir: public CreatureScript
                     instance->SetData(TYPE_ALAKIR, DONE);
 
                 DespawnStormlings();
-
-                DoScriptText(-1850534, me);
 
                 // summon loot chest
                 me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
@@ -193,6 +189,12 @@ class boss_alakir: public CreatureScript
                     me->CastSpell(pTarget, SPELL_LIGHTNING_STRIKE_VISUAL, true);
             }
 
+            void DamageTaken(Unit* /*pDoneBy*/, uint32 &damage)
+            {
+                if (m_phase == 3)
+                    damage = 0;
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
@@ -206,8 +208,6 @@ class boss_alakir: public CreatureScript
                         DoScriptText(-1850531, me);
                         m_phase = 3;
 
-                        windBurstTimer = 20000;
-
                         if(!map)
                             return;
                     // shatter platform, initialize
@@ -217,28 +217,31 @@ class boss_alakir: public CreatureScript
                     // let players fly
                         me->CastSpell(me, SPELL_WIND_BURST_THIRD_PHASE, false);
 
-                    // change model
-                        me->AddAura(SPELL_RELENTLESS_STORM_CHANNEL, me);
-                        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 400.0f);
-                        // client update
-                        //me->BuildUpdate
-                        //me->BuildFieldsUpdate
-                        //me->BuildValuesUpdateBlockForPlayer
-
                     // let myself fly
                         me->SetFlying(true);
-                        me->GetMotionMaster()->MovePoint(666,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
-                        WorldPacket data;
-                        me->BuildHeartBeatMsg(&data);
-                        me->SendMessageToSet(&data, false);
+
+
+                    // set invisible
+                        me->SetVisibility(VISIBILITY_OFF);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+
+                    // summon large model boss
+                        if (Creature* tmp_large_model = me->SummonCreature(NPC_ALAKIR_LARGE_MODEL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                        {
+                            m_large_model_guid = tmp_large_model->GetGUID();
+                            tmp_large_model->SetMaxHealth(me->GetMaxHealth());
+                            tmp_large_model->SetHealth(me->GetHealth());
+                            if (Unit* victim = me->getVictim())
+                                tmp_large_model->AI()->AttackStart(victim);
+                        }
 
                     // let Stormlings fly
                         if (!m_stormlings.empty())
                         {
+                            Creature *summon = NULL;
                             for (std::list<uint64>::const_iterator itr = m_stormlings.begin(); itr != m_stormlings.end(); ++itr)
                             {
-                                Creature *summon = map->GetCreature(*itr);
-                                if (summon)
+                                if (summon = map->GetCreature(*itr))
                                     me->AddAura(SPELL_EYE_OF_THE_STORM_AURA, summon);
                             }
                         }
@@ -258,16 +261,35 @@ class boss_alakir: public CreatureScript
                             summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             me->AddAura(SPELL_RELENTLESS_STORM_VISUAL, summon);
                         }
-
-                    // do initial Lightning Clouds at the bottom
-                        DoLightningCloud(185.0f);
-
                     }
                     else if (m_phase == 1 && me->GetHealthPct() < 80.0f)
                     {
                         DoScriptText(-1850529, me);
                         m_phase = 2;
                     }
+                    else if (m_phase == 3)
+                    {
+                        // check 2D distance of players -- Relentless Strom workaround
+                        Map::PlayerList const &plList = map->GetPlayers();
+                        if (!plList.isEmpty())
+                            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                            {
+                                if (Player *player = itr->getSource())
+                                {
+                                    if (me->GetDistance2d(player) > 130.0f // is too far
+                                        && !player->HasAura(89104))        // has not internal CD aura
+                                    {
+                                        float dx = player->GetPositionX() - me->GetPositionX();
+                                        float dy = player->GetPositionY() - me->GetPositionY();
+                                        float fx = me->GetPositionX() + (dx/2);
+                                        float fy = me->GetPositionY() + (dy/2);
+                                        player->GetMotionMaster()->MoveJump(fx, fy, player->GetPositionZ()-10.0f, 25.0f, 8.0f);
+                                        me->AddAura(89104, player);
+                                    }
+                                }
+                            }
+                    }
+
                     checkHealthTimer = 2000;
 
                 } else checkHealthTimer -= diff;
@@ -420,60 +442,34 @@ class boss_alakir: public CreatureScript
                     }
                     break;
                 case 3:
-                    {
-                    // Lightning
-                        if (lightningTimer <= diff)
-                        {
-                            Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                            if (target)
-                                me->CastSpell(target, SPELL_LIGHTNING, false);
-                            lightningTimer = 3000;
-
-                        } else lightningTimer -= diff;
-                    // Wind Burst
-                        if (windBurstTimer <= diff)
-                        {
-                            DoScriptText(-1850528, me);
-
-                            me->CastSpell(me, SPELL_WIND_BURST_THIRD_PHASE, false);
-                            windBurstTimer = 20000;
-
-                        } else windBurstTimer -= diff;
-                    // Lightning Rod
-                        if (lightningRodTimer <= diff)
-                        {
-                            Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                            if (target)
-                                me->AddAura(SPELL_LIGHTNING_ROD, target);
-                            lightningRodTimer = 15000;
-
-                        } else lightningRodTimer -= diff;
-                    // Lightning Cloud
-                        if (lightningCloudTimer < diff)
-                        {
-                            Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                            if (target)
-                            {
-                                float altitude = target->GetPositionZ();
-                                DoLightningCloud(altitude);
-                            }
-                            lightningCloudTimer = 30000;
-
-                        } else lightningCloudTimer -= diff;
-                    }
+                    // large model npc has its own AI
                     break;
-                }
+                default:
+                    break;
+               }
             }
 
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
+            void SummonedCreatureDies(Creature* summon, Unit* killer)
             {
                 // Stomrling dies --> apply feedback debuff
                 if (summon && summon->GetEntry() == NPC_STORMLING)
                 {
-                    me->CastSpell(me, SPELL_FEEDBACK, true);
-                    summon->ForcedDespawn();
+                    if (m_phase == 3 && map != NULL)
+                    {
+                        if (Creature* tmp = map->GetCreature(m_large_model_guid))
+                            tmp->CastSpell(tmp, SPELL_FEEDBACK, true);
+                    }
+                    else
+                        me->CastSpell(me, SPELL_FEEDBACK, true);
 
+                    summon->ForcedDespawn();
                     m_stormlings.remove(summon->GetGUID());
+                }
+                // large model for phase three dies --> die
+                else if (summon && summon->GetEntry() == NPC_ALAKIR_LARGE_MODEL && killer)
+                {
+                    m_phase = 4;
+                    killer->Kill(me);
                 }
             }
 
@@ -528,30 +524,9 @@ class boss_alakir: public CreatureScript
                 // todo: prevent from crossing inside boss
             }
 
-            void DoLightningCloud(float z)
-            {
-                // fill the given altitude with clouds
-                for (int i = 0; i < 50; i++)
-                {
-                    float x, y, d, r, a;
-
-                    // circle will be filled even
-                    d = float(urand(0,100)) / 100.0f;
-                    r = 125.0f * sqrt(d);
-
-                    a = float(urand(0,628)) / 100.0f;
-
-                    x = me->GetPositionX() + sin(a) * r;
-                    y = me->GetPositionY() + cos(a) * r;
-                    z += float(urand(0,8)) - 4.0f;
-
-                    me->SummonCreature(SUMMON_LIGHTNING_CLOUDS, x, y, z, 0);
-                }
-            }
-
             void DespawnStormlings()
             {
-                if (Map* map = me->GetMap())
+                if (map)
                 {
                     while (!m_stormlings.empty())
                     {
@@ -870,6 +845,130 @@ class npc_lightning_clouds: public CreatureScript
         }
 };
 
+class npc_alakir_large_model: public CreatureScript
+{
+    public:
+        npc_alakir_large_model(): CreatureScript("npc_alakir_large_model") {}
+
+        struct npc_alakir_large_modelAI: public Scripted_NoMovementAI
+        {
+            npc_alakir_large_modelAI(Creature* c): Scripted_NoMovementAI(c)
+            {
+                Reset();
+            }
+
+            uint32 lightningTimer;
+            uint32 windBurstTimer;
+            uint32 lightningRodTimer;
+            uint32 lightningCloudTimer;
+
+            void Reset()
+            {
+                me->AddAura(SPELL_RELENTLESS_STORM_CHANNEL, me);
+                me->setFaction(14);
+
+                me->SetFlying(true);
+                me->GetMotionMaster()->MovePoint(666,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
+                WorldPacket data;
+                me->BuildHeartBeatMsg(&data);
+                me->SendMessageToSet(&data, false);
+
+                lightningTimer = 3000;
+                windBurstTimer = 20000;
+                lightningRodTimer = 9000;
+                lightningCloudTimer = 30000;
+
+                // do initial Lightning Clouds at the bottom
+                DoLightningCloud(185.0f);
+            }
+
+            void EnterEvadeMode()
+            {
+                me->ForcedDespawn();
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                DoScriptText(-1850535, me);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+            // Lightning
+                if (lightningTimer <= diff)
+                {
+                    Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                    if (target)
+                        me->CastSpell(target, SPELL_LIGHTNING, false);
+                    lightningTimer = 3000;
+
+                } else lightningTimer -= diff;
+            // Wind Burst
+                if (windBurstTimer <= diff)
+                {
+                    DoScriptText(-1850534, me);
+
+                    me->CastSpell(me, SPELL_WIND_BURST_THIRD_PHASE, false);
+                    windBurstTimer = 20000;
+
+                } else windBurstTimer -= diff;
+            // Lightning Rod
+                if (lightningRodTimer <= diff)
+                {
+                    Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                    if (target)
+                        me->AddAura(SPELL_LIGHTNING_ROD, target);
+                    lightningRodTimer = 15000;
+
+                } else lightningRodTimer -= diff;
+            // Lightning Cloud
+                if (lightningCloudTimer < diff)
+                {
+                    Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                    if (target)
+                    {
+                        float altitude = target->GetPositionZ();
+                        DoLightningCloud(altitude);
+                    }
+                    lightningCloudTimer = 30000;
+
+                } else lightningCloudTimer -= diff;
+            }
+
+            void DoLightningCloud(float z)
+            {
+                // fill the given altitude with clouds
+                for (int i = 0; i < 50; i++)
+                {
+                    float x, y, d, r, a;
+
+                    // circle will be filled even
+                    d = float(urand(0,100)) / 100.0f;
+                    r = 125.0f * sqrt(d);
+
+                    a = float(urand(0,628)) / 100.0f;
+
+                    x = me->GetPositionX() + sin(a) * r;
+                    y = me->GetPositionY() + cos(a) * r;
+                    z += float(urand(0,8)) - 4.0f;
+
+                    me->SummonCreature(SUMMON_LIGHTNING_CLOUDS, x, y, z, 0);
+                }
+            }
+
+
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_alakir_large_modelAI(c);
+        }
+};
+
+
 void AddSC_alakir()
 {
     new boss_alakir();
@@ -877,6 +976,7 @@ void AddSC_alakir()
     new npc_ice_storm_ground();
     new npc_squall_vortex();
     new npc_lightning_clouds();
+    new npc_alakir_large_model();
 }
 
 /*
@@ -886,12 +986,13 @@ UPDATE creature_template SET vehicleId=342,AIName='NullAI' WHERE entry=48852;
 UPDATE creature_template SET vehicleId=0,ScriptName='npc_squall_vortex' WHERE entry=48855;
 UPDATE creature_template SET ScriptName='npc_ice_storm' WHERE entry=46973;
 UPDATE creature_template SET ScriptName='npc_ice_storm_ground' WHERE entry=46766;
-UPDATE creature_template SET ScriptName='boss_alakir' WHERE entry=46753;
+UPDATE creature_template SET ScriptName='boss_alakir', modelid1=35248 WHERE entry=46753;
 UPDATE creature_template SET ScriptName='npc_lightning_clouds' WHERE entry=48190;
+UPDATE creature_template SET ScriptName='npc_alakir_large_model', name="Al'akir" WHERE entry=48233;
 UPDATE creature_model_info SET bounding_radius=35.0, combat_reach=45.0 WHERE modelid=35248;
-UPDATE creature_model_info SET bounding_radius=400.0, combat_reach=1.0 WHERE modelid=36062;
+UPDATE creature_model_info SET bounding_radius=250.0, combat_reach=250.0 WHERE modelid=36062;
 
-
+DELETE FROM `script_texts` WHERE entry IN (-1850527,-1850528,-1850529,-1850530,-1850531,-1850532,-1850533,-1850534,-1850535);
 INSERT INTO `script_texts`
 (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`)
 VALUES
@@ -902,7 +1003,8 @@ VALUES
 (46753, -1850531, "ENOUGH! I WILL NO LONGER BE CONTAINED!", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_PHASE_THREE'),
 (46753, -1850532, "Like swatting insects...", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_KILL_1'),
 (46753, -1850533, "This little one will vex me no longer.", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_KILL_2'),
-(46753, -1850534, "After every storm... comes the calm...", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_DEATH');
+(48233, -1850534, "Winds! Obey my command!", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_WIND_BURST'),
+(48233, -1850535, "After every storm... comes the calm...", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_DEATH');
 
 
 */
