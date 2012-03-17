@@ -137,10 +137,11 @@ void GameObject::AddToWorld()
 
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
+        // The state can be changed after GameObject::Create but before GameObject::AddToWorld
+        bool toggledState = GetGoState() == GO_STATE_READY;
         if (m_model)
             GetMap()->Insert(*m_model);
-        if (startOpen)
-            EnableCollision(false);
+        EnableCollision(startOpen ^ toggledState);
         WorldObject::AddToWorld();
     }
 }
@@ -1985,7 +1986,8 @@ void GameObject::SetLootState(LootState s)
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = ((GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON) ? (GetGOInfo()->door.startOpen != 0) : false);
 
-        if (GetGOData()->go_state != GO_STATE_READY)
+        // Use the current go state
+        if (GetGoState() != GO_STATE_READY)
             startOpen = !startOpen;
 
         if (s == GO_ACTIVATED || s == GO_JUST_DEACTIVATED)
@@ -2006,7 +2008,7 @@ void GameObject::SetGoState(GOState state)
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = ((GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON) ? (GetGOInfo()->door.startOpen != 0) : false);
 
-        if (GetGOData()->go_state != GO_STATE_READY)
+        if (GetGOData() && GetGOData()->go_state == GO_STATE_READY)
             startOpen = !startOpen;
 
         if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
