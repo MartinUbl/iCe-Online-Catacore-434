@@ -144,13 +144,19 @@ public:
                     auiEncounter[5] = data;
                     break;
             }
-            if (data == DONE)
+            if (auiEncounter[1] == DONE
+                && auiEncounter[2] == DONE
+                && auiEncounter[3] == DONE
+                && auiEncounter[4] == DONE
+                && auiEncounter[5] == DONE)
             {
                 if (Creature* nef = this->instance->GetCreature(Nefarian1GUID))
                     nef->setFaction(14);
                 if (Creature* nef2 = this->instance->GetCreature(Nefarian2GUID))
                     nef2->setFaction(14);
-
+            }
+            if (data == DONE)
+            {
                 std::ostringstream saveStream;
                 saveStream << auiEncounter[0];
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
