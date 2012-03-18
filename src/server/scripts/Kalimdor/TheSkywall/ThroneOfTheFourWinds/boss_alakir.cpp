@@ -241,7 +241,7 @@ class boss_alakir: public CreatureScript
                             Creature *summon = NULL;
                             for (std::list<uint64>::const_iterator itr = m_stormlings.begin(); itr != m_stormlings.end(); ++itr)
                             {
-                                if (summon = map->GetCreature(*itr))
+                                if ((summon = map->GetCreature(*itr)) != NULL)
                                     me->AddAura(SPELL_EYE_OF_THE_STORM_AURA, summon);
                             }
                         }
