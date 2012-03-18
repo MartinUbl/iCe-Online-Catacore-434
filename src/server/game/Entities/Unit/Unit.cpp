@@ -8772,14 +8772,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         return false;
 
-    // Handle some custom things - little hacky, but safe and quick
-    switch (procSpell->Id)
+    if (procSpell)
     {
-        // These spells should not trigger anything - they used to trigger each other, and the triggered spell
-        // triggered the original spell, so we were trapped in a loop
-        case 20424: // Seals of Command
-        case 51292: // Soulthirst
-            return false;
+        // Handle some custom things - little hacky, but safe and quick
+        switch (procSpell->Id)
+        {
+            // These spells should not trigger anything - they used to trigger each other, and the triggered spell
+            // triggered the original spell, so we were trapped in a loop
+            case 20424: // Seals of Command
+            case 51292: // Soulthirst
+                return false;
+        }
     }
 
     // Custom requirements (not listed in procEx) Warning! damage dealing after this
