@@ -2035,6 +2035,10 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
                     CastSpell(this, 19579, true);
                 if (HasAura(20895) && !HasAura(24529))
                     CastSpell(this, 24529, true);
+
+                // Ferocious Inspiration
+                if (HasAura(34460))
+                    pet->CastSpell(pet, 75447, true);
             }
             else
             {
