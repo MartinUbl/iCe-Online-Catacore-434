@@ -3454,6 +3454,10 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
                 ++itr;
         }
     }
+
+    // Also check armor specialization for players - shapeshift are also influenced by that.. i think.. no, that's the wrong word.. i suppose!
+    if (target && target->GetTypeId() == TYPEID_PLAYER)
+        target->ToPlayer()->CheckArmorSpecialization();
 }
 
 /*********************************************************/
