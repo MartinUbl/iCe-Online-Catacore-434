@@ -2026,11 +2026,22 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         if (duration > 0)
             pet->SetDuration(duration);
 
-        // Regenerate health and mana of non-hunter pets
-        if (pet && !pet->isHunterPet())
+        if (pet)
         {
-            pet->SetHealth(pet->GetMaxHealth());
-            pet->SetPower(pet->getPowerType(), pet->GetMaxPower(pet->getPowerType()));
+            if (pet->isHunterPet())
+            {
+                // Spirit Bond effect
+                if (HasAura(19578) && !HasAura(19579))
+                    CastSpell(this, 19579, true);
+                if (HasAura(20895) && !HasAura(24529))
+                    CastSpell(this, 24529, true);
+            }
+            else
+            {
+                // Regenerate health and mana of non-hunter pets
+                pet->SetHealth(pet->GetMaxHealth());
+                pet->SetPower(pet->getPowerType(), pet->GetMaxPower(pet->getPowerType()));
+            }
         }
 
         return NULL;
