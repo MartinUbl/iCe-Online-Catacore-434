@@ -7126,10 +7126,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case SPELLFAMILY_DRUID:
                     // Lifebloom
-                    if (GetSpellProto()->SpellFamilyFlags[1] & 0x10)
+                    if (GetSpellProto()->Id == 33763)
                     {
                         // Final heal only on dispelled or duration end
-                        if (target && aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
+                        if (target && aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                             return;
 
                         // final heal

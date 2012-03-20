@@ -3866,6 +3866,16 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
                         dispeller->CastSpell(dispeller, 87204, true);
                 }
             }
+            // Lifebloom
+            else if (aura->GetSpellProto()->Id == 33763 && aura->GetCaster())
+            {
+                if (AuraEffect* pEff = aura->GetEffect(EFFECT_1))
+                {
+                    int32 amount = pEff->GetAmount() / (aura->GetStackAmount() ? aura->GetStackAmount() : 1);
+                    int32 stack = 1;
+                    CastCustomSpell(this, 33778, &amount, &stack, NULL, true, NULL, pEff, casterGUID);
+                }
+            }
             // Flame Shock
             if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (aura->GetSpellProto()->SpellFamilyFlags[0] & 0x10000000))
             {
