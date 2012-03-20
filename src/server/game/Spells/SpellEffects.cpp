@@ -4464,6 +4464,13 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
                 m_caster->CastCustomSpell(m_caster, 83098, &bp0, &bp0, 0, true);
             break;
         }
+        case 82726: // Fervor
+        {
+            // If caster is player and have pet, let him cast pet variant of spell Fervor (targetting system will do the trick for us)
+            if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetPetGUID())
+                m_caster->CastSpell(m_caster, 82728, true);
+            break;
+        }
         default:
             break;
     }
