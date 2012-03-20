@@ -5406,6 +5406,12 @@ void Spell::EffectLearnSkill(SpellEffIndex effIndex)
         return;
 
     uint32 skillid =  m_spellInfo->EffectMiscValue[effIndex];
+
+    // If we are learning Riding, we need to dismount to avoid unwanted auras on target
+    // This should unmount, so also remove all old "movement increase and flying" auras
+    if (skillid == SKILL_RIDING)
+        unitTarget->Unmount();
+
     uint16 skillval = unitTarget->ToPlayer()->GetPureSkillValue(skillid);
     unitTarget->ToPlayer()->SetSkill(skillid, SpellMgr::CalculateSpellEffectAmount(m_spellInfo, effIndex), skillval?skillval:1, damage*75);
 }
