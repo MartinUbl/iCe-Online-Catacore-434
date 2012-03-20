@@ -6839,20 +6839,26 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 // Focus Fire
                 case 82692:
                 {
+                    if (!GetCaster())
+                        break;
+
                     Unit* pPet = Unit::GetUnit(*GetCaster(),GetCaster()->GetPetGUID());
                     if (pPet)
                     {
-                        // Restore 4 focus to pet
-                        pPet->ModifyPower(POWER_FOCUS,+4);
+                        int32 focusRestore = 0;
 
                         // Modify aura stacks
                         if (Aura* pAura = pPet->GetAura(19615))
                         {
                             aurApp->GetBase()->SetStackAmount(pAura->GetStackAmount());
+                            focusRestore = pAura->GetStackAmount()*4;
                             pPet->RemoveAurasDueToSpell(19615);
                         }
                         else
                             GetCaster()->RemoveAurasDueToSpell(GetSpellProto()->Id);
+
+                        if (focusRestore)
+                            GetCaster()->CastCustomSpell(pPet, 83468, &focusRestore, 0, 0, true);
                     }
                     break;
                 }
