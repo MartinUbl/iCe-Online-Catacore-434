@@ -8873,6 +8873,16 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Battle Trance
+        case 12322:
+        case 85741:
+        case 85742:
+        {
+            // should proc only from Bloodthirst, Mortal Strike and Shield Slam
+            if (procSpell->Id != 23881 && procSpell->Id != 12294 && procSpell->Id != 23922)
+                return false;
+            break;
+        }
         // Brambles
         case 50419:
         {
