@@ -7652,6 +7652,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Static Shock
             if (dummySpell->SpellIconID == 3059)
             {
+                // proc only from Primal Strike, Stormstrike (+offhand) and Lava Lash
+                if (procSpell->Id != 73899 && procSpell->Id != 17364 && procSpell->Id != 32176 && procSpell->Id != 60103)
+                    return false;
+
                 // Lightning Shield
                 if (GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_SHAMAN, 0x400, 0, 0) != NULL)
                 {
