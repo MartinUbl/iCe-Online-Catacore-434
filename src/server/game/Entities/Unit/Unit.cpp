@@ -6677,6 +6677,21 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                                 }
                             }
                         }
+
+                    break;
+                }
+                // Glyph of Hemorrhage
+                case 56807:
+                {
+                    // proc only from Hemorrhage
+                    if (procSpell && procSpell->Id != 16511)
+                        return false;
+
+                    triggered_spell_id = 89775;
+                    target = pVictim;
+                    basepoints0 = damage*0.4f / 8.0f; // 40% damage in 8 ticks (24sec duration, 3sec amplitude)
+
+                    break;
                 }
                 // Bandit's Guile
                 case 84652:
