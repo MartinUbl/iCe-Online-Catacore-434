@@ -73,17 +73,6 @@ public:
             if (!add)
                 return;
 
-            if (this->instance->IsHeroic() /* Only for Heroic Mode */ && pCreature->GetEntry() == 41379 /* Chogall */)
-            {
-                ChogallGUID = pCreature->GetGUID();
-                if (auiEncounter[1] == DONE // Halfus
-                    && auiEncounter[2] == DONE // Valiona
-                    && auiEncounter[3] == DONE // Council
-                    && auiEncounter[4] == DONE) // Chogall
-                    if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
-                        go->SetGoState(GO_STATE_ACTIVE);
-            }
-
             switch (pCreature->GetEntry())
             {
                 case 44600: // Halfus
@@ -94,6 +83,18 @@ public:
                     break;
                 case 43735: // Council
                     CouncilGUID = pCreature->GetGUID();
+                    break;
+                case 41379:
+                    ChogallGUID = pCreature->GetGUID();
+                    if (this->instance->IsHeroic())
+                    {
+                        if (auiEncounter[1] == DONE // Halfus
+                            && auiEncounter[2] == DONE // Valiona
+                            && auiEncounter[3] == DONE // Council
+                            && auiEncounter[4] == DONE) // Chogall
+                            if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
+                                go->SetPhaseMask(2, true);
+                    }
                     break;
                 case 45213: // Sinestra
                     SinestraGUID = pCreature->GetGUID();
@@ -153,7 +154,7 @@ public:
             {
                 if (this->instance->IsHeroic())
                     if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        go->SetPhaseMask(2, true);
             }
 
             if (data == DONE)
