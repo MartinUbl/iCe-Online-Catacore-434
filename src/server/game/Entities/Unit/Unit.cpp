@@ -9429,7 +9429,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         {
             // Remove cooldown on Shield Slam
             if (GetTypeId() == TYPEID_PLAYER)
-                this->ToPlayer()->RemoveSpellCategoryCooldown(1209, true);
+                this->ToPlayer()->RemoveSpellCategoryCooldown(971, true);
             break;
         }
         // Maelstrom Weapon
