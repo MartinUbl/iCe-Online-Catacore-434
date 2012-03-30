@@ -1524,6 +1524,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
 
+    // Unleash Elements - Windfury part, drop charges after melee attacks
+    if(Aura *uw = GetAura(73681))
+        uw->DropCharge();
+
     // Implementation of "extra attacks" mastery proficiencies
     if (ToPlayer() && ToPlayer()->HasMastery() && damageInfo->damage > 1)
     {
