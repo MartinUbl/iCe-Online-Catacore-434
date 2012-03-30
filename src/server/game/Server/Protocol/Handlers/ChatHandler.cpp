@@ -359,7 +359,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             "< gm>", "<gm >", "< gm >"}; // initialize field
 
             size_t first;
-            for (int i = 0; i < sizeof(vyrazy)/sizeof(const char*); i++)
+            for (uint32 i = 0; i < sizeof(vyrazy)/sizeof(const char*); i++)
             {
                 first = msg.find(vyrazy[i]);
                 if (first == 0 || first == 1 || first == 2)
