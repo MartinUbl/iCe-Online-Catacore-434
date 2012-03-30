@@ -1852,6 +1852,34 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
 
         dmgInfo.AbsorbDamage(currentAbsorb);
 
+        // All warlocks absorb auras should trigger Nether Protection if talent present
+        if (currentAbsorb && pVictim && pVictim->GetTypeId() == TYPEID_PLAYER && aurApp->GetBase()->GetSpellProto() && spellInfo
+            && aurApp->GetBase()->GetSpellProto()->AppliesAuraType(SPELL_AURA_SCHOOL_ABSORB)
+            && aurApp->GetBase()->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK)
+        {
+            int32 bp0 = 0;
+            if (pVictim->HasAura(30301))
+                bp0 = 30;
+            else if (pVictim->HasAura(30299))
+                bp0 = 15;
+
+            if (bp0)
+            {
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_ARCANE))
+                    pVictim->CastCustomSpell(pVictim, 54373, &bp0, 0, 0, true);
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_FIRE))
+                    pVictim->CastCustomSpell(pVictim, 54371, &bp0, 0, 0, true);
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_FROST))
+                    pVictim->CastCustomSpell(pVictim, 54372, &bp0, 0, 0, true);
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_HOLY))
+                    pVictim->CastCustomSpell(pVictim, 54370, &bp0, 0, 0, true);
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_NATURE))
+                    pVictim->CastCustomSpell(pVictim, 54375, &bp0, 0, 0, true);
+                if (spellInfo->SchoolMask & (1 << SPELL_SCHOOL_SHADOW))
+                    pVictim->CastCustomSpell(pVictim, 54374, &bp0, 0, 0, true);
+            }
+        }
+
         absorb = currentAbsorb;
         absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, absorb);
 
@@ -8440,25 +8468,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     // Not remove charge (aura removed on death in any cases)
                     // Need for correct work Drain Soul SPELL_AURA_CHANNEL_DEATH_ITEM aura
                     return false;
-                }
-                // Nether Protection
-                else if (auraSpellInfo->SpellIconID == 1985)
-                {
-                    if (!procSpell)
-                        return false;
-                    switch(GetFirstSchoolInMask(GetSpellSchoolMask(procSpell)))
-                    {
-                        case SPELL_SCHOOL_NORMAL:
-                            return false;                   // ignore
-                        case SPELL_SCHOOL_HOLY:   trigger_spell_id = 54370; break;
-                        case SPELL_SCHOOL_FIRE:   trigger_spell_id = 54371; break;
-                        case SPELL_SCHOOL_NATURE: trigger_spell_id = 54375; break;
-                        case SPELL_SCHOOL_FROST:  trigger_spell_id = 54372; break;
-                        case SPELL_SCHOOL_SHADOW: trigger_spell_id = 54374; break;
-                        case SPELL_SCHOOL_ARCANE: trigger_spell_id = 54373; break;
-                        default:
-                            return false;
-                    }
                 }
                 break;
             }
