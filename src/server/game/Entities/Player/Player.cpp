@@ -5938,7 +5938,11 @@ void Player::UpdateRating(CombatRating cr)
 
     // Update also rune regeneration speed (affected by haste since 4.0.x)
     for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, (2 - GetFloatValue(UNIT_MOD_CAST_SPEED))*0.1f);
+    {
+        float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
+        haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, (1 + haste)*0.1f);
+    }
 
     bool affectStats = CanModifyStats();
 
@@ -25043,7 +25047,9 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
             cooldown = cooldown*(100-(*i)->GetAmount())/100;
     }
 
-    cooldown = cooldown/(2 - GetFloatValue(UNIT_MOD_CAST_SPEED));
+    float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
+    haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
+    cooldown = cooldown/(1 + haste);
 
     return cooldown;
 }
