@@ -1859,9 +1859,9 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
         {
             int32 bp0 = 0;
             if (pVictim->HasAura(30301))
-                bp0 = 30;
+                bp0 = -30;
             else if (pVictim->HasAura(30299))
-                bp0 = 15;
+                bp0 = -15;
 
             if (bp0)
             {
