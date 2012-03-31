@@ -7733,6 +7733,21 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (GetTypeId() != TYPEID_PLAYER || getClass() != CLASS_DEATH_KNIGHT)
                     return false;
 
+                // Runic Corruption talent
+                // It suppresses the main function of that passive ability and replaces it by rune regen speed bonus
+                if (HasAura(51462))
+                {
+                    int32 bp = 100;
+                    CastCustomSpell(this, 51460, &bp, 0, 0, true);
+                    return true;
+                }
+                else if (HasAura(51459))
+                {
+                    int32 bp = 50;
+                    CastCustomSpell(this, 51460, &bp, 0, 0, true);
+                    return true;
+                }
+
                 uint8 depletedRunes[3];
                 uint8 dsize = 0;
                 uint8 runes = ToPlayer()->GetRunesState();
@@ -7768,6 +7783,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // It allows us to tell client that one single rune was refreshed
                     CastSpell(this, 89831, false);
                 }
+                return true;
             }
             // Blood-Caked Strike - Blood-Caked Blade
             if (dummySpell->SpellIconID == 138)
