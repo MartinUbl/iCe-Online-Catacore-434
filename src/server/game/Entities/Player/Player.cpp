@@ -2309,7 +2309,7 @@ void Player::RegenerateAll()
                 AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
                 for (AuraEffectList::const_iterator it = regenAura.begin(); it != regenAura.end(); ++it)
                 {
-                    if ((*it)->GetMiscValue() == POWER_RUNE && (*it)->GetMiscValueB() == i)
+                    if ((*it)->GetMiscValue() == POWER_RUNE && (*it)->GetMiscValueB() == int32(i))
                         totalmod += (*it)->GetAmount();
                 }
                 float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
