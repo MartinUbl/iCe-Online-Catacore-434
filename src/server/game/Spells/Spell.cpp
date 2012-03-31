@@ -4347,7 +4347,9 @@ void Spell::SendSpellStart()
 void Spell::SendSpellGo()
 {
     // not send invisible spell casting
-    if (!IsNeedSendToClient())
+    // One exception for rune refresh spell used for that - unfortunatelly we have to solve it that way
+    // because we probably miss some opcodes for that
+    if (!IsNeedSendToClient() && m_spellInfo->Id != 89831)
         return;
 
     //sLog->outDebug("Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
