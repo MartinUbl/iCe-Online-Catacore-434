@@ -251,6 +251,56 @@ public:
                         alakir->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }
 
+                    // achievements
+                    bool stay_chill = true;
+                    uint32 wind_chill_id = 0;
+                    bool heroic = false;
+                    switch (instance->GetDifficulty())
+                    {
+                    case 0:
+                        wind_chill_id = 84645;
+                        break;
+                    case 1:
+                        wind_chill_id = 93123;
+                        break;
+                    case 2:
+                        wind_chill_id = 93124;
+                        heroic = true;
+                        break;
+                    case 3:
+                        wind_chill_id = 93125;
+                        heroic = true;
+                        break;
+                    default: break;
+                    }
+                    Map::PlayerList const& plrList = instance->GetPlayers();
+                    if (!plrList.isEmpty())
+                    {
+                        for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                        {
+                            if(Player* pPlayer = itr->getSource())
+                            {
+                                pPlayer->CastSpell(pPlayer, 88835, true); // kill credit
+                                if (heroic)
+                                    if (const AchievementEntry* achiev = sAchievementStore.LookupEntry(5122))
+                                        pPlayer->GetAchievementMgr().CompletedAchievement(achiev);
+                                if (stay_chill) // check Stay Chill condition
+                                {
+                                    if (wind_chill_id)
+                                        if (Aura* aura = pPlayer->GetAura(wind_chill_id))
+                                            if (aura->GetStackAmount() >= 7)
+                                                continue;
+                                    stay_chill = false;
+                                }
+                            }
+                        }
+                        if (stay_chill) // Stay Chill
+                            if (const AchievementEntry* stay_chill_achiev = sAchievementStore.LookupEntry(5304))
+                                for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                                    if(Player* pPlayer = itr->getSource())
+                                        pPlayer->GetAchievementMgr().CompletedAchievement(stay_chill_achiev);
+                    }
+
                 }
                 else if(uiData == NOT_STARTED)
                 {
@@ -327,7 +377,6 @@ public:
 
                         // destroy platform animation ?
 
-                        // despawn platform with no animation (there is no animation)
                         pGO->SetPhaseMask(2, false);
                         Map::PlayerList const& plrList = instance->GetPlayers();
                         if (!plrList.isEmpty())
@@ -354,7 +403,6 @@ public:
                 // despawn all summons
                 DespawnAllSummons();
             }
-
         }
 
         uint32 GetData(uint32 uiType)
@@ -572,10 +620,42 @@ VALUES
 INSERT INTO gameobject
   (id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state)
 VALUES
-  (4510369, 754, 1, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
-  (4510370, 754, 1, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
-  (4510136, 754, 1, 1, 185.588, 814.656, 200, 3.14662, 0, 0, 0.999997, -0.00251452, 300, 0, 1),
-  (4510135, 754, 1, 1, -50.642, 1055.37, 200, 4.71113, 0, 0, 0.707551, -0.706663, 300, 0, 1),
-  (4510137, 754, 1, 1, -54.9326, 578.428, 200, 1.55776, 0, 0, 0.702482, 0.711702, 300, 0, 1);
+  (4510369, 754, 15, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
+  (4510370, 754, 15, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
+  (4510136, 754, 15, 1, 185.588, 814.656, 200, 3.14662, 0, 0, 0.999997, -0.00251452, 300, 0, 1),
+  (4510135, 754, 15, 1, -50.642, 1055.37, 200, 4.71113, 0, 0, 0.707551, -0.706663, 300, 0, 1),
+  (4510137, 754, 15, 1, -54.9326, 578.428, 200, 1.55776, 0, 0, 0.702482, 0.711702, 300, 0, 1);
+
+UPDATE `creature_template` SET difficulty_entry_1=50203, difficulty_entry_2=50217, difficulty_entry_3=50231 WHERE entry=46753;
+UPDATE `creature_template` SET difficulty_entry_1=50204, difficulty_entry_2=50218, difficulty_entry_3=50232 WHERE entry=48233;
+UPDATE `creature_template` SET difficulty_entry_1=50098, difficulty_entry_2=50108, difficulty_entry_3=50118 WHERE entry=45871;
+UPDATE `creature_template` SET difficulty_entry_1=50103, difficulty_entry_2=50113, difficulty_entry_3=50123 WHERE entry=45870;
+UPDATE `creature_template` SET difficulty_entry_1=50095, difficulty_entry_2=50105, difficulty_entry_3=50115 WHERE entry=45872;
+
+--Four Play, Stay Chill, HC:Conclave
+--5305,5304,5122
+DELETE FROM achievement_criteria_data WHERE criteria_id IN (16011,16012,14413,15667);
+INSERT INTO achievement_criteria_data (criteria_id,type,value1,value2,ScriptName) VALUES
+(16011,11,0,0,""),(16012,11,0,0,""),(14413,11,0,0,""),(15667,11,0,0,"");
+
+--totfw normal/guild
+--4851,4987
+DELETE FROM achievement_criteria_data WHERE criteria_id IN (14097,13581,14012,14146);
+INSERT INTO achievement_criteria_data (criteria_id,type,value1,value2,ScriptName) VALUES
+(14097,0,0,0,""),(13581,0,0,0,""),(14012,0,0,0,""),(14146,0,0,0,"");
+
+--Al'akir HC only: slain, guild, RF guild
+--5123,          5463,            5410
+--14414,15668,   15699,15700,     15444,16024
+DELETE FROM achievement_criteria_data WHERE criteria_id IN (14414,15668,15699,15700,15444,16024);
+INSERT INTO achievement_criteria_data (criteria_id,type,value1,value2,ScriptName) VALUES
+(14414,12,2,0,""),(15668,12,3,0,""),(15699,12,2,0,""),(15700,12,3,0,""),(15444,12,2,0,""),(16024,12,3,0,"");
+
+--slain counters?
+--al'akir  criteria 16294,16295,16296,16297
+--conclave criteria 16290,16291,16292,16293
+DELETE FROM achievement_criteria_data WHERE criteria_id IN (16290,16291,16292,16293,16294,16295,16296,16297);
+INSERT INTO achievement_criteria_data (criteria_id,type,value1,value2,ScriptName) VALUES
+(16290,28,88835,0,""),(16291,11,0,0,""),(16292,11,0,0,""),(16293,11,0,0,""),(16294, 1,46753,0,""),(16295,11,0,0,""),(16296,11,0,0,""),(16297,11,0,0,"");
 
   */

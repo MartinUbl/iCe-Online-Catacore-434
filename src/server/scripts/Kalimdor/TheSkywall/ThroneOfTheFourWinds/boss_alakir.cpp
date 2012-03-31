@@ -892,6 +892,30 @@ class npc_alakir_large_model: public CreatureScript
                 DoScriptText(-1850535, me);
             }
 
+            void DamageTaken(Unit*, uint32 &damage)
+            {
+                if (damage > me->GetHealth())
+                {
+                    // Four Play
+                    if (me->HasAura(SPELL_FEEDBACK) ||
+                        me->HasAura(101458) ||
+                        me->HasAura(101459) ||
+                        me->HasAura(101460))
+                    {
+                        Map* map = me->GetMap();
+                        const AchievementEntry* achiev = sAchievementStore.LookupEntry(5305);
+                        if (map && achiev)
+                        {
+                            Map::PlayerList const &plList = map->GetPlayers();
+                            if (!plList.isEmpty())
+                                for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                                    if (Player *player = itr->getSource())
+                                        player->GetAchievementMgr().CompletedAchievement(achiev);
+                        }
+                    }
+                }
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
@@ -1006,5 +1030,6 @@ VALUES
 (48233, -1850534, "Winds! Obey my command!", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_WIND_BURST'),
 (48233, -1850535, "After every storm... comes the calm...", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 6, 0, 0, 'SAY_DEATH');
 
+UPDATE `gameobject_template` SET data0=43 WHERE entry=207891;
 
 */

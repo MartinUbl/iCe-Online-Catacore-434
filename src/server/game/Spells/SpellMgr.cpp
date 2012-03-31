@@ -4437,6 +4437,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             count++;
             break;
+        case 88835: // Conclave of Wind kill credit
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            count++;
         case 74434: // Soulburn
             spellInfo->procCharges = 1;
             count++;
