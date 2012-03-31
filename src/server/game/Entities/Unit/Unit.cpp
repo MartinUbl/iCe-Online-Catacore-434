@@ -7727,6 +7727,48 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 triggered_spell_id = 65142;
             }
+            // Runic Empowerment
+            else if (dummySpell->Id == 81229)
+            {
+                if (GetTypeId() != TYPEID_PLAYER || getClass() != CLASS_DEATH_KNIGHT)
+                    return false;
+
+                uint8 depletedRunes[3];
+                uint8 dsize = 0;
+                uint8 runes = ToPlayer()->GetRunesState();
+
+                for (uint32 i = 0; i < MAX_RUNES/2; i++)
+                {
+                    // if at least one of runes of that type is depleted
+                    if ((!(runes & (1 << (i*2)))) || (!(runes & (1 << ((i*2)+1)))))
+                    {
+                        // set its bit
+                        depletedRunes[dsize++] = i;
+                    }
+                }
+
+                if (dsize != 0)
+                {
+                    switch(depletedRunes[urand(1,dsize)-1])
+                    {
+                        case 0: // blood
+                            CastSpell(this, 81166, true);
+                            break;
+                        case 2: // frost
+                            CastSpell(this, 81168, true);
+                            break;
+                        case 1: // unholy
+                            CastSpell(this, 81169, true);
+                            break;
+                        default:
+                            break;
+                    }
+                    // hack alert !!
+                    // Also cast spell originally used for Empower Rune Weapon
+                    // It allows us to tell client that one single rune was refreshed
+                    CastSpell(this, 89831, false);
+                }
+            }
             // Blood-Caked Strike - Blood-Caked Blade
             if (dummySpell->SpellIconID == 138)
             {

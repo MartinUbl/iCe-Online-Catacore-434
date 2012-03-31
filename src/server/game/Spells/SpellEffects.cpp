@@ -9385,16 +9385,38 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
     // needed later
     m_runesState = m_caster->ToPlayer()->GetRunesState();
 
+    // Second effect of Empower Rune Weapon
+    // excluded for two reasons:
+    // 1) effect #1 does it all at once
+    // 2) we use that spell for dirty unclean hacky way to fix restoring single runes
+    if (m_spellInfo->Id == 89831)
+        return;
+
+    int8 lowestCDRune = -1;
+    uint32 lowestCooldown = 0;
+
     uint32 count = damage;
     if (count == 0) count = 1;
-    for (uint32 j = 0; j < MAX_RUNES && count > 0; ++j)
+
+    for (uint32 r = 0; r < count; r++)
     {
-        if (plr->GetRuneCooldown(j) && plr->GetCurrentRune(j) == RuneType(m_spellInfo->EffectMiscValue[effIndex]))
+        for (uint32 j = 0; j < MAX_RUNES; j++)
         {
-            plr->SetRuneCooldown(j, 0);
-            --count;
+            uint32 cd = plr->GetRuneCooldown(j);
+            if (cd && plr->GetCurrentRune(j) == RuneType(m_spellInfo->EffectMiscValue[effIndex]))
+            {
+                if (lowestCDRune == -1 || cd < lowestCooldown)
+                {
+                    lowestCDRune = j;
+                    lowestCooldown = cd;
+                }
+            }
         }
+
+        if (lowestCDRune >= 0)
+            plr->SetRuneCooldown(lowestCDRune, 0);
     }
+
     // Empower rune weapon
     if (m_spellInfo->Id == 47568)
     {
