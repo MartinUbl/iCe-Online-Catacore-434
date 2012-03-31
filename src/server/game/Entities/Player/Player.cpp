@@ -2303,10 +2303,26 @@ void Player::RegenerateAll()
             uint32 cd1 = GetRuneCooldown(i);
             uint32 cd2 = GetRuneCooldown(i + 1);
 
-            if (cd1 && (!cd2 || cd1 <= cd2))
-                SetRuneCooldown(i, (cd1 > m_regenTimer) ? cd1 - m_regenTimer : 0);
-            else if (cd2)
-                SetRuneCooldown(i + 1, (cd2 > m_regenTimer) ? cd2 - m_regenTimer : 0);
+            if (cd1 || cd2)
+            {
+                float totalmod = 0.0f;
+                AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+                for (AuraEffectList::const_iterator it = regenAura.begin(); it != regenAura.end(); ++it)
+                {
+                    if ((*it)->GetMiscValue() == POWER_RUNE && (*it)->GetMiscValueB() == i)
+                        totalmod += (*it)->GetAmount();
+                }
+                float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
+                haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
+                haste += totalmod / 100.0f;
+
+                uint32 realRegenTimer = m_regenTimer * (1.0f + haste);
+
+                if (cd1 && (!cd2 || cd1 <= cd2))
+                    SetRuneCooldown(i, (cd1 > realRegenTimer) ? cd1 - realRegenTimer : 0);
+                else if (cd2)
+                    SetRuneCooldown(i + 1, (cd2 > realRegenTimer) ? cd2 - realRegenTimer : 0);
+            }
         }
     }
 
@@ -25037,21 +25053,12 @@ void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
 
 uint32 Player::GetRuneBaseCooldown(uint8 index)
 {
-    uint8 rune = GetBaseRune(index);
-    uint32 cooldown = RUNE_COOLDOWN;
+    // Generally no reason for that function - cooldown refreshing speed is calculated elsewhere (Player::RegenerateAll)
 
-    AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-    {
-        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetMiscValueB() == rune)
-            cooldown = cooldown*(100-(*i)->GetAmount())/100;
-    }
+    if (index > MAX_RUNES)
+        return 0;
 
-    float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
-    haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
-    cooldown = cooldown/(1 + haste);
-
-    return cooldown;
+    return RUNE_COOLDOWN;
 }
 
 void Player::SetRuneCooldown(uint8 index, uint32 cooldown)
