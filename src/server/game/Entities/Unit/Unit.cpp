@@ -3908,6 +3908,34 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
                     CastCustomSpell(this, 33778, &amount, &stack, NULL, true, NULL, pEff, casterGUID);
                 }
             }
+            // Frost Fever
+            else if (aura->GetSpellProto()->Id == 55095)
+            {
+                if (aura->GetCaster() && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* plcaster = aura->GetCaster()->ToPlayer();
+                    // talent Resilient Infection
+                    if (plcaster->HasAura(81339) || (plcaster->HasAura(81338) && roll_chance_i(50)))
+                    {
+                        plcaster->CastSpell(plcaster, 81168, true);  // refresh frost rune
+                        plcaster->CastSpell(plcaster, 89831, true);  // and again this ugh-ugly hack (Empower Rune Weapon 
+                    }
+                }
+            }
+            // Blood Plague
+            else if (aura->GetSpellProto()->Id == 55078)
+            {
+                if (aura->GetCaster() && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* plcaster = aura->GetCaster()->ToPlayer();
+                    // talent Resilient Infection
+                    if (plcaster->HasAura(81339) || (plcaster->HasAura(81338) && roll_chance_i(50)))
+                    {
+                        plcaster->CastSpell(plcaster, 81169, true);  // refresh unholy rune
+                        plcaster->CastSpell(plcaster, 89831, true);  // and again this ugh-ugly hack (Empower Rune Weapon 
+                    }
+                }
+            }
             // Flame Shock
             if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (aura->GetSpellProto()->SpellFamilyFlags[0] & 0x10000000))
             {
