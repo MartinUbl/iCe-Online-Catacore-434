@@ -7809,7 +7809,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // hack alert !!
                     // Also cast spell originally used for Empower Rune Weapon
                     // It allows us to tell client that one single rune was refreshed
-                    CastSpell(this, 89831, false);
+                    CastSpell(this, 89831, true);
                 }
                 return true;
             }
