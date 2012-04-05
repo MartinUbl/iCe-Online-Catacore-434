@@ -33,6 +33,7 @@ public:
         c->ApplySpellImmune(0, IMMUNITY_ID, 93120, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93121, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93122, true);
+        c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
     }
 
     bool alive;

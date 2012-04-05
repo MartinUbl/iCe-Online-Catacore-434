@@ -8714,6 +8714,9 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (!unitTarget)
         return;
 
+    if (unitTarget->HasAura(87856)) // player is inside Al'akir squall line vehicle
+        return;
+
     // Instantly interrupt non melee spells being casted
     if (unitTarget->IsNonMeleeSpellCasted(true))
         unitTarget->InterruptNonMeleeSpells(true);

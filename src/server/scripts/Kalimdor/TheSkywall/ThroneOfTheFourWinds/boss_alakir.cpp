@@ -27,10 +27,8 @@ to be done:
  correct timers based on test feedback
 obsolete:
  lightning clouds dummy visual range to cca 20 (spells: 89583, 89592)
- Squall Line: wrong Vehicle Kit ID; omega speed; direction?
+ Squall Line: wrong Vehicle Kit ID
  destroy platform animation
- Lightning Strike visuals
- Al'akir equip id: sword
 workarond-ed:
  return to platform - port
  Relentless Storm
@@ -78,12 +76,10 @@ enum Stuff
 };
 
 #define SL_DIST_FIRST 29.0f
-#define SL_DIST_NEXT  6.2f
-#define SL_COUNT 7
+#define SL_DIST_NEXT  5.32f
+#define SL_COUNT 8
 #define SL_RAD_PER_STEP (M_PI/32.0f)
-
-static uint16 vortexready[SL_COUNT];
-float furthest_omega;
+#define SL_FURTH_SPEED (1.3f * (SL_DIST_FIRST+SL_DIST_NEXT * (SL_COUNT-1)))
 
 class boss_alakir: public CreatureScript
 {
@@ -94,6 +90,7 @@ class boss_alakir: public CreatureScript
         {
             boss_alakirAI(Creature* c): Scripted_NoMovementAI(c)
             {
+                c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 c->SetReactState(REACT_DEFENSIVE);
 
                 instance = c->GetInstanceScript();
@@ -123,6 +120,9 @@ class boss_alakir: public CreatureScript
             uint64 m_relentless_guid;
             uint64 m_large_model_guid;
 
+            uint16 vortexready[2][SL_COUNT]; // 2 slots for simultaneous Squall Lines
+            bool vortexslot;
+
             void Reset()
             {
                 m_phase = 0;
@@ -140,8 +140,12 @@ class boss_alakir: public CreatureScript
                 m_large_model_guid = 0;
                 DespawnStormlings();
 
+                vortexslot = false;
                 for (uint32 i = 0; i < SL_COUNT; i++)
-                    vortexready[i] = 0;
+                {
+                    vortexready[0][i] = 0;
+                    vortexready[1][i] = 0;
+                }
 
                 if (instance)
                     instance->SetData(TYPE_ALAKIR, NOT_STARTED);
@@ -170,7 +174,18 @@ class boss_alakir: public CreatureScript
                 DespawnStormlings();
 
                 // summon loot chest
-                me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
+                GameObject* pGO = me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
+                if (pGO)
+                {
+                    Map::PlayerList const& plrList = map->GetPlayers();
+                    if (plrList.isEmpty())
+                        return;
+                    for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    {
+                        if(Player* pPlayer = itr->getSource())
+                            pGO->SendUpdateToPlayer(pPlayer);
+                    }
+                }
             }
 
             void KilledUnit(Unit* /*victim*/)
@@ -302,7 +317,7 @@ class boss_alakir: public CreatureScript
                     // Squall Line
                         if (squallLineTimer <= diff)
                         {
-                            squallLineTimer = 40000 + 20000; // 40s duration, 20s delay
+                            squallLineTimer = 40000; // 40s duration
                             DoSquallLine();
 
                         } else squallLineTimer -= diff;
@@ -343,7 +358,7 @@ class boss_alakir: public CreatureScript
                                 break;
                             me->CastSpell(me, SPELL_WIND_BURST, false);
 
-                            windBurstTimer = 20000;
+                            windBurstTimer = 19000;
                             lightningStrikeTimer += 5000;
 
                             return;
@@ -360,6 +375,8 @@ class boss_alakir: public CreatureScript
                                 if (me->hasUnitState(UNIT_STAT_CASTING))
                                     break;
                                 me->CastSpell(target, SPELL_LIGHTNING_STRIKE_DAMAGE, false);
+                                float ori = me->GetAngle(target->GetPositionX(), target->GetPositionY());
+                                DoLightningVisual(ori);
                             }
                             lightningStrikeTimer = 5000;
 
@@ -380,7 +397,7 @@ class boss_alakir: public CreatureScript
                     // Squall Line
                         if (squallLineTimer <= diff)
                         {
-                            squallLineTimer = 40000 + 4000; // 40s duration, 4s delay
+                            squallLineTimer = 35000;
                             DoSquallLine();
 
                         } else squallLineTimer -= diff;
@@ -473,33 +490,58 @@ class boss_alakir: public CreatureScript
                 }
             }
 
+            void SetData(uint32 id, uint32 data)
+            {
+                uint32 pos = id/10;
+                uint32 slot = id%10;
+                vortexready[slot][pos] = (uint16)data;
+            }
+
+            uint32 GetData(uint32 id)
+            {
+                uint32 pos = id/10;
+                uint32 slot = id%10;
+                return vortexready[slot][pos];
+            }
+
             void DoSquallLine()
             {
                 DoScriptText(-1850530, me);
 
-                // 0.5f will be the speed of furthest squall
-                furthest_omega = 0.5f*(SL_DIST_FIRST+SL_DIST_NEXT * (SL_COUNT-1));
-
                 Creature* pTemp = NULL;
                 float mx,my,mz;
-                uint32 mstep = urand(0,uint32((2*M_PI)/(SL_RAD_PER_STEP)));
-                uint32 skip = urand(0,SL_COUNT-1);
+                uint32 mstep = urand(0,uint32((2*M_PI)/(SL_RAD_PER_STEP))-1);
+                uint32 skip = urand(0,SL_COUNT-2);
+
+                uint32 slot;
+                (vortexslot) ? slot = 1 : slot = 0;
+                vortexslot ^= true;
+
+                uint32 clockwise = urand(0,1);
+                float direction;
+                (!clockwise) ? direction=1.0f : direction=-1.0f;
+
                 for (uint32 i = 0; i < SL_COUNT; i++)
                 {
-                    if (i == skip)
+                    vortexready[slot][i] = 0;
+
+                    if (i == skip || i == skip+1)
                         continue;
 
-                    mx = me->GetPositionX()+(SL_DIST_FIRST+SL_DIST_NEXT * i) * cos(mstep * SL_RAD_PER_STEP);
-                    my = me->GetPositionY()+(SL_DIST_FIRST+SL_DIST_NEXT * i) * sin(mstep * SL_RAD_PER_STEP);
+                    mx = me->GetPositionX() + (SL_DIST_FIRST+SL_DIST_NEXT * i) * cos(mstep * SL_RAD_PER_STEP) * direction;
+                    my = me->GetPositionY() + (SL_DIST_FIRST+SL_DIST_NEXT * i) * sin(mstep * SL_RAD_PER_STEP);
                     mz = me->GetPositionZ();
                     pTemp = me->SummonCreature(48855, mx,my,mz,0,TEMPSUMMON_MANUAL_DESPAWN,0);
                     if (!pTemp)
                         continue;
 
-                    pTemp->SetSpeed(MOVE_RUN, furthest_omega/(SL_DIST_FIRST+SL_DIST_NEXT * (SL_COUNT-i)), true);
+                    pTemp->SetSpeed(MOVE_RUN, SL_FURTH_SPEED/(SL_DIST_FIRST+SL_DIST_NEXT * (SL_COUNT-i)), true);
+                    pTemp->AI()->SetData(1, clockwise); // direction
+                    pTemp->AI()->SetData(2, slot); // slot
 
-                    mx = me->GetPositionX()+(SL_DIST_FIRST+SL_DIST_NEXT*i)*cos((mstep+1)*SL_RAD_PER_STEP);
-                    my = me->GetPositionY()+(SL_DIST_FIRST+SL_DIST_NEXT*i)*sin((mstep+1)*SL_RAD_PER_STEP);
+                    mstep += 1;
+                    mx = me->GetPositionX() + (SL_DIST_FIRST+SL_DIST_NEXT * i) * cos(mstep * SL_RAD_PER_STEP) * direction;
+                    my = me->GetPositionY() + (SL_DIST_FIRST+SL_DIST_NEXT * i) * sin(mstep * SL_RAD_PER_STEP);
 
                     // Define actual point as 1000*position+step
                     pTemp->GetMotionMaster()->MovePoint(mstep+1000*i, mx, my, mz);
@@ -508,20 +550,41 @@ class boss_alakir: public CreatureScript
 
             void DoIceStorm()
             {
-                Unit* pTargetOne = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                Unit* pTargetTwo = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                if (pTargetOne && pTargetTwo)
+                Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                if (pTarget)
                 {
-                    Creature* pStorm = me->SummonCreature(46973, pTargetOne->GetPositionX(), pTargetOne->GetPositionY(), pTargetOne->GetPositionZ());
+                    Creature* pStorm = me->SummonCreature(46973, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
                     if (pStorm)
                     {
-                        pStorm->AddThreat(pTargetOne, 10000.0f);
-                        pStorm->AddThreat(pTargetTwo, 50000.0f);
-                        pStorm->Attack(pTargetTwo, true);
-                        pStorm->GetMotionMaster()->MoveChase(pTargetTwo);
+                        pStorm->AddThreat(pTarget, 50000.0f);
+                        pStorm->Attack(pTarget, true);
+                        pStorm->GetMotionMaster()->MoveChase(pTarget);
                     }
                 }
-                // todo: prevent from crossing inside boss
+            }
+
+            void DoLightningVisual(float ori) // 48977 Lightning Strike Trigger
+            {
+                float r = 67.0f;
+                for (int i = 0; i < 12; i++)
+                {
+                    float add = urand(0,157);
+                    float angle = ori + (add/100) - (M_PI/4); // 90 degrees cone
+                    if (i == 1)
+                        angle = ori - (M_PI/4);
+                    else if (i == 2)
+                        angle = ori + (M_PI/4);
+                    float x = me->GetPositionX() + cos(angle) * r;
+                    float y = me->GetPositionY() + sin(angle) * r;
+                    float z = me->GetPositionZ();
+                    Creature* pLightning = me->SummonCreature(48977, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 3000);
+                    if (pLightning)
+                    {
+                        pLightning->SetVisibility(VISIBILITY_OFF);
+                        pLightning->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        me->CastSpell(pLightning, SPELL_LIGHTNING_STRIKE_VISUAL, true); // 88230 visual spell
+                    }
+                }
             }
 
             void DespawnStormlings()
@@ -663,15 +726,21 @@ class npc_squall_vortex: public CreatureScript
                 c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 c->setFaction(14);
+                direction = 1.0f;
+                slot = 0;
                 Reset();
             }
 
             uint32 despawnTimer;
+            uint64 boss_guid;
             std::list<Unit*> pVehicle_list;
 
             float nextx,nexty,nextz,nextpoint;
             uint8 nextpos;
             bool needstomove;
+            bool active;
+            float direction;
+            uint32 slot;
 
             void Reset()
             {
@@ -679,13 +748,29 @@ class npc_squall_vortex: public CreatureScript
                 despawnTimer = 40000;
                 pVehicle_list.clear();
                 needstomove = false;
+                active = true;
+                if (TempSummon* summon = me->ToTempSummon())
+                    boss_guid = summon->GetSummonerGUID();
+                else
+                    boss_guid = 0;
+            }
+
+            void SetData(uint32 id, uint32 value)
+            {
+                if (id == 1)
+                {
+                    if (value) // if clockwise (counter-natural sense)
+                        direction = -1.0f;
+                }
+                else if (id == 2)
+                    slot = value;
             }
 
             void AttackStart(Unit* /*who*/) { }
 
             void MoveInLineOfSight(Unit* pWho)
             {
-                if (!pWho || pWho->GetVehicle() || pWho->GetTypeId() != TYPEID_PLAYER || pWho->isDead() || pWho->GetDistance2d(me) > 2.5f)
+                if (!pWho || pWho->GetVehicle() || pWho->GetTypeId() != TYPEID_PLAYER || pWho->isDead() || !active || pWho->GetDistance2d(me) > 2.5f)
                     return;
 
                 Player* pPassenger = pWho->ToPlayer();
@@ -693,6 +778,7 @@ class npc_squall_vortex: public CreatureScript
                 pVehicle->SetDisplayId(me->GetDisplayId());
                 pVehicle->setFaction(14);
                 pVehicle->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_SCHOOL_DAMAGE, true);
+                pVehicle->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 Vehicle* pVeh = pVehicle->GetVehicleKit();
                 if (pVeh)
@@ -713,56 +799,71 @@ class npc_squall_vortex: public CreatureScript
                 uint32 mypos = id/1000;
                 uint32 mypoint = id%1000;
 
-                float mx,my,mz;
-                Creature* pBoss = GetClosestCreatureWithEntry(me, 46753, 500.0f);
+                Creature* pBoss = NULL;
+                if (boss_guid)
+                    pBoss = me->GetCreature(*me, boss_guid);
                 if (!pBoss)
                     return;
 
                 // And do the trick
                 mypoint += 1;
 
-                mx = pBoss->GetPositionX()+(SL_DIST_FIRST+SL_DIST_NEXT*mypos)*cos(mypoint*SL_RAD_PER_STEP);
-                my = pBoss->GetPositionY()+(SL_DIST_FIRST+SL_DIST_NEXT*mypos)*sin(mypoint*SL_RAD_PER_STEP);
-                mz = pBoss->GetPositionZ();
+                nextx = pBoss->GetPositionX() + (SL_DIST_FIRST+SL_DIST_NEXT * mypos) * cos(mypoint * SL_RAD_PER_STEP) * direction;
+                nexty = pBoss->GetPositionY() + (SL_DIST_FIRST+SL_DIST_NEXT * mypos) * sin(mypoint * SL_RAD_PER_STEP);
+                nextz = pBoss->GetPositionZ();
 
-                nextx = mx;
-                nexty = my;
-                nextz = mz;
                 nextpos = mypos;
                 nextpoint = mypoint;
                 needstomove = true;
-                vortexready[mypos] = mypoint;
+                pBoss->AI()->SetData(mypos*10+slot, mypoint);
             }
 
             void UpdateAI(const uint32 diff)
             {
                 if (despawnTimer <= diff)
                 {
-                    me->Kill(me, false);
-                    me->ForcedDespawn();
-                    for(std::list<Unit*>::const_iterator itr = pVehicle_list.begin(); itr != pVehicle_list.end(); ++itr)
+                    if (active)
                     {
-                        (*itr)->Kill(*itr, false);
-                        if ((*itr)->ToCreature())
-                            (*itr)->ToCreature()->ForcedDespawn();
+                        me->RemoveAurasDueToSpell(SPELL_SQUALL_LINE_VISUAL);
+                        active = false;
+                        for(std::list<Unit*>::const_iterator itr = pVehicle_list.begin(); itr != pVehicle_list.end(); ++itr)
+                        {
+                            (*itr)->Kill(*itr, false);
+                            if ((*itr)->ToCreature())
+                                (*itr)->ToCreature()->ForcedDespawn();
+                        }
+                        pVehicle_list.clear();
+                        despawnTimer = 5000;
                     }
-                    // For being sure when doing multithreading
-                    // should not happen, but who knows
-                    despawnTimer = 10000;
+                    else
+                    {
+                        me->Kill(me, false);
+                        me->ForcedDespawn();
+                        // For being sure when doing multithreading
+                        // should not happen, but who knows
+                        despawnTimer = 10000;
+                    }
                 }
                 else despawnTimer -= diff;
 
                 if (needstomove)
                 {
+                    Creature* pBoss = NULL;
+                    if (boss_guid)
+                        pBoss = me->GetCreature(*me, boss_guid);
+                    if (!pBoss)
+                        return;
+
                     uint32 sum = 0;
                     for (uint32 i = 0; i < SL_COUNT; i++)
-                        sum += vortexready[i];
+                        sum += pBoss->AI()->GetData(i*10+slot);
 
-                    if (sum >= nextpoint*(SL_COUNT-1))
+                    if (sum >= nextpoint*(SL_COUNT-2))
                     {
                         me->GetMotionMaster()->MovePoint(nextpos*1000+nextpoint, nextx, nexty, nextz);
-                        for(std::list<Unit*>::const_iterator itr = pVehicle_list.begin(); itr != pVehicle_list.end(); ++itr)
-                            (*itr)->GetMotionMaster()->MovePoint(nextpos*1000+nextpoint, nextx, nexty, nextz);
+                        if (!pVehicle_list.empty())
+                            for(std::list<Unit*>::const_iterator itr = pVehicle_list.begin(); itr != pVehicle_list.end(); ++itr)
+                                (*itr)->GetMotionMaster()->MovePoint(nextpos*1000+nextpoint, nextx, nexty, nextz);
                         needstomove = false;
                     }
                 }
