@@ -788,6 +788,15 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     if (GetPlayer()->GetMapId() != achievementCriteria->moreRequirementValue[i])
                         meets = false;
                     break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID:
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID2:
+                    if (GetPlayer()->GetAreaId() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID3:
+                    if (GetPlayer()->GetZoneId() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
                 default:
                     break;
             }
