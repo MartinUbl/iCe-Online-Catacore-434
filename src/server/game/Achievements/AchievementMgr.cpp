@@ -770,6 +770,31 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         if (IsCompletedCriteria(achievementCriteria,achievement))
             continue;
 
+        // check for additional criteria requirement data
+        bool meets = true;
+        for (uint32 i = 0; i < 3; i++)
+        {
+            switch (achievementCriteria->moreRequirement[i])
+            {
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS:
+                    if (GetPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE:
+                    if (GetPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_ID:
+                    if (GetPlayer()->GetMapId() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (!meets)
+            continue;
+
         switch (type)
         {
             // std. case: increment at 1
@@ -1650,31 +1675,6 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
     CriteriaProgress const* progress = GetCriteriaProgress(achievementCriteria);
     if (!progress)
         return false;
-
-    // check for additional criteria requirement data
-    for (int i = 0; i < 3; i++)
-    {
-        switch (achievementCriteria->moreRequirement[i])
-        {
-            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS:
-                if (GetPlayer()->getClass() == achievementCriteria->moreRequirementValue[i])
-                    break;
-                else
-                    return false;
-            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE:
-                if (GetPlayer()->getRace() == achievementCriteria->moreRequirementValue[i])
-                    break;
-                else
-                    return false;
-            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_ID:
-                if (GetPlayer()->GetMapId() == achievementCriteria->moreRequirementValue[i])
-                    break;
-                else
-                    return false;
-            default:
-                break;
-        }
-    }
 
     switch (achievementCriteria->requiredType)
     {
