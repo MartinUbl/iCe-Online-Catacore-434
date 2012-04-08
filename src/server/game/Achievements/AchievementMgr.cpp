@@ -1921,9 +1921,14 @@ CriteriaProgress* AchievementMgr::GetCriteriaProgress(AchievementCriteriaEntry c
 void AchievementMgr::SetCriteriaProgress(uint32 entry, uint32 achievementEntry, uint32 changeValue, ProgressType ptype)
 {
     AchievementCriteriaEntry const *centry = sAchievementCriteriaStore.LookupEntry(entry);
-    AchievementEntry const *aentry = sAchievementStore.LookupEntry(achievementEntry);
-    if(!centry)
+
+    if (!centry)
         return;
+
+    if (!achievementEntry)
+        achievementEntry = centry->referredAchievement;
+
+    AchievementEntry const *aentry = sAchievementStore.LookupEntry(achievementEntry);
 
     SetCriteriaProgress(centry, changeValue, ptype);
 
