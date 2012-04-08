@@ -813,6 +813,11 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player *Source, uint32 BgObjectType
         AddPoints(Source->GetTeam(), BG_EY_FlagPoints[m_TeamPointsCount[team_id] - 1]);
 
     UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);
+
+    // achievement Storm Glory
+    // Needs condition, and achievement scripts are crappy way to do this
+    if (IsAllNodesConrolledByTeam(Source->GetTeam()))
+        Source->GetAchievementMgr().SetCriteriaProgress(3693, 0, 1, PROGRESS_SET);
 }
 
 void BattlegroundEY::UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor)
