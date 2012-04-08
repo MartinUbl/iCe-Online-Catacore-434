@@ -354,9 +354,23 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             }
 
             // Trolling fake GMs
-            static const char* vyrazy[] = {"<GM>", "<gm>","<gM>","<Gm>", "< GM>",
-            "<GM >","< GM >","< gM>", "<gM >", "< gM >", "< Gm>", "<Gm >", "< Gm >", 
-            "< gm>", "<gm >", "< gm >"}; // initialize field
+            static const char* vyrazy[] = {"<GM>", "<gm>", "<gM>", "<Gm>", "< GM>",
+            "<GM >", "< GM >", "< gM>", "<gM >", "< gM >", "< Gm>", "<Gm >", "< Gm >", 
+            "< gm>", "<gm >", "< gm >", "[GM]", "[gm]","[gM]","[Gm]", "[ GM]", 
+            "[GM ]","[ GM ]","[ gM]", "[gM ]", "[ gM ]", "[ Gm]", "[Gm ]", "[ Gm ]", 
+            "[ gm]", "[gm ]", "[ gm ]", "(GM)", "(gm)","(gM)","(Gm)", "( GM)", 
+            "(GM )","( GM )","( gM)", "(gM )", "( gM )", "( Gm)", "(Gm )", "( Gm )", 
+            "( gm)", "(gm )", "( gm )", "!GM!", "!gm!","!gM!","!Gm!", "! GM!", 
+            "!GM !","! GM !","! gM!", "!gM !", "! gM !", "! Gm!", "!Gm !", "! Gm !", 
+            "! gm!", "!gm !", "! gm !", "{GM}", "{gm}","{gM}","{Gm}", "{ GM}", 
+            "{GM }","{ GM }","{ gM}", "{gM }", "{ gM }", "{ Gm}", "{Gm }", "{ Gm }", 
+            "{ gm}", "{gm }", "{ gm }", "/GM/", "/gm/","/gM/","/Gm/", "/ GM/", 
+            "/GM /","/ GM /","/ gM/", "/gM /", "/ gM /", "/ Gm/", "/Gm /", "/ Gm /",  
+            "/ gm/", "/gm /", "/ gm /", "\\GM\\", "\\gm\\", "\\gM\\","\\Gm\\", "\\ GM\\", 
+            "\\GM \\", "\\ GM \\", "\\ gM\\", "\\gM \\", "\\ gM \\", "\\ Gm\\", "\\Gm \\", "\\ Gm \\",  
+            "\\ gm\\", "\\gm \\", "\\ gm \\", "|GM|", "|gm|", "|gM|", "|Gm|", "| GM|", 
+            "|GM |", "| GM |", "| gM|", "|gM |", "| gM |", "| Gm|", "|Gm |", "| Gm |", 
+            "| gm|", "|gm |", "| gm |"}; // initialize field
 
             size_t first;
             for (uint32 i = 0; i < sizeof(vyrazy)/sizeof(const char*); i++)
