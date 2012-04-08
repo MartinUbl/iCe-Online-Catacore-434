@@ -4472,6 +4472,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_REFLECTED;
             count++;
             break;
+        case 79361: // Twilight Phoenix (changing model from Twilight Phoenix to Dark Phoenix)
+            spellInfo->EffectMiscValue[0] = 47841; // Dark Phoenix models
+            count++;
+            break;
         default:
             break;
         }
