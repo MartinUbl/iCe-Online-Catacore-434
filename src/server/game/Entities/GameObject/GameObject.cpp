@@ -1888,7 +1888,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
             {
                 sScriptMgr->OnGameObjectDamaged(eventInvoker, this, 0);
                 if (Battleground* bg = eventInvoker->GetBattleground())
-                    bg->EventPlayerDamagedGO(eventInvoker, this, 0, m_goInfo->building.damagedEvent);
+                    bg->EventPlayerDamagedGO(eventInvoker, this, BG_OBJECT_DMG_HIT_TYPE_JUST_HIGH_DAMAGED, m_goInfo->building.damagedEvent);
             }
 
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
@@ -1919,8 +1919,8 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 sScriptMgr->OnGameObjectDestroyed(eventInvoker, this, 0);
                 if (Battleground* bg = eventInvoker->GetBattleground())
                 {
-                    bg->EventPlayerDamagedGO(eventInvoker, this, 0, m_goInfo->building.destroyedEvent);
-                    bg->DestroyGate(eventInvoker, this, 0);
+                    bg->EventPlayerDamagedGO(eventInvoker, this, BG_OBJECT_DMG_HIT_TYPE_JUST_DESTROYED, m_goInfo->building.destroyedEvent);
+                    bg->DestroyGate(eventInvoker, this, m_goInfo->building.destroyedEvent);
                 }
             }
 
