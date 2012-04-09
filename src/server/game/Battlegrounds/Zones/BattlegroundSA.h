@@ -466,6 +466,20 @@ class BattlegroundSA : public Battleground
             }
             return i;
         }
+        uint32 GetGateIDFromDamagedEventID(uint32 id)
+        {
+            uint32 i = 0;
+            switch(id)
+            {
+                case 19041: i = BG_SA_GREEN_GATE;   break; //Green gate damaged
+                case 19040: i = BG_SA_BLUE_GATE;    break; //blue gate
+                case 19042: i = BG_SA_RED_GATE;     break; //red gate
+                case 19043: i = BG_SA_PURPLE_GATE;  break; //purple gate
+                case 19044: i = BG_SA_YELLOW_GATE;  break; //yellow gate
+                case 19836: i = BG_SA_ANCIENT_GATE; break; //ancient gate
+            }
+            return i;
+        }
         /// Return worldstate id, according to door id
         uint32 GetWorldStateFromGateID(uint32 id)
         {
