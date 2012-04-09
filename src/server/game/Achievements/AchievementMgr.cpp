@@ -780,8 +780,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     if (GetPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
                         meets = false;
                     break;
-                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE:
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE2:
                     if (GetPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE:
+                    if (!unit || unit->getRace() != achievementCriteria->moreRequirementValue[i])
                         meets = false;
                     break;
                 case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_ID:
