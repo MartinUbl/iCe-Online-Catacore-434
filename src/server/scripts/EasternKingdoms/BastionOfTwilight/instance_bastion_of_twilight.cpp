@@ -41,14 +41,15 @@ public:
 
         void Initialize()
         {
-            memset(&auiEncounter, 0, sizeof(auiEncounter));
-
             HalfusGUID = 0;
             ValionaGUID = 0;
             CouncilGUID = 0;
             ChogallGUID = 0;
             SinestraGUID = 0;
             GOfloorGUID = 0;
+
+            for(uint8 i=0; i < MAX_ENCOUNTER; ++i)
+                auiEncounter[i] = NOT_STARTED;
         }
 
         bool IsEncounterInProgress() const
@@ -65,7 +66,17 @@ public:
                 return;
 
             if (go->GetEntry() == 402097)
+            {
                 GOfloorGUID = go->GetGUID();
+                if (auiEncounter[1] == DONE // Halfus
+                    && auiEncounter[2] == DONE // Valiona
+                    && auiEncounter[3] == DONE // Council
+                    && auiEncounter[4] == DONE) // Chogall
+                    {
+                        if (this->instance->IsHeroic())
+                            go->Delete();
+                    }
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature, bool add)
@@ -84,17 +95,8 @@ public:
                 case 43735: // Council
                     CouncilGUID = pCreature->GetGUID();
                     break;
-                case 41379:
+                case 41379: // Chogall
                     ChogallGUID = pCreature->GetGUID();
-                    if (this->instance->IsHeroic())
-                    {
-                        if (auiEncounter[1] == DONE // Halfus
-                            && auiEncounter[2] == DONE // Valiona
-                            && auiEncounter[3] == DONE // Council
-                            && auiEncounter[4] == DONE) // Chogall
-                            if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
-                                go->SetPhaseMask(2, true);
-                    }
                     break;
                 case 45213: // Sinestra
                     SinestraGUID = pCreature->GetGUID();
@@ -153,8 +155,10 @@ public:
                 && auiEncounter[4] == DONE) // Chogall
             {
                 if (this->instance->IsHeroic())
+                {
                     if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
-                        go->SetPhaseMask(2, true);
+                        go->Delete();
+                }
             }
 
             if (data == DONE)
