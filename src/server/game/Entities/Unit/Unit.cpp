@@ -17756,9 +17756,18 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
             }
             break;
         case FORM_FLIGHT:
-            if (Player::TeamForRace(getRace()) == ALLIANCE)
+            if (getRace() == RACE_NIGHTELF || getRace() == RACE_WORGEN)
+            {
                 return 20857;
-            return 20872;
+            }
+            else if (getRace() == RACE_TAUREN)
+            {
+                return 20872;
+            }
+            else if (getRace() == RACE_TROLL)
+            {
+                return 37728;
+            }
         case FORM_FLIGHT_EPIC:
             if (getRace() == RACE_NIGHTELF)
             {
