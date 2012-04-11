@@ -373,6 +373,23 @@ public:
     }
 };
 
+class achievement_bunny_maker : public AchievementCriteriaScript
+{
+    public:
+        achievement_bunny_maker() : AchievementCriteriaScript("achievement_bunny_maker") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target)
+        {
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                return false;
+                
+            if (target->getLevel() >= 18 && target->getGender() == GENDER_FEMALE)
+                return true;
+            else
+                return false;
+        }
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_school_of_hard_knocks();
@@ -389,4 +406,5 @@ void AddSC_achievement_scripts()
     new go_romantic_picnic();
     new npc_sraaz_or_jeremiah();
     new npc_love_fool();
+    new achievement_bunny_maker();
 }
