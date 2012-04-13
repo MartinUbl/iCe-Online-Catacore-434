@@ -190,7 +190,11 @@ class spell_pri_penance : public SpellScriptLoader
                 uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
 
                 if (caster->IsFriendlyTo(unitTarget))
+                {
                     caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_HEAL, rank), false, 0);
+                    if (caster->HasAura(89911) && unitTarget->HasAura(6788))
+                        caster->CastSpell(caster, 89913, true);
+                }
                 else
                     caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_DAMAGE, rank), false, 0);
             }
