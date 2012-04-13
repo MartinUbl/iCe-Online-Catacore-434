@@ -12571,6 +12571,14 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     if (spellProto)
         switch(spellProto->SpellFamilyName)
         {
+            case SPELLFAMILY_WARRIOR:
+                if (spellProto->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_SLAM)
+                {
+                    // Bloodsurge: Increases damage of Slam by +20%
+                    if(HasAura(46916))
+                        DoneTotalMod *= 1.20f;
+                }
+                break;
             case SPELLFAMILY_SHAMAN:
                 // Improved Lava Lash - damage increase by X% for every stack of Searing Flames
                 if (spellProto->Id == 60103)
