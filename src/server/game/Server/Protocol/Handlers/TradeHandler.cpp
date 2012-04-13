@@ -515,6 +515,27 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
             return;
         }
 
+        // Following code should avoid duplicating resources for enchanting spells via trade
+
+        for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+        {
+            myItems[i] = NULL;
+            hisItems[i] = NULL;
+        }
+
+        if (my_spell)
+            my_spell->prepare(&my_targets);
+
+        if (his_spell)
+            his_spell->prepare(&his_targets);
+
+        // enchanting could destroy some of the traded items so let's get the list again
+        for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+        {
+            myItems[i] =  my_trade->GetItem(TradeSlots(i));
+            hisItems[i] = his_trade->GetItem(TradeSlots(i));
+        }
+
         // execute trade: 1. remove
         for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
         {
@@ -557,12 +578,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         _player->ModifyMoney(his_trade->GetMoney());
         trader->ModifyMoney(-int32(his_trade->GetMoney()));
         trader->ModifyMoney(my_trade->GetMoney());
-
-        if (my_spell)
-            my_spell->prepare(&my_targets);
-
-        if (his_spell)
-            his_spell->prepare(&his_targets);
 
         // cleanup
         clearAcceptTradeMode(my_trade, his_trade);
