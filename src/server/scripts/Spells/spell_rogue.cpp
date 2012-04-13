@@ -358,6 +358,7 @@ public:
         int insight;
         Aura *buffIns;      // 84745 - 7
         Aura *buff;         // 84748
+        int32 duration;
 
         bool Validate(SpellEntry const *)
         {
@@ -377,11 +378,19 @@ public:
 
             if (buff)
             {
-                buffIns = caster->GetAura(buff->GetEffect(1)->GetAmount());
-                if (buffIns)
-                    insight = buffIns->GetSpellProto()->Id;
-                else
-                    insight = 0;
+                duration = buff->GetDuration();
+
+                AuraEffect *aurEff = buff->GetEffect(0);
+                if(!aurEff)
+                    return false;
+                switch(aurEff->GetAmount())
+                {
+                    case 10: insight = BUFF1; break;
+                    case 20: insight = BUFF2; break;
+                    case 30: insight = BUFF3; break;
+                    default: insight = 0; break;
+                }
+                buffIns = caster->GetAura(insight);
                 charges = buff->GetCharges();
             }
             else
@@ -424,7 +433,8 @@ public:
             else if (insight == BUFF3)
             {
                 pFrst->ChangeAmount(30);
-                pScnd->ChangeAmount(BUFF3);
+                pScnd->ChangeAmount(30);
+                this->SetDuration(duration);
             }
             else
             {
@@ -455,13 +465,13 @@ public:
                      bonus = (insight - BUFF1 + 1) * 10;
 
                 pFrst->ChangeAmount(bonus);
-                pScnd->ChangeAmount(insight);
+                pScnd->ChangeAmount(bonus);
             }
         }
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_rog_bandits_guile_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_343, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_rog_bandits_guile_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_MOD_AUTOATTACK_DAMAGE_1, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
