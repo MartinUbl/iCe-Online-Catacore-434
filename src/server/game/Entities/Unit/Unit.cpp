@@ -12488,11 +12488,15 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     float TakenTotalMod = 1.0f;
 
     // ..done
-    // SPELL_AURA_MOD_AUTOATTACK_DAMAGE
+    // SPELL_AURA_MOD_AUTOATTACK_DAMAGE_1, SPELL_AURA_MOD_AUTOATTACK_DAMAGE_2
     if (!spellProto)
     {
-        AuraEffectList const & autoattackDamage = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE);
+        AuraEffectList const & autoattackDamage = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_1);
         for (AuraEffectList::const_iterator i = autoattackDamage.begin(); i != autoattackDamage.end(); ++i)
+            AddPctN(DoneTotalMod, (*i)->GetAmount());
+
+        AuraEffectList const & autoattackDamage2 = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_2);
+        for (AuraEffectList::const_iterator i = autoattackDamage2.begin(); i != autoattackDamage2.end(); ++i)
         {
             int32 amount = (*i)->GetAmount();
             if ((*i)->GetSpellProto()->EquippedItemClass == -1)
