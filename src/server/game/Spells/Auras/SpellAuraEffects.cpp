@@ -6998,7 +6998,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case 52437: // Sudden Death
                     if (caster->ToPlayer()->HasSpellCooldown(86346)) // Colossus Smash
-                        caster->ToPlayer()->RemoveSpellCooldown(86346); // removing cooldown for spell Colossus Smash
+                        caster->ToPlayer()->RemoveSpellCooldown(86346, true); // removing cooldown for spell Colossus Smash
                     break;
             }
         }
