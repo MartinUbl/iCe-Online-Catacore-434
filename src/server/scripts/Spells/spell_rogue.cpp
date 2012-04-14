@@ -457,7 +457,7 @@ public:
                 else
                 {
                     b->SetCharges(charges);
-                    if(insight)
+                    if (insight && buffIns)
                         buffIns->RefreshDuration();
                 }
                 int bonus = 0;
