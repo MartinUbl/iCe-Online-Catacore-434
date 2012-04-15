@@ -3809,6 +3809,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
             count++;
             break;
+        case 16213: // Purification (passive)
+            // 4.0.6a Blizzard hotfix, note in client not present, also DBC data wrong!
+            spellInfo->EffectBasePoints[0] = 25;
+            spellInfo->EffectBasePoints[1] = 25;
+            count++;
+            break;
         case 81262: // Efflorescence
             // Change aura dummy for aura periodic dummy, we need to trigger spells periodically
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
