@@ -2536,6 +2536,9 @@ void Player::ResetAllPowers()
         default:
             break;
     }
+
+    // Also clear paladin's holy power to avoid overpowered combos
+    SetPower(POWER_HOLY_POWER, 0);
 }
 
 Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
