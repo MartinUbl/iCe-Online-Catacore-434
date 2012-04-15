@@ -175,7 +175,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         return;
     }
 
-    recv_data >> lang;
+    // Emotes are used universally
+    if (type == CHAT_MSG_EMOTE)
+        lang = 0;
+    else
+        recv_data >> lang;
 
     if (type >= MAX_CHAT_MSG_TYPE)
     {
