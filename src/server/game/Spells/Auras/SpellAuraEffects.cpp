@@ -666,12 +666,12 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 break;
             break;
         case SPELL_AURA_DAMAGE_SHIELD:
-            if (!caster)
+            if (!caster || !caster->ToPlayer())
                 break;
             // Thorns
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x100)
-                // 3.3% from sp bonus
-                DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.033f;
+                // 16.8% from sp bonus
+                DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.168f;
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
             if (!caster)
