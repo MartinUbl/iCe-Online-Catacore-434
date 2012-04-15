@@ -2958,6 +2958,21 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 case SPELLFAMILY_GENERIC:
                     switch (m_spellInfo->Id)
                     {
+                        case 12355: // Impact scripted effect
+                        {
+                            // Limit only effect no. 1
+                            if (i != 1)
+                                break;
+                            // Exclude targets which are out of combat
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                            {
+                                if (!(*itr)->isInCombat())
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
+                        }
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
@@ -2989,6 +3004,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                 else
                                     ++itr;
                             }
+                            break;
                         }
                         default:
                             break;
