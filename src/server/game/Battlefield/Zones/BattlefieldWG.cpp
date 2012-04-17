@@ -352,8 +352,6 @@ void BattlefieldWG::OnBattleStart()
     {
         // Update faction of relic, only attacker can click on
         m_relic->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetAttackerTeam()]);
-        // Set in use (not allow to click on before last door is broken)
-        m_relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     }
     else
         sLog->outError("WG: Failed to spawn titan relic.");

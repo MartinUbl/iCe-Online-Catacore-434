@@ -180,6 +180,10 @@ void WorldSession::HandleBfExitRequest(WorldPacket & recv_data)
 
         Bf->AskToLeaveQueue(_player);
         Bf->KickPlayerFromBf(_player->GetGUID());
+
+        if (_player->GetGroup() && _player->GetGroup()->isBFGroup())
+            _player->RemoveFromBattlegroundOrBattlefieldRaid();
+
         return;
     }
 
@@ -188,7 +192,7 @@ void WorldSession::HandleBfExitRequest(WorldPacket & recv_data)
     recv_data >> BattleId;
     recv_data.read_skip<uint32>(); // unknown, always 2
     recv_data.read_skip<uint16>(); // constant, same as in BG joining
-    sLog->outError("HandleBfExitRequest: BattleID:%u ", BattleId);
+
     Battlefield* Bf = sBattlefieldMgr.GetBattlefieldByBattleId(BattleId);
     if (!Bf)
         return;
