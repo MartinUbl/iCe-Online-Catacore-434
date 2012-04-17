@@ -2699,6 +2699,18 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 break;
             }
+            if (m_spellInfo->Id == 27683) // Shadow Protection
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    std::list<Unit*> PartyMembers;
+                    m_caster->GetPartyMembers(PartyMembers);
+                    if (PartyMembers.size() > 2)
+                        m_caster->CastSpell(unitTarget, 79107, true); // Shadow Protection (Raid)
+                    else
+                        m_caster->CastSpell(unitTarget, 79106, true); // Shadow Protection (Caster)
+                }
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Chains of Ice
