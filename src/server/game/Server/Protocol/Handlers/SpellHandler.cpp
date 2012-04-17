@@ -346,6 +346,7 @@ const uint32 ModABSpellMap[][3] = {
     {86121,            86211,         0}, // Soul Swap
     {77606,            77616,         0}, // Dark Simulacrum
     {88625,            81206,         2}, // Chakra: Sanctuary
+    {88625,            81208,         2}, // Chakra: Sanctuary
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)

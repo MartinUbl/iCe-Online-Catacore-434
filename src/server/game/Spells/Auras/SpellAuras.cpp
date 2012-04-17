@@ -880,6 +880,8 @@ bool Aura::IsModActionButton() const
         case 82926: // Fire! (Master Marksman proc)
         case 86211: // Soul Swap (marker)
         case 77616: // Dark Simulacrum
+        case 81206: // Chakra: Sanctuary
+        case 81208: // Chakra: Serenity
             return true;
         case 687:   // Demon Armor - condition for talent Nether Ward
         case 28176: // Fel Armor
@@ -930,6 +932,8 @@ uint8 Aura::GetModActionButtonEffectMask() const
             break;
         case 687:   // Demon Armor
         case 28176: // Fel Armor
+        case 81206: // Chakra: Sanctuary
+        case 81208: // Chakra: Serenity
             effMask |= 1 << 2;
             break;
         default:
@@ -970,6 +974,12 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
                 return 91711;
             else
                 return 6229;
+        case 81206: // Chakra: Sanctuary
+        case 81208: // Chakra: Serenity
+            // talent Revelations
+            if (!GetCaster() || !GetCaster()->HasAura(88627))
+                return 88625;
+            return GetSpellProto()->EffectBasePoints[effIndex];
         default:
             return 0;
     }
