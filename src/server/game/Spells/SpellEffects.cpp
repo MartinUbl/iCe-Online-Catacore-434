@@ -3895,7 +3895,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Healthstone
         else if (m_spellInfo->Id == 6262)
         {
-            addhealth = (float(addhealth)/100.0f)*caster->GetMaxHealth();
+            addhealth = (float(addhealth)/100.0f)*caster->GetCreateHealth();
 
             // Soulburn: Healthstone
             if (caster->HasAura(74434))
