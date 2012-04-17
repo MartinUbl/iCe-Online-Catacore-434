@@ -3815,6 +3815,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[1] = 25;
             count++;
             break;
+        case 88685: // Holy Word: Sanctuary
+            // Change aura dummy for aura periodic dummy, we need to trigger spells periodically
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
+            spellInfo->EffectApplyAuraName[1] = 0;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DST_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
+            spellInfo->EffectAmplitude[0] = 2000;
+            count++;
+            break;
         case 81262: // Efflorescence
             // Change aura dummy for aura periodic dummy, we need to trigger spells periodically
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;

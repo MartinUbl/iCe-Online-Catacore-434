@@ -2652,6 +2652,13 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             }
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Holy Word: Sanctuary effect
+            if (GetSpellProto() && GetSpellProto()->Id == 88685)
+                caster->CastSpell(target, 88686, true);
+            break;
+        }
         case SPELLFAMILY_DRUID:
         {
             switch (GetSpellProto()->Id)
