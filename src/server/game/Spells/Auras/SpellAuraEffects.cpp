@@ -749,7 +749,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Explosive Shot (Explosive Shit sounds also nice :-P)
             else if (GetId() == 53301)
             {
-                amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
+                float rmin = caster->GetWeaponDamageRange(RANGED_ATTACK,MINDAMAGE);
+                float rmax = caster->GetWeaponDamageRange(RANGED_ATTACK,MAXDAMAGE);
+                amount += 1.2f*((rmin+rmax)/2)+caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
             }
             // Lacerate
             else if (GetId() == 33745)
