@@ -2228,6 +2228,7 @@ class Unit : public WorldObject
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
 
+        bool IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active); // Hack in order to determine hack proc of non triggering auras if required
         bool HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active); // Hack in order to proc non triggering auras if required
 
         std::list<uint64> m_lDamageTakenHistory;

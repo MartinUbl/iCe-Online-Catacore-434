@@ -15046,10 +15046,12 @@ struct ProcTriggeredData
     {
         effMask = 0;
         spellProcEvent = NULL;
+        byHack = false;
     }
     SpellProcEventEntry const *spellProcEvent;
     Aura * aura;
     uint32 effMask;
+    bool byHack;
 };
 
 typedef std::list< ProcTriggeredData > ProcTriggeredList;
@@ -15276,12 +15278,23 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         if (!itr->second || !itr->second->GetBase())
             continue;
         SpellEntry const* spellProto = itr->second->GetBase()->GetSpellProto();
-        if(!IsTriggeredAtSpellProcEvent(pTarget, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))
+
+        // Call hack to handle aura proc of non triggering auras if required
+        if (IsHackTriggeredAura(pTarget, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active))
+            triggerData.byHack = true;
+        else if(!IsTriggeredAtSpellProcEvent(pTarget, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))
             continue;
 
         // Triggered spells not triggering additional spells
         bool triggered= !(spellProto->AttributesEx3 & SPELL_ATTR3_CAN_PROC_TRIGGERED) ?
             (procExtra & PROC_EX_INTERNAL_TRIGGERED && !(procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION)) : false;
+
+        // If hacked, immediatelly push front and do not continue in tick
+        if (triggerData.byHack)
+        {
+            procTriggered.push_front(triggerData);
+            continue;
+        }
 
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
@@ -15316,6 +15329,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         // look for aura in auras list, it may be removed while proc event processing
         if (i->aura->IsRemoved())
             continue;
+
+        // Handle our hacks
+        if (i->byHack)
+        {
+            HandleAuraProcHack(pTarget, i->aura, procSpell, procFlag, procExtra, attType, isVictim, ((damage > 0) || (procExtra & (PROC_EX_ABSORB|PROC_EX_BLOCK) && isVictim)));
+            continue;
+        }
 
         bool useCharges= i->aura->GetCharges()>0;
         bool takeCharges = false;
@@ -16073,10 +16093,6 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry co
         return false;
 
     SpellEntry const *spellProto = aura->GetSpellProto();
-
-    // Call hack to handle aura proc of non triggering auras if required
-    if(HandleAuraProcHack(pVictim, aura, procSpell, procFlag, procExtra, attType, isVictim, active))
-        return false;
 
     // Get proc Event Entry
     spellProcEvent = sSpellMgr->GetSpellProcEvent(spellProto->Id);
@@ -18528,8 +18544,7 @@ bool CharmInfo::IsReturning()
     return m_isReturning;
 }
 
-// HandleAuraProcHack in order to proc non triggering auras
-bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active)
+bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active)
 {
     // Return value: false - continue normal handling : true - do not continue
 
@@ -18545,110 +18560,133 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
     // All aura IDs to be registered here to prevent mistakes and not to handle regular spells
     switch(dummySpell->Id)
     {
-    // add case
-    case 14751:
-    case 53576:
-    case 53569:
-    case 44445:
-        break; // Continue handling
-    default:
-        return false; // Escape hack and continue normal way
-        break;
+        // add case
+        case 14751:
+        case 53576:
+        case 53569:
+        case 44445:
+            return true; // Continue handling
     }
 
-    switch(dummySpell->SpellFamilyName)
+    return false; // Will not be processed as triggered aura
+}
+
+bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active)
+{
+    // Return value: false - continue normal handling : true - do not continue
+
+    // Check for ordinal things
+    if (!aura || !aura->GetSpellProto())
+        return false;
+
+    SpellEntry const* dummySpell = aura->GetSpellProto();
+
+    // BE CAREFUL ! no foregoing checks.
+    // on melee procSpell = NULL, auras trigger themselves by other aura effects, etc..
+
+    switch (dummySpell->SpellFamilyName)
     {
-    case SPELLFAMILY_PRIEST:
+        case SPELLFAMILY_PRIEST:
         {
-            switch(dummySpell->Id)
+            switch (dummySpell->Id)
             {
-            // Chakra
-            case 14751:
-                {
-                    if(!procSpell)
-                        break;
-
-                    // is caster
-                    if(procFlag &
-                        (PROC_FLAG_DONE_MELEE_AUTO_ATTACK |
-                        PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
-                        PROC_FLAG_DONE_RANGED_AUTO_ATTACK |
-                        PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
-                        PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS |
-                        PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG |
-                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
-                        PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG))
+                // Chakra
+                case 14751:
                     {
-                        // these spells trigger different chakra states
-                        switch(procSpell->Id)
+                        if (!procSpell)
+                            break;
+
+                        // is caster
+                        if (procFlag &
+                            (PROC_FLAG_DONE_MELEE_AUTO_ATTACK |
+                            PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
+                            PROC_FLAG_DONE_RANGED_AUTO_ATTACK |
+                            PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
+                            PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS |
+                            PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG |
+                            PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
+                            PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG))
                         {
-                            // Chakra: Serenity
-                            case 2050:  // Heal
-                            case 2061:  // Flash Heal
-                            case 2060:  // Greater Heal
-                            case 32546: // Binding Heal
-                                CastSpell(this, 81208, true); // Refreshing Renew spell (81585) has its script effect handler
-                                RemoveAurasDueToSpell(81206);
-                                RemoveAurasDueToSpell(81207);
-                                RemoveAurasDueToSpell(81209);
-                                RemoveAurasDueToSpell(14751);
-                                break;
-                            // Chakra: Sanctuary
-                            case 596:   // Prayer of Healing
-                            case 33076: // Prayer of Mending
-                                CastSpell(this, 81206, true);
-                                CastSpell(this, 81207, true);
-                                RemoveAurasDueToSpell(81208);
-                                RemoveAurasDueToSpell(81209);
-                                RemoveAurasDueToSpell(14751);
-                                break;
-                            // Chakra: Chastise
-                            case 585:   // Smite
-                            case 73510: // Mind Spike
-                                CastSpell(this, 81209, true);
-                                RemoveAurasDueToSpell(81206);
-                                RemoveAurasDueToSpell(81207);
-                                RemoveAurasDueToSpell(81208);
-                                RemoveAurasDueToSpell(14751);
-                                break;
-                            default: break;
+                            // these spells trigger different chakra states
+                            switch (procSpell->Id)
+                            {
+                                // Chakra: Serenity
+                                case 2050:  // Heal
+                                case 2061:  // Flash Heal
+                                case 2060:  // Greater Heal
+                                case 32546: // Binding Heal
+                                    CastSpell(this, 81208, true); // Refreshing Renew spell (81585) has its script effect handler
+                                    RemoveAurasDueToSpell(81206);
+                                    RemoveAurasDueToSpell(81207);
+                                    RemoveAurasDueToSpell(81209);
+                                    RemoveAurasDueToSpell(14751);
+                                    return true;
+                                // Chakra: Sanctuary
+                                case 596:   // Prayer of Healing
+                                case 33076: // Prayer of Mending
+                                    CastSpell(this, 81206, true);
+                                    CastSpell(this, 81207, true);
+                                    RemoveAurasDueToSpell(81208);
+                                    RemoveAurasDueToSpell(81209);
+                                    RemoveAurasDueToSpell(14751);
+                                    return true;
+                                // Chakra: Chastise
+                                case 585:   // Smite
+                                case 73510: // Mind Spike
+                                    CastSpell(this, 81209, true);
+                                    RemoveAurasDueToSpell(81206);
+                                    RemoveAurasDueToSpell(81207);
+                                    RemoveAurasDueToSpell(81208);
+                                    RemoveAurasDueToSpell(14751);
+                                    return true;
+                                default:
+                                    break;
+                            }
                         }
+                        break;
                     }
+                default:
                     break;
-                }
-            default: break;
             }
         }
-    case SPELLFAMILY_PALADIN:
-        // Infusion of Light
-        if ((dummySpell->Id == 53576 || dummySpell->Id == 53569) && procExtra & PROC_EX_CRITICAL_HIT && procSpell && procSpell->Id == 25914)
+        case SPELLFAMILY_PALADIN:
         {
-            CastSpell(this, dummySpell->EffectTriggerSpell[0], true);
-            return true;
-        }
-        break;
-    case SPELLFAMILY_MAGE:
-        // Hot Streak
-        if (dummySpell->Id == 44445
-            && procExtra & PROC_EX_CRITICAL_HIT
-            && procSpell != NULL
-            && !(procFlag & PROC_FLAG_DONE_PERIODIC))
-        {
-            // Procs only from several spells
-            if (procSpell->Id == 133      // Fireball
-                || procSpell->Id == 44614 // Frostfire Bolt
-                || procSpell->Id == 2948  // Scorch
-                || procSpell->Id == 11366 // Pyroblast
-                || procSpell->Id == 92315 // Pyroblast!
-                || procSpell->Id == 2136) // Fire Blast
+            // Infusion of Light
+            if ((dummySpell->Id == 53576 || dummySpell->Id == 53569) && procExtra & PROC_EX_CRITICAL_HIT && procSpell && procSpell->Id == 25914)
             {
-                if (roll_chance_i(33))
-                    CastSpell(this, 48108, true);
+                CastSpell(this, dummySpell->EffectTriggerSpell[0], true);
+                return true;
+            }
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            // Hot Streak
+            if (dummySpell->Id == 44445
+                && procExtra & PROC_EX_CRITICAL_HIT
+                && procSpell != NULL
+                && !(procFlag & PROC_FLAG_DONE_PERIODIC))
+            {
+                // Procs only from several spells
+                if (procSpell->Id == 133      // Fireball
+                    || procSpell->Id == 44614 // Frostfire Bolt
+                    || procSpell->Id == 2948  // Scorch
+                    || procSpell->Id == 11366 // Pyroblast
+                    || procSpell->Id == 92315 // Pyroblast!
+                    || procSpell->Id == 2136) // Fire Blast
+                {
+                    if (roll_chance_i(33))
+                        CastSpell(this, 48108, true);
+
+                    return true;
+                }
             }
         }
-    default: break;
+        default:
+            break;
     }
-    return true; // Will not continue handling the aura
+
+    return false;
 }
 
 void Unit::SaveDamageTakenHistory(uint32 damage)
