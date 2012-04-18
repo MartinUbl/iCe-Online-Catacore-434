@@ -1367,18 +1367,12 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 damageInfo->TargetState = VICTIMSTATE_HIT;
                 damageInfo->HitInfo    |= HITINFO_BLOCK;
                 damageInfo->procEx     |= PROC_EX_BLOCK;
-                damageInfo->blocked_amount = damageInfo->target->GetShieldBlockValue();
-                //double blocked amount if block is critical
+                damageInfo->blocked_amount = damageInfo->damage * 0.3f;
+                // double blocked amount if block is critical
                 if (damageInfo->target->isBlockCritical())
                     damageInfo->blocked_amount+=damageInfo->blocked_amount;
-                if (damageInfo->blocked_amount >= damageInfo->damage)
-                {
-                    damageInfo->TargetState = VICTIMSTATE_BLOCKS;
-                    damageInfo->blocked_amount = damageInfo->damage;
-                    damageInfo->procEx |= PROC_EX_FULL_BLOCK;
-                }
-                else
-                    damageInfo->procEx  |= PROC_EX_NORMAL_HIT;
+
+                damageInfo->procEx  |= PROC_EX_NORMAL_HIT;
                 damageInfo->damage      -= damageInfo->blocked_amount;
                 damageInfo->cleanDamage += damageInfo->blocked_amount;
             }
