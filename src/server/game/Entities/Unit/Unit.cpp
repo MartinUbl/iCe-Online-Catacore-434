@@ -5292,17 +5292,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 9799:
                 case 25988:
                 {
-                    // return damage % to attacker but < 50% own total health
-                    basepoints0 = int32((triggerAmount * damage) /100);
+                    // Implicit 20/40% chance
+                    if ((dummySpell->Id == 9799 && !roll_chance_i(20)) || (dummySpell->Id == 25988 && !roll_chance_i(40)))
+                        return false;
 
-                    int32 halfMaxHealth = int32(CountPctFromMaxHealth(50));
-                    if (basepoints0 > halfMaxHealth)
-                        basepoints0 = halfMaxHealth;
-
-                    sLog->outDebug("DEBUG LINE: Data about Eye for an Eye ID %u, damage taken %u, unit max health %u, damage done %u", dummySpell->Id, damage, GetMaxHealth(), basepoints0);
-
+                    // return damage % back to attacker
+                    basepoints0 = int32((triggerAmount * damage) / 100.0f);
                     triggered_spell_id = 25997;
-
                     break;
                 }
                 // Sweeping Strikes
