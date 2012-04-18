@@ -672,6 +672,12 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x100)
                 // 16.8% from sp bonus
                 DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.168f;
+            // Retribution Aura
+            else if (GetSpellProto()->Id == 7294)
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    DoneActualBenefit = ceil(float(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY)) / 30.3f);
+            }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
             if (!caster)
