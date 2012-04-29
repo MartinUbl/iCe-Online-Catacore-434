@@ -29,9 +29,9 @@ class achievement_school_of_hard_knocks : public AchievementCriteriaScript
 
         bool OnCheck(Player* source, Unit* /*target*/)
         {
-            static uint32 const orphanEntries[6] = {14305, 14444, 22818, 22817, 33533, 33532};
+            static uint32 const orphanEntries[7] = {14305, 14444, 14445, 22818, 22817, 33533, 33532};
             uint32 currentPet = GUID_ENPART(source->GetCritterGUID());
-            for (uint8 i = 0; i < 6; ++i)
+            for (uint8 i = 0; i < 7; ++i)
                 if (currentPet == orphanEntries[i])
                     return true;
 
@@ -390,6 +390,23 @@ class achievement_bunny_maker : public AchievementCriteriaScript
         }
 };
 
+class achievement_home_alone : public AchievementCriteriaScript
+{
+    public:
+        achievement_home_alone() : AchievementCriteriaScript("achievement_home_alone") { }
+
+        bool OnCheck(Player* source, Unit* /*target*/)
+        {
+            static uint32 const orphanEntries[7] = {14305, 14444, 14445, 22818, 22817, 33533, 33532};
+            uint32 currentPet = GUID_ENPART(source->GetCritterGUID());
+            for (uint8 i = 0; i < 7; ++i)
+                if (currentPet == orphanEntries[i])
+                    return true;
+
+            return false;
+        }
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_school_of_hard_knocks();
@@ -407,4 +424,5 @@ void AddSC_achievement_scripts()
     new npc_sraaz_or_jeremiah();
     new npc_love_fool();
     new achievement_bunny_maker();
+    new achievement_home_alone();
 }
