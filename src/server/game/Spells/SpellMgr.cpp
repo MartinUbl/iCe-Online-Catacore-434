@@ -4067,14 +4067,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
-        case 779:   // Swipe  (Bear form)
         case 62078: // Swipe  (Cat  form)
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY;
-            count++;
-            break;
-        case 77758: // Thrash (Bear form)
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY;
             count++;
             break;
         case 85425: // Conclave of Wind: Anshal: Nurture triggered summoning spells
