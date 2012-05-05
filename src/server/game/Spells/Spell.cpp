@@ -5220,10 +5220,10 @@ void Spell::TakeReagents()
 
 void Spell::HandleThreatSpells(uint32 spellId)
 {
-    if (!m_targets.getUnitTarget() || !spellId)
+    if (!spellId)
         return;
 
-    if (!m_targets.getUnitTarget()->CanHaveThreatList())
+    if (!m_targets.getUnitTarget() && m_UniqueTargetInfo.empty())
         return;
 
     uint16 threat = sSpellMgr->GetSpellThreat(spellId);
@@ -5231,9 +5231,21 @@ void Spell::HandleThreatSpells(uint32 spellId)
     if (!threat)
         return;
 
-    m_targets.getUnitTarget()->AddThreat(m_caster, float(threat));
+    if (m_targets.getUnitTarget())
+    {
+        if (m_targets.getUnitTarget()->CanHaveThreatList())
+            m_targets.getUnitTarget()->AddThreat(m_caster, float(threat));
+    }
 
-    sLog->outStaticDebug("Spell %u, rank %u, added an additional %i threat", spellId, sSpellMgr->GetSpellRank(spellId), threat);
+    if (!m_UniqueTargetInfo.empty())
+    {
+        for (std::list<Spell::TargetInfo>::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+        {
+            if (Unit* target = Unit::GetUnit(*m_caster, (*itr).targetGUID))
+                if (target->CanHaveThreatList())
+                    target->AddThreat(m_caster, float(threat));
+        }
+    }
 }
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
