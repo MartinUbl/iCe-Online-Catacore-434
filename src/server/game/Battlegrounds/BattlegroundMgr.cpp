@@ -240,7 +240,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         case STATUS_IN_PROGRESS:
         {
             data->Initialize(SMSG_BATTLEFIELD_STATUS2, 100);
-            *data << uint8(bg->isRated() ? 128 : 0);
+            *data << uint8(bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS ? 64 : 0);
             *data << uint32(Time2); // Time since started
             *data << uint32(QueueSlot); // queueslot 
             *data << uint32(bg->GetMapId()); // MapID
