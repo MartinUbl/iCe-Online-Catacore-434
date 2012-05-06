@@ -1806,6 +1806,22 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 caster->ToPlayer()->RemoveSpellCooldown(51505, true);
                             break;
                         }
+                    case 33745: // Lacerate
+                    {
+                        // Condition to active spell Berserk
+                        if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->HasTalent(50334, caster->ToPlayer()->GetActiveSpec()))
+                        {
+                            if (roll_chance_i(50))
+                            {
+                                // Reset cooldown of Mangle (bear + cat)
+                                caster->ToPlayer()->RemoveSpellCooldown(33876, true);
+                                caster->ToPlayer()->RemoveSpellCooldown(33878, true);
+                                // ..and make it cost no rage
+                                caster->CastSpell(caster, 93622, true);
+                            }
+                        }
+                        break;
+                    }
                     // Shadow Word: Death - self damage spell
                     case 32409:
                     {
