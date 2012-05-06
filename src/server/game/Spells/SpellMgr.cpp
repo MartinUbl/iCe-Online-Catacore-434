@@ -412,6 +412,21 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
         {
             castTime = values.cast;
         }
+
+        // Tauren racial Cultivation - doesn't have effect for that
+        // ..all ranks of Herb Gathering
+        if (spellInfo->Id == 2366 ||
+            spellInfo->Id == 2368 ||
+            spellInfo->Id == 3570 ||
+            spellInfo->Id == 11993 ||
+            spellInfo->Id == 28695 ||
+            spellInfo->Id == 50300 ||
+            spellInfo->Id == 74519)
+        {
+            // Comments on Wowhead says, that cast time with that racial is aprox. 0.5s
+            if (spell->GetCaster()->HasAura(20552))
+                castTime = 500;
+        }
     }
     
     if (spell && spell->GetCaster())
