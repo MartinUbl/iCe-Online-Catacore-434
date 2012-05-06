@@ -11379,7 +11379,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             sumNegativeMod += (*i)->GetAmount();
 
     // Mod damage from spell mechanic
-    if (uint32 mechanicMask = GetAllSpellMechanicMask(spellProto))
+    uint32 mechanicMask = GetAllSpellMechanicMask(spellProto);
+
+    // Shred, Maul - "Effects which increase Bleed damage also increase Shred damage"
+    if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags[0] & 0x00008800)
+        mechanicMask |= (1<<MECHANIC_BLEED);
+
+    if (mechanicMask)
     {
         AuraEffectList const& mDamageDoneMechanic = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
         for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
