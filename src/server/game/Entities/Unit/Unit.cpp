@@ -11352,13 +11352,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             case 2109:
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
                 {
-                    // needs rework 4.0.6
-                    /*if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                    if (pVictim->GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
-                    if (mod < (*i)->GetAmount())
-                        mod = (float)(*i)->GetAmount();
-                    sumNegativeMod += int32(mod);*/
+                    if ((*i)->GetAmount())
+                        sumNegativeMod += (*i)->GetAmount();
                 }
                 break;
             // Ebon Plague
@@ -12654,13 +12651,10 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
             case 2109:
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
                 {
-                    // needs rework 4.0.6
-                    /*if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                    if (pVictim->GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
-                    if (mod < (*i)->GetAmount())
-                        mod = (float)(*i)->GetAmount();
-                    TakenTotalMod *= (mod+100.0f)/100.0f;*/
+                    if ((*i)->GetAmount())
+                        TakenTotalMod *= ((*i)->GetAmount()+100.0f)/100.0f;
                 }
                 break;
             // Blessing of Sanctuary
