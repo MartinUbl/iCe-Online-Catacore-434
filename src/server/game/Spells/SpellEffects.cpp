@@ -9433,8 +9433,14 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
     if (m_spellInfo->Id == 89831)
         return;
 
-    int8 lowestCDRune = -1;
-    uint32 lowestCooldown = 0;
+    RuneType refreshType = RuneType(m_spellInfo->EffectMiscValue[effIndex]);
+
+    // Blood Tap effect should refresh blood rune and convert it. Unfortunatelly, it does it backwards, so it doesn't work
+    if (m_spellInfo->Id == 45529)
+        refreshType = RUNE_BLOOD;
+
+    int8 highestCDRune = -1;
+    uint32 highestCooldown = 0;
 
     uint32 count = damage;
     if (count == 0) count = 1;
@@ -9444,18 +9450,18 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
         for (uint32 j = 0; j < MAX_RUNES; j++)
         {
             uint32 cd = plr->GetRuneCooldown(j);
-            if (cd && plr->GetCurrentRune(j) == RuneType(m_spellInfo->EffectMiscValue[effIndex]))
+            if (cd && plr->GetCurrentRune(j) == refreshType)
             {
-                if (lowestCDRune == -1 || cd < lowestCooldown)
+                if (highestCDRune == -1 || cd > highestCooldown)
                 {
-                    lowestCDRune = j;
-                    lowestCooldown = cd;
+                    highestCDRune = j;
+                    highestCooldown = cd;
                 }
             }
         }
 
-        if (lowestCDRune >= 0)
-            plr->SetRuneCooldown(lowestCDRune, 0);
+        if (highestCDRune >= 0)
+            plr->SetRuneCooldown(highestCDRune, 0);
     }
 
     // Empower rune weapon
@@ -9472,6 +9478,14 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
         }
 
         plr->ResyncRunes(MAX_RUNES);
+    }
+    // Any other spell activating a rune
+    else
+    {
+        // hack alert !!
+        // Also cast spell originally used for Empower Rune Weapon
+        // It allows us to tell client that one single rune was refreshed
+        m_caster->CastSpell(m_caster, 89831, true);
     }
 }
 
