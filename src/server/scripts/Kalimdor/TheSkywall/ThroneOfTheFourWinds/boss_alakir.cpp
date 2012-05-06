@@ -91,6 +91,7 @@ class boss_alakir: public CreatureScript
             boss_alakirAI(Creature* c): Scripted_NoMovementAI(c)
             {
                 c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                c->ApplySpellImmune(0, IMMUNITY_ID, 49575, true); // death grip jump eff
                 c->SetReactState(REACT_DEFENSIVE);
 
                 instance = c->GetInstanceScript();

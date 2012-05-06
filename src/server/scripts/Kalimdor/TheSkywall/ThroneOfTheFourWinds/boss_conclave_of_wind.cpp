@@ -34,6 +34,7 @@ public:
         c->ApplySpellImmune(0, IMMUNITY_ID, 93121, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93122, true);
         c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 49575, true); // death grip jump eff
     }
 
     bool alive;
@@ -447,13 +448,13 @@ Sleet Storm (ultimate)  _OK
             if(spell_windchill_timer < diff)
             {
                 me->CastSpell(me, 84645, false);
-                spell_windchill_timer = 5000;
+                spell_windchill_timer = 10000;
             } else spell_windchill_timer -= diff;
 
             if(spell_permafrost_timer < diff)
             {
                 me->CastSpell(me, 86082, true);
-                spell_permafrost_timer = 10000;
+                spell_permafrost_timer = 11000;
             } else spell_permafrost_timer -= diff;
 
             if(spell_icepatch_timer < diff)

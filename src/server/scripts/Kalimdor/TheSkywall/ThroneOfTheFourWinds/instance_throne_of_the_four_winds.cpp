@@ -129,7 +129,7 @@ public:
 
             m_playerUpdate_Timer = 2000;
 
-            m_conclUpdate_Timer = 500;
+            m_conclUpdate_Timer = 1000;
 
             m_Bridge_GUID = 0;
             m_Center_GUID = 0;
@@ -491,8 +491,9 @@ public:
                         p_Anshal->AI()->DoAction(666);
                         p_Nezir->AI()->DoAction(666);
                         p_Rohash->AI()->DoAction(666);
+                        m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
                     }
-                    m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
+                    else m_conclUpdate_Timer = 1000 - (diff - m_conclUpdate_Timer);
                 } else m_conclUpdate_Timer -= diff;
             }
             else if(m_auiEncounter[TYPE_CONCLAVE] == SPECIAL)
@@ -505,8 +506,11 @@ public:
                     p_Nezir->AI()->DoAction(m_power);
                     p_Rohash->AI()->DoAction(m_power);
                     if(m_power == 0)
+                    {
                         SetData(TYPE_CONCLAVE, IN_PROGRESS);
-                    m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
+                        m_conclUpdate_Timer = 1000 - (diff - m_conclUpdate_Timer);
+                    }
+                    else m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
                 } else m_conclUpdate_Timer -= diff;
             }
             else
