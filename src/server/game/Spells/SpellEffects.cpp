@@ -1040,7 +1040,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 6807)
                 {
                     if (m_caster)
+                    {
                         damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.24f;
+
+                        if (unitTarget->HasAuraState(AURA_STATE_BLEEDING))
+                        {
+                            // Rend and Tear talent bonus
+                            float coef = 0.0f;
+                            if (m_caster->HasAura(48434))
+                                coef = 1.20f;
+                            else if (m_caster->HasAura(48433))
+                                coef = 1.13f;
+                            else if (m_caster->HasAura(48432))
+                                coef = 1.07f;
+
+                            if (coef)
+                                damage *= coef;
+                        }
+                    }
                 }
                 break;
             }
@@ -6115,12 +6132,18 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->AddComboPoints(unitTarget,1, this);
             }
-            // Shred, Maul - Rend and Tear
-            else if (m_spellInfo->SpellFamilyFlags[0] & 0x00008800 && unitTarget->HasAuraState(AURA_STATE_BLEEDING))
+            // Shred
+            else if (m_spellInfo->Id == 5221)
             {
-                if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
+                if (unitTarget->HasAuraState(AURA_STATE_BLEEDING))
                 {
-                    totalDamagePercentMod *= float((rendAndTear->GetAmount() + 100.0f) / 100.0f);
+                    // Rend and Tear talent bonus
+                    if (m_caster->HasAura(48434))
+                        totalDamagePercentMod *= 1.20f;
+                    else if (m_caster->HasAura(48433))
+                        totalDamagePercentMod *= 1.13f;
+                    else if (m_caster->HasAura(48432))
+                        totalDamagePercentMod *= 1.07f;
                 }
             }
             // Ravage! (Stampede)
