@@ -3061,6 +3061,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         }
                         break;
                     }
+                    // Stampeding Roar (bear form, cat form) - add speed bonus to caster also
+                    else if (m_spellInfo->Id == 77761 || m_spellInfo->Id == 77764)
+                    {
+                        unitList.push_back(m_caster);
+                        break;
+                    }
                     else
                         break;
 
