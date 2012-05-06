@@ -2688,6 +2688,10 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                 // Frenzied Regeneration
                 case 22842:
                 {
+                    // Glyph of Frenzied Regeneration cancells this effect
+                    if (caster->HasAura(54810))
+                        break;
+
                     // Converts up to 10 rage per second into health for $d.  Each point of rage is converted into ${$m2/10}.1% of max health.
                     // Should be manauser
                     if (target->getPowerType() != POWER_RAGE)
