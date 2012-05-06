@@ -12566,9 +12566,11 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
 
     // Custom scripted damage
     if (spellProto)
+    {
         switch(spellProto->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
+            {
                 if (spellProto->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_SLAM)
                 {
                     // Bloodsurge: Increases damage of Slam by +20%
@@ -12576,7 +12578,9 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                         DoneTotalMod *= 1.20f;
                 }
                 break;
+            }
             case SPELLFAMILY_SHAMAN:
+            {
                 // Improved Lava Lash - damage increase by X% for every stack of Searing Flames
                 if (spellProto->Id == 60103)
                 {
@@ -12590,14 +12594,18 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                         DoneTotalMod += bonusApp * pAura->GetStackAmount();
                 }
                 break;
+            }
             case SPELLFAMILY_DEATHKNIGHT:
+            {
                 // Glacier Rot
                 if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
                     if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
                         if (pVictim->GetDiseasesByCaster(owner->GetGUID()) > 0)
                             DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
-            break;
+                break;
+            }
         }
+    }
 
     // ..taken
     AuraEffectList const& mModDamagePercentTaken = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
