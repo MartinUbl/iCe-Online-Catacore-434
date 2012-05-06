@@ -2692,15 +2692,15 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     // Should be manauser
                     if (target->getPowerType() != POWER_RAGE)
                         break;
-                    uint32 rage = target->GetPower(POWER_RAGE);
+                    uint32 rage = target->GetPower(POWER_RAGE) / 10.0f; // rage is multiplied by 10
                     // Nothing todo
                     if (rage == 0)
                         break;
-                    int32 mod = (rage < 100) ? rage : 100;
-                    int32 points = target->CalculateSpellDamage(target, GetSpellProto(), 1);
-                    int32 regen = (target->GetMaxHealth() * (mod * points / 10) / 1000) / 210;
+                    int32 mod = (rage < 10) ? rage : 10; // we use up to 10 rage
+                    int32 points = target->CalculateSpellDamage(target, GetSpellProto(), 0); // get percentage of bonus per rage point
+                    int32 regen = target->GetMaxHealth() * ((mod * (points / 100.0f)) / 100.0f); // its 0.15% as of cataclysm, so we need 0.0015 coef
                     target->CastCustomSpell(target, 22845, &regen, 0, 0, true, 0, this);
-                    target->SetPower(POWER_RAGE, rage-mod);
+                    target->SetPower(POWER_RAGE, (rage-mod)*10.0f); // multiply our modified rage by 10 also
                     break;
                 }
                 // Efflorescence
