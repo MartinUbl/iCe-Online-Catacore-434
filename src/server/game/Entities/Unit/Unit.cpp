@@ -5887,7 +5887,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     basepoints0 = basepoints0 / 2;
 
                     triggered_spell_id = 12654;
-                    //basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
+                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
                     break;
                 }
                 // Glyph of Ice Block
@@ -18417,19 +18417,19 @@ void Unit::OutDebugInfo() const
 
 uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIndex) const
 {
-    int32 amount = 0; // Signed type needed
+    int32 amount = 0;
 
     AuraEffectList const& DoTAuras = GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-    for (AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
+    AuraEffectList const l_DoTAuras = DoTAuras; // local copy
+    for (AuraEffectList::const_iterator i = l_DoTAuras.begin(); i != l_DoTAuras.end(); ++i)
     {
         if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
             continue;
-        // Negative value can be added
         amount += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
         break;
     }
 
-    // Chack value
+    // Check value
     if (amount < 0)
         amount = 0;
 
