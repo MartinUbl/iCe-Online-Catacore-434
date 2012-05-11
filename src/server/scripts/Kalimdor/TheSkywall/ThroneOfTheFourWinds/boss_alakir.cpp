@@ -48,6 +48,8 @@ enum Stuff
     SPELL_ICE_STORM_GROUND_AURA   = 87469,
     SPELL_ICE_STORM_TRIGGER       = 87472,
     SPELL_ICE_STORM_SUMMON        = 87055,
+    SPELL_SQUALL_LINE_DUMMY_ALERT = 91115, // dummy spell for addons
+    SPELL_SQUALL_LINE_INIT        = 87652,
     SPELL_SQUALL_LINE_VISUAL      = 87621,
     SPELL_SQUALL_LINE_VEHICLE     = 87856,
 // phase 2
@@ -65,6 +67,7 @@ enum Stuff
     SPELL_EYE_OF_THE_STORM_TRIGGER= 89107,
     SPELL_RELENTLESS_STORM_CHANNEL= 88875,
     SPELL_RELENTLESS_STORM_VISUAL = 88866,
+    SPELL_LIGHTNING_CLOUDS_ALERT  = 89628, // dummy spell for addons
     SPELL_LIGHTNING_CLOUDS        = 89564,
     SPELL_LIGHTNING_CLOUDS_DMG    = 89587,
     NPC_ALAKIR_LARGE_MODEL        = 48233,
@@ -175,15 +178,20 @@ class boss_alakir: public CreatureScript
                 DespawnStormlings();
 
                 // summon loot chest
-                GameObject* pGO = me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
-                if (pGO)
+                GameObject* pGO = NULL;
+                pGO = me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
+
+                Map::PlayerList const& plrList = map->GetPlayers();
+                if (plrList.isEmpty())
+                    return;
+                for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 {
-                    Map::PlayerList const& plrList = map->GetPlayers();
-                    if (plrList.isEmpty())
-                        return;
-                    for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    if(Player* pPlayer = itr->getSource())
                     {
-                        if(Player* pPlayer = itr->getSource())
+                        // kill credit to all players
+                        pPlayer->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+                        // GO client upate
+                        if (pGO)
                             pGO->SendUpdateToPlayer(pPlayer);
                     }
                 }
@@ -318,7 +326,7 @@ class boss_alakir: public CreatureScript
                     // Squall Line
                         if (squallLineTimer <= diff)
                         {
-                            squallLineTimer = 40000; // 40s duration
+                            squallLineTimer = 47000; // 50s duration
                             DoSquallLine();
 
                         } else squallLineTimer -= diff;
@@ -398,7 +406,7 @@ class boss_alakir: public CreatureScript
                     // Squall Line
                         if (squallLineTimer <= diff)
                         {
-                            squallLineTimer = 35000;
+                            squallLineTimer = 43000;
                             DoSquallLine();
 
                         } else squallLineTimer -= diff;
@@ -508,6 +516,7 @@ class boss_alakir: public CreatureScript
             void DoSquallLine()
             {
                 DoScriptText(-1850530, me);
+                me->CastSpell(me, SPELL_SQUALL_LINE_DUMMY_ALERT, true);
 
                 Creature* pTemp = NULL;
                 float mx,my,mz;
@@ -732,24 +741,24 @@ class npc_squall_vortex: public CreatureScript
                 Reset();
             }
 
-            uint32 despawnTimer;
+            uint32 phaseTimer;
             uint64 boss_guid;
             std::list<Unit*> pVehicle_list;
 
             float nextx,nexty,nextz,nextpoint;
             uint8 nextpos;
             bool needstomove;
-            bool active;
+            uint8 phase;
             float direction;
             uint32 slot;
 
             void Reset()
             {
-                me->CastSpell(me, SPELL_SQUALL_LINE_VISUAL, true);
-                despawnTimer = 40000;
+                me->AddAura(SPELL_SQUALL_LINE_INIT, me); // triggers SPELL_SQUALL_LINE_VISUAL after 5 sec
+                phaseTimer = 5000;
                 pVehicle_list.clear();
                 needstomove = false;
-                active = true;
+                phase = 1;
                 if (TempSummon* summon = me->ToTempSummon())
                     boss_guid = summon->GetSummonerGUID();
                 else
@@ -771,7 +780,7 @@ class npc_squall_vortex: public CreatureScript
 
             void MoveInLineOfSight(Unit* pWho)
             {
-                if (!pWho || pWho->GetVehicle() || pWho->GetTypeId() != TYPEID_PLAYER || pWho->isDead() || !active || pWho->GetDistance2d(me) > 2.5f)
+                if (!pWho || pWho->GetVehicle() || pWho->GetTypeId() != TYPEID_PLAYER || pWho->isDead() || (phase != 2) || pWho->GetDistance2d(me) > 2.5f)
                     return;
 
                 Player* pPassenger = pWho->ToPlayer();
@@ -785,7 +794,7 @@ class npc_squall_vortex: public CreatureScript
                 if (pVeh)
                 {
                     if (Aura* aura = pPassenger->AddAura(SPELL_SQUALL_LINE_VEHICLE, pPassenger))
-                        aura->SetDuration(despawnTimer);
+                        aura->SetDuration(phaseTimer);
                     pPassenger->EnterVehicle(pVehicle,0);
                     pPassenger->clearUnitState(UNIT_STAT_UNATTACKABLE); // applied when entering vehicle
                     pVehicle->GetMotionMaster()->MoveFollow(me, 0.0f, 0.0f);
@@ -821,12 +830,17 @@ class npc_squall_vortex: public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (despawnTimer <= diff)
+                if (phaseTimer <= diff)
                 {
-                    if (active)
+                    switch (phase)
                     {
+                    case 1:
+                        phaseTimer = 40000;
+                        phase++;
+                        break;
+                    case 2:
                         me->RemoveAurasDueToSpell(SPELL_SQUALL_LINE_VISUAL);
-                        active = false;
+                        phase++;
                         for(std::list<Unit*>::const_iterator itr = pVehicle_list.begin(); itr != pVehicle_list.end(); ++itr)
                         {
                             (*itr)->Kill(*itr, false);
@@ -834,18 +848,20 @@ class npc_squall_vortex: public CreatureScript
                                 (*itr)->ToCreature()->ForcedDespawn();
                         }
                         pVehicle_list.clear();
-                        despawnTimer = 5000;
-                    }
-                    else
-                    {
+                        phaseTimer = 5000;
+                        break;
+                    case 3:
                         me->Kill(me, false);
                         me->ForcedDespawn();
                         // For being sure when doing multithreading
                         // should not happen, but who knows
-                        despawnTimer = 10000;
+                        phaseTimer = 10000;
+                        phase++;
+                        break;
+                    default: break;
                     }
                 }
-                else despawnTimer -= diff;
+                else phaseTimer -= diff;
 
                 if (needstomove)
                 {
@@ -1053,6 +1069,7 @@ class npc_alakir_large_model: public CreatureScript
             // Lightning Cloud
                 if (lightningCloudTimer < diff)
                 {
+                    me->CastSpell(me, SPELL_LIGHTNING_CLOUDS_ALERT, true);
                     Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (target)
                     {

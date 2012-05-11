@@ -156,6 +156,14 @@ public:
             return false;
         }
 
+        void OnPlayerEnter(Player* plr)
+        {
+            if (!plr || plr->isGameMaster())
+                return;
+            if (m_auiEncounter[TYPE_CONCLAVE] != DONE)
+                SetData(TYPE_CONCLAVE, NOT_STARTED); // Conclave: evade + reset
+        }
+
         void OnGameObjectCreate(GameObject* pGO, bool add)
         {
             if(!add || !pGO)
