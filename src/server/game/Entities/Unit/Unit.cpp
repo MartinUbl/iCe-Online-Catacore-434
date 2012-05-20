@@ -5807,6 +5807,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 break;
             }
 
+            // Permafrost healing spell proc
+            if (dummySpell->Id == 12571 || dummySpell->Id == 12569 || dummySpell->Id == 11175)
+            {
+                if (damage > 0 && triggeredByAura && triggeredByAura->GetAmount() > 0)
+                {
+                    int32 bp0 = damage * triggeredByAura->GetAmount() / 100.0f;
+                    CastCustomSpell(this, 91394, &bp0, 0, 0, true);
+                }
+            }
+
             // Improved Hot Streak
             if (dummySpell->SpellIconID == 2999 && dummySpell->Id != 44445)
             {
