@@ -25373,7 +25373,11 @@ void Player::_LoadSkills(PreparedQueryResult result)
                     value = max = 300;
                     break;
                 case SKILL_RANGE_MONO:                          // 1..1, grey monolite bar
-                    value = max = 1;
+                    // Exception for Runeforging skill - always skill 300, but listed as "mono range" skill
+                    if (pSkill->id == SKILL_RUNEFORGING)
+                        value = max = 300;
+                    else
+                        value = max = 1;
                     break;
                 default:
                     break;
