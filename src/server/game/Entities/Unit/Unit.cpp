@@ -7772,8 +7772,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 for (uint32 i = 0; i < MAX_RUNES/2; i++)
                 {
-                    // if at least one of runes of that type is depleted
-                    if ((!(runes & (1 << (i*2)))) || (!(runes & (1 << ((i*2)+1)))))
+                    // if both runes of this kind are depleted
+                    if ((!(runes & (1 << (i*2)))) && (!(runes & (1 << ((i*2)+1)))))
                     {
                         // set its bit
                         depletedRunes[dsize++] = i;
