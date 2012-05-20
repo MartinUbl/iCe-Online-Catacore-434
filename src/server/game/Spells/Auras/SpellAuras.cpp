@@ -1582,6 +1582,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 break;
         }
+
+        // Paladin's talent Pursuit of Justice
+        // Must be written out of switch, because of different spell families of source spells
+        if (target && ((target->HasAura(26022) && roll_chance_i(50)) || target->HasAura(26023)))
+        {
+            if (aurApp->GetBase() && aurApp->GetBase()->GetSpellProto())
+            {
+                SpellEntry const* spellInfo = aurApp->GetBase()->GetSpellProto();
+                if (spellInfo->AppliesAuraType(SPELL_AURA_MOD_STUN) || spellInfo->AppliesAuraType(SPELL_AURA_MOD_FEAR) || spellInfo->AppliesAuraType(SPELL_AURA_MOD_ROOT))
+                    target->CastSpell(target, 89024, true);
+            }
+        }
     }
     // mods at aura remove
     else
