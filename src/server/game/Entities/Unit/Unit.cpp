@@ -15542,7 +15542,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
 
         // Sanguinary Vein - do not unapply Gouge if attempting from bleed effect
         if (pTarget && ((pTarget->HasAura(79146) && roll_chance_i(50)) || pTarget->HasAura(79147)) && i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 1776
-            && procSpell && procSpell->Mechanic == MECHANIC_BLEED && procSpell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
+            && procSpell && ((procSpell->Mechanic == MECHANIC_BLEED && procSpell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE)) || procSpell->Id == 89775))
             takeCharges = false;
 
         // Remove charge (aura can be removed by triggers)
