@@ -6239,8 +6239,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 basepoints0 = damage * triggerAmount/100 + bonus;
 
-                if (basepoints0 > (0.4f * target->GetMaxHealth()))
-                    basepoints0 = 0.4f * target->GetMaxHealth();
+                if (basepoints0 > (0.4f * GetMaxHealth()))
+                    basepoints0 = 0.4f * GetMaxHealth();
 
                 triggered_spell_id = 47753;
                 break;
