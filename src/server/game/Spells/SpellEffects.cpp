@@ -2417,16 +2417,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             break;
         case SPELLFAMILY_PALADIN:
-            // Divine Storm
-            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_PALADIN_DIVINESTORM && effIndex == 1)
-            {
-                int32 dmg = m_damage * damage / 100;
-                if (!unitTarget)
-                    unitTarget = m_caster;
-                m_caster->CastCustomSpell(unitTarget, 54171, &dmg, 0, 0, true);
-                return;
-            }
-
             switch(m_spellInfo->Id)
             {
                 case 31789:                                 // Righteous Defense (step 1)
@@ -6380,6 +6370,11 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     switch (m_spellInfo->Id)
     {
         case 53385: // Divine Storm
+            {
+                int32 dmg = m_damage * m_spellInfo->EffectBasePoints[1] / 100.0f;
+                m_caster->CastCustomSpell(m_caster, 54171, &dmg, 0, 0, true);
+            }
+            // do not 'break' ! Mastery profits also from divine storm
         case 35395: // Crusader Strike
         case 85256: // Templar's Verdict
             // Implementation of Hand of Light mastery proficiency
