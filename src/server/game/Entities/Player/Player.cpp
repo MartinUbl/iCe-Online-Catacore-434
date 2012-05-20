@@ -25563,6 +25563,10 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         //Safe fall, fall height reduction
         int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
 
+        // Glyph of Path of Frost with Path of Frost active
+        if (HasAura(3714) && HasAura(59307))
+            safe_fall += 20;
+
         float damageperc = 0.018f*(z_diff-safe_fall)-0.2426f;
 
         if (damageperc > 0)
