@@ -12488,7 +12488,8 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
         {
             AuraEffectList const & autoattackDamage = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_1);
             for (AuraEffectList::const_iterator i = autoattackDamage.begin(); i != autoattackDamage.end(); ++i)
-                AddPctN(DoneTotalMod, (*i)->GetAmount());
+                if ((*i)->GetCasterGUID() == GetGUID())
+                    AddPctN(DoneTotalMod, (*i)->GetAmount());
         }
 
         AuraEffectList const & autoattackDamage2 = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_2);
