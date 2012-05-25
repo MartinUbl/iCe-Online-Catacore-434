@@ -330,6 +330,13 @@ void WorldSession::HandleSetChannelWatch(WorldPacket &recvPacket)
     //recvPacket.hexlike();
     std::string channelname;
     recvPacket >> channelname;
+
+    // And send player list for player, which started watching channel
+    if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+        if (Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->List(_player);
+
+    // Why would be this here?
     /*if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->JoinNotify(_player->GetGUID());*/
