@@ -279,6 +279,13 @@ bool ChatHandler::HandleReloadAutobroadcastCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadChannelOwnerPrivsCommand(const char*)
+{
+    sObjectMgr->LoadChannelOwnerPrivs();
+    SendGlobalGMSysMessage("DB table `character_channel_owner` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadCommandCommand(const char*)
 {
     load_command_table = true;

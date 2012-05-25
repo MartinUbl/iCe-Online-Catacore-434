@@ -1549,6 +1549,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Player level dependent mail rewards...");
     sObjectMgr->LoadMailLevelRewards();
 
+    sLog->outString("Loading channel privileged owners...");
+    sObjectMgr->LoadChannelOwnerPrivs();
+
     // Loot tables
     LoadLootTables();
 

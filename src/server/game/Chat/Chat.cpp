@@ -496,6 +496,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadAreaTriggerTavernCommand>,       "", NULL },
         { "areatrigger_teleport",        SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadAreaTriggerTeleportCommand>,     "", NULL },
         { "autobroadcast",               SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadAutobroadcastCommand>,           "", NULL },
+        { "character_channel_owner",     SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadChannelOwnerPrivsCommand>,       "", NULL },
         { "command",                     SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadCommandCommand>,                 "", NULL },
         { "conditions",                  SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadConditions>,                     "", NULL },
         { "creature_text",               SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadCreatureText>,                   "", NULL },

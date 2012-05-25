@@ -1332,11 +1332,16 @@ class ObjectMgr
 
         std::vector<std::string> krcma_filter_keywords;
 
+        typedef std::list<uint32> GUIDList;
+        typedef UNORDERED_MAP<std::string, GUIDList> ChannelOwnerPriv;
+        ChannelOwnerPriv channelOwnerPrivs;
+
         void LoadFactionChangeAchievements();
         void LoadFactionChangeItems();
         void LoadFactionChangeSpells();
         void LoadFactionChangeReputations();
         void LoadKrcmaFilter();
+        void LoadChannelOwnerPrivs();
 
     protected:
 

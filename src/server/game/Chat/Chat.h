@@ -410,6 +410,7 @@ class ChatHandler
         bool HandleReloadEventAITextsCommand(const char* args);
         bool HandleReloadEventAISummonsCommand(const char* args);
         bool HandleReloadEventAIScriptsCommand(const char* args);
+        bool HandleReloadChannelOwnerPrivsCommand(const char* args);
         bool HandleReloadCommandCommand(const char* args);
         bool HandleReloadOnKillReputationCommand(const char* args);
         bool HandleReloadOnKillCurrencyCommand(const char* args);

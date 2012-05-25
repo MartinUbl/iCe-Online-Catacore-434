@@ -9334,3 +9334,33 @@ void ObjectMgr::LoadKrcmaFilter()
     sLog->outString();
     sLog->outString(">> Loaded %u krcma filter rules.", counter);
 }
+
+void ObjectMgr::LoadChannelOwnerPrivs()
+{
+    QueryResult result = CharacterDatabase.Query("SELECT * FROM character_channel_owner");
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outString(">> Loaded 0 channel privileged owners, table `character_channel_owner` is empty.");
+        return;
+    }
+
+    channelOwnerPrivs.clear();
+    uint32 counter = 0;
+    do
+    {
+        Field *fields = result->Fetch();
+
+        uint32 guidLow = fields[0].GetUInt32();
+        std::string channelName = fields[1].GetString();
+
+        channelOwnerPrivs[channelName].push_back(guidLow);
+
+        ++counter;
+    }
+    while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u channel privileged owners.", counter);
+}

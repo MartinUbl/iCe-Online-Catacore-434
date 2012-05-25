@@ -203,6 +203,35 @@ void Channel::Join(uint64 p, const char *pass)
         SetOwner(p, (players.size() > 1 ? true : false));
         players[p].SetModerator(true);
     }*/
+
+    // If no privileged owner is present, then one will be chosen
+    if (!IsConstant() && m_ownerGUID)
+    {
+        // At first, verify that privileged user has joined
+        bool privilegedOwnerJoined = false;
+        bool chooseNewOwner = true;
+        if (sObjectMgr->channelOwnerPrivs.find(GetName()) != sObjectMgr->channelOwnerPrivs.end() && !sObjectMgr->channelOwnerPrivs[GetName()].empty())
+        {
+            for (ObjectMgr::GUIDList::const_iterator itr = sObjectMgr->channelOwnerPrivs[GetName()].begin(); itr != sObjectMgr->channelOwnerPrivs[GetName()].end(); ++itr)
+            {
+                if ((*itr) == GUID_LOPART(p))
+                    privilegedOwnerJoined = true;
+                if ((*itr) == GUID_LOPART(m_ownerGUID))
+                {
+                    chooseNewOwner = false;
+                    break;
+                }
+            }
+        }
+
+        // and if needed, make him a new owner
+        if (chooseNewOwner && privilegedOwnerJoined)
+        {
+            SetOwner(p, (players.size() > 1 ? true : false));
+            players[m_ownerGUID].SetModerator(false);
+            players[p].SetModerator(true);
+        }
+    }
 }
 
 void Channel::Leave(uint64 p, bool send)
@@ -245,6 +274,19 @@ void Channel::Leave(uint64 p, bool send)
         if (changeowner)
         {
             uint64 newowner = !players.empty() ? players.begin()->second.player : 0;
+
+            if (sObjectMgr->channelOwnerPrivs.find(GetName()) != sObjectMgr->channelOwnerPrivs.end() && !sObjectMgr->channelOwnerPrivs[GetName()].empty())
+            {
+                for (ObjectMgr::GUIDList::const_iterator itr = sObjectMgr->channelOwnerPrivs[GetName()].begin(); itr != sObjectMgr->channelOwnerPrivs[GetName()].end(); ++itr)
+                {
+                    if (players.find((*itr)) != players.end())
+                    {
+                        newowner = (*itr);
+                        break;
+                    }
+                }
+            }
+
             players[newowner].SetModerator(true);
             SetOwner(newowner);
         }
