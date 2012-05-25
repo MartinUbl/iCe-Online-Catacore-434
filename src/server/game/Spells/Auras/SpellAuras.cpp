@@ -2020,6 +2020,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
                     }
                 }
+                // Eclipse (Solar)
+                else if (GetId() == 48517)
+                {
+                    // Cast spell, which adds aura to morph Starfire into Sunfire
+                    // Condition to talent Sunfire
+                    if (apply && caster->HasAura(93401))
+                        caster->CastSpell(caster, 94338, true);
+                    else
+                        caster->RemoveAurasDueToSpell(94338);
+                }
 
                 // Vengeance for druids - remove at bear form unapply
                 if (GetId() == 5487 && !apply && caster && caster->HasAura(76691))
