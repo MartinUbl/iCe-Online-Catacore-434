@@ -1252,7 +1252,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 83381)
                 {
                     if (m_caster->GetOwner() && m_caster->GetOwner()->ToPlayer())
-                        damage += ceil(0.35f*float(m_caster->GetOwner()->ToPlayer()->GetTotalAttackPowerValue(RANGED_ATTACK)));
+                        damage += ceil(0.516f*float(m_caster->GetOwner()->ToPlayer()->GetTotalAttackPowerValue(RANGED_ATTACK)));
                 }
                 break;
             }
