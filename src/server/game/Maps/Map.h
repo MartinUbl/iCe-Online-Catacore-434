@@ -577,6 +577,8 @@ class Map : public GridRefManager<NGridType>
         }
 };
 
+#define DEFAULT_INSTANCE_COMBAT_CHECK_TIME 1500
+
 enum InstanceResetMethod
 {
     INSTANCE_RESET_ALL,
@@ -610,6 +612,7 @@ class InstanceMap : public Map
 
         virtual void InitVisibilityDistance();
     private:
+        uint32 m_checkCombatTimer;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
         InstanceScript* i_data;

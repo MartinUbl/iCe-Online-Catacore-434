@@ -2269,6 +2269,9 @@ InstanceMap::InstanceMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 Spaw
     //lets initialize visibility distance for dungeons
     InstanceMap::InitVisibilityDistance();
 
+    // set timer to check combat inside instanceable map to spread combat to every single member
+    m_checkCombatTimer = DEFAULT_INSTANCE_COMBAT_CHECK_TIME;
+
     // the timer is started by default, and stopped when the first player joins
     // this make sure it gets unloaded if for some reason no player joins
     m_unloadTimer = std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
@@ -2483,6 +2486,54 @@ bool InstanceMap::Add(Player *player)
 void InstanceMap::Update(const uint32& t_diff)
 {
     Map::Update(t_diff);
+
+    // Here we will check whole InstanceMap group for combat, and if present, spread it to everyone
+    if (m_checkCombatTimer <= t_diff)
+    {
+        m_checkCombatTimer = DEFAULT_INSTANCE_COMBAT_CHECK_TIME;
+
+        Map::PlayerList const& plList = GetPlayers();
+        if (!plList.isEmpty())
+        {
+            // At first we check raid group for combat and save threat list from at least one of them
+            // We dont have to save a loads of references, if somebody doesnt have threat with that reference,
+            // he would be surely "in combat" even without it, and thats the spirit
+            bool combatPresent = false;
+            HostileRefManager* threatList = NULL;
+            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if (itr->getSource() && itr->getSource()->isInCombat())
+                {
+                    combatPresent = true;
+                    threatList = &(itr->getSource()->getHostileRefManager());
+                    break;
+                }
+            }
+
+            // And finally if combat is present
+            if (combatPresent && threatList && !threatList->isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                {
+                    // and somebody doesnt have combat
+                    if (itr->getSource() && !itr->getSource()->isInCombat())
+                    {
+                        // we will make (at least) one for him :)
+                        for (HostileRefManager::iterator iter = threatList->begin(); iter != threatList->end(); ++iter)
+                        {
+                            if (iter->getSource() && iter->getSource()->getOwner() && itr->getSource()->IsWithinDistInMap(iter->getSource()->getOwner(), 200.0f))
+                            {
+                                itr->getSource()->SetInCombatWith(iter->getSource()->getOwner());
+                                iter->getSource()->getOwner()->AddThreat(itr->getSource(), 0.0f);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+        m_checkCombatTimer -= t_diff;
 
     if (i_data)
         i_data->Update(t_diff);
