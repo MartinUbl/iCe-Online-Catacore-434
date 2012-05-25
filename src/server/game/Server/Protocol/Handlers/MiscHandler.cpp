@@ -76,6 +76,10 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
         GetPlayer()->KillPlayer();
     }
 
+    // If Raise Ally is present, we have to remove it
+    GetPlayer()->RemoveAurasDueToSpell(46619);
+    GetPlayer()->StopCastingCharm();
+
     //this is spirit release confirm?
     GetPlayer()->RemovePet(NULL,PET_SLOT_ACTUAL_PET_SLOT, true);
     GetPlayer()->BuildPlayerRepop();

@@ -2813,6 +2813,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                 spell_id = CalculateDamage(0, NULL);
                 break;
+            // Raise Ally
+            case 61999:
+                if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER &&
+                    (unitTarget->ToPlayer()->IsInPartyWith(m_caster) || unitTarget->ToPlayer()->IsInRaidWith(m_caster)))
+                    unitTarget->CastSpell(unitTarget, 46619, true);
+                break;
             }
             break;
     }
@@ -9607,6 +9613,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
     switch (m_spellInfo->Id)
     {
         case 1122: // Inferno
+        case 46619: // Raise Ally
             amount = 1;
             break;
         case 49028: // Dancing Rune Weapon

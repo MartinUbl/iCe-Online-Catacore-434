@@ -5803,6 +5803,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                 }
+                else if (m_spellInfo->Id == 61999)          // Raise Ally
+                {
+                    Unit* target = m_targets.getUnitTarget();
+                    if (!(target && target->isDead() && target->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER &&
+                        (target->ToPlayer()->IsInPartyWith(m_caster) || target->ToPlayer()->IsInRaidWith(m_caster))))
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:
