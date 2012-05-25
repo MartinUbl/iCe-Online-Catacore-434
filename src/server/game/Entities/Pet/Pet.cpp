@@ -238,7 +238,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         case SUMMON_PET:
             petlevel=owner->getLevel();
 
-            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); //class=mage
+            SetByteValue(UNIT_FIELD_BYTES_0, 1, 0x8); //class=mage
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet dismiss, cancel)
             break;
@@ -859,6 +859,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         {
             petType = HUNTER_PET;
             m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
+        }
+        else if (m_owner->getClass() == CLASS_DEATH_KNIGHT) // Ghoul
+        {
+            // It's there also to avoid showing error
+            setPowerType(POWER_ENERGY);
+            SetMaxPower(POWER_ENERGY, 100);
+            SetPower(POWER_ENERGY, 100);
         }
         else
             sLog->outError("Unknown type pet %u is summoned by player class %u", GetEntry(), m_owner->getClass());

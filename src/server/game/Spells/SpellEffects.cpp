@@ -2783,6 +2783,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             case 46584: // Raise Dead
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return;
+                // 46584 has two dummy effects, we will handle only one of them
+                if (effIndex != EFFECT_0)
+                    return;
 
                 // Do we have talent Master of Ghouls?
                 if (m_caster->HasAura(52143))
