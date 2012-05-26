@@ -2516,7 +2516,7 @@ void InstanceMap::Update(const uint32& t_diff)
                 for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                 {
                     // and somebody doesnt have combat
-                    if (itr->getSource() && !itr->getSource()->isInCombat())
+                    if (itr->getSource() && !itr->getSource()->isInCombat() && !itr->getSource()->isGameMaster())
                     {
                         // we will make (at least) one for him :)
                         for (HostileRefManager::iterator iter = threatList->begin(); iter != threatList->end(); ++iter)
