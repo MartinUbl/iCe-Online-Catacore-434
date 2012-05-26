@@ -4583,7 +4583,7 @@ bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
 {
     if (!*args) // if command empty
     {
-        SendSysMessage("Syntaxe prikazu je \n .reset archaeology <jmeno>");
+        SendSysMessage("Syntax:\n.reset archaeology <name>");
         SetSentErrorMessage(true);
         return false;
     }
@@ -4592,7 +4592,7 @@ bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
 
     if (!chname)
     {
-        SendSysMessage("Syntaxe prikazu je \n .reset archaeology <jmeno>");
+        SendSysMessage("Syntax:\n.reset archaeology <name>");
         SetSentErrorMessage(true);
         return false;
     }
@@ -4605,7 +4605,7 @@ bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
     {
         if (HasLowerSecurity(target, 0)) // Security Check
             return false;
-        SendSysMessage("Hrac musi byt offline!");
+        SendSysMessage("The player has to be offline!");
         SetSentErrorMessage(true);
         return false;
     }
@@ -4624,7 +4624,7 @@ bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
         }
         else
         {
-            SendSysMessage("Hrac nema zadny aktivni projekt.");
+            SendSysMessage("The player doesn't have any active research project");
             SetSentErrorMessage(true);
             return false;
         }
@@ -4632,11 +4632,11 @@ bool ChatHandler::HandleResetArchaeologyCommand(const char* args)
         if (counter >= 10) // if is active list > 10.. continue
         {
             CharacterDatabase.PExecute("UPDATE character_research_project SET active = 0 WHERE guid = %u",GUID_LOPART(pguid));
-            PSendSysMessage("Hotovo, hrac byl resetovan.");
+            PSendSysMessage("Done, research projects has been reset.");
         }
-        else // if not.. fuck off
+        else
         {
-            SendSysMessage("Hrac je podvodnik, takze Fuck Off :-P");
+            SendSysMessage("Player doesn't meet research project reset conditions, this command can't do anything for him.");
             SetSentErrorMessage(true);
             return false;
         }
