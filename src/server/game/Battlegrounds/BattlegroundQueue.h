@@ -120,12 +120,18 @@ class BattlegroundQueue
         //one selection pool for horde, other one for alliance
         SelectionPool m_SelectionPools[BG_TEAMS_COUNT];
 
+
+
+        void setTwink(uint8 twink) {m_twink = twink;}
+
     private:
 
         bool InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * bg, uint32 side);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
+
+        uint8 m_twink;
 };
 
 /*
