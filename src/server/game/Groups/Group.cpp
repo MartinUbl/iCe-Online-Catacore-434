@@ -1870,9 +1870,6 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
 
     BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
 
-
-    uint8 twink = GetFirstMember()->getSource()->GetTwinkType();
-
     // check every member of the group to be able to join
     memberscount = 0;
     for (GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next(), ++memberscount)
@@ -1909,10 +1906,6 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         // check if someone in party is using dungeon system
         if (member->isUsingLfg())
             return ERR_LFG_CANT_USE_BATTLEGROUND;
-        // player has set different value for flag PLAYER_FLAGS_NO_XP_GAIN than a leader
-        uint8 tw = member->GetTwinkType();
-        if (tw != twink)
-            return ERR_BATTLEGROUND_JOIN_XP_GAIN;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...

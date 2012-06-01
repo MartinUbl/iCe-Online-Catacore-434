@@ -78,11 +78,11 @@ class BattlegroundMgr
 
         /* Battleground queues */
         //these queues are instantiated when creating BattlegroundMrg
-        BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES][MAX_BATTLEGROUND_TW_ID+1]; // public, because we need to access them in BG handler code
+        BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES]; // public, because we need to access them in BG handler code
 
-        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_TW_ID+1];
+        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID];
 
-        void ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id, uint8 twink);
+        void ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id);
         uint32 GetMaxRatingDifference() const;
         uint32 GetRatingDiscardTimer()  const;
         uint32 GetPrematureFinishTime() const;
