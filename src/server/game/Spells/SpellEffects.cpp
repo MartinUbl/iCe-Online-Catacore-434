@@ -2093,6 +2093,90 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->ModifyPower(POWER_ENERGY, -1);
                     return;
                 }
+                case 82674: // Teleport With Error
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    switch (urand(1,25))
+                    {
+                        case 1: // Silithus - Hive'Zora
+                            m_caster->ToPlayer()->TeleportTo(1, -7423.328125f, 1825.405273f, -34.175117f, 3.881345f);
+                            break;
+                        case 2: // Duskwood - The Darken Bank
+                            m_caster->ToPlayer()->TeleportTo(0, -10162.260742f, 328.837677f, 28.624191f, 4.182609f);
+                            break;
+                        case 3: // Anywhere in Wetlands
+                            m_caster->ToPlayer()->TeleportTo(0, 4575.687500f, -3264.132324f, 175.662460f, 4.580755f);
+                            break;
+                        case 4: // Desolace - Slitherblade Shore
+                            m_caster->ToPlayer()->TeleportTo(1, -220.936539f, 2773.268799f, 4.103652f, 3.592412f);
+                            break;
+                        case 5: // Ungoro - Golakka Hot Springs
+                            m_caster->ToPlayer()->TeleportTo(1, -7361.037598f, -695.695496f, -269.397675f, 4.109206f);
+                            break;
+                        case 6: // Badlands - Crypt
+                            m_caster->ToPlayer()->TeleportTo(0, 6569.775879f, -3485.206787f, 313.996948f, 1.531060f);
+                            break;
+                        case 7: // Western Plaguelands - Mardenholde Keep
+                            m_caster->ToPlayer()->TeleportTo(0, 2938.456299f, -1399.236328f, 184.953110f, 4.183212f);
+                            break;
+                        case 8: // Tanaris - Steamwheedle Port
+                            m_caster->ToPlayer()->TeleportTo(1, -6732.344238f, -4744.461426f, 10.367676f, 3.820166f);
+                            break;
+                        case 9: // Badlands - Fuselight-by-the-Sea
+                            m_caster->ToPlayer()->TeleportTo(0, -6646.642578f, -4819.053711f, 9.158126f, 4.737045f);
+                            break;
+                        case 10: // Anywhere in Hellfire Peninsula
+                            m_caster->ToPlayer()->TeleportTo(530, -127.998326f, 512.378113f, -31.104742f, 2.026362f);
+                            break;
+                        case 11: // Nothern Barrens - Fray Island
+                            m_caster->ToPlayer()->TeleportTo(1, -1698.633911f, -4279.546875f, 11.451643f, 0.264871f);
+                            break;
+                        case 12: // Tanaris - Lost Rigger Cove
+                            m_caster->ToPlayer()->TeleportTo(1, -8079.051758f, -5089.977539f, 28.107094f, 5.152199f);
+                            break;
+                        case 13: // Anywhere in Felwood
+                            m_caster->ToPlayer()->TeleportTo(1, 5981.353027f, -1447.957642f, 434.463440f, 1.400303f);
+                            break;
+                        case 14: // Moonglade - Nighthaven
+                            m_caster->ToPlayer()->TeleportTo(1, 7766.967773f, -2434.168457f, 487.532715f, 6.089598f);
+                            break;
+                        case 15: // Anywhere in Western Plaguelands
+                            m_caster->ToPlayer()->TeleportTo(0, 2333.879395f, -1779.823486f, 96.284035f, 1.334569f);
+                            break;
+                        case 16: // Anywhere in Nothern Stranglethorn
+                            m_caster->ToPlayer()->TeleportTo(0, -12889.212891f, -44.755123f, 20.455288f, 2.872535f);
+                            break;
+                        case 17: // Badlands - Scar of the Worldbreaker
+                            m_caster->ToPlayer()->TeleportTo(0, -7003.808105f, -2646.0f, 301.0f, 0.191165f);
+                            break;
+                        case 18: // Anywhere in Arathi Highlands
+                            m_caster->ToPlayer()->TeleportTo(0, -1161.0f, -2824.0f, 54.0f, 3.172512f);
+                            break;
+                        case 19: // Anywhere in Blasted Lands
+                            m_caster->ToPlayer()->TeleportTo(0, -11846, -2419, 26, 4.817215f);
+                            break;
+                        case 20: // Cape of the Stranglethorn - Janeiro's Point
+                            m_caster->ToPlayer()->TeleportTo(0, -14191, 711, 40, 2.142116f);
+                            break;
+                        case 21: // Nothern Barrens - Near Crossroad
+                            m_caster->ToPlayer()->TeleportTo(1, -299, -2801, 93, 2.263477f);
+                            break;
+                        case 22: // Searing Gore - Iron Summit
+                            m_caster->ToPlayer()->TeleportTo(0,-7095.874023f, -1201.917114f, 354.192505f, 6.186895f);
+                            break;
+                        case 23: // Anywhere in Wetlands
+                            m_caster->ToPlayer()->TeleportTo(0 ,-4005, -1327, 146, 2.980112f);
+                            break;
+                        case 24: // Anywhere in Blasted Lands
+                            m_caster->ToPlayer()->TeleportTo(0, -11948, -3559, 219, 6.252136f);
+                            break;
+                        case 25: // Dire Maul
+                            m_caster->ToPlayer()->TeleportTo(1, -3660, 1092, 220, 3.053623f);
+                            break;
+                    }
+                    break;
+                }
             }
 
             break;
