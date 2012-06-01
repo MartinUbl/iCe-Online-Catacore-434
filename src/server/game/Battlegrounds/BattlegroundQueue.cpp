@@ -149,8 +149,6 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
 
     ginfo->Players.clear();
 
-    int twink = leader->GetTwinkType();
-
     //compute index (if group is premade or joined a rated match) to queues
     uint32 index = 0;
     if (!isRated && !isPremade)
