@@ -3906,6 +3906,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 77486: // Shadow Orb Power (disable spell proc, done in other way)
             spellInfo->Effect[0] = 0;
             break;
+        case 24576: // Chromatic Mount (disable slow fall effect)
+            spellInfo->Effect[2] = 0;
+            break;
         case 44543: //Fingers of Frost rank 1
             spellInfo->procChance = 7;
             spellInfo->EffectSpellClassMask[0] = flag96(0x4088, 0x1000, 0x802A0);
