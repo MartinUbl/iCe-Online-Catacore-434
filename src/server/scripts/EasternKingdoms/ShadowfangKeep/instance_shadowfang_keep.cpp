@@ -16,199 +16,166 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Instance_Shadowfang_Keep
-SD%Complete: 90
-SDComment:
-SDCategory: Shadowfang Keep
-EndScriptData */
-
 #include "ScriptPCH.h"
-#include "shadowfang_keep.h"
 
-#define MAX_ENCOUNTER              4
-
-enum eEnums
+enum data
 {
-    SAY_BOSS_DIE_AD         = -1033007,
-    SAY_BOSS_DIE_AS         = -1033008,
-    SAY_ARCHMAGE            = -1033009,
-
-    NPC_ASH                 = 3850,
-    NPC_ADA                 = 3849,
-    NPC_ARCHMAGE_ARUGAL     = 4275,
-    NPC_ARUGAL_VOIDWALKER   = 4627,
-
-    GO_COURTYARD_DOOR       = 18895,                        //door to open when talking to NPC's
-    GO_SORCERER_DOOR        = 18972,                        //door to open when Fenrus the Devourer
-    GO_ARUGAL_DOOR          = 18971,                        //door to open when Wolf Master Nandos
-
-    SPELL_ASHCROMBE_TELEPORT    = 15742
+    DATA_BARON_ASHBURY = 0,
+    DATA_BARON_SILVERLAINE,
+    DATA_COMMANDER_SPRINGVALE,
+    DATA_LORD_VALDEN,
+    DATA_LORD_GODFREY
 };
 
-const Position SpawnLocation[] =
-{
-    {-148.199f,2165.647f,128.448f,1.026f},
-    {-153.110f,2168.620f,128.448f,1.026f},
-    {-145.905f,2180.520f,128.448f,4.183f},
-    {-140.794f,2178.037f,128.448f,4.090f},
-    {-138.640f,2170.159f,136.577f,2.737f}
-};
+#define MAX_ENCOUNTER 5
+
 class instance_shadowfang_keep : public InstanceMapScript
 {
 public:
     instance_shadowfang_keep() : InstanceMapScript("instance_shadowfang_keep", 33) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    struct instance_shadowfang_keep_InstanceScript : public InstanceScript
     {
-        return new instance_shadowfang_keep_InstanceMapScript(pMap);
-    }
+        instance_shadowfang_keep_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
-    struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
-    {
-        instance_shadowfang_keep_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string str_data;
-
-        uint64 uiAshGUID;
-        uint64 uiAdaGUID;
-        uint64 uiArchmageArugalGUID;
-
-        uint64 DoorCourtyardGUID;
-        uint64 DoorSorcererGUID;
-        uint64 DoorArugalGUID;
-
-        uint8 uiPhase;
-        uint16 uiTimer;
+        uint64 Baron_AshburyGUID;
+        uint64 Baron_SilverlaineGUID;
+        uint64 Commander_SpringvaleGUID;
+        uint64 Lord_ValdenGUID;
+        uint64 Lord_GodfreyGUID;
 
         void Initialize()
         {
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
 
-            uiAshGUID = 0;
-            uiAdaGUID = 0;
-            uiArchmageArugalGUID = 0;
-
-            DoorCourtyardGUID = 0;
-            DoorSorcererGUID = 0;
-            DoorArugalGUID = 0;
-
-            uiPhase = 0;
-            uiTimer = 0;
+            Baron_AshburyGUID = 0;
+            Baron_SilverlaineGUID = 0;
+            Commander_SpringvaleGUID = 0;
+            Lord_ValdenGUID = 0;
+            Lord_GodfreyGUID = 0;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            switch(pCreature->GetEntry())
+            return false;
+        }
+
+        void OnCreatureCreate(Creature* pCreature, bool add)
+        {
+            if (!add) // for safity
+                return;
+
+            switch (pCreature->GetEntry())
             {
-                case NPC_ASH: uiAshGUID = pCreature->GetGUID(); break;
-                case NPC_ADA: uiAdaGUID = pCreature->GetGUID(); break;
-                case NPC_ARCHMAGE_ARUGAL: uiArchmageArugalGUID = pCreature->GetGUID(); break;
+                case 46962: // Baron Ashbury
+                    Baron_AshburyGUID = pCreature->GetGUID();
+                    break;
+                case 3887: // Baron Silverlaine
+                    Baron_SilverlaineGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_BARON_ASHBURY] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 4278: // Commander Springvale
+                    Commander_SpringvaleGUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_BARON_SILVERLAINE] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 46963: // Lord Walden
+                    Lord_ValdenGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_COMMANDER_SPRINGVALE] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 46964: // Lord Godfrey
+                    Lord_GodfreyGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_LORD_VALDEN] == DONE)
+                        pCreature->setFaction(14);
+                    break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
+        void OnGameObjectCreate(GameObject* pGO, bool add)
         {
-            switch(pGo->GetEntry())
-            {
-                case GO_COURTYARD_DOOR:
-                    DoorCourtyardGUID = pGo->GetGUID();
-                    if (m_auiEncounter[0] == DONE)
-                        HandleGameObject(NULL, true, pGo);
-                    break;
-                case GO_SORCERER_DOOR:
-                    DoorSorcererGUID = pGo->GetGUID();
-                    if (m_auiEncounter[2] == DONE)
-                        HandleGameObject(NULL, true, pGo);
-                    break;
-                case GO_ARUGAL_DOOR:
-                    DoorArugalGUID = pGo->GetGUID();
-                    if (m_auiEncounter[3] == DONE)
-                        HandleGameObject(NULL, true, pGo);
-                    break;
-            }
+            if (!add)
+                return;
         }
 
-        void DoSpeech()
+        uint64 GetData64(uint32 type)
         {
-            Creature* pAda = instance->GetCreature(uiAdaGUID);
-            Creature* pAsh = instance->GetCreature(uiAshGUID);
-
-            if (pAda && pAda->isAlive() && pAsh && pAsh->isAlive())
+            switch (type)
             {
-                DoScriptText(SAY_BOSS_DIE_AD,pAda);
-                DoScriptText(SAY_BOSS_DIE_AS,pAsh);
+                case DATA_BARON_ASHBURY:
+                    return Baron_AshburyGUID;
+                case DATA_BARON_SILVERLAINE:
+                    return Baron_SilverlaineGUID;
+                case DATA_COMMANDER_SPRINGVALE:
+                    return Commander_SpringvaleGUID;
+                case DATA_LORD_VALDEN:
+                    return Lord_ValdenGUID;
+                case DATA_LORD_GODFREY:
+                    return Lord_GodfreyGUID;
             }
+            return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
-                case TYPE_FREE_NPC:
-                    if (data == DONE)
-                        DoUseDoorOrButton(DoorCourtyardGUID);
-                    m_auiEncounter[0] = data;
-                    break;
-                case TYPE_RETHILGORE:
-                    if (data == DONE)
-                        DoSpeech();
-                    m_auiEncounter[1] = data;
-                    break;
-                case TYPE_FENRUS:
-                    switch(data)
-                    {
-                        case DONE:
-                            uiTimer = 1000;
-                            uiPhase = 1;
-                            break;
-                        case 7:
-                            DoUseDoorOrButton(DoorSorcererGUID);
-                            break;
-                    }
-                    m_auiEncounter[2] = data;
-                    break;
-                case TYPE_NANDOS:
-                    if (data == DONE)
-                        DoUseDoorOrButton(DoorArugalGUID);
-                    m_auiEncounter[3] = data;
+                case DATA_BARON_ASHBURY:
+                case DATA_BARON_SILVERLAINE:
+                case DATA_COMMANDER_SPRINGVALE:
+                case DATA_LORD_VALDEN:
+                case DATA_LORD_GODFREY:
+                    auiEncounter[type] = data;
                     break;
             }
 
+            if (auiEncounter[DATA_BARON_ASHBURY] == DONE) // Asbury
+                if (Creature* silverlaine = this->instance->GetCreature(Baron_SilverlaineGUID))
+                    silverlaine->setFaction(14);
+            if (auiEncounter[DATA_BARON_SILVERLAINE] == DONE) // Silverlaine
+                if (Creature* springvale = this->instance->GetCreature(Commander_SpringvaleGUID))
+                    springvale->setFaction(14);
+            if (auiEncounter[DATA_COMMANDER_SPRINGVALE] == DONE) // Springvale
+                if (Creature* valden = this->instance->GetCreature(Lord_ValdenGUID))
+                    valden->setFaction(14);
+            if (auiEncounter[DATA_LORD_VALDEN] == DONE) // Valden
+                if (Creature* godfrey = this->instance->GetCreature(Lord_GodfreyGUID))
+                    godfrey->setFaction(14);
+
             if (data == DONE)
             {
-                OUT_SAVE_INST_DATA;
-
                 std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
-
-                str_data = saveStream.str();
+                saveStream << auiEncounter[DATA_BARON_ASHBURY];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
 
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
         }
 
-        uint32 GetData(uint32 type)
-        {
-            switch(type)
-            {
-                case TYPE_FREE_NPC:
-                    return m_auiEncounter[0];
-                case TYPE_RETHILGORE:
-                    return m_auiEncounter[1];
-                case TYPE_FENRUS:
-                    return m_auiEncounter[2];
-                case TYPE_NANDOS:
-                    return m_auiEncounter[3];
-            }
-            return 0;
-        }
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
 
-        std::string GetSaveData()
+       std::string GetSaveData()
         {
-            return str_data;
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << auiEncounter[DATA_BARON_ASHBURY];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
         }
 
         void Load(const char* in)
@@ -222,61 +189,35 @@ public:
             OUT_LOAD_INST_DATA(in);
 
             std::istringstream loadStream(in);
-            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            {
-                if (m_auiEncounter[i] == IN_PROGRESS)
-                    m_auiEncounter[i] = NOT_STARTED;
-            }
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-
-        void Update(uint32 uiDiff)
-        {
-            if (GetData(TYPE_FENRUS) != DONE)
-                return;
-
-            Creature* pArchmage = instance->GetCreature(uiArchmageArugalGUID);
-            Creature* pSummon = NULL;
-
-            if (!pArchmage || !pArchmage->isAlive())
-                return;
-
-            if (uiPhase)
-            {
-                if (uiTimer <= uiDiff)
-                {
-                    switch(uiPhase)
-                    {
-                        case 1:
-                            pSummon = pArchmage->SummonCreature(pArchmage->GetEntry(),SpawnLocation[4],TEMPSUMMON_TIMED_DESPAWN,10000);
-                            pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                            pSummon->SetReactState(REACT_DEFENSIVE);
-                            pSummon->CastSpell(pSummon,SPELL_ASHCROMBE_TELEPORT,true);
-                            DoScriptText(SAY_ARCHMAGE,pSummon);
-                            uiTimer = 2000;
-                            uiPhase = 2;
-                            break;
-                        case 2:
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[0],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[1],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[2],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
-                            pArchmage->SummonCreature(NPC_ARUGAL_VOIDWALKER,SpawnLocation[3],TEMPSUMMON_CORPSE_TIMED_DESPAWN,60000);
-                            uiPhase = 0;
-                            break;
-
-                    }
-                } else uiTimer -= uiDiff;
-            }
-        }
     };
 
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_shadowfang_keep_InstanceScript(map);
+    }
 };
-
 
 void AddSC_instance_shadowfang_keep()
 {
     new instance_shadowfang_keep();
 }
+
+
+/* SQL 
+* UPDATE instance_template SET script='instance_shadowfang_keep' WHERE map=33;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (3887, 4278, 46963, 46964, 388711, 427811, 469631, 469641);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4696298, 46962, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (388798, 3887, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (427898, 4278, 6, 6, 34, 2, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4696398, 46963, 6, 6, 34, 3, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4696498, 46964, 6, 6, 34, 4, 3, 'instance script');
+*/

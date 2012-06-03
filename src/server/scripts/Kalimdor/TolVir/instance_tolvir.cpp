@@ -1,5 +1,6 @@
-/* 
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+/*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,156 +19,150 @@
 #include "ScriptPCH.h"
 #include "tolvir.h"
 
-#define ENCOUNTERS 5
+enum data
+{
+    DATA_GENERAL_HUSAM = 0,
+    DATA_LOCKMAW,
+    DATA_HIGH_PROPHET_BARIM,
+    DATA_SIAMAT
+};
 
-/* Boss Encounters
-   General Husam
-   High Prophet Barim
-   Lockmaw
-   Augh
-   Siamat
- */
+#define MAX_ENCOUNTER 4
 
 class instance_lost_city_of_the_tolvir : public InstanceMapScript
 {
 public:
     instance_lost_city_of_the_tolvir() : InstanceMapScript("instance_lost_city_of_the_tolvir", 755) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    struct instance_lost_city_of_the_tolvir_InstanceScript : public InstanceScript
     {
-        return new instance_lost_city_of_the_tolvir_InstanceMapScript(map);
-    }
+        instance_lost_city_of_the_tolvir_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
-    struct instance_lost_city_of_the_tolvir_InstanceMapScript: public InstanceScript
-    {
-        instance_lost_city_of_the_tolvir_InstanceMapScript(InstanceMap* map) : InstanceScript(map) {}
+        uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint32 uiEncounter[ENCOUNTERS];
-
-        uint64 uiGeneralHusam;
-        uint64 uiHighProphetBarim;
-        uint64 uiLockmaw;
-        uint64 uiAugh;
-        uint64 uiSiamat;
-        uint64 uiTeamInInstance;
+        uint64 General_HusamGUID;
+        uint64 LockmawGUID;
+        uint64 High_Prophet_BarimGUID;
+        uint64 SiamatGUID;
 
         void Initialize()
         {
-            uiGeneralHusam = 0;
-            uiHighProphetBarim = 0;
-            uiLockmaw = 0;
-            uiAugh = 0;
-            uiSiamat = 0;
-            
-            for(uint8 i=0 ; i<ENCOUNTERS; ++i)
-                uiEncounter[i] = NOT_STARTED;
- 
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
+
+            General_HusamGUID = 0;
+            LockmawGUID = 0;
+            High_Prophet_BarimGUID = 0;
+            SiamatGUID = 0;
         }
-    
-        bool IsEncounterInProgress() const
+
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            for(uint8 i=0; i<ENCOUNTERS; ++i)
-            {
-                if (uiEncounter[i] == IN_PROGRESS)
-                    return true;
-            }            
             return false;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool )
+        void OnCreatureCreate(Creature* pCreature, bool add)
         {
-            switch(pCreature->GetEntry())
+            if (!add) // for safity
+                return;
+
+            switch (pCreature->GetEntry())
             {
-                 case BOSS_GENERAL_HUSAM:
-                     uiGeneralHusam = pCreature->GetGUID();
-                     break;
-                 case BOSS_HIGH_PROPHET_BARIM:
-                     uiHighProphetBarim = pCreature->GetGUID();
-                     break;
-                 case BOSS_LOCKMAW:
-                     uiLockmaw = pCreature->GetGUID();
-                     break;
-                 case BOSS_AUGH:
-                     uiAugh = pCreature->GetGUID();
-                     break;
-                 case BOSS_SIAMAT:
-                     uiSiamat = pCreature->GetGUID();
-                     break;
+                case 44577: // General Husam
+                    General_HusamGUID = pCreature->GetGUID();
+                    break;
+                case 43614: // Lockmaw
+                    LockmawGUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_GENERAL_HUSAM] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 43612: // High Prophet Barim
+                    High_Prophet_BarimGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_LOCKMAW] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 44819: // Siamat
+                    SiamatGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_HIGH_PROPHET_BARIM] == DONE)
+                        pCreature->setFaction(14);
+                    break;
             }
         }
 
-        uint64 getData64(uint32 identifier)
+        void OnGameObjectCreate(GameObject* pGO, bool add)
         {
-            switch(identifier)
+            if (!add)
+                return;
+        }
+
+        uint64 GetData64(uint32 type)
+        {
+            switch (type)
             {
-                case DATA_GENERAL_HUSAM: 
-                    return uiGeneralHusam;
-                case DATA_HIGH_PROPHET_BARIM:
-                    return uiHighProphetBarim;
+                case DATA_GENERAL_HUSAM:
+                    return General_HusamGUID;
                 case DATA_LOCKMAW:
-                    return uiLockmaw;
-                case DATA_AUGH:
-                    return uiAugh;
+                    return LockmawGUID;
+                case DATA_HIGH_PROPHET_BARIM:
+                    return High_Prophet_BarimGUID;
                 case DATA_SIAMAT:
-                    return uiSiamat;
+                    return SiamatGUID;
             }
             return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
-                case DATA_GENERAL_HUSAM_EVENT:
-                    uiEncounter[0] = data;
-                    break;
-                case DATA_HIGH_PROPHET_BARIM_EVENT:
-                    uiEncounter[1] = data;
-                    break;
-                case DATA_LOCKMAW_EVENT:
-                    uiEncounter[2] = data;
-                    break;
-                case DATA_AUGH_EVENT:
-                    uiEncounter[3] = data;
-                    break;
-                case DATA_SIAMAT_EVENT:
-                    uiEncounter[4] = data;
+                case DATA_GENERAL_HUSAM:
+                case DATA_LOCKMAW:
+                case DATA_HIGH_PROPHET_BARIM:
+                case DATA_SIAMAT:
+                    auiEncounter[type] = data;
                     break;
             }
 
-           if (data == DONE)
-               SaveToDB();
-        }
+            if (auiEncounter[DATA_GENERAL_HUSAM] == DONE) // General
+                if (Creature* lockmaw = this->instance->GetCreature(LockmawGUID))
+                    lockmaw->setFaction(14);
+            if (auiEncounter[DATA_LOCKMAW] == DONE) // Lockmaw
+                if (Creature* barim = this->instance->GetCreature(High_Prophet_BarimGUID))
+                    barim->setFaction(14);
+            if (auiEncounter[DATA_HIGH_PROPHET_BARIM] == DONE) // Barim
+                if (Creature* siamat = this->instance->GetCreature(SiamatGUID))
+                    siamat->setFaction(14);
 
-        uint32 GetData(uint32 type)
-        {
-            switch(type)
+            if (data == DONE)
             {
-                case DATA_GENERAL_HUSAM_EVENT:
-                    return uiEncounter[0];
-                case DATA_HIGH_PROPHET_BARIM_EVENT:
-                    return uiEncounter[1];
-                case DATA_LOCKMAW_EVENT:
-                    return uiEncounter[2];
-                case DATA_AUGH_EVENT:
-                    return uiEncounter[3];
-                case DATA_SIAMAT_EVENT:
-                    return uiEncounter[4];
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[DATA_GENERAL_HUSAM];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
             }
-            return 0;
         }
 
-        std::string GetSaveData()
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
+
+       std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
 
-            std::string str_data;
             std::ostringstream saveStream;
-            saveStream << "L V" << uiEncounter[0] << " " << uiEncounter[1]  << " " << uiEncounter[2]  << " " << uiEncounter[3] << " " << uiEncounter[4];
-            str_data = saveStream.str();
+            saveStream << auiEncounter[DATA_GENERAL_HUSAM];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
 
             OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
+            return saveStream.str();
         }
 
         void Load(const char* in)
@@ -180,33 +175,35 @@ public:
 
             OUT_LOAD_INST_DATA(in);
 
-            char dataHead1, dataHead2;
-            uint16 data0, data1, data2, data3, data4;
-
             std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
 
-            if (dataHead1 == 'L' && dataHead2 == 'V')
-            {
-                uiEncounter[0] = data0;
-                uiEncounter[1] = data1;
-                uiEncounter[2] = data2;
-                uiEncounter[3] = data3;
-                uiEncounter[4] = data4;
-
-                for(uint8 i=0; i<ENCOUNTERS; ++i)
-                    if (uiEncounter[i] == IN_PROGRESS)
-                        uiEncounter[i] = NOT_STARTED;
-            }
-            else OUT_LOAD_INST_DATA_FAIL;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_lost_city_of_the_tolvir_InstanceScript(map);
+    }
 };
 
 void AddSC_instance_lost_city_of_the_tolvir()
 {
     new instance_lost_city_of_the_tolvir();
 }
+
+
+/* SQL 
+* UPDATE instance_template SET script='instance_lost_city_of_the_tolvir' WHERE map=755;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (43612, 43614, 44819, 48951, 49043, 51088);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4457798, 44577, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4361407, 43614, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4361298, 43612, 6, 6, 34, 2, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4481998, 44819, 6, 6, 34, 3, 3, 'instance script');
+*/

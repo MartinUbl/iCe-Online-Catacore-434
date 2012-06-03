@@ -1,214 +1,195 @@
- /*
-* Copyright (C) 2010-2011 SkyFire <http://www.projectskyfire.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptPCH.h"
 #include "halls_of_origination.h"
 
-#define ENCOUNTERS 7
+enum data
+{
+    DATA_TEMPLE_GUARDIAN_ANHUUR = 0,
+    DATA_ANRAPHET,
+    DATA_ISISET,
+    DATA_AMMUNAE,
+    DATA_SETESH,
+    DATA_RAJH
+};
 
-/* Boss Encounters
-   Temple Guardian Anhuur
-   Earthrager Ptah
-   Anraphet
-   Isiset
-   Ammunae
-   Setesh
-   Rajh
-*/
+#define MAX_ENCOUNTER 6
 
 class instance_halls_of_origination : public InstanceMapScript
 {
 public:
     instance_halls_of_origination() : InstanceMapScript("instance_halls_of_origination", 644) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    struct instance_halls_of_origination_InstanceScript : public InstanceScript
     {
-        return new instance_halls_of_origination_InstanceMapScript(map);
-    }
+        instance_halls_of_origination_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
-    struct instance_halls_of_origination_InstanceMapScript: public InstanceScript
-    {
-        instance_halls_of_origination_InstanceMapScript(InstanceMap *map) : InstanceScript(map) { }
-        
-        uint32 uiEncounter[ENCOUNTERS];
+        uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint64 uiTempleGuardianAnhuur;
-        uint64 uiEarthragerPtah;
-        uint64 uiAnraphet;
-        uint64 uiIsiset;
-        uint64 uiAmmunae;
-        uint64 uiSetesh;
-        uint64 uiRajh;
-        uint64 OriginationElevatorGUID;
-        uint64 uiTeamInInstance;
-      
+        uint64 Temple_Guardian_AnhuurGUID;
+        uint64 AnraphetGUID;
+        uint64 IsisetGUID;
+        uint64 AmmunaeGUID;
+        uint64 SeteshGUID;
+        uint64 RajhGUID;
+
         void Initialize()
         {
-            uiTempleGuardianAnhuur = 0;
-            uiEarthragerPtah = 0;
-            uiAnraphet = 0;
-            uiIsiset = 0;
-            uiAmmunae = 0;
-            uiSetesh = 0;
-            uiRajh = 0;
-            OriginationElevatorGUID = 0;
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
 
-            for(uint8 i=0; i<ENCOUNTERS; ++i)
-                uiEncounter[i] = NOT_STARTED;
+            Temple_Guardian_AnhuurGUID = 0;
+            AnraphetGUID = 0;
+            IsisetGUID = 0;
+            AmmunaeGUID = 0;
+            SeteshGUID = 0;
+            RajhGUID = 0;
         }
 
-        bool IsEncounterInProgress() const
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            for(uint8 i=0; i<ENCOUNTERS; ++i)
-            {
-                if (uiEncounter[i] == IN_PROGRESS)
-                    return true;
-            }
-
             return false;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool)
+        void OnCreatureCreate(Creature* pCreature, bool add)
         {
-            switch(pCreature->GetEntry())
+            if (!add) // for safity
+                return;
+
+            switch (pCreature->GetEntry())
             {
-                case BOSS_TEMPLE_GUARDIAN_ANHUUR:
-                    uiTempleGuardianAnhuur = pCreature->GetGUID();
+                case 39425: // Temple Guardian Anhuur
+                    Temple_Guardian_AnhuurGUID = pCreature->GetGUID();
                     break;
-                case BOSS_EARTHRAGER_PTAH:
-                    uiEarthragerPtah = pCreature->GetGUID();
+                case 39788: // Anraphet
+                    AnraphetGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_ANRAPHET:
-                    uiAnraphet = pCreature->GetGUID();
+                case 39587: // Isiset
+                    IsisetGUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ANRAPHET] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_ISISET:
-                    uiIsiset = pCreature->GetGUID();
+                case 39731: // Ammunae
+                    AmmunaeGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ANRAPHET] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_AMMUNAE:
-                    uiAmmunae = pCreature->GetGUID();
+                case 39732: // Setesh
+                    SeteshGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ANRAPHET] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_SETESH:
-                    uiSetesh = pCreature->GetGUID();
-                case BOSS_RAJH:
-                    uiRajh = pCreature->GetGUID();
+                case 39378: // Rajh
+                    RajhGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ANRAPHET] == DONE)
+                        pCreature->setFaction(14);
+                    break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* pGO, bool add)
         {
-            switch (go->GetEntry()) /* Elevator active switch to second level. Need more info on Id */
-            {
-                case GO_ORIGINATION_ELEVATOR:
-                     OriginationElevatorGUID = go->GetGUID();
-                     if (GetData(DATA_TEMPLE_GUARDIAN_ANHUUR) == DONE && GetData(DATA_ANRAPHET) == DONE && GetData(DATA_EARTHRAGER_PTAH) == DONE)
-                     {
-                         go->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
-                         go->SetGoState(GO_STATE_READY);
-                     }
-                     break;
-            }
+            if (!add)
+                return;
         }
 
-        uint64 GetData64(uint32 identifier)
+        uint64 GetData64(uint32 type)
         {
-            switch(identifier)
+            switch (type)
             {
                 case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    return uiTempleGuardianAnhuur;
-                case DATA_EARTHRAGER_PTAH:
-                    return uiEarthragerPtah;
+                    return Temple_Guardian_AnhuurGUID;
                 case DATA_ANRAPHET:
-                    return uiAnraphet;
+                    return AnraphetGUID;
                 case DATA_ISISET:
-                    return uiIsiset;
+                    return IsisetGUID;
                 case DATA_AMMUNAE:
-                    return uiAmmunae;
+                    return AmmunaeGUID;
                 case DATA_SETESH:
-                    return uiSetesh;
+                    return SeteshGUID;
                 case DATA_RAJH:
-                    return uiRajh;
+                    return RajhGUID;
             }
             return 0;
         }
 
-        void SetData(uint32 type,uint32 data)
+        void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    uiEncounter[0] = data;
-                    break;
-                case DATA_EARTHRAGER_PTAH:
-                    uiEncounter[1] = data;
-                    break;
                 case DATA_ANRAPHET:
-                    uiEncounter[2] = data;
-                    break;
                 case DATA_ISISET:
-                    uiEncounter[3] = data;
-                    break;
                 case DATA_AMMUNAE:
-                    uiEncounter[4] = data;
-                    break;
                 case DATA_SETESH:
-                    uiEncounter[5] = data;
-                    break;
                 case DATA_RAJH:
-                    uiEncounter[6] = data;
+                    auiEncounter[type] = data;
                     break;
             }
-         
-         if (data == DONE)
-             SaveToDB();
-        }
 
-        uint32 GetData(uint32 type)
-        {
-            switch(type)
+            if (auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR] == DONE) // Temple
+                if (Creature* anraphet = this->instance->GetCreature(AnraphetGUID))
+                    anraphet->setFaction(14);
+            if (auiEncounter[DATA_ANRAPHET] == DONE) // Anraphet
             {
-                case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    return uiEncounter[0];
-                case DATA_EARTHRAGER_PTAH:
-                    return uiEncounter[1];
-                case DATA_ANRAPHET:
-                    return uiEncounter[2];
-                case DATA_ISISET:
-                    return uiEncounter[3];
-                case DATA_AMMUNAE:
-                    return uiEncounter[4];
-                case DATA_SETESH:
-                    return uiEncounter[5];
-                case DATA_RAJH:
-                    return uiEncounter[6];
+                if (Creature* isiset = this->instance->GetCreature(IsisetGUID))
+                    isiset->setFaction(14);
+                if (Creature* ammunae = this->instance->GetCreature(AmmunaeGUID))
+                    ammunae->setFaction(14);
+                if (Creature* setesh = this->instance->GetCreature(SeteshGUID))
+                    setesh->setFaction(14);
+                if (Creature* rajh = this->instance->GetCreature(RajhGUID))
+                    rajh->setFaction(14);
             }
-            return 0;
+
+            if (data == DONE)
+            {
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
         }
 
-        std::string GetSaveData()
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
+
+       std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
 
-            std::string str_data;
             std::ostringstream saveStream;
-            saveStream << "H O" << uiEncounter[0] << " " << uiEncounter[1]  << " " << uiEncounter[2]  << " " << uiEncounter[3] << " " << uiEncounter[4] << " " << uiEncounter[5] << " " << uiEncounter[6]; 
-            str_data = saveStream.str();
+            saveStream << auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
 
             OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
+            return saveStream.str();
         }
 
         void Load(const char* in)
@@ -221,35 +202,36 @@ public:
 
             OUT_LOAD_INST_DATA(in);
 
-            char dataHead1, dataHead2;
-            uint16 data0, data1, data2, data3, data4, data5, data6;
-
             std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4 >> data5 >> data6;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
 
-            if (dataHead1 == 'H' && dataHead2 == 'O')
-            {
-                uiEncounter[0] = data0;
-                uiEncounter[1] = data1;
-                uiEncounter[2] = data2;
-                uiEncounter[3] = data3;
-                uiEncounter[4] = data4;
-                uiEncounter[5] = data5;
-                uiEncounter[6] = data6;
-
-                for(uint8 i=0; i<ENCOUNTERS; ++i)
-                    if (uiEncounter[i] == IN_PROGRESS)
-                        uiEncounter[i] = NOT_STARTED;
-            }
-            else OUT_LOAD_INST_DATA_FAIL;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_halls_of_origination_InstanceScript(map);
+    }
 };
 
 void AddSC_instance_halls_of_origination()
 {
     new instance_halls_of_origination();
 }
+
+/* SQL 
+* UPDATE instance_template SET script='instance_halls_of_origination' WHERE map=644;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (39788, 39587, 39731, 39732, 39378, 48815, 48710, 48715, 48776, 48902);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3942598, 39425, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3978898, 39788, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3958798, 39587, 6, 6, 34, 2, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3973198, 39731, 6, 6, 34, 3, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3973298, 39732, 6, 6, 34, 4, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (3937898, 39378, 6, 6, 34, 5, 3, 'instance script');
+*/

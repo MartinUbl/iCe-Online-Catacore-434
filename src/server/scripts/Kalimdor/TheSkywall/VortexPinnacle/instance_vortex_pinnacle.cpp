@@ -19,53 +19,84 @@
 #include "ScriptPCH.h"
 #include "vortex_pinnacle.h"
 
-/*
-UPDATE instance_template SET script='instance_vortex_pinnacle' WHERE map=657;
-*/
+enum data
+{
+    DATA_GRAND_VIZIER_ERTAN = 0,
+    DATA_ALTARIUS,
+    DATA_ASAAD
+};
 
-class instance_vortex_pinnacle: public InstanceMapScript
+#define MAX_ENCOUNTER 3
+
+class instance_vortex_pinnacle : public InstanceMapScript
 {
 public:
     instance_vortex_pinnacle() : InstanceMapScript("instance_vortex_pinnacle", 657) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    struct instance_vortex_pinnacle_InstanceScript : public InstanceScript
     {
-        return new instance_vortex_pinnacle_InstanceMapScript(pMap);
-    }
+        instance_vortex_pinnacle_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
-    struct instance_vortex_pinnacle_InstanceMapScript : public InstanceScript
-    {
-        instance_vortex_pinnacle_InstanceMapScript(Map* pMap): InstanceScript(pMap)
-        {
-            Initialize();
-        }
+        uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string str_data;
+        uint64 Grand_Vizier_ErrtanGUID;
+        uint64 AltariusGUID;
+        uint64 AsaadGUID;
 
         void Initialize()
         {
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
+
+            Grand_Vizier_ErrtanGUID = 0;
+            AltariusGUID = 0;
+            AsaadGUID = 0;
         }
 
-        bool IsEncounterInProgress() const
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
             return false;
         }
 
-        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
+        void OnCreatureCreate(Creature* pCreature, bool add)
         {
+            if (!add) // for safity
+                return;
+
+            switch (pCreature->GetEntry())
+            {
+                case 43878: // Grand Vizier Ertan
+                    Grand_Vizier_ErrtanGUID = pCreature->GetGUID();
+                    break;
+                case 43873: // Altairus
+                    AltariusGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_GRAND_VIZIER_ERTAN] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+                case 43875: // Asaad
+                    AsaadGUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ALTARIUS] == DONE)
+                        pCreature->setFaction(14);
+                    break;
+            }
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+        void OnGameObjectCreate(GameObject* pGO, bool add)
         {
+            if (!add)
+                return;
         }
 
-        uint64 GetData64(uint32 identifier)
+        uint64 GetData64(uint32 type)
         {
+            switch (type)
+            {
+                case DATA_GRAND_VIZIER_ERTAN:
+                    return Grand_Vizier_ErrtanGUID;
+                case DATA_ALTARIUS:
+                    return AltariusGUID;
+                case DATA_ASAAD:
+                    return AsaadGUID;
+            }
             return 0;
         }
 
@@ -73,37 +104,51 @@ public:
         {
             switch (type)
             {
-                case TYPE_ERTAN:
-                case TYPE_ALTAIRUS:
-                case TYPE_ASAAD:
-                    m_auiEncounter[type] = data;
-                    break;
-                default:
+                case DATA_GRAND_VIZIER_ERTAN:
+                case DATA_ALTARIUS:
+                case DATA_ASAAD:
+                    auiEncounter[type] = data;
                     break;
             }
 
+            if (auiEncounter[DATA_GRAND_VIZIER_ERTAN] == DONE) // Ertan
+                if (Creature* altar = this->instance->GetCreature(AltariusGUID))
+                    altar->setFaction(14);
+            if (auiEncounter[DATA_ALTARIUS] == DONE) // Altarius
+                if (Creature* asaad = this->instance->GetCreature(AsaadGUID))
+                    asaad->setFaction(14);
+
             if (data == DONE)
             {
-                OUT_SAVE_INST_DATA;
-
                 std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
-
-                str_data = saveStream.str();
+                saveStream << auiEncounter[DATA_GRAND_VIZIER_ERTAN];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
 
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
         }
 
-        uint32 GetData(uint32 type)
-        {
-            return 0;
-        }
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
 
-        std::string GetSaveData()
+       std::string GetSaveData()
         {
-            return str_data;
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << auiEncounter[0];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
         }
 
         void Load(const char* in)
@@ -115,17 +160,35 @@ public:
             }
 
             OUT_LOAD_INST_DATA(in);
+
             std::istringstream loadStream(in);
-            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
+
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as IN_PROGRESS - reset it instead.
-                    m_auiEncounter[i] = NOT_STARTED;
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
+
             OUT_LOAD_INST_DATA_COMPLETE;
         }
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_vortex_pinnacle_InstanceScript(map);
+    }
 };
 
 void AddSC_instance_vortex_pinnacle()
 {
     new instance_vortex_pinnacle();
 }
+
+
+/* SQL 
+* UPDATE instance_template SET script='instance_vortex_pinnacle' WHERE map=657;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (43873, 43875, 43874, 43876);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4387898, 43878, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4387398, 43873, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4387598, 43875, 6, 6, 34, 2, 3, 'instance script');
+*/

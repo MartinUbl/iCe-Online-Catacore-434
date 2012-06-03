@@ -1,162 +1,168 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2006-2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
-#define MAX_ENCOUNTER     4
+enum data
+{
+    DATA_CORBORUS = 0,
+    DATA_SLABHIDE,
+    DATA_OZRUK,
+    DATA_HIGH_PRIESTESS_AZIL
+};
+
+#define MAX_ENCOUNTER 4
 
 class instance_the_stonecore : public InstanceMapScript
 {
 public:
     instance_the_stonecore() : InstanceMapScript("instance_the_stonecore", 725) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    struct instance_the_stonecore_InstanceScript : public InstanceScript
     {
-        return new instance_the_stonecore_InstanceMapScript(map);
-    }
+        instance_the_stonecore_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
-    struct instance_the_stonecore_InstanceMapScript : public InstanceScript
-    {
-        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map) {};
+        uint32 auiEncounter[MAX_ENCOUNTER];
 
-        uint64 uiCorborus;
-        uint64 uiSlabhide;
-        uint64 uiOzruk;
-        uint64 uiHighPriestessAzil;
-        uint32 uiTeamInInstance;
-        uint32 uiEncounter[MAX_ENCOUNTER];
+        uint64 CorborusGUID;
+        uint64 SlabhideGUID;
+        uint64 OzrukGUID;
+        uint64 High_Priestess_AzilGUID;
 
         void Initialize()
         {
-             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                 uiEncounter[i] = NOT_STARTED;
- 
-             uiCorborus = 0;
-             uiSlabhide = 0;
-             uiOzruk = 0;
-             uiHighPriestessAzil = 0;
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
 
+            CorborusGUID = 0;
+            SlabhideGUID = 0;
+            OzrukGUID = 0;
+            High_Priestess_AzilGUID = 0;
         }
 
-        bool IsEncounterInProgress() const
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (uiEncounter[i] == IN_PROGRESS)
-                    return true;
- 
-             return false;
+            return false;
         }
 
-        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
+        void OnCreatureCreate(Creature* pCreature, bool add)
         {
-            Map::PlayerList const &players = instance->GetPlayers();
+            if (!add) // for safity
+                return;
 
-            if (!players.isEmpty())
+            switch (pCreature->GetEntry())
             {
-                if (Player* pPlayer = players.begin()->getSource())
-                    uiTeamInInstance = pPlayer->GetTeam();
-            }
-
-            switch(pCreature->GetEntry())
-            {
-                case BOSS_CORBORUS:
-                    uiCorborus = pCreature->GetGUID();
+                case 43438: // Corborus
+                    CorborusGUID = pCreature->GetGUID();
                     break;
-                case BOSS_SLABHIDE:
-                    uiSlabhide = pCreature->GetGUID();
+                case 43214: // Slabhide
+                    SlabhideGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_CORBORUS] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_OZRUK:
-                    uiOzruk = pCreature->GetGUID();
+                case 42188: // Ozruk
+                    OzrukGUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_SLABHIDE] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                case BOSS_HIGH_PRIESTESS_AZIL:
-                    uiHighPriestessAzil = pCreature->GetGUID();
+                case 42333: // High Priestess Azil
+                    High_Priestess_AzilGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_OZRUK] == DONE)
+                        pCreature->setFaction(14);
                     break;
             }
         }
 
-        uint64 GetData64(uint32 identifier)
+        void OnGameObjectCreate(GameObject* pGO, bool add)
         {
-            switch(identifier)
-            {
-                case DATA_CORBORUS:                    return uiCorborus;
-                case DATA_SLABHIDE:                    return uiSlabhide;
-                case DATA_OZRUK:                    return uiOzruk;
-                case DATA_HIGH_PRIESTESS_AZIL:        return uiHighPriestessAzil;
-            }
+            if (!add)
+                return;
+        }
 
+        uint64 GetData64(uint32 type)
+        {
+            switch (type)
+            {
+                case DATA_CORBORUS:
+                    return CorborusGUID;
+                case DATA_SLABHIDE:
+                    return SlabhideGUID;
+                case DATA_OZRUK:
+                    return OzrukGUID;
+                case DATA_HIGH_PRIESTESS_AZIL:
+                    return High_Priestess_AzilGUID;
+            }
             return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
-                case DATA_CORBORUS_EVENT:
-                    uiEncounter[0] = data;
-                    break;
-                case DATA_SLABHIDE_EVENT:
-                    uiEncounter[1] = data;
-                    break;
-                case DATA_OZRUK_EVENT:
-                    uiEncounter[2] = data;
-                    break;
-                case DATA_HIGH_PRIESTESS_AZIL_EVENT:
-                    uiEncounter[3] = data;
+                case DATA_CORBORUS:
+                case DATA_SLABHIDE:
+                case DATA_OZRUK:
+                case DATA_HIGH_PRIESTESS_AZIL:
+                    auiEncounter[type] = data;
                     break;
             }
+
+            if (auiEncounter[DATA_CORBORUS] == DONE) // Corborus
+                if (Creature* slabhide = this->instance->GetCreature(SlabhideGUID))
+                    slabhide->setFaction(14);
+            if (auiEncounter[DATA_SLABHIDE] == DONE) // Slabhide
+                if (Creature* ozruk = this->instance->GetCreature(OzrukGUID))
+                    ozruk->setFaction(14);
+            if (auiEncounter[DATA_OZRUK] == DONE) // Ozruk
+                if (Creature* azil = this->instance->GetCreature(High_Priestess_AzilGUID))
+                    azil->setFaction(14);
 
             if (data == DONE)
-               SaveToDB();
-        }
-
-        uint32 GetData(uint32 type)
-        {
-            switch(type)
             {
-                case DATA_CORBORUS_EVENT:                return uiEncounter[0];
-                case DATA_SLABHIDE_EVENT:                return uiEncounter[1];
-                case DATA_OZRUK_EVENT:                    return uiEncounter[2];
-                case DATA_HIGH_PRIESTESS_AZIL_EVENT:    return uiEncounter[3];
-            }
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[DATA_CORBORUS];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
 
-            return 0;
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
         }
 
-        std::string GetSaveData()
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
+
+       std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
 
-            std::string str_data;
-
             std::ostringstream saveStream;
-            saveStream << "P S " << uiEncounter[0] << " " << uiEncounter[1]  << " " << uiEncounter[2]  << " " << uiEncounter[3];
-
-            str_data = saveStream.str();
+            saveStream << auiEncounter[DATA_CORBORUS];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
 
             OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
+            return saveStream.str();
         }
 
         void Load(const char* in)
@@ -169,33 +175,35 @@ public:
 
             OUT_LOAD_INST_DATA(in);
 
-            char dataHead1, dataHead2;
-            uint16 data0, data1, data2, data3;
-
             std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
 
-            if (dataHead1 == 'P' && dataHead2 == 'S')
-            {
-                uiEncounter[0] = data0;
-                uiEncounter[1] = data1;
-                uiEncounter[2] = data2;
-                uiEncounter[3] = data3;
-
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (uiEncounter[i] == IN_PROGRESS)
-                        uiEncounter[i] = NOT_STARTED;
-
-            } 
-            else OUT_LOAD_INST_DATA_FAIL;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
     };
-};
 
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_the_stonecore_InstanceScript(map);
+    }
+};
 
 void AddSC_instance_the_stonecore()
 {
     new instance_the_stonecore();
 }
+
+
+/* SQL 
+* UPDATE instance_template SET script='instance_the_stonecore' WHERE map=725;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (43214, 42188, 42333, 49654, 49624, 49538);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4343898, 43438, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4321498, 43214, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4218898, 42188, 6, 6, 34, 2, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4233398, 42333, 6, 6, 34, 3, 3, 'instance script');
+*/

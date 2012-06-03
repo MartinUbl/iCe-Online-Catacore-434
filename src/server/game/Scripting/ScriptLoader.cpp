@@ -577,6 +577,12 @@ void AddSC_magmaw();
 void AddSC_atramedes();
 void AddSC_boss_defensing_system();
 void AddSC_instance_blackwing_descent();
+void AddSC_instance_lost_city_of_the_tolvir();
+void AddSC_instance_grim_batol();
+void AddSC_instance_halls_of_origination();
+void AddSC_instance_the_stonecore();
+void AddSC_instance_throne_of_the_tides();
+
 
 // battlegrounds
 
@@ -1186,6 +1192,11 @@ void AddCataclysmScripts()
     AddSC_instance_throne_of_the_four_winds();
     AddSC_boss_argaloth();
     AddSC_instance_baradin_hold();
+    AddSC_instance_lost_city_of_the_tolvir();
+    AddSC_instance_grim_batol();
+    AddSC_instance_halls_of_origination();
+    AddSC_instance_the_stonecore();
+    AddSC_instance_throne_of_the_tides();
 
     AddSC_magmaw();
     AddSC_atramedes();

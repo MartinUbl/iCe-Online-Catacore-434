@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2008 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,342 +16,224 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Instance_Deadmines
-SD%Complete: 100
-SDComment:
-SDCategory: Deadmines
-EndScriptData */
-
 #include "ScriptPCH.h"
 #include "deadmines.h"
 
-enum Factions
+enum data
 {
-    FACTION_HOSTILE_FOR_ALL                       = 16
+    DATA_GLUBTOK = 0,
+    DATA_HELIX_GEARBREAKER,
+    DATA_FOE_REAPER_5000,
+    DATA_ADMIRAL_RIPSNARL,
+    DATA_CAPTAIN_COOKIE,
+    DATA_VANESSA_VANCLEEF
 };
 
-enum Sounds
-{
-    SOUND_CANNONFIRE                                     = 1400,
-    SOUND_DESTROYDOOR                                    = 3079,
-    SOUND_MR_SMITE_ALARM1                                = 5775,
-    SOUND_MR_SMITE_ALARM2                                = 5777
-};
+#define MAX_ENCOUNTER 6
 
-#define SAY_MR_SMITE_ALARM1 "You there, check out that noise!"
-#define SAY_MR_SMITE_ALARM2 "We're under attack! A vast, ye swabs! Repel the invaders!"
-
-enum Misc
+class instance_the_deadmines : public InstanceMapScript
 {
-    DATA_CANNON_BLAST_TIMER                                = 3000,
-    DATA_PIRATES_DELAY_TIMER                               = 1000
-};
+public:
+    instance_the_deadmines() : InstanceMapScript("instance_the_deadmines", 36) { }
 
-class instance_deadmines : public InstanceMapScript
-{
-    public:
-        instance_deadmines()
-            : InstanceMapScript("instance_deadmines", 36)
+    struct instance_the_deadmines_InstanceScript : public InstanceScript
+    {
+        instance_the_deadmines_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+
+        uint32 auiEncounter[MAX_ENCOUNTER];
+
+        uint64 GlubtokGUID;
+        uint64 Helix_GearbreakerGUID;
+        uint64 Foe_Reaper_5000GUID;
+        uint64 Admiral_RipsnarlGUID;
+        uint64 Captain_CookieGUID;
+        uint64 Vanesa_VancleefGUID;
+
+        void Initialize()
         {
+            memset(&auiEncounter, 0, sizeof(auiEncounter));
+
+            GlubtokGUID = 0;
+            Helix_GearbreakerGUID = 0;
+            Foe_Reaper_5000GUID = 0;
+            Admiral_RipsnarlGUID = 0;
+            Captain_CookieGUID = 0;
+            Vanesa_VancleefGUID = 0;
         }
 
-        struct instance_deadmines_InstanceMapScript : public InstanceScript
+        bool IsEncounterInProgress() const // not avaiable for this instance script
         {
-            instance_deadmines_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); };
+            return false;
+        }
 
-            uint64 FactoryDoorGUID;
-            uint64 IronCladDoorGUID;
-            uint64 DefiasCannonGUID;
-            uint64 DoorLeverGUID;
-            uint64 DefiasPirate1GUID;
-            uint64 DefiasPirate2GUID;
-            uint64 DefiasCompanionGUID;
+        void OnCreatureCreate(Creature* pCreature, bool add)
+        {
+            if (!add) // for safity
+                return;
 
-            uint32 State;
-            uint32 CannonBlast_Timer;
-            uint32 PiratesDelay_Timer;
-            uint64 uiSmiteChestGUID;
-
-            void Initialize()
-            {
-                FactoryDoorGUID = 0;
-                IronCladDoorGUID = 0;
-                DefiasCannonGUID = 0;
-                DoorLeverGUID = 0;
-                DefiasPirate1GUID = 0;
-                DefiasPirate2GUID = 0;
-                DefiasCompanionGUID = 0;
-
-                State = CANNON_NOT_USED;
-                uiSmiteChestGUID = 0;
-            }
-
-            void OnCreatureCreate(Creature *pCreature, bool /*bAdd*/)
-            {
-            Map::PlayerList const &players = instance->GetPlayers();
-            uint32 TeamInInstance = 0;
-
-            if (!players.isEmpty())
-            {
-                if (Player* pPlayer = players.begin()->getSource())
-                    TeamInInstance = pPlayer->GetTeam();
-            }
             switch (pCreature->GetEntry())
             {
-                // Alliance, you will be supported by Alliance npcs. Horde = Invisible.
-                case 46889: // Kagtha
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(42308, ALLIANCE); // Lieutenant Horatio Laine
+                case 47162: // Glubtok
+                    GlubtokGUID = pCreature->GetGUID();
                     break;
-                }
-                case 46902: // Miss Mayhem
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(491, ALLIANCE); // Quartermaster Lewis <Quartermaster> 
+                case 47296: // Helix Gearbreaker
+                    Helix_GearbreakerGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_GLUBTOK] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                }
-                case 46890: // Shattered Hand Assassin
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(1, ALLIANCE); // GM WAYPOINT
+                case 43778: // Foe Reaper 5000
+                    Foe_Reaper_5000GUID  = pCreature->GetGUID();
+                    if (auiEncounter[DATA_HELIX_GEARBREAKER] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                }                
-                case 46903: // Mayhem Reaper Prototype
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(1, ALLIANCE); // GM WAYPOINT
+                case 47626: // Admiral Ripsnarl
+                    Admiral_RipsnarlGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_FOE_REAPER_5000] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                }
-                case 24935: // Vend-O-Tron D-Luxe
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(1, ALLIANCE); // GM WAYPOINT
+                case 47739: // Captain Cookie
+                    Captain_CookieGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_ADMIRAL_RIPSNARL] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                }
-                case 46906: // Slinky Sharpshiv
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == ALLIANCE)
-                        pCreature->UpdateEntry(1, ALLIANCE); // GM WAYPOINT
+                case 49541: // Vanessa VanCleef
+                    Vanesa_VancleefGUID = pCreature->GetGUID();
+                    if (auiEncounter[5] == DONE)
+                        pCreature->setFaction(14);
                     break;
-                }
-                // Horde, you will be supported by Horde npcs. Alliance = Invisible.
-                case 46613: // Crime Scene Alarm-O-Bot
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == HORDE)
-                        pCreature->UpdateEntry(1, HORDE); // GM WAYPOINT
-                    break;
-                }
-                case 50595: // Stormwind Defender
-                {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == HORDE)
-                        pCreature->UpdateEntry(1, HORDE); // GM WAYPOINT
-                   break;
-               }
-               case 46614: // Stormwind Investigator
-               {
-                    if (ServerAllowsTwoSideGroups())
-                        pCreature->setFaction(FACTION_HOSTILE_FOR_ALL);
-                    if (TeamInInstance == HORDE)
-                        pCreature->UpdateEntry(1, HORDE); // GM WAYPOINT
-                   break;
-               }
             }
-        
-			}                                                
-            virtual void Update(uint32 diff)
-            {
-                if (!IronCladDoorGUID || !DefiasCannonGUID || !DoorLeverGUID)
-                    return;
-
-                GameObject *pIronCladDoor = instance->GetGameObject(IronCladDoorGUID);
-                if (!pIronCladDoor)
-                    return;
-
-                switch (State)
-                {
-                    case CANNON_GUNPOWDER_USED:
-                        CannonBlast_Timer = DATA_CANNON_BLAST_TIMER;
-                        // it's a hack - Mr. Smite should do that but his too far away
-                        pIronCladDoor->SetName("Mr. Smite");
-                        pIronCladDoor->MonsterYell(SAY_MR_SMITE_ALARM1, LANG_UNIVERSAL, 0);
-                        DoPlaySound(pIronCladDoor, SOUND_MR_SMITE_ALARM1);
-                        State = CANNON_BLAST_INITIATED;
-                        break;
-                    case CANNON_BLAST_INITIATED:
-                        PiratesDelay_Timer = DATA_PIRATES_DELAY_TIMER;
-                        if (CannonBlast_Timer <= diff)
-                        {
-                            SummonCreatures();
-                            ShootCannon();
-                            BlastOutDoor();
-                            LeverStucked();
-                            pIronCladDoor->MonsterYell(SAY_MR_SMITE_ALARM2, LANG_UNIVERSAL, 0);
-                            DoPlaySound(pIronCladDoor, SOUND_MR_SMITE_ALARM2);
-                            State = PIRATES_ATTACK;
-                        } else CannonBlast_Timer -= diff;
-                        break;
-                    case PIRATES_ATTACK:
-                        if (PiratesDelay_Timer <= diff)
-                        {
-                            MoveCreaturesInside();
-                            State = EVENT_DONE;
-                        } else PiratesDelay_Timer -= diff;
-                        break;
-                }
-            }
-
-            void SummonCreatures()
-            {
-                if (GameObject *pIronCladDoor = instance->GetGameObject(IronCladDoorGUID))
-                {
-                    Creature *DefiasPirate1 = pIronCladDoor->SummonCreature(657,pIronCladDoor->GetPositionX() - 2,pIronCladDoor->GetPositionY()-7,pIronCladDoor->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                    Creature *DefiasPirate2 = pIronCladDoor->SummonCreature(657,pIronCladDoor->GetPositionX() + 3,pIronCladDoor->GetPositionY()-6,pIronCladDoor->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                    Creature *DefiasCompanion = pIronCladDoor->SummonCreature(3450,pIronCladDoor->GetPositionX() + 2,pIronCladDoor->GetPositionY()-6,pIronCladDoor->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-
-                    DefiasPirate1GUID = DefiasPirate1->GetGUID();
-                    DefiasPirate2GUID = DefiasPirate2->GetGUID();
-                    DefiasCompanionGUID = DefiasCompanion->GetGUID();
-                }
-            }
-
-            void MoveCreaturesInside()
-            {
-                if (!DefiasPirate1GUID || !DefiasPirate2GUID || !DefiasCompanionGUID)
-                    return;
-
-                Creature *pDefiasPirate1 = instance->GetCreature(DefiasPirate1GUID);
-                Creature *pDefiasPirate2 = instance->GetCreature(DefiasPirate2GUID);
-                Creature *pDefiasCompanion = instance->GetCreature(DefiasCompanionGUID);
-                if (!pDefiasPirate1 || !pDefiasPirate2 || !pDefiasCompanion)
-                    return;
-
-                MoveCreatureInside(pDefiasPirate1);
-                MoveCreatureInside(pDefiasPirate2);
-                MoveCreatureInside(pDefiasCompanion);
-            }
-
-            void MoveCreatureInside(Creature* pCreature)
-            {
-                pCreature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                pCreature->GetMotionMaster()->MovePoint(0, -102.7f,-655.9f, pCreature->GetPositionZ());
-            }
-
-            void ShootCannon()
-            {
-                if (GameObject *pDefiasCannon = instance->GetGameObject(DefiasCannonGUID))
-                {
-                    pDefiasCannon->SetGoState(GO_STATE_ACTIVE);
-                    DoPlaySound(pDefiasCannon, SOUND_CANNONFIRE);
-                }
-            }
-
-            void BlastOutDoor()
-            {
-                if (GameObject *pIronCladDoor = instance->GetGameObject(IronCladDoorGUID))
-                {
-                    pIronCladDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                    DoPlaySound(pIronCladDoor, SOUND_DESTROYDOOR);
-                }
-            }
-
-            void LeverStucked()
-            {
-                if (GameObject *pDoorLever = instance->GetGameObject(DoorLeverGUID))
-                    pDoorLever->SetUInt32Value(GAMEOBJECT_FLAGS, 4);
-            }
-
-            void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
-            {
-                switch(pGo->GetEntry())
-                {
-                    case GO_FACTORY_DOOR:   FactoryDoorGUID = pGo->GetGUID(); break;
-                    case GO_IRONCLAD_DOOR:  IronCladDoorGUID = pGo->GetGUID();  break;
-                    case GO_DEFIAS_CANNON:  DefiasCannonGUID = pGo->GetGUID();  break;
-                    case GO_DOOR_LEVER:     DoorLeverGUID = pGo->GetGUID();     break;
-                    case GO_MR_SMITE_CHEST: uiSmiteChestGUID = pGo->GetGUID();  break;
-                }
-            }
-
-            void SetData(uint32 type, uint32 data)
-            {
-                switch (type)
-                {
-                case EVENT_STATE:
-                    if (DefiasCannonGUID && IronCladDoorGUID)
-                        State=data;
-                    break;
-                case EVENT_RHAHKZOR:
-                    if (data == DONE)
-                        if (GameObject* pGo = instance->GetGameObject(FactoryDoorGUID))
-                            pGo->SetGoState(GO_STATE_ACTIVE);
-                    break;
-                }
-            }
-
-            uint32 GetData(uint32 type)
-            {
-                switch (type)
-                {
-                    case EVENT_STATE:
-                        return State;
-                }
-
-                return 0;
-            }
-
-            uint64 GetData64(uint32 data)
-            {
-                switch (data)
-                {
-                    case DATA_SMITE_CHEST:
-                        return uiSmiteChestGUID;
-                }
-
-                return 0;
-            }
-
-            void DoPlaySound(GameObject* unit, uint32 sound)
-            {
-                WorldPacket data(4);
-                data.SetOpcode(SMSG_PLAY_SOUND);
-                data << uint32(sound);
-                unit->SendMessageToSet(&data,false);
-            }
-
-            void DoPlaySoundCreature(Unit* unit, uint32 sound)
-            {
-                WorldPacket data(4);
-                data.SetOpcode(SMSG_PLAY_SOUND);
-                data << uint32(sound);
-                unit->SendMessageToSet(&data,false);
-            }
-        };
-
-        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
-        {
-            return new instance_deadmines_InstanceMapScript(pMap);
         }
+
+        void OnGameObjectCreate(GameObject* pGO, bool add)
+        {
+            if (!add)
+                return;
+        }
+
+        uint64 GetData64(uint32 type)
+        {
+            switch (type)
+            {
+                case DATA_GLUBTOK:
+                    return GlubtokGUID;
+                case DATA_HELIX_GEARBREAKER:
+                    return Helix_GearbreakerGUID;
+                case DATA_FOE_REAPER_5000:
+                    return Foe_Reaper_5000GUID;
+                case DATA_ADMIRAL_RIPSNARL:
+                    return Admiral_RipsnarlGUID;
+                case DATA_CAPTAIN_COOKIE:
+                    return Captain_CookieGUID;
+                case DATA_VANESSA_VANCLEEF:
+                    return Vanesa_VancleefGUID;
+            }
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            switch (type)
+            {
+                case DATA_GLUBTOK:
+                case DATA_HELIX_GEARBREAKER:
+                case DATA_FOE_REAPER_5000:
+                case DATA_ADMIRAL_RIPSNARL:
+                case DATA_CAPTAIN_COOKIE:
+                case DATA_VANESSA_VANCLEEF:
+                    auiEncounter[type] = data;
+                    break;
+            }
+
+            if (auiEncounter[DATA_GLUBTOK] == DONE) // Glubtok
+                if (Creature* helix = this->instance->GetCreature(Helix_GearbreakerGUID))
+                    helix->setFaction(14);
+            if (auiEncounter[DATA_HELIX_GEARBREAKER] == DONE) // Helix
+                if (Creature* reaper = this->instance->GetCreature(Foe_Reaper_5000GUID))
+                    reaper->setFaction(14);
+            if (auiEncounter[DATA_FOE_REAPER_5000] == DONE) // Reaper
+                if (Creature* admiral = this->instance->GetCreature(Admiral_RipsnarlGUID))
+                    admiral->setFaction(14);
+            if (auiEncounter[DATA_ADMIRAL_RIPSNARL] == DONE) // Admiral
+                if (Creature* captain = this->instance->GetCreature(Captain_CookieGUID))
+                    captain->setFaction(14);
+            if (auiEncounter[DATA_CAPTAIN_COOKIE] == DONE) // Captain
+                if (Creature* vanesa = this->instance->GetCreature(Vanesa_VancleefGUID))
+                    vanesa->setFaction(14);
+
+            if (data == DONE)
+            {
+                std::ostringstream saveStream;
+                saveStream << auiEncounter[DATA_GLUBTOK];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << auiEncounter[i];
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
+        }
+
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
+
+       std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << auiEncounter[DATA_GLUBTOK];
+            for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                saveStream << " " << auiEncounter[i];
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* in)
+        {
+            if (!in)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(in);
+
+            std::istringstream loadStream(in);
+            for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                loadStream >> auiEncounter[i];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (auiEncounter[i] == IN_PROGRESS)
+                    auiEncounter[i] = NOT_STARTED;
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+    };
+
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
+    {
+        return new instance_the_deadmines_InstanceScript(map);
+    }
 };
 
 void AddSC_instance_deadmines()
 {
-    new instance_deadmines();
+    new instance_the_deadmines();
 }
+
+
+/* SQL 
+* UPDATE instance_template SET script='instance_the_deadmines' WHERE map=36;
+* UPDATE creature_template SET faction_A=35, faction_H=35 WHERE entry in (47296, 43778, 47626, 47739, 49541, 48941, 48940, 48943, 48944);
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4716298, 47162, 6, 6, 34, 0, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4729698, 47296, 6, 6, 34, 1, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4377898, 43778, 6, 6, 34, 2, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4762698, 47626, 6, 6, 34, 3, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4773998, 47739, 6, 6, 34, 4, 3, 'instance script');
+* INSERT INTO `creature_ai_scripts` (id, creature_id, event_type, event_flags, action1_type, action1_param1, action1_param2, comment) VALUES (4954198, 49541, 6, 6, 34, 5, 3, 'instance script');
+*/
