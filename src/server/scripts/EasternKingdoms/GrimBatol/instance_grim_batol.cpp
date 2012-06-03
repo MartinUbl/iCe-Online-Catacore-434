@@ -147,7 +147,7 @@ public:
        uint32 GetData(uint32 type)
        {
             if (type < MAX_ENCOUNTER)
-                auiEncounter[type];
+                return auiEncounter[type];
             else
                 return 0;
        }
