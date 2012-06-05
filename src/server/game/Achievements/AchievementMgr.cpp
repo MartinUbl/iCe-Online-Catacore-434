@@ -1585,7 +1585,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (miscvalue1 != achievementCriteria->own_currency.currencyId)
                     continue;
 
-                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_ACCUMULATE);
+                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_SET);
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
