@@ -2822,6 +2822,38 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                         target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     }
                     break;
+                case 96268: // Death's Advance aura periodic tick
+                    {
+                        Player *pl = caster->ToPlayer();
+                        if (!pl)
+                            break;
+
+                        bool depleted = true;
+
+                        for (uint32 i = 0; i < MAX_RUNES; ++i)
+                        {
+                            if (pl->GetCurrentRune(i) != RUNE_UNHOLY)
+                                continue;
+                            if (pl->GetRuneCooldown(i) == 0)
+                            {
+                                depleted = false;    // found non-depleted unholy rune - remove the effect
+                                break;
+                            }
+                        }
+
+                        Aura *aura = GetBase();
+                        if (depleted)
+                        {
+                            if (aura->GetMaxDuration() != -1)
+                            {
+                                aura->SetMaxDuration(-1);
+                                aura->SetDuration(-1);
+                            }
+                        }
+                        else
+                            aura->Remove();
+                    }
+                    break;
             }
             // Death and Decay
             if (GetSpellProto()->SpellFamilyFlags[0] & 0x20)

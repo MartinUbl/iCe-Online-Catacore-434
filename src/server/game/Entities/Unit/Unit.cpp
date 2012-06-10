@@ -9458,6 +9458,24 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target = pVictim;
             break;
         }
+        // Death's Advance proc
+        case 96268:
+        {
+            if (HasAura(96268))
+                return false;
+            Player *pl = ToPlayer();
+            if (!pl)
+                break;
+
+            for (uint32 i = 0; i < MAX_RUNES; ++i)
+            {
+                if (pl->GetCurrentRune(i) != RUNE_UNHOLY)
+                    continue;
+                if (pl->GetRuneCooldown(i) == 0)    // non-depleted unholy rune found - do nothing
+                    return false;
+            }
+            break;
+        }
         case 54648: // Focus Magic
         {
             if (triggeredByAura && triggeredByAura->GetCaster() && (procEx & PROC_EX_CRITICAL_HIT))
