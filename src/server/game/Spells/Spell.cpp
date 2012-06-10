@@ -1012,9 +1012,30 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
         // Calculate minimum incoming time
         if (m_delayMoment == 0 || m_delayMoment>target.timeDelay)
             m_delayMoment = target.timeDelay;
+
+        m_delay = true;
     }
     else
-        target.timeDelay = 0LL;
+    {
+        // PvP CC Delay
+        bool isCasterPlayer = m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToPet();
+        bool isTargetPlayer = pVictim->GetTypeId() == TYPEID_PLAYER || pVictim->ToPet();
+        if(isCasterPlayer && isTargetPlayer)
+        {
+            target.timeDelay = GetCCDelay(m_spellInfo);
+            if (target.timeDelay > 0)
+            {
+                if (m_delayMoment == 0 || m_delayMoment > target.timeDelay)
+                    m_delayMoment = target.timeDelay;
+
+                m_delay = true;
+            }
+        }
+        else
+        {
+            target.timeDelay = 0LL;
+        }
+    }
 
     // If target reflect spell back to caster
     if (target.missCondition == SPELL_MISS_REFLECT)
@@ -3633,6 +3654,7 @@ void Spell::cast(bool skipCheck)
         }
     }
 
+    m_delay = false;
     SelectSpellTargets();
 
     // Spell may be finished after target map check
@@ -3766,7 +3788,7 @@ void Spell::cast(bool skipCheck)
     SendSpellCooldown();
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if ((m_spellInfo->speed > 0.0f && !IsChanneledSpell(m_spellInfo)) || m_spellInfo->Id == 14157)
+    if (m_delay || m_spellInfo->Id == 14157)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
@@ -6473,6 +6495,59 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     return CheckCast(true);
 }
 
+uint32 Spell::GetCCDelay(SpellEntry const* _spell)
+{
+    // CCD for spell with auras
+    AuraType auraWithCCD[] =
+    {
+        SPELL_AURA_MOD_STUN,
+        SPELL_AURA_MOD_CONFUSE,
+        SPELL_AURA_MOD_FEAR,
+        SPELL_AURA_MOD_SILENCE,
+        SPELL_AURA_MOD_DISARM,
+        SPELL_AURA_MOD_POSSESS
+    };
+    const uint8 CCDArraySize = sizeof(auraWithCCD) / sizeof(auraWithCCD[0]);
+
+    const uint32 ccDelay = 200u;
+
+    switch(_spell->SpellFamilyName)
+    {
+        case SPELLFAMILY_HUNTER:
+            // Traps
+            if (_spell->SpellFamilyFlags[0] & 0x8 ||      // Frozen trap
+                _spell->Id == 57879 ||                    // Snake Trap
+                _spell->SpellFamilyFlags[2] & 0x00024000) // Explosive and Immolation Trap
+                return 0;
+
+            // Entrapment
+            if (_spell->SpellIconID == 20)
+                return 0;
+            break;
+        case SPELLFAMILY_DEATHKNIGHT:
+            // Death Grip
+            if (_spell->Id == 49576)
+                return ccDelay;
+            break;
+        case SPELLFAMILY_ROGUE:
+            // Blind
+            if (_spell->Id == 2094)
+                return ccDelay;
+            break;
+        case SPELLFAMILY_PRIEST:
+            // Mind Control - for both caster and victim
+            if(_spell->Id == 605)
+                return ccDelay;
+            break;
+    }
+
+    for (uint8 i = 0; i < CCDArraySize; ++i)
+        if (_spell->AppliesAuraType(auraWithCCD[i]))
+            return ccDelay;
+
+    return 0;
+}
+
 SpellCastResult Spell::CheckCasterAuras() const
 {
     // spells totally immuned to caster auras (wsg flag drop, give marks etc)
@@ -7535,7 +7610,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             {
                 // no, we aren't, do the typical update
                 // check, if we have channeled spell on our hands
-                /*
                 if (IsChanneledSpell(m_Spell->m_spellInfo))
                 {
                     // evented channeled spell is processed separately, casted once after delay, and not destroyed till finish
@@ -7558,7 +7632,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     // event will be re-added automatically at the end of routine)
                 }
                 else
-                */
                 {
                     // run the spell handler and think about what we can do next
                     uint64 t_offset = e_time - m_Spell->GetDelayStart();

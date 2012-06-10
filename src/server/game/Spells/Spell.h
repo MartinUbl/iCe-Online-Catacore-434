@@ -451,6 +451,8 @@ class Spell
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);
 
+        static uint32 GetCCDelay(SpellEntry const* _spell);
+
         // handlers
         void handle_immediate();
         uint64 handle_delayed(uint64 t_offset);
@@ -596,6 +598,7 @@ class Spell
         }
 
         // Delayed spells system
+        bool m_delay;                                       // will the spell be delayed? (used before delay handling)
         uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
         uint64 m_delayMoment;                               // moment of next delay call, used internally
         bool m_immediateHandled;                            // were immediate actions handled? (used by delayed spells only)
