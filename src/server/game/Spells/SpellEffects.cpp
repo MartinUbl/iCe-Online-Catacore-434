@@ -4311,7 +4311,6 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
             case 61288:  // inscr: Minor Inscription Research
             case 61177:  // inscr: Nothernd Inscription Research
             case 89244:  // inscr: Forged Documents
-            case 55208:  // mining: Smelt Titansteel
             case 73478:  // jewel: Fire Prism
             case 62242:  // jewel: Icy Prism
             case 47280:  // jewel: Brilliant Glass
