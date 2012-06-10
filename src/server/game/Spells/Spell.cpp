@@ -5557,8 +5557,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             
             if (!m_IsTriggeredSpell)
             {
-                if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
-                    return SPELL_FAILED_LINE_OF_SIGHT;
+                if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
+                    if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+                        return SPELL_FAILED_LINE_OF_SIGHT;
                 if (m_caster->IsVisionObscured(target))
                     return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
             }
