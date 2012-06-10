@@ -1508,6 +1508,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.XP.Kill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
+#    Rate.XP.Gather
 #        XP rates
 #        Default: 1
 #
@@ -1683,6 +1684,7 @@ Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
+Rate.XP.Gather  = 1
 Rate.RepairCost = 1
 Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1

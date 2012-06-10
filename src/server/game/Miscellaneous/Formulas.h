@@ -317,6 +317,138 @@ namespace Trinity
             return rate;
         }
     }
+
+    namespace GatherXP
+    {
+        inline uint8 GetContent (uint32 item_id, uint32 skill)
+        {
+            if (skill <= 275)
+                return CONTENT_1_60;
+            if (skill <= 305)       // 275 - 305
+            {
+                if(item_id != 181270 && item_id != 181555)
+                    return CONTENT_1_60;        // Azeroth object with req. skill > 275
+                else
+                    return CONTENT_61_70;       // Felweed, Fel Iron Deposit
+            }
+            if (skill < 350)
+                return CONTENT_61_70;
+            if (skill <= 375)       // 350 - 375
+            {
+                if (item_id != 189973 && item_id != 191303 && item_id != 190169 && item_id != 189978 && item_id != 189979)
+                    return CONTENT_61_70;
+                else
+                    return CONTENT_71_80;       // Goldclover, Firethorn, Tiger Lily, Cobalt Deposit, Rich Cobalt Deposit
+            }
+            if (skill < 425)
+                return CONTENT_71_80;
+            if (skill <= 450)       // 425 - 450
+            {
+                if (item_id != 202749 && item_id != 202748 && item_id != 202736 && item_id != 202747)
+                    return CONTENT_71_80;
+                else
+                    return CONTENT_81_85;       // Azshara's Veil, Stormvine, Obsidium Deposit
+            }
+
+            return CONTENT_81_85;
+        }
+
+        inline uint8 GetItemLevel (uint32 item_id, uint32 skill, uint8 content)
+        {
+            switch (content)
+            {
+                case CONTENT_1_60:
+                {
+                    if (skill < 50)
+                        skill = 50;
+                    if (skill > 300)
+                        skill = 300;
+                    return skill / 5;
+                }
+                case CONTENT_61_70:
+                {
+                    if (skill < 300)
+                        skill = 300;
+                    if (skill > 350)
+                        skill = 350;
+                    return skill / 5;
+                }
+                case CONTENT_71_80:
+                {
+                    if (skill < 350)
+                        skill = 350;
+                    if (skill > 400)
+                        skill = 400;
+                    return skill / 5;
+                }
+                case CONTENT_81_85:
+                {
+                    return (skill + 1175) / 20;
+                }
+                default:
+                {
+                    return 0;
+                }
+            }
+        }
+
+        inline double GetBaseXp (uint32 item_id, uint32 skill, uint8 item_level)
+        {
+            uint8 content = GetContent (item_id, skill);
+
+            switch (content)
+            {
+                case CONTENT_1_60:
+                {
+                    if (item_level < 50)
+                        return 12.76 * item_level;
+                    else
+                        return 25 * item_level - 550;
+                }
+                case CONTENT_61_70:
+                    return 20 * item_level - 200;
+                case CONTENT_71_80:
+                    return 100 * item_level - 6600;
+                case CONTENT_81_85:
+                    return 750 * item_level - 58250;
+                default:
+                    return 0;
+            }
+        }
+
+        inline double GetLevelPenaltyCoef (uint8 pl_level, uint8 item_level)
+        {
+            if (pl_level <= item_level - 2)
+                return 0.948;
+            if (pl_level == item_level - 1)
+                return 0.974;
+            if (pl_level >= item_level && pl_level <= item_level + 5)
+                return 1.000;
+            if (pl_level == item_level + 6)
+                return 0.800;
+            if (pl_level == item_level + 7)
+                return 0.600;
+            if (pl_level == item_level + 8)
+                return 0.400;
+            if (pl_level == item_level + 9)
+                return 0.200;
+            if (pl_level >= item_level + 10)
+                return 0.100;
+
+            return 0;
+        }
+
+        inline uint32 Gain (uint8 pl_level, uint32 skill, uint32 item_id)
+        {
+            uint8 content = GetContent (item_id, skill);
+            uint8 ilvl = GetItemLevel (item_id, skill, content);
+            double xp = GetBaseXp (item_id, skill, ilvl);
+            xp *= GetLevelPenaltyCoef (pl_level, ilvl);
+            xp *= sWorld->getRate (RATE_XP_GATHER);
+
+            return (uint32) xp;
+        }
+    }
 }
 
 #endif

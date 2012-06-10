@@ -4831,10 +4831,26 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
         {
             if (gameObjTarget)
             {
-                // Allow one skill-up until respawned
+                // Allow one skill-up and one XP gain until respawned
                 if (!gameObjTarget->IsInSkillupList(player->GetGUIDLow()) &&
                     player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue))
+                {
                     gameObjTarget->AddToSkillupList(player->GetGUIDLow());
+                    if (skillId == SKILL_HERBALISM || skillId == SKILL_MINING || skillId == SKILL_ARCHAEOLOGY)
+                    {
+                        // give XP to player
+                        Player *pl = m_caster->ToPlayer();
+                        if (pl)
+                        {
+                            uint8 lvl = pl->getLevel();
+                            uint32 skill = reqSkillValue;
+                            uint32 id = gameObjTarget->GetGOInfo()->id;
+                            uint32 xp = Trinity::GatherXP::Gain(lvl, skill, id);
+                            xp += pl->GetXPRestBonus(xp);
+                            pl->GiveXP(xp, NULL);
+                        }
+                    }
+                }
             }
             else if (itemTarget)
             {
