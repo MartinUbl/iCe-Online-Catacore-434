@@ -7597,7 +7597,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         || GetAreaId() == 3539 /* Stair of Destiny (Hellfire peninsula) */
         || GetZoneId() == 3703 /* Shattrath City */
         || GetZoneId() == 4395 /* Dalaran */
-        || GetAreaId() == 4658) /* Argent Tournament */
+        || GetAreaId() == 4658 /* Argent Tournament */
+        || GetMapId() == 759) /* Uldum Phase Event Map Phantomia */
         ForcedSanctuary = true;
 
     if ((zone && zone->IsSanctuary()) || ForcedSanctuary == true)        // in sanctuary
