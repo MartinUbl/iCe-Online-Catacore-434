@@ -4100,6 +4100,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        case 85480: // Conclave of Wind: Rohash: Wind Blast channeled spell (attempt not to interrupt)
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
+            count++;
+            break;
         case 85483: // Conclave of Wind:
         case 93138: // Rohash:
         case 93139: // Wind Blast
