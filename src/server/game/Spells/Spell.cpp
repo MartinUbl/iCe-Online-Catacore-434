@@ -3654,7 +3654,7 @@ void Spell::cast(bool skipCheck)
         }
     }
 
-    m_delay = false;
+    m_delay = m_spellInfo->speed > 0.0f && !IsChanneledSpell(m_spellInfo);
     SelectSpellTargets();
 
     // Spell may be finished after target map check
