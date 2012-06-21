@@ -325,6 +325,22 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 }
                 SetCriteriaProgress(achievementCriteria, player->getLevel());
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
+            case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
+            {
+                if (!miscvalue1 || miscvalue1 != achievementCriteria->be_spell_target.spellID)
+                    continue;
+
+                // those requirements couldn't be found in the dbc
+                AchievementCriteriaDataSet const* data = sAchievementMgr->GetCriteriaDataSet(achievementCriteria);
+                if (!data)
+                    continue;
+                if (!data->Meets(player,unit))
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            }
             default:
                 // Not implemented, sorry
                 continue;
