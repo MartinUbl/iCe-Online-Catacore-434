@@ -177,9 +177,13 @@ class boss_alakir: public CreatureScript
 
                 DespawnStormlings();
 
+                if (!map)
+                    return;
+
                 // summon loot chest
+                uint32 go_entry = GO_HEART_OF_WIND + map->GetDifficulty(); // 207891 + 0/1/2/3
                 GameObject* pGO = NULL;
-                pGO = me->SummonGameObject(GO_HEART_OF_WIND, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
+                pGO = me->SummonGameObject(go_entry, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
 
                 Map::PlayerList const& plrList = map->GetPlayers();
                 if (plrList.isEmpty())
