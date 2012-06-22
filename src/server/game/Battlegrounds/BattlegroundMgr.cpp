@@ -199,7 +199,15 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         {
             // The client will set STATUS_WAIT_QUEUE at BGInfo once it receives this packet
             data->Initialize(SMSG_JOINED_BATTLEGROUND_QUEUE, (1+1+4+4+4+1+8+1+4));
-            *data << uint8(0x20); // packed flag, seems to be always 0x20 for non-rated non-arena bgs
+
+            // packed flag
+            // 0x20: arena, BG
+            // 0xA0 (0x80 | 0x20): rated
+            // 0x40: client will display message about joining - something is wrong, it shows queue for "All Arenas"
+            if(!bg->isRated())
+                *data << uint8(0x20);   // BG, skirmish
+            else
+                *data << uint8(0xE0);   // rated
             *data << uint8(bg->GetMaxLevel()); // max level
             *data << uint32(Time1); // avg wait time
             *data << uint32(QueueSlot); // queueSlot
@@ -211,7 +219,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint32(arenatype); // On retail 0x101F is sent here, but we need this value to be returned in PORT opcode
             // end
 
-            *data << uint8(0); // teamsize, 0 if not arena
+            *data << uint8(arenatype); // teamsize, 0 if queue is for "All Arenas" or battleground
             *data << uint32(Time2); // time in queue
             break;
         }
@@ -240,7 +248,17 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
         case STATUS_IN_PROGRESS:
         {
             data->Initialize(SMSG_BATTLEFIELD_STATUS2, 100);
-            *data << uint8(bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS ? 192 : 0);
+            int status = 0;
+            if(bg->isRated())
+            {
+                status |= 128;      // rated
+                if(bg->GetStatus() != STATUS_WAIT_JOIN)
+                {
+                    status |= 64;   // already began
+                }
+            }
+            *data << uint8(status);
+            
             *data << uint32(Time2); // Time since started
             *data << uint32(QueueSlot); // queueslot 
             *data << uint32(bg->GetMapId()); // MapID
