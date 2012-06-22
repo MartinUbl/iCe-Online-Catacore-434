@@ -12619,7 +12619,10 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                         bonusApp = 0.1f;
 
                     if (Aura* pAura = pVictim->GetAura(77661))
+                    {
                         DoneTotalMod += bonusApp * pAura->GetStackAmount();
+                        pAura->Remove();
+                    }
                 }
                 break;
             }
