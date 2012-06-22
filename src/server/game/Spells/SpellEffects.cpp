@@ -1149,9 +1149,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                         damage += int32(ap * combo * 0.091f);
 
-                        // We are done with damage calculation
-                        apply_direct_bonus = false;
-
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
                             damage += combo*40;
