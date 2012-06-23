@@ -2292,7 +2292,7 @@ void Player::RegenerateAll()
     m_regenTimerCount += m_regenTimer;
 
     Regenerate(POWER_ENERGY);
-
+    Regenerate(POWER_FOCUS);
     Regenerate(POWER_MANA);
 
     // Runes act as cooldowns, and they don't need to send any data
@@ -2338,9 +2338,6 @@ void Player::RegenerateAll()
         Regenerate(POWER_RAGE);
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
-
-        if (getClass() == CLASS_HUNTER)
-            Regenerate(POWER_FOCUS);
         
         m_regenTimerCount -= 2000;
     }
@@ -2387,8 +2384,8 @@ void Player::Regenerate(Powers power)
                 addvalue += -20 * RageDecreaseRate / haste;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
             }
         }   break;
-        case POWER_FOCUS:
-            addvalue = 12 * haste;
+        case POWER_FOCUS:                                   // Regenerate focus (hunter)
+            addvalue = 0.006f * m_regenTimer * haste;
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);
