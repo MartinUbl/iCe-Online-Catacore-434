@@ -308,6 +308,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
 
 void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 {
+    // do not display anything if the arena did not finish yet
+    if (bg->isArena() && bg->GetStatus() != STATUS_WAIT_LEAVE)
+        return;
+
     uint8 type = (bg->isArena() ? 128 + 64 : 0);
     if(bg->GetStatus() == STATUS_WAIT_LEAVE)
         type |= 32;
@@ -318,7 +322,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 
     if ((type & 64) != 0)                                                // arena
     {
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < 2; ++i)
         {
             uint32 at_id = bg->m_ArenaTeamIds[i];
             ArenaTeam* at = sObjectMgr->GetArenaTeamById(at_id);
@@ -338,10 +342,10 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 
         *data << uint32(bg->m_ArenaTeamMMR[1]); // Matchmaker rating - t2
         *data << uint32(bg->m_ArenaTeamMMR[0]); // Matchmaker rating - t1
-        *data << uint32(pointsLost_t2);         // rating after - t2
-        *data << uint32(pointsLost_t1);         // rating after - t1
-        *data << uint32(pointsGained_t2);       // rating before - t2
-        *data << uint32(pointsGained_t1);       // rating before - t1
+        *data << uint32(pointsLost_t2);         // rating lost - t2
+        *data << uint32(pointsGained_t1);       // rating gained - t1
+        *data << uint32(pointsGained_t2);       // rating gained - t2
+        *data << uint32(pointsLost_t1);         // rating lost - t1
     }
 
     size_t wpos = data->wpos();
