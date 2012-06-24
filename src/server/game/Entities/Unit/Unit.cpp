@@ -9276,6 +9276,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 83074: // Fingers of Frost
+        {
+            if(procSpell->Id == 30455) // should not proc from Ice Lance
+                return false;
+            break;
+        }
+        case 44561: // Enduring Winter (Rank 1)
+        case 86500: // Enduring Winter (Rank 2)
+        case 86508: // Enduring Winter (Rank 3)
+        {
+            if(procSpell->Id == 30455) // should not proc from Ice Lance
+                return false;
+            break;
+        }
         default:
             break;
     }
