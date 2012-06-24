@@ -11772,6 +11772,9 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         // Atonement (from crit Smite)
                         if (spellProto->Id == 94472)
                             return true; // Will probably add critical bonus
+                        // remove Mind Spike debuff after casting Mind Blast
+                        if (spellProto->Id == 8092)
+                            pVictim->RemoveAurasDueToSpell(87178, GetGUID());
                     break;
                     case SPELLFAMILY_WARLOCK:
                         // Searing Pain and Soulburn proficiency
