@@ -756,7 +756,6 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
                 case SPELL_AURA_AOE_CHARM:
                     return SPELL_SPECIFIC_CHARM;
                 case SPELL_AURA_TRACK_CREATURES:
-                case SPELL_AURA_TRACK_RESOURCES:
                 case SPELL_AURA_TRACK_STEALTHED:
                     return SPELL_SPECIFIC_TRACKER;
                 case SPELL_AURA_PHASE:
