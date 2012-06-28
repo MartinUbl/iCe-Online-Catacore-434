@@ -1244,6 +1244,136 @@ public:
     }
 };
 
+class go_instance_teleporter : public GameObjectScript
+{
+public:
+    go_instance_teleporter() : GameObjectScript("go_instance_teleporter") {}
+
+    bool OnGossipHello(Player* pPlayer, GameObject* pGO)
+    {
+
+        InstanceScript* pInstance;
+
+        if (pPlayer->GetMap()->IsDungeon() || pPlayer->GetMap()->IsRaid())
+            pInstance = pGO->GetInstanceScript();
+        else
+            return false;
+
+        if (pPlayer->isInCombat())
+        {
+            pPlayer->GetSession()->SendNotification("You are in combat");
+            return false;
+        }
+
+        bool data[5];
+
+        for (uint8 i = 0; i < 5; i++)
+        {
+            data[i] = false; // we must set data[i] to false
+        }
+
+        // Position list..
+
+        static const Position Stonecore[4] = // The Stonecore
+        {
+            {1168.479980f, 882.859009f, 284.938995f, 3.208110f}, // Corborus
+            {1273.811401f, 1223.705200f, 248.0847933f, 3.561588f}, // Slabhide
+            {1498.229736f, 1070.670654f, 217.666885f, 3.352670f}, // Ozruk
+            {1498.229736f, 1070.670654f, 217.666885f, 3.352670f} // High Priestess Azil
+        };
+
+        static const Position Tot[4] = // Throne of the Tides
+        {
+            {50.007553f, 802.189758f, 805.730774f, 3.095618f}, // Commander Ulthok
+            {192.537994f, 802.294006f, 807.638000f, 3.096290f}, // Lady Naz'jar
+            {-142.759995f, 635.239014f, 286.804993f, 3.008390f}, // Mindbender Ghur'sha
+            {-311.378418f, 848.479980f, 257.103394f, 1.648863f} // Ozumat
+        };
+
+        static const Position Tolvir[4] = // Lost City of the Tol'vir
+        {
+            {-10880.065430f, -1367.163818f, 15.353039f, 0.047870f}, // General Husam
+            {-11025.678711f, -1628.244873f, 0.745445f, 3.902604f}, // Lockmaw
+            {-11016.195312f, -1276.655640f, 13.689383f, 1.814235f}, // High Prophet Barim
+            {-11016.195312f, -1276.655640f, 13.689383f, 1.814235f} // Siamat
+        };
+
+        static const Position GB[4] = // Grim Batol
+        {
+            {-697.905029f, -433.833374f, 269.147552f, 0.549418f}, // General Umbriss
+            {-487.053009f, -567.869995f, 271.911011f, 3.821282f}, // Forgemaster Throngus
+            {-427.275360f, -701.097595f, 268.659332f, 2.574887f}, // Drahga Shadowburner
+            {-427.275360f, -701.097595f, 268.659332f, 2.574887f} // Erudax
+        };
+
+        static const Position VP[3] = // The Vortex Pinnacle
+        {
+            {-719.534302f, 4.064109f, 635.672852f, 5.597483f}, // Grand Vizier Ertan
+            {-1194.513794f, 42.746994f, 734.174255f, 2.531289f}, // Altairus
+            {-1188.920044f, 475.765991f, 634.781982f, 0.526217f} // Asaad
+        };
+
+        static const Position HoO[2] = // Halls of Origination
+        {
+            {-640.152710f, 361.176514f, 79.908211f, 4.689569f}, // Temple Guardian Anhuur
+            {-138.552322f, 365.854889f, 89.781120f, 0.018022f} // Anraphet
+        };
+
+        static const Position BoT[5] = // The Bastion of Twilight
+        {
+            {-321.997314f, -651.301941f, 888.107300f, 4.933565f}, // Halfus
+            {-721.962280f, -685.195862f, 831.8886011f, 3.149144f}, // Valiona
+            {-1024.612305f, -580.931458f, 831.901123f, 3.061177f}, // Elementium Monstrosity
+            {-1162.060059f, -856.096008f, 844.390991f, 1.617550f}, // Cho'Gall
+            {-1162.060059f, -856.096008f, 844.390991f, 1.617550f} // Sinestra
+        };
+
+        for (uint8 j = 0; j < 5; j++)
+        {
+            if (pInstance->GetData(j) == DONE) // if is GetData(j) == DONE ..set data[j] = true
+                data[j] = true;
+        }
+
+        uint8 k = 5;
+
+        do
+        {
+            k--;
+            if (data[k] == true) // if is data[k] == true ..teleport to last dead boss coordinators
+            {
+                switch (pPlayer->GetMapId()) // Switch for map ID
+                {
+                    case 725: // The Stonecore
+                        pPlayer->TeleportTo(725, Stonecore[k].GetPositionX(), Stonecore[k].GetPositionY(),Stonecore[k].GetPositionZ(), Stonecore[k].GetOrientation());
+                        return true;
+                    case 643: // Throne of the Tides
+                        pPlayer->TeleportTo(643, Tot[k].GetPositionX(), Tot[k].GetPositionY(),Tot[k].GetPositionZ(), Tot[k].GetOrientation());
+                        return true;
+                    case 670: // Grim Batol
+                        pPlayer->TeleportTo(670, GB[k].GetPositionX(), GB[k].GetPositionY(),GB[k].GetPositionZ(), GB[k].GetOrientation());
+                        return true;
+                    case 755: // Lost City of the Tol'vir
+                        pPlayer->TeleportTo(755, Tolvir[k].GetPositionX(), Tolvir[k].GetPositionY(),Tolvir[k].GetPositionZ(), Tolvir[k].GetOrientation());
+                        return true;
+                    case 657: // The Vortex Pinnacle
+                        pPlayer->TeleportTo(657, VP[k].GetPositionX(), VP[k].GetPositionY(),VP[k].GetPositionZ(), VP[k].GetOrientation());
+                        return true;
+                    case 644: // Halls of Origination
+                        pPlayer->TeleportTo(644, HoO[k].GetPositionX(), HoO[k].GetPositionY(),HoO[k].GetPositionZ(), HoO[k].GetOrientation());
+                        return true;
+                    case 671: // The Bastion of Twilight
+                        pPlayer->TeleportTo(671, BoT[k].GetPositionX(), BoT[k].GetPositionY(),BoT[k].GetPositionZ(), BoT[k].GetOrientation());
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        } while (k > 0);
+
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1283,4 +1413,5 @@ void AddSC_go_scripts()
     new go_hive_pod;
     new go_massive_seaforium_charge;
     new go_quest_condition_portal;
+    new go_instance_teleporter;
 }

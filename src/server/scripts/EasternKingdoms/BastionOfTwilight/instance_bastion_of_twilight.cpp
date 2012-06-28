@@ -68,10 +68,10 @@ public:
             if (go->GetEntry() == 402097)
             {
                 GOfloorGUID = go->GetGUID();
-                if (auiEncounter[1] == DONE // Halfus
-                    && auiEncounter[2] == DONE // Valiona
-                    && auiEncounter[3] == DONE // Council
-                    && auiEncounter[4] == DONE) // Chogall
+                if (auiEncounter[0] == DONE // Halfus
+                    && auiEncounter[1] == DONE // Valiona
+                    && auiEncounter[2] == DONE // Council
+                    && auiEncounter[3] == DONE) // Chogall
                     {
                         if (this->instance->IsHeroic())
                             go->Delete();
@@ -133,26 +133,26 @@ public:
             switch (type)
             {
                 case DATA_HALFUS:
-                    auiEncounter[1] = data;
+                    auiEncounter[0] = data;
                     break;
                 case DATA_VALIONA:
-                    auiEncounter[2] = data;
+                    auiEncounter[1] = data;
                     break;
                 case DATA_COUNCIL:
-                    auiEncounter[3] = data;
+                    auiEncounter[2] = data;
                     break;
                 case DATA_CHOGALL:
-                    auiEncounter[4] = data;
+                    auiEncounter[3] = data;
                     break;
                 case DATA_SINESTRA:
-                    auiEncounter[5] = data;
+                    auiEncounter[4] = data;
                     break;
             }
 
-            if (auiEncounter[1] == DONE // Halfus
-                && auiEncounter[2] == DONE // Valiona
-                && auiEncounter[3] == DONE // Council
-                && auiEncounter[4] == DONE) // Chogall
+            if (auiEncounter[0] == DONE // Halfus
+                && auiEncounter[1] == DONE // Valiona
+                && auiEncounter[2] == DONE // Council
+                && auiEncounter[3] == DONE) // Chogall
             {
                 if (this->instance->IsHeroic())
                 {
@@ -173,10 +173,13 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type)
-        {
-            return 0;
-        }
+       uint32 GetData(uint32 type)
+       {
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
+       }
 
        std::string GetSaveData()
         {
