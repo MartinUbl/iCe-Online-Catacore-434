@@ -1323,6 +1323,7 @@ class Unit : public WorldObject
         void GetPartyMemberInDist(std::list<Unit*> &units, float dist);
         void GetPartyMembers(std::list<Unit*> &units);
         void GetRaidMember(std::list<Unit*> &units, float dist);
+        void GetRaidMemberDead(std::list<Unit*> &units, float dist);
         bool IsContestedGuard() const
         {
             if (FactionTemplateEntry const* entry = getFactionTemplateEntry())

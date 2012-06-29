@@ -17260,6 +17260,28 @@ void Unit::GetRaidMember(std::list<Unit*> &nearMembers, float radius)
     }
 }
 
+void Unit::GetRaidMemberDead(std::list<Unit*> &nearMembers, float radius)
+{
+    Player *owner = GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!owner)
+        return;
+
+    Group *pGroup = owner->GetGroup();
+    if (pGroup)
+    {
+        for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* Target = itr->getSource();
+
+            if (Target && !IsHostileTo(Target))
+            {
+                if (Target->isDead() && IsWithinDistInMap(Target, radius))
+                    nearMembers.push_back(Target);
+            }
+        }
+    }
+}
+
 void Unit::GetPartyMemberInDist(std::list<Unit*> &TagUnitMap, float radius)
 {
     Unit *owner = GetCharmerOrOwnerOrSelf();

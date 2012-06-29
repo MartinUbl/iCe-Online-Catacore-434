@@ -1276,7 +1276,7 @@ enum Targets
     TARGET_DEST_UNK_112                = 112, // Unused, only one spell
     TARGET_DEST_UNK_117                = 117, // same as above, only one testing spell
     TARGET_DEST_UNK_118                = 118, // same as above
-    TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // i.e. Mass Ressurection
+    TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // target all dead party & raid members - used only in Mass Resurrection
     TARGET_DEST_UNK_120                = 120, // some generic spells
     TOTAL_SPELL_TARGETS
 };
