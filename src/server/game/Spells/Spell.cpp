@@ -697,7 +697,6 @@ void Spell::SelectSpellTargets()
                     break;
                 }
                 case SPELL_EFFECT_BIND:
-                case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_CREATE_ITEM:
                 case SPELL_EFFECT_TRIGGER_SPELL:
                 case SPELL_EFFECT_SKILL_STEP:
@@ -721,6 +720,7 @@ void Spell::SelectSpellTargets()
                             AddUnitTarget(target, i);
                     }
                     break;
+                case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_RESURRECT_NEW:
                     if (m_targets.getUnitTarget())
                         AddUnitTarget(m_targets.getUnitTarget(), i);
@@ -7512,6 +7512,7 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
             if (m_spellInfo->Id != 20577)                    // Cannibalize
                 break;
             //fall through
+        case SPELL_EFFECT_RESURRECT:
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
             if (target != m_caster && !target->IsWithinLOSInMap(m_caster))
