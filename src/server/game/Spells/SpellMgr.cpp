@@ -4503,6 +4503,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 47841; // Dark Phoenix models
             count++;
             break;
+        case 74854: // Blazzing Hippogryph
+            spellInfo->EffectMiscValue[0] = 29767;
+            spellInfo->CastingTimeIndex = 16; // 1,5s casting time
+            break;
+        case 74855: // Blazing Hippogryph
+            spellInfo->EffectMiscValue[0] = 4862;
+            spellInfo->CastingTimeIndex = 16; // 1,5s casting time
         default:
             break;
         }
