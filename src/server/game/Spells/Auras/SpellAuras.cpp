@@ -1490,6 +1490,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->CastSpell(target, 58876, true);
                         break;
                     }
+                    // Maelstrom Weapon - spell alert
+                    if (caster && GetId() == 53817)
+                    {
+                        Aura *maelstrom = aurApp->GetBase();
+                        if (maelstrom->GetStackAmount() == 5)
+                            caster->AddAura(60349, caster);
+                    }
                 }
                 break;
             case SPELLFAMILY_HUNTER:
@@ -1928,6 +1935,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->CastSpell(target, GetEffect(0)->GetAmount(), true, NULL, GetEffect(0));
                         break;
                 }
+                break;
+            case SPELLFAMILY_SHAMAN:
+                // Maelstrom Weapon - remove spell alert
+                if (caster && GetId() == 53817)
+                    caster->RemoveAura(60349);
                 break;
             case SPELLFAMILY_HUNTER:
                 // Glyph of Freezing Trap
