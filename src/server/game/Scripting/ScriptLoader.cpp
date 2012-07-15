@@ -1176,6 +1176,7 @@ void AddNorthrendScripts()
 
 void AddCataclysmScripts()
 {
+#ifdef SCRIPTS
     AddSC_deepholm();
     AddSC_vashjir();
 
@@ -1202,6 +1203,7 @@ void AddCataclysmScripts()
     AddSC_atramedes();
     AddSC_boss_defensing_system();
     AddSC_instance_blackwing_descent();
+#endif
 }
 
 void AddOutdoorPvPScripts()
