@@ -523,6 +523,8 @@ enum ePlayerFields
     PLAYER_END                                = UNIT_END + 0x04D6,
 };
 
+#define PLAYER_END_NOT_SELF PLAYER_FIELD_INV_SLOT_HEAD
+
 enum eGameObjectFields
 {
     OBJECT_FIELD_CREATED_BY                   = OBJECT_END + 0x0000, // Size: 2, Type: LONG, Flags: PUBLIC
