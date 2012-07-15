@@ -509,6 +509,8 @@ struct AchievementCriteriaEntry
         } raw;
     };
 
+    //uint32 unk; // all zeros, 4.3.4
+
     struct
     {
         uint32  additionalRequirement_type;
@@ -524,7 +526,7 @@ struct AchievementCriteriaEntry
     uint32  timerStartEvent;                                // 12 Always appears with timed events, used internally to start the achievement, store 
     uint32  timeLimit;                                      // 13 time limit in seconds
     uint32  showOrder;                                      // 14 show order
-    //uint32 unk1;                                          // 15 only one value, still unknown
+    // ??
     //uint32 unk2;                                          // 16 all zeros
     uint32 moreRequirement[3];                              // 17-19
     uint32 moreRequirementValue[3];                         // 20-22
@@ -549,7 +551,7 @@ struct AchievementCriteriaEntry
     uint32  timerStartEvent;                                // 13 Always appears with timed events, used internally to start the achievement, store 
     uint32  timeLimit;                                      // 14 time limit in seconds
     uint32  showOrder;                                      // 15 show order
-    //DBCString description;                                // 16 description
+    //uint32 unk;                                           // 16 unknown 4.3.4
 
     uint32 moreRequirement[3];                              // 17-19
     uint32 moreRequirementValue[3];                         // 20-22

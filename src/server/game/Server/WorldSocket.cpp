@@ -274,19 +274,9 @@ int WorldSocket::open (void *a)
     m_Address = remote_addr.get_host_addr();
 
     // Send startup packet.
-    WorldPacket packet (SMSG_AUTH_CHALLENGE, 37);
-    
-    BigNumber seed1;
-    seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16), 16);               // new encryption seeds
-    
-    packet << uint8(1);
-    packet << uint32(m_Seed);
+    WorldPacket packet(MSG_VERIFY_CONNECTIVITY, 46);
+    packet << "RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
 
-    BigNumber seed2;
-    seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16), 16);               // new encryption seeds
-    
     if (SendPacket(packet) == -1)
         return -1;
 
@@ -756,6 +746,29 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                 }
                 else
                 {
+                    if (new_pct->GetOpcode() == MSG_VERIFY_CONNECTIVITY)
+                    {
+                        // Verification packet for us
+
+                        WorldPacket authch(SMSG_AUTH_CHALLENGE, 37);
+
+                        for (uint32 i = 0; i < 8; i++)
+                            authch << uint32(0);
+
+                        authch << uint32(m_Seed);
+                        authch << uint8(1);
+
+                        if (SendPacket(authch) == -1)
+                            return -1;
+
+                        return 0;
+                    }
+                    // "Cancel" on Connecting progress bar push
+                    else if (new_pct->GetOpcode() == 0x446D)
+                    {
+                        // We don't care about that packet
+                        return 0;
+                    }
                     sLog->outError ("WorldSocket::ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
                     return -1;
                 }
@@ -794,21 +807,24 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     BigNumber v, s, g, N, K;
     WorldPacket packet;
 
-    recvPacket.read(digest, 7);
+    //recvPacket.read(digest, 7); 406a
     recvPacket.read_skip<uint32>();
     recvPacket.read(digest, 1);
     recvPacket.read_skip<uint64>();
     recvPacket.read_skip<uint32>();
     recvPacket.read(digest, 1);
-    recvPacket.read_skip<uint8>();
-    recvPacket.read(digest, 2);
-    recvPacket >> clientSeed;
+    //recvPacket.read_skip<uint8>(); 406a
+    //recvPacket.read(digest, 2); 406a
+    //recvPacket >> clientSeed;  406a
     recvPacket.read_skip<uint32>();
-    recvPacket.read(digest, 6);
-    recvPacket >> clientBuild;
     recvPacket.read(digest, 1);
-    recvPacket.read_skip<uint8>();
     recvPacket.read_skip<uint32>();
+    recvPacket.read(digest, 7);
+    recvPacket >> clientBuild;
+    recvPacket.read(digest, 8);
+    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>();
+    recvPacket >> clientSeed;
     recvPacket.read(digest, 2);
 
     recvPacket >> m_addonSize;
@@ -826,8 +842,11 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         delete tableauAddon;
     }
 
+    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>();
+
     recvPacket >> accountName;
-   
+
     if (sWorld->IsClosed())
     {
         packet.Initialize(SMSG_AUTH_RESPONSE, 1);

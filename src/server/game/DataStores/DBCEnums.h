@@ -245,8 +245,12 @@ enum AchievementCriteriaTypes
     ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD = 134,
     ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD = 135,
     ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD = 136,
-    // 0..136 => 137 criteria types total
-    ACHIEVEMENT_CRITERIA_TYPE_TOTAL = 137,
+    // 137, achievement for only one record not found on 4.3.4
+    ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE = 138,
+    ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_2 = 139,
+    // 140-150 not found on 4.3.4, probably MoP things?
+    // 0..150 => 151 criteria types total
+    ACHIEVEMENT_CRITERIA_TYPE_TOTAL = 151,
 };
 
 enum AchievementCriteriaMoreReqType
