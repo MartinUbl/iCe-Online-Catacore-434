@@ -8104,12 +8104,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
 
     int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
 
-    // Apply feral bonus from ScalingStatValue if set
-    if (ssv)
-    {
-        if (int32 feral_bonus = ssv->getFeralBonus(proto->ScalingStatValue))
-            ApplyFeralAPBonus(feral_bonus, apply);
-    }
     // Druids get feral AP bonus from weapon dps (lso use DPS from ScalingStat
     if (getClass() == CLASS_DRUID)
     {

@@ -846,7 +846,7 @@ struct CurrencyTypesEntry
     //uint32 unk6;                                          // 6        archaeology-related (?)
     uint32 TotalCap;                                        // 7
     uint32 WeekCap;                                         // 8
-    //int32 unk9;                                           // 9
+    uint32 Flags;                                           // 9
     //DBCString description;                                // 10
 };
 
@@ -1544,11 +1544,6 @@ struct ScalingStatValuesEntry
     uint32 getSpellBonus(uint32 mask) const
     {
         if (mask & 0x00008000) return spellBonus;
-        return 0;
-    }
-    uint32 getFeralBonus(uint32 mask) const                 // removed in 3.2.x?
-    {
-        if (mask & 0x00010000) return 0;                    // not used?
         return 0;
     }
 };
