@@ -124,7 +124,6 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry *auction, SQLTransaction& 
                     bidder_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
             }
         }
-        if (bidder_security > SEC_PLAYER)
         {
             std::string owner_name;
             if (!sObjectMgr->GetPlayerNameByGUID(auction->owner,owner_name))
@@ -132,8 +131,23 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry *auction, SQLTransaction& 
 
             uint32 owner_accid = sObjectMgr->GetPlayerAccountIdByGUID(auction->owner);
 
-            sLog->outCommand(bidder_accId,"GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: " UI64FMTD ". Original owner %s (Account: %u)",
-                bidder_name.c_str(),bidder_accId,pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,owner_name.c_str(),owner_accid);
+            if (bidder_security > SEC_PLAYER)
+                sLog->outCommand(bidder_accId,"GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: " UI64FMTD ". Original owner %s (Account: %u)",
+                    bidder_name.c_str(),bidder_accId,pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,owner_name.c_str(),owner_accid);
+
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) cost:("UI64FMTD") %s:(name:(%s) account:(%u))",
+                         bidder ? bidder->GetSession()->GetRemoteAddress().c_str() : "none",
+                         bidder_accId,
+                         bidder_name.c_str(),
+                         "won auction",
+                           "item",
+                           pItem->GetProto()->Name1,
+                           pItem->GetEntry(),
+                           pItem->GetCount(),
+                         auction->bid,
+                           "seller",
+                           owner_name.c_str(),
+                           owner_accid);
         }
     }
 

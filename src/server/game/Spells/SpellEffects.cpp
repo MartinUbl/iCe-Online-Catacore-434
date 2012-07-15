@@ -5625,6 +5625,20 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
                 itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
         }
+        if (item_owner != p_caster)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u)) %s:(name:(%s) account:(%u))",
+                         p_caster->GetSession()->GetRemoteAddress().c_str(),
+                         p_caster->GetSession()->GetAccountId(),
+                         p_caster->GetName(),
+                         "enchanting (perm)",
+                           "item",
+                           itemTarget->GetProto()->Name1,
+                           itemTarget->GetEntry(),
+                           "for_player",
+                           item_owner->GetName(),
+                           item_owner->GetSession()->GetAccountId());
+        }
 
         // remove old enchanting before applying new if equipped
         item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
@@ -5685,6 +5699,20 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
             p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
             itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
             item_owner->GetName(),item_owner->GetSession()->GetAccountId());
+    }
+    if (item_owner != p_caster)
+    {
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u)) %s:(name:(%s) account:(%u))",
+                     p_caster->GetSession()->GetRemoteAddress().c_str(),
+                     p_caster->GetSession()->GetAccountId(),
+                     p_caster->GetName(),
+                     "enchanting (perm)",
+                       "item",
+                       itemTarget->GetProto()->Name1,
+                       itemTarget->GetEntry(),
+                       "for_player",
+                       item_owner->GetName(),
+                       item_owner->GetSession()->GetAccountId());
     }
 
     // remove old enchanting before applying new if equipped
@@ -5763,6 +5791,21 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
             p_caster->GetName(), p_caster->GetSession()->GetAccountId(),
             itemTarget->GetProto()->Name1, itemTarget->GetEntry(),
             item_owner->GetName(), item_owner->GetSession()->GetAccountId());
+    }
+
+    if (item_owner != p_caster)
+    {
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u)) %s:(name:(%s) account:(%u))",
+                     p_caster->GetSession()->GetRemoteAddress().c_str(),
+                     p_caster->GetSession()->GetAccountId(),
+                     p_caster->GetName(),
+                     "enchanting (temp)",
+                       "item",
+                       itemTarget->GetProto()->Name1,
+                       itemTarget->GetEntry(),
+                       "for_player",
+                       item_owner->GetName(),
+                       item_owner->GetSession()->GetAccountId());
     }
 
     // remove old enchanting before applying new if equipped

@@ -591,6 +591,19 @@ void WorldSession::HandleSellItemOpcode(WorldPacket & recv_data)
                 uint32 money = pProto->SellPrice * count;
                 _player->ModifyMoney(money);
                 _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
+
+                if (pProto->Quality >= ITEM_QUALITY_EPIC)
+                {
+                    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) moneygain:(%u)",
+                                 _player->GetSession()->GetRemoteAddress().c_str(),
+                                 _player->GetSession()->GetAccountId(),
+                                 _player->GetName(),
+                                 "sell item",
+                                 pItem->GetEntry(),
+                                 pProto->Name1,
+                                 count,
+                                 money);
+                }
             }
             else
                 _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
@@ -640,6 +653,19 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, pItem->GetEntry(), pItem->GetCount());
             _player->StoreItem(dest, pItem, true);
+
+            if (pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+            {
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) moneylost:(%u)",
+                             _player->GetSession()->GetRemoteAddress().c_str(),
+                             _player->GetSession()->GetAccountId(),
+                             _player->GetName(),
+                             "buyback item",
+                             pItem->GetEntry(),
+                             pItem->GetProto()->Name1,
+                             pItem->GetCount(),
+                             price);
+            }
         }
         else
             _player->SendEquipError(msg, pItem, NULL);

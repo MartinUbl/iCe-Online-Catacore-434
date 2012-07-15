@@ -1504,6 +1504,17 @@ void Guild::PlayerMoveItemData::LogBankEvent(SQLTransaction& trans, MoveItemData
     // Bank -> Char
     m_pGuild->_LogBankEvent(trans, GUILD_BANK_LOG_WITHDRAW_ITEM, pFrom->GetContainer(), m_pPlayer->GetGUIDLow(), 
         pFrom->GetItem()->GetEntry(), count);
+
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) guild_id:(%u)",
+                 m_pPlayer->GetSession()->GetRemoteAddress().c_str(),
+                 m_pPlayer->GetSession()->GetAccountId(),
+                 m_pPlayer->GetName(),
+                 "guildbank withdraw",
+                   "item",
+                   pFrom->GetItem()->GetProto()->Name1,
+                   pFrom->GetItem()->GetEntry(),
+                   pFrom->GetItem()->GetCount(),
+                 m_pGuild->GetId());
 }
 
 inline uint8 Guild::PlayerMoveItemData::_CanStore(Item* pItem, bool swap)
@@ -1585,10 +1596,23 @@ void Guild::BankMoveItemData::LogBankEvent(SQLTransaction& trans, MoveItemData* 
         // Bank -> Bank
         m_pGuild->_LogBankEvent(trans, GUILD_BANK_LOG_MOVE_ITEM, pFrom->GetContainer(), m_pPlayer->GetGUIDLow(), 
             pFrom->GetItem()->GetEntry(), count, m_container);
-    else 
+    else
+    {
         // Char -> Bank
         m_pGuild->_LogBankEvent(trans, GUILD_BANK_LOG_DEPOSIT_ITEM, m_container, m_pPlayer->GetGUIDLow(), 
             pFrom->GetItem()->GetEntry(), count);
+
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) guild_id:(%u)",
+                     m_pPlayer->GetSession()->GetRemoteAddress().c_str(),
+                     m_pPlayer->GetSession()->GetAccountId(),
+                     m_pPlayer->GetName(),
+                     "guildbank deposit",
+                       "item",
+                       pFrom->GetItem()->GetProto()->Name1,
+                       pFrom->GetItem()->GetEntry(),
+                       pFrom->GetItem()->GetCount(),
+                     m_pGuild->GetId());
+    }
 }
 
 void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
@@ -2620,6 +2644,14 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
             "GM %s (Account: %u) deposit money (Amount: %u) to pGuild bank (Guild ID %u)",
             player->GetName(), player->GetSession()->GetAccountId(), amount, m_id);
     }
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(%u) guild_id:(%u)",
+                 player->GetSession()->GetRemoteAddress().c_str(),
+                 player->GetSession()->GetAccountId(),
+                 player->GetName(),
+                 "guildbank deposit money",
+                 amount,
+                 m_id);
+
     // Log guild bank event
     _LogBankEvent(trans, GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), player->GetGUIDLow(), amount);
 
@@ -2668,6 +2700,14 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
     // Log guild bank event
     _LogBankEvent(trans, repair ? GUILD_BANK_LOG_REPAIR_MONEY : GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), player->GetGUIDLow(), amount);
     CharacterDatabase.CommitTransaction(trans);
+
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(%u) guild_id:(%u)",
+                 player->GetSession()->GetRemoteAddress().c_str(),
+                 player->GetSession()->GetAccountId(),
+                 player->GetName(),
+                 "guildbank withdraw money",
+                 amount,
+                 m_id);
 
     SendMoneyInfo(session);
     if (!repair)

@@ -235,6 +235,19 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         myItems[i]->GetProto()->Name1, myItems[i]->GetEntry(), myItems[i]->GetCount(),
                         trader->GetName(), trader->GetSession()->GetAccountId());
                 }
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) %s:(name:(%s) account:(%u))",
+                             _player->GetSession()->GetRemoteAddress().c_str(),
+                             _player->GetSession()->GetAccountId(),
+                             _player->GetName(),
+                             "trade",
+                               "item",
+                               myItems[i]->GetProto()->Name1,
+                               myItems[i]->GetEntry(),
+                               myItems[i]->GetCount(),
+                               "to_player",
+                               trader->GetName(),
+                               trader->GetSession()->GetAccountId());
+
 
                 // adjust time (depends on /played)
                 if (myItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
@@ -253,6 +266,18 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         hisItems[i]->GetProto()->Name1, hisItems[i]->GetEntry(), hisItems[i]->GetCount(),
                         _player->GetName(), _player->GetSession()->GetAccountId());
                 }
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) %s:(name:(%s) account:(%u))",
+                             trader->GetSession()->GetRemoteAddress().c_str(),
+                             trader->GetSession()->GetAccountId(),
+                             trader->GetName(),
+                             "trade",
+                               "item",
+                               hisItems[i]->GetProto()->Name1,
+                               hisItems[i]->GetEntry(),
+                               hisItems[i]->GetCount(),
+                               "to_player",
+                               _player->GetName(),
+                               _player->GetSession()->GetAccountId());
 
                 // adjust time (depends on /played)
                 if (hisItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
@@ -571,6 +596,31 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
                     his_trade->GetMoney(),
                     _player->GetName(), _player->GetSession()->GetAccountId());
             }
+        }
+
+        if (my_trade->GetMoney() > 0)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) account:(%u))",
+                         _player->GetSession()->GetRemoteAddress().c_str(),
+                         _player->GetSession()->GetAccountId(),
+                         _player->GetName(),
+                         "trade money",
+                         my_trade->GetMoney(),
+                           "to_player",
+                           trader->GetName(),
+                           trader->GetSession()->GetAccountId());
+        }
+        else if (his_trade->GetMoney() > 0)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) account:(%u))",
+                         trader->GetSession()->GetRemoteAddress().c_str(),
+                         trader->GetSession()->GetAccountId(),
+                         trader->GetName(),
+                         "trade money",
+                         his_trade->GetMoney(),
+                           "to_player",
+                           _player->GetName(),
+                           _player->GetSession()->GetAccountId());
         }
 
         // update money

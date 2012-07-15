@@ -675,7 +675,13 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
 
     std::string IP_str = GetRemoteAddress();
     sLog->outDetail("Account: %d (IP: %s) Create Character:[%s] (GUID: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
-    sLog->outChar("Account: %d (IP: %s) Create Character:[%s] (GUID: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) guid:(%u)",
+                 IP_str.c_str(),
+                 GetAccountId(),
+                 name.c_str(),
+                 "create",
+                 pNewChar->GetGUIDLow());
+
     sScriptMgr->OnPlayerCreate(pNewChar);
     delete pNewChar;                                        // created only to call SaveToDB()
 
@@ -725,7 +731,13 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket & recv_data)
 
     std::string IP_str = GetRemoteAddress();
     sLog->outDetail("Account: %d (IP: %s) Delete Character:[%s] (GUID: %u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
-    sLog->outChar("Account: %d (IP: %s) Delete Character:[%s] (GUID: %u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) guid:(%u)",
+                 IP_str.c_str(),
+                 GetAccountId(),
+                 name.c_str(),
+                 "delete",
+                 GUID_LOPART(guid));
+
     sScriptMgr->OnPlayerDelete(guid);
 
     if (sLog->IsOutCharDump())                                // optimize GetPlayerDump call
@@ -1024,8 +1036,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         SendNotification(LANG_GM_ON);
 
     std::string IP_str = GetRemoteAddress();
-    sLog->outChar("Account: %d (IP: %s) Login Character:[%s] (GUID: %u)",
-        GetAccountId(),IP_str.c_str(),pCurrChar->GetName() ,pCurrChar->GetGUIDLow());
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) guid:(%u)",
+                 IP_str.c_str(),
+                 GetAccountId(),
+                 pCurrChar->GetName(),
+                 "login",
+                 pCurrChar->GetGUIDLow());
 
     if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1214,7 +1230,13 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult result, std:
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME), guidLow);
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", guidLow);
 
-    sLog->outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s", GetAccountId(), GetRemoteAddress().c_str(), oldname.c_str(), guidLow, newname.c_str());
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) new_name:(%s) guid:(%u)",
+                 GetRemoteAddress().c_str(),
+                 GetAccountId(),
+                 oldname.c_str(),
+                 "rename",
+                 newname.c_str(),
+                 guidLow);
 
     WorldPacket data(SMSG_CHAR_RENAME, 1+8+(newname.size()+1));
     data << uint8(RESPONSE_SUCCESS);
@@ -1520,7 +1542,13 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     {
         std::string oldname = result->Fetch()[0].GetString();
         std::string IP_str = GetRemoteAddress();
-        sLog->outChar("Account: %d (IP: %s), Character[%s] (guid:%u) Customized to: %s", GetAccountId(), IP_str.c_str(), oldname.c_str(), GUID_LOPART(guid), newname.c_str());
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) new_name:(%s) guid:(%u)",
+                     IP_str.c_str(),
+                     GetAccountId(),
+                     oldname.c_str(),
+                     "customize",
+                     newname.c_str(),
+                     GUID_LOPART(guid));
     }
     Player::Customize(guid, gender, skin, face, hairStyle, hairColor, facialHair);
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_CUSTOMIZE), GUID_LOPART(guid));

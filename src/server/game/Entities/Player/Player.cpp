@@ -13297,6 +13297,18 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         else if (Bag *pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
             pBag->RemoveItem(slot, update);
 
+        if (pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u)",
+                         GetSession()->GetRemoteAddress().c_str(),
+                         GetSession()->GetAccountId(),
+                         GetName(),
+                         "destroy item",
+                         pItem->GetEntry(),
+                         pItem->GetProto()->Name1,
+                         pItem->GetCount());
+        }
+
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
@@ -25287,6 +25299,23 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
             item->is_looted = true;
 
         --loot->unlootedCount;
+
+        if (newitem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
+                         GetSession()->GetRemoteAddress().c_str(),
+                         GetSession()->GetAccountId(),
+                         GetName(),
+                         "loot item",
+                         newitem->GetEntry(),
+                         newitem->GetProto()->Name1,
+                         newitem->GetCount(),
+                           "pos",
+                           GetPositionX(),
+                           GetPositionY(),
+                           GetPositionZ(),
+                           GetMapId());
+        }
 
         SendNewItem(newitem, uint32(item->count), false, false, true);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);

@@ -258,6 +258,19 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
                         GetPlayerName(), GetAccountId(), item->GetProto()->Name1, item->GetEntry(), item->GetCount(), receiver.c_str(), rc_account);
                 }
 
+		sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u)) %s:(name:(%s) account:(%u))",
+			     pl->GetSession()->GetRemoteAddress().c_str(),
+			     GetAccountId(),
+			     GetPlayerName(),
+			     "mail item",
+			       "item",
+			       item->GetProto()->Name1,
+			       item->GetEntry(),
+			       item->GetCount(),
+			       "recipient",
+			       receiver.c_str(),
+			       rc_account);
+
                 item->SetNotRefundable(GetPlayer()); // makes the item no longer refundable
                 pl->MoveItemFromInventory(items[i]->GetBagSlot(), item->GetSlot(), true);
 
@@ -281,6 +294,19 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
             sLog->outCommand(GetAccountId(),"GM %s (Account: %u) mail money:  "UI64FMTD" to player: %s (Account: %u)",
                 GetPlayerName(), GetAccountId(), money, receiver.c_str(), rc_account);
         }
+        if (money > 0)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) account:(%u))",
+                         pl->GetSession()->GetRemoteAddress().c_str(),
+                         GetAccountId(),
+                         GetPlayerName(),
+                         "mail money",
+                         money,
+                           "recipient",
+                           receiver.c_str(),
+                           rc_account);
+        }
+
     }
 
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
@@ -468,7 +494,6 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
 
             uint32 sender_accId = 0;
 
-            if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
             {
                 std::string sender_name;
                 if (receive)
@@ -484,11 +509,24 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
                     if (!sObjectMgr->GetPlayerNameByGUID(sender_guid,sender_name))
                         sender_name = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
                 }
-                sLog->outCommand(GetAccountId(),"GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money:  "UI64FMTD" to player: %s (Account: %u)",
-                    GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
+                if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
+                    sLog->outCommand(GetAccountId(),"GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money:  "UI64FMTD" to player: %s (Account: %u)",
+                        GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
+
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) entry:(%u) count:(%u)) %s:(name:(%s) account:(%u))",
+                             pl->GetSession()->GetRemoteAddress().c_str(),
+                             GetAccountId(),
+                             GetPlayerName(),
+                             "mail cod",
+                             m->COD,
+                               "item",
+                               it->GetProto()->Name1,
+                               it->GetEntry(),
+                               it->GetCount(),
+                               "recipient",
+                               sender_name.c_str(),
+                               sender_accId);
             }
-            else if (!receive)
-                sender_accId = sObjectMgr->GetPlayerAccountIdByGUID(sender_guid);
 
             // check player existence
             if (receive || sender_accId)
