@@ -26,6 +26,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "DBCStructure.h"
+#include "DB2Structure.h"
 
 enum ItemModType
 {

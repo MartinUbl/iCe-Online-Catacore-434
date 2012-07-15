@@ -24,6 +24,10 @@
 #define TRINITY_DBCSTORES_H
 
 #include "Common.h"
+
+#include "DB2Stores.h"
+#include "DB2Structure.h"
+
 #include "DBCStore.h"
 #include "DBCStructure.h"
 
@@ -130,7 +134,6 @@ extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandCasterStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageWandStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
-extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
 extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;

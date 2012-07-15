@@ -145,6 +145,7 @@ void SpellEntry::LoadSpellAddons()
         EffectTriggerSpell[i] = SpellEffect ? SpellEffect->EffectTriggerSpell : 0;
         EffectImplicitTargetA[i] = SpellEffect ? SpellEffect->EffectImplicitTargetA : 0;
         EffectImplicitTargetB[i] = SpellEffect ? SpellEffect->EffectImplicitTargetB : 0;
+        EffectFlags[i] = SpellEffect ? SpellEffect->EffectFlags : 0;
     }
     
     SpellEquippedItemsEntry const* SpellEquippedItems = GetSpellEquippedItems();
