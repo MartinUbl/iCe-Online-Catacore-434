@@ -581,6 +581,9 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
             return progress->counter >= achievementCriteria->raw.count;
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
             return progress->counter >= achievementCriteria->reach_level.level;
+        case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
+        case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
+            return progress->counter >= achievementCriteria->be_spell_target.spellCount;
         default:
             break;
     }
