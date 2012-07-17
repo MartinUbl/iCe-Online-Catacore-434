@@ -2290,13 +2290,21 @@ void Player::RegenerateAll()
     //    return;
 
     m_regenTimerCount += m_regenTimer;
+    uint8 cl = getClass();
 
-    Regenerate(POWER_ENERGY);
-    Regenerate(POWER_FOCUS);
-    Regenerate(POWER_MANA);
+    if (cl == CLASS_HUNTER)
+        Regenerate(POWER_FOCUS);
+    else if (cl == CLASS_DEATH_KNIGHT)
+        Regenerate(POWER_RUNIC_POWER);
+    else
+    {
+        Regenerate(POWER_ENERGY);
+        Regenerate(POWER_MANA);
+        Regenerate(POWER_RAGE);
+    }
 
     // Runes act as cooldowns, and they don't need to send any data
-    if (getClass() == CLASS_DEATH_KNIGHT)
+    if (cl == CLASS_DEATH_KNIGHT)
     {
         for (uint32 i = 0; i < MAX_RUNES; i += 2)
         {
@@ -2334,10 +2342,6 @@ void Player::RegenerateAll()
         {
             RegenerateHealth();
         }
-
-        Regenerate(POWER_RAGE);
-        if (getClass() == CLASS_DEATH_KNIGHT)
-            Regenerate(POWER_RUNIC_POWER);
         
         m_regenTimerCount -= 2000;
     }
@@ -2376,28 +2380,20 @@ void Player::Regenerate(Powers power)
             else
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
         }   break;
-        case POWER_RAGE:                                    // Regenerate rage
+        case POWER_RAGE:                                    // deplete rage
+        case POWER_RUNIC_POWER:                             // deplete runic power
         {
             if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             {
-                float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                addvalue += -20 * RageDecreaseRate / haste;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                addvalue += -0.0125f * m_regenTimer;        // 1.25 per second
             }
         }   break;
         case POWER_FOCUS:                                   // Regenerate focus (hunter)
-            addvalue = 0.006f * m_regenTimer * haste;
+            addvalue += 0.005f * m_regenTimer * haste;      // 5 per second
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);
+            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);  // 10 per second
             break;
-        case POWER_RUNIC_POWER:
-        {
-            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-            {
-                float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
-            }
-        }   break;
         case POWER_RUNE:
         case POWER_HAPPINESS:
         case POWER_HEALTH:
