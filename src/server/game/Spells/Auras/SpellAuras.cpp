@@ -1517,7 +1517,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->HasAura(56829) &&                   // Glyph of Misdirection
                         caster->GetPetGUID() == target->GetGUID())  // casters pet is the target
                     {
-                        caster->ToPlayer()->RemoveSpellCooldown(34477);
+                        caster->ToPlayer()->RemoveSpellCooldown(34477, true);
                     }
                 }
                 break;
