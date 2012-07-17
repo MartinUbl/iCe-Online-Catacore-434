@@ -1510,6 +1510,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
                         }
                     }
+                    // Misdirection
+                    else if (GetId() == 34477 &&
+                        caster && target &&
+                        caster->GetTypeId() == TYPEID_PLAYER &&
+                        caster->HasAura(56829) &&                   // Glyph of Misdirection
+                        caster->GetPetGUID() == target->GetGUID())  // casters pet is the target
+                    {
+                        caster->ToPlayer()->RemoveSpellCooldown(34477);
+                    }
                 }
                 break;
             case SPELLFAMILY_DRUID:
