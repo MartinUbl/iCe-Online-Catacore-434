@@ -5816,9 +5816,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     CastCustomSpell(this, 91394, &bp0, 0, 0, true);
                 }
             }
-
+        //UPDATE `spell_proc_event` SET SpellFamilyMask0=4194323 WHERE entry IN (44445,44446,44448);
+            // Hot Streak
+            if (dummySpell->Id == 44445)
+            {
+                if (procEx & PROC_EX_CRITICAL_HIT)
+                    if (roll_chance_i(33))
+                        CastSpell(this, 48108, true);
+                return true;
+            }
             // Improved Hot Streak
-            if (dummySpell->SpellIconID == 2999 && dummySpell->Id != 44445)
+            if (dummySpell->Id == 44446 || dummySpell->Id == 44448)
             {
                 if (effIndex != 0)
                     return false;
@@ -18630,7 +18638,6 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 14751:
         case 53576:
         case 53569:
-        case 44445:
             return true; // Continue handling
     }
 
@@ -18727,26 +18734,7 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         }
         case SPELLFAMILY_MAGE:
         {
-            // Hot Streak
-            if (dummySpell->Id == 44445
-                && procExtra & PROC_EX_CRITICAL_HIT
-                && procSpell != NULL
-                && !(procFlag & PROC_FLAG_DONE_PERIODIC))
-            {
-                // Procs only from several spells
-                if (procSpell->Id == 133      // Fireball
-                    || procSpell->Id == 44614 // Frostfire Bolt
-                    || procSpell->Id == 2948  // Scorch
-                    || procSpell->Id == 11366 // Pyroblast
-                    || procSpell->Id == 92315 // Pyroblast!
-                    || procSpell->Id == 2136) // Fire Blast
-                {
-                    if (roll_chance_i(33))
-                        CastSpell(this, 48108, true);
-
-                    return true;
-                }
-            }
+            break;
         }
         default:
             break;

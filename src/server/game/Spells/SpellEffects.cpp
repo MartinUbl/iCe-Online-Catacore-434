@@ -540,6 +540,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // since 4.0.1, every spell has a 40% chance of enabling Arcane Missiles
                 // but is canceled by presence of talents:
                 if (!(m_caster->HasAura(44445) || // Hot Streak
+                    m_caster->HasAura(44446) ||  // Improved Hot Streak #1 (overrides Hot Streak)
+                    m_caster->HasAura(44448) ||  // Improved Hot Streak #2
                     m_caster->HasAura(44546) ||  // Mind Freeze #1
                     m_caster->HasAura(44548) ||  // Mind Freeze #2
                     m_caster->HasAura(44549) ))  // Mind Freeze #3
