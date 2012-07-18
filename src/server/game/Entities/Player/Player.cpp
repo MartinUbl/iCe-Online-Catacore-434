@@ -7544,6 +7544,12 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
+    if (GetSession()->GetSecurity() == SEC_PLAYER && GetZoneId() == 876) // Prohibited zone GM Island
+    {
+        TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+        GetSession()->LogoutRequest(1);
+    }
+
     // zone changed, so area changed as well, update it
     UpdateArea(newArea);
 
