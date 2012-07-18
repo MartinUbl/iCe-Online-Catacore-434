@@ -555,9 +555,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             CastSpell(this, 87515, true); // Cooldown marker
             if (HasAura(11210))
-                CastSpell(pVictim, 83046, true);
+                pVictim->CastSpell(pVictim, 83046, true); // stun #1
             else if (HasAura(12592))
-                CastSpell(pVictim, 83047, true);
+                pVictim->CastSpell(pVictim, 83047, true); // stun #2
         }
 
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
