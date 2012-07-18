@@ -5364,6 +5364,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_ERROR;
     }
 
+    // Disallow using any spell in map "759"
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMapId() == 759
+        && m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
+        return SPELL_FAILED_NOT_HERE;
+
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
