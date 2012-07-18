@@ -1728,6 +1728,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                     }
                 }
+
+                if (GetId() == 86346) // Colossus Smash
+                {
+                    if (target->HasAura(58567)) //Sunder Armor
+                        if (caster->HasAura(89003)) // Glyph of Colossus Smash
+                            caster->CastSpell(target, 58567, false);
+                }
                 break;
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
