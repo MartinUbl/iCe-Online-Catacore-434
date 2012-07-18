@@ -2862,6 +2862,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     unit->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
                 else if (!unitTarget->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
                     unitTarget->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
+
+                if (m_caster->GetTypeId() == TYPEID_PLAYER // is Player
+                    && m_caster->HasAura(59309)) // Has Glyph of Resilient Grip
+                {
+                    if (unitTarget->IsImmunedToSpell(sSpellStore.LookupEntry(49560))) // if is target immune
+                        m_caster->ToPlayer()->RemoveSpellCooldown(49560, true); // remove spell cooldown
+                }
                 return;
             case 46584: // Raise Dead
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
