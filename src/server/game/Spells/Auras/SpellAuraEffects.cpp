@@ -4414,6 +4414,7 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const *aurApp, uint8 mode,
         return;
 
     Unit *target = aurApp->GetTarget();
+    Unit *caster = GetCaster();
 
     if (apply)
     {
@@ -4424,6 +4425,14 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const *aurApp, uint8 mode,
                 if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
+
+        if (GetId() == 47476) // Strangulate
+        {
+            if (target->hasUnitState(UNIT_STAT_CASTING))
+                if (caster->HasAura(58618)) // Glyph of Strangulate
+                    if (Aura*base = GetBase())
+                        base->SetDuration(base->GetDuration()+2000);
+        }
     }
     else
     {
