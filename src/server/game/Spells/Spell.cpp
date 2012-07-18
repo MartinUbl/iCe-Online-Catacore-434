@@ -5369,6 +5369,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         && m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
         return SPELL_FAILED_NOT_HERE;
 
+    // Check Noggenfogger Elixir cast in BG or Arenas (Special effect Dummy)
+    if (m_spellInfo->Id == 16589 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMap()->IsBattlegroundOrArena())
+        return SPELL_FAILED_NOT_HERE;
+
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
