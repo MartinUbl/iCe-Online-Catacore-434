@@ -7468,7 +7468,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Prohibited area teleport
     if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
     {
-        if (GetSession()->GetPlayer()->getLevel() < 58)
+        if (getLevel() < 58)
         {
             switch(newZone)
             {
@@ -7481,17 +7481,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 case 3519: // Terokkar Forest
                 case 3521: // Zangarmarsh
                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
-                    if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
-                        GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+                    if (HasSpellCooldown(8690))
+                        ModifySpellCooldown(8690,1800, true);
 
-                    GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                    AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
                     GetSession()->SendNotification("You must be at least level 58 for enter");
                     break;
                 default:
                     break;
             }
          }
-         if (GetSession()->GetPlayer()->getLevel() < 68)
+         if (getLevel() < 68)
          {
              switch(newZone)
              {
@@ -7508,17 +7508,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                  case 66:   // Zul'Drak
                  case 3537: // Borean Tundra
                      TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
-                     if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
-                         GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+                     if (HasSpellCooldown(8690))
+                         ModifySpellCooldown(8690,1800, true);
 
-                     GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                     AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
                      GetSession()->SendNotification("You must be at least level 68 for enter");
                      break;
                  default:
                      break;
              }
          }
-        if (GetSession()->GetPlayer()->GetMapId() == 746) // Special for Plantaz
+        if (GetMapId() == 746) // Special for Plantaz
         {
             AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurection Sickness)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
@@ -7530,16 +7530,16 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 counter = field[0].GetUInt32();
                 duvod = field[1].GetString();
             }
-            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
-            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
+            ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
+            ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
         }
 
         Aura* aur = GetAura(15007);
 
-        if (aur && aur->IsPermanent() && GetSession()->GetPlayer()->GetMapId() != 746) // Exiting Plantaz
+        if (aur && aur->IsPermanent() && GetMapId() != 746) // Exiting Plantaz
         {
             TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f); // Plantaz
-            GetSession()->SendNotification("Nemuzes se portovat z plantazee, dokud nebudes mit splneny svuj trest!"); // Czech
+            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
             GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
         }
     }
