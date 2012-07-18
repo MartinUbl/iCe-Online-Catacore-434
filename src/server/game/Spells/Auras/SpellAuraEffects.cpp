@@ -7225,8 +7225,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case SPELLFAMILY_HUNTER:
                     // Misdirection
-                    if (GetId() == 34477 && target)
+                    if (GetId() == 34477 && target) // dummy aura is applied to the hunter
+                    {
+                        if (target->GetTypeId() == TYPEID_PLAYER &&
+                            target->HasAura(56829)) // Glyph of Misdirection
+                        {
+                            if (Unit* misdir = target->GetMisdirectionTarget())
+                                if (misdir->GetGUID() == target->GetPetGUID()) // threat is being redirected to the hunters pet
+                                    target->ToPlayer()->RemoveSpellCooldown(34477, true);
+                        }
                         target->SetReducedThreatPercent(0, 0);
+                    }
                     break;
                 case SPELLFAMILY_DEATHKNIGHT:
                     // Summon Gargoyle (will start feeding gargoyle)
