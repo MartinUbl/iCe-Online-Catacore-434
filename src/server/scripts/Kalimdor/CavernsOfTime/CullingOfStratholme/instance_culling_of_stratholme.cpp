@@ -58,6 +58,43 @@ public:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
 
+        std::list<uint32> m_uiZombieDeathTimeStamp;
+        int m_iZombieDeathCounter;
+        int m_iZombiefestAchievementCounter;
+
+        void Initialize() { ZombiefestReset(); }
+
+        void ZombiefestReset()
+        {
+            m_uiZombieDeathTimeStamp.clear();
+            m_iZombieDeathCounter = 0;
+            m_iZombiefestAchievementCounter = 0;
+        }
+
+        void RecordDeathTimeStamp()
+        {
+            m_uiZombieDeathTimeStamp.push_back(getMSTime());
+            m_iZombieDeathCounter++;
+        }
+
+        bool AchievementCounter()
+        {
+            if (m_iZombieDeathCounter >= 100)
+            {
+                uint32 m_uiTime = getMSTime();
+                m_iZombiefestAchievementCounter = 0;
+                for(std::list<uint32>::const_iterator itr = m_uiZombieDeathTimeStamp.begin(); itr != m_uiZombieDeathTimeStamp.end(); ++itr)
+                {
+                    if (*itr >= (m_uiTime - 60000))
+                        m_iZombiefestAchievementCounter++;
+                }
+
+                    if (m_iZombiefestAchievementCounter == 100)
+                        return true;
+            }
+            return false;
+        }
+
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
@@ -122,6 +159,13 @@ public:
         {
             switch(type)
             {
+                case DATA_NPC_ZOMBIE:
+                {
+                    RecordDeathTimeStamp();
+                    if (AchievementCounter())
+                        DoCompleteAchievement(1872);
+                    break;
+                }
                 case DATA_MEATHOOK_EVENT:
                     m_auiEncounter[0] = data;
                     break;

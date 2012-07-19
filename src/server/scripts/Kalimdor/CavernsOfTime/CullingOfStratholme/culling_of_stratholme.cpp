@@ -1198,8 +1198,46 @@ public:
     };
 
 };
+class npc_zombie : public CreatureScript
+{
+public:
+    npc_zombie() : CreatureScript("npc_zombie") {}
 
+    struct npc_zombieAI : public ScriptedAI
+    {
+        npc_zombieAI(Creature* pCreature) : ScriptedAI(pCreature) 
+        {
+            pInstance = pCreature->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
+
+        void JustDied(Unit* pKiller)
+        {
+            if (pInstance && pInstance->instance->IsHeroic())
+                pInstance->SetData(DATA_NPC_ZOMBIE, SPECIAL);
+        }
+
+        void EnterCombat(Unit* /*Who*/) {}
+
+        void AttackStart(Unit* who)
+        {
+            UnitAI::AttackStart(who);
+        }
+
+        void UpdateAI(const uint32 diff) 
+        {
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_zombieAI(pCreature);
+    }
+};
 void AddSC_culling_of_stratholme()
 {
     new npc_arthas();
+    new npc_zombie();
 }
