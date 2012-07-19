@@ -4456,8 +4456,8 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 15237: // Holy Nova
+        case 23455: // Holy Nova - heal
             spellInfo->EffectRadiusIndex[0] = 13;
-            spellInfo->EffectRadiusIndex[1] = 13;
             count++;
             break;
         case 87904: // Feedback (Al'akir)
