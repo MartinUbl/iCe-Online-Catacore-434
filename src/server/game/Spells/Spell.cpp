@@ -2732,6 +2732,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 83619) // Fire Power (Mage: Flame Orb explosion)
+                {
+                    radius = 10.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;

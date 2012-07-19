@@ -3403,6 +3403,7 @@ enum eFlameOrb
 {
     SPELL_FLAME_ORB_DAMAGE_VISUAL   = 86719,
     SPELL_FLAME_ORB_DAMAGE          = 82739,
+    SPELL_FLAME_ORB_FIRE_POWER_EXPLODE = 83619,
     FLAME_ORB_DISTANCE              = 120
 };
 
@@ -3465,6 +3466,11 @@ public:
 
             if (uiDespawnTimer <= diff)
             {
+                if (Unit* owner = me->GetOwner())
+                    if (AuraEffect* aureff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE,SPELLFAMILY_MAGE,31,EFFECT_0))
+                        if (const SpellEntry* spellinfo = aureff->GetSpellProto())
+                            if (roll_chance_i(spellinfo->GetProcChance()))
+                                owner->CastSpell(me, SPELL_FLAME_ORB_FIRE_POWER_EXPLODE, true);
                 me->SetVisibility(VISIBILITY_OFF);
                 me->DisappearAndDie();
             }
