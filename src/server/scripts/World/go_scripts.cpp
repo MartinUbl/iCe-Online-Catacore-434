@@ -1332,6 +1332,12 @@ public:
         {
             if (pInstance->GetData(j) == DONE) // if is GetData(j) == DONE ..set data[j] = true
                 data[j] = true;
+
+            if (pInstance->GetData(j) == IN_PROGRESS)
+            {
+                pPlayer->GetSession()->SendNotification("Encounter is IN PROGRESS!");
+                return false;
+            }
         }
 
         uint8 k = 5;
