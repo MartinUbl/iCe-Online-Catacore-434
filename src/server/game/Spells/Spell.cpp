@@ -5373,9 +5373,25 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // Disallow using any spell in map "759"
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMapId() == 759
-        && m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
-        return SPELL_FAILED_NOT_HERE;
+    if (m_caster->GetMapId() == 759
+        && ((m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
+        || m_caster->ToPet()))
+    {
+        static const uint32 allowed_spells[] = // Hearthstone, Stuck, All mage portals
+        {
+            8690, 7355, 53142, 11419, 32266, 11416, 11417, 35717, 33691, 32267, 49361, 10059,
+            49360, 88345, 88346, 11418,53141,17608, 32268, 44089, 17609, 184594, 33728, 32270,
+            49363, 17334, 49362, 17610, 88339, 88341, 17611, 8326, 15007
+        };
+
+        for (uint32 i = 0;i < sizeof(allowed_spells) / sizeof(uint32); i++)
+        {
+            if (m_spellInfo->Id == allowed_spells[i])
+                return SPELL_CAST_OK;
+        }
+
+         return SPELL_FAILED_NOT_HERE;
+    }
 
     // Check Noggenfogger Elixir cast in BG or Arenas (Special effect Dummy)
     if (m_spellInfo->Id == 16589 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMap()->IsBattlegroundOrArena())
