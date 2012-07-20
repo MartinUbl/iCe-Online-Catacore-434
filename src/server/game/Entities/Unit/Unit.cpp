@@ -18690,29 +18690,29 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
                                 case 2061:  // Flash Heal
                                 case 2060:  // Greater Heal
                                 case 32546: // Binding Heal
-                                    CastSpell(this, 81208, true); // Refreshing Renew spell (81585) has its script effect handler
                                     RemoveAurasDueToSpell(81206);
                                     RemoveAurasDueToSpell(81207);
                                     RemoveAurasDueToSpell(81209);
                                     RemoveAurasDueToSpell(14751);
+                                    CastSpell(this, 81208, true); // Refreshing Renew spell (81585) has its script effect handler
                                     return true;
                                 // Chakra: Sanctuary
                                 case 596:   // Prayer of Healing
                                 case 33076: // Prayer of Mending
-                                    CastSpell(this, 81206, true);
-                                    CastSpell(this, 81207, true);
                                     RemoveAurasDueToSpell(81208);
                                     RemoveAurasDueToSpell(81209);
                                     RemoveAurasDueToSpell(14751);
+                                    CastSpell(this, 81206, true);
+                                    CastSpell(this, 81207, true);
                                     return true;
                                 // Chakra: Chastise
                                 case 585:   // Smite
                                 case 73510: // Mind Spike
-                                    CastSpell(this, 81209, true);
                                     RemoveAurasDueToSpell(81206);
                                     RemoveAurasDueToSpell(81207);
                                     RemoveAurasDueToSpell(81208);
                                     RemoveAurasDueToSpell(14751);
+                                    CastSpell(this, 81209, true);
                                     return true;
                                 default:
                                     break;

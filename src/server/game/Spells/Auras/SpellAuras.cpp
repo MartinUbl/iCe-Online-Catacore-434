@@ -1342,6 +1342,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                         break;
                     }
+                // T11 4p bonus apply
+                case 81206:
+                case 81208:
+                case 81209:
+                    if (caster->HasAura(89911))
+                        caster->AddAura(89912, caster);
+                    break;
                 // Resurrection Sickness for special iCe purposes
                 // weirdly SPELLFAMILY_PRIEST
                 case 15007:
@@ -1857,6 +1864,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->RemoveAurasDueToSpell(87154);
                             break;
                         }
+                    // T11 4p bonus remove (not in Chakra state)
+                    case 81206:
+                    case 81208:
+                    case 81209:
+                        caster->RemoveAura(89912, caster->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
+                        break;
                     default: break;
                 }
                 break;
