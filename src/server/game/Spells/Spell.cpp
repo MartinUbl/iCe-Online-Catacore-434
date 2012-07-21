@@ -5397,6 +5397,10 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_spellInfo->Id == 16589 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMap()->IsBattlegroundOrArena())
         return SPELL_FAILED_NOT_HERE;
 
+    // Explicitly allow usage of spell Dropping Heavy Bomb used for quest Mission: Abyssal Shelf only when riding taxi
+    if (m_spellInfo->Id == 33836 && (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->ToPlayer()->isInFlight()))
+        return SPELL_FAILED_NOT_HERE;
+
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
