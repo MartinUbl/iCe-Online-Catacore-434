@@ -3795,10 +3795,13 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 caster->RemoveAurasDueToSpell(90174);
             }
 
-            addhealth *= holypower;
+            // This spell retains 0.198 of attack power as heal value
+            addhealth += 0.198f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
             // Apply spell power bonus
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
+            addhealth *= holypower;
 
             // Selfless Healer
             if (caster != unitTarget)
