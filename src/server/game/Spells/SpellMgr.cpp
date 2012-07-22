@@ -3906,6 +3906,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[2] = 8;
             count++;
             break;
+        case 96273: // Charge Stun - only melee range (talent Blitz uses this)
+            spellInfo->rangeIndex = 8;
+            count++;
+            break;
         case 77486: // Shadow Orb Power (disable spell proc, done in other way)
             spellInfo->Effect[0] = 0;
             break;
