@@ -279,12 +279,14 @@ World::AddSession_ (WorldSession* s)
     }
 
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1 + 1);
-    packet << uint8(AUTH_OK);
+    packet << uint8(0x40);                                 // 4.3.4 flags (isQueued, hasAccountInfo; TODO: implement)
     packet << uint32(0);                                   // BillingTimeRemaining
-    packet << uint8(0);                                    // BillingPlanFlags
-    packet << uint32(0);                                   // BillingTimeRested
     packet << uint8(s->Expansion());                       // payed expansion
+    packet << uint32(0);                                   // 4.3.4, unknown
     packet << uint8(s->Expansion());                       // server expansion
+    packet << uint32(0);                                   // BillingTimeRested
+    packet << uint8(0);                                    // BillingPlanFlags
+    packet << uint8(AUTH_OK);
     s->SendPacket(&packet);
 
     s->SendAddonsInfo();

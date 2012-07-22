@@ -280,6 +280,17 @@ int WorldSocket::open (void *a)
     if (SendPacket(packet) == -1)
         return -1;
 
+    WorldPacket authch(SMSG_AUTH_CHALLENGE, 37);
+
+    for (uint32 i = 0; i < 8; i++)
+        authch << uint32(0);
+
+    authch << uint32(m_Seed);
+    authch << uint8(1);
+
+    if (SendPacket(authch) == -1)
+        return -1;
+
     // Register with ACE Reactor
     if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
     {
@@ -749,18 +760,6 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                     if (new_pct->GetOpcode() == MSG_VERIFY_CONNECTIVITY)
                     {
                         // Verification packet for us
-
-                        WorldPacket authch(SMSG_AUTH_CHALLENGE, 37);
-
-                        for (uint32 i = 0; i < 8; i++)
-                            authch << uint32(0);
-
-                        authch << uint32(m_Seed);
-                        authch << uint8(1);
-
-                        if (SendPacket(authch) == -1)
-                            return -1;
-
                         return 0;
                     }
                     // "Cancel" on Connecting progress bar push
