@@ -8344,6 +8344,21 @@ void Spell::EffectInebriate(SpellEffIndex /*effIndex*/)
 
     Player *player = (Player*)unitTarget;
     uint16 currentDrunk = player->GetDrunkValue();
+
+    // Drunken Vomit
+    if (m_CastItem && currentDrunk >= 25000 && damage > 0)
+    {
+        if (roll_chance_i(damage))
+        {
+            SpellCastTargets targets;
+            targets.setUnitTarget(player);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(67468);
+            // not triggered because of 2s cast time (not instant)
+            Spell *vomit = new Spell(player, spellInfo, false);
+            vomit->prepare(&targets);
+        }
+    }
+    
     int16 drunkMod = damage * 256;
     if (drunkMod < 0 && currentDrunk < (-drunkMod))
         currentDrunk = 0;
