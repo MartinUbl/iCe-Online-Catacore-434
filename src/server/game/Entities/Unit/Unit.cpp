@@ -601,7 +601,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f);
 
-                RewardRage(rage_damage, weaponSpeedHitFactor, true);
+                if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
+                    RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
                 break;
             }
@@ -609,7 +610,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f);
 
-                RewardRage(rage_damage, weaponSpeedHitFactor, true);
+                if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
+                    RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
                 break;
             }
