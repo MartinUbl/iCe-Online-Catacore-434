@@ -448,6 +448,7 @@ class Spell
         void TakeReagents();
         void TakeCastItem();
 
+        bool ApplyEffectCondition(SpellEffIndex effIndex);
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);
 

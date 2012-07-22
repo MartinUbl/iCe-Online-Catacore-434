@@ -609,6 +609,10 @@ void Spell::SelectSpellTargets()
         if (!m_spellInfo->Effect[i])
             continue;
 
+        // Check if effect is prevented by some custom reasons
+        if (!ApplyEffectCondition(SpellEffIndex(i)))
+            continue;
+
         uint32 effectTargetType = EffectTargetType[m_spellInfo->Effect[i]];
 
         // is it possible that areaaura is not applied to caster?
@@ -5306,6 +5310,37 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     {
         (this->*SpellEffects[eff])((SpellEffIndex)i);
     }
+}
+
+bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
+{
+    // Since Cataclysm, Blizzard implemented spells, which has glyph effects built in
+    // so we have to use some mechanism to prevent/allow applying those effects if player (don't) have glyph
+
+    // returns true to continue handling effect
+    // returns false to prevent applying this effect
+
+    bool result = true;
+
+    // I haven't found any not-player case (i.e. pets as casters and player owners as glyph holders)
+    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return result;
+
+    switch (m_spellInfo->Id)
+    {
+        case 5782: // Fear
+            // Glyph of Fear - apply effect #3, rooting effect
+            if (effIndex == EFFECT_2 && !m_caster->HasAura(56244))
+                result = false;
+            break;
+        case 85673: // Word of Glory
+            // Glyph of the Long Word - apply effect #2, HoT effect
+            if (effIndex == EFFECT_1 && !m_caster->HasAura(93466))
+                result = false;
+            break;
+    }
+
+    return result;
 }
 
 SpellCastResult Spell::CheckCast(bool strict)
