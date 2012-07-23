@@ -1483,7 +1483,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL:
-                SetCriteriaProgress(achievementCriteria, GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
+                SetCriteriaProgress(achievementCriteria, GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS:
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->hk_class.classID)
@@ -1838,6 +1838,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
         case ACHIEVEMENT_CRITERIA_TYPE_QUEST_ABANDONED:
         case ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN:
         case ACHIEVEMENT_CRITERIA_TYPE_ACCEPTED_SUMMONINGS:
+        case ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL:
+            break;
         default:
             break;
     }
@@ -2501,6 +2503,8 @@ void AchievementGlobalMgr::LoadAchievementCriteriaData()
             case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:
                 break;                                      // any cases
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:  // any cases
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL:
                 break;
             default:                                        // type not use DB data, ignore
                 continue;

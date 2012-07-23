@@ -780,10 +780,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES + i, 0);  // 0=disabled
     SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
 
-    SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    //SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
-    //SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-    //SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
+    SetUInt16Value(PLAYER_FIELD_KILLS, 0, 0);
+    SetUInt16Value(PLAYER_FIELD_KILLS, 1, 0);
 
     // set starting level
     uint32 start_level = getClass() != CLASS_DEATH_KNIGHT
@@ -7277,7 +7276,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
-            //ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, pVictim->getClass());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, pVictim->getRace(), 0, pVictim);
@@ -17580,7 +17579,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             SetArenaTeamInfoField(arena_slot, ArenaTeamInfoType(j), 0);
     }
 
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, fields[43].GetUInt32());
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, fields[43].GetUInt32());
     SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[44].GetUInt16());
     SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[45].GetUInt16());
 
@@ -19752,8 +19751,7 @@ void Player::SaveToDB()
 
     ss << "taxi_path = '" << m_taxi.SaveTaxiDestinationsToString() << "', ";
 
-    // zero value for now - maybe it should be stored only as achievement criteria (statistic)?
-    ss << "totalKills = " << uint32(0) << ", ";
+    ss << "totalKills = " << GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS)  << ", ";
 
     ss << "todayKills = " << GetUInt16Value(PLAYER_FIELD_KILLS, 0) << ", ";
 
