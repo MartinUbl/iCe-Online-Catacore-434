@@ -412,7 +412,8 @@ public:
 
         void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
-            Unit * target = GetTarget();
+            if (!aurEff || !aurEff->GetCaster())
+                return;
 
             if (aurEff->GetCaster()->GetCurrentSpell(CURRENT_GENERIC_SPELL) || aurEff->GetCaster()->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                 absorbAmount = dmgInfo.GetDamage()*float(absorbPercentage)/100.0f;
