@@ -4519,6 +4519,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 16; // 1,5s casting time
         case 89912: // Chakra Flow (Priest T11 4p bonus)
             spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL; // active during Chakra state - do not remove by right-click
+            break;
+        case 43810: // Frost Wyrm
+            spellInfo->AttributesEx |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
+            count++;
+            break;
         default:
             break;
         }
