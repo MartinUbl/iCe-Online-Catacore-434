@@ -595,32 +595,30 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         uint32 weaponSpeedHitFactor;
         uint32 rage_damage = damage + cleanDamage->absorbed_damage;
 
-        MeleeHitOutcome outcome = cleanDamage->hitOutCome;
-        if (outcome != MELEE_HIT_MISS && outcome != MELEE_HIT_DODGE && outcome != MELEE_HIT_PARRY)
+        switch(cleanDamage->attackType)
         {
-            switch(cleanDamage->attackType)
+            case BASE_ATTACK:
             {
-                case BASE_ATTACK:
-                {
-                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f);
+                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f);
 
+                if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
                     RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
-                    break;
-                }
-                case OFF_ATTACK:
-                {
-                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f);
-
-                    RewardRage(rage_damage, weaponSpeedHitFactor, true);
-
-                    break;
-                }
-                case RANGED_ATTACK:
-                    break;
-                default:
-                    break;
+                break;
             }
+            case OFF_ATTACK:
+            {
+                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f);
+
+                if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
+                    RewardRage(rage_damage, weaponSpeedHitFactor, true);
+
+                break;
+            }
+            case RANGED_ATTACK:
+                break;
+            default:
+                break;
         }
     }
 
