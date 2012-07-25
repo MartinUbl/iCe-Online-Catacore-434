@@ -41,8 +41,8 @@ class AuthCrypt
         bool IsInitialized() const { return _initialized; }
 
     private:
-        ARC4* _clientDecrypt;
-        ARC4* _serverEncrypt;
+        ARC4 _clientDecrypt;
+        ARC4 _serverEncrypt;
         bool _initialized;
 };
 #endif

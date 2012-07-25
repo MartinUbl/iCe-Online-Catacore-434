@@ -25,18 +25,14 @@
 #include "Logging/Log.h"
 #include "Cryptography/BigNumber.h"
 
-AuthCrypt::AuthCrypt()
+AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_DIGEST_LENGTH)
 {
-    _clientDecrypt = new ARC4(SHA_DIGEST_LENGTH);
-    _serverEncrypt = new ARC4(SHA_DIGEST_LENGTH);
-
     _initialized = false;
 }
 
 AuthCrypt::~AuthCrypt()
 {
-    delete _clientDecrypt;
-    delete _serverEncrypt;
+
 }
 
 void AuthCrypt::Init(BigNumber *K)
@@ -50,21 +46,21 @@ void AuthCrypt::Init(BigNumber *K)
     uint8 *decryptHash = clientDecryptHmac.ComputeHash(K);
 
     //ARC4 _serverDecrypt(encryptHash);
-    _clientDecrypt->Init(decryptHash);
-    _serverEncrypt->Init(encryptHash);
+    _clientDecrypt.Init(decryptHash);
+    _serverEncrypt.Init(encryptHash);
     //ARC4 _clientEncrypt(decryptHash);
 
     // Drop first 1024 bytes, as WoW uses ARC4-drop1024.
     uint8 syncBuf[1024];
     memset(syncBuf, 0, 1024);
 
-    _serverEncrypt->UpdateData(1024, syncBuf);
+    _serverEncrypt.UpdateData(1024, syncBuf);
     //_clientEncrypt.UpdateData(1024, syncBuf);
 
     memset(syncBuf, 0, 1024);
 
     //_serverDecrypt.UpdateData(1024, syncBuf);
-    _clientDecrypt->UpdateData(1024, syncBuf);
+    _clientDecrypt.UpdateData(1024, syncBuf);
 
     _initialized = true;
 }
@@ -74,7 +70,7 @@ void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
     if (!_initialized)
         return;
 
-    _clientDecrypt->UpdateData(len, data);
+    _clientDecrypt.UpdateData(len, data);
 }
 
 void AuthCrypt::EncryptSend(uint8 *data, size_t len)
@@ -82,6 +78,6 @@ void AuthCrypt::EncryptSend(uint8 *data, size_t len)
     if (!_initialized)
         return;
 
-    _serverEncrypt->UpdateData(len, data);
+    _serverEncrypt.UpdateData(len, data);
 }
 
