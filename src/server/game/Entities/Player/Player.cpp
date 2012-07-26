@@ -14374,7 +14374,8 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
 void Player::ApplyEnchantment(Item *item,bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        ApplyEnchantment(item, EnchantmentSlot(slot), apply);
+        if (slot != REFORGING_ENCHANTMENT_SLOT)     // do not add "bonus" enchant with reforge ID
+            ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
 void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
