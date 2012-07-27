@@ -636,9 +636,15 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (!damage)
     {
-        // Rage from absorbed damage
-        if (cleanDamage && cleanDamage->absorbed_damage && pVictim->getPowerType() == POWER_RAGE)
-            pVictim->RewardRage(cleanDamage->absorbed_damage, 0, false);
+        // Rage from absorbed and mitigated damage
+        if (cleanDamage && pVictim->getPowerType() == POWER_RAGE)
+        {
+            uint32 rage_damage = cleanDamage->absorbed_damage;
+            if (damagetype != SPELL_DIRECT_DAMAGE)
+                rage_damage += cleanDamage->mitigated_damage;
+            if (rage_damage > 0)
+                pVictim->RewardRage(rage_damage, 0, false, damagetype);
+        }
 
         return 0;
     }
@@ -819,8 +825,15 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // Rage from damage received
         if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
         {
-            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
-            pVictim->RewardRage(rage_damage, 0, false);
+            uint32 rage_damage = damage;
+            if (cleanDamage)
+            {
+                rage_damage += cleanDamage->absorbed_damage;
+                if (damagetype != SPELL_DIRECT_DAMAGE)
+                    rage_damage += cleanDamage->mitigated_damage;
+            }
+
+            pVictim->RewardRage(rage_damage, 0, false, damagetype);
         }
 
         if (GetTypeId() == TYPEID_PLAYER)
@@ -18431,15 +18444,9 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
     SendMessageToSet(&data, false);
 }
 
-void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
+void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker, DamageEffectType damageType)
 {
-    float addRage;
-
-    float rageconversion = ((0.0091107836f * getLevel()*getLevel())+3.225598133f*getLevel())+4.2652911f;
-
-    // Unknown if correct, but lineary adjust rage conversion above level 70
-    if (getLevel() > 70)
-        rageconversion += 13.27f*(getLevel()-70);
+    float addRage = 0;
 
     if (attacker)
     {
@@ -18450,12 +18457,19 @@ void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
     }
     else
     {
-        addRage = damage/rageconversion*2.5f;
+        float coeff = 18.92f;
+        if (damageType == SPELL_DIRECT_DAMAGE)
+            coeff = 20.25f;
+
+        addRage = coeff * damage / GetMaxHealth();
 
         // Berserker Rage effect
         if (HasAura(18499))
             addRage *= 2.0f;
     }
+
+    if (addRage < 1.0f)
+        addRage = 1.0f;
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);
 
