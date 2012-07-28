@@ -69,6 +69,7 @@ class AuraApplication
         uint8 GetEffectMask() const { return m_flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2); }
         bool HasEffect(uint8 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return m_flags & (1<<effect); }
         bool IsPositive() const { return m_flags & AFLAG_POSITIVE; }
+        bool IsNegative() const { return m_flags & AFLAG_NEGATIVE; }
         bool IsSelfcasted() const { return m_flags & AFLAG_CASTER; }
         uint8 GetEffectsToApply() const { return m_effectsToApply; }
 

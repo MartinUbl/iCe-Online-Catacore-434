@@ -500,6 +500,7 @@ enum UnitMoveType
 
 extern float baseMoveSpeed[MAX_MOVE_TYPE];
 extern float playerBaseMoveSpeed[MAX_MOVE_TYPE];
+extern uint32 preserve_spell_table[];
 
 enum WeaponAttackType
 {
@@ -1686,6 +1687,8 @@ class Unit : public WorldObject
 
         void RemoveAreaAurasDueToLeaveWorld();
         void RemoveAllAuras();
+        void RemoveAllPositiveAuras();
+        void RemoveAllNegativeAuras();
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasRequiringDeadTarget();

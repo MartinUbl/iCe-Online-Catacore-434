@@ -87,6 +87,19 @@ float playerBaseMoveSpeed[MAX_MOVE_TYPE] = {
     3.14f                  // MOVE_PITCH_RATE
 };
 
+uint32 preserve_spell_table[] = { // Perserve spell table
+    15007,  // Ressurection Sickness
+    26013,  // Deserter
+    25771,  // Forbearance (Paladin debuff)
+    11196,  // Recently Bandaged (First Aid)
+    6788,   // Weakened Soul (Priest debuff)
+    80354,  // Temporal Displacement (Time Wrap debuff)
+    57724,  // Sated (Bloodlust debuff)
+    57723,  // Exhaustion (Heroism debuff)
+    95223,  // Recently Mass Resurrected (Mass Resurrection debuff)
+    95809,  // Insanity (Ancient Histeria debuff)
+};
+
 // Used for prepare can/can`t triggr aura
 static bool InitTriggerAuraData();
 // Define can trigger auras
@@ -4284,6 +4297,48 @@ void Unit::RemoveAllAuras()
         AuraMap::iterator aurIter;
         for (aurIter = m_ownedAuras.begin(), i = 0; aurIter != m_ownedAuras.end() && i < 1000; i++)
             RemoveOwnedAura(aurIter);
+    }
+}
+
+void Unit::RemoveAllPositiveAuras()
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        AuraApplication const* aurApp = iter->second;
+
+        if (aurApp->IsPositive() && !aurApp->GetBase()->IsPassive())
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAllNegativeAuras()
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        AuraApplication const* aurApp = iter->second;
+
+        bool IsPreserved = false;
+
+        for (uint32 i = 0;i < sizeof(preserve_spell_table) / sizeof(uint32); i++)
+        {
+            if (aurApp->GetBase()->GetId() == preserve_spell_table[i])
+            {
+                IsPreserved = true;
+                break;
+            }
+        }
+        if (IsPreserved)
+        {
+            ++iter;
+            continue;
+        }
+
+        if (aurApp->IsNegative())
+            RemoveAura(iter);
+        else
+            ++iter;
     }
 }
 
