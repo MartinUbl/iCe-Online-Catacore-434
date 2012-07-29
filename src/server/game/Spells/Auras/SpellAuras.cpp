@@ -1594,6 +1594,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastSpell(target, spellId, true, 0, GetEffect(0));
                     }
                 }
+                if (GetId() == 47476) // Strangulate
+                {
+                    if (caster->HasAura(58618)) // Glyph of Strangulate
+                    {
+                        for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+                        {
+                            if (target->GetCurrentSpell(i)) // target casting spell..
+                                SetDuration(GetDuration()+2000); // Set Duration + 2sec
+                        }
+                    }
+                }
                 break;
         }
 
