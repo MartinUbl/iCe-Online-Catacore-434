@@ -4414,7 +4414,6 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const *aurApp, uint8 mode,
         return;
 
     Unit *target = aurApp->GetTarget();
-    Unit *caster = GetCaster();
 
     if (apply)
     {
