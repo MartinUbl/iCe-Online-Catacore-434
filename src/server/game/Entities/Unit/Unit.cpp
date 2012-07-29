@@ -6963,8 +6963,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Divine Purpose
             if (dummySpell->Id == 86172 || dummySpell->Id == 85117)
             {
-                target = this;
-                triggered_spell_id = 90174;
+                if (procSpell)
+                {
+                    uint32 id = procSpell->Id;
+                    // Judgement, Exorcism, Templar's Verdict, Divine Storm,
+                    // Inquisition, Holy Wrath, Hammer of Wrath
+                    if (id == 20271 || id == 879 || id == 85256 || id == 53385 ||
+                        id == 84963 || id == 2812 || id == 24275)
+                    {
+                        target = this;
+                        triggered_spell_id = 90174;
+                        break;
+                    }
+                }
+                return false;
             }
             // Judgements of the Bold
             if (dummySpell->Id == 89901)
