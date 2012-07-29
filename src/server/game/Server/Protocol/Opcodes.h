@@ -151,11 +151,10 @@ enum Opcodes
     SMSG_GUILD_TRADESKILL_UPDATE                     = 0x1001B, //
     SMSG_GUILD_MAX_DAILY_XP                          = 0x079B5, // 4.3.4 15595
     SMSG_GUILD_NEWS_UPDATE                           = 0x035A7, // 4.3.4 15595
-    SMSG_GUILD_GROUP_UPDATE                          = 0x1001C, //
+    SMSG_GUILD_GROUP_UPDATE                          = 0x050A6, // 4.3.4 15595 (smsg_guild_party_state_update)
     SMSG_GUILD_XP_UPDATE                             = 0x014A1, // 4.3.4 15595
     SMSG_GUILD_COMMAND_RESULT                        = 0x07DB3, // 4.3.4 15595
     SMSG_GUILD_ACHIEVEMENT_MEMBER                    = 0x1001D, //
-    SMSG_GUILD_PARTY_STATE_UPDATE                    = 0x1001E, //
     CMSG_MESSAGECHAT_SAY                             = 0x01154, // 4.3.4 15595
     CMSG_MESSAGECHAT_YELL                            = 0x03544, // 4.3.4 15595
     CMSG_MESSAGECHAT_CHANNEL                         = 0x01D44, // 4.3.4 15595
@@ -736,7 +735,7 @@ enum Opcodes
     CMSG_MOVE_NOT_ACTIVE_MOVER                       = 0x100BB, //
     SMSG_PLAY_SOUND                                  = 0x02134, // 4.3.4 15595
     CMSG_BATTLEFIELD_STATUS                          = 0x02500, // 4.3.4 15595
-    SMSG_BATTLEFIELD_STATUS1                         = 0x100BC, //
+    SMSG_BATTLEFIELD_STATUS1                         = 0x07DA1, // 4.3.4 15595
     SMSG_BATTLEFIELD_STATUS2                         = 0x074A4, // 4.3.4 15595
     SMSG_BATTLEFIELD_STATUS3                         = 0x059A0, // 4.3.4 15595
     SMSG_BATTLEFIELD_STATUS4                         = 0x075A2, // 4.3.4 15595
@@ -1309,7 +1308,8 @@ enum Opcodes
     CMSG_AUTO_DECLINE_GUILD_INVITES                  = 0x02034, // 4.3.4 15595
     CMSG_SET_PRIMARY_TALENT_TREE                     = 0x04524, // 4.3.4 15595
     CMSG_GROUP_SET_ROLES                             = 0x101F1, //
-    CMSG_WORLD_LOGIN                                 = 0x101F2, //
+    CMSG_WORLD_LOGIN                                 = 0x02422, // 4.3.4 15595
+    CMSG_LOG_DISCONNECT                              = 0x0446D, // 4.3.4 15595
     CMSG_RETURN_TO_GRAVEYARD                         = 0x0301E, // 4.3.4 15595
     CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x101F3, //
     SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE          = 0x101F4, //
@@ -1319,6 +1319,17 @@ enum Opcodes
     SMSG_ENTERED_INSTANCE_IN_PROGRESS                = 0x101F8, //
     CMSG_UI_TIME_REQUEST                             = 0x101F9, //
     SMSG_UI_TIME                                     = 0x101FA, //
+    SMSG_VOID_STORAGE_TRANSFER_CHANGES               = 0x051A6, // 4.3.4 15595
+    SMSG_VOID_STORAGE_CONTENTS                       = 0x075B4, // 4.3.4 15595
+    SMSG_VOID_ITEM_SWAP_RESPONSE                     = 0x078A2, // 4.3.4 15595
+    CMSG_GUILDFINDER_BROWSE_GUILDS                   = 0x00548, // 4.3.4 15595
+    CMSG_GUILDFINDER_JOIN                            = 0x068C5, // 4.3.4 15595
+    CMSG_GUILDFINDER_OPEN                            = 0x01230, // 4.3.4 15595
+    SMSG_GUILDFINDER_BROWSE_UPDATED                  = 0x01DA3, // 4.3.4 15595
+    SMSG_GUILDFINDER_MEMBERSHIP_LIST_UPDATED         = 0x01CA5, // 4.3.4 15595
+    SMSG_GUILDFINDER_POST_UPDATED                    = 0x035B7, // 4.3.4 15595
+    SMSG_GUILDFINDER_RECRUIT_LIST_UPDATED            = 0x01CB2, // 4.3.4 15595
+    SMSG_GUILDFINDER_SEARCH_RESULT                   = 0x00000, // Unknown
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1326,16 +1337,11 @@ enum Opcodes
     CMSG_DUNGEON_FINDER_GET_SYSTEM_INFO              = 0x00412, // 4.3.4 Build 15595
     CMSG_ENABLE_NAGLE                                = 0x04449, // 4.3.4 Build 15595
     CMSG_GROUP_INVITE_RESPONSE                       = 0x00410, // 4.3.4 Build 15595
-    CMSG_GUILDFINDER_BROWSE_GUILDS                   = 0x00548, // 4.3.4 Build 15595
-    CMSG_GUILDFINDER_JOIN                            = 0x068C5, // 4.3.4 Build 15595
-    CMSG_GUILDFINDER_OPEN                            = 0x01230, // 4.3.4 Build 15595
     CMSG_GUILD_BANK_REM_MONEY_WITHDRAW_QUERY         = 0x01225, // 4.3.4 Build 15595
     CMSG_GUILD_SET_ACHIEVEMENT_TRACKING              = 0x01027, // 4.3.4 Build 15595
     CMSG_LFG_GET_PLAYER_INFO                         = 0x00000, // Unknown
     CMSG_LFG_LFR_JOIN                                = 0x00000, // Unknown
     CMSG_LFG_PARTY_LOCK_INFO_REQUEST                 = 0x00000, // Unknown
-    CMSG_LOAD_SCREEN                                 = 0x02422, // 4.3.4 Build 15595
-    CMSG_LOG_DISCONNECT                              = 0x0446D, // 4.3.4 Build 15595
     CMSG_MAIL_SEND                                   = 0x00523, // 4.3.4 Build 15595
     CMSG_MESSAGECHAT_ADDON_BATTLEGROUND              = 0x00D46, // 4.3.4 Build 15595
     CMSG_MESSAGECHAT_ADDON_GUILD                     = 0x00544, // 4.3.4 Build 15595
@@ -1442,9 +1448,7 @@ enum Opcodes
     MSG_MOVE_WATER_WALK_ACK                          = 0x00000, // Unknown
     MSG_RAID_ROLE_CHECK                              = 0x00430, // 4.3.4 Build 15595
     MSG_START_MOVE_FORWARD                           = 0x07814, // 4.3.4 Build 15595
-    MSG_VERIFY_CONNECTIVITY                          = 0x04F57, // 4.3.4 Build 15595
-    SMSG_BATTLEFIELD_PLAYER_POSITIONS                = 0x058B4, // 4.3.4 Build 15595
-    SMSG_BATTLEFIELD_STATUS                          = 0x07DA1, // 4.3.4 Build 15595
+    //SMSG_BATTLEFIELD_STATUS                          = 0x07DA1, // 4.3.4 Build 15595
     SMSG_BATTLEFIELD_STATUS_QUEUED                   = 0x035A1, // 4.3.4 Build 15595
     SMSG_CATEGORY_COOLDOWN                           = 0x071B6, // 4.3.4 Build 15595
     SMSG_COMPLETION_NPC_RESPONSE                     = 0x075A1, // 4.3.4 Build 15595
@@ -1452,17 +1456,11 @@ enum Opcodes
     SMSG_COMPRESSED_CHAR_ENUM                        = 0x00000, // Unknown
     SMSG_COMPRESSED_GUILD_ROSTER                     = 0x00000, // Unknown
     SMSG_FAILED_PLAYER_CONDITION                     = 0x019A4, // 4.3.4 Build 15595
-    SMSG_GUILDFINDER_BROWSE_UPDATED                  = 0x01DA3, // 4.3.4 Build 15595
-    SMSG_GUILDFINDER_MEMBERSHIP_LIST_UPDATED         = 0x01CA5, // 4.3.4 Build 15595
-    SMSG_GUILDFINDER_POST_UPDATED                    = 0x035B7, // 4.3.4 Build 15595
-    SMSG_GUILDFINDER_RECRUIT_LIST_UPDATED            = 0x01CB2, // 4.3.4 Build 15595
-    SMSG_GUILDFINDER_SEARCH_RESULT                   = 0x00000, // Unknown
     SMSG_GUILD_ACHIEVEMENT_DATA                      = 0x054B7, // 4.3.4 Build 15595
     SMSG_GUILD_CANCEL                                = 0x00000, // Unknown
     SMSG_GUILD_CRITERIA_UPDATE                       = 0x014B4, // 4.3.4 Build 15595
     SMSG_GUILD_KNOWN_RECIPES                         = 0x010B3, // 4.3.4 Build 15595
     SMSG_GUILD_MEMBER_DAILY_RESET                    = 0x010A5, // 4.3.4 Build 15595
-    SMSG_GUILD_PARTY_STATE                           = 0x050A6, // 4.3.4 Build 15595
     SMSG_GUILD_PERMISSIONS_QUERY_RESULTS             = 0x034A3, // 4.3.4 Build 15595
     SMSG_GUILD_REPUTATION_WEEKLY_CAP                 = 0x030B7, // 4.3.4 Build 15595
     SMSG_GUILD_SET_NOTE                              = 0x00000, // Unknown
@@ -1488,9 +1486,6 @@ enum Opcodes
     SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT              = 0x04007, // 4.3.4 Build 15595
     SMSG_WEEKLY_SPELL_USAGE                          = 0x039B7, // 4.3.4 Build 15595
     SMSG_WORLD_SERVER_INFO                           = 0x009B1, // 4.3.4 Build 15595
-    SMSG_VOID_STORAGE_TRANSFER_CHANGES               = 0x051A6, // 4.3.4 Build 15595
-    SMSG_VOID_STORAGE_CONTENTS                       = 0x075B4, // 4.3.4 Build 15595
-    SMSG_VOID_ITEM_SWAP_RESPONSE                     = 0x078A2, // 4.3.4 Build 15595
 
     NUM_MSG_TYPES                                    = 0x20000  // this enum value doesnt make any sense after opcode randomization, needs rework to make us able to drop this value
 };
