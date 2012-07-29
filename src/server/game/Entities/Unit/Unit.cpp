@@ -1226,6 +1226,26 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
         }
     }
 
+    // Implementation of Hand of Light mastery proficiency
+    if (spellProto)
+    {
+        uint32 spellId = spellProto->Id;
+        // Divine Storm, Crusader Strike, Templar's Verdict
+        if (spellId == 53385 || spellId == 35395 || spellId == 85256)
+        {
+            Player *player = ToPlayer();
+            if (player && player->HasMastery() &&
+                player->GetTalentBranchSpec(player->GetActiveSpec()) == SPEC_PALADIN_RETRIBUTION)
+            {
+                uint32 damage = damageInfo->damage;
+                float mastp = player->GetMasteryPoints();
+                float coef = mastp*2.1f/100.0f;
+                int32 bp0 = coef*float(damage);//float(damage)*(player->GetMasteryPoints()*2.1f/100.0f);
+                CastCustomSpell(pVictim,96172,&bp0,0,0,true);
+            }
+        }
+    }
+
     // Call default DealDamage
     CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->absorb, BASE_ATTACK, MELEE_HIT_NORMAL);
     DealDamage(pVictim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchoolMask(damageInfo->schoolMask), spellProto, durabilityLoss);

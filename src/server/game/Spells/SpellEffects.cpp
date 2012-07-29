@@ -6477,18 +6477,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 int32 dmg = m_damage * m_spellInfo->EffectBasePoints[1] / 100.0f;
                 m_caster->CastCustomSpell(m_caster, 54171, &dmg, 0, 0, true);
             }
-            // do not 'break' ! Mastery profits also from divine storm
-        case 35395: // Crusader Strike
-        case 85256: // Templar's Verdict
-            // Implementation of Hand of Light mastery proficiency
-            if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-                m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_RETRIBUTION)
-            {
-                float mastp = m_caster->ToPlayer()->GetMasteryPoints();
-                float coef = mastp*2.1f/100.0f;
-                int32 bp0 = coef*float(m_damage);//float(m_damage)*(m_caster->ToPlayer()->GetMasteryPoints()*2.1f/100.0f);
-                m_caster->CastCustomSpell(unitTarget,96172,&bp0,0,0,true);
-            }
             break;
         case 53351: // Kill Shot
             // Glyph of Kill shot
