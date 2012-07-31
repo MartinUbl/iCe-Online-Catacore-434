@@ -667,6 +667,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     uint32 health = pVictim->GetHealth();
     sLog->outDetail("deal dmg:%d to health:%d ",damage,health);
 
+    // write clean damage to damagetaken map
+    pVictim->DamageTakenByUnit(this, (damage>health)?health:damage);
+
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
     if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->duel && damage >= (health-1))
@@ -913,6 +916,65 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     sLog->outStaticDebug("DealDamageEnd returned %d damage", damage);
 
     return damage;
+}
+
+uint64 Unit::GetDamageTakenByUnit(uint64 guid)
+{
+    if (m_damageTakenMap.empty() || m_damageTakenMap.find(guid) == m_damageTakenMap.end())
+        return 0;
+
+    return m_damageTakenMap[guid];
+}
+
+uint64 Unit::GetDamageTakenByUnit(Unit* dealer)
+{
+    if (!dealer)
+        return 0;
+
+    return GetDamageTakenByUnit(dealer->GetGUID());
+}
+
+void Unit::DamageTakenByUnit(uint64 guid, uint64 damage)
+{
+    // just for creatures (for now)
+    if (GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    DamageMap::iterator itr = m_damageTakenMap.find(guid);
+    if (itr == m_damageTakenMap.end())
+        m_damageTakenMap[guid] = damage;
+    else
+        m_damageTakenMap[guid] += damage;
+}
+
+void Unit::DamageTakenByUnit(Unit* dealer, uint64 damage)
+{
+    if (dealer)
+        DamageTakenByUnit(dealer->GetGUID(), damage);
+}
+
+void Unit::ClearDamageTakenByUnit(uint64 guid)
+{
+    if (m_damageTakenMap.find(guid) != m_damageTakenMap.end())
+        m_damageTakenMap.erase(guid);
+}
+
+void Unit::ClearDamageTakenByUnit(Unit* dealer)
+{
+    if (dealer)
+        ClearDamageTakenByUnit(dealer->GetGUID());
+}
+
+uint64 Unit::GetTotalDamageTaken()
+{
+    if (m_damageTakenMap.empty())
+        return 0;
+
+    uint64 sum = 0;
+    for (DamageMap::const_iterator itr = m_damageTakenMap.begin(); itr != m_damageTakenMap.end(); ++itr)
+        sum += (*itr).second;
+
+    return sum;
 }
 
 void Unit::CastStop(uint32 except_spellid)
@@ -13749,7 +13811,10 @@ void Unit::setDeathState(DeathState s)
         ExitVehicle();
     }
     if (s == ALIVE)
+    {
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
+        ClearAllDamageTaken();
+    }
 
     if (s == JUST_DIED)
     {

@@ -2116,6 +2116,18 @@ class Unit : public WorldObject
 
         uint32 GetDamageTakenHistory(uint32 seconds);
 
+        uint64 GetDamageTakenByUnit(uint64 guid);
+        uint64 GetDamageTakenByUnit(Unit* dealer);
+        void DamageTakenByUnit(uint64 guid, uint64 damage);
+        void DamageTakenByUnit(Unit* dealer, uint64 damage);
+        void ClearDamageTakenByUnit(uint64 guid);
+        void ClearDamageTakenByUnit(Unit* dealer);
+        void ClearAllDamageTaken()
+        {
+            m_damageTakenMap.clear();
+        }
+        uint64 GetTotalDamageTaken();
+
     protected:
         explicit Unit ();
 
@@ -2183,6 +2195,12 @@ class Unit : public WorldObject
         Vehicle *m_vehicleKit;
 
         uint32 m_unitTypeMask;
+
+        // Type for storing damage outcome/income per-player. Map fields: guid (key) - damage (value)
+        typedef std::map<uint64, uint64> DamageMap;
+
+        // Map of damage taken from different casters
+        std::map<uint64, uint64> m_damageTakenMap;
 
     private:
         bool IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry const * procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const *& spellProcEvent);
