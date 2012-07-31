@@ -24307,6 +24307,10 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     {
         xp = (PvP || GetVehicle()) ? 0 : Trinity::XP::Gain(this, pVictim);
 
+        // XP gain if player level and victim greater than 11 level (skull :-))
+        if (getLevel()+11 <= pVictim->getLevel())
+            xp = 0;
+
         // honor can be in PvP and !PvP (racial leader) cases
         if (RewardHonor(pVictim, 1, -1, true))
             honored_kill = true;
