@@ -232,7 +232,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
         return;
 
     // apply reputation discount
-    uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
+    uint64 nSpellCost = uint64(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
     if (!_player->HasEnoughMoney(nSpellCost))
@@ -240,7 +240,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
 
     if(result == ERR_TRAINER_OK)
     {
-        _player->ModifyMoney(-int32(nSpellCost));
+        _player->ModifyMoney(-int64(nSpellCost));
 
         WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
         data << uint64(guid);

@@ -2160,7 +2160,7 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
     if (HasLowerSecurity(chr, 0))
         return false;
 
-    int64 addmoney = atoi((char*)args);
+    int64 addmoney = atol((char*)args);
 
     uint64 moneyuser = chr->GetMoney();
 
@@ -2179,7 +2179,7 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
         }
         else
         {
-            if (newmoney > MAX_MONEY_AMOUNT)
+            if (newmoney > 0 && uint64(newmoney) > MAX_MONEY_AMOUNT)
                 newmoney = MAX_MONEY_AMOUNT;
 
             PSendSysMessage(LANG_YOU_TAKE_MONEY, addmoney, GetNameLink(chr).c_str());
@@ -2194,7 +2194,7 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
         if (needReportToTarget(chr))
             ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, GetNameLink().c_str(), addmoney);
 
-        if (addmoney >=MAX_MONEY_AMOUNT)
+        if (addmoney >= 0 && uint64(addmoney) >= MAX_MONEY_AMOUNT)
             chr->SetMoney(MAX_MONEY_AMOUNT);
         else
             chr->ModifyMoney(addmoney);

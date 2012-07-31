@@ -228,12 +228,12 @@ uint32 Quest::XPValue(Player *pPlayer) const
     return 0;
 }
 
-int32  Quest::GetRewOrReqMoney() const
+int64  Quest::GetRewOrReqMoney() const
 {
     if (RewOrReqMoney <= 0)
         return RewOrReqMoney;
 
-    return int32(RewOrReqMoney * sWorld->getRate(RATE_DROP_MONEY));
+    return int64(RewOrReqMoney * sWorld->getRate(RATE_DROP_MONEY));
 }
 
 bool Quest::IsAllowedInRaid() const
