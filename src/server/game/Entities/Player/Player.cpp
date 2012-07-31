@@ -14373,8 +14373,12 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
 
 void Player::ApplyEnchantment(Item *item,bool apply)
 {
+    if (!item)
+        return;
+
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        if (slot != REFORGING_ENCHANTMENT_SLOT)     // do not add "bonus" enchant with reforge ID
+        // do not add "bonus" enchant with reforge ID
+        if (slot != REFORGING_ENCHANTMENT_SLOT || item->GetProto()->Quality <= 2)
             ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
