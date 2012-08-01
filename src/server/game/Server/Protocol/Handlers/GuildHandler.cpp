@@ -357,7 +357,7 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     uint32 old_rights;
     recvPacket >> old_rights;
 
-    uint64 money;
+    uint32 money;
     recvPacket >> money;
 
     uint64 playerGuid;
@@ -555,7 +555,7 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket & recv_data)
     recv_data >> money;
 
     if (GetPlayer()->GetGameObjectIfCanInteractWith(GoGuid, GAMEOBJECT_TYPE_GUILD_BANK))
-        if (money && GetPlayer()->HasEnoughMoney(money))
+        if (money && GetPlayer()->HasEnoughMoney(uint32(money)))
             if (Guild* pGuild = _GetPlayerGuild(this))
                 pGuild->HandleMemberDepositMoney(this, money);
 }

@@ -1314,7 +1314,7 @@ public:
             case GOSSIP_OPTION_LEARNDUALSPEC:
                 if (pPlayer->GetSpecsCount() == 1 && !(pPlayer->getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL)))
                 {
-                    if (!pPlayer->HasEnoughMoney(100000*COPPER))
+                    if (!pPlayer->HasEnoughMoney(100000))
                     {
                         pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
                         pPlayer->PlayerTalkClass->CloseGossip();
@@ -1322,7 +1322,7 @@ public:
                     }
                     else
                     {
-                        pPlayer->ModifyMoney(-int64(100000));
+                        pPlayer->ModifyMoney(-100000);
 
                         // Cast spells that teach dual spec
                         // Both are also ImplicitTarget self and must be cast by player
@@ -2568,7 +2568,7 @@ public:
 ## npc_experience
 ######*/
 
-#define EXP_COST                100000*COPPER//10 00 00 copper (10golds)
+#define EXP_COST                100000//10 00 00 copper (10golds)
 #define GOSSIP_TEXT_EXP         14736
 #define GOSSIP_XP_OFF            "I no longer wish to gain experience."
 #define GOSSIP_XP_ON           "I wish to start gaining experience again."
@@ -2613,12 +2613,12 @@ public:
                 pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
             else if (noXPGain)
             {
-                pPlayer->ModifyMoney(-int64(EXP_COST));
+                pPlayer->ModifyMoney(-EXP_COST);
                 pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
             }
             else if (!noXPGain)
             {
-                pPlayer->ModifyMoney(-int64(EXP_COST));
+                pPlayer->ModifyMoney(-EXP_COST);
                 pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
             }
         }

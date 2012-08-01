@@ -33,7 +33,7 @@
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
 
-inline uint64 _GetGuildBankTabPrice(uint8 tabId)
+inline uint32 _GetGuildBankTabPrice(uint8 tabId)
 {
     switch (tabId)
     {
@@ -2256,7 +2256,7 @@ void Guild::HandleSetEmblem(WorldSession* session, const EmblemInfo& emblemInfo)
         SendSaveEmblemResult(session, ERR_GUILDEMBLEM_NOTENOUGHMONEY);
     else
     {
-        player->ModifyMoney(-int64(EMBLEM_PRICE));
+        player->ModifyMoney(-int32(EMBLEM_PRICE));
 
         m_emblemInfo = emblemInfo;
         m_emblemInfo.SaveToDB(m_id);
@@ -2342,7 +2342,7 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
     if (tabId != _GetPurchasedTabsSize())
         return;
 
-    uint64 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
+    uint32 tabCost = _GetGuildBankTabPrice(tabId) * GOLD;
     // tabs 6 and 7 (7 and 8 in game numbering) is bought by items and has no cost at all)
     if (!tabCost && tabId != 6 && tabId != 7)
         return;
@@ -2354,7 +2354,7 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
     if (!_CreateNewBankTab())
         return;
 
-    player->ModifyMoney(-int64(tabCost));
+    player->ModifyMoney(-int32(tabCost));
     _SetRankBankMoneyPerDay(player->GetRank(), GUILD_WITHDRAW_MONEY_UNLIMITED);
     _SetRankBankTabRightsAndSlots(player->GetRank(), tabId, GuildBankRightsAndSlots(GUILD_BANK_RIGHT_FULL, GUILD_WITHDRAW_SLOT_UNLIMITED));
     HandleRoster();                                         // Broadcast for tab rights update
@@ -2585,7 +2585,7 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
     }
 }
 
-void Guild::DepositBankMoneyFromLoot(uint64 amount)
+void Guild::DepositBankMoneyFromLoot(uint32 amount)
 {
     if (!_GetPurchasedTabsSize())
         return;
@@ -2597,7 +2597,7 @@ void Guild::DepositBankMoneyFromLoot(uint64 amount)
     CharacterDatabase.CommitTransaction(trans);
 }
 
-void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount)
+void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 {
     if (!_GetPurchasedTabsSize())
         return;                                                     // No guild bank tabs - no money in bank
@@ -2611,13 +2611,13 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount)
     // Add money to bank
     _ModifyBankMoney(trans, amount, true);
     // Remove money from player
-    player->ModifyMoney(-int64(amount));
+    player->ModifyMoney(-int32(amount));
     player->SaveGoldToDB(trans);
     // Log GM action (TODO: move to scripts)
     if (player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
     {
         sLog->outCommand(player->GetSession()->GetAccountId(),
-            "GM %s (Account: %u) deposit money (Amount: " UI64FMTD ") to pGuild bank (Guild ID %u)",
+            "GM %s (Account: %u) deposit money (Amount: %u) to pGuild bank (Guild ID %u)",
             player->GetName(), player->GetSession()->GetAccountId(), amount, m_id);
     }
     // Log guild bank event
@@ -2630,7 +2630,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint64 amount)
     _SendBankMoneyUpdate(session);
 }
 
-bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool repair)
+bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
 {
     if (!_GetPurchasedTabsSize())
         return false;                                       // No guild bank tabs - no money

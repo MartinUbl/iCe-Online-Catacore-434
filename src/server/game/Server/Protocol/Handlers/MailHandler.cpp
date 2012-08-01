@@ -112,7 +112,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
 
     uint64 reqmoney = cost + money;
 
-    if (!pl->HasEnoughMoney(reqmoney))
+    if (!pl->HasEnoughMoney(uint32(reqmoney)))
     {
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
@@ -236,7 +236,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
 
     pl->SendMailResult(0, MAIL_SEND, MAIL_OK);
 
-    pl->ModifyMoney(-int64(reqmoney));
+    pl->ModifyMoney(-int32(reqmoney));
     pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_MAIL, cost);
 
     bool needItemDelay = false;
@@ -445,7 +445,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
     }
 
     // prevent cheating with skip client money check
-    if (!pl->HasEnoughMoney(m->COD))
+    if (!pl->HasEnoughMoney(uint32(m->COD)))
     {
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
@@ -498,7 +498,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
                     .SendMailTo(trans, MailReceiver(receive, m->sender), MailSender(MAIL_NORMAL, m->receiver), MAIL_CHECK_MASK_COD_PAYMENT);
             }
 
-            pl->ModifyMoney(-int64(m->COD));
+            pl->ModifyMoney(-int32(m->COD));
         }
         m->COD = 0;
         m->state = MAIL_STATE_CHANGED;

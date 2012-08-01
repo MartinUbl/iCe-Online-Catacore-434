@@ -44,7 +44,7 @@ enum CharterItemIDs
 
 enum CharterCosts
 {
-    GUILD_CHARTER_COST                            = 1000*COPPER,
+    GUILD_CHARTER_COST                            = 1000,
 };
 
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
@@ -99,7 +99,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     uint32 charterid = GUILD_CHARTER;
-    uint64 cost = GUILD_CHARTER_COST;
+    uint32 cost = GUILD_CHARTER_COST;
 
     if (sObjectMgr->GetGuildByName(name))
     {

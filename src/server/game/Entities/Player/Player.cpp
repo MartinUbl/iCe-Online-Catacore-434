@@ -4245,7 +4245,7 @@ bool Player::resetTalents(bool no_cost)
         return false;
     }
 
-    uint64 cost = 0;
+    uint32 cost = 0;
 
     if (!no_cost && !sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST))
     {
@@ -4324,7 +4324,7 @@ bool Player::resetTalents(bool no_cost)
 
     if (!no_cost)
     {
-        ModifyMoney(-(int64)cost);
+        ModifyMoney(-(int32)cost);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS, cost);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS, 1);
 
@@ -5305,7 +5305,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
 {
     Item* item = GetItemByPos(pos);
 
-    uint64 TotalCost = 0;
+    uint32 TotalCost = 0;
     if (!item)
         return TotalCost;
 
@@ -5338,9 +5338,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             }
 
             uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];
-            uint64 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
+            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
 
-            costs = uint64(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
+            costs = uint32(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
 
             if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
                 costs = 1;
@@ -5368,7 +5368,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
                 return TotalCost;
             }
             else
-                ModifyMoney(-int64(costs));
+                ModifyMoney(-int32(costs));
         }
     }
 
@@ -15107,7 +15107,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         case GOSSIP_OPTION_LEARNDUALSPEC:
             if (GetSpecsCount() == 1 && getLevel() >= sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
             {
-                if (!HasEnoughMoney(100000*COPPER))
+                if (!HasEnoughMoney(100000))
                 {
                     SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
                     PlayerTalkClass->CloseGossip();
@@ -15115,7 +15115,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 }
                 else
                 {
-                    ModifyMoney(-int64(100000));
+                    ModifyMoney(-100000);
 
                     // Cast spells that teach dual spec
                     // Both are also ImplicitTarget self and must be cast by player
@@ -16866,7 +16866,7 @@ void Player::TalkedToCreature(uint32 entry, uint64 guid)
     }
 }
 
-void Player::MoneyChanged(uint64 count)
+void Player::MoneyChanged(uint32 count)
 {
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
@@ -16881,7 +16881,7 @@ void Player::MoneyChanged(uint64 count)
 
             if (q_status.m_status == QUEST_STATUS_INCOMPLETE)
             {
-                if (int64(count) >= -qInfo->GetRewOrReqMoney())
+                if (int32(count) >= -qInfo->GetRewOrReqMoney())
                 {
                     if (CanCompleteQuest(questid))
                         CompleteQuest(questid);
@@ -16889,7 +16889,7 @@ void Player::MoneyChanged(uint64 count)
             }
             else if (q_status.m_status == QUEST_STATUS_COMPLETE)
             {
-                if (int64(count) < -qInfo->GetRewOrReqMoney())
+                if (int32(count) < -qInfo->GetRewOrReqMoney())
                     IncompleteQuest(questid);
             }
         }
@@ -17494,7 +17494,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     SetUInt32Value(PLAYER_GUILDDELETE_DATE, 0);
     SetUInt32Value(PLAYER_GUILDLEVEL, 1);
 
-    uint64 money = fields[8].GetUInt64();
+    uint32 money = fields[8].GetUInt32();
     if (money > MAX_MONEY_AMOUNT)
         money = MAX_MONEY_AMOUNT;
     SetMoney(money);
@@ -21536,7 +21536,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
     }
 
-    uint64 money = GetMoney();
+    uint32 money = GetMoney();
 
     if (npc)
         totalcost = (uint32)ceil(totalcost*GetReputationPriceDiscount(npc));
@@ -21551,7 +21551,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     }
 
     //Checks and preparations done, DO FLIGHT
-    ModifyMoney(-(int64)totalcost);
+    ModifyMoney(-(int32)totalcost);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TRAVELLING, totalcost);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN, 1);
 
@@ -21894,7 +21894,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
     }
 
-    uint64 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
+    uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
 
     float discountMod = GetReputationPriceDiscount(pCreature);
     discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
@@ -23063,7 +23063,7 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(sWorld->getIntConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
-void Player::ModifyMoney(int64 d)
+void Player::ModifyMoney(int32 d)
 {
     sScriptMgr->OnPlayerMoneyChanged(this, d);
 
@@ -23072,7 +23072,7 @@ void Player::ModifyMoney(int64 d)
     else
     {
         uint64 newAmount = 0;
-        if (GetMoney() < uint64(MAX_MONEY_AMOUNT - d))
+        if (GetMoney() < uint32(MAX_MONEY_AMOUNT - d))
             newAmount = GetMoney() + d;
         else
         {
@@ -24849,7 +24849,7 @@ bool Player::CanCaptureTowerPoint()
 );
 }
 
-uint64 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, BarberShopStyleEntry const* newSkin)
+uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, BarberShopStyleEntry const* newSkin)
 
 {
     uint8 level = getLevel();

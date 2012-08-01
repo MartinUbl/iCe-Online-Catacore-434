@@ -799,14 +799,14 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_START_PLAYER_MONEY] = sConfig->GetIntDefault("StartPlayerMoney", 0);
     if (int32(m_int_configs[CONFIG_START_PLAYER_MONEY]) < 0)
     {
-        sLog->outError("StartPlayerMoney (%i) must be in range 0..%u. Set to %u.",m_int_configs[CONFIG_START_PLAYER_MONEY],uint32(MAX_MONEY_AMOUNT),0);
+        sLog->outError("StartPlayerMoney (%i) must be in range 0..%u. Set to %u.",m_int_configs[CONFIG_START_PLAYER_MONEY],MAX_MONEY_AMOUNT,0);
             m_int_configs[CONFIG_START_PLAYER_MONEY] = 0;
     }
-    else if (m_int_configs[CONFIG_START_PLAYER_MONEY] > uint32(MAX_MONEY_AMOUNT))
+    else if (m_int_configs[CONFIG_START_PLAYER_MONEY] > MAX_MONEY_AMOUNT)
     {
         sLog->outError("StartPlayerMoney (%i) must be in range 0..%u. Set to %u.",
-            m_int_configs[CONFIG_START_PLAYER_MONEY],uint32(MAX_MONEY_AMOUNT),uint32(MAX_MONEY_AMOUNT));
-        m_int_configs[CONFIG_START_PLAYER_MONEY] = uint32(MAX_MONEY_AMOUNT);
+            m_int_configs[CONFIG_START_PLAYER_MONEY],MAX_MONEY_AMOUNT,MAX_MONEY_AMOUNT);
+        m_int_configs[CONFIG_START_PLAYER_MONEY] = MAX_MONEY_AMOUNT;
     }
 
     m_int_configs[CONFIG_MAX_HONOR_POINTS] = sConfig->GetIntDefault("MaxHonorPoints", 4000);

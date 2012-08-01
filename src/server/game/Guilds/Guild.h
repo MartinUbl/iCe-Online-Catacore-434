@@ -715,12 +715,12 @@ public:
     void HandleUpdateMemberRank(WorldSession* session, uint64 guid, bool demote);
     void HandleAddNewRank(WorldSession* session, const std::string& name);
     void HandleRemoveRank(WorldSession* session, uint8 rankId);
-    void HandleMemberDepositMoney(WorldSession* session, uint64 amount);
-    bool HandleMemberWithdrawMoney(WorldSession* session, uint64 amount, bool repair = false);
+    void HandleMemberDepositMoney(WorldSession* session, uint32 amount);
+    bool HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair = false);
     void HandleMemberLogout(WorldSession* session);
     void HandleDisband(WorldSession* session);
 
-    void DepositBankMoneyFromLoot(uint64 amount);
+    void DepositBankMoneyFromLoot(uint32 amount);
 
     void UpdateMemberData(Player* plr, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* plr, uint32 flag, bool state);

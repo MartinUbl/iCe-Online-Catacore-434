@@ -202,14 +202,14 @@ class Pet : public Guardian
 
         bool resetTalents(bool no_cost = false);
         static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = NULL);
-        uint64 resetTalentsCost() const;
+        uint32 resetTalentsCost() const;
         void InitTalentForLevel();
 
         uint8 GetMaxTalentPointsForLevel(uint8 level);
         uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
         void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_BYTES_1, 1, points); }
 
-        uint64  m_resetTalentsCost;
+        uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
         uint32  m_usedTalentCount;
 

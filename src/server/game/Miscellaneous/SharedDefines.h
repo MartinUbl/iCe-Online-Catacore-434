@@ -152,10 +152,10 @@ enum ReputationRank
 #define MAX_REPUTATION_RANK 8
 
 #define MAX_SPILLOVER_FACTIONS 4
-#define COPPER UI64LIT(1)
 
 enum MoneyConstants
 {
+    COPPER = 1,
     SILVER = COPPER*100,
     GOLD   = SILVER*100
 };

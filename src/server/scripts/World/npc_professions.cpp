@@ -181,17 +181,17 @@ there is no difference here (except that default text is chosen with `gameobject
 # formulas to calculate unlearning cost
 ###*/
 
-int64 DoLearnCost(Player* /*pPlayer*/)                      //tailor, alchemy
+int32 DoLearnCost(Player* /*pPlayer*/)                      //tailor, alchemy
 {
     return 200000;
 }
 
-int64 DoHighUnlearnCost(Player* /*pPlayer*/)                //tailor, alchemy
+int32 DoHighUnlearnCost(Player* /*pPlayer*/)                //tailor, alchemy
 {
     return 1500000;
 }
 
-int64 DoMedUnlearnCost(Player* pPlayer)                     //blacksmith, leatherwork
+int32 DoMedUnlearnCost(Player* pPlayer)                     //blacksmith, leatherwork
 {
     uint8 level = pPlayer->getLevel();
     if (level < 51)
@@ -202,7 +202,7 @@ int64 DoMedUnlearnCost(Player* pPlayer)                     //blacksmith, leathe
         return 1000000;
 }
 
-int64 DoLowUnlearnCost(Player* pPlayer)                     //blacksmith
+int32 DoLowUnlearnCost(Player* pPlayer)                     //blacksmith
 {
     uint8 level = pPlayer->getLevel();
     if (level < 66)
