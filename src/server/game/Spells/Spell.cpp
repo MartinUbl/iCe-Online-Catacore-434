@@ -6298,7 +6298,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TRY_AGAIN;
 
                 /* not while falling */
-                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && m_spellInfo->Id != 6544)
                     return SPELL_FAILED_FALLING;
 
                 /* exclude flat ground for charge when not in BG */
