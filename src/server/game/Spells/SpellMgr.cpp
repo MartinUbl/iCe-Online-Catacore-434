@@ -318,8 +318,16 @@ SpellScaling::SpellScaling(uint8 playerLevel_, const SpellEntry * spellEntry_)
     else
         cast = ct_min;
 
-    if(cast > ct_max)
-        cast = ct_max;
+    if(ct_min < ct_max)     // cast time increasing with level
+    {
+        if(cast > ct_max)
+            cast = ct_max;
+    }
+    else                    // cast time decreasing with level (e.g. Starfire)
+    {
+        if (cast < ct_max)
+            cast = ct_max;
+    }
 
     //effects
     for(uint8 effIndex = 0; effIndex < 3; effIndex++)
