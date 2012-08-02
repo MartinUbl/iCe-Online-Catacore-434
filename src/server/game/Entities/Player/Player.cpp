@@ -17430,7 +17430,7 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
             break;
     }
     
-    if (player && player)
+    if (player)
         if (player->_LoadFromDB(guid, holder, result))
             return player;
 

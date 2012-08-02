@@ -461,14 +461,8 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_FLAGS));
 
-            std::ostringstream ssEnchants;
-            for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            {
-                ssEnchants << GetEnchantmentId(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentDuration(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentCharges(EnchantmentSlot(i)) << " ";
-            }
-            stmt->setString(++index, ssEnchants.str());
+            // delete enchantments
+            trans->PAppend("DELETE FROM item_enchantments where guid = %d", guid);
 
             stmt->setInt32 (++index, GetItemRandomPropertyId());
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
@@ -485,6 +479,33 @@ void Item::SaveToDB(SQLTransaction& trans)
                 stmt->setUInt32(1, guid);
                 trans->Append(stmt);
             }
+
+            // insert new enchantments
+            std::ostringstream ssEnchants;
+            for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+            {
+                EnchantmentSlot slot = EnchantmentSlot(i);
+                uint32 id = GetEnchantmentId(slot);
+                if (id != 0)
+                {
+                    uint32 duration = GetEnchantmentDuration(slot);
+                    uint32 charges = GetEnchantmentCharges(slot);
+                    ssEnchants << "(" << guid << ", ";
+                    ssEnchants << i << ", ";
+                    ssEnchants << id << ", ";
+                    ssEnchants << duration << ", ";
+                    ssEnchants << charges << "), ";
+                }
+            }
+            std::string str = ssEnchants.str();
+            size_t len = str.size();
+            if (len > 2)
+            {
+                str[len - 2] = ';' ;
+                str.resize(len - 1);
+                trans->PAppend("INSERT INTO item_enchantments values %s", str.c_str());
+            }
+
             break;
         }
         case ITEM_REMOVED:
@@ -556,8 +577,31 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         need_save = true;
     }
 
-    std::string enchants = fields[6].GetString();    
-    _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
+    // load enchantments from table item_enchantments
+    QueryResult enchantments = CharacterDatabase.PQuery("SELECT slot, id, duration, charges from item_enchantments "
+                                                            "where guid = %d", guid);
+
+    if (enchantments && enchantments->GetRowCount() > 0)
+    {
+        do 
+        {
+            Field* fields = enchantments->Fetch();
+            uint32 slot = fields[0].GetInt32(),
+                   id = fields[1].GetInt32(),
+                   duration = fields[2].GetInt32(),
+                   charges = fields[3].GetInt32();
+
+            if (slot < 0 || slot >= MAX_ENCHANTMENT_SLOT)
+            {
+                sLog->outError("Invalid enchantment slot (%d) for item %d.", slot, guid);
+                continue;
+            }
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET] = id;
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET] = duration;
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET] = charges;
+        } while (enchantments->NextRow());
+    }
+
     // Reforge is stored in slot 8
     m_reforgeId = GetEnchantmentId(REFORGING_ENCHANTMENT_SLOT);
     SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[7].GetInt32());
