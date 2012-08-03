@@ -72,7 +72,7 @@ class WorldPacket : public ByteBuffer
         uint32 GetOpcode() const { return m_opcode; }
         void SetOpcode(uint32 opcode) { m_opcode = opcode; m_realOpcode = opcode; }
 
-        uint32 GetRealOpcode() { return m_realOpcode; }
+        uint32 GetRealOpcode() const { return m_realOpcode; }
 
     protected:
 

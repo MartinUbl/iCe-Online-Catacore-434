@@ -146,7 +146,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     #endif                                                  // !TRINITY_DEBUG
 
 #if defined WINVER
-    sLog->outString("sent opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+    sLog->outString("sent opcode 0x%.4X (%s)", packet->GetRealOpcode(), LookupOpcodeName(packet->GetRealOpcode()));
 #endif
 
     if (m_Socket->SendPacket (*packet) == -1)
