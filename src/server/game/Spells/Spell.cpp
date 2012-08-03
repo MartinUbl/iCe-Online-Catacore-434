@@ -274,9 +274,9 @@ void SpellCastTargets::OutDebug()
     {
         sLog->outString("TARGET_FLAG_UNIT: " UI64FMTD, m_unitTargetGUID);
     }
-    if (m_targetMask & TARGET_FLAG_UNK17)
+    if (m_targetMask & TARGET_FLAG_UNIT_MINIPET)
     {
-        sLog->outString("TARGET_FLAG_UNK17: " UI64FMTD, m_unitTargetGUID);
+        sLog->outString("TARGET_FLAG_UNIT_MINIPET: " UI64FMTD, m_unitTargetGUID);
     }
     if (m_targetMask & TARGET_FLAG_OBJECT)
     {
@@ -321,7 +321,7 @@ void SpellCastTargets::read (ByteBuffer & data, Unit * caster)
     if (m_targetMask == TARGET_FLAG_SELF)
         return;
 
-    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNK17))
+    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_MINIPET))
         data.readPackGUID(m_unitTargetGUID);
 
     if (m_targetMask & (TARGET_FLAG_OBJECT))
@@ -377,7 +377,7 @@ void SpellCastTargets::write (ByteBuffer & data)
 {
     data << uint32(m_targetMask);
 
-    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK17))
+    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNIT_MINIPET))
     {
         if (m_targetMask & TARGET_FLAG_UNIT)
         {
@@ -4374,7 +4374,10 @@ void Spell::SendSpellStart()
     data << uint8(m_cast_count);                            // pending spell cast?
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint32(castFlags);                              // cast flags
-    data << uint32(m_timer);                                // delay?
+    data << uint32(0);                                      // unk 4.3.4
+    data << int32(m_timer);                                 // delay? signed int?
+
+    data << int32(0);                                       // unk 4.3.4
 
     m_targets.write(data);
 
@@ -4384,10 +4387,14 @@ void Spell::SendSpellStart()
     if (castFlags & CAST_FLAG_AMMO)
         WriteAmmoToPacket(&data);
 
-    if (castFlags & CAST_FLAG_UNKNOWN_27)
+    if (castFlags & CAST_FLAG_IMMUNITY)
     {
         data << uint32(0);
         data << uint32(0);
+
+        data << uint32(0);
+        data << uint8(2);       // if ==2
+        data << uint64(0);      //GUID
     }
 
     if (castFlags & CAST_FLAG_HEAL_VALUE)
@@ -4459,6 +4466,7 @@ void Spell::SendSpellGo()
     data << uint8(m_cast_count);                            // pending spell cast?
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint32(castFlags);                              // cast flags
+    data << uint32(0);                                      // unk 4.3.4
     data << uint32(getMSTime());                            // timestamp
 
     /*
@@ -4497,16 +4505,21 @@ void Spell::SendSpellGo()
         }
     }
 
-    if (castFlags & CAST_FLAG_UNKNOWN_18)                   // unknown wotlk
+    if (castFlags & CAST_FLAG_ADJUST_MISSILE)
     {
-        data << float(0);
+        /*
+        // Data from Trinity
+        data << m_targets.GetElevation();
+        data << uint32(m_delayMoment);
+        */
+        data << uint32(0);
         data << uint32(0);
     }
 
     if (castFlags & CAST_FLAG_AMMO)
         WriteAmmoToPacket(&data);
 
-    if (castFlags & CAST_FLAG_UNKNOWN_20)                   // unknown wotlk
+    if (castFlags & CAST_FLAG_VISUAL_CHAIN)
     {
         data << uint32(0);
         data << uint32(0);
@@ -4515,6 +4528,20 @@ void Spell::SendSpellGo()
     if (m_targets.getTargetMask() & TARGET_FLAG_DEST_LOCATION)
     {
         data << uint8(0);
+    }
+
+    if (m_targets.getTargetMask() & TARGET_FLAG_EXTRA_TARGETS)
+    {
+        data << uint8(0); // Extra targets count
+        /*
+        for (uint8 i = 0; i < count; ++i)
+        {
+            data << float(0);   // Target Position X
+            data << float(0);   // Target Position Y
+            data << float(0);   // Target Position Z
+            data << uint64(0);  // Target Guid
+        }
+        */
     }
 
     m_caster->SendMessageToSet(&data, true);

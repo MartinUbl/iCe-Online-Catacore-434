@@ -248,7 +248,7 @@ void AuraApplication::ClientUpdate(bool remove)
         }
     }
 
-    data << uint8(flags);
+    data << uint16(flags);
     data << uint8(aura->GetCasterLevel());
     data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
 

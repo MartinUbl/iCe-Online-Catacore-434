@@ -115,7 +115,7 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
 
-    m_updateFlag = (UPDATEFLAG_LIVING | UPDATEFLAG_HAS_POSITION);
+    m_updateFlag = (UPDATEFLAG_HAS_LIVING | UPDATEFLAG_HAS_STATIONARY_POSITION);
 
     m_attackTimer[BASE_ATTACK] = 0;
     m_attackTimer[OFF_ATTACK] = 0;
@@ -17201,7 +17201,7 @@ bool Unit::CreateVehicleKit(uint32 id)
         return false;
 
     m_vehicleKit = new Vehicle(this, vehInfo);
-    m_updateFlag |= UPDATEFLAG_VEHICLE;
+    m_updateFlag |= UPDATEFLAG_HAS_VEHICLE;
     m_unitTypeMask |= UNIT_MASK_VEHICLE;
     return true;
 }
@@ -17216,7 +17216,7 @@ void Unit::RemoveVehicleKit()
 
     m_vehicleKit = NULL;
 
-    m_updateFlag &= ~UPDATEFLAG_VEHICLE;
+    m_updateFlag &= ~UPDATEFLAG_HAS_VEHICLE;
     m_unitTypeMask &= ~UNIT_MASK_VEHICLE;
     RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);

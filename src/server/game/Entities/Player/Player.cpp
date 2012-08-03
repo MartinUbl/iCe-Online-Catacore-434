@@ -2159,11 +2159,17 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 			if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
-                data << uint32(mapid);
                 if (m_transport)
-                    data << m_movementInfo.t_pos.PositionXYZOStream();
+                    data << m_movementInfo.t_pos.PositionXYZStream();
                 else
-                    data << m_teleport_dest.PositionXYZOStream();
+                    data << m_teleport_dest.PositionXYZStream();
+
+                data << uint32(mapid);
+
+                if (m_transport)
+                    data << m_movementInfo.t_pos.GetOrientation();
+                else
+                    data << m_teleport_dest.GetOrientation();
 
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
@@ -9143,6 +9149,7 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
     data << Field;
     data << Value;
+    data << uint8(0);
     GetSession()->SendPacket(&data);
 }
 
@@ -11272,13 +11279,31 @@ void Player::SendCurrencies()
 
     for (PlayerCurrenciesMap::const_iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
     {
+        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr->first);
+        if (!entry)
+            continue;
+
+        uint32 precision = (entry->Flags & 0x8) ? 100 : 1;
+        packet.WriteBit(_GetCurrencyWeekCap(entry) / precision);
+        packet.WriteBit(0);
+        packet.WriteBit(itr->second.weekCount / precision);
+    }
+
+    for (PlayerCurrenciesMap::const_iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    {
         const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(itr->first);
-        packet << uint32(itr->second.weekCount);
-        packet << uint8(0);                     // unknown
+        if (!entry)
+            continue;
+
+        uint32 precision = (entry->Flags & 0x8) ? 100 : 1;
         packet << uint32(entry->ID);
-        packet << uint32(sWorld->GetNextWeeklyQuestsResetTime() - 1*WEEK);
-        packet << uint32(_GetCurrencyWeekCap(entry));
-        packet << uint32(itr->second.totalCount);
+        if (uint32 weekCap = (_GetCurrencyWeekCap(entry) / precision))
+            packet << uint32(weekCap);
+        packet << uint32(itr->second.totalCount / precision);
+        packet << uint8(0);                     // unknown
+        //packet << uint32(0); // season total earned
+        if (uint32 weekCount = (itr->second.weekCount / precision))
+            packet << uint32(weekCount);
     }
 
     GetSession()->SendPacket(&packet);
@@ -23646,7 +23671,7 @@ void Player::SendAurasForTarget(Unit *target)
             }
         }
 
-        data << uint8(flags);
+        data << uint16(flags);
         // level
         data << uint8(aura->GetCasterLevel());
         // charges
@@ -23698,7 +23723,7 @@ void Player::SendAurasForTarget(Unit *target)
         {
             data << uint8(128);                           // slot
             data << uint32(86914);                        // id
-            data << uint8(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
+            data << uint16(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
             data << uint8(getLevel());                    // level
             data << uint8(1);                             // stack amount
         }
@@ -23707,7 +23732,7 @@ void Player::SendAurasForTarget(Unit *target)
         {
             data << uint8(128);                           // slot
             data << uint32(85105);                        // id
-            data << uint8(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
+            data << uint16(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
             data << uint8(getLevel());                    // level
             data << uint8(1);                             // stack amount
         }
