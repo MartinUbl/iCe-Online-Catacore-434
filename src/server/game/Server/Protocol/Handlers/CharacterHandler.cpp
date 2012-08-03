@@ -205,29 +205,42 @@ bool LoginQueryHolder::Initialize()
 
 void WorldSession::HandleCharEnum(QueryResult result)
 {
-    WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
+    uint32 charCount = 0;
+    ByteBuffer bitBuffer;
+    ByteBuffer dataBuffer;
 
-    uint8 num = 0;
-
-    data << num;
-
-    _allowedCharsToLogin.clear();
+    bitBuffer.WriteBits(0, 23);
+    bitBuffer.WriteBit(1);
     if (result)
     {
+        _allowedCharsToLogin.clear();
+
+        charCount = uint32(result->GetRowCount());
+        bitBuffer.reserve(24 * charCount / 8);
+        dataBuffer.reserve(charCount * 381);
+
+        bitBuffer.WriteBits(charCount, 17);
+
         do
         {
-            uint32 guidlow = (*result)[0].GetUInt32();
-            sLog->outDetail("Loading char guid %u from account %u.",guidlow,GetAccountId());
-            if (Player::BuildEnumData(result, &data))
-            {
-                _allowedCharsToLogin.insert(guidlow);
-                ++num;
-            }
-        }
-        while (result->NextRow());
-    }
+            uint32 guidLow = (*result)[0].GetUInt32();
 
-    data.put<uint8>(0, num);
+            sLog->outDetail("Loading char guid %u from account %u.", guidLow, GetAccountId());
+
+            Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
+
+            _allowedCharsToLogin.insert(guidLow);
+        } while (result->NextRow());
+
+        bitBuffer.FlushBits();
+    }
+    else
+        bitBuffer.WriteBits(0, 17);
+
+    WorldPacket data(SMSG_CHAR_ENUM, 7 + bitBuffer.size() + dataBuffer.size());
+    data.append(bitBuffer);
+    if (charCount)
+        data.append(dataBuffer);
 
     SendPacket(&data);
 }
@@ -763,7 +776,20 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket & recv_data)
 
     sLog->outStaticDebug("WORLD: Recvd Player Logon Message");
 
-    recv_data >> playerGuid;
+    BitStream mask = recv_data.ReadBitStream(8);
+
+    ByteBuffer bytes(8, true);
+    //15595
+    recv_data.ReadXorByte(mask[0], bytes[2]);
+    recv_data.ReadXorByte(mask[7], bytes[7]);
+    recv_data.ReadXorByte(mask[2], bytes[0]);
+    recv_data.ReadXorByte(mask[1], bytes[3]);
+    recv_data.ReadXorByte(mask[5], bytes[5]);
+    recv_data.ReadXorByte(mask[3], bytes[6]);
+    recv_data.ReadXorByte(mask[6], bytes[1]);
+    recv_data.ReadXorByte(mask[4], bytes[4]);
+
+    playerGuid = BitConverter::ToUInt64(bytes);
 
     if (!CharCanLogin(playerGuid))
     {
