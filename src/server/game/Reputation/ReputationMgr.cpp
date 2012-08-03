@@ -179,31 +179,31 @@ void ReputationMgr::SendState(FactionState const* faction)
 void ReputationMgr::SendInitialReputations()
 {
     WorldPacket data(SMSG_INITIALIZE_FACTIONS, (4+128*5));
-    data << uint32 (0x00000080);
+    data << uint32(256);
 
     RepListID a = 0;
 
     for (FactionStateList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         // fill in absent fields
-        for (; a != itr->first; a++)
+        for (; a != itr->first; ++a)
         {
-            data << uint8  (0x00);
-            data << uint32 (0x00000000);
+            data << uint8(0);
+            data << uint32(0);
         }
 
         // fill in encountered data
-        data << uint8  (itr->second.Flags);
-        data << uint32 (itr->second.Standing);
+        data << uint8(itr->second.Flags);
+        data << uint32(itr->second.Standing);
 
         ++a;
     }
 
     // fill in absent fields
-    for (; a != 128; a++)
+    for (; a != 256; ++a)
     {
-        data << uint8  (0x00);
-        data << uint32 (0x00000000);
+        data << uint8(0);
+        data << uint32(0);
     }
 
     m_player->SendDirectMessage(&data);

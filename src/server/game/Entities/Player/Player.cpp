@@ -3210,7 +3210,7 @@ void Player::SendInitialSpells()
 
         data << uint32(itr->first);
 
-        data << uint16(itr->second.itemid);                 // cast item id
+        data << uint32(itr->second.itemid);                 // cast item id
         data << uint16(sEntry->Category);                   // spell category
 
         // send infinity cooldown in special format
@@ -4491,8 +4491,6 @@ void Player::InitVisibleBits()
 
 void Player::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
-    Unit::BuildCreateUpdateBlockForPlayer(data, target);
-    
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
         if (m_items[i] == NULL)
@@ -4518,6 +4516,8 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
         }
     }
+
+    Unit::BuildCreateUpdateBlockForPlayer(data, target);
 }
 
 void Player::DestroyForPlayer(Player *target, bool anim) const
@@ -6648,7 +6648,6 @@ void Player::SendActionButtons(uint32 state) const
     sLog->outDetail("Sending Action Buttons for '%u' spec '%u'", GetGUIDLow(), m_activeSpec);
 
     WorldPacket data(SMSG_ACTION_BUTTONS, 1+(MAX_ACTION_BUTTONS*4));
-    data << uint8(state);
     /*
         state can be 0, 1, 2
         0 - Looks to be sent when initial action buttons get sent, however on Trinity we use 1 since 0 had some difficulties
@@ -6666,6 +6665,8 @@ void Player::SendActionButtons(uint32 state) const
                 data << uint32(0);
         }
     }
+
+    data << uint8(state);
 
     GetSession()->SendPacket(&data);
     sLog->outDetail("Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), m_activeSpec);
@@ -23232,10 +23233,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendTalentsInfoData(false);
 
     // SMSG_INSTANCE_DIFFICULTY
-    data.Initialize(SMSG_INSTANCE_DIFFICULTY, 4+4);
-    data << uint32(GetMap()->GetDifficulty());
-    data << uint32(0);
-    GetSession()->SendPacket(&data);
+    //data.Initialize(SMSG_INSTANCE_DIFFICULTY, 4+4);
+    //data << uint32(GetMap()->GetDifficulty());
+    //data << uint32(0);
+    //GetSession()->SendPacket(&data);
 
     SendInitialSpells();
 

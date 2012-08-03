@@ -1054,6 +1054,31 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
+void WorldSession::HandleObjectUpdateFailed(WorldPacket& recv_data)
+{
+    ObjectGuid guid;
+    guid[6] = recv_data.ReadBit();
+    guid[7] = recv_data.ReadBit();
+    guid[4] = recv_data.ReadBit();
+    guid[0] = recv_data.ReadBit();
+    guid[1] = recv_data.ReadBit();
+    guid[5] = recv_data.ReadBit();
+    guid[3] = recv_data.ReadBit();
+    guid[2] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(guid[6]);
+    recv_data.ReadByteSeq(guid[7]);
+    recv_data.ReadByteSeq(guid[2]);
+    recv_data.ReadByteSeq(guid[3]);
+    recv_data.ReadByteSeq(guid[1]);
+    recv_data.ReadByteSeq(guid[4]);
+    recv_data.ReadByteSeq(guid[0]);
+    recv_data.ReadByteSeq(guid[5]);
+
+    WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
+    sLog->outError("Object update failed for object guid "UI64FMTD" (%s), player %s", uint64(guid), obj?obj->GetName():"not-found", GetPlayer()->GetName());
+}
+
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug("WORLD: Received CMSG_SET_ACTION_BUTTON");

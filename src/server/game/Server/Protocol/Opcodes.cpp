@@ -192,6 +192,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_CHANNEL_ANNOUNCEMENTS,                   STATUS_LOGGEDIN, &WorldSession::HandleChannelAnnouncements      );
     OPCODE( CMSG_CHANNEL_MODERATE,                        STATUS_LOGGEDIN, &WorldSession::HandleChannelModerate           );
     OPCODE( SMSG_UPDATE_OBJECT,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_OBJECT_UPDATE_FAILED,                    STATUS_LOGGEDIN, &WorldSession::HandleObjectUpdateFailed        );
     OPCODE( SMSG_DESTROY_OBJECT,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_USE_ITEM,                                STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode             );
     OPCODE( CMSG_OPEN_ITEM,                               STATUS_LOGGEDIN, &WorldSession::HandleOpenItemOpcode            );

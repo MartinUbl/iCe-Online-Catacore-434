@@ -437,6 +437,8 @@ class WorldSession
         void HandleRequestAccountData(WorldPacket& recvPacket);
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
 
+        void HandleObjectUpdateFailed(WorldPacket& recPacket);
+
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
         void HandleMeetingStoneInfo(WorldPacket& recPacket);
         void HandleGameobjectReportUse(WorldPacket& recvPacket);
