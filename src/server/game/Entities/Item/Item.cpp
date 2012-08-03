@@ -481,7 +481,6 @@ void Item::SaveToDB(SQLTransaction& trans)
             }
 
             // insert new enchantments
-            std::ostringstream ssEnchants;
             for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
             {
                 EnchantmentSlot slot = EnchantmentSlot(i);
@@ -490,20 +489,17 @@ void Item::SaveToDB(SQLTransaction& trans)
                 {
                     uint32 duration = GetEnchantmentDuration(slot);
                     uint32 charges = GetEnchantmentCharges(slot);
+
+                    std::ostringstream ssEnchants;
                     ssEnchants << "(" << guid << ", ";
                     ssEnchants << i << ", ";
                     ssEnchants << id << ", ";
                     ssEnchants << duration << ", ";
-                    ssEnchants << charges << "), ";
+                    ssEnchants << charges << ");";
+
+                    trans->PAppend("INSERT INTO item_enchantments (guid, slot, id, duration, charges) "
+                                   "VALUES %s", ssEnchants.str().c_str());
                 }
-            }
-            std::string str = ssEnchants.str();
-            size_t len = str.size();
-            if (len > 2)
-            {
-                str[len - 2] = ';' ;
-                str.resize(len - 1);
-                trans->PAppend("INSERT INTO item_enchantments values %s", str.c_str());
             }
 
             break;
@@ -797,8 +793,8 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
                 SetState(ITEM_CHANGED, GetOwner());
             }
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
-                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2],0,0);
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++i)
+                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }
     else
@@ -814,7 +810,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetState(ITEM_CHANGED, GetOwner());
             }
 
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++i)
                 SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }

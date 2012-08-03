@@ -14390,7 +14390,7 @@ void Player::ApplyEnchantment(Item *item,bool apply)
 
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
         // do not add "bonus" enchant with reforge ID
-        if (slot != REFORGING_ENCHANTMENT_SLOT || item->GetProto()->Quality <= 2)
+        if (slot != REFORGING_ENCHANTMENT_SLOT)
             ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
@@ -14466,7 +14466,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                                 if (item_rand)
                                 {
                                     // Search enchant_amount
-                                    for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                                    for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                                     {
                                         if (item_rand->enchant_id[k] == enchant_id)
                                         {
@@ -14492,7 +14492,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand)
                         {
-                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                             {
                                 if (item_rand->enchant_id[k] == enchant_id)
                                 {
@@ -14512,7 +14512,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand_suffix)
                         {
-                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                             {
                                 if (item_rand_suffix->enchant_id[k] == enchant_id)
                                 {
