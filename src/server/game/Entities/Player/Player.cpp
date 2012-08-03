@@ -4724,8 +4724,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                             do
                             {
                                 Field* fields = resultItems->Fetch();
-                                uint32 item_guidlow = fields[11].GetUInt32();
-                                uint32 item_template = fields[12].GetUInt32();
+                                uint32 item_guidlow = fields[10].GetUInt32();
+                                uint32 item_template = fields[11].GetUInt32();
 
                                 ItemPrototype const* itemProto = sObjectMgr->GetItemPrototype(item_template);
                                 if (!itemProto)
@@ -18295,10 +18295,10 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timediff)
         {
             Field* fields = result->Fetch();
 
-            uint32 bag_guid  = fields[11].GetUInt32();
-            uint8  slot      = fields[12].GetUInt8();
-            uint32 item_guid = fields[13].GetUInt32();
-            uint32 item_id   = fields[14].GetUInt32();
+            uint32 bag_guid  = fields[10].GetUInt32();
+            uint8  slot      = fields[11].GetUInt8();
+            uint32 item_guid = fields[12].GetUInt32();
+            uint32 item_id   = fields[13].GetUInt32();
 
             ItemPrototype const * proto = sObjectMgr->GetItemPrototype(item_id);
 
@@ -18516,8 +18516,8 @@ void Player::_LoadMailedItems(Mail *mail)
     {
         Field* fields = result->Fetch();
 
-        uint32 item_guid_low = fields[11].GetUInt32();
-        uint32 item_template = fields[12].GetUInt32();
+        uint32 item_guid_low = fields[10].GetUInt32();
+        uint32 item_template = fields[11].GetUInt32();
 
         mail->AddItem(item_guid_low, item_template);
 
