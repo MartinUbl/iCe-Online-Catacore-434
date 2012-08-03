@@ -1442,6 +1442,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 damageInfo->procEx      |= PROC_EX_CRITICAL_HIT;
                 // Crit bonus calc
                 damageInfo->damage += damageInfo->damage;
+                damageInfo->cleanDamage += damageInfo->cleanDamage;
                 int32 mod = 0;
                 // Apply SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE or SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
                 if (damageInfo->attackType == RANGED_ATTACK)
@@ -1457,7 +1458,11 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 // Increase crit damage from SPELL_AURA_MOD_CRIT_PERCENT_VERSUS
                 mod += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, crTypeMask);
                 if (mod != 0)
-                    damageInfo->damage = int32((damageInfo->damage) * float((100.0f + mod)/100.0f));
+                {
+                    float coeff = float((100.0f + mod)/100.0f);
+                    damageInfo->damage = int32((damageInfo->damage) * coeff);
+                    damageInfo->cleanDamage = int32((damageInfo->cleanDamage) * coeff);
+                }
             }
             break;
         case MELEE_HIT_PARRY:
