@@ -375,6 +375,60 @@ class Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 
+struct ObjectGuid
+{
+public:
+    ObjectGuid() { _data.u64 = 0lu; }
+    ObjectGuid(uint64 guid) { _data.u64 = guid; }
+    ObjectGuid(ObjectGuid const& other) { _data.u64 = other._data.u64; }
+
+    uint8& operator[](uint32 index)
+    {
+        ASSERT(index < sizeof(uint64));
+
+#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+        return _data.byte[index];
+#else
+        return _data.byte[7 - index];
+#endif
+    }
+
+    uint8 const& operator[](uint32 index) const
+    {
+        ASSERT(index < sizeof(uint64));
+
+#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+        return _data.byte[index];
+#else
+        return _data.byte[7 - index];
+#endif
+    }
+
+    operator uint64()
+    {
+        return _data.u64;
+    }
+
+    ObjectGuid& operator=(uint64 guid)
+    {
+        _data.u64 = guid;
+        return *this;
+    }
+
+    ObjectGuid& operator=(ObjectGuid const& other)
+    {
+        _data.u64 = other._data.u64;
+        return *this;
+    }
+
+private:
+    union
+    {
+        uint64 u64;
+        uint8 byte[8];
+    } _data;
+};
+
 struct Position
 {
     struct PositionXYZStreamer
