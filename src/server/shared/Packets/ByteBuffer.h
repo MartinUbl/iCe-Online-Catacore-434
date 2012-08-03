@@ -146,7 +146,7 @@ class ByteBuffer
         }
 
         // constructor
-        ByteBuffer(size_t res, bool init = false)
+        ByteBuffer(size_t res, bool init = false): _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
         {
             if (init)
                 _storage.resize(res, 0);
@@ -156,7 +156,7 @@ class ByteBuffer
 
         // copy constructor
         ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
-            _storage(buf._storage), _bitpos(buf._bitpos), _curbitval(buf._curbitval)
+            _bitpos(buf._bitpos), _curbitval(buf._curbitval), _storage(buf._storage)
         {
         }
 
@@ -168,12 +168,12 @@ class ByteBuffer
 
         template <typename T> void append(T value)
         {
-            flushBits();
+            FlushBits();
             EndianConvert(value);
             append((uint8 *)&value, sizeof(value));
         }
 
-        void flushBits()
+        void FlushBits()
         {
             if (_bitpos == 8)
                 return;
@@ -183,7 +183,15 @@ class ByteBuffer
             _bitpos = 8;
         }
 
-        bool writeBit(uint32 bit)
+        void SetBitPoz()
+        {
+            if (_bitpos < 7)
+            {
+                _bitpos = 7;
+            }
+        }
+
+        bool WriteBit(uint32 bit)
         {
             --_bitpos;
             if (bit)
@@ -211,10 +219,10 @@ class ByteBuffer
             return ((_curbitval >> (7-_bitpos)) & 1) != 0;
         }
 
-        template <typename T> void writeBits(T value, size_t bits)
+        template <typename T> void WriteBits(T value, size_t bits)
         {
             for (int32 i = bits-1; i >= 0; --i)
-                writeBit((value >> i) & 1);
+                WriteBit((value >> i) & 1);
         }
 
         uint32 ReadBits(size_t bits)
@@ -222,7 +230,7 @@ class ByteBuffer
             uint32 value = 0;
             for (int32 i = bits-1; i >= 0; --i)
                 if (ReadBit())
-                    value |= (1 << (_bitpos));
+                    value |= (1 << (i));
 
             return value;
         }
@@ -233,6 +241,58 @@ class ByteBuffer
             for (uint32 i = 0; i < len; ++i)
                 b.WriteBit(ReadBit());
             return b;
+        }
+
+        void ReadByteMask(uint8& b)
+        {
+            b = ReadBit() ? 1 : 0;
+        }
+
+        void ReadByteSeq(uint8& b)
+        {
+            if (b != 0)
+                b ^= read<uint8>();
+        }
+
+        uint8 ReadXorByte()
+        {
+            return ReadUInt8() ^ 1;
+        }
+
+        void ReadXorByte(uint32 bit, uint8& byte)
+        {
+            if (!bit)
+                byte = 0;
+            else
+                byte = ReadUInt8() ^ bit;
+        }
+
+        void WriteByteMask(uint8 b)
+        {
+            WriteBit(b);
+        }
+
+        void WriteByteSeq(uint8 b)
+        {
+            if (b != 0)
+                append<uint8>(b ^ 1);
+        }
+
+         void WriteGuidMask(uint64 guid, uint8* maskOrder, uint8 maskCount, uint8 maskPos = 0)
+        {
+            uint8* guidByte = ((uint8*)&guid);
+
+            for (uint8 i = 0; i < maskCount; i++)
+                WriteBit(guidByte[maskOrder[i + maskPos]]);
+        }
+
+        void WriteGuidBytes(uint64 guid, uint8* byteOrder, uint8 byteCount, uint8 bytePos)
+        {
+            uint8* guidByte = ((uint8*)&guid);
+
+            for (uint8 i = 0; i < byteCount; i++)
+                if (guidByte[byteOrder[i + bytePos]])
+                    (*this) << uint8(guidByte[byteOrder[i + bytePos]] ^ 1);
         }
 
         template <typename T> void put(size_t pos, T value)
@@ -461,7 +521,7 @@ class ByteBuffer
         void read(uint8 *dest, size_t len)
         {
             if (_rpos  + len > size())
-                throw ByteBufferException(false, _rpos, len, size());
+               throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
         }
@@ -551,6 +611,16 @@ class ByteBuffer
             std::string s = 0;
             (*this) >> s;
             return s;
+        }
+
+        std::string ReadString(uint32 length)
+        {
+            char* buffer = new char[length + 1];
+            memset(buffer, 0, length + 1);
+            read((uint8*)buffer, length);
+            std::string retval = buffer;
+            delete[] buffer;
+            return retval;
         }
 
         bool ReadBoolean()
@@ -648,10 +718,20 @@ class ByteBuffer
             append(packGUID, size);
         }
 
+        void appendSpecialString(std::string string)
+        {
+            append(string.c_str(), string.length());
+        }
+
+        void appendSpecialString(char* string)
+        {
+            append(string, strlen(string));
+        }
+
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
             if (pos + cnt > size())
-                throw ByteBufferException(true, pos, cnt, size());
+               throw ByteBufferException(true, pos, cnt, size());
             memcpy(&_storage[pos], src, cnt);
         }
 
