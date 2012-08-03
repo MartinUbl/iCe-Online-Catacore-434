@@ -57,5 +57,7 @@ void DruidPlayer::ClearEclipseState()
     RemoveAurasDueToSpell(48518);
 
     // and hardly set eclipse power to zero
-    SetUInt32Value(UNIT_FIELD_POWER1 + POWER_ECLIPSE, 0);
+    uint32 powerIndex = GetPowerIndexByClass(POWER_ECLIPSE, getClass());
+    if (powerIndex != MAX_POWERS)
+        SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
 }

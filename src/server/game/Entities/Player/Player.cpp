@@ -2470,7 +2470,11 @@ void Player::Regenerate(Powers power)
     if (m_regenTimerCount >= 2000)
         SetPower(power, curValue);
     else
-        UpdateUInt32Value(UNIT_FIELD_POWER1 + power, curValue);
+    {
+        uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+        if (powerIndex != MAX_POWERS)
+            UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, curValue);
+    }
 }
 
 void Player::RegenerateHealth()
