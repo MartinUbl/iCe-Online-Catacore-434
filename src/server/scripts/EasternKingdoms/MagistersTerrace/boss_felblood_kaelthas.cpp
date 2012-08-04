@@ -159,7 +159,7 @@ public:
             // Open the encounter door
 
             if (GameObject* go = me->FindNearestGameObject(GO_ESCAPE_ORB, 150.0f))
-                go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32 &damage)
