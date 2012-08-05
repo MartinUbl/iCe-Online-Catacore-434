@@ -1446,7 +1446,14 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
     if (pProto->SellPrice > GetPlayer()->GetMoney() && reforgeID != 0)
     {
         sLog->outDebug("Player doesn't have enough money for reforge item");
-        SendNotification("You don't have enought money!");
+        SendNotification("You don't have enough money!");
+        return;
+    }
+
+    // Check for random enchantments (disabled because of not working correctly)
+    if (dstItem->GetItemRandomPropertyId() != 0)
+    {
+        sLog->outDebug("Player is trying to reforge random enchantment (temporarily disabled)");
         return;
     }
 
