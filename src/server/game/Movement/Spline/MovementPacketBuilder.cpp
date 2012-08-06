@@ -140,9 +140,10 @@ namespace Movement
             WriteLinearPath(spline, data);
     }
 
-    void PacketBuilder::WriteCreateBits(MoveSpline const& moveSpline, ByteBuffer& data)
+    void PacketBuilder::WriteCreateBits(MoveSpline const& moveSpline, ByteBuffer& data, bool& fullData)
     {
-        if (!data.WriteBit(!moveSpline.Finalized()))
+        fullData = data.WriteBit(!moveSpline.Finalized());
+        if (!fullData)
             return;
 
         data.WriteBits(uint8(moveSpline.spline.mode()), 2);
@@ -179,9 +180,9 @@ namespace Movement
         data.WriteBits(moveSpline.splineflags.raw(), 25);
     }
 
-    void PacketBuilder::WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data)
+    void PacketBuilder::WriteCreateData(MoveSpline const& moveSpline, ByteBuffer& data, bool fullData)
     {
-        if (!moveSpline.Finalized())
+        if (fullData)
         {
             MoveSplineFlag splineFlags = moveSpline.splineflags;
 
