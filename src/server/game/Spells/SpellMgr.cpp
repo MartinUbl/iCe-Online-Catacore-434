@@ -4533,6 +4533,28 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
             count++;
             break;
+        case 82415: // Dampening Wave
+        case 92650: // Dampening Wave (heroic difficulty)
+            // because of bug in dbc
+            spellInfo->EffectRadiusIndex[0] = 48; // 60 yards
+            spellInfo->EffectRadiusIndex[1] = 48; // 60 yards
+            break;
+        case 81828: // Thrashing Charge
+        case 92651: // Thrashing Charge (heroic difficulty)
+            // because bug of dbc we must set corrected target manually
+            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
+            spellInfo->CastingTimeIndex = 1; // instant cast
+            break;
+        case 81008: // Quake
+        case 92631: // Quake (Heroic difficulty)
+            // because of bug in dbc
+            spellInfo->EffectRadiusIndex[0] = 31; // 80 yards
+            break;
         default:
             break;
         }
