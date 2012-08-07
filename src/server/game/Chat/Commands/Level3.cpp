@@ -4063,6 +4063,9 @@ bool ChatHandler::HandleGetDistanceCommand(const char *args)
             SetSentErrorMessage(true);
             return false;
         }
+
+        bool los = m_session->GetPlayer()->IsWithinLOSInMap(obj);
+        PSendSysMessage("Line of sight to target: %s", los ? "yes" : "no");
     }
 
     PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistance(obj), m_session->GetPlayer()->GetDistance2d(obj), m_session->GetPlayer()->GetExactDist(obj), m_session->GetPlayer()->GetExactDist2d(obj));
