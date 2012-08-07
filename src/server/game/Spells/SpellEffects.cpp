@@ -9882,6 +9882,13 @@ void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 coun
         m_caster->GetClosePoint(x,y,z,3.0f);
         pos.Relocate(x, y, z);
     }
+    // if totem is not in LOS ...relocate
+    if ((m_spellInfo->EffectImplicitTargetA[i] == TARGET_DEST_CASTER_FRONT_LEFT // earth
+        || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DEST_CASTER_BACK_LEFT // water
+        || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DEST_CASTER_FRONT_RIGHT // fire
+        || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DEST_CASTER_BACK_RIGHT) // air
+        && !m_caster->IsWithinLOS(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ()))
+        pos.Relocate(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ());
 }
 
 void Spell::EffectRenamePet(SpellEffIndex /*effIndex*/)
