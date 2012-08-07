@@ -167,12 +167,13 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT          = 5,
     PRISMATIC_ENCHANTMENT_SLOT      = 6,                    // added at apply special permanent enchantment
     REFORGING_ENCHANTMENT_SLOT      = 8,
+    MAX_INSPECTED_ENCHANTMENT_SLOT  = 9,
+
     PROP_ENCHANTMENT_SLOT_0         = 9,                    // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_1         = 10,                   // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_2         = 11,                   // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_3         = 12,                   // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_4         = 13,                   // used with RandomSuffix and RandomProperty
-    MAX_INSPECTED_ENCHANTMENT_SLOT  = 14,
     MAX_ENCHANTMENT_SLOT            = 14
 };
 
