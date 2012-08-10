@@ -732,9 +732,21 @@ void Transport::UpdateNPCPositions()
         GetMap()->CreatureRelocation(npc, x, y, z, o, false);
     }
 }
+
+//! This method transforms supplied transport offsets into global coordinates
+void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+{
+    float inx = x, iny = y, inz = z, ino = o;
+    o = MapManager::NormalizeOrientation(GetOrientation() + ino);
+    x = GetPositionX() + (inx * cos(GetOrientation()) + iny * sin(GetOrientation() + M_PI));
+    y = GetPositionY() + (iny * cos(GetOrientation()) + inx * sin(GetOrientation()));
+    z = GetPositionZ() + inz;
+}
+
+//! This method transforms supplied global coordinates into local offsets
 void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
 {
-    o -= GetOrientation();
+    o = MapManager::NormalizeOrientation(o - GetOrientation());
     z -= GetPositionZ();
     y -= GetPositionY();    // y = searchedY * cos(o) + searchedX * sin(o)
     x -= GetPositionX();    // x = searchedX * cos(o) + searchedY * sin(o + pi)

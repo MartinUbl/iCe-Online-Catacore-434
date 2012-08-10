@@ -250,10 +250,11 @@ void Creature::RemoveCorpse(bool setSpawnTime)
     if(setSpawnTime)
         m_respawnTime = time(NULL) + respawnDelay;
 
-    float x,y,z,o;
-    GetRespawnCoord(x, y, z, &o);
-    SetHomePosition(x,y,z,o);
-    GetMap()->CreatureRelocation(this,x,y,z,o);
+    float x, y, z, o;
+    GetRespawnPosition(x, y, z, &o);
+    o = MapManager::NormalizeOrientation(o);
+    SetHomePosition(x, y, z, o);
+    GetMap()->CreatureRelocation(this, x, y, z, o);
 }
 
 /**
