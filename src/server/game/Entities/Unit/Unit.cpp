@@ -307,29 +307,56 @@ void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed)
     init.Launch();
 }
 
+enum MovementIntervals
+{
+    POSITION_UPDATE_DELAY = 400,
+};
+
 void Unit::UpdateSplineMovement(uint32 t_diff)
 {
-    enum {
-        POSITION_UPDATE_DELAY = 400,
-    };
     if (movespline->Finalized())
         return;
 
     movespline->updateState(t_diff);
     bool arrived = movespline->Finalized();
+
     if (arrived)
         DisableSpline();
 
     m_movesplineTimer.Update(t_diff);
     if (m_movesplineTimer.Passed() || arrived)
+        UpdateSplinePosition();
+}
+
+void Unit::UpdateSplinePosition()
+{
+    uint32 const positionUpdateDelay = 400;
+
+    m_movesplineTimer.Reset(positionUpdateDelay);
+    Movement::Location loc = movespline->ComputePosition();
+    if (GetTransGUID())
     {
-        m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
-        Movement::Location loc = movespline->ComputePosition();
-        if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->SetPosition(loc.x,loc.y,loc.z,loc.orientation);
-        else
-            GetMap()->CreatureRelocation((Creature*)this,loc.x,loc.y,loc.z,loc.orientation);
+        Position& pos = m_movementInfo.t_pos;
+        pos.m_positionX = loc.x;
+        pos.m_positionY = loc.y;
+        pos.m_positionZ = loc.z;
+        pos.SetOrientation(loc.orientation);
+
+        if (Unit* vehicle = GetVehicleBase())
+        {
+            loc.x += vehicle->GetPositionX();
+            loc.y += vehicle->GetPositionY();
+            loc.z += vehicle->GetPositionZMinusOffset();
+            loc.orientation = vehicle->GetOrientation();
+        }
+        else if (TransportBase* transport = GetDirectTransport())
+                transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
     }
+
+        if (HasUnitState(UNIT_STATE_CANNOT_TURN))
+            loc.orientation = GetOrientation();
+
+    UpdatePosition(loc.x, loc.y, loc.z, loc.orientation);
 }
 
 bool Unit::IsSplineEnabled() const
@@ -16206,9 +16233,13 @@ void Unit::StopMoving()
 {
     clearUnitState(UNIT_STAT_MOVING);
 
-    Movement::MoveSplineInit init(*this);
-    init.SetFacing(GetOrientation());
-    init.Launch();
+    // not need send any packets if not in world or not moving
+    if (!IsInWorld() || movespline->Finalized())
+        return;
+
+    // Update position using old spline
+    UpdateSplinePosition();
+    Movement::MoveSplineInit(*this).Stop();
 }
 
 void Unit::SendMovementFlagUpdate()
