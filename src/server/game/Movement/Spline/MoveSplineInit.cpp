@@ -120,6 +120,7 @@ namespace Movement
 
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
+        args.splineId = splineIdGen.NewId();
         // Elevators also use MOVEMENTFLAG_ONTRANSPORT but we do not keep track of their position changes
         args.TransformForTransport = unit.GetTransGUID();
         // mix existing state into new
