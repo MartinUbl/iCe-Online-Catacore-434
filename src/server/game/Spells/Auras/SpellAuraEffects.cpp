@@ -412,6 +412,23 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //351
     &AuraEffect::HandleNULL,                                      //352
     &AuraEffect::HandleModCamouflage,                             //353 SPELL_AURA_CAMOUFLAGE
+    &AuraEffect::HandleNULL,                                      //354
+    &AuraEffect::HandleNULL,                                      //355
+    &AuraEffect::HandleNULL,                                      //356
+    &AuraEffect::HandleNULL,                                      //357
+    &AuraEffect::HandleAuraTransform,                             //358 SPELL_AURA_TRANSFORM_2
+    &AuraEffect::HandleNULL,                                      //359
+    &AuraEffect::HandleNULL,                                      //360
+    &AuraEffect::HandleNULL,                                      //361
+    &AuraEffect::HandleNULL,                                      //362
+    &AuraEffect::HandleNULL,                                      //363
+    &AuraEffect::HandleNULL,                                      //364
+    &AuraEffect::HandleNULL,                                      //365
+    &AuraEffect::HandleNoImmediateEffect,                         //366 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2
+    &AuraEffect::HandleNULL,                                      //367
+    &AuraEffect::HandleNULL,                                      //368
+    &AuraEffect::HandleNULL,                                      //369
+    &AuraEffect::HandleNULL,                                      //370
 };
 
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit *caster) :

@@ -829,7 +829,15 @@ enum SpellEffects
     SPELL_EFFECT_MASS_RESURRECTION         = 172,
     SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT  = 173,
     SPELL_EFFECT_APPLY_AURA_FORCED         = 174,
-    TOTAL_SPELL_EFFECTS                    = 175
+    SPELL_EFFECT_175                       = 175,
+    SPELL_EFFECT_LEAVE_COMBAT              = 176,
+    SPELL_EFFECT_177                       = 177,
+    SPELL_EFFECT_178                       = 178,
+    SPELL_EFFECT_179                       = 179,
+    SPELL_EFFECT_180                       = 180,
+    SPELL_EFFECT_181                       = 181,
+    SPELL_EFFECT_182                       = 182,
+    TOTAL_SPELL_EFFECTS                    = 183
 };
 
 enum SpellCastResult

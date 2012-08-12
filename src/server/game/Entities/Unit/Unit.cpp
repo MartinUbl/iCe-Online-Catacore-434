@@ -11571,6 +11571,21 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
 int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
 {
+    // SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2:
+    // Your spell power is now equal to ??% of your attack power, and you no longer benefit from other sources of spell power
+    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2);
+    if (!mDamageDonebyAP.empty())
+    {
+        float AP = GetTotalAttackPowerValue(BASE_ATTACK);
+        int32 amount = 0;
+        for (AuraEffectList::const_iterator i =mDamageDonebyAP.begin(); i != mDamageDonebyAP.end(); ++i)
+            if ((*i)->GetMiscValue() & schoolMask)
+                amount += (*i)->GetAmount();
+
+        return  uint32(AP * amount / 100.0f);
+    }
+
+
     int32 DoneAdvertisedBenefit = 0;
 
     // ..done
@@ -12241,6 +12256,21 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
 
 int32 Unit::SpellBaseHealingBonus(SpellSchoolMask schoolMask)
 {
+    // SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2:
+    // Your spell power is now equal to ??% of your attack power, and you no longer benefit from other sources of spell power
+    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2);
+    if (!mDamageDonebyAP.empty())
+    {
+        float AP = GetTotalAttackPowerValue(BASE_ATTACK);
+        int32 amount = 0;
+        for (AuraEffectList::const_iterator i =mDamageDonebyAP.begin(); i != mDamageDonebyAP.end(); ++i)
+            if ((*i)->GetMiscValue() & schoolMask)
+                amount += (*i)->GetAmount();
+
+        return  uint32(AP * amount / 100.0f);
+    }
+
+
     int32 AdvertisedBenefit = 0;
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);

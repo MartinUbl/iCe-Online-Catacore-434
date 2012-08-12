@@ -250,6 +250,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectResurrect,                                //172 SPELL_EFFECT_MASS_RESURRECT
     &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
     &Spell::EffectNULL,                                     //174
+    &Spell::EffectUnused,                                   //175 unused
+    &Spell::EffectLeaveCombat,                              //176 SPELL_EFFECT_LEAVE_COMBAT
+    &Spell::EffectNULL,                                     //177
+    &Spell::EffectUnused,                                   //178 unused
+    &Spell::EffectNULL,                                     //179
+    &Spell::EffectUnused,                                   //180 unused
+    &Spell::EffectUnused,                                   //181 unused
+    &Spell::EffectNULL,                                     //182
 };
 
 void Spell::EffectNULL(SpellEffIndex /*effIndex*/)
@@ -10032,4 +10040,9 @@ void Spell::EffectBind(SpellEffIndex effIndex)
     data << uint64(player->GetGUID());
     data << uint32(area_id);
     player->SendDirectMessage( &data );
+}
+
+void Spell::EffectLeaveCombat(SpellEffIndex effIndex)
+{
+    m_caster->CombatStop();
 }
