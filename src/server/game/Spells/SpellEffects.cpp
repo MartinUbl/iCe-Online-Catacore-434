@@ -10045,4 +10045,5 @@ void Spell::EffectBind(SpellEffIndex effIndex)
 void Spell::EffectLeaveCombat(SpellEffIndex effIndex)
 {
     m_caster->CombatStop();
+    m_caster->getHostileRefManager().deleteReferences();
 }
