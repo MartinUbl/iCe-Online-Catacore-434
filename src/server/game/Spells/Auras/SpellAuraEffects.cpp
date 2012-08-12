@@ -717,17 +717,12 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x00800000 && GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
             {
                 m_canBeRecalculated = false;
-                // 0.01*$AP*cp
+                // (((56 + 161 * cp) + (0.0207*CP * AP)) * 8)  damage over 16 sec.
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     break;
 
                 uint8 cp = caster->ToPlayer()->GetComboPoints();
-
-                // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-                if (AuraEffect const * aurEff = caster->GetAuraEffect(34241, 0))
-                    amount += cp * aurEff->GetAmount();
-
-                amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
+                amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp * 0.0207f);
             }
             // Rake
             else if (GetId() == 1822)
