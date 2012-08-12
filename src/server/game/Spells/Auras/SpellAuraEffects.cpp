@@ -729,6 +729,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
 
                 amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
             }
+            // Rake
+            else if (GetId() == 1822)
+            {
+                amount += int32((caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.378f)/3);
+            }
             // Rend
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
             {
