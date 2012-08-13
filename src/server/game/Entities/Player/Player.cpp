@@ -23075,6 +23075,21 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(sWorld->getIntConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
+void Player::QueueSpell()
+{
+    m_queuedSpell = true;
+}
+
+void Player::CancelQueuedSpell()
+{
+    m_queuedSpell = false;
+}
+
+bool Player::HasQueuedSpell()
+{
+    return m_queuedSpell;
+}
+
 void Player::ModifyMoney(int32 d)
 {
     sScriptMgr->OnPlayerMoneyChanged(this, d);
@@ -25063,6 +25078,14 @@ bool Player::HasGlobalCooldown(SpellEntry const *spellInfo) const
 
     std::map<uint32, uint32>::const_iterator itr = m_globalCooldowns.find(spellInfo->StartRecoveryCategory);
     return itr != m_globalCooldowns.end() && (itr->second > sWorld->GetUpdateTime());
+}
+
+uint32 Player::GetGlobalCooldown(SpellEntry const *spellInfo)
+{
+    if (!spellInfo)
+        return 0;
+
+    return m_globalCooldowns[spellInfo->StartRecoveryCategory]; 
 }
 
 void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
