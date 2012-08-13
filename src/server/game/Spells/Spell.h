@@ -431,7 +431,6 @@ class Spell
         void EffectCastButtons(SpellEffIndex effIndex);
         void EffectRechargeManaGem(SpellEffIndex effIndex);
         void EffectActivateGuildBankSlot(SpellEffIndex effIndex);
-        void EffectLeaveCombat(SpellEffIndex effIndex);
 
         typedef std::set<Aura *> UsedSpellMods;
 

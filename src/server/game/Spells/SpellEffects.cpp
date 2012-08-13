@@ -251,7 +251,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
     &Spell::EffectNULL,                                     //174
     &Spell::EffectUnused,                                   //175 unused
-    &Spell::EffectLeaveCombat,                              //176 SPELL_EFFECT_LEAVE_COMBAT
+    &Spell::EffectSanctuary,                                //176 SPELL_EFFECT_SANCTUARY_2
     &Spell::EffectNULL,                                     //177
     &Spell::EffectUnused,                                   //178 unused
     &Spell::EffectNULL,                                     //179
@@ -10040,10 +10040,4 @@ void Spell::EffectBind(SpellEffIndex effIndex)
     data << uint64(player->GetGUID());
     data << uint32(area_id);
     player->SendDirectMessage( &data );
-}
-
-void Spell::EffectLeaveCombat(SpellEffIndex effIndex)
-{
-    m_caster->CombatStop();
-    m_caster->getHostileRefManager().deleteReferences();
 }

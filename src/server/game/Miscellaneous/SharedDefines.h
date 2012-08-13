@@ -830,7 +830,7 @@ enum SpellEffects
     SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT  = 173,
     SPELL_EFFECT_APPLY_AURA_FORCED         = 174,
     SPELL_EFFECT_175                       = 175,
-    SPELL_EFFECT_LEAVE_COMBAT              = 176,
+    SPELL_EFFECT_SANCTUARY_2               = 176,
     SPELL_EFFECT_177                       = 177,
     SPELL_EFFECT_178                       = 178,
     SPELL_EFFECT_179                       = 179,
