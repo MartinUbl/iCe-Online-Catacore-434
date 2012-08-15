@@ -596,7 +596,7 @@ enum PlayerSlots
     // first slot for item stored (in any way in player m_items data)
     PLAYER_SLOT_START           = 0,
     // last+1 slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_END             = 150,
+    PLAYER_SLOT_END             = 86,
     PLAYER_SLOTS_COUNT          = (PLAYER_SLOT_END - PLAYER_SLOT_START)
 };
 
@@ -656,18 +656,6 @@ enum BuyBackSlots                                           // 12 slots
     // stored in m_buybackitems
     BUYBACK_SLOT_START          = 74,
     BUYBACK_SLOT_END            = 86
-};
-
-enum KeyRingSlots                                           // 32 slots
-{
-    KEYRING_SLOT_START          = 86,
-    KEYRING_SLOT_END            = 118
-};
-
-enum CurrencyTokenSlots                                     // 32 slots
-{
-    CURRENCYTOKEN_SLOT_START    = 118,
-    CURRENCYTOKEN_SLOT_END      = 150
 };
 
 enum EquipmentSetUpdateState
@@ -1343,7 +1331,6 @@ class Player : public Unit, public GridObject<Player>
         void AddItemToBuyBackSlot(Item *pItem);
         Item* GetItemFromBuyBackSlot(uint32 slot);
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
-        uint32 GetMaxKeyringSize() const { return KEYRING_SLOT_END-KEYRING_SLOT_START; }
         void SendEquipError(uint8 msg, Item* pItem, Item *pItem2 = NULL, uint32 itemid = 0);
         void SendBuyError(uint8 msg, Creature* pCreature, uint32 item, uint32 param);
         void SendSellError(uint8 msg, Creature* pCreature, uint64 guid, uint32 param);
