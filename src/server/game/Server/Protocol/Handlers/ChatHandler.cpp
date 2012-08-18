@@ -71,6 +71,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
     uint32 type = 0;
     uint32 lang;
 
+    uint32 textLength = 0;
+    uint32 receiverLength = 0;
+
     // Les types sont maintenant ger�s par opcode, un opcode par type
     // Changement en place depuis la 4.0.1 13164
     switch(recv_data.GetOpcode())
@@ -132,8 +135,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
     // no language for AFK and DND messages
     if(type == CHAT_MSG_AFK)
     {
-        std::string msg;
-        recv_data >> msg;
+        textLength = recv_data.ReadBits(9);
+        std::string msg = recv_data.ReadString(textLength);
 
         if ((msg.empty() || !_player->isAFK()) && !_player->isInCombat())
         {
@@ -154,8 +157,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
     }
     else if(type == CHAT_MSG_DND)
     {
-        std::string msg;
-        recv_data >> msg;
+        textLength = recv_data.ReadBits(9);
+        std::string msg = recv_data.ReadString(textLength);
 
         if (msg.empty() || !_player->isDND())
         {
@@ -288,9 +291,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
     if (GetPlayer()->HasAura(1852) && type != CHAT_MSG_WHISPER)
     {
-        std::string msg="";
-        recv_data >> msg;
-
+        recv_data.rfinish();
         SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName());
         return;
     }
@@ -301,8 +302,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         case CHAT_MSG_EMOTE:
         case CHAT_MSG_YELL:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 return;
@@ -332,9 +333,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
         case CHAT_MSG_WHISPER:
         {
-            std::string to, msg;
-            recv_data >> msg;
-            recv_data >> to;
+            receiverLength = recv_data.ReadBits(10);
+            textLength = recv_data.ReadBits(9);
+
+            std::string to = recv_data.ReadString(receiverLength);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (_player->getLevel() < sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ))
             {
@@ -419,8 +422,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         case CHAT_MSG_PARTY:
         case CHAT_MSG_PARTY_LEADER:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 break;
@@ -455,8 +458,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
         case CHAT_MSG_GUILD:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 break;
@@ -484,8 +487,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         }
         case CHAT_MSG_OFFICER:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 break;
@@ -512,8 +515,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         }
         case CHAT_MSG_RAID:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 break;
@@ -544,8 +547,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         } break;
         case CHAT_MSG_RAID_LEADER:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (msg.empty())
                 break;
@@ -576,8 +579,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         } break;
         case CHAT_MSG_RAID_WARNING:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
                 return;
@@ -599,8 +602,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
         case CHAT_MSG_BATTLEGROUND:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
                 return;
@@ -625,8 +628,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
         case CHAT_MSG_BATTLEGROUND_LEADER:
         {
-            std::string msg;
-            recv_data >> msg;
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
                 return;
@@ -651,9 +654,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
         case CHAT_MSG_CHANNEL:
         {
-            std::string channel, msg;
-            recv_data >> msg;
-            recv_data >> channel;
+            receiverLength = recv_data.ReadBits(10);
+            textLength = recv_data.ReadBits(9);
+            std::string msg = recv_data.ReadString(textLength);
+            std::string channel = recv_data.ReadString(receiverLength);
 
             if (msg.empty())
                 break;
