@@ -597,6 +597,7 @@ void Transport::Update(uint32 p_diff)
 
 void Transport::UpdateForMap(Map const* targetMap)
 {
+    return;
     Map::PlayerList const& pl = targetMap->GetPlayers();
     if (pl.isEmpty())
         return;
