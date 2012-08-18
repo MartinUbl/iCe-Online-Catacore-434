@@ -115,7 +115,7 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
 
-    m_updateFlag = (UPDATEFLAG_HAS_LIVING | UPDATEFLAG_HAS_STATIONARY_POSITION);
+    m_updateFlag = UPDATEFLAG_HAS_LIVING;
 
     m_attackTimer[BASE_ATTACK] = 0;
     m_attackTimer[OFF_ATTACK] = 0;
@@ -14567,9 +14567,6 @@ void Unit::SetPower(Powers power, int32 val)
 {
     uint32 powerIndex = GetPowerIndexByClass(power, getClass());
     if (powerIndex == MAX_POWERS)
-        return;
-
-    if (GetPower(power) == uint32(val))
         return;
 
     // Special case for eclipse power (druid system)
