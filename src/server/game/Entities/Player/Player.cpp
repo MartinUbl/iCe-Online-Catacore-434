@@ -11090,9 +11090,10 @@ void Player::SendCurrencies()
             continue;
 
         uint32 precision = (entry->Flags & 0x8) ? 100 : 1;
+        packet.WriteBit(itr->second.weekCount / precision);
+        packet.WriteBits(0,4); // flags?
         packet.WriteBit(_GetCurrencyWeekCap(entry) / precision);
         packet.WriteBit(0);
-        packet.WriteBit(itr->second.weekCount / precision);
     }
 
     for (PlayerCurrenciesMap::const_iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
@@ -11102,12 +11103,15 @@ void Player::SendCurrencies()
             continue;
 
         uint32 precision = (entry->Flags & 0x8) ? 100 : 1;
-        packet << uint32(entry->ID);
+        packet << uint32(itr->second.totalCount / precision);
+
         if (uint32 weekCap = (_GetCurrencyWeekCap(entry) / precision))
             packet << uint32(weekCap);
-        packet << uint32(itr->second.totalCount / precision);
-        packet << uint8(0);                     // unknown
+
         //packet << uint32(0); // season total earned
+
+        packet << uint32(entry->ID);
+
         if (uint32 weekCount = (itr->second.weekCount / precision))
             packet << uint32(weekCount);
     }
