@@ -4546,9 +4546,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 count++;
                 break;
-                // Do not allow Deadly throw and Slice and Dice to proc twice
+                // Do not allow Deadly throw to proc twice
             case SPELLFAMILY_ROGUE:
-                if (spellInfo->SpellFamilyFlags[1] & 0x1 || spellInfo->SpellFamilyFlags[0] & 0x40000)
+                if (spellInfo->SpellFamilyFlags[1] & 0x1)
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_CANT_PROC_FROM_SELFCAST;
                 else
                     break;
