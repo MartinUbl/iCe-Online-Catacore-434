@@ -5711,7 +5711,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 // Lay on Hands - cannot be self-cast on paladin with Forbearance or after using Avenging Wrath
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags[0] & 0x0008000)
-                    if (target->HasAura(61988)) // Immunity shield marker
+                    if (target->HasAura(25771)) // Immunity shield marker
                         return SPELL_FAILED_TARGET_AURASTATE;
             }
         }
