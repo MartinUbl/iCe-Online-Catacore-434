@@ -7697,15 +7697,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->CastCustomSpell(m_caster,91954,&bp0,0,0,true);
                 }
 
-                if (unitTarget->GetAura(1978))
-                    unitTarget->GetAura(1978)->SetDuration((unitTarget->GetAura(1978)->GetDuration() + 6000), true);
+                if (unitTarget->GetAura(1978, m_originalCasterGUID))
+                    unitTarget->GetAura(1978, m_originalCasterGUID)->SetDuration((unitTarget->GetAura(1978, m_originalCasterGUID)->GetDuration() + 6000), true);
             }
             // chimera shot health effect + serpent sting refresh
             if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
             {
                 m_caster->CastSpell(m_caster,53353,true);
-                if (unitTarget->GetAura(1978))
-                    unitTarget->GetAura(1978)->RefreshDuration();
+                if (unitTarget->GetAura(1978, m_originalCasterGUID))
+                    unitTarget->GetAura(1978, m_originalCasterGUID)->RefreshDuration();
             }
             // Kill Command (caster fix)
             if (m_spellInfo->Id == 34026)
