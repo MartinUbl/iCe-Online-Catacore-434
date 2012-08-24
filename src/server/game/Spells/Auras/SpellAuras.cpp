@@ -1905,6 +1905,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->RemoveAurasDueToSpell(84747);
                     }
                 }
+                else if (GetId() == 2983) // Glyph of Blurred speed
+                {
+                    caster->RemoveAurasDueToSpell(61922);
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
