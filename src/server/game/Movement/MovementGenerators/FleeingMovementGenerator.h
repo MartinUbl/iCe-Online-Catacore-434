@@ -32,18 +32,18 @@ class FleeingMovementGenerator
     public:
         FleeingMovementGenerator(uint64 fright) : i_frightGUID(fright), i_nextCheckTime(0) {}
 
-        void Initialize(T &);
-        void Finalize(T &);
-        void Reset(T &);
-        bool Update(T &, const uint32 &);
+        void Initialize(T*);
+        void Finalize(T*);
+        void Reset(T*);
+        bool Update(T*, const uint32&);
 
         MovementGeneratorType GetMovementGeneratorType() { return FLEEING_MOTION_TYPE; }
 
     private:
-        void _setTargetLocation(T &owner);
-        bool _getPoint(T &owner, float &x, float &y, float &z);
-        bool _setMoveData(T &owner);
-        void _Init(T &);
+        void _setTargetLocation(T *owner);
+        bool _getPoint(T *owner, float &x, float &y, float &z);
+        bool _setMoveData(T *owner);
+        void _Init(T *);
 
         bool is_water_ok   :1;
         bool is_land_ok    :1;
@@ -69,8 +69,8 @@ class TimedFleeingMovementGenerator
             i_totalFleeTime(time) {}
 
         MovementGeneratorType GetMovementGeneratorType() { return TIMED_FLEEING_MOTION_TYPE; }
-        bool Update(Unit &, const uint32 &);
-        void Finalize(Unit &);
+        bool Update(Unit*, const uint32&);
+        void Finalize(Unit*);
 
     private:
         TimeTracker i_totalFleeTime;

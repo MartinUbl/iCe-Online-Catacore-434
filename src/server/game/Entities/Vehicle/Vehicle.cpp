@@ -356,7 +356,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
     if (me->IsInWorld())
     {
-        Movement::MoveSplineInit init(*unit);
+        Movement::MoveSplineInit init(unit);
         init.DisableTransportPathTransformations();
         init.MoveTo(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);
         init.SetFacing(0.0f);

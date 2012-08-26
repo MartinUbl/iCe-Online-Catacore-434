@@ -301,7 +301,7 @@ bool Unit::haveOffhandWeapon() const
 
 void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.MoveTo(x,y,z);
     init.SetVelocity(speed);
     init.Launch();
@@ -16324,7 +16324,7 @@ void Unit::StopMoving()
 
     // Update position using old spline
     UpdateSplinePosition();
-    Movement::MoveSplineInit(*this).Stop();
+    Movement::MoveSplineInit(this).Stop();
 }
 
 void Unit::SendMovementFlagUpdate()
@@ -18981,7 +18981,7 @@ void Unit::ExitVehicle()
         this->ToPlayer()->SetFallInformation(0, GetPositionZ());
     }
 
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
@@ -19446,7 +19446,8 @@ void Unit::SetInFront(Unit const* target)
 
 void Unit::SetFacingTo(float ori)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
+    init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
     init.SetFacing(ori);
     init.Launch();
 }
