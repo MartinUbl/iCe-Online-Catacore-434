@@ -6935,9 +6935,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 84653:
                 case 84654:
                 {
-                    triggered_spell_id = 84748;
-                    target = pVictim;
-                    originalCaster = GetGUID();
+                    // should proc only from Sinister Strike and Revealing Strike
+                    if (procSpell && (procSpell->Id == 1752 || procSpell->Id == 84617))
+                    {
+                        triggered_spell_id = 84748;
+                        target = pVictim;
+                        originalCaster = GetGUID();
+                    }
+                    else
+                        return false;
 
                     break;
                 }
