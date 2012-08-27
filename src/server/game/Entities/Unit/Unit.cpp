@@ -602,34 +602,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
-    // Implementation of "extra attacks" mastery proficiencies
-    if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-    {
-        uint32 spellId = 0;
-        if (spellProto)
-            spellId = spellProto->Id;       // do not allow to proc from itself
-
-        if (!spellProto || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
-        {
-            if (ToPlayer() && ToPlayer()->HasMastery() && cleanDamage->attackType == BASE_ATTACK && cleanDamage->hitOutCome != MELEE_HIT_MISS)
-            {
-                // Implementation of Main Gauche rogue combat mastery proficiency
-                if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_COMBAT && spellId != 86392)
-                {
-                    if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.0f))
-                        CastSpell(pVictim, 86392, true);
-                }
-
-                // Implementation of Strikes of Opportunity warrior arms mastery proficiency
-                if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS && spellId != 76858)
-                {
-                    if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
-                        CastSpell(pVictim, 76858, true);
-                }
-            }
-        }
-    }
-
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && getPowerType() == POWER_RAGE)
     {
@@ -1664,6 +1636,24 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     // Unleash Elements - Windfury part, drop charges after melee attacks
     if(Aura *uw = GetAura(73681))
         uw->DropCharge();
+
+    // Implementation of "extra attacks" mastery proficiencies
+    if (ToPlayer() && ToPlayer()->HasMastery() && damageInfo->damage > 1)
+    {
+        // Implementation of Main Gauche rogue combat mastery proficiency
+        if (damageInfo->attackType == BASE_ATTACK && ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_ROGUE_COMBAT)
+        {
+            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.0f))
+                CastSpell(pVictim, 86392, true);
+        }
+
+        // Implementation of Strikes of Opportunity warrior arms mastery proficiency
+        if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
+        {
+            if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
+                CastSpell(pVictim, 76858, true);
+        }
+    }
 
     // Do effect if any damage done to target
     if (damageInfo->damage)
