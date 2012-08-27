@@ -3831,6 +3831,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
             count++;
             break;
+        case 12712: // Arms specialization (Two-Handed Weapon Specialization)
+            spellInfo->EffectBasePoints[0] = 20;
+            count++;
+            break;
         case 16213: // Purification (passive)
             // 4.0.6a Blizzard hotfix, note in client not present, also DBC data wrong!
             spellInfo->EffectBasePoints[0] = 25;
