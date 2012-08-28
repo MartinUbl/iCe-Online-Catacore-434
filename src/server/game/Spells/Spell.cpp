@@ -6615,7 +6615,7 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
     };
     const uint8 CCDArraySize = sizeof(auraWithCCD) / sizeof(auraWithCCD[0]);
 
-    const uint32 ccDelay = 200u;
+    const uint32 ccDelay = 150;
 
     switch(_spell->SpellFamilyName)
     {
