@@ -9605,6 +9605,16 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+20);
                 break;
+
+            case 89183: // Darkmoon card: Tsunami
+            {
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                    return false;
+
+                if (ToPlayer()->GetAura(89183)->GetStackAmount() == 5)
+                    ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+30);
+                break;
+            }
         }
     }
 
