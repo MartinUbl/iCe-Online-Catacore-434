@@ -3750,13 +3750,16 @@ void AuraEffect::HandlePhase(AuraApplication const *aurApp, uint8 mode, bool app
             if (apply)
                 target->SetPhaseMask(GetMiscValue(), false);
             else
-                target->SetPhaseMask(PHASEMASK_NORMAL, false);
+                target->SetPhaseMask(PHASEMASK_NORMAL, true);
         }
 
         if (apply)
             target->ToPlayer()->GetSession()->SendSetPhaseShift(GetMiscValueB());
         else
+        {
             target->ToPlayer()->GetSession()->SendSetPhaseShift(0);
+            target->SetPhaseMask(PHASEMASK_NORMAL, true);
+        }
     }
     else if (apply)
         target->SetPhaseMask(GetMiscValue(), false);
