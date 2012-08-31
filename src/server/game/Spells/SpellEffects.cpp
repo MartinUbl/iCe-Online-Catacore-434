@@ -5172,10 +5172,10 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
                         ExecuteLogEffectSummonObject(effIndex, summon);
-                    }
 
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                        m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
+                    }
 
                     return;
                 }
