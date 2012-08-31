@@ -274,8 +274,7 @@ enum SpellState
     SPELL_STATE_CASTING   = 2,
     SPELL_STATE_FINISHED  = 3,
     SPELL_STATE_IDLE      = 4,
-    SPELL_STATE_DELAYED   = 5,
-    SPELL_STATE_QUEUED    = 6
+    SPELL_STATE_DELAYED   = 5
 };
 
 enum ReplenishType
@@ -438,7 +437,6 @@ class Spell
         ~Spell();
 
         void prepare(SpellCastTargets const* targets, AuraEffect const * triggeredByAura = NULL);
-        void prepareFinish(AuraEffect const * triggeredByAura = NULL);
         void cancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
@@ -530,7 +528,6 @@ class Spell
         UsedSpellMods m_appliedMods;
 
         int32 GetCastTime() const { return m_casttime; }
-        uint32 GetRemainingCastTime() const { return m_timer; }
         bool IsAutoRepeat() const { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = m_casttime > 0 ? m_casttime : 0; }
