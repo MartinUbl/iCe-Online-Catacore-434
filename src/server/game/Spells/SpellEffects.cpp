@@ -5177,6 +5177,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
                     }
 
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player::GUIDTimestampMap* tsMap = m_caster->ToPlayer()->GetSummonMapFor(entry);
+                        if (tsMap && tsMap->size() > 15)
+                            sLog->outChar("Player %s has really lots (%u) of summons with entry %u !", m_caster->GetName(), uint32(tsMap->size()), entry);
+                    }
+
                     return;
                 }
             }//switch
@@ -5214,7 +5221,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         ExecuteLogEffectSummonObject(effIndex, summon);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
             m_caster->ToPlayer()->AddSummonToMap(entry, summon->GetGUID(),time(NULL));
+
+            Player::GUIDTimestampMap* tsMap = m_caster->ToPlayer()->GetSummonMapFor(entry);
+            if (tsMap && tsMap->size() > 15)
+                sLog->outChar("Player %s has really lots (%u) of summons with entry %u !", m_caster->GetName(), uint32(tsMap->size()), entry);
+        }
     }
 }
 
