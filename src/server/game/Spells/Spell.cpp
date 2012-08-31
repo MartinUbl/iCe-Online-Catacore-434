@@ -3006,6 +3006,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 26073: // Fire Nova (Quest spell)
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToCreature()->GetEntry() == 46394)
+                                    ++itr;
+                                else
+                                    itr = unitList.erase(itr);
+                            }
+                            break;
+                        }
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
