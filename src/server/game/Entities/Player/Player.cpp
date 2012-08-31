@@ -11386,7 +11386,7 @@ bool Player::HasCurrency(uint32 id, uint32 count)
     return itr != m_currencies.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
+void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ignorebonuses)
 {
     if (!count)
         return;
@@ -11396,14 +11396,17 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
         return;
 
     // Check for auras modifying amount of currency gained
-    if (!GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN).empty())
+    if (!ignorebonuses)
     {
-        Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN);
-        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        if (!GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN).empty())
         {
-            // currency id is saved in MiscValue, percentage in BaseAmount
-            if ((*itr)->GetMiscValue() == int32(id))
-                count = (100+(*itr)->GetBaseAmount())*count/100;
+            Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN);
+            for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+            {
+                // currency id is saved in MiscValue, percentage in BaseAmount
+                if ((*itr)->GetMiscValue() == int32(id))
+                    count = (100+(*itr)->GetBaseAmount())*count/100;
+            }
         }
     }
 
@@ -11492,7 +11495,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
 
 void Player::SetCurrency(uint32 id, uint32 count)
 {
-    ModifyCurrency(id, int32(count) - GetCurrency(id));
+    ModifyCurrency(id, int32(count) - GetCurrency(id), true, true);
 }
 
 uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency)
@@ -26679,7 +26682,7 @@ void Player::RefundItem(Item *item)
             count = count / PLAYER_CURRENCY_PRECISION;
         if (count && currid)
         {
-            ModifyCurrency(currid, count, true);
+            ModifyCurrency(currid, count, true, true);
         }
     }
 
