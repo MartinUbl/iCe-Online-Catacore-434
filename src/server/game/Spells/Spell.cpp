@@ -7820,6 +7820,9 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 uint32 cd = player->GetGlobalCooldown(spellInfo);
                 uint32 available = std::max(cast, cd);
 
+                if (available <= 0)
+                    available = 1;
+
                 // maximum of 400 ms allowed
                  // this sometimes happens when player tries to cast the spell twice on one global cooldown
                 if (available > 400)
