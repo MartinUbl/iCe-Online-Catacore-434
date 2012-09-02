@@ -4351,7 +4351,7 @@ void Spell::SendSpellStart()
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
          && m_spellInfo->powerType != POWER_HEALTH)
-        castFlags |= CAST_FLAG_POWER_LEFT_SELF;
+        castFlags |= CAST_FLAG_UNKNOWN_19;
 
     if (m_spellInfo->runeCostID && m_spellInfo->powerType == POWER_RUNE)
         castFlags |= CAST_FLAG_UNKNOWN_19;
@@ -4377,7 +4377,7 @@ void Spell::SendSpellStart()
     data << uint32(0);                                      // unk 4.3.4
     data << int32(m_timer);                                 // delay? signed int?
 
-    data << int32(0);                                       // unk 4.3.4
+    //data << int32(0);                                       // unk 4.3.4
 
     m_targets.write(data);
 
