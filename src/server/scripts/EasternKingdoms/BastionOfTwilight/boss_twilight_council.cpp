@@ -231,7 +231,7 @@ public:
                     }
                 }
                         // Jeden seed spawn do stredu miestnosti
-                        Creature* middle_seed=me->SummonCreature(CREATURE_LAVA_SEED,-1009.1f,-582.5f,831.91f, 0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                        me->SummonCreature(CREATURE_LAVA_SEED,-1009.1f,-582.5f,831.91f, 0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
                 }
             }
             else Lava_seed_timer-=diff;
@@ -692,7 +692,7 @@ public:
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
                                 me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,10)-urand(0,10),target->GetPositionY()+urand(0,10)-urand(0,10),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                                if(uint32 rand=(urand(0,1))) // +par bomb naviac cca 5
+                                if (urand(0,1)) // +par bomb naviac cca 5
                                 me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,5)-urand(0,5),target->GetPositionY()+urand(0,5)-urand(0,5),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
@@ -773,14 +773,12 @@ public:
 
                             if(PHASE==3) //  Zakamuflujem sa a portnem sa na spawn position ak sa spawnla Monstrosity
                             {
-                                if(Creature* pArion = me->FindNearestCreature(ARION_ENTRY, 500, true) )
-                                    ;
-                                    else
-                                    {
-                                        me->SetVisible(false);
-                                        me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
-                                        PHASE=4;
-                                    }
+                                if(me->FindNearestCreature(ARION_ENTRY, 500, true) == NULL)
+                                {
+                                    me->SetVisibility(VISIBILITY_OFF);
+                                    me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
+                                    PHASE=4;
+                                }
                             }
         }
     };
@@ -989,7 +987,7 @@ public:
                             if(!me->IsNonMeleeSpellCasted(false))
                             {
                                 Rush_target=NULL;
-                                if (Rush_target= SelectTarget(SELECT_TARGET_FARTHEST, 0,50, true))
+                                if ((Rush_target=SelectTarget(SELECT_TARGET_FARTHEST, 0,50, true)) != NULL)
                                 {
                                     float uhol=me->GetAngle(Rush_target->GetPositionX(), Rush_target->GetPositionY());
                                     float dlzka=me->GetDistance(Rush_target); // vzdialenost medzi hracom a bossom
@@ -1066,16 +1064,14 @@ public:
 
                             if(PHASE==3) //  Zakamuflujem sa a portnem sa na spawn position ak sa spawnla Monstrosity :P
                             {
-                                if(Creature* pArion = me->FindNearestCreature(43689, 300, true) )
-                                    ;
-                                    else
-                                    {
-                                        me->SetVisible(false);
-                                        float x, y, z, o;
-                                        me->GetHomePosition(x, y, z, o);
-                                        me->NearTeleportTo(x, y, z, o);
-                                        PHASE=4;
-                                    }
+                                if(me->FindNearestCreature(43689, 300, true) == NULL)
+                                {
+                                    me->SetVisible(false);
+                                    float x, y, z, o;
+                                    me->GetHomePosition(x, y, z, o);
+                                    me->NearTeleportTo(x, y, z, o);
+                                    PHASE=4;
+                                }
                             }
         }
 
@@ -1319,7 +1315,7 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    if (pRod_marked_player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                    if ((pRod_marked_player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) != NULL)
                     {
                         me->AddAura(83099,pRod_marked_player);
                         rod_timer=40000;
@@ -1753,7 +1749,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
+            if(me->FindNearestCreature(43735, 500, true) != NULL)
                 me->ForcedDespawn();
 
             if(Buff_timer<=diff && !buffed)
@@ -1812,7 +1808,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
+            if(me->FindNearestCreature(43735, 500, true) != NULL)
                 me->ForcedDespawn();
             if(Buff_timer<=diff && !buffed)
             {
