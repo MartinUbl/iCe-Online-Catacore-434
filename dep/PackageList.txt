@@ -42,4 +42,4 @@ utf8-cpp (UTF-8 with C++ in a Portable Way)
 
 zlib (A Massively Spiffy Yet Delicately Unobtrusive Compression Library)
   http://www.zlib.net/
-  Version: 1.2.5
+  Version: 1.2.7
