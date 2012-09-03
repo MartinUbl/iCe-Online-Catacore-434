@@ -582,6 +582,7 @@ void AddSC_instance_grim_batol();
 void AddSC_instance_halls_of_origination();
 void AddSC_instance_the_stonecore();
 void AddSC_instance_throne_of_the_tides();
+void AddSC_twilight_council();
 
 
 // battlegrounds
@@ -1202,6 +1203,8 @@ void AddCataclysmScripts()
     AddSC_atramedes();
     AddSC_boss_defensing_system();
     AddSC_instance_blackwing_descent();
+
+    AddSC_twilight_council();
 }
 
 void AddOutdoorPvPScripts()
