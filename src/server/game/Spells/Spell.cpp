@@ -3428,14 +3428,41 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
-    //Prevent casting at cast another spell (ServerSide check)
+    // queue casting at the cast of another spell
+    Player *player = m_caster->ToPlayer();
     if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
     {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+        if (!player || player->HasQueuedSpell())
+        {
+            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            finish(false);
+            return;
+        }
+        player->QueueSpell();
+        m_spellState = SPELL_STATE_QUEUED;
+        return;
+    }
+
+    // queue casting at global cooldown
+    if (!m_IsTriggeredSpell && !IsAutoRepeat() && player && player->HasGlobalCooldown(m_spellInfo))
+    {
+        if (!player->HasQueuedSpell())
+        {
+            player->QueueSpell();
+            m_spellState = SPELL_STATE_QUEUED;
+            return;
+        }
+        SendCastResult(SPELL_FAILED_NOT_READY);
         finish(false);
         return;
     }
 
+    prepareFinish(triggeredByAura);
+}
+
+void Spell::prepareFinish(AuraEffect const * triggeredByAura)
+{
+    m_spellState = SPELL_STATE_PREPARING;
     if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
         SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
@@ -7745,6 +7772,86 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
                 return false;                               // event not complete
             }
+        } break;
+
+        case SPELL_STATE_QUEUED:
+        {
+            const SpellEntry *spellInfo = m_Spell->m_spellInfo;
+            Player *player = ((Player*)m_Spell->GetCaster());
+            if (!spellInfo || !player)
+                return true;
+
+            if (!player->HasQueuedSpell())      // interrupted by Esc key, ...
+            {
+                m_Spell->SendCastResult(SPELL_FAILED_DONT_REPORT);
+                m_Spell->cancel();
+                player->CancelQueuedSpell();
+                break;
+            }
+
+            // do not queue spells with cooldown started
+            if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
+            {
+                m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
+                m_Spell->cancel();
+                player->CancelQueuedSpell();
+                break;
+            }
+            
+            SpellCastResult result = m_Spell->CheckCast(true);
+            // can't cast because something other than CD and cast is preventing casting (e.g. crowd control)
+            if (result != SPELL_CAST_OK && result != SPELL_FAILED_NOT_READY && result != SPELL_FAILED_SPELL_IN_PROGRESS)
+            {
+                m_Spell->SendCastResult(result);
+                m_Spell->cancel();
+                player->CancelQueuedSpell();
+                break;
+            }
+
+            // not ready or another action in progress - wait more
+            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
+            {
+                // cast time of current spell
+                uint32 cast = 0;
+                Spell *current = player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                if (current)
+                    cast = current->GetRemainingCastTime();
+                // remaining global cooldown on queued spell
+                uint32 cd = player->GetGlobalCooldown(spellInfo);
+                uint32 available = std::max(cast, cd);
+
+                // maximum of 400 ms allowed
+                 // this sometimes happens when player tries to cast the spell twice on one global cooldown
+                if (available > 400)
+                {
+                    m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
+                    m_Spell->cancel();
+                    player->CancelQueuedSpell();
+                    break;
+                }
+
+                player->m_Events.AddEvent(this, e_time + available, false);
+                return false;
+            }
+
+            // cast queued spell
+            m_Spell->setState(SPELL_STATE_PREPARING);
+            m_Spell->prepareFinish(NULL);
+            player->CancelQueuedSpell();
+            
+            // send global cooldown to client
+            // without this the GDC on client would start immediately when pressed spell on action bar
+            //  instead of when the cast is started
+            // TODO: invent something better, this sometimes causes the GCD on client
+            //  jumping up (finished cast) & down (started cast of this)
+            //  one of the possibilities is to cast this spell immediately, not as separated event
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+            data << uint64(player->GetGUID());
+            data << uint8(3);
+            data << uint32(spellInfo->Id);
+            data << uint32(player->GetGlobalCooldown(spellInfo));
+            player->GetSession()->SendPacket(&data);
+            break;
         } break;
 
         default:

@@ -1704,6 +1704,12 @@ class Player : public Unit, public GridObject<Player>
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS, profs); }
         void InitPrimaryProfessions();
 
+        // queued spells
+        bool m_queuedSpell;
+        void QueueSpell();
+        void CancelQueuedSpell();
+        bool HasQueuedSpell();
+
         PlayerSpellMap const& GetSpellMap() const { return m_spells; }
         PlayerSpellMap      & GetSpellMap()       { return m_spells; }
 
@@ -1751,6 +1757,7 @@ class Player : public Unit, public GridObject<Player>
         void AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell);
         bool HasGlobalCooldown(SpellEntry const *spellInfo) const;
         void RemoveGlobalCooldown(SpellEntry const *spellInfo);
+        uint32 GetGlobalCooldown(SpellEntry const *spellInfo);
 
         void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
