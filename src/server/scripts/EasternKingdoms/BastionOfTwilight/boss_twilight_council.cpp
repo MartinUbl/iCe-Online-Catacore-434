@@ -265,7 +265,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
                         castingGC=true;
-                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+30,5.0f,0.8f);
+                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+30,0.0f,0.8f);
                         DoCast(target,84948);
                         me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
                         me->SendPlaySound(20400, false);
@@ -961,7 +961,6 @@ public:
                 {
                     if(!me->IsNonMeleeSpellCasted(false))
                     {
-                        me->getVictim()->DealDamage(me->getVictim(),500000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NATURE,false);
                         can_interrupt=false;
                         DoCast(me->getVictim(),SPELL_FLAME_TORRENT);
                         Flame_torrent_timer=urand(13000,20000);
