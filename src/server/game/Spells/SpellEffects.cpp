@@ -884,7 +884,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 3110)
                 {
                     // Damage fix
-                    damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.657f*0.5f;
+                    if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet())
+                        damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.657f*0.5f;
 
                     Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
                     if (!pOwner)
