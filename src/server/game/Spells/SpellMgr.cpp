@@ -4536,7 +4536,7 @@ void SpellMgr::LoadSpellCustomAttr()
         /************************************ MONSTROSITY ***********************************************************/
         case 82699: // Water bomb
         case 84913: // Lava seed ( Monstrosity)
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC; // water bomb 
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC; // water bomb
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             break;
         case 84915: //Liquid ice
@@ -4551,6 +4551,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 83070: // Lightning blast - Obmedzenie na jeden target
             spellInfo->MaxAffectedTargets = 1;
+            spellInfo->EffectRadiusIndex[0] = 22;
             spellInfo->Effect[1] = 0;// vypnem effekt 1
             break;
         case 83565: // Quake
@@ -4558,20 +4559,27 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92545:
         case 92546:
             spellInfo->excludeTargetAuraSpell=83500; // Ak ma hrac "levitate" debuff tak sa mu nic nestane
+            spellInfo->EffectRadiusIndex[0] = 22;
             break;
         case 83067: //Thundershock
         case 92469:
         case 92470:
         case 92471:
             spellInfo->excludeTargetAuraSpell=83581; // Ak ma hrac grounded debuff tak sa mu nic nestane
+            spellInfo->EffectRadiusIndex[0] = 22;
             break;
         case 82859:
             spellInfo->Effect[0] = 0;// vypnem effekt 0
             break;
+            // Gravity crush
         case 84948:
         case 92486:
         case 92487:
         case 92488:
+            spellInfo->EffectRadiusIndex[0] = 22;
+            spellInfo->EffectRadiusIndex[1] = 22;
+            spellInfo->EffectRadiusIndex[2] = 22;
+            spellInfo->MaxAffectedTargets = 1;
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
             break;
         /************************************************************************************************************/

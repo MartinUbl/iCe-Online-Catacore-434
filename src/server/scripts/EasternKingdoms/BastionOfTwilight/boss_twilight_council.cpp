@@ -17,6 +17,7 @@
  */
 
 #include "ScriptPCH.h"
+#include "Spell.h"
 #include "bastion_of_twilight.h"
 
 
@@ -127,7 +128,7 @@ public:
         uint32 Intensity_timer; // cca 20s sekund sa prida frekvencia Instability
         uint32 spawn_timer;
         uint32 INSTABILITY;
-        bool killed_unit,spawned,can_seed,castingGC;
+        bool killed_unit,spawned,can_seed;
 
         void Reset()
         {
@@ -140,7 +141,7 @@ public:
             Instability_timer=5000;
             Intensity_timer=20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
-            killed_unit=spawned=can_seed=castingGC=false;
+            killed_unit=spawned=can_seed=false;
             DoCast(me,84918); // Cryogenic aura
         }
 
@@ -264,8 +265,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
-                        castingGC=true;
-                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+30,0.0f,0.8f);
+                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,0.0f,0.1f);
                         DoCast(target,84948);
                         me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
                         me->SendPlaySound(20400, false);
@@ -279,9 +279,16 @@ public:
                         {
                             uint32 number_of_players=0;
 
-                            if(!castingGC) //Ak castim Gravity crush bunny bude davat dmg za bossa po dobu 6 sekund
+                            Spell *activeSpell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL); // Aktualne casteny spell
+                            if(activeSpell && activeSpell->m_spellInfo && activeSpell->m_spellInfo->Id == 84948) // Ak castim Gravity Crush
                             {
-                                castingGC=false;
+                                me->SummonCreature(CREATURE_INSTABILITY,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ()+6,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                                Instability_timer=6100; // Po dobu 6 sekund bude za mna castit instability "bunny" npc
+                            }
+                            else if(activeSpell && activeSpell->m_spellInfo && activeSpell->m_spellInfo->Id == 84913) // Ak castim Lava seed 
+                                    Instability_timer=2100;
+                            else if(!me->IsNonMeleeSpellCasted(false)) // Ak necastim
+                                {
                                 std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
                                 for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                 {
@@ -327,11 +334,6 @@ public:
                                     Instability_timer=1000;
                                     free((void*)pole);
                                 }
-                            else
-                            {
-                                me->SummonCreature(CREATURE_INSTABILITY,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ()+6,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                                Instability_timer=6000;
-                            }
                         }
                         else Instability_timer-=diff;
             DoMeleeAttackIfReady();
@@ -364,7 +366,7 @@ public:
         void Reset()
         {
             Lava_erupt_timer=99999;
-            Rand_eruption_timer=8000; // Ak sa mi do 8 sekund nepoadri najst speavny cas -> nastavim random
+            Rand_eruption_timer=5000; // Ak sa mi do 5 sekund nepoadri najst speavny cas -> nastavim random
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
             erupted=found_position=false;
             DoCast(me,84911);
@@ -416,7 +418,7 @@ public:
 
             if(Rand_eruption_timer<=diff && !found_position) // Nepodarilo sa najst spravny eruption timer nastavim random 
             {
-                Lava_erupt_timer=urand(2000,3500);
+                Lava_erupt_timer=urand(1500,2500);
                 found_position=true;
             }
             else Rand_eruption_timer-=diff;
@@ -467,7 +469,6 @@ public:
 
             if(Liquid_timer<=diff && !buffed)
             {
-                DoCast(me,84917); // zvacsi plosku
                 DoCast(me,84914); // dmg + visual liquid ice
                 buffed=true;
             }
@@ -587,6 +588,7 @@ public:
 
         void Reset()
         {
+            me->SetSpeed(MOVE_RUN,1.5f,true);
             me->SetVisible(true);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE); // na test
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
@@ -747,7 +749,9 @@ public:
 
                      if(Tele_debug_timer<=diff && !debuged)
                      {
-                        me->NearTeleportTo(-1044.48f,-551.18f,835.5f, 0.98f);
+                        DoCast(me,87459); // Visual teleport
+                        me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
+                        DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
                      else Tele_debug_timer-=diff;
@@ -758,16 +762,14 @@ public:
                                 debuged=false;
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
-                                me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
                                 PHASE=3;
                                 me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
-                                me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
-                                DoCast(me,83810); // Visual Water channel
+                                me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
+                                DoCast(me,87459); // Visual teleport
                                 me->SummonCreature(ARION_ENTRY,-1051.28f,-599.69f,835.21f, 5.7f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                                me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
                                 Hp_dropped=true;
                             }
 
@@ -776,7 +778,7 @@ public:
                                 if(me->FindNearestCreature(ARION_ENTRY, 500, true) == NULL)
                                 {
                                     me->SetVisibility(VISIBILITY_OFF);
-                                    me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
+                                    me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
                                     PHASE=4;
                                 }
                             }
@@ -842,7 +844,6 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-            me->SetReactState(REACT_AGGRESSIVE);
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1037,7 +1038,9 @@ public:
 
                      if(Tele_debug_timer<=diff && !debuged)
                      {
-                        me->NearTeleportTo(-1044.48f,-551.18f,835.15f, 0.98f);
+                        DoCast(me,87459); // Visual teleport
+                        me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
+                        DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
                      else Tele_debug_timer-=diff;
@@ -1052,12 +1055,9 @@ public:
                                 me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-                                me->AttackStop();
-                                float x, y, z, o;
-                                me->GetHomePosition(x, y, z, o);
-                                me->NearTeleportTo(x, y, z, o);
+                                me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
                                 me->SummonCreature(TERRASTRA_ENTRY,-1053.943f,-569.11f,835.2f, 6.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                                DoCast(me,83811); // Visual cast fire evocation ( stali v combat pozicii lepsie takto zatial :D )
+                                DoCast(me,87459); // Visual teleport
                                 Hp_dropped=true;
                             }
 
@@ -1169,7 +1169,7 @@ public:
             flame_timer=3000;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(35000);
-            me->GetMotionMaster()->MoveFall(0);
+            me->GetMotionMaster()->MoveJump(me->GetPositionX(),me->GetPositionY(),831.91f,0.0f,5.0f);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1219,7 +1219,7 @@ public:
         void Reset()
         {
             PHASE=1;
-            me->SetSpeed(MOVE_RUN,1.3f,true);
+            me->SetSpeed(MOVE_RUN,1.5f,true);
             rod_timer=15000;
             Call_winds=10000;
             Thundershock_timer=70000;
@@ -1231,8 +1231,6 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
-
-            me->SetSpeed(MOVE_RUN, 1.4f, true);
             me->SetInCombatWithZone();
         }
 
@@ -1484,8 +1482,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
-
-            me->SetSpeed(MOVE_RUN, 1.4f, true);
+            me->SetSpeed(MOVE_RUN, 1.5f, true);
             me->SetInCombatWithZone();
         }
 
@@ -1617,9 +1614,10 @@ public:
                             {
                                 if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
                                 {
+                                    pfel->SetReactState(REACT_PASSIVE);
                                     pfel->InterruptNonMeleeSpells(true);
-                                    pfel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                     pfel->CastSpell(pfel, 87459, true); // Visual teleport
+                                    pfel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                 }
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
@@ -1641,10 +1639,12 @@ public:
 
                             if(PHASE==3 && TeleDebug_timer<=diff) // musel so mdat tele este raz bugovalo sa to visualne
                             {
+                                DoCast(me,87459); // Visual teleport
                                 me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
                                 if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
                                     pfel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                 PHASE=4;
+                                DoCast(me,87459); // Visual teleport
                                 walk_timer=6000;
                             }
                             else TeleDebug_timer-=diff;
