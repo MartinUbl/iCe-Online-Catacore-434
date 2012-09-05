@@ -13837,18 +13837,6 @@ void Unit::setDeathState(DeathState s)
         if (IsNonMeleeSpellCasted(false))
             InterruptNonMeleeSpells(false);
 
-        // And finally remove summon from summon map if unit is owned by player (usually non-combat / guardian pet, and so..)
-        if (GetTypeId() == TYPEID_UNIT && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player::GUIDTimestampMap* tsMap = GetOwner()->ToPlayer()->GetSummonMapFor(GetEntry());
-            if (tsMap)
-            {
-                Player::GUIDTimestampMap::iterator itr = tsMap->find(GetGUID());
-                if (itr != tsMap->end())
-                    tsMap->erase(itr);
-            }
-        }
-
         UnsummonAllTotems();
         RemoveAllControlled();
         RemoveAllAurasOnDeath();
