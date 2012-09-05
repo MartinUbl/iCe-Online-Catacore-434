@@ -900,6 +900,9 @@ class WorldSession
         AddonsList m_addonsList;
         uint32 recruiterId;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+
+        // primitive version of mutex preventing to cast two spell at once
+        bool m_isHandlingCasting;
 };
 #endif
 /// @}
