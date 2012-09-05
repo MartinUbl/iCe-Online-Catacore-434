@@ -143,12 +143,33 @@ public:
             INSTABILITY=1;
             killed_unit=spawned=can_seed=false;
             DoCast(me,84918); // Cryogenic aura
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20396, false);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+             if (damage > 500000 )
+                damage=0; // Zabranim IK dmgu od magovho Ignite
+        }
+
+        void EnterEvadeMode()
+        {
+            if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
+                    pGoDoor1->Delete();
+            if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
+                    pGoDoor2->Delete();
+
+            ScriptedAI::EnterEvadeMode();
         }
 
         void KilledUnit(Unit * /*victim*/)
@@ -171,6 +192,11 @@ public:
         {
             me->MonsterYell("Impossible....", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20399, false);
+
+            if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po smrti despawnem dvere
+                    pGoDoor1->Delete();
+            if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
+                    pGoDoor2->Delete();
         }
 
 
@@ -199,7 +225,6 @@ public:
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_seed=false;
-                    Instability_timer=6000; // Musim takto instability bunny je nastaveny na 6s
                     float uhol=0.0f;
                     float kopia_uhol=0.0f;
                     float dlzka=0.0f;
@@ -265,7 +290,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
-                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,0.0f,0.1f);
+                        target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,0.0f,0.01f);
                         DoCast(target,84948);
                         me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
                         me->SendPlaySound(20400, false);
@@ -283,10 +308,10 @@ public:
                             if(activeSpell && activeSpell->m_spellInfo && activeSpell->m_spellInfo->Id == 84948) // Ak castim Gravity Crush
                             {
                                 me->SummonCreature(CREATURE_INSTABILITY,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ()+6,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                                Instability_timer=6100; // Po dobu 6 sekund bude za mna castit instability "bunny" npc
+                                Instability_timer=100; // Bunny pravdepodobne odstranim jeho funkcnost je aj tak miziva
                             }
                             else if(activeSpell && activeSpell->m_spellInfo && activeSpell->m_spellInfo->Id == 84913) // Ak castim Lava seed 
-                                    Instability_timer=2100;
+                                    Instability_timer=100;
                             else if(!me->IsNonMeleeSpellCasted(false)) // Ak necastim
                                 {
                                 std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
@@ -366,7 +391,7 @@ public:
         void Reset()
         {
             Lava_erupt_timer=99999;
-            Rand_eruption_timer=5000; // Ak sa mi do 5 sekund nepoadri najst speavny cas -> nastavim random
+            Rand_eruption_timer=4000; // Ak sa mi do 4 sekund nepoadri najst speavny cas -> nastavim random
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
             erupted=found_position=false;
             DoCast(me,84911);
@@ -418,7 +443,7 @@ public:
 
             if(Rand_eruption_timer<=diff && !found_position) // Nepodarilo sa najst spravny eruption timer nastavim random 
             {
-                Lava_erupt_timer=urand(1500,2500);
+                Lava_erupt_timer=urand(100,2500);
                 found_position=true;
             }
             else Rand_eruption_timer-=diff;
@@ -583,6 +608,8 @@ public:
         uint32 Frozen_timer;
         uint32 Tele_debug_timer;
         uint32 PHASE;
+        GameObject* pGO_Door1; // Dvere  na uzamknutie miestnosti pri encountry
+        GameObject* pGO_Door2;
         bool check_debuff,Hp_dropped,can_interrupt,debuged;
 
 
@@ -590,7 +617,6 @@ public:
         {
             me->SetSpeed(MOVE_RUN,1.5f,true);
             me->SetVisible(true);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE); // na test
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_AGGRESSIVE);
             Heart_debuff_timer=17000;
@@ -601,6 +627,12 @@ public:
             check_debuff=Hp_dropped=can_interrupt=false;
             debuged=true;
             PHASE=1;
+            pGO_Door1=pGO_Door2=NULL;
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -624,6 +656,10 @@ public:
             me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20162, false);
 
+            // Miestnost by sa mala uzavriet pri zacati encounteru
+            pGO_Door1=me->SummonGameObject(401930,-908.46f,-582.9257f,831.901f,0.15f,0,0,0,0,0); // Dvere 1
+            pGO_Door2=me->SummonGameObject(401930,-1108.666f,-582.5855f,841.283508f,3.161f,0,0,0,0,0);  // Dvere 2
+
             if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true))
             {
                 pIgnacious->SetInCombatWithZone();
@@ -636,6 +672,23 @@ public:
                     }
                 }
             }
+        }
+
+        void EnterEvadeMode() // Pri wipe raidu despawnem dvere
+        {
+            if(pGO_Door1)
+                pGO_Door1->Delete();
+
+                if(pGO_Door2)
+                    pGO_Door2->Delete();
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+             if (damage > me->GetHealth() || damage > 500000 )
+                damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
         void KilledUnit(Unit * /*victim*/)
@@ -751,6 +804,8 @@ public:
                      {
                         DoCast(me,87459); // Visual teleport
                         me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
+                        me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                        me->GetMotionMaster()->MoveIdle();
                         DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
@@ -768,8 +823,10 @@ public:
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
                                 me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
                                 DoCast(me,87459); // Visual teleport
-                                me->SummonCreature(ARION_ENTRY,-1051.28f,-599.69f,835.21f, 5.7f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                                me->SummonCreature(ARION_ENTRY,-1051.28f,-599.69f,835.21f, 5.7f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
                                 Hp_dropped=true;
                             }
 
@@ -843,6 +900,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
         }
 
@@ -861,6 +920,12 @@ public:
                         break;
                     }
                 }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+             if (damage > me->GetHealth() || damage > 500000 )
+                damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
         void KilledUnit(Unit * /*victim*/)
@@ -1040,6 +1105,8 @@ public:
                      {
                         DoCast(me,87459); // Visual teleport
                         me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
+                        me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                        me->GetMotionMaster()->MoveIdle();
                         DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
@@ -1056,7 +1123,9 @@ public:
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
-                                me->SummonCreature(TERRASTRA_ENTRY,-1053.943f,-569.11f,835.2f, 6.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
+                                me->SummonCreature(TERRASTRA_ENTRY,-1053.943f,-569.11f,835.2f, 6.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
                                 DoCast(me,87459); // Visual teleport
                                 Hp_dropped=true;
                             }
@@ -1231,6 +1300,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->SetInCombatWithZone();
         }
 
@@ -1244,6 +1315,13 @@ public:
         {
             me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20237, false);
+            DoCast(me,87459); // Visual teleport
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+             if (damage > me->GetHealth() || damage > 500000 )
+                damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1343,7 +1421,7 @@ public:
                 {
                     can_interrupt=false;
                     me->MonsterTextEmote("The air around you crackles with energy...", 0, true);
-                    DoCast(me->getVictim(),83067);
+                    DoCast(83067);
                     Thundershock_timer=70000;
                 }
             }
@@ -1382,12 +1460,29 @@ public:
 
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me->getVictim(),82285); // Elemental stasis
+
+                                // V tretej faze maju hracom opadnut debuffy  ( grounded /swirling winds )
+                                std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
+                                for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                                {
+                                    Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                                    if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                    {
+                                        if(unit->HasAura(83500)) // Ak ma hrac auru swirling winds zhodim mu ju
+                                            unit->RemoveAurasDueToSpell(83500);
+                                        if(unit->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
+                                            unit->RemoveAura(83581);
+                                    }
+                                }
+
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
                                 me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
                                 me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
                                 TeleDebug_timer=200;
                                 walk_timer=4000;
@@ -1400,6 +1495,8 @@ public:
                             if(PHASE==3 && TeleDebug_timer<=diff)
                             {
                                 me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
                                 PHASE=4;
                             }
                             else TeleDebug_timer-=diff;
@@ -1482,6 +1579,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->SetSpeed(MOVE_RUN, 1.5f, true);
             me->SetInCombatWithZone();
         }
@@ -1490,6 +1589,17 @@ public:
         {
             me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(21842, false);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoCast(me,87459); // Visual teleport
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+             if (damage > me->GetHealth() || damage > 500000 )
+                damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1627,6 +1737,8 @@ public:
                                 me->SetReactState(REACT_PASSIVE);
                                 me->AttackStop();
                                 me->GetMotionMaster()->MovementExpired();
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
                                 me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
                                 TeleDebug_timer=300;
                                 walk_timer=1000;
@@ -1641,6 +1753,8 @@ public:
                             {
                                 DoCast(me,87459); // Visual teleport
                                 me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
+                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveIdle();
                                 if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
                                     pfel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                 PHASE=4;
@@ -1679,7 +1793,7 @@ public:
                             {
                                 PHASE=7;
                                 DoCast(me,78771); // Visual Explosion when Monstrosity spawn
-                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,10000);
+                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,1000);
 
                                 if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
                                     Hp_gainer=Hp_gainer+pIgnac->GetHealth();
@@ -1742,6 +1856,8 @@ public:
                 me->AddAura(83500,target);
                 if(target->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
                     target->RemoveAura(83581);
+                if(target->HasAura(82285)) // Ak sa tornado priblizi prilis k hracovi a prebieha tretia faza ( hraci su v staze) despawnem sa
+                    me->ForcedDespawn();
             }
         }
 
@@ -1802,6 +1918,8 @@ public:
                 me->AddAura(83581,target); // grounded debuff
                 if(target->HasAura(83500)) // Ak ma hrac auru swirling winds zhodim mu ju
                     target->RemoveAurasDueToSpell(83500);
+                if(target->HasAura(82285)) // Ak sa spawne well blizko hraca a uz zacala tretia faza ( hraci su v staze) despawnem sa
+                    me->ForcedDespawn();
             }
         }
 

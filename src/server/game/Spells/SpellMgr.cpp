@@ -4546,7 +4546,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 13; // 10 yardov
             break;
         case 82700: // Water bomb
-        case 70415: // Flame patch
+        case 88579: // Inferno rush aoe
+        case 82860:
             spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
             break;
         case 83070: // Lightning blast - Obmedzenie na jeden target
@@ -4581,6 +4582,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[2] = 22;
             spellInfo->MaxAffectedTargets = 1;
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
+            break;
+        case 84529: // Electric Instability by mal ignorovat resist hracov
+        case 92480:
+        case 92481:
+        case 92482:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         /************************************************************************************************************/
         default:
