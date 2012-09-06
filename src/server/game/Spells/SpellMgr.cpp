@@ -4533,63 +4533,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
             count++;
             break;
-        /************************************ MONSTROSITY ***********************************************************/
-        case 82699: // Water bomb
-        case 84913: // Lava seed ( Monstrosity)
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC; // water bomb
-            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
-            break;
-        case 84915: //Liquid ice
-            spellInfo->EffectRadiusIndex[0] = 8;
-            break;
-        case 82746: // Glaciate
-            spellInfo->EffectRadiusIndex[0] = 13; // 10 yardov
-            break;
-        case 82700: // Water bomb
-        case 88579: // Inferno rush aoe
-        case 82860:
-            spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
-            break;
-        case 83070: // Lightning blast - Obmedzenie na jeden target
-            spellInfo->MaxAffectedTargets = 1;
-            spellInfo->EffectRadiusIndex[0] = 22;
-            spellInfo->Effect[1] = 0;// vypnem effekt 1
-            break;
-        case 83565: // Quake
-        case 92544:
-        case 92545:
-        case 92546:
-            spellInfo->excludeTargetAuraSpell=83500; // Ak ma hrac "levitate" debuff tak sa mu nic nestane
-            spellInfo->EffectRadiusIndex[0] = 22;
-            break;
-        case 83067: //Thundershock
-        case 92469:
-        case 92470:
-        case 92471:
-            spellInfo->excludeTargetAuraSpell=83581; // Ak ma hrac grounded debuff tak sa mu nic nestane
-            spellInfo->EffectRadiusIndex[0] = 22;
-            break;
-        case 82859:
-            spellInfo->Effect[0] = 0;// vypnem effekt 0
-            break;
-            // Gravity crush
-        case 84948:
-        case 92486:
-        case 92487:
-        case 92488:
-            spellInfo->EffectRadiusIndex[0] = 22;
-            spellInfo->EffectRadiusIndex[1] = 22;
-            spellInfo->EffectRadiusIndex[2] = 22;
-            spellInfo->MaxAffectedTargets = 1;
-            spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
-            break;
-        case 84529: // Electric Instability by mal ignorovat resist hracov
-        case 92480:
-        case 92481:
-        case 92482:
-            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
-            break;
-        /************************************************************************************************************/
         default:
             break;
         }
