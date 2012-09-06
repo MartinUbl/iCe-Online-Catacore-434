@@ -6842,7 +6842,7 @@ void Player::setInHumanForm()
 
 void Player::setInWorgenForm(uint32 form)
 {
-    if(isInWorgenForm())
+    if(isInWorgenForm()||!HasAura(94293)) //check if player already completed changing prequests
         return;
     SetFlag(UNIT_FIELD_FLAGS_2, form);
     m_ExtraFlags |= PLAYER_EXTRA_WORGEN_FORM;
