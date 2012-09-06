@@ -506,7 +506,7 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
         _player->InterruptNonMeleeSpells(false,spellId,false);
 
     // cancel queued spell, too
-    _player->CancelQueuedSpell();
+    _player->FreeQueuedSpell();
 }
 
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)

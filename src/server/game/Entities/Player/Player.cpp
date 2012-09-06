@@ -401,7 +401,7 @@ UpdateMask Player::updateVisualBits;
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this), m_GCDGuard()
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -450,6 +450,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_zoneUpdateTimer = 0;
 
     m_areaUpdateId = 0;
+
+    m_canQueueSpell = true;
 
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
 
@@ -1324,6 +1326,7 @@ void Player::Update(uint32 p_time)
         m_nextMailDelivereTime = 0;
     }
 
+    LockGCD();
     for (std::map<uint32, uint32>::iterator itr = m_globalCooldowns.begin(); itr != m_globalCooldowns.end(); ++itr)
     {
         if (itr->second)
@@ -1334,6 +1337,9 @@ void Player::Update(uint32 p_time)
                 itr->second = 0;
         }
     }
+    UnlockGCD();
+
+    m_canQueueSpell = true;
 
     // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
     // Having this would prevent more aura charges to be dropped, so let's crash
@@ -22765,19 +22771,36 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(sWorld->getIntConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
-void Player::QueueSpell()
+bool Player::QueueSpell()
 {
-    m_queuedSpell = true;
-}
+    if (!m_canQueueSpell)
+    {
+        return false;
+    }
 
-void Player::CancelQueuedSpell()
-{
-    m_queuedSpell = false;
+    // if returned 0, then successfully acquired (it was not acquired before)
+    if (m_queuedSpell.set(1) == 0)
+    {
+        m_canQueueSpell = false;
+        return true;
+    }
+
+    return false;
 }
 
 bool Player::HasQueuedSpell()
 {
-    return m_queuedSpell;
+    if (m_queuedSpell.set(1))    // was 1 already - acquired before
+        return true;
+    
+    // release it immediately
+    m_queuedSpell.set(0);
+    return false;
+}
+
+void Player::FreeQueuedSpell()
+{
+    m_queuedSpell.set(0);
 }
 
 void Player::ModifyMoney(int32 d)
@@ -24766,24 +24789,36 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell)
 
     ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, cdTime, spell);
     if (cdTime > 0)
+    {
+        LockGCD();
         m_globalCooldowns[spellInfo->StartRecoveryCategory] = uint32(cdTime);
+        UnlockGCD();
+    }
 }
 
-bool Player::HasGlobalCooldown(SpellEntry const *spellInfo) const
+bool Player::HasGlobalCooldown(SpellEntry const *spellInfo)
 {
     if (!spellInfo)
         return false;
 
+    LockGCD();
     std::map<uint32, uint32>::const_iterator itr = m_globalCooldowns.find(spellInfo->StartRecoveryCategory);
-    return itr != m_globalCooldowns.end() && (itr->second > sWorld->GetUpdateTime());
+    bool has = (itr != m_globalCooldowns.end() && (itr->second > sWorld->GetUpdateTime()));
+    UnlockGCD();
+
+    return has;
 }
 
 uint32 Player::GetGlobalCooldown(SpellEntry const *spellInfo)
 {
     if (!spellInfo)
-        return 0;
+        return 1500;
 
-    return m_globalCooldowns[spellInfo->StartRecoveryCategory]; 
+    LockGCD();
+    uint32 time = m_globalCooldowns[spellInfo->StartRecoveryCategory];
+    UnlockGCD();
+
+    return time;
 }
 
 void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
@@ -24791,7 +24826,9 @@ void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
     if (!spellInfo)
         return;
 
+    LockGCD();
     m_globalCooldowns[spellInfo->StartRecoveryCategory] = 0;
+    UnlockGCD();
 }
 
 uint32 Player::GetRuneBaseCooldown(uint8 index)

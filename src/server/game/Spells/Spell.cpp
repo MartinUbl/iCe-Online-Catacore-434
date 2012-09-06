@@ -3430,25 +3430,23 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
 
     // queue casting at the cast of another spell
     Player *player = m_caster->ToPlayer();
-    if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
+    if (player && !m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
     {
-        if (!player || player->HasQueuedSpell())
+        if (player->QueueSpell())
         {
-            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-            finish(false);
+            m_spellState = SPELL_STATE_QUEUED;
             return;
         }
-        player->QueueSpell();
-        m_spellState = SPELL_STATE_QUEUED;
+        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+        finish(false);
         return;
     }
 
     // queue casting at global cooldown
     if (!m_IsTriggeredSpell && !IsAutoRepeat() && player && player->HasGlobalCooldown(m_spellInfo))
     {
-        if (!player->HasQueuedSpell())
+        if (player->QueueSpell())
         {
-            player->QueueSpell();
             m_spellState = SPELL_STATE_QUEUED;
             return;
         }
@@ -3457,11 +3455,23 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
         return;
     }
 
+    if (player)
+        player->LockCast();
     prepareFinish(triggeredByAura);
+    if (player)
+        player->UnlockCast();
 }
 
 void Spell::prepareFinish(AuraEffect const * triggeredByAura)
 {
+    if (!m_IsTriggeredSpell && !IsAutoRepeat() &&
+         m_caster->ToPlayer() && m_caster->ToPlayer()->GetGlobalCooldown(m_spellInfo) > 0)
+    {
+        SendCastResult(SPELL_FAILED_NOT_READY);
+        finish(false);
+        return;
+    }
+
     m_spellState = SPELL_STATE_PREPARING;
     if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
@@ -3491,7 +3501,6 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
             triggeredByAura->GetBase()->SetDuration(0);
         }
         SendCastResult(result);
-
         finish(false);
         return;
     }
@@ -7785,7 +7794,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             {
                 m_Spell->SendCastResult(SPELL_FAILED_DONT_REPORT);
                 m_Spell->cancel();
-                player->CancelQueuedSpell();
                 break;
             }
 
@@ -7794,7 +7802,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             {
                 m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
                 m_Spell->cancel();
-                player->CancelQueuedSpell();
+                player->FreeQueuedSpell();
                 break;
             }
             
@@ -7804,12 +7812,13 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             {
                 m_Spell->SendCastResult(result);
                 m_Spell->cancel();
-                player->CancelQueuedSpell();
+                player->FreeQueuedSpell();
                 break;
             }
 
+            uint32 cd = player->GetGlobalCooldown(spellInfo);
             // not ready or another action in progress - wait more
-            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
+            if (cd || result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
             {
                 // cast time of current spell
                 uint32 cast = 0;
@@ -7817,7 +7826,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 if (current)
                     cast = current->GetRemainingCastTime();
                 // remaining global cooldown on queued spell
-                uint32 cd = player->GetGlobalCooldown(spellInfo);
                 uint32 available = std::max(cast, cd);
 
                 if (available <= 0)
@@ -7829,7 +7837,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 {
                     m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
                     m_Spell->cancel();
-                    player->CancelQueuedSpell();
+                    player->FreeQueuedSpell();
                     break;
                 }
 
@@ -7839,8 +7847,10 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
 
             // cast queued spell
             m_Spell->setState(SPELL_STATE_PREPARING);
+            player->LockCast();
             m_Spell->prepareFinish(NULL);
-            player->CancelQueuedSpell();
+            player->UnlockCast();
+            player->FreeQueuedSpell();
             
             // send global cooldown to client
             // without this the GDC on client would start immediately when pressed spell on action bar
