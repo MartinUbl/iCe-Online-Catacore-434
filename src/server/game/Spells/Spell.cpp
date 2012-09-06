@@ -4300,11 +4300,14 @@ void Spell::finish(bool ok)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
     }
 
-    // Special case for Holy Power taking spells which takes all charges for greater healing
+    //Case for Holy Power taking spells which takes all charges for greater healing and for dropping of Empowered imp buff
     switch (m_spellInfo->Id)
     {
         case 85222: // Light of Dawn
             m_caster->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 6353: //Soul Fire
+            m_caster->RemoveAurasDueToSpell(47283);
             break;
         default:
             break;
