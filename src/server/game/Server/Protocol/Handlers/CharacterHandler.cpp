@@ -1035,6 +1035,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if (pCurrChar->isGameMaster())
         SendNotification(LANG_GM_ON);
 
+    if (pCurrChar->getRace() == RACE_WORGEN /* is Worgen (:P) */
+        && (pCurrChar->GetQuestStatus(14222) == QUEST_STATUS_COMPLETE) /* Has Quest Last Stand */ 
+        && !pCurrChar->HasSpell(68996) /* Hasn't spell Two Forms */)
+        pCurrChar->toggleWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+
     std::string IP_str = GetRemoteAddress();
     sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) guid:(%u)",
                  IP_str.c_str(),

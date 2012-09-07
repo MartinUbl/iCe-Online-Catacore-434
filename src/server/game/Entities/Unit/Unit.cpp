@@ -13239,10 +13239,12 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             Unmount();
     }
     
-    if(GetTypeId() == TYPEID_PLAYER && ToPlayer()->getRace() == RACE_WORGEN)
+    if(GetTypeId() == TYPEID_PLAYER)
     {
-        //TODO: make a hackfix for worgen starting zone.
-        ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+        if (ToPlayer()->getRace() == RACE_WORGEN && ToPlayer()->HasSpell(68996) /* Two forms */)
+        {
+            ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+        }
     }
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
