@@ -13241,6 +13241,14 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     
     if(GetTypeId() == TYPEID_PLAYER)
     {
+        // Interrupt mount spell cast while entering to combat
+        Spell* currSpell = ToPlayer()->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        {
+            if (currSpell && currSpell->m_spellInfo && currSpell->m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOUNTED)
+                ToPlayer()->InterruptSpell(CURRENT_GENERIC_SPELL);
+        }
+
         if (ToPlayer()->getRace() == RACE_WORGEN && ToPlayer()->HasSpell(68996) /* Two forms */)
         {
             ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
