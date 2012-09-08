@@ -291,10 +291,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
     if (_player->m_mover != _player)
         return;
 
-    while (m_isHandlingCasting) // do not allow while handling another - wait a while
-        ;
-    m_isHandlingCasting = true;
-
     GameObject *obj = GetPlayer()->GetMap()->GetGameObject(guid);
 
     if (!obj)
@@ -306,8 +302,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
     obj->AI()->GossipHello(_player);
 
     obj->Use(_player);
-
-    m_isHandlingCasting = false;
 }
 
 void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
@@ -487,12 +481,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->m_keyStonesCount = keyStonesCount;
-
-    while (m_isHandlingCasting) // do not allow while handling another - wait a while
-        ;
-    m_isHandlingCasting = true;
     spell->prepare(&targets);
-    m_isHandlingCasting = false;
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
