@@ -11408,26 +11408,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 DoneTotal += (*i)->GetAmount();
                 break;
             }
-            // Tundra Stalker
-            // Merciless Combat
-            case 7277:
-            {
-                // Merciless Combat
-                if ((*i)->GetSpellProto()->SpellIconID == 2656)
-                {
-                    if (!pVictim->HealthAbovePct(35))
-                        DoneTotalMod *= (100.0f+(*i)->GetAmount())/100.0f;
-                }
-                // Tundra Stalker
-                else
-                {
-                    // Frost Fever (target debuff)
-                    if (pVictim->HasAura(55095))
-                        DoneTotalMod *= ((*i)->GetAmount()+100.0f)/100.0f;
-                    break;
-                }
-                break;
-            }
             // Rage of Rivendare
             case 7293:
             {
@@ -11547,6 +11527,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
         break;
         case SPELLFAMILY_DEATHKNIGHT:
+            // all DK attacks profit from Merciless Combat
+            if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
+                if (!pVictim->HealthAbovePct(35))
+                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+
             // Improved Icy Touch
             if (spellProto->SpellFamilyFlags[0] & 0x2)
                 if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2721, 0))
@@ -12762,6 +12747,14 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
             else if (!((*i)->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellProto()->EquippedItemSubClassMask == 0))
                 AddPctN(DoneTotalMod, amount);
         }
+
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // all DK attacks profit from Merciless Combat
+            if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
+                if (!pVictim->HealthAbovePct(35))
+                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+        }
     }
 
 
@@ -12799,25 +12792,6 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
 
         switch ((*i)->GetMiscValue())
         {
-            // Tundra Stalker
-            // Merciless Combat
-            case 7277:
-            {
-                // Merciless Combat
-                if ((*i)->GetSpellProto()->SpellIconID == 2656)
-                {
-                    if (!pVictim->HealthAbovePct(35))
-                        DoneTotalMod *= (100.0f+(*i)->GetAmount())/100.0f;
-                }
-                // Tundra Stalker
-                else
-                {
-                    // Frost Fever (target debuff)
-                    if (pVictim->HasAura(55095))
-                        DoneTotalMod *= ((*i)->GetAmount()+100.0f)/100.0f;
-                }
-                break;
-            }
             // Rage of Rivendare
             case 7293:
             {
