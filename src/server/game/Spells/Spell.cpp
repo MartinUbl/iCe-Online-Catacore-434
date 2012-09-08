@@ -3455,11 +3455,23 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
         return;
     }
 
+    if (player)
+        player->LockCast();
     prepareFinish(triggeredByAura);
+    if (player)
+        player->UnlockCast();
 }
 
 void Spell::prepareFinish(AuraEffect const * triggeredByAura)
 {
+    if (!m_IsTriggeredSpell && !IsAutoRepeat() &&
+         m_caster->ToPlayer() && m_caster->ToPlayer()->GetGlobalCooldown(m_spellInfo) > 0)
+    {
+        SendCastResult(SPELL_FAILED_NOT_READY);
+        finish(false);
+        return;
+    }
+
     m_spellState = SPELL_STATE_PREPARING;
     if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
@@ -3537,28 +3549,11 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
             }
         }
 
-        if (Player *pl = m_caster->ToPlayer())
-        {
-            // test global cooldown and add it
-            pl->LockGCD();
-
-            bool hasGCD = !IsAutoRepeat() && pl->HasGlobalCooldown(m_spellInfo);
-
-            if (!hasGCD)    // if the GCD is finished, add it before leaving the critical section...
-                pl->AddGlobalCooldown(m_spellInfo,this);
-
-            pl->UnlockGCD(); 
-
-            if (hasGCD)     // otherwise set Not ready and fail the spell
-            {
-                SendCastResult(SPELL_FAILED_NOT_READY);
-                finish(false);
-                return;
-            }
-        }
-
         m_caster->SetCurrentCastedSpell(this);
         SendSpellStart();
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->ToPlayer()->AddGlobalCooldown(m_spellInfo,this);
 
         if (!m_casttime && !m_spellInfo->StartRecoveryTime
             && !m_castItemGUID     //item: first cast may destroy item and second cast causes crash
@@ -7798,18 +7793,18 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             if (!spellInfo || !player)
                 return true;
 
-            if (!player->HasQueuedSpell())      // previous spell cast was interrupted
+            if (!player->HasQueuedSpell())      // interrupted by Esc key, ...
             {
                 m_Spell->SendCastResult(SPELL_FAILED_DONT_REPORT);
-                m_Spell->finish(false);
+                m_Spell->cancel();
                 break;
             }
 
-            // do not queue spells with cooldown not finished
+            // do not queue spells with cooldown started
             if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
             {
                 m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
-                m_Spell->finish(false);
+                m_Spell->cancel();
                 player->FreeQueuedSpell();
                 break;
             }
@@ -7819,14 +7814,12 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             if (result != SPELL_CAST_OK && result != SPELL_FAILED_NOT_READY && result != SPELL_FAILED_SPELL_IN_PROGRESS)
             {
                 m_Spell->SendCastResult(result);
-                m_Spell->finish(false);
+                m_Spell->cancel();
                 player->FreeQueuedSpell();
                 break;
             }
 
-            // remaining global cooldown on queued spell
             uint32 cd = player->GetGlobalCooldown(spellInfo);
-
             // not ready or another action in progress - wait more
             if (cd || result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
             {
@@ -7835,12 +7828,9 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 Spell *current = player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
                 if (current)
                     cast = current->GetRemainingCastTime();
-
+                // remaining global cooldown on queued spell
                 uint32 available = std::max(cast, cd);
 
-                // do not requeue to the same moment if the global cooldown is finished,
-                // but previous spell was not finished yet
-                // - it would cause server freezes by infinite event processing of this event
                 if (available <= 0)
                     available = 1;
 
@@ -7849,7 +7839,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 if (available > 400)
                 {
                     m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
-                    m_Spell->finish(false);
+                    m_Spell->cancel();
                     player->FreeQueuedSpell();
                     break;
                 }
@@ -7859,7 +7849,10 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             }
 
             // cast queued spell
+            m_Spell->setState(SPELL_STATE_PREPARING);
+            player->LockCast();
             m_Spell->prepareFinish(NULL);
+            player->UnlockCast();
             player->FreeQueuedSpell();
             
             // send global cooldown to client

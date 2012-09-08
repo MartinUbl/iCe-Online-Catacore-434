@@ -44,7 +44,6 @@
 #include<string>
 #include<vector>
 
-#include "ace/Mutex.h"
 #include "ace/Test_and_Set.h"
 #include "ace/Null_Mutex.h"
 
@@ -1710,9 +1709,15 @@ class Player : public Unit, public GridObject<Player>
 
         // queued spells
         ACE_Test_and_Set<ACE_Null_Mutex, int> m_queuedSpell;
+        bool m_canQueueSpell;   // only one per player's update (to prevent cheating)
         bool QueueSpell();
         void FreeQueuedSpell();
         bool HasQueuedSpell();
+
+        // don't allow to prepare 2 spells at once
+        ACE_Mutex m_castGuard;
+        void LockCast() { m_castGuard.acquire(); }
+        void UnlockCast() { m_castGuard.release(); }
 
         // guard global cooldowns
         ACE_Mutex m_GCDGuard;
