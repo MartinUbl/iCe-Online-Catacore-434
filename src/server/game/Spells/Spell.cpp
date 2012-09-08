@@ -7787,8 +7787,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             if (!player->HasQueuedSpell())      // interrupted by Esc key, ...
             {
                 m_Spell->SendCastResult(SPELL_FAILED_DONT_REPORT);
-                m_Spell->cancel();
-                player->CancelQueuedSpell();
+                m_Spell->finish(false);
                 break;
             }
 
@@ -7796,7 +7795,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
             {
                 m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
-                m_Spell->cancel();
+                m_Spell->finish(false);
                 player->CancelQueuedSpell();
                 break;
             }
@@ -7806,7 +7805,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             if (result != SPELL_CAST_OK && result != SPELL_FAILED_NOT_READY && result != SPELL_FAILED_SPELL_IN_PROGRESS)
             {
                 m_Spell->SendCastResult(result);
-                m_Spell->cancel();
+                m_Spell->finish(false);
                 player->CancelQueuedSpell();
                 break;
             }
@@ -7831,7 +7830,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 if (available > 400)
                 {
                     m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
-                    m_Spell->cancel();
+                    m_Spell->finish(false);
                     player->CancelQueuedSpell();
                     break;
                 }
