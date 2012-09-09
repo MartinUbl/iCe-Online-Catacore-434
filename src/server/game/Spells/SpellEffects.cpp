@@ -620,13 +620,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 5308)
                 {
                     float availableRage = m_caster->GetPower(POWER_RAGE);
-                    if (availableRage > 20.0f)
-                        availableRage = 20.0f;
-                    damage = uint32 (10 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.437f*(1.0f+availableRage/20.0f));
+
+                    // Sudden Death rage save
+                    if (m_caster->HasAura(29723))
+                        availableRage -= 50.0f;
+                    else if (m_caster->HasAura(29725))
+                        availableRage -= 100.0f;
+
+                    if (availableRage < 0.0f)  // no bonus rage used (Sudden Death could set it to negative)
+                        availableRage = 0.0f;
+
+                    if (availableRage > 200.0f)     // maximum of 20 rage used
+                        availableRage = 200.0f;
+
+                    float usedRage = 10.0f + (availableRage / 10.0f);    // rage amount used for a computation (including 10 base)
+                    // before: damage = % modifier for low levels, after: final damage
+                    damage = uint32 (10 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.0437f * usedRage) * damage / 100;
 
                     m_caster->ModifyPower(POWER_RAGE, -int32(availableRage));
-
-                    apply_direct_bonus = false;
                 }
                 // Thunder Clap and talent Blood and Thunder
                 else if (m_spellInfo->Id == 6343)
