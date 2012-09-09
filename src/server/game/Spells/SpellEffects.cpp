@@ -7868,11 +7868,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             continue;
 
                         int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dot_eff->GetEffIndex(), dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
+                        uint32 dot_amplitude = dot_spell->EffectAmplitude[effIndex];
 
-                        dot_sum += dot_tick * dot_eff->GetTotalTicks();
+                        if (dot_amplitude > 0 && dot_tick > 0)
+                            dot_sum += dot_tick * IN_MILLISECONDS / dot_amplitude;    // base damage per second (without haste)
                     }
-
-                dot_sum = dot_sum / 10;
 
                 // apply a new DoT. amount is equal to the sum above
                 if (dot_sum > 0)
