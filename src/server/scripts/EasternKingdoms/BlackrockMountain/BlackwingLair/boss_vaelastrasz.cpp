@@ -143,6 +143,7 @@ public:
             DoCast(me, SPELL_ESSENCEOFTHERED);
             DoZoneInCombat();
             me->SetHealth(me->CountPctFromMaxHealth(30));
+            me->ResetPlayerDamageReq();
         }
 
         void UpdateAI(const uint32 diff)
