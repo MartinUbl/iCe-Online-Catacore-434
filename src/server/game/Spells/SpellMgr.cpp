@@ -4503,6 +4503,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 47841; // Dark Phoenix models
             count++;
             break;
+        case 89485: // Inner Focus
+            spellInfo->procCharges = 1; // only one charge
+            count++;
+            break;
         default:
             break;
         }
