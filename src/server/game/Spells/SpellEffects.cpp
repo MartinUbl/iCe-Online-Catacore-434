@@ -2857,11 +2857,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                     // Implementation of Blood Shield mastery profficiency
                     if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DK_BLOOD &&
-                        m_caster->ToPlayer()->HasAura(48263) && !m_caster->HasAura(77535))
+                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DK_BLOOD)
                     {
+                        // Blood Shield effect stacks
+                        int32 bonus = 0;
+                        if (AuraEffect *aurEff = m_caster->GetAuraEffect(77535, 0))
+                            bonus = aurEff->GetAmount();
+
                         // 6.25% of amount healed per mastery point, so mastery*6.25 percent
-                        int32 bp0 = bp*(m_caster->ToPlayer()->GetMasteryPoints()*6.25f/100.0f);
+                        int32 bp0 = bp*(m_caster->ToPlayer()->GetMasteryPoints()*6.25f/100.0f) + bonus;
                         m_caster->CastCustomSpell(m_caster,77535,&bp0,0,0,true);
                     }
                     return;
