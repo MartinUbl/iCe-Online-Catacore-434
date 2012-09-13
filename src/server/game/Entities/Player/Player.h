@@ -2276,7 +2276,7 @@ class Player : public Unit, public GridObject<Player>
         void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }
         uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
 
-        void LeaveBattleground(bool teleportToEntryPoint = true);
+        void LeaveBattleground(bool teleportToEntryPoint = true, bool CastDeserter = true);
         bool CanJoinToBattleground() const;
         bool CanReportAfkDueToLimit();
         void ReportedAfkBy(Player* reporter);

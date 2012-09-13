@@ -22268,7 +22268,7 @@ void Player::SetBattlegroundEntryPoint()
     m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
 }
 
-void Player::LeaveBattleground(bool teleportToEntryPoint)
+void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
 {
     if (Battleground *bg = GetBattleground())
     {
@@ -22286,11 +22286,14 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
                 //lets check if player was teleported from BG and schedule delayed Deserter spell cast
                 if (IsBeingTeleportedFar())
                 {
-                    ScheduleDelayedOperation(DELAYED_SPELL_CAST_DESERTER);
+                    if (CastDeserter)
+                        ScheduleDelayedOperation(DELAYED_SPELL_CAST_DESERTER);
+
                     return;
                 }
 
-                CastSpell(this, 26013, true);               // Deserter
+                if (CastDeserter)
+                    CastSpell(this, 26013, true);               // Deserter
             }
         }
     }
