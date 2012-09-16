@@ -994,7 +994,7 @@ enum Opcodes
     CMSG_CHANNEL_SILENCE_VOICE                       = 0x07A18, //
     CMSG_CHANNEL_SILENCE_ALL                         = 0x01A90, //
     CMSG_CHANNEL_UNSILENCE_VOICE                     = 0x06A80, //
-    CMSG_CHANNEL_UNSILENCE_ALL                       = 0x03A80, //
+    CMSG_CHANNEL_UNSILENCE_ALL                       = 0x00004, //
     CMSG_TARGET_CAST                                 = 0x10183, //
     CMSG_TARGET_SCRIPT_CAST                          = 0x10184, //
     CMSG_CHANNEL_DISPLAY_LIST                        = 0x10185, //
