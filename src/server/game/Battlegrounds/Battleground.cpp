@@ -1213,6 +1213,10 @@ void Battleground::AddPlayer(Player* plr)
 
     // Log
     sLog->outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
+
+    // log twinks in normal BG
+    if (plr->GetTwinkType() == BATTLEGROUND_TWINK && plr->GetTwinkType() != m_twink)
+        CharacterDatabase.PExecute("insert into twink_cheaters values (%d);", plr->GetGUID());
 }
 
 // this method adds player to his team's bg group, or sets his correct group if player is already in bg group
