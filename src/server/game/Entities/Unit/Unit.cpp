@@ -6085,10 +6085,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                             return false;
                     }
-                    basepoints0 = basepoints0 / 2;
-
                     triggered_spell_id = 12654;
                     basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
+                    basepoints0 = basepoints0 / 2;
                     break;
                 }
                 // Glyph of Ice Block
