@@ -4555,6 +4555,144 @@ void SpellMgr::LoadSpellCustomAttr()
             // because of bug in dbc
             spellInfo->EffectRadiusIndex[0] = 31; // 80 yards
             break;
+       case 82699: // Water bomb
+           spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+           spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+           spellInfo->EffectRadiusIndex[0] = 22;
+           break;
+       case 82746: // Glaciate
+       case 92506:
+       case 92507:
+       case 92508:
+           spellInfo->EffectRadiusIndex[0] = 13; // 10 yardov ???
+           break;
+       case 82700: // Water bomb
+       case 88579: // Inferno rush aoe
+       case 82860:
+           spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+           break;
+       case 92212: // Flamestrike ( Ignacious pure visual)
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            break;
+       case 92214:  // Flamestrike aoe
+            spellInfo->EffectRadiusIndex[0] = 29;
+            break;
+       case 92270: // Summon effekt u Frozen orbu
+            spellInfo->Effect[0] = 0;
+            break;
+       case 92303: // Zvysovanie rychlosti u Frozen orbu
+            spellInfo->Effect[1] = 0;
+            break;
+       case 84915: // Liquid ice
+       case 92497:
+       case 92498:
+       case 92499:
+             spellInfo->EffectRadiusIndex[0] = 13; // 10 yardov ???
+             break;
+       case 83070: // Lightning blast -  Zmena z aoe na direct dmg spell
+       case 92454:
+       case 92455:
+       case 92456:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->Effect[1] = 0;// vypnem effekt 1
+            break;
+       case 83565: // Quake
+       case 92544:
+       case 92545:
+       case 92546:
+           spellInfo->excludeTargetAuraSpell=83500; // Ak ma hrac "levitate" debuff tak sa mu nic nestane
+           spellInfo->EffectRadiusIndex[0] = 22;
+           break;
+       case 83067: //Thundershock
+       case 92469:
+       case 92470:
+       case 92471:
+           spellInfo->excludeTargetAuraSpell=83581; // Ak ma hrac grounded debuff tak sa mu nic nestane
+           spellInfo->EffectRadiusIndex[0] = 22;
+           break;
+       case 92548: // Instant glaciate u Frozen orbu
+           spellInfo->EffectRadiusIndex[0] = 22;
+           break;
+       case 84948: // Gravity crush ( na 10 mane maju affektovat iba 1 hraca )
+       case 92487:
+           spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+           spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+           spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+           spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+           spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+           spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
+           spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
+           break;
+        case 92486: //Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
+        case 92488:
+            spellInfo->MaxAffectedTargets = 4;
+            spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
+            break;
+       case 92076: // Gravity core chybajuci radius index
+       case 92537:
+       case 92538:
+       case 92539:
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
+            break;
+       case 92075:
+            spellInfo->rangeIndex=6; // 100 yards
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
+            break;
+       case 92067: // Static overload
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            //spellInfo->EffectImplicitTargetA[1] = 22; // caster
+            //spellInfo->EffectImplicitTargetB[1] = 30; // all friendly around caster;
+            spellInfo->rangeIndex=6; // 100 yards
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yardov
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
+            break;
+       case 92068: // Static overload
+            spellInfo->Effect[0] = 164; // spell effect remove aura
+            spellInfo->EffectBasePoints[0]= 1;
+            spellInfo->EffectImplicitTargetA[0] = 22; // caster
+            spellInfo->EffectImplicitTargetB[0] = 30; // all friendly around caster
+            spellInfo->EffectRadiusIndex[1] = 15; // 3 yardy ( kontaktna vzdialenost)
+            spellInfo->EffectTriggerSpell[1]=92075;
+            spellInfo->procChance = 0;
+            break;
+       case 92466:
+            spellInfo->Effect[0] = 164; // spell effect remove aura
+            spellInfo->EffectBasePoints[0]= 1;
+            spellInfo->EffectImplicitTargetA[0] = 22; // caster
+            spellInfo->EffectImplicitTargetB[0] = 30; // all friendly around caster
+            spellInfo->EffectRadiusIndex[1] = 15; // 3 yardy ( kontaktna vzdialenost)
+            spellInfo->EffectTriggerSpell[1]=92075 ;
+            spellInfo->procChance = 0;
+            break;
+       case 92467:
+            spellInfo->Effect[0] = 164; // spell effect remove aura
+            spellInfo->EffectBasePoints[0]= 1;
+            spellInfo->EffectImplicitTargetA[0] = 22; // caster
+            spellInfo->EffectImplicitTargetB[0] = 30; // all friendly around caster
+            spellInfo->EffectRadiusIndex[1] = 15; // 3 yardy ( kontaktna vzdialenost)
+            spellInfo->EffectTriggerSpell[1]=92075 ;
+            spellInfo->procChance = 0;
+            break;
+       case 92468:
+            spellInfo->Effect[0] = 164; // spell effect remove aura
+            spellInfo->EffectBasePoints[0]= 1;
+            spellInfo->EffectImplicitTargetA[0] = 22; // caster
+            spellInfo->EffectImplicitTargetB[0] = 30; // all friendly around caster
+            spellInfo->EffectRadiusIndex[1] = 8; // 5 yardy ( kontaktna vzdialenost)
+            spellInfo->EffectTriggerSpell[1]=92075 ;
+            spellInfo->procChance = 0;
+            break;
+       /*case 84529: // Electric Instability by mal ignorovat resist hracov
+       case 92480:
+       case 92481:
+       case 92482:
+           spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+           break;*/
         default:
             break;
         }
