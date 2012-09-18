@@ -1175,7 +1175,7 @@ enum Opcodes
     SMSG_HEALTH_UPDATE                               = 0x02AA8, // 4.0.6a 13623
     SMSG_POWER_UPDATE                                = 0x065E8, // 4.0.6a 13623
     CMSG_GAMEOBJ_REPORT_USE                          = 0x023A0, // 4.0.6a 13623
-    SMSG_HIGHEST_THREAT_UPDATE                       = 0x03F7E, //
+    SMSG_HIGHEST_THREAT_UPDATE                       = 0x0EC84, // 4.0.6a 13623
     SMSG_THREAT_UPDATE                               = 0x0B480, // 4.0.6a 13623
     SMSG_THREAT_REMOVE                               = 0x029E0, // 4.0.6a 13623
     SMSG_THREAT_CLEAR                                = 0x0FFC8, // 4.0.6a 13623
