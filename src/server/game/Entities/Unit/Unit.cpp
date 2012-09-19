@@ -8836,8 +8836,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     else if (triggeredByAura->GetSpellProto()->Id == 53238) // Rank 3
                         basepoints0 = damage * 0.3f;
 
-                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), trigger_spell_id);
                     basepoints0 = basepoints0 / (GetSpellMaxDuration(TriggerPS) / 1000);
+                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), trigger_spell_id);
                     break;
                 }
                 if (auraSpellInfo->SpellIconID == 2225)     // Serpent Spread 1,2
