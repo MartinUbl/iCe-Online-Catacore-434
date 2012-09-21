@@ -4581,9 +4581,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92270: // Summon effekt u Frozen orbu
             spellInfo->Effect[0] = 0;
             break;
-        case 92303: // Zvysovanie rychlosti u Frozen orbu
-            spellInfo->Effect[1] = 0;
-            break;
         case 84915: // Liquid ice
         case 92497:
         case 92498:
@@ -4641,11 +4638,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
+            spellInfo->DurationIndex = 1;
             break;
         case 92067: // Static overload
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
+            spellInfo->DurationIndex = 1;
             break;
         /*case 84529: // Electric Instability by mal ignorovat resist hracov
         case 92480:

@@ -355,7 +355,7 @@ public:
 
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)) // Na jedneho zacastim  ostatnym dam iba auru
                         {
-                            target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,2.0f,2.0f);
+                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+20);
                             DoCast(target,84948);
                         }
 
@@ -367,12 +367,12 @@ public:
                                 if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                                 {
                                         me->AddAura(92486,player);
-                                        player->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,2.0f,2.0f);
+                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+20);
                                 }
                                 if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                                 {
                                         me->AddAura(92488,player);
-                                        player->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,2.0f,2.0f);
+                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+20);
                                 }
                                 counter++;
                             }
@@ -387,7 +387,7 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
-                            target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,0.002f,0.002f); // na test :D
+                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+20);
                             DoCast(target,84948);
                             Gravity_crush_timer=25000;
                         }
@@ -557,12 +557,12 @@ public:
         InstanceScript* instance;
         uint32 Growing_timer;
         uint32 Aoe_dmg_timer;
-        float Stack_counter;
+        float range;
         uint32 Stacks;
 
         void Reset()
         {
-            Stack_counter=0.0f;
+            range=0.0f;
             Stacks=0;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
             Growing_timer= 2000;
@@ -583,16 +583,16 @@ public:
 
             if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
-                Stack_counter=4.0f*(1.0f + 0.4f*Stacks);
+                range=4.0f*(1.0f + 0.4f*Stacks);
                 Stacks++;
 
                 if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
                 {
-                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< Stack_counter)
+                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
                             //Stack_counter=Stack_counter+135.0f;
-                            Stack_counter++;
+                            Stacks++;
                             Growing_timer=3000;
                         }
                 }
@@ -602,7 +602,7 @@ public:
             if(Aoe_dmg_timer<=diff)
             {
                 //me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(350.0f+Stack_counter)); // aoe dmg liquid ice
-                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stack_counter * 4000)); // 100% + stacky*40% ?
+                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 4000)); // 100% + stacky*40% ?
                 Aoe_dmg_timer=1000;
             }
             else Aoe_dmg_timer-=diff;
@@ -919,10 +919,8 @@ public:
         uint32 Static_overload_timer;
         uint32 Gravity_core_timer;
         uint32 Stack,counter;
-        bool aegis_used,ticked,can_spread_fire,can_knock,Hp_dropped,speaked,can_interrupt,debuged,can_remove_OL,can_remove_GC;
+        bool aegis_used,ticked,can_spread_fire,can_knock,Hp_dropped,speaked,can_interrupt,debuged;
         Unit* Rush_target;
-        Unit* pOverload_target;
-        Unit* pGravity_target;
 
         void Reset()
         {
@@ -943,9 +941,9 @@ public:
             Ticking_timer=1000;
             spread_flame_timer=100;
             Stack=counter=0;
-            aegis_used=ticked=can_spread_fire=can_knock=Hp_dropped=speaked=can_interrupt=can_remove_OL=can_remove_GC=false;
+            aegis_used=ticked=can_spread_fire=can_knock=Hp_dropped=speaked=can_interrupt=false;
             debuged=true;
-            Rush_target=pOverload_target=pGravity_target=NULL;
+            Rush_target=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
@@ -1031,24 +1029,9 @@ public:
             {
                 if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
-                    if(!can_remove_OL) // Aplikujem Overload
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        {
-                            pOverload_target=target;
-                            can_remove_OL=!can_remove_OL;
                             DoCast(target,92067,true); // Overload debuff
-                        }
                         Static_overload_timer=10000; // Po 10 sekundach hracom debuff zhodim
-                    }
-                    else  // Odstranujem Overload
-                    {
-                        if(pOverload_target)
-                            if(pGravity_target->HasAura(92067))
-                                pOverload_target->RemoveAurasDueToSpell(92067);
-                        can_remove_OL=!can_remove_OL;
-                        Static_overload_timer=10000;
-                    }
                 }
             }
             else Static_overload_timer-=diff;
@@ -1056,24 +1039,9 @@ public:
 
             if(Gravity_core_timer<=diff) 
             {
-                    if(!can_remove_GC) // Aplikujem Gravity core
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        {
-                            pGravity_target=target;
-                            DoCast(target,92075,true);
-                            can_remove_GC=!can_remove_GC;
-                        }
-                        Gravity_core_timer=10000;
-                    }
-                    else // Odtsranujem debuff
-                    {
-                        if(pGravity_target)
-                            if(pGravity_target->HasAura(92075))
-                                pGravity_target->RemoveAurasDueToSpell(92075);
-                        can_remove_GC=!can_remove_GC;
-                        Gravity_core_timer=10000;
-                    }
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                    DoCast(target,92075,true);
+                Gravity_core_timer=10000;
             }
             else Gravity_core_timer-=diff;
 
@@ -1375,9 +1343,10 @@ public:
         uint32 TeleDebug_timer;
         uint32 walk_timer;
         uint32 walk_timer_Feludisu;
+        uint32 Update_timer;
         Unit* pRod_marked_player;
         Unit * pole[2]; // Staticke pole pre ulozenie pointra na hracov ktory maju marku( debuff)
-        bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt;
+        bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
         void Reset()
         {
@@ -1390,8 +1359,9 @@ public:
             Thundershock_timer=70000;
             Disperse_timer=20000;
             Chain_timer=1000;
+            Update_timer=0;
             pRod_marked_player=NULL;
-            can_chaining=ported=can_tele=Hp_dropped=can_interrupt=false;
+            can_chaining=ported=can_tele=Hp_dropped=can_interrupt=update_movement=false;
             pRod_marked_player=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
@@ -1464,6 +1434,14 @@ public:
 
     if(PHASE==1)
     {
+        if(Update_timer<=diff && update_movement==true) // Hadam pomoze odstranit problem s visual teleportom kde hraci nevideli spravnu poziciu ariona
+        {
+            me->SendMovementFlagUpdate();
+            me->SendMovementFlagUpdate();
+            update_movement=false;
+        }
+        else Update_timer-=diff;
+
         if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) && !me->IsNonMeleeSpellCasted(false)) // Po Disperse bezal boss za targetom musim to cekovat takto
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
 
@@ -1485,6 +1463,8 @@ public:
                     }
                     me->SetPosition(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation(),true);
                     me->SendMovementFlagUpdate();
+                    update_movement=true;
+                    Update_timer=200;
                     me->SetVisible(true);
                     can_interrupt=true;
                     DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
@@ -2233,9 +2213,7 @@ public:
         uint32 Chasing_timer;
         uint32 Glaciate_timer;
         uint32 Flamestrike_timer;
-        uint32 Addspeed_timer;
         bool buffed;
-        float speed;
         Unit* target;
 
 
@@ -2249,22 +2227,12 @@ public:
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
-            speed=0.5f;
-            Addspeed_timer=5000;
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if(Addspeed_timer<=diff)
-            {
-                speed=speed+0.05;
-                Addspeed_timer=500; // Kazdych 500 ms pridam rychlost orbu o 5 %  spell effect kto ho pridava sa bije s nastvenim speedu cez AI na zaciatku na polovicu
-                me->SetSpeed(MOVE_RUN,speed);
-            }
-            else Addspeed_timer-=diff;
-
             if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
             {
                 if(player->HasAura(82285)) // Ak ma na sebe hrac debuff Elemental Stasis -> nastala faza 3 cize despawnem sa
@@ -2311,7 +2279,6 @@ public:
                     me->GetMotionMaster()->MoveChase(target); // Orb sa rozbehne za hracom s beacon debuffom
                 }
 
-                //me->AddAura(3514,me);// - 50 % movement speed
                 DoCast(me,92302 ); // Spell nahdodi "model" orbu + priebezne zvysuje speed
 
                 buffed=true;
@@ -2321,9 +2288,6 @@ public:
 
             if(checking_timer<=diff)
             {
-                //me->AddAura(3514,me);// - 50 % movement speed ( ma iba par sekund duration treba obnovovat )
-                me->SetSpeed(MOVE_RUN,0.5f,true);
-
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 500, true))
                 {
                     if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
