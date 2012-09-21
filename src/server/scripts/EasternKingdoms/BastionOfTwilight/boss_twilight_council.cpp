@@ -614,6 +614,7 @@ public:
                         if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
+                            //Stack_counter=Stack_counter+135.0f;
                             Stacks++;
                             Growing_timer=3000;
                         }
@@ -623,7 +624,8 @@ public:
 
             if(Aoe_dmg_timer<=diff)
             {
-                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 3000)); // 100% + stacky*40% ?
+                //me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(350.0f+Stack_counter)); // aoe dmg liquid ice
+                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 4000)); // 100% + stacky*40% ?
                 Aoe_dmg_timer=1000;
             }
             else Aoe_dmg_timer-=diff;
