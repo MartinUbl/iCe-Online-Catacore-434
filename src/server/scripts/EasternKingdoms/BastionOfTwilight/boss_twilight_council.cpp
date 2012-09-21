@@ -65,14 +65,11 @@ const Position Tele_pos[4] =              // Random position for teleport Arion 
     {-1037.94f, -589.27f, 831.92f, 0.17f},
 };
 
-const Position Gravity_pos[6] =           // Random position for spawn Gravity Well
+const Position Gravity_pos[3] =           // Random position for spawn Gravity Well
 {
-    {-981.3f, -555.3f, 831.92f, 0.0f},
-    {-970.8f, -592.2f, 831.92f, 0.0f},
-    {-1013.1f, -561.25f, 831.92f, 0.0f},
-    {-999.6f, -600.0f, 831.92f, 0.0f},
-    {-1037.1f, -613.77f, 835.29f, 0.0f},
-    {-1044.19f, -562.2f, 835.2f, 0.0f},
+    {-1038.55f,-619.776f,835.16f, 0.9f},
+    {-1044.313f,-550.27f,835.135f, 5.6f},
+    {-1053.32f,-582.284f,835.01f, 6.26f},
 };
 
 const Position Seeds_pos[16] =  // Pozicie na spawn lava seedov :D Ostatne po miestnosti robim algoritmom :)
@@ -121,9 +118,10 @@ public:
         uint32 Intensity_timer; // cca 20s sekund sa prida frekvencia Instability
         uint32 spawn_timer;
         uint32 INSTABILITY;
-        //Creature *pLiquidIce;
+        Creature *pLiquidIce;
         uint32 Distance_timer;
         uint32 achiev_counter;
+        uint32 number_of_stacks;
         float Stack_counter;
         bool killed_unit,spawned,can_seed,boomed;
 
@@ -131,6 +129,7 @@ public:
         {
             Stack_counter=0.0f;
             achiev_counter=0;
+            number_of_stacks=0;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             spawn_timer=5000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
@@ -142,7 +141,7 @@ public:
             Intensity_timer=20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
             killed_unit=spawned=can_seed=boomed=false;
-            //pLiquidIce=NULL;
+            pLiquidIce=NULL;
             DoCast(me,84918); // Cryogenic aura
             me->SetInCombatWithZone();
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -253,9 +252,10 @@ public:
                 boomed=true;
             }
 
-            if(Distance_timer<=diff)
+            if(Distance_timer<=diff) // Pocitam vzdialenost plosky od bossa
             {
-                Stack_counter=Stack_counter+135.0f;
+                Stack_counter=4.0f*(1.0f + 0.4f*number_of_stacks);
+                number_of_stacks++;
                 Distance_timer=3000;
             }
             else Distance_timer-=diff;
@@ -330,15 +330,14 @@ public:
 
             if(LiquidIce_timer<=diff) // Kazde 3s Liquide ice patch pod seba
             {
-                /*Creature* pLiquidIce=*/me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                achiev_counter++;
-                    /*if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ())) >(Stack_counter+360.0f)/65))
+                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ())) >Stack_counter))
                     {
                         pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        me->MonsterYell("ICE PATCH SPAWNED !!!!", LANG_UNIVERSAL, NULL);
                         achiev_counter++;
                         Distance_timer=2000;
                         Stack_counter=0.0f;
-                    }*/
+                    }
                     LiquidIce_timer=3000;
             }
             else LiquidIce_timer-=diff;
@@ -388,7 +387,7 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
-                            target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,2.0f,2.0f);
+                            target->ToPlayer()->GetMotionMaster()->MoveJump(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()+35,0.002f,0.002f); // na test :D
                             DoCast(target,84948);
                             Gravity_crush_timer=25000;
                         }
@@ -535,7 +534,7 @@ public:
 
         }
 
-            };
+    };
 };
 
 class mob_liquide_ice : public CreatureScript
@@ -556,19 +555,20 @@ public:
         }
 
         InstanceScript* instance;
-        //uint32 Growing_timer;
-        //uint32 Aoe_dmg_timer;
-        //uint32 Stack_counter;
+        uint32 Growing_timer;
+        uint32 Aoe_dmg_timer;
+        float Stack_counter;
+        uint32 Stacks;
 
         void Reset()
         {
-            //Stack_counter=0;
+            Stack_counter=0.0f;
+            Stacks=0;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
-            //Growing_timer= 2000;
-            //Aoe_dmg_timer=1000;
+            Growing_timer= 2000;
+            Aoe_dmg_timer=1000;
             DoCast(me,84914); // visual liquid ice + trigger aoe
-            DoCast(me,84917); // Zvacsenie plosky
-            DoCast(me,84917); // Zvacsenie plosky
+            //DoCast(me,84917); // Zvacsenie plosky
         }
 
         void UpdateAI(const uint32 diff)
@@ -581,12 +581,14 @@ public:
             else me->ForcedDespawn();
 
 
-            /*if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
+            if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
+                Stack_counter=4.0f*(1.0f + 0.4f*Stacks);
+                Stacks++;
+
                 if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
                 {
-
-                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())<= Stack_counter+350)
+                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< Stack_counter)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
                             //Stack_counter=Stack_counter+135.0f;
@@ -603,10 +605,10 @@ public:
                 me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stack_counter * 4000)); // 100% + stacky*40% ?
                 Aoe_dmg_timer=1000;
             }
-            else Aoe_dmg_timer-=diff;*/
+            else Aoe_dmg_timer-=diff;
         }
 
-            };
+    };
 };
 
 /************************* FELUDIUS *******************************/
@@ -917,10 +919,10 @@ public:
         uint32 Static_overload_timer;
         uint32 Gravity_core_timer;
         uint32 Stack,counter;
-        bool aegis_used,ticked,can_spread_fire,can_knock,Hp_dropped,speaked,can_interrupt,debuged,/*can_check*/;
+        bool aegis_used,ticked,can_spread_fire,can_knock,Hp_dropped,speaked,can_interrupt,debuged,can_remove_OL,can_remove_GC;
         Unit* Rush_target;
-        //Unit* Overload_target;
-        //Unit* Gravity_core_target;
+        Unit* pOverload_target;
+        Unit* pGravity_target;
 
         void Reset()
         {
@@ -941,9 +943,9 @@ public:
             Ticking_timer=1000;
             spread_flame_timer=100;
             Stack=counter=0;
-            aegis_used=ticked=can_spread_fire=can_knock=Hp_dropped=speaked=can_interrupt=/*can_check=*/false;
+            aegis_used=ticked=can_spread_fire=can_knock=Hp_dropped=speaked=can_interrupt=can_remove_OL=can_remove_GC=false;
             debuged=true;
-            Rush_target=/*Overload_target=Gravity_core_target=*/NULL;
+            Rush_target=pOverload_target=pGravity_target=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
@@ -1027,110 +1029,54 @@ public:
 
             if(Static_overload_timer<=diff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
-                    //Overload_target=target; // daneho nosica overload debuffu si ulozim
-
-                    if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Bol som lenivy opravit targety a range spellu ta kto robim takto :D
-                                me->AddAura(92068,target);
-                                if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                                    me->AddAura(92466,target);
-                                    if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
-                                        me->AddAura(92467 ,target);
-                                        if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                                            me->AddAura(92468 ,target);
+                    if(!can_remove_OL) // Aplikujem Overload
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                        {
+                            pOverload_target=target;
+                            can_remove_OL=!can_remove_OL;
+                            DoCast(target,92067,true); // Overload debuff
+                        }
+                        Static_overload_timer=10000; // Po 10 sekundach hracom debuff zhodim
+                    }
+                    else  // Odstranujem Overload
+                    {
+                        if(pOverload_target)
+                            if(pGravity_target->HasAura(92067))
+                                pOverload_target->RemoveAurasDueToSpell(92067);
+                        can_remove_OL=!can_remove_OL;
+                        Static_overload_timer=10000;
+                    }
                 }
-                else
-                {
-                    //me->AddAura(92467,me->getVictim()); // ak by bol nazive iba tank tak to zacastm nanho
-                    //Overload_target=me->getVictim();
-                    //DoCast(me->getVictim(),92067,true);
-                    me->AddAura(92467 ,target);
-                }
-
-                Static_overload_timer=20000;
             }
             else Static_overload_timer-=diff;
 
 
             if(Gravity_core_timer<=diff) 
             {
-
-                //for(int i=0;i<=20;i++) // 10 krat skusim ci random target neni nahodou aj ten ktory ma na sebe uz Static overload debuff
-                //{
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Asi bez sance picknu tanka
+                    if(!can_remove_GC) // Aplikujem Gravity core
                     {
-                        /*if(!target->HasAura(92068) && !target->HasAura(92466) && !target->HasAura(92467) && !target->HasAura(92468))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
                         {
-                            Gravity_core_target=target; // Nosica Gravity core debuffu si ulozim
-
-                            if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Bol som lenivy opravit targety a range spellu ta kto robim takto :D
-                                me->AddAura(92076,target);
-                                if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                                    me->AddAura(92537 ,target);
-                                    if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
-                                        me->AddAura(92538,target);
-                                        if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                                            me->AddAura(92539 ,target);*/
+                            pGravity_target=target;
                             DoCast(target,92075,true);
-                         }
-                         else DoCast(me->getVictim(),92075,true);
-                    //}
-                    //if(Gravity_core_target!=NULL) // nasli sme vhodny ciel -> ukoncim cyklus
-                        //break;
-                //}
-                /*if(Gravity_core_target==NULL) // Ani na 20 krat sa nepodarilo najst vhodny target vyberem posledny krat aj keby mal uz Overload auru
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                    {
-                        Gravity_core_target=target;
-                        me->AddAura(92538,target); //kaslem na difficulty, dajme tomu 10H verziu
+                            can_remove_GC=!can_remove_GC;
+                        }
+                        Gravity_core_timer=10000;
                     }
-                    can_check=true; // od teraz mozem sledovat vzdialenost hracov s buffmi od seba
-                    */
-                Gravity_core_timer=20000;
+                    else // Odtsranujem debuff
+                    {
+                        if(pGravity_target)
+                            if(pGravity_target->HasAura(92075))
+                                pGravity_target->RemoveAurasDueToSpell(92075);
+                        can_remove_GC=!can_remove_GC;
+                        Gravity_core_timer=10000;
+                    }
             }
             else Gravity_core_timer-=diff;
 
-
-            /*if(can_check) // Kontrolujem vzdialenost hracov medzi sebou ak budu blizko seba odstranim im aury
-            {
-                if(Gravity_core_target && Overload_target) // Ak existuju taky
-                {
-                     if(Overload_target->isAlive() && Gravity_core_target->isAlive()) // Ak su obaja nazive
-                     {
-                        if(Overload_target->IsWithinMeleeRange(Gravity_core_target) || Overload_target==Gravity_core_target) // ak su blizko seba alebo je to rovnaka osoba ( nepravdepodobne)
-                        {
-                            can_check=false;
-                            // GRAVITY CORE
-                            if(Gravity_core_target->HasAura(92076))
-                            Gravity_core_target->RemoveAurasDueToSpell(92076);
-
-                            else if(Gravity_core_target->HasAura(92537))
-                                    Gravity_core_target->RemoveAurasDueToSpell(92537);
-
-                               else if(Gravity_core_target->HasAura(92538))
-                                        Gravity_core_target->RemoveAurasDueToSpell(92538);
-
-                                   else if(Gravity_core_target->HasAura(92539))
-                                            Gravity_core_target->RemoveAurasDueToSpell(92539);
-
-                            // STATIC OVERLOAD
-                           if(Overload_target->HasAura(92068))
-                            Overload_target->RemoveAurasDueToSpell(92068);
-
-                            else if(Overload_target->HasAura(92466 ))
-                                    Overload_target->RemoveAurasDueToSpell(92466);
-
-                               else if(Overload_target->HasAura(92467))
-                                        Overload_target->RemoveAurasDueToSpell(92467);
-
-                                   else if(Overload_target->HasAura(92468))
-                                            Overload_target->RemoveAurasDueToSpell(92468);
-                        }
-                     }
-                }
-
-            }*/
 
             if(aegis_used && !me->IsNonMeleeSpellCasted(false) && (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514))) //Cast rising flames hned po nahodeni stitu ( AEGIS_OF_FLAME)
             {
@@ -1335,7 +1281,7 @@ public:
                 Bomb_timer= 2200 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
             else Bomb_timer =3000+ urand(500,3000); // keby nahodou
 
-            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_STUNNED);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_STUNNED);
             bombed=false;
         }
 
@@ -1466,6 +1412,26 @@ public:
             me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
+
+                Map* map;
+                map = me->GetMap();
+                Map::PlayerList const& plrList = map->GetPlayers();
+                if (plrList.isEmpty())
+                    return;
+
+                for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr) // Ostranim zbytkove GC a OL aury
+                {
+                    if (Player* pPlayer = itr->getSource())
+                    {
+
+                            if(pPlayer->HasAura(92075))
+                                pPlayer->RemoveAurasDueToSpell(92075);
+
+                            if(pPlayer->HasAura(92067))
+                                pPlayer->RemoveAurasDueToSpell(92067);
+                    }
+
+                }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -1930,8 +1896,17 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    int rand = urand(1,6);
-                    me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    if(urand(0,1)) // 50 % sanca na spawn na pevnu poziciu
+                    {
+                        int rand = urand(1,3);
+                        me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                    else // inak po kruznici random
+                    {
+                        float angle=0.0f;
+                        angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
+                        me->SummonCreature(CREATURE_GRAVITY_WELL,-1009.1f+cos(angle)*20.0f,-582.5f+sin(angle)*20.0f,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
                     Gravity_well_timer=30000;
                 }
             }
@@ -2143,6 +2118,7 @@ public:
             Buff_timer=4000;
             DoCast(me,95760); // visualne zobrazi kde sa spawne well
             buffed=false;
+            me->SetFlying(true);
             me->SetInCombatWithZone();
         }
 
@@ -2170,6 +2146,8 @@ public:
 
             if(Buff_timer<=diff && !buffed)
             {
+                if(me->HasAura(95760)) // Zhodim forecast auru
+                    me->RemoveAurasDueToSpell(95760);
                 DoCast(me,83579); //effekt Gravity wellu + aoe dmg
                 DoCast(me,83587); // magnetic pull - 50 % movement speed v okoli wellu
                 buffed=true;
@@ -2254,48 +2232,71 @@ public:
         uint32 checking_timer;
         uint32 Chasing_timer;
         uint32 Glaciate_timer;
+        uint32 Flamestrike_timer;
         uint32 Addspeed_timer;
         bool buffed;
         float speed;
         Unit* target;
+
 
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
             me->ForcedDespawn(61000);
-            speed=0.5f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
+            Flamestrike_timer=5000; // Spawn Flamestriku hned po zacati nahanani 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
-            Addspeed_timer=5000;
             buffed=false;
+            speed=0.5f;
+            Addspeed_timer=5000;
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
 
         void UpdateAI(const uint32 diff)
         {
-
             if(Addspeed_timer<=diff)
             {
                 speed=speed+0.05;
                 Addspeed_timer=500; // Kazdych 500 ms pridam rychlost orbu o 5 %  spell effect kto ho pridava sa bije s nastvenim speedu cez AI na zaciatku na polovicu
+                me->SetSpeed(MOVE_RUN,speed);
             }
             else Addspeed_timer-=diff;
 
             if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
             {
                 if(player->HasAura(82285)) // Ak ma na sebe hrac debuff Elemental Stasis -> nastala faza 3 cize despawnem sa
+                {
+                    if(target)
+                        if(target->HasAura(92307))
+                            target->RemoveAurasDueToSpell(92307);
                     me->ForcedDespawn();
+                }
             }
 
             if(Glaciate_timer<=diff)
             {
-                DoCast(92548 );
+                DoCast(92548);
                 Glaciate_timer=2000;
             }
             else Glaciate_timer-=diff;
+
+            if(Flamestrike_timer<=diff) // Spawn Flamestriku pod random hraca
+            {
+                if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                        me->SummonCreature(50297,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+
+                    if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true))
+                        pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
+
+                }
+                Flamestrike_timer=25000;
+            }
+            else Flamestrike_timer-=diff;
 
 
             if(Chasing_timer<=diff && !buffed)
@@ -2310,7 +2311,7 @@ public:
                     me->GetMotionMaster()->MoveChase(target); // Orb sa rozbehne za hracom s beacon debuffom
                 }
 
-                me->SetSpeed(MOVE_RUN,speed);
+                //me->AddAura(3514,me);// - 50 % movement speed
                 DoCast(me,92302 ); // Spell nahdodi "model" orbu + priebezne zvysuje speed
 
                 buffed=true;
@@ -2320,7 +2321,8 @@ public:
 
             if(checking_timer<=diff)
             {
-                me->SetSpeed(MOVE_RUN,speed);
+                //me->AddAura(3514,me);// - 50 % movement speed ( ma iba par sekund duration treba obnovovat )
+                me->SetSpeed(MOVE_RUN,0.5f,true);
 
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 500, true))
                 {
@@ -2350,7 +2352,7 @@ public:
             }
             else checking_timer-=diff;
         }
-            };
+    };
 };
 
 /****************************** FLAMESTRIKE *****************************************/
