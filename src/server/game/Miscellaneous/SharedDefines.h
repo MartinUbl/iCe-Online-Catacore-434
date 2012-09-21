@@ -416,7 +416,7 @@ enum SpellAttr3
 
 enum SpellAttr4
 {
-    SPELL_ATTR4_UNK0                             = 0x00000001, //  0
+    SPELL_ATTR4_IGNORE_RESISTANCES               = 0x00000001, //  0 spells with this attribute will completely ignore the target's resistance (these spells can't be resisted)
     SPELL_ATTR4_UNK1                             = 0x00000002, //  1 proc on finishing move?
     SPELL_ATTR4_UNK2                             = 0x00000004, //  2
     SPELL_ATTR4_CANT_PROC_FROM_SELFCAST          = 0x00000008, //  3
