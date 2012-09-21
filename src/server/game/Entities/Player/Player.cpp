@@ -23509,14 +23509,6 @@ Battleground* Player::GetBattleground() const
     return sBattlegroundMgr->GetBattleground(GetBattlegroundId(), m_bgData.bgTypeID);
 }
 
-uint8 Player::GetTwinkType() const
-{
-    if(getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        return BATTLEGROUND_NOTWINK;  // at max. level there is no difference whether the player has his XP stopped by NPC or not
-
-    return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN) ? BATTLEGROUND_TWINK : BATTLEGROUND_NOTWINK;
-}
-
 bool Player::InArena() const
 {
     Battleground *bg = GetBattleground();

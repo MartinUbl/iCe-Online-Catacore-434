@@ -442,7 +442,7 @@ class Battleground
         void AddPlayerToResurrectQueue(const uint64& npc_guid, const uint64& player_guid);
         void RemovePlayerFromResurrectQueue(const uint64& player_guid);
 
-        void StartBattleground(uint8 twink);
+        void StartBattleground();
 
         GameObject* GetBGObject(uint32 type);
         Creature* GetBGCreature(uint32 type);
@@ -652,8 +652,6 @@ class Battleground
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
         char const *m_Name;
-
-        uint8 m_twink;
 
         // Player lists
         std::vector<uint64> m_ResurrectQueue;               // Player GUID

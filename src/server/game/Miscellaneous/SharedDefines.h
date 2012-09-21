@@ -2971,14 +2971,6 @@ enum BattlegroundTypeId
 
 #define MAX_BATTLEGROUND_TYPE_ID 543
 
-enum BattlegroundTwinkType
-{
-    BATTLEGROUND_NOTWINK       = 0,
-    BATTLEGROUND_TWINK         = 1,
-
-    BATTLEGROUND_TWINK_TYPES   = 2
-};
-
 enum MailResponseType
 {
     MAIL_SEND               = 0,
