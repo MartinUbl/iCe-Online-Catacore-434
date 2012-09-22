@@ -2978,6 +2978,106 @@ public:
     }
 };
 
+// npc_title_restorer
+struct RestoreTitles
+{
+    uint32 title;
+    uint32 achv_a;
+    uint32 achv_b;
+    uint32 quest;
+};
+const RestoreTitles restore_titles[]=
+{
+    {122,1402,0,0},     // Conqueror of Naxxramas
+    {143,2188,0,0},     // Jenkins
+    {84,1563,0,0},      // Chef
+    {125,7520,0,0},     // Loremaster
+    {172,4477,0,0},     // the Patient
+
+    {83,1516,0,0},      // Salty
+    {78,46,0,0},        // the Explorer
+    {81,978,0,0},       // the Seeker
+    {144,871,0,0},      // Bloodsail Admiral
+    {77,5374,0,0},      // the Exalted
+
+    {132,953,0,0},      // Guardian of Cenarius
+    {176,4598,0,0},     // of the Ashen Verdict
+    {131,945,0,0},      // The Argent Champion
+    {64,431,0,0},       // Hand of A'dal
+    {145,2336,0,0},     // The Insane
+
+    {130,948,762,0},    // Ambassador
+    {79,942,943,0},     // the Diplomat
+    {53,0,0,10888},     // Champion of the Naaru
+    {46,0,0,8743},      // Scarab Lord
+    {63,0,0,11549}      // of the Shattered Sun
+};
+class npc_title_restorer : public CreatureScript
+{
+public:
+    npc_title_restorer() : CreatureScript("npc_title_restorer") { }
+
+    bool OnGossipHello(Player* plr, Creature* c)
+    {
+        plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to restore my lost titles", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        plr->SEND_GOSSIP_MENU(1,c->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* plr, Creature* c, uint32 sender, uint32 action)
+    {
+        if (!plr)
+            return false;
+
+        uint32 count = 0;
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                if (DoRestoreTitle(plr, restore_titles[i]))
+                    count++;
+            }
+        }
+        plr->CLOSE_GOSSIP_MENU();
+
+        char output[128];
+        sprintf(output, "total of %d lost titles have been restored", count);
+        if (c)
+            c->MonsterSay(output, LANG_UNIVERSAL, plr->GetGUID());
+
+        return true;
+    }
+
+    bool DoRestoreTitle(Player* plr, RestoreTitles restore)
+    {
+        const CharTitlesEntry *titleInfo = sCharTitlesStore.LookupEntry(restore.title);
+        if (!titleInfo || plr->HasTitle(titleInfo))
+            return false;
+
+        const AchievementEntry* achiev = NULL;
+        if (restore.achv_a)
+            if (achiev = sAchievementStore.LookupEntry(restore.achv_a))
+                if (plr->GetAchievementMgr().HasAchieved(achiev))
+                {
+                    plr->SetTitle(titleInfo);
+                    return true;
+                }
+        if (restore.achv_b)
+            if (achiev = sAchievementStore.LookupEntry(restore.achv_b))
+                if (plr->GetAchievementMgr().HasAchieved(achiev))
+                {
+                    plr->SetTitle(titleInfo);
+                    return true;
+                }
+        if (restore.quest && plr->GetQuestStatus(restore.quest) == QUEST_STATUS_COMPLETE)
+        {
+            plr->SetTitle(titleInfo);
+            return true;
+        }
+        return false;
+    }
+};
+
 class npc_tail_receipe_giver : public CreatureScript
 {
 public:
@@ -3966,6 +4066,7 @@ void AddSC_npcs_special()
     new guardian_of_ancient_kings_holy;
     new guardian_of_ancient_kings_prot;
     new guardian_of_ancient_kings_ret;
+    new npc_title_restorer;
     new npc_tail_receipe_giver;
     new npc_thrall_maelstrom;
     new quest_trigger;
