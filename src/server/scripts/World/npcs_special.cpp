@@ -3056,20 +3056,20 @@ public:
 
         const AchievementEntry* achiev = NULL;
         if (restore.achv_a)
-            if (achiev = sAchievementStore.LookupEntry(restore.achv_a))
+            if ((achiev = sAchievementStore.LookupEntry(restore.achv_a)))
                 if (plr->GetAchievementMgr().HasAchieved(achiev))
                 {
                     plr->SetTitle(titleInfo);
                     return true;
                 }
         if (restore.achv_b)
-            if (achiev = sAchievementStore.LookupEntry(restore.achv_b))
+            if ((achiev = sAchievementStore.LookupEntry(restore.achv_b)))
                 if (plr->GetAchievementMgr().HasAchieved(achiev))
                 {
                     plr->SetTitle(titleInfo);
                     return true;
                 }
-        if (restore.quest && plr->GetQuestStatus(restore.quest) == QUEST_STATUS_COMPLETE)
+        if (restore.quest && (plr->GetQuestStatus(restore.quest) == QUEST_STATUS_COMPLETE))
         {
             plr->SetTitle(titleInfo);
             return true;
