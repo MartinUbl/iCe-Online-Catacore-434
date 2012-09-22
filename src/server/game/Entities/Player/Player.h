@@ -104,6 +104,13 @@ enum PlayerSpellState
     PLAYERSPELL_TEMPORARY = 4
 };
 
+enum RatedBGStats
+{
+    RATED_BG_STAT_MATCHES_WON    = 0,
+    RATED_BG_STAT_MATCHES_LOST   = 1,
+    RATED_BG_STATS_MAX           = 2
+};
+
 struct PlayerSpell
 {
     PlayerSpellState state : 8;
@@ -1440,6 +1447,9 @@ class Player : public Unit, public GridObject<Player>
         void ResetDailyQuestStatus();
         void ResetWeeklyQuestStatus();
 
+        //uint16 GetConquestPointsWeekCap(ConquestPointsSources source) const { return _conquestPointsWeekCap[source]; }
+        uint16 GetConquestPointsThisWeek();
+
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
         uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
@@ -1526,6 +1536,8 @@ class Player : public Unit, public GridObject<Player>
         static uint32 GetLevelFromDB(uint64 guid);
         static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
 
+        void _LoadRatedBGData();
+
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
         /*********************************************************/
@@ -1534,6 +1546,8 @@ class Player : public Unit, public GridObject<Player>
         bool CreateInDB();
         void SaveInventoryAndGoldToDB(SQLTransaction& trans);                    // fast save function for item/money cheating preventing
         void SaveGoldToDB(SQLTransaction& trans);
+
+        void _SaveRatedBGData();
 
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
@@ -2277,6 +2291,12 @@ class Player : public Unit, public GridObject<Player>
         bool GetRandomWinner() { return m_IsBGRandomWinner; }
         void SetRandomWinner(bool isWinner);
 
+        uint32 GetRatedBattlegroundStat(uint8 index) const { return m_ratedBgStats[index]; }
+        uint32 GetRatedBattlegroundRating() const { return GetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING); }
+
+        void AddRatedBattlegroundStat(uint8 index) { m_ratedBgStats[index]++; }
+        void SetRatedBattlegroundRating(uint32 value) { SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, value); }
+
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
         /*********************************************************/
@@ -2629,6 +2649,8 @@ class Player : public Unit, public GridObject<Player>
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];
+
+        uint32 m_ratedBgStats[RATED_BG_STATS_MAX]; // for won and lost games, rating is stored in PlayerFields
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

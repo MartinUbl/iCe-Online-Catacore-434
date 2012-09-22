@@ -587,12 +587,11 @@ enum Opcodes
     CMSG_BATTLEFIELD_LIST                            = 0x00508, // 4.0.6a 13623
     SMSG_BATTLEFIELD_LIST                            = 0x0490C, // 4.0.6a 13623
     CMSG_BATTLEFIELD_JOIN                            = 0x00C91, // 4.0.6a 13623
-    CMSG_JOIN_RATED_BATTLEFIELD                      = 0x00591, // 4.0.6a 13623
+    CMSG_BATTLEMASTER_JOIN_RATED                     = 0x00591, // 4.0.6a 13623
     SMSG_PVP_RATED_STATS_UPDATE                      = 0x0015E, // 4.0.6a 13623
     SMSG_JOINED_BATTLEGROUND_QUEUE                   = 0x0090E, // 4.0.6a 13623
-    CMSG_REQUEST_RATED_BG_INFO                       = 0x08501, // 4.0.6a 13623
+    CMSG_REQUEST_RATED_BG_INFO                       = 0x00508, // 4.0.6a 13623
     CMSG_REQUEST_PVP_OPTIONS_ENABLED                 = 0x00188, // 4.0.6a 13623
-    CMSG_BATTLEMASTER_JOIN_RATED                     = 0x10104, //
     CMSG_TAXICLEARNODE                               = 0x100AD, //
     CMSG_TAXIENABLENODE                              = 0x100AE, //
     CMSG_ITEM_TEXT_QUERY                             = 0x0F280, // 4.0.6a 13623 
@@ -1316,6 +1315,8 @@ enum Opcodes
     CMSG_REFORGE                                     = 0x00313, // 4.0.6a 13623
     SMSG_REFORGING_RESULT                            = 0x0451C, // 4.0.6a 13623
     SMSG_ENTERED_INSTANCE_IN_PROGRESS                = 0x07488, // 4.0.6a 13623
+    SMSG_BATTLEFIELD_RATED_INFO                      = 0x0410E, // 4.0.6a 13623
+    CMSG_REQUEST_RATED_BG_STATS                      = 0x08501, // 4.0.6a 13623
     NUM_MSG_TYPES                                    = 0x20000  // last unknown opcode + 1.
 };
 

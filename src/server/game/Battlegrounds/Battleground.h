@@ -186,6 +186,8 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_2v2      = 10,
     BATTLEGROUND_QUEUE_3v3      = 11,
     BATTLEGROUND_QUEUE_5v5      = 12,
+    BATTLEGROUND_QUEUE_RA_BG_10 = 13,
+    BATTLEGROUND_QUEUE_RA_BG_15 = 14,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -215,6 +217,8 @@ enum ScoreType
     //SOTA
     SCORE_DESTROYED_DEMOLISHER  = 18,
     SCORE_DESTROYED_WALL        = 19,
+    // Rated BG
+    SCORE_BATTLEGROUND_RATING   = 20,
 };
 
 enum ArenaType
@@ -273,13 +277,13 @@ enum BG_OBJECT_DMG_HIT_TYPE
 
 enum GroupJoinBattlegroundResult
 {
-    ERR_GROUP_JOIN_BATTLEGROUND_FAIL        = 0,            // Your group has joined a battleground queue, but you are not eligible (showed for non existing BattlemasterList.dbc indexes)
+    ERR_GROUP_JOIN_BATTLEGROUND_FAIL        = 0,           // Your group has joined a battleground queue, but you are not eligible (showed for non existing BattlemasterList.dbc indexes)
     ERR_BATTLEGROUND_NONE                   = 1,           // not show anything
     ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS   = 2,           // You cannot join the battleground yet because you or one of your party members is flagged as a Deserter.
     ERR_ARENA_TEAM_PARTY_SIZE               = 3,           // Incorrect party size for this arena.
     ERR_BATTLEGROUND_TOO_MANY_QUEUES        = 4,           // You can only be queued for 2 battles at once
     ERR_BATTLEGROUND_CANNOT_QUEUE_FOR_RATED = 5,           // You cannot queue for a rated match while queued for other battles
-    ERR_BATTLEDGROUND_QUEUED_FOR_RATED      = 6,           // You cannot queue for another battle while queued for a rated arena match
+    ERR_BATTLEGROUND_QUEUED_FOR_RATED       = 6,           // You cannot queue for another battle while queued for a rated arena match
     ERR_BATTLEGROUND_TEAM_LEFT_QUEUE        = 7,           // Your team has left the arena queue
     ERR_BATTLEGROUND_NOT_IN_BATTLEGROUND    = 8,           // You can't do that in a battleground.
     ERR_BATTLEGROUND_JOIN_XP_GAIN           = 9,           // wtf, doesn't exist in client...
@@ -301,7 +305,7 @@ class BattlegroundScore
 {
     public:
         BattlegroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
-            BonusHonor(0), DamageDone(0), HealingDone(0)
+            BonusHonor(0), DamageDone(0), HealingDone(0), BattlegroundRating(0)
         {}
         virtual ~BattlegroundScore() {}                     //virtual destructor is used when deleting score from scores map
 
@@ -311,6 +315,7 @@ class BattlegroundScore
         uint32 BonusHonor;
         uint32 DamageDone;
         uint32 HealingDone;
+        uint32 BattlegroundRating;
 };
 
 enum BGHonorMode
@@ -592,6 +597,14 @@ class Battleground
         void RewardXPAtKill(Player* killer, Player* victim);
         bool CanAwardArenaPoints() const { return m_LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
 
+        typedef std::map<uint64, int32> BattlegroundRatingChangeMap;
+        int32 GetBattlegroundRatingChangeForPlayer(uint64 guid) { return m_bgRatingChange[guid]; }
+        void SetBattlegroundRatingChangeForPlayer(uint64 guid, int32 change) { m_bgRatingChange[guid] = change; }
+
+        void RatedBattlegroundWon(Player *player);
+        void RatedBattlegroundLost(Player *player);
+        void RatedBattlegroundLostOffline(uint64 guid);
+
     protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends Battleground
         void EndNow();
@@ -691,6 +704,9 @@ class Battleground
         float m_TeamStartLocZ[BG_TEAMS_COUNT];
         float m_TeamStartLocO[BG_TEAMS_COUNT];
         uint32 ScriptId;
+
+        // Rated Battlegroud
+        BattlegroundRatingChangeMap m_bgRatingChange;
 };
 #endif
 

@@ -1795,6 +1795,26 @@ AutoBroadcast.Timer = 60000
 #        Reset random battlegrounds at specified hour of the day (0-23)
 #        Default: 6
 #
+#    Battleground.Rated.Enabled
+#        Description: Enables/disables Rated Battlegrounds.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    Battleground.Rated.WeeksInRotation
+#        Description: Bitmask that specifies which rated battleground weeks are put into rotation.
+#        Default:     3 - (All)
+#                     1 - (10v10)
+#                     2 - (15v15)
+#
+#    Battleground.Rated.MaxRatingDifference
+#        Description: Max. average Battleground rating difference between 2 teams.
+#        Default:     300
+#
+#    Battleground.Rated.RatingDiscardTimer
+#        Description: Time in milliseconds in which are rating differences ignored while setting up matches.
+#        Default:     300000 - (5 minutes)
+#                     0 - (Disabled)
+#
 ###############################################################################
 
 Battleground.CastDeserter = 1
@@ -1805,6 +1825,10 @@ BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
 Battleground.GiveXPForKills = 0
 Battleground.Random.ResetHour = 6
+Battleground.Rated.Enabled = 1
+Battleground.Rated.WeeksInRotation = 3
+Battleground.Rated.MaxRatingDifference = 300
+Battleground.Rated.RatingDiscardTimer = 300000 
 
 ###############################################################################
 # ARENA CONFIG

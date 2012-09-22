@@ -1869,6 +1869,8 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
     uint32 team = reference->GetTeam();
 
     BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattlegroundQueueTypeId bgQueueTypeIdRated_10 = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RA_BG_10, 10);
+    BattlegroundQueueTypeId bgQueueTypeIdRated_15 = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RA_BG_15, 15);
 
     // check every member of the group to be able to join
     memberscount = 0;
@@ -1886,8 +1888,14 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         if (memberBracketEntry != bracketEntry)
             return ERR_BATTLEGROUND_JOIN_RANGE_INDEX;
         // don't let join rated matches if the arena team id doesn't match
-        if (isRated && member->GetArenaTeamId(arenaSlot) != arenaTeamId)
+        if (isRated && bgOrTemplate->isArena() && member->GetArenaTeamId(arenaSlot) != arenaTeamId)
             return ERR_BATTLEGROUND_JOIN_FAILED;
+        // cannot queue for rated battleground while in other queue
+        if (isRated && bgOrTemplate->isBattleground() && member->InBattlegroundQueue())
+            return ERR_BATTLEGROUND_CANNOT_QUEUE_FOR_RATED;
+        // cannot queue for battleground while in rated battleground queue
+        if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRated_10) || member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRated_15))
+            return ERR_BATTLEGROUND_QUEUED_FOR_RATED;
         // don't let join if someone from the group is already in that bg queue
         if (member->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
             return ERR_BATTLEGROUND_JOIN_FAILED;            // not blizz-like
@@ -1966,6 +1974,22 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         player->SetRaidDifficulty(difficulty);
         player->SendRaidDifficulty(true);
     }
+}
+
+uint32 Group::GetAverageBattlegroundRating()
+{
+    uint32 sum = 0;
+
+    for (GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* member = itr->getSource();
+        if (!member)
+            continue;
+
+        sum += member->GetRatedBattlegroundRating();
+    }
+
+    return uint32(sum / GetMembersCount());
 }
 
 bool Group::InCombatToInstance(uint32 instanceId)

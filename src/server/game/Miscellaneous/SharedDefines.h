@@ -2954,9 +2954,9 @@ enum BattlegroundTypeId
     BATTLEGROUND_RV            = 11,
     BATTLEGROUND_IC            = 30,
     BATTLEGROUND_RB            = 32,                        // Random Battleground
-    BATTLEGROUND_RA_BG         = 100,                       // Rated Battleground
-    BATTLEGROUND_RA_BG1        = 101,                       // Rated Battleground
-    BATTLEGROUND_RA_BG2        = 102,                       // Rated Battleground
+    BATTLEGROUND_RA_BG_10      = 100,                       // Rated Battleground (10v10)
+    BATTLEGROUND_RA_BG_15      = 101,                       // Rated Battleground (15v15)
+    BATTLEGROUND_RA_BG_25      = 102,                       // Rated Battleground (25v25) - NOT USED
     BATTLEGROUND_TP            = 108,                       // Twin Peaks
     BATTLEGROUND_BG            = 120,                       // The Battle for Gilneas
     BATTLEGROUND_ICD           = 441,                       // Icecrown Citadel
@@ -3080,6 +3080,17 @@ enum XPColorChar
     XP_YELLOW,
     XP_GREEN,
     XP_GRAY
+};
+
+// Rated Battlegrounds
+
+#define RATED_BATTLEGROUND_WEEK_WORLDSTATE     5508
+
+enum RatedBattlegroundWeek
+{
+    RATED_BATTLEGROUND_WEEK_NONE               = 0,
+    RATED_BATTLEGROUND_WEEK_10v10              = 1,
+    RATED_BATTLEGROUND_WEEK_15v15              = 2
 };
 
 #endif

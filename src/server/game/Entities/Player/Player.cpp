@@ -9787,6 +9787,8 @@ void Player::SendBGWeekendWorldStates()
                 SendUpdateWorldState(bl->HolidayWorldStateId, 0);
         }
     }
+
+    SendUpdateWorldState(RATED_BATTLEGROUND_WEEK_WORLDSTATE, sBattlegroundMgr->GetRatedBattlegroundWeek());
 }
 
 uint32 Player::GetXPRestBonus(uint32 xp)
@@ -17292,6 +17294,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
+    _LoadRatedBGData();
 
     // Load conquest point cap.. little hack
     QueryResult pCapQuery = CharacterDatabase.PQuery("SELECT MAX(conquest_point_cap) FROM character_arena_stats WHERE guid=%lu", GetGUID());
@@ -19167,6 +19170,25 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
     return true;
 }
 
+void Player::_LoadRatedBGData()
+{
+    QueryResult result = CharacterDatabase.PQuery("SELECT rating, matches_won, matches_lost FROM character_rated_bg_stats WHERE guid = %u", GetGUIDLow());
+    
+    if (!result)
+    {
+        SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, 0);
+        m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
+        m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
+        return;
+    }
+
+    Field *fields = result->Fetch();
+
+    SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, fields[0].GetUInt32());
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = fields[1].GetUInt32();
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = fields[2].GetUInt32();
+}
+
 /*********************************************************/
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
@@ -19329,6 +19351,7 @@ bool Player::CreateInDB()
         _SaveMail(trans);
 
     _SaveBGData(trans);
+    _SaveRatedBGData();
     _SaveInventory(trans);
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
@@ -20026,6 +20049,12 @@ void Player::_SaveStats(SQLTransaction& trans)
        << GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1+CR_RESILIENCE_PLAYER_DAMAGE_TAKEN) << ", "
        << GetAchievementMgr().GetAchievementPoints() << ")";
     trans->Append(ss.str().c_str());
+}
+
+void Player::_SaveRatedBGData()
+{
+    CharacterDatabase.PExecute("REPLACE INTO character_rated_bg_stats (guid, rating, matches_won, matches_lost) VALUES (%u, %u, %u, %u)", GetGUIDLow(), GetRatedBattlegroundRating(),
+        GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON), GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST));
 }
 
 void Player::outDebugValues() const
@@ -22243,10 +22272,14 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (Battleground *bg = GetBattleground())
     {
+        // leaving rated bg -> count it as a loose to prevent exploit
+        if (bg->isBattleground() && bg->isRated() && bg->GetStatus() < STATUS_WAIT_LEAVE)
+            bg->RatedBattlegroundLost(this);
+
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
-        if (bg->isBattleground() && !isGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
+        if (bg->isBattleground() && !bg->isRated() && !isGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
         {
             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
             {
@@ -26836,4 +26869,15 @@ void Player::BroadcastMessage(const char* Format, ...)
 	WorldPacket data;
     ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, Message, NULL);
 	GetSession()->SendPacket(&data);
+}
+
+uint16 Player::GetConquestPointsThisWeek()
+{
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    {
+        if (itr->first == CURRENCY_TYPE_CONQUEST_POINTS)
+            return (uint16)itr->second.weekCount / PLAYER_CURRENCY_PRECISION;
+    }
+
+    return 0;
 }

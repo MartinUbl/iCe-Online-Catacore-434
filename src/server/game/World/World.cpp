@@ -1069,6 +1069,17 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = sConfig->GetBoolDefault("Arena.ArenaSeason.InProgress", true);
     m_bool_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = sConfig->GetBoolDefault("ArenaLog.ExtendedInfo", false);
 
+    m_bool_configs[CONFIG_RATED_BATTLEGROUND_ENABLED]                = sConfig->GetBoolDefault("Battleground.Rated.Enabled", true);
+    m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION]       = sConfig->GetIntDefault("Battleground.Rated.WeeksInRotation", 3);
+    m_int_configs[CONFIG_RATED_BATTLEGROUND_MAX_RATING_DIFFERENCE]   = sConfig->GetIntDefault("Battleground.Rated.MaxRatingDifference", 300);
+    m_int_configs[CONFIG_RATED_BATTLEGROUND_RATING_DISCARD_TIMER]    = sConfig->GetIntDefault("Battleground.Rated.RatingDiscardTimer", 300000);
+
+    if (!m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION] || m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION] > 3)
+    {
+        sLog->outError("Battleground.Rated.WeeksInRotation (%i) can't be load. Set to 3.", m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION]);
+        m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION] = 3;
+    }
+
     m_bool_configs[CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN]            = sConfig->GetBoolDefault("OffhandCheckAtSpellUnlearn", true);
 
     if (int32 clientCacheId = sConfig->GetIntDefault("ClientCacheVersion", 0))
@@ -1769,6 +1780,7 @@ void World::SetInitialWorldSettings()
     sLog->outString("Starting Battleground System");
     sBattlegroundMgr->CreateInitialBattlegrounds();
     sBattlegroundMgr->InitAutomaticArenaPointDistribution();
+    sBattlegroundMgr->InitRatedBattlegrounds();
 
     ///- Initialize outdoor pvp
     sLog->outString("Starting Outdoor PvP System");
