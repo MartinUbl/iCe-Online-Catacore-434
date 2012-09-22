@@ -18702,22 +18702,35 @@ void Unit::OutDebugInfo() const
 uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIndex) const
 {
     int32 amount = 0;
+    int32 old_amount = 1;
 
     AuraEffectList const& DoTAuras = GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-    AuraEffectList const l_DoTAuras = DoTAuras; // local copy
-    for (AuraEffectList::const_iterator i = l_DoTAuras.begin(); i != l_DoTAuras.end(); ++i)
-    {
-        if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
-            continue;
-        amount += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
-        break;
-    }
 
-    // Check value
-    if (amount < 0)
+    // measure against IKs due to possible memory leaks (OJaaaa)
+    // any output amount < 500000 is OK
+    // only loap-verified output amount >= 500000 is OK (in case the amount is REALLY over 500000)
+    while (amount != old_amount)
+    {
+        old_amount = amount;
         amount = 0;
 
-    return uint32(amount); // Type conversion
+        AuraEffectList const l_DoTAuras = DoTAuras; // local copy
+        for (AuraEffectList::const_iterator i = l_DoTAuras.begin(); i != l_DoTAuras.end(); ++i)
+        {
+            if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
+                continue;
+            amount = ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
+            break;
+        }
+
+        if (amount < 500000)
+            break;
+    }
+
+    if (amount < 0) // check value
+        amount = 0;
+
+    return uint32(amount); // type conversion
 }
 
 bool Unit::IsVisionObscured(Unit* pVictim)
