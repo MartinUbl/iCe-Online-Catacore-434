@@ -652,6 +652,8 @@ class World
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
+        uint32 GetShutdownTimer() { return m_ShutdownTimer; }
+        uint8 GetShutdownMask() { return m_ShutdownMask; }
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
