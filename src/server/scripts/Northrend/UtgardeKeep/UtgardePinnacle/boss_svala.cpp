@@ -154,7 +154,7 @@ public:
 			me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_LEVITATING);
 
 			//me->SendMonsterMoveWithSpeed(fX, fY, fZ + 5.0f, 6000);
-			me->SendMonsterMove(fX,fY,fZ+5.0f,MOVEMENTFLAG_FLYING | MOVEMENTFLAG_LEVITATING,6000,1.0f);
+			me->MonsterMoveWithSpeed(fX,fY,fZ+5.0f,1.0f);
 		    me->GetMap()->CreatureRelocation(me, fX, fY, fZ + 5.0f, me->GetOrientation());
 	    }
 

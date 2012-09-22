@@ -243,7 +243,7 @@ public:
             {
                 if (m_uiPause_Timer <= uiDiff)
                 {
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
                         if (me->getVictim())
                             me->GetMotionMaster()->MoveChase(me->getVictim());
 
@@ -363,11 +363,11 @@ public:
 
             pCaster->AttackStop();
 
-            if (pCaster->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+            if (pCaster->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 pCaster->GetMotionMaster()->MovementExpired();
 
             cre->GetMap()->CreatureRelocation(cre, fX, fY, fZ, pCreatureTarget->GetOrientation());
-            cre->SendMonsterMove(fX, fY, fZ, 0, cre->GetUnitMovementFlags(), 1);
+            cre->MonsterMoveWithSpeed(fX, fY, fZ, 0);
         }
     };
 
@@ -431,7 +431,7 @@ public:
                 // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); //Set in DB
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
                 m_bIsFrozen = true;
             }

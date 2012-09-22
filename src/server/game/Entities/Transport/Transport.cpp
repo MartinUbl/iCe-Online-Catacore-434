@@ -41,19 +41,13 @@ void MapManager::LoadTransports()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u transports", count);
         return;
     }
 
-    
-
     do
     {
-        
 
         Field *fields = result->Fetch();
         uint32 lowguid = fields[0].GetUInt32();
@@ -739,4 +733,14 @@ void Transport::UpdateNPCPositions()
         npc->SetHomePosition(x, y, z, o);
         GetMap()->CreatureRelocation(npc, x, y, z, o, false);
     }
+}
+void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+{
+    o -= GetOrientation();
+    z -= GetPositionZ();
+    y -= GetPositionY();    // y = searchedY * cos(o) + searchedX * sin(o)
+    x -= GetPositionX();    // x = searchedX * cos(o) + searchedY * sin(o + pi)
+    float inx = x, iny = y;
+    y = (iny - inx * tan(GetOrientation())) / (cos(GetOrientation()) - sin(GetOrientation() + M_PI) * tan(GetOrientation()));
+    x = (inx - iny * sin(GetOrientation() + M_PI) / cos(GetOrientation())) / (cos(GetOrientation()) - tan(GetOrientation()) * sin(GetOrientation() + M_PI));
 }

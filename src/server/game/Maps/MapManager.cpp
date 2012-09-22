@@ -30,7 +30,6 @@
 #include "GridDefines.h"
 #include "MapInstanced.h"
 #include "InstanceScript.h"
-#include "DestinationHolderImp.h"
 #include "Config.h"
 #include "World.h"
 #include "CellImpl.h"
@@ -133,6 +132,14 @@ Map* MapManager::_createBaseMap(uint32 id)
 
     ASSERT(m != NULL);
     return m;
+}
+
+Map* MapManager::FindBaseNonInstanceMap(uint32 mapId) const
+{
+    Map* map = _findMap(mapId);
+    if (map && map->Instanceable())
+        return NULL;
+    return map;
 }
 
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj, uint32 /*instanceId*/)

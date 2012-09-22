@@ -1288,7 +1288,7 @@ public:
                     me->RemoveAllAuras();
                     SetCombatMovement(false);
 
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                        me->GetMotionMaster()->MovementExpired();
 
                     DespawnCreatures(NPC_STATIC_FIELD, 120.0f);
@@ -1450,7 +1450,7 @@ public:
                 me->AttackStop();
                 SetCombatMovement(false);
 
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
 
                 uiDamage = 0;

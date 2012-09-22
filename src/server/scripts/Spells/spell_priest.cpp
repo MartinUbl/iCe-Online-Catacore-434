@@ -334,7 +334,7 @@ class mob_shadowy_apparition: public CreatureScript
                     return;
                 }
                 // If we are not moving towards our target, do it
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
                     me->GetMotionMaster()->MoveChase(me->getVictim());
 
                 if (me->isAttackReady())

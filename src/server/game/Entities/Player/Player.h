@@ -1767,6 +1767,8 @@ class Player : public Unit, public GridObject<Player>
         bool isRessurectRequested() const { return m_resurrectGUID != 0; }
         void ResurectUsingRequestData();
 
+        bool FallGround(uint8 FallMode);
+
         uint8 getCinematic()
         {
             return m_cinematic;
@@ -1988,7 +1990,6 @@ class Player : public Unit, public GridObject<Player>
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
-        bool FallGround(uint8 FallMode = 0);
         void KillPlayer();
         uint32 GetResurrectionSpellId();
         void ResurrectPlayer(float restore_percent, bool applySickness = false);

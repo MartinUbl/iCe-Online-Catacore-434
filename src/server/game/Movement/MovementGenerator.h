@@ -47,8 +47,6 @@ class MovementGenerator
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
 
         virtual void unitSpeedChanged() { }
-
-        virtual bool GetDestination(float& /*x*/, float& /*y*/, float& /*z*/) const { return false; }
 };
 
 template<class T, class D>

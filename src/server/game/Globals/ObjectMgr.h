@@ -169,7 +169,7 @@ struct ScriptInfo
         struct                      // SCRIPT_COMMAND_MOVE_TO (3)
         {
             uint32 Unused1;         // datalong
-            uint32 TravelTime;      // datalong2
+            uint32 Speed;      // datalong2
             int32  Unused2;         // dataint
 
             float DestX;

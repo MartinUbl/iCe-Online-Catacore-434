@@ -1981,6 +1981,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     SetUnitMovementFlags(0);
+    DisableSpline();
 
     if (m_transport)
     {
@@ -5041,7 +5042,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 bool Player::FallGround(uint8 FallMode)
 {
     // Let's abort after we called this function one time
-    if (getDeathState() == DEAD_FALLING && FallMode == 0)
+    if (getDeathState() == JUST_DIED && FallMode == 0)
         return false;
 
     float x, y, z;
@@ -5051,7 +5052,7 @@ bool Player::FallGround(uint8 FallMode)
     if ((z_diff = fabs(ground_Z - z)) < 0.1f)
         return false;
 
-    GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
+    GetMotionMaster()->MoveFall();
 
     // Below formula for falling damage is from Player::HandleFall
     if (FallMode == 2 && z_diff >= 14.57f)
@@ -5060,13 +5061,14 @@ bool Player::FallGround(uint8 FallMode)
         if (damage > 0) EnvironmentalDamage(DAMAGE_FALL, damage);
     }
     else if (FallMode == 0)
-        Unit::setDeathState(DEAD_FALLING);
+        Unit::setDeathState(JUST_DIED);
     return true;
 }
 
 void Player::KillPlayer()
 {
-    if (IsFlying() && !GetTransport()) FallGround();
+    if (IsFlying() && !GetTransport())
+        i_motionMaster.MoveFall();
 
     SetMovement(MOVE_ROOT);
 
@@ -22693,8 +22695,6 @@ void Player::SendInitialVisiblePackets(Unit* target)
     SendAurasForTarget(target);
     if (target->isAlive())
     {
-        if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
-            target->SendMonsterMoveWithSpeedToCurrentDestination(this);
         if (target->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && target->getVictim())
             target->SendMeleeAttackStart(target->getVictim());
     }

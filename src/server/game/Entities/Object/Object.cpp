@@ -50,6 +50,7 @@
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "OutdoorPvPMgr.h"
+#include "MovementPacketBuilder.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -408,6 +409,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     // Start Write data
     if (flags & UPDATEFLAG_HAS_LIVING)
     {
+        Unit const* self = ToUnit();
         const Player* player = ((Player*)this);
         const Unit* unit = ((Unit*)this);
 
@@ -438,10 +440,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             *data << (float)((Unit*)this)->m_movementInfo.j_zspeed;
         }
 
+        *data << ((Unit*)this)->GetSpeed(MOVE_SWIM);
         *data << ((Unit*)this)->GetSpeed(MOVE_SWIM_BACK);
 
         if (((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_SPLINE_ENABLED)
-            *data << unit->m_movementInfo.splineElevation;
+            Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
 /*
         if (player && player->isInFlight())
         {
@@ -2771,4 +2774,68 @@ uint64 WorldObject::GetTransGUID() const
     if (GetTransport())
         return GetTransport()->GetGUID();
     return 0;
+}
+void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+{
+    switch (GetTypeId())
+    {
+        case TYPEID_UNIT:
+            if (!((Creature const*)this)->canFly())
+            {
+                bool canSwim = ((Creature const*)this)->canSwim();
+                float ground_z = z;
+                float max_z = canSwim
+                    ? GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
+                    : ((ground_z = GetBaseMap()->GetHeight(x, y, z, true)));
+
+                if (max_z > INVALID_HEIGHT)
+                {
+                    if (z > max_z)
+                        z = max_z;
+                    else if (z < ground_z)
+                        z = ground_z;
+                }
+            }
+            else
+            {
+                float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
+
+                if (z < ground_z)
+                    z = ground_z;
+            }
+            break;
+        case TYPEID_PLAYER:
+            if (!((Player const*)this)->canFly())
+            {
+                float ground_z = z;
+                float max_z = GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK));
+
+                if (max_z > INVALID_HEIGHT)
+                {
+                    if (z > max_z)
+                        z = max_z;
+                    else if (z < ground_z)
+                        z = ground_z;
+                }
+            }
+            else
+            {
+                float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
+
+                if (z < ground_z)
+                    z = ground_z;
+            }
+            break;
+        default:
+        {
+            float ground_z = GetBaseMap()->GetHeight(x, y, z, true);
+
+            if(ground_z > INVALID_HEIGHT)
+                z = ground_z;
+
+            break;
+        }
+    }
+
+
 }

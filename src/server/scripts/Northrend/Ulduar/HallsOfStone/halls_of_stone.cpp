@@ -199,12 +199,12 @@ public:
                         if (uiPositionCounter == 0)
                         {
                             (*itr)->GetMap()->CreatureRelocation((*itr), 927.265f, 333.200f, 218.780f, (*itr)->GetOrientation());
-                            (*itr)->SendMonsterMove(927.265f, 333.200f, 218.780f, 0, (*itr)->GetUnitMovementFlags(), 1);
+                            (*itr)->MonsterMoveWithSpeed(927.265f, 333.200f, 218.780f, 0);
                         }
                         else
                         {
                             (*itr)->GetMap()->CreatureRelocation((*itr), 921.745f, 328.076f, 218.780f, (*itr)->GetOrientation());
-							(*itr)->SendMonsterMove(921.745f, 328.076f, 218.780f, 0, (*itr)->GetUnitMovementFlags(), 1);
+							(*itr)->MonsterMoveWithSpeed(921.745f, 328.076f, 218.780f, 0);
                         }
                     }
                     ++uiPositionCounter;
