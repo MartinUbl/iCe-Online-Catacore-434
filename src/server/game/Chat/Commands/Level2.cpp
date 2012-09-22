@@ -51,6 +51,22 @@
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 
+bool ChatHandler::HandleDebugRatedBGCommand(const char* args)
+{
+    if (sWorld->getBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED))
+    {
+        PSendSysMessage("Rated BGs turned OFF");
+        sWorld->setBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED, false);
+    }
+    else
+    {
+        PSendSysMessage("Rated BGs turned ON");
+        sWorld->setBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED, true);
+    }
+
+    return true;
+}
+
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
 {

@@ -953,6 +953,12 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
 
 void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
 {
+    if (!(sWorld->getBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED)))
+    {
+        SendNotification("Rated battlegrounds are currently disabled.");
+        return;
+    }
+
     BattlegroundTypeId bgTypeId = sBattlegroundMgr->GetRatedBattlegroundType();
     uint32 arenaType = sBattlegroundMgr->GetRatedBattlegroundSize();
 

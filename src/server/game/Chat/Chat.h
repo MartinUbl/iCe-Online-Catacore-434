@@ -191,6 +191,7 @@ class ChatHandler
         bool HandleDebugSetItemValueCommand(const char * args);
         bool HandleDebugItemExpireCommand(const char * args);
         bool HandleDebugOpcodeCommand(const char * args);
+        bool HandleDebugRatedBGCommand(const char * args);
         bool HandleDebugSetVehicleId(const char * args);
         bool HandleDebugEnterVehicle(const char * args);
         bool HandleDebugSetValueCommand(const char* args);
