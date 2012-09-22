@@ -813,25 +813,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        // Maelstrom Weapon
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            if (damagetype == DIRECT_DAMAGE )
-            {
-                if (this->ToPlayer()->HasAura(51528))
-                    if (roll_chance_f(10.0f))
-                        this->CastSpell(this, 53817, true);
-
-                if (this->ToPlayer()->HasAura(51529))
-                    if (roll_chance_f(20.0f))
-                        this->CastSpell(this, 53817, true);
-
-                if (this->ToPlayer()->HasAura(51530))
-                    if (roll_chance_f(30.0f))
-                        this->CastSpell(this, 53817, true);
-            }
-        }
-
         // Nature's Ward
         if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->getClass() == CLASS_DRUID
             && pVictim->ToPlayer()->GetSpellCooldownDelay(45281) == 0
