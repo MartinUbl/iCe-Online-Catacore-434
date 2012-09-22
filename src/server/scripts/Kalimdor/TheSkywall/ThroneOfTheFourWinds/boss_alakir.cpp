@@ -94,7 +94,10 @@ class boss_alakir: public CreatureScript
             boss_alakirAI(Creature* c): Scripted_NoMovementAI(c)
             {
                 c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                c->ApplySpellImmune(0, IMMUNITY_ID, 49575, true); // death grip jump eff
+                c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+                c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+                c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
                 c->SetReactState(REACT_DEFENSIVE);
 
                 instance = c->GetInstanceScript();
@@ -976,6 +979,12 @@ class npc_alakir_large_model: public CreatureScript
         {
             npc_alakir_large_modelAI(Creature* c): Scripted_NoMovementAI(c)
             {
+                c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+                c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+                c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+
                 Reset();
             }
 

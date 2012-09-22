@@ -33,8 +33,12 @@ public:
         c->ApplySpellImmune(0, IMMUNITY_ID, 93120, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93121, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93122, true);
+
         c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-        c->ApplySpellImmune(0, IMMUNITY_ID, 49575, true); // death grip jump eff
+        c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+        c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+        c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
     }
 
     bool alive;
