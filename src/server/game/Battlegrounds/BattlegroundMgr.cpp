@@ -1419,12 +1419,12 @@ void BattlegroundMgr::UpdateRatedBattlegroundWeek()
     {
         do
         {
-            if (m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_15v15)
+            if (m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_NONE || m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_15v15)
                 m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_10v10;
             else if (m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_10v10)
                 m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_15v15;
             else
-                m_ratedBgWeek = 0;
+                m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
         }
         while (!(possibleWeeks & m_ratedBgWeek));
     }
