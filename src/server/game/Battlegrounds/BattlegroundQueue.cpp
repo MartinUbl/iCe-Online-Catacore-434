@@ -1107,8 +1107,8 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][opponentTeamQueue].begin(); itr != m_QueuedGroups[bracket_id][opponentTeamQueue].end(); ++itr)
         {
             // only if both teams are long enough in queue, we can ignore the difference
-            if (canIgnoreRatingDiff = firstTeam->JoinTime + discardTime < getMSTime())
-                canIgnoreRatingDiff = (*itr)->JoinTime + discardTime < getMSTime();
+            if ((canIgnoreRatingDiff = ((firstTeam->JoinTime + discardTime) < getMSTime())))
+                canIgnoreRatingDiff = (((*itr)->JoinTime + discardTime) < getMSTime());
 
             if (!(*itr)->IsInvitedToBGInstanceGUID && ((*itr)->ArenaTeamRating >= minRating || (*itr)->ArenaTeamRating <= maxRating || canIgnoreRatingDiff))
             {

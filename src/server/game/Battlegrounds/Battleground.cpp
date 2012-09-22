@@ -2005,9 +2005,9 @@ void Battleground::RatedBattlegroundWon(Player *player)
 {
     uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
-    float win_mod = std::ceilf((1.0f - chance) * 1000.0f) / 1000.0f;
+    float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
     
-    int32 rating_change = (int32)std::ceilf(92.0f * win_mod);
+    int32 rating_change = (int32)ceil(92.0f * win_mod);
 
     SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
     player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
@@ -2018,7 +2018,7 @@ void Battleground::RatedBattlegroundWon(Player *player)
 
     //player->UpdateMaxWeekRating(CP_SOURCE_RATED_BG, 0);
     //player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f) * PLAYER_CURRENCY_PRECISION);
-    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointCap() / 3.0f));
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)ceil(player->GetConquestPointCap() / 3.0f));
 
     player->SaveToDB();
 }
@@ -2029,9 +2029,9 @@ void Battleground::RatedBattlegroundLost(Player *player)
     uint32 player_rating = player->GetRatedBattlegroundRating();
 
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
-    float loose_mod = std::floorf((-chance) * 1000.0f) / 1000.0f;
+    float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
 
-    int32 rating_change = (int32)std::floorf(92.0f * loose_mod);
+    int32 rating_change = (int32)floor(92.0f * loose_mod);
 
     if (int32(player_rating) + rating_change < 0)
         rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
@@ -2054,9 +2054,9 @@ void Battleground::RatedBattlegroundLostOffline(uint64 guid)
 
     uint32 player_rating = score->BattlegroundRating;
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
-    float loose_mod = std::floorf((-chance) * 1000.0f) / 1000.0f;
+    float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
 
-    int32 rating_change = (int32)std::floorf(92.0f * loose_mod);
+    int32 rating_change = (int32)floor(92.0f * loose_mod);
 
     if (int32(player_rating) + rating_change < 0)
         rating_change = (player_rating == 0) ? 0 : player_rating * (-1);

@@ -980,7 +980,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
     {
         avgRating = group->GetAverageBattlegroundRating();
         GroupQueueInfo *groupQueueInfo = queue.AddGroup(_player, group, bgTypeId, bracketEntry, arenaType, true, true, avgRating, avgRating);
-        uint32 avgTime = queue.GetAverageQueueWaitTime(groupQueueInfo, bracketEntry->GetBracketId());
+        avgTime = queue.GetAverageQueueWaitTime(groupQueueInfo, bracketEntry->GetBracketId());
     }
 
     for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
