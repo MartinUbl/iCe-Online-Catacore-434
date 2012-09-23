@@ -440,7 +440,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             *data << (float)((Unit*)this)->m_movementInfo.j_zspeed;
         }
 
-        *data << ((Unit*)this)->GetSpeed(MOVE_SWIM);
         *data << ((Unit*)this)->GetSpeed(MOVE_SWIM_BACK);
 
         if (((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_SPLINE_ENABLED)
