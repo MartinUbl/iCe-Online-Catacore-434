@@ -651,8 +651,11 @@ enum NPCFlags
     UNIT_NPC_FLAG_GUILD_BANKER          = 0x00800000,       // cause client to send 997 opcode
     UNIT_NPC_FLAG_SPELLCLICK            = 0x01000000,       // cause client to send 1015 opcode (spell click), dynamic, set at loading and don't must be set in DB
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
-    UNIT_NPC_FLAG_GUARD                 = 0x10000000,       // custom flag for guards
-    UNIT_NPC_FLAG_OUTDOORPVP            = 0x20000000,       // custom flag for outdoor pvp creatures
+    UNIT_NPC_FLAG_REFORGER              = 0x08000000,       // reforging
+    UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x10000000,       // transmogrification
+    UNIT_NPC_FLAG_VAULTKEEPER           = 0x20000000,       // void storage
+    UNIT_NPC_FLAG_GUARD                 = 0x40000000,       // custom flag for guards
+    UNIT_NPC_FLAG_OUTDOORPVP            = 0x80000000,       // custom flag for outdoor pvp creatures
 };
 
 enum MovementFlags
@@ -1416,13 +1419,17 @@ class Unit : public WorldObject
         bool isTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
         bool isAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
         bool isArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+        bool isReforger()     const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REFORGER); }
+        bool isTransmogrifier() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRANSMOGRIFIER); }
+        bool isVoidKeeper() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VAULTKEEPER); }
         bool isServiceProvider() const
         {
             return HasFlag(UNIT_NPC_FLAGS,
                 UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_FLIGHTMASTER |
                 UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_BATTLEMASTER | UNIT_NPC_FLAG_BANKER |
                 UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_GUARD | UNIT_NPC_FLAG_SPIRITHEALER |
-                UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER);
+                UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER |
+                UNIT_NPC_FLAG_REFORGER | UNIT_NPC_FLAG_TRANSMOGRIFIER | UNIT_NPC_FLAG_VAULTKEEPER);
         }
         bool isSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
