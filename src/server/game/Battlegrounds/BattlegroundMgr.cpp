@@ -280,13 +280,8 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint32(Time2); // Time since started
             *data << uint32(QueueSlot); // queueslot 
             *data << uint32(bg->GetMapId()); // MapID
-            
-            // This is bg guid
-            *data << uint32(bg->GetTypeID()); // BGTypeID
-            *data << uint16(0);
-            *data << uint8(0x10); // High guid
-            *data << uint8(0x1F); // High guid
-            // end
+
+            *data << uint64(bg->isRated() && !bg->isArena() ? 0x0100001 : 0);
 
             *data << uint32(Time1); // Time until BG closed
             *data << uint8(arenatype); // teamsize (0 if not arena)
