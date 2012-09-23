@@ -4723,8 +4723,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                             do
                             {
                                 Field* fields = resultItems->Fetch();
-                                uint32 item_guidlow = fields[11].GetUInt32();
-                                uint32 item_template = fields[12].GetUInt32();
+                                uint32 item_guidlow = fields[10].GetUInt32();
+                                uint32 item_template = fields[11].GetUInt32();
 
                                 ItemPrototype const* itemProto = sObjectMgr->GetItemPrototype(item_template);
                                 if (!itemProto)
@@ -14085,7 +14085,8 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
 void Player::ApplyEnchantment(Item *item,bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        ApplyEnchantment(item, EnchantmentSlot(slot), apply);
+        if (slot != REFORGING_ENCHANTMENT_SLOT)
+            ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
 void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
@@ -14160,7 +14161,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                                 if (item_rand)
                                 {
                                     // Search enchant_amount
-                                    for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                                    for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                                     {
                                         if (item_rand->enchant_id[k] == enchant_id)
                                         {
@@ -14186,7 +14187,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand)
                         {
-                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                             {
                                 if (item_rand->enchant_id[k] == enchant_id)
                                 {
@@ -14206,7 +14207,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand_suffix)
                         {
-                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
+                            for (int k = 0; k < MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++k)
                             {
                                 if (item_rand_suffix->enchant_id[k] == enchant_id)
                                 {
@@ -17124,7 +17125,7 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
             break;
     }
     
-    if (player && player)
+    if (player)
         if (player->_LoadFromDB(guid, holder, result))
             return player;
 
@@ -17989,10 +17990,10 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timediff)
         {
             Field* fields = result->Fetch();
 
-            uint32 bag_guid  = fields[11].GetUInt32();
-            uint8  slot      = fields[12].GetUInt8();
-            uint32 item_guid = fields[13].GetUInt32();
-            uint32 item_id   = fields[14].GetUInt32();
+            uint32 bag_guid  = fields[10].GetUInt32();
+            uint8  slot      = fields[11].GetUInt8();
+            uint32 item_guid = fields[12].GetUInt32();
+            uint32 item_id   = fields[13].GetUInt32();
 
             ItemPrototype const * proto = sObjectMgr->GetItemPrototype(item_id);
 
@@ -18210,8 +18211,8 @@ void Player::_LoadMailedItems(Mail *mail)
     {
         Field* fields = result->Fetch();
 
-        uint32 item_guid_low = fields[11].GetUInt32();
-        uint32 item_template = fields[12].GetUInt32();
+        uint32 item_guid_low = fields[10].GetUInt32();
+        uint32 item_template = fields[11].GetUInt32();
 
         mail->AddItem(item_guid_low, item_template);
 
@@ -18229,7 +18230,7 @@ void Player::_LoadMailedItems(Mail *mail)
 
         Item *item = NewItemOrBag(proto);
 
-        if (!item->LoadFromDB(item_guid_low, MAKE_NEW_GUID(fields[13].GetUInt32(), 0, HIGHGUID_PLAYER), fields, item_template))
+        if (!item->LoadFromDB(item_guid_low, MAKE_NEW_GUID(fields[12].GetUInt32(), 0, HIGHGUID_PLAYER), fields, item_template))
         {
             sLog->outError("Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", mail->messageID, item_guid_low);
             CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);

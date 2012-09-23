@@ -461,14 +461,8 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_FLAGS));
 
-            std::ostringstream ssEnchants;
-            for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            {
-                ssEnchants << GetEnchantmentId(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentDuration(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentCharges(EnchantmentSlot(i)) << " ";
-            }
-            stmt->setString(++index, ssEnchants.str());
+            // delete enchantments
+            trans->PAppend("DELETE FROM item_enchantments where guid = %d", guid);
 
             stmt->setInt32 (++index, GetItemRandomPropertyId());
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
@@ -485,6 +479,29 @@ void Item::SaveToDB(SQLTransaction& trans)
                 stmt->setUInt32(1, guid);
                 trans->Append(stmt);
             }
+
+            // insert new enchantments
+            for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+            {
+                EnchantmentSlot slot = EnchantmentSlot(i);
+                uint32 id = GetEnchantmentId(slot);
+                if (id != 0)
+                {
+                    uint32 duration = GetEnchantmentDuration(slot);
+                    uint32 charges = GetEnchantmentCharges(slot);
+
+                    std::ostringstream ssEnchants;
+                    ssEnchants << "(" << guid << ", ";
+                    ssEnchants << i << ", ";
+                    ssEnchants << id << ", ";
+                    ssEnchants << duration << ", ";
+                    ssEnchants << charges << ");";
+
+                    trans->PAppend("INSERT INTO item_enchantments (guid, slot, id, duration, charges) "
+                                   "VALUES %s", ssEnchants.str().c_str());
+                }
+            }
+
             break;
         }
         case ITEM_REMOVED:
@@ -510,8 +527,8 @@ void Item::SaveToDB(SQLTransaction& trans)
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry)
 {
-    //                                                    0                1      2         3        4      5             6                 7           8           9    10
-    //result = CharacterDatabase.PQuery("SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text FROM item_instance WHERE guid = '%u'", guid);
+    //                                                    0                1      2         3        4      5                 6           7           8     9
+    //result = CharacterDatabase.PQuery("SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, randomPropertyId, durability, playedTime, text FROM item_instance WHERE guid = '%u'", guid);
 
     // create item before any checks for store correct guid
     // and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
@@ -556,16 +573,39 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         need_save = true;
     }
 
-    std::string enchants = fields[6].GetString();    
-    _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
+    // load enchantments from table item_enchantments
+    QueryResult enchantments = CharacterDatabase.PQuery("SELECT slot, id, duration, charges from item_enchantments "
+                                                            "where guid = %d", guid);
+
+    if (enchantments && enchantments->GetRowCount() > 0)
+    {
+        do 
+        {
+            Field* fields = enchantments->Fetch();
+            uint32 slot = fields[0].GetInt32(),
+                   id = fields[1].GetInt32(),
+                   duration = fields[2].GetInt32(),
+                   charges = fields[3].GetInt32();
+
+            if (slot < 0 || slot >= MAX_ENCHANTMENT_SLOT)
+            {
+                sLog->outError("Invalid enchantment slot (%d) for item %d.", slot, guid);
+                continue;
+            }
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET] = id;
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET] = duration;
+            m_uint32Values[ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET] = charges;
+        } while (enchantments->NextRow());
+    }
+
     // Reforge is stored in slot 8
     m_reforgeId = GetEnchantmentId(REFORGING_ENCHANTMENT_SLOT);
-    SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[7].GetInt32());
+    SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[6].GetInt32());
     // recalculate suffix factor
     if (GetItemRandomPropertyId() < 0)
         UpdateItemSuffixFactor();
 
-    uint32 durability = fields[8].GetUInt32();
+    uint32 durability = fields[7].GetUInt32();
     SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
     // update max durability (and durability) if need
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, proto->MaxDurability);
@@ -575,8 +615,8 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         need_save = true;
     }
 
-    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[9].GetUInt32());
-    SetText(fields[10].GetString());
+    SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[8].GetUInt32());
+    SetText(fields[9].GetString());
 
     if (need_save)                                           // normal item changed state set not work at loading
     {
@@ -753,8 +793,8 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
                 SetState(ITEM_CHANGED, GetOwner());
             }
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
-                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2],0,0);
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++i)
+                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }
     else
@@ -770,7 +810,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetState(ITEM_CHANGED, GetOwner());
             }
 
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES; ++i)
                 SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }

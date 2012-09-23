@@ -169,12 +169,12 @@ enum EnchantmentSlot
     REFORGING_ENCHANTMENT_SLOT      = 8,
     MAX_INSPECTED_ENCHANTMENT_SLOT  = 9,                    // need some research, 9 is the right value
 
-    PROP_ENCHANTMENT_SLOT_0         = 7,                    // used with RandomSuffix
-    PROP_ENCHANTMENT_SLOT_1         = 8,                    // used with RandomSuffix
-    PROP_ENCHANTMENT_SLOT_2         = 9,                    // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_3         = 10,                   // used with RandomProperty
-    PROP_ENCHANTMENT_SLOT_4         = 11,                   // used with RandomProperty
-    MAX_ENCHANTMENT_SLOT            = 12
+    PROP_ENCHANTMENT_SLOT_0         = 9,                    // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_1         = 10,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_2         = 11,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_3         = 12,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_4         = 13,                   // used with RandomSuffix and RandomProperty
+    MAX_ENCHANTMENT_SLOT            = 14
 };
 
 #define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)

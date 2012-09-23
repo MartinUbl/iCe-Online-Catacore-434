@@ -1230,6 +1230,8 @@ struct ItemRandomSuffixEntry
     uint32    prefix[5];                                    // 8-12     m_allocationPct};
 };
 
+#define MAX_ITEM_ENCHANTMENT_RANDOM_ENTRIES 5
+
 struct ItemReforgeEntry
 {
     uint32    ID;                                           // 0        m_ID

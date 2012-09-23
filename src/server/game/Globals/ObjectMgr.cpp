@@ -3792,7 +3792,7 @@ void ObjectMgr::LoadGuilds()
         do
         {
             Field* fields = result->Fetch();
-            uint32 guildId = fields[11].GetUInt32();
+            uint32 guildId = fields[10].GetUInt32();
             if (Guild* pGuild = GetGuildById(guildId))
                 pGuild->LoadBankItemFromDB(fields);
         }
