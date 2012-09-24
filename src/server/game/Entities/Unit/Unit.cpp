@@ -3485,25 +3485,29 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
         // find current aura from spell and change it's stackamount
         if (Aura * foundAura = GetOwnedAura(aura->GetId(), aura->GetCasterGUID(), (sSpellMgr->GetSpellCustomAttr(aura->GetId()) & SPELL_ATTR0_CU_ENCHANT_PROC) ? aura->GetCastItemGUID() : 0, 0, aura))
         {
-            if (aura->GetSpellProto()->StackAmount)
+            // do not get stacks from aura which is being removed
+            if (!foundAura->IsRemoved())
             {
-                aura->ModStackAmount(foundAura->GetStackAmount());
-            }
-            // Update periodic timers from the previous aura
-            // ToDo Fix me
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            {
-                AuraEffect *existingEff = foundAura->GetEffect(i);
-                AuraEffect *newEff = aura->GetEffect(i);
-                if (!existingEff || !newEff)
-                    continue;
-                if (existingEff->IsPeriodic() && newEff->IsPeriodic())
-                    newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
-            }
+                if (aura->GetSpellProto()->StackAmount)
+                {
+                    aura->ModStackAmount(foundAura->GetStackAmount());
+                }
+                // Update periodic timers from the previous aura
+                // ToDo Fix me
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    AuraEffect *existingEff = foundAura->GetEffect(i);
+                    AuraEffect *newEff = aura->GetEffect(i);
+                    if (!existingEff || !newEff)
+                        continue;
+                    if (existingEff->IsPeriodic() && newEff->IsPeriodic())
+                        newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
+                }
 
-            // Use the new one to replace the old one
-            // This is the only place where AURA_REMOVE_BY_STACK should be used
-            RemoveOwnedAura(foundAura, AURA_REMOVE_BY_STACK);
+                // Use the new one to replace the old one
+                // This is the only place where AURA_REMOVE_BY_STACK should be used
+                RemoveOwnedAura(foundAura, AURA_REMOVE_BY_STACK);
+            }
         }
     }
     _RemoveNoStackAurasDueToAura(aura);
