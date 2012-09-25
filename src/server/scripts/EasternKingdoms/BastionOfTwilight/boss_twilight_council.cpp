@@ -42,7 +42,7 @@ enum Spells
     SPELL_INFERNO_RUSH_AOE  = 88579,
 
 };
-/*********************************************** DALSIE ABILITY SOM BOL UZ LENIVY PISAT CEZ ENUMU :D **************************************************/
+/*********************************************** DALSIE ABILITY SOM BOL UZ LENIVY PISAT DO ENUMU :D **************************************************/
 enum Creatures
 {
     IGNACIOUS_ENTRY        = 43686,
@@ -333,7 +333,6 @@ public:
                     if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ())) >Stack_counter))
                     {
                         pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        me->MonsterYell("ICE PATCH SPAWNED !!!!", LANG_UNIVERSAL, NULL);
                         achiev_counter++;
                         Distance_timer=2000;
                         Stack_counter=0.0f;
@@ -350,12 +349,12 @@ public:
                     me->SendPlaySound(20400, false);
 
                     if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) 
-                    {
+                    {/*
                         uint32 counter=0; // Obmedzenie na 3 targety
 
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)) // Na jedneho zacastim  ostatnym dam iba auru
                         {
-                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+20);
+                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+35);
                             DoCast(target,84948);
                         }
 
@@ -367,12 +366,14 @@ public:
                                 if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                                 {
                                         me->AddAura(92486,player);
-                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+20);
+                                        DoCast(player,84952,true);
+                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+35);
                                 }
                                 if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                                 {
                                         me->AddAura(92488,player);
-                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+20);
+                                        DoCast(player,84952,true);
+                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+35);
                                 }
                                 counter++;
                             }
@@ -381,13 +382,35 @@ public:
                                 Gravity_crush_timer=25000;
                                 break;
                             }
+                        }*/
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                        {
+                            DoCast(target,92486);
+
+                            Map* map;
+                            map = me->GetMap();
+                            Map::PlayerList const& plrList = map->GetPlayers();
+                            if (plrList.isEmpty())
+                            return;
+
+                            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                            {
+                                if (Player* pPlayer = itr->getSource())
+                                    if(pPlayer->HasAura(92486) || pPlayer->HasAura(92488))
+                                    {
+                                        DoCast(pPlayer,84952,true);
+                                        pPlayer->GetMotionMaster()->MovePoint(0,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()+35);
+                                    }
+                            }
+                            Gravity_crush_timer=25000;
                         }
                     }
                     else // 10 man 
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
-                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+20);
+                            DoCast(target,84952,true);
+                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+35);
                             DoCast(target,84948);
                             Gravity_crush_timer=25000;
                         }
@@ -591,7 +614,6 @@ public:
                         if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
-                            //Stack_counter=Stack_counter+135.0f;
                             Stacks++;
                             Growing_timer=3000;
                         }
@@ -601,8 +623,7 @@ public:
 
             if(Aoe_dmg_timer<=diff)
             {
-                //me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(350.0f+Stack_counter)); // aoe dmg liquid ice
-                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 4000)); // 100% + stacky*40% ?
+                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 3000)); // 100% + stacky*40% ?
                 Aoe_dmg_timer=1000;
             }
             else Aoe_dmg_timer-=diff;
@@ -776,7 +797,6 @@ public:
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_interrupt=false;
-                    DoCast(SPELL_WATER_BOMB); // pure visual
 
                     std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
                         for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
@@ -786,11 +806,32 @@ public:
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
                                 me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,10)-urand(0,10),target->GetPositionY()+urand(0,10)-urand(0,10),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                                if (urand(0,1)) // +par bomb naviac cca 5
-                                me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,5)-urand(0,5),target->GetPositionY()+urand(0,5)-urand(0,5),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
+
+                            float angle=0.0f; // + Par bomb naviac 
+                            float range=0.0f;
+                        if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                        {
+                            for(int i=0;i<5;i++)
+                            {
+                                angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
+                                range=(float)urand(0,21);
+                                me->SummonCreature(CREATURE_WATER_BOMB,-1009.1f+cos(angle)*range,-582.5f+sin(angle)*range,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                            }
+                        }
+                        else // 25 MAN
+                        {
+                            for(int i=0;i<12;i++)
+                            {
+                                angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
+                                range=(float)urand(0,21);
+                                me->SummonCreature(CREATURE_WATER_BOMB,-1009.1f+cos(angle)*range,-582.5f+sin(angle)*range,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                            }
+                        }
+                        DoCast(SPELL_WATER_BOMB); // pure visual
                         Water_bomb_timer=32000;
+
                  }
                 }
                 else Water_bomb_timer-=diff;
@@ -1031,7 +1072,7 @@ public:
                 {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
                             DoCast(target,92067,true); // Overload debuff
-                        Static_overload_timer=10000; // Po 10 sekundach hracom debuff zhodim
+                        Static_overload_timer=20000; // Po 10 sekundach hracom debuff zhodim
                 }
             }
             else Static_overload_timer-=diff;
@@ -1039,9 +1080,13 @@ public:
 
             if(Gravity_core_timer<=diff) 
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                    DoCast(target,92075,true);
-                Gravity_core_timer=10000;
+                if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                        DoCast(target,92075,true);
+                    else DoCast(me->getVictim(),92075,true);
+                }
+                Gravity_core_timer=20000;
             }
             else Gravity_core_timer-=diff;
 
@@ -1249,7 +1294,7 @@ public:
                 Bomb_timer= 2200 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
             else Bomb_timer =3000+ urand(500,3000); // keby nahodou
 
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_STUNNED);
+            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_DISABLE_MOVE);
             bombed=false;
         }
 
@@ -1450,7 +1495,6 @@ public:
 
             if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    me->SetVisible(false);
                     float max_distance=0.0f;
                     int position=1;
                     for(int i=1;i<=4;i++) // Na port si veberem najvzdialenejsie miesto od mojej aktualnej pozicie
@@ -1465,7 +1509,6 @@ public:
                     me->SendMovementFlagUpdate();
                     update_movement=true;
                     Update_timer=200;
-                    me->SetVisible(true);
                     can_interrupt=true;
                     DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
                     can_tele=false;
@@ -2213,7 +2256,9 @@ public:
         uint32 Chasing_timer;
         uint32 Glaciate_timer;
         uint32 Flamestrike_timer;
+        uint32 Speed_timer;
         bool buffed;
+        float speeder;
         Unit* target;
 
 
@@ -2222,11 +2267,14 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->SetInCombatWithZone();
             me->ForcedDespawn(61000);
+            speeder=0.0f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
             Flamestrike_timer=5000; // Spawn Flamestriku hned po zacati nahanani 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
+            Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
+            me->SetSpeed(MOVE_RUN,0.6f);
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
@@ -2243,6 +2291,14 @@ public:
                     me->ForcedDespawn();
                 }
             }
+
+            if(Speed_timer<=diff) // Pribezne zvysujem speed orbu
+            {
+                speeder=speeder+0.1f;
+                me->SetSpeed(MOVE_RUN,0.6f+speeder);
+                Speed_timer=1000;
+            }
+            else Speed_timer-=diff;
 
             if(Glaciate_timer<=diff)
             {

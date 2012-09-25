@@ -4555,7 +4555,7 @@ void SpellMgr::LoadSpellCustomAttr()
             // because of bug in dbc
             spellInfo->EffectRadiusIndex[0] = 31; // 80 yards
             break;
-        case 82699: // Water bomb
+       case 82699: // Water bomb
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
             spellInfo->EffectRadiusIndex[0] = 22;
@@ -4581,11 +4581,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92270: // Summon effekt u Frozen orbu
             spellInfo->Effect[0] = 0;
             break;
+        case 92303: // Zvysovanie rychlosti u Frozen orbu
+            spellInfo->Effect[1] = 0;
+            break;
         case 84915: // Liquid ice
         case 92497:
         case 92498:
         case 92499:
-            spellInfo->EffectRadiusIndex[0] =26; 
+            spellInfo->EffectRadiusIndex[0] =15; 
             break;
         case 83070: // Lightning blast -  Zmena z aoe na direct dmg spell
         case 92454:
@@ -4618,14 +4621,20 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
-            spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
-            break;
-        case 92486: //Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_FLY;
+            spellInfo->EffectTriggerSpell[2] = 0;
+            break;        case 92486: //Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
         case 92488:
-            spellInfo->MaxAffectedTargets = 4;
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
+            spellInfo->EffectChainTarget[0]=2; //2 pre test
+            spellInfo->EffectChainTarget[1]=2; //2 pre test
             break;
         case 92076: // Gravity core chybajuci radius index
         case 92537:
@@ -4646,12 +4655,40 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[1] = 13; // 10 yardov
             spellInfo->DurationIndex = 1;
             break;
-        /*case 84529: // Electric Instability by mal ignorovat resist hracov
+        case 84529: // Electric Instability by mal ignorovat resist hracov
         case 92480:
         case 92481:
         case 92482:
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+<<<<<<< HEAD
             break;*/
+=======
+            break;
+        case 86838: // Impending dooooom
+            spellInfo->EffectTriggerSpell[0] = 0;
+            spellInfo->DurationIndex = 21; // unlimited duration
+            break;
+        case 81441: // Shadowfury
+        case 92644: // Shadowfury (heroic difficulty)
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[1] = 13;
+            break;
+        case 81440: // Frostbolt Volley
+        case 92642: // Frostbolt Volley (heroic difficulty)
+            spellInfo->EffectRadiusIndex[0] = 23; // 40 yards
+            spellInfo->EffectRadiusIndex[1] = 23;
+            break;
+        case 81569: // Spining Slash
+        case 92623: // Spining Slash (heroic difficulty)
+            spellInfo->EffectRadiusIndex[0] = 8; // 5 yards
+            break;
+        case 81508: // Dust Storm
+        case 92624: // Dust Storm (heoric difficulty)
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[2] = 13; // 10 yards
+            break;
+>>>>>>> 01d1b52... Scripts/BoT: Twilight Council more fixes..
         default:
             break;
         }
