@@ -14090,6 +14090,13 @@ Unit* Creature::SelectVictim()
         if (target && _IsTargetAcceptable(target))
                 return target;
     }
+    
+    // Killing spree retarget (if no any other target found)
+    target = ((Unit*)this)->getAttackerForHelper();
+    if(target && target->HasAura(69107))
+        return target;
+    else
+        target = NULL;
 
     if (m_invisibilityMask)
     {

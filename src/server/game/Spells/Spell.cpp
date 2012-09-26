@@ -5431,7 +5431,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // Killing Spree check - at least one enemy in range
     if (m_spellInfo->Id == 51690)
     {
-        if (!SearchNearbyTarget(10.0f, SPELL_TARGETS_ENTRY, EFFECT_1))
+        if (!SearchNearbyTarget(10.0f, SPELL_TARGETS_ENEMY, EFFECT_1))
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
