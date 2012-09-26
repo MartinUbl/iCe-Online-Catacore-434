@@ -436,6 +436,10 @@ bool BattlegroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * b
         // not yet invited
         // set invitation
         ginfo->IsInvitedToBGInstanceGUID = bg->GetInstanceID();
+
+        if (bg->isRated() && !bg->isArena())
+            sLog->outChar("RatedBG: battleground group (side: %u) invited to instance ID %u", ginfo->Team, bg->GetInstanceID());
+
         BattlegroundTypeId bgTypeId = bg->GetTypeID();
         BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, bg->GetArenaType());
         BattlegroundBracketId bracket_id = bg->GetBracketId();
