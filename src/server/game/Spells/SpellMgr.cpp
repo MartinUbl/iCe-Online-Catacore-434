@@ -4621,11 +4621,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
-            spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
-            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
-            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_FLY;
-            spellInfo->EffectTriggerSpell[2] = 0;
+            spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
             break;
         case 92486: // Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
         case 92488:
@@ -4634,8 +4630,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
-            spellInfo->EffectChainTarget[0]=2; //2 pre test
-            spellInfo->EffectChainTarget[1]=2; //2 pre test
+            spellInfo->EffectChainTarget[0] = 3;
+            spellInfo->EffectChainTarget[1] = 3;
             break;
         case 92076: // Gravity core chybajuci radius index
         case 92537:
