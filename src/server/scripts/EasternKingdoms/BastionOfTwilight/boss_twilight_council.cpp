@@ -244,7 +244,10 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
+            {
+                me->ForcedDespawn(2000);
                 return;
+            }
 
             if(!boomed) // Viusal explosion pri spawne ( neslo inak nebolo vidno animaciu )
             {
@@ -606,15 +609,13 @@ public:
 
             if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
-                range=4.0f*(1.0f + 0.4f*Stacks);
-                Stacks++;
+                range=3.0f*(1.0f + 0.3f*Stacks);
 
                 if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
                 {
                         if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
-                            //Stack_counter=Stack_counter+135.0f;
                             Stacks++;
                             Growing_timer=3000;
                         }
@@ -624,8 +625,7 @@ public:
 
             if(Aoe_dmg_timer<=diff)
             {
-                //me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(350.0f+Stack_counter)); // aoe dmg liquid ice
-                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 4000)); // 100% + stacky*40% ?
+                me->CastCustomSpell(84915, SPELLVALUE_RADIUS_MOD,(10000 + Stacks * 3000)); // 100% + stacky*30% ?
                 Aoe_dmg_timer=1000;
             }
             else Aoe_dmg_timer-=diff;
@@ -2024,7 +2024,7 @@ public:
                             if(Monstrosity_timer<=diff && PHASE==6)
                             {
                                 PHASE=7;
-                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,1000);
+                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,600000);
 
                                 if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
                                     Hp_gainer=Hp_gainer+pIgnac->GetHealth();
