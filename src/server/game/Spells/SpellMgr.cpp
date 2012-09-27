@@ -4588,7 +4588,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92497:
         case 92498:
         case 92499:
-            spellInfo->EffectRadiusIndex[0] =15; 
+            spellInfo->EffectRadiusIndex[0] = 15;
             break;
         case 83070: // Lightning blast -  Zmena z aoe na direct dmg spell
         case 92454:
@@ -4626,7 +4626,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[2] = TARGET_NONE;
             spellInfo->EffectApplyAuraName[2] = SPELL_AURA_FLY;
             spellInfo->EffectTriggerSpell[2] = 0;
-            break;        case 92486: //Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
+            break;
+        case 92486: // Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
         case 92488:
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
@@ -4660,9 +4661,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92481:
         case 92482:
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
-<<<<<<< HEAD
-            break;*/
-=======
             break;
         case 86838: // Impending dooooom
             spellInfo->EffectTriggerSpell[0] = 0;
@@ -4688,7 +4686,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
             spellInfo->EffectRadiusIndex[2] = 13; // 10 yards
             break;
->>>>>>> 01d1b52... Scripts/BoT: Twilight Council more fixes..
         default:
             break;
         }
