@@ -955,7 +955,8 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
 
         BattlegroundTypeId bgTypeID = BattlegroundTypeId(bgTypeID_);
 
-        IsArena = (bl->type == TYPE_ARENA);
+        // bl->rated attribute is set to 2 when it's rated battleground. Arenas are rated, but have this field set to 0 !
+        IsArena = (bl->type == TYPE_ARENA) && (bl->rated == 0);
         MinPlayersPerTeam = fields[1].GetUInt32();
         MaxPlayersPerTeam = fields[2].GetUInt32();
         MinLvl = fields[3].GetUInt32();

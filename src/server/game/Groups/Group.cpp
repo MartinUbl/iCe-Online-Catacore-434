@@ -1887,9 +1887,13 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         PvPDifficultyEntry const* memberBracketEntry = GetBattlegroundBracketByLevel(bracketEntry->mapId,member->getLevel());
         if (memberBracketEntry != bracketEntry)
             return ERR_BATTLEGROUND_JOIN_RANGE_INDEX;
-        // don't let join rated matches if the arena team id doesn't match
-        if (isRated && bgOrTemplate->isArena() && member->GetArenaTeamId(arenaSlot) != arenaTeamId)
-            return ERR_BATTLEGROUND_JOIN_FAILED;
+        // check arena teams only when not joining rated BGs
+        if (bgQueueTypeId != bgQueueTypeIdRated_10 && bgQueueTypeId != bgQueueTypeIdRated_15)
+        {
+            // don't let join rated matches if the arena team id doesn't match
+            if (isRated && bgOrTemplate->isArena() && member->GetArenaTeamId(arenaSlot) != arenaTeamId)
+                return ERR_BATTLEGROUND_JOIN_FAILED;
+        }
         // cannot queue for rated battleground while in other queue
         if (isRated && bgOrTemplate->isBattleground() && member->InBattlegroundQueue())
             return ERR_BATTLEGROUND_CANNOT_QUEUE_FOR_RATED;

@@ -978,7 +978,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
 
     Group *group = _player->GetGroup();
 
-    GroupJoinBattlegroundResult err = group->CanJoinBattlegroundQueue(bg, queueTypeId, arenaType, arenaType, true, arenaType);
+    GroupJoinBattlegroundResult err = group->CanJoinBattlegroundQueue(bg, queueTypeId, arenaType, arenaType, true, 0);
     uint32 avgTime = 0;
     uint32 avgRating = 0;
 
