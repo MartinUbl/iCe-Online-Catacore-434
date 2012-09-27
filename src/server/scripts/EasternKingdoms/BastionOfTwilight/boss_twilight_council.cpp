@@ -2024,7 +2024,7 @@ public:
                             if(Monstrosity_timer<=diff && PHASE==6)
                             {
                                 PHASE=7;
-                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,600000);
+                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f, TEMPSUMMON_CORPSE_TIMED_DESPAWN,600000);
 
                                 if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
                                     Hp_gainer=Hp_gainer+pIgnac->GetHealth();
