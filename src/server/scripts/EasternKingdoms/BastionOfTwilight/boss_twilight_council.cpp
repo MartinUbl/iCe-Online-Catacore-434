@@ -397,7 +397,7 @@ public:
 
                             Gravity_crush_timer=25000;
                             lift_timer=1000; // Po jednej sekunde zdvihnem hracov zo zeme
-                            can_lift-true;
+                            can_lift=true;
 
                         }
                     }
