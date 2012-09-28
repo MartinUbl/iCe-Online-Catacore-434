@@ -4542,12 +4542,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 81828: // Thrashing Charge
         case 92651: // Thrashing Charge (heroic difficulty)
             // because bug of dbc we must set corrected target manually
-            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
-            spellInfo->EffectImplicitTargetA[1] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
-            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
-            spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[0] = 9; // 20 yards
+            spellInfo->EffectRadiusIndex[1] = 9; // 20 yards
             spellInfo->CastingTimeIndex = 1; // instant cast
             break;
         case 81008: // Quake
@@ -4681,9 +4677,9 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 81508: // Dust Storm
         case 92624: // Dust Storm (heoric difficulty)
-            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
-            spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
-            spellInfo->EffectRadiusIndex[2] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[0] = 11; // 40 yards
+            spellInfo->EffectRadiusIndex[1] = 11; // 40 yards
+            spellInfo->EffectRadiusIndex[2] = 11; // 40 yards
             break;
         default:
             break;
