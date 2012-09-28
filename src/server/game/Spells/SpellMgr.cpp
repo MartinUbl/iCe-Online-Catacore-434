@@ -4588,7 +4588,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92497:
         case 92498:
         case 92499:
-            spellInfo->EffectRadiusIndex[0] = 15;
+            spellInfo->EffectRadiusIndex[0] =15; 
             break;
         case 83070: // Lightning blast -  Zmena z aoe na direct dmg spell
         case 92454:
@@ -4623,15 +4623,18 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
             break;
-        case 92486: // Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
+        case 92486: //Gravity crush 25 man ( nerfli to z 5 na 3 ) Takze skusime 4 ak to bude prilis hard da sa to spat na 3 :D
         case 92488:
             spellInfo->Effect[2] = 0;// vypnem effekt 2 triggerroval neexistujuci spell v DB
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
-            spellInfo->EffectChainTarget[0] = 3;
-            spellInfo->EffectChainTarget[1] = 3;
+            spellInfo->MaxAffectedTargets = 3;
+            spellInfo->EffectChainTarget[0] = 3; 
+			spellInfo->EffectRadiusIndex[0] = 22; 
+            spellInfo->EffectChainTarget[1] = 3; 
+            spellInfo->EffectRadiusIndex[1] = 22;
             break;
         case 92076: // Gravity core chybajuci radius index
         case 92537:

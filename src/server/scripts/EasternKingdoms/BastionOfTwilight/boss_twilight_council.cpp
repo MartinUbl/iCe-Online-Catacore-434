@@ -122,14 +122,16 @@ public:
         uint32 Distance_timer;
         uint32 achiev_counter;
         uint32 number_of_stacks;
+        uint32 lift_timer;
         float Stack_counter;
-        bool killed_unit,spawned,can_seed,boomed;
+        bool killed_unit,spawned,can_seed,boomed,can_lift;
 
         void Reset()
         {
             Stack_counter=0.0f;
             achiev_counter=0;
             number_of_stacks=0;
+            lift_timer=0;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             spawn_timer=5000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
@@ -140,12 +142,13 @@ public:
             Instability_timer=5000;
             Intensity_timer=20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
-            killed_unit=spawned=can_seed=boomed=false;
+            killed_unit=spawned=can_seed=boomed=can_lift=false;
             pLiquidIce=NULL;
             DoCast(me,84918); // Cryogenic aura
             me->SetInCombatWithZone();
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
@@ -174,7 +177,7 @@ public:
                     pGoDoor1->Delete();
             if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
                     pGoDoor2->Delete();
-
+            me->ForcedDespawn(1000);
             ScriptedAI::EnterEvadeMode();
         }
 
@@ -249,6 +252,7 @@ public:
                 return;
             }
 
+
             if(!boomed) // Viusal explosion pri spawne ( neslo inak nebolo vidno animaciu )
             {
                 DoCast(me,78771);
@@ -257,9 +261,9 @@ public:
 
             if(Distance_timer<=diff) // Pocitam vzdialenost plosky od bossa
             {
-                Stack_counter=4.0f*(1.0f + 0.4f*number_of_stacks);
+                Stack_counter=3.0f*(1.0f + 0.4f*number_of_stacks);
                 number_of_stacks++;
-                Distance_timer=3000;
+                Distance_timer=2500;
             }
             else Distance_timer-=diff;
 
@@ -318,6 +322,7 @@ public:
 
             if(spawn_timer<=diff && !spawned) // Na zaciatku ma byt monstrosity par sekund v "klude"
             {
+                me->ResetPlayerDamageReq();
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_AGGRESSIVE);
                 spawned=true;
@@ -333,14 +338,14 @@ public:
 
             if(LiquidIce_timer<=diff) // Kazde 3s Liquide ice patch pod seba
             {
-                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ())) >Stack_counter))
+                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+2 > Stack_counter))
                     {
                         pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                         achiev_counter++;
-                        Distance_timer=2000;
+                        Distance_timer=2500;
                         Stack_counter=0.0f;
                     }
-                    LiquidIce_timer=3000;
+                    LiquidIce_timer=2500;
             }
             else LiquidIce_timer-=diff;
 
@@ -390,22 +395,10 @@ public:
                         {
                             DoCast(target,92486);
 
-                            Map* map;
-                            map = me->GetMap();
-                            Map::PlayerList const& plrList = map->GetPlayers();
-                            if (plrList.isEmpty())
-                            return;
-
-                            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                            {
-                                if (Player* pPlayer = itr->getSource())
-                                    if(pPlayer->HasAura(92486) || pPlayer->HasAura(92488))
-                                    {
-                                        DoCast(pPlayer,84952,true);
-                                        pPlayer->GetMotionMaster()->MovePoint(0,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()+35);
-                                    }
-                            }
                             Gravity_crush_timer=25000;
+                            lift_timer=1000; // Po jednej sekunde zdvihnem hracov zo zeme
+                            can_lift-true;
+
                         }
                     }
                     else // 10 man 
@@ -421,6 +414,24 @@ public:
                 }
             }
             else Gravity_crush_timer-=diff;
+
+            if(lift_timer<=diff && can_lift) // Hracov ktory maju GC zdvihnem zo zeme
+            {
+                if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                {
+                    std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
+                    for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                    {
+                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                            if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                if(unit->HasAura(92486 ) || unit->HasAura(92488 )) // Gravity Crush
+                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+35);
+                    }
+                }
+                can_lift=false;
+            }
+            else lift_timer-=diff;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
                         if(Instability_timer<=diff)
                         {
@@ -609,11 +620,11 @@ public:
 
             if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
-                range=3.0f*(1.0f + 0.3f*Stacks);
 
+                range=3.0f*(1.0f + 0.4f*Stacks);
                 if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
                 {
-                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range)
+                        if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range+2)
                         {
                             DoCast(me,84917); // Zvacsenie plosky
                             Stacks++;
@@ -684,6 +695,7 @@ public:
             pGO_Door1=pGO_Door2=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
@@ -989,6 +1001,7 @@ public:
             Rush_target=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
@@ -1082,13 +1095,18 @@ public:
 
             if(Gravity_core_timer<=diff) 
             {
-                if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+
+                if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        DoCast(target,92075,true);
-                    else DoCast(me->getVictim(),92075,true);
+                    if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                            DoCast(target,92075,true);
+                        else DoCast(me->getVictim(),92075,true);
+                    }
+                    Gravity_core_timer=20000;
                 }
-                Gravity_core_timer=20000;
+
             }
             else Gravity_core_timer-=diff;
 
@@ -1412,6 +1430,7 @@ public:
             pRod_marked_player=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
@@ -1521,14 +1540,11 @@ public:
 
         if(Chain_timer<=diff && can_chaining)
         {
-            if(!me->IsNonMeleeSpellCasted(false))
-                {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // Ak som v 10 mane
                     {
                         if(pRod_marked_player && pRod_marked_player->isAlive())
                         {
-                            DoCast(pRod_marked_player,83282);
-                            Chain_timer=1000;
+                            DoCast(pRod_marked_player,83282,true);
                             can_chaining=false;
                         }
                     }
@@ -1540,17 +1556,16 @@ public:
 
                             for(int i=0;i<3;i++) // Vymazanie povodnych hracov
                                 pole[i]=NULL;
-                            Chain_timer=1000;
                             can_chaining=false;
                     }
-
-                }
         }
         else Chain_timer-=diff;
 
 
             if(rod_timer<=diff) // Lightning rod (mark) pre chain lightning
             {
+                if(!me->IsNonMeleeSpellCasted(false))
+                {
                if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // Ak som v 10 mane 
                 {
                     if ((pRod_marked_player = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true))) // Na jedneho hraca pridam marku
@@ -1561,7 +1576,7 @@ public:
                         can_chaining=true;
                     }
                 }
-                else // Sme v 25 mane TODO :D
+                else // Sme v 25 mane
                 {
                     uint32 counter=0; // Obmedzenie na 3 targety
                     for(int i=0;i<20;i++)
@@ -1581,6 +1596,7 @@ public:
                             }
                     }
                 }
+              }
             }
             else rod_timer-=diff;
 
@@ -1770,6 +1786,7 @@ public:
             PHASE=1;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
@@ -1847,13 +1864,19 @@ public:
                 HS_counter++;
                 countdown_timer=500;
 
-                if(HS_counter==3 && (!me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543))) // 1 sekundovy cast time Harden skinu ( Po 1.5 sekunde skontrolujem ci sa podaril spell vycastit)
+                if(HS_counter==54) // Ak uz presla spell duration dalej uz nic 
                 {
                     has_shield=false;
                     HS_counter=0;
                 }
 
-                if(!me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543) && HS_counter<=60 && HS_counter>3 ) // 60 pretoze 30 s duration ale checkujem kazdych 500 ms nie sekundu
+                if(HS_counter==1 && !me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543)) // 1 sekundovy cast time Harden skinu ( Po 1.5 sekunde skontrolujem ci sa podaril spell vycastit)
+                {
+                    has_shield=false;
+                    HS_counter=0;
+                }
+
+                if(!me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543) && HS_counter<54 && HS_counter>1 ) // 60 pretoze 30 s duration ale checkujem kazdych 500 ms nie sekundu
                 {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)// Kazdy stit absorbuje viac dmg --> tym padom ked ho prelomia musim si dat aj viac dmgu
                                 me->DealDamage(me,500000, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -1867,7 +1890,6 @@ public:
                     has_shield=false;
                     HS_counter=0;
                 }
-
 
             }
             else countdown_timer-=diff;
@@ -1893,7 +1915,7 @@ public:
                 {
                     can_interrupt=true;
                     DoCast(me,83718); // Harden skin
-                    countdown_timer=500;// Kazdych
+                    countdown_timer=2000;// Cast trva 1 sekundu po 2 skontrolujem ci mu hraci prerusili cast
                     has_shield=true;
                     Harden_Skin_timer=40000;
                 }
@@ -2024,7 +2046,7 @@ public:
                             if(Monstrosity_timer<=diff && PHASE==6)
                             {
                                 PHASE=7;
-                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f, TEMPSUMMON_CORPSE_TIMED_DESPAWN,600000);
+                                Creature* Monstrosity=me->SummonCreature(43735,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 6.25f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,600000);
 
                                 if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
                                     Hp_gainer=Hp_gainer+pIgnac->GetHealth();
@@ -2276,7 +2298,9 @@ public:
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
-            me->SetSpeed(MOVE_RUN,0.6f);
+
+            me->SetSpeed(MOVE_RUN,0.5f);
+
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
