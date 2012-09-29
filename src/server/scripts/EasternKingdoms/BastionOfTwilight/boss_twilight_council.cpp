@@ -177,7 +177,6 @@ public:
                     pGoDoor1->Delete();
             if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
                     pGoDoor2->Delete();
-            me->ForcedDespawn(1000);
             ScriptedAI::EnterEvadeMode();
         }
 
@@ -247,10 +246,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
-            {
-                me->ForcedDespawn(2000);
                 return;
-            }
 
 
             if(!boomed) // Viusal explosion pri spawne ( neslo inak nebolo vidno animaciu )
@@ -394,11 +390,9 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
-
                             Gravity_crush_timer=25000;
                             lift_timer=1000; // Po jednej sekunde zdvihnem hracov zo zeme
                             can_lift=true;
-
                         }
                     }
                     else // 10 man 
@@ -620,8 +614,8 @@ public:
 
             if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
-
                 range=3.0f*(1.0f + 0.4f*Stacks);
+
                 if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
                 {
                         if(me->GetDistance(pMonstr->GetPositionX(),pMonstr->GetPositionY(),pMonstr->GetPositionZ())< range+2)
@@ -749,6 +743,10 @@ public:
                     pGO_Door2->Delete();
 
             ScriptedAI::EnterEvadeMode();
+            if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true)) // Despawn Monstrosity ak na nej wipli hraci
+            {
+                pMonstr->ForcedDespawn(3000);
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -915,7 +913,6 @@ public:
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
-                                //me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
@@ -1037,6 +1034,15 @@ public:
             me->SendPlaySound(20286, false);
         }
 
+        void EnterEvadeMode() // Pri wipe raidu despawnem dvere
+        {
+            if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true)) // Despawn Monstrosity ak na nej wipli hraci
+            {
+                pMonstr->ForcedDespawn(4000);
+            }
+            ScriptedAI::EnterEvadeMode();
+        }
+
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -1095,7 +1101,6 @@ public:
 
             if(Gravity_core_timer<=diff) 
             {
-
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -1106,7 +1111,6 @@ public:
                     }
                     Gravity_core_timer=20000;
                 }
-
             }
             else Gravity_core_timer-=diff;
 
@@ -1252,7 +1256,6 @@ public:
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
-                                //me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->SetPosition(-1057.72f,-630.95f,877.684f,0.814f,true);
@@ -1311,8 +1314,8 @@ public:
         void Reset()
         {
             if(Creature *pTarget = me->FindNearestCreature(43687, 500, true))
-                Bomb_timer= 2200 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
-            else Bomb_timer =3000+ urand(500,3000); // keby nahodou
+                Bomb_timer= 3200 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
+            else Bomb_timer =3200+ urand(500,3000); // keby nahodou
 
             me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_DISABLE_MOVE);
             bombed=false;
@@ -1676,7 +1679,6 @@ public:
                                 }
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
-                                //me->RemoveAllAuras();
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
@@ -1859,24 +1861,18 @@ public:
             else Frozen_orb_timer-=diff;
 
 
-            if(has_shield==true && countdown_timer<=diff) // Kazdych 500 ms cekujem ci bossovi hraci prelomili stit (Harden Skin )
+            if(has_shield==true && countdown_timer<=diff) // Kazdu sekundu kontrolujem ci mu hraci prelomili stit
             {
                 HS_counter++;
-                countdown_timer=500;
+                countdown_timer=1000;
 
-                if(HS_counter==54) // Ak uz presla spell duration dalej uz nic 
+                if(HS_counter==1 && !me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543))// Prerusili cast ?
                 {
                     has_shield=false;
                     HS_counter=0;
                 }
 
-                if(HS_counter==1 && !me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543)) // 1 sekundovy cast time Harden skinu ( Po 1.5 sekunde skontrolujem ci sa podaril spell vycastit)
-                {
-                    has_shield=false;
-                    HS_counter=0;
-                }
-
-                if(!me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543) && HS_counter<54 && HS_counter>1 ) // 60 pretoze 30 s duration ale checkujem kazdych 500 ms nie sekundu
+                if(!me->HasAura(83718) && !me->HasAura(92541) && !me->HasAura(92542) && !me->HasAura(92543) && HS_counter<26 && HS_counter>1 )// Ak prerazia stit Terrastra si da dmg
                 {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)// Kazdy stit absorbuje viac dmg --> tym padom ked ho prelomia musim si dat aj viac dmgu
                                 me->DealDamage(me,500000, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -1981,7 +1977,6 @@ public:
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
-                                //me->RemoveAllAuras();
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->SetReactState(REACT_PASSIVE);
                                 me->AttackStop();
@@ -2298,9 +2293,7 @@ public:
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
-
             me->SetSpeed(MOVE_RUN,0.5f);
-
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }

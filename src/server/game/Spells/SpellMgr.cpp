@@ -4577,6 +4577,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92270: // Summon effekt u Frozen orbu
             spellInfo->Effect[0] = 0;
             break;
+        case 93362: // Flamestrike summon effekt
+        case 93383:
+            spellInfo->Effect[1] = 0;
+            break;
         case 92303: // Zvysovanie rychlosti u Frozen orbu
             spellInfo->Effect[1] = 0;
             break;
