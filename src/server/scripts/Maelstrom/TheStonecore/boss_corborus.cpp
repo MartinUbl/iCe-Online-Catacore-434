@@ -86,9 +86,6 @@ public:
         void Reset()
         {
 
-            if (pInstance)
-                pInstance->SetData(DATA_CORBORUS, NOT_STARTED);
-
             if (me->GetEntry() == 43438) {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_PASSIVE);
@@ -204,7 +201,7 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 1000,true))
+                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
                         {
                             DoCast(pTarget, SPELL_CRYSTAL_BARRAGE);
                             ShardSpawn = true;
@@ -254,7 +251,7 @@ public:
 
                 if (submergedelayTimer <= diff)
                 {
-                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 1000,true);
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (!pTarget)
                         pTarget = me->getVictim();
                     if (pTarget)
@@ -604,7 +601,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 80,true);
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0,);
                     me->CastSpell(pTarget, SPELL_FEAR, false);
                     FearTimer = 20000;
                 }
@@ -614,7 +611,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 80,true);
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     me->CastSpell(pTarget, SPELL_SHADOW_BOLT, false);
                     ShadowBoltTimer = 8000;
                 }
@@ -624,7 +621,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0, 80,true);
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
                     me->CastSpell(pTarget, SPELL_SHADOWFURY, false);
                     ShadowfuryTimer = 15000;
                 }
@@ -721,10 +718,7 @@ public:
         void SpellHit(Unit* target, SpellEntry const* pSpell)
         {
             if (pSpell->Id == 81459)
-            {
                 me->UpdateEntry(IsHeroic() ? 49649 : 43552);
-            }
-        
         }
 
         void UpdateAI(const uint32 diff)
@@ -746,7 +740,7 @@ public:
             }
             else
             {
-                if (HealthBelowPct(95))
+                if (HealthBelowPct(95) || HealthBelowPct(30))
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                         me->CastSpell(me, 81459, false);
@@ -755,9 +749,8 @@ public:
                 if (ground_shockTimer <= diff)
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
-                    {
                         me->CastSpell(me, 81530, false);
-                    }
+
                     ground_shockTimer = urand(15000, 19000);
                 } else ground_shockTimer -= diff;
 
@@ -765,7 +758,7 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 30, true);
+                        Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0,);
                         me->CastSpell(pTarget, 81576, false);
                         lava_burstTimer = urand(5000, 10000);
                     }
@@ -796,7 +789,7 @@ UPDATE gameobject_template SET name = 'DEEPHOLM_ROCKDOOR_BREAK', data1 = 0 WHERE
 UPDATE creature_template SET scriptname='mob_stonecore_earthshaper',AIName='',faction_a=14,faction_h=14,minlevel = 81,maxlevel=81,health_mod='6.7282' WHERE entry IN (43552, 43537);
 UPDATE creature_template SET scriptname='mob_stonecore_earthshaper', faction_a=14,faction_h=14,minlevel=85,maxlevel=85,health_mod='6.4166' where entry = 49649;
 UPDATE creature_template SET scriptname='mob_millhouse', AIName='' WHERE entry = 43391;
-UPDATE creature_template SET heath_mod='3.9880' WHERE entry = 43552;
+UPDATE creature_template SET health_mod='3.9880' WHERE entry = 43552;
 UPDATE creature_template SET health_mod='8.3362', faction_a=14,faction_h=14 WHERE entry = 49662;
 
 INSERT INTO `creature_template` (`entry`,`difficulty_entry_1`,`modelid1`,`name`,`minlevel`,`maxlevel`,`exp`,`faction_A`,`faction_H`,`rank`,`mindmg`,`maxdmg`,`baseattacktime`,`unit_class`,`type`,`Health_mod`,`Mana_mod`,`ScriptName`)
