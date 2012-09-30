@@ -2206,12 +2206,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
     CombatStart(pVictim);
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
 
-    uint32 hitInfo;
-    if (attType == BASE_ATTACK)
-        hitInfo = HITINFO_NORMALSWING2;
-    else if (attType == OFF_ATTACK)
-        hitInfo = HITINFO_LEFTSWING;
-    else
+    if (attType != BASE_ATTACK && attType != OFF_ATTACK)
         return;                                             // ignore ranged case
 
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt

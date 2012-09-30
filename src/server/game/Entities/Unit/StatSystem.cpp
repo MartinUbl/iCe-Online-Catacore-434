@@ -491,26 +491,18 @@ void Player::UpdateShieldBlockValue()
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage)
 {
     UnitMods unitMod;
-    UnitMods attPower_pos;
-    UnitMods attPower_neg;
 
     switch(attType)
     {
         case BASE_ATTACK:
         default:
             unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_NEG;
             break;
         case OFF_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_NEG;
             break;
         case RANGED_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_RANGED;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_RANGED_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_RANGED_NEG;
             break;
     }
 

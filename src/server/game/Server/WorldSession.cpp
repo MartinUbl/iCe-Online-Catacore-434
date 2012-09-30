@@ -889,14 +889,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
             AddonInfo addon(addonName, enabled, crc, 2, true);
 
             SavedAddon const* savedAddon = sAddonMgr->GetAddonInfo(addonName);
-            if (savedAddon)
-            {
-                bool match = true;
-
-                if (addon.CRC != savedAddon->CRC)
-                    match = false;
-            }
-            else
+            if (!savedAddon)
                 sAddonMgr->SaveAddon(addon);
 
             // TODO: Find out when to not use CRC/pubkey, and other possible states.

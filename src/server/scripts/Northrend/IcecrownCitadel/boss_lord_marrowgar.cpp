@@ -461,7 +461,6 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                 if (Creature* marrowgar = GetCaster()->ToCreature())
                 {
                     CreatureAI* marrowgarAI = marrowgar->AI();
-                    bool yell = false;
                     uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {
@@ -471,12 +470,8 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                             target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_IMPALED);
                         if (!target)
                             break;
-                        yell = true;
                         target->CastCustomSpell(boneSpikeSummonId[i], SPELLVALUE_BASE_POINT0, 0, target, true);
                     }
-
-                   // if (yell)
-                    //    marrowgarAI->Talk(SAY_BONESPIKE);
                 }
             }
 

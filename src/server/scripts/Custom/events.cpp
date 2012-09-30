@@ -49,9 +49,8 @@ class npc_gh: public CreatureScript
         {
             pPlayer->PlayerTalkClass->ClearMenus();
 
-            QueryResult res = ScriptDatabase.PQuery("SELECT guildid, rank, password, phase, map, x, y, z FROM gh_system WHERE guildid = %u", pPlayer->GetGuildId());
+            QueryResult res = ScriptDatabase.PQuery("SELECT rank, password, phase, map, x, y, z FROM gh_system WHERE guildid = %u", pPlayer->GetGuildId());
 
-            uint32 guildid;
             uint16 phase;
             int8 rank;
             std::string password;
@@ -61,14 +60,13 @@ class npc_gh: public CreatureScript
             if (res != NULL) // Process
             {
                 Field* field = res->Fetch();
-                guildid = field[0].GetUInt32();
-                rank = field[1].GetInt8();
-                password = field[2].GetString();
-                phase = field[3].GetUInt16();
-                map = field[4].GetUInt16();
-                x = field[5].GetFloat();
-                y = field[6].GetFloat();
-                z = field[7].GetFloat();
+                rank = field[0].GetInt8();
+                password = field[1].GetString();
+                phase = field[2].GetUInt16();
+                map = field[3].GetUInt16();
+                x = field[4].GetFloat();
+                y = field[5].GetFloat();
+                z = field[6].GetFloat();
 
                 switch (uiAction)
                 {

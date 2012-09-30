@@ -3364,19 +3364,6 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     if (m_targets.HasDst())
     {
         m_targets.m_dstPos.GetPosition(x, y, z);
-
-        if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_DEST_TARGET_BACK)
-        {
-            // explicit cast data from client or server-side cast
-            // some spell at client send caster
-            Unit* pTarget = NULL;
-            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
-                pTarget = m_targets.getUnitTarget();
-            else if (m_caster->getVictim())
-                pTarget = m_caster->getVictim();
-            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                pTarget = ObjectAccessor::GetUnit(*m_caster, m_caster->ToPlayer()->GetSelection());
-        }
     }
     else
     {

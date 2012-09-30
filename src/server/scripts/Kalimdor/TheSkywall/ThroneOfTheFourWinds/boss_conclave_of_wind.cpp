@@ -583,10 +583,8 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
             if(m_ability_phase == 41)
             {
                 // Prepare dummy for farsight
-                uint64 dummyGUID = 0;
                 if(Creature* pDummy = me->SummonCreature(WORLD_TRIGGER, me->GetPositionX(), me->GetPositionY()+1, 237.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
                 {
-                    dummyGUID = pDummy->GetGUID();
                     //pDummy->SetVisibility(VISIBILITY_OFF);
                     pDummy->setFaction(14);
                     pDummy->SetFacingToObject(me);
