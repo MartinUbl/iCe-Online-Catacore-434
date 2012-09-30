@@ -601,7 +601,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0,);
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     me->CastSpell(pTarget, SPELL_FEAR, false);
                     FearTimer = 20000;
                 }
@@ -758,7 +758,7 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0,);
+                        Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                         me->CastSpell(pTarget, 81576, false);
                         lava_burstTimer = urand(5000, 10000);
                     }
