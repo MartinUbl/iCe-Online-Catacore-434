@@ -73,7 +73,7 @@ class MySQLConnection
     public:
         MySQLConnection(MySQLConnectionInfo& connInfo);                               //! Constructor for synchroneous connections.
         MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo);  //! Constructor for asynchroneous connections.
-        ~MySQLConnection();
+        virtual ~MySQLConnection();
 
         virtual bool Open();
         void Close();
