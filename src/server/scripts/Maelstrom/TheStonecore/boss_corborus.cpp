@@ -61,6 +61,7 @@ public:
         boss_corborusAI(Creature* c): ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            map = c->GetMap();
             Reset();
 
             c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -71,17 +72,21 @@ public:
         }
 
         InstanceScript* pInstance;
+
         uint32 phase;
+        Map* map;
+
         uint32 dampening_waveTimer;
         uint32 crystal_barrageTimer;
         uint32 crystal_shardTimer;
-        uint32 submergeTimer;
         uint32 delay;
         uint32 submergeCounter;
         uint32 ShardsCounter;
         uint32 submergedelayTimer;
+
         bool BeginPhase;
         bool ShardSpawn;
+        bool submerge[2];
 
         void Reset()
         {
@@ -98,7 +103,6 @@ public:
             crystal_barrageTimer = 10000;
             crystal_shardTimer = 500;
             delay = 500;
-            submergeTimer = 16000;
             submergedelayTimer = 3500;
 
             // Counters
@@ -108,6 +112,8 @@ public:
             // Boolean
             BeginPhase = false;
             ShardSpawn = false;
+            submerge[0] = true;
+            submerge[1] = true;
 
             // Safity...
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE) && me->GetEntry() != 43438)
@@ -116,8 +122,7 @@ public:
 
         void SummonedCreatureDies(Creature* pSummon, Unit* pKiller)
         {
-            if(pSummon->GetEntry() == NPC_ROCK_BORE)
-                pSummon->ForcedDespawn();
+            pSummon->ForcedDespawn();
         }
 
         void EnterCombat(Unit* pWho)
@@ -226,13 +231,18 @@ public:
 
                 } else crystal_shardTimer -= diff;
 
-                if (submergeTimer <= diff) {
+                if (HealthBelowPct(60) && submerge[0] == true) {
+                    submerge[0] = false;
                     BeginPhase = true;
                     delay = 500;
                     phase = 2;
-                    submergeTimer = 0;
                 }
-                else submergeTimer -= diff;
+                if (HealthBelowPct(15) && submerge[1] == true) {
+                    submerge[1] = false;
+                    BeginPhase = true;
+                    delay = 500;
+                    phase = 2;
+                }
             }
 
             if (phase == 2)
@@ -257,6 +267,25 @@ public:
                     if (pTarget)
                         DoCast(pTarget, SPELL_THRASHING_CHARGE);
 
+                    Map::PlayerList const& plrList = map->GetPlayers();
+                    if (plrList.isEmpty())
+                        return;
+
+                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    {
+                        if (Player* pl = itr->getSource())
+                        {
+                            if (pl->HasUnitMovementFlag(MOVEMENTFLAG_MOVING))
+                            {
+                                for (uint32 i = 0; i < 6;i++)
+                                {
+                                    Creature* pSummon = me->SummonCreature(NPC_ROCK_BORE, me->GetPositionX() + (i+1)*6.0f, me->GetPositionY(), me->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                                    pSummon->AI()->AttackStart(pTarget);
+                                }
+                            }
+                        }
+                    }
+
                     submergeCounter++;
                     submergedelayTimer = 7000;
                 } else submergedelayTimer -= diff;
@@ -270,7 +299,6 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         dampening_waveTimer = 3300;
                         submergeCounter = 0;
-                        submergeTimer = 20000;
                         phase = 1;
                     }
                 }
@@ -586,9 +614,12 @@ public:
                     for (std::list<uint64>::const_iterator itr = millhouse_summon.begin(); itr != millhouse_summon.end(); ++itr)
                     {
                         Creature* pSummons = NULL;
-                        if ((pSummons = map->GetCreature((*itr))) != NULL)
+                        if ((pSummons = map->GetCreature((*itr))) != NULL) {
                             pSummons->SetPhaseMask(2, false);
+                            pSummons->ForcedDespawn();
+                        }
                     }
+                    me->ForcedDespawn();
                     millhouse_kill = 25000;
                     start = false;
                 } else millhouse_kill -= diff;
@@ -693,6 +724,7 @@ public:
         }
 
         uint32 ground_shockTimer;
+        uint32 force_of_earthTimer;
         uint32 lava_burstTimer;
         uint32 dust_stormTimer;
         Position pos;
@@ -701,6 +733,7 @@ public:
         {
             ground_shockTimer = urand(8000, 12000);
             lava_burstTimer = urand(5000, 10000);
+            force_of_earthTimer = 3000;
             dust_stormTimer = 2000;
 
             if (me->GetEntry() == 43552 || me->GetEntry() == 49649)
@@ -740,11 +773,14 @@ public:
             }
             else
             {
-                if (HealthBelowPct(95) || HealthBelowPct(30))
+                if (force_of_earthTimer <= diff)
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
+                    {
                         me->CastSpell(me, 81459, false);
-                }
+                        force_of_earthTimer = 10000;
+                    }
+                } else force_of_earthTimer -= diff;
 
                 if (ground_shockTimer <= diff)
                 {

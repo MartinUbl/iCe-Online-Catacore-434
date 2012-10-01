@@ -4542,9 +4542,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 81828: // Thrashing Charge
         case 92651: // Thrashing Charge (heroic difficulty)
             // because bug of dbc we must set corrected target manually
-            spellInfo->EffectRadiusIndex[0] = 8; // 5 yards
-            spellInfo->EffectRadiusIndex[1] = 8; // 5 yards
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yards
+            spellInfo->EffectRadiusIndex[1] = 13; // 10 yards
             spellInfo->CastingTimeIndex = 1; // instant cast
+            break;
+        case 81629: // Submerge
+            spellInfo->EffectTriggerSpell[0] = 0; // Summon effect, summoned in DB
             break;
         case 81008: // Quake
         case 92631: // Quake (Heroic difficulty)
