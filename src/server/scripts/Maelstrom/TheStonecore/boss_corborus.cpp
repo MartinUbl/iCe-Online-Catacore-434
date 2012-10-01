@@ -693,7 +693,6 @@ public:
         }
 
         uint32 ground_shockTimer;
-        uint32 force_of_earthTimer;
         uint32 lava_burstTimer;
         uint32 dust_stormTimer;
         Position pos;
@@ -702,7 +701,6 @@ public:
         {
             ground_shockTimer = urand(8000, 12000);
             lava_burstTimer = urand(5000, 10000);
-            force_of_earthTimer = 3000;
             dust_stormTimer = 2000;
 
             if (me->GetEntry() == 43552 || me->GetEntry() == 49649)
@@ -742,14 +740,11 @@ public:
             }
             else
             {
-                if (force_of_earthTimer <= diff)
+                if (HealthBelowPct(95) || HealthBelowPct(30))
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
-                    {
                         me->CastSpell(me, 81459, false);
-                        force_of_earthTimer = 10000;
-                    }
-                } else -= diff;
+                }
 
                 if (ground_shockTimer <= diff)
                 {
