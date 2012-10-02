@@ -83,6 +83,7 @@ public:
         uint32 submergeCounter;
         uint32 ShardsCounter;
         uint32 submergedelayTimer;
+        uint32 rockboreTimer;
 
         bool BeginPhase;
         bool ShardSpawn;
@@ -104,6 +105,7 @@ public:
             crystal_shardTimer = 500;
             delay = 500;
             submergedelayTimer = 3500;
+            rockboreTimer = 3600;
 
             // Counters
             submergeCounter = 0;
@@ -135,8 +137,10 @@ public:
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
         {
-            if (pSpell->Id == SPELL_THRASHING_CHARGE)
+            if (pSpell->Id == SPELL_THRASHING_CHARGE) {
                 me->CastSpell(me->getVictim(), SPELL_THRASHING_CHARGE_2, false);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            }
         }
 
         void DoAction(const int32 Action)
@@ -221,7 +225,7 @@ public:
                 {
                     if (ShardsCounter <= 7)
                     {
-                        me->SummonCreature(NPC_CRYSTAL_SHARD, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN);
+                        me->SummonCreature(NPC_CRYSTAL_SHARD, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
                         ShardsCounter++;
                     }
                     crystal_shardTimer = 500;
@@ -259,31 +263,32 @@ public:
                     } else delay -= diff;
                 }
 
+                if (rockboreTimer <= diff)
+                {
+                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                    if (!pTarget)
+                        pTarget = me->getVictim();
+
+                    Creature* pSummon = me->SummonCreature(NPC_ROCK_BORE, pTarget->GetPositionX() + 10.0f, pTarget->GetPositionY(), pTarget->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    pSummon->AI()->AttackStart(pTarget);
+                    
+                    Unit* pTarget2 = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                    if (!pTarget2)
+                        pTarget2 = me->getVictim();
+
+                    Creature* pSummon2 = me->SummonCreature(NPC_ROCK_BORE, pTarget2->GetPositionX() + 10.0f, pTarget2->GetPositionY(), pTarget2->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    pSummon2->AI()->AttackStart(pTarget2);
+                    rockboreTimer = 7600;
+                } else rockboreTimer -= diff;
+
                 if (submergedelayTimer <= diff)
                 {
                     Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (!pTarget)
                         pTarget = me->getVictim();
-                    if (pTarget)
-                        DoCast(pTarget, SPELL_THRASHING_CHARGE);
-
-                    Map::PlayerList const& plrList = map->GetPlayers();
-                    if (plrList.isEmpty())
-                        return;
-
-                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                    {
-                        if (Player* pl = itr->getSource())
-                        {
-                            if (pl->HasUnitMovementFlag(MOVEMENTFLAG_MOVING))
-                            {
-                                for (uint32 i = 0; i < 6;i++)
-                                {
-                                    Creature* pSummon = me->SummonCreature(NPC_ROCK_BORE, me->GetPositionX() + (i+1)*6.0f, me->GetPositionY(), me->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                                    pSummon->AI()->AttackStart(pTarget);
-                                }
-                            }
-                        }
+                    if (pTarget) {
+                        me->CastSpell(pTarget, SPELL_THRASHING_CHARGE, false);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     }
 
                     submergeCounter++;
@@ -507,7 +512,7 @@ public:
                     if (yell == false) {
                     me->SetFacing(3.291410f, NULL);
                     me->CastSpell(me, SPELL_IMPENDING_DOOOOOOM_VISUAL, false);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
                     me->RemoveAurasDueToSpell(SPELL_BLUR);
                     me->SetReactState(REACT_AGGRESSIVE);
                     DoCombatStop();
