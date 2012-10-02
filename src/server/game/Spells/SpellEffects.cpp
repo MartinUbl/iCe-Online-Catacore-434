@@ -585,6 +585,37 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         pOwner->CastSpell(pOwner, 44544, true);
                     }
                 }
+                // Arcane Blast
+                else if (m_spellInfo->Id == 30451)
+                {
+                    if (m_caster && unitTarget && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Nether Vortex
+                        if (m_caster->HasAura(86209) || (m_caster->HasAura(86181) && roll_chance_i(50)))
+                        {
+                            Unit::AuraList const& myAuras = m_caster->GetSingleCastAuras();
+                            bool found = false;
+                            if (!myAuras.empty())
+                            {
+                                for (Unit::AuraList::const_iterator itr = myAuras.begin(); itr != myAuras.end(); ++itr)
+                                {
+                                    if ((*itr) && (*itr)->GetId() == 31589)
+                                    {
+                                        // search only on other targets than a current
+                                        Unit *owner = (*itr)->GetUnitOwner();
+                                        if (owner && unitTarget->GetGUID() != owner->GetGUID())
+                                        {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (!found)
+                                m_caster->CastSpell(unitTarget, 31589, true);
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_WARRIOR:
