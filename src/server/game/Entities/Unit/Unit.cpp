@@ -18701,11 +18701,7 @@ uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIn
         {
             if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
                 continue;
-
             amount = ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
-            if (amount > 500000)
-                sLog->outChar("IK ALERT: Spell ID %u, effIndex %u, amount: %i, totalticks: %i, actualtick: %i, isremoving: %u", spellId, effectIndex, (*i)->GetAmount(), (*i)->GetTotalTicks(), (*i)->GetTickNumber(), (*i)->GetBase()->IsRemoved() ? 1 : 0);
-
             break;
         }
 
