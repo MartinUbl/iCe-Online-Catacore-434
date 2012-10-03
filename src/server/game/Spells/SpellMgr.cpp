@@ -4530,7 +4530,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL; // active during Chakra state - do not remove by right-click
             break;
         case 43810: // Frost Wyrm
-            spellInfo->AttributesEx |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
+            spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
             count++;
             break;
         case 82415: // Dampening Wave
