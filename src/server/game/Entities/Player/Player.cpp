@@ -5397,6 +5397,16 @@ void Player::RepopAtGraveyard()
         return;
     }
 
+    switch (GetMapId())
+    {
+        case 723: // Stormwind (?)
+            TeleportTo(723, -8897, -172, 82,0);
+            break;
+        case 719: // Mount Hyjal Phase map
+            TeleportTo(719, 5157, -1378, 1356, 0);
+            break;
+    }
+
     // Vashj'ir GraveYard fix
     switch (GetAreaId())
     {
@@ -5480,7 +5490,7 @@ void Player::RepopAtGraveyard()
         case 5146: // Vashj'ir
             TeleportTo(0, -6800.419922f, 4561.220215f, -604.364014f, 0.0f); // GY ID - 1721
             break;
-        default:      
+        default:
             break;
     }
 
