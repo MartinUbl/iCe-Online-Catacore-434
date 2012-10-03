@@ -18703,7 +18703,7 @@ uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIn
                 continue;
 
             int32 total = (*i)->GetTotalTicks();
-            uint32 ticknum = (*i)->GetTickNumber();
+            int32 ticknum = (int32)(*i)->GetTickNumber();
             if (ticknum >= total)   // should not happen but happens...
             {
                 amount = 0;
