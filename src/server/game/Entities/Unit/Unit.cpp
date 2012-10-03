@@ -18701,7 +18701,16 @@ uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIn
         {
             if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
                 continue;
-            amount = ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
+
+            int32 total = (*i)->GetTotalTicks();
+            uint32 ticknum = (*i)->GetTickNumber();
+            if (ticknum >= total)   // should not happen but happens...
+            {
+                amount = 0;
+                break;
+            }
+
+            amount = ((*i)->GetAmount() * (total - ticknum)) / total;
             break;
         }
 
