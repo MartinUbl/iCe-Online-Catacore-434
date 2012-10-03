@@ -3897,6 +3897,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        case 31700: // Black Qiraji Battle Tank
         case 44824: // Flying Reindeer
             // iCelike casting time fix - 1.5seconds like other mounts
             spellInfo->CastingTimeIndex = 16;
