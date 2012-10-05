@@ -312,8 +312,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         Unit* unit = ((Unit*)this);
         Player *player = ((Player*)unit);
 
-        bool isTransport = ((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_ONTRANSPORT;
-        bool isSplineEnabled = ((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_SPLINE_ENABLED;
+        bool isTransport = (unit->m_movementInfo.t_guid != 0);
+        bool isSplineEnabled = ((Unit*)this)->IsSplineEnabled();
         bool swimming = ((((Unit*)this)->m_movementInfo.GetMovementFlags() & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) ||
             (((Unit*)this)->m_movementInfo.GetExtraMovementFlags() & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
         bool interPolatedTurning = ((Unit*)this)->m_movementInfo.GetExtraMovementFlags() & MOVEMENTFLAG2_INTERPOLATED_TURNING;
@@ -413,7 +413,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         const Player* player = ((Player*)this);
         const Unit* unit = ((Unit*)this);
 
-        bool isSplineEnabled = ((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_SPLINE_ENABLED;
+        bool isSplineEnabled = ((Unit*)this)->IsSplineEnabled();
         bool swimming = ((((Unit*)this)->m_movementInfo.GetMovementFlags() & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) ||
                         (((Unit*)this)->m_movementInfo.GetExtraMovementFlags() & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
 
@@ -442,7 +442,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
         *data << ((Unit*)this)->GetSpeed(MOVE_SWIM_BACK);
 
-        if (((Unit*)this)->m_movementInfo.GetMovementFlags() & MOVEMENTFLAG_SPLINE_ENABLED)
+        if (isSplineEnabled)
             Movement::PacketBuilder::WriteCreateBits(*self->movespline, *data);
 /*
         if (player && player->isInFlight())
@@ -1320,7 +1320,13 @@ void MovementInfo::OutDebug()
     sLog->outString("flags2 %u", flags2);
     sLog->outString("time %u current time " UI64FMTD "", flags2, uint64(::time(NULL)));
     sLog->outString("position: `%s`", pos.ToString().c_str());
-    if (flags & MOVEMENTFLAG_ONTRANSPORT)
+    sLog->outString("MOVEMENT INFO");
+    sLog->outString("guid " UI64FMTD, guid);
+    sLog->outString("flags %u", flags);
+    sLog->outString("flags2 %u", flags2);
+    sLog->outString("time %u current time " UI64FMTD "", flags2, uint64(::time(NULL)));
+    sLog->outString("position: `%s`", pos.ToString().c_str());
+    if (t_guid)
     {
         sLog->outString("TRANSPORT:");
         sLog->outString("guid: " UI64FMTD, t_guid);
@@ -1335,7 +1341,7 @@ void MovementInfo::OutDebug()
         sLog->outString("pitch: %f", pitch);
     }
     sLog->outString("fallTime: %u", fallTime);
-    if (flags & MOVEMENTFLAG_JUMPING)
+    if (flags & MOVEMENTFLAG_FALLING)
     {
         sLog->outString("j_zspeed: %f j_sinAngle: %f j_cosAngle: %f j_xyspeed: %f", j_zspeed, j_sinAngle, j_cosAngle, j_xyspeed);
     }

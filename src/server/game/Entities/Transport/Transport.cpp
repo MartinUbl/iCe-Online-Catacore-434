@@ -670,7 +670,6 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     }
 
     pCreature->SetTransport(this);
-    pCreature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     pCreature->m_movementInfo.guid = GetGUID();
     pCreature->m_movementInfo.t_pos.Relocate(x, y, z, o);
 
