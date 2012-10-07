@@ -540,7 +540,10 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     //when dying/logging out
     m_oldpetspell = 0;
     m_lastpetnumber = 0;
-    
+
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
+
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_mapid=0;
@@ -19182,15 +19185,14 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
 
 void Player::_LoadRatedBGData()
 {
+    SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, 0);
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
+
     QueryResult result = CharacterDatabase.PQuery("SELECT rating, matches_won, matches_lost FROM character_rated_bg_stats WHERE guid = %u", GetGUIDLow());
-    
+
     if (!result)
-    {
-        SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, 0);
-        m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
-        m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
         return;
-    }
 
     Field *fields = result->Fetch();
 
