@@ -152,6 +152,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+            me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             if (instance)
                 instance->SetData(DATA_COUNCIL, NOT_STARTED);
         }
@@ -353,40 +354,7 @@ public:
                     me->SendPlaySound(20400, false);
 
                     if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) 
-                    {/*
-                        uint32 counter=0; // Obmedzenie na 3 targety
-
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)) // Na jedneho zacastim  ostatnym dam iba auru
-                        {
-                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+35);
-                            DoCast(target,84948);
-                        }
-
-                    for(int i=0;i<10;i++)
                     {
-                        if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 1, 500, true))
-                            if(!player->HasAura(92486 ) && !player->HasAura(92488 ) && player->isAlive()) // Ak uz nema na sebe GC
-                            {
-                                if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                                {
-                                        me->AddAura(92486,player);
-                                        DoCast(player,84952,true);
-                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+35);
-                                }
-                                if (getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                                {
-                                        me->AddAura(92488,player);
-                                        DoCast(player,84952,true);
-                                        player->ToPlayer()->GetMotionMaster()->MovePoint(0,player->GetPositionX(),player->GetPositionY(),player->GetPositionZ()+35);
-                                }
-                                counter++;
-                            }
-                            if(counter>=2)
-                            {
-                                Gravity_crush_timer=25000;
-                                break;
-                            }
-                        }*/
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
@@ -666,8 +634,6 @@ public:
         uint32 Frozen_timer;
         uint32 Tele_debug_timer;
         uint32 PHASE;
-        GameObject* pGO_Door1; // Dvere  na uzamknutie miestnosti pri encountry
-        GameObject* pGO_Door2;
         bool check_debuff,Hp_dropped,can_interrupt,debuged;
 
 
@@ -686,13 +652,13 @@ public:
             check_debuff=Hp_dropped=can_interrupt=false;
             debuged=true;
             PHASE=1;
-            pGO_Door1=pGO_Door2=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+            me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -717,8 +683,8 @@ public:
             me->SendPlaySound(20162, false);
 
             // Miestnost by sa mala uzavriet pri zacati encounteru
-            pGO_Door1=me->SummonGameObject(401930,-908.46f,-582.9257f,831.901f,0.15f,0,0,0,0,0); // Dvere 1
-            pGO_Door2=me->SummonGameObject(401930,-1108.666f,-582.5855f,841.283508f,3.161f,0,0,0,0,0);  // Dvere 2
+            me->SummonGameObject(401930,-908.46f,-582.9257f,831.901f,0.15f,0,0,0,0,0); // Dvere 1
+            me->SummonGameObject(401930,-1108.666f,-582.5855f,841.283508f,3.161f,0,0,0,0,0);  // Dvere 2
 
             if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true))
             {
@@ -736,11 +702,10 @@ public:
 
         void EnterEvadeMode() // Pri wipe raidu despawnem dvere
         {
-            if(pGO_Door1)
-                pGO_Door1->Delete();
-
-                if(pGO_Door2)
-                    pGO_Door2->Delete();
+            if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
+                    pGoDoor1->Delete();
+            if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
+                    pGoDoor2->Delete();
 
             ScriptedAI::EnterEvadeMode();
             if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true)) // Despawn Monstrosity ak na nej wipli hraci
@@ -968,8 +933,8 @@ public:
         uint32 PHASE;
         uint32 flames_break;
         uint32 Speaking_timer;
-        uint32 Static_overload_timer;
-        uint32 Gravity_core_timer;
+//        uint32 Static_overload_timer;
+//        uint32 Gravity_core_timer;
         uint32 Stack,counter;
         bool aegis_used,ticked,can_spread_fire,can_knock,Hp_dropped,speaked,can_interrupt,debuged;
         Unit* Rush_target;
@@ -988,8 +953,8 @@ public:
             Flame_torrent_timer=10000;
             Inferno_rush_timer=15000;
             Burning_blood_timer=27000;
-            Static_overload_timer=20000;
-            Gravity_core_timer=24000;
+            //Static_overload_timer=20000;
+            //Gravity_core_timer=24000;
             Ticking_timer=1000;
             spread_flame_timer=100;
             Stack=counter=0;
@@ -1002,6 +967,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+            me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
         }
 
@@ -1024,6 +990,9 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
+             if( (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514)) && ( getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC )) // Ak ma boss nasebe stit hraci maju donho zvyseny dmg o 10 %
+                damage=damage*1.1;  // due to broken buff which should increase dmg done by players
+
              if (damage > me->GetHealth() || damage > 500000 )
                 damage=0; // Zabranim IK dmgu od magovho Ignite
         }
@@ -1087,7 +1056,7 @@ public:
                 }
             }
 
-            if(Static_overload_timer<=diff)
+            /*if(Static_overload_timer<=diff)
             {
                 if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
@@ -1096,10 +1065,10 @@ public:
                         Static_overload_timer=20000; // Po 10 sekundach hracom debuff zhodim
                 }
             }
-            else Static_overload_timer-=diff;
+            else Static_overload_timer-=diff;*/
 
 
-            if(Gravity_core_timer<=diff) 
+            /*if(Gravity_core_timer<=diff) 
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
@@ -1112,7 +1081,7 @@ public:
                     Gravity_core_timer=20000;
                 }
             }
-            else Gravity_core_timer-=diff;
+            else Gravity_core_timer-=diff;*/
 
 
             if(aegis_used && !me->IsNonMeleeSpellCasted(false) && (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514))) //Cast rising flames hned po nahodeni stitu ( AEGIS_OF_FLAME)
@@ -1314,8 +1283,8 @@ public:
         void Reset()
         {
             if(Creature *pTarget = me->FindNearestCreature(43687, 500, true))
-                Bomb_timer= 3200 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
-            else Bomb_timer =3200+ urand(500,3000); // keby nahodou
+                Bomb_timer= 3000 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
+            else Bomb_timer =3000+ urand(500,3000); // keby nahodou
 
             me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_DISABLE_MOVE);
             bombed=false;
@@ -1374,7 +1343,7 @@ public:
         {
             if(flame_timer<=diff && !fired)
             {
-                DoCast(me,SPELL_INFERNO_RUSH_AOE);
+                me->AddAura(SPELL_INFERNO_RUSH_AOE,me);
                 fired=true;
             }
             else flame_timer-=diff;
@@ -1437,6 +1406,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+            me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             me->SetInCombatWithZone();
         }
 
@@ -1792,6 +1762,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
+            me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             me->SetSpeed(MOVE_RUN, 1.5f, true);
             me->SetInCombatWithZone();
         }
