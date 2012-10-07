@@ -4689,6 +4689,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[1] = 11; // 40 yards
             spellInfo->EffectRadiusIndex[2] = 11; // 40 yards
             break;
+        case 81272: // Electrocute radius index ( Nefarian Encounter in BWD )
+        case 94088:
+        case 94089:
+        case 94090:
+            spellInfo->EffectRadiusIndex[0] = 22;
+            break;
         default:
             break;
         }
