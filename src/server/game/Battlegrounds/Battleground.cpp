@@ -2003,7 +2003,7 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
 
 void Battleground::RatedBattlegroundWon(Player *player)
 {
-    /*uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
     float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
 
@@ -2018,14 +2018,15 @@ void Battleground::RatedBattlegroundWon(Player *player)
 
     //player->UpdateMaxWeekRating(CP_SOURCE_RATED_BG, 0);
     //player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f) * PLAYER_CURRENCY_PRECISION);
-    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)ceil(player->GetConquestPointCap() / 3.0f));
 
-    player->SaveToDB();*/
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)ceil(player->GetConquestPointCap() / 6.0f));
+
+    player->SaveToDB();
 }
 
 void Battleground::RatedBattlegroundLost(Player *player)
 {
-    /*uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
     uint32 player_rating = player->GetRatedBattlegroundRating();
 
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
@@ -2042,12 +2043,12 @@ void Battleground::RatedBattlegroundLost(Player *player)
 
     player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST);
 
-    player->SaveToDB();*/
+    player->SaveToDB();
 }
 
 void Battleground::RatedBattlegroundLostOffline(uint64 guid)
 {
-    /*uint32 opponent_team_rating = GetArenaMatchmakerRating(m_Players[guid].Team == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 opponent_team_rating = GetArenaMatchmakerRating(m_Players[guid].Team == ALLIANCE ? HORDE : ALLIANCE);
     BattlegroundScore *score = m_PlayerScores[guid];
     if (!score)
         return;
@@ -2063,5 +2064,5 @@ void Battleground::RatedBattlegroundLostOffline(uint64 guid)
 
     SetBattlegroundRatingChangeForPlayer(guid, rating_change);
 
-    CharacterDatabase.PExecute("UPDATE character_rated_bg_stats SET rating = %u, matches_lost = matches_lost + 1 WHERE guid = %u", player_rating + rating_change, GUID_LOPART(guid));*/
+    CharacterDatabase.PExecute("UPDATE character_rated_bg_stats SET rating = %u, matches_lost = matches_lost + 1 WHERE guid = %u", player_rating + rating_change, GUID_LOPART(guid));
 }
