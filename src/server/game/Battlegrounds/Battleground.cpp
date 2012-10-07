@@ -2003,16 +2003,14 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
 
 void Battleground::RatedBattlegroundWon(Player *player)
 {
-    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    /*uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
     float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
 
     int32 rating_change = (int32)ceil(92.0f * win_mod);
 
-    sLog->outChar("RatedBG: Player %s won rated BG match, rating change would be %i", player->GetName(), rating_change);
-
     SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
-    /*player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
+    player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
     player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON);
 
     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, player->GetRatedBattlegroundRating() + rating_change);
@@ -2027,7 +2025,7 @@ void Battleground::RatedBattlegroundWon(Player *player)
 
 void Battleground::RatedBattlegroundLost(Player *player)
 {
-    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    /*uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
     uint32 player_rating = player->GetRatedBattlegroundRating();
 
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
@@ -2038,11 +2036,9 @@ void Battleground::RatedBattlegroundLost(Player *player)
     if (int32(player_rating) + rating_change < 0)
         rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
 
-    sLog->outChar("RatedBG: Player %s lost rated BG match, rating change would be %i", player->GetName(), rating_change);
-
     // we need to store it to show the final scoreboard
     SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
-    /*player->SetRatedBattlegroundRating(player_rating + rating_change);
+    player->SetRatedBattlegroundRating(player_rating + rating_change);
 
     player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST);
 
