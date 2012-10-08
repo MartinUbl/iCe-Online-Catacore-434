@@ -1041,6 +1041,8 @@ struct GlyphSlotEntry
 
 // All Gt* DBC store data for 100 levels, some by 100 per class/race
 #define GT_MAX_LEVEL    100
+// gtOCTClassCombatRatingScalar.dbc stores data for 32 ratings, look at MAX_COMBAT_RATING for real used amount
+#define GT_MAX_RATING   32
 
 struct GtBarberShopCostBaseEntry
 {
@@ -1075,6 +1077,12 @@ struct GtChanceToSpellCritBaseEntry
 struct GtChanceToSpellCritEntry
 {
     //uint32 level;
+    float    ratio;
+};
+
+struct GtOCTClassCombatRatingScalarEntry
+{
+    uint32   Id;
     float    ratio;
 };
 
