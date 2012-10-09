@@ -3882,21 +3882,31 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult result, int32 limit)
         uint32 acc_id = fields[0].GetUInt32();
         std::string acc_name = fields[1].GetString();
 
-        QueryResult chars = CharacterDatabase.PQuery("SELECT guid,name FROM characters WHERE account = '%u'", acc_id);
+        QueryResult chars = CharacterDatabase.PQuery("SELECT guid,name,level,online FROM characters WHERE account = '%u'", acc_id);
         if (chars)
         {
             PSendSysMessage(LANG_LOOKUP_PLAYER_ACCOUNT,acc_name.c_str(),acc_id);
 
             uint64 guid = 0;
             std::string name;
+            std::string isOnline;
+            uint32 level;
+            uint8 online;
 
             do
             {
                 Field* charfields = chars->Fetch();
                 guid = charfields[0].GetUInt64();
                 name = charfields[1].GetString();
+                level = charfields[2].GetUInt32();
+                online = charfields[3].GetUInt8();
 
-                PSendSysMessage(LANG_LOOKUP_PLAYER_CHARACTER,name.c_str(),guid);
+                if (online == 1)
+                    isOnline = "online";
+                else
+                    isOnline = "offline";
+
+                PSendSysMessage(LANG_LOOKUP_PLAYER_CHARACTER,name.c_str(),GUID_LOPART(guid),isOnline.c_str(),level);
                 ++i;
 
             } while (chars->NextRow() && (limit == -1 || i < limit));
