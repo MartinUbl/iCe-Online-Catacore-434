@@ -89,6 +89,8 @@ public:
         bool ShardSpawn;
         bool submerge[2];
 
+        Position crystal_pos;
+
         void Reset()
         {
 
@@ -213,6 +215,9 @@ public:
                         if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
                         {
                             DoCast(pTarget, SPELL_CRYSTAL_BARRAGE);
+                            crystal_pos.m_positionX = pTarget->GetPositionX();
+                            crystal_pos.m_positionY = pTarget->GetPositionY();
+                            crystal_pos.m_positionZ = pTarget->GetPositionZ();
                             ShardSpawn = true;
                             crystal_shardTimer = 500;
                             ShardsCounter = 0;
@@ -221,19 +226,25 @@ public:
                     }
                 } else crystal_barrageTimer -= diff;
 
-                if (IsHeroic() && crystal_shardTimer <= diff && ShardSpawn == true)
+                if (IsHeroic()) // Reworked Crystal Shards spawn
                 {
-                    if (ShardsCounter <= 7)
+                    if (ShardSpawn == true)
                     {
-                        me->SummonCreature(NPC_CRYSTAL_SHARD, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
-                        ShardsCounter++;
+                        if (crystal_shardTimer <= diff)
+                        {
+                            if (ShardsCounter <= 7)
+                            {
+                                me->SummonCreature(NPC_CRYSTAL_SHARD, crystal_pos.GetPositionX(),crystal_pos.GetPositionY(),crystal_pos.GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                                ShardsCounter++;
+                            }
+                            crystal_shardTimer = 500;
+
+                            if (ShardsCounter == 8)
+                                ShardSpawn = false;
+
+                        } else crystal_shardTimer -= diff;
                     }
-                    crystal_shardTimer = 500;
-
-                    if (ShardsCounter == 8)
-                        ShardSpawn = false;
-
-                } else crystal_shardTimer -= diff;
+                }
 
                 if (HealthBelowPct(60) && submerge[0] == true) {
                     submerge[0] = false;

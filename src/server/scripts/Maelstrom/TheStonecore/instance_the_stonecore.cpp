@@ -127,8 +127,10 @@ public:
 
             if (pGO->GetEntry() == 4510265)
             {
-                if (auiEncounter[DATA_CORBORUS_EVENT] == DONE)
+                if (auiEncounter[DATA_CORBORUS_EVENT] == DONE) {
+                    pGO->SetPhaseMask(2,false);
                     pGO->Delete();
+                }
             }
 
         }
@@ -208,8 +210,10 @@ public:
             {
                 if (auiEncounter[DATA_CORBORUS_EVENT] == DONE) {
                     corborus_new->SetPhaseMask(PHASEMASK_NORMAL, false);
-                    if (GameObject* go = this->instance->GetGameObject(wallGUID))
+                    if (GameObject* go = this->instance->GetGameObject(wallGUID)) {
+                        go->SetPhaseMask(2, false);
                         go->Delete();
+                    }
                 }
             }
 
