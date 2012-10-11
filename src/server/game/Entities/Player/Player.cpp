@@ -5404,10 +5404,10 @@ void Player::RepopAtGraveyard()
     {
         case 723: // Stormwind (?)
             TeleportTo(723, -8897, -172, 82,0);
-            break;
+            return;
         case 719: // Mount Hyjal Phase map
             TeleportTo(719, 5157, -1378, 1356, 0);
-            break;
+            return;
     }
 
     // Vashj'ir GraveYard fix
