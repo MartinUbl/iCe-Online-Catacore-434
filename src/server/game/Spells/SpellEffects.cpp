@@ -5145,7 +5145,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 case SUMMON_TYPE_TOTEM:
                 {
                     // we need to know the totem's GUID before it is actually created
-                    uint32 lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+                    uint32 lowGUID = sObjectMgr->GenerateLowGuidForUnit(true);
                     if (m_originalCaster->GetTypeId() == TYPEID_PLAYER
                         && properties->Slot >= SUMMON_SLOT_TOTEM
                         && properties->Slot < MAX_TOTEM_SLOT)

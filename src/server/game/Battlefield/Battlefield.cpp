@@ -940,7 +940,7 @@ Creature *Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
     }
 
     //Create creature
-    uint32 db_guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 db_guid = sObjectMgr->GenerateLowGuidForUnit(true);
     Creature* creature = new Creature;
     if (!creature->Create(db_guid, map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
     {

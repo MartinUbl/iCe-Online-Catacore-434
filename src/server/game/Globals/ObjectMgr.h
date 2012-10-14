@@ -1076,6 +1076,7 @@ class ObjectMgr
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
+        uint32 GenerateLowGuidForUnit(bool temporary);
         uint32 GenerateArenaTeamId();
         uint32 GenerateAuctionID();
         uint64 GenerateEquipmentSetGuid();
@@ -1354,9 +1355,10 @@ class ObjectMgr
         uint32 m_mailid;
         uint32 m_hiPetNumber;
 
-        // first free low guid for seelcted guid type
+        // first free low guid for selected guid type
         uint32 m_hiCharGuid;
         uint32 m_hiCreatureGuid;
+        uint32 m_hiTempCreatureGuid;
         uint32 m_hiPetGuid;
         uint32 m_hiVehicleGuid;
         uint32 m_hiItemGuid;

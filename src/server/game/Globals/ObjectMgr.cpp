@@ -269,6 +269,7 @@ ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid        = 1;
     m_hiCreatureGuid    = 1;
+    m_hiTempCreatureGuid = 0x0FFFFFFE; // the same guid space as for normal creature guids, but from highest possible to lowest
     m_hiPetGuid         = 1;
     m_hiVehicleGuid     = 1;
     m_hiItemGuid        = 1;
@@ -6587,12 +6588,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiItemGuid++;
         case HIGHGUID_UNIT:
-            if (m_hiCreatureGuid >= 0x0FFFFFFE)
-            {
-                sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
-                ASSERT("Creature guid overflow!" && false);
-            }
-            return m_hiCreatureGuid++;
+            return GenerateLowGuidForUnit(false);
         case HIGHGUID_PET:
             if (m_hiPetGuid >= 0x00FFFFFE)
             {
@@ -6655,6 +6651,28 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 
     ASSERT(0);
     return 0;
+}
+
+uint32 ObjectMgr::GenerateLowGuidForUnit(bool temporary)
+{
+    if (!temporary)
+    {
+        if (m_hiCreatureGuid >= m_hiTempCreatureGuid)
+        {
+            sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
+            ASSERT("Creature guid overflow!" && false);
+        }
+        return m_hiCreatureGuid++;
+    }
+    else
+    {
+        if (m_hiTempCreatureGuid <= m_hiCreatureGuid)
+        {
+            sLog->outError("Temporary creature guid uderflow!! Can't continue, shutting down server. ");
+            ASSERT("Temporary creature guid underflow!" && false);
+        }
+        return m_hiTempCreatureGuid--;
+    }
 }
 
 void ObjectMgr::LoadGameObjectLocales()

@@ -1954,7 +1954,7 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
     }
     if(!lowGUID)
     {
-        lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+        lowGUID = sObjectMgr->GenerateLowGuidForUnit(true);
     }
 
     if (!summon->Create(lowGUID, this, phase, entry, vehId, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
