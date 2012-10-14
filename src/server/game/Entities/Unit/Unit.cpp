@@ -9579,10 +9579,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+30);
                 break;
-            // 20 second cooldown
+            // 20 second cooldown and hp check
             case 90998: // Sorrowsong
             case 91003: // Sorrowsong (Heroic)
-                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id) || !pVictim || pVictim->GetHealthPct() > 35.0f)
                     return false;
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+20);
