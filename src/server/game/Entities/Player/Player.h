@@ -963,6 +963,7 @@ public:
 			return false;
 	}
 	void AppendTaximaskTo(ByteBuffer& data,bool all);
+	bool AutomaticTaxiNodeLearn(uint32 nodeid);
 
 	// Destinations
 	bool LoadTaxiDestinationsFromString(const std::string& values, uint32 team);
