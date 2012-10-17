@@ -239,6 +239,160 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket & recv_data)
     }
 }
 
+void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
+{
+    Player* pPlayer = GetPlayer();
+
+    // Read data
+
+    uint32 count = recv_data.ReadBits(22);
+    int32 cost = 0;
+
+    if (count < EQUIPMENT_SLOT_START || count >= EQUIPMENT_SLOT_END)
+    {
+        recv_data.rfinish();
+        return;
+    }
+
+    std::vector<ObjectGuid> itemGuids(count, ObjectGuid(0));
+    std::vector<uint32> newEntries(count, 0);
+    std::vector<uint32> slots(count, 0);
+
+    for (uint8 i = 0; i < count; ++i)
+    {
+        itemGuids[i][0] = recv_data.ReadBit();
+        itemGuids[i][5] = recv_data.ReadBit();
+        itemGuids[i][6] = recv_data.ReadBit();
+        itemGuids[i][2] = recv_data.ReadBit();
+        itemGuids[i][3] = recv_data.ReadBit();
+        itemGuids[i][7] = recv_data.ReadBit();
+        itemGuids[i][4] = recv_data.ReadBit();
+        itemGuids[i][1] = recv_data.ReadBit();
+    }
+
+    ObjectGuid npcGuid;
+    npcGuid[7] = recv_data.ReadBit();
+    npcGuid[3] = recv_data.ReadBit();
+    npcGuid[5] = recv_data.ReadBit();
+    npcGuid[6] = recv_data.ReadBit();
+    npcGuid[1] = recv_data.ReadBit();
+    npcGuid[4] = recv_data.ReadBit();
+    npcGuid[0] = recv_data.ReadBit();
+    npcGuid[2] = recv_data.ReadBit();
+
+    recv_data.FlushBits();
+
+    for (uint32 i = 0; i < count; ++i)
+    {
+        recv_data >> uint32(newEntries[i]);
+
+        recv_data.ReadByteSeq(itemGuids[i][1]);
+        recv_data.ReadByteSeq(itemGuids[i][5]);
+        recv_data.ReadByteSeq(itemGuids[i][0]);
+        recv_data.ReadByteSeq(itemGuids[i][4]);
+        recv_data.ReadByteSeq(itemGuids[i][6]);
+        recv_data.ReadByteSeq(itemGuids[i][7]);
+        recv_data.ReadByteSeq(itemGuids[i][3]);
+        recv_data.ReadByteSeq(itemGuids[i][2]);
+
+        recv_data >> uint32(slots[i]);
+    }
+
+    recv_data.ReadByteSeq(npcGuid[7]);
+    recv_data.ReadByteSeq(npcGuid[2]);
+    recv_data.ReadByteSeq(npcGuid[5]);
+    recv_data.ReadByteSeq(npcGuid[4]);
+    recv_data.ReadByteSeq(npcGuid[3]);
+    recv_data.ReadByteSeq(npcGuid[1]);
+    recv_data.ReadByteSeq(npcGuid[6]);
+    recv_data.ReadByteSeq(npcGuid[0]);
+
+    // Validate
+
+    if (!pPlayer->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_TRANSMOGRIFIER))
+        return;
+
+    for (uint8 i = 0; i < count; ++i)
+    {
+        // slot of the transmogrified item
+        if (slots[i] < EQUIPMENT_SLOT_START || slots[i] >= EQUIPMENT_SLOT_END)
+            return;
+
+        // entry of the transmogrifier item, if it's not 0
+        if (newEntries[i])
+        {
+            ItemPrototype const* pProto = sObjectMgr->GetItemPrototype(newEntries[i]);
+            if (!pProto)
+                return;
+        }
+
+        Item* itemTransmogrifier = NULL;
+
+        // guid of the transmogrifier item, if it's not 0
+        if (itemGuids[i])
+        {
+            itemTransmogrifier = pPlayer->GetItemByGuid(itemGuids[i]);
+
+            if (!itemTransmogrifier)
+                return;
+        }
+
+        // transmogrified item
+        Item* itemTransmogrified = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]);
+
+        if (!itemTransmogrified)
+        {
+            SendNotification("You can only transmogrify an item to take the appearance of an item of the same type and slot.");
+            return;
+        }
+
+        if (!newEntries[i]) // reset visible
+        {
+            itemTransmogrified->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
+            pPlayer->SetVisibleItemSlot(slots[i], itemTransmogrified);
+        }
+        else
+        {
+            if (!Item::CanTransmogrifyItemWithItem(itemTransmogrified, itemTransmogrifier))
+            {
+                SendNotification("This item's appearance cannot be used.");
+                return;
+            }
+
+            // All okay, proceed
+
+            cost += itemTransmogrified->GetTransmogrifyCost();
+
+            if (cost) // Modify money
+            {
+                if (!pPlayer->HasEnoughMoney(cost))
+                {
+                    SendNotification("You don't have enough money!");
+                    return;
+                }
+                else
+                    pPlayer->ModifyMoney(-int32(cost));
+            }
+
+            itemTransmogrified->SetEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT, newEntries[i], 0, 0);
+            pPlayer->SetVisibleItemSlot(slots[i], itemTransmogrified);
+
+            itemTransmogrified->UpdatePlayedTime(pPlayer);
+
+            itemTransmogrified->SetOwnerGUID(pPlayer->GetGUID());
+            itemTransmogrified->SetNotRefundable(pPlayer);
+            itemTransmogrified->ClearSoulboundTradeable(pPlayer);
+
+            if (itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_EQUIPED || itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_USE)
+                itemTransmogrifier->SetBinding(true);
+
+            itemTransmogrifier->SetOwnerGUID(pPlayer->GetGUID());
+            itemTransmogrifier->SetNotRefundable(pPlayer);
+            itemTransmogrifier->ClearSoulboundTradeable(pPlayer);
+        }
+    }
+}
+
 void WorldSession::HandleDestroyItemOpcode(WorldPacket & recv_data)
 {
     //sLog->outDebug("WORLD: CMSG_DESTROYITEM");

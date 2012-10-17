@@ -167,14 +167,15 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT          = 5,
     PRISMATIC_ENCHANTMENT_SLOT      = 6,                    // added at apply special permanent enchantment
     REFORGING_ENCHANTMENT_SLOT      = 8,
-    MAX_INSPECTED_ENCHANTMENT_SLOT  = 9,                    // need some research, 9 is the right value
+    TRANSMOGRIFY_ENCHANTMENT_SLOT   = 9,
+    MAX_INSPECTED_ENCHANTMENT_SLOT  = 10,                    // need some research, 9 is the right value
 
-    PROP_ENCHANTMENT_SLOT_0         = 9,                    // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_1         = 10,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_2         = 11,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_3         = 12,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_4         = 13,                   // used with RandomSuffix and RandomProperty
-    MAX_ENCHANTMENT_SLOT            = 14
+    PROP_ENCHANTMENT_SLOT_0         = 10,                    // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_1         = 12,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_2         = 13,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_3         = 14,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_4         = 15,                   // used with RandomSuffix and RandomProperty
+    MAX_ENCHANTMENT_SLOT            = 16
 };
 
 #define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)
@@ -335,10 +336,12 @@ class Item : public Object
 
         bool hasQuest(uint32 quest_id) const { return GetProto()->StartQuest == quest_id; }
         bool hasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
+        bool HasStats() const;
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsWeaponVellum() const { return GetProto()->IsWeaponVellum(); }
         bool IsArmorVellum() const { return GetProto()->IsArmorVellum(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
+        bool IsRangedWeapon() const { return GetProto()->IsRangedWeapon(); }
 
         // Item Refund system
         void SetNotRefundable(Player *owner, bool changestate = true);
@@ -355,11 +358,27 @@ class Item : public Object
 
         // Soulbound trade system
         void SetSoulboundTradeable(AllowedLooterSet* allowedLooters, Player* currentOwner, bool apply);
+        void ClearSoulboundTradeable(Player* currentOwner);
         bool CheckSoulboundTradeExpire();
 
         void BuildUpdate(UpdateDataMapType&);
 
         uint32 GetScriptId() const { return GetProto()->ScriptId; }
+
+        // Item Transmogrify system
+        bool CanBeTransmogrified() const;
+        bool CanTransmogrify() const;
+        static bool CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier);
+        uint32 GetTransmogrifyCost() const;
+
+        uint32 GetVisibleEntry() const
+        {
+            if (uint32 transmogrification = GetEnchantmentId(TRANSMOGRIFY_ENCHANTMENT_SLOT))
+                return transmogrification;
+            return GetEntry();
+        }
+        static uint32 GetSellPrice(ItemPrototype const* pProto, bool& success);
+
     private:
         std::string m_text;
         uint8 m_slot;

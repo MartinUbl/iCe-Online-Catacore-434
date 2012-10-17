@@ -750,6 +750,13 @@ struct ItemPrototype
     bool IsWeaponVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT; }
     bool IsArmorVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_PROTO_FLAG_CONJURED); }
+    bool IsRangedWeapon() const
+    {
+        return Class == ITEM_CLASS_WEAPON ||
+               SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+               SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
+               SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
+    }
 };
 
 struct ItemLocale

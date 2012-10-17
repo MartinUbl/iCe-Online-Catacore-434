@@ -1143,6 +1143,44 @@ struct HolidaysEntry
     //uint32 unk53;                                         // 53
     //uint32 unk54;                                         // 54
 };
+// ImportPriceArmor.dbc
+struct ImportPriceArmorEntry
+{
+    uint32 InventoryType;                                   // 1        Id/InventoryType
+    float ClothFactor;                                      // 2        Price factor cloth
+    float LeatherFactor;                                    // 3        Price factor leather
+    float MailFactor;                                       // 4        Price factor mail
+    float PlateFactor;                                      // 5        Price factor plate
+};
+
+// ImportPriceQuality.dbc
+struct ImportPriceQualityEntry
+{
+    uint32 QualityId;                                       // 1        Quality Id (+1?)
+    float Factor;                                           // 2        Price factor
+};
+
+// ImportPriceShield.dbc
+struct ImportPriceShieldEntry
+{
+    uint32 Id;                                              // 1        Unk id (only 1 and 2)
+    float Factor;                                           // 2        Price factor
+};
+
+// ImportPriceWeapon.dbc
+struct ImportPriceWeaponEntry
+{
+    uint32 Id;                                              // 1        Unk id (mainhand - 0, offhand - 1, weapon - 2, 2hweapon - 3, ranged/rangedright/relic - 4)
+    float Factor;                                           // 2        Price factor
+};
+
+// ItemPriceBase.dbc
+struct ItemPriceBaseEntry
+{
+    uint32 ItemLevel;                                       // 2        Item level (1 - 1000)
+    float ArmorFactor;                                      // 3        Price factor for armor
+    float WeaponFactor;                                     // 4        Price factor for weapons
+};
 
 struct ItemArmorQualityEntry
 {
@@ -1169,6 +1207,16 @@ struct ItemBagFamilyEntry
 {
     uint32   ID;                                            // 0
     //DBCString name;                                       // 1     m_name_lang
+};
+
+// ItemClass.dbc
+struct ItemClassEntry
+{
+    uint32    Class;                                          // 1 item class id
+  //uint32    Unk;                                            // 2 unk
+  //uint32    IsWeapon;                                       // 3 1 for weapon, 0 for everything else
+    float     PriceFactor;                                    // 4 used to calculate certain prices
+  //char*     Name;                                           // class name
 };
 
 struct ItemDisplayInfoEntry

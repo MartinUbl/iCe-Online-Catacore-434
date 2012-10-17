@@ -835,6 +835,10 @@ class WorldSession
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
 
+        // Transmogrification
+        void HandleTransmogrifyItems(WorldPacket& recv_data);
+        static bool CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier);
+
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleMirrrorImageDataRequest(WorldPacket & recv_data);
         void HandleAlterAppearance(WorldPacket& recv_data);

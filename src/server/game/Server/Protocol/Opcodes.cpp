@@ -688,6 +688,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_SPELL_FAILED_OTHER,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GAMEOBJECT_RESET_STATE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REPAIR_ITEM,                             STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode          );
+    OPCODE( CMSG_TRANSMOGRIFY_ITEMS,                      STATUS_LOGGEDIN, &WorldSession::HandleTransmogrifyItems         );
     OPCODE( SMSG_CHAT_PLAYER_NOT_FOUND,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( MSG_TALENT_WIPE_CONFIRM,                      STATUS_LOGGEDIN, &WorldSession::HandleTalentWipeConfirmOpcode   );
     OPCODE( SMSG_SUMMON_REQUEST,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
