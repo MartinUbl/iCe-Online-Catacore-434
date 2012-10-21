@@ -9629,7 +9629,7 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
         for (uint32 j = 0; j < MAX_RUNES; j++)
         {
             uint32 cd = plr->GetRuneCooldown(j);
-            if (cd && plr->GetCurrentRune(j) == refreshType)
+            if (plr->GetCurrentRune(j) == refreshType)
             {
                 if (highestCDRune == -1 || cd > highestCooldown)
                 {
@@ -9641,6 +9641,23 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
 
         if (highestCDRune >= 0)
             plr->SetRuneCooldown(highestCDRune, 0);
+        else if (m_spellInfo->Id == 45529) // Blood Tap: No blood rune to refresh. Try death rune in first two slots.
+        {
+            for (uint32 k = 0; k < 2; k++)
+            {
+                uint32 cd = plr->GetRuneCooldown(k);
+                if (cd && plr->GetCurrentRune(k) == RUNE_DEATH)
+                {
+                    if (highestCDRune == -1 || cd > highestCooldown)
+                    {
+                        highestCDRune = k;
+                        highestCooldown = cd;
+                    }
+                }
+            }
+            if (highestCDRune >= 0)
+                plr->SetRuneCooldown(highestCDRune, 0);
+        }
     }
 
     // Empower rune weapon
