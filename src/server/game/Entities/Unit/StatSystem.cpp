@@ -921,6 +921,15 @@ void Player::UpdateMastery()
 
                             // And modify amount by new calculated value
                             pEffect->ChangeAmount(GetMasteryPoints()*modifier);
+
+                            // Update mastery-modified auras
+                            if (GetTalentBranchSpec(m_activeSpec) == SPEC_DRUID_BALANCE)
+                            {
+                                // Solar Eclipse, Lunar Eclipse
+                                AuraEffect* eff = HasAura(48517) ? GetAuraEffect(48517,EFFECT_0) : GetAuraEffect(48518,EFFECT_0);
+                                if (eff)
+                                    eff->RecalculateAmount();
+                            }
                         }
                     }
                 }
