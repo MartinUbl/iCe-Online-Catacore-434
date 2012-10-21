@@ -2474,6 +2474,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (m_caster->hasUnitState(UNIT_STAT_CONTROLLED))
                     return;
 
+                //Max 20 stars
+                if (AuraEffect* eff = m_caster->GetAuraEffect(48505,EFFECT_0)) //periodic trigger spell aura effect
+                {
+                    int32 count = eff->GetAmount();
+                    if (count >= 20)
+                        return;
+                    else
+                        eff->SetAmount(++count);
+                }
+
                 m_caster->CastSpell(unitTarget, damage, true);
                 return;
             }
