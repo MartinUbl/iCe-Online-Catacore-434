@@ -181,20 +181,23 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            if(killed_unit==false)
+            if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("Annihilate....", LANG_UNIVERSAL, NULL);
-                me->SendPlaySound(20397, false);
-                killed_unit=true;
-            }
-            else
-            {
-                me->MonsterYell("Eradicate....", LANG_UNIVERSAL, NULL);
-                me->SendPlaySound(20398, false);
-                killed_unit=false;
-            }
+                if(killed_unit==false)
+                {
+                    me->MonsterYell("Annihilate....", LANG_UNIVERSAL, NULL);
+                    me->SendPlaySound(20397, false);
+                    killed_unit=true;
+                }
+                else
+                {
+                    me->MonsterYell("Eradicate....", LANG_UNIVERSAL, NULL);
+                    me->SendPlaySound(20398, false);
+                    killed_unit=false;
+                }
+             }
         }
 
         void JustDied (Unit * killed)
@@ -353,26 +356,13 @@ public:
                     me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
                     me->SendPlaySound(20400, false);
 
-                    if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) 
-                    {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
-                            Gravity_crush_timer=25000;
-                            lift_timer=1000; // Po jednej sekunde zdvihnem hracov zo zeme
+                            lift_timer=2000; // Po dvoch sekundach zdvihnem hracov zo zeme
                             can_lift=true;
                         }
-                    }
-                    else // 10 man 
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        {
-                            DoCast(target,84952,true);
-                            target->ToPlayer()->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()+35);
-                            DoCast(target,84948);
-                            Gravity_crush_timer=25000;
-                        }
-                    }
+                        Gravity_crush_timer=25000;
                 }
             }
             else Gravity_crush_timer-=diff;
@@ -386,8 +376,8 @@ public:
                     {
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                             if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
-                                if(unit->HasAura(92486 ) || unit->HasAura(92488 )) // Gravity Crush
-                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+35);
+                                if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
+                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+30);
                     }
                 }
                 can_lift=false;
@@ -403,44 +393,61 @@ public:
                                 for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                 {
                                     Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                    if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                    if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                         number_of_players++;
                                 }
-                                    Unit** pole;
-                                    pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
 
-                                    uint32 iter=0;
-                                    for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                                    if(number_of_players>0)
                                     {
-                                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                        if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
-                                        {
-                                            pole[iter]=unit; // zapisem si hracov do dynamickeho pola
-                                            iter++;
-                                        }
-                                    }
+                                        Unit** pole;
+                                        pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
 
-                                    Unit* pom=NULL;
-                                    for(uint32 i=0; i<number_of_players-1;i++)
-                                    for(uint32 j=0; j<number_of_players-1;j++)
-                                        if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                        uint32 iter=0;
+
+                                        for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                         {
-                                            pom=pole[j];
-                                            pole[j]=pole[j+1];
-                                            pole[j+1]=pom;
+                                            Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                                            if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                            {
+                                                pole[iter]=unit; // zapisem si hracov do dynamickeho pola
+                                                iter++;
+                                            }
                                         }
 
-                                    for(uint32 i=0;i<INSTABILITY;i++)
-                                    {
-                                        if(i<number_of_players)
-                                            DoCast(pole[i],84529,true);
+                                        Unit* pom=NULL;
+                                        for(uint32 i=0; i<number_of_players-1;i++)
+                                        for(uint32 j=0; j<number_of_players-1;j++)
+                                            if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                            {
+                                                pom=pole[j];
+                                                pole[j]=pole[j+1];
+                                                pole[j+1]=pom;
+                                            }
 
-                                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
-                                                DoCast(target,84529,true);
+                                        for(uint32 i=0;i<INSTABILITY;i++)
+                                        {
+                                            if(i<number_of_players) // Kym je pocet bleskov mensi ako hracov triafam podla vzdialenosti inac random
+                                            {
+                                                if(INSTABILITY<=3) // Ak je pocet aktivnych bleskov mensi ako 4 
+                                                {
+                                                        Unit *temp = NULL;
+                                                        temp = pole[i + urand(0,2) ];
+                                                        if (temp) // cast na random z 3 najvzdialenejsich
+                                                            DoCast(temp,84529,true);
 
-                                    }
-                                    Instability_timer=1000;
-                                    free((void*)pole);
+                                                        else if (pole[i]) // keby nahodou 
+                                                                DoCast(pole[i],84529,true);
+                                                 }
+
+                                            }
+
+                                            else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
+                                                    DoCast(target,84529,true);
+                                        }
+
+                                        Instability_timer=1000;
+                                        free((void*)pole);
+                             }
                         }
                         else Instability_timer-=diff;
 
@@ -633,6 +640,7 @@ public:
         uint32 Glaciate_all_timer; // 15 k primerne do kazdeho
         uint32 Frozen_timer;
         uint32 Tele_debug_timer;
+        uint32 Debug_door_timer;
         uint32 PHASE;
         bool check_debuff,Hp_dropped,can_interrupt,debuged;
 
@@ -648,6 +656,7 @@ public:
             Hydrolance_timer=8000;
             Glaciate_timer=30000;
             Glaciate_all_timer=9999999; // 3 skeundovy cast time
+            Debug_door_timer=10000; // Kazdych 10 sekund skontrolujem ci som nenasiel bugnute dvere nahodou
             Frozen_timer=3000;
             check_debuff=Hp_dropped=can_interrupt=false;
             debuged=true;
@@ -720,14 +729,25 @@ public:
                 damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            me->MonsterYell("Perish!", LANG_UNIVERSAL, NULL);
-            me->SendPlaySound(20163, false);
+            if(victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->MonsterYell("Perish!", LANG_UNIVERSAL, NULL);
+                me->SendPlaySound(20163, false);
+            }
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if(Debug_door_timer<=diff && !UpdateVictim()) // Ak by sa nahodou bugli dvere :) odstranim ich
+            {
+                if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f))
+                        pGoDoor1->Delete();
+                Debug_door_timer = 10000;
+            }
+            else Debug_door_timer-=diff;
+
             if (!UpdateVictim())
                     return;
 
@@ -782,7 +802,7 @@ public:
 
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
-                                me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,10)-urand(0,10),target->GetPositionY()+urand(0,10)-urand(0,10),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                                me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
 
@@ -790,7 +810,7 @@ public:
                             float range=0.0f;
                         if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
                         {
-                            for(int i=0;i<5;i++)
+                            for(int i=0;i<3;i++)
                             {
                                 angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
                                 range=(float)urand(0,21);
@@ -799,7 +819,7 @@ public:
                         }
                         else // 25 MAN
                         {
-                            for(int i=0;i<12;i++)
+                            for(int i=0;i<6;i++)
                             {
                                 angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
                                 range=(float)urand(0,21);
@@ -969,6 +989,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            me->GetMotionMaster()->Clear();
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -997,10 +1018,13 @@ public:
                 damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, NULL);
-            me->SendPlaySound(20286, false);
+            if(victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, NULL);
+                me->SendPlaySound(20286, false);
+            }
         }
 
         void EnterEvadeMode() // Pri wipe raidu despawnem dvere
@@ -1099,7 +1123,7 @@ public:
                    Stack=counter=0;
                    DoCast(me,SPELL_AEGIS_OF_FLAME);
                    aegis_used=true;
-                   Rising_flames_timer=60000;
+                   Rising_flames_timer=64000;
                    me->MonsterYell("BURN!", LANG_UNIVERSAL, NULL);
                    me->SendPlaySound(20287, false);
                 }
@@ -1272,6 +1296,7 @@ public:
 
         InstanceScript* instance;
         uint32 Bomb_timer;
+        uint32 Unselectable_timer;
         bool bombed;
 
         void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
@@ -1282,16 +1307,25 @@ public:
 
         void Reset()
         {
+            Unselectable_timer = 4000;
             if(Creature *pTarget = me->FindNearestCreature(43687, 500, true))
                 Bomb_timer= 3000 + uint32(me->GetDistance2d(pTarget)/7)*1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
             else Bomb_timer =3000+ urand(500,3000); // keby nahodou
 
-            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             bombed=false;
         }
 
         void UpdateAI(const uint32 diff)
         {
+
+            if(Unselectable_timer <= diff ) // Musim priradit unselectable flagu az po vacasteni water bomby lebo inak by visualne nezasiahlo trigger -> ( me )
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+                Unselectable_timer=9999999;
+            }
+            else Unselectable_timer -= diff;
+
             if(Bomb_timer<=diff && !bombed)
             {
                 DoCast(me,SPELL_WATER_B_DMG);
@@ -1382,15 +1416,12 @@ public:
         uint32 walk_timer_Feludisu;
         uint32 Update_timer;
         Unit* pRod_marked_player;
-        Unit * pole[2]; // Staticke pole pre ulozenie pointra na hracov ktory maju marku( debuff)
         bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
         void Reset()
         {
             PHASE=1;
             me->SetSpeed(MOVE_RUN,1.5f,true);
-            for(int i=0;i<3;i++) // VyNNULovanie pola :D
-                pole[i]=NULL;
             rod_timer=15000;
             Call_winds=10000;
             Thundershock_timer=70000;
@@ -1410,10 +1441,13 @@ public:
             me->SetInCombatWithZone();
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, NULL);
-            me->SendPlaySound(20238, false);
+            if(victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, NULL);
+                me->SendPlaySound(20238, false);
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -1523,12 +1557,20 @@ public:
                     }
                     else // 25 man
                     {
-                        for(int i=0;i<3;i++) // Cast na danych hracov z markov chain lightning
-                            if(pole[i] && pole[i]->isAlive())
-                                DoCast(pole[i],83282,true);
+                        Map* map;
+                        map = me->GetMap();
+                        Map::PlayerList const& plrList = map->GetPlayers();
+                        if (plrList.isEmpty())
+                            return;
 
-                            for(int i=0;i<3;i++) // Vymazanie povodnych hracov
-                                pole[i]=NULL;
+                        for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                        {
+                            if (Player* pPlayer = itr->getSource())
+                            {
+                                if(pPlayer && pPlayer->isAlive() && pPlayer->HasAura(83099) ) // Cast Chain lightning na ludi s markou
+                                    DoCast(pPlayer,83282,true);
+                            }
+                        }
                             can_chaining=false;
                     }
         }
@@ -1554,20 +1596,18 @@ public:
                     uint32 counter=0; // Obmedzenie na 3 targety
                     for(int i=0;i<20;i++)
                     {
-                        if ((pole[counter] = SelectTarget(SELECT_TARGET_RANDOM, 0, 500, true)))
-                            if(!pole[counter]->HasAura(83099)) // Ak nema na sebe uz marku
+                        if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 500, true))
+                            if(!player->HasAura(83099)) // Ak nema na sebe uz marku
                             {
-                                me->AddAura(83099,pole[counter]);
+                                me->AddAura(83099,player);
                                 counter++;
                             }
                             if(counter>=3)
-                            {
-                                rod_timer=40000;
-                                Chain_timer=12000; // Do marked targetov zacastim chain lightning
-                                can_chaining=true;
                                 break;
-                            }
                     }
+                                rod_timer=40000;
+                                Chain_timer=12000; // Do marked targetov zacastim chain lightning po 12 sekundach 
+                                can_chaining=true;
                 }
               }
             }
@@ -1767,10 +1807,13 @@ public:
             me->SetInCombatWithZone();
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, NULL);
-            me->SendPlaySound(21842, false);
+            if(victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, NULL);
+                me->SendPlaySound(21842, false);
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -1921,6 +1964,7 @@ public:
                         angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
                         me->SummonCreature(CREATURE_GRAVITY_WELL,-1009.1f+cos(angle)*20.0f,-582.5f+sin(angle)*20.0f,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
+
                     Gravity_well_timer=30000;
                 }
             }
@@ -2249,7 +2293,7 @@ public:
         uint32 Speed_timer;
         bool buffed;
         float speeder;
-        Unit* target;
+        Unit* target; // Hrac s markou ktoreho bude orb nahanat
 
 
         void Reset()
@@ -2264,7 +2308,7 @@ public:
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
-            me->SetSpeed(MOVE_RUN,0.5f);
+            me->SetSpeed(MOVE_RUN,0.3f);
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
@@ -2284,9 +2328,10 @@ public:
 
             if(Speed_timer<=diff) // Pribezne zvysujem speed orbu
             {
-                speeder=speeder+0.1f;
-                me->SetSpeed(MOVE_RUN,0.6f+speeder);
-                Speed_timer=1000;
+                speeder=speeder+0.05f;
+                if(speeder <= 0.45) // Orb neprevysi 75 % normalnej rychlosti
+                    me->SetSpeed(MOVE_RUN,0.3f+speeder);
+                Speed_timer=500;
             }
             else Speed_timer-=diff;
 
@@ -2301,8 +2346,8 @@ public:
             {
                 if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        me->SummonCreature(50297,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                    if (Unit* ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                        me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
 
                     if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true))
                         pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
@@ -2320,13 +2365,12 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                     me->AddAura(92307,target);
                     me->Attack(target,true);
-                    me->AddThreat(target,999999.f);
+                    me->AddThreat(target,9999999.f);
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveChase(target); // Orb sa rozbehne za hracom s beacon debuffom
+                    me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()); // Orb sa rozbehne za hracom s beacon debuffom
                 }
 
-                DoCast(me,92302 ); // Spell nahdodi "model" orbu + priebezne zvysuje speed
-
+                DoCast(me,92302 ); // Spell nahdodi "model" orbu + zvysuje speed ---> Speed som musel, vypnut robim rucne v AI
                 buffed=true;
             }
             else Chasing_timer-=diff;
@@ -2334,6 +2378,9 @@ public:
 
             if(checking_timer<=diff)
             {
+                if(target!=NULL)
+                    me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()); // Orb sa rozbehne za hracom s beacon debuffom
+
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 500, true))
                 {
                     if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
