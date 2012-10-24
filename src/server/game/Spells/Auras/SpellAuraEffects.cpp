@@ -1711,10 +1711,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 589:   // Shadow Word: Pain
                         {
                         // Shadowy Apparition
-                        if ((caster->HasAura(78204) && (roll_chance_i(12) || (caster->isMoving() && roll_chance_i(60))))
-                            || (caster->HasAura(78203) && (roll_chance_i(8) || (caster->isMoving() && roll_chance_i(40))))
-                            || (caster->HasAura(78202) && (roll_chance_i(4) || (caster->isMoving() && roll_chance_i(20)))))
+                        if ((caster->HasAura(78204) && (!caster->isMoving() ? roll_chance_i(12) : roll_chance_i(60)))
+                            || (caster->HasAura(78203) && (!caster->isMoving() ? roll_chance_i(8) : roll_chance_i(40)))
+                            || (caster->HasAura(78202) && (!caster->isMoving() ? roll_chance_i(4) : roll_chance_i(20))))
+                        {
                             caster->CastSpell(target, 87212, true, 0, 0, target->GetGUID());
+                        }
 
                         // no break;
                         }

@@ -5054,15 +5054,14 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 for (Player::GUIDTimestampMap::iterator itr2 = tsMap->begin(); itr2 != tsMap->end(); ++itr2)
                 {
                     if (ittd == tsMap->end() || (*itr2).second < (*ittd).second)
-                        ittd = itr2;
+                        if (!Creature::GetCreature(*m_originalCaster, (*itr2).first))
+                            ittd = itr2;
                 }
+
                 if (ittd != tsMap->end())
-                {
-                    Creature* pOldest = Creature::GetCreature(*m_originalCaster, (*ittd).first);
-                    if (!pOldest)
-                        tsMap->erase(ittd);
-                }
-                return;
+                    tsMap->erase(ittd);
+                else
+                    return;
             }
         }
         m_originalCaster->GetPosition(&pos);
