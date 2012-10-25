@@ -116,8 +116,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_GROUP_INVITE,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GROUP_CANCEL,                            STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_GROUP_CANCEL,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_GROUP_ACCEPT,                            STATUS_LOGGEDIN, &WorldSession::HandleGroupAcceptOpcode         );
-    OPCODE( CMSG_GROUP_DECLINE,                           STATUS_LOGGEDIN, &WorldSession::HandleGroupDeclineOpcode        );
+    OPCODE( CMSG_GROUP_INVITE_RESPONSE,                   STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteResponseOpcode );
     OPCODE( SMSG_GROUP_DECLINE,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GROUP_UNINVITE,                          STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteOpcode       );
     OPCODE( CMSG_GROUP_UNINVITE_GUID,                     STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuidOpcode   );

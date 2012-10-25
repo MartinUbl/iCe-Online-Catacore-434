@@ -110,12 +110,11 @@ enum Opcodes
     SMSG_GROUP_INVITE                                = 0x031B2, // 4.3.4 15595
     CMSG_GROUP_CANCEL                                = 0x04D25, // 4.3.4 15595
     SMSG_GROUP_CANCEL                                = 0x04D25, // 4.3.4 15595
-    CMSG_GROUP_ACCEPT                                = 0x1000D, //
-    CMSG_GROUP_DECLINE                               = 0x1000E, //
+    CMSG_GROUP_INVITE_RESPONSE                       = 0x00410, // 4.3.4 15595
     SMSG_GROUP_DECLINE                               = 0x06835, // 4.3.4 15595
     CMSG_GROUP_UNINVITE                              = 0x1000F, //
     CMSG_GROUP_UNINVITE_GUID                         = 0x02E07, // 4.3.4 15595
-    SMSG_GROUP_UNINVITE                              = 0x10010, //
+    SMSG_GROUP_UNINVITE                              = 0x00A07, // 4.3.4 15595
     CMSG_GROUP_SET_LEADER                            = 0x04C17, // 4.3.4 15595
     SMSG_GROUP_SET_LEADER                            = 0x00526, // 4.3.4 15595
     CMSG_LOOT_METHOD                                 = 0x02F24, // 4.3.4 15595
@@ -123,7 +122,7 @@ enum Opcodes
     SMSG_GROUP_DESTROYED                             = 0x10011, //
     SMSG_GROUP_LIST                                  = 0x04C24, // 4.3.4 15595
     SMSG_PARTY_MEMBER_STATS                          = 0x02104, // 4.3.4 15595
-    SMSG_PARTY_COMMAND_RESULT                        = 0x00A07, // 4.3.4 15595
+    SMSG_PARTY_COMMAND_RESULT                        = 0x06E07, // 4.3.4 15595
     CMSG_GUILD_CREATE                                = 0x10012, //
     CMSG_GUILD_INVITE                                = 0x024B0, // 4.3.4 15595
     SMSG_GUILD_INVITE                                = 0x014A2, // 4.3.4 15595
@@ -1336,7 +1335,6 @@ enum Opcodes
     CMSG_BATTLEFIELD_LEAVE                           = 0x03018, // 4.3.4 Build 15595
     CMSG_DUNGEON_FINDER_GET_SYSTEM_INFO              = 0x00412, // 4.3.4 Build 15595
     CMSG_ENABLE_NAGLE                                = 0x04449, // 4.3.4 Build 15595
-    CMSG_GROUP_INVITE_RESPONSE                       = 0x00410, // 4.3.4 Build 15595
     CMSG_GUILD_BANK_REM_MONEY_WITHDRAW_QUERY         = 0x01225, // 4.3.4 Build 15595
     CMSG_GUILD_SET_ACHIEVEMENT_TRACKING              = 0x01027, // 4.3.4 Build 15595
     CMSG_LFG_GET_PLAYER_INFO                         = 0x00000, // Unknown
