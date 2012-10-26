@@ -1144,6 +1144,25 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             damage *= doses;
                             damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * doses);
                         }
+
+                        // Relentless Strikes
+                        uint32 chance = m_caster->ToPlayer()->GetComboPoints();
+                        if(m_caster->HasAura(14179)) //rank 1
+                        {
+                            chance *= 7;
+                        }
+                        if(m_caster->HasAura(58422)) //rank 2
+                        {
+                            chance *= 14;
+                        }
+                        if(m_caster->HasAura(58423)) //rank 3
+                        {
+                            chance *= 20;
+                        }
+                        if(roll_chance_i(chance))
+                        {
+                            m_caster->CastSpell(m_caster, 14181 , true);
+                        }
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
                             damage += ((Player*)m_caster)->GetComboPoints()*40;
