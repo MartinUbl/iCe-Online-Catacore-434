@@ -695,6 +695,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // manual implementation due to avoid overpowering already overpowered class
                     damage += m_spellInfo->ap_bonus*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                 }
+                // Glyph of Heroic throw
+                else if (m_spellInfo->Id == 57755 && m_caster->HasAura(58357)&&unitTarget)
+                {
+                    m_caster->CastSpell(unitTarget,58567,true);
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
