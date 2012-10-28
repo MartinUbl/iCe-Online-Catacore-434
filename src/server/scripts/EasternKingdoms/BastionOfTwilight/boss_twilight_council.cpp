@@ -396,58 +396,41 @@ public:
                                     if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                         number_of_players++;
                                 }
+                                    Unit** pole;
+                                    pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
 
-                                    if(number_of_players>0)
+                                    uint32 iter=0;
+                                    for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                     {
-                                        Unit** pole;
-                                        pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
-
-                                        uint32 iter=0;
-
-                                        for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
+                                        if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                         {
-                                            Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                            if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
-                                            {
-                                                pole[iter]=unit; // zapisem si hracov do dynamickeho pola
-                                                iter++;
-                                            }
+                                            pole[iter]=unit; // zapisem si hracov do dynamickeho pola
+                                            iter++;
+                                        }
+                                    }
+
+                                    Unit* pom=NULL;
+                                    for(uint32 i=0; i<number_of_players-1;i++)
+                                    for(uint32 j=0; j<number_of_players-1;j++)
+                                        if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                        {
+                                            pom=pole[j];
+                                            pole[j]=pole[j+1];
+                                            pole[j+1]=pom;
                                         }
 
-                                        Unit* pom=NULL;
-                                        for(uint32 i=0; i<number_of_players-1;i++)
-                                        for(uint32 j=0; j<number_of_players-1;j++)
-                                            if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
-                                            {
-                                                pom=pole[j];
-                                                pole[j]=pole[j+1];
-                                                pole[j+1]=pom;
-                                            }
+                                    for(uint32 i=0;i<INSTABILITY;i++)
+                                    {
+                                        if(i<number_of_players)
+                                            DoCast(pole[i],84529,true);
 
-                                        for(uint32 i=0;i<INSTABILITY;i++)
-                                        {
-                                            if(i<number_of_players) // Kym je pocet bleskov mensi ako hracov triafam podla vzdialenosti inac random
-                                            {
-                                                if(INSTABILITY<=3) // Ak je pocet aktivnych bleskov mensi ako 4 
-                                                {
-                                                        Unit *temp = NULL;
-                                                        temp = pole[i + urand(0,2) ];
-                                                        if (temp) // cast na random z 3 najvzdialenejsich
-                                                            DoCast(temp,84529,true);
+                                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
+                                                DoCast(target,84529,true);
 
-                                                        else if (pole[i]) // keby nahodou 
-                                                                DoCast(pole[i],84529,true);
-                                                 }
-
-                                            }
-
-                                            else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
-                                                    DoCast(target,84529,true);
-                                        }
-
-                                        Instability_timer=1000;
-                                        free((void*)pole);
-                             }
+                                    }
+                                    Instability_timer=1000;
+                                    free((void*)pole);
                         }
                         else Instability_timer-=diff;
 
@@ -574,7 +557,6 @@ public:
             Growing_timer= 2000;
             Aoe_dmg_timer=1000;
             DoCast(me,84914); // visual liquid ice + trigger aoe
-            //DoCast(me,84917); // Zvacsenie plosky
         }
 
         void UpdateAI(const uint32 diff)
@@ -697,12 +679,12 @@ public:
 
             if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true))
             {
-                pIgnacious->SetInCombatWithZone();
                 if(!pIgnacious->isInCombat()) // Ak neni Feludius v combate donutim ho :D
                 {
                     if(!pIgnacious->IsInEvadeMode())
                     {
                         pIgnacious->Attack(me->getVictim(),true);
+                        pIgnacious->AddThreat(me->getVictim(),100.0f);
                         pIgnacious->GetMotionMaster()->MoveChase(me->getVictim()); // zostal na mieste ;)
                     }
                 }
@@ -731,7 +713,7 @@ public:
 
         void KilledUnit(Unit * victim)
         {
-            if(victim->GetTypeId() == TYPEID_PLAYER)
+            if (victim->GetTypeId() == TYPEID_PLAYER)
             {
                 me->MonsterYell("Perish!", LANG_UNIVERSAL, NULL);
                 me->SendPlaySound(20163, false);
@@ -740,11 +722,11 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(Debug_door_timer<=diff && !UpdateVictim()) // Ak by sa nahodou bugli dvere :) odstranim ich
+            if(Debug_door_timer<=diff && !UpdateVictim()) // Ak by sa nahodou bugli dvere :) odstranim ich kazdych 30 sekund cekujem... :)
             {
                 if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f))
                         pGoDoor1->Delete();
-                Debug_door_timer = 10000;
+                Debug_door_timer = 30000;
             }
             else Debug_door_timer-=diff;
 
@@ -755,12 +737,12 @@ public:
                 {
                 if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true)) // Musel som to dat aj sem pretoze ked je jeden z bossov v evademode tak ignoruje vsetko, t.j dalo by sa to bugovat
                 {
-                    if(!pIgnacious->isInCombat()) // Ak neni Feludius v combate donutim ho :D
+                    if(!pIgnacious->isInCombat()) // Ak nie Feludius v combate donutim ho :D
                     {
                         if(!pIgnacious->IsInEvadeMode())
                         {
                             pIgnacious->Attack(me->getVictim(),true);
-                            me->SetInCombatWithZone();
+                            pIgnacious->AddThreat(me->getVictim(),100.0f);
                             pIgnacious->GetMotionMaster()->MoveChase(me->getVictim());
                         }
                     }
@@ -1011,7 +993,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-             if( (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514)) && ( getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC )) // Ak ma boss nasebe stit hraci maju donho zvyseny dmg o 10 %
+             if( (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514)) ) // Ak ma boss nasebe stit hraci maju donho zvyseny dmg o 10 %
                 damage=damage*1.1;  // due to broken buff which should increase dmg done by players
 
              if (damage > me->GetHealth() || damage > 500000 )
@@ -1041,7 +1023,6 @@ public:
         {
             if(Creature *pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 300, true))
             {
-                pFeludius->SetInCombatWithZone();
                 if(!pFeludius->isInCombat()) // Ak neni Feludius v combate donutim ho :D
                 {
                     if(!pFeludius->IsInEvadeMode())
@@ -1073,7 +1054,6 @@ public:
                 {
                     if(!pFeludius->IsInEvadeMode())
                     {
-                        me->SetInCombatWithZone();
                         pFeludius->Attack(me->getVictim(),true);
                         pFeludius->GetMotionMaster()->MoveChase(me->getVictim());
                     }
@@ -1416,6 +1396,7 @@ public:
         uint32 walk_timer_Feludisu;
         uint32 Update_timer;
         Unit* pRod_marked_player;
+        Creature* pIGNACIOUS;
         bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
         void Reset()
@@ -1430,7 +1411,7 @@ public:
             Update_timer=0;
             pRod_marked_player=NULL;
             can_chaining=ported=can_tele=Hp_dropped=can_interrupt=update_movement=false;
-            pRod_marked_player=NULL;
+            pRod_marked_player=pIGNACIOUS=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
@@ -1641,6 +1622,10 @@ public:
 
             if(Disperse_timer<=diff)
             {
+                if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) ) //  Stavalo sa ze ked bol boss daleko nenaslo ho takto to budem skusat kazdych 30 s
+                { 
+                    pIGNACIOUS = pIgnacious;
+                }
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_interrupt=false;
@@ -1663,7 +1648,14 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
-                                if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
+                                if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
+                                {
+                                    pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
+                                    pIGNACIOUS->SendMovementFlagUpdate();
+                                    pIGNACIOUS->InterruptNonMeleeSpells(true);
+                                    pIGNACIOUS->CastSpell(pIGNACIOUS, 87459, true); // Visual teleport
+                                }
+                                else if (Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
                                 {
                                     pIgnacious->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
                                     pIgnacious->SendMovementFlagUpdate();
@@ -1708,11 +1700,20 @@ public:
                             {
                                 me->SetPosition(-987.17f,-561.25f,831.91f,3.93f,true);
                                 me->SendMovementFlagUpdate();
-                                if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
+
+                                if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
+                                {
+                                    pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
+                                    pIGNACIOUS->SendMovementFlagUpdate();
+                                    pIGNACIOUS->CastSpell(pIGNACIOUS, 87459, true); // Visual teleport
+                                }
+                                else if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
                                 {
                                     pIgnacious->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
                                     pIgnacious->SendMovementFlagUpdate();
+                                    pIgnacious->CastSpell(pIgnacious, 87459, true); // Visual teleport
                                 }
+
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
                                 PHASE=4;
@@ -1732,7 +1733,7 @@ public:
 
                             if(walk_timer_Feludisu<=diff && PHASE==5)
                             {
-                                if(Creature* pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
+                                if(Creature* pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) )
                                 {
                                     pFeludius->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pFeludius->InterruptNonMeleeSpells(true);
@@ -1782,6 +1783,7 @@ public:
         uint32 Frozen_orb_timer;
         uint32 HS_counter; // Harden skin counter
         uint32 Hp_gainer; // HP ktore bude mat monstrosity
+        Creature* pFELUDIUS;
         bool Hp_dropped,has_shield,speaked,can_interrupt;
 
         void Reset()
@@ -1796,6 +1798,7 @@ public:
             Hp_gainer=0;
             Hp_dropped=has_shield=speaked=can_interrupt=false;
             PHASE=1;
+            pFELUDIUS=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
@@ -1921,6 +1924,11 @@ public:
 
             if(Harden_Skin_timer<=diff)
             {
+                if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) ) // Kazdych 40 sekund  skontrolujem ci dokazem najst pointer a feludiusa
+                {
+                    pFELUDIUS = pfel;
+                }
+
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_interrupt=true;
@@ -1970,7 +1978,7 @@ public:
             }
             else Gravity_well_timer-=diff;
 
-            if(Creature* pArion = me->FindNearestCreature(ARION_ENTRY, 500, true) )
+            if(Creature* pArion = me->FindNearestCreature(ARION_ENTRY, 1000, true) )
             {
                 if(pArion->HealthBelowPct(25))
                     PHASE=2;
@@ -1981,7 +1989,15 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
-                                if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
+                                if(pFELUDIUS) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
+                                {
+                                    pFELUDIUS->SetReactState(REACT_PASSIVE);
+                                    pFELUDIUS->InterruptNonMeleeSpells(true);
+                                    pFELUDIUS->CastSpell(pFELUDIUS, 87459, true); // Visual teleport
+                                    pFELUDIUS->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pFELUDIUS->SendMovementFlagUpdate();
+                                }
+                                else if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) )
                                 {
                                     pfel->SetReactState(REACT_PASSIVE);
                                     pfel->InterruptNonMeleeSpells(true);
@@ -1989,6 +2005,7 @@ public:
                                     pfel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
                                     pfel->SendMovementFlagUpdate();
                                 }
+
                                 me->InterruptNonMeleeSpells(true);
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
@@ -2016,11 +2033,20 @@ public:
                                 me->SendMovementFlagUpdate();
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
-                                if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 500, true) )
+
+                                if(pFELUDIUS)
+                                {
+                                    pFELUDIUS->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pFELUDIUS->CastSpell(pFELUDIUS, 87459, true); // Visual teleport
+                                    pFELUDIUS->SendMovementFlagUpdate();
+                                }
+                                else if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) )
                                 {
                                     pfel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pfel->CastSpell(pfel, 87459, true); // Visual teleport
                                     pfel->SendMovementFlagUpdate();
                                 }
+
                                 PHASE=4;
                                 DoCast(me,87459); // Visual teleport
                                 walk_timer=5500;
@@ -2040,7 +2066,7 @@ public:
 
                             if(walk_timer_Ignacious<=diff && PHASE==5)
                             {
-                                if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true) )
+                                if(Creature* pIgnac = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
                                 {
                                     pIgnac->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pIgnac->InterruptNonMeleeSpells(true);
@@ -2303,7 +2329,7 @@ public:
             me->ForcedDespawn(61000);
             speeder=0.0f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
-            Flamestrike_timer=5000; // Spawn Flamestriku hned po zacati nahanani 
+            Flamestrike_timer=3000; // Spawn Flamestriku po 3 sekundach od spawnu 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
@@ -2353,7 +2379,7 @@ public:
                         pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
 
                 }
-                Flamestrike_timer=25000;
+                Flamestrike_timer=99999;
             }
             else Flamestrike_timer-=diff;
 
@@ -2440,7 +2466,7 @@ public:
             me->ForcedDespawn(60000);
             me->SetInCombatWithZone();
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
-            Buff_timer=5000;
+            Buff_timer=4000;
             buffed=false;
         }
 
