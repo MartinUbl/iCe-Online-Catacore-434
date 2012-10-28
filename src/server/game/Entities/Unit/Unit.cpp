@@ -8422,7 +8422,7 @@ bool Unit::HandleModDamagePctTakenAuraProc(Unit *pVictim, uint32 /*damage*/, Aur
 
 // Used in case when access to whole aura is needed
 // All procs should be handled like this...
-bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura, SpellEntry const * procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 /*cooldown*/, bool * handled)
+bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura, SpellEntry const * procSpell, uint32 procFlag, uint32 procEx, uint32 /*cooldown*/, bool * handled)
 {
     SpellEntry const *dummySpell = triggeredByAura->GetSpellProto();
 
@@ -8583,6 +8583,13 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     *handled = true;
                     // Drop only in not disease case
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
+                        return false;
+                    return true;
+                // Cinderglacier
+                case 53386:
+                    *handled = true;
+                    // Drop only in non-periodic case
+                    if (procFlag & PROC_FLAG_DONE_PERIODIC)
                         return false;
                     return true;
             }
