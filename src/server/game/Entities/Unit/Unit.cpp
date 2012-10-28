@@ -11512,10 +11512,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
         break;
         case SPELLFAMILY_DEATHKNIGHT:
-            // all DK attacks profit from Merciless Combat
-            if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
-                if (!pVictim->HealthAbovePct(35))
-                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+            // Merciless Combat
+            if (spellProto->SpellFamilyFlags[0] == 0x00000002       // Icy Touch
+                || spellProto->SpellFamilyFlags[1] == 0x00000002    // Howling Blast
+                || spellProto->SpellFamilyFlags[1] == 0x00020000    // Obliterate
+                || spellProto->SpellFamilyFlags[1] == 0x00000004)   // Frost Strike
+            {
+                if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
+                    if (!pVictim->HealthAbovePct(35))
+                        DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+            }
 
             // Improved Icy Touch
             if (spellProto->SpellFamilyFlags[0] & 0x2)
