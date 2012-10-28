@@ -8538,23 +8538,32 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
 
                     if (dummySpell->SpellIconID == 2622)
                         runesLeft = 2;
+                    else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948) // Reaping / Festering Strike
+                        runesLeft = 2;
                     else
                         runesLeft = 1;
 
                     for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
                     {
+                        if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH)
+                            continue;
+
                         if (dummySpell->SpellIconID == 2622)
                         {
-                            if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
-                                ((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
+                            if (((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
+                                continue;
+                        }
+                        else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)
+                        {
+                            if (((Player*)this)->GetBaseRune(i) == RUNE_UNHOLY)
                                 continue;
                         }
                         else
                         {
-                            if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
-                                ((Player*)this)->GetBaseRune(i) != RUNE_BLOOD)
+                            if (((Player*)this)->GetBaseRune(i) != RUNE_BLOOD)
                                 continue;
                         }
+
                         if (((Player*)this)->GetRuneCooldown(i) != ((Player*)this)->GetRuneBaseCooldown(i))
                             continue;
 
