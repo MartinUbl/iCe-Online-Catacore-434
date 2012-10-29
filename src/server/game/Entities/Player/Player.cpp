@@ -1894,11 +1894,62 @@ uint8 Player::GetChatTag() const
 
 void Player::SendTeleportPacket(Position &oldPos)
 {
-    WorldPacket data2(MSG_MOVE_TELEPORT, 38);
-    data2.append(GetPackGUID());
-    BuildMovementPacket(&data2);
+    ObjectGuid guid = GetGUID();
+    ObjectGuid transGuid = GetTransGUID();
+
+    WorldPacket data(MSG_MOVE_TELEPORT, 38);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(0);       // unknown
+    data.WriteBit(uint64(transGuid));
+    data.WriteBit(guid[1]);
+    if (transGuid)
+    {
+        data.WriteBit(transGuid[1]);
+        data.WriteBit(transGuid[3]);
+        data.WriteBit(transGuid[2]);
+        data.WriteBit(transGuid[5]);
+        data.WriteBit(transGuid[0]);
+        data.WriteBit(transGuid[7]);
+        data.WriteBit(transGuid[6]);
+        data.WriteBit(transGuid[4]);
+    }
+
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.FlushBits();
+
+    if (transGuid)
+    {
+        data.WriteByteSeq(transGuid[6]);
+        data.WriteByteSeq(transGuid[5]);
+        data.WriteByteSeq(transGuid[1]);
+        data.WriteByteSeq(transGuid[7]);
+        data.WriteByteSeq(transGuid[0]);
+        data.WriteByteSeq(transGuid[2]);
+        data.WriteByteSeq(transGuid[4]);
+        data.WriteByteSeq(transGuid[3]);
+    }
+
+    data << uint32(0);  // counter
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data << float(GetPositionX());
+    data.WriteByteSeq(guid[4]);
+    data << float(GetOrientation());
+    data.WriteByteSeq(guid[7]);
+    data << float(GetPositionZMinusOffset());
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data << float(GetPositionY());
+
     Relocate(&oldPos);
-    SendMessageToSet(&data2, false);
+    SendDirectMessage(&data);
 }
 
 void Player::SendTeleportAckPacket()
@@ -1992,6 +2043,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             m_movementInfo.t_pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
             m_movementInfo.t_time = 0;
             m_movementInfo.t_seat = -1;
+            m_movementInfo.t_guid = 0;
         }
     }
 
@@ -2041,7 +2093,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
-            SendTeleportAckPacket();
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
     }
@@ -2061,8 +2112,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // If the map is not created, assume it is possible to enter it.
         // It will be created in the WorldPortAck.
-        Map *map = sMapMgr->FindMap(mapid);
-        if (!map ||  map->CanEnter(this))
+        //Map *map = sMapMgr->FindMap(mapid);
+        //if (!map ||  map->CanEnter(this))
         {
             //lets reset near teleport flag if it wasn't reset during chained teleports
             SetSemaphoreTeleportNear(false);
@@ -2124,10 +2175,16 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 // send transfer packets
                 WorldPacket data(SMSG_TRANSFER_PENDING, (4 + 4 + 4));
-                data << uint32(mapid);
+                data.WriteBit(0);       // unknown
                 if (m_transport)
-                    data << m_transport->GetEntry() << GetMapId();
+                {
+                    data.WriteBit(1);   // has transport
+                    data << GetMapId() << m_transport->GetEntry();
+                }
+                else
+                    data.WriteBit(0);   // has transport
 
+                data << uint32(mapid);
                 GetSession()->SendPacket(&data);
                
             }
@@ -2155,20 +2212,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
-			if (!GetSession()->PlayerLogout())
+            if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
-                if (m_transport)
-                    data << m_movementInfo.t_pos.PositionXYZStream();
-                else
-                    data << m_teleport_dest.PositionXYZStream();
-
+                data << float(m_teleport_dest.GetPositionX());
+                data << float(m_teleport_dest.GetOrientation());
+                data << float(m_teleport_dest.GetPositionZ());
                 data << uint32(mapid);
-
-                if (m_transport)
-                    data << m_movementInfo.t_pos.GetOrientation();
-                else
-                    data << m_teleport_dest.GetOrientation();
+                data << float(m_teleport_dest.GetPositionY());
 
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
@@ -2178,8 +2229,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
             SetSemaphoreTeleportFar(true);
         }
-        else
-            return false;
+        //else
+        //    return false;
     }
     return true;
 }
