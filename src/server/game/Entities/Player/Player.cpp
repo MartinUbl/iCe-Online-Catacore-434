@@ -4118,6 +4118,63 @@ bool Player::Has310Flyer(bool checkAllSpells, uint32 excludeSpellId)
     return false;
 }
 
+void Player::SetSendFlyPacket(bool apply)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data;
+
+    if (apply)
+    {
+        data.Initialize(SMSG_MOVE_SET_CAN_FLY, 1 + 8 + 4);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[3]);
+
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[3]);
+
+        data << uint32(0);
+
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[5]);
+    }
+    else
+    {
+        data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 1 + 8 + 4);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[7]);
+
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[6]);
+
+        data << uint32(0);
+
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[7]);
+    }
+
+    SendDirectMessage(&data);
+}
+
 void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 {
     m_spellCooldowns.erase(spell_id);
