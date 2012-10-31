@@ -739,7 +739,8 @@ enum Opcodes
     SMSG_BATTLEFIELD_STATUS2                         = 0x074A4, // 4.3.4 15595
     SMSG_BATTLEFIELD_STATUS3                         = 0x059A0, // 4.3.4 15595
     SMSG_BATTLEFIELD_STATUS4                         = 0x075A2, // 4.3.4 15595
-    CMSG_BATTLEFIELD_PORT                            = 0x100BD, //
+    CMSG_BATTLEFIELD_PORT                            = 0x0711A, // 4.3.4 15595
+    SMSG_BATTLEFIELD_STATUS_FAILED                   = 0x071A7, // 4.3.4 15595
     CMSG_INSPECT_HONOR_STATS                         = 0x100BE, //
     SMSG_INSPECT_HONOR_STATS                         = 0x079A5, // 4.3.4 15595
     CMSG_BATTLEMASTER_HELLO                          = 0x100BF, //
@@ -754,7 +755,7 @@ enum Opcodes
     //MSG_PVP_LOG_DATA                                 = 0x05CB2, // 4.3.4 15595 SkyFire has this ID, but the same ID for SMSG_RATED_BATTLEFIELD_INFO (new, unmapped)
     MSG_PVP_LOG_DATA                                 = 0x054A3, // 4.3.4 15595
     CMSG_BATTLEFIELD_REQUEST_SCORE_DATA              = 0x100C8, //
-    CMSG_LEAVE_BATTLEFIELD                           = 0x100C9, //
+    CMSG_LEAVE_BATTLEFIELD                           = 0x03018, // 4.3.4 15595
     CMSG_AREA_SPIRIT_HEALER_QUERY                    = 0x04907, // 4.3.4 15595
     CMSG_AREA_SPIRIT_HEALER_QUEUE                    = 0x100CA, //
     SMSG_AREA_SPIRIT_HEALER_TIME                     = 0x00734, // 4.3.4 15595
@@ -1333,7 +1334,6 @@ enum Opcodes
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
-    CMSG_BATTLEFIELD_LEAVE                           = 0x03018, // 4.3.4 Build 15595
     CMSG_DUNGEON_FINDER_GET_SYSTEM_INFO              = 0x00412, // 4.3.4 Build 15595
     CMSG_ENABLE_NAGLE                                = 0x04449, // 4.3.4 Build 15595
     CMSG_GUILD_BANK_REM_MONEY_WITHDRAW_QUERY         = 0x01225, // 4.3.4 Build 15595

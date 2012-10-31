@@ -137,11 +137,11 @@ enum BattlegroundBuffObjects
 enum BattlegroundRandomRewards
 {
     BG_REWARD_WINNER_HONOR_FIRST    = 30,
-    BG_REWARD_WINNER_ARENA_FIRST    = 25,
+    BG_REWARD_WINNER_CONQUEST_FIRST = 25,
     BG_REWARD_WINNER_HONOR_LAST     = 15,
-    BG_REWARD_WINNER_ARENA_LAST     = 0,
-    BG_REWARD_LOSER_HONOR_FIRST    = 5,
-    BG_REWARD_LOSER_HONOR_LAST     = 5
+    BG_REWARD_WINNER_CONQUEST_LAST  =  0,
+    BG_REWARD_LOSER_HONOR_FIRST     =  5,
+    BG_REWARD_LOSER_HONOR_LAST      =  5
 };
 
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
@@ -364,6 +364,7 @@ class Battleground
         BattlegroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
         BattlegroundBracketId GetBracketId() const { return m_BracketId; }
         uint32 GetInstanceID() const        { return m_InstanceID; }
+        uint64 GetGUID() const              { return MAKE_NEW_GUID(GetTypeID(), 0, HIGHGUID_BATTLEGROUND); }
         BattlegroundStatus GetStatus() const { return m_Status; }
         uint32 GetClientInstanceID() const  { return m_ClientInstanceID; }
         uint32 GetStartTime() const         { return m_StartTime; }
