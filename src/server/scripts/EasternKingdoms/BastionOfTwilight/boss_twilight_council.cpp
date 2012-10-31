@@ -172,6 +172,15 @@ public:
                 damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
+        void DamageDealt(Unit* target, uint32 &damage, DamageEffectType damagetype)
+        {
+            if(damagetype == SPELL_DIRECT_DAMAGE) // Ak ma hrac Gravity crush ma byt immuny na dmg ? ? ?  TODO -> Overit ci je to naozaj tak
+            {
+                if(target->HasAura(92486 ) || target->HasAura(92488 ) || target->HasAura(84948 ) || target->HasAura(92487 )) // Gravity Crush
+                    damage = 0;
+            }
+        }
+
         void EnterEvadeMode()
         {
             if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
@@ -359,7 +368,7 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
-                            lift_timer=2000; // Po dvoch sekundach zdvihnem hracov zo zeme
+                            lift_timer=1500; // Po 1.5 sekundach zdvihnem hracov zo zeme
                             can_lift=true;
                         }
                         Gravity_crush_timer=25000;
@@ -369,8 +378,6 @@ public:
 
             if(lift_timer<=diff && can_lift) // Hracov ktory maju GC zdvihnem zo zeme
             {
-                if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
                     std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
                     for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                     {
@@ -379,7 +386,6 @@ public:
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                     unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+30);
                     }
-                }
                 can_lift=false;
             }
             else lift_timer-=diff;
@@ -971,7 +977,6 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-            me->GetMotionMaster()->Clear();
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1437,7 +1442,7 @@ public:
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
 
-                Map* map;
+                /*Map* map; 
                 map = me->GetMap();
                 Map::PlayerList const& plrList = map->GetPlayers();
                 if (plrList.isEmpty())
@@ -1447,7 +1452,6 @@ public:
                 {
                     if (Player* pPlayer = itr->getSource())
                     {
-
                             if(pPlayer->HasAura(92075))
                                 pPlayer->RemoveAurasDueToSpell(92075);
 
@@ -1455,13 +1459,13 @@ public:
                                 pPlayer->RemoveAurasDueToSpell(92067);
                     }
 
-                }
+                }*/
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
              if (damage > me->GetHealth() || damage > 500000 )
-                damage=0; // Zabranim IK dmgu od magovho Ignite
+                damage=0;
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1653,6 +1657,7 @@ public:
                                     pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
                                     pIGNACIOUS->SendMovementFlagUpdate();
                                     pIGNACIOUS->InterruptNonMeleeSpells(true);
+                                    pIGNACIOUS->SetSpeed(MOVE_RUN,1.5f,true);
                                     pIGNACIOUS->CastSpell(pIGNACIOUS, 87459, true); // Visual teleport
                                 }
                                 else if (Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
@@ -1660,6 +1665,7 @@ public:
                                     pIgnacious->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
                                     pIgnacious->SendMovementFlagUpdate();
                                     pIgnacious->InterruptNonMeleeSpells(true);
+                                    pIgnacious->SetSpeed(MOVE_RUN,1.5f,true);
                                     pIgnacious->CastSpell(pIgnacious, 87459, true); // Visual teleport
                                 }
 
