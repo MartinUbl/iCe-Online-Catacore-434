@@ -42,6 +42,8 @@
 /// List of Opcodes
 enum Opcodes
 {
+    COMPRESSED_OPCODE_MASK                           = 0x08000, // Mask for opcodes specific for compressed variant of packet
+
     CMSG_WORLD_TELEPORT                              = 0x03330, // 4.3.4 15595
     CMSG_TELEPORT_TO_UNIT                            = 0x10000, //
     SMSG_CHECK_FOR_BOTS                              = 0x10001, //
@@ -524,7 +526,6 @@ enum Opcodes
     SMSG_PLAY_SPELL_VISUAL                           = 0x055A5, // 4.3.4 15595
     CMSG_ZONEUPDATE                                  = 0x04F37, // 4.3.4 15595
     SMSG_PARTYKILLLOG                                = 0x04937, // 4.3.4 15595
-    SMSG_COMPRESSED_UPDATE_OBJECT                    = 0x10076, //
     SMSG_PLAY_SPELL_IMPACT                           = 0x10077, //
     SMSG_EXPLORATION_EXPERIENCE                      = 0x06716, // 4.3.4 15595
     CMSG_GM_SET_SECURITY_GROUP                       = 0x10078, //
@@ -1450,9 +1451,6 @@ enum Opcodes
     SMSG_BATTLEFIELD_STATUS_QUEUED                   = 0x035A1, // 4.3.4 Build 15595
     SMSG_CATEGORY_COOLDOWN                           = 0x071B6, // 4.3.4 Build 15595
     SMSG_COMPLETION_NPC_RESPONSE                     = 0x075A1, // 4.3.4 Build 15595
-    SMSG_COMPRESSED_ACHIEVEMENT_DATA                 = 0x00000, // Unknown
-    SMSG_COMPRESSED_CHAR_ENUM                        = 0x00000, // Unknown
-    SMSG_COMPRESSED_GUILD_ROSTER                     = 0x00000, // Unknown
     SMSG_FAILED_PLAYER_CONDITION                     = 0x019A4, // 4.3.4 Build 15595
     SMSG_GUILD_ACHIEVEMENT_DATA                      = 0x054B7, // 4.3.4 Build 15595
     SMSG_GUILD_CANCEL                                = 0x00000, // Unknown
@@ -1485,6 +1483,7 @@ enum Opcodes
     SMSG_WEEKLY_SPELL_USAGE                          = 0x039B7, // 4.3.4 Build 15595
     SMSG_WORLD_SERVER_INFO                           = 0x009B1, // 4.3.4 Build 15595
 
+    OPCODES_MAX                                      = 0x10000, // Maximum number of opcode+1
     NUM_MSG_TYPES                                    = 0x20000  // this enum value doesnt make any sense after opcode randomization, needs rework to make us able to drop this value
 };
 
@@ -1492,6 +1491,7 @@ enum Opcodes
 #define MSG_VERIFY_CONNECTIVITY 0x4F57
 
 extern void InitOpcodeTable();
+extern void DestroyOpcodeTable();
 
 /// Player state
 enum SessionStatus
@@ -1513,7 +1513,7 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-extern OpcodeHandler opcodeTable[NUM_MSG_TYPES];
+extern OpcodeHandler* opcodeTable;
 
 /// Lookup opcode name for human understandable logging
 inline const char* LookupOpcodeName(uint32 id)

@@ -32,6 +32,7 @@
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
 #include "World.h"
+#include <zlib.h>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -326,6 +327,8 @@ class WorldSession
 
         // Recruit-A-Friend Handling
         uint32 GetRecruiterId() { return recruiterId; }
+
+        z_stream_s* GetCompressionStream() { return _compressionStream; }
 
     public:                                                 // opcodes handlers
 
@@ -905,6 +908,7 @@ class WorldSession
         AddonsList m_addonsList;
         uint32 recruiterId;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        z_stream_s* _compressionStream;
 };
 #endif
 /// @}

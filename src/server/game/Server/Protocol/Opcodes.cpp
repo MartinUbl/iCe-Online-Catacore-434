@@ -27,12 +27,31 @@
 
 #include "Opcodes.h"
 #include "WorldSession.h"
+#include "Log.h"
 
 /// Correspondence between opcodes and their names
-OpcodeHandler opcodeTable[NUM_MSG_TYPES];
+OpcodeHandler* opcodeTable;
 
 static void DefineOpcode(uint32 opcode, const char* name, SessionStatus status, void (WorldSession::*handler)(WorldPacket& recvPacket) )
 {
+    if (opcode >= OPCODES_MAX)
+        return;
+
+    if (opcode & COMPRESSED_OPCODE_MASK)
+        sLog->outError("Warning: defining handler for opcode %s (0x%.4X) which is marked as compressed type! Compressed opcode handlers are defined automatically", name, opcode);
+    else
+    {
+        // Also define handler and name for compressed variant
+        uint16 compressedOpcode = uint16(opcode) | COMPRESSED_OPCODE_MASK;
+
+        char* compressedName = new char[strlen(name)+11+1]; // 11 = strlen("_COMPRESSED"), 1 for null terminator
+        sprintf(compressedName, "%s_COMPRESSED", name);
+
+        opcodeTable[compressedOpcode].name = compressedName;
+        opcodeTable[compressedOpcode].status = status;
+        opcodeTable[compressedOpcode].handler = handler;
+    }
+
     opcodeTable[opcode].name = name;
     opcodeTable[opcode].status = status;
     opcodeTable[opcode].handler = handler;
@@ -42,11 +61,9 @@ static void DefineOpcode(uint32 opcode, const char* name, SessionStatus status, 
 
 void InitOpcodeTable()
 {
-    for( int i = 0; i < NUM_MSG_TYPES; ++i )
-    {
-        DefineOpcode( i, "UNKNOWN", STATUS_NEVER, &WorldSession::Handle_NULL );
-    }
-    
+    opcodeTable = new OpcodeHandler[OPCODES_MAX];
+    memset(opcodeTable, 0, sizeof(OpcodeHandler)*OPCODES_MAX);
+
     OPCODE( CMSG_WORLD_TELEPORT,                          STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode       );
     OPCODE( CMSG_TELEPORT_TO_UNIT,                        STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_CHECK_FOR_BOTS,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -523,7 +540,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_PLAY_SPELL_VISUAL,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_ZONEUPDATE,                              STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode          );
     OPCODE( SMSG_PARTYKILLLOG,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_COMPRESSED_UPDATE_OBJECT,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAY_SPELL_IMPACT,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_EXPLORATION_EXPERIENCE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GM_SET_SECURITY_GROUP,                   STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -1295,4 +1311,11 @@ void InitOpcodeTable()
     OPCODE( CMSG_REFORGE,                                 STATUS_LOGGEDIN, &WorldSession::HandleItemReforge               );
     OPCODE( SMSG_REFORGING_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ENTERED_INSTANCE_IN_PROGRESS,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+
+    // Define the rest of the opcodes as UNKNOWN
+    for (int i = 0; i < OPCODES_MAX; i++)
+    {
+        if (opcodeTable[i].handler == NULL)
+            DefineOpcode(i, "UNKNOWN", STATUS_NEVER, &WorldSession::Handle_NULL);
+    }
 };
