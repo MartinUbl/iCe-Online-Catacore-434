@@ -20553,7 +20553,7 @@ void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string
     *data << (uint8)msgtype;
     *data << (uint32)language;
     *data << (uint64)GetGUID();
-    *data << (uint32)language;                               //language 2.1.0 ?
+    *data << (uint32)0;                               //language 2.1.0 ?
     *data << (uint64)GetGUID();
     *data << (uint32)(text.length()+1);
     *data << text;
@@ -22834,7 +22834,10 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
             //if (target->isType(TYPEMASK_UNIT) && ((Unit*)target)->m_Vehicle)
             //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle, data, visibleNow);
 
-            target->BuildCreateUpdateBlockForPlayer(&data, this);
+            // Temporary hackfix for updating visible objects and sending them to client
+            // unfortunatelly, this breaks sending player update to player (initial)
+            //target->BuildCreateUpdateBlockForPlayer(&data, this);
+            target->SendUpdateToPlayer(this);
             UpdateVisibilityOf_helper(m_clientGUIDs,target,visibleNow);
 
             #ifdef TRINITY_DEBUG

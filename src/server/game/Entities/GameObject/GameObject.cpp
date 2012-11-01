@@ -50,7 +50,7 @@ GameObject::GameObject() : WorldObject(), m_goValue(new GameObjectValue), m_AI(N
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
-    m_updateFlag = (UPDATEFLAG_HAS_STATIONARY_POSITION | UPDATEFLAG_HAS_GO_POSITION | UPDATEFLAG_HAS_GO_ROTATION);
+    m_updateFlag = (UPDATEFLAG_HAS_STATIONARY_POSITION | UPDATEFLAG_HAS_GO_ROTATION);
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
