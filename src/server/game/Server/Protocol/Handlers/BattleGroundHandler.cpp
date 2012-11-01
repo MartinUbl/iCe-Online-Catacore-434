@@ -73,8 +73,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     uint32 bgTypeId_;
     uint32 instanceId;
     uint8 joinAsGroup;
-    uint8 unk2;
-    uint16 unk3;
     bool isPremade = false;
     Group *grp = NULL;
     ObjectGuid guid;
