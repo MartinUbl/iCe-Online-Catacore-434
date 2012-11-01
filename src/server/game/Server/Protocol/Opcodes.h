@@ -59,7 +59,7 @@ enum Opcodes
     SMSG_CHAR_ENUM                                   = 0x010B0, // 4.3.4 15595
     SMSG_CHAR_DELETE                                 = 0x00304, // 4.3.4 15595
     CMSG_PLAYER_LOGIN                                = 0x005B1, // 4.3.4 15595
-    SMSG_NEW_WORLD                                   = 0x031A2, // 4.3.4 15595
+    SMSG_NEW_WORLD                                   = 0x079B1, // 4.3.4 15595
     SMSG_TRANSFER_PENDING                            = 0x018A6, // 4.3.4 15595
     SMSG_TRANSFER_ABORTED                            = 0x00537, // 4.3.4 15595
     SMSG_CHARACTER_LOGIN_FAILED                      = 0x04417, // 4.3.4 15595
@@ -243,7 +243,7 @@ enum Opcodes
     MSG_MOVE_TOGGLE_COLLISION_CHEAT                  = 0x07B04, // 4.3.4 15595
     MSG_MOVE_SET_FACING                              = 0x07914, // 4.3.4 15595
     MSG_MOVE_SET_PITCH                               = 0x07312, // 4.3.4 15595
-    MSG_MOVE_WORLDPORT_ACK                           = 0x1002C, //
+    MSG_MOVE_WORLDPORT_ACK                           = 0x02411, // 4.3.4 15595
     SMSG_MONSTER_MOVE                                = 0x06E17, // 4.3.4 15595
     SMSG_MOVE_WATER_WALK                             = 0x1002D, //
     SMSG_MOVE_LAND_WALK                              = 0x1002E, //
