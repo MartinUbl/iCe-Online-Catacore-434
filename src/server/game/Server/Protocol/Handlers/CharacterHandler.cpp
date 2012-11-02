@@ -2073,3 +2073,19 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     data << uint8(race);
     SendPacket(&data);
 }
+
+void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
+{
+    Player* player = GetPlayer();
+    // Only players that has not yet gained any experience can use this
+    if (player->GetUInt32Value(PLAYER_XP))
+        return;
+
+    if (ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(player->getClass()))
+    {
+        if (classEntry->CinematicSequence)
+            player->SendCinematicStart(classEntry->CinematicSequence);
+        else if (ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(player->getRace()))
+            player->SendCinematicStart(raceEntry->CinematicSequence);
+    }
+}

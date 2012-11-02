@@ -857,6 +857,7 @@ class WorldSession
         void HandleEjectPasenger(WorldPacket &data);
         void HandleEnterPlayerVehicle(WorldPacket &data);
         void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
+        void HandleOpeningCinematic(WorldPacket& recvData);
 
     private:
         void ProcessQueryCallbacks();

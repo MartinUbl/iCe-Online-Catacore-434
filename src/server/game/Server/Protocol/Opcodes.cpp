@@ -288,7 +288,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_MOVE_HOVER_ACK,                          STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck              );
     OPCODE( MSG_MOVE_HOVER,                               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TRIGGER_CINEMATIC_CHEAT,                 STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( CMSG_OPENING_CINEMATIC,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_OPENING_CINEMATIC,                       STATUS_NEVER,    &WorldSession::HandleOpeningCinematic          );
     OPCODE( SMSG_TRIGGER_CINEMATIC,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_NEXT_CINEMATIC_CAMERA,                   STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera       );
     OPCODE( CMSG_COMPLETE_CINEMATIC,                      STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinematic         );
