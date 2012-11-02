@@ -34,6 +34,7 @@
 DB2Storage <ItemEntry>                    sItemStore(Itemfmt);
 DB2Storage <ItemCurrencyCostEntry>        sItemCurrencyCostStore(ItemCurrencyCostEntryfmt);
 DB2Storage <ItemExtendedCostEntry>        sItemExtendedCostStore(ItemExtendedCostEntryfmt);
+DB2Storage <ItemSparseEntry>              sItemSparseStore (ItemSparsefmt);
 
 #include "DB2Stores.h"
 
@@ -99,6 +100,7 @@ void LoadDB2Stores(const std::string& dataPath)
     LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path,"ItemCurrencyCost.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path,"ItemExtendedCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
 
     // error checks
     if (bad_db2_files.size() >= DB2FileCount)
