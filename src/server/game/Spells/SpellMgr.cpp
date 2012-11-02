@@ -4664,6 +4664,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92481:
         case 92482:
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->EffectRadiusIndex[0] = 84;  // 8 yardov
             break;
         case 86838: // Impending dooooom
             spellInfo->EffectTriggerSpell[0] = 0;

@@ -783,14 +783,15 @@ public:
                 {
                     can_interrupt=false;
 
-                    std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
+                        std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
                         for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                         {
                             Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid());
 
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
-                                me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                                if( urand(0,100) <= 50 ) // 50% sanca na spawn bomby pod hraca
+                                    me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
 
@@ -798,7 +799,7 @@ public:
                             float range=0.0f;
                         if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
                         {
-                            for(int i=0;i<3;i++)
+                            for(int i=0;i<6;i++)
                             {
                                 angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
                                 range=(float)urand(0,21);
@@ -807,7 +808,7 @@ public:
                         }
                         else // 25 MAN
                         {
-                            for(int i=0;i<6;i++)
+                            for(int i=0;i<8;i++)
                             {
                                 angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
                                 range=(float)urand(0,21);
@@ -2335,7 +2336,7 @@ public:
             me->ForcedDespawn(61000);
             speeder=0.0f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
-            Flamestrike_timer=3000; // Spawn Flamestriku po 3 sekundach od spawnu 
+            Flamestrike_timer=5000; // Spawn Flamestriku po 5 sekundach od spawnu 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
@@ -2344,6 +2345,19 @@ public:
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
+
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
+        {
+            if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
+                victim->RemoveAurasDueToSpell(92307);
+
+            if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
+            {
+                DoCast(92548); // Zacastim instant Glaciate
+                me->ForcedDespawn();
+            }
+        }
+
 
         void UpdateAI(const uint32 diff)
         {
@@ -2358,11 +2372,11 @@ public:
                 }
             }
 
-            if(Speed_timer<=diff) // Pribezne zvysujem speed orbu
+            if(Speed_timer<=diff) // Priebezne zvysujem speed orbu
             {
                 speeder=speeder+0.05f;
-                if(speeder <= 0.45) // Orb neprevysi 75 % normalnej rychlosti
-                    me->SetSpeed(MOVE_RUN,0.3f+speeder);
+                if(speeder <= 0.6) // Orb neprevysi 90 % normalnej rychlosti
+                    me->SetSpeed(MOVE_RUN, (0.3f + speeder));
                 Speed_timer=500;
             }
             else Speed_timer-=diff;
@@ -2376,16 +2390,13 @@ public:
 
             if(Flamestrike_timer<=diff) // Spawn Flamestriku pod random hraca
             {
-                if (getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
-                    if (Unit* ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                if (Unit* ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
+                    me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
 
-                    if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true))
-                        pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
+                if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true))
+                    pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
 
-                }
-                Flamestrike_timer=99999;
+                Flamestrike_timer=999999;
             }
             else Flamestrike_timer-=diff;
 
@@ -2397,12 +2408,10 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                     me->AddAura(92307,target);
                     me->Attack(target,true);
-                    me->AddThreat(target,9999999.f);
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()); // Orb sa rozbehne za hracom s beacon debuffom
+                    me->AddThreat(target,9999999.0f);
                 }
 
-                DoCast(me,92302 ); // Spell nahdodi "model" orbu + zvysuje speed ---> Speed som musel, vypnut robim rucne v AI
+                DoCast(me,92302); // Spell nahodi "model" orbu + zvysuje speed ---> Speed som musel, vypnut robim rucne v AI
                 buffed=true;
             }
             else Chasing_timer-=diff;
@@ -2410,36 +2419,23 @@ public:
 
             if(checking_timer<=diff)
             {
-                if(target!=NULL)
-                    me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()); // Orb sa rozbehne za hracom s beacon debuffom
-
-                if(Creature *pFlamestrike = me->FindNearestCreature(50297, 500, true))
+                if(Creature *pFlamestrike = me->FindNearestCreature(50297, 1000, true))
                 {
                     if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
                     {
                         me->ForcedDespawn();
                         pFlamestrike->ForcedDespawn();
-                        if(target)
-                            if(target->HasAura(92307))
-                                target->RemoveAurasDueToSpell(92307);
+
+                        if(target && target->HasAura(92307)) // Odstranim hracovi marku
+                            target->RemoveAurasDueToSpell(92307);
                     }
 
-                    if(target)
-                    {
-                        if(target->HasAura(82285))
-                            me->ForcedDespawn();
-                        if(me->IsWithinMeleeRange(target)) // Ak ma hrac Elemental stasis -> faza 3
-                        {
-                            if(target->HasAura(92307))
-                                target->RemoveAurasDueToSpell(92307);
-                            DoCast(92548); // Zacastim instant Glaciate ak dobehne orb hraca alebo ma Stasis debuff
-                            me->ForcedDespawn();
-                        }
-                    }
                 }
-                checking_timer=50;
+                checking_timer=100;
             }
             else checking_timer-=diff;
+
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -2468,11 +2464,12 @@ public:
 
         void Reset()
         {
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE |UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE|*/UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(60000);
             me->SetInCombatWithZone();
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
-            Buff_timer=4000;
+            Buff_timer=4500;
             buffed=false;
         }
 
