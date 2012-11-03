@@ -104,6 +104,13 @@ enum PlayerSpellState
     PLAYERSPELL_TEMPORARY = 4
 };
 
+enum RatedBGStats
+{
+    RATED_BG_STAT_MATCHES_WON    = 0,
+    RATED_BG_STAT_MATCHES_LOST   = 1,
+    RATED_BG_STATS_MAX           = 2
+};
+
 struct PlayerSpell
 {
     PlayerSpellState state : 8;
@@ -956,6 +963,7 @@ public:
 			return false;
 	}
 	void AppendTaximaskTo(ByteBuffer& data,bool all);
+	bool AutomaticTaxiNodeLearn(uint32 nodeid);
 
 	// Destinations
 	bool LoadTaxiDestinationsFromString(const std::string& values, uint32 team);
@@ -1296,7 +1304,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetCurrency(uint32 id);
         bool HasCurrency(uint32 id, uint32 count);
         void SetCurrency(uint32 id, uint32 count);
-        void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false);
+        void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false, bool ignorebonuses = false);
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
@@ -1441,6 +1449,9 @@ class Player : public Unit, public GridObject<Player>
         void ResetDailyQuestStatus();
         void ResetWeeklyQuestStatus();
 
+        //uint16 GetConquestPointsWeekCap(ConquestPointsSources source) const { return _conquestPointsWeekCap[source]; }
+        uint16 GetConquestPointsThisWeek();
+
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
         uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
@@ -1527,6 +1538,8 @@ class Player : public Unit, public GridObject<Player>
         static uint32 GetLevelFromDB(uint64 guid);
         static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
 
+        void _LoadRatedBGData();
+
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
         /*********************************************************/
@@ -1535,6 +1548,8 @@ class Player : public Unit, public GridObject<Player>
         bool CreateInDB();
         void SaveInventoryAndGoldToDB(SQLTransaction& trans);                    // fast save function for item/money cheating preventing
         void SaveGoldToDB(SQLTransaction& trans);
+
+        void _SaveRatedBGData();
 
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
@@ -1705,6 +1720,12 @@ class Player : public Unit, public GridObject<Player>
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS, profs); }
         void InitPrimaryProfessions();
 
+        // queued spells
+        bool m_queuedSpell;
+        void QueueSpell();
+        void CancelQueuedSpell();
+        bool HasQueuedSpell();
+
         PlayerSpellMap const& GetSpellMap() const { return m_spells; }
         PlayerSpellMap      & GetSpellMap()       { return m_spells; }
 
@@ -1752,6 +1773,7 @@ class Player : public Unit, public GridObject<Player>
         void AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell);
         bool HasGlobalCooldown(SpellEntry const *spellInfo) const;
         void RemoveGlobalCooldown(SpellEntry const *spellInfo);
+        uint32 GetGlobalCooldown(SpellEntry const *spellInfo);
 
         void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
@@ -1855,7 +1877,7 @@ class Player : public Unit, public GridObject<Player>
         {
             SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + type, value);
         }
-        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); }
+        uint32 GetArenaTeamId(uint8 slot) { if (slot < 3) return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); else return 0;}
         uint32 GetArenaPersonalRating(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
         static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
@@ -2257,7 +2279,7 @@ class Player : public Unit, public GridObject<Player>
         void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }
         uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
 
-        void LeaveBattleground(bool teleportToEntryPoint = true);
+        void LeaveBattleground(bool teleportToEntryPoint = true, bool CastDeserter = true);
         bool CanJoinToBattleground() const;
         bool CanReportAfkDueToLimit();
         void ReportedAfkBy(Player* reporter);
@@ -2271,6 +2293,12 @@ class Player : public Unit, public GridObject<Player>
 
         bool GetRandomWinner() { return m_IsBGRandomWinner; }
         void SetRandomWinner(bool isWinner);
+
+        uint32 GetRatedBattlegroundStat(uint8 index) const { return m_ratedBgStats[index]; }
+        uint32 GetRatedBattlegroundRating() const { return GetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING); }
+
+        void AddRatedBattlegroundStat(uint8 index) { m_ratedBgStats[index]++; }
+        void SetRatedBattlegroundRating(uint32 value) { SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, value); }
 
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
@@ -2624,6 +2652,8 @@ class Player : public Unit, public GridObject<Player>
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];
+
+        uint32 m_ratedBgStats[RATED_BG_STATS_MAX]; // for won and lost games, rating is stored in PlayerFields
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

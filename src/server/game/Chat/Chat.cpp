@@ -236,6 +236,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "update",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugUpdateCommand>,              "", NULL },
         { "itemexpire",     SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugItemExpireCommand>,          "", NULL },
         { "opcode",            SEC_ADMINISTRATOR, false, OldHandler<&ChatHandler::HandleDebugOpcodeCommand>, "", NULL },
+        { "ratedbg",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleDebugRatedBGCommand>, "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 
@@ -1112,16 +1113,34 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, co
         // table[i].Name == "" is special case: send original command to handler
         if ((table[i].Handler)(this, strlen(table[i].Name) != 0 ? text : oldtext))
         {
-            if (table[i].SecurityLevel > SEC_PLAYER)
             {
                 // chat case
                 if (m_session)
                 {
                     Player* p = m_session->GetPlayer();
                     uint64 sel_guid = p->GetSelection();
-                    sLog->outCommand(m_session->GetAccountId(),"Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected %s: %s (GUID: %u)]",
-                        fullcmd.c_str(),p->GetName(),m_session->GetAccountId(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
-                        GetLogNameForGuid(sel_guid), (p->GetSelectedUnit()) ? p->GetSelectedUnit()->GetName() : "", GUID_LOPART(sel_guid));
+                    if (table[i].SecurityLevel > SEC_PLAYER)
+                        sLog->outCommand(m_session->GetAccountId(),"Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected %s: %s (GUID: %u)]",
+                            fullcmd.c_str(),p->GetName(),m_session->GetAccountId(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
+                            GetLogNameForGuid(sel_guid), (p->GetSelectedUnit()) ? p->GetSelectedUnit()->GetName() : "", GUID_LOPART(sel_guid));
+
+                    if (table[i].SecurityLevel <= SEC_PLAYER   // no GM commands
+                        && fullcmd != ".save"
+                        && fullcmd != ".SAVE"
+                        && fullcmd != ".Save")
+                    {
+                        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) cmd:(%s) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
+                                     m_session->GetRemoteAddress().c_str(),
+                                     m_session->GetAccountId(),
+                                     p->GetName(),
+                                     "command",
+                                     fullcmd.c_str(),
+                                       "pos",
+                                       p->GetPositionX(),
+                                       p->GetPositionY(),
+                                       p->GetPositionZ(),
+                                       p->GetMapId());
+                    }
                 }
             }
         }

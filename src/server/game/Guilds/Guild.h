@@ -806,6 +806,7 @@ public:
         Members::const_iterator itr = m_members.find(GUID_LOPART(guid));
         return itr != m_members.end() ? itr->second->GetRankId() : -1;
     }
+    inline uint8 _GetRanksSize() const { return uint8(m_ranks.size()); }
 
 protected:
     uint32 m_id;
@@ -837,7 +838,6 @@ protected:
     LogHolder* m_bankEventLog[GUILD_BANK_MAX_TABS + 1];
 
 private:
-    inline uint8 _GetRanksSize() const { return uint8(m_ranks.size()); }
     inline const RankInfo *GetRankInfo(uint8 rankId) const { return rankId < _GetRanksSize() ? &m_ranks[rankId] : NULL; }
     inline RankInfo *GetRankInfo(uint8 rankId) { return rankId < _GetRanksSize() ? &m_ranks[rankId] : NULL; }
     inline bool _HasRankRight(Player* player, uint32 right) const { return (_GetRankRights(player->GetRank()) & right) != GR_RIGHT_EMPTY; }

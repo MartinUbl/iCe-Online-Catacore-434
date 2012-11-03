@@ -529,6 +529,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
+    m_queuedSpell = false;
+
     /* spread initial manual save a bit */
     m_lastManualSave = m_logintime + urand(0,m_nextSave/2000);
 
@@ -538,7 +540,10 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     //when dying/logging out
     m_oldpetspell = 0;
     m_lastpetnumber = 0;
-    
+
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
+
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_mapid=0;
@@ -780,10 +785,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES + i, 0);  // 0=disabled
     SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
 
-    SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    //SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
-    //SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-    //SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
+    SetUInt16Value(PLAYER_FIELD_KILLS, 0, 0);
+    SetUInt16Value(PLAYER_FIELD_KILLS, 1, 0);
 
     // set starting level
     uint32 start_level = getClass() != CLASS_DEATH_KNIGHT
@@ -2356,13 +2360,21 @@ void Player::RegenerateAll()
     //    return;
 
     m_regenTimerCount += m_regenTimer;
+    uint8 cl = getClass();
 
-    Regenerate(POWER_ENERGY);
-    Regenerate(POWER_FOCUS);
-    Regenerate(POWER_MANA);
+    if (cl == CLASS_HUNTER)
+        Regenerate(POWER_FOCUS);
+    else if (cl == CLASS_DEATH_KNIGHT)
+        Regenerate(POWER_RUNIC_POWER);
+    else
+    {
+        Regenerate(POWER_ENERGY);
+        Regenerate(POWER_MANA);
+        Regenerate(POWER_RAGE);
+    }
 
     // Runes act as cooldowns, and they don't need to send any data
-    if (getClass() == CLASS_DEATH_KNIGHT)
+    if (cl == CLASS_DEATH_KNIGHT)
     {
         for (uint32 i = 0; i < MAX_RUNES; i += 2)
         {
@@ -2400,10 +2412,6 @@ void Player::RegenerateAll()
         {
             RegenerateHealth();
         }
-
-        Regenerate(POWER_RAGE);
-        if (getClass() == CLASS_DEATH_KNIGHT)
-            Regenerate(POWER_RUNIC_POWER);
         
         m_regenTimerCount -= 2000;
     }
@@ -2442,28 +2450,20 @@ void Player::Regenerate(Powers power)
             else
                 addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
         }   break;
-        case POWER_RAGE:                                    // Regenerate rage
+        case POWER_RAGE:                                    // deplete rage
+        case POWER_RUNIC_POWER:                             // deplete runic power
         {
             if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             {
-                float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                addvalue += -20 * RageDecreaseRate / haste;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                addvalue += -0.0125f * m_regenTimer;        // 1.25 per second
             }
         }   break;
         case POWER_FOCUS:                                   // Regenerate focus (hunter)
-            addvalue = 0.006f * m_regenTimer * haste;
+            addvalue += 0.005f * m_regenTimer * haste;      // 5 per second
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);
+            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);  // 10 per second
             break;
-        case POWER_RUNIC_POWER:
-        {
-            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-            {
-                float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
-            }
-        }   break;
         case POWER_RUNE:
         case POWER_HAPPINESS:
         case POWER_HEALTH:
@@ -2482,7 +2482,7 @@ void Player::Regenerate(Powers power)
 
         // Butchery requires combat for this effect
         if (power != POWER_RUNIC_POWER || isInCombat())
-            addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power != POWER_ENERGY) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
+            addvalue += (float) GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power == POWER_HEALTH) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
     }
 
     if (addvalue < 0.0f)
@@ -5518,6 +5518,16 @@ void Player::RepopAtGraveyard()
         return;
     }
 
+    switch (GetMapId())
+    {
+        case 723: // Stormwind (?)
+            TeleportTo(723, -8897, -172, 82,0);
+            return;
+        case 719: // Mount Hyjal Phase map
+            TeleportTo(719, 5157, -1378, 1356, 0);
+            return;
+    }
+
     // Vashj'ir GraveYard fix
     switch (GetAreaId())
     {
@@ -5601,7 +5611,7 @@ void Player::RepopAtGraveyard()
         case 5146: // Vashj'ir
             TeleportTo(0, -6800.419922f, 4561.220215f, -604.364014f, 0.0f); // GY ID - 1721
             break;
-        default:      
+        default:
             break;
     }
 
@@ -7382,7 +7392,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
-            //ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, pVictim->getClass());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, pVictim->getRace(), 0, pVictim);
@@ -7569,7 +7579,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Prohibited area teleport
     if (GetSession()->GetSecurity() == SEC_PLAYER && !isInFlight())
     {
-        if (GetSession()->GetPlayer()->getLevel() < 58)
+        if (getLevel() < 58)
         {
             switch(newZone)
             {
@@ -7582,17 +7592,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 case 3519: // Terokkar Forest
                 case 3521: // Zangarmarsh
                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
-                    if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
-                        GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+                    if (HasSpellCooldown(8690))
+                        ModifySpellCooldown(8690,1800, true);
 
-                    GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                    AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
                     GetSession()->SendNotification("You must be at least level 58 for enter");
                     break;
                 default:
                     break;
             }
          }
-         if (GetSession()->GetPlayer()->getLevel() < 68)
+         if (getLevel() < 68)
          {
              switch(newZone)
              {
@@ -7609,17 +7619,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                  case 66:   // Zul'Drak
                  case 3537: // Borean Tundra
                      TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
-                     if (GetSession()->GetPlayer()->HasSpellCooldown(8690))
-                         GetSession()->GetPlayer()->ModifySpellCooldown(8690,1800, true);
+                     if (HasSpellCooldown(8690))
+                         ModifySpellCooldown(8690,1800, true);
 
-                     GetSession()->GetPlayer()->AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                     AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
                      GetSession()->SendNotification("You must be at least level 68 for enter");
                      break;
                  default:
                      break;
              }
          }
-        if (GetSession()->GetPlayer()->GetMapId() == 746) // Special for Plantaz
+        if (GetMapId() == 746) // Special for Plantaz
         {
             AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurection Sickness)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
@@ -7631,18 +7641,24 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 counter = field[0].GetUInt32();
                 duvod = field[1].GetString();
             }
-            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
-            ChatHandler(GetSession()->GetPlayer()).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
+            ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
+            ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
         }
 
         Aura* aur = GetAura(15007);
 
-        if (aur && aur->IsPermanent() && GetSession()->GetPlayer()->GetMapId() != 746) // Exiting Plantaz
+        if (aur && aur->IsPermanent() && GetMapId() != 746) // Exiting Plantaz
         {
             TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f); // Plantaz
-            GetSession()->SendNotification("Nemuzes se portovat z plantazee, dokud nebudes mit splneny svuj trest!"); // Czech
+            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
             GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
         }
+    }
+
+    if (GetSession()->GetSecurity() == SEC_PLAYER && GetZoneId() == 876) // Prohibited zone GM Island
+    {
+        TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+        GetSession()->LogoutRequest(1);
     }
 
     // zone changed, so area changed as well, update it
@@ -9900,6 +9916,8 @@ void Player::SendBGWeekendWorldStates()
                 SendUpdateWorldState(bl->HolidayWorldStateId, 0);
         }
     }
+
+    SendUpdateWorldState(RATED_BATTLEGROUND_WEEK_WORLDSTATE, sBattlegroundMgr->GetRatedBattlegroundWeek());
 }
 
 uint32 Player::GetXPRestBonus(uint32 xp)
@@ -11521,7 +11539,7 @@ bool Player::HasCurrency(uint32 id, uint32 count)
     return itr != m_currencies.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
+void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ignorebonuses)
 {
     if (!count)
         return;
@@ -11531,14 +11549,17 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
         return;
 
     // Check for auras modifying amount of currency gained
-    if (!GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN).empty())
+    if (!ignorebonuses)
     {
-        Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN);
-        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+        if (!GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN).empty())
         {
-            // currency id is saved in MiscValue, percentage in BaseAmount
-            if ((*itr)->GetMiscValue() == int32(id))
-                count = (100+(*itr)->GetBaseAmount())*count/100;
+            Unit::AuraEffectList const& effList = GetAuraEffectsByType(SPELL_AURA_MOD_CURRENCY_GAIN);
+            for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
+            {
+                // currency id is saved in MiscValue, percentage in BaseAmount
+                if ((*itr)->GetMiscValue() == int32(id))
+                    count = (100+(*itr)->GetBaseAmount())*count/100;
+            }
         }
     }
 
@@ -11627,7 +11648,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap)
 
 void Player::SetCurrency(uint32 id, uint32 count)
 {
-    ModifyCurrency(id, int32(count) - GetCurrency(id));
+    ModifyCurrency(id, int32(count) - GetCurrency(id), true, true);
 }
 
 uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency)
@@ -13152,6 +13173,18 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         else if (Bag *pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
             pBag->RemoveItem(slot, update);
 
+        if (pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u)",
+                         GetSession()->GetRemoteAddress().c_str(),
+                         GetSession()->GetAccountId(),
+                         GetName(),
+                         "destroy item",
+                         pItem->GetEntry(),
+                         pItem->GetProto()->Name1,
+                         pItem->GetCount());
+        }
+
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
@@ -14195,7 +14228,11 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
 
 void Player::ApplyEnchantment(Item *item,bool apply)
 {
+    if (!item)
+        return;
+
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+        // do not add "bonus" enchant with reforge ID
         if (slot != REFORGING_ENCHANTMENT_SLOT)
             ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
@@ -17408,6 +17445,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
+    _LoadRatedBGData();
 
     // Load conquest point cap.. little hack
     QueryResult pCapQuery = CharacterDatabase.PQuery("SELECT MAX(conquest_point_cap) FROM character_arena_stats WHERE guid=%lu", GetGUID());
@@ -19283,6 +19321,24 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
     return true;
 }
 
+void Player::_LoadRatedBGData()
+{
+    SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, 0);
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = 0;
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = 0;
+
+    QueryResult result = CharacterDatabase.PQuery("SELECT rating, matches_won, matches_lost FROM character_rated_bg_stats WHERE guid = %u", GetGUIDLow());
+
+    if (!result)
+        return;
+
+    Field *fields = result->Fetch();
+
+    SetUInt32Value(PLAYER_FIELD_BATTLEGROUND_RATING, fields[0].GetUInt32());
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_WON] = fields[1].GetUInt32();
+    m_ratedBgStats[RATED_BG_STAT_MATCHES_LOST] = fields[2].GetUInt32();
+}
+
 /*********************************************************/
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
@@ -19445,6 +19501,7 @@ bool Player::CreateInDB()
         _SaveMail(trans);
 
     _SaveBGData(trans);
+    _SaveRatedBGData();
     _SaveInventory(trans);
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
@@ -19574,8 +19631,7 @@ void Player::SaveToDB()
 
     ss << "taxi_path = '" << m_taxi.SaveTaxiDestinationsToString() << "', ";
 
-    // zero value for now - maybe it should be stored only as achievement criteria (statistic)?
-    ss << "totalKills = " << uint32(0) << ", ";
+    ss << "totalKills = " << GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS)  << ", ";
 
     ss << "todayKills = " << GetUInt16Value(PLAYER_FIELD_KILLS, 0) << ", ";
 
@@ -20143,6 +20199,12 @@ void Player::_SaveStats(SQLTransaction& trans)
        << GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1+CR_RESILIENCE_PLAYER_DAMAGE_TAKEN) << ", "
        << GetAchievementMgr().GetAchievementPoints() << ")";
     trans->Append(ss.str().c_str());
+}
+
+void Player::_SaveRatedBGData()
+{
+    CharacterDatabase.PExecute("REPLACE INTO character_rated_bg_stats (guid, rating, matches_won, matches_lost) VALUES (%u, %u, %u, %u)", GetGUIDLow(), GetRatedBattlegroundRating(),
+        GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON), GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST));
 }
 
 void Player::outDebugValues() const
@@ -22356,25 +22418,32 @@ void Player::SetBattlegroundEntryPoint()
     m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
 }
 
-void Player::LeaveBattleground(bool teleportToEntryPoint)
+void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
 {
     if (Battleground *bg = GetBattleground())
     {
+        // leaving rated bg -> count it as a loose to prevent exploit
+        if (bg->isBattleground() && bg->isRated() && bg->GetStatus() < STATUS_WAIT_LEAVE)
+            bg->RatedBattlegroundLost(this);
+
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
-        if (bg->isBattleground() && !isGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
+        if (bg->isBattleground() && !bg->isRated() && !isGameMaster() && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
         {
             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
             {
                 //lets check if player was teleported from BG and schedule delayed Deserter spell cast
                 if (IsBeingTeleportedFar())
                 {
-                    ScheduleDelayedOperation(DELAYED_SPELL_CAST_DESERTER);
+                    if (CastDeserter)
+                        ScheduleDelayedOperation(DELAYED_SPELL_CAST_DESERTER);
+
                     return;
                 }
 
-                CastSpell(this, 26013, true);               // Deserter
+                if (CastDeserter)
+                    CastSpell(this, 26013, true);               // Deserter
             }
         }
     }
@@ -22881,6 +22950,21 @@ void Player::UpdateVisibilityForPlayer()
 void Player::InitPrimaryProfessions()
 {
     SetFreePrimaryProfessions(sWorld->getIntConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
+}
+
+void Player::QueueSpell()
+{
+    m_queuedSpell = true;
+}
+
+void Player::CancelQueuedSpell()
+{
+    m_queuedSpell = false;
+}
+
+bool Player::HasQueuedSpell()
+{
+    return m_queuedSpell;
 }
 
 void Player::ModifyMoney(int32 d)
@@ -24127,6 +24211,10 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     {
         xp = (PvP || GetVehicle()) ? 0 : Trinity::XP::Gain(this, pVictim);
 
+        // XP gain if player level and victim greater than 11 level (skull :-))
+        if (getLevel()+11 <= pVictim->getLevel())
+            xp = 0;
+
         // honor can be in PvP and !PvP (racial leader) cases
         if (RewardHonor(pVictim, 1, -1, true))
             honored_kill = true;
@@ -24869,6 +24957,14 @@ bool Player::HasGlobalCooldown(SpellEntry const *spellInfo) const
     return itr != m_globalCooldowns.end() && (itr->second > sWorld->GetUpdateTime());
 }
 
+uint32 Player::GetGlobalCooldown(SpellEntry const *spellInfo)
+{
+    if (!spellInfo)
+        return 0;
+
+    return m_globalCooldowns[spellInfo->StartRecoveryCategory]; 
+}
+
 void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
 {
     if (!spellInfo)
@@ -25103,6 +25199,23 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
             item->is_looted = true;
 
         --loot->unlootedCount;
+
+        if (newitem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+        {
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
+                         GetSession()->GetRemoteAddress().c_str(),
+                         GetSession()->GetAccountId(),
+                         GetName(),
+                         "loot item",
+                         newitem->GetEntry(),
+                         newitem->GetProto()->Name1,
+                         newitem->GetCount(),
+                           "pos",
+                           GetPositionX(),
+                           GetPositionY(),
+                           GetPositionZ(),
+                           GetMapId());
+        }
 
         SendNewItem(newitem, uint32(item->count), false, false, true);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
@@ -26756,7 +26869,7 @@ void Player::RefundItem(Item *item)
             count = count / PLAYER_CURRENCY_PRECISION;
         if (count && currid)
         {
-            ModifyCurrency(currid, count, true);
+            ModifyCurrency(currid, count, true, true);
         }
     }
 
@@ -26910,4 +27023,15 @@ void Player::BroadcastMessage(const char* Format, ...)
 	WorldPacket data;
     ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, Message, NULL);
 	GetSession()->SendPacket(&data);
+}
+
+uint16 Player::GetConquestPointsThisWeek()
+{
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    {
+        if (itr->first == CURRENCY_TYPE_CONQUEST_POINTS)
+            return (uint16)itr->second.weekCount / PLAYER_CURRENCY_PRECISION;
+    }
+
+    return 0;
 }

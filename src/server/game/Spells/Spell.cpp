@@ -609,6 +609,10 @@ void Spell::SelectSpellTargets()
         if (!m_spellInfo->Effect[i])
             continue;
 
+        // Check if effect is prevented by some custom reasons
+        if (!ApplyEffectCondition(SpellEffIndex(i)))
+            continue;
+
         uint32 effectTargetType = EffectTargetType[m_spellInfo->Effect[i]];
 
         // is it possible that areaaura is not applied to caster?
@@ -697,7 +701,6 @@ void Spell::SelectSpellTargets()
                     break;
                 }
                 case SPELL_EFFECT_BIND:
-                case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_CREATE_ITEM:
                 case SPELL_EFFECT_TRIGGER_SPELL:
                 case SPELL_EFFECT_SKILL_STEP:
@@ -721,6 +724,7 @@ void Spell::SelectSpellTargets()
                             AddUnitTarget(target, i);
                     }
                     break;
+                case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_RESURRECT_NEW:
                     if (m_targets.getUnitTarget())
                         AddUnitTarget(m_targets.getUnitTarget(), i);
@@ -2732,6 +2736,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 83619) // Fire Power (Mage: Flame Orb explosion)
+                {
+                    radius = 10.0f;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
@@ -2928,8 +2938,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 {
                     case TARGET_UNIT_AREA_PARTY_SRC:
                     case TARGET_UNIT_AREA_PARTY_DST:
-                    case TARGET_UNIT_AREA_PARTY_SRC_2:
                         m_caster->GetPartyMemberInDist(unitList, radius); //fix me
+                        break;
+                    case TARGET_UNIT_AREA_PARTY_SRC_2:
+                        m_caster->GetRaidMemberDead(unitList, radius); // dead party and raid members
                         break;
                     case TARGET_UNIT_PARTY_TARGET:
                         m_targets.getUnitTarget()->GetPartyMemberInDist(unitList, radius);
@@ -2988,6 +3000,29 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                             {
                                 if (!(*itr)->isInCombat())
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
+                        }
+                        case 26073: // Fire Nova (Quest spell)
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToCreature()->GetEntry() == 46394)
+                                    ++itr;
+                                else
+                                    itr = unitList.erase(itr);
+                            }
+                            break;
+                        }
+                        case 81008: // Quake
+                        case 92631: // Quake (Heroic difficulty)
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                            {
+                                if ((*itr)->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
                                     itr = unitList.erase(itr);
                                 else
                                     ++itr;
@@ -3405,14 +3440,41 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
-    //Prevent casting at cast another spell (ServerSide check)
+    // queue casting at the cast of another spell
+    Player *player = m_caster->ToPlayer();
     if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
     {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+        if (!player || player->HasQueuedSpell())
+        {
+            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            finish(false);
+            return;
+        }
+        player->QueueSpell();
+        m_spellState = SPELL_STATE_QUEUED;
+        return;
+    }
+
+    // queue casting at global cooldown
+    if (!m_IsTriggeredSpell && !IsAutoRepeat() && player && player->HasGlobalCooldown(m_spellInfo))
+    {
+        if (!player->HasQueuedSpell())
+        {
+            player->QueueSpell();
+            m_spellState = SPELL_STATE_QUEUED;
+            return;
+        }
+        SendCastResult(SPELL_FAILED_NOT_READY);
         finish(false);
         return;
     }
 
+    prepareFinish(triggeredByAura);
+}
+
+void Spell::prepareFinish(AuraEffect const * triggeredByAura)
+{
+    m_spellState = SPELL_STATE_PREPARING;
     if (sDisableMgr->IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
     {
         SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
@@ -4241,11 +4303,14 @@ void Spell::finish(bool ok)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
     }
 
-    // Special case for Holy Power taking spells which takes all charges for greater healing
+    //Case for Holy Power taking spells which takes all charges for greater healing and for dropping of Empowered imp buff
     switch (m_spellInfo->Id)
     {
         case 85222: // Light of Dawn
             m_caster->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 6353: //Soul Fire
+            m_caster->RemoveAurasDueToSpell(47283);
             break;
         default:
             break;
@@ -5327,6 +5392,37 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     }
 }
 
+bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
+{
+    // Since Cataclysm, Blizzard implemented spells, which has glyph effects built in
+    // so we have to use some mechanism to prevent/allow applying those effects if player (don't) have glyph
+
+    // returns true to continue handling effect
+    // returns false to prevent applying this effect
+
+    bool result = true;
+
+    // I haven't found any not-player case (i.e. pets as casters and player owners as glyph holders)
+    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return result;
+
+    switch (m_spellInfo->Id)
+    {
+        case 5782: // Fear
+            // Glyph of Fear - apply effect #3, rooting effect
+            if (effIndex == EFFECT_2 && !m_caster->HasAura(56244))
+                result = false;
+            break;
+        case 85673: // Word of Glory
+            // Glyph of the Long Word - apply effect #2, HoT effect
+            if (effIndex == EFFECT_1 && !m_caster->HasAura(93466))
+                result = false;
+            break;
+    }
+
+    return result;
+}
+
 SpellCastResult Spell::CheckCast(bool strict)
 {
     Unit* Target = m_targets.getUnitTarget();
@@ -5357,6 +5453,13 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (SpellSteal == 0)
                 return SPELL_FAILED_NOTHING_TO_STEAL;
         }
+    }
+
+    // Killing Spree check - at least one enemy in range
+    if (m_spellInfo->Id == 51690)
+    {
+        if (!SearchNearbyTarget(10.0f, SPELL_TARGETS_ENEMY, EFFECT_1))
+            return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
     // Archaeology project check - reagents / keystones
@@ -5390,6 +5493,35 @@ SpellCastResult Spell::CheckCast(bool strict)
         else
             return SPELL_FAILED_ERROR;
     }
+
+    // Disallow using any spell in map "759"
+    if (m_caster->GetMapId() == 759
+        && ((m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER)
+        || m_caster->ToPet()))
+    {
+        static const uint32 allowed_spells[] = // Hearthstone, Stuck, All mage portals
+        {
+            8690, 7355, 53142, 11419, 32266, 11416, 11417, 35717, 33691, 32267, 49361, 10059,
+            49360, 88345, 88346, 11418,53141,17608, 32268, 44089, 17609, 184594, 33728, 32270,
+            49363, 17334, 49362, 17610, 88339, 88341, 17611, 8326, 15007
+        };
+
+        for (uint32 i = 0;i < sizeof(allowed_spells) / sizeof(uint32); i++)
+        {
+            if (m_spellInfo->Id == allowed_spells[i])
+                return SPELL_CAST_OK;
+        }
+
+         return SPELL_FAILED_NOT_HERE;
+    }
+
+    // Check Noggenfogger Elixir cast in BG or Arenas (Special effect Dummy)
+    if (m_spellInfo->Id == 16589 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetMap()->IsBattlegroundOrArena())
+        return SPELL_FAILED_NOT_HERE;
+
+    // Explicitly allow usage of spell Dropping Heavy Bomb used for quest Mission: Abyssal Shelf only when riding taxi
+    if (m_spellInfo->Id == 33836 && (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->ToPlayer()->isInFlight()))
+        return SPELL_FAILED_NOT_HERE;
 
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
@@ -5632,7 +5764,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 // Lay on Hands - cannot be self-cast on paladin with Forbearance or after using Avenging Wrath
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags[0] & 0x0008000)
-                    if (target->HasAura(61988)) // Immunity shield marker
+                    if (target->HasAura(25771)) // Immunity shield marker
                         return SPELL_FAILED_TARGET_AURASTATE;
             }
         }
@@ -6219,7 +6351,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TRY_AGAIN;
 
                 /* not while falling */
-                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && m_spellInfo->Id != 6544)
                     return SPELL_FAILED_FALLING;
 
                 /* exclude flat ground for charge when not in BG */
@@ -6536,7 +6668,7 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
     };
     const uint8 CCDArraySize = sizeof(auraWithCCD) / sizeof(auraWithCCD[0]);
 
-    const uint32 ccDelay = 200u;
+    const uint32 ccDelay = 50;
 
     switch(_spell->SpellFamilyName)
     {
@@ -7528,6 +7660,7 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
             if (m_spellInfo->Id != 20577)                    // Cannibalize
                 break;
             //fall through
+        case SPELL_EFFECT_RESURRECT:
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
             if (target != m_caster && !target->IsWithinLOSInMap(m_caster))
@@ -7681,6 +7814,88 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
                 return false;                               // event not complete
             }
+        } break;
+
+        case SPELL_STATE_QUEUED:
+        {
+            const SpellEntry *spellInfo = m_Spell->m_spellInfo;
+            Player *player = ((Player*)m_Spell->GetCaster());
+            if (!spellInfo || !player)
+                return true;
+
+            if (!player->HasQueuedSpell())      // interrupted by Esc key, ...
+            {
+                m_Spell->SendCastResult(SPELL_FAILED_DONT_REPORT);
+                m_Spell->finish(false);
+                break;
+            }
+
+            // do not queue spells with cooldown started
+            if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
+            {
+                m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
+                m_Spell->finish(false);
+                player->CancelQueuedSpell();
+                break;
+            }
+            
+            SpellCastResult result = m_Spell->CheckCast(true);
+            // can't cast because something other than CD and cast is preventing casting (e.g. crowd control)
+            if (result != SPELL_CAST_OK && result != SPELL_FAILED_NOT_READY && result != SPELL_FAILED_SPELL_IN_PROGRESS)
+            {
+                m_Spell->SendCastResult(result);
+                m_Spell->finish(false);
+                player->CancelQueuedSpell();
+                break;
+            }
+
+            // not ready or another action in progress - wait more
+            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
+            {
+                // cast time of current spell
+                uint32 cast = 0;
+                Spell *current = player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                if (current)
+                    cast = current->GetRemainingCastTime();
+                // remaining global cooldown on queued spell
+                uint32 cd = player->GetGlobalCooldown(spellInfo);
+                uint32 available = std::max(cast, cd);
+
+                if (available <= 0)
+                    available = 1;
+
+                // maximum of 400 ms allowed
+                 // this sometimes happens when player tries to cast the spell twice on one global cooldown
+                if (available > 400)
+                {
+                    m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
+                    m_Spell->finish(false);
+                    player->CancelQueuedSpell();
+                    break;
+                }
+
+                player->m_Events.AddEvent(this, e_time + available, false);
+                return false;
+            }
+
+            // cast queued spell
+            m_Spell->setState(SPELL_STATE_PREPARING);
+            m_Spell->prepareFinish(NULL);
+            player->CancelQueuedSpell();
+            
+            // send global cooldown to client
+            // without this the GDC on client would start immediately when pressed spell on action bar
+            //  instead of when the cast is started
+            // TODO: invent something better, this sometimes causes the GCD on client
+            //  jumping up (finished cast) & down (started cast of this)
+            //  one of the possibilities is to cast this spell immediately, not as separated event
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+            data << uint64(player->GetGUID());
+            data << uint8(3);
+            data << uint32(spellInfo->Id);
+            data << uint32(player->GetGlobalCooldown(spellInfo));
+            player->GetSession()->SendPacket(&data);
+            break;
         } break;
 
         default:

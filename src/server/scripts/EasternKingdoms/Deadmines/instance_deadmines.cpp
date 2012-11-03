@@ -98,7 +98,7 @@ public:
                     break;
                 case 49541: // Vanessa VanCleef
                     Vanesa_VancleefGUID = pCreature->GetGUID();
-                    if (auiEncounter[5] == DONE)
+                    if (auiEncounter[DATA_VANESSA_VANCLEEF] == DONE)
                         pCreature->setFaction(14);
                     break;
             }

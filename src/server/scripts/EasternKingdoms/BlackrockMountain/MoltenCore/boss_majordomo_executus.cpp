@@ -70,12 +70,14 @@ public:
         uint32 MagicReflection_Timer;
         uint32 DamageReflection_Timer;
         uint32 Blastwave_Timer;
+        bool HealthPct;
 
         void Reset()
         {
-            MagicReflection_Timer =  30000;                     //Damage reflection first so we alternate
+            MagicReflection_Timer =  30000; //Damage reflection first so we alternate
             DamageReflection_Timer = 15000;
             Blastwave_Timer = 10000;
+            HealthPct = true;
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -97,28 +99,25 @@ public:
                 return;
 
             //Cast Ageis if less than 50% hp
-            if (HealthBelowPct(50))
+            if (HealthBelowPct(50) && HealthPct)
             {
                 DoCast(me, SPELL_AEGIS);
+                HealthPct = false;
             }
 
             //MagicReflection_Timer
-            //        if (MagicReflection_Timer <= diff)
-            //        {
-            //            DoCast(me, SPELL_MAGICREFLECTION);
-
-            //60 seconds until we should cast this agian
-            //            MagicReflection_Timer = 30000;
-            //        } else MagicReflection_Timer -= diff;
+            if (MagicReflection_Timer <= diff)
+            {
+                DoCast(me, SPELL_MAGIC_REFLECTION);
+                MagicReflection_Timer = 30000; //60 seconds until we should cast this agian
+            } else MagicReflection_Timer -= diff;
 
             //DamageReflection_Timer
-            //        if (DamageReflection_Timer <= diff)
-            //        {
-            //            DoCast(me, SPELL_DAMAGEREFLECTION);
-
-            //60 seconds until we should cast this agian
-            //            DamageReflection_Timer = 30000;
-            //        } else DamageReflection_Timer -= diff;
+            if (DamageReflection_Timer <= diff)
+            {
+                DoCast(me, SPELL_DAMAGE_REFLECTION);
+                DamageReflection_Timer = 30000; //60 seconds until we should cast this agian
+            } else DamageReflection_Timer -= diff;
 
             //Blastwave_Timer
             if (Blastwave_Timer <= diff)

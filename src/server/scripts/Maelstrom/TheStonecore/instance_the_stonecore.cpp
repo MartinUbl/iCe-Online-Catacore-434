@@ -24,10 +24,14 @@ enum data
     DATA_CORBORUS = 0,
     DATA_SLABHIDE,
     DATA_OZRUK,
-    DATA_HIGH_PRIESTESS_AZIL
+    DATA_HIGH_PRIESTESS_AZIL,
+    DATA_MILLHOUSE_EVENT1,
+    DATA_MILLHOUSE_EVENT2,
+    DATA_MILLHOUSE_EVENT3,
+    DATA_CORBORUS_EVENT,
 };
 
-#define MAX_ENCOUNTER 4
+#define MAX_ENCOUNTER 8
 
 class instance_the_stonecore : public InstanceMapScript
 {
@@ -41,18 +45,26 @@ public:
         uint32 auiEncounter[MAX_ENCOUNTER];
 
         uint64 CorborusGUID;
+        uint64 Corborus2GUID;
         uint64 SlabhideGUID;
         uint64 OzrukGUID;
         uint64 High_Priestess_AzilGUID;
+        uint64 Millhouse1_GUID;
+        uint64 Millhouse2_GUID;
+        uint64 wallGUID;
 
         void Initialize()
         {
             memset(&auiEncounter, 0, sizeof(auiEncounter));
 
             CorborusGUID = 0;
+            Corborus2GUID = 0;
             SlabhideGUID = 0;
             OzrukGUID = 0;
             High_Priestess_AzilGUID = 0;
+            Millhouse1_GUID = 0;
+            Millhouse2_GUID = 0;
+            wallGUID = 0;
         }
 
         bool IsEncounterInProgress() const // not avaiable for this instance script
@@ -67,8 +79,15 @@ public:
 
             switch (pCreature->GetEntry())
             {
+                case 434380:
+                    Corborus2GUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_CORBORUS_EVENT] == DONE)
+                        pCreature->SetPhaseMask(PHASEMASK_NORMAL, false);
+                    break;
                 case 43438: // Corborus
                     CorborusGUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_CORBORUS_EVENT] == DONE)
+                        pCreature->SetPhaseMask(2, false);
                     break;
                 case 43214: // Slabhide
                     SlabhideGUID = pCreature->GetGUID();
@@ -85,6 +104,19 @@ public:
                     if (auiEncounter[DATA_OZRUK] == DONE)
                         pCreature->setFaction(14);
                     break;
+                case 43392:
+                    Millhouse1_GUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_MILLHOUSE_EVENT1] == DONE)
+                        pCreature->SetPhaseMask(PHASEMASK_NORMAL, false);
+                     break;
+                case 433930:
+                    Millhouse2_GUID = pCreature->GetGUID();
+                    if (auiEncounter[DATA_MILLHOUSE_EVENT2] == DONE)
+                        pCreature->SetPhaseMask(PHASEMASK_NORMAL, false);
+                     if (auiEncounter[DATA_MILLHOUSE_EVENT3] == IN_PROGRESS) {
+                        SetData(DATA_MILLHOUSE_EVENT3, NOT_STARTED);
+                     }
+                     break;
             }
         }
 
@@ -92,6 +124,15 @@ public:
         {
             if (!add)
                 return;
+
+            if (pGO->GetEntry() == 4510265)
+            {
+                if (auiEncounter[DATA_CORBORUS_EVENT] == DONE) {
+                    pGO->SetPhaseMask(2,false);
+                    pGO->Delete();
+                }
+            }
+
         }
 
         uint64 GetData64(uint32 type)
@@ -99,6 +140,7 @@ public:
             switch (type)
             {
                 case DATA_CORBORUS:
+                case DATA_CORBORUS_EVENT:
                     return CorborusGUID;
                 case DATA_SLABHIDE:
                     return SlabhideGUID;
@@ -106,6 +148,11 @@ public:
                     return OzrukGUID;
                 case DATA_HIGH_PRIESTESS_AZIL:
                     return High_Priestess_AzilGUID;
+                case DATA_MILLHOUSE_EVENT1:
+                    return Millhouse1_GUID;
+                case DATA_MILLHOUSE_EVENT2:
+                case DATA_MILLHOUSE_EVENT3:
+                    return Millhouse2_GUID;
             }
             return 0;
         }
@@ -118,6 +165,10 @@ public:
                 case DATA_SLABHIDE:
                 case DATA_OZRUK:
                 case DATA_HIGH_PRIESTESS_AZIL:
+                case DATA_MILLHOUSE_EVENT1:
+                case DATA_MILLHOUSE_EVENT2:
+                case DATA_MILLHOUSE_EVENT3:
+                case DATA_CORBORUS_EVENT:
                     auiEncounter[type] = data;
                     break;
             }
@@ -131,6 +182,40 @@ public:
             if (auiEncounter[DATA_OZRUK] == DONE) // Ozruk
                 if (Creature* azil = this->instance->GetCreature(High_Priestess_AzilGUID))
                     azil->setFaction(14);
+            if (auiEncounter[DATA_MILLHOUSE_EVENT1] == DONE) // Millhouse event
+                if (Creature* millhouse = this->instance->GetCreature(Millhouse1_GUID))
+                    millhouse->SetPhaseMask(PHASEMASK_NORMAL, false);
+
+            if (Creature* millhouse2 = this->instance->GetCreature(Millhouse2_GUID))
+            {
+                if (auiEncounter[DATA_MILLHOUSE_EVENT2] == DONE) // Millhouse event 2
+                    millhouse2->SetPhaseMask(PHASEMASK_NORMAL, false);
+                if (auiEncounter[DATA_MILLHOUSE_EVENT3] == IN_PROGRESS) // behani
+                {
+                    millhouse2->GetMotionMaster()->MovePoint(6, 1159.725342f, 881.786621f, 284.963928f);
+                }
+                if (auiEncounter[DATA_MILLHOUSE_EVENT3] == DONE) {
+                    millhouse2->AI()->DoAction(1);
+                }
+            }
+
+            if (Creature* corborus = this->instance->GetCreature(CorborusGUID))
+            {
+                if (auiEncounter[DATA_CORBORUS_EVENT] == IN_PROGRESS)
+                    corborus->AI()->DoAction(1);
+                if (auiEncounter[DATA_CORBORUS_EVENT] == DONE)
+                    corborus->SetPhaseMask(2, false);
+            }
+            if (Creature* corborus_new = this->instance->GetCreature(Corborus2GUID))
+            {
+                if (auiEncounter[DATA_CORBORUS_EVENT] == DONE) {
+                    corborus_new->SetPhaseMask(PHASEMASK_NORMAL, false);
+                    if (GameObject* go = this->instance->GetGameObject(wallGUID)) {
+                        go->SetPhaseMask(2, false);
+                        go->Delete();
+                    }
+                }
+            }
 
             if (data == DONE)
             {
@@ -179,7 +264,7 @@ public:
             for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
                 loadStream >> auiEncounter[i];
 
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            for (uint8 i = 0; i < 3; ++i)
                 if (auiEncounter[i] == IN_PROGRESS)
                     auiEncounter[i] = NOT_STARTED;
 

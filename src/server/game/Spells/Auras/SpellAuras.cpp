@@ -1247,7 +1247,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 if (target->HasAura(74434))
                                     target->CastSpell(target, 79438, true);
 
-                                target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation());
+                                target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation(), target->GetMap()->IsBattlegroundOrArena() ? TELE_TO_NOT_LEAVE_COMBAT : 0);
                                 target->ToPlayer()->RemoveMovementImpairingAuras();
                             }
                         break;
@@ -1342,6 +1342,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                         break;
                     }
+                // T11 4p bonus apply
+                case 81206:
+                case 81208:
+                case 81209:
+                    if (caster->HasAura(89911))
+                        caster->AddAura(89912, caster);
+                    break;
                 // Resurrection Sickness for special iCe purposes
                 // weirdly SPELLFAMILY_PRIEST
                 case 15007:
@@ -1430,6 +1437,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
                 break;
+
+            case SPELLFAMILY_WARRIOR:                
+                if (GetId() == 86346) // Colossus Smash
+                {
+                    if (target->HasAura(58567)) //Sunder Armor
+                        if (caster->HasAura(89003)) // Glyph of Colossus Smash
+                            target->GetAura(58567)->RefreshDuration();
+                }
+                break;
+
             case SPELLFAMILY_PALADIN: // Speed of Light (talent)
                 if(GetId() == 82327)
                 {
@@ -1454,10 +1471,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     if(caster)
                     {
-                        uint32 holypower = caster->GetPower(POWER_HOLY_POWER) + 1;
                         if (caster->HasAura(90174))
                         {
-                            holypower = 3;
                             caster->RemoveAurasDueToSpell(90174);
                         }
                         SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1));
@@ -1489,6 +1504,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->RemoveMovementImpairingAuras();
                         target->CastSpell(target, 58876, true);
                         break;
+                    }
+                    // Maelstrom Weapon - spell alert
+                    if (caster && GetId() == 53817)
+                    {
+                        Aura *maelstrom = aurApp->GetBase();
+                        if (maelstrom->GetStackAmount() == 5)
+                            caster->AddAura(60349, caster);
                     }
                 }
                 break;
@@ -1580,6 +1602,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastSpell(target, spellId, true, 0, GetEffect(0));
                     }
                 }
+                if (GetId() == 47476) // Strangulate
+                {
+                    if (caster->HasAura(58618)) // Glyph of Strangulate
+                    {
+                        for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+                        {
+                            if (target->GetCurrentSpell(i)) // target casting spell..
+                                SetDuration(GetDuration()+2000); // Set Duration + 2sec
+                        }
+                    }
+                }
                 break;
         }
 
@@ -1660,7 +1693,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                     case 43681: // Inactive (Report AFK)
                         if (removeMode == AURA_REMOVE_BY_EXPIRE)
-                            caster->ToPlayer()->LeaveBattleground(); // Leave Battleground
+                        {
+                            caster->CastSpell(caster, 26013, true); // we must cast deserter here..
+                            caster->ToPlayer()->LeaveBattleground(true, false); // Leave Battleground
+                            if (Aura* deserter = target->GetAura(26013)) // deserter
+                            {
+                                deserter->SetMaxDuration(deserter->GetMaxDuration()*2); // 15*2 = 30 min duration
+                                deserter->RefreshDuration();
+                            }
+                        }
                         break;
                 }
                 break;
@@ -1719,6 +1760,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                     }
                 }
+
                 break;
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
@@ -1843,6 +1885,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->RemoveAurasDueToSpell(87154);
                             break;
                         }
+                    // T11 4p bonus remove (not in Chakra state)
+                    case 81206:
+                    case 81208:
+                    case 81209:
+                        caster->RemoveAura(89912, caster->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
+                        break;
                     default: break;
                 }
                 break;
@@ -1866,6 +1914,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->RemoveAurasDueToSpell(84746);
                         caster->RemoveAurasDueToSpell(84747);
                     }
+                }
+                else if (GetId() == 2983) // Glyph of Blurred speed
+                {
+                    caster->RemoveAurasDueToSpell(61922);
                 }
                 break;
             case SPELLFAMILY_PALADIN:
@@ -1912,6 +1964,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->CastSpell(target, GetEffect(0)->GetAmount(), true, NULL, GetEffect(0));
                         break;
                 }
+                break;
+            case SPELLFAMILY_SHAMAN:
+                // Maelstrom Weapon - remove spell alert
+                if (caster && GetId() == 53817)
+                    caster->RemoveAura(60349);
                 break;
             case SPELLFAMILY_HUNTER:
                 // Glyph of Freezing Trap

@@ -839,15 +839,12 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     WorldPacket packetAddon;
     if (m_addonSize > 0)
     {
-        uint8 * tableauAddon = new uint8[m_addonSize];
         for(uint32 i = 0; i < m_addonSize; i++)
         {
             uint8 ByteSize = 0;
             recvPacket >> ByteSize;
-            tableauAddon[i] = ByteSize;
             packetAddon << ByteSize;
         }
-        delete tableauAddon;
     }
 
     recvPacket.read_skip<uint8>();

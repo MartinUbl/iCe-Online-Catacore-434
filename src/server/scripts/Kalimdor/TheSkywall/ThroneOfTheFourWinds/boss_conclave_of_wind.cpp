@@ -33,8 +33,12 @@ public:
         c->ApplySpellImmune(0, IMMUNITY_ID, 93120, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93121, true);
         c->ApplySpellImmune(0, IMMUNITY_ID, 93122, true);
+
         c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-        c->ApplySpellImmune(0, IMMUNITY_ID, 49575, true); // death grip jump eff
+        c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+        c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+        c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
     }
 
     bool alive;
@@ -579,10 +583,8 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
             if(m_ability_phase == 41)
             {
                 // Prepare dummy for farsight
-                uint64 dummyGUID = 0;
                 if(Creature* pDummy = me->SummonCreature(WORLD_TRIGGER, me->GetPositionX(), me->GetPositionY()+1, 237.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
                 {
-                    dummyGUID = pDummy->GetGUID();
                     //pDummy->SetVisibility(VISIBILITY_OFF);
                     pDummy->setFaction(14);
                     pDummy->SetFacingToObject(me);

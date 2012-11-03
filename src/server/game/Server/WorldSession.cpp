@@ -503,7 +503,13 @@ void WorldSession::LogoutPlayer(bool Save)
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         _player->CleanupsBeforeDelete();
-        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() ,_player->GetGUIDLow());
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) guid:(%u)",
+                     GetRemoteAddress().c_str(),
+                     GetAccountId(),
+                     _player->GetName(),
+                     "logout",
+                     _player->GetGUIDLow());
+
         Map* _map = _player->GetMap();
         _map->Remove(_player, true);
         SetPlayer(NULL);                                    // deleted in Remove call
@@ -811,14 +817,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
             AddonInfo addon(addonName, enabled, crc, 2, true);
 
             SavedAddon const* savedAddon = sAddonMgr->GetAddonInfo(addonName);
-            if (savedAddon)
-            {
-                bool match = true;
-
-                if (addon.CRC != savedAddon->CRC)
-                    match = false;
-            }
-            else
+            if (!savedAddon)
                 sAddonMgr->SaveAddon(addon);
 
             // TODO: Find out when to not use CRC/pubkey, and other possible states.

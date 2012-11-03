@@ -150,6 +150,10 @@ public:
 
         bool IsEncounterInProgress() const
         {
+            Map::PlayerList const &PlList = instance->GetPlayers();
+            if (PlList.isEmpty())
+                return false;
+
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS) return true;
 
@@ -160,7 +164,8 @@ public:
         {
             if (!plr || plr->isGameMaster())
                 return;
-            if (m_auiEncounter[TYPE_CONCLAVE] != DONE)
+            if (m_auiEncounter[TYPE_CONCLAVE] != DONE &&
+                m_auiEncounter[TYPE_CONCLAVE] != NOT_STARTED)
                 SetData(TYPE_CONCLAVE, NOT_STARTED); // Conclave: evade + reset
         }
 

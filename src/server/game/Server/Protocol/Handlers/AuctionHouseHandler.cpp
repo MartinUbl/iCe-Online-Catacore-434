@@ -230,6 +230,16 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),count);
     }
 
+    sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u))",
+                 pl->GetSession() ? pl->GetSession()->GetRemoteAddress().c_str() : "none",
+                 GetAccountId(),
+                 GetPlayerName(),
+                 "create auction",
+                   "item",
+                   it->GetProto()->Name1,
+                   it->GetEntry(),
+                   count);
+
     pl->ModifyMoney(-int32(deposit));
 
     uint32 auction_time = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));

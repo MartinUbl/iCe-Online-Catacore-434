@@ -276,6 +276,11 @@ public:
                         maxHorsemenDiedTime = now;
                     }
                     break;
+                case BOSS_HORSEMEN:
+                    if (value == DONE)
+                        if (GameObject* pHorsemenChest = instance->GetGameObject(HorsemenChestGUID))
+                            pHorsemenChest->SetRespawnTime(pHorsemenChest->GetRespawnDelay());
+                    break;
             }
         }
 
@@ -328,20 +333,6 @@ public:
                 return uiKelthuzadTrigger;
             }
             return 0;
-        }
-
-        bool SetBossState(uint32 id, EncounterState state)
-        {
-            if (!InstanceScript::SetBossState(id, state))
-                return false;
-
-            if (id == BOSS_HORSEMEN && state == DONE)
-            {
-                if (GameObject* pHorsemenChest = instance->GetGameObject(HorsemenChestGUID))
-                    pHorsemenChest->SetRespawnTime(pHorsemenChest->GetRespawnDelay());
-            }
-
-            return true;
         }
 
         void HeiganErupt(uint32 section)

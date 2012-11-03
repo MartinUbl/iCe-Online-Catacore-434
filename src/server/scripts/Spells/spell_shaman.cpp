@@ -382,6 +382,58 @@ public:
     }
 };
 
+class spell_sha_ancestral_resolve : public SpellScriptLoader
+{
+public:
+    spell_sha_ancestral_resolve() : SpellScriptLoader("spell_sha_ancestral_resolve") { }
+
+    class spell_sha_ancestral_resolve_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_sha_ancestral_resolve_AuraScript);
+
+        uint32 absorbPercentage;
+
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            return true;
+        }
+
+        bool Load()
+        {
+            absorbPercentage = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0);
+            return GetUnitOwner()->ToPlayer();
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
+        {
+            // Set absorbtion amount to unlimited
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            if (!aurEff || !aurEff->GetCaster())
+                return;
+
+            if (aurEff->GetCaster()->GetCurrentSpell(CURRENT_GENERIC_SPELL) || aurEff->GetCaster()->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                absorbAmount = dmgInfo.GetDamage()*float(absorbPercentage)/100.0f;
+            else
+                absorbAmount = 0;
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_ancestral_resolve_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_sha_ancestral_resolve_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_sha_ancestral_resolve_AuraScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_astral_shift();
@@ -390,4 +442,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_unleash_elements();
     new spell_sha_totemic_wrath();
     new spell_sha_fulmination();
+    new spell_sha_ancestral_resolve();
 }

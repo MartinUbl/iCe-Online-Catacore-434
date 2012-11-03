@@ -171,11 +171,11 @@ enum EnchantmentSlot
     MAX_INSPECTED_ENCHANTMENT_SLOT  = 10,                    // need some research, 9 is the right value
 
     PROP_ENCHANTMENT_SLOT_0         = 10,                    // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_1         = 12,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_2         = 13,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_3         = 14,                   // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_4         = 15,                   // used with RandomSuffix and RandomProperty
-    MAX_ENCHANTMENT_SLOT            = 16
+    PROP_ENCHANTMENT_SLOT_1         = 11,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_2         = 12,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_3         = 13,                   // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_4         = 14,                   // used with RandomSuffix and RandomProperty
+    MAX_ENCHANTMENT_SLOT            = 15
 };
 
 #define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)

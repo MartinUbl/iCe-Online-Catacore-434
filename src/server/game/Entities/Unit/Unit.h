@@ -505,6 +505,7 @@ enum UnitMoveType
 
 extern float baseMoveSpeed[MAX_MOVE_TYPE];
 extern float playerBaseMoveSpeed[MAX_MOVE_TYPE];
+extern uint32 preserve_spell_table[];
 
 enum WeaponAttackType
 {
@@ -1302,6 +1303,7 @@ class Unit : public WorldObject
         void GetPartyMemberInDist(std::list<Unit*> &units, float dist);
         void GetPartyMembers(std::list<Unit*> &units);
         void GetRaidMember(std::list<Unit*> &units, float dist);
+        void GetRaidMemberDead(std::list<Unit*> &units, float dist);
         bool IsContestedGuard() const
         {
             if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
@@ -1677,6 +1679,8 @@ class Unit : public WorldObject
 
         void RemoveAreaAurasDueToLeaveWorld();
         void RemoveAllAuras();
+        void RemoveAllPositiveAuras();
+        void RemoveAllNegativeAuras();
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasRequiringDeadTarget();
@@ -2084,7 +2088,7 @@ class Unit : public WorldObject
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING); }
         void SetFlying(bool apply);
 
-        void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker);
+        void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker, DamageEffectType damageType = DIRECT_DAMAGE);
 
         virtual float GetFollowAngle() const { return static_cast<float>(M_PI/2); }
 
@@ -2100,6 +2104,18 @@ class Unit : public WorldObject
         uint32 GetDamageTakenHistory(uint32 seconds);
 
         Movement::MoveSpline * movespline;
+
+        uint64 GetDamageTakenByUnit(uint64 guid);
+        uint64 GetDamageTakenByUnit(Unit* dealer);
+        void DamageTakenByUnit(uint64 guid, uint64 damage);
+        void DamageTakenByUnit(Unit* dealer, uint64 damage);
+        void ClearDamageTakenByUnit(uint64 guid);
+        void ClearDamageTakenByUnit(Unit* dealer);
+        void ClearAllDamageTaken()
+        {
+            m_damageTakenMap.clear();
+        }
+        uint64 GetTotalDamageTaken();
 
     protected:
         explicit Unit ();
@@ -2169,6 +2185,12 @@ class Unit : public WorldObject
 
         uint32 m_unitTypeMask;
         void DisableSpline();
+
+        // Type for storing damage outcome/income per-player. Map fields: guid (key) - damage (value)
+        typedef std::map<uint64, uint64> DamageMap;
+
+        // Map of damage taken from different casters
+        std::map<uint64, uint64> m_damageTakenMap;
 
     private:
         bool IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry const * procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const *& spellProcEvent);

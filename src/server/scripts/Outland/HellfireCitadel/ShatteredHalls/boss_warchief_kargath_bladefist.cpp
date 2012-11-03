@@ -303,10 +303,11 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
                 if (resetcheck_timer <= diff)
                 {
-                    uint32 tempx,tempy;
-                    tempx = uint32(me->GetPositionX());
-                    tempy = uint32(me->GetPositionY());
-                    if (tempx > 255 || tempx < 205)
+                    uint32 pos;
+                    pos = uint32(me->GetPositionX());
+                    // 255 = front exit of the pit
+                    // 205 = back exit of the pit
+                    if (pos > 255 || pos < 205)
                     {
                         EnterEvadeMode();
                         return;

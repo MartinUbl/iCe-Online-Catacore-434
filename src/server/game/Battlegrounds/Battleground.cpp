@@ -749,6 +749,27 @@ void Battleground::EndBattleground(uint32 winner)
         }
     }
 
+    if (isBattleground() && isRated())
+    {
+        for (BattlegroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        {
+            Player *player = itr->second.OfflineRemoveTime ? NULL : ObjectAccessor::FindPlayer(itr->first);
+
+            if (itr->second.Team == winner)
+            {
+                if (player)
+                    RatedBattlegroundWon(player);
+            }
+            else
+            {
+                if (player)
+                    RatedBattlegroundLost(player);
+                else
+                    RatedBattlegroundLostOffline(itr->first);
+            }
+        }
+    }
+
     for (BattlegroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         uint32 team = itr->second.Team;
@@ -1207,6 +1228,9 @@ void Battleground::AddPlayer(Player* plr)
     PlayerAddedToBGCheckIfBGIsRunning(plr);
     AddOrSetPlayerToCorrectBgGroup(plr, team);
 
+    if (isBattleground() && isRated())
+        UpdatePlayerScore(plr, SCORE_BATTLEGROUND_RATING, plr->GetRatedBattlegroundRating());
+
     // Log
     sLog->outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }
@@ -1405,6 +1429,9 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, 
             break;
         case SCORE_HEALING_DONE:                            // Healing Done
             itr->second->HealingDone += value;
+            break;
+        case SCORE_BATTLEGROUND_RATING:
+            itr->second->BattlegroundRating += value;
             break;
         default:
             sLog->outError("Battleground::UpdatePlayerScore: unknown score type (%u) for BG (map: %u, instance id: %u)!",
@@ -1972,4 +1999,70 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
         if (Pet* pet = plr->GetPet())
             pet->GivePetXP(xp);
     }
+}
+
+void Battleground::RatedBattlegroundWon(Player *player)
+{
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
+    float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
+
+    int32 rating_change = (int32)ceil(92.0f * win_mod);
+
+    SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
+    player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
+    player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON);
+
+    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, player->GetRatedBattlegroundRating() + rating_change);
+    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
+
+    //player->UpdateMaxWeekRating(CP_SOURCE_RATED_BG, 0);
+    //player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f) * PLAYER_CURRENCY_PRECISION);
+
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)ceil(player->GetConquestPointCap() / 6.0f));
+
+    player->SaveToDB();
+}
+
+void Battleground::RatedBattlegroundLost(Player *player)
+{
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 player_rating = player->GetRatedBattlegroundRating();
+
+    float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
+    float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
+
+    int32 rating_change = (int32)floor(92.0f * loose_mod);
+
+    if (int32(player_rating) + rating_change < 0)
+        rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
+
+    // we need to store it to show the final scoreboard
+    SetBattlegroundRatingChangeForPlayer(player->GetGUID(), rating_change);
+    player->SetRatedBattlegroundRating(player_rating + rating_change);
+
+    player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST);
+
+    player->SaveToDB();
+}
+
+void Battleground::RatedBattlegroundLostOffline(uint64 guid)
+{
+    uint32 opponent_team_rating = GetArenaMatchmakerRating(m_Players[guid].Team == ALLIANCE ? HORDE : ALLIANCE);
+    BattlegroundScore *score = m_PlayerScores[guid];
+    if (!score)
+        return;
+
+    uint32 player_rating = score->BattlegroundRating;
+    float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));
+    float loose_mod = floor((-chance) * 1000.0f) / 1000.0f;
+
+    int32 rating_change = (int32)floor(92.0f * loose_mod);
+
+    if (int32(player_rating) + rating_change < 0)
+        rating_change = (player_rating == 0) ? 0 : player_rating * (-1);
+
+    SetBattlegroundRatingChangeForPlayer(guid, rating_change);
+
+    CharacterDatabase.PExecute("UPDATE character_rated_bg_stats SET rating = %u, matches_lost = matches_lost + 1 WHERE guid = %u", player_rating + rating_change, GUID_LOPART(guid));
 }

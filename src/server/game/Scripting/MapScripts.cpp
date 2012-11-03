@@ -948,9 +948,9 @@ void Map::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_PLAYMOVIE:
-                // Source must be Player.
-                if (Player *pSource = _GetScriptPlayer(source, true, step.script))
-                    pSource->SendMovieStart(step.script->PlayMovie.MovieID);
+                // Target must be Player.
+                if (Player *pTarget = _GetScriptPlayer(target, false, step.script))
+                    pTarget->SendMovieStart(step.script->PlayMovie.MovieID);
                 break;
             // iCe only
             case SCRIPT_COMMAND_COMPLETE_ACHIEVEMENT:
@@ -987,21 +987,6 @@ void Map::ScriptsProcess()
                 break;
             case SCRIPT_COMMAND_SUMMON_TO_PLAYER:
             {
-                // Source must be WorldObject (Creature / GameObject).
-                GameObject* uObject = NULL;
-                Creature* uCreature = NULL;
-                switch (step.script->SummonOnPlayer.type)
-                {
-                    case SF_SUMMON_TYPE_CREATURE:
-                        uCreature= dynamic_cast<Creature*>(source);
-                        break;
-                    case SF_SUMMON_TYPE_OBJECT:
-                        uObject = dynamic_cast<GameObject*>(source);
-                        break;
-                    default:
-                       uCreature= dynamic_cast<Creature*>(source);
-                       break;
-                }
                 if (WorldObject* pSummoner = _GetScriptWorldObject(source, true, step.script))
                 {
                     if (step.script->SummonOnPlayer.type == SF_SUMMON_TYPE_CREATURE)

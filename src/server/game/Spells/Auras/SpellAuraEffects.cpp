@@ -734,17 +734,17 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x00800000 && GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
             {
                 m_canBeRecalculated = false;
-                // 0.01*$AP*cp
+                // (((56 + 161 * cp) + (0.0207*CP * AP)) * 8)  damage over 16 sec.
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     break;
 
                 uint8 cp = caster->ToPlayer()->GetComboPoints();
-
-                // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-                if (AuraEffect const * aurEff = caster->GetAuraEffect(34241, 0))
-                    amount += cp * aurEff->GetAmount();
-
-                amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
+                amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp * 0.0207f);
+            }
+            // Rake
+            else if (GetId() == 1822)
+            {
+                amount += int32((caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.378f)/3);
             }
             // Rend
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
@@ -942,7 +942,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         continue;
                     if(cap->map != ((uint32)-1) && cap->map != map)
                         continue;
-                    if(cap->reqSkillLevel > plrskill || cap->reqSkillLevel <= maxSkill)
+                    if(cap->reqSkillLevel && (cap->reqSkillLevel > plrskill || cap->reqSkillLevel <= maxSkill))
                         continue;
                     if(cap->reqSpell && !plr->HasSpell(cap->reqSpell))
                         continue;
@@ -1728,10 +1728,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 589:   // Shadow Word: Pain
                         {
                         // Shadowy Apparition
-                        if ((caster->HasAura(78204) && (roll_chance_i(12) || (caster->isMoving() && roll_chance_i(60))))
-                            || (caster->HasAura(78203) && (roll_chance_i(8) || (caster->isMoving() && roll_chance_i(40))))
-                            || (caster->HasAura(78202) && (roll_chance_i(4) || (caster->isMoving() && roll_chance_i(20)))))
+                        if ((caster->HasAura(78204) && (!caster->isMoving() ? roll_chance_i(12) : roll_chance_i(60)))
+                            || (caster->HasAura(78203) && (!caster->isMoving() ? roll_chance_i(8) : roll_chance_i(40)))
+                            || (caster->HasAura(78202) && (!caster->isMoving() ? roll_chance_i(4) : roll_chance_i(20))))
+                        {
                             caster->CastSpell(target, 87212, true, 0, 0, target->GetGUID());
+                        }
 
                         // no break;
                         }
@@ -3589,8 +3591,8 @@ void AuraEffect::HandleInvisibility(AuraApplication const *aurApp, uint8 mode, b
         if (mode & AURA_EFFECT_HANDLE_REAL)
             target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
-        // apply glow vision
-        if (target->GetTypeId() == TYPEID_PLAYER)
+        // apply glow vision (not for Killing spree)
+        if (target->GetTypeId() == TYPEID_PLAYER && !target->HasAura(69107))
             target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
         target->UpdateObjectVisibility();
@@ -3748,37 +3750,48 @@ void AuraEffect::HandlePhase(AuraApplication const *aurApp, uint8 mode, bool app
     Unit *target = aurApp->GetTarget();
 
     // no-phase is also phase state so same code for apply and remove
+    uint32 newPhase = 0;
+    Unit::AuraEffectList const& phases = target->GetAuraEffectsByType(SPELL_AURA_PHASE);
+    if (!phases.empty())
+        for (Unit::AuraEffectList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+            newPhase |= (*itr)->GetMiscValue();
 
     // phase auras normally not expected at BG but anyway better check
-    if (target->GetTypeId() == TYPEID_PLAYER)
+    if (Player* pPlayer = target->ToPlayer())
     {
-        // drop flag at invisible in bg
-        if (target->ToPlayer()->InBattleground())
-            if (Battleground *bg = target->ToPlayer()->GetBattleground())
-          bg->EventPlayerDroppedFlag(target->ToPlayer());
-
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
             return;
 
-        // GM-mode have mask 0xFFFFFFFF
-        if (!target->ToPlayer()->isGameMaster())
+        if (!newPhase)
+            newPhase = PHASEMASK_NORMAL;
+
+        if (pPlayer->isGameMaster())
+            newPhase = 0xFFFFFFFF;
+
+        pPlayer->SetPhaseMask(newPhase, false);
+        pPlayer->GetSession()->SendSetPhaseShift(newPhase);
+
+        // drop flag at invisible in bg
+        if (pPlayer->InBattleground())
+            if (Battleground *bg = pPlayer->GetBattleground())
+                bg->EventPlayerDroppedFlag(pPlayer);
+    }
+    else
+    {
+        if (!newPhase)
         {
-            if (apply)
-                target->SetPhaseMask(GetMiscValue(), false);
-            else
-                target->SetPhaseMask(PHASEMASK_NORMAL, false);
+            newPhase = PHASEMASK_NORMAL;
+            if (Creature* creature = target->ToCreature())
+                if (CreatureData const* data = sObjectMgr->GetCreatureData(creature->GetDBTableGUIDLow()))
+                    newPhase = data->phaseMask;
         }
 
-        if (apply)
-            target->ToPlayer()->GetSession()->SendSetPhaseShift(GetMiscValueB());
-        else
-            target->ToPlayer()->GetSession()->SendSetPhaseShift(0);
+        target->SetPhaseMask(newPhase, false);
     }
-    else if (apply)
-        target->SetPhaseMask(GetMiscValue(), false);
-    else
-        target->SetPhaseMask(PHASEMASK_NORMAL, false);
+
+    if (apply && (mode & AURA_EFFECT_HANDLE_REAL))
+        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
     // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
     if (target->GetVisibility() != VISIBILITY_OFF)
@@ -5436,8 +5449,6 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
             break;
         case 18499: // Berserker Rage
-            if (target->HasAura(58096))
-                target->CastSpell(target, 23690, true);
             mechanic = (1 << MECHANIC_FEAR) | (1 << MECHANIC_KNOCKOUT) | (1 << MECHANIC_SAPPED);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, apply);
@@ -7302,8 +7313,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     break;
                 case SPELLFAMILY_HUNTER:
                     // Misdirection
-                    if (GetId() == 34477 && target)
+                    if (GetId() == 34477 && target) // dummy aura is applied to the hunter
+                    {
+                        if (target->GetTypeId() == TYPEID_PLAYER &&
+                            target->HasAura(56829)) // Glyph of Misdirection
+                        {
+                            if (Unit* misdir = target->GetMisdirectionTarget())
+                                if (misdir->GetGUID() == target->GetPetGUID()) // threat is being redirected to the hunters pet
+                                    target->ToPlayer()->RemoveSpellCooldown(34477, true);
+                        }
                         target->SetReducedThreatPercent(0, 0);
+                    }
                     break;
                 case SPELLFAMILY_DEATHKNIGHT:
                     // Summon Gargoyle (will start feeding gargoyle)

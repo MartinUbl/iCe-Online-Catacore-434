@@ -65,6 +65,10 @@ BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
         m_Battlegrounds[i].clear();
     m_NextRatingDiscardUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
     m_Testing=false;
+
+    m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
+    m_ratedBgNextWeek = 0;
+    m_ratedBgWeekCheckTimer = 0;
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -141,7 +145,8 @@ void BattlegroundMgr::Update(uint32 diff)
             BattlegroundQueueTypeId bgQueueTypeId = BattlegroundQueueTypeId(scheduled[i] >> 16 & 255);
             BattlegroundTypeId bgTypeId = BattlegroundTypeId((scheduled[i] >> 8) & 255);
             BattlegroundBracketId bracket_id = BattlegroundBracketId(scheduled[i] & 255);
-            m_BattlegroundQueues[bgQueueTypeId].Update(bgTypeId, bracket_id, arenaType, arenaMMRating > 0, arenaMMRating);
+            bool isRated = (arenaMMRating > 0) || (bgTypeId == BATTLEGROUND_RA_BG_10) || (bgTypeId == BATTLEGROUND_RA_BG_15);
+            m_BattlegroundQueues[bgQueueTypeId].Update(bgTypeId, bracket_id, arenaType, isRated, arenaMMRating);
         }
     }
 
@@ -179,6 +184,19 @@ void BattlegroundMgr::Update(uint32 diff)
         else
             m_AutoDistributionTimeChecker -= diff;
     }
+
+    if (m_ratedBgNextWeek)
+    {
+        if (m_ratedBgWeekCheckTimer < diff)
+        {
+            if (m_ratedBgNextWeek <= time(NULL))
+                UpdateRatedBattlegroundWeek();
+
+            m_ratedBgWeekCheckTimer = 600000; // 10 minutes
+        }
+        else
+            m_ratedBgWeekCheckTimer -= diff;
+    }
 }
 
 void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battleground *bg, Player *player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint8 arenatype, uint8 uiFrame)
@@ -186,12 +204,12 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
     ObjectGuid guidBytes1 = player->GetGUID();
     ObjectGuid guidBytes2;
 
-    if(!bg)
+    if (!bg)
         StatusID = STATUS_NONE;
     else
         guidBytes2 = bg->GetGUID();
 
-    switch(StatusID)
+    switch (StatusID)
     {
         case STATUS_NONE:
         {
@@ -511,6 +529,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
         switch(bg->GetTypeID(true))                             // battleground specific things
         {
             case BATTLEGROUND_RB:
+            case BATTLEGROUND_RA_BG_10:
+            case BATTLEGROUND_RA_BG_15:
                 switch(bg->GetMapId())
                 {
                     case 489:
@@ -615,7 +635,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
                 break;
         }
 
-        *data << uint32(0);                                     // unk, enabled by flag
+        *data << uint32(bg->isBattleground() && bg->isRated() ? bg->GetBattlegroundRatingChangeForPlayer(itr2->first) : 0); // rated battleground rating change
         *data << uint32(itr2->second->HealingDone);             // healing done
 
         // should never happen
@@ -808,6 +828,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
     // get the template BG
     Battleground *bg_template = GetBattlegroundTemplate(bgTypeId);
     BattlegroundSelectionWeightMap *selectionWeights = NULL;
+    BattlegroundTypeId originalBgTypeId = bgTypeId;
 
     if (!bg_template)
     {
@@ -822,6 +843,40 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
     {
         selectionWeights = &m_BGSelectionWeights;
         isRandom = true;
+    }
+    else if (bg_template->isBattleground() && isRated)
+    {
+        std::vector<BattlegroundTypeId> possibleBgs;
+
+        switch (bgTypeId)
+        {
+            case BATTLEGROUND_RA_BG_10:
+                possibleBgs.push_back(BATTLEGROUND_WS);
+                possibleBgs.push_back(BATTLEGROUND_BG);
+                possibleBgs.push_back(BATTLEGROUND_TP);
+                break;
+            case BATTLEGROUND_RA_BG_15:
+                possibleBgs.push_back(BATTLEGROUND_AB);
+                possibleBgs.push_back(BATTLEGROUND_EY);
+                break;
+            default:
+                break;
+        }
+
+        if (possibleBgs.empty())
+        {
+            sLog->outError("Battleground: CreateNewBattleground - no rated battleground choosen for %u", bgTypeId);
+            return NULL;
+        }
+        
+        bgTypeId = possibleBgs[irand(0, possibleBgs.size() - 1)];
+        bg_template = GetBattlegroundTemplate(bgTypeId);
+
+        if (!bg_template)
+        {
+            sLog->outError("Battleground: CreateNewBattleground - bg template not found for rated %u", bgTypeId);
+            return NULL;
+        }
     }
 
     if (selectionWeights)
@@ -960,7 +1015,12 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
 
     // generate a new instance id
     bg->SetInstanceID(sMapMgr->GenerateInstanceId()); // set instance id
-    bg->SetClientInstanceID(CreateClientVisibleInstanceId(isRandom ? BATTLEGROUND_RB : bgTypeId, bracketEntry->GetBracketId()));
+    if (isRandom)
+        bg->SetClientInstanceID(CreateClientVisibleInstanceId(BATTLEGROUND_RB, bracketEntry->GetBracketId()));
+    else if (bg->isBattleground() && isRated)
+        bg->SetClientInstanceID(CreateClientVisibleInstanceId(originalBgTypeId, bracketEntry->GetBracketId()));
+    else
+        bg->SetClientInstanceID(CreateClientVisibleInstanceId(bgTypeId, bracketEntry->GetBracketId()));
 
     // reset the new bg (set status to status_wait_queue from status_none)
     bg->Reset();
@@ -970,7 +1030,12 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
     bg->SetArenaType(arenaType);
     bg->SetRated(isRated);
     bg->SetRandom(isRandom);
-    bg->SetTypeID(isRandom ? BATTLEGROUND_RB : bgTypeId);
+    if (isRandom)
+        bg->SetTypeID(BATTLEGROUND_RB);
+    else if (bg->isBattleground() && isRated)
+        bg->SetTypeID(originalBgTypeId);
+    else
+        bg->SetTypeID(bgTypeId);
     bg->SetRandomTypeID(bgTypeId);
 
     return bg;
@@ -1062,7 +1127,8 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
 
         BattlegroundTypeId bgTypeID = BattlegroundTypeId(bgTypeID_);
 
-        IsArena = (bl->type == TYPE_ARENA);
+        // bl->rated attribute is set to 2 when it's rated battleground. Arenas are rated, but have this field set to 0 !
+        IsArena = (bl->type == TYPE_ARENA) && (bl->rated == 0);
         MinPlayersPerTeam = fields[1].GetUInt32();
         MaxPlayersPerTeam = fields[2].GetUInt32();
         MinLvl = fields[3].GetUInt32();
@@ -1090,7 +1156,7 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
             AStartLoc[2] = start->z;
             AStartLoc[3] = fields[6].GetFloat();
         }
-        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB || bl->rated)
         {
             AStartLoc[0] = 0;
             AStartLoc[1] = 0;
@@ -1113,7 +1179,7 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
             HStartLoc[2] = start->z;
             HStartLoc[3] = fields[8].GetFloat();
         }
-        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB || bl->rated)
         {
             HStartLoc[0] = 0;
             HStartLoc[1] = 0;
@@ -1346,6 +1412,10 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
                 default:
                     return BATTLEGROUND_QUEUE_NONE;
             }
+        case BATTLEGROUND_RA_BG_10:
+            return BATTLEGROUND_QUEUE_RA_BG_10;
+        case BATTLEGROUND_RA_BG_15:
+            return BATTLEGROUND_QUEUE_RA_BG_15;
         default:
             return BATTLEGROUND_QUEUE_NONE;
     }
@@ -1377,6 +1447,10 @@ BattlegroundTypeId BattlegroundMgr::BGTemplateId(BattlegroundQueueTypeId bgQueue
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:
             return BATTLEGROUND_AA;
+        case BATTLEGROUND_QUEUE_RA_BG_10:
+            return BATTLEGROUND_RA_BG_10;
+        case BATTLEGROUND_QUEUE_RA_BG_15:
+            return BATTLEGROUND_RA_BG_15;
         default:
             return BattlegroundTypeId(0);                   // used for unknown template (it existed and do nothing)
     }
@@ -1518,5 +1592,87 @@ void BattlegroundMgr::DoCompleteAchievement(uint32 achievement, Player * player)
     else
     {
         player->CompletedAchievement(AE);
+    }
+}
+
+void BattlegroundMgr::InitRatedBattlegrounds()
+{
+    // even Rated BGs are disabled, lets load it
+    QueryResult result = CharacterDatabase.Query("SELECT week, next_week FROM rated_battleground");
+
+    if (!result)
+    {
+        sLog->outString(">> DB table `rated_battleground` is empty!");
+        sLog->outString();
+        return;
+    }
+
+    Field* fields = result->Fetch();
+    m_ratedBgWeek = fields[0].GetUInt32();
+    m_ratedBgNextWeek = fields[1].GetUInt32();
+
+    if (!sWorld->getBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED))
+        m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
+}
+
+void BattlegroundMgr::UpdateRatedBattlegroundWeek()
+{
+    uint32 possibleWeeks = sWorld->getIntConfig(CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION);
+    
+    if (sWorld->getBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED))
+    {
+        do
+        {
+            if (m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_NONE || m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_15v15)
+                m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_10v10;
+            else if (m_ratedBgWeek == RATED_BATTLEGROUND_WEEK_10v10)
+                m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_15v15;
+            else
+                m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
+        }
+        while (!(possibleWeeks & m_ratedBgWeek));
+    }
+    else
+        m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
+
+    do
+    {
+        m_ratedBgNextWeek += 7*DAY;
+    }
+    while (time(NULL) > m_ratedBgNextWeek);
+
+    CharacterDatabase.PExecute("UPDATE rated_battleground SET week = %u, next_week = %u", m_ratedBgWeek, m_ratedBgNextWeek);
+
+    //TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
+    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+        itr->second->SendUpdateWorldState(RATED_BATTLEGROUND_WEEK_WORLDSTATE, m_ratedBgWeek);
+}
+
+BattlegroundTypeId BattlegroundMgr::GetRatedBattlegroundType()
+{
+    switch (m_ratedBgWeek)
+    {
+        case RATED_BATTLEGROUND_WEEK_10v10:
+            return BATTLEGROUND_RA_BG_10;
+        case RATED_BATTLEGROUND_WEEK_15v15:
+            return BATTLEGROUND_RA_BG_15;
+        case RATED_BATTLEGROUND_WEEK_NONE:
+        default:
+            return BATTLEGROUND_TYPE_NONE;
+    }
+}
+
+uint32 BattlegroundMgr::GetRatedBattlegroundSize()
+{
+    switch (m_ratedBgWeek)
+    {
+        case RATED_BATTLEGROUND_WEEK_10v10:
+            return 10;
+        case RATED_BATTLEGROUND_WEEK_15v15:
+            return 15;
+        case RATED_BATTLEGROUND_WEEK_NONE:
+        default:
+            return 0;
     }
 }

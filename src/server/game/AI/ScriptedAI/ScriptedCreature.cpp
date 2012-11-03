@@ -565,7 +565,7 @@ void BossAI::_Reset()
     events.Reset();
     summons.DespawnAll();
     if (instance)
-        instance->SetBossState(bossId, NOT_STARTED);
+        instance->SetData(bossId, NOT_STARTED);
 }
 
 void BossAI::_JustDied()
@@ -574,7 +574,7 @@ void BossAI::_JustDied()
     summons.DespawnAll();
     if (instance)
     {
-        instance->SetBossState(bossId, DONE);
+        instance->SetData(bossId, DONE);
         instance->SaveToDB();
     }
 }
@@ -584,7 +584,7 @@ void BossAI::_EnterCombat()
     me->setActive(true);
     DoZoneInCombat();
     if (instance)
-        instance->SetBossState(bossId, IN_PROGRESS);
+        instance->SetData(bossId, IN_PROGRESS);
 }
 
 void BossAI::TeleportCheaters()

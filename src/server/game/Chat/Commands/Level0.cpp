@@ -172,6 +172,16 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     PSendSysMessage(LANG_UPTIME, uptime.c_str());
     //PSendSysMessage("Update time diff: %u.", updateTime); // This is useless
 
+    if (sWorld->IsShutdowning())
+    {
+        std::string toShutdown = secsToTimeString(sWorld->GetShutdownTimer());
+
+        if (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART)
+            PSendSysMessage("Restart in: %s", toShutdown.c_str());
+        else
+            PSendSysMessage("Shutdown in: %s", toShutdown.c_str());
+    }
+
     return true;
 }
 

@@ -167,6 +167,7 @@ enum WorldBoolConfigs
     CONFIG_AUTOBROADCAST,
     CONFIG_GUILD_ADVANCEMENT_ENABLED,
     CONFIG_WINTERGRASP_ENABLE,
+    CONFIG_RATED_BATTLEGROUND_ENABLED,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -318,6 +319,9 @@ enum WorldIntConfigs
     CONFIG_WINTERGRASP_BATTLETIME,
     CONFIG_WINTERGRASP_NOBATTLETIME,
     CONFIG_WINTERGRASP_RESTART_AFTER_CRASH,
+    CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION,
+    CONFIG_RATED_BATTLEGROUND_MAX_RATING_DIFFERENCE,
+    CONFIG_RATED_BATTLEGROUND_RATING_DISCARD_TIMER,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -648,6 +652,8 @@ class World
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
+        uint32 GetShutdownTimer() { return m_ShutdownTimer; }
+        uint8 GetShutdownMask() { return m_ShutdownMask; }
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);

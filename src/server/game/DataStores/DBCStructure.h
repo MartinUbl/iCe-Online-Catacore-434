@@ -502,6 +502,20 @@ struct AchievementCriteriaEntry
             uint32  dungeonsComplete;
         } use_lfg;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND = 130
+        struct
+        {
+            uint32 unused;
+            uint32 count;
+        } win_rated_battleground;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING      = 132
+        struct
+        {
+            uint32 unused;
+            uint32 rating;
+        } reach_bg_rating;
+
         struct
         {
             uint32  field3;                                 // 3 main requirement

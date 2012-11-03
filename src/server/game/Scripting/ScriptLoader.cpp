@@ -582,6 +582,8 @@ void AddSC_instance_grim_batol();
 void AddSC_instance_halls_of_origination();
 void AddSC_instance_the_stonecore();
 void AddSC_instance_throne_of_the_tides();
+void AddSC_corborus();
+void AddSC_twilight_council();
 
 
 // battlegrounds
@@ -1198,6 +1200,8 @@ void AddCataclysmScripts()
     AddSC_instance_halls_of_origination();
     AddSC_instance_the_stonecore();
     AddSC_instance_throne_of_the_tides();
+    AddSC_corborus();
+    AddSC_twilight_council();
 
     AddSC_magmaw();
     AddSC_atramedes();

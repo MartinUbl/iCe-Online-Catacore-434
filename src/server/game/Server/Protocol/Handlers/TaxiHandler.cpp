@@ -136,6 +136,25 @@ void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathN
 	GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path,pathNode);
 }
 
+bool PlayerTaxi::AutomaticTaxiNodeLearn(uint32 nodeid)  //automatic taxi nodes linking when one node is discovered
+{
+    if(SetTaximaskNode(nodeid)) //player does not have that node yet (endless recursive cycle protection)
+    {
+        switch(nodeid)
+        {
+        case 26:
+            AutomaticTaxiNodeLearn(27);
+            break;
+        case 27:
+            AutomaticTaxiNodeLearn(26);
+            break;
+        }
+        return true;
+    }
+    else
+       return false;
+}
+
 bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
 {
 	// find current node
@@ -144,7 +163,7 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
 	if (curloc == 0)
 		return true;                                        // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
 
-	if (GetPlayer()->m_taxi.SetTaximaskNode(curloc))
+	if (GetPlayer()->m_taxi.AutomaticTaxiNodeLearn(curloc)) 
 	{
 		WorldPacket msg(SMSG_NEW_TAXI_PATH, 0);
 		SendPacket(&msg);

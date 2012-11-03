@@ -99,6 +99,12 @@ class BattlegroundMgr
         bool isArenaTesting() const { return m_ArenaTesting; }
         bool isTesting() const { return m_Testing; }
 
+        void InitRatedBattlegrounds();
+        uint32 GetRatedBattlegroundWeek() const { return m_ratedBgWeek; }
+        void UpdateRatedBattlegroundWeek();
+        BattlegroundTypeId GetRatedBattlegroundType();
+        uint32 GetRatedBattlegroundSize();
+
         static bool IsArenaType(BattlegroundTypeId bgTypeId);
         static bool IsBattlegroundType(BattlegroundTypeId bgTypeId) { return !BattlegroundMgr::IsArenaType(bgTypeId); }
         static BattlegroundQueueTypeId BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType);
@@ -123,6 +129,10 @@ class BattlegroundMgr
         uint32 m_AutoDistributionTimeChecker;
         bool   m_ArenaTesting;
         bool   m_Testing;
+
+        uint32 m_ratedBgWeek;
+        uint32 m_ratedBgNextWeek;
+        uint32 m_ratedBgWeekCheckTimer;
 };
 
 #define sBattlegroundMgr ACE_Singleton<BattlegroundMgr, ACE_Null_Mutex>::instance()

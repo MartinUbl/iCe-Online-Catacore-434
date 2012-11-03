@@ -42,6 +42,12 @@ public:
         boss_argalothAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(pCreature)
         {
             pInstance = pCreature->GetInstanceScript();
+
+            pCreature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            pCreature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            pCreature->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            pCreature->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            pCreature->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
         }
 
         InstanceScript *pInstance;

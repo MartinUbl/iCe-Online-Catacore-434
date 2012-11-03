@@ -603,8 +603,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_BATTLEFIELD_LIST,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldListOpcode     );
     OPCODE( SMSG_BATTLEFIELD_LIST,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEFIELD_JOIN,                        STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinOpcode    );
-    OPCODE( CMSG_JOIN_RATED_BATTLEFIELD,                  STATUS_LOGGEDIN, &WorldSession::Handle_NULL                     );
-    OPCODE( CMSG_REQUEST_RATED_BG_INFO,                   STATUS_LOGGEDIN, &WorldSession::HandleRequestRatedBGInfo        );
+    OPCODE( CMSG_REQUEST_RATED_BG_INFO,                   STATUS_LOGGEDIN, &WorldSession::HandleRequestRatedBgInfo        );
     OPCODE( CMSG_REQUEST_PVP_OPTIONS_ENABLED,             STATUS_LOGGEDIN, &WorldSession::HandleRequestPvPOptions         );
     OPCODE( CMSG_TAXICLEARNODE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXIENABLENODE,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -1315,6 +1314,10 @@ void InitOpcodeTable()
     OPCODE( CMSG_REFORGE,                                 STATUS_LOGGEDIN, &WorldSession::HandleItemReforge               );
     OPCODE( SMSG_REFORGING_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ENTERED_INSTANCE_IN_PROGRESS,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_BATTLEFIELD_RATED_INFO,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_REQUEST_RATED_BG_STATS,                  STATUS_LOGGEDIN, &WorldSession::HandleRequestRatedBgStats       );
+    OPCODE( SMSG_PVP_RATED_STATS_UPDATE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_BATTLEMASTER_JOIN_RATED,                 STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinRated     );
     OPCODE( SMSG_PLAY_ONE_SHOT_ANIM_KIT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 
     // Define the rest of the opcodes as UNKNOWN

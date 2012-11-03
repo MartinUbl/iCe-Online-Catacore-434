@@ -443,6 +443,8 @@ class Group
         // FG: evil hacks
         void BroadcastGroupUpdate(void);
 
+        uint32 GetAverageBattlegroundRating();
+
     protected:
         bool _addMember(const uint64 &guid, const char* name);
         bool _addMember(const uint64 &guid, const char* name, uint8 group);

@@ -416,7 +416,7 @@ enum SpellAttr3
 
 enum SpellAttr4
 {
-    SPELL_ATTR4_UNK0                             = 0x00000001, //  0
+    SPELL_ATTR4_IGNORE_RESISTANCES               = 0x00000001, //  0 spells with this attribute will completely ignore the target's resistance (these spells can't be resisted)
     SPELL_ATTR4_UNK1                             = 0x00000002, //  1 proc on finishing move?
     SPELL_ATTR4_UNK2                             = 0x00000004, //  2
     SPELL_ATTR4_CANT_PROC_FROM_SELFCAST          = 0x00000008, //  3
@@ -1284,7 +1284,7 @@ enum Targets
     TARGET_DEST_UNK_112                = 112, // Unused, only one spell
     TARGET_DEST_UNK_117                = 117, // same as above, only one testing spell
     TARGET_DEST_UNK_118                = 118, // same as above
-    TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // i.e. Mass Ressurection
+    TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // target all dead party & raid members - used only in Mass Resurrection
     TARGET_DEST_UNK_120                = 120, // some generic spells
     TOTAL_SPELL_TARGETS
 };
@@ -2962,9 +2962,9 @@ enum BattlegroundTypeId
     BATTLEGROUND_RV            = 11,
     BATTLEGROUND_IC            = 30,
     BATTLEGROUND_RB            = 32,                        // Random Battleground
-    BATTLEGROUND_RA_BG         = 100,                       // Rated Battleground
-    BATTLEGROUND_RA_BG1        = 101,                       // Rated Battleground
-    BATTLEGROUND_RA_BG2        = 102,                       // Rated Battleground
+    BATTLEGROUND_RA_BG_10      = 100,                       // Rated Battleground (10v10)
+    BATTLEGROUND_RA_BG_15      = 101,                       // Rated Battleground (15v15)
+    BATTLEGROUND_RA_BG_25      = 102,                       // Rated Battleground (25v25) - NOT USED
     BATTLEGROUND_TP            = 108,                       // Twin Peaks
     BATTLEGROUND_BG            = 120,                       // The Battle for Gilneas
     BATTLEGROUND_ICD           = 441,                       // Icecrown Citadel
@@ -3088,6 +3088,17 @@ enum XPColorChar
     XP_YELLOW,
     XP_GREEN,
     XP_GRAY
+};
+
+// Rated Battlegrounds
+
+#define RATED_BATTLEGROUND_WEEK_WORLDSTATE     5508
+
+enum RatedBattlegroundWeek
+{
+    RATED_BATTLEGROUND_WEEK_NONE               = 0,
+    RATED_BATTLEGROUND_WEEK_10v10              = 1,
+    RATED_BATTLEGROUND_WEEK_15v15              = 2
 };
 
 #endif

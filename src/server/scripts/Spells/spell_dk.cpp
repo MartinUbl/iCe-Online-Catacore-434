@@ -277,89 +277,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                static const AuraType diseaseAuraTypes[] =
-                {
-                    SPELL_AURA_PERIODIC_DAMAGE, // Frost Fever and Blood Plague
-                    SPELL_AURA_LINKED, // Crypt Fever and Ebon Plague
-                    SPELL_AURA_NONE
-                };
-
                 Unit* caster = GetCaster();
-                Unit* target = GetHitUnit();
-
-                if (!target)
-                    return;
-
-                uint32 diseases = 0;
-                int32 extratime = 0, maxtime = 0;
-                AuraEffect const * aurEffA = NULL;
-
-                Unit::AuraEffectList aurasA;
-                GetGlyphScourgeStrikeAuraEffects(caster, caster, aurasA);
-
-                bool hasGlyph = bool(aurasA.size());
-
-                if (hasGlyph)
-                {
-                    aurEffA = *aurasA.begin();
-                    extratime = aurEffA->GetAmount();
-                    maxtime = SpellMgr::CalculateSpellEffectAmount(aurEffA->GetSpellProto(), EFFECT_1);
-
-                    aurasA.clear();
-                    GetGlyphScourgeStrikeAuraEffects(caster, target, aurasA);
-                }
-
-                for (AuraType const * itrA = &diseaseAuraTypes[0]; itrA && itrA[0] != SPELL_AURA_NONE; ++itrA)
-                {
-                    Unit::AuraEffectList const & aurasB = target->GetAuraEffectsByType(*itrA);
-                    for (Unit::AuraEffectList::const_iterator itrB = aurasB.begin(); itrB != aurasB.end(); ++itrB)
-                        if (((*itrB)->GetSpellProto()->Dispel == DISPEL_DISEASE) && ((*itrB)->GetCasterGUID() == caster->GetGUID()))
-                        {
-                            ++diseases;
-
-                            if (!hasGlyph)
-                                continue;
-
-                            Aura * aura = (*itrB)->GetBase();
-
-                            int32 applytime = int32(aura->GetApplyTime() & 0x7FFFFFFF);
-                            int32 duration = std::min(aura->GetDuration() + (extratime * IN_MILLISECONDS), aura->GetMaxDuration());
-
-                            if (AuraEffect * aurEffB = GetGlyphScourgeStrikeAuraEffect(aura->GetId(), aurasA))
-                            {
-                                aurEffB->GetBase()->SetDuration(duration);
-
-                                if (applytime != aurEffB->GetBase()->GetMaxDuration())
-                                    aurEffB->SetAmount(aurEffB->GetAmount() & ~(0xF));
-
-                                if (maxtime <= (aurEffB->GetAmount() & 0xF))
-                                    continue;
-
-                                aura->SetDuration(duration);
-
-                                aurEffB->GetBase()->SetMaxDuration(applytime);
-                                aurEffB->SetAmount(aurEffB->GetAmount() + extratime);
-
-                                continue;
-                            }
-
-                            int32 bp0 = (aura->GetId() << 4) + extratime;
-                            caster->CastCustomSpell(target, aurEffA->GetId(), &bp0, NULL, NULL, true);
-
-                            Unit::AuraEffectList tmp;
-                            GetGlyphScourgeStrikeAuraEffects(caster, target, tmp);
-
-                            if (AuraEffect * aurEffB = GetGlyphScourgeStrikeAuraEffect(aura->GetId(), tmp))
-                            {
-                                aura->SetDuration(duration);
-
-                                aurEffB->GetBase()->SetMaxDuration(applytime);
-                                aurEffB->GetBase()->SetDuration(duration);
-                            }
-                        }
-                }
-
-                m_multip = (target->GetDiseasesByCaster(caster->GetGUID()) * GetEffectValue()) / 100.0f;
+                if (Unit* target = GetHitUnit())
+                    m_multip = (target->GetDiseasesByCaster(caster->GetGUID()) * GetEffectValue()) / 100.0f;
             }
 
             void HandleAfterHit()
