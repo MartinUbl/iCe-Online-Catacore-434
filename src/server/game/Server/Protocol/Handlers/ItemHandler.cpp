@@ -874,17 +874,12 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket & recv_data)
 void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug("WORLD: Received CMSG_BUY_ITEM");
-    uint64 vendorguid;
-    uint8 unk;
+    uint64 vendorguid, bagGuid;
     uint32 item, slot, count;
-    uint64 unk1;
-    uint8 unk2;
+    uint8 itemType; // 1 = item, 2 = currency
+    uint8 bagSlot;
 
-    recv_data >> vendorguid;
-    recv_data >> unk;                                       // 4.0.6
-    recv_data >> item >> slot >> count;
-    recv_data >> unk1;                                      // 4.0.6
-    recv_data >> unk2;
+    recv_data >> vendorguid >> itemType >> item >> slot >> count >> bagGuid >> bagSlot;
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
@@ -892,7 +887,22 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
     else
         return; // cheating
 
-    GetPlayer()->BuyItemFromVendorSlot(vendorguid,slot,item,count,NULL_BAG,NULL_SLOT);
+    //if (itemType == ITEM_VENDOR_TYPE_ITEM)
+    {
+        Item* bagItem = _player->GetItemByGuid(bagGuid);
+
+        uint8 bag = NULL_BAG;
+        if (bagItem && bagItem->IsBag())
+            bag = bagItem->GetSlot();
+        else if (bagGuid == GetPlayer()->GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
+            bag = INVENTORY_SLOT_BAG_0;
+
+        GetPlayer()->BuyItemFromVendorSlot(vendorguid, slot, item, count, bag, bagSlot);
+    }
+    //else if (itemType == ITEM_VENDOR_TYPE_CURRENCY)
+    //    GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count);
+    //else
+    //    sLog->outDebug("WORLD: received wrong itemType (%u) in HandleBuyItemOpcode", itemType);
 }
 
 void WorldSession::HandleListInventoryOpcode(WorldPacket & recv_data)
@@ -929,115 +939,144 @@ void WorldSession::SendListInventory(uint64 vendorguid)
     if (pCreature->hasUnitState(UNIT_STAT_MOVING))
         pCreature->StopMoving();
 
-    VendorItemData const* vItems = pCreature->GetVendorItems();
-    if (!vItems)
-    {
-        WorldPacket data(SMSG_LIST_INVENTORY, (8+1+1+2), true);
-        data << uint64(vendorguid);
-        data << uint8(0);                                   // count==0, next will be error code
-        data << uint8(0);                                   // "Vendor has no inventory"
-        SendPacket(&data);
-        return;
-    }
+    VendorItemData const *vendorItems = pCreature->GetVendorItems();
+    uint8 rawItemCount = vendorItems ? vendorItems->GetItemCount() : 0;
 
-    uint32 numitems = vItems->GetItemCount();
+    //if (rawItemCount > 300),
+    //    rawItemCount = 300; // client cap but uint8 max value is 255
+
+    ByteBuffer itemsData(32 * rawItemCount);
+    std::vector<bool> enablers;
+    enablers.reserve(2 * rawItemCount);
+
+    const float discountMod = _player->GetReputationPriceDiscount(pCreature);
     uint8 count = 0;
-
-    WorldPacket data(SMSG_LIST_INVENTORY, (8+1+numitems*9*4+1*numitems+2), true);
-    data << uint64(vendorguid);
-
-    size_t count_pos = data.wpos();
-    data << uint8(count);
-
-    float discountMod = _player->GetReputationPriceDiscount(pCreature);
-
-    discountMod -= _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
-
-    for (uint32 vendorslot = 0; vendorslot < numitems; ++vendorslot )
+    for (uint8 slot = 0; slot < rawItemCount; ++slot)
     {
-        if (VendorItem const* crItem = vItems->GetItem(vendorslot))
+        VendorItem const* vendorItem = vendorItems->GetItem(slot);
+        if (!vendorItem) continue;
+
+        //if (vendorItem->Type == ITEM_VENDOR_TYPE_ITEM)
         {
-            if (ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(crItem->item))
+            ItemPrototype const* itemTemplate = sObjectMgr->GetItemPrototype(vendorItem->item);
+            if (!itemTemplate)
+                continue;
+
+            uint32 leftInStock = !vendorItem->maxcount ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(vendorItem);
+            if (!_player->isGameMaster()) // ignore conditions if GM on
             {
-                if ((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP && !_player->isGameMaster())
-                    continue;
-                // Only display items in vendor lists for the team the
-                // player is on. If GM on, display all items.
-                if (!_player->isGameMaster() && ((pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && _player->GetTeam() == ALLIANCE) || (pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && _player->GetTeam() == HORDE)))
+                // Respect allowed class
+                if (!(itemTemplate->AllowableClass & _player->getClassMask()) && itemTemplate->Bonding == BIND_WHEN_PICKED_UP)
                     continue;
 
-                // reputation discount
-                int32 price = crItem->IsGoldRequired(pProto) ? uint32(floor(pProto->BuyPrice * discountMod)) : 0;
-                bool available = true;
+                // Only display items in vendor lists for the team the player is on
+                if ((itemTemplate->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && _player->GetTeam() == ALLIANCE) ||
+                    (itemTemplate->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && _player->GetTeam() == HORDE))
+                    continue;
 
-                // If item is listed as guild reward, check whether player is capable to buy
-                if (Guild::IsListedAsGuildReward(pProto->ItemId))
-                {
-                    // If player doesn't have guild, do not display
-                    if (!_player->GetGuildId())
-                        continue;
-                    else
-                    {
-                        // Get price in copper from reward template
-                        if (Guild* pGuild = sObjectMgr->GetGuildById(_player->GetGuildId()))
-                        {
-                            if (pGuild->IsRewardReachable(_player, pProto->ItemId))
-                                price = Guild::GetRewardData(pProto->ItemId)->price;
-                            else
-                                available = false;
-                        }
-                    }
-                }
-
-                ++count;
-                if(count == 150)
-                    break; // client can only display 15 pages
-
-                data << uint32(vendorslot+1);    // client expects counting to start at 1
-                data << uint32(1); // unknow value 4.0.1, always 1
-                data << uint32(crItem->item);
-                data << uint32(pProto->DisplayInfoID);
-                data << int32(crItem->maxcount <= 0 ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(crItem));
-                data << uint32(price);
-                data << uint32(pProto->MaxDurability);
-                data << uint32(pProto->BuyCount);
-                data << uint32(crItem->ExtendedCost);
-                data << uint8(available? 0x00 : 0xFF); // 4.0.1, means availability (if not, item is displayed as red)
+                // Items sold out are not displayed in list
+                if (leftInStock == 0)
+                    continue;
             }
+
+            int32 price = vendorItem->IsGoldRequired(itemTemplate) ? uint32(floor(itemTemplate->BuyPrice * discountMod)) : 0;
+
+            if (int32 priceMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST))
+                price -= CalculatePctN(price, priceMod);
+
+            ++count;
+            itemsData << uint32(slot + 1);        // client expects counting to start at 1
+            itemsData << uint32(itemTemplate->MaxDurability);
+
+            if (vendorItem->ExtendedCost != 0)
+            {
+                enablers.push_back(0);
+                itemsData << uint32(vendorItem->ExtendedCost);
+            }
+            else
+                enablers.push_back(1);
+            enablers.push_back(1);                 // unk bit
+
+            itemsData << uint32(vendorItem->item);
+            itemsData << uint32(1);     // 1 is items, 2 is currency
+            itemsData << uint32(price);
+            itemsData << uint32(itemTemplate->DisplayInfoID);
+            // if (!unk "enabler") data << uint32(something);
+            itemsData << int32(leftInStock);
+            itemsData << uint32(itemTemplate->BuyCount);
         }
+        /*else if (vendorItem->Type == ITEM_VENDOR_TYPE_CURRENCY)
+        {
+            CurrencyTypesEntry const* currencyTemplate = sCurrencyTypesStore.LookupEntry(vendorItem->item);
+            if (!currencyTemplate)
+                continue;
+
+            if (vendorItem->ExtendedCost == 0)
+                continue; // there's no price defined for currencies, only extendedcost is used
+
+            uint32 precision = (currencyTemplate->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? 100 : 1;
+
+            ++count;
+            itemsData << uint32(slot + 1);			 // client expects counting to start at 1
+            itemsData << uint32(0);                  // max durability
+
+            if (vendorItem->ExtendedCost != 0)
+            {
+                enablers.push_back(0);
+                itemsData << uint32(vendorItem->ExtendedCost);
+            }
+            else
+                enablers.push_back(1);
+
+            enablers.push_back(1);                    // unk bit
+
+            itemsData << uint32(vendorItem->item);
+            itemsData << uint32(vendorItem->Type);    // 1 is items, 2 is currency
+            itemsData << uint32(0);                   // price, only seen currency types that have Extended cost
+            itemsData << uint32(0);                   // displayId
+            // if (!unk "enabler") data << uint32(something);
+            itemsData << int32(-1);
+            itemsData << uint32(vendorItem->maxcount * precision);
+        }
+        */
+        // else error
     }
 
-    
-    //TODO: add error messages.
-    /*switch ( v13 )
-    {
-      case 2:
-        ConsoleWrite(v7, a2, (int)"You are too far away", 0);
-        break;
-      case 1:
-        ConsoleWrite(v7, a2, (int)"I don't think he likes you very much", 0);
-        break;
-      case 0:
-        ConsoleWrite(v7, a2, (int)"Vendor has no inventory", 0);
-        break;
-      case 3:
-        ConsoleWrite(v7, a2, (int)"Vendor is dead", 0);
-        break;
-      case 4:
-        ConsoleWrite(v7, a2, (int)"You can't shop while dead.", 0);
-        break;
-      default:
-        break;
-    }*/
-    
-    if (count == 0)
-    {
-        data << uint8(0);
-        SendPacket(&data);
-        return;
-    }
+    ObjectGuid guid = vendorguid;
 
-    data.put<uint8>(count_pos, count);
+    WorldPacket data(SMSG_LIST_INVENTORY, 12 + itemsData.size());
+
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[0]);
+
+    data.WriteBits(count, 21); // item count
+
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+
+    for (std::vector<bool>::const_iterator itr = enablers.begin(); itr != enablers.end(); ++itr)
+        data.WriteBit(*itr);
+
+    data.WriteBit(guid[4]);
+
+    data.FlushBits();
+    data.append(itemsData);
+
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+
+    data << uint8(count == 0); // unk byte, item count 0: 1, item count != 0: 0 or some "random" value below 300
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[7]);
+
     SendPacket(&data);
 }
 
