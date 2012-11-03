@@ -1201,7 +1201,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket & recv_data)
     ReadMovementInfo(recv_data, &movementInfo);
     _player->m_movementInfo = movementInfo;
 
-    WorldPacket data(MSG_MOVE_KNOCK_BACK, 66);
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, 66);
     data.appendPackGUID(guid);
     _player->BuildMovementPacket(&data);
 

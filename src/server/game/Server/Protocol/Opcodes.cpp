@@ -221,7 +221,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_READ_ITEM_FAILED,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ITEM_COOLDOWN,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GAMEOBJ_USE,                             STATUS_LOGGEDIN, &WorldSession::HandleGameObjectUseOpcode       );
-    OPCODE( CMSG_DESTROY_ITEMS,                           STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode         );
     OPCODE( SMSG_GAMEOBJECT_CUSTOM_ANIM,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_AREATRIGGER,                             STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode         );
     OPCODE( MSG_MOVE_START_FORWARD,                       STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           );
@@ -284,7 +283,6 @@ void InitOpcodeTable()
     OPCODE( MSG_MOVE_HEARTBEAT,                           STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           );
     OPCODE( SMSG_MOVE_KNOCK_BACK,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_MOVE_KNOCK_BACK_ACK,                     STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck          );
-    OPCODE( MSG_MOVE_KNOCK_BACK,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_MOVE_FEATHER_FALL,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_MOVE_NORMAL_FALL,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_MOVE_SET_HOVER,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -714,8 +712,6 @@ void InitOpcodeTable()
     OPCODE( MSG_MOVE_TOGGLE_GRAVITY_CHEAT,                STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_MONSTER_MOVE_TRANSPORT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PET_BROKEN,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( MSG_MOVE_FEATHER_FALL,                        STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( MSG_MOVE_WATER_WALK,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_SERVER_BROADCAST,                        STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_SELF_RES,                                STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode             );
     OPCODE( SMSG_FEIGN_DEATH_RESISTED,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -1307,7 +1303,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_RETURN_TO_GRAVEYARD,                     STATUS_LOGGEDIN, &WorldSession::HandleReturnToGraveyardOpcode   );
     OPCODE( CMSG_GROUP_SET_ROLES,                         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetRoles             );
     OPCODE( SMSG_UNKNOWN_1310,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_RETURN_TO_GRAVEYARD,                     STATUS_LOGGEDIN, &WorldSession::HandleMoveToGraveyard           );
     OPCODE( CMSG_QUERY_COMPLETED_ARTIFACTS,               STATUS_LOGGEDIN, &WorldSession::HandleQueryCompletedArtifacts   );
     OPCODE( SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE,      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_REFORGING_OPEN,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
