@@ -52,6 +52,10 @@ static void DefineOpcode(uint32 opcode, const char* name, SessionStatus status, 
         opcodeTable[compressedOpcode].handler = handler;
     }
 
+    // Output overlapping alert
+    if (opcodeTable[opcode].handler != NULL && opcodeTable[opcode].name != NULL)
+        sLog->outError("Warning: overlapping opcodes! Opcode %s is trying to overlap already defined opcode %s (0x%.4X)", name, opcodeTable[opcode].name, opcode);
+
     opcodeTable[opcode].name = name;
     opcodeTable[opcode].status = status;
     opcodeTable[opcode].handler = handler;
@@ -1319,3 +1323,8 @@ void InitOpcodeTable()
             DefineOpcode(i, "UNKNOWN", STATUS_NEVER, &WorldSession::Handle_NULL);
     }
 };
+
+void DestroyOpcodeTable()
+{
+    delete [] opcodeTable;
+}
