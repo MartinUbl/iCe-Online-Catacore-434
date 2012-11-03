@@ -172,15 +172,6 @@ public:
                 damage=0; // Zabranim IK dmgu od magovho Ignite
         }
 
-        void DamageDealt(Unit* target, uint32 &damage, DamageEffectType damagetype)
-        {
-            if(damagetype == SPELL_DIRECT_DAMAGE) // Ak ma hrac Gravity crush ma byt immuny na dmg ? ? ?  TODO -> Overit ci je to naozaj tak
-            {
-                if(target->HasAura(92486 ) || target->HasAura(92488 ) || target->HasAura(84948 ) || target->HasAura(92487 )) // Gravity Crush
-                    damage = 0;
-            }
-        }
-
         void EnterEvadeMode()
         {
             if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
@@ -340,7 +331,8 @@ public:
 
             if(Intensity_timer<=diff) // Kazdych 20 sekund sa zvysi pocet instability "castov" o 1
             {
-                    INSTABILITY=INSTABILITY+1;
+                    if(INSTABILITY<10) // Obmedzenie na max 10 bleskov
+                        INSTABILITY=INSTABILITY+1;
                     Intensity_timer=20000;
             }
             else Intensity_timer-=diff;
@@ -368,7 +360,7 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
-                            lift_timer=1500; // Po 1.5 sekundach zdvihnem hracov zo zeme
+                            lift_timer=2000; // Po 2 sekundach zdvihnem hracov zo zeme
                             can_lift=true;
                         }
                         Gravity_crush_timer=25000;
@@ -384,7 +376,7 @@ public:
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                             if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
-                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+30);
+                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
                     }
                 can_lift=false;
             }
@@ -429,7 +421,12 @@ public:
                                     for(uint32 i=0;i<INSTABILITY;i++)
                                     {
                                         if(i<number_of_players)
+                                        {
+                                            if( pole[i]->HasAura(92486 ) || pole[i]->HasAura(92488 ) || pole[i]->HasAura(84948 ) || pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
+                                                continue;
+
                                             DoCast(pole[i],84529,true);
+                                        }
 
                                         else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
                                                 DoCast(target,84529,true);
@@ -790,7 +787,7 @@ public:
 
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
-                                if( urand(0,100) <= 50 ) // 50% sanca na spawn bomby pod hraca
+                                if( urand(0,100) <= 50 && me->getVictim() != target) // 50% sanca na spawn bomby pod hraca + vylucim Tanka Feludiusa
                                     me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
@@ -841,7 +838,7 @@ public:
                             {
                                 can_interrupt=false;
                                 check_debuff=true;
-                                Frozen_timer=3000; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
+                                Frozen_timer=4500; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
                                 DoCast(me,SPELL_GLACIATE);
                                 Glaciate_timer=32000;
                                 Glaciate_all_timer=3000;
@@ -1000,7 +997,7 @@ public:
         void DamageTaken(Unit* attacker, uint32& damage)
         {
              if( (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514)) ) // Ak ma boss nasebe stit hraci maju donho zvyseny dmg o 10 %
-                damage=damage*1.1;  // due to broken buff which should increase dmg done by players
+                damage=damage*1.2;  // due to broken buff which should increase dmg done by players
 
              if (damage > me->GetHealth() || damage > 500000 )
                 damage=0; // Zabranim IK dmgu od magovho Ignite
@@ -1344,8 +1341,10 @@ public:
         bool fired;
         uint32 flame_timer;
 
-        void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType typeOfDamage)
         {
+            damage = urand(4000,6000); // Ohen daval prilis velky dmg okresem to na cca 5 k
+
             if(typeOfDamage == SPELL_DIRECT_DAMAGE) // Ak dam dmg hracovi
                 if(target->HasAura(SPELL_WATER_LOGGED)) // a ma na sebe waterlogged debuff
                     target->RemoveAura(SPELL_WATER_LOGGED); // odstranim ho
@@ -2026,7 +2025,7 @@ public:
                                 me->SendMovementFlagUpdate();
                                 TeleDebug_timer=300;
                                 walk_timer=5000;
-                                walk_timer_Ignacious=walk_timer+7000;
+                                walk_timer_Ignacious=walk_timer+5200;
                                 Monstrosity_timer=14000;
                                 me->ForcedDespawn(15000);
                                 DoCast(me,87459); // Visual teleport
@@ -2108,7 +2107,7 @@ public:
                                 }
                                 if(Monstrosity!=NULL)
                                 {
-                                    Monstrosity->SetHealth(Hp_gainer);// Monstrosity bude mat tolko HP kolko zostalo elementalom dokopy
+                                    Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) << 1) ); // Nerfol som vysledne HP Monstrosity o 2 % - > predsa nam nejdu classy na 100 % 
                                     Monstrosity->SetInCombatWithZone();
                                 }
                             }
@@ -2149,13 +2148,19 @@ public:
             me->SetInCombatWithZone();
         }
 
-        void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType typeOfDamage)
         {
-            if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER)
-            { // Po zasahu tornadom hrac dostane buff ( swirling winds)->levitate
-                me->AddAura(83500,target);
-                if(target->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
-                    target->RemoveAura(83581);
+            if(target->HasAura(83587)) // Ak ma hrac magnetic pull auru, nebude dostavat dmg
+                damage = 0;
+
+            if(!target->HasAura(83587)) // Ak hrac nema auru magnetic pull aplikujem buff swirling winds -> tymto zabranim tomu aby si hraca pohadzovalo medzi tornadom a studnickou ak sa spawnu vedla seba
+            {
+                if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER)
+                { // Po zasahu tornadom hrac dostane buff ( swirling winds)->levitate
+                    me->AddAura(83500,target);
+                    if(target->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
+                        target->RemoveAura(83581);
+                }
             }
         }
 
@@ -2336,7 +2341,7 @@ public:
             me->ForcedDespawn(61000);
             speeder=0.0f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
-            Flamestrike_timer=5000; // Spawn Flamestriku po 5 sekundach od spawnu 
+            Flamestrike_timer=5000; // Spawn Flamestriku po 3 sekundach od spawnu 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
@@ -2348,13 +2353,17 @@ public:
 
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
         {
-            if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
-                victim->RemoveAurasDueToSpell(92307);
-
-            if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
+            if(me->HasAura(92302)) // Ak uz mam model orbu -> mohlo by sa stat ze sa spawne orb pod hracom a hitne ho hned a to nechceme
             {
-                DoCast(92548); // Zacastim instant Glaciate
-                me->ForcedDespawn();
+                if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
+                    victim->RemoveAurasDueToSpell(92307);
+
+                if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
+                {
+                    DoCast(92548); // Zacastim instant Glaciate
+                    me->ForcedDespawn();
+                }
+
             }
         }
 
@@ -2408,6 +2417,12 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                     me->AddAura(92307,target);
                     me->Attack(target,true);
+                    me->AddThreat(target,9999999.0f);
+                }
+
+                if(target) // Nejak sa orb nechcel pohnut sam od seba tak mu musim pomoct
+                {
+                    me->GetMotionMaster()->MoveChase(target);
                     me->AddThreat(target,9999999.0f);
                 }
 
