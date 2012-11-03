@@ -180,7 +180,7 @@ public:
                         pInstance->SetData(DATA_MILLHOUSE_EVENT3, DONE);
                     }
 
-                    me->SetFacing(3.291410f, NULL);
+                    me->SetFacingTo(3.291410f);
 
                     me->SetSpeed(MOVE_RUN, 1);
                     me->SetSpeed(MOVE_WALK, 1);
@@ -521,7 +521,7 @@ public:
                     break;
                case 6: // third group - begin event
                     if (yell == false) {
-                    me->SetFacing(3.291410f, NULL);
+                    me->SetFacingTo(3.291410f);
                     me->CastSpell(me, SPELL_IMPENDING_DOOOOOOM_VISUAL, false);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
                     me->RemoveAurasDueToSpell(SPELL_BLUR);
@@ -551,7 +551,7 @@ public:
                 for (uint32 i = 0; i < 8; i++)
                 {
                     Creature* pSummon = me->SummonCreature(43430, millhouse_spawn[i].GetPositionX(),millhouse_spawn[i].GetPositionY(),millhouse_spawn[i].GetPositionZ(),0,TEMPSUMMON_MANUAL_DESPAWN);
-                    pSummon->SetFacing(me->GetOrientation(), NULL);
+                    pSummon->SetFacingTo(me->GetOrientation());
                     pSummon->SetReactState(REACT_PASSIVE);
                     millhouse_summon.push_back(pSummon->GetGUID());
                 }
