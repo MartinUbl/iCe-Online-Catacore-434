@@ -1175,7 +1175,7 @@ enum Opcodes
     SMSG_POWER_UPDATE                                = 0x04A07, // 4.3.4 15595
     CMSG_GAMEOBJ_REPORT_USE                          = 0x04827, // 4.3.4 15595
     SMSG_HIGHEST_THREAT_UPDATE                       = 0x04104, // 4.3.4 15595
-    SMSG_THREAT_UPDATE                               = 0x04104, // 4.3.4 15595
+    SMSG_THREAT_UPDATE                               = 0x04735, // 4.3.4 15595
     SMSG_THREAT_REMOVE                               = 0x02E05, // 4.3.4 15595
     SMSG_THREAT_CLEAR                                = 0x06437, // 4.3.4 15595
     SMSG_CONVERT_RUNE                                = 0x04F14, // 4.3.4 15595
