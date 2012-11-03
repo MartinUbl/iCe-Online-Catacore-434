@@ -17794,6 +17794,42 @@ void Unit::UpdateObjectVisibility(bool forced)
     }
 }
 
+void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1+8+4+4+4+4+4));
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+
+    data.WriteByteSeq(guid[1]);
+
+    data << float(vsin);
+    data << uint32(0);
+
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+
+    data << float(speedXY);
+
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[3]);
+
+    data << float(speedZ);
+    data << float(vcos);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
+
+    player->GetSession()->SendPacket(&data);
+}
+
 void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
 {
     Player *player = NULL;
@@ -17815,17 +17851,7 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         float vcos, vsin;
         GetSinCos(x, y, vsin, vcos);
 
-        WorldPacket data(SMSG_MULTIPLE_PACKETS, (2+8+4+4+4+4+4));
-        //WorldPacket data(/*SMSG_MOVE_KNOCK_BACK*/, (8+4+4+4+4+4));
-        data << uint16(SMSG_MOVE_KNOCK_BACK);
-        data.append(GetPackGUID());
-        data << uint32(0);                                      // Sequence
-        data << float(vcos);                                    // x direction
-        data << float(vsin);                                    // y direction
-        data << float(speedXY);                                 // Horizontal speed
-        data << float(-speedZ);                                 // Z Movement speed (vertical)
-
-        player->GetSession()->SendPacket(&data);
+        SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
     }
 }
 
@@ -18291,17 +18317,7 @@ void Unit::JumpTo(float speedXY, float speedZ, bool forward)
         float vcos = cos(angle+GetOrientation());
         float vsin = sin(angle+GetOrientation());
 
-        WorldPacket data(SMSG_MULTIPLE_PACKETS, (2+8+4+4+4+4+4));
-        //WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
-        data << uint16(SMSG_MOVE_KNOCK_BACK);
-        data.append(GetPackGUID());
-        data << uint32(0);                                      // Sequence
-        data << float(vcos);                                    // x direction
-        data << float(vsin);                                    // y direction
-        data << float(speedXY);                                 // Horizontal speed
-        data << float(-speedZ);                                 // Z Movement speed (vertical)
-
-        this->ToPlayer()->GetSession()->SendPacket(&data);
+        SendMoveKnockBack(ToPlayer(), speedXY, -speedZ, vcos, vsin);
     }
 }
 

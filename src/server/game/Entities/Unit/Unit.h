@@ -1349,6 +1349,7 @@ class Unit : public WorldObject
         void Unmount();
 
         void PlayOneShotAnimKit(uint32 id);
+        void SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin);
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb);
