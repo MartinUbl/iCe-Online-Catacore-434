@@ -1315,6 +1315,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_REFORGE,                                 STATUS_LOGGEDIN, &WorldSession::HandleItemReforge               );
     OPCODE( SMSG_REFORGING_RESULT,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ENTERED_INSTANCE_IN_PROGRESS,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_PLAY_ONE_SHOT_ANIM_KIT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 
     // Define the rest of the opcodes as UNKNOWN
     for (int i = 0; i < OPCODES_MAX; i++)
