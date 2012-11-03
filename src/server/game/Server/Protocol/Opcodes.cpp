@@ -762,7 +762,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( SMSG_FORCE_TURN_RATE_CHANGE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_TURN_RATE_CHANGE_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
-    OPCODE( MSG_PVP_LOG_DATA,                             STATUS_LOGGEDIN, &WorldSession::HandlePVPLogDataOpcode          );
+    OPCODE( CMSG_PVP_LOG_DATA,                            STATUS_LOGGEDIN, &WorldSession::HandlePVPLogDataOpcode          );
     OPCODE( CMSG_BATTLEFIELD_REQUEST_SCORE_DATA,          STATUS_LOGGEDIN, &WorldSession::HandlePVPLogDataOpcode          );
     OPCODE( CMSG_LEAVE_BATTLEFIELD,                       STATUS_LOGGEDIN, &WorldSession::HandleLeaveBattlefieldOpcode    );
     OPCODE( CMSG_AREA_SPIRIT_HEALER_QUERY,                STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode);
