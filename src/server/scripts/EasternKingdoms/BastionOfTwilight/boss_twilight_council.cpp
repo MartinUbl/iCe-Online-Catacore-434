@@ -396,12 +396,13 @@ public:
                                 }
                                     Unit** pole;
                                     pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
+                                    memset(pole, 0, number_of_players*sizeof(Unit*));
 
                                     uint32 iter=0;
                                     for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                     {
                                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                        if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                        if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                         {
                                             pole[iter]=unit; // zapisem si hracov do dynamickeho pola
                                             iter++;
@@ -411,7 +412,7 @@ public:
                                     Unit* pom=NULL;
                                     for(uint32 i=0; i<number_of_players-1;i++)
                                     for(uint32 j=0; j<number_of_players-1;j++)
-                                        if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                        if(pole[j] && pole[j+1] && pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
                                         {
                                             pom=pole[j];
                                             pole[j]=pole[j+1];
