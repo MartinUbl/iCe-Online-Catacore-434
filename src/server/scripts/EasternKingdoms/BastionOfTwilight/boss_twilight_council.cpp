@@ -65,11 +65,13 @@ const Position Tele_pos[4] =              // Random position for teleport Arion 
     {-1037.94f, -589.27f, 831.92f, 0.17f},
 };
 
-const Position Gravity_pos[3] =           // Random position for spawn Gravity Well
+const Position Gravity_pos[5] =           // Random position for spawn Gravity Well
 {
-    {-1038.55f,-619.776f,835.16f, 0.9f},
-    {-1044.313f,-550.27f,835.135f, 5.6f},
-    {-1053.32f,-582.284f,835.01f, 6.26f},
+    {-1034.813f,-616.48f,835.27f, 0.0f},
+    {-1050.118f,-586.70f,835.03f, 0.0f},
+    {-1038.73f,-553.526f,835.29f, 0.0f},
+    {-992.18f,-542.59f,831.91f, 0.0f},
+    {-991.07f,-622.236f,831.91f, 0.0f},
 };
 
 const Position Seeds_pos[16] =  // Pozicie na spawn lava seedov :D Ostatne po miestnosti robim algoritmom :)
@@ -134,13 +136,13 @@ public:
             lift_timer=0;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-            spawn_timer=5000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
+            spawn_timer=7000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
             Gravity_crush_timer=spawn_timer+28000;
             LiquidIce_timer=spawn_timer;
             Distance_timer=spawn_timer-2000;
             Lava_spell_timer=19000; // 2 sekundy po caste sa spawnu "lava seeds"
-            Instability_timer=5000;
-            Intensity_timer=20000; // kazdych 20s sa zvysi frekvencia instability
+            Instability_timer=7000;
+            Intensity_timer= spawn_timer + 20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
             killed_unit=spawned=can_seed=boomed=can_lift=false;
             pLiquidIce=NULL;
@@ -1409,7 +1411,7 @@ public:
         {
             PHASE=1;
             me->SetSpeed(MOVE_RUN,1.5f,true);
-            rod_timer=15000;
+            rod_timer=20000;
             Call_winds=10000;
             Thundershock_timer=70000;
             Disperse_timer=20000;
@@ -1522,7 +1524,8 @@ public:
                     me->SetPosition(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation(),true);
                     me->SendMovementFlagUpdate();
                     update_movement=true;
-                    Update_timer=200;
+                    Update_timer=500;
+                    me->SendMovementFlagUpdate();
                     can_interrupt=true;
                     DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
                     can_tele=false;
@@ -1800,7 +1803,7 @@ public:
             Harden_Skin_timer=25000;
             Gravity_well_timer=13000;
             Speaking_timer=3500;
-            Frozen_orb_timer=20000;
+            Frozen_orb_timer=25000;
             HS_counter=0;
             Hp_gainer=0;
             Hp_dropped=has_shield=speaked=can_interrupt=false;
@@ -1968,18 +1971,8 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    if(urand(0,1)) // 50 % sanca na spawn na pevnu poziciu
-                    {
-                        int rand = urand(1,3);
-                        me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    }
-                    else // inak po kruznici random
-                    {
-                        float angle=0.0f;
-                        angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
-                        me->SummonCreature(CREATURE_GRAVITY_WELL,-1009.1f+cos(angle)*20.0f,-582.5f+sin(angle)*20.0f,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    }
-
+                    int rand = urand(1,5);
+                    me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     Gravity_well_timer=30000;
                 }
             }
@@ -2281,7 +2274,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(6000);
             Buff_timer=1000;
-            Spike_dmg_timer = 5000;
+            Spike_dmg_timer = 5500;
             buffed=spiked=false;
         }
 
@@ -2435,9 +2428,12 @@ public:
 
             if(checking_timer<=diff)
             {
+                if(target && target->isDead()) // Ak frozen orbu zomrie beacon target gulicka sa despawne
+                    me->ForcedDespawn();
+
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 1000, true))
                 {
-                    if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
+                    if(me->IsWithinMeleeRange(pFlamestrike,1.2f) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
                     {
                         me->ForcedDespawn();
                         pFlamestrike->ForcedDespawn();
@@ -2485,7 +2481,7 @@ public:
             me->ForcedDespawn(60000);
             me->SetInCombatWithZone();
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
-            Buff_timer=4500;
+            Buff_timer=5500;
             buffed=false;
         }
 
@@ -2543,7 +2539,7 @@ public:
                     if(pHalfus->isInCombat()) // Iba ak je halfus v combate
                     {
                         if(!pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
-                            pHalfus->getVictim()->NearTeleportTo(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f);
+                            pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
                     }
                 }
                 Los_timer = 5000;
