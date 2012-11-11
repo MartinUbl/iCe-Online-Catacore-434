@@ -4636,7 +4636,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[1] = TARGET_NONE;
             spellInfo->MaxAffectedTargets = 3;
             spellInfo->EffectChainTarget[0] = 3; 
-			spellInfo->EffectRadiusIndex[0] = 22; 
+            spellInfo->EffectRadiusIndex[0] = 22; 
             spellInfo->EffectChainTarget[1] = 3; 
             spellInfo->EffectRadiusIndex[1] = 22;
             break;
@@ -4696,6 +4696,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 94090:
             spellInfo->EffectRadiusIndex[0] = 22;
             break;
+        case 77987:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            spellInfo->StackAmount = 20;
+            spellInfo->Effect[2] = 0;
         default:
             break;
         }
