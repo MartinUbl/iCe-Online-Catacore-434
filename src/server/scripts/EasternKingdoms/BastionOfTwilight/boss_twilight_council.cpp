@@ -2538,7 +2538,7 @@ public:
                 {
                     if(pHalfus->isInCombat()) // Iba ak je halfus v combate
                     {
-                        if(!pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
+                        if(pHalfus->getVictim() && pHalfus->getVictim()->ToPlayer() && !pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
                             pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
                     }
                 }
