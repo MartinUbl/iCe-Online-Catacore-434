@@ -165,7 +165,10 @@ public:
             me->SendPlaySound(20396, false);
             me->ResetPlayerDamageReq(); // Potrebny reset aby hraci mohli lootovat
             if (instance)
+            {
                 instance->SetData(DATA_COUNCIL, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -179,6 +182,8 @@ public:
 
         void EnterEvadeMode()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
                     pGoDoor1->Delete();
             if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
@@ -207,6 +212,7 @@ public:
 
         void JustDied (Unit * killed)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20399, false);
 
@@ -642,6 +648,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             me->SetSpeed(MOVE_RUN,1.5f,true);
             me->SetVisible(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
@@ -683,6 +691,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20162, false);
 
@@ -915,6 +925,8 @@ public:
                                     me->SendMovementFlagUpdate();
                                     PHASE=4;
                                 }
+
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                             }
         }
     };
@@ -957,6 +969,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             PHASE=1;
             Speaking_timer=4000;
             me->SetVisible(true);
@@ -1034,6 +1048,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             if(Creature *pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 300, true))
             {
                 if(!pFeludius->isInCombat()) // Ak neni Feludius v combate donutim ho :D
@@ -1262,6 +1278,8 @@ public:
                                     me->SendMovementFlagUpdate();
                                     PHASE=4;
                                 }
+
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                             }
         }
 
@@ -1416,6 +1434,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             PHASE=1;
             me->SetSpeed(MOVE_RUN,1.5f,true);
             rod_timer=20000;
@@ -1448,6 +1468,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
@@ -1665,6 +1687,8 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                                 if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
                                 {
                                     pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
@@ -1807,6 +1831,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             Quake_timer=30000;
             Eruption_timer=27000;
             Harden_Skin_timer=25000;
@@ -1840,6 +1866,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             DoCast(me,87459); // Visual teleport
         }
 
@@ -2000,6 +2028,8 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                                 if(pFELUDIUS) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
                                     pFELUDIUS->SetReactState(REACT_PASSIVE);
