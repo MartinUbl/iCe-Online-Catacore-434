@@ -61,22 +61,23 @@ enum AchievementFaction
 
 enum AchievementFlags
 {
-    ACHIEVEMENT_FLAG_COUNTER           = 0x00000001,        // Just count statistic (never stop and complete)
-    ACHIEVEMENT_FLAG_HIDDEN            = 0x00000002,        // Not sent to client - internal use only
-    ACHIEVEMENT_FLAG_STORE_MAX_VALUE   = 0x00000004,        // Store only max value? used only in "Reach level xx"
-    ACHIEVEMENT_FLAG_SUMM              = 0x00000008,        // Use summ criteria value from all reqirements (and calculate max value)
-    ACHIEVEMENT_FLAG_MAX_USED          = 0x00000010,        // Show max criteria (and calculate max value ??)
-    ACHIEVEMENT_FLAG_REQ_COUNT         = 0x00000020,        // Use not zero req count (and calculate max value)
-    ACHIEVEMENT_FLAG_AVERAGE           = 0x00000040,        // Show as average value (value / time_in_days) depend from other flag (by def use last criteria value)
-    ACHIEVEMENT_FLAG_BAR               = 0x00000080,        // Show as progress bar (value / max vale) depend from other flag (by def use last criteria value)
-    ACHIEVEMENT_FLAG_REALM_FIRST_REACH = 0x00000100,        //
-    ACHIEVEMENT_FLAG_REALM_FIRST_KILL  = 0x00000200,        //
-    ACHIEVEMENT_FLAG_UNK0              = 0x00000400,        //
-    ACHIEVEMENT_FLAG_UNK1              = 0x00000800,        //
-    ACHIEVEMENT_FLAG_UNK2              = 0x00001000,        // 4.0.x
-    ACHIEVEMENT_FLAG_UNK3              = 0x00002000,        // 4.0.x
-    ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT = 0x00004000,        // Only guild is allowed to earn this achievement
-    ACHIEVEMENT_FLAG_NEEDS_GUILD_GROUP = 0x00008000,        // Needs to be in guild group to achieve this
+    ACHIEVEMENT_FLAG_COUNTER                = 0x00000001,        // Just count statistic (never stop and complete)
+    ACHIEVEMENT_FLAG_HIDDEN                 = 0x00000002,        // Not sent to client - internal use only
+    ACHIEVEMENT_FLAG_STORE_MAX_VALUE        = 0x00000004,        // Store only max value? used only in "Reach level xx"
+    ACHIEVEMENT_FLAG_SUMM                   = 0x00000008,        // Use summ criteria value from all reqirements (and calculate max value)
+    ACHIEVEMENT_FLAG_MAX_USED               = 0x00000010,        // Show max criteria (and calculate max value ??)
+    ACHIEVEMENT_FLAG_REQ_COUNT              = 0x00000020,        // Use not zero req count (and calculate max value)
+    ACHIEVEMENT_FLAG_AVERAGE                = 0x00000040,        // Show as average value (value / time_in_days) depend from other flag (by def use last criteria value)
+    ACHIEVEMENT_FLAG_BAR                    = 0x00000080,        // Show as progress bar (value / max vale) depend from other flag (by def use last criteria value)
+    ACHIEVEMENT_FLAG_REALM_FIRST_REACH      = 0x00000100,        //
+    ACHIEVEMENT_FLAG_REALM_FIRST_KILL       = 0x00000200,        //
+    ACHIEVEMENT_FLAG_UNK0                   = 0x00000400,        //
+    ACHIEVEMENT_FLAG_UNK1                   = 0x00000800,        //
+    ACHIEVEMENT_FLAG_UNK2                   = 0x00001000,        // 4.0.x
+    ACHIEVEMENT_FLAG_UNK3                   = 0x00002000,        // 4.0.x
+    ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT      = 0x00004000,        // Only guild is allowed to earn this achievement
+    ACHIEVEMENT_FLAG_NEEDS_GUILD_GROUP      = 0x00008000,        // Needs to be in guild group to achieve this
+    ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS  = 0x00010000     //
 };
 
 #define MAX_CRITERIA_REQUIREMENTS 2
@@ -304,7 +305,7 @@ enum AreaFlags
     AREA_FLAG_SLAVE_CAPITAL    = 0x00000008,                // city and city subsones
     AREA_FLAG_UNK3             = 0x00000010,                // can't find common meaning
     AREA_FLAG_SLAVE_CAPITAL2   = 0x00000020,                // slave capital city flag?
-    AREA_FLAG_UNK4             = 0x00000040,                // many zones have this flag
+    AREA_FLAG_ALLOW_DUELS      = 0x00000040,                // many zones have this flag
     AREA_FLAG_ARENA            = 0x00000080,                // arena, both instanced and world arenas
     AREA_FLAG_CAPITAL          = 0x00000100,                // main capital city flag
     AREA_FLAG_CITY             = 0x00000200,                // only for one zone named "City" (where it located?)
@@ -316,7 +317,7 @@ enum AreaFlags
     AREA_FLAG_PVP              = 0x00008000,                // pvp objective area? (Death's Door also has this flag although it's no pvp object area)
     AREA_FLAG_ARENA_INSTANCE   = 0x00010000,                // used by instanced arenas only
     AREA_FLAG_UNUSED2          = 0x00020000,                // not used now (no area/zones with this flag set in 3.0.3)
-    AREA_FLAG_UNK5             = 0x00040000,                // only used for Amani Pass, Hatchet Hills
+    AREA_FLAG_CONTESTED_AREA   = 0x00040000,                // only used for Amani Pass, Hatchet Hills
     AREA_FLAG_UNK6             = 0x00080000,                // Valgarde and Acherus: The Ebon Hold
     AREA_FLAG_LOWLEVEL         = 0x00100000,                // used for some starting areas with area_level <= 15
     AREA_FLAG_TOWN             = 0x00200000,                // small towns with Inn
@@ -326,7 +327,8 @@ enum AreaFlags
     AREA_FLAG_INSIDE           = 0x02000000,                // used for determinating spell related inside/outside questions in Map::IsOutdoors
     AREA_FLAG_OUTSIDE          = 0x04000000,                // used for determinating spell related inside/outside questions in Map::IsOutdoors
     AREA_FLAG_OUTDOOR_PVP2     = 0x08000000,                // Wintergrasp and it's subzones
-    AREA_FLAG_NO_FLY_ZONE      = 0x20000000                 // Marks zones where you cannot fly
+    AREA_FLAG_NO_FLY_ZONE      = 0x20000000,                // Marks zones where you cannot fly
+    AREA_FLAG_UNK9             = 0x40000000,
 };
 
 enum Difficulty

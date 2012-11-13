@@ -1076,7 +1076,7 @@ void WorldSession::HandleObjectUpdateFailed(WorldPacket& recv_data)
     recv_data.ReadByteSeq(guid[5]);
 
     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
-    sLog->outError("Object update failed for object guid "UI64FMTD" (%s), player %s", uint64(guid), obj?obj->GetName():"not-found", GetPlayer()->GetName());
+    sLog->outError("Object update failed for object guid %u (%s), player %s", GUID_LOPART(uint64(guid)), obj?obj->GetName():"not-found", GetPlayer()->GetName());
 }
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)

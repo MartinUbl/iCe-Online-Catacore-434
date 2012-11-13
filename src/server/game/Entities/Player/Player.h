@@ -57,9 +57,9 @@ class OutdoorPvP;
 
 typedef std::deque<Mail*> PlayerMails;
 
-#define PLAYER_MAX_SKILLS           127
+#define PLAYER_MAX_SKILLS           128
 #define PLAYER_MAX_DAILY_QUESTS     25
-#define PLAYER_EXPLORED_ZONES_SIZE  144
+#define PLAYER_EXPLORED_ZONES_SIZE  156
 
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
@@ -431,6 +431,9 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK26          = 0x04000000,
     PLAYER_FLAGS_UNK27          = 0x08000000,
     PLAYER_FLAGS_GLEVEL_ENABLED = 0x10000000,
+    PLAYER_FLAGS_VOID_UNLOCKED  = 0x20000000,       // void storage
+    PLAYER_FLAGS_UNK30          = 0x40000000,
+    PLAYER_FLAGS_UNK31          = 0x80000000
 };
 
 // used for PLAYER__FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
@@ -478,8 +481,8 @@ enum PlayerFlags
 #define PLAYER_TITLE_HAND_OF_ADAL          UI64LIT(0x0000008000000000) // 39
 #define PLAYER_TITLE_VENGEFUL_GLADIATOR    UI64LIT(0x0000010000000000) // 40
 
-#define KNOWN_TITLES_SIZE   6
-#define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 3 uint64 fields
+#define KNOWN_TITLES_SIZE   4
+#define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 4 uint64 fields
 
 // used in PLAYER_FIELD_BYTES values
 enum PlayerFieldByteFlags

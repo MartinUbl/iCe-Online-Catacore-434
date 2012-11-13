@@ -1286,6 +1286,13 @@ enum Targets
     TARGET_DEST_UNK_118                = 118, // same as above
     TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // target all dead party & raid members - used only in Mass Resurrection
     TARGET_DEST_UNK_120                = 120, // some generic spells
+    TARGET_UNK_121                     = 121,
+    TARGET_UNK_122                     = 122,
+    TARGET_UNK_123                     = 123,
+    TARGET_UNK_124                     = 124,
+    TARGET_UNK_125                     = 125,
+    TARGET_UNK_126                     = 126,
+    TARGET_UNK_127                     = 127,
     TOTAL_SPELL_TARGETS
 };
 
@@ -2186,30 +2193,49 @@ enum CreatureFamily
 
 enum CreatureTypeFlags
 {
-    CREATURE_TYPEFLAGS_TAMEABLE         = 0x000001,         // Tameable by any hunter
-    CREATURE_TYPEFLAGS_GHOST            = 0x000002,         // Creature are also visible for not alive player. Allow gossip interaction if npcflag allow?
-    CREATURE_TYPEFLAGS_UNK3             = 0x000004,
-    CREATURE_TYPEFLAGS_UNK4             = 0x000008,
-    CREATURE_TYPEFLAGS_UNK5             = 0x000010,
-    CREATURE_TYPEFLAGS_UNK6             = 0x000020,
-    CREATURE_TYPEFLAGS_UNK7             = 0x000040,
-    CREATURE_TYPEFLAGS_DEAD_INTERACT    = 0x000080,         // Player can interact with the creature if its dead (not player dead)
-    CREATURE_TYPEFLAGS_HERBLOOT         = 0x000100,         // Can be looted by herbalist
-    CREATURE_TYPEFLAGS_MININGLOOT       = 0x000200,         // Can be looted by miner
-    CREATURE_TYPEFLAGS_UNK11            = 0x000400,
-    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x000800,         // Creature can remain mounted when entering combat
-    CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x001000,         // ? Can aid any player in combat if in range?
-    CREATURE_TYPEFLAGS_UNK14            = 0x002000,
-    CREATURE_TYPEFLAGS_UNK15            = 0x004000,         // ? Possibly not in use
-    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x008000,         // Can be looted by engineer
-    CREATURE_TYPEFLAGS_EXOTIC           = 0x010000,         // Can be tamed by hunter as exotic pet
-    CREATURE_TYPEFLAGS_UNK18            = 0x020000,         // ? Related to vehicles/pvp?
-    CREATURE_TYPEFLAGS_UNK19            = 0x040000,         // ? Related to vehicle/siege weapons?
-    CREATURE_TYPEFLAGS_UNK20            = 0x080000,
-    CREATURE_TYPEFLAGS_UNK21            = 0x100000,
-    CREATURE_TYPEFLAGS_UNK22            = 0x200000,
-    CREATURE_TYPEFLAGS_UNK23            = 0x400000,
-    CREATURE_TYPEFLAGS_UNK24            = 0x800000          // ? First seen in 3.2.2. Related to banner/backpack of creature/companion?
+    CREATURE_TYPEFLAGS_TAMEABLE         = 0x00000001,         // Tameable by any hunter
+    CREATURE_TYPEFLAGS_GHOST            = 0x00000002,         // Creature are also visible for not alive player. Allow gossip interaction if npcflag allow?
+    CREATURE_TYPEFLAGS_UNK3             = 0x00000004,
+    CREATURE_TYPEFLAGS_UNK4             = 0x00000008,
+    CREATURE_TYPEFLAGS_UNK5             = 0x00000010,
+    CREATURE_TYPEFLAGS_UNK6             = 0x00000020,
+    CREATURE_TYPEFLAGS_UNK7             = 0x00000040,
+    CREATURE_TYPEFLAGS_DEAD_INTERACT    = 0x00000080,         // Player can interact with the creature if its dead (not player dead)
+    CREATURE_TYPEFLAGS_HERBLOOT         = 0x00000100,         // Can be looted by herbalist
+    CREATURE_TYPEFLAGS_MININGLOOT       = 0x00000200,         // Can be looted by miner
+    CREATURE_TYPEFLAGS_UNK11            = 0x00000400,
+    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x00000800,         // Creature can remain mounted when entering combat
+    CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x00001000,         // ? Can aid any player in combat if in range?
+    CREATURE_TYPEFLAGS_UNK14            = 0x00002000,
+    CREATURE_TYPEFLAGS_UNK15            = 0x00004000,         // ? Possibly not in use
+    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x00008000,         // Can be looted by engineer
+    CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,         // Can be tamed by hunter as exotic pet
+    CREATURE_TYPEFLAGS_UNK18            = 0x00020000,         // ? Related to vehicles/pvp?
+    CREATURE_TYPEFLAGS_UNK19            = 0x00040000,         // ? Related to vehicle/siege weapons?
+    CREATURE_TYPEFLAGS_UNK20            = 0x00080000,
+    CREATURE_TYPEFLAGS_UNK21            = 0x00100000,
+    CREATURE_TYPEFLAGS_UNK22            = 0x00200000,
+    CREATURE_TYPEFLAGS_UNK23            = 0x00400000,
+    CREATURE_TYPEFLAGS_UNK24            = 0x00800000,          // ? First seen in 3.2.2. Related to banner/backpack of creature/companion?
+    CREATURE_TYPEFLAGS_UNK25            = 0x02000000,
+    CREATURE_TYPEFLAGS_PARTY_MEMBER     = 0x04000000,         //! Creature can be targeted by spells that require target to be in caster's party/raid
+    CREATURE_TYPEFLAGS_UNK27            = 0x08000000,
+    CREATURE_TYPEFLAGS_UNK28            = 0x10000000,
+    CREATURE_TYPEFLAGS_UNK29            = 0x20000000,
+    CREATURE_TYPEFLAGS_UNK30            = 0x40000000,
+    CREATURE_TYPEFLAGS_UNK31            = 0x80000000
+};
+
+enum CreatureTypeFlags2
+{
+    CREATURE_TYPEFLAGS_2_UNK1           = 0x00000001,
+    CREATURE_TYPEFLAGS_2_UNK2           = 0x00000002,
+    CREATURE_TYPEFLAGS_2_UNK3           = 0x00000004,
+    CREATURE_TYPEFLAGS_2_UNK4           = 0x00000008,
+    CREATURE_TYPEFLAGS_2_UNK5           = 0x00000010,
+    CREATURE_TYPEFLAGS_2_UNK6           = 0x00000020,
+    CREATURE_TYPEFLAGS_2_UNK7           = 0x00000040,
+    CREATURE_TYPEFLAGS_2_UNK8           = 0x00000080,
 };
 
 enum CreatureEliteType
@@ -2257,7 +2283,10 @@ enum HolidayIds
     HOLIDAY_CALL_TO_ARMS_TP          = 436,                 // Call to Arms: Twin Peaks
     HOLIDAY_10_V_10                  = 441,                 // Rated BG: 10v10
     HOLIDAY_15_V_15                  = 442,                 // Rated BG: 15v15
-    HOLIDAY_25_V_25                  = 443                  // Rated BG: 25v25
+    HOLIDAY_25_V_25                  = 443,                 // Rated BG: 25v25
+    HOLIDAY_ANNIVERSARY_7_YEARS      = 467,
+    HOLIDAY_DARKMOON_FAIRE_TEROKKAR  = 479,
+    HOLIDAY_ANNIVERSARY_8_YEARS      = 484,
 };
 
 // values based at QuestInfo.dbc
@@ -2320,7 +2349,11 @@ enum QuestSort
     QUEST_SORT_NOBLEGARDEN         = 374,
     QUEST_SORT_PILGRIMS_BOUNTY     = 375,
     QUEST_SORT_LOVE_IS_IN_THE_AIR  = 376,
-    QUEST_SORT_ARCHAEOLOGY         = 377
+    QUEST_SORT_ARCHAEOLOGY         = 377,
+    QUEST_SORT_CHILDRENS_WEEK      = 378,
+    QUEST_SORT_FIRELANDS_INVASION  = 379,
+    QUEST_SORT_ZANDALARI           = 380,
+    QUEST_SORT_ELEMENTAL_BONDS     = 381
 };
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
@@ -2517,10 +2550,11 @@ enum SkillType
     SKILL_MONKEY                   = 815,
     SKILL_SHALE_SPIDER             = 817,
     SKILL_BEETLE                   = 818,
-    SKILL_GUILD_PERKS_ALL          = 821
+    SKILL_GUILD_PERKS_ALL          = 821,
+    SKILL_PET_HYDRA                = 824,
 };
 
-#define MAX_SKILL_TYPE               822
+#define MAX_SKILL_TYPE               825
 
 inline SkillType SkillByLockType(LockType locktype)
 {
@@ -2801,6 +2835,8 @@ enum SummonType
     SUMMON_TYPE_VEHICLE     = 9,
     SUMMON_TYPE_VEHICLE2    = 10,
     SUMMON_TYPE_OBJECT      = 11,
+    SUMMON_TYPE_UNK12       = 12,
+    SUMMON_TYPE_UNK13       = 13
 };
 
 enum EventId
@@ -2969,15 +3005,10 @@ enum BattlegroundTypeId
     BATTLEGROUND_BG            = 120,                       // The Battle for Gilneas
     BATTLEGROUND_ICD           = 441,                       // Icecrown Citadel
     BATTLEGROUND_RS            = 443,                       // The Ruby Sanctum
-    BATTLEGROUND_FL            = 522,                       // Firelands
-    BATTLEGROUND_FL2           = 523,                       // Firelands Terrain 2
-    BATTLEGROUND_TFW           = 530,                       // Throne of the Four Winds
-    BATTLEGROUND_BD            = 531,                       // Blackwing Descent
-    BATTLEGROUND_BT            = 532,                       // The Bastion of Twilight
-    BATTLEGROUND_BH            = 533                        // Baradin Hold
+    BATTLEGROUND_RA_EOS        = 656,                       // Rated Eye of the Storm
 };
 
-#define MAX_BATTLEGROUND_TYPE_ID 543
+#define MAX_BATTLEGROUND_TYPE_ID 657
 
 enum MailResponseType
 {
@@ -3055,30 +3086,38 @@ enum PetSlot
 
 enum TradeStatus
 {
-    TRADE_STATUS_BUSY           = 0,
-    TRADE_STATUS_BEGIN_TRADE    = 1,
-    TRADE_STATUS_OPEN_WINDOW    = 2,
-    TRADE_STATUS_TRADE_CANCELED = 3,
-    TRADE_STATUS_TRADE_ACCEPT   = 4,
-    TRADE_STATUS_BUSY_2         = 5,
-    TRADE_STATUS_NO_TARGET      = 6,
-    TRADE_STATUS_BACK_TO_TRADE  = 7,
-    TRADE_STATUS_TRADE_COMPLETE = 8,
-    // 9?
-    TRADE_STATUS_TARGET_TO_FAR  = 10,
-    TRADE_STATUS_WRONG_FACTION  = 11,
-    TRADE_STATUS_CLOSE_WINDOW   = 12,
-    // 13?
-    TRADE_STATUS_IGNORE_YOU     = 14,
-    TRADE_STATUS_YOU_STUNNED    = 15,
-    TRADE_STATUS_TARGET_STUNNED = 16,
-    TRADE_STATUS_YOU_DEAD       = 17,
-    TRADE_STATUS_TARGET_DEAD    = 18,
-    TRADE_STATUS_YOU_LOGOUT     = 19,
-    TRADE_STATUS_TARGET_LOGOUT  = 20,
-    TRADE_STATUS_TRIAL_ACCOUNT  = 21,                       // Trial accounts can not perform that action
-    TRADE_STATUS_ONLY_CONJURED  = 22,                       // You can only trade conjured items... (cross realm BG related).
-    TRADE_STATUS_NOT_ELIGIBLE   = 23                        // Related to trading soulbound loot items
+    TRADE_STATUS_OPEN_WINDOW = 0,
+    // 1 - Related to EVENT_PLAYER_MONEY
+    TRADE_STATUS_NOT_ELIGIBLE = 2,           // Related to trading soulbound loot items
+    TRADE_STATUS_YOU_LOGOUT = 3,
+    TRADE_STATUS_IGNORE_YOU = 4,
+    TRADE_STATUS_TARGET_DEAD = 5,
+    TRADE_STATUS_TRADE_ACCEPT = 6,
+    TRADE_STATUS_TARGET_LOGOUT = 7,
+    // 8 - nonexistent
+    TRADE_STATUS_TRADE_COMPLETE = 9,
+    TRADE_STATUS_TRIAL_ACCOUNT = 10,         // Trial accounts can not perform that action
+    // 11 - nonexistent
+    TRADE_STATUS_BEGIN_TRADE = 12,
+    TRADE_STATUS_YOU_DEAD = 13,
+    // 14 - nonexistent
+    // 15 - nonexistent
+    TRADE_STATUS_TARGET_TO_FAR = 16,
+    TRADE_STATUS_NO_TARGET = 17,
+    TRADE_STATUS_BUSY_2 = 18,
+    TRADE_STATUS_CURRENCY_NOT_TRADABLE = 19, // new 4.x
+    TRADE_STATUS_WRONG_FACTION = 20,
+    TRADE_STATUS_BUSY = 21,
+    // 22 - equivalent to 335 unk status 9
+    TRADE_STATUS_TRADE_CANCELED = 23,
+    TRADE_STATUS_CURRENCY = 24,              // new 4.x
+    TRADE_STATUS_BACK_TO_TRADE = 25,
+    TRADE_STATUS_ONLY_CONJURED = 26,         // You can only trade conjured items... (cross realm BG related).
+    TRADE_STATUS_YOU_STUNNED = 27,
+    // 28 - nonexistent
+    TRADE_STATUS_TARGET_STUNNED = 29,
+    // 30 - nonexistent
+    TRADE_STATUS_CLOSE_WINDOW = 31,
 };
 
 enum XPColorChar

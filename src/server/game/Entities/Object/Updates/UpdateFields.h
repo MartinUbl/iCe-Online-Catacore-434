@@ -453,9 +453,6 @@ enum EPlayerFields
     PLAYER__FIELD_KNOWN_TITLES3                      = UNIT_END + 0x01E2, // Size: 2, Type: LONG, Flags: PRIVATE
     PLAYER_XP                                        = UNIT_END + 0x01E4, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_NEXT_LEVEL_XP                             = UNIT_END + 0x01E5, // Size: 1, Type: INT, Flags: PRIVATE
-
-    PLAYER_SKILL_INFO_1_1                            = UNIT_END + 0x01E6,
-
     PLAYER_SKILL_LINEID_0                            = UNIT_END + 0x01E6, // Size: 64, Type: TWO_SHORT, Flags: PRIVATE
     PLAYER_SKILL_STEP_0                              = UNIT_END + 0x0226, // Size: 64, Type: TWO_SHORT, Flags: PRIVATE
     PLAYER_SKILL_RANK_0                              = UNIT_END + 0x0266, // Size: 64, Type: TWO_SHORT, Flags: PRIVATE
