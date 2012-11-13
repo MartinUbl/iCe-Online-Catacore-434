@@ -500,10 +500,11 @@ enum Opcodes
     SMSG_STOP_MIRROR_TIMER                           = 0x00B06, // 4.3.4 15595
     CMSG_PING                                        = 0x0444D, // 4.3.4 15595
     SMSG_PONG                                        = 0x04D42, // 4.3.4 15595
-    SMSG_CLEAR_COOLDOWN                              = 0x059B4, // 4.3.4 15595
+    SMSG_CLEAR_COOLDOWN                              = 0x00627, // 4.3.4 15595
+    SMSG_CLEAR_COOLDOWNS                             = 0x059B4, // 4.3.4 15595
     SMSG_GAMEOBJECT_PAGETEXT                         = 0x02925, // 4.3.4 15595
     CMSG_SETSHEATHED                                 = 0x04326, // 4.3.4 15595
-    SMSG_COOLDOWN_CHEAT                              = 0x00627, // 4.3.4 15595
+    SMSG_COOLDOWN_CHEAT                              = 0x04537, // 4.3.4 15595
     SMSG_SPELL_DELAYED                               = 0x00715, // 4.3.4 15595
     CMSG_QUEST_POI_QUERY                             = 0x04037, // 4.3.4 15595
     SMSG_QUEST_POI_QUERY_RESPONSE                    = 0x06304, // 4.3.4 15595
@@ -1589,7 +1590,6 @@ enum Opcodes
     SMSG_CHAT_SERVER_DISCONNECTED                     = 0x6D34,
     SMSG_CHAT_SERVER_RECONNECTED                      = 0x6905,
     SMSG_CLEAR_BOSS_EMOTES                            = 0x19A3,
-    SMSG_CLEAR_COOLDOWNS                              = 0x59B4,
     SMSG_COMBAT_EVENT_FAILED                          = 0x2B07,
     SMSG_COMMENTATOR_PARTY_INFO                       = 0x38B0,
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1           = 0x2126,

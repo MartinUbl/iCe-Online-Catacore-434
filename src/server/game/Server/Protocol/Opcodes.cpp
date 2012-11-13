@@ -519,6 +519,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_PING,                                    STATUS_NEVER,    &WorldSession::Handle_EarlyProccess            );
     OPCODE( SMSG_PONG,                                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CLEAR_COOLDOWN,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_CLEAR_COOLDOWNS,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GAMEOBJECT_PAGETEXT,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_SETSHEATHED,                             STATUS_LOGGEDIN, &WorldSession::HandleSetSheathedOpcode         );
     OPCODE( SMSG_COOLDOWN_CHEAT,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
