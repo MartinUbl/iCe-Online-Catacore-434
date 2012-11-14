@@ -618,7 +618,7 @@ enum Opcodes
     CMSG_AUCTION_LIST_OWNER_ITEMS                    = 0x00206, // 4.3.4 15595
     CMSG_AUCTION_PLACE_BID                           = 0x02306, // 4.3.4 15595
     SMSG_AUCTION_COMMAND_RESULT                      = 0x04C25, // 4.3.4 15595
-    SMSG_AUCTION_LIST_RESULT                         = 0x00027, // 4.3.4 15595
+    SMSG_AUCTION_LIST_RESULT                         = 0x6637, // 4.3.4 15595
     SMSG_AUCTION_OWNER_LIST_RESULT                   = 0x06C34, // 4.3.4 15595
     SMSG_AUCTION_BIDDER_NOTIFICATION                 = 0x04E27, // 4.3.4 15595
     SMSG_AUCTION_OWNER_NOTIFICATION                  = 0x04116, // 4.3.4 15595
@@ -627,7 +627,7 @@ enum Opcodes
     SMSG_DISPEL_FAILED                               = 0x00307, // 4.3.4 15595
     SMSG_SPELLORDAMAGE_IMMUNE                        = 0x04507, // 4.3.4 15595
     CMSG_AUCTION_LIST_BIDDER_ITEMS                   = 0x06937, // 4.3.4 15595
-    SMSG_AUCTION_BIDDER_LIST_RESULT                  = 0x06637, // 4.3.4 15595
+    SMSG_AUCTION_BIDDER_LIST_RESULT                  = 0x0027, // 4.3.4 15595
     SMSG_SET_FLAT_SPELL_MODIFIER                     = 0x00224, // 4.3.4 15595
     SMSG_SET_PCT_SPELL_MODIFIER                      = 0x02834, // 4.3.4 15595
     CMSG_SET_AMMO                                    = 0x10098, //

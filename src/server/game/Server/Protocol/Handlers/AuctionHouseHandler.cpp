@@ -77,14 +77,30 @@ void WorldSession::SendAuctionHello(uint64 guid, Creature* unit)
 }
 
 //call this method when player bids, creates, or deletes auction
-void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint64 bidError)
+void WorldSession::SendAuctionCommandResult(AuctionEntry* auction, uint32 Action, uint32 ErrorCode, uint64 bidError)
 {
-    WorldPacket data(SMSG_AUCTION_COMMAND_RESULT, 20);
-    data << auctionId;
-    data << Action;
-    data << ErrorCode;
-    if (!ErrorCode && Action)
-        data << bidError;                                   //when bid, then send 0, once...
+    WorldPacket data(SMSG_AUCTION_COMMAND_RESULT);
+    data << uint32(auction ? auction->Id : 0);
+    data << uint32(Action);
+    data << uint32(ErrorCode);
+
+    switch (ErrorCode)
+    {
+        case ERR_AUCTION_OK:
+            if (Action == AUCTION_PLACE_BID)
+                data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
+            break;
+        case ERR_AUCTION_INVENTORY:
+            data << uint32(bidError);
+            break;
+        case ERR_AUCTION_HIGHER_BID:
+            data << uint64(auction->bidder);
+            data << uint64(auction->bid);
+            data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
+            break;
+    }
+
+
     SendPacket(&data);
 }
 
@@ -110,18 +126,18 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
     data << auction->bid;
     data << uint32(0);                                     // unk
     data << uint64(0);                                     // unk
-    data << auction->item_template;
+    data << auction->itemEntry;
     data << uint32(0);                                     // Something with item names
     data << float(0);                                      // unk
     SendPacket(&data);
 }
 
-void WorldSession::SendAuctionRemovedNotification(AuctionEntry* auction)
+void WorldSession::SendAuctionRemovedNotification(uint32 auctionId, uint32 itemEntry, int32 randomPropertyId)
 {
-    WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, 12);
-    data << auction->Id;
-    data << auction->item_template;
-    data << uint32(0);                // Something with item names
+    WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, (4+4+4));
+    data << uint32(auctionId);
+    data << uint32(itemEntry);
+    data << uint32(randomPropertyId);
     SendPacket(&data);
 }
 
@@ -186,31 +202,31 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     if (sAuctionMgr->GetAItem(GUID_LOPART(item)))
     {
         sLog->outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), GUID_LOPART(item));
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }
     // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
     if (!it)
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_ITEM_NOT_FOUND);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
         return;
     }
 
     if (!it->CanBeTraded())
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }
 
     if (it->GetProto()->Flags & ITEM_PROTO_FLAG_CONJURED || it->GetUInt32Value(ITEM_FIELD_DURATION))
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }
 
     if (it->IsBag() && !((Bag*)it)->IsEmpty())
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }
 
@@ -220,7 +236,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, it, count);
     if (!pl->HasEnoughMoney(deposit))
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_NOT_ENOUGHT_MONEY);
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_NOT_ENOUGHT_MONEY);
         return;
     }
 
@@ -251,7 +267,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     else
         AH->auctioneer = GUID_LOPART(auctioneer);
     AH->item_guidlow = GUID_LOPART(item);
-    AH->item_template = it->GetEntry();
+    AH->itemEntry = it->GetEntry();
     AH->owner = pl->GetGUIDLow();
     AH->startbid = bid;
     AH->bidder = 0;
@@ -273,7 +289,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     pl->SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
+    SendAuctionCommandResult(AH, AUCTION_SELL_ITEM, ERR_AUCTION_OK);
 
     GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
 }
@@ -310,7 +326,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
     if (!auction || auction->owner == pl->GetGUIDLow())
     {
         //you cannot bid your own auction:
-        SendAuctionCommandResult(0, AUCTION_PLACE_BID, CANNOT_BID_YOUR_AUCTION_ERROR);
+        SendAuctionCommandResult(0, AUCTION_PLACE_BID, ERR_AUCTION_BID_OWN);
         return;
     }
 
@@ -319,7 +335,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
     if (!auction_owner && sObjectMgr->GetPlayerAccountIdByGUID(MAKE_NEW_GUID(auction->owner, 0, HIGHGUID_PLAYER)) == pl->GetSession()->GetAccountId())
     {
         //you cannot bid your another character auction:
-        SendAuctionCommandResult(0, AUCTION_PLACE_BID, CANNOT_BID_YOUR_AUCTION_ERROR);
+        SendAuctionCommandResult(0, AUCTION_PLACE_BID, ERR_AUCTION_BID_OWN);
         return;
     }
 
@@ -366,7 +382,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
 
         trans->PAppend("UPDATE auctionhouse SET buyguid = '%u',lastbid = '%u' WHERE id = '%u'", auction->bidder, auction->bid, auction->Id);
 
-        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0);
+        SendAuctionCommandResult(auction, AUCTION_PLACE_BID, ERR_AUCTION_OK, 0);
     }
     else
     {
@@ -388,13 +404,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recv_data)
         sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
         sAuctionMgr->SendAuctionWonMail(auction, trans);
 
-        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
+        SendAuctionCommandResult(auction, AUCTION_PLACE_BID, ERR_AUCTION_OK);
 
         auction->DeleteFromDB(trans);
 
-        uint32 item_template = auction->item_template;
+        uint32 itemEntry = auction->itemEntry;
         sAuctionMgr->RemoveAItem(auction->item_guidlow);
-        auctionHouse->RemoveAuction(auction, item_template);
+        auctionHouse->RemoveAuction(auction, itemEntry);
     }
     pl->SaveInventoryAndGoldToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
@@ -437,12 +453,12 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recv_data)
                 if (!pl->HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
-                sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans);
+                sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans, pItem);
                 pl->ModifyMoney(-int32(auctionCut));
             }
             // Return the item by mail
             std::ostringstream msgAuctionCanceledOwner;
-            msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED << ":0:0";
+            msgAuctionCanceledOwner << auction->itemEntry << ":0:" << AUCTION_CANCELED << ":0:0";
 
             // item will deleted or added to received mail list
             MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
@@ -452,20 +468,20 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recv_data)
         else
         {
             sLog->outError("Auction id: %u has non-existed item (item guid : %u)!!!", auction->Id, auction->item_guidlow);
-            SendAuctionCommandResult(0, AUCTION_CANCEL, AUCTION_INTERNAL_ERROR);
+            SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
             return;
         }
     }
     else
     {
-        SendAuctionCommandResult(0, AUCTION_CANCEL, AUCTION_INTERNAL_ERROR);
+        SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
         //this code isn't possible ... maybe there should be assert
         sLog->outError("CHEATER : %u, he tried to cancel auction (id: %u) of another player, or auction is NULL", pl->GetGUIDLow(), auctionId);
         return;
     }
 
     //inform player, that auction is removed
-    SendAuctionCommandResult(auction->Id, AUCTION_CANCEL, AUCTION_OK);
+    SendAuctionCommandResult(auction, AUCTION_CANCEL, ERR_AUCTION_OK);
 
     // Now remove the auction
 
@@ -473,9 +489,9 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recv_data)
     auction->DeleteFromDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    uint32 item_template = auction->item_template;
+    uint32 itemEntry = auction->itemEntry;
     sAuctionMgr->RemoveAItem(auction->item_guidlow);
-    auctionHouse->RemoveAuction(auction, item_template);
+    auctionHouse->RemoveAuction(auction, itemEntry);
 }
 
 //called when player lists his bids
@@ -584,15 +600,11 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     recv_data >> quality >> usable;
 
     recv_data.read_skip<uint8>();                           // unk
+    recv_data.read_skip<uint8>();                           // unk
 
     // this block looks like it uses some lame byte packing or similar...
-    uint8 unkCnt;
-    recv_data >> unkCnt;
-    for (uint8 i = 0; i < unkCnt; i++)
-    {
+    for (uint8 i = 0; i < 15; i++)
         recv_data.read_skip<uint8>();
-        recv_data.read_skip<uint8>();
-    }
 
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid,UNIT_NPC_FLAG_AUCTIONEER);
     if (!pCreature)
@@ -613,7 +625,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     WorldPacket data(SMSG_AUCTION_LIST_RESULT, (4+4+4));
     uint32 count = 0;
     uint32 totalcount = 0;
-    data << (uint32) 0;
+    data << uint32(0);
 
     // converting string that we try to find to lower case
     std::wstring wsearchedname;
