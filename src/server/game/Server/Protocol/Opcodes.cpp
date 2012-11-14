@@ -542,7 +542,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_PET_CAST_SPELL,                          STATUS_LOGGEDIN, &WorldSession::HandlePetCastSpellOpcode        );
     OPCODE( MSG_SAVE_GUILD_EMBLEM,                        STATUS_LOGGEDIN, &WorldSession::HandleSaveGuildEmblemOpcode     );
     OPCODE( MSG_TABARDVENDOR_ACTIVATE,                    STATUS_LOGGEDIN, &WorldSession::HandleTabardVendorActivateOpcode);
-    OPCODE( SMSG_PLAY_SPELL_VISUAL,                       STATUS_UNHANDLED,&WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAY_SPELL_VISUAL_KIT,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_ZONEUPDATE,                              STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode          );
     OPCODE( SMSG_PARTYKILLLOG,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

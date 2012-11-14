@@ -522,7 +522,6 @@ enum Opcodes
     CMSG_PET_CAST_SPELL                              = 0x06337, // 4.3.4 15595
     MSG_SAVE_GUILD_EMBLEM                            = 0x02404, // 4.3.4 15595
     MSG_TABARDVENDOR_ACTIVATE                        = 0x06926, // 4.3.4 15595
-    SMSG_PLAY_SPELL_VISUAL                           = 0x055A5, // 4.3.4 15595
     CMSG_ZONEUPDATE                                  = 0x04F37, // 4.3.4 15595
     SMSG_PARTYKILLLOG                                = 0x04937, // 4.3.4 15595
     SMSG_PLAY_SPELL_IMPACT                           = 0x10077, //
@@ -1692,7 +1691,7 @@ enum Opcodes
     SMSG_PETITION_ALREADY_SIGNED                      = 0x5DA3,
     SMSG_PET_SLOT_UPDATED                             = 0x51A3,
     SMSG_PLAY_ONE_SHOT_ANIM_KIT                       = 0x4A35,
-    SMSG_PLAY_SPELL_VISUAL_KIT                        = 0x55A5,
+    SMSG_PLAY_SPELL_VISUAL_KIT                        = 0x55A5, // 4.3.4 15595
     SMSG_PVP_OPTIONS_ENABLED                          = 0x50A1,
     SMSG_QUEST_FORCE_REMOVE                           = 0x6605,
     SMSG_RAID_MARKERS_CHANGED                         = 0x10A1,
