@@ -141,7 +141,7 @@ public:
             LiquidIce_timer=spawn_timer;
             Distance_timer=spawn_timer-2000;
             Lava_spell_timer=19000; // 2 sekundy po caste sa spawnu "lava seeds"
-            Instability_timer=7000;
+            Instability_timer= spawn_timer;
             Intensity_timer= spawn_timer + 20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
             killed_unit=spawned=can_seed=boomed=can_lift=false;
@@ -171,7 +171,10 @@ public:
         void DamageTaken(Unit* attacker, uint32& damage)
         {
              if (damage > 500000 )
-                damage=0; // Zabranim IK dmgu od magovho Ignite
+                damage=0; // Anti IK prevention
+
+             if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                damage = damage * 1.15f; // 15 % dmg boost na heroicu 
         }
 
         void EnterEvadeMode()
@@ -335,7 +338,10 @@ public:
             {
                     if(INSTABILITY<10) // Obmedzenie na max 10 bleskov
                         INSTABILITY=INSTABILITY+1;
+
                     Intensity_timer=20000;
+                    if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) // V HC mensi nerf zvysovania bleskov
+                        Intensity_timer=25000;
             }
             else Intensity_timer-=diff;
 
@@ -378,7 +384,14 @@ public:
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                             if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
-                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
+                                {
+                                    if(unit->GetTypeId() == TYPEID_PLAYER )
+                                    {
+                                        unit->ToPlayer()->SetFlying(true);
+                                        unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
+                                        unit->ToPlayer()->SetFlying(false);
+                                    }
+                                }
                     }
                 can_lift=false;
             }
@@ -400,7 +413,7 @@ public:
                                     pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
                                     memset(pole, 0, number_of_players*sizeof(Unit*));
 
-                                    uint32 iter=0;
+                                    uint32 iter = 0;
                                     for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                     {
                                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
@@ -414,7 +427,7 @@ public:
                                     Unit* pom=NULL;
                                     for(uint32 i=0; i<number_of_players-1;i++)
                                     for(uint32 j=0; j<number_of_players-1;j++)
-                                        if(pole[j] && pole[j+1] && pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                        if(pole[j] && pole[j+1] && me->GetDistance(pole[j]) < me->GetDistance(pole[j+1]))
                                         {
                                             pom=pole[j];
                                             pole[j]=pole[j+1];
@@ -425,15 +438,9 @@ public:
                                     {
                                         if(i<number_of_players)
                                         {
-                                            if( pole[i]->HasAura(92486 ) || pole[i]->HasAura(92488 ) || pole[i]->HasAura(84948 ) || pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
-                                                continue;
-
-                                            DoCast(pole[i],84529,true);
+                                            if(!pole[i]->HasAura(92486 ) && !pole[i]->HasAura(92488 ) && !pole[i]->HasAura(84948 ) && !pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
+                                                DoCast(pole[i],84529,true);
                                         }
-
-                                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
-                                                DoCast(target,84529,true);
-
                                     }
                                     Instability_timer=1000;
                                     free((void*)pole);
@@ -1467,8 +1474,10 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-             if (damage > me->GetHealth() || damage > 500000 )
+             if(damage > me->GetHealth() || damage > 500000 )
                 damage=0;
+
+             damage = damage * 1.1f ; // 10 % dmg boost 
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1836,6 +1845,8 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
+            damage = damage * 1.1f; // 10 % dmg boost
+
             if(attacker==me) // Davam si sam dmg pri spelle Harden skin
                 return;
 
@@ -2101,7 +2112,12 @@ public:
                                 }
                                 if(Monstrosity!=NULL)
                                 {
-                                    Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) << 1) ); // Nerfol som vysledne HP Monstrosity o 2 % - > predsa nam nejdu classy na 100 % 
+                                    // Kedze nejde vsetko na 100 % ako na offi znizim zacinajuce HP Monstoristy o par %
+                                    if(getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Na normale uberem 2 %
+                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) << 1) );
+                                    else
+                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) * 4) ); // Na HC 4 %
+
                                     Monstrosity->SetInCombatWithZone();
                                 }
                             }
@@ -2171,7 +2187,7 @@ public:
             {
                 me->SetSpeed(MOVE_RUN,0.5f,true);
                 DoCast(me,83472); //effekt tornada
-                me->GetMotionMaster()->MoveRandom(60.0f);
+                me->GetMotionMaster()->MoveRandom(40.0f);
                 buffed=true;
             }
             else Buff_timer-=diff;
@@ -2215,7 +2231,7 @@ public:
         {
             if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER) // Po zasahu wellom hrac dostane debuff grounded
             {
-                if(!target->HasAura(83581)) // Ak sa hrac ktory nema grounded debuff priblizi ku wellu vcucne ho to :D
+                if(!target->HasAura(83581) && !target->HasAura(92307)) // Ak sa hrac ktory nema grounded debuff a zaroven lightning rod debuff, ak sa  priblizi ku wellu vcucne ho to :D
                     target->GetMotionMaster()->MoveJump(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),30.0f,2.0f);
 
                 me->AddAura(83581,target); // grounded debuff
@@ -2394,7 +2410,12 @@ public:
             if(Flamestrike_timer<=diff) // Spawn Flamestriku pod random hraca
             {
                 if (Unit* ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                    me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                {
+                    Creature *pflamestrike = NULL;
+                    pflamestrike = me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                    if(pflamestrike == NULL ) // V pripade neuspechu summmonu despawnem orb
+                        me->ForcedDespawn();
+                }
 
                 if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true))
                     pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
@@ -2433,7 +2454,7 @@ public:
 
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 1000, true))
                 {
-                    if(me->IsWithinMeleeRange(pFlamestrike,1.2f) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
+                    if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
                     {
                         me->ForcedDespawn();
                         pFlamestrike->ForcedDespawn();
@@ -2480,9 +2501,11 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE|*/UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(60000);
             me->SetInCombatWithZone();
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,6.0f);
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
             Buff_timer=5500;
             buffed=false;
+            me->SetFlying(true); // Aby sa neprepadaval nahodu do textury
         }
 
         void UpdateAI(const uint32 diff)
@@ -2539,7 +2562,7 @@ public:
                     if(pHalfus->isInCombat()) // Iba ak je halfus v combate
                     {
                         if(pHalfus->getVictim() && pHalfus->getVictim()->ToPlayer() && !pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
-                            pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
+                             pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
                     }
                 }
                 Los_timer = 5000;
