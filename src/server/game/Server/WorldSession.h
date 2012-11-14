@@ -222,6 +222,7 @@ class WorldSession
         void SendTabardVendorActivate(uint64 guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
+        void SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 trainState);
 
         void SendAttackStop(Unit const* enemy);
 
