@@ -295,6 +295,14 @@ class ByteBuffer
                     (*this) << uint8(guidByte[byteOrder[i + bytePos]] ^ 1);
         }
 
+        // Method for writing strings that have their length sent separately in packet
+        // without null-terminating the string
+        void WriteString(std::string const& str)
+        {
+            if (size_t len = str.length())
+                append(str.c_str(), len);
+        }
+
         template <typename T> void put(size_t pos, T value)
         {
             EndianConvert(value);

@@ -749,7 +749,8 @@ enum Opcodes
     CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK            = 0x100C5, //
     SMSG_FORCE_TURN_RATE_CHANGE                      = 0x100C6, //
     CMSG_FORCE_TURN_RATE_CHANGE_ACK                  = 0x100C7, //
-    CMSG_BATTLEFIELD_REQUEST_SCORE_DATA              = 0x100C8, //
+    MSG_PVP_LOG_DATA                                 = 0x05CB2, // 4.3.4 15595
+    CMSG_BATTLEFIELD_REQUEST_SCORE_DATA              = 0x07308, // 4.3.4 15595
     CMSG_LEAVE_BATTLEFIELD                           = 0x03018, // 4.3.4 15595
     CMSG_AREA_SPIRIT_HEALER_QUERY                    = 0x04907, // 4.3.4 15595
     CMSG_AREA_SPIRIT_HEALER_QUEUE                    = 0x04815, // 4.3.4 15595 (remap)
@@ -1462,7 +1463,7 @@ enum Opcodes
     SMSG_PLAYER_UNK_DEAD_ALIVE                       = 0x00000, // Unknown
     SMSG_QUEST_NPC_QUERY_RESPONSE                    = 0x00000, // Unknown
     SMSG_RANDOMIZE_CHAR_NAME                         = 0x038B1, // 4.3.4 Build 15595
-    SMSG_RATED_BATTLEFIELD_INFO                      = 0x05CB2, // 4.3.4 Build 15595 (needs handled)
+    SMSG_RATED_BATTLEFIELD_INFO                      = 0x054A3, // 4.3.4 Build 15595 (needs handled)
     SMSG_REFER_A_FRIEND_EXPIRED                      = 0x04934, // 4.3.4 Build 15595
     SMSG_REQUEST_CEMETERY_LIST_RESPONSE              = 0x030A7, // 4.3.4 Build 15595
     SMSG_SAVE_CUF_PROFILES                           = 0x0730E, // 4.3.4 Build 15595
@@ -1534,7 +1535,6 @@ enum Opcodes
     CMSG_MOVE_SET_CAN_FLY                             = 0x720E,
     CMSG_MOVE_SET_COLLISION_HEIGHT_ACK                = 0x7114,
     CMSG_OBJECT_UPDATE_RESCUED                        = 0x3906,
-    CMSG_PVP_LOG_DATA                                 = 0x7308,
     CMSG_QUERY_GUILD_MEMBERS_FOR_RECIPE               = 0x1036,
     CMSG_QUERY_GUILD_MEMBER_RECIPES                   = 0x1037,
     CMSG_QUERY_GUILD_RECIPES                          = 0x3033,
@@ -1577,7 +1577,6 @@ enum Opcodes
     SMSG_AVERAGE_ITEM_LEVEL_INFORM                    = 0x5DA7,
     SMSG_BATTLEFIELD_MGR_EXIT_REQUEST                 = 0x51B1,
     SMSG_BATTLEFIELD_PLAYER_POSITIONS                 = 0x58B4,
-    SMSG_BATTLEFIELD_RATED_INFO                       = 0x54A3,
     SMSG_BATTLEFIELD_STATUS_ACTIVE                    = 0x74A4,
     SMSG_BATTLEFIELD_STATUS_NEEDCONFIRMATION          = 0x59A0,
     SMSG_BATTLEFIELD_STATUS_WAITFORGROUPS             = 0x75A2,
@@ -1694,7 +1693,6 @@ enum Opcodes
     SMSG_PET_SLOT_UPDATED                             = 0x51A3,
     SMSG_PLAY_ONE_SHOT_ANIM_KIT                       = 0x4A35,
     SMSG_PLAY_SPELL_VISUAL_KIT                        = 0x55A5,
-    SMSG_PVP_LOG_DATA                                 = 0x5CB2,
     SMSG_PVP_OPTIONS_ENABLED                          = 0x50A1,
     SMSG_QUEST_FORCE_REMOVE                           = 0x6605,
     SMSG_RAID_MARKERS_CHANGED                         = 0x10A1,
