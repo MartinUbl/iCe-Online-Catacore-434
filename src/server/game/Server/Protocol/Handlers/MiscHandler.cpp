@@ -1298,10 +1298,25 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
-    uint64 guid;
-    recv_data >> guid;
+    ObjectGuid guid;
+    guid[1] = recv_data.ReadBit();
+    guid[5] = recv_data.ReadBit();
+    guid[7] = recv_data.ReadBit();
+    guid[3] = recv_data.ReadBit();
+    guid[2] = recv_data.ReadBit();
+    guid[4] = recv_data.ReadBit();
+    guid[0] = recv_data.ReadBit();
+    guid[6] = recv_data.ReadBit();
 
-    Player *player = sObjectMgr->GetPlayer(guid);
+    recv_data.ReadByteSeq(guid[4]);
+    recv_data.ReadByteSeq(guid[7]);
+    recv_data.ReadByteSeq(guid[0]);
+    recv_data.ReadByteSeq(guid[5]);
+    recv_data.ReadByteSeq(guid[1]);
+    recv_data.ReadByteSeq(guid[6]);
+    recv_data.ReadByteSeq(guid[2]);
+    recv_data.ReadByteSeq(guid[3]);
+    Player* player = ObjectAccessor::FindPlayer(guid);
 
     if (!player)
     {
@@ -1309,11 +1324,28 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 4+1+4+8);
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
-    data << uint8(0); // rank
+    ObjectGuid playerGuid = player->GetGUID();
+    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(playerGuid[5]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(playerGuid[1]);
+    data << uint8(0);                                               // rank
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 1));  // yesterday kills
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 0));  // today kills
+    data.WriteByteSeq(playerGuid[2]);
+    data.WriteByteSeq(playerGuid[0]);
+    data.WriteByteSeq(playerGuid[6]);
+    data.WriteByteSeq(playerGuid[3]);
+    data.WriteByteSeq(playerGuid[4]);
+    data.WriteByteSeq(playerGuid[1]);
+    data.WriteByteSeq(playerGuid[5]);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
-    data << uint64(player->GetGUID());
+    data.WriteByteSeq(playerGuid[7]);
     SendPacket(&data);
 }
 
