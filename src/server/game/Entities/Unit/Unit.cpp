@@ -9458,31 +9458,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        // Sudden Doom
-        case 49018:
-        case 49529:
-        case 49530:
-        {
-            if(GetTypeId() != TYPEID_PLAYER)
-                return false;
-            if (!ToPlayer()->GetWeaponForAttack(BASE_ATTACK))
-                return false;
-
-            // Select chance based on weapon speed
-            float speed = ToPlayer()->GetWeaponForAttack(BASE_ATTACK)->GetProto()->Delay / 1000;
-
-            int32 modifier = 1;
-
-            if(auraSpellInfo->Id == 49530) // Rank 3
-                modifier = 4;
-            else if(auraSpellInfo->Id == 49529) // Rank 2
-                modifier = 3;
-
-            // ToDo: Check this, its based on a wowhead comment
-            if(!roll_chance_f(speed * modifier))
-                return false;
-            break;
-        }
         case 83074: // Fingers of Frost
         {
             if(procSpell->Id == 30455) // should not proc from Ice Lance
