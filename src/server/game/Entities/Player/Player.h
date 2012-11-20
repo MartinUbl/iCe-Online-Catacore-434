@@ -54,6 +54,7 @@ class UpdateMask;
 class SpellCastTargets;
 class PlayerSocial;
 class OutdoorPvP;
+class Guild;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -1856,6 +1857,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetRank() { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() { return m_guildId; }
+        Guild *GetGuild();
         uint32 GetLastGuildId() { return m_lastGuildId; }
         void SetLastGuildId(uint32 guildid) { m_lastGuildId = guildid; }
         static uint32 GetGuildIdFromDB(uint64 guid);

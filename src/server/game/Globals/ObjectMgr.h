@@ -704,6 +704,7 @@ class ObjectMgr
 
         Guild* GetGuildByLeader(uint64 const&guid) const;
         Guild* GetGuildById(uint32 guildId) const;
+        Guild* GetGuildByGuid(uint64 guid) const;
         Guild* GetGuildByName(const std::string& guildname) const;
         std::string GetGuildNameById(uint32 guildId) const;
         void AddGuild(Guild* pGuild);

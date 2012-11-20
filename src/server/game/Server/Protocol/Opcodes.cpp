@@ -590,7 +590,8 @@ void InitOpcodeTable()
     OPCODE( CMSG_CHARACTER_POINT_CHEAT,                   STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_GOSSIP_POI,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_CHAT_IGNORED,                            STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode         );
-    OPCODE( CMSG_GUILD_RANK,                              STATUS_LOGGEDIN, &WorldSession::HandleGuildRankOpcode           );
+    OPCODE( CMSG_GUILD_QUERY_RANKS,                       STATUS_LOGGEDIN, &WorldSession::HandleGuildQueryRanksOpcode           );
+    OPCODE( SMSG_GUILD_RANK,                              STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GUILD_ADD_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildAddRankOpcode        );
     OPCODE( CMSG_GUILD_DEL_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode        );
     OPCODE( CMSG_GUILD_SWITCH_RANK,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -1049,9 +1050,10 @@ void InitOpcodeTable()
     OPCODE( CMSG_GM_CHARACTER_RESTORE,                    STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_GM_CHARACTER_SAVE,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_VOICESESSION_FULL,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( MSG_GUILD_PERMISSIONS,                        STATUS_LOGGEDIN, &WorldSession::HandleGuildPermissions          );
-    OPCODE( MSG_GUILD_BANK_MONEY_WITHDRAWN,               STATUS_LOGGEDIN, &WorldSession::HandleGuildBankMoneyWithdrawn   );
-    OPCODE( MSG_GUILD_EVENT_LOG_QUERY,                    STATUS_LOGGEDIN, &WorldSession::HandleGuildEventLogQueryOpcode  );
+    OPCODE( CMSG_GUILD_PERMISSIONS,                       STATUS_LOGGEDIN, &WorldSession::HandleGuildPermissions          );
+    OPCODE( CMSG_GUILD_BANK_MONEY_WITHDRAWN,              STATUS_LOGGEDIN, &WorldSession::HandleGuildBankMoneyWithdrawn   );
+    OPCODE( CMSG_GUILD_EVENT_LOG_QUERY,                   STATUS_LOGGEDIN, &WorldSession::HandleGuildEventLogQueryOpcode  );
+    OPCODE( SMSG_GUILD_EVENT_LOG_QUERY_RESULT,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_MAELSTROM_RENAME_GUILD,                  STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_GET_MIRRORIMAGE_DATA,                    STATUS_LOGGEDIN, &WorldSession::HandleMirrrorImageDataRequest   );
     OPCODE( SMSG_MIRRORIMAGE_DATA,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -1317,6 +1319,17 @@ void InitOpcodeTable()
     OPCODE( SMSG_PVP_RATED_STATS_UPDATE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEMASTER_JOIN_RATED,                 STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinRated     );
     OPCODE( SMSG_PLAY_ONE_SHOT_ANIM_KIT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_GUILD_ASSIGN_MEMBER_RANK,                STATUS_LOGGEDIN, &WorldSession::HandleGuildAssignRankOpcode     );
+    OPCODE( SMSG_GUILD_MEMBER_DAILY_RESET,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_REPUTATION_WEEKLY_CAP,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_ACHIEVEMENT_DATA,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_HOTFIX_INFO,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_INIT_CURRENCY,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_BANK_MONEY_WITHDRAWN,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_REQUEST_GUILD_PARTY_STATE,               STATUS_LOGGEDIN, &WorldSession::HandleGuildRequestPartyState    );
+    OPCODE( SMSG_GUILD_PARTY_STATE_RESPONSE,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_GUILD_PERMISSIONS_QUERY_RESULTS,         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_GUILD_SET_ACHIEVEMENT_TRACKING,          STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
 
     // Define the rest of the opcodes as UNKNOWN
     for (int i = 0; i < OPCODES_MAX; i++)

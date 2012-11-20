@@ -569,7 +569,7 @@ enum Opcodes
     CMSG_CHARACTER_POINT_CHEAT                       = 0x10086, //
     SMSG_GOSSIP_POI                                  = 0x04316, // 4.3.4 15595
     CMSG_CHAT_IGNORED                                = 0x00D54, // 4.3.4 15595 (remap)
-    CMSG_GUILD_RANK                                  = 0x01026, // 4.3.4 15595
+    CMSG_GUILD_QUERY_RANKS                           = 0x01026, // 4.3.4 15595
     SMSG_GUILD_RANK                                  = 0x030B4, // 4.3.4 15595
     CMSG_GUILD_ADD_RANK                              = 0x03030, // 4.3.4 15595 (remap)
     CMSG_GUILD_DEL_RANK                              = 0x03234, // 4.3.4 15595 (remap)
@@ -1037,9 +1037,11 @@ enum Opcodes
     CMSG_GM_CHARACTER_RESTORE                        = 0x1015D, //
     CMSG_GM_CHARACTER_SAVE                           = 0x1015E, //
     SMSG_VOICESESSION_FULL                           = 0x06225, // 4.3.4 15595 (remap)
-    MSG_GUILD_PERMISSIONS                            = 0x03022, // 4.3.4 15595
-    MSG_GUILD_BANK_MONEY_WITHDRAWN                   = 0x05DB4, // 4.3.4 15595 (remap)
-    MSG_GUILD_EVENT_LOG_QUERY                        = 0x01220, // 4.3.4 15595
+    CMSG_GUILD_PERMISSIONS                           = 0x03022, // 4.3.4 15595
+    CMSG_GUILD_BANK_MONEY_WITHDRAWN                  = 0x01225, // 4.3.4 15595
+    SMSG_GUILD_BANK_MONEY_WITHDRAWN                  = 0x05DB4, // 4.3.4 15595
+    CMSG_GUILD_EVENT_LOG_QUERY                       = 0x01220, // 4.3.4 15595
+    SMSG_GUILD_EVENT_LOG_QUERY_RESULT                = 0x010B2, // 4.3.4 15595
     CMSG_MAELSTROM_RENAME_GUILD                      = 0x10161, //
     CMSG_GET_MIRRORIMAGE_DATA                        = 0x00C25, // 4.3.4 15595
     SMSG_MIRRORIMAGE_DATA                            = 0x02634, // 4.3.4 15595
@@ -1326,6 +1328,8 @@ enum Opcodes
     SMSG_GUILDFINDER_POST_UPDATED                    = 0x035B7, // 4.3.4 15595
     SMSG_GUILDFINDER_RECRUIT_LIST_UPDATED            = 0x01CB2, // 4.3.4 15595
     SMSG_GUILDFINDER_SEARCH_RESULT                   = 0x00000, // Unknown
+    CMSG_GUILD_ASSIGN_MEMBER_RANK                    = 0x03032, // 4.3.4 Build 15595
+    SMSG_GUILD_PARTY_STATE_RESPONSE                  = 0x050A6, // 4.3.4 Build 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1490,21 +1494,15 @@ enum Opcodes
     CMSG_GROUP_REQUEST_JOIN_UPDATES                   = 0x2583,
     CMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x3025,
     CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY             = 0x3235,
-    CMSG_GUILD_ASSIGN_MEMBER_RANK                     = 0x3032,
     CMSG_GUILD_BANK_LOG_QUERY                         = 0x3224,
-    CMSG_GUILD_BANK_MONEY_WITHDRAWN_QUERY             = 0x1225,
     CMSG_GUILD_BANK_QUERY_TEXT                        = 0x3220,
     CMSG_GUILD_CHANGE_NAME_REQUEST                    = 0x1232,
-    CMSG_GUILD_EVENT_LOG_QUERY                        = 0x1220,
     CMSG_GUILD_MEMBER_SEND_SOR_REQUEST                = 0x3225,
     CMSG_GUILD_NEWS_UPDATE_STICKY                     = 0x3223,
-    CMSG_GUILD_PERMISSIONS                            = 0x3022,
     CMSG_GUILD_QUERY_NEWS                             = 0x3020,
-    CMSG_GUILD_QUERY_RANKS                            = 0x1026,
     CMSG_GUILD_REPLACE_GUILD_MASTER                   = 0x1034,
     CMSG_GUILD_REQUEST_CHALLENGE_UPDATE               = 0x1224,
     CMSG_GUILD_REQUEST_MAX_DAILY_XP                   = 0x3232,
-    CMSG_GUILD_REQUEST_PARTY_STATE                    = 0x3900,
     CMSG_GUILD_SET_GUILD_MASTER                       = 0x3034,
     CMSG_GUILD_SET_RANK_PERMISSIONS                   = 0x1024,
     CMSG_LFG_GET_STATUS                               = 0x2581,
@@ -1613,7 +1611,6 @@ enum Opcodes
     SMSG_GUILD_ACHIEVEMENT_EARNED                     = 0x50B5,
     SMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x38A5,
     SMSG_GUILD_BANK_LOG_QUERY_RESULT                  = 0x30B2,
-    SMSG_GUILD_BANK_MONEY_WITHDRAWN                   = 0x5DB4,
     SMSG_GUILD_BANK_QUERY_TEXT_RESULT                 = 0x75A3,
     SMSG_GUILD_CHALLENGE_COMPLETED                    = 0x39A3,
     SMSG_GUILD_CHALLENGE_UPDATED                      = 0x18B1,
@@ -1621,7 +1618,6 @@ enum Opcodes
     SMSG_GUILD_COMMAND_RESULT_2                       = 0x2707,
     SMSG_GUILD_CRITERIA_DATA                          = 0x14B4,
     SMSG_GUILD_CRITERIA_DELETED                       = 0x55B1,
-    SMSG_GUILD_EVENT_LOG_QUERY_RESULT                 = 0x10B2,
     SMSG_GUILD_FLAGGED_FOR_RENAME                     = 0x30B6,
     SMSG_GUILD_INVITE_CANCEL                          = 0x0606,
     SMSG_GUILD_MEMBERS_FOR_RECIPE                     = 0x1CB7,
@@ -1630,7 +1626,6 @@ enum Opcodes
     SMSG_GUILD_MOVE_COMPLETE                          = 0x11B2,
     SMSG_GUILD_MOVE_STARTING                          = 0x70A4,
     SMSG_GUILD_NEWS_DELETED                           = 0x74A7,
-    SMSG_GUILD_PARTY_STATE_RESPONSE                   = 0x50A6,
     SMSG_GUILD_RECIPES                                = 0x10B3,
     SMSG_GUILD_RENAMED                                = 0x74A6,
     SMSG_GUILD_REPUTATION_REACTION_CHANGED            = 0x74B0,

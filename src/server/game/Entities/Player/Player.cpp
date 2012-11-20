@@ -26577,7 +26577,13 @@ uint32 Player::GetReputation(uint32 factionentry)
 }
 std::string Player::GetGuildName()
 {
-    return sObjectMgr->GetGuildById(GetGuildId())->GetName();
+    return GetGuildId() ? sObjectMgr->GetGuildById(GetGuildId())->GetName() : "";
+}
+
+Guild *Player::GetGuild()
+{
+    uint32 guildId = GetGuildId();
+    return guildId ? sObjectMgr->GetGuildById(guildId) : NULL;
 }
 
 void Player::SendDuelCountdown(uint32 counter)
