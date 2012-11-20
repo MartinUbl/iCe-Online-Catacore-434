@@ -222,6 +222,12 @@ public:
         boss_maloriakAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            c->GetMap();
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
+            c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             Reset();
         }
@@ -277,9 +283,10 @@ public:
         GOState Blue;
         GOState Red;
         std::list<uint32> AberrationDeathTimeStamp;
-        int Counter;
-        int AberrationAchievementCounter;
-        int SpellCounter;
+        uint32 counter;
+        uint32 AberrationAchievementCounter;
+        uint32 SpellCounter;
+        std::vector<uint64> PrimeSubject;
 
         void Reset()
         {
@@ -294,7 +301,7 @@ public:
             subphase = 0;
             SummonAll = 0;
             Poradi = 0;
-            Counter = 0;
+            counter = 0;
             SpellCounter = 0;
             _AberrationGUID = 0;
             mujList.clear();
@@ -316,7 +323,6 @@ public:
             {
                 Cell->SetGoState(GO_STATE_READY);
             }
-        
         }
         
         void OpenCell()
@@ -384,8 +390,6 @@ public:
                 (*itr)->GetMotionMaster()->MoveJump(-102.292519f,-439.359955f,73.534279f,20.0f,20.0f);
             }
         }
-        
- 
 
         void ReleaseAll()
         {
@@ -431,7 +435,7 @@ public:
                         }
                     }
                     break;
-                }                    
+                }
            }
            else if(SpellCounter == 2)
            {
@@ -475,10 +479,10 @@ public:
                         }
                     }
                     break;
-                }       
+                }
            }
            else if(SpellCounter == 4)
-           {    
+           {
                  switch(urand(0,1))
                 {
                     case 0:
@@ -553,21 +557,21 @@ public:
                 case RECORD_DEATH:
                 {
                     AberrationDeathTimeStamp.push_back(getMSTime());
-                    Counter++;
+                    counter++;
                 }
                 break;
                 case CHECK_COUNTER:
                 {
-                    if (Counter >= 12)
+                    if (counter >= 12)
                     {
                         uint32 m_uiTime = getMSTime();
-                        Counter = 0;
+                        counter = 0;
                         for(std::list<uint32>::const_iterator itr = AberrationDeathTimeStamp.begin(); itr != AberrationDeathTimeStamp.end(); ++itr)
                         {
                             if (*itr >= (m_uiTime - 12000))
-                            Counter++;
+                            counter++;
                         }
-                        if (Counter == 12)
+                        if (counter == 12)
                             AwardAchiev = true;
                     }
                 }
@@ -669,14 +673,20 @@ public:
                 uiRemedy = 14000;
                 // 1.prime subject
                 if (Creature* Spawned = me->SummonCreature(NPC_PRIME_SUBJECT,SpawnPos[1],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                {
+                    PrimeSubject.push_back(Spawned->GetGUID());
                     if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
                         if (Spawned->AI())
                             Spawned->AI()->AttackStart(pTarget);
+                }
                 // 2.prime Subject
                 if (Creature* Spawned = me->SummonCreature(NPC_PRIME_SUBJECT,SpawnPos[1],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                {
+                    PrimeSubject.push_back(Spawned->GetGUID());
                     if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
                         if (Spawned->AI())
                             Spawned->AI()->AttackStart(pTarget);
+                }
 
                 DoScriptText(TEXT_PRIME_SUBJECT,me);
                 ReleaseAll();
@@ -920,18 +930,14 @@ public:
                     switch(Poradi)
                     {
                         case 0:
-                        {
                             Poradi = 1;
-                        }
-                        break;
+                            break;
                         case 1: //5 SEC
-                        {
                             Poradi = 2;
                             CastTimer = 7000; 
                             me->CastSpell(me,SPELL_ARCANE_STORM,false);
                             can_interrupt = true;
-                        }
-                        break;
+                            break;
                         case 2: //13
                         {
                             Poradi = 3;
@@ -939,8 +945,8 @@ public:
                             Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
                             me->CastSpell(target,SPELL_CONSUMING_FLAMES,false);
                             can_interrupt = false;
+                            break;
                         }
-                        break;
                         case 3: // 16
                         {
                             can_interrupt = false;
@@ -949,24 +955,20 @@ public:
                             Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                             if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
+                            break;
                         }
-                        break;
                         case 4: //19
-                        {
                             Poradi = 5;
                             CastTimer = 6000; 
                             me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
                             can_interrupt = true;
-                        }
-                        break;
+                            break;
                         case 5:// 25
-                        {
                             Poradi = 6;
                             CastTimer = 7000;
                             me->CastSpell(me,SPELL_ARCANE_STORM,false);
                             can_interrupt = true;
-                        }
-                        break;
+                            break;
                         case 6://31
                         {
                             Poradi= 7;
@@ -974,16 +976,14 @@ public:
                             Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
                             me->CastSpell(target,SPELL_CONSUMING_FLAMES,false);
                             can_interrupt = false;
+                            break;
                         }
-                        break;
                         case 7://34
-                        {
                             Poradi = 8;
                             CastTimer = 6000;
                             me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
                             can_interrupt = true;
-                        }
-                        break;
+                            break;
                         case 8://40
                         {
                             can_interrupt = false;
@@ -991,11 +991,11 @@ public:
                             Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                             if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
-                        }
                         break;
+                        }
                     }
                 }
-                else 
+                else
                     CastTimer -= diff;
             }
 
@@ -1122,15 +1122,15 @@ public:
                 if (uiAbsoluteZero <= diff)
                 {
                     if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300, true))
-                    {
                         me->SummonCreature(NPC_ABSOLUTE_ZERO,pTarget->GetPositionX()+15,pTarget->GetPositionY(),pTarget->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 35000);
-                    }
+
                     uiAbsoluteZero = 30000;
                 }else uiAbsoluteZero -= diff;
 
                 if (uiAcid_Nova <= diff )
                 {
                     DoCast(me, SPELL_ACID_NOVA);
+
                     uiAcid_Nova = urand(10000,12000);
                 } else uiAcid_Nova -= diff;
 
@@ -1156,9 +1156,7 @@ public:
                     uiEngulfingDarkness = 10000;
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        me->CastSpell(target,92982,false);
-                    }
+                        me->CastSpell(target, 92982, false);
                 }
                 else
                     uiEngulfingDarkness -= diff;
@@ -1183,16 +1181,14 @@ public:
             }
             if (pSummon->GetEntry() == NPC_ABERRATION)
             {
-                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
+                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0)) {
                    if (pSummon->AI())
                        pSummon->AI()->AttackStart(pTarget);
+                }
             }
             if (pSummon->GetEntry() == NPC_FLASH_FREEZE)
-            {
                 pSummon->AddAura(77712,pSummon);
-            }
         }
-
 
         void SummonedCreatureDies(Creature* pSummon, Unit* killer) 
         {
@@ -1203,8 +1199,20 @@ public:
             }
         }
 
+        void CleanPrimeSubject()
+        {
+             for (std::vector<uint64>::const_iterator itr = PrimeSubject.begin(); itr != PrimeSubject.end(); ++itr) {
+                if ((Unit* Prime = me->GetMap()->GetCreature((*itr)) != NULL) {
+                    if (Prime->isAlive())
+                        Prime->ToCreature()->ForcedDespawn();
+                }
+             }
+             PrimeSubject.clear();
+        }
+
         void JustDied(Unit* /*killer*/)
         {
+            CleanPrimeSubject();
             OpenCell();
             DoScriptText(TEXT_DEATH,me);
 
@@ -1286,10 +1294,7 @@ class npc_aberration: public CreatureScript
 
         struct npc_aberrationAI : public ScriptedAI
         {
-            npc_aberrationAI(Creature* creature) : ScriptedAI(creature)
-              
-            {
-            }
+            npc_aberrationAI(Creature* creature) : ScriptedAI(creature){}
             uint32 timer;
             uint32 ListSize;
             void CheckAuraCount()
@@ -1308,7 +1313,7 @@ class npc_aberration: public CreatureScript
                     }
                 }
             }
-        
+
             void Reset()
             {
                 me->RemoveAllAuras();
@@ -1316,7 +1321,6 @@ class npc_aberration: public CreatureScript
             }
 
             void EnterCombat(Unit* /*target*/) { }
-
 
             void UpdateAI(uint32 const diff)
             {
