@@ -2911,8 +2911,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             case 49998: // Death Strike (main hand only)
                 {
-                    // Heal for 20% of the damage sustained in 5 preceding seconds
-                    bp = int32(m_caster->GetDamageTakenHistory(5) * 20.0f / 100.0f);
+                    // Heal for 15% of the damage sustained in 5 preceding seconds
+                    bp = int32(m_caster->GetDamageTakenHistory(5) * 15.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
                     bp = bp > min ? bp : min;
