@@ -2932,6 +2932,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                         // 6.25% of amount healed per mastery point, so mastery*6.25 percent
                         int32 bp0 = bp*(m_caster->ToPlayer()->GetMasteryPoints()*6.25f/100.0f) + bonus;
+                        // Max Health is a Cap
+                        int32 max = m_caster->GetMaxHealth();
+                        bp0 = bp0 > max ? max : bp0;
                         m_caster->CastCustomSpell(m_caster,77535,&bp0,0,0,true);
                     }
                     return;
