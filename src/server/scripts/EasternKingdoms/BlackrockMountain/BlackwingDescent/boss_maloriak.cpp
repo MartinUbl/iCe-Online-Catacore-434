@@ -1201,8 +1201,10 @@ public:
 
         void CleanPrimeSubject()
         {
+             Unit* Prime = NULL;
              for (std::vector<uint64>::const_iterator itr = PrimeSubject.begin(); itr != PrimeSubject.end(); ++itr) {
-                if ((Unit* Prime = me->GetMap()->GetCreature((*itr)) != NULL) {
+                Prime = me->GetMap()->GetCreature((*itr));
+                if (Prime) {
                     if (Prime->isAlive())
                         Prime->ToCreature()->ForcedDespawn();
                 }
