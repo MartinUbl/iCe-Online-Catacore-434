@@ -574,6 +574,7 @@ void AddSC_instance_throne_of_the_four_winds();
 void AddSC_boss_argaloth();
 void AddSC_instance_baradin_hold();
 void AddSC_magmaw();
+void AddSC_maloriak();
 void AddSC_atramedes();
 void AddSC_boss_defensing_system();
 void AddSC_instance_blackwing_descent();
@@ -1203,6 +1204,7 @@ void AddCataclysmScripts()
     AddSC_twilight_council();
 
     AddSC_magmaw();
+    AddSC_maloriak();
     AddSC_atramedes();
     AddSC_boss_defensing_system();
     AddSC_instance_blackwing_descent();
