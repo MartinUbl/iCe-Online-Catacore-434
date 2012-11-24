@@ -1244,7 +1244,7 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
             return false;
     }
     else
-        guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+        guid = sObjectMgr->GenerateLowGuidForUnit(true);
 
     uint16 team = 0;
     if (!Create(guid,map,data->phaseMask,data->id,0,team,data->posX,data->posY,data->posZ,data->orientation,data))
