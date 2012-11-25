@@ -130,9 +130,6 @@ public:
 
             void UpdateAI(const uint32 diff)
             {
-                if (me->HasAura(SPELL_GROWTH_CATACLYST))
-                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
-
                 if (!CanExplode)
                 {
                     if(uiPauseTimer <= diff)
@@ -211,11 +208,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 /*diff*/)
-        {
-            if (me->HasAura(SPELL_GROWTH_CATACLYST))
-                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
-        }
+        void UpdateAI(const uint32 /*diff*/) { }
     };
 
 };
@@ -1212,8 +1205,8 @@ public:
         {
             if (pSummon->GetEntry() == NPC_ABERRATION)
             {
-                me->AI()->DoAction(RECORD_DEATH);
-                me->AI()->DoAction(CHECK_COUNTER);
+                /*me->AI()->DoAction(RECORD_DEATH);
+                me->AI()->DoAction(CHECK_COUNTER);*/
             }
         }
 
