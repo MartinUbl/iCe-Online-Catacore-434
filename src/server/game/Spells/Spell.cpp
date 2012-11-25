@@ -3029,6 +3029,20 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 77679: // Scorching Blast + difficulty entries
+                        case 92968:
+                        case 92969:
+                        case 92970:
+                        {
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId()== TYPEID_UNIT && (*itr)->ToCreature()->isPet())
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
+                        }
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
