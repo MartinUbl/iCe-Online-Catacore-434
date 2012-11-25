@@ -58,7 +58,13 @@ enum Spells
     SPELL_ACID_NOVA              = 93013,
     SPELL_REMEDY                 = 77912,
     SPELL_DEBILITATING_SLIME     = 77615,
-    SPELL_FLASH_FREEZE           = 77699,
+    SPELL_DEBILITATING_SLIME_VISUAL = 77602,
+    SPELL_FLASH_FREEZE_10M          = 77699,
+    SPELL_FLASH_FREEZE_25M       = 92978,
+    SPELL_FLASH_FREEZE_10M_HC    = 92979,
+    SPELL_FLASH_FREEZE_25M_HC    = 92980,
+    SPELL_GROWTH_CATACLYST       = 77987,
+    SPELL_ENFULGING_DARKNESS     = 92754,
     //Consuming flames
     SPELL_CONSUMING_FLAMES       = 77786,
     SPELL_CONSUMING_FLAMES10HC   = 92972,
@@ -124,6 +130,9 @@ public:
 
             void UpdateAI(const uint32 diff)
             {
+                if (me->HasAura(SPELL_GROWTH_CATACLYST))
+                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+
                 if (!CanExplode)
                 {
                     if(uiPauseTimer <= diff)
@@ -198,11 +207,15 @@ public:
             {
                 Unit* FlashFreeze = Unit::GetUnit((*me),FlashFreezeGUID);
                 if (FlashFreeze)
-                    FlashFreeze->RemoveAurasDueToSpell(SPELL_FLASH_FREEZE);
+                    FlashFreeze->RemoveAurasDueToSpell(RAID_MODE(SPELL_FLASH_FREEZE_10M,SPELL_FLASH_FREEZE_25M,SPELL_FLASH_FREEZE_10M_HC,SPELL_FLASH_FREEZE_25M_HC));
             }
         }
 
-        void UpdateAI(const uint32 /*diff*/) { }
+        void UpdateAI(const uint32 /*diff*/)
+        {
+            if (me->HasAura(SPELL_GROWTH_CATACLYST))
+                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+        }
     };
 
 };
@@ -246,7 +259,7 @@ public:
         uint32 uiRemedy;
         uint32 uiScorchingBlast;
         uint32 uiDarkSludge;
-        uint32 uiEngulfingDarkness;	
+        uint32 uiEngulfingDarkness;
         uint32 uiVilleSwill;
         // uint32 pro faze
         uint32 uiSwitchPhaseTimer;
@@ -647,7 +660,8 @@ public:
                 me->GetMotionMaster()->MoveChase(me->getVictim());
                 if(Creature* Cauldron = me->FindNearestCreature(NPC_CAULDRON_TRIGGER,250.0f,true))
                 {
-                    Cauldron->CastSpell(Cauldron,77602,false);
+                    Cauldron->CastSpell(Cauldron, SPELL_DEBILITATING_SLIME_VISUAL, false);
+                    Cauldron->CastSpell(Cauldron, SPELL_DEBILITATING_SLIME, true);
                 }
             }
 
@@ -1039,7 +1053,8 @@ public:
                                     if (Creature *pFlashFreeze = me->SummonCreature(NPC_FLASH_FREEZE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
                                         CAST_AI(npc_flash_freeze::npc_flash_freezeAI, pFlashFreeze->AI())->SetPrison(pTarget);
-                                        pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE, true);
+                                        pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE_10M, true);
+                                        pTarget->ToPlayer()->TeleportTo(pFlashFreeze->GetMapId(), pFlashFreeze->GetPositionX(),pFlashFreeze->GetPositionY(),pFlashFreeze->GetPositionZ(),pTarget->GetOrientation()); // Protoze nechcem aby to nestalo vizualne za houby
                                     }
                                  }
                             }
@@ -1073,7 +1088,8 @@ public:
                                     if (Creature *pFlashFreeze = me->SummonCreature(NPC_FLASH_FREEZE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
                                         CAST_AI(npc_flash_freeze::npc_flash_freezeAI, pFlashFreeze->AI())->SetPrison(pTarget);
-                                        pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE, true);
+                                        pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE_10M, true);
+                                        pTarget->ToPlayer()->TeleportTo(pFlashFreeze->GetMapId(), pFlashFreeze->GetPositionX(),pFlashFreeze->GetPositionY(),pFlashFreeze->GetPositionZ(),pTarget->GetOrientation()); // Protoze nechcem aby to nestalo vizualne za houby
                                     }
                                  }
                             }
@@ -1153,10 +1169,13 @@ public:
             {
                 if(uiEngulfingDarkness <=diff)
                 {
-                    uiEngulfingDarkness = 10000;
+                    uiEngulfingDarkness = 15000;
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
-                        me->CastSpell(target, 92982, false);
+                    {
+                        me->StopMoving();
+                        me->CastSpell(target, SPELL_ENFULGING_DARKNESS, false);
+                    }
                 }
                 else
                     uiEngulfingDarkness -= diff;
@@ -1177,7 +1196,6 @@ public:
             if (pSummon->GetEntry() == 41901)
             {
                 pSummon->CastSpell(pSummon,78095,false);
-                pSummon->CastSpell(pSummon,62680,false);
             }
             if (pSummon->GetEntry() == NPC_ABERRATION)
             {
@@ -1226,7 +1244,7 @@ public:
                 if(pInstance)
                 {
                      if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
-                         pInstance->DoCompleteAchievement(1872);
+                         pInstance->DoCompleteAchievement(5310);
                 }
             }
         }
@@ -1265,7 +1283,7 @@ public:
         void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
-            me->AddAura(77987,me);
+            me->AddAura(SPELL_GROWTH_CATACLYST,me);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1310,7 +1328,8 @@ class npc_aberration: public CreatureScript
                     {
                         for (uint32 i = 0; i < AuraCount.size(); ++i)
                         {
-                            (*itr)->AddAura(77987,me);
+                            if (!me->HasAura(SPELL_DEBILITATING_SLIME))
+                                (*itr)->AddAura(SPELL_GROWTH_CATACLYST,me);
                         }
                     }
                 }
@@ -1331,7 +1350,7 @@ class npc_aberration: public CreatureScript
 
                 if(timer <= diff)
                 {
-                    me->RemoveAllAuras();
+                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
                     CheckAuraCount();
                     timer = 2000;
                 }
