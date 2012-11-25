@@ -4437,6 +4437,8 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
     PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
     PSendSysMessage(LANG_NPCINFO_PHASEMASK, target->GetPhaseMask());
     PSendSysMessage(LANG_NPCINFO_ARMOR, target->GetArmor());
+    if (target->IsVehicle())
+        PSendSysMessage("Vehicle ID: %u", cInfo->VehicleId);
     PSendSysMessage(LANG_NPCINFO_POSITION,float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
     if (const CreatureData* const linked = target->GetLinkedRespawnCreatureData())
         if (CreatureInfo const *master = GetCreatureInfo(linked->id))
@@ -4450,6 +4452,12 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
     {
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }
+
+    if (strlen(cInfo->AIName) != 0)
+        PSendSysMessage("AIName: %s", cInfo->AIName);
+
+    if (!target->GetScriptName().empty())
+        PSendSysMessage("ScriptName: %s", target->GetScriptName().c_str());
 
     return true;
 }
