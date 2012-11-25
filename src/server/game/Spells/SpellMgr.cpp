@@ -4700,6 +4700,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
             spellInfo->StackAmount = 20;
             spellInfo->Effect[2] = 0;
+        case 78095: // Magma Jets + difficulty entries
+        case 93014:
+        case 93015:
+        case 93016:
+            spellInfo->EffectRadiusIndex[0] = 15; // 3yd
+            spellInfo->EffectRadiusIndex[1] = 13; // 10yd
+            break;
         default:
             break;
         }
