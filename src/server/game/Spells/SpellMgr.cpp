@@ -4696,8 +4696,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 94090:
             spellInfo->EffectRadiusIndex[0] = 22;
             break;
-        case 77987:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+        case 77987: // Growth Catalyst
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
             spellInfo->StackAmount = 20;
             spellInfo->Effect[2] = 0;
         default:
