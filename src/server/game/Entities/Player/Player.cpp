@@ -22796,10 +22796,7 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& vi
             //if (target->isType(TYPEMASK_UNIT) && ((Unit*)target)->m_Vehicle)
             //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle, data, visibleNow);
 
-            //target->BuildCreateUpdateBlockForPlayer(&data, this);
-            // Temporary hackfix for updating visible objects and sending them to client
-            // unfortunatelly, this breaks sending player update to player (initial)
-            target->SendUpdateToPlayer(this);
+            target->BuildCreateUpdateBlockForPlayer(&data, this);
 
             UpdateVisibilityOf_helper(m_clientGUIDs,target,visibleNow);
 
@@ -23392,9 +23389,22 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 
 void Player::SendAurasForTarget(Unit *target)
 {
-    // Client requires this packet on login to initialize so we can't skip it for self
-    if (!target || (target->GetVisibleAuras()->empty() && target != this ))                  // speedup things
+    if (!target || target->GetVisibleAuras()->empty())                  // speedup things
         return;
+
+    /*! Blizz sends certain movement packets sometimes even before CreateObject
+        These movement packets are usually found in SMSG_COMPRESSED_MOVES
+    */
+    /*
+    if (target->HasAuraType(SPELL_AURA_FEATHER_FALL))
+        target->SendMovementFeatherFall();
+
+    if (target->HasAuraType(SPELL_AURA_WATER_WALK))
+        target->SendMovementWaterWalking();
+
+    if (target->HasAuraType(SPELL_AURA_HOVER))
+        target->SendMovementHover();
+        */
 
     WorldPacket data(SMSG_AURA_UPDATE_ALL);
     data.append(target->GetPackGUID());
@@ -23403,119 +23413,7 @@ void Player::SendAurasForTarget(Unit *target)
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
     {
         AuraApplication * auraApp = itr->second;
-        Aura * aura = auraApp->GetBase();
-        data << uint8(auraApp->GetSlot());
-        data << uint32(aura->GetId());
-
-        // flags
-        uint32 flags = auraApp->GetFlags();
-        if (aura->GetMaxDuration() > 0)
-            flags |= AFLAG_DURATION;
-
-        AuraBasepointType bptype = BP_NONE;
-
-        int32 idx = 0;
-        if (aura->IsModActionButton())
-        {
-            bptype = BP_MOD_ACTION_BUTTON;
-            flags |= AFLAG_BASEPOINT;
-        }
-        else
-        {
-            idx = aura->GetSpellProto()->GetEffectMiscValueB(0);
-            if (aura->GetCasterGUID() == GetGUID())
-            {
-                if (aura->GetSpellProto()->Id == 87840)
-                    idx = GetMountCapabilityIndex(230);
-                else
-                    idx = GetMountCapabilityIndex(idx);
-
-                if (idx)
-                {
-                    bptype = BP_MOUNT_CAPATIBILITY;
-                    flags |= AFLAG_BASEPOINT;
-                }
-            }
-        }
-
-        // If we still haven't got basepoint replacement
-        if (bptype == BP_NONE)
-        {
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-            {
-                if (aura->GetEffect(i) && aura->GetEffect(i)->GetAmount())
-                {
-                    bptype = BP_AMOUNT;
-                    flags |= AFLAG_BASEPOINT;
-                }
-            }
-        }
-
-        data << uint16(flags);
-        // level
-        data << uint8(aura->GetCasterLevel());
-        // charges
-        data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
-
-        if (!(flags & AFLAG_CASTER))
-            data.appendPackGUID(aura->GetCasterGUID());
-
-        if (flags & AFLAG_DURATION)          // include aura duration
-        {
-            data << uint32(aura->GetMaxDuration());
-            data << uint32(aura->GetDuration());
-        }
-
-        if (flags & AFLAG_BASEPOINT)
-        {
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-            {
-                if ( (1 << i) & flags )
-                {
-                    switch (bptype)
-                    {
-                        case BP_MOD_ACTION_BUTTON:
-                            data << uint32(aura->GetActionButtonSpellForEffect(i));
-                            break;
-                        case BP_MOUNT_CAPATIBILITY:
-                            data << uint32(idx);
-                            break;
-                        case BP_AMOUNT:
-                            data << uint32(aura->GetEffect(i) ? aura->GetEffect(i)->GetAmount() : 0);
-                            break;
-                        default:
-                            data << uint32(0);
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    // Ugly hack for sending passive auras update to max slot
-    // MAY CAUSE INCONSTISTENCE
-    if (target == this)
-    {
-        // We can use the same slots for auras, which won't ever apear both at one time at one target
-
-        // Firestarter
-        if (HasAura(86914))
-        {
-            data << uint8(128);                           // slot
-            data << uint32(86914);                        // id
-            data << uint16(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
-            data << uint8(getLevel());                    // level
-            data << uint8(1);                             // stack amount
-        }
-        // Inferno
-        if (HasAura(85105))
-        {
-            data << uint8(128);                           // slot
-            data << uint32(85105);                        // id
-            data << uint16(AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_EFF_INDEX_0); // flags
-            data << uint8(getLevel());                    // level
-            data << uint8(1);                             // stack amount
-        }
+        auraApp->BuildUpdatePacket(data, false);
     }
 
     GetSession()->SendPacket(&data);

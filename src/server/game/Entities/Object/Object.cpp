@@ -53,6 +53,7 @@
 #include "OutdoorPvPMgr.h"
 #include "MovementPacketBuilder.h"
 #include "Group.h"
+#include "G3D/g3dmath.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -308,12 +309,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
         data->WriteBit(!movementFlags);
-
-        if (self->GetTypeId() == TYPEID_UNIT)
-            data->WriteBit(false);             // Has Orientation
-        else
-            data->WriteBit(true);
-
+        data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f));             // Has Orientation
         data->WriteBit(guid[7]);
         data->WriteBit(guid[3]);
         data->WriteBit(guid[2]);
@@ -479,9 +475,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         *data << self->GetSpeed(MOVE_FLIGHT_BACK);
         data->WriteByteSeq(guid[6]);
         *data << self->GetSpeed(MOVE_TURN_RATE);
-
-        // Has Orientation
-        if (self->GetTypeId() == TYPEID_UNIT)
+        if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
             *data << float(self->GetOrientation());
 
         *data << self->GetSpeed(MOVE_RUN);

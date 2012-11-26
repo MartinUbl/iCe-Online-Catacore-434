@@ -38,7 +38,7 @@ class TempSummon : public Creature
         void SetTempSummonType(TempSummonType type);
         void SaveToDB();
         Unit* GetSummoner() const;
-        uint64 const& GetSummonerGUID() { return m_summonerGUID; }
+        uint64 GetSummonerGUID() const { return m_summonerGUID; }
 
         const SummonPropertiesEntry * const m_Properties;
     private:

@@ -181,6 +181,44 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
     SetNeedClientUpdate();
 }
 
+void AuraApplication::BuildUpdatePacket(ByteBuffer &data, bool remove) const
+{
+    data << uint8(m_slot);
+
+    if (remove)
+    {
+        ASSERT(!m_target->GetVisibleAura(m_slot));
+        data << uint32(0);
+        return;
+    }
+    ASSERT(m_target->GetVisibleAura(m_slot));
+
+    Aura const *aura = GetBase();
+    data << uint32(aura->GetId());
+    uint32 flags = m_flags;
+    if (aura->GetMaxDuration() > 0 && !(aura->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
+        flags |= AFLAG_DURATION;
+    data << uint16(flags);
+    data << uint8(aura->GetCasterLevel());
+    // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
+    // stack amount has priority over charges (checked on retail with spell 50262)
+    data << uint8(aura->GetSpellProto()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
+
+    if (!(flags & AFLAG_CASTER))
+        data.appendPackGUID(aura->GetCasterGUID());
+
+    if (flags & AFLAG_DURATION)
+    {
+        data << uint32(aura->GetMaxDuration());
+        data << uint32(aura->GetDuration());
+    }
+
+    if (flags & AFLAG_BASEPOINT)
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            if (AuraEffect const* eff = aura->GetEffect(i)) // NULL if effect flag not set
+                data << int32(eff->GetAmount());
+}
+
 void AuraApplication::ClientUpdate(bool remove)
 {
     m_needClientUpdate = false;

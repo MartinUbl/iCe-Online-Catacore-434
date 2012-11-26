@@ -439,6 +439,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recv_data)
 // Only _static_ data send in this packet !!!
 void WorldSession::HandleRequestHotFixOpcode(WorldPacket & recv_data)
 {
+    /*
     uint32 count, type;
     recv_data >> count >> type;
 
@@ -599,6 +600,7 @@ void WorldSession::HandleRequestHotFixOpcode(WorldPacket & recv_data)
         data2 << uint32(type);
         SendPacket(&data2);
     }
+    */
 }
 
 void WorldSession::HandleReadItem(WorldPacket & recv_data)

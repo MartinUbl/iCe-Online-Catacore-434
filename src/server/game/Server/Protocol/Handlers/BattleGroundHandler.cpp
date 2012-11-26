@@ -924,6 +924,7 @@ void WorldSession::HandleReportPvPAFK(WorldPacket & recv_data)
 
 void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
 {
+    /*
     uint8 unk_byte;
     recv_data >> unk_byte; // always 3
 
@@ -942,10 +943,12 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
     SendPacket(&data);
 
     sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG info", _player->GetName(), _player->GetGUIDLow());
+    */
 }
 
 void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
 {
+    /*
     // client calculation
     // 11th uint32 + 15th uint32 + 17th uint32 == total games
     // 1st uint32 + 12th uint32 + 18th uint32 == games won
@@ -978,6 +981,7 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
     SendPacket(&data);
 
     sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG stats", _player->GetName(), _player->GetGUIDLow());
+    */
 }
 
 void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
