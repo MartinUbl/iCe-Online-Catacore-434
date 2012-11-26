@@ -298,7 +298,7 @@ public:
         {
             OpenCell();
             if (pInstance)
-                pInstance->SetData(DATA_MALORIAK, NOT_STARTED);
+                pInstance->SetData(DATA_MALORIAK_GUID, NOT_STARTED);
             uiRemedy = 14000;
             uiphase = 0;
             Berserk = IsHeroic() ? 1200000 : 420000; // 7 minut
@@ -546,7 +546,7 @@ public:
            else
                 DoScriptText(TEXT_AGGRO,me);
             if (pInstance)
-                pInstance->SetData(DATA_MALORIAK, IN_PROGRESS);
+                pInstance->SetData(DATA_MALORIAK_GUID, IN_PROGRESS);
             SummonAll = false;
             Block = false;
             uiSubPhaseTimer = 1000;
@@ -1162,7 +1162,7 @@ public:
             {
                 if(uiEngulfingDarkness <=diff)
                 {
-                    uiEngulfingDarkness = 15000;
+                    uiEngulfingDarkness = 12000;
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
@@ -1175,7 +1175,7 @@ public:
 
                 if(uiVilleSwill <= diff)
                 {
-                    uiVilleSwill = 5000;
+                    uiVilleSwill = 10000;
                     me->SummonCreature(49811,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),1.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,2000);
                 }
                 else
@@ -1230,7 +1230,7 @@ public:
             DoScriptText(TEXT_DEATH,me);
 
             if (pInstance)
-                pInstance->SetData(DATA_MALORIAK, DONE);
+                pInstance->SetData(DATA_MALORIAK_GUID, DONE);
 
             if (AwardAchiev == true)
             {
