@@ -353,7 +353,7 @@ public:
 
             if(LiquidIce_timer<=diff) // Kazde 3s Liquide ice patch pod seba
             {
-                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+2 > Stack_counter))
+                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+8 > Stack_counter))
                     {
                         pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                         achiev_counter++;
