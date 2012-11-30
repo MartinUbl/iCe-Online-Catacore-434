@@ -2457,11 +2457,13 @@ void Creature::FarTeleportTo(Map* map, float X, float Y, float Z, float O)
 
     RemoveFromWorld();
     ResetMap();
+
+    Relocate(X, Y, Z, O);
+
     SetMap(map);
     AddToWorld();
-    
-    SetPosition(X, Y, Z, O, true);
 }
+
 void Creature::SetWalk(bool enable)
 {
     if (enable)

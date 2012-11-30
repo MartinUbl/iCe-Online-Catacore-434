@@ -850,6 +850,9 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         if (ToGameObject()->GetGOInfo()->chest.groupLootRules)
                             flags |= GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE;
 
+                    if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
+                        flags = GO_FLAG_NODESPAWN | GO_FLAG_TRANSPORT;
+
                     *data << flags;
                 }
                 else

@@ -623,9 +623,9 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     mi->guid = guid;
     mi->t_guid = tguid;
 
-   if (hasTransportData && mi->pos.m_positionX != mi->t_pos.m_positionX)
-       if (GetPlayer()->GetTransport())
-           GetPlayer()->GetTransport()->UpdatePosition(mi);
+    if (hasTransportData && mi->pos.m_positionX != mi->t_pos.m_positionX)
+        if (GetPlayer()->GetTransport())
+            GetPlayer()->GetTransport()->UpdatePosition(mi);
 
     //! Anti-cheat checks. Please keep them in seperate if() blocks to maintain a clear overview.
     //! Might be subject to latency, so just remove improper flags.
