@@ -53,8 +53,8 @@ public:
     {
         TeleHome();
         me->GetMotionMaster()->Clear(true);
-        uint32 spellID;
-        int32 textID;
+        uint32 spellID = 0;
+        int32 textID = 0;
         switch(me->GetEntry())
         {
         case NPC_ANSHAL: spellID = 85576; textID = -1850513; break; // spell Withering Winds
