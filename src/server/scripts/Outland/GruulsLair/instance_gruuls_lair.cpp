@@ -100,7 +100,7 @@ public:
             {
                 case 184468:
                     MaulgarDoor = pGo->GetGUID();
-                    if (m_auiEncounter[0] == DONE) HandleGameObject(NULL, true, pGo);
+                    if (m_auiEncounter[0] == DONE) HandleGameObject(0, true, pGo);
                     break;
                 case 184662: GruulDoor = pGo->GetGUID(); break;
             }

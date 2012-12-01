@@ -3941,7 +3941,7 @@ class npc_odevzdavac: public CreatureScript
                  QueryResult pocet = ScriptDatabase.PQuery("SELECT count FROM ice_bananky WHERE guid = %u AND done = 0", pPlayer->GetGUID()); // select punishment count
 
                  uint32 counter = 0;
-                 if (pocet != NULL)
+                 if (pocet != 0)
                  {
                      Field* field = pocet->Fetch();
                      counter = field[0].GetUInt32();
@@ -3990,7 +3990,7 @@ class npc_areatrigger_completer: public CreatureScript
 
                 QueryResult qResult = WorldDatabase.PQuery("SELECT quest,distance FROM creature_areatrigger_completer WHERE guid = %u", me->GetDBTableGUIDLow());
 
-                if (qResult != NULL)
+                if (qResult != 0)
                 {
                     Field* fields = qResult->Fetch();
                     quest = fields[0].GetUInt32(); // Quest assign

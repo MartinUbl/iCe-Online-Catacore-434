@@ -7514,7 +7514,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
             uint32 counter = 0;
             std::string duvod;
-            if (result != NULL) // if result not null
+            if (result != 0) // if result not null
             {
                 Field* field = result->Fetch();
                 counter = field[0].GetUInt32();
@@ -17090,7 +17090,7 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
     if (!result)
     {
         sLog->outError("Player (GUID: %u) not found in table `characters`, can't load. ",guid);
-        return false;
+        return NULL;
     }
     
     Field* fields = result->Fetch();

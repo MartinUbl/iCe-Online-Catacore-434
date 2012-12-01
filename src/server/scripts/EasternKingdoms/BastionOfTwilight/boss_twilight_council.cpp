@@ -161,7 +161,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20396, false);
             me->ResetPlayerDamageReq(); // Potrebny reset aby hraci mohli lootovat
             if (instance)
@@ -197,13 +197,13 @@ public:
             {
                 if(killed_unit==false)
                 {
-                    me->MonsterYell("Annihilate....", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Annihilate....", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20397, false);
                     killed_unit=true;
                 }
                 else
                 {
-                    me->MonsterYell("Eradicate....", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Eradicate....", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20398, false);
                     killed_unit=false;
                 }
@@ -213,7 +213,7 @@ public:
         void JustDied (Unit * killed)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20399, false);
 
             if(achiev_counter==1) // Podmienka na splnenie je spawn iba jedneho ice patchu pocas celeho encounteru
@@ -368,7 +368,7 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20400, false);
 
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
@@ -693,7 +693,7 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
-            me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20162, false);
 
             // Miestnost by sa mala uzavriet pri zacati encounteru
@@ -738,7 +738,7 @@ public:
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("Perish!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("Perish!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20163, false);
             }
         }
@@ -862,7 +862,7 @@ public:
                                 DoCast(me,SPELL_GLACIATE);
                                 Glaciate_timer=32000;
                                 Glaciate_all_timer=3000;
-                                me->MonsterYell("I will freeze the blood in your veins!", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("I will freeze the blood in your veins!", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(20164, false);
                             }
                         }
@@ -1031,7 +1031,7 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20286, false);
             }
         }
@@ -1070,7 +1070,7 @@ public:
 
                     if(Speaking_timer<=diff && !speaked)
                     {
-                        me->MonsterYell("You will die for your insolence!", LANG_UNIVERSAL, NULL);
+                        me->MonsterYell("You will die for your insolence!", LANG_UNIVERSAL, 0);
                         me->SendPlaySound(20285, false);
                         speaked=true;
                     }
@@ -1133,7 +1133,7 @@ public:
                    DoCast(me,SPELL_AEGIS_OF_FLAME);
                    aegis_used=true;
                    Rising_flames_timer=64000;
-                   me->MonsterYell("BURN!", LANG_UNIVERSAL, NULL);
+                   me->MonsterYell("BURN!", LANG_UNIVERSAL, 0);
                    me->SendPlaySound(20287, false);
                 }
             }
@@ -1461,7 +1461,7 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20238, false);
             }
         }
@@ -1470,7 +1470,7 @@ public:
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
-            me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
 
@@ -1641,7 +1641,7 @@ public:
                     can_interrupt=false;
                     DoCast(83491); // summon Viloent cyclone
                     Call_winds=20000;
-                    me->MonsterYell("Wind, hear my call!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Wind, hear my call!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20239, false);
                 }
             }
@@ -1767,7 +1767,7 @@ public:
                             {
                                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                 me->SetSpeed(MOVE_WALK, 1.5f, true);
-                                me->MonsterYell("An impressive display...", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("An impressive display...", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(20240, false);
                                 me->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                 PHASE=5;
@@ -1781,7 +1781,7 @@ public:
                                     pFeludius->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pFeludius->InterruptNonMeleeSpells(true);
                                     pFeludius->SetSpeed(MOVE_WALK, 1.5f, true);
-                                    pFeludius->MonsterYell(" But now witness true power...", LANG_UNIVERSAL, NULL);
+                                    pFeludius->MonsterYell(" But now witness true power...", LANG_UNIVERSAL, 0);
                                     pFeludius->SendPlaySound(20165, false);
                                     pFeludius->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                     PHASE=6;
@@ -1859,7 +1859,7 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21842, false);
             }
         }
@@ -1906,7 +1906,7 @@ public:
 
                 if(Speaking_timer<=diff && !speaked)
                 {
-                    me->MonsterYell("We will handle them!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("We will handle them!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(21843, false);
                     speaked=true;
                 }
@@ -1964,7 +1964,7 @@ public:
                     DoCast(me,83565); // Quake
                     Quake_timer=60000;
                     me->MonsterTextEmote("The ground beneath you rumbles ominously...", 0, true);
-                    me->MonsterYell("The earth will devour you!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("The earth will devour you!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(21844, false);
                 }
             }
@@ -2098,7 +2098,7 @@ public:
                             {
                                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                 me->SetSpeed(MOVE_WALK, 1.5f, true);
-                                me->MonsterYell("To have made it this far.", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("To have made it this far.", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(21845, false);
                                 me->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                 PHASE=5;
@@ -2112,7 +2112,7 @@ public:
                                     pIgnac->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pIgnac->InterruptNonMeleeSpells(true);
                                     pIgnac->SetSpeed(MOVE_WALK, 1.5f, true);
-                                    pIgnac->MonsterYell("The fury of the elements!", LANG_UNIVERSAL, NULL);
+                                    pIgnac->MonsterYell("The fury of the elements!", LANG_UNIVERSAL, 0);
                                     pIgnac->SendPlaySound(20288, false);
                                     pIgnac->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                     PHASE=6;

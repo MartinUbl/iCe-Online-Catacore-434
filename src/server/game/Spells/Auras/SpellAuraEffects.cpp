@@ -5469,7 +5469,7 @@ void AuraEffect::HandleAuraModStateImmunity(AuraApplication const *aurApp, uint8
     Unit *target = aurApp->GetTarget();
 
     if (apply && (GetSpellProto()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY))
-        target->RemoveAurasByType(AuraType(GetMiscValue()), NULL , GetBase());
+        target->RemoveAurasByType(AuraType(GetMiscValue()), 0 , GetBase());
 
     target->ApplySpellImmune(GetId(), IMMUNITY_STATE, GetMiscValue(), apply);
 }

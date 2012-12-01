@@ -456,7 +456,7 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             ItemPosCountVec dest;
-            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30658, 1, false);
+            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30658, 1, 0);
             if (msg == EQUIP_ERR_OK)
             {
                 pPlayer->StoreNewItem(dest, 30658, 1, true);
@@ -466,7 +466,7 @@ public:
         if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
         {
             ItemPosCountVec dest;
-            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30659, 1, false);
+            uint8 msg = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30659, 1, 0);
             if (msg == EQUIP_ERR_OK)
             {
                 pPlayer->StoreNewItem(dest, 30659, 1, true);
@@ -1156,10 +1156,10 @@ static TorlothCinematic TorlothAnim[]=
     {-1000367, 0, 2000},
     {-1000368, 1, 7000},
     {-1000369, 0, 3000},
-    {NULL, 0, 2000}, // Torloth stand
+    {0, 0, 2000}, // Torloth stand
     {-1000370, 0, 1000},
-    {NULL, 0, 3000},
-    {NULL, 0, NULL}
+    {0, 0, 3000},
+    {0, 0, 0}
 };
 
 struct Location

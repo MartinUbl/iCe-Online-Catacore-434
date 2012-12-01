@@ -210,14 +210,14 @@ public:
                     break;
                 case GO_LEVIATHAN_DOOR:
                     uiLeviathanDoor[flag] = go->GetGUID();
-                    HandleGameObject(NULL, true, go);
+                    HandleGameObject(0, true, go);
                     flag++;
                     if (flag == 7)
                         flag =0;
                     break;
                 case GO_LEVIATHAN_GATE:
                     uiLeviathanGateGUID = go->GetGUID();
-                    HandleGameObject(NULL, false, go);
+                    HandleGameObject(0, false, go);
                     break;
             }
         }
