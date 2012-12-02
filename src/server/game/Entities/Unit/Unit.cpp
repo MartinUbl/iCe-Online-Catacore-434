@@ -349,14 +349,14 @@ void Unit::UpdateSplinePosition()
             loc.z += vehicle->GetPositionZMinusOffset();
             loc.orientation = vehicle->GetOrientation();
         }
-        else if (TransportBase* transport = GetDirectTransport())
-                transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
+        else if (Transport* transport = GetTransport())
+            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
     }
 
-        if (HasUnitState(UNIT_STATE_CANNOT_TURN))
-            loc.orientation = GetOrientation();
+    if (hasUnitState(UNIT_STAT_CANNOT_TURN))
+        loc.orientation = GetOrientation();
 
-    UpdatePosition(loc.x, loc.y, loc.z, loc.orientation);
+    SetPosition(loc.x, loc.y, loc.z, loc.orientation);
 }
 
 bool Unit::IsSplineEnabled() const

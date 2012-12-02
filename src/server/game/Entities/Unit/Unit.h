@@ -710,12 +710,6 @@ enum MovementFlags
     MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_ROOT | MOVEMENTFLAG_SWIMMING |
     MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_WATERWALKING | MOVEMENTFLAG_FALLING_SLOW | MOVEMENTFLAG_HOVER,
 
-    // Movement flags allowed for creature in CreateObject - we need to keep all other enabled serverside
-    // to properly calculate all movement
-    MOVEMENTFLAG_MASK_CREATURE_ALLOWED =
-        MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_ROOT | MOVEMENTFLAG_SWIMMING |
-        MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_WATERWALKING | MOVEMENTFLAG_FALLING_SLOW | MOVEMENTFLAG_HOVER,
-
     //! TODO if needed: add more flags to this masks that are exclusive to players
     MOVEMENTFLAG_MASK_PLAYER_ONLY =
     MOVEMENTFLAG_FLYING
@@ -1360,6 +1354,8 @@ class Unit : public WorldObject
 
         void PlayOneShotAnimKit(uint32 id);
         void SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin);
+        void SendMoveRoot(uint32 value);
+        void SendMoveUnroot(uint32 value);
         void SendDurabilityLoss(Player* receiver, uint32 percent);
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }

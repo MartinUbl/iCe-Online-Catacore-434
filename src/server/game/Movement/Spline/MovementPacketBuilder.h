@@ -19,6 +19,9 @@
 #ifndef TRINITYSERVER_PACKET_BUILDER_H
 #define TRINITYSERVER_PACKET_BUILDER_H
 
+#include "G3D/Vector3.h"
+using G3D::Vector3;
+
 class ByteBuffer;
 class WorldPacket;
 
