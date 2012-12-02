@@ -2147,7 +2147,7 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (db2item)
         {
-            if (proto->Class != db2item->Class)
+            /*if (proto->Class != db2item->Class)
             {
                 sLog->outErrorDb("Item (Entry: %u) does not have a correct class %u, must be %u .", i, proto->Class, db2item->Class);
             }
@@ -2174,16 +2174,16 @@ void ObjectMgr::LoadItemPrototypes()
             {
                 sLog->outErrorDb("Item (Entry: %u) does not have a correct inventory type (%u), must be %u (still using DB value).",i,proto->InventoryType,db2item->InventoryType);
                 // It is safe to use InventoryType from DB
-            }
+            }*/
 
             if (proto->DisplayInfoID != db2item->DisplayId)
             {
-                sLog->outErrorDb("Item (Entry: %u) does not have a correct display id (%u), must be %u (using it).", i, proto->DisplayInfoID, db2item->DisplayId);
+                //sLog->outErrorDb("Item (Entry: %u) does not have a correct display id (%u), must be %u (using it).", i, proto->DisplayInfoID, db2item->DisplayId);
                 const_cast<ItemPrototype*>(proto)->DisplayInfoID = db2item->DisplayId;
             }
             if (proto->Sheath != db2item->Sheath)
             {
-                sLog->outErrorDb("Item (Entry: %u) does not have a correct sheathid (%u), must be %u  (using it).",i,proto->Sheath,db2item->Sheath);
+                //sLog->outErrorDb("Item (Entry: %u) does not have a correct sheathid (%u), must be %u  (using it).",i,proto->Sheath,db2item->Sheath);
                 const_cast<ItemPrototype*>(proto)->Sheath = db2item->Sheath;
             }
         }
