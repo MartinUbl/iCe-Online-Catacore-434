@@ -1135,12 +1135,32 @@ void WorldSession::HandleNextCinematicCamera(WorldPacket & /*recv_data*/)
 
 void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket & recv_data)
 {
-    /*  WorldSession::Update(getMSTime());*/
     sLog->outStaticDebug("WORLD: Time Lag/Synchronization Resent/Update");
 
-    uint64 guid;
-    recv_data.readPackGUID(guid);
-    recv_data.read_skip<uint32>();
+    ObjectGuid guid;
+    uint32 time;
+    recv_data >> time;
+
+    guid[5] = recv_data.ReadBit();
+    guid[1] = recv_data.ReadBit();
+    guid[3] = recv_data.ReadBit();
+    guid[7] = recv_data.ReadBit();
+    guid[6] = recv_data.ReadBit();
+    guid[0] = recv_data.ReadBit();
+    guid[4] = recv_data.ReadBit();
+    guid[2] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(guid[7]);
+    recv_data.ReadByteSeq(guid[1]);
+    recv_data.ReadByteSeq(guid[2]);
+    recv_data.ReadByteSeq(guid[4]);
+    recv_data.ReadByteSeq(guid[3]);
+    recv_data.ReadByteSeq(guid[6]);
+    recv_data.ReadByteSeq(guid[0]);
+    recv_data.ReadByteSeq(guid[5]);
+
+    // Not finished support, TODO
+
     /*
         uint64 guid;
         uint32 time_skipped;
