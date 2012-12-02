@@ -224,7 +224,7 @@ struct BfWGCoordGY
     float o;
     uint32 gyid;
     uint8 type;
-    uint32 textid;              // for gossip menu
+    eWGGossipText textid;       // for gossip menu
     TeamId startcontrol;
 };
 
