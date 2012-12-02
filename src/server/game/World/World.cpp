@@ -1793,10 +1793,10 @@ void World::SetInitialWorldSettings()
     sBattlefieldMgr.InitBattlefield();
 
     sLog->outString("Loading Transports...");
-    sMapMgr->LoadTransports();
+    //sMapMgr->LoadTransports();
 
     sLog->outString("Loading Transport NPCs...");
-    sMapMgr->LoadTransportNPCs();
+    //sMapMgr->LoadTransportNPCs();
 
     sLog->outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");
