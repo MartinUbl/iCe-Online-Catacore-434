@@ -199,12 +199,29 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
     sLog->outDebug("MSG_MOVE_TELEPORT_ACK");
-    uint64 guid;
 
-    recv_data.readPackGUID(guid);
-
+    ObjectGuid guid;
     uint32 flags, time;
     recv_data >> flags >> time;
+
+    guid[5] = recv_data.ReadBit();
+    guid[0] = recv_data.ReadBit();
+    guid[1] = recv_data.ReadBit();
+    guid[6] = recv_data.ReadBit();
+    guid[3] = recv_data.ReadBit();
+    guid[7] = recv_data.ReadBit();
+    guid[2] = recv_data.ReadBit();
+    guid[4] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(guid[4]);
+    recv_data.ReadByteSeq(guid[2]);
+    recv_data.ReadByteSeq(guid[7]);
+    recv_data.ReadByteSeq(guid[6]);
+    recv_data.ReadByteSeq(guid[5]);
+    recv_data.ReadByteSeq(guid[1]);
+    recv_data.ReadByteSeq(guid[3]);
+    recv_data.ReadByteSeq(guid[0]);
+
     sLog->outStaticDebug("Guid " UI64FMTD, guid);
     sLog->outStaticDebug("Flags %u, time %u", flags, time/IN_MILLISECONDS);
 
