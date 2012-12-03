@@ -109,8 +109,82 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
         }
 };
 
+class spell_druid_blood_in_water : public SpellScriptLoader
+{
+    public:
+        spell_druid_blood_in_water() : SpellScriptLoader("spell_druid_blood_in_water") { }
+
+        class spell_druid_blood_in_water_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_druid_blood_in_water_SpellScript);
+
+            enum spell
+            {
+                RIP = 1079,
+            };
+
+            bool Validate(SpellEntry const* /*spellEntry*/)
+            {
+               return (sSpellStore.LookupEntry(RIP));
+            }
+
+            bool Load()
+            {
+                _executed = false;
+                return (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DRUID);
+            }
+
+            void HandleAfterHit()
+            {
+                if (_executed)
+                    return;
+
+                _executed = true;
+
+                    if( Unit* caster = GetCaster())
+                        if (Unit* unitTarget = GetHitUnit())
+                            if(unitTarget->HealthBelowPct(26)) // <= 25 %
+                                if (Aura *aura = unitTarget->GetAura(RIP))
+                                {
+
+                                    Unit::AuraApplicationMap const& auras = unitTarget->GetAppliedAuras();
+                                    for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                                    {
+                                        Aura* aura = itr->second->GetBase();
+                                        if(aura->GetCaster()->ToPlayer() == caster && aura->GetId() == RIP)
+                                        {
+                                            if(caster->HasAura(80318) && roll_chance_i(50)) // 50 % rank 1
+                                            {
+                                                aura->RefreshDuration();
+                                                break;
+                                            }
+                                            else if(roll_chance_i(100) && caster->HasAura(80319)) // 100 % rank 2
+                                            {
+                                                aura->RefreshDuration();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_druid_blood_in_water_SpellScript::HandleAfterHit);
+            }
+
+            bool _executed;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_druid_blood_in_water_SpellScript;
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
+    new spell_druid_blood_in_water();
 }
