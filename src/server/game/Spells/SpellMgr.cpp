@@ -4714,6 +4714,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[1] = SPELLMOD_EFFECT2;
             spellInfo->EffectSpellClassMask[1] = flag96(0x00000000, 0x00004000, 0x00000000);
             break;
+        case 56222: // Dark command
+        case 6795:  // Growl
+        case 20736: // Distracting shot
+        case 62124: // Hand of Reckoning
+        case 355:   // Taunt
+        case 21008: // Mocking blow
+            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            count++;
+            break;
         default:
             break;
         }
