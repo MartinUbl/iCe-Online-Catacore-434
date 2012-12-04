@@ -466,7 +466,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_TAXICLEARALLNODES,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXIENABLEALLNODES,                      STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_TAXISHOWNODES,                           STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodes   );
-    OPCODE( SMSG_SHOWTAXINODES,                           STATUS_NEVER, &WorldSession::Handle_ServerSide                  );
+    OPCODE( SMSG_SHOWTAXINODES,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_TAXINODE_STATUS_QUERY,                   STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode );
     OPCODE( SMSG_TAXINODE_STATUS,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_TAXIQUERYAVAILABLENODES,                 STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodes   );

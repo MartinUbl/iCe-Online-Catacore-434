@@ -61,7 +61,7 @@ void WorldSession::SendTaxiStatus(uint64 guid)
 
 	sLog->outDebug("WORLD: current location %u ",curloc);
 
-	WorldPacket data(SMSG_TAXINODE_STATUS, 9, true);
+	WorldPacket data(SMSG_TAXINODE_STATUS, 9);
 	data << guid;
 	data << uint8(GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc) ? 1 : 0);
 	SendPacket(&data);
@@ -108,11 +108,10 @@ void WorldSession::SendTaxiMenu(Creature* unit)
 
 	sLog->outDebug("WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
-    WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4), true);
+    WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4));
     data << uint32(1);
     data << uint64(unit->GetGUID());
     data << uint32(curloc);
-    data << uint8((sTaxiNodesStore.GetNumRows() >> 6) + 1); // This is 11 as of 4.0.6 13623 (count of following uint64's)
     GetPlayer()->m_taxi.AppendTaximaskTo(data,GetPlayer()->isGameMaster()?GetPlayer()->isTaxiCheater():false);
     SendPacket(&data);
 
@@ -224,13 +223,11 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 {
 	sLog->outDebug("WORLD: Received CMSG_MOVE_SPLINE_DONE");
 
-	uint64 guid; // used only for proper packet read
-	recv_data.readPackGUID(guid);
+	recv_data.read_skip<uint32>();							// unk
 
 	MovementInfo movementInfo;                              // used only for proper packet read
 	ReadMovementInfo(recv_data, &movementInfo);
 
-	recv_data.read_skip<uint32>();                          // unk
 
 	// in taxi flight packet received in 2 case:
 	// 1) end taxi path in far (multi-node) flight
