@@ -25126,6 +25126,11 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
         return true;
     if(v_map == 571 && canNorthrendFly)             // Northrend
         return true;
+
+    // disallow fly in old world zones (Azuremyst + Exodar, Bloodmyst, Eversong + Silvermoon, Ghostland)
+    if (zone == 3524 || zone == 3557 || zone == 3525 || zone == 3487 || zone == 3430 || zone == 3433)
+        return false;
+
                                                     // Old World and new zones
     if((v_map == 0 || v_map == 1 || v_map == 646) && canAzerothFly)
         return true;
