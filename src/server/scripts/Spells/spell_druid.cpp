@@ -144,7 +144,7 @@ class spell_druid_blood_in_water : public SpellScriptLoader
                     if( Unit* caster = GetCaster())
                         if (Unit* unitTarget = GetHitUnit())
                             if(unitTarget->HealthBelowPct(26)) // <= 25 %
-                                if (Aura *aura = unitTarget->GetAura(RIP))
+                                if (unitTarget->HasAura(RIP))
                                 {
 
                                     Unit::AuraApplicationMap const& auras = unitTarget->GetAppliedAuras();
@@ -217,7 +217,7 @@ class spell_druid_pulverize : public SpellScriptLoader
 
                 if( Unit* caster = GetCaster())
                     if (Unit* unitTarget = GetHitUnit())
-                        if (Aura * lacer = unitTarget->GetAura(LACERATE_DOT)) // Ak ma target dotku Lacerate
+                        if (unitTarget->HasAura(LACERATE_DOT)) // Ak ma target dotku Lacerate
                         {
                             int32 stackAmount = 0;
 
