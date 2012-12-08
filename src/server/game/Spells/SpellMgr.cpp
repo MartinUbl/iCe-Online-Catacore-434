@@ -4707,6 +4707,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 15; // 3yd
             spellInfo->EffectRadiusIndex[1] = 13; // 10yd
             break;
+        case 51466: // Elemental Oath (Rank 1)
+        case 51470: // Elemental Oath (Rank 2)
+            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_ADD_FLAT_MODIFIER;
+            spellInfo->EffectMiscValue[1] = SPELLMOD_EFFECT2;
+            spellInfo->EffectSpellClassMask[1] = flag96(0x00000000, 0x00004000, 0x00000000);
+            break;
         default:
             break;
         }
