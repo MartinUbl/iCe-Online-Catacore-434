@@ -182,9 +182,94 @@ class spell_druid_blood_in_water : public SpellScriptLoader
         }
 };
 
+class spell_druid_pulverize : public SpellScriptLoader
+{
+    public:
+        spell_druid_pulverize() : SpellScriptLoader("spell_druid_pulverize") { }
+
+        class spell_druid_pulverize_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_druid_pulverize_SpellScript);
+
+            enum spell
+            {
+                PULVERIZE_BUFF  = 80951,
+                LACERATE_DOT    = 33745,
+            };
+
+            bool Validate(SpellEntry const* /*spellEntry*/)
+            {
+               return (sSpellStore.LookupEntry(PULVERIZE_BUFF));
+            }
+
+            bool Load()
+            {
+                _executed = false;
+                return (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DRUID);
+            }
+
+            void HandleAfterHit()
+            {
+                if (_executed)
+                    return;
+
+                _executed = true;
+
+                if( Unit* caster = GetCaster())
+                    if (Unit* unitTarget = GetHitUnit())
+                        if (Aura * lacer = unitTarget->GetAura(LACERATE_DOT)) // Ak ma target dotku Lacerate
+                        {
+                            int32 stackAmount = 0;
+
+                            // Musim prebehnut aura list a najst iba lacerate dotky ktore patria prislunemu druidovi
+                            Unit::AuraApplicationMap const& auras = unitTarget->GetAppliedAuras();
+                            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                            {
+                                Aura* aura = itr->second->GetBase();
+                                if(aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT)
+                                {
+                                    stackAmount = aura->GetStackAmount();
+                                    break;
+                                }
+                            }
+
+                            int32 bp = stackAmount * 3;
+                            caster->CastCustomSpell(caster, PULVERIZE_BUFF, &bp, 0, 0, true); // Dostane crtical buff podla poctu stakov
+
+                            //bp = (stackAmount * 361 ); // u mna na skyfire ten dmg nebol spravny takmer 10 x vacsi ... zatial TODO
+                            //caster->CastCustomSpell(caster, 31756, &bp, 0, 0, true);
+
+                            //Remove lacerate stacks from target, only those which are bound with caster
+                            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                            {
+                                Aura* aura = itr->second->GetBase();
+                                if( aura->GetCaster()->ToPlayer() != NULL &&  aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT )
+                                {
+                                    aura->Remove();
+                                    break;
+                                }
+                            }
+                        }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_druid_pulverize_SpellScript::HandleAfterHit);
+            }
+
+            bool _executed;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_druid_pulverize_SpellScript;
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_blood_in_water();
+    new spell_druid_pulverize();
 }
