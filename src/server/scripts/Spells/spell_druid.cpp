@@ -151,7 +151,8 @@ class spell_druid_blood_in_water : public SpellScriptLoader
                                     for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                                     {
                                         Aura* aura = itr->second->GetBase();
-                                        if(aura->GetCaster()->ToPlayer() == caster && aura->GetId() == RIP)
+                                        if(aura->GetCaster() != NULL && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER
+                                            && aura->GetCaster()->ToPlayer() == caster && aura->GetId() == RIP)
                                         {
                                             if(caster->HasAura(80318) && roll_chance_i(50)) // 50 % rank 1
                                             {
@@ -226,7 +227,8 @@ class spell_druid_pulverize : public SpellScriptLoader
                             for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                             {
                                 Aura* aura = itr->second->GetBase();
-                                if(aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT)
+                                if(aura->GetCaster() != NULL && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER
+                                  && aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT)
                                 {
                                     stackAmount = aura->GetStackAmount();
                                     break;
