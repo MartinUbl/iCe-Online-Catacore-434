@@ -76,6 +76,9 @@ class UpdateMask
 
         UpdateMask& operator=(UpdateMask const& mask)
         {
+            if (this == &mask)
+                return *this;
+
             SetCount(mask.mCount);
             memcpy(mUpdateMask, mask.mUpdateMask, mBlocks << 2);
 
