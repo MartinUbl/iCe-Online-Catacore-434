@@ -2197,6 +2197,15 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, b
     }
 }
 
+struct VisibleAchievementPred
+{
+    bool operator()(CompletedAchievementMap::value_type const& val)
+    {
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(val.first);
+        return achievement && !(achievement->flags & ACHIEVEMENT_FLAG_HIDDEN);
+    }
+};
+
 void AchievementMgr::SendAllAchievementData()
 {
     time_t now = time(NULL);
@@ -2295,53 +2304,74 @@ void AchievementMgr::SendAllAchievementData()
 
     // Now we are ready to send player achievements
 
+    VisibleAchievementPred isVisible;
+
     size_t numCriterias = m_criteriaProgress.size();
-    uint32 achievementCount = 0;
-    ByteBuffer bitBuffer(numCriterias * 2 / 8 + 1);     // 2 bits per criteria/8 bits per byte
-    ByteBuffer counterBuffer(numCriterias * 8);         // uint64 values
-    ByteBuffer guidBuffer(numCriterias * 8);
-    ByteBuffer criteriaDateBuffer(numCriterias * 4);
-    ByteBuffer zeros(numCriterias * 4, true);           // fill with zeros
-    ByteBuffer criteriaIdBuffer(numCriterias * 4);
-    ByteBuffer achievementDateBuffer(m_completedAchievements.size() * 4);
-    ByteBuffer achievementIdBuffer(m_completedAchievements.size() * 4);
+    size_t achievementCount = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
+    ByteBuffer criteriaData(numCriterias * (4 + 4 + 4 + 4 + 8 + 8));
+    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid counter;
 
     WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4, true);
+    data.WriteBits(numCriterias, 21);
+    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+    {
+        counter = uint64(iter->second.counter);
+
+        data.WriteBit(guid[4]);
+        data.WriteBit(counter[3]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(counter[0]);
+        data.WriteBit(counter[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(counter[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(counter[7]);
+        data.WriteBit(guid[7]);
+        data.WriteBits(0u, 2);
+        data.WriteBit(guid[6]);
+        data.WriteBit(counter[2]);
+        data.WriteBit(counter[1]);
+        data.WriteBit(counter[5]);
+        data.WriteBit(guid[1]);
+
+        criteriaData.WriteByteSeq(guid[3]);
+        criteriaData.WriteByteSeq(counter[5]);
+        criteriaData.WriteByteSeq(counter[6]);
+        criteriaData.WriteByteSeq(guid[4]);
+        criteriaData.WriteByteSeq(guid[6]);
+        criteriaData.WriteByteSeq(counter[2]);
+        criteriaData << uint32(0); // timer 2
+        criteriaData.WriteByteSeq(guid[2]);
+        criteriaData << uint32(iter->first); // criteria id
+        criteriaData.WriteByteSeq(guid[5]);
+        criteriaData.WriteByteSeq(counter[0]);
+        criteriaData.WriteByteSeq(counter[3]);
+        criteriaData.WriteByteSeq(counter[1]);
+        criteriaData.WriteByteSeq(counter[4]);
+        criteriaData.WriteByteSeq(guid[0]);
+        criteriaData.WriteByteSeq(guid[7]);
+        criteriaData.WriteByteSeq(counter[7]);
+        criteriaData << uint32(0); // timer 1
+        criteriaData.AppendPackedTime(iter->second.date);  // criteria date
+        criteriaData.WriteByteSeq(guid[1]);
+    }
+
+    data.WriteBits(achievementCount, 23);
+    data.FlushBits();
+    data.append(criteriaData);
 
     AchievementEntry const* achievement = NULL;
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         // Skip hidden achievements
-        achievement = sAchievementStore.LookupEntry(iter->first);
-        if (achievement->flags & ACHIEVEMENT_FLAG_HIDDEN)
+        if (!isVisible(*iter))
             continue;
 
-        achievementDateBuffer << uint32(secsToTimeBitFields(iter->second.date));
-        achievementIdBuffer << uint32(achievement->ID);
-        ++achievementCount;
+        data << uint32(iter->first);
+        data.AppendPackedTime(iter->second.date);
     }
-
-    for (CriteriaProgressMap::const_iterator itr = m_criteriaProgress.begin(); itr != m_criteriaProgress.end(); ++itr)
-    {
-        bitBuffer.WriteBits(0, 2);
-        counterBuffer << uint64(itr->second.counter);
-        guidBuffer << uint64(GetPlayer()->GetGUID());
-        criteriaDateBuffer << uint32(secsToTimeBitFields(itr->second.date));
-        criteriaIdBuffer << uint32(itr->first);
-    }
-
-    bitBuffer.FlushBits();
-    data << uint32(numCriterias);
-    data.append(bitBuffer);
-    data.append(counterBuffer);
-    data << uint32(achievementCount);
-    data.append(achievementDateBuffer);
-    data.append(guidBuffer);
-    data.append(criteriaDateBuffer);
-    data.append(zeros);
-    data.append(achievementIdBuffer);
-    data.append(criteriaIdBuffer);
-    data.append(zeros);
 
     GetPlayer()->GetSession()->SendPacket(&data);
 }
