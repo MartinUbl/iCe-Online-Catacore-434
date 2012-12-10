@@ -151,7 +151,7 @@ struct PlayerCurrency
     uint32 weekCount;
 };
 
-#define PLAYER_CURRENCY_PRECISION   100
+#define CURRENCY_PRECISION 100
 
 // Spell modifier (used for modify other spells)
 struct SpellModifier
@@ -1301,6 +1301,7 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
+        void SendNewCurrency(uint32 id) const;
         void SendCurrencies();
         uint32 GetCurrency(uint32 id);
         bool HasCurrency(uint32 id, uint32 count);
@@ -1887,7 +1888,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(uint64 guid);
         void SetConquestPointCap(uint32 newcap) { m_ConquestPointCap = newcap; };
-        uint32 GetConquestPointCap() { return m_ConquestPointCap; };
+        uint32 GetConquestPointCap() const { return m_ConquestPointCap; };
 
         // Research mechanisms (Archaeology)
         uint16 GetResearchSite(uint8 slot);
@@ -2773,7 +2774,7 @@ class Player : public Unit, public GridObject<Player>
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
         PlayerCurrenciesMap m_currencies;
-        uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency);
+        uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
@@ -2943,6 +2944,7 @@ class Player : public Unit, public GridObject<Player>
 
         std::set<uint32> m_refundableItems;
         void SendRefundInfo(Item* item);
+        void SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece, uint8 error);
         void RefundItem(Item* item);
 
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, int32 faction, bool for_quest, bool noQuestBonus = false);

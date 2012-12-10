@@ -1330,6 +1330,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_PARTY_STATE_RESPONSE,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_PERMISSIONS_QUERY_RESULTS,         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GUILD_SET_ACHIEVEMENT_TRACKING,          STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
+    OPCODE( SMSG_UPDATE_CURRENCY,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 
     // Define the rest of the opcodes as UNKNOWN
     for (int i = 0; i < OPCODES_MAX; i++)

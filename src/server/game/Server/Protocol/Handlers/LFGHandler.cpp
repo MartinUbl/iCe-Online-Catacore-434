@@ -221,7 +221,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recv_data
                     data << uint32(qRew->RewCurrencyId[i]);
                     data << uint32(0); // unk?
                     if (qRew->RewCurrencyId[i] == 396 || qRew->RewCurrencyId[i] == 395 || qRew->RewCurrencyId[i] == 392)
-                        data << uint32(qRew->RewCurrencyCount[i] * PLAYER_CURRENCY_PRECISION);
+                        data << uint32(qRew->RewCurrencyCount[i] * CURRENCY_PRECISION);
                     else
                         data << uint32(qRew->RewCurrencyCount[i]);
                 }
@@ -514,7 +514,7 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
             data << uint32(qRew->RewCurrencyId[i]);
             data << uint32(0); // unk?
             if (qRew->RewCurrencyId[i] == 396 || qRew->RewCurrencyId[i] == 395 || qRew->RewCurrencyId[i] == 392)
-                data << uint32(qRew->RewCurrencyCount[i] * PLAYER_CURRENCY_PRECISION);
+                data << uint32(qRew->RewCurrencyCount[i] * CURRENCY_PRECISION);
             else
                 data << uint32(qRew->RewCurrencyCount[i]);
         }
