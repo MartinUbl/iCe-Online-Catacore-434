@@ -1689,7 +1689,7 @@ void Position::RelocateOffset(const Position & offset)
     m_positionX = GetPositionX() + (offset.GetPositionX() * cos(GetOrientation()) + offset.GetPositionY() * sin(GetOrientation() + M_PI));
     m_positionY = GetPositionY() + (offset.GetPositionY() * cos(GetOrientation()) + offset.GetPositionX() * sin(GetOrientation()));
     m_positionZ = GetPositionZ() + offset.GetPositionZ();
-    m_orientation = GetOrientation() + offset.GetOrientation();
+    SetOrientation(GetOrientation() + offset.GetOrientation());
 }
 
 void Position::GetPositionOffsetTo(const Position & endPos, Position & retOffset) const
@@ -1700,7 +1700,7 @@ void Position::GetPositionOffsetTo(const Position & endPos, Position & retOffset
     retOffset.m_positionX = dx * cos(GetOrientation()) + dy * sin(GetOrientation());
     retOffset.m_positionY = dy * cos(GetOrientation()) - dx * sin(GetOrientation());
     retOffset.m_positionZ = endPos.GetPositionZ() - GetPositionZ();
-    retOffset.m_orientation = endPos.GetOrientation() - GetOrientation();
+    retOffset.SetOrientation(endPos.GetOrientation() - GetOrientation());
 }
 
 float Position::GetAngle(const Position *obj) const
