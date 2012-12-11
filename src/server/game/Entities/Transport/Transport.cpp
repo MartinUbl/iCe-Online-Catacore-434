@@ -613,7 +613,7 @@ void Transport::UpdateForMap(Map const* targetMap)
     else
     {
         UpdateData transData;
-        transData.m_map = uint16(GetMapId());
+        transData.m_map = uint16(targetMap->GetId());
         BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket out_packet;
         transData.BuildPacket(&out_packet);
