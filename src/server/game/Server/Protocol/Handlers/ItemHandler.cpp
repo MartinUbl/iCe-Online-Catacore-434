@@ -282,9 +282,12 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
 
     recv_data.FlushBits();
 
+    uint32 entry, slot;
     for (uint32 i = 0; i < count; ++i)
     {
-        recv_data >> uint32(newEntries[i]);
+        recv_data >> entry;
+
+        newEntries[i] = entry;
 
         recv_data.ReadByteSeq(itemGuids[i][1]);
         recv_data.ReadByteSeq(itemGuids[i][5]);
@@ -295,7 +298,9 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
         recv_data.ReadByteSeq(itemGuids[i][3]);
         recv_data.ReadByteSeq(itemGuids[i][2]);
 
-        recv_data >> uint32(slots[i]);
+        recv_data >> slot;
+
+        slots[i] = slot;
     }
 
     recv_data.ReadByteSeq(npcGuid[7]);

@@ -2742,7 +2742,7 @@ public:
 
             for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
             {
-                if(Player* pPlayer = me->GetPlayer(*me, *i))
+                if(me->GetPlayer(*me, *i))
                     me->MonsterMoveWithSpeed(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), uint32(dist/6.8f));
             }
             return true;

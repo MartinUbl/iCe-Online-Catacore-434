@@ -1724,7 +1724,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
     uint32 petSlot = fields[18].GetUInt32();
     if (petSlot < PET_SLOT_HUNTER_LAST)
     {
-        QueryResult pPetRes = CharacterDatabase.PQuery("SELECT modelid,level,entry FROM character_pet WHERE owner = %u AND slot = %u LIMIT 1;", guid, petSlot);
+        QueryResult pPetRes = CharacterDatabase.PQuery("SELECT modelid,level,entry FROM character_pet WHERE owner = " UI64FMTD " AND slot = %u LIMIT 1;", (uint64)(guid), petSlot);
         if(pPetRes && pPetRes->GetRowCount() > 0)
         {
             Field* pFields = pPetRes->Fetch();

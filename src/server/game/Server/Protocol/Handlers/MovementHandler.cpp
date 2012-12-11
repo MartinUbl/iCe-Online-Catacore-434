@@ -222,7 +222,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     recv_data.ReadByteSeq(guid[3]);
     recv_data.ReadByteSeq(guid[0]);
 
-    sLog->outStaticDebug("Guid " UI64FMTD, guid);
+    sLog->outStaticDebug("Guid " UI64FMTD, (uint64)guid);
     sLog->outStaticDebug("Flags %u, time %u", flags, time/IN_MILLISECONDS);
 
     Unit *mover = _player->m_mover;
@@ -1043,7 +1043,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
         }
         else
         {
-            sLog->outError("HandleSetActiveMoverOpcode: incorrect mover guid: mover is " UI64FMTD " and should be " UI64FMTD, guid, _player->m_mover->GetGUID());
+            sLog->outError("HandleSetActiveMoverOpcode: incorrect mover guid: mover is " UI64FMTD " and should be " UI64FMTD, (uint64)guid, _player->m_mover->GetGUID());
             GetPlayer()->SetMover(GetPlayer());
         }
     }

@@ -59,7 +59,7 @@ class BitStream
             WriteBits(val, len);
         }
 
-        BitStream(BitStream const& bs) : _rpos(bs._rpos), _wpos(bs._wpos), _data(bs._data) {}
+        BitStream(BitStream const& bs) : _data(bs._data), _rpos(bs._rpos), _wpos(bs._wpos) {}
 
         void Clear()
         {

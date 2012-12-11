@@ -965,6 +965,9 @@ void Object::GetUpdateFieldData(Player const* target, uint32*& flags, bool& isOw
             flags = CorpseUpdateFieldFlags;
             isOwner = ((Corpse*)this)->GetOwnerGUID() == target->GetGUID();
             break;
+        case TYPEID_OBJECT:
+            // This should NEVER happen!
+            break;
     }
 }
 

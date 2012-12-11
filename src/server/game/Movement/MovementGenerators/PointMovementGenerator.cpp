@@ -97,7 +97,6 @@ template <> void PointMovementGenerator<Creature>::MovementInform(Creature &unit
 template void PointMovementGenerator<Player>::Initialize(Player&);
 template void PointMovementGenerator<Creature>::Initialize(Creature&);
 template void PointMovementGenerator<Player>::Finalize(Player&);
-template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32 &diff);
 template void PointMovementGenerator<Creature>::Finalize(Creature&);
 template void PointMovementGenerator<Player>::Reset(Player&);
 template void PointMovementGenerator<Creature>::Reset(Creature&);

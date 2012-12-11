@@ -752,7 +752,7 @@ public:
     bool HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair = false);
     void HandleMemberLogout(WorldSession* session);
     void HandleDisband(WorldSession* session);
-    void Guild::HandleGuildPartyRequest(WorldSession* session);
+    void HandleGuildPartyRequest(WorldSession* session);
 
     void DepositBankMoneyFromLoot(uint32 amount);
 

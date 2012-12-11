@@ -1657,6 +1657,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE:
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_2:
                 break;
         }
 
@@ -2208,7 +2210,6 @@ struct VisibleAchievementPred
 
 void AchievementMgr::SendAllAchievementData()
 {
-    time_t now = time(NULL);
     uint32 achievements = 0;
 
     // A first, send guild achievements done
@@ -2292,7 +2293,6 @@ void AchievementMgr::SendAllAchievementData()
     data.FlushBits();
     data.append(criteriaData);
 
-    AchievementEntry const* achievement = NULL;
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         // Skip hidden achievements
