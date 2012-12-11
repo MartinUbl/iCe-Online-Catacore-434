@@ -7527,7 +7527,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
             uint32 counter = 0;
             std::string duvod;
-            if (result != NULL) // if result not null
+            if (result != 0) // if result not null
             {
                 Field* field = result->Fetch();
                 counter = field[0].GetUInt32();
@@ -17127,7 +17127,7 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
     if (!result)
     {
         sLog->outError("Player (GUID: %u) not found in table `characters`, can't load. ",guid);
-        return false;
+        return NULL;
     }
     
     Field* fields = result->Fetch();
@@ -25065,6 +25065,11 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
         return true;
     if(v_map == 571 && canNorthrendFly)             // Northrend
         return true;
+
+    // disallow fly in old world zones (Azuremyst + Exodar, Bloodmyst, Eversong + Silvermoon, Ghostland)
+    if (zone == 3524 || zone == 3557 || zone == 3525 || zone == 3487 || zone == 3430 || zone == 3433)
+        return false;
+
                                                     // Old World and new zones
     if((v_map == 0 || v_map == 1 || v_map == 646) && canAzerothFly)
         return true;

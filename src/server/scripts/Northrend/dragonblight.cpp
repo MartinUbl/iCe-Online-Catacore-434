@@ -318,7 +318,7 @@ public:
 	    	   break;
     	   case 3:
 		       arthas->SetOrientation(5.25f);
-	    	   arthas->MonsterSay("Behold, Muradin, our salvation, Frostmourne.",LANG_UNIVERSAL,NULL);
+	    	   arthas->MonsterSay("Behold, Muradin, our salvation, Frostmourne.",LANG_UNIVERSAL,0);
     		   ++phase;
 		       phasetim = 4000;
 	    	   break;
@@ -329,7 +329,7 @@ public:
 	    	   break;
     	   case 7:
 		       muradin->SetStandState(UNIT_STAND_STATE_KNEEL);
-	    	   muradin->MonsterSay("Hold, lad. There\'s an inscription on the dais. It\'s a warning. It says, \"Whomsoever takes up this blade shall wield power eternal. Just as the blade rends flesh, so must power scar the spirit.\" Oh, I should\'ve known. The blade is cursed! Let\'s get the hell out of here!",LANG_UNIVERSAL,NULL);
+	    	   muradin->MonsterSay("Hold, lad. There\'s an inscription on the dais. It\'s a warning. It says, \"Whomsoever takes up this blade shall wield power eternal. Just as the blade rends flesh, so must power scar the spirit.\" Oh, I should\'ve known. The blade is cursed! Let\'s get the hell out of here!",LANG_UNIVERSAL,0);
     		   ++phase;
 		       phasetim = 16000;
 	    	   break;
@@ -341,7 +341,7 @@ public:
     	   case 11:
 		       //muradin->GetMotionMaster()->MovePoint(0, 4819.44f, -586.73f, 163.25f);
 	    	   //Muradin's orientation
-    		   arthas->MonsterSay("I would gladly bear any curse to save my homeland.",LANG_UNIVERSAL,NULL);
+    		   arthas->MonsterSay("I would gladly bear any curse to save my homeland.",LANG_UNIVERSAL,0);
 		       ++phase;
 		       phasetim = 1000;
 	    	   break;
@@ -357,12 +357,12 @@ public:
 		       phasetim = 2000;
 	    	   break;
     	   case 17:
-	    	   muradin->MonsterSay("Leave it be, Arthas. Forget this business and lead your men home.",LANG_UNIVERSAL,NULL);
+	    	   muradin->MonsterSay("Leave it be, Arthas. Forget this business and lead your men home.",LANG_UNIVERSAL,0);
     		   ++phase;
 		       phasetim = 7000;
 	    	   break;
     	   case 19:
-	    	   arthas->MonsterSay("Damn the men! Nothing shall prevent me from having my revenge, old friend. Not even you.",LANG_UNIVERSAL,NULL);
+	    	   arthas->MonsterSay("Damn the men! Nothing shall prevent me from having my revenge, old friend. Not even you.",LANG_UNIVERSAL,0);
     		   ++phase;
 		       phasetim = 5000;
 	    	   break;
@@ -372,7 +372,7 @@ public:
     		   phasetim = 3000;
 		       break;
 	       case 23:
-    		   arthas->MonsterSay("Now, I call out to the spirits of this place. I will give anything or pay any price, if only you will help me save my people.",LANG_UNIVERSAL,NULL);
+    		   arthas->MonsterSay("Now, I call out to the spirits of this place. I will give anything or pay any price, if only you will help me save my people.",LANG_UNIVERSAL,0);
 		       arthas->CastSpell(me,49824,false);
 	    	   ++phase;
     		   phasetim = 10000;
@@ -409,7 +409,7 @@ public:
 	    	   phasetim = 3000;
     		   break;
 	       case 35:
-	    	   muradin->MonsterSay("O\' my head... Wh... Where am I?",LANG_UNIVERSAL,NULL);
+	    	   muradin->MonsterSay("O\' my head... Wh... Where am I?",LANG_UNIVERSAL,0);
     		   ++phase;
 		       phasetim = 4000;
 	    	   break;

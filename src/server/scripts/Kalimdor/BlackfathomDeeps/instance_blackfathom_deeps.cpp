@@ -135,7 +135,7 @@ public:
                     break;
                 case GO_AKU_MAI_DOOR:
                     if (m_auiEncounter[2] == DONE)
-                        HandleGameObject(NULL,true,pGo);
+                        HandleGameObject(0,true,pGo);
                     m_uiMainDoorGUID = pGo->GetGUID();
                     break;
             }

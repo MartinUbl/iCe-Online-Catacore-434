@@ -77,7 +77,7 @@ void SmartScript::OnReset()
         (*i).runOnce = false;
     }
     ProcessEventsFor(SMART_EVENT_RESET);
-    mLastInvoker = NULL;
+    mLastInvoker = 0;
 }
 
 void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellEntry* spell, GameObject* gob)
@@ -157,7 +157,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             mLastTextID = e.action.talk.textGroupID;
             mTextTimer = e.action.talk.duration;
-            mTextGUID = IsPlayer(GetLastInvoker()) ? GetLastInvoker()->GetGUID() : NULL;//invoker, used for $vars in texts
+            mTextGUID = IsPlayer(GetLastInvoker()) ? GetLastInvoker()->GetGUID() : 0;//invoker, used for $vars in texts
             mUseTextTimer = true;
             sCreatureTextMgr->SendChat(talker, uint8(e.action.talk.textGroupID), mTextGUID);
             sLog->outDebug("SmartScript::ProcessAction: SMART_ACTION_TALK: talker: %s (GuidLow: %u), textGuid: " UI64FMTD "!",
@@ -172,11 +172,11 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 {
                     if (IsCreature((*itr)))
-                        sCreatureTextMgr->SendChat((*itr)->ToCreature(), uint8(e.action.talk.textGroupID), IsPlayer(GetLastInvoker())? GetLastInvoker()->GetGUID() : NULL);
+                        sCreatureTextMgr->SendChat((*itr)->ToCreature(), uint8(e.action.talk.textGroupID), IsPlayer(GetLastInvoker())? GetLastInvoker()->GetGUID() : 0);
                     else if (IsPlayer((*itr)))
                     {
                         Unit* templastInvoker = GetLastInvoker();
-                        sCreatureTextMgr->SendChat(me, uint8(e.action.talk.textGroupID), IsPlayer(templastInvoker) ? templastInvoker->GetGUID() : NULL, CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_NORMAL, NULL, TEAM_OTHER, false, (*itr)->ToPlayer());
+                        sCreatureTextMgr->SendChat(me, uint8(e.action.talk.textGroupID), IsPlayer(templastInvoker) ? templastInvoker->GetGUID() : 0, CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, (*itr)->ToPlayer());
                     }
                     sLog->outDebug("SmartScript::ProcessAction:: SMART_ACTION_SIMPLE_TALK: talker: %s (GuidLow: %u), textGroupId: %u",
                         (*itr)->GetName(), (*itr)->GetGUIDLow(), uint8(e.action.talk.textGroupID));

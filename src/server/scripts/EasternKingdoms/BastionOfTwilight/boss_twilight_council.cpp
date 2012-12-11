@@ -65,11 +65,13 @@ const Position Tele_pos[4] =              // Random position for teleport Arion 
     {-1037.94f, -589.27f, 831.92f, 0.17f},
 };
 
-const Position Gravity_pos[3] =           // Random position for spawn Gravity Well
+const Position Gravity_pos[5] =           // Random position for spawn Gravity Well
 {
-    {-1038.55f,-619.776f,835.16f, 0.9f},
-    {-1044.313f,-550.27f,835.135f, 5.6f},
-    {-1053.32f,-582.284f,835.01f, 6.26f},
+    {-1034.813f,-616.48f,835.27f, 0.0f},
+    {-1050.118f,-586.70f,835.03f, 0.0f},
+    {-1038.73f,-553.526f,835.29f, 0.0f},
+    {-992.18f,-542.59f,831.91f, 0.0f},
+    {-991.07f,-622.236f,831.91f, 0.0f},
 };
 
 const Position Seeds_pos[16] =  // Pozicie na spawn lava seedov :D Ostatne po miestnosti robim algoritmom :)
@@ -134,13 +136,13 @@ public:
             lift_timer=0;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-            spawn_timer=5000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
+            spawn_timer=7000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
             Gravity_crush_timer=spawn_timer+28000;
             LiquidIce_timer=spawn_timer;
             Distance_timer=spawn_timer-2000;
             Lava_spell_timer=19000; // 2 sekundy po caste sa spawnu "lava seeds"
-            Instability_timer=5000;
-            Intensity_timer=20000; // kazdych 20s sa zvysi frekvencia instability
+            Instability_timer= spawn_timer;
+            Intensity_timer= spawn_timer + 20000; // kazdych 20s sa zvysi frekvencia instability
             INSTABILITY=1;
             killed_unit=spawned=can_seed=boomed=can_lift=false;
             pLiquidIce=NULL;
@@ -159,30 +161,29 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20396, false);
             me->ResetPlayerDamageReq(); // Potrebny reset aby hraci mohli lootovat
             if (instance)
+            {
                 instance->SetData(DATA_COUNCIL, IN_PROGRESS);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
              if (damage > 500000 )
-                damage=0; // Zabranim IK dmgu od magovho Ignite
-        }
+                damage=0; // Anti IK prevention
 
-        void DamageDealt(Unit* target, uint32 &damage, DamageEffectType damagetype)
-        {
-            if(damagetype == SPELL_DIRECT_DAMAGE) // Ak ma hrac Gravity crush ma byt immuny na dmg ? ? ?  TODO -> Overit ci je to naozaj tak
-            {
-                if(target->HasAura(92486 ) || target->HasAura(92488 ) || target->HasAura(84948 ) || target->HasAura(92487 )) // Gravity Crush
-                    damage = 0;
-            }
+             if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                damage = damage * 1.15f; // 15 % dmg boost na heroicu 
         }
 
         void EnterEvadeMode()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
                     pGoDoor1->Delete();
             if (GameObject* pGoDoor2 = me->FindNearestGameObject(401930, 500.0f)) // Druhe dvere
@@ -196,13 +197,13 @@ public:
             {
                 if(killed_unit==false)
                 {
-                    me->MonsterYell("Annihilate....", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Annihilate....", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20397, false);
                     killed_unit=true;
                 }
                 else
                 {
-                    me->MonsterYell("Eradicate....", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Eradicate....", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20398, false);
                     killed_unit=false;
                 }
@@ -211,7 +212,8 @@ public:
 
         void JustDied (Unit * killed)
         {
-            me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, NULL);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20399, false);
 
             if(achiev_counter==1) // Podmienka na splnenie je spawn iba jedneho ice patchu pocas celeho encounteru
@@ -340,14 +342,18 @@ public:
 
             if(Intensity_timer<=diff) // Kazdych 20 sekund sa zvysi pocet instability "castov" o 1
             {
-                    INSTABILITY=INSTABILITY+1;
+                    if(INSTABILITY<10) // Obmedzenie na max 10 bleskov
+                        INSTABILITY=INSTABILITY+1;
+
                     Intensity_timer=20000;
+                    if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) // V HC mensi nerf zvysovania bleskov
+                        Intensity_timer=25000;
             }
             else Intensity_timer-=diff;
 
             if(LiquidIce_timer<=diff) // Kazde 3s Liquide ice patch pod seba
             {
-                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+2 > Stack_counter))
+                    if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+8 > Stack_counter))
                     {
                         pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                         achiev_counter++;
@@ -362,13 +368,13 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("FEEL THE POWER!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20400, false);
 
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
                             DoCast(target,92486);
-                            lift_timer=1500; // Po 1.5 sekundach zdvihnem hracov zo zeme
+                            lift_timer=2000; // Po 2 sekundach zdvihnem hracov zo zeme
                             can_lift=true;
                         }
                         Gravity_crush_timer=25000;
@@ -384,7 +390,14 @@ public:
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
                             if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
-                                    unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+30);
+                                {
+                                    if(unit->GetTypeId() == TYPEID_PLAYER )
+                                    {
+                                        unit->ToPlayer()->SetFlying(true);
+                                        unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
+                                        unit->ToPlayer()->SetFlying(false);
+                                    }
+                                }
                     }
                 can_lift=false;
             }
@@ -404,12 +417,13 @@ public:
                                 }
                                     Unit** pole;
                                     pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
+                                    memset(pole, 0, number_of_players*sizeof(Unit*));
 
-                                    uint32 iter=0;
+                                    uint32 iter = 0;
                                     for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                     {
                                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                        if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                        if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
                                         {
                                             pole[iter]=unit; // zapisem si hracov do dynamickeho pola
                                             iter++;
@@ -419,7 +433,7 @@ public:
                                     Unit* pom=NULL;
                                     for(uint32 i=0; i<number_of_players-1;i++)
                                     for(uint32 j=0; j<number_of_players-1;j++)
-                                        if(pole[j]->GetDistance(me) < pole[j+1]->GetDistance(me))
+                                        if(pole[j] && pole[j+1] && me->GetDistance(pole[j]) < me->GetDistance(pole[j+1]))
                                         {
                                             pom=pole[j];
                                             pole[j]=pole[j+1];
@@ -429,11 +443,10 @@ public:
                                     for(uint32 i=0;i<INSTABILITY;i++)
                                     {
                                         if(i<number_of_players)
-                                            DoCast(pole[i],84529,true);
-
-                                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true)) // Keby nahodou
-                                                DoCast(target,84529,true);
-
+                                        {
+                                            if(!pole[i]->HasAura(92486 ) && !pole[i]->HasAura(92488 ) && !pole[i]->HasAura(84948 ) && !pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
+                                                DoCast(pole[i],84529,true);
+                                        }
                                     }
                                     Instability_timer=1000;
                                     free((void*)pole);
@@ -635,6 +648,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             me->SetSpeed(MOVE_RUN,1.5f,true);
             me->SetVisible(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
@@ -676,7 +691,9 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, NULL);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            me->MonsterYell("You dare invade our lord's sanctum?", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20162, false);
 
             // Miestnost by sa mala uzavriet pri zacati encounteru
@@ -721,7 +738,7 @@ public:
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("Perish!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("Perish!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20163, false);
             }
         }
@@ -790,7 +807,7 @@ public:
 
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
-                                if( urand(0,100) <= 50 ) // 50% sanca na spawn bomby pod hraca
+                                if( urand(0,100) <= 50 && me->getVictim() != target) // 50% sanca na spawn bomby pod hraca + vylucim Tanka Feludiusa
                                     me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
@@ -841,11 +858,11 @@ public:
                             {
                                 can_interrupt=false;
                                 check_debuff=true;
-                                Frozen_timer=3000; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
+                                Frozen_timer=4500; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
                                 DoCast(me,SPELL_GLACIATE);
                                 Glaciate_timer=32000;
                                 Glaciate_all_timer=3000;
-                                me->MonsterYell("I will freeze the blood in your veins!", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("I will freeze the blood in your veins!", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(20164, false);
                             }
                         }
@@ -908,6 +925,8 @@ public:
                                     me->SendMovementFlagUpdate();
                                     PHASE=4;
                                 }
+
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                             }
         }
     };
@@ -950,6 +969,8 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             PHASE=1;
             Speaking_timer=4000;
             me->SetVisible(true);
@@ -1000,7 +1021,7 @@ public:
         void DamageTaken(Unit* attacker, uint32& damage)
         {
              if( (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514)) ) // Ak ma boss nasebe stit hraci maju donho zvyseny dmg o 10 %
-                damage=damage*1.1;  // due to broken buff which should increase dmg done by players
+                damage=damage*1.2;  // due to broken buff which should increase dmg done by players
 
              if (damage > me->GetHealth() || damage > 500000 )
                 damage=0; // Zabranim IK dmgu od magovho Ignite
@@ -1010,7 +1031,7 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("More fuel for the fire!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20286, false);
             }
         }
@@ -1027,6 +1048,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             if(Creature *pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 300, true))
             {
                 if(!pFeludius->isInCombat()) // Ak neni Feludius v combate donutim ho :D
@@ -1047,7 +1070,7 @@ public:
 
                     if(Speaking_timer<=diff && !speaked)
                     {
-                        me->MonsterYell("You will die for your insolence!", LANG_UNIVERSAL, NULL);
+                        me->MonsterYell("You will die for your insolence!", LANG_UNIVERSAL, 0);
                         me->SendPlaySound(20285, false);
                         speaked=true;
                     }
@@ -1110,7 +1133,7 @@ public:
                    DoCast(me,SPELL_AEGIS_OF_FLAME);
                    aegis_used=true;
                    Rising_flames_timer=64000;
-                   me->MonsterYell("BURN!", LANG_UNIVERSAL, NULL);
+                   me->MonsterYell("BURN!", LANG_UNIVERSAL, 0);
                    me->SendPlaySound(20287, false);
                 }
             }
@@ -1255,6 +1278,8 @@ public:
                                     me->SendMovementFlagUpdate();
                                     PHASE=4;
                                 }
+
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                             }
         }
 
@@ -1344,8 +1369,10 @@ public:
         bool fired;
         uint32 flame_timer;
 
-        void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType typeOfDamage)
         {
+            damage = urand(4000,6000); // Ohen daval prilis velky dmg okresem to na cca 5 k
+
             if(typeOfDamage == SPELL_DIRECT_DAMAGE) // Ak dam dmg hracovi
                 if(target->HasAura(SPELL_WATER_LOGGED)) // a ma na sebe waterlogged debuff
                     target->RemoveAura(SPELL_WATER_LOGGED); // odstranim ho
@@ -1407,9 +1434,11 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             PHASE=1;
             me->SetSpeed(MOVE_RUN,1.5f,true);
-            rod_timer=15000;
+            rod_timer=20000;
             Call_winds=10000;
             Thundershock_timer=70000;
             Disperse_timer=20000;
@@ -1432,14 +1461,16 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("Merely a whisper in the wind...", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20238, false);
             }
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, NULL);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
 
@@ -1465,8 +1496,10 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-             if (damage > me->GetHealth() || damage > 500000 )
+             if(damage > me->GetHealth() || damage > 500000 )
                 damage=0;
+
+             damage = damage * 1.1f ; // 10 % dmg boost 
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1522,7 +1555,8 @@ public:
                     me->SetPosition(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation(),true);
                     me->SendMovementFlagUpdate();
                     update_movement=true;
-                    Update_timer=200;
+                    Update_timer=500;
+                    me->SendMovementFlagUpdate();
                     can_interrupt=true;
                     DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
                     can_tele=false;
@@ -1607,7 +1641,7 @@ public:
                     can_interrupt=false;
                     DoCast(83491); // summon Viloent cyclone
                     Call_winds=20000;
-                    me->MonsterYell("Wind, hear my call!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("Wind, hear my call!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(20239, false);
                 }
             }
@@ -1653,6 +1687,8 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                                 if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
                                 {
                                     pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
@@ -1731,7 +1767,7 @@ public:
                             {
                                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                 me->SetSpeed(MOVE_WALK, 1.5f, true);
-                                me->MonsterYell("An impressive display...", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("An impressive display...", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(20240, false);
                                 me->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                 PHASE=5;
@@ -1745,7 +1781,7 @@ public:
                                     pFeludius->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pFeludius->InterruptNonMeleeSpells(true);
                                     pFeludius->SetSpeed(MOVE_WALK, 1.5f, true);
-                                    pFeludius->MonsterYell(" But now witness true power...", LANG_UNIVERSAL, NULL);
+                                    pFeludius->MonsterYell(" But now witness true power...", LANG_UNIVERSAL, 0);
                                     pFeludius->SendPlaySound(20165, false);
                                     pFeludius->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                     PHASE=6;
@@ -1795,12 +1831,14 @@ public:
 
         void Reset()
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
             Quake_timer=30000;
             Eruption_timer=27000;
             Harden_Skin_timer=25000;
             Gravity_well_timer=13000;
             Speaking_timer=3500;
-            Frozen_orb_timer=20000;
+            Frozen_orb_timer=25000;
             HS_counter=0;
             Hp_gainer=0;
             Hp_dropped=has_shield=speaked=can_interrupt=false;
@@ -1821,18 +1859,22 @@ public:
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
             {
-                me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21842, false);
             }
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
             DoCast(me,87459); // Visual teleport
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
+            damage = damage * 1.1f; // 10 % dmg boost
+
             if(attacker==me) // Davam si sam dmg pri spelle Harden skin
                 return;
 
@@ -1864,7 +1906,7 @@ public:
 
                 if(Speaking_timer<=diff && !speaked)
                 {
-                    me->MonsterYell("We will handle them!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("We will handle them!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(21843, false);
                     speaked=true;
                 }
@@ -1922,7 +1964,7 @@ public:
                     DoCast(me,83565); // Quake
                     Quake_timer=60000;
                     me->MonsterTextEmote("The ground beneath you rumbles ominously...", 0, true);
-                    me->MonsterYell("The earth will devour you!", LANG_UNIVERSAL, NULL);
+                    me->MonsterYell("The earth will devour you!", LANG_UNIVERSAL, 0);
                     me->SendPlaySound(21844, false);
                 }
             }
@@ -1968,18 +2010,8 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
-                    if(urand(0,1)) // 50 % sanca na spawn na pevnu poziciu
-                    {
-                        int rand = urand(1,3);
-                        me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    }
-                    else // inak po kruznici random
-                    {
-                        float angle=0.0f;
-                        angle=(float)urand(0,6)+ 0.28f ; // Spawn pod random uhlom
-                        me->SummonCreature(CREATURE_GRAVITY_WELL,-1009.1f+cos(angle)*20.0f,-582.5f+sin(angle)*20.0f,831.91f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    }
-
+                    int rand = urand(1,5);
+                    me->SummonCreature(CREATURE_GRAVITY_WELL,Gravity_pos[rand].GetPositionX(),Gravity_pos[rand].GetPositionY(),Gravity_pos[rand].GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     Gravity_well_timer=30000;
                 }
             }
@@ -1996,6 +2028,8 @@ public:
 /********************************* DRUHA FAZA *********************************************************/
                             if(PHASE==2 || (HealthBelowPct(25) && !Hp_dropped))
                             {
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                                 if(pFELUDIUS) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
                                     pFELUDIUS->SetReactState(REACT_PASSIVE);
@@ -2026,7 +2060,7 @@ public:
                                 me->SendMovementFlagUpdate();
                                 TeleDebug_timer=300;
                                 walk_timer=5000;
-                                walk_timer_Ignacious=walk_timer+7000;
+                                walk_timer_Ignacious=walk_timer+5200;
                                 Monstrosity_timer=14000;
                                 me->ForcedDespawn(15000);
                                 DoCast(me,87459); // Visual teleport
@@ -2064,7 +2098,7 @@ public:
                             {
                                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                 me->SetSpeed(MOVE_WALK, 1.5f, true);
-                                me->MonsterYell("To have made it this far.", LANG_UNIVERSAL, NULL);
+                                me->MonsterYell("To have made it this far.", LANG_UNIVERSAL, 0);
                                 me->SendPlaySound(21845, false);
                                 me->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                 PHASE=5;
@@ -2078,7 +2112,7 @@ public:
                                     pIgnac->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                     pIgnac->InterruptNonMeleeSpells(true);
                                     pIgnac->SetSpeed(MOVE_WALK, 1.5f, true);
-                                    pIgnac->MonsterYell("The fury of the elements!", LANG_UNIVERSAL, NULL);
+                                    pIgnac->MonsterYell("The fury of the elements!", LANG_UNIVERSAL, 0);
                                     pIgnac->SendPlaySound(20288, false);
                                     pIgnac->GetMotionMaster()->MovePoint(0,-1009.1f,-582.5f,831.91f);
                                     PHASE=6;
@@ -2108,7 +2142,12 @@ public:
                                 }
                                 if(Monstrosity!=NULL)
                                 {
-                                    Monstrosity->SetHealth(Hp_gainer);// Monstrosity bude mat tolko HP kolko zostalo elementalom dokopy
+                                    // Kedze nejde vsetko na 100 % ako na offi znizim zacinajuce HP Monstoristy o par %
+                                    if(getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Na normale uberem 2 %
+                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) << 1) );
+                                    else
+                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) * 4) ); // Na HC 4 %
+
                                     Monstrosity->SetInCombatWithZone();
                                 }
                             }
@@ -2149,13 +2188,19 @@ public:
             me->SetInCombatWithZone();
         }
 
-        void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType typeOfDamage)
         {
-            if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER)
-            { // Po zasahu tornadom hrac dostane buff ( swirling winds)->levitate
-                me->AddAura(83500,target);
-                if(target->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
-                    target->RemoveAura(83581);
+            if(target->HasAura(83587)) // Ak ma hrac magnetic pull auru, nebude dostavat dmg
+                damage = 0;
+
+            if(!target->HasAura(83587)) // Ak hrac nema auru magnetic pull aplikujem buff swirling winds -> tymto zabranim tomu aby si hraca pohadzovalo medzi tornadom a studnickou ak sa spawnu vedla seba
+            {
+                if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER)
+                { // Po zasahu tornadom hrac dostane buff ( swirling winds)->levitate
+                    me->AddAura(83500,target);
+                    if(target->HasAura(83581)) // Ak ma hrac grounded debuff zhodim mu ho
+                        target->RemoveAura(83581);
+                }
             }
         }
 
@@ -2172,7 +2217,7 @@ public:
             {
                 me->SetSpeed(MOVE_RUN,0.5f,true);
                 DoCast(me,83472); //effekt tornada
-                me->GetMotionMaster()->MoveRandom(60.0f);
+                me->GetMotionMaster()->MoveRandom(40.0f);
                 buffed=true;
             }
             else Buff_timer-=diff;
@@ -2216,7 +2261,7 @@ public:
         {
             if(typeOfDamage == SPELL_DIRECT_DAMAGE && target->GetTypeId() == TYPEID_PLAYER) // Po zasahu wellom hrac dostane debuff grounded
             {
-                if(!target->HasAura(83581)) // Ak sa hrac ktory nema grounded debuff priblizi ku wellu vcucne ho to :D
+                if(!target->HasAura(83581) && !target->HasAura(92307)) // Ak sa hrac ktory nema grounded debuff a zaroven lightning rod debuff, ak sa  priblizi ku wellu vcucne ho to :D
                     target->GetMotionMaster()->MoveJump(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),30.0f,2.0f);
 
                 me->AddAura(83581,target); // grounded debuff
@@ -2275,7 +2320,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(6000);
             Buff_timer=1000;
-            Spike_dmg_timer = 5000;
+            Spike_dmg_timer = 5500;
             buffed=spiked=false;
         }
 
@@ -2336,7 +2381,7 @@ public:
             me->ForcedDespawn(61000);
             speeder=0.0f;
             Chasing_timer=5000; // Po 5 sekundach sa rozbehnem po random hracovi s Frost beacon debuffom
-            Flamestrike_timer=5000; // Spawn Flamestriku po 5 sekundach od spawnu 
+            Flamestrike_timer=5000; // Spawn Flamestriku po 3 sekundach od spawnu 
             checking_timer =5000; // kazdych 500ms sekund kontrolujem ci sa nachadzam pri Flamestriku ( 5s potom ako zmenim 
             Speed_timer=6000;
             Glaciate_timer=60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
@@ -2348,13 +2393,17 @@ public:
 
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
         {
-            if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
-                victim->RemoveAurasDueToSpell(92307);
-
-            if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
+            if(me->HasAura(92302)) // Ak uz mam model orbu -> mohlo by sa stat ze sa spawne orb pod hracom a hitne ho hned a to nechceme
             {
-                DoCast(92548); // Zacastim instant Glaciate
-                me->ForcedDespawn();
+                if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
+                    victim->RemoveAurasDueToSpell(92307);
+
+                if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
+                {
+                    DoCast(92548); // Zacastim instant Glaciate
+                    me->ForcedDespawn();
+                }
+
             }
         }
 
@@ -2391,7 +2440,12 @@ public:
             if(Flamestrike_timer<=diff) // Spawn Flamestriku pod random hraca
             {
                 if (Unit* ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                    me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                {
+                    Creature *pflamestrike = NULL;
+                    pflamestrike = me->SummonCreature(50297,ptarget->GetPositionX(),ptarget->GetPositionY(),ptarget->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Flamestrike
+                    if(pflamestrike == NULL ) // V pripade neuspechu summmonu despawnem orb
+                        me->ForcedDespawn();
+                }
 
                 if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true))
                     pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
@@ -2411,6 +2465,12 @@ public:
                     me->AddThreat(target,9999999.0f);
                 }
 
+                if(target) // Nejak sa orb nechcel pohnut sam od seba tak mu musim pomoct
+                {
+                    me->GetMotionMaster()->MoveChase(target);
+                    me->AddThreat(target,9999999.0f);
+                }
+
                 DoCast(me,92302); // Spell nahodi "model" orbu + zvysuje speed ---> Speed som musel, vypnut robim rucne v AI
                 buffed=true;
             }
@@ -2419,6 +2479,9 @@ public:
 
             if(checking_timer<=diff)
             {
+                if(target && target->isDead()) // Ak frozen orbu zomrie beacon target gulicka sa despawne
+                    me->ForcedDespawn();
+
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 1000, true))
                 {
                     if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
@@ -2468,9 +2531,11 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE|*/UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(60000);
             me->SetInCombatWithZone();
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,6.0f);
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
-            Buff_timer=4500;
+            Buff_timer=5500;
             buffed=false;
+            me->SetFlying(true); // Aby sa neprepadaval nahodu do textury
         }
 
         void UpdateAI(const uint32 diff)
@@ -2494,6 +2559,50 @@ public:
 };
 
 
+/******************** HALFUS ANTI-LOS DEBUGGER BUNNY****************************/
+class Halfus_los_checker : public CreatureScript
+{
+public:
+    Halfus_los_checker() : CreatureScript("Halfus_los_checker") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new Halfus_los_checkerAI (creature);
+    }
+
+    struct Halfus_los_checkerAI : public ScriptedAI
+    {
+        Halfus_los_checkerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 Los_timer;
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            Los_timer=5000; // Kazdych 5 sekund checknem ci je Halfus v texture
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if(Los_timer <= diff)
+            {
+                if(Creature *pHalfus = me->FindNearestCreature(44600, 1000, true)) // Halfus
+                {
+                    if(pHalfus->isInCombat()) // Iba ak je halfus v combate
+                    {
+                        if(pHalfus->getVictim() && pHalfus->getVictim()->ToPlayer() && !pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
+                             pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
+                    }
+                }
+                Los_timer = 5000;
+            }
+            else Los_timer-=diff;
+        }
+    };
+};
+
+
 void AddSC_twilight_council()
 {
     new mob_felo();
@@ -2510,4 +2619,5 @@ void AddSC_twilight_council()
     new mob_liquide_ice();
     new Frozen_orb();
     new Flamestrike_patch();
+    new Halfus_los_checker();
 }

@@ -736,7 +736,7 @@ public:
                     {
                         pGoPortal->SetPhaseMask(32,true);
                         pGoPortal->SetRespawnTime(9999999);
-                        pGoPortal->SetOwnerGUID(NULL);
+                        pGoPortal->SetOwnerGUID(0);
                     }
                     DoCast(SPELL_TWILIGHT_DIVISION);
                     setStage(3);

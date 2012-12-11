@@ -269,6 +269,7 @@ ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid        = 1;
     m_hiCreatureGuid    = 1;
+    m_hiTempCreatureGuid = 0x0FFFFFFE; // the same guid space as for normal creature guids, but from highest possible to lowest
     m_hiPetGuid         = 1;
     m_hiVehicleGuid     = 1;
     m_hiItemGuid        = 1;
@@ -1687,7 +1688,7 @@ uint32 ObjectMgr::AddCreData(uint32 entry, uint32 /*team*/, uint32 mapId, float 
     uint32 level = cInfo->minlevel == cInfo->maxlevel ? cInfo->minlevel : urand(cInfo->minlevel, cInfo->maxlevel); // Only used for extracting creature base stats
     CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, cInfo->unit_class);
 
-    uint32 guid = GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 guid = GenerateLowGuidForUnit(true);
     CreatureData& data = NewOrExistCreatureData(guid);
     data.id = entry;
     data.mapid = mapId;
@@ -6598,12 +6599,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiItemGuid++;
         case HIGHGUID_UNIT:
-            if (m_hiCreatureGuid >= 0x0FFFFFFE)
-            {
-                sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
-                ASSERT("Creature guid overflow!" && false);
-            }
-            return m_hiCreatureGuid++;
+            return GenerateLowGuidForUnit(false);
         case HIGHGUID_PET:
             if (m_hiPetGuid >= 0x00FFFFFE)
             {
@@ -6666,6 +6662,28 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 
     ASSERT(0);
     return 0;
+}
+
+uint32 ObjectMgr::GenerateLowGuidForUnit(bool temporary)
+{
+    if (!temporary)
+    {
+        if (m_hiCreatureGuid >= m_hiTempCreatureGuid)
+        {
+            sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
+            ASSERT("Creature guid overflow!" && false);
+        }
+        return m_hiCreatureGuid++;
+    }
+    else
+    {
+        if (m_hiTempCreatureGuid <= m_hiCreatureGuid)
+        {
+            sLog->outError("Temporary creature guid uderflow!! Can't continue, shutting down server. ");
+            ASSERT("Temporary creature guid underflow!" && false);
+        }
+        return m_hiTempCreatureGuid--;
+    }
 }
 
 void ObjectMgr::LoadGameObjectLocales()
@@ -8340,7 +8358,7 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
     // explicit name case
     std::wstring wname;
     if (!Utf8toWStr(name,wname))
-        return false;
+        return NULL;
 
     // converting string that we try to find to lower case
     wstrToLower(wname);

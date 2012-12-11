@@ -223,7 +223,7 @@ public:
             RubbleCount = 0;
             Gripped = false;
             for (int32 n = 0; n < RAID_MODE(1, 3); ++n)
-                GripTargetGUID[n] = NULL;
+                GripTargetGUID[n] = 0;
             
             for (int32 n = 0; n < 2; ++n)
             {
@@ -564,7 +564,7 @@ public:
                                 GripTarget->EnterVehicle(me, n);
                                 me->AddAura(SPELL_STONE_GRIP, GripTarget);
                                 me->AddAura(SPELL_STONE_GRIP_STUN, GripTarget);
-                                GripTargetGUID[n] = NULL;
+                                GripTargetGUID[n] = 0;
                             }
                         }
                     }  

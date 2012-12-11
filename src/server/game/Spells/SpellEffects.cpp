@@ -1087,6 +1087,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Glyph of Starsurge
                     if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(62971))
                         m_caster->ToPlayer()->ModifySpellCooldown(48505, -5000, true);
+
+                    // Shooting Stars
+                    if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(93400))
+                        m_caster->ToPlayer()->RemoveAurasDueToSpell(93400);
+
                 }
                 // Lacerate
                 else if (m_spellInfo->Id == 33745)
@@ -2919,8 +2924,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             case 49998: // Death Strike (main hand only)
                 {
-                    // Heal for 20% of the damage sustained in 5 preceding seconds
-                    bp = int32(m_caster->GetDamageTakenHistory(5) * 20.0f / 100.0f);
+                    // Heal for 15% of the damage sustained in 5 preceding seconds
+                    bp = int32(m_caster->GetDamageTakenHistory(5) * 15.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
                     bp = bp > min ? bp : min;
@@ -2940,6 +2945,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                         // 6.25% of amount healed per mastery point, so mastery*6.25 percent
                         int32 bp0 = bp*(m_caster->ToPlayer()->GetMasteryPoints()*6.25f/100.0f) + bonus;
+                        // Max Health is a Cap
+                        int32 max = m_caster->GetMaxHealth();
+                        bp0 = bp0 > max ? max : bp0;
                         m_caster->CastCustomSpell(m_caster,77535,&bp0,0,0,true);
                     }
                     return;
@@ -5150,7 +5158,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 case SUMMON_TYPE_TOTEM:
                 {
                     // we need to know the totem's GUID before it is actually created
-                    uint32 lowGUID = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+                    uint32 lowGUID = sObjectMgr->GenerateLowGuidForUnit(true);
                     if (m_originalCaster->GetTypeId() == TYPEID_PLAYER
                         && properties->Slot >= SUMMON_SLOT_TOTEM
                         && properties->Slot < MAX_TOTEM_SLOT)

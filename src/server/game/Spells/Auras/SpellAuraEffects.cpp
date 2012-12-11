@@ -856,9 +856,23 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 amount *= 1.0f+caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f;
             }
             break;
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+            if (!caster)
+                break;
+            if (GetSpellProto()->Id == 77987) // Growth Cataclyst
+            {
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                    amount += GetBase()->GetUnitOwner()->ToCreature()->GetMap()->IsHeroic() ? 20.0 : 10.0;
+            }
+            break;
         case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
             if (!caster)
                 break;
+            if (GetSpellProto()->Id == 77987) // Growth Cataclyst
+            {
+                if (GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_UNIT)
+                    amount += 10.0;
+            }
             // Icebound Fortitude
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellProto->SpellFamilyFlags[0] & 0x00100000)
             {
@@ -5564,7 +5578,7 @@ void AuraEffect::HandleAuraModStateImmunity(AuraApplication const *aurApp, uint8
     Unit *target = aurApp->GetTarget();
 
     if (apply && (GetSpellProto()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY))
-        target->RemoveAurasByType(AuraType(GetMiscValue()), NULL , GetBase());
+        target->RemoveAurasByType(AuraType(GetMiscValue()), 0 , GetBase());
 
     target->ApplySpellImmune(GetId(), IMMUNITY_STATE, GetMiscValue(), apply);
 }
@@ -5738,16 +5752,24 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
     {
         // Bear Form - increase armor by 120% on level >= 40
         case 5487:
+        {
+            float f_amount = 100 + amount;
             if (target->getLevel() >= 40)
-                amount = 120;
+                f_amount = 100 + 120;
             // Thick Hide increases armor percentage by an additional 26/52/78%
             if (target->HasAura(16931))
-                amount += 78;
+                f_amount *= 1.78f;
             else if (target->HasAura(16930))
-                amount += 52;
+                f_amount *= 1.52f;
             else if (target->HasAura(16929))
-                amount += 26;
+                f_amount *= 1.26f;
+            amount = f_amount - 100.0f;
+            // total armor is 1 * 2.2 * 1.78    =  391.6%
+            // bonus armor is 1 * 2.2 * 1.78 -1 = +291.6%
+            // (no bonus 100% - 100% = 0%)
+            // --> amount == bonus percent
             break;
+        }
         default:
             break;
     }

@@ -545,7 +545,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
     if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
             // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-            sCreatureTextMgr->SendChat(stalker, (uint8) entry, NULL, CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_ZONE);
+            sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_ZONE);
 }
 
 /*void Battlefield::SendWarningToAllInWar(int32 entry,...)
@@ -940,7 +940,7 @@ Creature *Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
     }
 
     //Create creature
-    uint32 db_guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 db_guid = sObjectMgr->GenerateLowGuidForUnit(true);
     Creature* creature = new Creature;
     if (!creature->Create(db_guid, map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
     {

@@ -1008,7 +1008,7 @@ public:
                         me->SetInFront(car);
                         me->SendMovementFlagUpdate();
                     }
-                    me->MonsterSay(SAY_SCARLET_MINER1,LANG_UNIVERSAL,NULL);
+                    me->MonsterSay(SAY_SCARLET_MINER1,LANG_UNIVERSAL,0);
                     SetRun(true);
                     IntroTimer = 4000;
                     IntroPhase = 1;
@@ -1022,7 +1022,7 @@ public:
                         car->StopMoving();
                         car->RemoveAura(SPELL_CART_DRAG);
                     }
-                    me->MonsterSay(SAY_SCARLET_MINER2,LANG_UNIVERSAL,NULL);
+                    me->MonsterSay(SAY_SCARLET_MINER2,LANG_UNIVERSAL,0);
                     break;
                 default:
                     break;
