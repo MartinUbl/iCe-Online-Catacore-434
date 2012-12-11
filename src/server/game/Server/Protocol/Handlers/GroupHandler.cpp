@@ -34,6 +34,7 @@
 #include "SocialMgr.h"
 #include "Util.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "Vehicle.h"
 #include "LFGMgr.h"
 
@@ -878,14 +879,32 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         // TODO: looks like now client requires all active auras to be in the beginning of the auramask
         // e.g. if you have holes in the aura mask the values after are ignored.
         *data << uint64(auramask);
-        *data << uint32(64);  // how many bits client reads from auramask
+        *data << uint32(MAX_AURAS);  // how many bits client reads from auramask
         for (uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if (auramask & (uint64(1) << i))
             {
                 AuraApplication const * aurApp = player->GetVisibleAura(i);
-                *data << uint32(aurApp ? aurApp->GetBase()->GetId() : 0);
-                *data << uint8(1);
+                if (!aurApp)
+                {
+                    *data << uint32(0);
+                    *data << uint16(0);
+                    continue;
+                }
+
+                *data << uint32(aurApp->GetBase()->GetId());
+                *data << uint16(aurApp->GetFlags());
+
+                if (aurApp->GetFlags() & AFLAG_BASEPOINT)
+                {
+                    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (AuraEffect const *eff = aurApp->GetBase()->GetEffect(i))
+                            *data << int32(eff->GetAmount());
+                        else
+                            *data << int32(0);
+                    }
+                }
             }
         }
     }
@@ -955,33 +974,54 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
             *data << (uint16) 0;
     }
 
+    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
+    {
+        if (Vehicle* veh = player->GetVehicle())
+            *data << uint32(veh->GetVehicleInfo()->m_seatID[player->m_movementInfo.t_seat]);
+        else
+            *data << uint32(0);
+    }
+
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
     {
         if (pet)
         {
-            *data << uint8(0); // if true client clears auras that are not covered by auramask
+            *data << uint8(0);
             const uint64& auramask = pet->GetAuraUpdateMaskForRaid();
             *data << uint64(auramask);
-            *data << uint32(64);  // how many bits client reads from auramask
+            *data << uint32(MAX_AURAS); // count
             for (uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if (auramask & (uint64(1) << i))
                 {
-                    AuraApplication const * aurApp = player->GetVisibleAura(i);
-                    *data << uint32(aurApp ? aurApp->GetBase()->GetId() : 0);
-                    *data << uint8(1);
+                    AuraApplication const * aurApp = pet->GetVisibleAura(i);
+                    if (!aurApp)
+                    {
+                        *data << uint32(0);
+                        *data << uint16(0);
+                        continue;
+                    }
+
+                    *data << uint32(aurApp->GetBase()->GetId());
+                    *data << uint16(aurApp->GetFlags());
+
+                    if (aurApp->GetFlags() & AFLAG_BASEPOINT)
+                    {
+                        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                        {
+                            if (AuraEffect const* eff = aurApp->GetBase()->GetEffect(i))
+                                *data << int32(eff->GetAmount());
+                            else
+                                *data << int32(0);
+                        }
+                    }
                 }
             }
         }
         else
-            *data << uint8(1) << (uint64) 0 << uint32(0);
-    }
-
-    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
-    {
-        if (player->GetVehicle()){
-            Vehicle* vv=player->GetVehicle();
-            *data << (uint32) vv->GetVehicleInfo()->m_seatID[player->m_movementInfo.t_seat];
+        {
+            *data << uint8(0);
+            *data << uint64(0);
         }
     }
 

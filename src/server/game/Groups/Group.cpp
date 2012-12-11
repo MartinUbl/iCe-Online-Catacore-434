@@ -368,6 +368,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
             player->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
 
             UpdateData groupData;
+            groupData.m_map = player->GetMapId();
             WorldPacket groupDataPacket;
 
             // Broadcast group members' fields to player
@@ -1367,6 +1368,7 @@ void Group::SendUpdate()
         {
             data << uint8(sLFGMgr->GetState(m_guid) == LFG_STATE_FINISHED_DUNGEON ? 2 : 0); // FIXME - Dungeon save status? 2 = done
             data << uint32(sLFGMgr->GetDungeon(m_guid));
+            data << uint8(0); // 4.x new
         }
 
         data << uint64(m_guid);
@@ -1402,33 +1404,6 @@ void Group::SendUpdate()
         }
 
         player->GetSession()->SendPacket(&data);
-
-        // Guild members present
-        uint32 gmembers = GetGuildMembersCount(player->GetGuildId());
-        // Max group size
-        uint32 maxgsize = 5;
-        uint32 guildprofit = GROUP_MEMBERS_DUNGEON_PROFIT;
-        if (isRaidGroup())
-        {
-            if (m_raidDifficulty == RAID_DIFFICULTY_10MAN_NORMAL ||
-                m_raidDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
-            {
-                maxgsize = 10;
-                guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
-            }
-            else
-            {
-                maxgsize = 25;
-                guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
-            }
-        }
-
-        WorldPacket guilddata(SMSG_GUILD_GROUP_UPDATE, 1+4+4+4, true);
-        guilddata << uint8( (gmembers >= guildprofit) ? 0x80 : 0x00 ); // value is 1 << 7 if it is guild group
-        guilddata << uint32(gmembers);                                 // members of guild present (also online)
-        guilddata << uint32(maxgsize);                                 // unknown
-        guilddata << float(GetGuildProfitCoef(player->GetGuildId()));  // % of guild profit
-        player->GetSession()->SendPacket(&guilddata);
     }
 }
 
