@@ -37,6 +37,12 @@
 #include <vector>
 #include "SharedDefines.h"
 
+#if defined(__GNUC__)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 // Structures using to access raw DB2 data and required packing to portability
 struct ItemEntry
 {
@@ -153,5 +159,11 @@ struct ItemSparseEntry
     int32      CurrencySubstitutionId;                       // 129
     int32      CurrencySubstitutionCount;                    // 130
 };
+
+#if defined(__GNUC__)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 #endif
