@@ -23,6 +23,8 @@
 #include "Unit.h"
 #include "Transport.h"
 #include "Vehicle.h"
+#include "WorldPacket.h"
+#include "Opcodes.h"
 
 namespace Movement
 {
@@ -73,7 +75,8 @@ namespace Movement
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized())
+        // Don't compute for transport movement if the unit is in a motion between two transports
+        if (!move_spline.Finalized() && move_spline.onTransport == (unit.GetTransGUID() != 0))
             real_position = move_spline.ComputePosition();
 
         // should i do the things that user should do? - no.
@@ -83,6 +86,7 @@ namespace Movement
         // correct first vertex
         args.path[0] = real_position;
         args.initialOrientation = real_position.orientation;
+        move_spline.onTransport = (unit.GetTransGUID() != 0);
 
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
         if (args.flags.walkmode)
@@ -95,7 +99,7 @@ namespace Movement
         if (!args.HasVelocity)
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
 
-        if (!args.Validate())
+        if (!args.Validate(&unit))
             return;
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
@@ -150,7 +154,7 @@ namespace Movement
         args.TransformForTransport = unit.GetTransGUID();
         // mix existing state into new
         args.flags.walkmode = unit.m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);
-        args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_LEVITATING));
+        args.flags.flying = unit.m_movementInfo.HasMovementFlag(MovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_LEVITATING));
         args.flags.smoothGroundPath = true; // enabled by default, CatmullRom mode or client config "pathSmoothing" will disable this
     }
 
@@ -182,21 +186,19 @@ namespace Movement
         args.path[1] = transform(dest);
     }
 
+    void MoveSplineInit::SetFall()
+    {
+        args.flags.EnableFalling();
+        args.flags.fallingSlow = unit.HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
+    }
+
     Vector3 TransportPathTransform::operator()(Vector3 input)
     {
         if (_transformForTransport)
         {
-            if (Unit* vehicle = _owner.GetVehicleBase())
-            {
-                input.x -= vehicle->GetPositionX();
-                input.y -= vehicle->GetPositionY();
-                input.z -= vehicle->GetPositionZMinusOffset();
-            }
-            else if (Transport* transport = _owner.GetTransport())
-            {
-                float unused = 0.0f;
+            float unused = 0.0f;
+            if (TransportBase* transport = _owner.GetDirectTransport())
                 transport->CalculatePassengerOffset(input.x, input.y, input.z, unused);
-            }
         }
 
         return input;

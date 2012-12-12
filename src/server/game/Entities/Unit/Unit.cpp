@@ -338,8 +338,8 @@ void Unit::UpdateSplinePosition()
             loc.z += vehicle->GetPositionZMinusOffset();
             loc.orientation = vehicle->GetOrientation();
         }
-        else if (Transport* transport = GetTransport())
-            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
+        else if (TransportBase* transport = GetDirectTransport())
+                transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
     }
 
     if (hasUnitState(UNIT_STAT_CANNOT_TURN))
@@ -17711,6 +17711,13 @@ uint64 Unit::GetTransGUID() const
         return GetTransport()->GetGUID();
 
     return 0;
+}
+
+TransportBase* Unit::GetDirectTransport() const
+{
+    if (Vehicle* veh = GetVehicle())
+        return veh;
+    return (TransportBase*)GetTransport();
 }
 
 bool Unit::IsInPartyWith(Unit const *unit) const

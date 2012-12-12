@@ -339,6 +339,7 @@ class Guardian;
 class UnitAI;
 class Totem;
 class Transport;
+class TransportBase;
 class Vehicle;
 
 struct SpellImmune
@@ -2072,6 +2073,8 @@ class Unit : public WorldObject
         uint32 GetTransTime()   const { return m_movementInfo.t_time; }
         int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         uint64 GetTransGUID()   const;
+
+        TransportBase* GetDirectTransport() const;
 
         bool m_ControlledByPlayer;
 

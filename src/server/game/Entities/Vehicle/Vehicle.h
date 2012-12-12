@@ -133,7 +133,17 @@ typedef std::map<uint32, VehicleScalingInfo> VehicleScalingMap;
 typedef std::map<int8, VehicleSeat> SeatMap;
 typedef std::set<uint64> GuidSet;
 
-class Vehicle
+class TransportBase
+{
+    public:
+        /// This method transforms supplied transport offsets into global coordinates
+        virtual void CalculatePassengerPosition(float& x, float& y, float& z, float& o) = 0;
+
+        /// This method transforms supplied global coordinates into local offsets
+        virtual void CalculatePassengerOffset(float& x, float& y, float& z, float& o) = 0;
+};
+
+class Vehicle : public TransportBase
 {
     friend class Unit;
     public:
@@ -147,6 +157,13 @@ class Vehicle
         void InstallAllAccessories(uint32 entry);
 
         Unit *GetBase() const { return me; }
+
+        /// This method transforms supplied transport offsets into global coordinates
+        void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
+
+        /// This method transforms supplied global coordinates into local offsets
+        void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
+
         VehicleEntry const *GetVehicleInfo() const { return m_vehicleInfo; }
 
         bool HasEmptySeat(int8 seatId) const;
