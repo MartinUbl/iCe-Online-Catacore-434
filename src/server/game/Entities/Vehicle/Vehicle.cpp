@@ -492,7 +492,7 @@ uint16 Vehicle::GetExtraMovementFlagsForBase() const
 void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
 {
     float inx = x, iny = y, inz = z, ino = o;
-    o = GetBase()->GetOrientation() + ino;
+    o = MapManager::NormalizeOrientation(GetBase()->GetOrientation() + ino);
     x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
     y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
     z = GetBase()->GetPositionZ() + inz;
@@ -500,7 +500,7 @@ void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
 
 void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
 {
-    o -= GetBase()->GetOrientation();
+    o -= MapManager::NormalizeOrientation(GetBase()->GetOrientation());
     z -= GetBase()->GetPositionZ();
     y -= GetBase()->GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
     x -= GetBase()->GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)
