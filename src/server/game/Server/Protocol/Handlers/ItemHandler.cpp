@@ -444,168 +444,222 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recv_data)
 // Only _static_ data send in this packet !!!
 void WorldSession::HandleRequestHotFixOpcode(WorldPacket & recv_data)
 {
-    /*
-    uint32 count, type;
-    recv_data >> count >> type;
+    uint32 type, count;
+    recv_data >> type;
 
-    if(type != DB2TYPE_ITEM_SPARSE && type != DB2TYPE_ITEM)
+    count = recv_data.ReadBits(23);
+
+    ObjectGuid* guids = new ObjectGuid[count];
+    for (uint32 i = 0; i < count; ++i)
     {
-        sLog->outString("Client tried to request update item data from non-handled update type");
+        guids[i][0] = recv_data.ReadBit();
+        guids[i][4] = recv_data.ReadBit();
+        guids[i][7] = recv_data.ReadBit();
+        guids[i][2] = recv_data.ReadBit();
+        guids[i][5] = recv_data.ReadBit();
+        guids[i][3] = recv_data.ReadBit();
+        guids[i][6] = recv_data.ReadBit();
+        guids[i][1] = recv_data.ReadBit();
+    }
+
+    uint32 entry;
+    for (uint32 i = 0; i < count; ++i)
+    {
+        recv_data.ReadByteSeq(guids[i][5]);
+        recv_data.ReadByteSeq(guids[i][6]);
+        recv_data.ReadByteSeq(guids[i][7]);
+        recv_data.ReadByteSeq(guids[i][0]);
+        recv_data.ReadByteSeq(guids[i][1]);
+        recv_data.ReadByteSeq(guids[i][3]);
+        recv_data.ReadByteSeq(guids[i][4]);
+        recv_data >> entry;
+        recv_data.ReadByteSeq(guids[i][2]);
+
+        switch (type)
+        {
+            case DB2_REPLY_ITEM:
+                SendItemDb2Reply(entry);
+                break;
+            case DB2_REPLY_SPARSE:
+                SendItemSparseDb2Reply(entry);
+                break;
+            default:
+                sLog->outError("CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
+                recv_data.rfinish();
+                break;
+        }
+    }
+
+    delete[] guids;
+}
+
+void WorldSession::SendItemDb2Reply(uint32 entry)
+{
+    WorldPacket data(SMSG_DB_REPLY, 44);
+    ItemPrototype const* proto = sObjectMgr->GetItemPrototype(entry);
+    if (!proto)
+    {
+        data << uint32(-1);         // entry
+        data << uint32(DB2_REPLY_ITEM);
+        data << uint32(time(NULL)); // hotfix date
+        data << uint32(0);          // size of next block
         return;
     }
 
-    for(uint32 i = 0; i < count; ++i)
+    data << uint32(entry);
+    data << uint32(DB2_REPLY_ITEM);
+
+    // we don't even know, why's this important, but we will send the newest possible value
+    data << uint32(time(NULL) /*sObjectMgr->GetHotfixDate(entry, DB2_REPLY_SPARSE)*/);
+
+    ByteBuffer buff;
+    buff << uint32(entry);
+    buff << uint32(proto->Class);
+    buff << uint32(proto->SubClass);
+    buff << int32(-1 /*proto->SoundOverrideSubclass*/);
+    buff << uint32(proto->Material);
+    buff << uint32(proto->DisplayInfoID);
+    buff << uint32(proto->InventoryType);
+    buff << uint32(proto->Sheath);
+
+    data << uint32(buff.size());
+    data.append(buff);
+
+    SendPacket(&data);
+}
+
+void WorldSession::SendItemSparseDb2Reply(uint32 entry)
+{
+    WorldPacket data(SMSG_DB_REPLY, 526);
+    ItemPrototype const* proto = sObjectMgr->GetItemPrototype(entry);
+    if (!proto)
     {
-        uint32 item;
-        recv_data >> item;
-        recv_data.read_skip(8);
-        WorldPacket data2(SMSG_DB_REPLY,700);
-        ByteBuffer data;
-
-        data2 << uint32(type); // Needed?
-        data2 << uint32(item);
-
-        ItemPrototype const* proto = sObjectMgr->GetItemPrototype(item);
-
-        if(!proto) // Item does not exist
-        {
-            data2 << uint32(4); // sizeof(uint32)
-            data2 << uint32(item | 0x80000000);
-            SendPacket(&data2);
-            continue;
-        }
-        else
-        {
-            data << uint32(item);
-            if(type == DB2TYPE_ITEM) // Update the base item shit
-            {
-                data << uint32(proto->Class);
-                data << uint32(proto->SubClass);
-                data << int32(proto->Unk0);
-                data << uint32(proto->Material);
-                data << uint32(proto->DisplayInfoID);
-                data << uint32(proto->InventoryType);
-                data << uint32(proto->Sheath);
-            }
-            else if(type == DB2TYPE_ITEM_SPARSE) // Send more advanced shit
-            {
-                data << uint32(proto->Quality);
-                data << uint32(proto->Flags);
-                data << uint32(proto->Flags2);
-                data << int32(proto->BuyPrice);
-                data << uint32(proto->SellPrice);
-                data << uint32(proto->InventoryType);
-                data << int32(proto->AllowableClass);
-                data << int32(proto->AllowableRace);
-                data << uint32(proto->ItemLevel);
-                data << uint32(proto->RequiredLevel);
-                data << uint32(proto->RequiredSkill);
-                data << uint32(proto->RequiredSkillRank);
-
-                data << uint32(proto->RequiredSpell);
-                data << uint32(proto->RequiredHonorRank);
-                data << uint32(proto->RequiredCityRank);
-                data << uint32(proto->RequiredReputationFaction);
-                data << uint32(proto->RequiredReputationRank);
-                data << int32(proto->MaxCount);
-                data << int32(proto->Stackable);
-                data << uint32(proto->ContainerSlots);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
-                    data << uint32(proto->ItemStat[x].ItemStatType);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
-                    data << int32(proto->ItemStat[x].ItemStatValue);
-
-                // Till here we are going good, now we start with the unk shit
-                for(uint32 x = 0; x < 20; ++x) // 20 unk fields
-                    data << uint32(0);
-
-                data << uint32(proto->ScalingStatDistribution);
-                data << uint32(proto->damageType);
-                data << uint32(proto->Delay);
-                data << float(proto->RangedModRange);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << int32(proto->Spells[x].SpellId);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << uint32(proto->Spells[x].SpellTrigger);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << int32(proto->Spells[x].SpellCharges);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << int32(proto->Spells[x].SpellCooldown);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << uint32(proto->Spells[x].SpellCategory);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-                    data << int32(proto->Spells[x].SpellCategoryCooldown);
-
-                data << uint32(proto->Bonding);
-
-                // Now we send item names :S pascal string?
-                const char* str = proto->Name1;
-                data << uint16(strlen(str) + 1);
-                data << str;
-
-                for(uint32 x = 0; x < 3; ++x) // other 3 names
-                {
-                    const char* str = (const char*)"";
-                    data << uint16(strlen(str) + 1);
-                    data << str;
-                }
-
-                // Now we send item descriptions :S pascal string?
-                const char* str2 = (const char*)"";
-                data << uint16(strlen(str2) + 1);
-                data << str2;
-
-                data << uint32(proto->PageText);
-                data << uint32(proto->LanguageID);
-                data << uint32(proto->PageMaterial);
-                data << uint32(proto->StartQuest);
-                data << uint32(proto->LockID);
-                data << int32(proto->Material);
-                data << uint32(proto->Sheath);
-                data << int32(proto->RandomProperty);
-                data << int32(proto->RandomSuffix);
-                data << uint32(proto->ItemSet);
-                data << uint32(proto->MaxDurability);
-
-                data << uint32(proto->Area);
-                data << uint32(proto->Map);
-                data << uint32(proto->BagFamily);
-                data << uint32(proto->TotemCategory);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
-                    data << uint32(proto->Socket[x].Color);
-
-                for(uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
-                    data << uint32(proto->Socket[x].Content);
-
-                data << uint32(proto->socketBonus);
-                data << uint32(proto->GemProperties);
-                data << float(proto->ArmorDamageModifier);
-                data << int32(proto->Duration);
-                data << uint32(proto->ItemLimitCategory);
-                data << uint32(proto->HolidayId);
-
-                data << float(0.0f); // StatScalingFactor
-                data << uint32(0);
-                data << uint32(0);
-            }
-
-            data2 << uint32(data.size());
-            data2.append(data);
-        }
-
-        data2 << uint32(type);
-        SendPacket(&data2);
+        data << uint32(-1);         // entry
+        data << uint32(DB2_REPLY_SPARSE);
+        data << uint32(time(NULL)); // hotfix date
+        data << uint32(0);          // size of next block
+        return;
     }
-    */
+
+    data << uint32(entry);
+    data << uint32(DB2_REPLY_SPARSE);
+
+    // we don't even know, why's this important, but we will send the newest possible value
+    data << uint32(time(NULL) /*sObjectMgr->GetHotfixDate(entry, DB2_REPLY_SPARSE)*/);
+
+    ByteBuffer buff;
+    buff << uint32(entry);
+    buff << uint32(proto->Quality);
+    buff << uint32(proto->Flags);
+    buff << uint32(proto->Flags2);
+    buff << float(0.0f /*proto->Unk430_1*/);
+    buff << float(0.0f /*proto->Unk430_2*/);
+    buff << uint32(proto->BuyCount);
+    buff << int32(proto->BuyPrice);
+    buff << uint32(proto->SellPrice);
+    buff << uint32(proto->InventoryType);
+    buff << int32(proto->AllowableClass);
+    buff << int32(proto->AllowableRace);
+    buff << uint32(proto->ItemLevel);
+    buff << uint32(proto->RequiredLevel);
+    buff << uint32(proto->RequiredSkill);
+    buff << uint32(proto->RequiredSkillRank);
+    buff << uint32(proto->RequiredSpell);
+    buff << uint32(proto->RequiredHonorRank);
+    buff << uint32(proto->RequiredCityRank);
+    buff << uint32(proto->RequiredReputationFaction);
+    buff << uint32(proto->RequiredReputationRank);
+    buff << int32(proto->MaxCount);
+    buff << int32(proto->Stackable);
+    buff << uint32(proto->ContainerSlots);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+        buff << uint32(proto->ItemStat[x].ItemStatType);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+        buff << int32(proto->ItemStat[x].ItemStatValue);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+        buff << int32(0 /*proto->ItemStat[x].ItemStatUnk1*/);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+        buff << int32(0 /*proto->ItemStat[x].ItemStatUnk2*/);
+
+    buff << uint32(proto->ScalingStatDistribution);
+    buff << uint32(proto->damageType);
+    buff << uint32(proto->Delay);
+    buff << float(proto->RangedModRange);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << int32(proto->Spells[x].SpellId);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << uint32(proto->Spells[x].SpellTrigger);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << int32(proto->Spells[x].SpellCharges);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << int32(proto->Spells[x].SpellCooldown);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << uint32(proto->Spells[x].SpellCategory);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        buff << int32(proto->Spells[x].SpellCategoryCooldown);
+
+    buff << uint32(proto->Bonding);
+
+    // item name
+    std::string name = proto->Name1;
+    buff << uint16(name.length());
+    if (name.length())
+        buff << name;
+
+    for (uint32 i = 0; i < 3; ++i) // other 3 names
+        buff << uint16(0);
+
+    std::string desc = proto->Description;
+    buff << uint16(desc.length());
+    if (desc.length())
+        buff << desc;
+
+    buff << uint32(proto->PageText);
+    buff << uint32(proto->LanguageID);
+    buff << uint32(proto->PageMaterial);
+    buff << uint32(proto->StartQuest);
+    buff << uint32(proto->LockID);
+    buff << int32(proto->Material);
+    buff << uint32(proto->Sheath);
+    buff << int32(proto->RandomProperty);
+    buff << int32(proto->RandomSuffix);
+    buff << uint32(proto->ItemSet);
+
+    buff << uint32(proto->Area);
+    buff << uint32(proto->Map);
+    buff << uint32(proto->BagFamily);
+    buff << uint32(proto->TotemCategory);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
+        buff << uint32(proto->Socket[x].Color);
+
+    for (uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
+        buff << uint32(proto->Socket[x].Content);
+
+    buff << uint32(proto->socketBonus);
+    buff << uint32(proto->GemProperties);
+    buff << float(proto->ArmorDamageModifier);
+    buff << int32(proto->Duration);
+    buff << uint32(proto->ItemLimitCategory);
+    buff << uint32(proto->HolidayId);
+    buff << float(1.0f/*proto->StatScalingFactor*/);    // StatScalingFactor
+    buff << uint32(0 /*proto->CurrencySubstitutionId*/);
+    buff << uint32(0 /*proto->CurrencySubstitutionCount*/);
+
+    data << uint32(buff.size());
+    data.append(buff);
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleReadItem(WorldPacket & recv_data)

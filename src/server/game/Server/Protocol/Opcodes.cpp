@@ -110,7 +110,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_QUERY_RESPONSE,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_COMMENTATOR_START_WARGAME,               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_DB_REPLY,                                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_HOTFIX_NOTIFY_BLOP,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_HOTFIX_INFO,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_HOTFIX_NOTIFY,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_HOTFIX,                          STATUS_AUTHED,   &WorldSession::HandleRequestHotFixOpcode       );
     OPCODE( CMSG_PAGE_TEXT_QUERY,                         STATUS_LOGGEDIN, &WorldSession::HandlePageTextQueryOpcode       );
@@ -1323,7 +1323,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_MEMBER_DAILY_RESET,                STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_REPUTATION_WEEKLY_CAP,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_ACHIEVEMENT_DATA,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_HOTFIX_INFO,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_INIT_CURRENCY,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GUILD_BANK_MONEY_WITHDRAWN,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_GUILD_PARTY_STATE,               STATUS_LOGGEDIN, &WorldSession::HandleGuildRequestPartyState    );

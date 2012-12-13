@@ -144,6 +144,9 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
+#define DB2_REPLY_SPARSE 2442913102
+#define DB2_REPLY_ITEM   1344507586
+
 /// Player session in the World
 class WorldSession
 {
@@ -233,6 +236,9 @@ class WorldSession
         void SendCancelTrade();
 
         void SendPetitionQueryOpcode(uint64 petitionguid);
+
+        void SendItemDb2Reply(uint32 entry);
+        void SendItemSparseDb2Reply(uint32 entry);
 
         // Spell
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);

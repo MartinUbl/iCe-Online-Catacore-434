@@ -85,7 +85,7 @@ enum Opcodes
     SMSG_GUILD_QUERY_RESPONSE                        = 0x00E06, // 4.3.4 15595
     CMSG_COMMENTATOR_START_WARGAME                   = 0x025A0, // 4.3.4 15595
     SMSG_DB_REPLY                                    = 0x038A4, // 4.3.4 15595
-    SMSG_HOTFIX_NOTIFY_BLOP                          = 0x1000A, //
+    SMSG_HOTFIX_INFO                                 = 0x019B5, // 4.3.4 15595
     SMSG_HOTFIX_NOTIFY                               = 0x055A7, // 4.3.4 15595
     CMSG_REQUEST_HOTFIX                              = 0x02401, // 4.3.4 15595
     CMSG_PAGE_TEXT_QUERY                             = 0x06614, // 4.3.4 15595
@@ -873,7 +873,7 @@ enum Opcodes
     MSG_MOVE_START_ASCEND                            = 0x0390A, // 4.3.4 15595
     MSG_MOVE_STOP_ASCEND                             = 0x07B00, // 4.3.4 15595
     SMSG_ARENA_TEAM_STATS                            = 0x04425, // 4.3.4 15595
-    CMSG_LFG_JOIN                                    = 0x02581, // 4.3.4 15595
+    CMSG_LFG_JOIN                                    = 0x02430, // 4.3.4 15595
     CMSG_LFG_LEAVE                                   = 0x02433, // 4.3.4 15595 (remap)
     CMSG_SEARCH_LFG_JOIN                             = 0x1010B, //
     CMSG_SEARCH_LFG_LEAVE                            = 0x1010C, //
@@ -1457,7 +1457,6 @@ enum Opcodes
     SMSG_GUILD_PERMISSIONS_QUERY_RESULTS             = 0x034A3, // 4.3.4 Build 15595
     SMSG_GUILD_REPUTATION_WEEKLY_CAP                 = 0x030B7, // 4.3.4 Build 15595
     SMSG_GUILD_SET_NOTE                              = 0x00000, // Unknown
-    SMSG_HOTFIX_INFO                                 = 0x019B5, // 4.3.4 Build 15595
     SMSG_LFG_BOOT_PLAYER                             = 0x00000, // Unknown
     SMSG_LFG_UPDATE_SEARCH                           = 0x00000, // Unknown
     SMSG_LOAD_CUF_PROFILES                           = 0x050B1, // 4.3.4 Build 15595
