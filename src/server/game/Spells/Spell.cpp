@@ -7885,20 +7885,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             m_Spell->setState(SPELL_STATE_PREPARING);
             m_Spell->prepareFinish(NULL);
             player->CancelQueuedSpell();
-            
-            // send global cooldown to client
-            // without this the GDC on client would start immediately when pressed spell on action bar
-            //  instead of when the cast is started
-            // TODO: invent something better, this sometimes causes the GCD on client
-            //  jumping up (finished cast) & down (started cast of this)
-            //  one of the possibilities is to cast this spell immediately, not as separated event
-            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-            data << uint64(player->GetGUID());
-            data << uint8(3);
-            data << uint32(spellInfo->Id);
-            data << uint32(player->GetGlobalCooldown(spellInfo));
-            player->GetSession()->SendPacket(&data);
-            break;
         } break;
 
         default:
