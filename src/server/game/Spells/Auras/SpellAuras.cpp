@@ -151,6 +151,9 @@ void AuraApplication::_InitFlags(Unit * caster, uint8 effMask)
         }
         m_flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
     }
+
+    if (GetBase()->GetSpellProto()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+        m_flags |= AFLAG_BASEPOINT;
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
