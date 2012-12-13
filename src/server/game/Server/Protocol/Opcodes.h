@@ -369,7 +369,7 @@ enum Opcodes
     SMSG_BINDZONEREPLY                               = 0x10059, //
     SMSG_PLAYERBOUND                                 = 0x02516, // 4.3.4 15595
     SMSG_CLIENT_CONTROL_UPDATE                       = 0x02837, // 4.3.4 15595
-    CMSG_REPOP_REQUEST                               = 0x06B16, // 4.3.4 15595
+    CMSG_REPOP_REQUEST                               = 0x06235, // 4.3.4 15595
     SMSG_RESURRECT_REQUEST                           = 0x02905, // 4.3.4 15595
     CMSG_RESURRECT_RESPONSE                          = 0x06827, // 4.3.4 15595
     CMSG_LOOT                                        = 0x00127, // 4.3.4 15595
@@ -1051,7 +1051,7 @@ enum Opcodes
     SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT            = 0x10165, //
     CMSG_KEEP_ALIVE                                  = 0x00015, // 4.3.4 15595
     SMSG_RAID_READY_CHECK_ERROR                      = 0x10166, //
-    CMSG_OPT_OUT_OF_LOOT                             = 0x06235, // 4.3.4 15595
+    CMSG_OPT_OUT_OF_LOOT                             = 0x06B16, // 4.3.4 15595
     MSG_QUERY_GUILD_BANK_TEXT                        = 0x075A3, // 4.3.4 15595
     CMSG_SET_GUILD_BANK_TEXT                         = 0x03023, // 4.3.4 15595 (remap)
     CMSG_SET_GRANTABLE_LEVELS                        = 0x10168, //
