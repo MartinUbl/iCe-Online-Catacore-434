@@ -323,8 +323,8 @@ bool WorldSession::Update(uint32 diff)
             }
             catch(ByteBufferException &)
             {
-                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: 0x%05X - %s) from client %s, accountid=%i. Skipped packet.",
-                        packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()), GetRemoteAddress().c_str(), GetAccountId());
+                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
+                        packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
                 if (sLog->IsOutDebug())
                 {
                     sLog->outDebug("Dumping error causing packet:");
