@@ -1963,7 +1963,7 @@ struct SpellEntry
     uint32    AttributesEx7;                                // 8       3.2.0 (0x20 - totems, 0x4 - paladin auras, etc...)
     uint32    AttributesEx8;                                // 9        m_attributesExH
     uint32    AttributesEx9;                                // 10       4.0.0, attributes?
-    uint32    AttributesExA;                                // 11       4.3.4, attributes?
+    uint32    AttributesEx10;                               // 11       4.3.4, attributes?
     uint32    CastingTimeIndex;                             // 12       m_castingTimeIndex
     uint32    DurationIndex;                                // 13       m_durationIndex
     uint32    powerType;                                    // 14       m_powerType
