@@ -2198,6 +2198,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellIconID == 2864)
                     damage += int32(float(damage * GetTotalTicks()) * ((6 - float(2 * (GetTickNumber() - 1))) / 100));
 
+                // Recuperate
+                if (m_spellProto->Id == 73651)
+                {
+                    float percent = (float) damage;
+                    Aura *aura;
+                    if ((aura = target->GetAura(79007)) || (aura = target->GetAura(79008)))     // Improved Recuperate
+                        percent += aura->GetEffect(0)->GetAmount() / 1000.0f;
+
+                    damage = percent * target->GetMaxHealth() / 100.0f;
+                }
+
                 damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
 
