@@ -236,99 +236,103 @@ bool WorldSession::Update(uint32 diff)
         }
         else
         {
-            OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
-            try
+            OpcodeHandler* opHandle = opcodeTable[packet->GetOpcode()];
+
+            if (opHandle != NULL)
             {
-                switch (opHandle.status)
+                try
                 {
-                    case STATUS_LOGGEDIN:
-                        if (!_player)
-                        {
-                            // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-                            if (!m_playerRecentlyLogout)
-                                LogUnexpectedOpcode(packet, "the player has not logged in yet");
-                        }
-                        else if (_player->IsInWorld())
-                        {
-                            sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
-                            (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
-                                LogUnprocessedTail(packet);
-                        }
-                        // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
-                        break;
-                    case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
-                        if (!_player && !m_playerRecentlyLogout)
-                        {
-                            LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logout");
-                        }
-                        else
-                        {
-                            // not expected _player or must checked in packet hanlder
-                            sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
-                            (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
-                                LogUnprocessedTail(packet);
-                        }
-                        break;
-                    case STATUS_TRANSFER:
-                        if (!_player)
-                            LogUnexpectedOpcode(packet, "the player has not logged in yet");
-                        else if (_player->IsInWorld())
-                            LogUnexpectedOpcode(packet, "the player is still in world");
-                        else
-                        {
-                            sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
-                            (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
-                                LogUnprocessedTail(packet);
-                        }
-                        break;
-                    case STATUS_AUTHED:
-                        // prevent cheating with skip queue wait
-                        if (m_inQueue)
-                        {
-                            LogUnexpectedOpcode(packet, "the player not pass queue yet");
+                    switch (opHandle->status)
+                    {
+                        case STATUS_LOGGEDIN:
+                            if (!_player)
+                            {
+                                // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+                                if (!m_playerRecentlyLogout)
+                                    LogUnexpectedOpcode(packet, "the player has not logged in yet");
+                            }
+                            else if (_player->IsInWorld())
+                            {
+                                sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
+                                (this->*opHandle->handler)(*packet);
+                                if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                                    LogUnprocessedTail(packet);
+                            }
+                            // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                             break;
-                        }
+                        case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
+                            if (!_player && !m_playerRecentlyLogout)
+                            {
+                                LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logout");
+                            }
+                            else
+                            {
+                                // not expected _player or must checked in packet hanlder
+                                sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
+                                (this->*opHandle->handler)(*packet);
+                                if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                                    LogUnprocessedTail(packet);
+                            }
+                            break;
+                        case STATUS_TRANSFER:
+                            if (!_player)
+                                LogUnexpectedOpcode(packet, "the player has not logged in yet");
+                            else if (_player->IsInWorld())
+                                LogUnexpectedOpcode(packet, "the player is still in world");
+                            else
+                            {
+                                sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
+                                (this->*opHandle->handler)(*packet);
+                                if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                                    LogUnprocessedTail(packet);
+                            }
+                            break;
+                        case STATUS_AUTHED:
+                            // prevent cheating with skip queue wait
+                            if (m_inQueue)
+                            {
+                                LogUnexpectedOpcode(packet, "the player not pass queue yet");
+                                break;
+                            }
 
-                        // single from authed time opcodes send in to after logout time
-                        // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
-                        if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
-                            m_playerRecentlyLogout = false;
+                            // single from authed time opcodes send in to after logout time
+                            // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
+                            if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                                m_playerRecentlyLogout = false;
 
-                        sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
-                        (this->*opHandle.handler)(*packet);
-                        if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
-                            LogUnprocessedTail(packet);
-                        break;
-                    case STATUS_NEVER:
-                        if(strcmp(LookupOpcodeName(packet->GetOpcode()), "UNKNOWN") == 0)
-                        {
-                            sLog->outDebug("received not found opcode 0x%.4X", packet->GetOpcode());
-                        }
-                        else
-                        {
-                            sLog->outDebug("SESSION: received not allowed opcode %s (0x%.4X)",
-                                          LookupOpcodeName(packet->GetOpcode()),
-                                          packet->GetOpcode());
-                        }
-                        break;
-                    case STATUS_UNHANDLED:    
-                        sLog->outDebug("SESSION: received not handled opcode %s (0x%.4X)",    
-                            LookupOpcodeName(packet->GetOpcode()),    
-                            packet->GetOpcode());    
-                        break;
+                            sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
+                            (this->*opHandle->handler)(*packet);
+                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                                LogUnprocessedTail(packet);
+                            break;
+                        case STATUS_NEVER:
+                            if(strcmp(LookupOpcodeName(packet->GetOpcode()), "UNKNOWN") == 0)
+                            {
+                                sLog->outDebug("received not found opcode 0x%.4X", packet->GetOpcode());
+                            }
+                            else
+                            {
+                                sLog->outDebug("SESSION: received not allowed opcode %s (0x%.4X)",
+                                              LookupOpcodeName(packet->GetOpcode()),
+                                              packet->GetOpcode());
+                            }
+                            break;
+                        case STATUS_UNHANDLED:
+                            sLog->outDebug("SESSION: received not handled opcode %s (0x%.4X)",
+                                LookupOpcodeName(packet->GetOpcode()),
+                                packet->GetOpcode());
+                            break;
+                    }
                 }
-            }
-            catch(ByteBufferException &)
-            {
-                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
-                        packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
-                if (sLog->IsOutDebug())
+                catch(ByteBufferException &)
                 {
-                    sLog->outDebug("Dumping error causing packet:");
-                    packet->hexlike();
+                    sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: 0x%05X - %s) from client %s, accountid=%i. Skipped packet.",
+                            packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()), GetRemoteAddress().c_str(), GetAccountId());
+                    if (sLog->IsOutDebug())
+                    {
+                        sLog->outDebug("Dumping error causing packet:");
+                        packet->hexlike();
+                    }
                 }
             }
         }

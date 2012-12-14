@@ -1770,14 +1770,19 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-extern OpcodeHandler* opcodeTable;
+extern OpcodeHandler** opcodeTable;
 
 /// Lookup opcode name for human understandable logging
 inline const char* LookupOpcodeName(uint32 id)
 {
     if (id >= NUM_MSG_TYPES)
-        return "Received unknown opcode, it's more than max!";
-    return opcodeTable[id].name;
+        return "<out of bounds>";
+    if (!opcodeTable)
+        return "<error>";
+    if (!opcodeTable[id])
+        return "<undefined>";
+
+    return opcodeTable[id]->name;
 }
 #endif
 /// @}
