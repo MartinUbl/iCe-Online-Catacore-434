@@ -245,7 +245,7 @@ class spell_druid_pulverize : public SpellScriptLoader
                             for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                             {
                                 Aura* aura = itr->second->GetBase();
-                                if( aura->GetCaster()->ToPlayer() != NULL &&  aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT )
+                                if (aura && aura->GetCaster() && aura->GetCaster()->ToPlayer() != NULL &&  aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT )
                                 {
                                     aura->Remove();
                                     break;
