@@ -1482,10 +1482,28 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
 {
     uint32 slot;      // bag slot
     uint32 reforgeID; // ID of reforge entry in ItemReforge.dbc
-    uint64 guid;      // NPC guid
+    ObjectGuid guid; // NPC guid
     uint32 unk2;      // mostly 0xFF
 
-    recvPacket >> slot >> reforgeID >> guid >> unk2;
+    recvPacket >> reforgeID >> slot >> unk2;
+
+    guid[2] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[5]);
 
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(reforgeID);
     if(!ref_info && reforgeID != 0)
@@ -1536,8 +1554,9 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         sLog->outDebug("Removing reforge from item");
     sLog->outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
 
-    WorldPacket data(SMSG_REFORGE_RESULT,1,true);
-    data << uint8(reforgeID); //is that true? 0 in all cases
+    WorldPacket data(SMSG_REFORGE_RESULT,1);
+    data.WriteBit(reforgeID);
+    data.FlushBits();
     SendPacket(&data);
 
     dstItem->SetReforge(reforgeID);
