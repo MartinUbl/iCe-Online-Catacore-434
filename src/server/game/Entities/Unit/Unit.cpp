@@ -13495,6 +13495,19 @@ void Unit::SetVisibility(UnitVisibility x)
     UpdateObjectVisibility();
 }
 
+bool Unit::SetWalk(bool enable)
+{
+    if (enable == IsWalking())
+        return false;
+
+    if (enable)
+        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+    else
+        RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+
+    return true;
+}
+
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
     int32 main_speed_mod  = 0;

@@ -2465,16 +2465,58 @@ void Creature::FarTeleportTo(Map* map, float X, float Y, float Z, float O)
     AddToWorld();
 }
 
-void Creature::SetWalk(bool enable)
+bool Creature::SetWalk(bool enable)
 {
-    if (enable)
-        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-    else
-        RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+    if (!Unit::SetWalk(enable))
+        return false;
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
-    data.append(GetPackGUID());
-    SendMessageToSet(&data, true);
+    ObjectGuid guid = GetGUID();
+    WorldPacket data;
+    if (enable)
+    {
+        data.Initialize(SMSG_SPLINE_MOVE_SET_WALK_MODE, 9);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
+    }
+    else
+    {
+        data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[1]);
+
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[3]);
+    }
+
+    SendMessageToSet(&data, false);
+    return true;
 }
 
 void Creature::SetLevitate(bool enable)
