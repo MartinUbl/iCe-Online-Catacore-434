@@ -1775,7 +1775,7 @@ extern OpcodeHandler** opcodeTable;
 /// Lookup opcode name for human understandable logging
 inline const char* LookupOpcodeName(uint32 id)
 {
-    if (id >= NUM_MSG_TYPES)
+    if (id >= OPCODES_MAX)
         return "<out of bounds>";
     if (!opcodeTable)
         return "<error>";
