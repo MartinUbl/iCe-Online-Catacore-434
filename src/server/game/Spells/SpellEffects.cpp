@@ -7643,6 +7643,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     break;
                 }
                 case 64142:                                 // Upper Deck - Create Foam Sword
+                {
                     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
                     Player *plr = unitTarget->ToPlayer();
@@ -7653,6 +7654,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             return;
                     DoCreateItem(effIndex, itemId[urand(0,4)]);
                     return;
+                }
+                case 14181:                                 // Relentless Strikes
+                {
+                    if (effIndex == 0)
+                    {
+                        unitTarget->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, POWER_ENERGY);
+                        return;
+                    }
+                }
             }
             break;
         }
