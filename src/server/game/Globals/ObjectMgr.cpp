@@ -1392,6 +1392,8 @@ void ObjectMgr::LoadCreatures()
         return;
     }
 
+    mCreatureDataMap.rehash(result->GetRowCount() * 1.1f);
+
     // build single time for check creature data
     std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
     for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
