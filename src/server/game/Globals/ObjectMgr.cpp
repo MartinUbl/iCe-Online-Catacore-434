@@ -1765,6 +1765,8 @@ void ObjectMgr::LoadGameobjects()
         return;
     }
 
+    mGameObjectDataMap.rehash(result->GetRowCount() * 1.1f);
+
     // build single time for check spawnmask
     std::map<uint32,uint32> spawnMasks;
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
