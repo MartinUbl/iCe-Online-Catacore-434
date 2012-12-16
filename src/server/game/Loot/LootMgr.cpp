@@ -111,7 +111,7 @@ void LootStore::LoadLootTable()
     {
         uint32 count = 0;
 
-        QueryResult resCount = WorldDatabase.PQuery("SELECT entry, count(*) as cnt FROM %s where groupid = 0 and mincountorref = 0 GROUP BY entry", GetName());
+        QueryResult resCount = WorldDatabase.PQuery("SELECT entry, count(*) as cnt FROM %s where groupid = 0 or mincountorref = 0 GROUP BY entry", GetName());
         if (resCount)
         {
             m_LootTemplates.rehash(resCount->GetRowCount() * 1.1f);     // it is only "reserve" (missing function) in this case as it is empty
