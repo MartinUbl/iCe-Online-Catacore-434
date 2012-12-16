@@ -17390,13 +17390,58 @@ void Unit::SetRooted(bool apply)
 
         if(Player *plr = ToPlayer())
         {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-            data.append(GetPackGUID());
-            data << m_rootTimes;
+            ObjectGuid guid = GetGUID();
+            WorldPacket data(SMSG_MOVE_ROOT, 1 + 8 + 4);
+            data.WriteBit(guid[2]);
+            data.WriteBit(guid[7]);
+            data.WriteBit(guid[6]);
+            data.WriteBit(guid[0]);
+            data.WriteBit(guid[5]);
+            data.WriteBit(guid[4]);
+            data.WriteBit(guid[1]);
+            data.WriteBit(guid[3]);
+
+            data.WriteByteSeq(guid[1]);
+            data.WriteByteSeq(guid[0]);
+            data.WriteByteSeq(guid[2]);
+            data.WriteByteSeq(guid[5]);
+
+            data << uint32(m_rootTimes);
+
+            data.WriteByteSeq(guid[3]);
+            data.WriteByteSeq(guid[4]);
+            data.WriteByteSeq(guid[7]);
+            data.WriteByteSeq(guid[6]);
+
             plr->GetSession()->SendPacket(&data);
         }
         else
-            ToCreature()->StopMoving();
+        {
+            if (IsInWorld())
+            {
+                ObjectGuid guid = GetGUID();
+                WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[0]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[4]);
+                SendMessageToSet(&data, true);
+                StopMoving();
+            }
+        }
     }
     else
     {
@@ -17406,10 +17451,56 @@ void Unit::SetRooted(bool apply)
 
             if(Player* plr = ToPlayer())
             {
-                WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
-                data.append(GetPackGUID());
-                data << m_rootTimes;
+                ObjectGuid guid = GetGUID();
+                WorldPacket data(SMSG_MOVE_UNROOT, 1 + 8 + 4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[6]);
+
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[1]);
+
+                data << uint32(m_rootTimes);
+
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[5]);
+
                 plr->GetSession()->SendPacket(&data);
+            }
+            else
+            {
+                ObjectGuid guid = GetGUID();
+                WorldPacket data(SMSG_SPLINE_MOVE_UNROOT, 8);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[4]);
+
+                data.FlushBits();
+
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+
+                SendMessageToSet(&data, true);
             }
         }
     }
