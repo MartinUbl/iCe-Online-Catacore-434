@@ -1616,6 +1616,7 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     data.dbData = false;
 
     AddGameobjectToGrid(guid, &data);
+    SetGameObjectSpawned(entry);
 
     // Spawn if necessary (loaded grids only)
     // We use spawn coords to spawn

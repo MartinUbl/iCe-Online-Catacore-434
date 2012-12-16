@@ -438,6 +438,7 @@ struct TrinityStringLocale
 typedef std::map<uint32,uint32> CreatureLinkedRespawnMap;
 typedef UNORDERED_MAP<uint32,CreatureData> CreatureDataMap;
 typedef UNORDERED_MAP<uint32,GameObjectData> GameObjectDataMap;
+typedef UNORDERED_MAP<uint32,bool> GameObjectSpawnedMap;
 typedef UNORDERED_MAP<uint32,CreatureLocale> CreatureLocaleMap;
 typedef UNORDERED_MAP<uint32,GameObjectLocale> GameObjectLocaleMap;
 typedef UNORDERED_MAP<uint32,ItemLocale> ItemLocaleMap;
@@ -1177,11 +1178,7 @@ class ObjectMgr
 
         bool IsGoOfSpecificEntrySpawned(uint32 entry) const
         {
-            for (GameObjectDataMap::const_iterator it = mGameObjectDataMap.begin(); it != mGameObjectDataMap.end(); ++it)
-                if (it->second.id == entry)
-                    return true;
-
-            return false;
+            return mGameObjectSpawnedMap.find(entry) != mGameObjectSpawnedMap.end();
         }
 
         GameObjectData const* GetGOData(uint32 guid) const
@@ -1192,6 +1189,7 @@ class ObjectMgr
         }
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
+        void SetGameObjectSpawned(uint32 entry) { mGameObjectSpawnedMap[entry] = true; }
 
         TrinityStringLocale const* GetTrinityStringLocale(int32 entry) const
         {
@@ -1477,6 +1475,7 @@ class ObjectMgr
         CreatureLinkedRespawnMap mCreatureLinkedRespawnMap;
         CreatureLocaleMap mCreatureLocaleMap;
         GameObjectDataMap mGameObjectDataMap;
+        GameObjectSpawnedMap mGameObjectSpawnedMap;
         GameObjectLocaleMap mGameObjectLocaleMap;
         ItemLocaleMap mItemLocaleMap;
         ItemSetNameLocaleMap mItemSetNameLocaleMap;
