@@ -143,6 +143,8 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+        virtual uint32* GetUiEncounter(){return uiEncounter;}
+        virtual uint32 GetMaxEncounter(){return ENCOUNTERS;}
     };
 };
 

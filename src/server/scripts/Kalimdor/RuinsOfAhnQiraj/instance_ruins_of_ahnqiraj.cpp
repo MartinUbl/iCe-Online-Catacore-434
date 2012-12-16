@@ -57,7 +57,7 @@ public:
         uint64 uiAyamiss;
         uint64 uiOssirian;
 
-        uint16 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
 
         void Initialize()
@@ -208,6 +208,8 @@ public:
 
             } else OUT_LOAD_INST_DATA_FAIL;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

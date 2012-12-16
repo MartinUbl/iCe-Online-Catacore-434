@@ -28,6 +28,7 @@
 #include "VMapFactory.h"
 #include "InstanceSaveMgr.h"
 #include "World.h"
+#include "InstanceScript.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
@@ -148,6 +149,52 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                     pSave = groupBind->save;
             }
         }
+        //instance bound merging when same bosses killed
+        Group *group = player->GetGroup();
+        if (group && pBind && pBind->perm &&
+            group->GetBoundInstance(this) && group->GetLeader() &&
+            pBind->save != group->GetBoundInstance(this)->save)
+        {
+            Player *leader = group->GetLeader();
+
+            NewInstanceId = pSave->GetInstanceId();
+            map = _FindMap(pBind->save->GetInstanceId()); 
+            Map* mapG = _FindMap(leader->GetMap()->GetInstanceId());
+            if (!map)     //sometimes (almost always) it doesnt exist even when id is already loaded
+                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
+            if (!mapG)
+                mapG = CreateInstance(leader->GetMap()->GetInstanceId(), group->GetBoundInstance(this)->save, group->GetBoundInstance(this)->save->GetDifficulty());
+
+            InstanceMap* iMap = map->ToInstanceMapPort();
+            InstanceMap* iGMap = mapG->ToInstanceMapPort();
+            if(iMap && iGMap && iMap->GetId() == iGMap->GetId())
+            {
+                uint32 count = iGMap->GetInstanceScript()->GetMaxEncounter();
+                uint32* bossP = iMap->GetInstanceScript()->GetUiEncounter();
+                uint32* bossG = iGMap->GetInstanceScript()->GetUiEncounter();
+                if (count && bossP && bossG)
+                {
+                    bool canMerge=true;
+                    for (uint32 i = 0; i < count; i++)
+                        if (bossP[i] != bossG[i])
+                        {
+                            canMerge=false;
+                            break;
+                        }
+                     if(canMerge)
+                     {
+                        InstanceGroupBind *groupBind = NULL;
+                        groupBind = group->GetBoundInstance(this);
+                        if (groupBind)
+                        {
+                            pSave = groupBind->save;
+                            player->BindToInstance(pSave, true);
+                        }
+                     }
+                }
+            }
+        }
+
         if (pSave)
         {
             // solo/perm/group

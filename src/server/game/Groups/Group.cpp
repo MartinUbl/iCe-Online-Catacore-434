@@ -40,6 +40,7 @@
 #include "LFGMgr.h"
 #include "Guild.h"
 #include "UpdateFieldFlags.h"
+#include "ObjectAccessor.h"
 
 Group::Group() : m_leaderGuid(0), m_groupType(GROUPTYPE_NORMAL), m_bgGroup(NULL),
 m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_looterGuid(0), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
@@ -470,6 +471,10 @@ uint32 Group::RemoveMember(const uint64 &guid, const RemoveMethod &method /* = G
         Disband();
 
     return m_memberSlots.size();
+}
+Player* Group::GetLeader()
+{
+    return ObjectAccessor::FindPlayer(m_leaderGuid);
 }
 
 void Group::ChangeLeader(const uint64 &guid)

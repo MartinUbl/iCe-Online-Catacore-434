@@ -497,6 +497,9 @@ public:
                  return go->GetGoState();
              return GO_STATE_ACTIVE;
          }
+
+         virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

@@ -74,7 +74,7 @@ public:
         uint64 m_uiAltarOfTheDeepsGUID;
         uint64 m_uiMainDoorGUID;
 
-        uint8 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint8 m_uiCountFires;
         uint8 uiDeathTimes;
 
@@ -254,6 +254,8 @@ public:
 
             return 0;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };
