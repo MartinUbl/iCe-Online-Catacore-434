@@ -335,6 +335,7 @@ void FleeingMovementGenerator<Player>::Finalize(Player &owner)
 {
     owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner.clearUnitState(UNIT_STAT_FLEEING|UNIT_STAT_FLEEING_MOVE);
+    owner.StopMoving();
 }
 
 template<>
