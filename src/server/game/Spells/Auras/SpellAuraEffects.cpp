@@ -2716,6 +2716,10 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                             target->RemoveAura(62388);
                     }
                     break;
+                case 79268: // Soul Harvest
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->CastSpell(caster, 101977, true); // Soul Harvest (Energize +1 shard per 3s tick)
+                    break;
             }
             break;
         }
