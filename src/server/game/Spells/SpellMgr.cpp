@@ -4735,6 +4735,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             count++;
             break;
+        case 51723: //Fan of Knives
+        case 26679: //Deadly Throw
+            spellInfo->excludeCasterAuraSpell=0;
+            count++;
+            break;
         default:
             break;
         }
