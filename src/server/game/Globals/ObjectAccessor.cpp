@@ -271,45 +271,32 @@ void ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, 
     }
 }
 
-Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool /*insignia*/)
+Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia /*=false*/)
 {
     Corpse* corpse = GetCorpseForPlayerGUID(player_guid);
     if (!corpse)
     {
         //in fact this function is called from several places
         //even when player doesn't have a corpse, not an error
-        // TODO: really, now...
-        //sLog->outError("Try remove corpse that not in map for GUID %ul", player_guid);
         return NULL;
     }
 
     sLog->outStaticDebug("Deleting Corpse and spawned bones.");
 
-    //Map* map = corpse->FindMap();
+    Map* map = corpse->FindMap();
 
     // remove corpse from player_guid -> corpse map
     RemoveCorpse(corpse);
-
-    // done in removecorpse
-    // remove resurrectable corpse from grid object registry (loaded state checked into call)
-    // do not load the map if it's not loaded
-    //Map *map = sMapMgr->FindMap(corpse->GetMapId(), corpse->GetInstanceId());
-    //if (map)
-    //    map->Remove(corpse, false);
 
     // remove corpse from DB
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     corpse->DeleteFromDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    // we don't want bones to save some cpu.. :)
-    delete corpse;
-    return NULL;
-
-    /*
     Corpse* bones = NULL;
     // create the bones only if the map and the grid is loaded at the corpse's location
     // ignore bones creating option in case insignia
+
     if (map && (insignia ||
         (map->IsBattlegroundOrArena() ? sWorld->getIntConfig(CONFIG_DEATH_BONES_BG_OR_ARENA) : sWorld->getIntConfig(CONFIG_DEATH_BONES_WORLD))) &&
         !map->IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
@@ -318,7 +305,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool /*insign
         bones = new Corpse;
         bones->Create(corpse->GetGUIDLow(), map);
 
-        for (int i = 3; i < CORPSE_END; ++i)                    // don't overwrite guid and object type
+        for (uint32 i = OBJECT_FIELD_TYPE + 1; i < CORPSE_END; ++i)                    // don't overwrite guid and object type
             bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
 
         bones->SetGrid(corpse->GetGrid());
@@ -331,7 +318,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool /*insign
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
         bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
-        for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+        for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
             if (corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
                 bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
@@ -345,9 +332,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool /*insign
     delete corpse;
 
     return bones;
-    */
 }
-
 void ObjectAccessor::RemoveOldCorpses()
 {
     time_t now = time(NULL);
