@@ -167,7 +167,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 
             InstanceMap* iMap = map ? map->ToInstanceMap() : NULL;
             InstanceMap* iGMap = mapG ? mapG->ToInstanceMap() : NULL;
-            if(iMap && iGMap && iMap->GetId() == iGMap->GetId())
+            if(iMap && iGMap && iMap->GetId() == iGMap->GetId() && iMap->GetDifficulty() == igMap->GetDifficulty())
             {
                 uint32 count = iGMap->GetInstanceScript()->GetMaxEncounter();
                 uint32* bossP = iMap->GetInstanceScript()->GetUiEncounter();
@@ -188,6 +188,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
+                            player->UnbindInstance(pSave->GetMapId(), pSave->GetDifficulty(), true);
                             player->BindToInstance(pSave, true);
                         }
                      }
