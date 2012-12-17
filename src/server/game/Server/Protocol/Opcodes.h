@@ -627,8 +627,8 @@ enum Opcodes
     SMSG_SPELLORDAMAGE_IMMUNE                        = 0x04507, // 4.3.4 15595
     CMSG_AUCTION_LIST_BIDDER_ITEMS                   = 0x06937, // 4.3.4 15595
     SMSG_AUCTION_BIDDER_LIST_RESULT                  = 0x0027, // 4.3.4 15595
-    SMSG_SET_FLAT_SPELL_MODIFIER                     = 0x00224, // 4.3.4 15595
-    SMSG_SET_PCT_SPELL_MODIFIER                      = 0x02834, // 4.3.4 15595
+    SMSG_SET_FLAT_SPELL_MODIFIER                     = 0x02834, // 4.3.4 15595
+    SMSG_SET_PCT_SPELL_MODIFIER                      = 0x00224, // 4.3.4 15595
     CMSG_SET_AMMO                                    = 0x10098, //
     SMSG_CORPSE_RECLAIM_DELAY                        = 0x00D34, // 4.3.4 15595
     CMSG_SET_ACTIVE_MOVER                            = 0x03314, // 4.3.4 15595

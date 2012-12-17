@@ -20853,10 +20853,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
             }
             val += apply ? mod->value : -(mod->value);
             data << uint8(eff);
-            if(isFlat)
-                data << int32(val);
-            else
-                data << float(val);
+            data << float(val);
             count2++;
         }
     }
