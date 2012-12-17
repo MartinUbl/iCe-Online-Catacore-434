@@ -71,12 +71,15 @@ ArenaTeam::~ArenaTeam()
 {
 }
 
-bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string ArenaTeamName)
+bool ArenaTeam::Create(Player *captain, uint32 type, std::string ArenaTeamName)
 {
-    if (!sObjectMgr->GetPlayer(captainGuid))                      // player not exist
-        return false;
+    uint64 captainGuid = captain->GetGUID();
+
     if (sObjectMgr->GetArenaTeamByName(ArenaTeamName))            // arena team with this name already exist
+    {
+        captain->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", captain->GetName(), ERR_ARENA_TEAM_NAME_EXISTS_S);
         return false;
+    }
 
     uint32 captainLowGuid = GUID_LOPART(captainGuid);
     sLog->outDebug("GUILD: creating arena team %s to leader: %u", ArenaTeamName.c_str(), captainLowGuid);
@@ -565,6 +568,20 @@ uint8 ArenaTeam::GetSlotByType(uint32 type)
             break;
     }
     sLog->outError("FATAL: Unknown arena team type %u for some arena team", type);
+    return 0xFF;
+}
+
+uint8 ArenaTeam::GetTypeBySlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case 0: return ARENA_TEAM_2v2;
+        case 1: return ARENA_TEAM_3v3;
+        case 2: return ARENA_TEAM_5v5;
+        default:
+            break;
+    }
+    sLog->outError("FATAL: Unknown arena team slot %u for some arena team", slot);
     return 0xFF;
 }
 
