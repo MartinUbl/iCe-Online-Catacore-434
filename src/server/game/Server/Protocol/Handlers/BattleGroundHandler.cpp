@@ -613,12 +613,6 @@ void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug("WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
-    // uint64
-    recv_data.read_skip<uint8>();                           // unk1
-    recv_data.read_skip<uint8>();                           // unk2
-    recv_data.read_skip<uint32>();                          // BattlegroundTypeId
-    recv_data.read_skip<uint16>();                          // unk3
-
     // not allow leave battleground in combat
     if (_player->isInCombat())
         if (Battleground* bg = _player->GetBattleground())
