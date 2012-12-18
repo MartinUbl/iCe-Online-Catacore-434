@@ -368,8 +368,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
             // Broadcast new player group member fields to rest of the group
             player->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
 
-            UpdateData groupData;
-            groupData.m_map = player->GetMapId();
+            UpdateData groupData(player->GetMapId());
             WorldPacket groupDataPacket;
 
             // Broadcast group members' fields to player
@@ -389,7 +388,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
                     if (member->HaveAtClient(player))
                     {
-                        UpdateData newData;
+                        UpdateData newData(member->GetMapId());
                         WorldPacket newDataPacket;
                         player->BuildValuesUpdateBlockForPlayer(&newData, member);
                         member->SendDirectMessage(&newDataPacket);

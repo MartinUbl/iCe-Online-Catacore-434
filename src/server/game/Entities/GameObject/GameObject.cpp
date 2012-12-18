@@ -297,8 +297,7 @@ void GameObject::Update(uint32 diff)
                             SetGoState(GO_STATE_ACTIVE);
                             SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
 
-                            UpdateData udata;
-                            udata.m_map = uint16(GetMapId());
+                            UpdateData udata(GetMapId());
                             WorldPacket packet;
                             BuildValuesUpdateBlockForPlayer(&udata,caster->ToPlayer());
                             udata.BuildPacket(&packet);

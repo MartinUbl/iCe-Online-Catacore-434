@@ -77,7 +77,7 @@ enum OBJECT_UPDATE_FLAGS
 class UpdateData
 {
     public:
-        UpdateData();
+        UpdateData(uint32 map);
 
         void AddOutOfRangeGUID(std::set<uint64>& guids);
         void AddOutOfRangeGUID(const uint64 &guid);
