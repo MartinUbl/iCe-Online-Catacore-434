@@ -4348,6 +4348,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             count++;
             break;
+        case 31228: // Cheat Death (rank 1)
+        case 31229: // Cheat Death (rank 2)
+        case 31230: // Cheat Death (rank 3)
+            spellInfo->SpellCooldownsId = 398;
+            break;
         case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
             count++;
