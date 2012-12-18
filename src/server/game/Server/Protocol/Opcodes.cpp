@@ -274,6 +274,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_MOVE_SET_RAW_POSITION,                   STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_FORCE_RUN_SPEED_CHANGE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_RUN_SPEED_CHANGE_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
+    OPCODE( MSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK,          STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( SMSG_FORCE_RUN_BACK_SPEED_CHANGE,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( SMSG_FORCE_SWIM_SPEED_CHANGE,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -932,7 +933,7 @@ void InitOpcodeTable()
     OPCODE( MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT,         STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( MSG_MOVE_SET_FLIGHT_BACK_SPEED,               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_FORCE_FLIGHT_SPEED_CHANGE,               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK,           STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
+    OPCODE( MSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK,       STATUS_UNHANDLED,&WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE,          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK,      STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
     OPCODE( SMSG_SPLINE_SET_FLIGHT_SPEED,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
