@@ -1792,7 +1792,7 @@ struct SpellEffectEntry
     int32     EffectMiscValueB;                             // 13       m_effectMiscValueB
     float     EffectPointsPerComboPoint;                    // 14       m_effectPointsPerCombo
     uint32    EffectRadiusIndex;                            // 15       m_effectRadiusIndex - spellradius.dbc
-    //uint32   EffectRadiusMaxIndex;                        // 16       4.0.0
+    uint32    EffectRadiusMaxIndex;                         // 16       m_effectRadiusMaxIndex - spellradius.dbc
     float     EffectRealPointsPerLevel;                     // 17       m_effectRealPointsPerLevel
     flag96    EffectSpellClassMask;                         // 18       m_effectSpellClassMask, effect 0
     uint32    EffectTriggerSpell;                           // 19       m_effectTriggerSpell
@@ -2054,6 +2054,7 @@ struct SpellEntry
         int32     EffectMiscValueB[3];
         float     EffectPointsPerComboPoint[3];
         uint32    EffectRadiusIndex[3];
+        uint32    EffectRadiusMaxIndex[3];
         float     EffectRealPointsPerLevel[3];
         flag96    EffectSpellClassMask[3];
         uint32    EffectTriggerSpell[3];
@@ -2181,6 +2182,7 @@ struct SpellEntry
 
     // some additional helper functions
     bool AppliesAuraType(uint32 type) const;
+    float GetSpellRadius(Unit *caster, uint32 effIndex) const;
 
 private:
     // prevent creating custom entries (copy data from original in fact)
@@ -2214,9 +2216,10 @@ struct SpellFocusObjectEntry
 
 struct SpellRadiusEntry
 {
-    uint32    ID;                                           // 0
-    float     radiusHostile;                                // 1
-    float     radiusFriend;                                 // 2
+    uint32    ID;
+    float     RadiusMin;
+    float     RadiusPerLevel;
+    float     RadiusMax;
 };
 
 struct SpellRangeEntry

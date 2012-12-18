@@ -1163,7 +1163,6 @@ class Unit : public WorldObject
         //target dependent range checks
         uint32 GetSpellMaxRangeForTarget(Unit* target,const SpellRangeEntry * rangeEntry);
         uint32 GetSpellMinRangeForTarget(Unit* target,const SpellRangeEntry * rangeEntry);
-        uint32 GetSpellRadiusForTarget(Unit* target,const SpellRadiusEntry * radiusEntry);
 
         virtual void Update(uint32 time);
 

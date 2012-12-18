@@ -2607,13 +2607,7 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
         else
         {
             float radius;
-            if (GetSpellProto()->Effect[effIndex] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
-                radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[effIndex]));
-            else
-                radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[effIndex]));
-
-            if (modOwner)
-                modOwner->ApplySpellMod(GetId(), SPELLMOD_RADIUS, radius);
+            radius = GetSpellProto()->GetSpellRadius(caster, effIndex);
 
             if (!GetUnitOwner()->hasUnitState(UNIT_STAT_ISOLATED))
             {
@@ -2628,7 +2622,7 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
                         GetUnitOwner()->GetRaidMember(targetList, radius);
                         // Strength of Earth totem
                         if (GetSpellProto()->SpellIconID == 691)
-                            GetUnitOwner()->GetRaidMember(targetList, GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[1])));
+                            GetUnitOwner()->GetRaidMember(targetList, GetSpellProto()->GetSpellRadius(GetUnitOwner(), 1));
                         break;
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
                     {

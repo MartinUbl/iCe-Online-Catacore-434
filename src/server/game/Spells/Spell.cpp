@@ -1961,6 +1961,11 @@ void Spell::SearchChainTarget(std::list<Unit*> &TagUnitMap, float max_range, uin
     }
 }
 
+float Spell::GetEffectRadius(uint32 effIndex)
+{
+    return m_spellInfo->GetSpellRadius(m_caster, effIndex);
+}
+
 void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry)
 {
     if (TargetType == SPELL_TARGETS_GO)
@@ -2312,8 +2317,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             if (m_spellInfo->AttributesEx & SPELL_ATTR1_USE_RADIUS_AS_MAX_DISTANCE)
                 dist = 0.0f;
             else
-                dist = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-            if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, dist, this);
+                dist = GetEffectRadius(i);
+
             if (dist < objSize)
                 dist = objSize;
             else if (cur == TARGET_DEST_CASTER_RANDOM)
@@ -2362,7 +2367,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             float angle, dist;
 
             float objSize = target->GetObjectSize();
-            dist = (float)target->GetSpellRadiusForTarget(target, sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+            dist = GetEffectRadius(i);
+
             if (dist < objSize)
                 dist = objSize;
             else if (cur == TARGET_DEST_TARGET_RANDOM)
@@ -2419,7 +2425,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             }
 
             float dist;
-            dist = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+            dist = GetEffectRadius(i);
             if (cur == TARGET_DEST_DEST_RANDOM || cur == TARGET_DEST_DEST_RANDOM_DIR_DIST)
                 dist *= (float)rand_norm();
 
@@ -2742,7 +2748,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
-                radius = GetSpellRadius(m_spellInfo, i, false);
+                radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
             case TARGET_UNIT_AREA_ALLY_SRC:
@@ -2767,7 +2773,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ALLY;
                     break;
                 }
-                radius = GetSpellRadius(m_spellInfo, i, true);
+                radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_ALLY;
                 break;
             case TARGET_UNIT_AREA_ENTRY_DST:
@@ -2784,23 +2790,21 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ANY;
                     break;
                 }
-                radius = GetSpellRadius(m_spellInfo, i, IsPositiveSpell(m_spellInfo->Id));
+                radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_ENTRY;
                 break;
             case TARGET_GAMEOBJECT_AREA_SRC:
             case TARGET_GAMEOBJECT_AREA_DST:
             case TARGET_GAMEOBJECT_AREA_PATH:
-                radius = GetSpellRadius(m_spellInfo, i, true);
+                radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_GO;
                 break;
             default:
-                radius = GetSpellRadius(m_spellInfo, i, true);
+                radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_NONE;
                 break;
         }
 
-        if (modOwner)
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
         radius *= m_spellValue->RadiusMod;
 
         std::list<Unit*> unitList;

@@ -140,6 +140,7 @@ void SpellEntry::LoadSpellAddons()
         EffectMiscValueB[i] = SpellEffect ? SpellEffect->EffectMiscValueB : 0;
         EffectPointsPerComboPoint[i] = SpellEffect ? SpellEffect->EffectPointsPerComboPoint : 0;
         EffectRadiusIndex[i] = SpellEffect ? SpellEffect->EffectRadiusIndex : 0;
+        EffectRadiusMaxIndex[i] = SpellEffect ? SpellEffect->EffectRadiusMaxIndex : 0;
         EffectRealPointsPerLevel[i] = SpellEffect ? SpellEffect->EffectRealPointsPerLevel : 0;
         EffectSpellClassMask[i] = SpellEffect ? SpellEffect->EffectSpellClassMask : flag96(0);
         EffectTriggerSpell[i] = SpellEffect ? SpellEffect->EffectTriggerSpell : 0;
@@ -556,4 +557,35 @@ bool SpellEntry::AppliesAuraType(uint32 type) const
     }
 
     return false;
+}
+
+float SpellEntry::GetSpellRadius(Unit *caster, uint32 effIndex) const
+{
+    if (effIndex < 0 || effIndex >= MAX_SPELL_EFFECTS)
+        return 0.0f;
+
+    const SpellRadiusEntry *radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusIndex[effIndex]);
+
+    if (!radiusEntry)
+    {
+        radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusMaxIndex[effIndex]);
+
+        if (radiusEntry)
+            return radiusEntry->RadiusMin;
+
+        return 0.0f;
+    }
+
+    float radius = radiusEntry->RadiusMin;
+    if (caster)
+    {
+        radius += radiusEntry->RadiusPerLevel * caster->getLevel();
+        if (radius > radiusEntry->RadiusMax)
+            radius = radiusEntry->RadiusMax;
+
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(Id, SPELLMOD_RADIUS, radius, NULL);
+    }
+
+    return radius;
 }
