@@ -716,14 +716,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (m_caster->ToPlayer()
                     && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521))
                 {
-                    if (m_spellInfo->Id == 71521) // Hand of Gul'dan again
-                    {
-                        // Cremation Rank 1 + Rank 2 talent
-                        if ((m_caster->HasAura(85103) && roll_chance_i(50)) || (m_caster->HasAura(85104) && roll_chance_i(100)))
-                            if (unitTarget->GetAura(348)) // immolate
-                                unitTarget->GetAura(348)->RefreshDuration();
-                    }
-
                     // Impending Doom talent
                     if ((m_caster->HasAura(85108) && roll_chance_i(15)) ||
                         (m_caster->HasAura(85107) && roll_chance_i(10)) ||
