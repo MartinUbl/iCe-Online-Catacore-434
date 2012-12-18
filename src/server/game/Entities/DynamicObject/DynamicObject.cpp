@@ -87,8 +87,10 @@ void DynamicObject::RemoveFromWorld()
     }
 }
 
-bool DynamicObject::Create(uint32 guidlow, Unit *caster, uint32 spellId, const Position &pos, float radius, bool active)
+bool DynamicObject::Create(uint32 guidlow, Unit *caster, SpellEntry const *spell, const Position &pos, float radius, bool active, DynamicObjectType type)
 {
+    uint32 spellId = spell->Id;
+
     SetMap(caster->GetMap());
     Relocate(pos);
     if (!IsPositionValid())
@@ -102,13 +104,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit *caster, uint32 spellId, const P
     SetEntry(spellId);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1);
     SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
-
-    // The lower word of DYNAMICOBJECT_BYTES must be 0x0001. This value means that the visual radius will be overriden
-    // by client for most of the "ground patch" visual effect spells and a few "skyfall" ones like Hurricane.
-    // If any other value is used, the client will _always_ use the radius provided in DYNAMICOBJECT_RADIUS, but
-    // precompensation is necessary (eg radius *= 2) for many spells. Anyway, blizz sends 0x0001 for all the spells
-    // I saw sniffed...
-    SetUInt32Value(DYNAMICOBJECT_BYTES, 0x00000001);
+    SetUInt32Value(DYNAMICOBJECT_BYTES, spell->SpellVisual[0] | (type << 28));
     SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
     SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
     SetUInt32Value(DYNAMICOBJECT_CASTTIME, getMSTime());
