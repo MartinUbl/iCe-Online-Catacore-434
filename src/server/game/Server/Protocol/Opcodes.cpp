@@ -547,6 +547,7 @@ void InitOpcodeTable()
     OPCODE( MSG_SAVE_GUILD_EMBLEM,                        STATUS_LOGGEDIN, &WorldSession::HandleSaveGuildEmblemOpcode     );
     OPCODE( MSG_TABARDVENDOR_ACTIVATE,                    STATUS_LOGGEDIN, &WorldSession::HandleTabardVendorActivateOpcode);
     OPCODE( SMSG_PLAY_SPELL_VISUAL_KIT,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_VIOLENCE_LEVEL,                          STATUS_AUTHED,   &WorldSession::HandleViolenceLevel             );
     OPCODE( CMSG_ZONEUPDATE,                              STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode          );
     OPCODE( SMSG_PARTYKILLLOG,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAY_SPELL_IMPACT,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
