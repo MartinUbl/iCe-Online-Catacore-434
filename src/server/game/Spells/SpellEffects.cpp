@@ -5232,6 +5232,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     {
                         case 18662: // Curse of Doom
                         case 88747: // Wild Mushroom
+                        case 62618: // Power Word: Barrier
                             amount = 1;
                             break;
                         default:
