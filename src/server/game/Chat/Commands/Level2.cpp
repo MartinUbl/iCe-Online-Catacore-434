@@ -3968,9 +3968,9 @@ bool ChatHandler::HandleWaterwalkCommand(const char* args)
         return false;
 
     if (strncmp(args, "on", 3) == 0)
-        player->SetMovement(MOVE_WATER_WALK);               // ON
+        player->SetWaterWalk(true);
     else if (strncmp(args, "off", 4) == 0)
-        player->SetMovement(MOVE_LAND_WALK);                // OFF
+       player->SetWaterWalk(false);
     else
     {
         SendSysMessage(LANG_USE_BOL);

@@ -17333,8 +17333,7 @@ void Unit::SetStunned(bool apply)
         else
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        if(Player * plr = ToPlayer())
-            plr->SetMovement(MOVE_ROOT);
+        SendMoveRoot(0);
     }
     else
     {
@@ -17348,10 +17347,63 @@ void Unit::SetStunned(bool apply)
 
         if (!hasUnitState(UNIT_STAT_ROOT))         // prevent allow move if have also root effect
         {
-            if(Player * plr = ToPlayer())
-                plr->SetMovement(MOVE_UNROOT);
+            SendMoveUnroot(0);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
         }
     }
+}
+
+void Unit::SetWaterWalk(bool apply)
+{
+    WorldPacket data;
+    ObjectGuid guid = GetGUID();
+
+    if (apply)
+    {
+        data.Initialize(SMSG_MOVE_WATER_WALK, 1 + 4 + 8);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[2]);
+
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[2]);
+        data << uint32(0);          //! movement counter
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[6]);
+    }
+    else
+    {
+        data.Initialize(SMSG_MOVE_LAND_WALK, 1 + 4 + 8);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[7]);
+
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[2]);
+        data << uint32(0);          //! movement counter
+    }
+
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SetRooted(bool apply)
@@ -17364,32 +17416,7 @@ void Unit::SetRooted(bool apply)
 //        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
 
         if(Player *plr = ToPlayer())
-        {
-            ObjectGuid guid = GetGUID();
-            WorldPacket data(SMSG_MOVE_ROOT, 1 + 8 + 4);
-            data.WriteBit(guid[2]);
-            data.WriteBit(guid[7]);
-            data.WriteBit(guid[6]);
-            data.WriteBit(guid[0]);
-            data.WriteBit(guid[5]);
-            data.WriteBit(guid[4]);
-            data.WriteBit(guid[1]);
-            data.WriteBit(guid[3]);
-
-            data.WriteByteSeq(guid[1]);
-            data.WriteByteSeq(guid[0]);
-            data.WriteByteSeq(guid[2]);
-            data.WriteByteSeq(guid[5]);
-
-            data << uint32(m_rootTimes);
-
-            data.WriteByteSeq(guid[3]);
-            data.WriteByteSeq(guid[4]);
-            data.WriteByteSeq(guid[7]);
-            data.WriteByteSeq(guid[6]);
-
-            plr->GetSession()->SendPacket(&data);
-        }
+            plr->SendMoveRoot(m_rootTimes);
         else
         {
             if (IsInWorld())
@@ -17425,32 +17452,7 @@ void Unit::SetRooted(bool apply)
             m_rootTimes++; //blizzard internal check?
 
             if(Player* plr = ToPlayer())
-            {
-                ObjectGuid guid = GetGUID();
-                WorldPacket data(SMSG_MOVE_UNROOT, 1 + 8 + 4);
-                data.WriteBit(guid[0]);
-                data.WriteBit(guid[1]);
-                data.WriteBit(guid[3]);
-                data.WriteBit(guid[7]);
-                data.WriteBit(guid[5]);
-                data.WriteBit(guid[2]);
-                data.WriteBit(guid[4]);
-                data.WriteBit(guid[6]);
-
-                data.WriteByteSeq(guid[3]);
-                data.WriteByteSeq(guid[6]);
-                data.WriteByteSeq(guid[1]);
-
-                data << uint32(m_rootTimes);
-
-                data.WriteByteSeq(guid[2]);
-                data.WriteByteSeq(guid[0]);
-                data.WriteByteSeq(guid[7]);
-                data.WriteByteSeq(guid[4]);
-                data.WriteByteSeq(guid[5]);
-
-                plr->GetSession()->SendPacket(&data);
-            }
+                plr->SendMoveUnroot(m_rootTimes);
             else
             {
                 ObjectGuid guid = GetGUID();

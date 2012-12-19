@@ -2125,6 +2125,12 @@ class Unit : public WorldObject
         }
         uint64 GetTotalDamageTaken();
 
+        void SetRooted(bool apply);
+        void SetFeared(bool apply);
+        void SetConfused(bool apply);
+        void SetStunned(bool apply);
+        void SetWaterWalk(bool apply);
+
     protected:
         explicit Unit ();
 
@@ -2219,11 +2225,6 @@ class Unit : public WorldObject
         // player or player's pet
         float GetCombatRatingReduction(CombatRating cr) const;
         uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
-
-        void SetFeared(bool apply);
-        void SetConfused(bool apply);
-        void SetStunned(bool apply);
-        void SetRooted(bool apply);
 
         uint32 m_rootTimes;
 

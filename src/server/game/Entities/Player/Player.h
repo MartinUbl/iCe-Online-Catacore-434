@@ -2040,8 +2040,6 @@ class Player : public Unit, public GridObject<Player>
             StopMirrorTimer(FIRE_TIMER);
         }
 
-        void SetMovement(PlayerMovementType pType);
-
         bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
         void JoinedChannel(Channel *c);

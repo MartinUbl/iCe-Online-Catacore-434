@@ -1039,7 +1039,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         if (pCurrChar->HasAura(83950))
             pCurrChar->CastSpell(pCurrChar, 84559, true);
 
-        pCurrChar->SetMovement(MOVE_WATER_WALK);
+        pCurrChar->SetWaterWalk(true);
     }
 
     pCurrChar->ContinueTaxiFlight();
