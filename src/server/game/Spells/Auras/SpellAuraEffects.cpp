@@ -1733,11 +1733,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
                         break;
                     case 1120:   // Drain Soul
-                        // Pandemic - refresh duration of Unstable Affliction
+                        // Pandemic - refresh duration of Unstable Affliction if target have below 25%
                         if (caster->HasAura(85100) || (caster->HasAura(85099) && roll_chance_i(50)))
                         {
-                            if (Aura* pAura = target->GetAura(30108))
-                                pAura->RefreshDuration();
+                            if (Aura* pAura = target->GetAura(30108)) {
+                                if (target->HealthBelowPct(25))
+                                    pAura->RefreshDuration();
+                            }
                         }
                         break;
                     case 589:   // Shadow Word: Pain
