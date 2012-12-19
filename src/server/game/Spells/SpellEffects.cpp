@@ -712,9 +712,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Shadow Bolt, Incinerate and Hand of Gul'dan
+                // Shadow Bolt, Incinerate and Hand of Gul'dan, Soul Fire
                 if (m_caster->ToPlayer()
-                    && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521))
+                    && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521 || m_spellInfo->Id == 6353))
                 {
                     // Impending Doom talent
                     if ((m_caster->HasAura(85108) && roll_chance_i(15)) ||
