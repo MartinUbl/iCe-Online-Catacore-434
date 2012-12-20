@@ -3819,9 +3819,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectValueMultiplier[1] = 15;
             spellInfo->EffectBasePoints[1] = 15;
             break;
-        case 77215: // Mastery: Potent Afflictions
-            spellInfo->EffectMiscValue[0] = 13; // 13% instead 22%
-            break;
         case 95673: // Ozumat Heroic Kill Credit
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
