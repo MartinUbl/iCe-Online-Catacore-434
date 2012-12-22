@@ -3429,24 +3429,39 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     if (aura->IsRemoved())
         return;
 
-    aura->SetIsSingleTarget(caster && IsSingleTargetSpell(aura->GetSpellProto()));
-    if (aura->IsSingleTarget())
+    if (caster)
     {
-        ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
-        // register single target aura
-        caster->GetSingleCastAuras().push_back(aura);
-        // remove other single target auras
-        Unit::AuraList& scAuras = caster->GetSingleCastAuras();
-        for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
+        bool isSingleTarget = false;
+        switch (aura->GetSpellProto()->Id)
         {
-            if ((*itr) != aura &&
-                IsSingleTargetSpells((*itr)->GetSpellProto(), aura->GetSpellProto()))
+            case 33763:     // Lifebloom - only on 1 target if caster is not in Tree of life form
+                isSingleTarget = !caster->HasAura(33891);
+                break;
+            default:
+                isSingleTarget = IsSingleTargetSpell(aura->GetSpellProto());
+                break;
+        }
+
+        aura->SetIsSingleTarget(isSingleTarget);
+
+        if (aura->IsSingleTarget())
+        {
+            ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
+            // register single target aura
+            caster->GetSingleCastAuras().push_back(aura);
+            // remove other single target auras
+            Unit::AuraList& scAuras = caster->GetSingleCastAuras();
+            for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
             {
-                (*itr)->Remove();
-                itr = scAuras.begin();
+                if ((*itr) != aura &&
+                    IsSingleTargetSpells((*itr)->GetSpellProto(), aura->GetSpellProto()))
+                {
+                    (*itr)->Remove();
+                    itr = scAuras.begin();
+                }
+                else
+                    ++itr;
             }
-            else
-                ++itr;
         }
     }
 }
