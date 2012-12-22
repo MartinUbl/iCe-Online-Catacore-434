@@ -851,9 +851,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             unitTarget->RemoveAurasDueToSpell((*itr));
                     }
                     // Cast spell which changes AB spell to Exhale one
-                    Aura* pMarkAura = unitTarget->AddAura(86211, m_caster);//m_caster->CastCustomSpell(m_caster, 86211, &bp0, 0, 0, true);
-                    if (pMarkAura)
-                        pMarkAura->GetEffect(0)->SetAmount(bp0);
+                    Aura* pMarkAura = unitTarget->AddAura(86211, m_caster);
+                    if (pMarkAura && pMarkAura->GetEffect(0))
+                        pMarkAura->GetEffect(0)->SetScriptedAmount(bp0);
                     // ..and cast visual
                     unitTarget->CastSpell(m_caster, 92795, true);
 
@@ -865,7 +865,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 86213)
                 {
                     Aura* pMarkAura = m_caster->GetAura(86211);
-                    if (!pMarkAura)
+                    if (!pMarkAura || !pMarkAura->GetEffect(0))
                         return;
 
                     if (pMarkAura->GetCaster() == unitTarget)
@@ -874,7 +874,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // -100% cast time
                     m_caster->CastSpell(m_caster, 92794, true);
 
-                    int32 bp0 = pMarkAura->GetEffect(0)->GetAmount();
+                    int32 bp0 = pMarkAura->GetEffect(0)->GetScriptedAmount();
                     if (bp0 & (1 << 0))
                         m_caster->CastSpell(unitTarget, 172, true);
                     if (bp0 & (1 << 1))
