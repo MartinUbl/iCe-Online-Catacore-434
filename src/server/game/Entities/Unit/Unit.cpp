@@ -989,6 +989,26 @@ void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32
     CastCustomSpell(spellId, values, target, triggered, castItem, triggeredByAura, originalCaster);
 }
 
+void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, int32 const* sp0, int32 const* sp1, int32 const* sp2, bool triggered, Item *castItem, AuraEffect const * triggeredByAura, uint64 originalCaster)
+{
+    CustomSpellValues values;
+    if (bp0)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT0, *bp0);
+    if (bp1)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT1, *bp1);
+    if (bp2)
+        values.AddSpellMod(SPELLVALUE_BASE_POINT2, *bp2);
+
+    if (sp0)
+        values.AddSpellMod(SPELLVALUE_SCRIPTED_POINT0, *sp0);
+    if (sp1)
+        values.AddSpellMod(SPELLVALUE_SCRIPTED_POINT1, *sp1);
+    if (sp2)
+        values.AddSpellMod(SPELLVALUE_SCRIPTED_POINT2, *sp2);
+
+    CastCustomSpell(spellId, values, target, triggered, castItem, triggeredByAura, originalCaster);
+}
+
 void Unit::CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* target, bool triggered, Item *castItem, AuraEffect const * triggeredByAura, uint64 originalCaster)
 {
     CustomSpellValues values;
@@ -4032,7 +4052,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
             {
                 int32 dur = (2*MINUTE*IN_MILLISECONDS < aura->GetDuration() || aura->GetDuration() < 0) ? 2*MINUTE*IN_MILLISECONDS : aura->GetDuration();
 
-                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], NULL, aura->GetCasterGUID());
+                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], NULL, NULL, aura->GetCasterGUID());
                 if (!newAura)
                     return;
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted

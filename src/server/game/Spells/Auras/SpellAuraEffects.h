@@ -34,11 +34,11 @@ typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const * aurApp, ui
 
 class AuraEffect
 {
-    friend void Aura::_InitEffects(uint8 effMask, Unit * caster, int32 *baseAmount);
+    friend void Aura::_InitEffects(uint8 effMask, Unit * caster, int32 *baseAmount, int32* scriptedAmount);
     friend Aura::~Aura();
     private:
         ~AuraEffect();
-        explicit AuraEffect(Aura * base, uint8 effIndex, int32 *baseAmount, Unit * caster);
+        explicit AuraEffect(Aura * base, uint8 effIndex, int32 *baseAmount, int32 *scriptedAmount, Unit * caster);
     public:
         Unit * GetCaster() const { return GetBase()->GetCaster(); }
         uint64 GetCasterGUID() const { return GetBase()->GetCasterGUID(); }
@@ -57,6 +57,9 @@ class AuraEffect
         AuraType GetAuraType() const { return (AuraType)m_spellProto->EffectApplyAuraName[m_effIndex]; }
         int32 GetAmount() const { return m_amount; }
         void SetAmount(int32 amount) { m_amount = amount; m_canBeRecalculated = false;}
+
+        int32 GetScriptedAmount() const { return m_scriptedAmount; }
+        void SetScriptedAmount(int32 amount) { m_scriptedAmount = amount; }
 
         int32 GetPeriodicTimer() const { return m_periodicTimer; }
         void SetPeriodicTimer(int32 periodicTimer) { m_periodicTimer = periodicTimer; }
@@ -104,6 +107,9 @@ class AuraEffect
         SpellEntry const * const m_spellProto;
         uint8 const m_effIndex;
         int32 const m_baseAmount;
+
+        // Amount used for custom internal reasons, such as saving additional data or flags
+        int32 m_scriptedAmount;
 
         int32 m_amount;
         bool m_canBeRecalculated;

@@ -1617,8 +1617,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
 
         if (m_originalCaster)
         {
-            m_spellAura = Aura::TryCreate(aurSpellInfo, effectMask, unit,
-                m_originalCaster,(aurSpellInfo == m_spellInfo)? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem);
+            m_spellAura = Aura::TryCreate(aurSpellInfo, (uint8)effectMask, (WorldObject*)unit,
+                (Unit*)m_originalCaster, (aurSpellInfo == m_spellInfo)? &m_spellValue->EffectBasePoints[0] : &basePoints[0], &m_spellValue->EffectScriptedPoints[0], m_CastItem);
             if (m_spellAura)
             {
                 // Now Reduce spell duration using data received at spell hit
@@ -8159,6 +8159,15 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_BASE_POINT2:
             m_spellValue->EffectBasePoints[2] = SpellMgr::CalculateSpellEffectBaseAmount(value, m_spellInfo, 2);
+            break;
+        case SPELLVALUE_SCRIPTED_POINT0:
+            m_spellValue->EffectScriptedPoints[0] = value;
+            break;
+        case SPELLVALUE_SCRIPTED_POINT1:
+            m_spellValue->EffectScriptedPoints[1] = value;
+            break;
+        case SPELLVALUE_SCRIPTED_POINT2:
+            m_spellValue->EffectScriptedPoints[2] = value;
             break;
         case SPELLVALUE_RADIUS_MOD:
             m_spellValue->RadiusMod = (float)value / 10000;
