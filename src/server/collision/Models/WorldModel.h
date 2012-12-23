@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _WORLDMODEL_H
@@ -60,8 +56,8 @@ namespace VMAP
             float *GetHeightStorage() { return iHeight; }
             uint8 *GetFlagsStorage() { return iFlags; }
             uint32 GetFileSize();
-            bool writeToFile(FILE *wf);
-            static bool readFromFile(FILE *rf, WmoLiquid *&liquid);
+            bool writeToFile(FILE* wf);
+            static bool readFromFile(FILE* rf, WmoLiquid* &liquid);
         private:
             WmoLiquid(): iHeight(0), iFlags(0) {};
             uint32 iTilesX;  //!< number of tiles in x direction, each
@@ -84,13 +80,13 @@ namespace VMAP
 
             //! pass mesh data to object and create BIH. Passed vectors get get swapped with old geometry!
             void setMeshData(std::vector<Vector3> &vert, std::vector<MeshTriangle> &tri);
-            void setLiquidData(WmoLiquid *liquid) { iLiquid = liquid; }
+            void setLiquidData(WmoLiquid*& liquid) { iLiquid = liquid; liquid = NULL; }
             bool IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const;
             bool IsInsideObject(const Vector3 &pos, const Vector3 &down, float &z_dist) const;
             bool GetLiquidLevel(const Vector3 &pos, float &liqHeight) const;
             uint32 GetLiquidType() const;
-            bool writeToFile(FILE *wf);
-            bool readFromFile(FILE *rf);
+            bool writeToFile(FILE* wf);
+            bool readFromFile(FILE* rf);
             const G3D::AABox& GetBound() const { return iBound; }
             uint32 GetMogpFlags() const { return iMogpFlags; }
             uint32 GetWmoID() const { return iGroupWMOID; }
@@ -101,7 +97,7 @@ namespace VMAP
             std::vector<Vector3> vertices;
             std::vector<MeshTriangle> triangles;
             BIH meshTree;
-            WmoLiquid *iLiquid;
+            WmoLiquid* iLiquid;
     };
     /*! Holds a model (converted M2 or WMO) in its original coordinate space */
     class WorldModel

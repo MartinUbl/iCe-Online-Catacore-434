@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ModelInstance.h"
@@ -30,7 +26,7 @@ using G3D::Ray;
 
 namespace VMAP
 {
-    ModelInstance::ModelInstance(const ModelSpawn &spawn, WorldModel *model): ModelSpawn(spawn), iModel(model)
+    ModelInstance::ModelInstance(const ModelSpawn &spawn, WorldModel* model): ModelSpawn(spawn), iModel(model)
     {
         iInvRot = G3D::Matrix3::fromEulerAnglesZYX(G3D::pi()*iRot.y/180.f, G3D::pi()*iRot.x/180.f, G3D::pi()*iRot.z/180.f).inverse();
         iInvScale = 1.f/iScale;
@@ -53,7 +49,7 @@ namespace VMAP
 //        std::cout << "Ray crosses bound of '" << name << "'\n";
 /*        std::cout << "ray from:" << pRay.origin().x << ", " << pRay.origin().y << ", " << pRay.origin().z
                   << " dir:" << pRay.direction().x << ", " << pRay.direction().y << ", " << pRay.direction().z
-                  << " t/tmax:" << time << "/" << pMaxDist;
+                  << " t/tmax:" << time << '/' << pMaxDist;
         std::cout << "\nBound lo:" << iBound.low().x << ", " << iBound.low().y << ", " << iBound.low().z << " hi: "
                   << iBound.high().x << ", " << iBound.high().y << ", " << iBound.high().z << std::endl; */
         // child bounds are defined in object space:
@@ -61,7 +57,7 @@ namespace VMAP
         Ray modRay(p, iInvRot * pRay.direction());
         float distance = pMaxDist * iInvScale;
         bool hit = iModel->IntersectRay(modRay, distance, pStopAtFirstHit);
-        if(hit)
+        if (hit)
         {
             distance *= iScale;
             pMaxDist = distance;
@@ -144,22 +140,20 @@ namespace VMAP
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
-        float zLevel;
-        if (info.hitModel->GetLiquidLevel(pModel, zLevel))
+        float zDist;
+        if (info.hitModel->GetLiquidLevel(pModel, zDist))
         {
-            // despite making little sense, there ARE some (slightly) tilted WMOs...
-            // we can only determine liquid height in LOCAL z-direction (heightmap data),
-            // so with increasing tilt, liquid calculation gets increasingly wrong...not my fault, really :p
-            liqHeight = (zLevel - pModel.z) * iScale + p.z; 
-
+            // calculate world height (zDist in model coords):
+            // assume WMO not tilted (wouldn't make much sense anyway)
+            liqHeight = zDist * iScale + iPos.z;
             return true;
         }
         return false;
     }
 
-    bool ModelSpawn::readFromFile(FILE *rf, ModelSpawn &spawn)
+    bool ModelSpawn::readFromFile(FILE* rf, ModelSpawn &spawn)
     {
-        uint32 check=0, nameLen;
+        uint32 check = 0, nameLen;
         check += fread(&spawn.flags, sizeof(uint32), 1, rf);
         // EoF?
         if (!check)
@@ -182,13 +176,13 @@ namespace VMAP
             spawn.iBound = G3D::AABox(bLow, bHigh);
         }
         check += fread(&nameLen, sizeof(uint32), 1, rf);
-        if(check != (has_bound ? 17 : 11))
+        if (check != uint32(has_bound ? 17 : 11))
         {
             std::cout << "Error reading ModelSpawn!\n";
             return false;
         }
         char nameBuff[500];
-        if (nameLen>500) // file names should never be that long, must be file error
+        if (nameLen > 500) // file names should never be that long, must be file error
         {
             std::cout << "Error reading ModelSpawn, file name too long!\n";
             return false;
@@ -203,7 +197,7 @@ namespace VMAP
         return true;
     }
 
-    bool ModelSpawn::writeToFile(FILE *wf, const ModelSpawn &spawn)
+    bool ModelSpawn::writeToFile(FILE* wf, const ModelSpawn &spawn)
     {
         uint32 check=0;
         check += fwrite(&spawn.flags, sizeof(uint32), 1, wf);
@@ -213,16 +207,16 @@ namespace VMAP
         check += fwrite(&spawn.iRot, sizeof(float), 3, wf);
         check += fwrite(&spawn.iScale, sizeof(float), 1, wf);
         bool has_bound = (spawn.flags & MOD_HAS_BOUND);
-        if(has_bound) // only WMOs have bound in MPQ, only available after computation
+        if (has_bound) // only WMOs have bound in MPQ, only available after computation
         {
             check += fwrite(&spawn.iBound.low(), sizeof(float), 3, wf);
             check += fwrite(&spawn.iBound.high(), sizeof(float), 3, wf);
         }
         uint32 nameLen = spawn.name.length();
         check += fwrite(&nameLen, sizeof(uint32), 1, wf);
-        if(check != (has_bound ? 17 : 11)) return false;
+        if (check != uint32(has_bound ? 17 : 11)) return false;
         check = fwrite(spawn.name.c_str(), sizeof(char), nameLen, wf);
-        if(check != nameLen) return false;
+        if (check != nameLen) return false;
         return true;
     }
 

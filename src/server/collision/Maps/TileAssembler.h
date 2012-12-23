@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _TILEASSEMBLER_H_
@@ -26,8 +22,10 @@
 #include <G3D/Vector3.h>
 #include <G3D/Matrix3.h>
 #include <map>
+#include <set>
 
 #include "ModelInstance.h"
+#include "WorldModel.h"
 
 namespace VMAP
 {
@@ -65,6 +63,31 @@ namespace VMAP
     typedef std::map<uint32, MapSpawns*> MapData;
     //===============================================
 
+    struct GroupModel_Raw
+    {
+        uint32 mogpflags;
+        uint32 GroupWMOID;
+
+        G3D::AABox bounds;
+        uint32 liquidflags;
+        std::vector<MeshTriangle> triangles;
+        std::vector<G3D::Vector3> vertexArray;
+        class WmoLiquid *liquid;
+
+        GroupModel_Raw() : liquid(0) {}
+        ~GroupModel_Raw();
+
+        bool Read(FILE * f);
+    };
+
+    struct WorldModel_Raw
+    {
+        uint32 RootWMOID;
+        std::vector<GroupModel_Raw> groupsArray;
+
+        bool Read(const char * path);
+    };
+
     class TileAssembler
     {
         private:
@@ -74,6 +97,7 @@ namespace VMAP
             G3D::Table<std::string, unsigned int > iUniqueNameIds;
             unsigned int iCurrentUniqueNameId;
             MapData mapData;
+            std::set<std::string> spawnedModelFiles;
 
         public:
             TileAssembler(const std::string& pSrcDirName, const std::string& pDestDirName);
@@ -82,11 +106,11 @@ namespace VMAP
             bool convertWorld2();
             bool readMapSpawns();
             bool calculateTransformedBound(ModelSpawn &spawn);
+            void exportGameobjectModels();
 
             bool convertRawFile(const std::string& pModelFilename);
             void setModelNameFilterMethod(bool (*pFilterMethod)(char *pName)) { iFilterMethod = pFilterMethod; }
             std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
-            unsigned int getUniqueNameId(const std::string pName);
     };
 
 }                                                           // VMAP
