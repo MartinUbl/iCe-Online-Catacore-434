@@ -17,7 +17,6 @@ set(scripts_STAT_SRCS
   Northrend/Ulduar/ulduar/boss_yoggsaron.cpp
   Northrend/Ulduar/ulduar/boss_hodir.cpp
   Northrend/Ulduar/ulduar/boss_assembly_of_iron.cpp
-  Northrend/Ulduar/ulduar/boss_flame_leviathan.cpp
   Northrend/Ulduar/ulduar/boss_xt002.cpp
   Northrend/Ulduar/ulduar/boss_mimiron.cpp
   Northrend/Ulduar/ulduar/ulduar.h
