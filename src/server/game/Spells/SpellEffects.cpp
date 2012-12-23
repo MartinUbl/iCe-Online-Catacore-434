@@ -6673,6 +6673,15 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
             }
         }
     }
+    switch(m_spellInfo->Id)
+    {
+        case 6552://Rude interruption
+            if(m_originalCaster->HasAura(61216))
+                m_originalCaster->CastSpell(m_originalCaster,86662,true);
+            else if(m_originalCaster->HasAura(61221))
+                m_originalCaster->CastSpell(m_originalCaster,86663,true);
+            break;
+    }
 }
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
