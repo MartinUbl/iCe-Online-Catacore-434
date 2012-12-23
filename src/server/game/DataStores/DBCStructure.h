@@ -1016,7 +1016,7 @@ struct FactionTemplateEntry
 struct GameObjectDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
-    //DBCString filename;                                   // 1
+    DBCString filename;                                     // 1
     //uint32  unk1[10];                                     // 2-11
     float   minX;                                           // 12  
     float   minY;                                           // 13

@@ -595,6 +595,7 @@ enum LootState
 };
 
 class Unit;
+class GameObjectModel;
 
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
@@ -690,7 +691,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
-        void SetGoState(GOState state) { SetByteValue(GAMEOBJECT_BYTES_1, 0, state); }
+        void SetGoState(GOState state);
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
         void SetGoArtKit(uint8 artkit);
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
@@ -700,7 +701,11 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void Use(Unit* user);
 
         LootState getLootState() const { return m_lootState; }
-        void SetLootState(LootState s) { m_lootState = s; }
+        void SetLootState(LootState s);
+
+        void SetDisplayId(uint32 displayid);
+        void SetPhaseMask(uint32 newPhaseMask, bool update);
+        void EnableCollision(bool enable);
 
         uint16 GetLootMode() { return m_LootMode; }
         bool HasLootMode(uint16 lootMode) { return m_LootMode & lootMode; }
@@ -769,6 +774,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         GameObjectAI* AI() const { return (GameObjectAI*)m_AI; }
 
         std::string GetAIName() const;
+
+        GameObjectModel * m_model;
     protected:
         bool AIM_Initialize();
         uint32      m_spellId;
@@ -798,5 +805,6 @@ class GameObject : public WorldObject, public GridObject<GameObject>
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         GameObjectAI* m_AI;
+        void UpdateModel();                                 // updates model in case displayId were changed
 };
 #endif

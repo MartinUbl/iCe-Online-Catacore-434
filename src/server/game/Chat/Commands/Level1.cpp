@@ -844,8 +844,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     Map2ZoneCoordinates(zone_x,zone_y,zone_id);
 
     Map const *map = obj->GetMap();
-    float ground_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
-    float floor_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+    float ground_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
+    float floor_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
 
     GridPair p = Trinity::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -860,7 +860,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     FILE *GPSOut = fopen("gps.txt","a");
     if (GPSOut)
     {
-        fprintf(GPSOut, "%ff, %ff, %ff, %ff", obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+        fprintf(GPSOut, "%ff, %ff, %ff, %ff\n", obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
         fclose(GPSOut);
     }
 #endif

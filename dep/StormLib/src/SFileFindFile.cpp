@@ -262,7 +262,7 @@ static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
         nPrefixLength = strlen(ha->szPatchPrefix);
 
         // Parse the file table
-        while(pFileEntry < pFileTableEnd)
+        while (pFileEntry && pFileEntry < pFileTableEnd)
         {
             // Increment the next index for subsequent search
             hs->dwNextIndex++;
@@ -376,7 +376,7 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
     if(nError == ERROR_SUCCESS)
     {
         memset(hs, 0, sizeof(TMPQSearch));
-        strcpy(&hs->szSearchMask[0], szMask);
+        strncpy(&hs->szSearchMask[0], szMask, strlen(szMask));
         hs->dwFlagMask = MPQ_FILE_EXISTS;
         hs->ha = ha;
 

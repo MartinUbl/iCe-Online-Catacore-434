@@ -1270,6 +1270,8 @@ void World::LoadConfigSettings(bool reload)
     sScriptMgr->OnConfigLoad(reload);
 }
 
+extern void LoadGameObjectModelList();
+
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
@@ -1329,6 +1331,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Initialize db2 stores...");
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
+
+    sLog->outString("Loading GameObject models...");
+    LoadGameObjectModelList();
 
     sLog->outString("Loading Script Names...");
     sObjectMgr->LoadScriptNames();
