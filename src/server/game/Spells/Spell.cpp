@@ -3219,6 +3219,34 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         break;
                     }
                     break;
+                case SPELLFAMILY_SHAMAN:
+                    // Spirit Link targetting and secondary effect
+                    // we have to do it this way, cause the dummy raid aura select targets for us, which have to be used for calculation
+                    if (m_spellInfo->Id == 98020)
+                    {
+                        float percentage = 0.0f;
+
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                            percentage += (*itr)->GetHealthPct()/(float)(unitList.size());
+
+                        int32 bp = 0;
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                        {
+                            // effect 0 = damage
+                            if ((*itr)->GetHealthPct() > percentage)
+                            {
+                                bp = ((*itr)->GetHealthPct()-percentage)*(*itr)->GetMaxHealth()/100.0f;
+                                m_caster->CastCustomSpell((*itr), 98021, &bp, 0, 0, true);
+                            }
+                            // effect 1 = heal
+                            else
+                            {
+                                bp = (percentage-(*itr)->GetHealthPct())*(*itr)->GetMaxHealth()/100.0f;
+                                m_caster->CastCustomSpell((*itr), 98021, 0, &bp, 0, true);
+                            }
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
