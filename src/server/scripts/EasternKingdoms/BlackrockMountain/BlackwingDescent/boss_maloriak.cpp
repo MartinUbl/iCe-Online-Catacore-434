@@ -20,10 +20,6 @@ enum Texts
     TEXT_UNKNOWN                = -1999970,
     TEXT_PRIME_SUBJECT          = -1999971,
     TEXT_PRIME_SUBJECT1         = -1999972,
-    TEXT_EMOTE_RED              = -1999973,
-    TEXT_EMOTE_BLUE             = -1999974,
-    TEXT_EMOTE_GREEN            = -1999975,
-    TEXT_EMOTE_DARK             = -1999976,
 };
 
 enum Phase
@@ -38,6 +34,7 @@ enum Action
     CHECK_COUNTER               = 2,
     ACTION_INTRO                = 3,
     CHECK_AURA_COUNT            = 4,
+    SET_TIMER                   = 5,
 };
 
 enum Npc
@@ -50,51 +47,169 @@ enum Npc
     NPC_CAULDRON_TRIGGER        = 41505,
     NPC_LORD_VOICE_TRIGGER      = 415050,
     NPC_LORD_VICTOR_NEFARIUS    = 49799,
+    NPC_VILE_SWILL_PREEFECT     = 49812,
+    NPC_VILE_SWILL              = 49811,
+    NPC_MAGMA_JETS              = 41091,
 };
 
 enum Spells
 {
+    // Maloriak ====>
     SPELL_MAGMA_JETS             = 78194,
     SPELL_ACID_NOVA              = 93013,
     SPELL_REMEDY                 = 77912,
-    SPELL_DEBILITATING_SLIME     = 77615,
-    SPELL_DEBILITATING_SLIME_VISUAL = 77602,
-    SPELL_FLASH_FREEZE_10M          = 77699,
-    SPELL_FLASH_FREEZE_25M       = 92978,
-    SPELL_FLASH_FREEZE_10M_HC    = 92979,
-    SPELL_FLASH_FREEZE_25M_HC    = 92980,
-    SPELL_GROWTH_CATACLYST       = 77987,
+    SPELL_BITTING_CHILL          = 77760,
+    SPELL_ARCANE_STORM           = 77896,
     SPELL_ENFULGING_DARKNESS     = 92754,
+
     //Consuming flames
     SPELL_CONSUMING_FLAMES       = 77786,
     SPELL_CONSUMING_FLAMES10HC   = 92972,
     SPELL_CONSUMING_FLAMES25N    = 92971,
     SPELL_CONSUMING_FLAMES25HC   = 92973,
-    //
-    SPELL_BITTING_CHILL          = 77760,
-    SPELL_ARCANE_STORM           = 77896,
+
     // Scorching blast
     SPELL_SCORCHING_BLAST10N     = 77679,
     SPELL_SCORCHING_BLAST10HC    = 92969,
     SPELL_SCORCHING_BLAST25N     = 92968,
     SPELL_SCORCHING_BLAST25HC    = 92970,
+
     SPELL_RELEASE_ALL_MINION     = 77991,
-    SPELL_RELLEASE_ABERRATION    = 77569,
+    SPELL_RELEASE_ABERRATION     = 77569,
+    // <==== Maloriak
+
+    // Aberration ====>
+    SPELL_GROWTH_CATACLYST       = 77987,
+    // <==== Aberration
+
+    // Cauldron ====>
+    SPELL_DEBILITATING_SLIME     = 77615,
+    SPELL_DEBILITATING_SLIME_VISUAL = 77602,
+    // <==== Cauldron
+
+    // Flash Freeze ====>
+    SPELL_FLASH_FREEZE_10M          = 77699,
+    SPELL_FLASH_FREEZE_25M       = 92978,
+    SPELL_FLASH_FREEZE_10M_HC    = 92979,
+    SPELL_FLASH_FREEZE_25M_HC    = 92980,
+    // <==== Flash Freeze
+
+
+    // Absolute Zero ====>
     SPELL_ABSOLUTE_ZERO          = 78223,
     SPELL_ABSOLUTE_ZERO_AURA     = 78201,
     SPELL_ABSOLUTE_ZERO_DMG      = 78208,
+    // <==== Absolute Zero
+
+
+    // Vile Swill ====>
+    SPELL_DARK_SLUDGE            = 92987,
+    SPELL_VILE_SWILL_PREEFECT    = 92737,
+    // <==== Vile Swill
 };
 
 static const Position SpawnPos[2] =
 {
     {-105.692007f, -435.626007f, 73.331398f},
-    {-105.692007f, -435.626007f, 73.331398f},
+    {-105.692007f, -435.626007f, 73.331398f}
 };
 
-static const Position AddSpawnPos[2] =
+static const Position AberrationSpawnPos[3] =
 {
-    {-105.692007f, -435.626007f, 73.331398f,0.0f},
-    {-105.692007f, -435.626007f, 73.331398f,0.0f},
+    {-149.28f, -443.74f, 89.931f, 0},
+    {-148.25f, -439.79f, 89.137f, 0},
+    {-60.197f, -449.86f, 85.557f, 0}
+};
+
+class npc_vile_swill_preeffect: public CreatureScript
+{
+    public:
+        npc_vile_swill_preeffect() : CreatureScript("npc_vile_swill_preeffect") { }
+
+        struct npc_vile_swill_preeffectAI : public ScriptedAI
+        {
+            npc_vile_swill_preeffectAI(Creature* creature) : ScriptedAI(creature){}
+            
+            uint32 Release_timer;
+            int Count;
+
+            void Reset()
+            {
+                Release_timer = 2000;
+                Count = 0;
+            }
+
+            void EnterCombat(Unit* /*target*/) { }
+
+            void DamageTaken(Unit* pTarget, uint32& damage)
+            {
+                damage = 0;
+            }
+            
+            void UpdateAI(uint32 const diff)
+            {
+                    
+                if (Count >= 5)
+                {
+                    me->DespawnOrUnsummon();
+                }
+
+                if(Release_timer <= diff)
+                {
+                    Count++;
+                    me->SummonCreature(NPC_VILE_SWILL,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    me->CastSpell(me,92720,false);
+                    Release_timer = 2000;
+                }
+                else
+                    Release_timer -= diff;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_vile_swill_preeffectAI(creature);
+        }
+};
+
+class npc_vile_swill: public CreatureScript
+{
+    public:
+        npc_vile_swill() : CreatureScript("npc_vile_swill") { }
+
+        struct npc_vile_swillAI : public ScriptedAI
+        {
+            npc_vile_swillAI(Creature* creature) : ScriptedAI(creature){}
+            uint32 Dark_Sludge;
+
+            void Reset()
+            {
+                Dark_Sludge = 2000;
+            }
+
+            void EnterCombat(Unit* /*target*/) { }
+
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if(Dark_Sludge <= diff)
+                {
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
+                    me->CastSpell(target,SPELL_DARK_SLUDGE,false);
+                    Dark_Sludge = 2000;
+                }
+                else
+                    Dark_Sludge -= diff;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_vile_swillAI(creature);
+        }
 };
 
 class npc_absolute_zero : public CreatureScript
@@ -109,9 +224,8 @@ public:
 
     struct npc_absolute_zeroAI : public ScriptedAI
     {
-        npc_absolute_zeroAI(Creature *c) : ScriptedAI(c)
-        {
-        }
+        npc_absolute_zeroAI(Creature *c) : ScriptedAI(c) { }
+
             uint32 uiPauseTimer; 
             uint32 uiDespawnTimer;
             bool CanExplode;
@@ -228,17 +342,15 @@ public:
         boss_maloriakAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
-            c->GetMap();
             c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
             c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            c->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             Reset();
         }
         // uint32 pro spelly
-        uint32 uiDebilitatingSlime;
         uint32 uiAbsoluteZero;
         uint32 uiArcaneStorm;
         uint32 uiBitingChill;
@@ -254,44 +366,43 @@ public:
         uint32 uiDarkSludge;
         uint32 uiEngulfingDarkness;
         uint32 uiVilleSwill;
+        uint32 maxspawncount;
+
         // uint32 pro faze
         uint32 uiSwitchPhaseTimer;
         uint32 uiSubPhaseTimer;
-        uint32 phase1;
-        uint32 phase2;
-        uint32 phase3;
+
         // zbytek
-        uint32 _AberrationGUID;
         uint32 Poradi;
         uint32 CastTimer;
-        uint32 phase;
         uint32 Phase;
         uint32 SubPhase;
-        uint32 subphase;
-        uint32 diff;
+        uint32 AuraCheckTimer;      
+
         uint32 HeroicIntro;
+
         InstanceScript* pInstance;
         bool isEnraged;
         bool SummonAll;
-        bool Block;
+        bool StopTimer;
         bool PhaseOne;
         bool PhaseTwo;
         bool LastPhase;
         bool StopSlime;
         bool Jump;
         bool AwardAchiev;
-        bool Intro;
         bool IntroDone;
         bool can_interrupt;
-        uint8 move;
+
         uint8 uiphase;
-        std::list<Creature*> mujList;
-        GOState Blue;
-        GOState Red;
-        std::list<uint32> AberrationDeathTimeStamp;
+        GameObject* pCauldron;
+        Creature* pLord;
+        Creature* pCauldronTrigger;
         uint32 counter;
         uint32 AberrationAchievementCounter;
         uint32 SpellCounter;
+
+        std::list<uint32> AberrationDeathTimeStamp;
         std::vector<uint64> PrimeSubject;
 
         void Reset()
@@ -302,15 +413,16 @@ public:
             uiRemedy = 14000;
             uiphase = 0;
             Berserk = IsHeroic() ? 1200000 : 420000; // 7 minut
-            move = 0;
-            phase = 0;
-            subphase = 0;
-            SummonAll = 0;
+            SummonAll = false;
             Poradi = 0;
             counter = 0;
+            maxspawncount = 0;
             SpellCounter = 0;
-            _AberrationGUID = 0;
-            mujList.clear();
+
+            pCauldron = NULL;
+            pLord = NULL;
+            pCauldronTrigger = NULL;
+
             isEnraged = false;
             PhaseOne = false;
             PhaseTwo = false;
@@ -320,7 +432,7 @@ public:
             IntroDone = false;
             Jump = false;
             can_interrupt = false;
-
+            //StopTimer = false;
         }
 
         void CloseCell()
@@ -330,7 +442,13 @@ public:
                 Cell->SetGoState(GO_STATE_READY);
             }
         }
-        
+
+        void ChangeCauldronColor(uint8 color) {
+            // 0 - red, 1 - blue, 2 - green, 3 - dark
+            if (pCauldron)
+                pCauldron->SendCustomAnim(color);
+        }
+
         void OpenCell()
         {
             if(GameObject* Cell= me->FindNearestGameObject(191722,100.0f))
@@ -355,32 +473,17 @@ public:
                 }
             }
 
-            if (spell->Id == SPELL_RELLEASE_ABERRATION)
+            if (spell->Id == SPELL_RELEASE_ABERRATION)
             {
                 SpellCounter++;
-                
+
                 if(SpellCounter <= 6)
                 {
-                    switch(urand(0,1))
+                    for (uint32 i = 0; i < 3; i++)
                     {
-                        case 0:
-                        {
-                             for (uint32 i = 0; i < 3; i++)
-                             {
-                                 me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                             }
-                        }
-                        break;
-                        case 1:
-                        {
-                             for (uint32 i = 0; i < 3; i++)
-                             {
-                                me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                             }
-                        }
-                        break;
-                     }
-                 }
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    }
+                }
             }
         }
 
@@ -399,163 +502,96 @@ public:
 
         void ReleaseAll()
         {
-           if (SpellCounter == 0)
-           {
-                switch(urand(0,1))
+            if (SpellCounter == 0)
+            {
+                for (uint32 i = 0; i < 6; i++) // 18 (6 na kazde pozici)
                 {
-                    case 0:
+                    for (uint32 o = 0; o < 3; o++)
                     {
-                        for (uint32 i = 0; i < 18; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                     }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 18; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                } 
-           }
-           else if(SpellCounter == 1)
-           {
-                switch(urand(0,1))
-                {
-                    case 0:
-                    {
-                        for (uint32 i = 0; i < 15; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 15; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
                 }
-           }
-           else if(SpellCounter == 2)
-           {
-                switch(urand(0,1))
+            }
+            else if(SpellCounter == 1)
+            {
+                for (uint32 i = 0; i < 5; i++) // 15 (5 na kazde pozici)
                 {
-                    case 0:
+                    for (uint32 o = 0; o < 3; o++)
                     {
-                        for (uint32 i = 0; i < 12; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                     }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 12; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                }       
-           }
-           else if(SpellCounter == 3)
-           {
-                switch(urand(0,1))
-                {
-                    case 0:
-                    {
-                        for (uint32 i = 0; i < 9; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 9; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
                 }
-           }
-           else if(SpellCounter == 4)
-           {
-                 switch(urand(0,1))
+            }
+            else if(SpellCounter == 2)
+            {
+                for (uint32 i = 0; i < 4; i++) // 12 (4 na kazde pozici)
                 {
-                    case 0:
+                    for (uint32 o = 0; o < 3; o++)
                     {
-                        for (uint32 i = 0; i < 6; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                     }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 6; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                }       
-           }
-           else if(SpellCounter == 5)
-           {
-                switch(urand(0,1))
-                {
-                    case 0:
-                    {
-                        for (uint32 i = 0; i < 3; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-77.633163f,-444.687256f,73.449394f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
-                    case 1:
-                    {
-                        for (uint32 i = 0; i < 3; i++)
-                        {
-                            me->SummonCreature(NPC_ABERRATION,-134.706467f,-444.746613f,73.447304f,0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                        }
-                    }
-                    break;
                 }
-           }
-           else
+            }
+            else if(SpellCounter == 3)
+            {
+                for (uint32 i = 0; i < 3; i++) // 9 (3 na kazde pozici)
+                {
+                    for (uint32 o = 0; o < 3; o++)
+                    {
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    }
+                }
+            }
+            else if(SpellCounter == 4)
+            {
+                for (uint32 i = 0; i < 2; i++) // 6 (2 na kazde pozici)
+                {
+                    for (uint32 o = 0; o < 3; o++)
+                    {
+                        me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    }
+                 }
+            }
+            else if(SpellCounter == 5)
+            {
+                for (uint32 i = 0; i < 3; i++)
+                {
+                    me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                }
+            }
+            else
                 return;
-           
         }
 
         void EnterCombat(Unit* /*who*/)
         {
            if(IsHeroic())
-           {
-                DoScriptText(TEXT_AGGRO,me);
                 HeroicIntro = 8000;
-           }
-           else
-                DoScriptText(TEXT_AGGRO,me);
+
+            DoScriptText(TEXT_AGGRO,me);
+
             if (pInstance)
                 pInstance->SetData(DATA_MALORIAK_GUID, IN_PROGRESS);
             SummonAll = false;
-            Block = false;
+
             uiSubPhaseTimer = 1000;
             uiSwitchPhaseTimer = 15000;
             Phase = 0;
             SubPhase = 0;
             CloseCell();
+            AuraCheckTimer = 1000;
+
+            if (pCauldron == NULL)
+                pCauldron = me->FindNearestGameObject(459554, 100.0f);
+
+            if (pCauldronTrigger == NULL)
+                pCauldronTrigger = me->FindNearestCreature(NPC_CAULDRON_TRIGGER, 250.0f);
+
+            if (pLord == NULL)
+                pLord = me->FindNearestCreature(NPC_LORD_VOICE_TRIGGER, 100.0f);
+
         }
-        
+
         void DoAction(const int Action)
         {
             switch (Action)
@@ -589,40 +625,63 @@ public:
         {
             if (type != POINT_MOTION_TYPE)
                 return;
- 
+
             switch (id)
             {
                 case 1:
                 {
-                     me->GetMotionMaster()->MoveChase(me->getVictim());
-                     DoScriptText(TEXT_RED_VIAL,me);
+                    DoScriptText(TEXT_RED_VIAL, me);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+
+                    ChangeCauldronColor(0);
                 }
                 break;
                 case 2:
                 {
-                     me->GetMotionMaster()->MoveChase(me->getVictim());
-                     DoScriptText(TEXT_BLUE_VIAL,me);
+                    DoScriptText(TEXT_BLUE_VIAL,me);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+
+                    ChangeCauldronColor(1);
                 }
                 break;
                 case 3:
                 {
                      FindPlayers();
-                     Jump = true;
                      DoScriptText(TEXT_GREEN_VIAL,me);
+                     Jump = true;
+                     ChangeCauldronColor(2);
                 }
                 break;
                 case 4:
                 {
+                    ChangeCauldronColor(3);
+                    uiEngulfingDarkness = 6000;
+                    uiVilleSwill = 8000;
                     me->GetMotionMaster()->MoveChase(me->getVictim());
-                    uiEngulfingDarkness = 2000;
-                    uiVilleSwill = 4000;
-                    if(Creature* Lord = me->FindNearestCreature(NPC_LORD_VOICE_TRIGGER,250.0f,true))
+                    if(pLord)
                     {
-                        Lord->MonsterYell(" Your mixtures are weak, Maloriak! They need a bit more... kick!",0,0);
-                        Lord->PlayDirectSound(23370,0);
+                        pLord->MonsterYell("Your mixtures are weak, Maloriak! They need a bit more... kick!",0,0);
+                        pLord->PlayDirectSound(23370,0);
                     }
                 }
                 break;
+            }
+        }
+
+        void CheckAuraCount()
+        {
+            std::list<Creature*> AuraCount;
+            me->GetCreatureListWithEntryInGrid(AuraCount, NPC_ABERRATION, 10.0f);
+            if (!AuraCount.empty())
+            {
+                for (std::list<Creature*>::const_iterator itr = AuraCount.begin(); itr != AuraCount.end(); ++itr)
+                {
+                    for (uint32 i = 0; i < AuraCount.size(); ++i)
+                    {
+                        if (!me->HasAura(SPELL_DEBILITATING_SLIME))
+                            (*itr)->AddAura(SPELL_GROWTH_CATACLYST,me);
+                    }
+                }
             }
         }
 
@@ -630,32 +689,38 @@ public:
         {
             if (!UpdateVictim())
                 return;
-                
+
+            if(AuraCheckTimer <= diff)
+            {
+                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+                CheckAuraCount();
+                AuraCheckTimer = 1000;
+            }
+            else
+                AuraCheckTimer -= diff;
+
             if (!IntroDone)
             {
                 if (HeroicIntro <= diff)
                 {
                     IntroDone = true;
-                    if(Creature* Lord = me->FindNearestCreature(NPC_LORD_VOICE_TRIGGER,250.0f,true))
+                    if (pLord)
                     {
-                        Lord->MonsterYell("Maloriak, try not to lose to these mortals! Semi-competent help is SO hard to create.",0,0);
-                        Lord->PlayDirectSound(23372,0);
+                        pLord->MonsterYell("Maloriak, try not to lose to these mortals! Semi-competent help is SO hard to create.",0,0);
+                        pLord->PlayDirectSound(23372,0);
                     }
                 }
                 else
                     HeroicIntro -= diff;
             }
-            
-            if (Jump == true)
+
+            if (Jump == true && !me->hasUnitState(UNIT_STAT_CASTING))
             {
                 Jump = false;
                 me->GetMotionMaster()->MoveJump(-102.292519f,-439.359955f,73.534279f,20.0f,20.0f);
                 me->GetMotionMaster()->MoveChase(me->getVictim());
-                if(Creature* Cauldron = me->FindNearestCreature(NPC_CAULDRON_TRIGGER,250.0f,true))
-                {
-                    Cauldron->CastSpell(Cauldron, SPELL_DEBILITATING_SLIME_VISUAL, false);
-                    Cauldron->CastSpell(Cauldron, SPELL_DEBILITATING_SLIME, true);
-                }
+                if(pCauldronTrigger)
+                    pCauldronTrigger->CastSpell(pCauldronTrigger, SPELL_DEBILITATING_SLIME_VISUAL, false);
             }
 
             if (!isEnraged)
@@ -678,6 +743,7 @@ public:
                 uiMagmaJets = 20000;
                 uiAcid_Nova = 10000;
                 uiRemedy = 14000;
+
                 // 1.prime subject
                 if (Creature* Spawned = me->SummonCreature(NPC_PRIME_SUBJECT,SpawnPos[1],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                 {
@@ -764,10 +830,11 @@ public:
                                 SubPhase = 1;
                                 break;
                             case 1:
+                                StopTimer = false;
                                 SubPhase = 2;
                                 uiphase = 5;
                                 uiSubPhaseTimer = 72000;
-                                me->TextEmote(TEXT_EMOTE_DARK,0,true);
+                                maxspawncount = 0;
                                 me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
                                 me->AddAura(92716,me);
                                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
@@ -776,7 +843,6 @@ public:
                                 SubPhase = 3;
                                 uiphase = 1;
                                 uiSubPhaseTimer = 50000;
-                                me->TextEmote(TEXT_EMOTE_RED,0,true);
                                 me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
                                 me->RemoveAurasDueToSpell(92716);
                                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
@@ -787,7 +853,6 @@ public:
                                 SubPhase = 4;
                                 uiphase = 2;
                                 uiSubPhaseTimer = 50000;
-                                me->TextEmote(TEXT_EMOTE_BLUE,0,true);
                                 me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
                                 CastTimer = 5000;
                                 Poradi = 0;
@@ -798,7 +863,6 @@ public:
                                 uiSubPhaseTimer = 50000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                me->TextEmote(TEXT_EMOTE_GREEN,0,true);
                             break;
                         }
                     }
@@ -815,7 +879,6 @@ public:
                                 SubPhase = 2;
                                 uiphase = 1;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_RED,0,true);
                                 me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
                                 break;
                             case 2:
@@ -824,7 +887,6 @@ public:
                                 SubPhase = 3;
                                 uiphase = 2;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_BLUE,0,true);
                                 me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
                                 break;
                             case 3:
@@ -833,7 +895,6 @@ public:
                                 uiSubPhaseTimer = 40000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                me->TextEmote(TEXT_EMOTE_GREEN,0,true);
                                 break;
                         }
                     }
@@ -851,12 +912,14 @@ public:
                         {
                             case 0:
                                 SubPhase = 1;
-                            break;
+                                break;
                             case 1:
+                                StopTimer = false;
                                 SubPhase = 2;
                                 uiphase = 5;
+                                maxspawncount = 0;
                                 uiSubPhaseTimer = 72000;
-                                me->TextEmote(TEXT_EMOTE_DARK,0,true);
+                                ChangeCauldronColor(3);
                                 me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
                                 me->AddAura(92716,me);
                                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
@@ -868,7 +931,6 @@ public:
                                 SubPhase = 3;
                                 uiphase = 2;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_BLUE,0,true);
                                 me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
                                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
                                 break;
@@ -878,7 +940,6 @@ public:
                                 SubPhase = 4;
                                 uiphase = 1;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_RED,0,true);
                                 me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
                             break;
                             case 4:
@@ -887,7 +948,6 @@ public:
                                 uiSubPhaseTimer = 40000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                me->TextEmote(TEXT_EMOTE_GREEN,0,true);
                                 break;
                         }
                     }
@@ -904,7 +964,6 @@ public:
                                 SubPhase = 2;
                                 uiphase = 2;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_BLUE,0,true);
                                 me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
                                 break;
                             case 2:
@@ -913,7 +972,6 @@ public:
                                 SubPhase = 3;
                                 uiphase = 1;
                                 uiSubPhaseTimer = 40000;
-                                me->TextEmote(TEXT_EMOTE_RED,0,true);
                                 me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
                                 break;
                             case 3:
@@ -922,7 +980,6 @@ public:
                                 uiSubPhaseTimer = 40000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                me->TextEmote(TEXT_EMOTE_GREEN,0,true);
                                 break;
                         }
                     }
@@ -934,6 +991,7 @@ public:
             {
                 if (CastTimer <= diff)
                 {
+
                     switch(Poradi)
                     {
                         case 0:
@@ -941,7 +999,7 @@ public:
                             break;
                         case 1: //5 SEC
                             Poradi = 2;
-                            CastTimer = 7000; 
+                            CastTimer = 7000;
                             me->CastSpell(me,SPELL_ARCANE_STORM,false);
                             can_interrupt = true;
                             break;
@@ -967,7 +1025,7 @@ public:
                         case 4: //19
                             Poradi = 5;
                             CastTimer = 6000; 
-                            me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
+                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                             can_interrupt = true;
                             break;
                         case 5:// 25
@@ -987,8 +1045,8 @@ public:
                         }
                         case 7://34
                             Poradi = 8;
-                            CastTimer = 6000;
-                            me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
+                            CastTimer = 5000;
+                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                             can_interrupt = true;
                             break;
                         case 8://40
@@ -1006,10 +1064,11 @@ public:
                     CastTimer -= diff;
             }
 
-            if (uiphase == 2) //Blue Phase 
+            if (uiphase == 2) //Blue Phase
             {
                 if (CastTimer <= diff)
                 {
+
                     switch(Poradi)
                     {
                         case 0:
@@ -1031,7 +1090,7 @@ public:
                             Poradi = 3;
                             CastTimer = 2000;
                             if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast (SPELL_BITTING_CHILL);
+                                DoCast(SPELL_BITTING_CHILL);
                         }
                         break;
                         case 3: // 16
@@ -1058,7 +1117,7 @@ public:
                             can_interrupt = true;
                             Poradi = 5;
                             CastTimer = 6000; 
-                            me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
+                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                         }
                         break;
                         case 5:// 25
@@ -1093,7 +1152,7 @@ public:
                             can_interrupt = true;
                             Poradi = 8;
                             CastTimer = 6000;
-                            me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
+                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                         }
                         break;
                         case 8://40
@@ -1115,15 +1174,15 @@ public:
                 if (uiReleaseAberrations <= diff )
                 {
                     me->InterruptNonMeleeSpells(true);
-                    me->CastSpell(me,SPELL_RELLEASE_ABERRATION,false);
+                    me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                     uiReleaseAberrations = 17000;
                 } else uiReleaseAberrations -= diff;
 
-                if (!StopSlime && uiDebilitatingSlime<= diff)
+                if (StopSlime == false)
                 {
-                    me->CastSpell(me,SPELL_DEBILITATING_SLIME,true);
+                    me->CastSpell(me,SPELL_DEBILITATING_SLIME,false);
                     StopSlime = true;
-                } else uiDebilitatingSlime-= diff;
+                }
             }
 
             if (uiphase == 4) // Final Phase
@@ -1148,12 +1207,14 @@ public:
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
+                        me->SetOrientation(target->GetOrientation());
                         //DoCast(SPELL_MAGMA_JETS);
-                        me->SummonCreature(41901,target->GetPositionX(),target->GetPositionY()+5,target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX(),target->GetPositionY()+10,target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX(),target->GetPositionY()+15,target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX(),target->GetPositionY()+20,target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                    }
+                        me->SummonCreature(41901,target->GetPositionX()+5,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(41901,target->GetPositionX()+10,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(41901,target->GetPositionX()+15,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(41901,target->GetPositionX()+20,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(41901,target->GetPositionX()+25,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(41901,target->GetPositionX()+30,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);                    }
                     uiMagmaJets = 8000;
                 } else uiMagmaJets -= diff;
             }
@@ -1172,33 +1233,42 @@ public:
                 }
                 else
                     uiEngulfingDarkness -= diff;
-
-                if(uiVilleSwill <= diff)
+                
+                if(!StopTimer)
                 {
-                    uiVilleSwill = 10000;
-                    me->SummonCreature(49811,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),1.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,2000);
+                    if(uiVilleSwill <= diff)
+                    {
+                        StopTimer = true;
+                        uiVilleSwill = 150000;
+                        me->SummonCreature(NPC_VILE_SWILL_PREEFECT,me->GetPositionX()+5,me->GetPositionY(),me->GetPositionZ()+1,TEMPSUMMON_MANUAL_DESPAWN);
+                    }
+                    else
+                        uiVilleSwill -= diff;   
                 }
-                else
-                    uiVilleSwill -= diff;
             }
             DoMeleeAttackIfReady();
         }
 
         void JustSummoned (Creature* pSummon)
         {
-            if (pSummon->GetEntry() == 41901)
+            switch(pSummon->GetEntry())
             {
-                pSummon->CastSpell(pSummon,78095,false);
+                case NPC_VILE_SWILL_PREEFECT:
+                    pSummon->CastSpell(pSummon,SPELL_VILE_SWILL_PREEFECT,true);
+                    break;
+                case NPC_MAGMA_JETS:
+                    pSummon->CastSpell(pSummon,78095,false);
+                    break;
+                case NPC_ABERRATION:
+                    pSummon->GetMotionMaster()->MoveJump(-106.564323f, -455.508728f, 73.458221f,1.0f,1.0f);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0)) 
+                       if (pSummon->AI())
+                           pSummon->AI()->AttackStart(pTarget);
+                    break;
+                case NPC_FLASH_FREEZE:
+                    pSummon->AddAura(77712,pSummon);
+                    break;
             }
-            if (pSummon->GetEntry() == NPC_ABERRATION)
-            {
-                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0)) {
-                   if (pSummon->AI())
-                       pSummon->AI()->AttackStart(pTarget);
-                }
-            }
-            if (pSummon->GetEntry() == NPC_FLASH_FREEZE)
-                pSummon->AddAura(77712,pSummon);
         }
 
         void SummonedCreatureDies(Creature* pSummon, Unit* killer) 
@@ -1227,6 +1297,14 @@ public:
         {
             CleanPrimeSubject();
             OpenCell();
+            if(IsHeroic())
+            {
+                if(pLord)
+                {
+                    pLord->MonsterYell("Congratulations! Allow me to grant you a title befitting the amazing achievement you just performed! Henceforth, you shall be known as the Slayer of Incompetent, Stupid and Disappointing Minions!", LANG_UNIVERSAL, 0);
+                    pLord->PlayDirectSound(23371,0);
+                }
+            }
             DoScriptText(TEXT_DEATH,me);
 
             if (pInstance)
@@ -1285,7 +1363,7 @@ public:
                 return;
 
             DoMeleeAttackIfReady();
-            //timer pro aggro a taunt imunitu náhrada za spell fixate.
+
             if (!StopTimer)
             {
                 if(AggroTimer <= diff)
@@ -1307,9 +1385,11 @@ class npc_aberration: public CreatureScript
 
         struct npc_aberrationAI : public ScriptedAI
         {
-            npc_aberrationAI(Creature* creature) : ScriptedAI(creature){}
-            uint32 timer;
+            npc_aberrationAI(Creature *c) : ScriptedAI(c){}
+
             uint32 ListSize;
+            uint32 timer;
+ 
             void CheckAuraCount()
             {
                 std::list<Creature*> AuraCount;
@@ -1331,10 +1411,15 @@ class npc_aberration: public CreatureScript
             void Reset()
             {
                 me->RemoveAllAuras();
-                timer = 3000;
+                timer = 1000;
             }
 
-            void EnterCombat(Unit* /*target*/) { }
+            void EnterCombat(Unit* /*target*/) 
+            { 
+                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                me->GetMotionMaster()->Clear(true);
+                me->GetMotionMaster()->MoveChase(me->getVictim());
+            }
 
             void UpdateAI(uint32 const diff)
             {
@@ -1361,11 +1446,45 @@ class npc_aberration: public CreatureScript
         }
 };
 
+class spell_gen_maloriak_remedy : public SpellScriptLoader
+{
+public:
+    spell_gen_maloriak_remedy() : SpellScriptLoader("spell_gen_maloriak_remedy") { }
+
+    class spell_gen_maloriak_remedy_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_maloriak_remedy_AuraScript);
+        void HandleTick(AuraEffect const* aurEff)
+        {
+            Unit* target = GetTarget();
+            if (target && target->GetTypeId() == TYPEID_UNIT)
+            {
+                int32 baseAmount = aurEff->GetBaseAmount();
+                if (baseAmount > 0)
+                    const_cast<AuraEffect*>(aurEff)->SetAmount(baseAmount * aurEff->GetTickNumber());
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_maloriak_remedy_AuraScript::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_gen_maloriak_remedy_AuraScript();
+    }
+};
+
 void AddSC_maloriak()
 {
+    new npc_vile_swill_preeffect();
     new npc_Prime_Subject();
     new boss_maloriak();
     new npc_flash_freeze();
     new npc_absolute_zero();
     new npc_aberration();
+    new npc_vile_swill();
+    new spell_gen_maloriak_remedy();
 }

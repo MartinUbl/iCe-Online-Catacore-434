@@ -3043,6 +3043,26 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 77569: // Release Aberration
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId()== TYPEID_UNIT && ((*itr)->ToCreature()->GetEntry() == 415055
+                                    || (*itr)->ToCreature()->GetEntry() == 41378))
+                                    ++itr;
+                                else
+                                    itr = unitList.erase(itr);
+                            }
+                            break;
+                        case 77615: // Debilitating Slime
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                           {
+                                if ((*itr)->GetTypeId()== TYPEID_UNIT && ((*itr)->ToCreature()->GetEntry() == 415055 ||
+                                    (*itr)->ToCreature()->GetEntry() == 415050 || (*itr)->ToCreature()->GetEntry() == 41505))
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)

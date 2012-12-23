@@ -4723,6 +4723,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             count++;
             break;
+        case 77569: // Release Aberration
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
         default:
             break;
         }
