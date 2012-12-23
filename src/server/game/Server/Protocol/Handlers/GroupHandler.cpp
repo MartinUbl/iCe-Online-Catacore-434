@@ -90,8 +90,17 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     recv_data.ReadByteSeq(crossRealmGuid[6]);
 
     std::string membername, realmName;
-    membername = recv_data.ReadString(nameLen);
-    realmName = recv_data.ReadString(realmLen); // unused
+
+    if (nameLen)
+        membername = recv_data.ReadString(nameLen);
+    else
+    {
+        sLog->outError("GroupInvite: player %s trying to invite non-existent player with empty name!", GetPlayer()->GetName());
+        return;
+    }
+
+    if (realmLen)
+        realmName = recv_data.ReadString(realmLen); // unused
 
     recv_data.ReadByteSeq(crossRealmGuid[1]);
     recv_data.ReadByteSeq(crossRealmGuid[0]);
