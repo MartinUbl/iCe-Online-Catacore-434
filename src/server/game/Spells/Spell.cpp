@@ -3561,18 +3561,6 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
     m_casttime = GetSpellCastTime(m_spellInfo, this);
     //m_caster->ModSpellCastTime(m_spellInfo, m_casttime, this);
 
-    // don't allow channeled spells / spells with cast time to be casted while moving
-    // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
-    if ((IsChanneledSpell(m_spellInfo) || m_casttime)
-        && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving()
-        && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT
-        && !m_caster->CanCastWhileWalking(m_spellInfo))
-    {
-        SendCastResult(SPELL_FAILED_MOVING);
-        finish(false);
-        return;
-    }
-
     // set timer base at cast time
     ReSetTimer();
 
@@ -3583,6 +3571,18 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
         cast(true);
     else
     {
+        // don't allow channeled spells / spells with cast time to be casted while moving
+        // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
+        if ((IsChanneledSpell(m_spellInfo) || m_casttime)
+            && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving()
+            && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT
+            && !m_caster->CanCastWhileWalking(m_spellInfo))
+        {
+            SendCastResult(SPELL_FAILED_MOVING);
+            finish(false);
+            return;
+        }
+
         // stealth must be removed at cast starting (at show channel bar)
         // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
         if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
