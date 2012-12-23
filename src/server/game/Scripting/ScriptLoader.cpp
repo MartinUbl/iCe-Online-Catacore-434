@@ -400,7 +400,6 @@ void AddSC_boss_sjonnir();
 void AddSC_instance_halls_of_stone();
 void AddSC_halls_of_stone();
 void AddSC_boss_auriaya();               //Ulduar Ulduar
-void AddSC_boss_flame_leviathan();
 void AddSC_boss_ignis();
 void AddSC_boss_razorscale();
 void AddSC_boss_xt002();
@@ -1102,7 +1101,6 @@ void AddNorthrendScripts()
     AddSC_instance_halls_of_stone();
     AddSC_halls_of_stone();
     AddSC_boss_auriaya();               //Ulduar Ulduar
-    AddSC_boss_flame_leviathan();
     AddSC_boss_ignis();
     AddSC_boss_razorscale();
     AddSC_boss_xt002();
