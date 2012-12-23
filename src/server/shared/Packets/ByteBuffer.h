@@ -649,6 +649,9 @@ class ByteBuffer
 
         std::string ReadString(uint32 length)
         {
+            if (length == 0)
+                return "";
+
             char* buffer = new char[length + 1];
             memset(buffer, 0, length + 1);
             read((uint8*)buffer, length);
