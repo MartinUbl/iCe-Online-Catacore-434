@@ -1980,10 +1980,10 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
 void GameObject::SetLootState(LootState s)
 {
     m_lootState = s;
-    if (m_model)
+    if (m_model && GetGOData() && GetGOInfo())
     {
         // startOpen determines whether we are going to add or remove the LoS on activation
-        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
+        bool startOpen = ((GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON) ? (GetGOInfo()->door.startOpen != 0) : false);
 
         if (GetGOData()->go_state != GO_STATE_READY)
             startOpen = !startOpen;
