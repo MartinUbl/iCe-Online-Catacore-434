@@ -135,25 +135,19 @@ void MapManager::LoadTransports()
 void MapManager::LoadTransportNPCs()
 {
     // Spawn NPCs linked to the transport
-    //                                                         0    1          2                3             4             5             6             7
+    //                                                0     1          2                3             4             5             6             7
     QueryResult result = WorldDatabase.PQuery("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
     uint32 count = 0;
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
-        sLog->outString(">> Loaded %u transport NPCs.", count);
+        sLog->outString(">> Loaded 0 transport NPCs.");
         return;
     }
 
-    
-
     do
     {
-        
         Field *fields = result->Fetch();
         uint32 guid = fields[0].GetUInt32();
         uint32 entry = fields[1].GetUInt32();
