@@ -49,7 +49,7 @@ enum Npc
     NPC_LORD_VICTOR_NEFARIUS    = 49799,
     NPC_VILE_SWILL_PREEFECT     = 49812,
     NPC_VILE_SWILL              = 49811,
-    NPC_MAGMA_JETS              = 41091,
+    NPC_MAGMA_JETS              = 41901,
 };
 
 enum Spells
@@ -504,7 +504,7 @@ public:
         {
             if (SpellCounter == 0)
             {
-                for (uint32 i = 0; i < 6; i++) // 18 (6 na kazde pozici)
+                for (uint32 i = 0; i < 15; i++) // 18 (15 + 3 = 18)
                 {
                     for (uint32 o = 0; o < 3; o++)
                     {
@@ -514,7 +514,7 @@ public:
             }
             else if(SpellCounter == 1)
             {
-                for (uint32 i = 0; i < 5; i++) // 15 (5 na kazde pozici)
+                for (uint32 i = 0; i < 12; i++) // 15 (12 + 3 = 15)
                 {
                     for (uint32 o = 0; o < 3; o++)
                     {
@@ -524,7 +524,7 @@ public:
             }
             else if(SpellCounter == 2)
             {
-                for (uint32 i = 0; i < 4; i++) // 12 (4 na kazde pozici)
+                for (uint32 i = 0; i < 9; i++) // 12 (9 + 3 = 12)
                 {
                     for (uint32 o = 0; o < 3; o++)
                     {
@@ -534,7 +534,7 @@ public:
             }
             else if(SpellCounter == 3)
             {
-                for (uint32 i = 0; i < 3; i++) // 9 (3 na kazde pozici)
+                for (uint32 i = 0; i < 6; i++) // 9 (6 + 3 = 9)
                 {
                     for (uint32 o = 0; o < 3; o++)
                     {
@@ -544,7 +544,7 @@ public:
             }
             else if(SpellCounter == 4)
             {
-                for (uint32 i = 0; i < 2; i++) // 6 (2 na kazde pozici)
+                for (uint32 i = 0; i < 3; i++) // 6 (3 + 3 = 6)
                 {
                     for (uint32 o = 0; o < 3; o++)
                     {
@@ -1207,14 +1207,14 @@ public:
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        me->SetOrientation(target->GetOrientation());
+                        me->SetFacing(target->GetOrientation());
                         //DoCast(SPELL_MAGMA_JETS);
-                        me->SummonCreature(41901,target->GetPositionX()+5,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX()+10,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX()+15,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX()+20,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX()+25,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
-                        me->SummonCreature(41901,target->GetPositionX()+30,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);                    }
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+5,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+10,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+15,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+20,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+25,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
+                        me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+30,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);                    }
                     uiMagmaJets = 8000;
                 } else uiMagmaJets -= diff;
             }
