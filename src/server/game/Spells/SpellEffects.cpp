@@ -898,20 +898,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Burning Embers talent
                     bp0 = 0;
                     if (m_caster->HasAura(85112))
-                        bp0 = 30;
+                        bp0 = 50;
                     else if (m_caster->HasAura(91986))
-                        bp0 = 15;
+                        bp0 = 25;
 
                     // We must calculate maximal basepoints manually
                     int32 maxbp = m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
-                    if (bp0 == 30)
+                    if (bp0 == 50)
                         maxbp *= 0.85f;
                     else
                         maxbp *= 0.425f;
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
                     if (pSpell)
                     {
-                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
                         SpellScaling pScaling(m_caster->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
@@ -940,20 +940,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Burning Embers talent
                     int32 bp0 = 0;
                     if (pOwner->HasAura(85112))
-                        bp0 = 30;
+                        bp0 = 50;
                     else if (pOwner->HasAura(91986))
-                        bp0 = 15;
+                        bp0 = 25;
 
                     // We must calculate maximal basepoints manually
                     int32 maxbp = pOwner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
-                    if (bp0 == 30)
+                    if (bp0 == 50)
                         maxbp *= 0.85f;
                     else
                         maxbp *= 0.425f;
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
                     if (pSpell)
                     {
-                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
                         SpellScaling pScaling(pOwner->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
