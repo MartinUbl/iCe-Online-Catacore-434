@@ -147,9 +147,9 @@ class Aura
         bool IsPassive() const;
         bool IsDeathPersistent() const;
         bool IsRemovedOnShapeLost(Unit * target) const { return (GetCasterGUID() == target->GetGUID() && m_spellProto->Stances && !(m_spellProto->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && !(m_spellProto->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT)); }
-		bool CanBeSaved() const;
+        bool CanBeSaved() const;
         bool IsRemoved() const { return m_isRemoved; }
-        bool IsVisible() const;
+        bool CanBeSentToClient() const;
         // Single cast aura helpers
         bool IsSingleTarget() const {return m_isSingleTarget;}
         void SetIsSingleTarget(bool val) { m_isSingleTarget = val;}
