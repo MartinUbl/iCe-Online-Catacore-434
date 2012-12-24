@@ -77,7 +77,7 @@ public:
                 return;
 
             target->CastSpell(target, ROG_SPELL_CHEAT_DEATH_COOLDOWN, true);
-            target->ToPlayer()->AddSpellCooldown(ROG_SPELL_CHEAT_DEATH_COOLDOWN, 0, time(NULL) + 60);
+            target->ToPlayer()->AddSpellCooldown(ROG_SPELL_CHEAT_DEATH_COOLDOWN, 0, time(NULL) + 90);
 
             target->CastSpell(target, ROG_SPELL_CHEAT_DEATH_DAMAGE_REDUCE, true);
 
