@@ -4700,6 +4700,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
             spellInfo->StackAmount = 20;
             spellInfo->Effect[2] = 0;
+            break;
         case 78095: // Magma Jets + difficulty entries
         case 93014:
         case 93015:
