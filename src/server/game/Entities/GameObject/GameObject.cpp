@@ -1998,13 +1998,13 @@ void GameObject::SetLootState(LootState s)
 void GameObject::SetGoState(GOState state)
 {
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
-    if (m_model)
+    if (m_model && GetGOData() && GetGOInfo())
     {
         if (!IsInWorld())
             return;
 
         // startOpen determines whether we are going to add or remove the LoS on activation
-        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
+        bool startOpen = ((GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON) ? (GetGOInfo()->door.startOpen != 0) : false);
 
         if (GetGOData()->go_state != GO_STATE_READY)
             startOpen = !startOpen;
