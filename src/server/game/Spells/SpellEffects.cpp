@@ -6679,6 +6679,10 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                         else if(m_originalCaster->HasAura(61221))
                             m_originalCaster->CastSpell(m_originalCaster,86663,true);
                         break;
+                    case 1766://Glyph of Kick
+                        if(m_originalCaster->ToPlayer() && m_originalCaster->HasAura(56805))
+                            m_originalCaster->ToPlayer()->ModifySpellCooldown(1766,-6000,true);
+                        break;
                 }
             }
         }
