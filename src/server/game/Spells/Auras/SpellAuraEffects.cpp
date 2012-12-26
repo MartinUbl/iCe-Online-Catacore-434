@@ -790,6 +790,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Innervate
             case 29166:
                 {
+                if (caster == owner)
+                {
+                    if (caster->HasAura(33597))  // Dreamstate rank1
+                        amount += 15;
+                    if (caster->HasAura(33599))  // Dreamstate rank2
+                        amount += 30;
+                }
                 int32 total_ticks = GetTotalTicks();
                 if (total_ticks > 0)
                     amount = int32(owner->GetMaxPower(POWER_MANA) * amount / (total_ticks * 100.0f));
