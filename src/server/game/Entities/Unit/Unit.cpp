@@ -3510,7 +3510,7 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     if (aura->IsRemoved())
         return;
 
-    if (caster)
+    if (caster && IsInWorld())
     {
         bool isSingleTarget = false;
         switch (aura->GetSpellProto()->Id)
@@ -3527,7 +3527,7 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
 
         if (isSingleTarget)
         {
-            ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
+            ASSERT((!IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
             // register single target aura
             caster->GetSingleCastAuras().push_back(aura);
             // remove other single target auras
