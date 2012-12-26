@@ -12864,23 +12864,9 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                 {
                     RemoveItemDependentAurasAndCasts(pItem);
 
-                    // remove held enchantments, update expertise
+                    // update expertise
                     if (slot == EQUIPMENT_SLOT_MAINHAND)
-                    {
-                        if (pItem->GetItemSuffixFactor())
-                        {
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_4);
-                        }
-                        else
-                        {
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_0);
-                            // Here is the place where reforge is stored, so don't remove if has reforge
-                            //pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
-                        }
-
                         UpdateExpertise(BASE_ATTACK);
-                    }
                     else if (slot == EQUIPMENT_SLOT_OFFHAND)
                         UpdateExpertise(OFF_ATTACK);
                     // update armor penetration - passive auras may need it
