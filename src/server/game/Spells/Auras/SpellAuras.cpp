@@ -218,8 +218,15 @@ void AuraApplication::BuildUpdatePacket(ByteBuffer &data, bool remove) const
 
     if (flags & AFLAG_BASEPOINT)
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (AuraEffect const* eff = aura->GetEffect(i)) // NULL if effect flag not set
-                data << int32(eff->GetAmount());
+        {
+            if (flags & (1 << i))
+            {
+                if (AuraEffect const* eff = aura->GetEffect(i)) // NULL if effect flag not set
+                    data << int32(eff->GetAmount());
+                else
+                    data << int32(0);
+            }
+        }
 }
 
 void AuraApplication::ClientUpdate(bool remove)
