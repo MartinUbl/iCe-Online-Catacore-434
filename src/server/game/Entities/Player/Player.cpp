@@ -24924,6 +24924,10 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         --loot->unlootedCount;
         loot->NotifyItemRemoved(lootSlot);
 
+        WorldPacket lootrem(SMSG_CURRENCY_LOOT_REMOVED);
+        lootrem << uint8(lootSlot);
+        GetSession()->SendPacket(&lootrem);
+
         return;
     }
 
