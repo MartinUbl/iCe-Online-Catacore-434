@@ -16757,27 +16757,33 @@ void Player::SendQuestReward(Quest const *pQuest, uint32 XP, Object * questGiver
     uint32 questid = pQuest->GetQuestId();
     sLog->outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
     sGameEventMgr->HandleQuestComplete(questid);
-    WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4+4+4+4+4));
-    data << uint8(0x80); // unk 4.0.1 flags
-    data << uint32(pQuest->GetRewSkillLineId());
-    data << uint32(questid);
+
+    uint32 xp;
+    uint32 moneyReward;
 
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
-        data << uint32(pQuest->GetRewOrReqMoney());            
-        data << uint32(pQuest->GetBonusTalents());              // bonus talents
-        data << uint32(pQuest->GetRewSkillPoints());
-        data << uint32(XP);
+        xp = XP;
+        moneyReward = pQuest->GetRewOrReqMoney();
     }
-    else
-    { 
-        data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
-        data << uint32(pQuest->GetRewSkillPoints());              // bonus talents
-        data << uint32(0);
-        
-        data << uint32(0);
+    else // At max level, increase gold reward
+    {
+        xp = 0;
+        moneyReward = uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
     }
 
+    WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4+4+4+4+4));
+
+    data << uint32(pQuest->GetBonusTalents());              // bonus talents (not verified for 4.x)
+    data << uint32(pQuest->GetRewSkillPoints());         // 4.x bonus skill points
+    data << uint32(moneyReward);
+    data << uint32(xp);
+    data << uint32(questid);
+    data << uint32(pQuest->GetRewSkillLineId());             // 4.x bonus skill id
+
+    data.WriteBit(0);                                      // FIXME: unknown bits, common values sent
+    data.WriteBit(1);
+    data.FlushBits();
 
     GetSession()->SendPacket(&data);
 
