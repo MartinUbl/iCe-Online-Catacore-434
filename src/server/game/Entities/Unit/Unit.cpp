@@ -17676,6 +17676,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const * a
             case CHARM_TYPE_VEHICLE:
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
                 charmer->ToPlayer()->SetClientControl(this, 1);
+                charmer->ToPlayer()->SetMover(this);
                 charmer->ToPlayer()->SetViewpoint(this, true);
                 charmer->ToPlayer()->VehicleSpellInitialize();
                 break;

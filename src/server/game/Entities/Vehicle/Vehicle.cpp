@@ -31,6 +31,8 @@
 #include "ScriptMgr.h"
 #include "CreatureAI.h"
 #include "ZoneScript.h"
+#include "MoveSplineInit.h"
+#include "MoveSpline.h"
 
 Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
 {
@@ -329,6 +331,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     unit->m_movementInfo.t_pos.m_orientation = 0;
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
+    unit->m_movementInfo.t_guid = me->GetGUID();
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
@@ -353,7 +356,12 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
     if (me->IsInWorld())
     {
-        unit->SendMonsterMoveTransport(me);
+        Movement::MoveSplineInit init(*unit);
+        init.DisableTransportPathTransformations();
+        init.MoveTo(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);
+        init.SetFacing(0.0f);
+        init.SetTransportEnter();
+        init.Launch();
 
         if (me->GetTypeId() == TYPEID_UNIT)
         {
@@ -361,7 +369,8 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
                 me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
 
             // update all passenger's positions
-            RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            // spline system will relocate passengers automatically
+            //RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         }
     }
     unit->DestroyForNearbyPlayers();

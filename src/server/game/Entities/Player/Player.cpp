@@ -20688,13 +20688,14 @@ void Player::VehicleSpellInitialize()
 
     // GetPosition_ is not a member of 'Vehicle', SetPosition is a member of 'Player': SetPosition(GetVehicle()->GetPositionX(), GetVehicle()->GetPositionY(), GetVehicle()->GetPositionZ(), GetVehicle()->GetOrientation());
 
-    // GetPosition_ is not a member of 'Vehicle', SetPosition is a member of 'Player': SetPosition(GetVehicle()->GetPositionX(), GetVehicle()->GetPositionY(), GetVehicle()->GetPositionZ(), GetVehicle()->GetOrientation());
-
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*10+1+1);
     data << uint64(veh->GetGUID());
     data << uint16(0);
-    data << uint32(0);
-    data << uint32(0x00000101);
+    data << uint32(veh->isSummon() ? /* timer */0 : 0); // Duration
+
+    data << uint8(veh->GetReactState());                // React State
+    data << uint8(0);                                   // Command State
+    data << uint16(0x800);                              // DisableActions (set for all vehicles)
 
     for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
     {
