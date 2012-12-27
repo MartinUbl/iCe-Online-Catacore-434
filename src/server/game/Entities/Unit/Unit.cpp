@@ -13667,7 +13667,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
         rate = 0.0f;
 
     // Update speed only on change
-    if (m_speed_rate[mtype] == rate)
+    if (m_speed_rate[mtype] == rate && !forced)
         return;
 
     m_speed_rate[mtype] = rate;

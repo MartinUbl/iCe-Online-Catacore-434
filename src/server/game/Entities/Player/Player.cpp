@@ -23039,6 +23039,10 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     CastSpell(this, 836, true);                             // LOGINEFFECT
 
+    SendAurasForTarget(this);
+    SendEnchantmentDurations();                             // must be after add to map
+    SendItemDurations();                                    // must be after add to map
+
     // set some aura effects that send packet to player client after add player to map
     // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
     // same auras state lost at far teleport, send it one more time in this case also
@@ -23061,10 +23065,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that don't must be re-applied.
     if (HasAuraType(SPELL_AURA_MOD_ROOT))
         SendMoveRoot(2);
-
-    SendAurasForTarget(this);
-    SendEnchantmentDurations();                             // must be after add to map
-    SendItemDurations();                                    // must be after add to map
 
     // Also update group to allow profit from i.e. guild runs
     if (Group* pGroup = GetGroup())

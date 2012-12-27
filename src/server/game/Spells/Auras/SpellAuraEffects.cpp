@@ -5311,7 +5311,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const *aurApp,
         }
     }
 
-    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK)
+    if ((mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK) || (mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT))
         target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
