@@ -926,8 +926,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_DEATH_RELEASE_LOC,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_CANCEL_TEMP_ENCHANTMENT,                 STATUS_LOGGEDIN, &WorldSession::HandleCancelTempEnchantmentOpcode);
     OPCODE( SMSG_FORCED_DEATH_UPDATE,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( CMSG_CHEAT_SET_HONOR_CURRENCY,                STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( CMSG_CHEAT_SET_ARENA_CURRENCY,                STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( MSG_MOVE_SET_FLIGHT_SPEED_CHEAT,              STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( MSG_MOVE_SET_FLIGHT_SPEED,                    STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT,         STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -966,10 +964,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_VOICE_SESSION_ADJUST_PRIORITY,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_VOICE_SET_TALKER_MUTED_REQUEST,          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_VOICE_SET_TALKER_MUTED,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_INIT_EXTRA_AURA_INFO_OBSOLETE,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_SET_EXTRA_AURA_INFO_OBSOLETE,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE_OBSOLETE,STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_CLEAR_EXTRA_AURA_INFO_OBSOLETE,          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( MSG_MOVE_START_DESCEND,                       STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           );
     OPCODE( CMSG_IGNORE_REQUIREMENTS_CHEAT,               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_IGNORE_REQUIREMENTS_CHEAT,               STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

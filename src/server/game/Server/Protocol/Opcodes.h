@@ -904,8 +904,6 @@ enum Opcodes
     SMSG_DEATH_RELEASE_LOC                           = 0x02F07, // 4.3.4 15595
     CMSG_CANCEL_TEMP_ENCHANTMENT                     = 0x06C37, // 4.3.4 15595 (remap)
     SMSG_FORCED_DEATH_UPDATE                         = 0x02606, // 4.3.4 15595
-    CMSG_CHEAT_SET_HONOR_CURRENCY                    = 0x1011A, //
-    CMSG_CHEAT_SET_ARENA_CURRENCY                    = 0x1011B, //
     SMSG_INIT_CURRENCY                               = 0x015A5, // 4.3.4 15595
     SMSG_UPDATE_CURRENCY                             = 0x059B0, // 4.3.4 15595
     SMSG_UPDATE_CURRENCY_WEEK_LIMIT                  = 0x070A7, // 4.3.4 15595
@@ -946,10 +944,6 @@ enum Opcodes
     SMSG_VOICE_SESSION_ADJUST_PRIORITY               = 0x10131, //
     CMSG_VOICE_SET_TALKER_MUTED_REQUEST              = 0x10132, //
     SMSG_VOICE_SET_TALKER_MUTED                      = 0x06E35, // 4.3.4 15595
-    SMSG_INIT_EXTRA_AURA_INFO_OBSOLETE               = 0x10133, //
-    SMSG_SET_EXTRA_AURA_INFO_OBSOLETE                = 0x10134, //
-    SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE_OBSOLETE    = 0x10135, //
-    SMSG_CLEAR_EXTRA_AURA_INFO_OBSOLETE              = 0x10136, //
     MSG_MOVE_START_DESCEND                           = 0x03800, // 4.3.4 15595
     CMSG_IGNORE_REQUIREMENTS_CHEAT                   = 0x10137, //
     SMSG_IGNORE_REQUIREMENTS_CHEAT                   = 0x10138, //
@@ -1136,7 +1130,7 @@ enum Opcodes
     MSG_MOVE_SET_PITCH_RATE                          = 0x075B0, // 4.3.4 15595
     SMSG_FORCE_PITCH_RATE_CHANGE                     = 0x1019E, //
     CMSG_FORCE_PITCH_RATE_CHANGE_ACK                 = 0x1019F, //
-    SMSG_SPLINE_SET_PITCH_RATE                       =0x14B0, // 4.3.4 15595
+    SMSG_SPLINE_SET_PITCH_RATE                       = 0x014B0, // 4.3.4 15595
     SMSG_MOVE_ABANDON_TRANSPORT                      = 0x101A1, //
     SMSG_CALENDAR_UPDATE_INVITE_LIST                 = 0x101A2, //
     SMSG_CALENDAR_UPDATE_INVITE_LIST2                = 0x101A3, //
@@ -1309,8 +1303,9 @@ enum Opcodes
     CMSG_WORLD_LOGIN                                 = 0x02422, // 4.3.4 15595
     CMSG_LOG_DISCONNECT                              = 0x0446D, // 4.3.4 15595
     CMSG_RETURN_TO_GRAVEYARD                         = 0x0301E, // 4.3.4 15595
-    CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x101F3, //
-    SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE          = 0x101F4, //
+    CMSG_QUERY_COMPLETED_ARTIFACTS                   = 0x03306, // 4.3.4 15595
+    SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE          = 0x010B6, // 4.3.4 15595
+    SMSG_RESEARCH_COMPLETE                           = 0x035A6, // 4.3.4 15595 is this related?
     SMSG_REFORGING_OPEN                              = 0x101F5, //
     CMSG_REFORGE                                     = 0x0331A, // 4.3.4 15595
     SMSG_REFORGING_RESULT                            = 0x058A4, // 4.3.4 15595
@@ -1693,7 +1688,6 @@ enum Opcodes
     SMSG_RATED_BG_STATS                               = 0x34A1,
     SMSG_REFORGE_RESULT                               = 0x58A4,
     SMSG_REQUEST_PVP_REWARDS_RESPONSE                 = 0x5DA4,
-    SMSG_RESEARCH_COMPLETE                            = 0x35A6,
     SMSG_RESEARCH_SETUP_HISTORY                       = 0x10B6,
     SMSG_RESET_COMPRESSION_CONTEXT                    = 0x0142,
     SMSG_ROLE_POLL_BEGIN                              = 0x70B0,
