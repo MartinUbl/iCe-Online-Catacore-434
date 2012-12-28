@@ -4727,6 +4727,17 @@ void SpellMgr::LoadSpellCustomAttr()
         case 77569: // Release Aberration
             spellInfo->EffectRadiusIndex[0] = 12;
             break;
+        case 82848: // Massacre
+            spellInfo->EffectRadiusIndex[0] = 28;
+            break;
+        case 91307: // Mocking Shadows
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            break;
+        case 82881: // Break
+        case 82890: // Mortality
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
+            break;
         default:
             break;
         }
