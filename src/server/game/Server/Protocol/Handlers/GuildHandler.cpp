@@ -164,9 +164,10 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
 }
 
 // CATA Status: Done
-void WorldSession::HandleGuildRosterOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 {
     sLog->outDebug("WORLD: Received CMSG_GUILD_ROSTER");
+    recvPacket.rfinish();
 
     if (Guild* pGuild = _GetPlayerGuild(this))
         pGuild->HandleRoster(this);
@@ -269,10 +270,9 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
     sLog->outDebug("WORLD: Received CMSG_GUILD_LEADER");
 
-    std::string name;
-    recvPacket.read_skip<uint64>(); // guild GUID
-    recvPacket.read_skip<uint64>(); // user's guid?
-    recvPacket >> name;
+    uint8 nameLength = recvPacket.ReadBits(7);
+    /*bool isDethrone = */recvPacket.ReadBit();
+    std::string name = recvPacket.ReadString(nameLength);
 
     if (normalizePlayerName(name))
         if (Guild* pGuild = _GetPlayerGuild(this, true))

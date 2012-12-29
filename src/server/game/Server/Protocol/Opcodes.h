@@ -140,7 +140,7 @@ enum Opcodes
     CMSG_GUILD_LEAVE                                 = 0x01021, // 4.3.4 15595
     CMSG_GUILD_REMOVE                                = 0x01231, // 4.3.4 15595
     CMSG_GUILD_DISBAND                               = 0x03226, // 4.3.4 15595
-    CMSG_GUILD_LEADER                                = 0x10017, //
+    CMSG_GUILD_LEADER                                = 0x03034, // 4.3.4 15595
     CMSG_GUILD_MOTD                                  = 0x01035, // 4.3.4 15595
     CMSG_QUERY_GUILD_REWARDS                         = 0x03012, // 4.3.4 15595
     CMSG_QUERY_GUILD_MAX_XP                          = 0x10019, //
@@ -1497,7 +1497,6 @@ enum Opcodes
     CMSG_GUILD_REPLACE_GUILD_MASTER                   = 0x1034,
     CMSG_GUILD_REQUEST_CHALLENGE_UPDATE               = 0x1224,
     CMSG_GUILD_REQUEST_MAX_DAILY_XP                   = 0x3232,
-    CMSG_GUILD_SET_GUILD_MASTER                       = 0x3034,
     CMSG_GUILD_SET_RANK_PERMISSIONS                   = 0x1024,
     CMSG_LFG_GET_STATUS                               = 0x2581,
     CMSG_LFG_LFR_LEAVE                                = 0x0500,
