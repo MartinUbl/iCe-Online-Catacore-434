@@ -1474,6 +1474,7 @@ enum Opcodes
     SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT              = 0x04007, // 4.3.4 Build 15595
     SMSG_WEEKLY_SPELL_USAGE                          = 0x039B7, // 4.3.4 Build 15595
     SMSG_WORLD_SERVER_INFO                           = 0x009B1, // 4.3.4 Build 15595
+    SMSG_MOVE_SET_ACTIVE_MOVER                       = 0x011B3, // 4.3.4 Build 15595
 
     // New 4.1+ opcodes, found and verified by TrinityCore
     CMSG_BATTLEFIELD_LEAVE                            = 0x3018,
@@ -1649,7 +1650,6 @@ enum Opcodes
     SMSG_MOVE_GRAVITY_DISABLE                         = 0x75B2,
     SMSG_MOVE_GRAVITY_ENABLE                          = 0x30B3,
     SMSG_MOVE_ROOT                                    = 0x7DA0,
-    SMSG_MOVE_SET_ACTIVE_MOVER                        = 0x11B3,
     SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY = 0x59A2,
     SMSG_MOVE_SET_COLLISION_HEIGHT                    = 0x11B0,
     SMSG_MOVE_SET_COMPOUND_STATE                      = 0x75A0,

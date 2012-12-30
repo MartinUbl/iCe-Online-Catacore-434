@@ -1053,13 +1053,8 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
 {
     sLog->outDebug("WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
-    uint64 old_mover_guid;
-    recv_data.readPackGUID(old_mover_guid);
-
     MovementInfo mi;
-    mi.guid = old_mover_guid;
     ReadMovementInfo(recv_data, &mi);
-
     _player->m_movementInfo = mi;
 }
 
@@ -1076,14 +1071,8 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
         return;
     }
 
-    uint64 guid;
-
-    recv_data.readPackGUID(guid);
-
     MovementInfo mi;
-    mi.guid = guid;
     ReadMovementInfo(recv_data, &mi);
-
     _player->m_movementInfo = mi;
 
     _player->ExitVehicle();
