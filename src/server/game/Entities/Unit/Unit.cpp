@@ -9415,6 +9415,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 20243 || pVictim->GetHealthPct() > 20.0f)
                 return false;
             break;
+        // Rude Interruption
+        case 61216:
+        case 61221:
+        {
+            // Should proc only from Pummel
+            if (procSpell->Id != 6552)
+                return false;
+            break;
+        }
         // Soul Leech
         case 30293:     // rank 1
         case 30295:     // rank 2
