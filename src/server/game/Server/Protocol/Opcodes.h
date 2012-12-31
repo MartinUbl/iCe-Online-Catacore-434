@@ -303,7 +303,7 @@ enum Opcodes
     SMSG_INSPECT                                     = 0x00C14, // 4.3.4 15595
     CMSG_INITIATE_TRADE                              = 0x07916, // 4.3.4 15595
     CMSG_BEGIN_TRADE                                 = 0x0721E, // 4.3.4 15595
-    CMSG_BUSY_TRADE                                  = 0x0331C, // 4.3.4 15595
+    CMSG_BLOCK_TRADE                                 = 0x0331C, // 4.3.4 15595
     CMSG_IGNORE_TRADE                                = 0x07112, // 4.3.4 15595
     CMSG_ACCEPT_TRADE                                = 0x07110, // 4.3.4 15595
     CMSG_UNACCEPT_TRADE                              = 0x0391A, // 4.3.4 15595

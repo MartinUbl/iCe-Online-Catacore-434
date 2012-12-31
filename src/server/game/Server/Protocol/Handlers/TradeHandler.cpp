@@ -80,10 +80,10 @@ void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
     // recvPacket.print_storage();
 }
 
-void WorldSession::HandleBusyTradeOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleBlockTradeOpcode(WorldPacket& /*recvPacket*/)
 {
-    sLog->outDebug("WORLD: Busy Trade %u",_player->GetGUIDLow());
-    // recvPacket.print_storage();
+    _player->TradeCancel(false);
+    SendTradeStatus(TRADE_STATUS_CLOSE_WINDOW);
 }
 
 void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)

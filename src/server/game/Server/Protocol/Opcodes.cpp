@@ -326,7 +326,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_INSPECT,                                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_INITIATE_TRADE,                          STATUS_LOGGEDIN, &WorldSession::HandleInitiateTradeOpcode       );
     OPCODE( CMSG_BEGIN_TRADE,                             STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode          );
-    OPCODE( CMSG_BUSY_TRADE,                              STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode           );
+    OPCODE( CMSG_BLOCK_TRADE,                             STATUS_LOGGEDIN, &WorldSession::HandleBlockTradeOpcode          );
     OPCODE( CMSG_IGNORE_TRADE,                            STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode         );
     OPCODE( CMSG_ACCEPT_TRADE,                            STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode         );
     OPCODE( CMSG_UNACCEPT_TRADE,                          STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode       );
