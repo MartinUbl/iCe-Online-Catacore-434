@@ -377,7 +377,7 @@ public:
         uint32 CastTimer;
         uint32 Phase;
         uint32 SubPhase;
-        uint32 AuraCheckTimer;      
+        uint32 AuraCheckTimer;
 
         uint32 HeroicIntro;
 
@@ -782,13 +782,13 @@ public:
                             break;
                         case 1:
                             Phase = 2;
-                            uiSwitchPhaseTimer = 192000;
+                            uiSwitchPhaseTimer = 194000;
                             PhaseOne = true;
                             PhaseTwo = false;
                             break;
                         case 2:
                             Phase = 0;
-                            uiSwitchPhaseTimer = 192000;
+                            uiSwitchPhaseTimer = 194000;
                             PhaseOne = false;
                             PhaseTwo = true;
                             break;
@@ -803,13 +803,13 @@ public:
                             break;
                         case 1:
                             Phase = 2;
-                            uiSwitchPhaseTimer = 120000;
+                            uiSwitchPhaseTimer = 122000;
                             PhaseOne = true;
                             PhaseTwo = false;
                         break;
                         case 2:
                             Phase = 0;
-                            uiSwitchPhaseTimer = 120000;
+                            uiSwitchPhaseTimer = 122000;
                             PhaseOne = false;
                             PhaseTwo = true;
                         break;
@@ -858,6 +858,7 @@ public:
                                 Poradi = 0;
                             break;
                             case 4:
+                                uiReleaseAberrations = 4000;
                                 SubPhase = 0;
                                 uiphase = 3;
                                 uiSubPhaseTimer = 50000;
@@ -890,6 +891,7 @@ public:
                                 me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
                                 break;
                             case 3:
+                                uiReleaseAberrations = 4000;
                                 SubPhase = 0;
                                 uiphase = 3;
                                 uiSubPhaseTimer = 40000;
@@ -945,7 +947,8 @@ public:
                             case 4:
                                 SubPhase = 0;
                                 uiphase = 3;
-                                uiSubPhaseTimer = 40000;
+                                uiReleaseAberrations = 4000;
+                                uiSubPhaseTimer = 42000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
                                 break;
@@ -977,7 +980,8 @@ public:
                             case 3:
                                 SubPhase = 0;
                                 uiphase = 3;
-                                uiSubPhaseTimer = 40000;
+                                uiReleaseAberrations = 4000;
+                                uiSubPhaseTimer = 42000;
                                 StopSlime = false;
                                 me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
                                 break;
