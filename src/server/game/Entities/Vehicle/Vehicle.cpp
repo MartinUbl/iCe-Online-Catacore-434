@@ -370,7 +370,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
             // update all passenger's positions
             // spline system will relocate passengers automatically
-            //RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         }
     }
     unit->DestroyForNearbyPlayers();

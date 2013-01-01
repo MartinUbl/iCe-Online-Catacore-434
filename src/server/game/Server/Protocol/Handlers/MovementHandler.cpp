@@ -1097,19 +1097,90 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
             break;
         case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
             {
-                uint64 guid;        // current vehicle guid
-                recv_data.readPackGUID(guid);
-
-                ReadMovementInfo(recv_data, &vehicle_base->m_movementInfo);
-
-                uint64 accessory;        //  accessory guid
-                recv_data.readPackGUID(accessory);
-
+                float x, y, z;
                 int8 seatId;
+                uint64 accessory = 0;
+                uint64 guid = 0;
+
+                ObjectGuid vg, ag;
+
+                vg[3] = 0; // dafuq?
+                ag[3] = 0;
+
+                recv_data >> y >> x >> z;
                 recv_data >> seatId;
 
-                if (vehicle_base->GetGUID() != guid)
+                recv_data.ReadBit(); // v2 + 10 !
+                bool hasAdditionalData = recv_data.ReadBit(); // v2 + 72 // accessory?
+                ag[2] = recv_data.ReadBit(); // v2 + 34
+                ag[6] = recv_data.ReadBit(); // v2 + 38
+                ag[4] = recv_data.ReadBit(); // v2 + 36
+                vg[2] = recv_data.ReadBit(); // v2 + 18
+                vg[4] = recv_data.ReadBit(); // v2 + 20
+                recv_data.ReadBit(); // ??
+
+                recv_data.ReadBit(); // v2 + 165
+                vg[7] = recv_data.ReadBit(); // v2 + 23
+                ag[7] = recv_data.ReadBit(); // v2 + 39
+                vg[6] = recv_data.ReadBit(); // v2 + 22
+                recv_data.ReadBit(); // v2 + 12 !
+                recv_data.ReadBit(); // ??
+                ag[5] = recv_data.ReadBit(); // v2 + 37
+                vg[5] = recv_data.ReadBit(); // v2 + 21
+
+                recv_data.ReadBit(); // v2 + 22 !
+                recv_data.ReadBit(); // ??
+                vg[0] = recv_data.ReadBit(); // v2 + 16
+                ag[0] = recv_data.ReadBit(); // v2 + 32
+                vg[1] = recv_data.ReadBit(); // v2 + 17
+                recv_data.ReadBit(); // v2 + 132
+                ag[1] = recv_data.ReadBit(); // v2 + 33
+                recv_data.ReadBit(); // v2 + 164
+
+                if (hasAdditionalData)
+                {
+                    // wtf omg?
+                    // probably accessory guid? who knows
+                    // TODO: fix this
+
+                    // for now, just abort
+                    sLog->outError("MovementHandler::ChangeSeatsOnControlledVehicle: unhandled data input");
+                    recv_data.rfinish();
                     return;
+                }
+
+                recv_data.read_skip<uint8>(); // unk.. flags?
+                recv_data.read_skip<uint8>(); // unk
+
+                recv_data.ReadByteSeq(ag[6]);
+                recv_data.ReadByteSeq(vg[7]);
+                recv_data.ReadByteSeq(vg[5]);
+                recv_data.ReadByteSeq(ag[1]);
+                recv_data.ReadByteSeq(ag[2]);
+                recv_data.ReadByteSeq(vg[6]);
+                recv_data.ReadByteSeq(ag[5]);
+                recv_data.ReadByteSeq(ag[3]);
+                recv_data.ReadByteSeq(vg[3]);
+                recv_data.ReadByteSeq(ag[0]);
+                recv_data.ReadByteSeq(vg[0]);
+                recv_data.ReadByteSeq(ag[4]);
+                recv_data.ReadByteSeq(vg[4]);
+                recv_data.ReadByteSeq(vg[1]);
+                recv_data.ReadByteSeq(ag[7]);
+                recv_data.ReadByteSeq(vg[2]);
+
+                // Unfinished support for the rest of the packet, sorry
+                recv_data.rfinish();
+
+                if (vehicle_base->GetGUID() != vg)
+                    return;
+
+                // Due to received "move not active mover" packet, which sets the seatId by hard way,
+                // we have to invalidate the seat to make us able to change it in the EnterVehicle/ChangeSeat functions
+                if (GetPlayer()->GetTransSeat() == seatId)
+                    GetPlayer()->m_movementInfo.t_seat = -1;
+
+                accessory = ag;
 
                 if (!accessory)
                     GetPlayer()->ChangeSeat(-1, seatId > 0); // prev/next
@@ -1119,6 +1190,10 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                         if (vehicle->HasEmptySeat(seatId))
                             GetPlayer()->EnterVehicle(vehicle, seatId);
                 }
+
+                // And if the change went wrong, change the seat back
+                if (GetPlayer()->GetTransSeat() == -1)
+                    GetPlayer()->m_movementInfo.t_seat = seatId;
             }
             break;
         case CMSG_REQUEST_VEHICLE_SWITCH_SEAT:
