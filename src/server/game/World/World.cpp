@@ -122,6 +122,8 @@ World::World()
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
 
+    m_allowAutosave = true;
+
     m_isClosed = false;
 }
 

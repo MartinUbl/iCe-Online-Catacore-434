@@ -557,6 +557,8 @@ class ChatHandler
         bool HandleSaveCommand(const char* args);
         bool HandlePetResetCommand(const char* args);
 
+        bool HandleAutosaveCommand(const char* args);
+
         bool HandleSummonCommand(const char* args);
         bool HandleAppearCommand(const char* args);
         bool HandleGroupSummonCommand(const char* args);

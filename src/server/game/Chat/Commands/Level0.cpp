@@ -219,6 +219,12 @@ bool ChatHandler::HandleSaveCommand(const char* /*args*/)
         return true;
     }
 
+    if (!sWorld->IsAutosaveAllowed())
+    {
+        // Some sysmessage? Do we really want to tell players, that we disabled autosaves?
+        return true;
+    }
+
     /* disallow player-induced save sooner than PlayerSaveInterval/2,
      * ie. PlayerSaveInterval (config) = 900sec,
      * allow manual save each 450sec + reset the timer */
