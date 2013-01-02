@@ -1100,7 +1100,6 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 float x, y, z;
                 int8 seatId;
                 uint64 accessory = 0;
-                uint64 guid = 0;
 
                 ObjectGuid vg, ag;
 
