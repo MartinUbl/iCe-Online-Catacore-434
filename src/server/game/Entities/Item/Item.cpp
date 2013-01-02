@@ -391,6 +391,9 @@ Item::Item()
     m_refundRecipient = 0;
     m_paidMoney = 0;
     m_paidExtendedCost = 0;
+
+    for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; slot++)
+        m_enchantmentChanges[slot] = UNCHANGED;
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -461,9 +464,6 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_FLAGS));
 
-            // delete enchantments
-            trans->PAppend("DELETE FROM item_enchantments where guid = %d", guid);
-
             stmt->setInt32 (++index, GetItemRandomPropertyId());
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
@@ -480,27 +480,7 @@ void Item::SaveToDB(SQLTransaction& trans)
                 trans->Append(stmt);
             }
 
-            // insert new enchantments
-            for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            {
-                EnchantmentSlot slot = EnchantmentSlot(i);
-                uint32 id = GetEnchantmentId(slot);
-                if (id != 0)
-                {
-                    uint32 duration = GetEnchantmentDuration(slot);
-                    uint32 charges = GetEnchantmentCharges(slot);
-
-                    std::ostringstream ssEnchants;
-                    ssEnchants << "(" << guid << ", ";
-                    ssEnchants << i << ", ";
-                    ssEnchants << id << ", ";
-                    ssEnchants << duration << ", ";
-                    ssEnchants << charges << ");";
-
-                    trans->PAppend("INSERT INTO item_enchantments (guid, slot, id, duration, charges) "
-                                   "VALUES %s", ssEnchants.str().c_str());
-                }
-            }
+            SaveEnchantmentsToDB(trans);
 
             break;
         }
@@ -633,9 +613,93 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
 
 void Item::DeleteFromDB(SQLTransaction& trans)
 {
+    trans->PAppend("DELETE FROM item_enchantments WHERE guid = %d;", GetGUIDLow());
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
+}
+
+void Item::SaveEnchantmentsToDB(SQLTransaction& trans)
+{
+    uint64 guid = GetGUIDLow();
+
+
+    // delete old non-existing enchantments
+
+    std::vector<uint32> enchantments;
+    enchantments.reserve(MAX_ENCHANTMENT_SLOT);
+    for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; slot++)
+    {
+        if (m_enchantmentChanges[slot] == DELETED)
+        {
+            m_enchantmentChanges[slot] = UNCHANGED;
+            enchantments.push_back(slot);
+        }
+    }
+
+    if (!enchantments.empty())
+    {
+        std::stringstream sqlDelete;
+        sqlDelete << "DELETE FROM item_enchantments WHERE guid = " << guid << " AND slot IN ( ";
+        for (uint8 i = 0; i < enchantments.size() - 1; i++)
+            sqlDelete << enchantments[i] << ", ";
+        sqlDelete << enchantments.back() << " );";
+
+        trans->PAppend(sqlDelete.str().c_str());
+    }
+
+
+    // update existing enchantments
+
+    for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+    {
+        if (m_enchantmentChanges[i] == CHANGED)
+        {
+            m_enchantmentChanges[i] == UNCHANGED;
+
+            EnchantmentSlot slot = (EnchantmentSlot) i;
+
+            uint32 id = GetEnchantmentId(slot);
+            uint32 duration = GetEnchantmentDuration(slot);
+            uint32 charges = GetEnchantmentCharges(slot);
+
+            std::stringstream sqlUpdate;
+            sqlUpdate << "UPDATE item_enchantments SET "
+                <<   "id = " << id << ", "
+                <<   "duration = " << duration << ", "
+                <<   "charges = " << charges
+                << " WHERE guid = " << guid
+                <<   " AND slot = " << slot << ";";
+
+            trans->PAppend(sqlUpdate.str().c_str());
+        }
+    }
+
+
+    // insert new enchantments
+    for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+    {
+        EnchantmentSlot slot = EnchantmentSlot(i);
+        uint32 id = GetEnchantmentId(slot);
+        if (m_enchantmentChanges[i] == ADDED)
+        {
+            m_enchantmentChanges[i] = UNCHANGED;
+
+            uint32 duration = GetEnchantmentDuration(slot);
+            uint32 charges = GetEnchantmentCharges(slot);
+
+            std::stringstream sqlInsert;
+            sqlInsert << "(" << guid << ", ";
+            sqlInsert << slot << ", ";
+            sqlInsert << id << ", ";
+            sqlInsert << duration << ", ";
+            sqlInsert << charges << ")";
+
+            trans->PAppend("REPLACE INTO item_enchantments (guid, slot, id, duration, charges) "
+                "VALUES %s;", sqlInsert.str().c_str());
+        }
+    }
 }
 
 void Item::DeleteFromInventoryDB(SQLTransaction& trans)
@@ -1042,6 +1106,13 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
     if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
         return;
 
+    if (id == 0)        // deleting enchantment
+        SetDeletedEnchantment(slot);
+    else if (GetEnchantmentId(slot) == 0)       // inserting enchantment
+        SetInsertedEnchantment(slot);
+    else            // changing enchantment
+        SetChangedEnchantment(slot);
+
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET,id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET,duration);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET,charges);
@@ -1056,6 +1127,8 @@ void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player*
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED, owner);
     // Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
+
+    SetChangedEnchantment(slot);
 }
 
 void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
@@ -1065,6 +1138,8 @@ void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET,charges);
     SetState(ITEM_CHANGED, GetOwner());
+
+    SetChangedEnchantment(slot);
 }
 
 void Item::ClearEnchantment(EnchantmentSlot slot)
@@ -1075,6 +1150,8 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     for (uint8 x = 0; x < MAX_ITEM_ENCHANTMENT_EFFECTS; ++x)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + x, 0);
     SetState(ITEM_CHANGED, GetOwner());
+
+    SetDeletedEnchantment(slot);
 }
 
 
@@ -1792,4 +1869,26 @@ uint32 Item::GetTransmogrifyCost() const
         cost = 10000;
     
     return cost;
+}
+
+void Item::SetInsertedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] == DELETED)
+        m_enchantmentChanges[slot] = CHANGED;       // update instead of delete followed by insert
+    else
+        m_enchantmentChanges[slot] = ADDED;
+}
+
+void Item::SetChangedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] != ADDED)
+        m_enchantmentChanges[slot] = CHANGED;
+}
+
+void Item::SetDeletedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] == ADDED)
+        m_enchantmentChanges[slot] = UNCHANGED;     // added and then deleted again - no need to do anything in DB
+    else
+        m_enchantmentChanges[slot] = DELETED;
 }

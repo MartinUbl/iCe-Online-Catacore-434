@@ -254,6 +254,7 @@ class Item : public Object
         virtual void SaveToDB(SQLTransaction& trans);
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry);
         virtual void DeleteFromDB(SQLTransaction& trans);
+        void SaveEnchantmentsToDB(SQLTransaction& trans);
         void DeleteFromInventoryDB(SQLTransaction& trans);
         void SaveRefundDataToDB();
         void DeleteRefundDataFromDB();
@@ -393,5 +394,12 @@ class Item : public Object
         uint32 m_paidExtendedCost;
         uint32 m_reforgeId;
         AllowedLooterSet allowedGUIDs;
+
+        // enchantments changes since last save
+        enum {UNCHANGED, ADDED, DELETED, CHANGED} m_enchantmentChanges[MAX_ENCHANTMENT_SLOT];
+
+        void SetInsertedEnchantment(EnchantmentSlot slot);
+        void SetChangedEnchantment(EnchantmentSlot slot);
+        void SetDeletedEnchantment(EnchantmentSlot slot);
 };
 #endif
