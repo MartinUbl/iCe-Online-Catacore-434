@@ -656,7 +656,7 @@ void Item::SaveEnchantmentsToDB(SQLTransaction& trans)
     {
         if (m_enchantmentChanges[i] == CHANGED)
         {
-            m_enchantmentChanges[i] == UNCHANGED;
+            m_enchantmentChanges[i] = UNCHANGED;
 
             EnchantmentSlot slot = (EnchantmentSlot) i;
 
