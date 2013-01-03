@@ -184,7 +184,7 @@ class npc_vile_swill: public CreatureScript
 
             void Reset()
             {
-                Dark_Sludge = 2000;
+                Dark_Sludge = 3500;
             }
 
             void EnterCombat(Unit* /*target*/) { }
@@ -197,9 +197,8 @@ class npc_vile_swill: public CreatureScript
 
                 if(Dark_Sludge <= diff)
                 {
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
-                    me->CastSpell(target,SPELL_DARK_SLUDGE,false);
-                    Dark_Sludge = 2000;
+                    me->CastSpell(me, SPELL_DARK_SLUDGE, false);
+                    Dark_Sludge = 3500;
                 }
                 else
                     Dark_Sludge -= diff;
