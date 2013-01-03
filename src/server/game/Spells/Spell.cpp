@@ -845,8 +845,15 @@ void Spell::SelectSpellTargets()
         }
         else if (m_spellInfo->speed > 0.0f)
         {
-            float dist = m_caster->GetDistance(m_targets.m_dstPos);
-            m_delayMoment = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
+            if (!(m_spellInfo->AttributesEx9 & SPELL_ATTR9_SPECIAL_DELAY_CALCULATION))
+            {
+                float dist = m_caster->GetDistance(m_targets.m_dstPos);
+                m_delayMoment = (uint64)floor(dist / m_spellInfo->speed * 1000.0f);
+            }
+            else
+            {
+                m_delayMoment = (uint64)(m_spellInfo->speed * 1000.0f);
+            }
         }
     }
 }
