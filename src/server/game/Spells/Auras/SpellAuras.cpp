@@ -1873,6 +1873,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     caster->RemoveAurasDueToSpell(61922);
                 }
+                else if (GetId() == 2818 || GetId() == 3409 || GetId() == 5760 || GetId() == 13218)
+                {
+                    if (!target->HasAura(2818) && !target->HasAura(3409) && !target->HasAura(5760) && !target->HasAura(13218))
+                    {
+                        target->RemoveAurasDueToSpell(58683, caster->GetGUID());
+                        target->RemoveAurasDueToSpell(58684, caster->GetGUID());
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
