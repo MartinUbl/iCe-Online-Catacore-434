@@ -48,6 +48,8 @@ SpellEntry::SpellEntry(SpellEntry_n const* spell)
     AttributesEx6 = spell->AttributesEx6;
     AttributesEx7 = spell->AttributesEx7;
     AttributesEx8 = spell->AttributesEx8;
+    AttributesEx9 = spell->AttributesEx9;
+    AttributesEx10 = spell->AttributesEx10;
     CastingTimeIndex = spell->CastingTimeIndex;
     DurationIndex = spell->DurationIndex;
     powerType = spell->powerType;
