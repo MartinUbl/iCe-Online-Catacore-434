@@ -1174,13 +1174,6 @@ public:
 
             if (uiphase == 3) // GreenPhase
             {
-                if (uiReleaseAberrations <= diff )
-                {
-                    me->InterruptNonMeleeSpells(true);
-                    me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
-                    uiReleaseAberrations = 17000;
-                } else uiReleaseAberrations -= diff;
-
                 if (StopSlime == false)
                 {
                     me->CastSpell(me,SPELL_DEBILITATING_SLIME,false);
