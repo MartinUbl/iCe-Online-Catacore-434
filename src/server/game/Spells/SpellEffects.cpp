@@ -3332,9 +3332,10 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // Empower Rune Weapon
         case 53258:
             return; // skip, hack-added in spell effect
-        // Coldflame
-        case 33801:
-            return; // just make the core stfu
+        // just make the core stfu
+        case 33801: // Coldflame
+        case 89024: // Pursuit of Justice
+            return;
     }
 
     // normal case
