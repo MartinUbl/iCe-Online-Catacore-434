@@ -4745,6 +4745,43 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeCasterAuraSpell=0;
             count++;
             break;
+        case 96466: // Whispers of Hethiss
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            break;
+        case 96560: // Word of Hethiss
+             spellInfo->EffectRadiusIndex[0] = 13; // 10 yd
+             spellInfo->EffectRadiusIndex[1] = 13; // 10 yd
+             break;
+        case 96685: // Venomous Effusion
+             spellInfo->EffectRadiusIndex[0] = 7; // 2 yd
+             break;
+        case 96521: // Pool of Acrid Tears
+        case 97089:
+            spellInfo->EffectRadiusIndex[0] = 26; // 4 yd
+            break;
+        case 96755: // Pool of Arcid Tears (again)
+        case 97085:
+            spellInfo->EffectRadiusIndex[0] = 13; // 10 yd
+            break;
+        case 97357: // Gaping Wound
+        case 97358:
+            spellInfo->EffectRadiusIndex[0] = 28; // unlimited
+            spellInfo->EffectRadiusIndex[1] = 28; // unlimited
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 96335: // Zanzil's Graveyard Gas
+        case 96434:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_AREA_ENEMY_SRC;
+            spellInfo->EffectRadiusIndex[0] = 22; // 200 yd
+            spellInfo->EffectRadiusIndex[1] = 22; // 200 yd
+            break;
+        case 97016: // Big Bad Voodoo
+            spellInfo->EffectRadiusIndex[0] = 66; // 100 yd
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
         default:
             break;
         }
