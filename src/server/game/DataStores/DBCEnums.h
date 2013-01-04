@@ -504,6 +504,17 @@ enum CurrencyTypes
     CURRENCY_TYPE_VALOR_POINTS                   = 396,
 };
 
+enum CurrencyFlags
+{
+    CURRENCY_FLAG_TRADEABLE          = 0x01,
+    CURRENCY_FLAG_UNK0               = 0x02, // used by archaeology currencies and Tol Barad Commendation
+    CURRENCY_FLAG_UNK1               = 0x04, // Conquest points only
+    CURRENCY_FLAG_HIGH_PRECISION     = 0x08,
+    CURRENCY_FLAG_UNK2               = 0x10, // Justice points only
+    CURRENCY_FLAG_UNK3               = 0x40, // used by honor, valor, conquest and justice points
+    CURRENCY_FLAG_COUNT_SEASON_TOTAL = 0x80,
+};
+
 // Faction used for Guild reputation counting
 #define FACTION_GUILD 1168
 

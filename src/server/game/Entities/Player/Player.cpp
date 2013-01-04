@@ -7319,9 +7319,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
     GetSession()->SendPacket(&data);
 
     // add honor points
-	ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor)); // Why the fuck * 2.4 multiplier?!
-
-    //ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, honor, true);
+    ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, int32(honor));
 
     if (InBattleground() && honor > 0)
     {
@@ -11107,7 +11105,7 @@ void Player::SendNewCurrency(uint32 id) const
     if (!entry) // should never happen
         return;
 
-    uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+    uint32 precision = GetCurrencyPrecision(id);
     uint32 weekCount = itr->second.weekCount / precision;
     uint32 weekCap = _GetCurrencyWeekCap(entry) / precision;
 
@@ -11148,7 +11146,7 @@ void Player::SendCurrencies()
         if (!entry || entry->Category == CURRENCY_CATEGORY_META_CONQUEST)
             continue;
 
-        uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
+        uint32 precision = GetCurrencyPrecision(itr->first);
         uint32 weekCount = itr->second.weekCount / precision;
         uint32 weekCap = _GetCurrencyWeekCap(entry) / precision;
 
@@ -11454,16 +11452,18 @@ void Player::SetNewResearchProject(uint8 slot, bool completed)
     }
 }
 
-uint32 Player::GetCurrency(uint32 id)
+uint32 Player::GetCurrency(uint32 id, bool countprecision)
 {
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
-    return itr != m_currencies.end() ? itr->second.totalCount : 0;
+    return itr != m_currencies.end() ? itr->second.totalCount / (countprecision ? GetCurrencyPrecision(id) : 1) : 0;
 }
 
-bool Player::HasCurrency(uint32 id, uint32 count)
+bool Player::HasCurrency(uint32 id, uint32 count, bool countprecision)
 {
+    // countprecision = true => "count" has already been multiplied by precision coef
+
     PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
-    return itr != m_currencies.end() && itr->second.totalCount >= count;
+    return itr != m_currencies.end() && (itr->second.totalCount / (countprecision ? GetCurrencyPrecision(id) : 1)) >= count;
 }
 
 void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ignorebonuses)
@@ -11479,7 +11479,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
     if (!ignorebonuses)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
-    int32 precision = currency->Flags & CURRENCY_FLAG_HIGH_PRECISION ? CURRENCY_PRECISION : 1;
+    int32 precision = GetCurrencyPrecision(id);
     int32 oldTotalCount = 0;
     int32 oldWeekCount = 0;
     PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
@@ -11498,11 +11498,11 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
         oldWeekCount = itr->second.weekCount;
     }
 
-    int32 newTotalCount = int32(oldTotalCount) + count;
+    int32 newTotalCount = int32(oldTotalCount) + count * precision;
     if (newTotalCount < 0)
         newTotalCount = 0;
 
-    int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count : 0);
+    int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count * precision : 0);
     if (newWeekCount < 0)
         newWeekCount = 0;
 
@@ -11569,16 +11569,17 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
     {
         case CURRENCY_TYPE_CONQUEST_POINTS:
         {
-            cap = 1343;
+            cap = 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
             if (GetConquestPointCap())
-                cap = GetConquestPointCap();
+                cap = GetConquestPointCap() * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
             break;
         }
     }
+
     if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
     {
         WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-        packet << uint32(cap / ((currency->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? 100 : 1));
+        packet << uint32(cap / GetCurrencyPrecision(currency->ID));
         packet << uint32(currency->ID);
         GetSession()->SendPacket(&packet);
     }
@@ -21563,19 +21564,10 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
                 DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
         }
 
-        float CurrencyPrecision = 1.0f;
-
         for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
             if (iece->RequiredCurrency[i])
-            {
-                // Honor, Conquest, Valor and Justice points exception - divide by 100
-                if (iece->RequiredCurrency[i] == 390 || iece->RequiredCurrency[i] == 392 || iece->RequiredCurrency[i] == 395 || iece->RequiredCurrency[i] == 396)
-                    CurrencyPrecision = 0.01f;
-                else
-                    CurrencyPrecision = 1.0f;
-                ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] * count * CurrencyPrecision)));
-            }
+                ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] * count / (float)GetCurrencyPrecision(iece->RequiredCurrency[i]))));
         }
     }
 
@@ -21731,17 +21723,10 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             }
         }
 
-        float CurrencyPrecision = 1.0f;
-
         // currency price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            // Honor, Conquest, Valor and Justice points exception - divide by 100
-            if (iece->RequiredCurrency[i] == 390 || iece->RequiredCurrency[i] == 392 || iece->RequiredCurrency[i] == 395 || iece->RequiredCurrency[i] == 396)
-                CurrencyPrecision = 0.01f;
-            else
-                CurrencyPrecision = 1.0f;
-            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], ceil(float(iece->RequiredCurrencyCount[i]) * CurrencyPrecision)))
+            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], ceil(float(iece->RequiredCurrencyCount[i])), false))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -26593,7 +26578,7 @@ void Player::SendRefundInfo(Item *item)
     data.WriteByteSeq(guid[2]);
     for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)                       // currency cost data
     {
-        data << uint32(iece->RequiredCurrencyCount[i]);
+        data << uint32(iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i]));
         data << uint32(iece->RequiredCurrency[i]);
     }
 
@@ -26647,7 +26632,7 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
     {
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            data << uint32(iece->RequiredCurrencyCount[i]);
+            data << uint32(iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i]));
             data << uint32(iece->RequiredCurrency[i]);
         }
 
@@ -26779,13 +26764,11 @@ void Player::RefundItem(Item *item)
     // Grant back extendedcost currency
     for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
     {
-        uint32 count = iece->RequiredCurrencyCount[i];
+        uint32 count = iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i]);
         uint32 currid = iece->RequiredCurrency[i];
 
         if (count && currid)
-        {
             ModifyCurrency(currid, count, true, true);
-        }
     }
 
     // Grant back money
@@ -26945,7 +26928,7 @@ uint16 Player::GetConquestPointsThisWeek()
     for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
     {
         if (itr->first == CURRENCY_TYPE_CONQUEST_POINTS)
-            return (uint16)itr->second.weekCount / CURRENCY_PRECISION;
+            return (uint16)itr->second.weekCount / GetCurrencyPrecision(itr->first);
     }
 
     return 0;

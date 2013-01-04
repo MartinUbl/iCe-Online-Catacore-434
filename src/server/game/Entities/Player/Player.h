@@ -151,8 +151,6 @@ struct PlayerCurrency
     uint32 weekCount;
 };
 
-#define CURRENCY_PRECISION 100
-
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -1303,8 +1301,8 @@ class Player : public Unit, public GridObject<Player>
 
         void SendNewCurrency(uint32 id) const;
         void SendCurrencies();
-        uint32 GetCurrency(uint32 id);
-        bool HasCurrency(uint32 id, uint32 count);
+        uint32 GetCurrency(uint32 id, bool countprecision = false);
+        bool HasCurrency(uint32 id, uint32 count, bool countprecision = false);
         void SetCurrency(uint32 id, uint32 count);
         void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false, bool ignorebonuses = false);
 

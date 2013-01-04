@@ -1075,10 +1075,10 @@ void WorldSession::SendListInventory(uint64 vendorguid)
             if (vendorItem->ExtendedCost == 0)
                 continue; // there's no price defined for currencies, only extendedcost is used
 
-            uint32 precision = (currencyTemplate->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? 100 : 1;
+            float precision = GetCurrencyPrecisionCoef(vendorItem->item);
 
             ++count;
-            itemsData << uint32(slot + 1);			 // client expects counting to start at 1
+            itemsData << uint32(slot + 1);           // client expects counting to start at 1
             itemsData << uint32(0);                  // max durability
 
             if (vendorItem->ExtendedCost != 0)

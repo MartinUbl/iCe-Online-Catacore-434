@@ -927,6 +927,25 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
     return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
 }
 
+uint32 GetCurrencyPrecision(uint32 currId)
+{
+    // May happen, mainly in loops, where things are put into packets
+    if (currId == 0)
+        return 1;
+
+    CurrencyTypesEntry const* ct = sCurrencyTypesStore.LookupEntry(currId);
+
+    if (!ct || (ct->Flags & CURRENCY_FLAG_HIGH_PRECISION) == 0)
+        return 1;
+
+    return 100;
+}
+
+float GetCurrencyPrecisionCoef(uint32 currId)
+{
+    return 1.0f/(float)GetCurrencyPrecision(currId);
+}
+
 void Zone2MapCoordinates(float& x,float& y,uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
