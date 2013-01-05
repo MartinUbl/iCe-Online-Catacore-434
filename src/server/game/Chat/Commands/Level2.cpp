@@ -1055,7 +1055,7 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(const char* args)
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
 
-    if (!sObjectMgr->IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,extendedcost,m_session->GetPlayer()))
+    if (!sObjectMgr->IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,extendedcost,VENDOR_ITEM_ITEM,m_session->GetPlayer()))
     {
         SetSentErrorMessage(true);
         return false;

@@ -895,15 +895,23 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket & recv_data)
     sLog->outDebug("WORLD: Received CMSG_BUY_ITEM_IN_SLOT");
     uint64 vendorguid, bagguid;
     uint32 item, slot, count;
-    uint8 bagslot, unk;
+    uint8 bagslot, type;
 
-    recv_data >> vendorguid >> unk >> item  >> slot >> count >> bagguid >> bagslot;
+    recv_data >> vendorguid >> type >> item  >> slot >> count >> bagguid >> bagslot;
 
     // client expects count starting at 1, and we send vendorslot+1 to client already
     if (slot > 0)
         --slot;
     else
         return;                                             // cheating
+
+    // currencies are special case
+    // they don't need bags
+    if (type == 2)
+    {
+        GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count / GetCurrencyPrecision(item));
+        return;
+    }
 
     uint8 bag = NULL_BAG;                                   // init for case invalid bagGUID
 
@@ -948,7 +956,7 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
     else
         return; // cheating
 
-    //if (itemType == ITEM_VENDOR_TYPE_ITEM)
+    if (itemType == VENDOR_ITEM_ITEM)
     {
         Item* bagItem = _player->GetItemByGuid(bagGuid);
 
@@ -960,10 +968,10 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket & recv_data)
 
         GetPlayer()->BuyItemFromVendorSlot(vendorguid, slot, item, count, bag, bagSlot);
     }
-    //else if (itemType == ITEM_VENDOR_TYPE_CURRENCY)
-    //    GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count);
-    //else
-    //    sLog->outDebug("WORLD: received wrong itemType (%u) in HandleBuyItemOpcode", itemType);
+    else if (itemType == VENDOR_ITEM_CURRENCY)
+        GetPlayer()->BuyCurrencyFromVendorSlot(vendorguid, slot, item, count);
+    else
+        sLog->outDebug("WORLD: received wrong itemType (%u) in HandleBuyItemOpcode", itemType);
 }
 
 void WorldSession::HandleListInventoryOpcode(WorldPacket & recv_data)
@@ -1017,7 +1025,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
         VendorItem const* vendorItem = vendorItems->GetItem(slot);
         if (!vendorItem) continue;
 
-        //if (vendorItem->Type == ITEM_VENDOR_TYPE_ITEM)
+        if (vendorItem->type == VENDOR_ITEM_ITEM)
         {
             ItemPrototype const* itemTemplate = sObjectMgr->GetItemPrototype(vendorItem->item);
             if (!itemTemplate)
@@ -1066,7 +1074,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
             itemsData << int32(leftInStock);
             itemsData << uint32(itemTemplate->BuyCount);
         }
-        /*else if (vendorItem->Type == ITEM_VENDOR_TYPE_CURRENCY)
+        else if (vendorItem->type == VENDOR_ITEM_CURRENCY)
         {
             CurrencyTypesEntry const* currencyTemplate = sCurrencyTypesStore.LookupEntry(vendorItem->item);
             if (!currencyTemplate)
@@ -1075,7 +1083,11 @@ void WorldSession::SendListInventory(uint64 vendorguid)
             if (vendorItem->ExtendedCost == 0)
                 continue; // there's no price defined for currencies, only extendedcost is used
 
-            float precision = GetCurrencyPrecisionCoef(vendorItem->item);
+            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(vendorItem->ExtendedCost);
+            if (!iece)
+                continue;
+
+            uint32 precision = GetCurrencyPrecision(vendorItem->item);
 
             ++count;
             itemsData << uint32(slot + 1);           // client expects counting to start at 1
@@ -1092,14 +1104,13 @@ void WorldSession::SendListInventory(uint64 vendorguid)
             enablers.push_back(1);                    // unk bit
 
             itemsData << uint32(vendorItem->item);
-            itemsData << uint32(vendorItem->Type);    // 1 is items, 2 is currency
+            itemsData << uint32(2);                   // 1 is items, 2 is currency
             itemsData << uint32(0);                   // price, only seen currency types that have Extended cost
             itemsData << uint32(0);                   // displayId
             // if (!unk "enabler") data << uint32(something);
             itemsData << int32(-1);
             itemsData << uint32(vendorItem->maxcount * precision);
         }
-        */
         // else error
     }
 

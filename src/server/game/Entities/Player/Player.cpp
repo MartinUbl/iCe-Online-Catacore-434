@@ -21772,6 +21772,112 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     return crItem->maxcount != 0;
 }
 
+bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count)
+{
+    // cheating attempt
+    if (count < 1) count = 1;
+
+    if (!isAlive())
+        return false;
+
+    CurrencyTypesEntry const* proto = sCurrencyTypesStore.LookupEntry(currency);
+    if (!proto)
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        return false;
+    }
+
+    Creature* creature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
+    if (!creature)
+    {
+        sLog->outDebug("WORLD: BuyCurrencyFromVendorSlot - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));
+        SendBuyError(BUY_ERR_DISTANCE_TOO_FAR, NULL, currency, 0);
+        return false;
+    }
+
+    VendorItemData const* vItems = creature->GetVendorItems();
+    if (!vItems || vItems->Empty())
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        return false;
+    }
+
+    if (vendorSlot >= vItems->GetItemCount())
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        return false;
+    }
+
+    VendorItem const* crItem = vItems->GetItem(vendorSlot);
+    // store diff item (cheating)
+    if (!crItem || crItem->item != currency || crItem->type != VENDOR_ITEM_CURRENCY)
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0);
+        return false;
+    }
+
+    ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
+    if (iece)
+    {
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
+        {
+            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count)))
+            {
+                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                return false;
+            }
+        }
+
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+        {
+            if (!iece->RequiredCurrency[i])
+                continue;
+
+            CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(iece->RequiredCurrency[i]);
+            if (!entry)
+            {
+                SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, currency, 0); // Find correct error
+                return false;
+            }
+
+            if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i])))
+            {
+                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+                return false;
+            }
+        }
+
+        // check for personal arena rating requirement
+        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
+        {
+            // probably not the proper equip err
+            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+            return false;
+        }
+    }
+    else // currencies have no price defined, can only be bought with ExtendedCost
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, currency, 0);
+        return false;
+    }
+
+    for (int i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
+    {
+        if (iece->RequiredItem[i])
+            DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
+    }
+
+    for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+    {
+        if (iece->RequiredCurrency[i])
+            ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] / (float)GetCurrencyPrecision(iece->RequiredCurrency[i]))));
+    }
+
+    ModifyCurrency(currency, crItem->maxcount ? crItem->maxcount : 1, true, true);
+
+    return true;
+}
+
 uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot)
 {
     // returns the maximal personal arena rating that can be used to purchase items requiring this condition

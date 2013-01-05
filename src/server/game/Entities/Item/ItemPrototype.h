@@ -219,6 +219,12 @@ enum CurrencyCategory
     // ...
 };
 
+enum VendorItemType
+{
+    VENDOR_ITEM_ITEM      = 0,
+    VENDOR_ITEM_CURRENCY  = 1,
+};
+
 enum BAG_FAMILY_MASK
 {
     BAG_FAMILY_MASK_NONE                      = 0x00000000,
