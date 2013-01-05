@@ -21840,7 +21840,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
                 return false;
             }
 
-            if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i])))
+            if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i]), true))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
                 return false;

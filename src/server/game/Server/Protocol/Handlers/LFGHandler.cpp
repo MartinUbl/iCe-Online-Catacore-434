@@ -35,8 +35,10 @@ void BuildPlayerLockDungeonBlock(WorldPacket& data, const LfgLockMap& lock)
     data << uint32(lock.size());                           // Size of lock dungeons
     for (LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
     {
-        data << uint32(it->first);                         // Dungeon entry (id + type)
-        data << uint32(it->second);                        // Lock status
+        data << uint32(it->first);                          // Dungeon entry (id + type)
+        data << uint32(it->second);                         // Lock status
+        data << uint32(0);                                  // 4.2.2
+        data << uint32(0);                                  // 4.2.2
     }
 }
 
@@ -59,33 +61,35 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
         return;
     }
 
-    uint8 numDungeons;
-    uint32 dungeon;
-    uint32 roles;
+    uint32 i;
+    uint32 roles, unk[3], dungeonCount;
+    uint8 unk1, unk2;
 
     recv_data >> roles;
-    recv_data.read_skip<uint16>();                        // uint8 (always 0) - uint8 (always 0)
-    recv_data >> numDungeons;
-    if (!numDungeons)
-    {
-        sLog->outDebug("CMSG_LFG_JOIN [" UI64FMTD "] no dungeons selected", GetPlayer()->GetGUID());
-        recv_data.rpos(recv_data.wpos());
-        return;
-    }
 
+    for (i = 0; i < 3; i++)
+        recv_data >> unk[i];
+
+    recv_data >> unk1;
+
+    //if (v8)
+        recv_data >> unk2;
+
+    dungeonCount = recv_data.ReadBits(17);
+    recv_data.FlushBits();
+
+    uint32 dungeon;
     LfgDungeonSet newDungeons;
-    for (int8 i = 0 ; i < numDungeons; ++i)
+    for (uint8 i = 0 ; i < dungeonCount; ++i)
     {
         recv_data >> dungeon;
         newDungeons.insert((dungeon & 0x00FFFFFF));       // remove the type from the dungeon entry
     }
 
-    recv_data.read_skip<uint32>();                        // for 0..uint8 (always 3) { uint8 (always 0) }
+    recv_data.read_skip<uint8>(); // almost always set to 128
 
-    std::string comment;
-    recv_data >> comment;
-    sLog->outDebug("CMSG_LFG_JOIN [" UI64FMTD "] roles: %u, Dungeons: %u, Comment: %s", GetPlayer()->GetGUID(), roles, uint8(newDungeons.size()), comment.c_str());
-    sLFGMgr->Join(GetPlayer(), uint8(roles), newDungeons, comment);
+    sLog->outDebug("CMSG_LFG_JOIN [" UI64FMTD "] roles: %u, Dungeons: %u", GetPlayer()->GetGUID(), roles, uint8(newDungeons.size()));
+    sLFGMgr->Join(GetPlayer(), uint8(roles), newDungeons, "");
 }
 
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket&  /*recv_data*/)
@@ -154,7 +158,7 @@ void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recv_data)
     sLFGMgr->TeleportPlayer(GetPlayer(), out, true);
 }
 
-void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
 {
     uint64 guid = GetPlayer()->GetGUID();
     sLog->outDebug("CMSG_LFD_PLAYER_LOCK_INFO_REQUEST [" UI64FMTD "]", guid);
@@ -453,12 +457,82 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
         size += 8 + 4 + uint32(it->second.size()) * (4 + 4);
 
+    // NOT YET FINISHED! WILL NOT WORK! Need to figure out the first 32+8+32+8+32 fields and verify the rest!
+    // IDA address: 0x006F7C20
+
     sLog->outDebug("SMSG_LFG_JOIN_RESULT [" UI64FMTD "] checkResult: %u checkValue: %u", GetPlayer()->GetGUID(), joinData.result, joinData.state);
-    WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
-    data << uint32(joinData.result);                       // Check Result
-    data << uint32(joinData.state);                        // Check Value
-    if (!joinData.lockmap.empty())
-        BuildPartyLockDungeonBlock(data, joinData.lockmap);
+    WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size, true);
+
+    data << uint32(joinData.result); // probably wrong field
+    data << uint8(0);
+    data << uint32(joinData.state);  // probably wrong field
+    data << uint8(0);
+    data << uint32(0);
+
+    ObjectGuid plGuid = GetPlayer()->GetGUID();
+    data.WriteBit(plGuid[2]);
+    data.WriteBit(plGuid[7]);
+    data.WriteBit(plGuid[3]);
+    data.WriteBit(plGuid[0]);
+    data.WriteBit(plGuid[4]);
+    data.WriteBit(plGuid[5]);
+    data.WriteBit(plGuid[1]);
+    data.WriteBit(plGuid[6]);
+
+    data.WriteBits(joinData.lockmap.size(), 17);
+    data.FlushBits();
+
+    ObjectGuid tmpGuid;
+
+    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    {
+        tmpGuid = it->first;
+
+        // 0,2,4,1,7,5,3,6 ???
+        data.WriteBit(tmpGuid[7]);
+        data.WriteBit(tmpGuid[5]);
+        data.WriteBit(tmpGuid[3]);
+        data.WriteBit(tmpGuid[6]);
+        data.WriteBit(tmpGuid[0]);
+        data.WriteBit(tmpGuid[2]);
+        data.WriteBit(tmpGuid[4]);
+        data.WriteBit(tmpGuid[1]);
+
+        data.WriteBits(it->second.size(), 17);
+        data.FlushBits();
+    }
+
+    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    {
+        tmpGuid = it->first;
+
+        for (LfgLockMap::const_iterator itr = it->second.begin(); itr != it->second.end(); ++it)
+        {
+            data << uint32(itr->first);                          // Dungeon entry (id + type)
+            data << uint32(itr->second);                         // Lock status
+            data << uint32(0);                                   // 4.2.2
+            data << uint32(0);                                   // 4.2.2
+        }
+
+        data.WriteByteSeq(tmpGuid[2]);
+        data.WriteByteSeq(tmpGuid[5]);
+        data.WriteByteSeq(tmpGuid[1]);
+        data.WriteByteSeq(tmpGuid[0]);
+        data.WriteByteSeq(tmpGuid[4]);
+        data.WriteByteSeq(tmpGuid[3]);
+        data.WriteByteSeq(tmpGuid[6]);
+        data.WriteByteSeq(tmpGuid[7]);
+    }
+
+    data.WriteByteSeq(plGuid[1]);
+    data.WriteByteSeq(plGuid[4]);
+    data.WriteByteSeq(plGuid[3]);
+    data.WriteByteSeq(plGuid[5]);
+    data.WriteByteSeq(plGuid[0]);
+    data.WriteByteSeq(plGuid[7]);
+    data.WriteByteSeq(plGuid[2]);
+    data.WriteByteSeq(plGuid[6]);
+
     SendPacket(&data);
 }
 
@@ -538,6 +612,7 @@ void WorldSession::SendLfgBootPlayer(const LfgPlayerBoot* pBoot)
     data << uint8(pBoot->inProgress);                      // Vote in progress
     data << uint8(playerVote != LFG_ANSWER_PENDING);       // Did Vote
     data << uint8(playerVote == LFG_ANSWER_AGREE);         // Agree
+    data << uint8(0);                                      // 4.2.2
     data << uint64(pBoot->victim);                         // Victim GUID
     data << uint32(votesNum);                              // Total Votes
     data << uint32(agreeNum);                              // Agree Count
