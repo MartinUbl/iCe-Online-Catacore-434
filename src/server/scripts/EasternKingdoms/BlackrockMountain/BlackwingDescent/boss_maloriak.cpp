@@ -1271,8 +1271,8 @@ public:
         {
             if (pSummon->GetEntry() == NPC_ABERRATION)
             {
-                /*me->AI()->DoAction(RECORD_DEATH);
-                me->AI()->DoAction(CHECK_COUNTER);*/
+                me->AI()->DoAction(RECORD_DEATH);
+                me->AI()->DoAction(CHECK_COUNTER);
             }
         }
 
