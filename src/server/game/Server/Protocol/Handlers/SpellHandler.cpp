@@ -409,6 +409,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if(mover->ToPlayer()->GetEmoteState())
             mover->ToPlayer()->SetEmoteState(0);
 
+        // allow cast even if the player don't know the spell
+        if (spellInfo->AttributesEx8 & SPELL_ATTR8_RAID_MARKER)
+            IgnoreDontKnowSpell = true;
+
         // not have spell in spellbook or spell passive and not casted by client
         if ((!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId)) && !IgnoreDontKnowSpell)
         {
