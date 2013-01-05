@@ -1301,6 +1301,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Gravity Strike (Corla's Zealot) + HC version
+                if (m_spellInfo->Id == 76561 || m_spellInfo->Id == 93656)
+                {
+                    damage = unitTarget->CountPctFromMaxHealth(damage);
+                }
                 break;
             }
             case SPELLFAMILY_HUNTER:
