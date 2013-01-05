@@ -443,16 +443,20 @@ void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
 }
 
 // Cata Status: Done
-// TODO: The structure is completely ignored atm
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 {
     sLog->outDebug("WORLD: Received CMSG_GUILD_ADD_RANK");
 
-    //std::string rankName;
-    //recvPacket >> rankName;
+    uint32 rankId;
+    recvPacket >> rankId;   // unused, value is computed by server
+
+    uint32 rankNameLength;
+    rankNameLength = recvPacket.ReadBits(7);
+    std::string rankName;
+    rankName = recvPacket.ReadString(rankNameLength);
 
     if (Guild* pGuild = _GetPlayerGuild(this, true))
-        pGuild->HandleAddNewRank(this, "New Rank");
+        pGuild->HandleAddNewRank(this, rankName);
 }
 
 // Cata Status: Done

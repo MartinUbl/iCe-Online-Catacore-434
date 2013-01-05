@@ -37,7 +37,7 @@ enum GuildMisc
     GUILD_BANK_MAX_TABS                 = 8,                    // send by client for money log also
     GUILD_BANK_MAX_SLOTS                = 98,
     GUILD_BANK_MONEY_LOGS_TAB           = 100,                  // used for money log in DB
-    GUILD_RANKS_MIN_COUNT               = 3, // Seems to be 3 starting from Cataclysm
+    GUILD_RANKS_MIN_COUNT               = 2,
     GUILD_RANKS_MAX_COUNT               = 10,
     GUILD_RANK_NONE                     = 0xFF,
     GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
@@ -917,7 +917,7 @@ private:
     // Creates default guild ranks with names in given locale
     void _CreateDefaultGuildRanks(LocaleConstant loc);
     // Creates new rank
-    void _CreateRank(const std::string& name, uint32 rights);
+    bool _CreateRank(const std::string& name, uint32 rights);
     // Update account number when member added/removed from guild
     void _UpdateAccountsNumber();
     bool _IsLeader(Player* player) const;

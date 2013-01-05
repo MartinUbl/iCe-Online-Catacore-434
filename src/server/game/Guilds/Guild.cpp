@@ -2706,9 +2706,8 @@ void Guild::HandleAddNewRank(WorldSession* session, const std::string& name)
         SendCommandResult(session, GUILD_COMMAND_CREATE, ERR_GUILD_PERMISSIONS);
     else
     {
-        _CreateRank(name, GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-        HandleQuery(session);
-        HandleRoster();                                             // Broadcast for tab rights update
+        if (_CreateRank(name, GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK))
+            _BroadcastEvent(GE_RANK_CREATED, 0);
     }
 }
 
@@ -2737,8 +2736,7 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
 
         m_ranks.erase(m_ranks.begin()+rankId);
 
-        HandleQuery(session);
-        HandleRoster();                                             // Broadcast for tab rights update
+        _BroadcastEvent(GE_RANK_DELETED, rankId);
     }
 }
 
@@ -3704,10 +3702,10 @@ void Guild::_CreateDefaultGuildRanks(LocaleConstant loc)
     _CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_INITIATE, loc), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 }
 
-void Guild::_CreateRank(const std::string& name, uint32 rights)
+bool Guild::_CreateRank(const std::string& name, uint32 rights)
 {
     if (_GetRanksSize() >= GUILD_RANKS_MAX_COUNT)
-        return;
+        return false;
 
     // Ranks represent sequence 0,1,2,... where 0 means guildmaster
     uint8 newRankId = _GetRanksSize();
@@ -3727,6 +3725,8 @@ void Guild::_CreateRank(const std::string& name, uint32 rights)
     }
     info.SaveToDB(trans);
     CharacterDatabase.CommitTransaction(trans);
+
+    return true;
 }
 
 // Updates the number of accounts that are in the guild
