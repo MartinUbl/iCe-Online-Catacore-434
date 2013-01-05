@@ -17454,7 +17454,8 @@ void Unit::SetRooted(bool apply)
             plr->SendMoveRoot(m_rootTimes);
         else
         {
-            if (IsInWorld())
+            // this check should catch not initialized target
+            if (m_uint32Values)
             {
                 ObjectGuid guid = GetGUID();
                 WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);
