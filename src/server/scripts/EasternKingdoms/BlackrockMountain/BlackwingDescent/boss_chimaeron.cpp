@@ -133,12 +133,18 @@ public:
             if (plrList.isEmpty())
                 return;
 
-            if(achiev_counter <= 2 )
+            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
             {
-                for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                if (Player* pPlayer = itr->getSource())
                 {
-                    if (Player* pPlayer = itr->getSource())
+                    if( achiev_counter <= 2) {
                         pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5309));// Full of Sound and Fury
+                    }
+
+                    if (IsHeroic()) {
+                    // because automatic assignment achievement doesn't work correctly,we must do it manually
+                        pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5115));
+                    }
                 }
             }
 

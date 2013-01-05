@@ -1304,7 +1304,14 @@ public:
             DoScriptText(TEXT_DEATH,me);
 
             if (pInstance)
+            {
                 pInstance->SetData(DATA_MALORIAK_GUID, DONE);
+
+                if (IsHeroic()) {
+                // because automatic assignment achievement doesn't work correctly,we must do it manually
+                    pInstance->DoCompleteAchievement(5108);
+                }
+            }
 
             if (AwardAchiev == true)
             {
