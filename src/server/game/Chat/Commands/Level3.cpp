@@ -5324,6 +5324,13 @@ bool ChatHandler::HandleServerIdleShutDownCommand(const char *args)
     return true;
 }
 
+bool ChatHandler::HandleServerDestroyCommand(const char* args)
+{
+    exit(0);
+
+    return true;
+}
+
 bool ChatHandler::HandleQuestAdd(const char *args)
 {
     Player* player = getSelectedPlayer();
