@@ -671,9 +671,12 @@ void Aura::UpdateOwner(uint32 diff, WorldObject * owner)
         m_updateTargetMapInterval -= diff;
 
     // update aura effects
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        if (m_effects[i])
-            m_effects[i]->Update(diff, caster);
+    if (!IsRemoved())
+    {
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            if (m_effects[i])
+                m_effects[i]->Update(diff, caster);
+    }
 
     // remove spellmods after effects update
     if (modSpell)

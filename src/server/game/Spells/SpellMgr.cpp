@@ -4717,6 +4717,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
             spellInfo->StackAmount = 20;
             spellInfo->Effect[2] = 0;
+            break;
         case 78095: // Magma Jets + difficulty entries
         case 93014:
         case 93015:
@@ -4781,6 +4782,19 @@ void SpellMgr::LoadSpellCustomAttr()
         case 97016: // Big Bad Voodoo
             spellInfo->EffectRadiusIndex[0] = 66; // 100 yd
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC;
+        case 77569: // Release Aberration
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
+        case 82848: // Massacre
+            spellInfo->EffectRadiusIndex[0] = 28;
+            break;
+        case 91307: // Mocking Shadows
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            break;
+        case 82881: // Break
+        case 82890: // Mortality
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
         default:
             break;

@@ -723,10 +723,10 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                 switch(this->getDifficulty()) // Storm Shield (HC-only ability)
                 {
                 case RAID_DIFFICULTY_10MAN_HEROIC:
-                    me->CastSpell(me, 93060, true);
+                    me->CastSpell(me, 93059, true);
                     break;
                 case RAID_DIFFICULTY_25MAN_HEROIC:
-                    me->CastSpell(me, 93066, true);
+                    me->CastSpell(me, 95865, true);
                     break;
                 default: break;
                 }

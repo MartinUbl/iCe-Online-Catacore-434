@@ -763,6 +763,9 @@ class World
         void ProcessStopEvent();
         bool GetEventKill() const { return isEventKillStart; }
 
+        bool IsAutosaveAllowed() { return m_allowAutosave; };
+        void AllowAutosave(bool allow) { m_allowAutosave = allow; };
+
         bool isEventKillStart;
     protected:
         void _UpdateGameTime();
@@ -780,6 +783,8 @@ class World
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
+
+        bool m_allowAutosave;
 
         bool m_isClosed;
 

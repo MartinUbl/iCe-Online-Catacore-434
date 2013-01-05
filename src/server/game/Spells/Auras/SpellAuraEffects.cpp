@@ -810,6 +810,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Innervate
             case 29166:
                 {
+                if (caster == owner)
+                {
+                    if (caster->HasAura(33597))  // Dreamstate rank1
+                        amount += 15;
+                    if (caster->HasAura(33599))  // Dreamstate rank2
+                        amount += 30;
+                }
                 int32 total_ticks = GetTotalTicks();
                 if (total_ticks > 0)
                     amount = int32(owner->GetMaxPower(POWER_MANA) * amount / (total_ticks * 100.0f));
@@ -1980,9 +1987,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             damage = dmg;
 
             caster->CalcAbsorbResist(target, GetSpellSchoolMask(GetSpellProto()), DOT, damage, &absorb, &resist, m_spellProto);
-
-            sLog->outDetail("PeriodicTick: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), damage, GetId(),absorb);
 
             caster->DealDamageMods(target,damage,&absorb);
 
@@ -4486,20 +4490,25 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const *aurApp, uint8 mode, 
     if (!apply)
         target->RemoveFlag(field, flag);
 
-    if (apply)
-        target->SetFlag(field, flag);
-
     // Handle damage modifcation, shapeshifted druids are not affected
     if (target->GetTypeId() == TYPEID_PLAYER && !target->IsInFeralForm())
     {
-        if (Item *pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        Player *player = target->ToPlayer();
+
+        if (Item *pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         {
             uint8 attacktype = Player::GetAttackBySlot(slot);
 
             if (attacktype < MAX_ATTACK)
-                target->ToPlayer()->_ApplyWeaponDamage(slot, pItem->GetProto(), NULL, !apply);
+            {
+                player->_ApplyWeaponDependentAuraMods(pItem, (WeaponAttackType) attacktype, !apply);
+                player->_ApplyWeaponDamage(slot, pItem->GetProto(), NULL, !apply);
+            }
         }
     }
+
+    if (apply)
+        target->SetFlag(field, flag);
 
     if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->GetCurrentEquipmentId())
         target->UpdateDamagePhysical(attType);
@@ -5864,7 +5873,7 @@ void AuraEffect::HandleModPercentStat(AuraApplication const *aurApp, uint8 mode,
 
     if (GetMiscValue() < -1 || GetMiscValue() > 4)
     {
-        sLog->outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        sLog->outError("WARNING: Misc Value (%i) for SPELL_AURA_MOD_PERCENT_STAT (spell: %u) not valid", GetMiscValue(), GetSpellProto()->Id);
         return;
     }
 
@@ -5990,7 +5999,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     if (miscValue < -1 || miscValue > 4)
     {
-        sLog->outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        sLog->outError("WARNING: Misc Value (%i) for SPELL_AURA_MOD_PERCENT_STAT (spell: %u) not valid", miscValue, GetSpellProto()->Id);
         return;
     }
 

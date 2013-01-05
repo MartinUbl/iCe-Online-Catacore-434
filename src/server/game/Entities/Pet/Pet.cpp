@@ -868,6 +868,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             SetMaxPower(POWER_ENERGY, 100);
             SetPower(POWER_ENERGY, 100);
         }
+        else if (m_owner->getClass() == CLASS_MAGE && GetEntry() == 510) // Water elemental
+        {
+            // no additional things needed?
+        }
         else
             sLog->outError("Unknown type pet %u is summoned by player class %u", GetEntry(), m_owner->getClass());
     }

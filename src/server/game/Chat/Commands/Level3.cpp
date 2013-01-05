@@ -5324,6 +5324,13 @@ bool ChatHandler::HandleServerIdleShutDownCommand(const char *args)
     return true;
 }
 
+bool ChatHandler::HandleServerDestroyCommand(const char* args)
+{
+    exit(0);
+
+    return true;
+}
+
 bool ChatHandler::HandleQuestAdd(const char *args)
 {
     Player* player = getSelectedPlayer();
@@ -7465,6 +7472,34 @@ bool ChatHandler::HandleListFreezeCommand(const char * /*args*/)
         PSendSysMessage(LANG_COMMAND_FROZEN_PLAYERS,fplayers.c_str());
     } while (result->NextRow());
 
+    return true;
+}
+
+bool ChatHandler::HandleAutosaveCommand(const char* args)
+{
+    if (!*args)
+    {
+        PSendSysMessage("Autosave is currently %s.", sWorld->IsAutosaveAllowed() ? "allowed" : "disabled");
+        return true;
+    }
+
+    std::string argstr = (char*)args;
+
+    if (argstr == "on" || argstr == "enable")
+    {
+        sWorld->AllowAutosave(true);
+        SendSysMessage("Autosave has been enabled.");
+        return true;
+    }
+
+    if (argstr == "off" || argstr == "disable")
+    {
+        sWorld->AllowAutosave(false);
+        SendSysMessage("Autosave has been disabled.");
+        return true;
+    }
+
+    PSendSysMessage("Autosave is currently %s.", sWorld->IsAutosaveAllowed() ? "allowed" : "disabled");
     return true;
 }
 

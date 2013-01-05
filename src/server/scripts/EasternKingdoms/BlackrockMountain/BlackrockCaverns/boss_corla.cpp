@@ -38,9 +38,10 @@ enum Spells
     SPELL_FORCE_BLAST_H             = 93648,
     SPELL_GRAVITY_STRIKE            = 76561,
     SPELL_GRAVITY_STRIKE_H          = 93656,
-    SPELL_SHADOW_STRIKE             = 87374,
-    SPELL_SHADOW_STRIKE_H           = 82362,
-    // Spell Grieving Whirl does not work
+    SPELL_SHADOW_STRIKE             = 82362,
+    SPELL_SHADOW_STRIKE_H           = 87374,
+    SPELL_GRIEVOUS_WHIRL            = 76524,
+    SPELL_GRIEVOUS_WHIRL_H          = 93658
 };
 
 #define DUMMY_X 573.64f
@@ -353,7 +354,7 @@ public:
                                         if(Creature* pDummy = me->GetCreature(*me, m_uiDummyGUID))
                                             pDummy->ForcedDespawn();
                                 }
-                                // Is a player eveloved
+                                // Is a player evolved
                                 else
                                 {
                                     // Corla will put on Charm effect
@@ -366,7 +367,8 @@ public:
                         else pBeamTarget->CastSpell(pBeamTarget, SPELL_EVOLUTION, true);
                     }
 
-                    m_uiEvolution_Timer = 200 - (diff - m_uiEvolution_Timer); // Should not get delayed
+                    int32 new_timer = 200 - (diff - m_uiEvolution_Timer); // Should not get delayed
+                    m_uiEvolution_Timer = (new_timer > 0) ? (uint32)new_timer : 0;
                 } else m_uiEvolution_Timer -= diff;
 
                 return;
@@ -379,7 +381,7 @@ public:
             if(m_uiAbility_Timer < diff)
             {
                 Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                switch(urand(1,5))
+                switch(urand(1,6))
                 {
                 case 1:
                     if(pTarget)
@@ -393,6 +395,9 @@ public:
                 case 4:
                 case 5:
                     me->CastSpell(me->getVictim(), DUNGEON_MODE(SPELL_GRAVITY_STRIKE, SPELL_GRAVITY_STRIKE_H), false);
+                    break;
+                case 6:
+                    me->CastSpell(me, DUNGEON_MODE(SPELL_GRIEVOUS_WHIRL, SPELL_GRIEVOUS_WHIRL_H), false);
                     break;
                 default:
                     break;

@@ -2622,7 +2622,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 if (m_spellInfo->Id == 2643      // Multi-Shot
                     || m_spellInfo->Id == 81297  // Consecration
                     || m_spellInfo->Id == 779    // Swipe  (Bear form)
-                    || m_spellInfo->Id == 77758) // Thrash (Bear form)
+                    || m_spellInfo->Id == 77758  // Thrash (Bear form)
+                    || m_spellInfo->Id == 76524  // Grievous Whirl (Corla's Zealots)
+                    || m_spellInfo->Id == 93658) // Grievous Whirl heroic version
                 {
                     radius = 8; // 8yd
                     targetType = SPELL_TARGETS_ENEMY;
@@ -2658,7 +2660,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     || m_spellInfo->Id == 93145
                     || m_spellInfo->Id == 93146
                     || m_spellInfo->Id == 93060 // Storm Shield (conclave: rohash) damage spells
-                    || m_spellInfo->Id == 93066
+                    || m_spellInfo->Id == 95866
                     || m_spellInfo->Id == 87770 // Wind Burst (al'akir)
                     || m_spellInfo->Id == 93261
                     || m_spellInfo->Id == 93262
@@ -3065,6 +3067,26 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 77569: // Release Aberration
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId()== TYPEID_UNIT && ((*itr)->ToCreature()->GetEntry() == 415055
+                                    || (*itr)->ToCreature()->GetEntry() == 41378))
+                                    ++itr;
+                                else
+                                    itr = unitList.erase(itr);
+                            }
+                            break;
+                        case 77615: // Debilitating Slime
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                           {
+                                if ((*itr)->GetTypeId()== TYPEID_UNIT && ((*itr)->ToCreature()->GetEntry() == 415055 ||
+                                    (*itr)->ToCreature()->GetEntry() == 415050 || (*itr)->ToCreature()->GetEntry() == 41505))
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)

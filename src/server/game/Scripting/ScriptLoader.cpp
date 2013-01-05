@@ -576,6 +576,7 @@ void AddSC_magmaw();
 void AddSC_maloriak();
 void AddSC_atramedes();
 void AddSC_boss_defensing_system();
+void AddSC_boss_chimaeron();
 void AddSC_instance_blackwing_descent();
 void AddSC_instance_lost_city_of_the_tolvir();
 void AddSC_instance_grim_batol();
@@ -1206,6 +1207,7 @@ void AddCataclysmScripts()
     AddSC_maloriak();
     AddSC_atramedes();
     AddSC_boss_defensing_system();
+    AddSC_boss_chimaeron();
     AddSC_instance_blackwing_descent();
 #endif
 }

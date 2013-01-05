@@ -522,6 +522,7 @@ class ChatHandler
         bool HandleServerShutDownCommand(const char* args);
         bool HandleServerShutDownCancelCommand(const char* args);
         bool HandleServerSetClosedCommand(const char* args);
+        bool HandleServerDestroyCommand(const char* args);
 
         bool HandleServerSetLogFileLevelCommand(const char* args);
         bool HandleServerSetDiffTimeCommand(const char* args);
@@ -556,6 +557,8 @@ class ChatHandler
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
         bool HandlePetResetCommand(const char* args);
+
+        bool HandleAutosaveCommand(const char* args);
 
         bool HandleSummonCommand(const char* args);
         bool HandleAppearCommand(const char* args);
