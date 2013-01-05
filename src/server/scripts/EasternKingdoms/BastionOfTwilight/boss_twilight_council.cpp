@@ -406,50 +406,55 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////
                         if(Instability_timer<=diff)
                         {
-                            uint32 number_of_players=0;
+                            Map* map;
+                            map = me->GetMap();
+                            Map::PlayerList const& plrList = map->GetPlayers();
+                            if (plrList.isEmpty())
+                                return;
+                            uint32 max_players = plrList.getSize();
 
-                                std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-                                for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                            Player** pole;
+                            pole=(Player**)calloc(max_players,sizeof(Player*));
+                            if(!pole) // Allocation failed
+                                return;
+
+                            uint32 iter = 0;
+                            for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                            {
+                                if (Player* pPlayer = itr->getSource())
+                                    if(pPlayer && pPlayer->ToPlayer() && pPlayer->isAlive())
+                                    {
+                                        pole[iter] = pPlayer; // zapisem si hracov do dynamickeho pola
+                                        iter++;
+                                    }
+                            }
+                            iter--;
+
+                            Player* pom = NULL;
+                            for(uint32 i = 0; i < iter; i++)
+                                for(uint32 j = 0; j < (iter -i - 1);j++)
+                                    if(pole[j] && pole[j+1] && ( me->GetDistance(pole[j]) < me->GetDistance(pole[j+1]) ))
+                                    {
+                                        pom = pole[j];
+                                        pole[j] = pole[j+1];
+                                        pole[j+1] = pom;
+                                    }
+
+                            for(uint32 i = 0;i < INSTABILITY;i++)
+                            {
+                                if(i <= iter)
                                 {
-                                    Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                    if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
-                                        number_of_players++;
+                                    if( INSTABILITY == 1 && urand(0,1) && ( (i + 1) < = iter)) // 50 % chance to cast on second one if INSTABILITY == 1 and second exist
+                                    {
+                                        if(!pole[i +1 ]->HasAura(92486 ) && !pole[i + 1]->HasAura(92488 ) && !pole[i + 1]->HasAura(84948 ) && !pole[i + 1]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
+                                            me->CastSpell(pole[i + 1],84529,true);
+                                    }
+                                    else if(!pole[i]->HasAura(92486 ) && !pole[i]->HasAura(92488 ) && !pole[i]->HasAura(84948 ) && !pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
+                                        me->CastSpell(pole[i],84529,true);
                                 }
-                                    Unit** pole;
-                                    pole=(Unit**)malloc(number_of_players*sizeof(Unit*));
-                                    memset(pole, 0, number_of_players*sizeof(Unit*));
-
-                                    uint32 iter = 0;
-                                    for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
-                                    {
-                                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                        if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
-                                        {
-                                            pole[iter]=unit; // zapisem si hracov do dynamickeho pola
-                                            iter++;
-                                        }
-                                    }
-
-                                    Unit* pom=NULL;
-                                    for(uint32 i=0; i<number_of_players-1;i++)
-                                    for(uint32 j=0; j<number_of_players-1;j++)
-                                        if(pole[j] && pole[j+1] && me->GetDistance(pole[j]) < me->GetDistance(pole[j+1]))
-                                        {
-                                            pom=pole[j];
-                                            pole[j]=pole[j+1];
-                                            pole[j+1]=pom;
-                                        }
-
-                                    for(uint32 i=0;i<INSTABILITY;i++)
-                                    {
-                                        if(i<number_of_players)
-                                        {
-                                            if(!pole[i]->HasAura(92486 ) && !pole[i]->HasAura(92488 ) && !pole[i]->HasAura(84948 ) && !pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
-                                                DoCast(pole[i],84529,true);
-                                        }
-                                    }
-                                    Instability_timer=1000;
-                                    free((void*)pole);
+                            }
+                            Instability_timer=1000;
+                            free((void*)pole); // Dealloction
                         }
                         else Instability_timer-=diff;
 
@@ -2400,8 +2405,9 @@ public:
 
                 if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
                 {
-                    DoCast(92548); // Zacastim instant Glaciate
-                    me->ForcedDespawn();
+                    me->CastSpell(me,92548,true); // Zacastim instant Glaciate
+                    me->SetReactState(REACT_PASSIVE);
+                    me->ForcedDespawn(2000);
                 }
 
             }
