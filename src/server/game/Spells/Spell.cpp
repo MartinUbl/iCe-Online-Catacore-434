@@ -2636,7 +2636,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     || m_spellInfo->Id == 93145
                     || m_spellInfo->Id == 93146
                     || m_spellInfo->Id == 93060 // Storm Shield (conclave: rohash) damage spells
-                    || m_spellInfo->Id == 93066
+                    || m_spellInfo->Id == 95866
                     || m_spellInfo->Id == 87770 // Wind Burst (al'akir)
                     || m_spellInfo->Id == 93261
                     || m_spellInfo->Id == 93262

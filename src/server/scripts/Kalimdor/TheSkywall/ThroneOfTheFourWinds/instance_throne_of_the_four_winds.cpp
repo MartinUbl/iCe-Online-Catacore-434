@@ -504,9 +504,14 @@ public:
                         p_Anshal->AI()->DoAction(666);
                         p_Nezir->AI()->DoAction(666);
                         p_Rohash->AI()->DoAction(666);
-                        m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
+                        int32 new_timer = 500 - (diff - m_conclUpdate_Timer);
+                        m_conclUpdate_Timer = (new_timer > 0) ? (uint32)new_timer : 0;
                     }
-                    else m_conclUpdate_Timer = 1000 - (diff - m_conclUpdate_Timer);
+                    else
+                    {
+                        int32 new_timer = 1000 - (diff - m_conclUpdate_Timer);
+                        m_conclUpdate_Timer = (new_timer > 0) ? (uint32)new_timer : 0;
+                    }
                 } else m_conclUpdate_Timer -= diff;
             }
             else if(m_auiEncounter[TYPE_CONCLAVE] == SPECIAL)
@@ -521,9 +526,14 @@ public:
                     if(m_power == 0)
                     {
                         SetData(TYPE_CONCLAVE, IN_PROGRESS);
-                        m_conclUpdate_Timer = 1000 - (diff - m_conclUpdate_Timer);
+                        int32 new_timer = 1000 - (diff - m_conclUpdate_Timer);
+                        m_conclUpdate_Timer = (new_timer > 0) ? (uint32)new_timer : 0;
                     }
-                    else m_conclUpdate_Timer = 500 - (diff - m_conclUpdate_Timer);
+                    else
+                    {
+                        int32 new_timer = 500 - (diff - m_conclUpdate_Timer);
+                        m_conclUpdate_Timer = (new_timer > 0) ? (uint32)new_timer : 0;
+                    }
                 } else m_conclUpdate_Timer -= diff;
             }
             else
