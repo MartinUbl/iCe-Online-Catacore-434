@@ -444,7 +444,7 @@ public:
                             {
                                 if(i <= iter)
                                 {
-                                    if( INSTABILITY == 1 && urand(0,1) && ( (i + 1) < = iter)) // 50 % chance to cast on second one if INSTABILITY == 1 and second exist
+                                    if (INSTABILITY == 1 && urand(0,1) && ((i + 1) <= iter)) // 50 % chance to cast on second one if INSTABILITY == 1 and second exist
                                     {
                                         if(!pole[i +1 ]->HasAura(92486 ) && !pole[i + 1]->HasAura(92488 ) && !pole[i + 1]->HasAura(84948 ) && !pole[i + 1]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
                                             me->CastSpell(pole[i + 1],84529,true);
