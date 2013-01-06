@@ -472,7 +472,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 
         if (!isArena) // Unk 3 prolly is (bg)
         {
-            buff << uint32(itr2->second->BonusHonor / 100);
+            buff << uint32(itr2->second->BonusHonor);
             buff << uint32(itr2->second->Deaths);
             buff << uint32(itr2->second->HonorableKills);
         }
