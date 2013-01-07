@@ -2284,16 +2284,17 @@ bool ChatHandler::HandleModifyCurrencyCommand (const char* args)
 
         int32 currencyid = (int32)atoi(currencyid_s);
         int32 amount = (int32)atoi(amount_s);
-        if (!sCurrencyTypesStore.LookupEntry(uint32(currencyid)))
+        CurrencyTypesEntry const* ce = sCurrencyTypesStore.LookupEntry(uint32(currencyid));
+        if (!ce)
         {
             PSendSysMessage("Currency %u does not exist.", currencyid);
             SetSentErrorMessage(true);
             return false;
         }
 
-        target->ModifyCurrency(uint32(currencyid), amount);
+        target->ModifyCurrency(uint32(currencyid), amount, CURRENCY_SOURCE_ALL, true, true);
 
-        PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, GetNameLink(target).c_str(), target->GetCurrency(uint32(currencyid), true));
+        PSendSysMessage("%s of player %s is now %u", ce->name, GetNameLink(target).c_str(), target->GetCurrency(uint32(currencyid), true));
         return true;
 }
 

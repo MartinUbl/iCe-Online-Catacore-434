@@ -923,9 +923,9 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
     recv_data >> unk_byte; // always 3
 
     uint32 rating = _player->GetRatedBattlegroundRating();
-    uint32 current_CP = _player->GetConquestPointsThisWeek();
-    uint32 CP_cap = _player->GetConquestPointCap();//std::max(_player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG), _player->GetConquestPointsWeekCap(CP_SOURCE_ARENA));
-    uint32 CP_for_win = (uint32)std::ceil(_player->GetConquestPointCap() / 6.0f);//(uint32)std::ceil(_player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f);
+    uint32 current_CP = _player->GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG);
+    uint32 CP_cap = _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG);
+    uint32 CP_for_win = (uint32)std::ceil(_player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG) / 6.0f);
 
     WorldPacket data(SMSG_RATED_BATTLEFIELD_INFO, 5 * 4 + 1);
     data << uint32(rating);             // rating

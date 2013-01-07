@@ -777,6 +777,7 @@ class World
         void InitRandomBGResetTime();
         void ResetDailyQuests();
         void ResetWeeklyQuests();
+        void ResetCurrencyWeekCount();
         void ResetRandomBG();
     private:
         static volatile bool m_stopEvent;

@@ -268,8 +268,9 @@ bool CharacterDatabaseConnection::Open()
     PrepareStatement(CHAR_ADD_AURA, "INSERT INTO character_aura (guid,caster_guid,spell,effect_mask,recalculate_mask,stackcount,amount0,amount1,amount2,base_amount0,base_amount1,base_amount2,maxduration,remaintime,remaincharges) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", true);
 
-	// Currency
-	PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY, "SELECT currency, count, thisweek FROM character_currency WHERE guid = ?");
+    // Currency
+    PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY, "SELECT currency, count FROM character_currency WHERE guid = ?");
+    PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY_WEEKCAP, "SELECT currency, source, cap, thisweek FROM character_currency_weekcap WHERE guid = ?");
 
     return true;
 }

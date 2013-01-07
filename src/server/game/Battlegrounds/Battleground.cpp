@@ -873,7 +873,7 @@ void Battleground::EndBattleground(uint32 winner)
             {
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_kills));
                 if (CanAwardArenaPoints())
-                    plr->ModifyCurrency(390,winner_arena);
+                    plr->ModifyCurrency(390,winner_arena, CURRENCY_SOURCE_BG);
                 if (!plr->GetRandomWinner())
                     plr->SetRandomWinner(true);
             }
@@ -2019,7 +2019,7 @@ void Battleground::RatedBattlegroundWon(Player *player)
     //player->UpdateMaxWeekRating(CP_SOURCE_RATED_BG, 0);
     //player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f) * PLAYER_CURRENCY_PRECISION);
 
-    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)ceil(player->GetConquestPointCap() / 6.0f));
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)(player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f), CURRENCY_SOURCE_BG);
 
     player->SaveToDB();
 }

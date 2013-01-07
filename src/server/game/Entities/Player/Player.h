@@ -144,11 +144,24 @@ enum PlayerCurrencyState
     PLAYERCURRENCY_REMOVED   = 3
 };
 
+enum CurrencySource
+{
+    CURRENCY_SOURCE_ALL    = 0,
+    CURRENCY_SOURCE_ARENA  = 1,
+    CURRENCY_SOURCE_BG     = 2,
+    CURRENCY_SOURCE_OTHER  = 3,
+    CURRENCY_SOURCE_MAX
+};
+
+typedef UNORDERED_MAP<CurrencySource, uint32> CurrencySourceMap;
+
 struct PlayerCurrency
 {
     PlayerCurrencyState state;
     uint32 totalCount;
-    uint32 weekCount;
+
+    CurrencySourceMap weekCap;
+    CurrencySourceMap weekCount;
 };
 
 // Spell modifier (used for modify other spells)
@@ -835,7 +848,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS    = 30,
     PLAYER_LOGIN_QUERY_LOADPETSLOT              = 31,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
-    MAX_PLAYER_LOGIN_QUERY                      = 36
+    PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP    = 36,
+    MAX_PLAYER_LOGIN_QUERY                      = 37
 };
 
 enum PlayerDelayedOperations
@@ -1299,12 +1313,27 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        void SendNewCurrency(uint32 id) const;
+        void SendNewCurrency(uint32 id);
         void SendCurrencies();
+        void SendUpdateCurrencyWeekCap(uint32 id, uint32 cap);
         uint32 GetCurrency(uint32 id, bool countprecision = false);
         bool HasCurrency(uint32 id, uint32 count, bool countprecision = false);
         void SetCurrency(uint32 id, uint32 count);
-        void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false, bool ignorebonuses = false);
+        uint32 GetCurrencyWeekCap(const CurrencyTypesEntry* currency, CurrencySource src);
+        uint32 GetCurrencyWeekCap(uint32 id, CurrencySource src)
+        {
+            CurrencyTypesEntry const* curr = sCurrencyTypesStore.LookupEntry(id);
+            if (curr)
+                return GetCurrencyWeekCap(curr, src);
+
+            return 0;
+        }
+        uint32 GetCurrencyWeekCount(uint32 id, CurrencySource src);
+        void SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap);
+        void SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count);
+        void ModifyCurrency(uint32 id, int32 count, CurrencySource src = CURRENCY_SOURCE_ALL, bool ignoreweekcap = false, bool ignorebonuses = false);
+
+        void ResetCurrencyWeekCount();
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
@@ -1449,9 +1478,6 @@ class Player : public Unit, public GridObject<Player>
         void SetWeeklyQuestStatus(uint32 quest_id);
         void ResetDailyQuestStatus();
         void ResetWeeklyQuestStatus();
-
-        //uint16 GetConquestPointsWeekCap(ConquestPointsSources source) const { return _conquestPointsWeekCap[source]; }
-        uint16 GetConquestPointsThisWeek();
 
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
@@ -1886,8 +1912,6 @@ class Player : public Unit, public GridObject<Player>
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(uint64 guid);
-        void SetConquestPointCap(uint32 newcap) { m_ConquestPointCap = newcap; };
-        uint32 GetConquestPointCap() const { return m_ConquestPointCap; };
 
         // Research mechanisms (Archaeology)
         uint16 GetResearchSite(uint8 slot);
@@ -2711,6 +2735,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
+        void _LoadCurrencyWeekcap(PreparedQueryResult result);
         void _LoadArchaeologyData();
 
         /*********************************************************/
@@ -2732,6 +2757,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveTalents(SQLTransaction& trans);
         void _SaveTalentBranchSpecs(SQLTransaction& trans);
         void _SaveCurrency();
+        void _SaveCurrencyWeekcap();
         void _SaveStats(SQLTransaction& trans);
         void _SaveArchaeologyData();
 
@@ -2766,7 +2792,6 @@ class Player : public Unit, public GridObject<Player>
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
         PlayerCurrenciesMap m_currencies;
-        uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const;
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;

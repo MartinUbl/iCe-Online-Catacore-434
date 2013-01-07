@@ -1986,7 +1986,12 @@ void World::Update(uint32 diff)
     }
 
     if (m_gameTime > m_NextWeeklyQuestReset)
+    {
         ResetWeeklyQuests();
+
+        // For now, we reset currency week cap at the same time
+        ResetCurrencyWeekCount();
+    }
 
     if (m_gameTime > m_NextRandomBGReset)
         ResetRandomBG();
@@ -2805,9 +2810,6 @@ void World::ResetWeeklyQuests()
 {
     CharacterDatabase.Execute("DELETE FROM character_queststatus_weekly");
 
-    CharacterDatabase.Execute("UPDATE character_currency SET thisweek = 0");
-    sBattlegroundMgr->DistributeArenaCurrency();
-
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
@@ -2817,6 +2819,16 @@ void World::ResetWeeklyQuests()
 
     // change available weeklies
     sPoolMgr->ChangeWeeklyQuests();
+}
+
+void World::ResetCurrencyWeekCount()
+{
+    CharacterDatabase.Execute("UPDATE character_currency_weekcap SET thisweek = 0");
+    sBattlegroundMgr->DistributeArenaCurrency();
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetCurrencyWeekCount();
 }
 
 void World::ResetRandomBG()

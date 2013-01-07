@@ -11091,9 +11091,9 @@ uint8 Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec &dest, uint32
     return EQUIP_ERR_INVENTORY_FULL;
 }
 
-void Player::SendNewCurrency(uint32 id) const
+void Player::SendNewCurrency(uint32 id)
 {
-    PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
+    PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
     if (itr == m_currencies.end())
         return;
 
@@ -11106,8 +11106,8 @@ void Player::SendNewCurrency(uint32 id) const
         return;
 
     uint32 precision = GetCurrencyPrecision(id);
-    uint32 weekCount = itr->second.weekCount / precision;
-    uint32 weekCap = _GetCurrencyWeekCap(entry) / precision;
+    uint32 weekCount = GetCurrencyWeekCount(id, CURRENCY_SOURCE_ALL) / precision;
+    uint32 weekCap = GetCurrencyWeekCap(entry, CURRENCY_SOURCE_ALL) / precision;
 
     packet.WriteBit(weekCount);
     packet.WriteBits(0, 4); // some flags
@@ -11138,7 +11138,7 @@ void Player::SendCurrencies()
     packet.WriteBits(m_currencies.size(), 23);
 
     size_t count = 0;
-    for (PlayerCurrenciesMap::const_iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
     {
         CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr->first);
 
@@ -11147,8 +11147,8 @@ void Player::SendCurrencies()
             continue;
 
         uint32 precision = GetCurrencyPrecision(itr->first);
-        uint32 weekCount = itr->second.weekCount / precision;
-        uint32 weekCap = _GetCurrencyWeekCap(entry) / precision;
+        uint32 weekCount = GetCurrencyWeekCount(itr->first, CURRENCY_SOURCE_ALL) / precision;
+        uint32 weekCap = GetCurrencyWeekCap(entry, CURRENCY_SOURCE_ALL) / precision;
 
         packet.WriteBit(weekCount);
         packet.WriteBits(0, 4); // some flags
@@ -11466,7 +11466,116 @@ bool Player::HasCurrency(uint32 id, uint32 count, bool countprecision)
     return itr != m_currencies.end() && (itr->second.totalCount / (countprecision ? GetCurrencyPrecision(id) : 1)) >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ignorebonuses)
+uint32 Player::GetCurrencyWeekCap(const CurrencyTypesEntry* currency, CurrencySource src)
+{
+    // we will respect the original hard cap
+    if (currency->WeekCap)
+        return currency->WeekCap;
+
+    PlayerCurrenciesMap::const_iterator itr = m_currencies.find(currency->ID);
+    if (itr != m_currencies.end())
+    {
+        if (itr->second.weekCap.empty())
+            return 0;
+
+        if (src == CURRENCY_SOURCE_ALL)
+        {
+            uint32 cap = 0;
+            for (CurrencySourceMap::const_iterator it = itr->second.weekCap.begin(); it != itr->second.weekCap.end(); ++it)
+                cap += it->second;
+
+            return cap;
+        }
+
+        CurrencySourceMap::const_iterator iter = itr->second.weekCap.find(src);
+        if (iter != itr->second.weekCap.end())
+            return iter->second;
+    }
+
+    return 0;
+}
+
+uint32 Player::GetCurrencyWeekCount(uint32 id, CurrencySource src)
+{
+    PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
+    if (itr != m_currencies.end())
+    {
+        if (itr->second.weekCount.empty())
+            return 0;
+
+        if (src == CURRENCY_SOURCE_ALL)
+        {
+            uint32 count = 0;
+            for (CurrencySourceMap::const_iterator it = itr->second.weekCount.begin(); it != itr->second.weekCount.end(); ++it)
+                count += it->second;
+
+            return count;
+        }
+
+        CurrencySourceMap::const_iterator iter = itr->second.weekCount.find(src);
+        if (iter != itr->second.weekCount.end())
+            return iter->second;
+    }
+
+    return 0;
+}
+
+void Player::SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap)
+{
+    uint32 oldCap = GetCurrencyWeekCap(id, src);
+    if (oldCap == cap)
+        return;
+
+    PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
+    if (itr != m_currencies.end())
+    {
+        itr->second.weekCap[src] = cap;
+        SendUpdateCurrencyWeekCap(id, cap);
+
+        if (itr->second.weekCount.find(src) == itr->second.weekCount.end())
+            itr->second.weekCount[src] = 0;
+
+        return;
+    }
+
+    // If the player don't have this type of currency yet, create a new record
+    PlayerCurrency cur;
+    cur.state = PLAYERCURRENCY_NEW;
+    cur.totalCount = 0;
+    m_currencies[id] = cur;
+    itr = m_currencies.find(id);
+
+    itr->second.weekCap[src] = cap;
+    itr->second.weekCount[src] = 0;
+
+    SendUpdateCurrencyWeekCap(id, cap);
+}
+
+void Player::SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count)
+{
+    PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
+    if (itr != m_currencies.end())
+    {
+        itr->second.weekCount[src] = count;
+
+        if (itr->second.weekCap.find(src) == itr->second.weekCap.end())
+            itr->second.weekCap[src] = 0;
+
+        return;
+    }
+
+    // If the player don't have this type of currency yet, create a new record
+    PlayerCurrency cur;
+    cur.state = PLAYERCURRENCY_NEW;
+    cur.totalCount = 0;
+    m_currencies[id] = cur;
+    itr = m_currencies.find(id);
+
+    itr->second.weekCount[src] = count;
+    itr->second.weekCap[src] = 0;
+}
+
+void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ignoreweekcap, bool ignorebonuses)
 {
     if (!count)
         return;
@@ -11488,14 +11597,13 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
         PlayerCurrency cur;
         cur.state = PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
-        cur.weekCount = 0;
         m_currencies[id] = cur;
         itr = m_currencies.find(id);
     }
     else
     {
         oldTotalCount = itr->second.totalCount;
-        oldWeekCount = itr->second.weekCount;
+        oldWeekCount = GetCurrencyWeekCount(id, src);
     }
 
     int32 newTotalCount = int32(oldTotalCount) + count * precision;
@@ -11506,8 +11614,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
     if (newWeekCount < 0)
         newWeekCount = 0;
 
-    uint32 weekCap = _GetCurrencyWeekCap(currency);
-    if (!ignoreweekcap && weekCap && int32(weekCap) < newWeekCount)
+    uint32 weekCap = GetCurrencyWeekCap(currency, src);
+    if (!ignoreweekcap && src != CURRENCY_SOURCE_ALL && weekCap && int32(weekCap) < newWeekCount)
     {
         int32 delta = newWeekCount - int32(weekCap);
         newWeekCount = int32(weekCap);
@@ -11523,8 +11631,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
             itr->second.state = PLAYERCURRENCY_CHANGED;
 
         itr->second.totalCount = newTotalCount;
-        if (!ignoreweekcap)
-            itr->second.weekCount = newWeekCount;
+        if (!ignoreweekcap && src != CURRENCY_SOURCE_ALL)
+            SetCurrencyWeekCount(id, src, newWeekCount);
 
         // probably excessive checks
         if (IsInWorld() && !GetSession()->PlayerLoading())
@@ -11559,32 +11667,18 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap, bool ign
 
 void Player::SetCurrency(uint32 id, uint32 count)
 {
-    ModifyCurrency(id, int32(count) - GetCurrency(id), true, true);
+    ModifyCurrency(id, int32(count) - GetCurrency(id), CURRENCY_SOURCE_ALL, true, true);
 }
 
-uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
+void Player::SendUpdateCurrencyWeekCap(uint32 id, uint32 cap)
 {
-    uint32 cap = currency->WeekCap;
-    switch (currency->ID)
-    {
-        case CURRENCY_TYPE_CONQUEST_POINTS:
-        {
-            cap = 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-            if (GetConquestPointCap())
-                cap = GetConquestPointCap() * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-            break;
-        }
-    }
-
-    if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
+    if (IsInWorld() && !GetSession()->PlayerLoading())
     {
         WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-        packet << uint32(cap / GetCurrencyPrecision(currency->ID));
-        packet << uint32(currency->ID);
+        packet << uint32(cap / GetCurrencyPrecision(id));
+        packet << uint32(id);
         GetSession()->SendPacket(&packet);
     }
-
-    return cap;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -15520,7 +15614,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     for (int i = 0; i < 4; i++)
     {
         if (pQuest->RewCurrencyId[i] && pQuest->RewCurrencyCount[i])
-            ModifyCurrency(pQuest->RewCurrencyId[i],pQuest->RewCurrencyCount[i]);
+            ModifyCurrency(pQuest->RewCurrencyId[i],pQuest->RewCurrencyCount[i],CURRENCY_SOURCE_OTHER);
     }
 
     RewardReputation(pQuest);
@@ -17331,14 +17425,6 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
     _LoadRatedBGData();
 
-    // Load conquest point cap.. little hack
-    QueryResult pCapQuery = CharacterDatabase.PQuery("SELECT MAX(conquest_point_cap) FROM character_arena_stats WHERE guid=%lu", GetGUID());
-    if (pCapQuery)
-    {
-        Field* pCapField = pCapQuery->Fetch();
-        SetConquestPointCap(pCapField[0].GetUInt32());
-    }
-
     MapEntry const * mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || !IsPositionValid())
     {
@@ -17662,8 +17748,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
         sLog->outError("Player %s(GUID: %u) has SpecCount = %u and ActiveSpec = %u.", GetName(), GetGUIDLow(), m_specsCount, m_activeSpec);
     }
 
-	_LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
-	_LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
+    _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
+    _LoadCurrencyWeekcap(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP));
+    _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
     _LoadTalentBranchSpecs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS));
     _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
     _LoadArchaeologyData();
@@ -18532,8 +18619,8 @@ void Player::_LoadWeeklyQuestStatus(PreparedQueryResult result)
 
 void Player::_LoadCurrency(PreparedQueryResult result)
 {
-    //         0         1      2
-    // "SELECT currency, count, thisweek FROM character_currency WHERE guid = '%u'"
+    //         0         1
+    // "SELECT currency, count FROM character_currency WHERE guid = '%u'"
 
     if (result)
     {
@@ -18543,17 +18630,15 @@ void Player::_LoadCurrency(PreparedQueryResult result)
 
             uint32 currency_id = fields[0].GetUInt16();
             uint32 totalCount = fields[1].GetUInt32();
-            uint32 weekCount = fields[2].GetUInt32();
 
             const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(currency_id);
             if (!entry)
             {
                 sLog->outError("Player::_LoadCurrency: %s has not existing currency %u, removing.", GetName(), currency_id);
                 CharacterDatabase.PExecute("DELETE FROM character_currency WHERE currency = '%u'", currency_id);
+                CharacterDatabase.PExecute("DELETE FROM character_currency_weekcap WHERE currency = '%u'", currency_id);
                 continue;
             }
-
-            uint32 weekCap = _GetCurrencyWeekCap(entry);
 
             PlayerCurrency cur;
 
@@ -18563,14 +18648,56 @@ void Player::_LoadCurrency(PreparedQueryResult result)
             if (entry->TotalCap > 0 && totalCount > entry->TotalCap)
                 cur.totalCount = entry->TotalCap;
 
-            cur.weekCount = weekCount;
-            if (weekCap > 0 && weekCount > weekCap)
-                cur.weekCount = weekCap;
-
             m_currencies[currency_id] = cur;
         }
         while(result->NextRow());
     }
+}
+
+void Player::_LoadCurrencyWeekcap(PreparedQueryResult result)
+{
+    //         0         1       2    3
+    // "SELECT currency, source, cap, thisweek FROM character_currency_weekcap WHERE guid = '%u'"
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 currency_id = fields[0].GetUInt16();
+            uint32 source = fields[1].GetUInt16();
+            uint32 weekCap = fields[2].GetUInt32();
+            uint32 weekCount = fields[3].GetUInt32();
+
+            PlayerCurrenciesMap::const_iterator itr = m_currencies.find(currency_id);
+            if (itr == m_currencies.end())
+            {
+                sLog->outError("Player::_LoadCurrencyWeekcap: failed to find currency %u for loading week cap for player %s! Skipping", currency_id, GetName());
+                continue;
+            }
+            if (source == 0 || source >= CURRENCY_SOURCE_MAX)
+            {
+                sLog->outError("Player::_LoadCurrencyWeekcap: currency %u of player %s has invalid source %u, skipping.", currency_id, GetName(), source);
+                continue;
+            }
+
+            // do not load zero values
+            if (weekCap == 0 && weekCount == 0)
+                continue;
+
+            SetCurrencyWeekCap(currency_id, (CurrencySource)source, weekCap);
+            SetCurrencyWeekCount(currency_id, (CurrencySource)source, weekCount);
+        }
+        while(result->NextRow());
+    }
+
+    // Some hardcoded default values, which has to be set as default!
+    if (GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) == 0)
+        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
+
+    if (GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) == 0)
+        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG, 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
 }
 
 void Player::_LoadArchaeologyData()
@@ -19403,6 +19530,7 @@ bool Player::CreateInDB()
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveGlyphs(trans);
     _SaveCurrency();
+    _SaveCurrencyWeekcap();
     _SaveArchaeologyData();
 
     // check if stats should only be saved on logout
@@ -19594,6 +19722,7 @@ void Player::SaveToDB()
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveGlyphs(trans);
     _SaveCurrency();
+    _SaveCurrencyWeekcap();
     _SaveArchaeologyData();
 
     // check if stats should only be saved on logout
@@ -20005,24 +20134,49 @@ void Player::_SaveSpells(SQLTransaction& trans)
 
 void Player::_SaveCurrency()
 {
-	for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end();)
-	{
-		if (itr->second.state == PLAYERCURRENCY_CHANGED)
-			CharacterDatabase.PExecute("UPDATE character_currency SET `count` = '%u', thisweek = '%u' WHERE guid = '%u' AND currency = '%u'",
-			itr->second.totalCount, itr->second.weekCount, GetGUIDLow(), itr->first);
-		else if (itr->second.state == PLAYERCURRENCY_NEW)
-			CharacterDatabase.PExecute("INSERT INTO character_currency (guid,currency,`count`,thisweek) VALUES ('%u','%u','%u','%u')",
-			GetGUIDLow(), itr->first, itr->second.totalCount, itr->second.weekCount);
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end();)
+    {
+        if (itr->second.state == PLAYERCURRENCY_CHANGED)
+            CharacterDatabase.PExecute("UPDATE character_currency SET `count` = '%u' WHERE guid = '%u' AND currency = '%u'",
+            itr->second.totalCount, GetGUIDLow(), itr->first);
+        else if (itr->second.state == PLAYERCURRENCY_NEW)
+            CharacterDatabase.PExecute("INSERT INTO character_currency (guid,currency,`count`) VALUES ('%u','%u','%u')",
+            GetGUIDLow(), itr->first, itr->second.totalCount);
 
-		if (itr->second.state == PLAYERCURRENCY_REMOVED)
-			m_currencies.erase(itr++);
-		else
-		{
-			itr->second.state = PLAYERCURRENCY_UNCHANGED;
-			++itr;
-		}
+        if (itr->second.state == PLAYERCURRENCY_REMOVED)
+            m_currencies.erase(itr++);
+        else
+        {
+            itr->second.state = PLAYERCURRENCY_UNCHANGED;
+            ++itr;
+        }
+    }
+}
 
-	}
+void Player::_SaveCurrencyWeekcap()
+{
+    uint32 guid = GetGUIDLow();
+    uint32 currency_id;
+    CurrencySource source;
+
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    {
+        if (itr->second.weekCap.empty() && itr->second.weekCount.empty())
+            continue;
+
+        currency_id = itr->first;
+
+        for (CurrencySourceMap::iterator csitr = itr->second.weekCap.begin(); csitr != itr->second.weekCap.end(); ++csitr)
+        {
+            source = csitr->first;
+
+            if (source == CURRENCY_SOURCE_ALL || source >= CURRENCY_SOURCE_MAX)
+                continue;
+
+            CharacterDatabase.PExecute("REPLACE INTO character_currency_weekcap VALUES ('%u','%u','%u','%u','%u');",
+                guid, currency_id, source, csitr->second, GetCurrencyWeekCount(currency_id, source));
+        }
+    }
 }
 
 void Player::_SaveArchaeologyData()
@@ -21859,7 +22013,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] / (float)GetCurrencyPrecision(iece->RequiredCurrency[i]))));
     }
 
-    ModifyCurrency(currency, crItem->maxcount ? crItem->maxcount : 1, true, true);
+    ModifyCurrency(currency, crItem->maxcount ? crItem->maxcount : 1, CURRENCY_SOURCE_ALL, true, true);
 
     return true;
 }
@@ -23549,9 +23703,15 @@ void Player::ResetWeeklyQuestStatus()
     m_weeklyquests.clear();
     // DB data deleted in caller
     m_WeeklyQuestChanged = false;
+}
 
-	for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
-		itr->second.weekCount = 0;                  // no need to change state here as sWorld resets currencies in DB
+void Player::ResetCurrencyWeekCount()
+{
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
+    {
+        for (CurrencySourceMap::iterator it = itr->second.weekCount.begin(); it != itr->second.weekCount.end(); ++it)
+            SetCurrencyWeekCount(itr->first, it->first, 0);
+    }
 }
 
 Battleground* Player::GetBattleground() const
@@ -25040,7 +25200,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
     {
         uint32 currencyId = abs(item->itemid);
         if (!item->is_looted)
-            ModifyCurrency(currencyId, item->count);
+            ModifyCurrency(currencyId, item->count, CURRENCY_SOURCE_OTHER);
 
         item->is_looted = true;
         --loot->unlootedCount;
@@ -26860,7 +27020,7 @@ void Player::RefundItem(Item *item)
         uint32 currid = iece->RequiredCurrency[i];
 
         if (count && currid)
-            ModifyCurrency(currid, count, true, true);
+            ModifyCurrency(currid, count, CURRENCY_SOURCE_ALL, true, true);
     }
 
     // Grant back money
@@ -27013,15 +27173,4 @@ void Player::BroadcastMessage(const char* Format, ...)
 	WorldPacket data;
     ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, Message, NULL);
 	GetSession()->SendPacket(&data);
-}
-
-uint16 Player::GetConquestPointsThisWeek()
-{
-    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
-    {
-        if (itr->first == CURRENCY_TYPE_CONQUEST_POINTS)
-            return (uint16)itr->second.weekCount / GetCurrencyPrecision(itr->first);
-    }
-
-    return 0;
 }
