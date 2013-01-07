@@ -212,11 +212,11 @@ enum ItemFlagsExtra
     ITEM_FLAGS_EXTRA_CAN_TRANSMOG            = 0x00800000,
 };
 
+// other cathegories are unlisted here, because we don't use them - these are directly from CurrencyCategory.dbc
 enum CurrencyCategory
 {
-    // ...
+    CURRENCY_CATEGORY_PVP           = 2,
     CURRENCY_CATEGORY_META_CONQUEST = 89,
-    // ...
 };
 
 enum VendorItemType

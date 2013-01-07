@@ -269,7 +269,7 @@ bool CharacterDatabaseConnection::Open()
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", true);
 
     // Currency
-    PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY, "SELECT currency, count FROM character_currency WHERE guid = ?");
+    PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY, "SELECT currency, count, thisseason FROM character_currency WHERE guid = ?");
     PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY_WEEKCAP, "SELECT currency, source, cap, thisweek FROM character_currency_weekcap WHERE guid = ?");
 
     return true;

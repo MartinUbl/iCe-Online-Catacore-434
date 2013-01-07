@@ -11112,14 +11112,14 @@ void Player::SendNewCurrency(uint32 id)
     packet.WriteBit(weekCount);
     packet.WriteBits(0, 4); // some flags
     packet.WriteBit(weekCap);
-    packet.WriteBit(0);     // season total earned
+    packet.WriteBit(entry->Category == CURRENCY_CATEGORY_PVP);     // season total earned
 
     currencyData << uint32(itr->second.totalCount / precision);
     if (weekCap)
         currencyData << uint32(weekCap);
 
-    //if (seasonTotal)
-    //    currencyData << uint32(seasonTotal);
+    if (entry->Category == CURRENCY_CATEGORY_PVP)
+        currencyData << uint32(itr->second.seasonCount / precision);
 
     currencyData << uint32(entry->ID);
     if (weekCount)
@@ -11153,14 +11153,14 @@ void Player::SendCurrencies()
         packet.WriteBit(weekCount);
         packet.WriteBits(0, 4); // some flags
         packet.WriteBit(weekCap);
-        packet.WriteBit(0);     // season total earned
+        packet.WriteBit(entry->Category == CURRENCY_CATEGORY_PVP);     // season total earned
 
         currencyData << uint32(itr->second.totalCount / precision);
         if (weekCap)
             currencyData << uint32(weekCap);
 
-        //if (seasonTotal)
-        //    currencyData << uint32(seasonTotal);
+        if (entry->Category == CURRENCY_CATEGORY_PVP)
+            currencyData << uint32(itr->second.seasonCount / precision);
 
         currencyData << uint32(entry->ID);
         if (weekCount)
@@ -11520,6 +11520,15 @@ uint32 Player::GetCurrencyWeekCount(uint32 id, CurrencySource src)
     return 0;
 }
 
+uint32 Player::GetCurrencySeasonCount(uint32 id)
+{
+    PlayerCurrenciesMap::const_iterator itr = m_currencies.find(id);
+    if (itr != m_currencies.end())
+        return itr->second.seasonCount;
+
+    return 0;
+}
+
 void Player::SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap)
 {
     uint32 oldCap = GetCurrencyWeekCap(id, src);
@@ -11589,6 +11598,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
 
     int32 precision = GetCurrencyPrecision(id);
+    int32 oldSeasonCount = 0;
     int32 oldTotalCount = 0;
     int32 oldWeekCount = 0;
     PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
@@ -11597,6 +11607,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         PlayerCurrency cur;
         cur.state = PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
+        cur.seasonCount = 0;
         m_currencies[id] = cur;
         itr = m_currencies.find(id);
     }
@@ -11604,11 +11615,17 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
     {
         oldTotalCount = itr->second.totalCount;
         oldWeekCount = GetCurrencyWeekCount(id, src);
+        oldSeasonCount = itr->second.seasonCount;
     }
 
     int32 newTotalCount = int32(oldTotalCount) + count * precision;
     if (newTotalCount < 0)
         newTotalCount = 0;
+
+    int32 newSeasonCount = int32(oldSeasonCount);
+    // only save season count in PvP currency cases
+    if (count > 0 && currency->Category == CURRENCY_CATEGORY_PVP)
+        newSeasonCount +=  count * precision;
 
     int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count * precision : 0);
     if (newWeekCount < 0)
@@ -11634,6 +11651,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         if (!ignoreweekcap && src != CURRENCY_SOURCE_ALL)
             SetCurrencyWeekCount(id, src, newWeekCount);
 
+        itr->second.seasonCount = newSeasonCount;
+
         // probably excessive checks
         if (IsInWorld() && !GetSession()->PlayerLoading())
         {
@@ -11650,10 +11669,11 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
             WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
             packet.WriteBit(weekCap != 0);
-            packet.WriteBit(0); // hasSeasonCount
+            packet.WriteBit(currency->Category == CURRENCY_CATEGORY_PVP); // hasSeasonCount
             packet.WriteBit(1); // print in log
 
-            // if hasSeasonCount packet << uint32(seasontotalearned); TODO: save this in character DB and use it
+            if (currency->Category == CURRENCY_CATEGORY_PVP)
+                packet << uint32(newSeasonCount / precision);
 
             packet << uint32(newTotalCount / precision);
             packet << uint32(id);
@@ -18619,8 +18639,8 @@ void Player::_LoadWeeklyQuestStatus(PreparedQueryResult result)
 
 void Player::_LoadCurrency(PreparedQueryResult result)
 {
-    //         0         1
-    // "SELECT currency, count FROM character_currency WHERE guid = '%u'"
+    //         0         1      2
+    // "SELECT currency, count, thisseason FROM character_currency WHERE guid = '%u'"
 
     if (result)
     {
@@ -18630,6 +18650,7 @@ void Player::_LoadCurrency(PreparedQueryResult result)
 
             uint32 currency_id = fields[0].GetUInt16();
             uint32 totalCount = fields[1].GetUInt32();
+            uint32 seasonCount = fields[2].GetUInt32();
 
             const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(currency_id);
             if (!entry)
@@ -18645,6 +18666,7 @@ void Player::_LoadCurrency(PreparedQueryResult result)
             cur.state = PLAYERCURRENCY_UNCHANGED;
 
             cur.totalCount = totalCount;
+            cur.seasonCount = seasonCount;
             if (entry->TotalCap > 0 && totalCount > entry->TotalCap)
                 cur.totalCount = entry->TotalCap;
 
@@ -20137,11 +20159,11 @@ void Player::_SaveCurrency()
     for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end();)
     {
         if (itr->second.state == PLAYERCURRENCY_CHANGED)
-            CharacterDatabase.PExecute("UPDATE character_currency SET `count` = '%u' WHERE guid = '%u' AND currency = '%u'",
-            itr->second.totalCount, GetGUIDLow(), itr->first);
+            CharacterDatabase.PExecute("UPDATE character_currency SET `count` = '%u', `thisseason` = '%u' WHERE guid = '%u' AND currency = '%u'",
+            itr->second.totalCount, itr->second.seasonCount, GetGUIDLow(), itr->first);
         else if (itr->second.state == PLAYERCURRENCY_NEW)
-            CharacterDatabase.PExecute("INSERT INTO character_currency (guid,currency,`count`) VALUES ('%u','%u','%u')",
-            GetGUIDLow(), itr->first, itr->second.totalCount);
+            CharacterDatabase.PExecute("INSERT INTO character_currency (guid,currency,`count`,`thisseason`) VALUES ('%u','%u','%u','%u')",
+            GetGUIDLow(), itr->first, itr->second.totalCount, itr->second.seasonCount);
 
         if (itr->second.state == PLAYERCURRENCY_REMOVED)
             m_currencies.erase(itr++);

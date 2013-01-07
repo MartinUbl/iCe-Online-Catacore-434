@@ -159,6 +159,7 @@ struct PlayerCurrency
 {
     PlayerCurrencyState state;
     uint32 totalCount;
+    uint32 seasonCount;
 
     CurrencySourceMap weekCap;
     CurrencySourceMap weekCount;
@@ -1329,6 +1330,7 @@ class Player : public Unit, public GridObject<Player>
             return 0;
         }
         uint32 GetCurrencyWeekCount(uint32 id, CurrencySource src);
+        uint32 GetCurrencySeasonCount(uint32 id);
         void SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap);
         void SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count);
         void ModifyCurrency(uint32 id, int32 count, CurrencySource src = CURRENCY_SOURCE_ALL, bool ignoreweekcap = false, bool ignorebonuses = false);
