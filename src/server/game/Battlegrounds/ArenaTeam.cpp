@@ -892,13 +892,7 @@ void ArenaTeam::UpdateMembersConquestPointCap()
         if (pSource && newcap != oldcap)
         {
             pSource->SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, newcap * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
-            if (pSource->IsInWorld() && !pSource->GetSession()->PlayerLoading())
-            {
-                WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-                packet << uint32(newcap);
-                packet << uint32(CURRENCY_TYPE_CONQUEST_POINTS);
-                pSource->GetSession()->SendPacket(&packet);
-            }
+            pSource->SendUpdateCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, newcap);
         }
         else
         {
