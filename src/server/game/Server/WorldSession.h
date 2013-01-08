@@ -871,6 +871,10 @@ class WorldSession
         void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
         void HandleOpeningCinematic(WorldPacket& recvData);
 
+        // Compact Unit Frames (4.x)
+        void HandleSaveCUFProfiles(WorldPacket& recvPacket);
+        void SendLoadCUFProfiles();
+
     private:
         void ProcessQueryCallbacks();
 

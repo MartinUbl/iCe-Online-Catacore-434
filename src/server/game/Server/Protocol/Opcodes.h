@@ -1463,7 +1463,7 @@ enum Opcodes
     SMSG_RATED_BATTLEFIELD_INFO                      = 0x054A3, // 4.3.4 Build 15595 (needs handled)
     SMSG_REFER_A_FRIEND_EXPIRED                      = 0x04934, // 4.3.4 Build 15595
     SMSG_REQUEST_CEMETERY_LIST_RESPONSE              = 0x030A7, // 4.3.4 Build 15595
-    SMSG_SAVE_CUF_PROFILES                           = 0x0730E, // 4.3.4 Build 15595
+    CMSG_SAVE_CUF_PROFILES                           = 0x0730E, // 4.3.4 Build 15595
     SMSG_SETUP_RESEARCH_HISTORY                      = 0x010B6, // 4.3.4 Build 15595
     SMSG_SET_PLAY_HOVER_ANIM                         = 0x030A6, // 4.3.4 Build 15595
     SMSG_SUSPEND_COMMS                               = 0x04140, // 4.3.4 Build 15595
@@ -1534,7 +1534,6 @@ enum Opcodes
     CMSG_REQUEST_RATED_BG_STATS                       = 0x05B3,
     CMSG_REQUEST_RESEARCH_HISTORY                     = 0x3306,
     CMSG_ROLE_POLL_BEGIN                              = 0x0430,
-    CMSG_SAVE_CUF_PROFILES                            = 0x730E,
     CMSG_SEND_SOR_REQUEST_VIA_ADDRESS                 = 0x0420,
     CMSG_SEND_SOR_REQUEST_VIA_BNET_ACCOUNT_ID         = 0x0482,
     CMSG_SET_CURRENCY_FLAGS                           = 0x7306,

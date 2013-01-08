@@ -1330,6 +1330,8 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_PERMISSIONS_QUERY_RESULTS,         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GUILD_SET_ACHIEVEMENT_TRACKING,          STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
     OPCODE( SMSG_UPDATE_CURRENCY,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_SAVE_CUF_PROFILES,                       STATUS_LOGGEDIN, &WorldSession::HandleSaveCUFProfiles           );
+    OPCODE( SMSG_LOAD_CUF_PROFILES,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

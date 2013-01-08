@@ -272,5 +272,10 @@ bool CharacterDatabaseConnection::Open()
     PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY, "SELECT currency, count, thisseason FROM character_currency WHERE guid = ?");
     PrepareStatement(CHAR_LOAD_PLAYER_CURRENCY_WEEKCAP, "SELECT currency, source, cap, thisweek FROM character_currency_weekcap WHERE guid = ?");
 
+    // CompactUnitFrame profiles
+    PrepareStatement(CHAR_SEL_CHAR_CUF_PROFILES, "SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = ?");
+    PrepareStatement(CHAR_REP_CHAR_CUF_PROFILES, "REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    PrepareStatement(CHAR_DEL_CHAR_CUF_PROFILES, "DELETE FROM character_cuf_profiles WHERE guid = ? and id = ?");
+
     return true;
 }

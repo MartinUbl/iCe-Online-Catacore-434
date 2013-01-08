@@ -23,6 +23,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <bitset>
 #include "Common.h"
 #include "ItemPrototype.h"
 #include "Unit.h"
@@ -182,6 +183,94 @@ typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
 typedef UNORDERED_MAP<uint32, PlayerSpell*> PlayerSpellMap;
 typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
 typedef std::list<SpellModifier*> SpellModList;
+
+/// Maximum number of CompactUnitFrames profiles
+#define MAX_CUF_PROFILES 5
+
+/// Bit index used in the many bool options of CompactUnitFrames
+enum CUFBoolOptions
+{
+    CUF_KEEP_GROUPS_TOGETHER,
+    CUF_DISPLAY_PETS,
+    CUF_DISPLAY_MAIN_TANK_AND_ASSIST,
+    CUF_DISPLAY_HEAL_PREDICTION,
+    CUF_DISPLAY_AGGRO_HIGHLIGHT,
+    CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS,
+    CUF_DISPLAY_POWER_BAR,
+    CUF_DISPLAY_BORDER,
+    CUF_USE_CLASS_COLORS,
+    CUF_DISPLAY_NON_BOSS_DEBUFFS,
+    CUF_DISPLAY_HORIZONTAL_GROUPS,
+    CUF_LOCKED,
+    CUF_SHOWN,
+    CUF_AUTO_ACTIVATE_2_PLAYERS,
+    CUF_AUTO_ACTIVATE_3_PLAYERS,
+    CUF_AUTO_ACTIVATE_5_PLAYERS,
+    CUF_AUTO_ACTIVATE_10_PLAYERS,
+    CUF_AUTO_ACTIVATE_15_PLAYERS,
+    CUF_AUTO_ACTIVATE_25_PLAYERS,
+    CUF_AUTO_ACTIVATE_40_PLAYERS,
+    CUF_AUTO_ACTIVATE_SPEC_1,
+    CUF_AUTO_ACTIVATE_SPEC_2,
+    CUF_AUTO_ACTIVATE_PVP,
+    CUF_AUTO_ACTIVATE_PVE,
+    CUF_UNK_145,
+    CUF_UNK_156,
+    CUF_UNK_157,
+
+    CUF_BOOL_OPTIONS_COUNT,
+};
+
+/// Represents a CompactUnitFrame profile
+struct CUFProfile
+{
+    CUFProfile() : ProfileName(), BoolOptions() // might want to change default value for options
+    {
+        FrameHeight = 0;
+        FrameWidth  = 0;
+        SortBy      = 0;
+        HealthText  = 0;
+        Unk146      = 0;
+        Unk147      = 0;
+        Unk148      = 0;
+        Unk150      = 0;
+        Unk152      = 0;
+        Unk154      = 0;
+    }
+
+    CUFProfile(const std::string& name, uint16 frameHeight, uint16 frameWidth, uint8 sortBy, uint8 healthText, uint32 boolOptions,
+        uint8 unk146, uint8 unk147, uint8 unk148, uint16 unk150, uint16 unk152, uint16 unk154)
+        : ProfileName(name), BoolOptions((int)boolOptions)
+    {
+        FrameHeight = frameHeight;
+        FrameWidth  = frameWidth;
+        SortBy      = sortBy;
+        HealthText  = healthText;
+        Unk146      = unk146;
+        Unk147      = unk147;
+        Unk148      = unk148;
+        Unk150      = unk150;
+        Unk152      = unk152;
+        Unk154      = unk154;
+    }
+
+    std::string ProfileName;
+    uint16 FrameHeight;
+    uint16 FrameWidth;
+    uint8 SortBy;
+    uint8 HealthText;
+
+    uint8 Unk146;
+    uint8 Unk147;
+    uint8 Unk148;
+    uint16 Unk150;
+    uint16 Unk152;
+    uint16 Unk154;
+
+    std::bitset<CUF_BOOL_OPTIONS_COUNT> BoolOptions;
+
+    // More fields can be added to BoolOptions without changing DB schema (up to 31, currently 24)
+};
 
 struct SpellCooldown
 {
@@ -850,7 +939,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADPETSLOT              = 31,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP    = 36,
-    MAX_PLAYER_LOGIN_QUERY                      = 37
+    PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES        = 37,
+    MAX_PLAYER_LOGIN_QUERY                      = 38
 };
 
 enum PlayerDelayedOperations
@@ -1551,6 +1641,17 @@ class Player : public Unit, public GridObject<Player>
 
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
+
+        void SaveCUFProfile(uint8 id, CUFProfile* profile) { delete _CUFProfiles[id]; _CUFProfiles[id] = profile; } ///> Replaces a CUF profile at position 0-4
+        CUFProfile* GetCUFProfile(uint8 id) const { return _CUFProfiles[id]; } ///> Retrieves a CUF profile at position 0-4
+        uint8 GetCUFProfilesCount() const
+        {
+            uint8 count = 0;
+            for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+                if (_CUFProfiles[i])
+                    ++count;
+            return count;
+        }
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -2738,6 +2839,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
         void _LoadCurrencyWeekcap(PreparedQueryResult result);
+        void _LoadCUFProfiles(PreparedQueryResult result);
         void _LoadArchaeologyData();
 
         /*********************************************************/
@@ -2762,6 +2864,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveCurrencyWeekcap();
         void _SaveStats(SQLTransaction& trans);
         void _SaveArchaeologyData();
+        void _SaveCUFProfiles(SQLTransaction& trans);
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/
@@ -2954,6 +3057,8 @@ class Player : public Unit, public GridObject<Player>
         DeclinedName *m_declinedname;
         Runes *m_runes;
         EquipmentSets m_EquipmentSets;
+
+        CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
     private:
         // internal common parts for CanStore/StoreItem functions
         uint8 _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem) const;
