@@ -1305,32 +1305,35 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
 
 bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float maxdist = dist2compare + sizefactor;
+    float dx, dy, dz, distsq;
 
-    if (m_transport && obj->GetTransport() &&  obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
+    /* add size of the objects themselves, resulting in real max distance */
+    dist2compare += GetObjectSize() + obj->GetObjectSize();
+
+    if (m_transport && obj->GetTransport() && obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
     {
-        float dtx = m_movementInfo.t_pos.m_positionX - obj->m_movementInfo.t_pos.m_positionX;
-        float dty = m_movementInfo.t_pos.m_positionY - obj->m_movementInfo.t_pos.m_positionY;
-        float disttsq = dtx * dtx + dty * dty;
+        dx = m_movementInfo.t_pos.m_positionX - obj->m_movementInfo.t_pos.m_positionX;
+        dy = m_movementInfo.t_pos.m_positionY - obj->m_movementInfo.t_pos.m_positionY;
+        distsq = dx * dx + dy * dy;
         if (is3D)
         {
-            float dtz = m_movementInfo.t_pos.m_positionZ - obj->m_movementInfo.t_pos.m_positionZ;
-            disttsq += dtz * dtz;
+            dz = m_movementInfo.t_pos.m_positionZ - obj->m_movementInfo.t_pos.m_positionZ;
+            distsq += dz * dz;
         }
-        return disttsq < (maxdist * maxdist);
     }
-
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
-    if (is3D)
+    else
     {
-        float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
+        dx = GetPositionX() - obj->GetPositionX();
+        dy = GetPositionY() - obj->GetPositionY();
+        distsq = dx*dx + dy*dy;
+        if (is3D)
+        {
+            dz = GetPositionZ() - obj->GetPositionZ();
+            distsq += dz*dz;
+        }
     }
 
-    return distsq < maxdist * maxdist;
+    return distsq < dist2compare * dist2compare;
 }
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
