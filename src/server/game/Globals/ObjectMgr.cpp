@@ -285,6 +285,7 @@ ObjectMgr::ObjectMgr()
     m_guildId           = 1;
     m_arenaTeamId       = 1;
     m_auctionid         = 1;
+    m_hiGuildNewsId     = 1;
 }
 
 ObjectMgr::~ObjectMgr()
@@ -6501,6 +6502,10 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         m_auctionid = (*result)[0].GetUInt32()+1;
 
+    result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
+    if (result)
+        m_hiGuildNewsId = (*result)[0].GetUInt32()+1;
+
     result = CharacterDatabase.Query("SELECT MAX(id) FROM mail");
     if (result)
         m_mailid = (*result)[0].GetUInt32()+1;
@@ -6544,6 +6549,16 @@ uint32 ObjectMgr::GenerateAuctionID()
         ASSERT("Auction ids overflow!" && false);
     }
     return m_auctionid++;
+}
+
+uint32 ObjectMgr::GenerateGuildNewsID()
+{
+    if (m_hiGuildNewsId >= 0xFFFFFFFE)
+    {
+        sLog->outError("Guild news ids overflow!! Can't continue, shutting down server. ");
+        ASSERT("Guild news ids overflow!" && false);
+    }
+    return m_hiGuildNewsId++;
 }
 
 uint64 ObjectMgr::GenerateEquipmentSetGuid()

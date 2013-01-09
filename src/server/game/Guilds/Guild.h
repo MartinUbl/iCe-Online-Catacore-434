@@ -163,14 +163,27 @@ enum GuildEvents
 
 enum GuildNewsType
 {
+    GUILD_NEWS_MIN                  = 0,
     GUILD_NEWS_GUILD_ACHIEVEMENT    = 0x00,
     GUILD_NEWS_PLAYER_ACHIEVEMENT   = 0x01,
     GUILD_NEWS_BOSS_ENCOUNTER       = 0x02,
     GUILD_NEWS_ITEM_LOOT            = 0x03,
     GUILD_NEWS_ITEM_CRAFT           = 0x04,
     GUILD_NEWS_ITEM_PURCHASED       = 0x05,
-    GUILD_NEWS_GUILD_LEVEL          = 0x06
+    GUILD_NEWS_GUILD_LEVEL          = 0x06,
+    GUILD_NEWS_MAX                  = 7
 };
+
+struct GuildNewsEntry
+{
+    uint32 id;
+    GuildNewsType type;
+    uint32 date;
+    uint64 param;
+    uint64 guid;
+};
+
+typedef std::list<GuildNewsEntry> GuildNewsList;
 
 enum PetitionTurns
 {
@@ -820,6 +833,7 @@ protected:
     uint64 m_xp;
     uint64 m_nextLevelXP;
     uint64 m_todayXP;
+    GuildNewsList m_guildNews;
 
     EmblemInfo m_emblemInfo;
     uint32 m_accountsNumber;
