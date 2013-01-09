@@ -1902,7 +1902,7 @@ void Guild::UpdateMemberData(Player* plr, uint8 dataid, uint32 value)
             sLog->outError("Guild::UpdateMemberData: Called with incorrect DATAID %u (value %u)", dataid, value);
             break;
         }
-    }    
+    }
 }
 
 void Guild::SendUpdateRoster(WorldSession* session /*= NULL*/)
@@ -1926,7 +1926,7 @@ void Guild::OnPlayerStatusChange(Player* plr, uint32 flag, bool state)
         if(state)
             pMember->AddFlag(flag);
         else pMember->RemFlag(flag);
-    }    
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1937,7 +1937,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     // we are using item ID 3767 to stop sending roster due to lags
     if (session && session->GetPlayer() && session->GetPlayer()->GetItemCount(3767) > 0)
     {
-        WorldPacket data(SMSG_GUILD_ROSTER);
+        WorldPacket data(SMSG_GUILD_ROSTER, m_motd.length()+4+m_info.length()+8+8+8);
         data << m_motd;
         data << uint32(0);
         data << m_info;
@@ -1951,8 +1951,10 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         return;
     }
 
+    uint32 ranksSize = _GetRanksSize();
+
     // Guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4 + m_motd.length() + 1 + m_info.length() + 1 + 2 + 4 + 2 + _GetRanksSize() * 100), true);
+    WorldPacket data(SMSG_GUILD_ROSTER, (4 + m_motd.length() + 1 + m_info.length() + 1 + 2 + 4 + 2 + ranksSize * 100), true);
     data << m_motd;
     data << uint32(m_members.size());
 
@@ -2042,9 +2044,9 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     //else 
     //    BroadcastPacket(&data);
 
-    WorldPacket data7(SMSG_GUILD_RANK);
-    data7 << uint32(_GetRanksSize());
-    for(uint32 i = 0; i < _GetRanksSize(); i++)
+    WorldPacket data7(SMSG_GUILD_RANK, 4+(4+4+ 1 +4+8*4+8*4+4)*ranksSize);
+    data7 << uint32(ranksSize);
+    for(uint32 i = 0; i < ranksSize; i++)
     {
         data7 << uint32(i);
         data7 << uint32(i);
@@ -2076,7 +2078,7 @@ void Guild::UpdateGuildNews(WorldSession* session)
 
     uint32 count = m_guildNews.size();
 
-    ByteBuffer ids, types, dates, params, guids, unks;
+    ByteBuffer ids(4*count), types(4*count), dates(4*count), params(8*count), guids(8*count), unks(4*count);
 
     for (GuildNewsList::const_iterator itr = m_guildNews.begin(); itr != m_guildNews.end(); ++itr)
     {
@@ -2100,13 +2102,13 @@ void Guild::UpdateGuildNews(WorldSession* session)
      6 = guild level,         param = level
     */
 
-    WorldPacket data(SMSG_GUILD_NEWS_UPDATE);
+    WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 4+(5*4+2*8)*count);
     data << uint32(count);   //count
 
     // Unknown
     data.append(unks);
 
-    // Date and time, unknown for now (wierd structure)
+    // Date and time
     data.append(dates);
 
     // Player GUIDs
