@@ -111,6 +111,7 @@ void AuraApplication::_Remove()
     // update for out of range group members
     if (slot < MAX_AURAS)
     {
+        ClientUpdate(false);    // send last effect values first and then send remove
         GetTarget()->RemoveVisibleAura(slot);
         ClientUpdate(true);
     }
