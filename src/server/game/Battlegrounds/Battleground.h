@@ -607,6 +607,8 @@ class Battleground
         void RatedBattlegroundLost(Player *player);
         void RatedBattlegroundLostOffline(uint64 guid);
 
+        virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
+
     protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends Battleground
         void EndNow();

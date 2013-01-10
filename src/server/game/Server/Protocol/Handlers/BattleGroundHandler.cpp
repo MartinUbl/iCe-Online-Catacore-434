@@ -283,126 +283,93 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_data)
 {
-                                                            // empty opcode
     sLog->outDebug("WORLD: Recvd CMSG_BATTLEGROUND_PLAYER_POSITIONS Message");
 
     Battleground *bg = _player->GetBattleground();
     if (!bg)                                                 // can't be received if player not in battleground
         return;
 
-    switch(bg->GetTypeID(true))
+    uint32 acount = 0;
+    uint32 hcount = 0;
+    Player *aplr = NULL;
+    Player *hplr = NULL;
+
+    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_ALLIANCE))
     {
-        case BATTLEGROUND_WS: // Warsong Gulch
-            {
-                uint32 count1 = 0;                                  //always constant zero?
-                uint32 count2 = 0;                                  //count of next fields
-
-                Player *ali_plr = sObjectMgr->GetPlayer(((BattlegroundWS*)bg)->GetAllianceFlagPickerGUID());
-                if (ali_plr)
-                    ++count1;
-
-                Player *horde_plr = sObjectMgr->GetPlayer(((BattlegroundWS*)bg)->GetHordeFlagPickerGUID());
-                if (horde_plr)
-                    ++count2;
-
-                WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2), true);
-                data << count1;                                     // alliance flag holders count
-                data << count2;                                     // horde flag holders count
-                if (ali_plr)
-                {
-                    data << (float)ali_plr->GetPositionX();
-                    data << (float)ali_plr->GetPositionY();
-                    data << (uint64)ali_plr->GetGUID();
-                }
-                if (horde_plr)
-                {
-                    data << (float)horde_plr->GetPositionX();
-                    data << (float)horde_plr->GetPositionY();
-                    data << (uint64)horde_plr->GetGUID();
-                }
-
-                SendPacket(&data);
-            }
-            break;
-        case BATTLEGROUND_TP: // Twin Peaks (needs special implementation due to other class for it)
-            {
-                uint32 count1 = 0;                                  //always constant zero?
-                uint32 count2 = 0;                                  //count of next fields
-
-                Player *ali_plr = sObjectMgr->GetPlayer(((BattlegroundTP*)bg)->GetAllianceFlagPickerGUID());
-                if (ali_plr)
-                    ++count1;
-
-                Player *horde_plr = sObjectMgr->GetPlayer(((BattlegroundTP*)bg)->GetHordeFlagPickerGUID());
-                if (horde_plr)
-                    ++count2;
-
-                WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2), true);
-                data << count1;                                     // alliance flag holders count
-                data << count2;                                     // horde flag holders count
-                if (ali_plr)
-                {
-                    data << (float)ali_plr->GetPositionX();
-                    data << (float)ali_plr->GetPositionY();
-                    data << (uint64)ali_plr->GetGUID();
-                }
-                if (horde_plr)
-                {
-                    data << (float)horde_plr->GetPositionX();
-                    data << (float)horde_plr->GetPositionY();
-                    data << (uint64)horde_plr->GetGUID();
-                }
-
-                SendPacket(&data);
-            }
-            break;
-        case BATTLEGROUND_EY: // Eye of the Storm
-            {
-                uint32 count1 = 0;                                  //count of alliance pickers
-                uint32 count2 = 0;                                  //count of horde pickers
-
-                Player *plr = sObjectMgr->GetPlayer(((BattlegroundEY*)bg)->GetFlagPickerGUID());
-                if (plr)
-                {
-                    if (plr->GetTeam() == HORDE)
-                        count2++;
-                    else
-                        count1++;
-                }
-
-                WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2), true);
-                data << count1;                                     // alliance flag holders count
-                data << count2;                                     // horde flag holders count
-                if (count1)
-                {
-                    data << (float)plr->GetPositionX();
-                    data << (float)plr->GetPositionY();
-                    data << (uint64)plr->GetGUID();
-                }
-                if (count2)
-                {
-                    data << (float)plr->GetPositionX();
-                    data << (float)plr->GetPositionY();
-                    data << (uint64)plr->GetGUID();
-                }
-
-                SendPacket(&data);
-            }
-            break;
-        case BATTLEGROUND_AB: // Arathi Basin
-        case BATTLEGROUND_AV: // Alterac Valley
-            {
-                //for other BG types - send default
-                WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4));
-                data << uint32(0);
-                data << uint32(0);
-                SendPacket(&data);
-            }
-            break;
-        default:
-            //maybe it is sent also in arena - do nothing
-            break;
+        aplr = ObjectAccessor::FindPlayer(guid);
+        if (aplr)
+            ++acount;
     }
+
+    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_HORDE))
+    {
+        hplr = ObjectAccessor::FindPlayer(guid);
+        if (hplr)
+            ++hcount;
+    }
+
+    ObjectGuid aguid = aplr ? aplr->GetGUID() : 0;
+    ObjectGuid hguid = hplr ? hplr->GetGUID() : 0;
+
+    WorldPacket data(SMSG_BATTLEFIELD_PLAYER_POSITIONS);
+
+    data.WriteBits(acount, 22);
+    for (uint8 i = 0; i < acount; i++)
+    {
+        data.WriteBit(aguid[3]);
+        data.WriteBit(aguid[5]);
+        data.WriteBit(aguid[1]);
+        data.WriteBit(aguid[6]);
+        data.WriteBit(aguid[7]);
+        data.WriteBit(aguid[0]);
+        data.WriteBit(aguid[2]);
+        data.WriteBit(aguid[4]);
+    }
+
+    data.WriteBits(hcount, 22);
+    for (uint8 i = 0; i < hcount; i++)
+    {
+        data.WriteBit(hguid[6]);
+        data.WriteBit(hguid[5]);
+        data.WriteBit(hguid[4]);
+        data.WriteBit(hguid[7]);
+        data.WriteBit(hguid[2]);
+        data.WriteBit(hguid[1]);
+        data.WriteBit(hguid[0]);
+        data.WriteBit(hguid[3]);
+    }
+
+    data.FlushBits();
+
+    for (uint8 i = 0; i < hcount; i++)
+    {
+        data.WriteByteSeq(hguid[2]);
+        data.WriteByteSeq(hguid[1]);
+        data << float(hplr->GetPositionY());
+        data.WriteByteSeq(hguid[5]);
+        data.WriteByteSeq(hguid[4]);
+        data.WriteByteSeq(hguid[7]);
+        data.WriteByteSeq(hguid[0]);
+        data.WriteByteSeq(hguid[6]);
+        data.WriteByteSeq(hguid[3]);
+        data << float(hplr->GetPositionX());
+    }
+
+    for (uint8 i = 0; i < acount; i++)
+    {
+        data.WriteByteSeq(aguid[6]);
+        data << float(aplr->GetPositionX());
+        data.WriteByteSeq(aguid[5]);
+        data.WriteByteSeq(aguid[3]);
+        data << float(aplr->GetPositionY());
+        data.WriteByteSeq(aguid[1]);
+        data.WriteByteSeq(aguid[7]);
+        data.WriteByteSeq(aguid[0]);
+        data.WriteByteSeq(aguid[2]);
+        data.WriteByteSeq(aguid[4]);
+    }
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)

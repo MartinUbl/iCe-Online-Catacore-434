@@ -177,6 +177,12 @@ class BattlegroundWS : public Battleground
         /* BG Flags */
         uint64 GetAllianceFlagPickerGUID() const    { return m_FlagKeepers[BG_TEAM_ALLIANCE]; }
         uint64 GetHordeFlagPickerGUID() const       { return m_FlagKeepers[BG_TEAM_HORDE]; }
+        virtual uint64 GetFlagPickerGUID(int32 team = -1) const
+        {
+            if (team == BG_TEAM_ALLIANCE || team == BG_TEAM_HORDE)
+                return m_FlagKeepers[team];
+            return 0;
+        }
         void SetAllianceFlagPicker(uint64 guid)     { m_FlagKeepers[BG_TEAM_ALLIANCE] = guid; }
         void SetHordeFlagPicker(uint64 guid)        { m_FlagKeepers[BG_TEAM_HORDE] = guid; }
         bool IsAllianceFlagPickedup() const         { return m_FlagKeepers[BG_TEAM_ALLIANCE] != 0; }
