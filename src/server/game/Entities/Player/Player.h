@@ -154,7 +154,7 @@ enum CurrencySource
     CURRENCY_SOURCE_MAX
 };
 
-typedef UNORDERED_MAP<CurrencySource, uint32> CurrencySourceMap;
+typedef std::map<CurrencySource, uint32> CurrencySourceMap;
 
 struct PlayerCurrency
 {
