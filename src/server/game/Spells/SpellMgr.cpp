@@ -3902,6 +3902,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
         case 89299: case 92953: // Twilight Spit
+        case 97358: case 97357: // Gaping Wound
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
@@ -4747,7 +4748,7 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 96466: // Whispers of Hethiss
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             break;
         case 96560: // Word of Hethiss
              spellInfo->EffectRadiusIndex[0] = 13; // 10 yd
@@ -4764,12 +4765,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 97085:
             spellInfo->EffectRadiusIndex[0] = 13; // 10 yd
             break;
-        case 97357: // Gaping Wound
-        case 97358:
-            spellInfo->EffectRadiusIndex[0] = 28; // unlimited
-            spellInfo->EffectRadiusIndex[1] = 28; // unlimited
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
-            break;
         case 96335: // Zanzil's Graveyard Gas
         case 96434:
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
@@ -4782,6 +4777,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 97016: // Big Bad Voodoo
             spellInfo->EffectRadiusIndex[0] = 66; // 100 yd
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
         case 77569: // Release Aberration
             spellInfo->EffectRadiusIndex[0] = 12;
             break;
