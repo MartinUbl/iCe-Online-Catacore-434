@@ -4032,6 +4032,42 @@ class npc_areatrigger_completer: public CreatureScript
 };
 
 
+class npc_fac_race_changer : public CreatureScript
+{
+    public:
+        npc_fac_race_changer(): CreatureScript("npc_fac_race_changer") {}
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (!pPlayer->HasAtLoginFlag(AT_LOGIN_CHANGE_RACE))
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to change the race please.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+            if (!pPlayer->HasAtLoginFlag(AT_LOGIN_CHANGE_FACTION))
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to change the faction please.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+
+            pPlayer->SEND_GOSSIP_MENU(1,pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+        {
+            switch (uiAction)
+            {
+                case GOSSIP_ACTION_INFO_DEF+1:
+                    pPlayer->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
+                    ChatHandler(pPlayer).PSendSysMessage("After next login you'll have the icon to race change next to your character.");
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+2:
+                    pPlayer->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+                    ChatHandler(pPlayer).PSendSysMessage("After next login you'll have the icon to faction change next to your character.");
+                    break;
+            }
+
+            pPlayer->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4080,4 +4116,5 @@ void AddSC_npcs_special()
     new boss_event_jarmila_pet;
     new npc_odevzdavac;
     new npc_areatrigger_completer;
+    new npc_fac_race_changer;
 }
