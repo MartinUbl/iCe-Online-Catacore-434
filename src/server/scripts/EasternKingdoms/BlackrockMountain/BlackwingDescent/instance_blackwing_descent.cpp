@@ -129,11 +129,19 @@ public:
             switch (type)
             {
                 case DATA_MALORIAK_GUID:
+                    auiEncounter[1] = data;
+                    break;
                 case DATA_ATRAMEDES_GUID:
+                    auiEncounter[2] = data;
+                    break;
                 case DATA_CHIMAERON_GUID:
+                    auiEncounter[3] = data;
+                    break;
                 case DATA_DEFENSE_SYSTEM_GUID:
+                    auiEncounter[4] = data;
+                    break;
                 case DATA_MAGMAW_GUID:
-                    auiEncounter[type] = data;
+                    auiEncounter[5] = data;
                     break;
             }
             if (auiEncounter[1] == DONE
