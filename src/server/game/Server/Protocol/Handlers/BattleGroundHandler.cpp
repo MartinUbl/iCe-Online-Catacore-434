@@ -461,7 +461,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         return;
     }
 
-    Battleground *bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
+    Battleground *bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId == BATTLEGROUND_AA ? BATTLEGROUND_TYPE_NONE : bgTypeId);
 
     // bg template might and must be used in case of leaving queue, when instance is not created yet
     if (!bg && action == 0)
@@ -471,6 +471,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         sLog->outError("BattlegroundHandler: bg_template not found for type id %u.", bgTypeId);
         return;
     }
+    
+    if (bgTypeId == BATTLEGROUND_AA)
+        bgTypeId = bg->GetTypeID();
 
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
