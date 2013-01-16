@@ -7892,6 +7892,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     }
                 }
             }
+            // Acherus Deathcharger
+            else if (m_spellInfo->Id == 48778)
+            {
+                m_caster->CastSpell(m_caster, 50772, true); // Summon Unholy Mount Visual
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
