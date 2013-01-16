@@ -164,11 +164,11 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
     // check queue conditions
     if (joinAsGroup == 0)
     {
-        if (GetPlayer()->isUsingLfg())
+        if (_player->isUsingLfg())
         {
             // player is using dungeon finder or raid finder
             WorldPacket data;
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_LFG_CANT_USE_BATTLEGROUND);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_LFG_CANT_USE_BATTLEGROUND);
             GetPlayer()->GetSession()->SendPacket(&data);
             return;
         }
@@ -177,7 +177,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         if (!_player->CanJoinToBattleground())
         {
             WorldPacket data;
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -186,7 +186,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         {
             //player is already in random queue
             WorldPacket data;
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_RANDOM_BG);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_IN_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -195,7 +195,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         {
             //player is already in queue, can't start random queue
             WorldPacket data;
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_NON_RANDOM_BG);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_IN_NON_RANDOM_BG);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -211,7 +211,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         if (!_player->HasFreeBattlegroundQueueId())
         {
             WorldPacket data;
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -258,9 +258,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
             WorldPacket data;
 
-            if (err != 1)
+            if (err != ERR_BATTLEGROUND_NONE)
             {
-                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, err);
                 member->GetSession()->SendPacket(&data);
                 continue;
             }
@@ -270,8 +270,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
 
             // send status packet (in queue)
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, ginfo->JoinTime, ginfo->ArenaType);
-            member->GetSession()->SendPacket(&data);
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
             member->GetSession()->SendPacket(&data);
             sLog->outDebug("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,member->GetGUIDLow(), member->GetName());
         }
@@ -761,7 +759,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
     if (!bracketEntry)
         return;
 
-    GroupJoinBattlegroundResult err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
+    GroupJoinBattlegroundResult err = ERR_BATTLEGROUND_NONE;
 
     if (!asGroup)
     {
@@ -810,7 +808,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
     {
         uint32 avgTime = 0;
 
-        if (err > 0)
+        if (err == ERR_BATTLEGROUND_NONE)
         {
             sLog->outDebug("Battleground: arena join as group start");
             if (isRated)
@@ -833,9 +831,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
 
             WorldPacket data;
 
-            if (err <= 0)
+            if (err != ERR_BATTLEGROUND_NONE)
             {
-                sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+                sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, err);
                 member->GetSession()->SendPacket(&data);
                 continue;
             }
@@ -845,8 +843,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
 
             // send status packet (in queue)
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype);
-            member->GetSession()->SendPacket(&data);
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
             member->GetSession()->SendPacket(&data);
             sLog->outDebug("Battleground: player joined queue for arena as group bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,member->GetGUIDLow(), member->GetName());
         }
@@ -976,7 +972,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
     uint32 avgTime = 0;
     uint32 avgRating = 0;
 
-    if (err > 0)
+    if (err != ERR_BATTLEGROUND_NONE)
     {
         avgRating = group->GetAverageBattlegroundRating();
         GroupQueueInfo *groupQueueInfo = queue.AddGroup(_player, group, bgTypeId, bracketEntry, arenaType, true, true, avgRating, avgRating);
@@ -991,9 +987,9 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
 
         WorldPacket data;
 
-        if (err <= 0)
+        if (err != ERR_BATTLEGROUND_NONE)
         {
-            sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
+            sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, _player, 0, err);
             member->GetSession()->SendPacket(&data);
             continue;
         }
@@ -1003,8 +999,6 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
 
         // send status packet (in queue)
         sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenaType);
-        member->GetSession()->SendPacket(&data);
-        sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
         member->GetSession()->SendPacket(&data);
         sLog->outDebug("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s", queueTypeId, bgTypeId, member->GetGUIDLow(), member->GetName());
     }

@@ -648,15 +648,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     *data << uint8(0); // unk
 }
 
-void BattlegroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket *data, GroupJoinBattlegroundResult result)
-{
-    data->Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
-    *data << uint32(-1);                                   // QueueSlot
-    *data << uint32(result);
-    *data << uint64(0);                                    // player guid
-    *data << uint64(0);                                    // unk, could be bg guid, but it wasnt checked
-}
-
 void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket *data, Battleground *bg, Player *pPlayer, uint8 QueueSlot, GroupJoinBattlegroundResult result)
 {
     ObjectGuid guidBytes1 = pPlayer ? pPlayer->GetGUID() : 0; // player who caused the error
