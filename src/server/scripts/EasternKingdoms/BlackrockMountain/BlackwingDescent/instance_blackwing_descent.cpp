@@ -118,7 +118,7 @@ public:
                 case DATA_CHIMAERON_GUID:               return ChimaeronGUID;
                 case DATA_MAGMAW_GUID:                  return MagmawGUID;
                 case DATA_DEFENSE_SYSTEM_GUID:          return OmnotronDefenceMatrixGUID;
-                case DATA_NEFARIAN1:                    return Nefarian2GUID;
+                case DATA_NEFARIAN1:                    return Nefarian1GUID;
                 case DATA_NEFARIAN2:                    return Nefarian2GUID;
             }
             return 0;
@@ -129,19 +129,11 @@ public:
             switch (type)
             {
                 case DATA_MALORIAK_GUID:
-                    auiEncounter[1] = data;
-                    break;
                 case DATA_ATRAMEDES_GUID:
-                    auiEncounter[2] = data;
-                    break;
                 case DATA_CHIMAERON_GUID:
-                    auiEncounter[3] = data;
-                    break;
                 case DATA_DEFENSE_SYSTEM_GUID:
-                    auiEncounter[4] = data;
-                    break;
                 case DATA_MAGMAW_GUID:
-                    auiEncounter[5] = data;
+                    auiEncounter[type] = data;
                     break;
             }
             if (auiEncounter[1] == DONE
@@ -169,7 +161,10 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            return 0;
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
         }
 
        std::string GetSaveData()
