@@ -250,7 +250,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteBit(bgGuid[3]);
             data->WriteBit(playerGuid[2]);
             data->WriteBit(1);                          // Eligible In Queue
-            data->WriteBit(0);                          // Join Failed, 1 when it's arena ...
+            data->WriteBit(bg->isRated());
             data->WriteBit(bgGuid[2]);
             data->WriteBit(playerGuid[1]);
             data->WriteBit(bgGuid[0]);
@@ -279,7 +279,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint8(0);                          // unk
             data->WriteByteSeq(bgGuid[4]);
             data->WriteByteSeq(playerGuid[2]);
-            *data << uint8(0);                          // unk
+            *data << uint8(bg->isArena() && bg->isRated() ? arenatype : 0);                // non-zero on rated arenas (team size)
             data->WriteByteSeq(bgGuid[6]);
             data->WriteByteSeq(playerGuid[7]);
             data->WriteByteSeq(bgGuid[3]);
@@ -308,7 +308,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint8(bg->GetMinLevel());          // Min Level
             *data << uint32(bg->isArena() ? arenatype : 1); // Player count, 1 for bgs, 2-3-5 for arena (2v2, 3v3, 5v5)
             *data << uint32(bg->GetMapId());            // Map Id
-            *data << uint8(0);                          // unk
+            *data << uint8(bg->isArena() && bg->isRated() ? arenatype : 0);                // non-zero on rated arenas (team size)
 
             data->WriteBit(playerGuid[5]);
             data->WriteBit(playerGuid[2]);
@@ -357,7 +357,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteBit(bgGuid[7]);
             data->WriteBit(bgGuid[1]);
             data->WriteBit(playerGuid[5]);
-            data->WriteBit(player->GetBGTeam() == TEAM_ALLIANCE);       // Battlefield Faction ( 0 horde, 1 alliance )
+            data->WriteBit(bg->isArena() && bg->GetStatus() == STATUS_IN_PROGRESS);       // show unit frames
             data->WriteBit(bgGuid[0]);
             data->WriteBit(playerGuid[1]);
             data->WriteBit(bgGuid[3]);
@@ -389,7 +389,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteByteSeq(playerGuid[1]);
 
             *data << uint32(QueueSlot);                 // Queue slot
-            *data << uint8(0);                          // unk
+            *data << uint8(bg->isArena() && bg->isRated() ? arenatype : 0);        // non-zero on rated arenas (team size)
             *data << uint32(bg->isArena() ? arenatype : 1); // Player count, 1 for bgs, 2-3-5 for arena (2v2, 3v3, 5v5)
             *data << uint32(bg->GetMapId());            // Map Id
             *data << uint8(bg->GetMinLevel());          // Min Level
