@@ -9428,6 +9428,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 56414: // Glyph of Dazing Shield
+            // only proc from Avenger's Shield
+            if (procSpell->Id != 31935)
+                return false;
+            break;
         // Soul Leech
         case 30293:     // rank 1
         case 30295:     // rank 2
