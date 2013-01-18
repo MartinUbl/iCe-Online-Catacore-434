@@ -12830,7 +12830,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                     else if (HasAura(77700))
                         bonusApp = 0.1f;
 
-                    if (Aura* pAura = pVictim->GetAura(77661))
+                    if (Aura* pAura = pVictim->GetAura(77661, GetGUID()))
                     {
                         DoneTotalMod += bonusApp * pAura->GetStackAmount();
                         pAura->Remove();
