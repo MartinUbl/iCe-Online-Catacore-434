@@ -61,6 +61,10 @@
 
 BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTesting(false)
 {
+    for(int type = 0; type < MAX_BATTLEGROUND_QUEUE_TYPES; type++)
+        for(uint8 tw = 0; tw < BATTLEGROUND_TWINK_TYPES; tw++)
+            m_BattlegroundQueues[type][tw].setTwink(tw);
+
     for (uint32 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; i++)
         m_Battlegrounds[i].clear();
     m_NextRatingDiscardUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
@@ -94,8 +98,9 @@ void BattlegroundMgr::DeleteAllBattlegrounds()
     for (uint32 bgTypeId = 0; bgTypeId < MAX_BATTLEGROUND_TYPE_ID; ++bgTypeId)
     {
         // ~Battleground call unregistring BG from queue
-        while (!BGFreeSlotQueue[bgTypeId].empty())
-            delete BGFreeSlotQueue[bgTypeId].front();
+        for(uint8 tw = 0; tw < BATTLEGROUND_TWINK_TYPES; tw++)
+            while (!BGFreeSlotQueue[bgTypeId][tw].empty())
+                delete BGFreeSlotQueue[bgTypeId][tw].front();
     }
 }
 
@@ -140,13 +145,14 @@ void BattlegroundMgr::Update(uint32 diff)
 
         for (uint8 i = 0; i < scheduled.size(); i++)
         {
-            uint32 arenaMMRating = scheduled[i] >> 32;
-            uint8 arenaType = scheduled[i] >> 24 & 255;
+            uint32 arenaMMRating = (scheduled[i] >> 32) & 0x00FFFFFF;
+            uint8 arenaType = (scheduled[i] >> 24) & 255;
             BattlegroundQueueTypeId bgQueueTypeId = BattlegroundQueueTypeId(scheduled[i] >> 16 & 255);
             BattlegroundTypeId bgTypeId = BattlegroundTypeId((scheduled[i] >> 8) & 255);
             BattlegroundBracketId bracket_id = BattlegroundBracketId(scheduled[i] & 255);
             bool isRated = (arenaMMRating > 0) || (bgTypeId == BATTLEGROUND_RA_BG_10) || (bgTypeId == BATTLEGROUND_RA_BG_15);
-            m_BattlegroundQueues[bgQueueTypeId].Update(bgTypeId, bracket_id, arenaType, isRated, arenaMMRating);
+            uint8 twink = (scheduled[i] >> 56) & 0xFF;
+            m_BattlegroundQueues[bgQueueTypeId][twink].Update(bgTypeId, bracket_id, arenaType, isRated, arenaMMRating);
         }
     }
 
@@ -160,9 +166,10 @@ void BattlegroundMgr::Update(uint32 diff)
             sLog->outDebug("BattlegroundMgr: UPDATING ARENA QUEUES");
             for (int qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
                 for (int bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
-                    m_BattlegroundQueues[qtype].Update(
-                        BATTLEGROUND_AA, BattlegroundBracketId(bracket),
-                        BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId(qtype)), true, 0);
+                    for(int tw = 0; tw < BATTLEGROUND_TWINK_TYPES; tw++)
+                        m_BattlegroundQueues[qtype][tw].Update(
+                            BATTLEGROUND_AA, BattlegroundBracketId(bracket),
+                            BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId(qtype)), true, 0);
 
             m_NextRatingDiscardUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
         }
@@ -1490,11 +1497,11 @@ void BattlegroundMgr::SetHolidayWeekends(uint32 mask)
     }
 }
 
-void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
+void BattlegroundMgr::ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id, uint8 twink)
 {
     //This method must be atomic, TODO add mutex
     //we will use only 1 number created of bgTypeId and bracket_id
-    uint64 schedule_id = ((uint64)arenaMatchmakerRating << 32) | (arenaType << 24) | (bgQueueTypeId << 16) | (bgTypeId << 8) | bracket_id;
+    uint64 schedule_id = ((uint64)twink << 56) | ((uint64)(arenaMatchmakerRating & 0x00FFFFFF) << 32) | (arenaType << 24) | (bgQueueTypeId << 16) | (bgTypeId << 8) | bracket_id;
     bool found = false;
     for (uint8 i = 0; i < m_QueueUpdateScheduler.size(); i++)
     {

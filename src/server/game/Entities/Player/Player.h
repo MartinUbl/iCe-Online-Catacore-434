@@ -2328,6 +2328,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetBattlegroundId()  const                { return m_bgData.bgInstanceID; }
         BattlegroundTypeId GetBattlegroundTypeId() const { return m_bgData.bgTypeID; }
         Battleground* GetBattleground() const;
+        uint8 GetTwinkType()        const;
 
         uint32 GetBattlegroundQueueJoinTime(uint32 bgTypeId) const { return m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second; }
         void AddBattlegroundQueueJoinTime(uint32 bgTypeId, uint32 joinTime)

@@ -2611,15 +2611,20 @@ public:
         {
             if (!pPlayer->HasEnoughMoney(EXP_COST))
                 pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
-            else if (noXPGain)
+            // allow only if the player is not in the battleground queue
+            // TODO: remove the player from the queues instead of this check
+            else if (!pPlayer->InBattlegroundQueue())
             {
-                pPlayer->ModifyMoney(-EXP_COST);
-                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
-            }
-            else if (!noXPGain)
-            {
-                pPlayer->ModifyMoney(-EXP_COST);
-                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                if (noXPGain)
+                {
+                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                }
+                else if (!noXPGain)
+                {
+                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                }
             }
         }
         pPlayer->PlayerTalkClass->CloseGossip();
