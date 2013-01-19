@@ -422,7 +422,7 @@ public:
                             for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                             {
                                 if (Player* pPlayer = itr->getSource())
-                                    if(pPlayer && pPlayer->ToPlayer() && pPlayer->isAlive())
+                                    if(pPlayer && pPlayer->ToPlayer() && pPlayer->isAlive() && pPlayer->IsInWorld())
                                     {
                                         pole[iter] = pPlayer; // zapisem si hracov do dynamickeho pola
                                         iter++;
