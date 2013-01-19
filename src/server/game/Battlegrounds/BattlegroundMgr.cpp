@@ -424,7 +424,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 
     if (isArena)
     {
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < 2; ++i)
         {
             uint32 at_id = bg->m_ArenaTeamIds[i];
             if (ArenaTeam* at = sObjectMgr->GetArenaTeamById(at_id))
@@ -618,7 +618,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     if (isRated)                                             // arena TODO : Fix Order on Rated Implementation
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < 2; ++i)
         {
             int32 rating_change = bg->m_ArenaTeamRatingChanges[i];
 
@@ -636,7 +636,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     data->append(buff);
 
     if (isArena)
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < 2; ++i)
             if (ArenaTeam* at = sObjectMgr->GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->WriteString(at->GetName());
 
