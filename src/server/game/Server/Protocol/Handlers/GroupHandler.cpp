@@ -1067,9 +1067,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
     data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
     data.append(player->GetPackGUID());
 
-    uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
-    if (pet)
-        mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
+    uint32 mask1 = GROUP_UPDATE_FULL;                              // common mask, real flags used 0x000040BFF
+    if (!pet)
+        mask1 &= ~GROUP_UPDATE_PET;                                // for hunters and other classes with pets
 
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;                                 // group update mask
@@ -1083,21 +1083,31 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
     data << (uint16) player->GetZoneId();                   // GROUP_UPDATE_FLAG_ZONE
     data << (uint16) player->GetPositionX();                // GROUP_UPDATE_FLAG_POSITION
     data << (uint16) player->GetPositionY();                // GROUP_UPDATE_FLAG_POSITION
+    data << (uint16) player->GetPositionZ();                // GROUP_UPDATE_FLAG_POSITION
 
     uint64 auramask = 0;
-    data << uint8(0); // if true client clears auras that are not covered by auramask
-    // TODO: looks like now client requires all active auras to be in the beginning of the auramask
-    // e.g. if you have holes in the aura mask the values after are ignored.
+    data << uint8(1);
     size_t maskPos = data.wpos();
     data << (uint64) auramask;                              // placeholder
-    data << uint32(64);  // how many bits client reads from auramask
+    data << uint32(MAX_AURAS);  // how many bits client reads from auramask
     for (uint8 i = 0; i < MAX_AURAS; ++i)
     {
         if (AuraApplication * aurApp = player->GetVisibleAura(i))
         {
             auramask |= (uint64(1) << i);
             data << (uint32) aurApp->GetBase()->GetId();
-            data << (uint8)  1;
+            data << (uint16) aurApp->GetFlags();
+
+            if (aurApp->GetFlags() & AFLAG_BASEPOINT)
+            {
+                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (AuraEffect const* eff = aurApp->GetBase()->GetEffect(i))
+                        data << int32(eff->GetAmount());
+                    else
+                        data << int32(0);
+                }
+            }
         }
     }
     data.put<uint64>(maskPos,auramask);                     // GROUP_UPDATE_FLAG_AURAS
@@ -1115,30 +1125,37 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
         data << (uint16) pet->GetMaxPower(petpowertype);    // GROUP_UPDATE_FLAG_PET_MAX_POWER
 
         uint64 petauramask = 0;
-        data << uint8(0); // if true client clears auras that are not covered by auramask
-        // TODO: looks like now client requires all active auras to be in the beginning of the auramask
-        // e.g. if you have holes in the aura mask the values after are ignored.
+        data << uint8(1);
         size_t petMaskPos = data.wpos();
         data << (uint64) petauramask;                       // placeholder
-        data << uint32(64);  // how many bits client reads from auramask
+        data << uint32(MAX_AURAS);                         // count
         for (uint8 i = 0; i < MAX_AURAS; ++i)
         {
             if (AuraApplication * auraApp = pet->GetVisibleAura(i))
             {
                 petauramask |= (uint64(1) << i);
                 data << (uint32) auraApp->GetBase()->GetId();
-                data << (uint8)  1;
+                data << uint16(auraApp->GetFlags());
+
+                if (auraApp->GetFlags() & AFLAG_BASEPOINT)
+                {
+                    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (AuraEffect const* eff = auraApp->GetBase()->GetEffect(i))
+                            data << int32(eff->GetAmount());
+                        else
+                            data << int32(0);
+                    }
+                }
             }
         }
         data.put<uint64>(petMaskPos,petauramask);           // GROUP_UPDATE_FLAG_PET_AURAS
     }
-    else
-    {
-        data << (uint8)  0;                                 // GROUP_UPDATE_FLAG_PET_NAME
-        data << (uint8) 0;                                    // GROUP_UPDATE_FLAG_PET_AURAS
-        data << (uint64) 0;                                 // GROUP_UPDATE_FLAG_PET_AURAS
-        data << (uint32) 0;
-    }
+
+    // GROUP_UPDATE_FLAG_PHASE
+    data << uint32(8); // either 0 or 8, same unk found in SMSG_PHASESHIFT
+    data << uint32(0); // count
+    // for (count) *data << uint16(phaseId)
 
     SendPacket(&data);
 }
