@@ -111,6 +111,8 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
         return true;
     }
 
+    sLog->outChar("petreset command from player %s, petSlotUsed value: %u", m_session->GetPlayer()->GetName(), m_session->GetPlayer()->m_petSlotUsed);
+
     PSendSysMessage("Reset hunter pet slotu...");
 
     // Nastavit specialni AT_LOGIN flagu pro reset currentPetSlot u hrace (nutne, nejde za behu)
