@@ -107,7 +107,7 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
 
     if(m_session->GetPlayer()->GetPet())
     {
-        PSendSysMessage("Nejdrive dismissnete sveho peta!");
+        PSendSysMessage("At first, dismiss your pet!");
         return true;
     }
 
@@ -116,18 +116,18 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
     ss << "petreset command from player " << m_session->GetPlayer()->GetName();
     ss << " , petSlotUsed value: " << m_session->GetPlayer()->m_petSlotUsed << "; ";
 
-    PSendSysMessage("Reset hunter pet slotu...");
+    PSendSysMessage("Hunter pet slot reset...");
 
     // Nastavit specialni AT_LOGIN flagu pro reset currentPetSlot u hrace (nutne, nejde za behu)
     m_session->GetPlayer()->SetAtLoginFlag(AT_LOGIN_RESET_PET_SLOT);
     m_session->GetPlayer()->m_petSlotUsed = 0;
-    PSendSysMessage("AT_LOGIN flag nastavena");
+    PSendSysMessage("AT_LOGIN flag set");
 
     // Vybrat vsechny pety
     QueryResult qr = CharacterDatabase.PQuery("SELECT id,name,slot FROM character_pet WHERE owner = %u",m_session->GetPlayer()->GetGUID());
     if(!qr)
     {
-        PSendSysMessage("Nemate zadneho peta, bude vam nejspis stacit jen relog. Pokud ne, kontaktujte spravce.");
+        PSendSysMessage("You don't have any pet, you'll probably need only relog.");
         return true;
     }
     std::map<uint32,std::string> PetEntrys;
@@ -142,11 +142,11 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
         fd = qr->Fetch();
     }
     sLog->outChar(ss.str().c_str());
-    PSendSysMessage("Nalezeno %u petu",uint32(PetEntrys.size()));
+    PSendSysMessage("%u pets found",uint32(PetEntrys.size()));
     // Pokud jsme nenasli zadneho peta, vratime se, protoze by proces zfailoval (begin == end)
     if(PetEntrys.size() < 1)
     {
-        PSendSysMessage("Nemate zadneho peta!");
+        PSendSysMessage("You don't have any pet!");
         return true;
     }
 
@@ -159,7 +159,7 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
         m_session->GetPlayer()->setPetSlotUsed((PetSlot)i,true);
         i++;
     }
-    PSendSysMessage("Proces hotov, pro projeveni zmen provedte relog.");
+    PSendSysMessage("Process OK, just perform a relog!");
     return true;
 }
 
