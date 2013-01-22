@@ -111,7 +111,10 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
         return true;
     }
 
-    sLog->outChar("petreset command from player %s, petSlotUsed value: %u", m_session->GetPlayer()->GetName(), m_session->GetPlayer()->m_petSlotUsed);
+    std::stringstream ss;
+
+    ss << "petreset command from player " << m_session->GetPlayer()->GetName();
+    ss << " , petSlotUsed value: " << m_session->GetPlayer()->m_petSlotUsed << "; ";
 
     PSendSysMessage("Reset hunter pet slotu...");
 
@@ -121,7 +124,7 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
     PSendSysMessage("AT_LOGIN flag nastavena");
 
     // Vybrat vsechny pety
-    QueryResult qr = CharacterDatabase.PQuery("SELECT id,name FROM character_pet WHERE owner = %u",m_session->GetPlayer()->GetGUID());
+    QueryResult qr = CharacterDatabase.PQuery("SELECT id,name,slot FROM character_pet WHERE owner = %u",m_session->GetPlayer()->GetGUID());
     if(!qr)
     {
         PSendSysMessage("Nemate zadneho peta, bude vam nejspis stacit jen relog. Pokud ne, kontaktujte spravce.");
@@ -133,10 +136,12 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
     while(fd)
     {
         PetEntrys[fd[0].GetUInt32()] = fd[1].GetCString();
+        ss << " pet id " << fd[0].GetUInt32() << ", slot " << fd[2].GetUInt32() << ", name " << fd[1].GetCString() << ";; ";
         if(!qr->NextRow())
             break;
         fd = qr->Fetch();
     }
+    sLog->outChar(ss.str().c_str());
     PSendSysMessage("Nalezeno %u petu",uint32(PetEntrys.size()));
     // Pokud jsme nenasli zadneho peta, vratime se, protoze by proces zfailoval (begin == end)
     if(PetEntrys.size() < 1)
