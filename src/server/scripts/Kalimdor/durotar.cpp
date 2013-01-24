@@ -24,7 +24,10 @@
 
 enum LazyPeonYells
 {
-    SAY_SPELL_HIT                                 = -1001900   //Ow! OK, I''ll get back to work, $N!'
+    SAY_SPELL_HIT                                  = -1000600,
+    SAY_SPELL_HIT2                                 = -1000601,
+    SAY_SPELL_HIT3                                 = -1000602,
+    SAY_SPELL_HIT4                                 = -1000603
 };
 
 enum LazyPeon
@@ -73,7 +76,7 @@ public:
                 && CAST_PLR(caster)->GetQuestStatus(QUEST_LAZY_PEONS) == QUEST_STATUS_INCOMPLETE)
             {
                 caster->ToPlayer()->KilledMonsterCredit(me->GetEntry(),me->GetGUID());
-                DoScriptText(SAY_SPELL_HIT, me, caster);
+                DoScriptText(RAND(SAY_SPELL_HIT,SAY_SPELL_HIT2,SAY_SPELL_HIT3,SAY_SPELL_HIT4), me, caster);
                 me->RemoveAllAuras();
                 if (GameObject* Lumberpile = me->FindNearestGameObject(GO_LUMBERPILE, 20))
                     me->GetMotionMaster()->MovePoint(1,Lumberpile->GetPositionX()-1,Lumberpile->GetPositionY(),Lumberpile->GetPositionZ());
@@ -87,7 +90,7 @@ public:
             if (m_uiRebuffTimer <= uiDiff)
             {
                 DoCast(me, SPELL_BUFF_SLEEP);
-                m_uiRebuffTimer = 300000;                 //Rebuff agian in 5 minutes
+                m_uiRebuffTimer = 600000;                 //Rebuff agian in 1 minutes
             }
             else
                 m_uiRebuffTimer -= uiDiff;
@@ -98,6 +101,14 @@ public:
     };
 
 };
+
+/*
+INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES (10556, -1000600, 'Ow! OK, I\'\'ll get back to work, $N!\'', '', '', '', '', '', '', '', '', 0, 0, 0, 0, '');
+INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES (10556, -1000601, 'OK boss, I get back to tree-hitting.', '', '', '', '', '', '', '', '', 0, 0, 0, 0, '');
+INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES (10556, -1000602, 'Just was resting eyes! Back to work now!', '', '', '', '', '', '', '', '', 0, 0, 0, 0, '');
+INSERT INTO `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES (10556, -1000603, 'Sleepy... so sleepy...', '', '', '', '', '', '', '', '', 0, 0, 0, 0, '');
+
+*/
 
 
 void AddSC_durotar()
