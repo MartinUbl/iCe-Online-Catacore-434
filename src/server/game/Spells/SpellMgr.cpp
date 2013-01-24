@@ -4792,6 +4792,10 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
+        case 96644: // Thousand Blades
+        case 96645:
+            spellInfo->EffectRadiusIndex[0] = 21; // 35 yd
+            break;
         default:
             break;
         }
