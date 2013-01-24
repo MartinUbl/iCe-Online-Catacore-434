@@ -272,15 +272,19 @@ public:
             {
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+
+                if (dmgInfo.GetDamage() != 0) // Mana Shield broken
+                    target->CastSpell(target, 86261, true); // Knockback to nearby enemies
             }
             else if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R2, EFFECT_0))
             {
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+
+                if (dmgInfo.GetDamage() != 0) // Mana Shield broken
+                    target->CastSpell(target, 86261, true); // Knockback to nearby enemies
             }
 
-            if (dmgInfo.GetDamage() != 0) // Mana Shield broken
-                target->CastSpell(target, 86261, true); // Knockback to nearby enemies
         }
 
         void Register()
