@@ -268,10 +268,72 @@ class spell_druid_pulverize : public SpellScriptLoader
         }
 };
 
+// Insect Swarm application proc Nature' grace
+class spell_druid_insect_swarm : public SpellScriptLoader
+{
+public:
+    spell_druid_insect_swarm() : SpellScriptLoader("spell_druid_insect_swarm") { }
+
+    class spell_druid_insect_swarm_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_druid_insect_swarm_AuraScript);
+
+        enum haste_buff
+        {
+            NATURES_GRACE_BUFF = 16886,
+            NATURES_GRACE_R1   = 16880,
+            NATURES_GRACE_R2   = 61345,
+            NATURES_GRACE_R3   = 61346,
+        };
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if(!GetCaster() || !GetCaster()->ToPlayer() || !GetTarget())
+                return;
+
+            Unit *caster = GetCaster();
+            int32 bp;
+
+            if(caster->ToPlayer()->HasSpellCooldown(16886))
+                return;
+
+            if(caster->HasAura(NATURES_GRACE_R1))
+            {
+                bp = 5;
+                caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+            }
+            else if(caster->HasAura(NATURES_GRACE_R2))
+            {
+                bp = 10;
+                caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+            }
+            else if(caster->HasAura(NATURES_GRACE_R3))
+            {
+                bp = 15;
+                caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_druid_insect_swarm_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_druid_insect_swarm_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_blood_in_water();
     new spell_druid_pulverize();
+    new spell_druid_insect_swarm();
 }
