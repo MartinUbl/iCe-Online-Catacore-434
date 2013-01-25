@@ -1497,6 +1497,12 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                         //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
                         m_caster->ModifyPower(POWER_ECLIPSE, bp0);
                     }
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886); // reset spell cooldown of Nature's Grace
+                    }
                 }
                 break;
             //Starfire
@@ -1512,15 +1518,41 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
-                        m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                    {
+                        // Doesn't work as intended, leave alone and modify manually
+                        //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    }
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) >= 100)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
                 }
                 break;
             //Starsurge
             case 78674:
                 if(EclipseLeft)
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE,-15);
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
+                }
                 else
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE, 15);
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) >= 100)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
+                }
                 break;
         }
     }
