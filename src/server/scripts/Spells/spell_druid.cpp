@@ -198,14 +198,17 @@ class spell_druid_pulverize : public SpellScriptLoader
                 LACERATE_DOT    = 33745,
             };
 
+            int32 stackAmount;
+
             bool Validate(SpellEntry const* /*spellEntry*/)
             {
-               return (sSpellStore.LookupEntry(PULVERIZE_BUFF));
+               return ( sSpellStore.LookupEntry(PULVERIZE_BUFF));
             }
 
             bool Load()
             {
                 _executed = false;
+                stackAmount = 0;
                 return (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getClass() == CLASS_DRUID);
             }
 
@@ -220,32 +223,17 @@ class spell_druid_pulverize : public SpellScriptLoader
                     if (Unit* unitTarget = GetHitUnit())
                         if (unitTarget->HasAura(LACERATE_DOT)) // Ak ma target dotku Lacerate
                         {
-                            int32 stackAmount = 0;
-
-                            // Musim prebehnut aura list a najst iba lacerate dotky ktore patria prislunemu druidovi
-                            Unit::AuraApplicationMap const& auras = unitTarget->GetAppliedAuras();
-                            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                            {
-                                Aura* aura = itr->second->GetBase();
-                                if(aura->GetCaster() != NULL && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER
-                                  && aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT)
-                                {
-                                    stackAmount = aura->GetStackAmount();
-                                    break;
-                                }
-                            }
-
                             int32 bp = stackAmount * 3;
                             caster->CastCustomSpell(caster, PULVERIZE_BUFF, &bp, 0, 0, true); // Dostane crtical buff podla poctu stakov
 
-                            //bp = (stackAmount * 361 ); // u mna na skyfire ten dmg nebol spravny takmer 10 x vacsi ... zatial TODO
-                            //caster->CastCustomSpell(caster, 31756, &bp, 0, 0, true);
-
                             //Remove lacerate stacks from target, only those which are bound with caster
+                            Unit::AuraApplicationMap const& auras = GetHitUnit()->GetAppliedAuras();
                             for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                             {
                                 Aura* aura = itr->second->GetBase();
-                                if (aura && aura->GetCaster() && aura->GetCaster()->ToPlayer() != NULL &&  aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT )
+
+                                if(aura->GetCaster() != NULL && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER
+                                  && aura->GetCaster()->ToPlayer() == caster && aura->GetId() == LACERATE_DOT)
                                 {
                                     aura->Remove();
                                     break;
@@ -254,9 +242,25 @@ class spell_druid_pulverize : public SpellScriptLoader
                         }
             }
 
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                Unit::AuraApplicationMap const& auras = GetHitUnit()->GetAppliedAuras();
+                for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                {
+                    Aura* aura = itr->second->GetBase();
+                    if (aura && aura->GetCaster() && aura->GetCaster()->ToPlayer() != NULL &&  aura->GetCaster()->ToPlayer() == GetCaster() && aura->GetId() == LACERATE_DOT )
+                    {
+                        stackAmount = aura->GetStackAmount();
+                        break;
+                    }
+                }
+                    SetHitDamage(GetHitDamage() + (stackAmount * 361)); // Original formula
+            }
+
             void Register()
             {
                 AfterHit += SpellHitFn(spell_druid_pulverize_SpellScript::HandleAfterHit);
+                OnEffect += SpellEffectFn(spell_druid_pulverize_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
             }
 
             bool _executed;
