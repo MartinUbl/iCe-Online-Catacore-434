@@ -6371,6 +6371,13 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 m_caster->RemoveAurasDueToSpell(81021); // Stampede buff rank 1
                 m_caster->RemoveAurasDueToSpell(81022); // Stampede buff rank 2
             }
+            else if (m_spellInfo->Id == 6785) // Ravage
+            {
+                if (m_caster->HasAura(48483)) // Infected Wounds (Rank 1)
+                    m_caster->CastSpell(unitTarget, 58179, true);
+                else if (m_caster->HasAura(48484)) // Infected Wounds (Rank 2)
+                    m_caster->CastSpell(unitTarget, 58180, true);
+            }
             break;
         }
         case SPELLFAMILY_HUNTER:
