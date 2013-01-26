@@ -3941,6 +3941,14 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
         if (aurApp->GetRemoveMode())
             return;
 
+        switch (form)
+        {
+            case FORM_FLIGHT:
+            case FORM_FLIGHT_EPIC:
+                target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNT);
+                break;
+        }
+
         target->SetShapeshiftForm(form);
     }
     else
