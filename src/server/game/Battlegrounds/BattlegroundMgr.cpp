@@ -225,8 +225,6 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteBit(playerGuid[5]);
             data->WriteBit(playerGuid[2]);
 
-            data->FlushBits();
-
             data->WriteByteSeq(playerGuid[5]);
             data->WriteByteSeq(playerGuid[6]);
             data->WriteByteSeq(playerGuid[7]);
@@ -714,7 +712,7 @@ void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket *data, Battleground *b
 
     data->WriteByteSeq(unkGuid3[2]);
 
-    *data << uint32(time(NULL));                // Time
+    *data << uint32(pPlayer->GetBattlegroundQueueJoinTime(bg->GetTypeID())); // Join Time
 
     data->WriteByteSeq(unkGuid3[5]);
 }
