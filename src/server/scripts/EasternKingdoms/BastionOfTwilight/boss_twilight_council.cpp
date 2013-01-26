@@ -2400,22 +2400,23 @@ public:
         {
             if(me->HasAura(92302)) // Ak uz mam model orbu -> mohlo by sa stat ze sa spawne orb pod hracom a hitne ho hned a to nechceme
             {
-                if(victim && victim->HasAura(92307)) // Odstranim hracovi marku
+                if (victim && victim->HasAura(92307)) // Odstranim hracovi marku
                     victim->RemoveAurasDueToSpell(92307);
-
-                if(typeOfDamage == DIRECT_DAMAGE)  // Ak ho dobehnem -> hitnem melee utokom
-                {
-                    me->CastSpell(me,92548,true); // Zacastim instant Glaciate
-                    me->SetReactState(REACT_PASSIVE);
-                    me->ForcedDespawn(2000);
-                }
-
             }
         }
 
 
         void UpdateAI(const uint32 diff)
         {
+
+            // toto by melo vyresit problem s padem, uvidime
+            if (me->getVictim() && me->GetDistance(me->getVictim()) <= 4.0f) // melee range
+            {
+                me->CastSpell(me, 92548, true); // Zacastim instant Glaciate
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->ForcedDespawn(2000);
+            }
+
             if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
             {
                 if(player->HasAura(82285)) // Ak ma na sebe hrac debuff Elemental Stasis -> nastala faza 3 cize despawnem sa
