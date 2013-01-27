@@ -5564,6 +5564,11 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_spellInfo->Id == 33836 && (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->ToPlayer()->isInFlight()))
         return SPELL_FAILED_NOT_HERE;
 
+    // Do not allow to use gameobject which was already used and is going to disappear on next update
+    GameObject *go = m_targets.getGOTarget();
+    if (go && go->GetGoType() == GAMEOBJECT_TYPE_GOOBER && go->getLootState() != GO_READY)
+        return SPELL_FAILED_CHEST_IN_USE;
+
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
