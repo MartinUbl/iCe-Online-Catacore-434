@@ -739,10 +739,11 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand banankyCommandTable[] = // Bananky Command
     {
-        { "add",            SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandAdd>, "", NULL },
-        { "list",           SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandList>, "", NULL },
-        { "blist",          SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandBlist>, "", NULL },
-        { NULL,             0,                  false, NULL,                                                "", NULL }
+        { "add",            SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandAdd>,    "",  NULL },
+        { "list",           SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandList>,   "",  NULL },
+        { "blist",          SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandBlist>,  "",  NULL },
+        { "modify",         SEC_MODERATOR,      true, OldHandler<&ChatHandler::HandleBanankyCommandModify>, "",  NULL },
+        { NULL,             0,                  false, NULL,                                                "",  NULL }
     };
 
     static ChatCommand commandTable[] =

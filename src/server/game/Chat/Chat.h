@@ -625,6 +625,7 @@ class ChatHandler
         bool HandleBanankyCommandAdd(const char* args);
         bool HandleBanankyCommandList(const char* args);
         bool HandleBanankyCommandBlist(const char* args);
+        bool HandleBanankyCommandModify(const char* args);
 
         // GM ticket command handlers
         bool HandleGMTicketListCommand(const char* args);
