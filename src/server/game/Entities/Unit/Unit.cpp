@@ -6002,6 +6002,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     int32 bp0 = damage * triggeredByAura->GetAmount() / 100.0f;
                     CastCustomSpell(this, 91394, &bp0, 0, 0, true);
                 }
+                //TODO On 4.3.4  healing reduction increase by 8,16,25 % from 3,7,10 %
+
+                if (HasAura(11175)) // Permafrost (Rank 1)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -3, pVictim, true);
+                else if (HasAura(12569)) // Permafrost (Rank 2)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -7, pVictim, true);
+                else if (HasAura(12571)) // Permafrost (Rank 3)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -10, pVictim, true); 
             }
         //UPDATE `spell_proc_event` SET SpellFamilyMask0=4194323 WHERE entry IN (44445,44446,44448);
             // Hot Streak
