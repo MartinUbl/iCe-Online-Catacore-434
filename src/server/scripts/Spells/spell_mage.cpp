@@ -621,6 +621,73 @@ public:
     }
 };
 
+class spell_mage_invocation : public SpellScriptLoader
+{
+public:
+    spell_mage_invocation() : SpellScriptLoader("spell_mage_invocation") { }
+
+    class spell_mage_invocation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_invocation_SpellScript);
+
+        Player *caster;
+        bool success;
+
+        enum talents
+        {
+            INVOCATION_RANK1 = 84722,
+            INVOCATION_RANK2 = 84723,
+            INVOCATION_BUFF  = 87098,
+        };
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+
+            caster = GetCaster()->ToPlayer();
+            return true;
+        }
+
+        void HandleInvocation(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            success = false;
+
+            if(GetHitUnit()->hasUnitState(UNIT_STAT_CASTING))
+                success = true;
+        }
+
+        void HandleInterrupt(void)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if(success)
+            {
+                if(caster->HasAura(INVOCATION_RANK1))
+                    caster->CastCustomSpell(INVOCATION_BUFF, SPELLVALUE_BASE_POINT0, 5, caster, true);// 5 % dmg boost
+
+                else if(caster->HasAura(INVOCATION_RANK2))
+                    caster->CastCustomSpell(INVOCATION_BUFF, SPELLVALUE_BASE_POINT0, 10, caster, true);// 10 % dmg boost
+            }
+        }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_invocation_SpellScript::HandleInvocation, EFFECT_0, SPELL_EFFECT_INTERRUPT_CAST);
+                AfterHit += SpellHitFn(spell_mage_invocation_SpellScript::HandleInterrupt);
+            }
+        };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_invocation_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
@@ -631,4 +698,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_cauterize();
     new spell_mage_impact();
     new spell_mage_blizzard();
+    new spell_mage_invocation();
 }
