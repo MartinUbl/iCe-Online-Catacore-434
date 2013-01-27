@@ -12122,6 +12122,16 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
     if (crit_bonus > 0)
         damage += crit_bonus;
 
+    if (spellProto && spellProto->Id == 116 &&  HasAura(83156)) // Piercing Chill rank 1
+    {
+        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS,1, pVictim, true);// Piercing chill to one additional target
+    }
+
+    if (spellProto && spellProto->Id == 116 &&  HasAura(83157)) // Piercing Chill rank 2
+    {
+        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS, 2 , pVictim, true); // Piercing chill to 2 additional target
+    }
+
     return damage;
 }
 

@@ -4738,6 +4738,10 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             break;
+        case 83154: // Piercing Chill
+            spellInfo->EffectRadiusIndex[0] = 9; // 20 yd
+            spellInfo->EffectRadiusIndex[1] = 9; // 20 yd
+            break;
         default:
             break;
         }
