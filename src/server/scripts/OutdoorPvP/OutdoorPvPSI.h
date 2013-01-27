@@ -44,7 +44,6 @@ const uint32 SI_TURNIN_QUEST_CM_A = 17090;
 const uint32 SI_TURNIN_QUEST_CM_H = 18199;
 
 const uint32 SI_SILITHYST_MOUND = 181597;
-const uint32 SI_SILITHYST_GEYSER = 181598;
 
 enum SI_WorldStates
 {

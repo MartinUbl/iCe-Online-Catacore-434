@@ -245,7 +245,7 @@ bool OutdoorPvPSI::HandleCustomSpell(Player *plr, uint32 spellId, GameObject *go
     if (plr->IsMounted() || plr->IsMountedShape())
         plr->Unmount();
 
-    if (go->GetGOInfo()->id == SI_SILITHYST_MOUND || go->GetGOInfo()->id == SI_SILITHYST_GEYSER)
+    if (go->GetGOInfo()->id == SI_SILITHYST_MOUND)
     {
         // despawn go
         go->SetRespawnTime(0);
