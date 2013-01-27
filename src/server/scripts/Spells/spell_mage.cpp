@@ -188,7 +188,7 @@ class spell_mage_incanters_absorbtion_absorb : public SpellScriptLoader
 public:
     spell_mage_incanters_absorbtion_absorb() : SpellScriptLoader("spell_mage_incanters_absorbtion_absorb") { }
 
-    class spell_mage_incanters_absorbtion_absorb_AuraScript : public AuraScript
+class spell_mage_incanters_absorbtion_absorb_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_mage_incanters_absorbtion_absorb_AuraScript);
 
@@ -225,9 +225,21 @@ public:
             }
         }
 
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if(!GetOwner() || !GetOwner()->ToPlayer() || !GetOwner()->ToPlayer()->HasAura(11094) ) // Molten shields talent
+                return;
+
+            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+            {
+                GetOwner()->ToPlayer()->CastSpell(GetOwner()->ToPlayer(),31643,true); // Blazing speed
+            }
+        }
+
         void Register()
         {
              AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_incanters_absorbtion_absorb_AuraScript::Trigger, EFFECT_0);
+             OnEffectRemove += AuraEffectRemoveFn(spell_mage_incanters_absorbtion_absorb_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -236,7 +248,6 @@ public:
         return new spell_mage_incanters_absorbtion_absorb_AuraScript();
     }
 };
-
 // Incanter's Absorption (Mana Shield)
 class spell_mage_incanters_absorbtion_manashield : public SpellScriptLoader
 {
