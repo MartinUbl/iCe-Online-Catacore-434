@@ -446,6 +446,8 @@ public:
             me->CastSpell(me,MORTALITY_HEALING_DEBUFF,true);
             me->CastSpell(me,MORTALITY_BOSS_BUFF,true);
             me->SetReactState(REACT_AGGRESSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->InterruptNonMeleeSpells(false);
             if( IsHeroic())
             {
