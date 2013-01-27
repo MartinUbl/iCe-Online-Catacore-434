@@ -541,6 +541,86 @@ public:
     }
 };
 
+// Blizzard
+class spell_mage_blizzard : public SpellScriptLoader
+{
+public:
+    spell_mage_blizzard() : SpellScriptLoader("spell_mage_blizzard") { }
+
+    class spell_mage_blizzard_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_blizzard_SpellScript);
+
+        Player *caster;
+
+        enum spells
+        {
+            // Talents
+            ICE_SHARDS_R1 = 11185,
+            ICE_SHARDS_R2 = 12487,
+            // Chill effects
+            CHILLED_R1 = 12484,
+            CHILLED_R2 = 12485,
+        };
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+
+            caster = GetCaster()->ToPlayer();
+            return true;
+        }
+
+        void HandleBlizzard(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if(caster->HasAura(11175)) // Permafrost (Rank 1)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -3, GetHitUnit(), true); // - 3% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -3, GetHitUnit(), true); // - 3% healing
+            }
+
+            else if(caster->HasAura(12569)) // Permafrost (Rank 2)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -7, GetHitUnit(), true); // - 7% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -7, GetHitUnit(), true); // - 7% healing
+            }
+
+            else if(caster->HasAura(12571)) // Permafrost (Rank 3)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -10, GetHitUnit(), true); // - 10% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -10, GetHitUnit(), true); // - 10% healing
+            }
+            else // Don't have talent Permafrost -> regular chill effect without healing reduction
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastSpell(GetHitUnit(),CHILLED_R1,true);
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastSpell(GetHitUnit(),CHILLED_R2,true);
+            }
+        }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_blizzard_SpellScript::HandleBlizzard, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_blizzard_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
@@ -550,4 +630,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_polymorph_cast_visual;
     new spell_mage_cauterize();
     new spell_mage_impact();
+    new spell_mage_blizzard();
 }
