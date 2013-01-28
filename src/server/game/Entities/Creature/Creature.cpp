@@ -451,6 +451,17 @@ void Creature::Update(uint32 diff)
         AI()->JustRespawned();
     }
 
+    if (IsInWater())
+    {
+        if (canSwim())
+            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+    else
+    {
+        if (canWalk())
+            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+
     switch(m_deathState)
     {
         case JUST_ALIVED:
