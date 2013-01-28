@@ -398,10 +398,11 @@ public:
             int32 aura_duration;
             int32 aura_per_timer;
             uint8 auraEff_id;
+            uint32 aura_bp;
             struct auraRecord *next;
-        } DOT;
+        }DOT;
 
-#define LIVING_BOMB 44457
+        #define LIVING_BOMB 44457
 
         Player * caster;
         DOT* begin;
@@ -465,8 +466,8 @@ public:
                 Aura* aura = itr->second->GetBase();
 
                 if(aura && aura->GetCaster() != NULL && aura->GetCaster()->ToPlayer()
-                    && (aura->GetCaster()->ToPlayer() == caster) && aura->GetSpellProto() && aura->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE &&
-                    (aura->HasEffectType(SPELL_AURA_PERIODIC_DAMAGE) || aura->HasEffectType(SPELL_AURA_PERIODIC_TRIGGER_SPELL)))
+                  && (aura->GetCaster()->ToPlayer() == caster) && aura->GetSpellProto() && aura->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE &&
+                  (aura->HasEffectType(SPELL_AURA_PERIODIC_DAMAGE) || aura->HasEffectType(SPELL_AURA_PERIODIC_TRIGGER_SPELL)))
                 {
                     DOT *current = alloc();
                     if(!current)
@@ -484,6 +485,7 @@ public:
                         {
                             current->auraEff_id = i;
                             current->aura_per_timer = aurEff->GetPeriodicTimer();
+                            current->aura_bp =aurEff->GetAmount();
                             break;
                         }
                     }
@@ -520,20 +522,24 @@ public:
 
                         if(akt->auraEff_id != -1)
                             if (AuraEffect* aurEff = nova->GetEffect(akt->auraEff_id))
+                            {
                                 aurEff->SetPeriodicTimer(akt->aura_per_timer); // Need synchronize periodic timer
+                                aurEff->SetAmount(akt->aura_bp);
+                            }
                     }
-                }
+                 }
 
                 akt = akt->next; // look for another aura in list
             }
         }
 
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
 
     SpellScript* GetSpellScript() const
     {
