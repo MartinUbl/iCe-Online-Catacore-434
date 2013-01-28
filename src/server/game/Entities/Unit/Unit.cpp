@@ -9347,8 +9347,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Decimation
         case 63156:
         case 63158:
-            // Can proc only if target has hp below 35%
-            if (!pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
+            // Can proc only if target has hp below 25%
+            if (!pVictim->HealthBelowPct(26))
                 return false;
             break;
         // Deep Freeze Immunity State (hack)
