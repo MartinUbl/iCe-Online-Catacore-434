@@ -4969,6 +4969,22 @@ void AuraEffect::HandleModConfuse(AuraApplication const *aurApp, uint8 mode, boo
         return;
 
     Unit *target = aurApp->GetTarget();
+    Unit* caster = GetCaster();
+
+    if (apply)
+    {
+        if (caster && caster->ToPlayer()
+            && caster->HasAura(56375) // Glyph of Polymorph
+            && m_spellProto->Id == 118) // Polymorph
+        {
+            if (target)
+            {
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+            }
+        }
+    }
 
     target->SetControlled(apply, UNIT_STAT_CONFUSED);
 }
