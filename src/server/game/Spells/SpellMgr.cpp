@@ -4742,6 +4742,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 9; // 20 yd
             spellInfo->EffectRadiusIndex[1] = 9; // 20 yd
             break;
+        case 30213: // Legion Strike
+            spellInfo->EffectRadiusIndex[1] = 29; // 6 yd
+            break;
         default:
             break;
         }
