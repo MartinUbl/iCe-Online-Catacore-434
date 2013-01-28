@@ -362,12 +362,12 @@ bool ChatHandler::HandleBanankyCommandModify(const char* args)
 
     uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname);
 
-    QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u AND done = 0",pguid);
+    QueryResult result = ScriptDatabase.PQuery("SELECT duvod FROM ice_bananky WHERE guid = %u AND done = 0",pguid);
 
     if (result)
     {
         Field* fields = result->Fetch();
-        const char* old_duvod = fields[1].GetCString();
+        const char* old_duvod = fields[0].GetCString();
 
         if (!duvod)
             duvod = old_duvod;
