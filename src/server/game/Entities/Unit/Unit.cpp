@@ -16801,14 +16801,20 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 case 1860:  // Voidwalker
                 case 1863:  // Succubus
                 case 691:   // Felhunter
-                case 11859: // Doomguard
+                case 17252: // Felguard
                     if (pOwner->HasAura(88447))
                         bp0 = -100;
                     if (pOwner->HasAura(88446))
                         bp0 = -50;
 
                     if(bp0)
-                        pOwner->CastCustomSpell(pOwner, 88448, &bp0, 0, 0, true);
+                    {
+                        if (!pOwner->ToPlayer()->HasSpellCooldown(88448))
+                        {
+                            pOwner->CastCustomSpell(pOwner, 88448, &bp0, 0, 0, true);
+                            pOwner->ToPlayer()->AddSpellCooldown(88448, 0, time(NULL)+120); // add 2 min cd
+                        }
+                    }
                     break;
             }
         }
