@@ -694,6 +694,80 @@ public:
     }
 };
 
+class spell_mage_reactive_barrier : public SpellScriptLoader
+{
+public:
+    spell_mage_reactive_barrier() : SpellScriptLoader("spell_mage_reactive_barrier") { }
+
+    class spell_mage_reactive_barrier_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_reactive_barrier_AuraScript);
+
+        Player * caster;
+
+        enum Spels
+        {
+            ICE_BARRIER = 11426,
+            REACTIVE_BARRIER_R1 =  86303,
+            REACTIVE_BARRIER_R2 =  86304,
+            RB_REDUCE_MANA_COST =  86347,
+        };
+
+        bool Load()
+        {
+            if(!GetCaster() || !GetCaster()->ToPlayer() || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+            else
+            {
+                caster = GetCaster()->ToPlayer();
+                return true;
+            }
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            amount = -1; // Set absorbtion amount to unlimited
+        }
+
+        void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            if (caster->GetHealth() < caster->GetMaxHealth() / 2 ) // must be above 50 % of health
+                return;
+
+            if (caster->GetHealth() - dmgInfo.GetDamage() > caster->GetMaxHealth() / 2 ) // Health after damage have to be less than 50 % of health
+                return;
+
+            if (caster->HasSpellCooldown(ICE_BARRIER)) // This talent obeys Ice Barrier's cooldown
+                return;
+
+            if(caster->HasAura(REACTIVE_BARRIER_R1))
+            {
+                if (roll_chance_i(50)) // 50 % chance for rank 1
+                {
+                    caster->CastSpell(caster, RB_REDUCE_MANA_COST, true);
+                    caster->CastSpell(caster, ICE_BARRIER, true);
+                }
+            }
+            else // 100 % chance for rank 2
+            {
+                caster->CastSpell(caster, RB_REDUCE_MANA_COST, true);
+                caster->CastSpell(caster, ICE_BARRIER, true);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_reactive_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_reactive_barrier_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_mage_reactive_barrier_AuraScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
@@ -705,4 +779,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_impact();
     new spell_mage_blizzard();
     new spell_mage_invocation();
+    new spell_mage_reactive_barrier();
 }

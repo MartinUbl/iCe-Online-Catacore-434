@@ -4023,6 +4023,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[1] = 7;
             count++;
             break;
+        case 86303: // Reactive barrier (rank 1)
+        case 86304: // Reactvie barrier (rank 2)
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_SCHOOL_ABSORB;
+            spellInfo->EffectMiscValue[0] = 127;
+            break;
         case 46841: // Escape to the Isle of Quel'Danas
             // not sure why this is needed
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
