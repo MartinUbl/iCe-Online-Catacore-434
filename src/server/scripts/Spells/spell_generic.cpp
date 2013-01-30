@@ -669,6 +669,43 @@ class spell_gen_parachute_ic : public SpellScriptLoader
         }
 };
 
+class spell_gen_replenishment : public SpellScriptLoader
+{
+public:
+    spell_gen_replenishment() : SpellScriptLoader("spell_gen_replenishment") { }
+
+    class spell_gen_replenishment_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_replenishment_AuraScript);
+
+        void HandleTick(AuraEffect const* aurEff)
+        {
+            Unit* target = GetTarget();
+
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+            {
+                uint32 tick_amount = 1;
+
+                if(target->getPowerType() == POWER_MANA)
+                {
+                    tick_amount += ((target->GetMaxPower(POWER_MANA) / 100 )* 1.5) / 15; // 1.5 % per 15 seconds
+                    const_cast<AuraEffect*>(aurEff)->SetAmount(tick_amount);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_replenishment_AuraScript::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_gen_replenishment_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -686,4 +723,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();
     new spell_gen_gunship_portal();
+    
 }
