@@ -2884,8 +2884,8 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             }
             // Blood of the North
             // Reaping
-            // Death Rune Mastery
-            if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2622)
+            // Blood Rites
+            if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
