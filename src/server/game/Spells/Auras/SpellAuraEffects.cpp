@@ -777,11 +777,10 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
 
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
             {
-                // Replenishment (0.25% from max)
-                // Infinite Replenishment
+                // Replenishment (1.5% from max)
                 if (m_spellProto->SpellIconID == 3184 && m_spellProto->SpellVisual[0] == 12495)
                 {
-                    amount = owner->GetMaxPower(POWER_MANA) * 25 / 10000;
+                    amount = ((owner->GetMaxPower(POWER_MANA) / 100 )* 1.5) / 15; 
                     break;
                 }
             }
