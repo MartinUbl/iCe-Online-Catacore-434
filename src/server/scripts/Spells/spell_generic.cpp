@@ -723,5 +723,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();
     new spell_gen_gunship_portal();
-    
+    new spell_gen_replenishment();
 }
