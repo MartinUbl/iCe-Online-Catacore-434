@@ -458,7 +458,7 @@ void Creature::Update(uint32 diff)
     }
     else
     {
-        if (canWalk())
+        if (canWalk() || canFly())
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
     }
 
