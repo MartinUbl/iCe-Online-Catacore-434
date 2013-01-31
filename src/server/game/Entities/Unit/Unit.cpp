@@ -8542,8 +8542,8 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
         {
             // Blood of the North
             // Reaping
-            // Blood Rites
-            if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2724)
+            // Death Rune Mastery
+            if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2622)
             {
                 *handled = true;
                 // Convert recently used Blood Rune to Death Rune
@@ -8559,8 +8559,9 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     aurEff->ResetPeriodic(true);
                     uint32 runesLeft;
 
-                    if ((dummySpell->SpellIconID == 2724 /* Blood Rites */ && (procSpell->Id == 49998 || procSpell->Id == 49020)) // Death Strike / Obliterate
-                     || (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)) // Reaping / Festering Strike
+                    if (dummySpell->SpellIconID == 2622)
+                        runesLeft = 2;
+                    else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948) // Reaping / Festering Strike
                         runesLeft = 2;
                     else
                         runesLeft = 1;
@@ -8570,7 +8571,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                         if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH)
                             continue;
 
-                        if (dummySpell->SpellIconID == 2724 && (procSpell->Id == 49998 || procSpell->Id == 49020))
+                        if (dummySpell->SpellIconID == 2622)
                         {
                             if (((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
                                 continue;
