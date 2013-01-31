@@ -3891,6 +3891,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 1978:  // Serpent Sting
         case 2818:  // Deadly Poison
         case 84617: // Revealing Strike
+        case 84748: // Bandit's Guile
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
         case 89299: case 92953: // Twilight Spit
