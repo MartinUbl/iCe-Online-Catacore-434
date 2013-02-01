@@ -240,7 +240,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectNULL,                                     //163 unused
     &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
-    &Spell::EffectNULL,                                     //165
+    &Spell::EffectDamageFromMaxHealthPCT,                   //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT
     &Spell::EffectNULL,                                     //166
     &Spell::EffectNULL,                                     //167
     &Spell::EffectNULL,                                     //168
@@ -10061,6 +10061,14 @@ void Spell::EffectPlayerNotification(SpellEffIndex /*effIndex*/)
             unitTarget->PlayDirectSound(9417); // Fel Reaver sound
             break;
     }
+}
+
+void Spell::EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex)
+{
+    if (!unitTarget)
+        return;
+
+    m_damage += unitTarget->CountPctFromMaxHealth(damage);
 }
 
 void Spell::EffectRemoveAura(SpellEffIndex effIndex)

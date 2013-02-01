@@ -433,6 +433,7 @@ class Spell
         void EffectActivateSpec(SpellEffIndex effIndex);
         void EffectPlayerNotification(SpellEffIndex effIndex);
         void EffectRemoveAura(SpellEffIndex effIndex);
+        void EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex);
         void EffectCastButtons(SpellEffIndex effIndex);
         void EffectRechargeManaGem(SpellEffIndex effIndex);
         void EffectActivateGuildBankSlot(SpellEffIndex effIndex);
