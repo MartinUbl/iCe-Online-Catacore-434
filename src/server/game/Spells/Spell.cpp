@@ -3341,6 +3341,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         break;
                     case 55789: // Improved Icy Talons
                     case 59725: // Improved Spell Reflection - aoe aura
+                    case 97016: // Big Bad Voodoo
                         unitList.remove(m_caster);
                         break;
                     case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
