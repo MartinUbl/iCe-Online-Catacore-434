@@ -539,13 +539,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         // Don't allow to modify damage with spellpower and so on
                         apply_direct_bonus = false;
                         break;
-                    case 96644: // Thousand Blades
-                    case 96645:
-                    {
-                        float distance = m_caster->GetDistance2d(unitTarget);
-                        damage = m_spellInfo->EffectBasePoints[0] * (distance / 35.0f); // 35 yards should be enough
-                        break;
-                    }
                 }
                 break;
             }
