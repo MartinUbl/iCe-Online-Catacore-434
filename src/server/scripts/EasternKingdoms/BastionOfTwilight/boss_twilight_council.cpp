@@ -305,11 +305,10 @@ public:
                 {
                     float fall_distance=me->GetDistance(Seeds_pos[i].GetPositionX(),Seeds_pos[i].GetPositionY(),Seeds_pos[i].GetPositionZ());
                     Creature* seed=me->SummonCreature(CREATURE_LAVA_SEED,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ()+6,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    seed->SetFlying(true);
                     seed->GetMotionMaster()->MoveJump(Seeds_pos[i].GetPositionX(),Seeds_pos[i].GetPositionY(),Seeds_pos[i].GetPositionZ(),25.0f,fall_distance/2.0);
-                    seed->SetFlying(false);
+
                 }
-                for(int i=0;i<6;i++) // pocet "kruznic"
+                for(int i = 0;i < 6; i++) // pocet "kruznic"
                 {
                     pocet_flamov += 4;
                     uhol =(((360 / pocet_flamov)*3.14)/180);
@@ -343,7 +342,7 @@ public:
             if(Intensity_timer<=diff) // Kazdych 20 sekund sa zvysi pocet instability "castov" o 1
             {
                     if(INSTABILITY < 10) // Obmedzenie na max 10 bleskov
-                        INSTABILITY = INSTABILITY+1;
+                        INSTABILITY = INSTABILITY + 1;
 
                     Intensity_timer = 20000;
                     if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) // V HC mensi nerf zvysovania bleskov
@@ -355,10 +354,10 @@ public:
             {
                     if(achiev_counter==0 || (pLiquidIce && (me->GetDistance(pLiquidIce->GetPositionX(),pLiquidIce->GetPositionY(),pLiquidIce->GetPositionZ()))+8 > Stack_counter))
                     {
-                        pLiquidIce=me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        pLiquidIce = me->SummonCreature(CREATURE_LIQUID_ICE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                         achiev_counter++;
-                        Distance_timer=2500;
-                        Stack_counter=0.0f;
+                        Distance_timer = 2500;
+                        Stack_counter = 0.0f;
                     }
                     LiquidIce_timer=2500;
             }
@@ -392,11 +391,7 @@ public:
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                 {
                                     if(unit->GetTypeId() == TYPEID_PLAYER )
-                                    {
-                                        unit->ToPlayer()->SetFlying(true);
                                         unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
-                                        unit->ToPlayer()->SetFlying(false);
-                                    }
                                 }
                     }
                 can_lift=false;
@@ -776,10 +771,10 @@ public:
                     }
                 }
 
-                if(Glaciate_all_timer<=diff)
+                if(Glaciate_all_timer <= diff)
                 {
-                    me->CastCustomSpell(92548 , SPELLVALUE_BASE_POINT0, 15000); // Glaciate by malo davat dmg od vzdialenosti od bossa kedze to nejde nijak spojazdnit tak dam cca 15 k kazdemu 
-                    Glaciate_all_timer=99999999;
+                    me->CastCustomSpell(92548 , SPELLVALUE_BASE_POINT0, 15000); // Glaciate by malo davat dmg od vzdialenosti od bossa kedze som lenivy robit spellscript tak dam cca 15 k kazdemu 
+                    Glaciate_all_timer = 99999999;
                 }
                 else Glaciate_all_timer-=diff;
 
@@ -1282,22 +1277,30 @@ public:
         uint32 Bomb_timer;
         uint32 Unselectable_timer;
         bool bombed;
+        Creature *pfeludius;
 
         void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
         {
+            if(pfeludius && pfeludius->getVictim() && pfeludius->getVictim() == target) // Feludius tank can't get waterlogged debuff
+                return;
+
             if(typeOfDamage == SPELL_DIRECT_DAMAGE) // Po zasahu bombou aplikujem Watterlogged
                 me->AddAura(SPELL_WATER_LOGGED,target);
         }
 
         void Reset()
         {
+            pfeludius = NULL;
             Unselectable_timer = 4000;
-            if(Creature *pTarget = me->FindNearestCreature(43687, 500, true))
-                Bomb_timer= 3000 + uint32(me->GetDistance2d(pTarget) / 7) * 1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
+            if(Creature *pFel = me->FindNearestCreature(43687, 500, true))
+                Bomb_timer= 3000 + uint32(me->GetDistance2d(pFel) / 7) * 1000; // zhruba tolko trva kym visualne doleti bomba k "water bomb npc"
             else Bomb_timer = 3000+ urand(500,3000); // keby nahodou
 
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             bombed=false;
+
+            if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature() )
+                pfeludius = me->ToTempSummon()->GetSummoner()->ToCreature();
         }
 
         void UpdateAI(const uint32 diff)
@@ -1305,16 +1308,16 @@ public:
 
             if(Unselectable_timer <= diff ) // Musim priradit unselectable flagu az po vacasteni water bomby lebo inak by visualne nezasiahlo trigger -> ( me )
             {
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
-                Unselectable_timer=9999999;
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+                Unselectable_timer = 9999999;
             }
             else Unselectable_timer -= diff;
 
             if(Bomb_timer<=diff && !bombed)
             {
                 DoCast(me,SPELL_WATER_B_DMG);
-                bombed=true;
-                me->ForcedDespawn(Bomb_timer+2000);
+                bombed = true;
+                me->ForcedDespawn(Bomb_timer + 2000);
             }
             else Bomb_timer-=diff;
         }
@@ -1351,7 +1354,7 @@ public:
 
         void Reset()
         {
-            fired=false;
+            fired = false;
             flame_timer = 4000;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->ForcedDespawn(40000);
@@ -1361,6 +1364,7 @@ public:
         {
             if(flame_timer<=diff && !fired)
             {
+                me->AddAura(89350,me); // Added auru tu reduce dmg by 60 %
                 me->AddAura(SPELL_INFERNO_RUSH_AOE,me);
                 fired=true;
             }
@@ -1400,7 +1404,6 @@ public:
         uint32 walk_timer_Feludisu;
         uint32 Update_timer;
         Unit* pRod_marked_player;
-        Creature* pIGNACIOUS;
         bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
         void Reset()
@@ -1417,7 +1420,7 @@ public:
             Update_timer=0;
             pRod_marked_player=NULL;
             can_chaining=ported=can_tele=Hp_dropped=can_interrupt=update_movement=false;
-            pRod_marked_player=pIGNACIOUS=NULL;
+            pRod_marked_player=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
@@ -1613,10 +1616,6 @@ public:
 
             if(Disperse_timer<=diff)
             {
-                if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) ) //  Stavalo sa ze ked bol boss daleko nenaslo ho takto to budem skusat kazdych 30 s
-                { 
-                    pIGNACIOUS = pIgnacious;
-                }
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_interrupt=false;
@@ -1641,21 +1640,18 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                                if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
+                                Creature * pIgnac = NULL;
+
+                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
+                                    pIgnac = me->ToTempSummon()->GetSummoner()->ToCreature();
+
+                                if(pIgnac)
                                 {
-                                    pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIGNACIOUS->SendMovementFlagUpdate();
-                                    pIGNACIOUS->InterruptNonMeleeSpells(true);
-                                    pIGNACIOUS->SetSpeed(MOVE_RUN,1.5f,true);
-                                    pIGNACIOUS->CastSpell(pIGNACIOUS, 87459, true); // Visual teleport
-                                }
-                                else if (Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
-                                {
-                                    pIgnacious->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIgnacious->SendMovementFlagUpdate();
-                                    pIgnacious->InterruptNonMeleeSpells(true);
-                                    pIgnacious->SetSpeed(MOVE_RUN,1.5f,true);
-                                    pIgnacious->CastSpell(pIgnacious, 87459, true); // Visual teleport
+                                    pIgnac->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
+                                    pIgnac->SendMovementFlagUpdate();
+                                    pIgnac->InterruptNonMeleeSpells(true);
+                                    pIgnac->SetSpeed(MOVE_RUN,1.5f,true);
+                                    pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
                                 }
 
                                 me->InterruptNonMeleeSpells(true);
@@ -1696,17 +1692,16 @@ public:
                                 me->SetPosition(-987.17f,-561.25f,831.91f,3.93f,true);
                                 me->SendMovementFlagUpdate();
 
-                                if(pIGNACIOUS) // Ak mam na isto pointer na Ignaciousa netreba dalej hladat
+                                Creature * pIgnac = NULL;
+
+                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
+                                    pIgnac = me->ToTempSummon()->GetSummoner()->ToCreature();
+
+                                if(pIgnac)
                                 {
-                                    pIGNACIOUS->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIGNACIOUS->SendMovementFlagUpdate();
-                                    pIGNACIOUS->CastSpell(pIGNACIOUS, 87459, true); // Visual teleport
-                                }
-                                else if(Creature* pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true) )
-                                {
-                                    pIgnacious->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIgnacious->SendMovementFlagUpdate();
-                                    pIgnacious->CastSpell(pIgnacious, 87459, true); // Visual teleport
+                                    pIgnac->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
+                                    pIgnac->SendMovementFlagUpdate();
+                                    pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
                                 }
 
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
@@ -1778,7 +1773,6 @@ public:
         uint32 Frozen_orb_timer;
         uint32 HS_counter; // Harden skin counter
         uint32 Hp_gainer; // HP ktore bude mat monstrosity
-        Creature* pFELUDIUS;
         bool Hp_dropped,has_shield,speaked,can_interrupt;
 
         void Reset()
@@ -1795,7 +1789,6 @@ public:
             Hp_gainer=0;
             Hp_dropped=has_shield=speaked=can_interrupt=false;
             PHASE=1;
-            pFELUDIUS=NULL;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
@@ -1925,11 +1918,6 @@ public:
 
             if(Harden_Skin_timer <= diff)
             {
-                if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) ) // Kazdych 40 sekund  skontrolujem ci dokazem najst pointer na feludiusa
-                {
-                    pFELUDIUS = pfel;
-                }
-
                 if(!me->IsNonMeleeSpellCasted(false))
                 {
                     can_interrupt=true;
@@ -1982,21 +1970,18 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                                if(pFELUDIUS) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
+                                Creature * pFel = NULL;
+
+                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
+                                    pFel = me->ToTempSummon()->GetSummoner()->ToCreature();
+
+                                if(pFel) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
-                                    pFELUDIUS->SetReactState(REACT_PASSIVE);
-                                    pFELUDIUS->InterruptNonMeleeSpells(true);
-                                    pFELUDIUS->CastSpell(pFELUDIUS, 87459, true); // Visual teleport
-                                    pFELUDIUS->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
-                                    pFELUDIUS->SendMovementFlagUpdate();
-                                }
-                                else if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) )
-                                {
-                                    pfel->SetReactState(REACT_PASSIVE);
-                                    pfel->InterruptNonMeleeSpells(true);
-                                    pfel->CastSpell(pfel, 87459, true); // Visual teleport
-                                    pfel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
-                                    pfel->SendMovementFlagUpdate();
+                                    pFel->SetReactState(REACT_PASSIVE);
+                                    pFel->InterruptNonMeleeSpells(true);
+                                    pFel->CastSpell(pFel, 87459, true); // Visual teleport
+                                    pFel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pFel->SendMovementFlagUpdate();
                                 }
 
                                 me->InterruptNonMeleeSpells(true);
@@ -2027,17 +2012,17 @@ public:
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
 
-                                if(pFELUDIUS)
+
+                                Creature * pFel = NULL;
+
+                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
+                                    pFel = me->ToTempSummon()->GetSummoner()->ToCreature();
+
+                                if(pFel) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
-                                    pFELUDIUS->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
-                                    pFELUDIUS->CastSpell(pFELUDIUS, 87459, true); // Visual teleport
-                                    pFELUDIUS->SendMovementFlagUpdate();
-                                }
-                                else if(Creature* pfel = me->FindNearestCreature(FELUDIUS_ENTRY, 1000, true) )
-                                {
-                                    pfel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
-                                    pfel->CastSpell(pfel, 87459, true); // Visual teleport
-                                    pfel->SendMovementFlagUpdate();
+                                    pFel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pFel->CastSpell(pFel, 87459, true); // Visual teleport
+                                    pFel->SendMovementFlagUpdate();
                                 }
 
                                 PHASE = 4;
@@ -2089,10 +2074,10 @@ public:
                                 {
                                     Hp_gainer = Hp_gainer + pArion->GetHealth();
                                     pArion->DisappearAndDie();
-                                    Hp_gainer = Hp_gainer+me->GetHealth(); // + HP Terrastry
+                                    Hp_gainer = Hp_gainer + me->GetHealth(); // + HP Terrastry
                                     me->DisappearAndDie();
                                 }
-                                if(Monstrosity!=NULL)
+                                if(Monstrosity != NULL)
                                 {
                                     // Kedze nejde vsetko na 100 % ako na offi znizim zacinajuce HP Monstoristy o par %
                                     if(getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Na normale uberem 2 %
@@ -2455,7 +2440,7 @@ public:
             }
             else checking_timer-=diff;
 
-            if(me->HasAura(92302)) // Attack only if orb was fully formed
+            if(buffed) // Attack only if orb was fully formed
                 DoMeleeAttackIfReady();
         }
     };
@@ -2491,7 +2476,7 @@ public:
             me->SetInCombatWithZone();
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,DEFAULT_COMBAT_REACH + 1.0f);
             DoCast(me,92211); // Viusalna marka kde sa objavi Flamestrike
-            Buff_timer=5500;
+            Buff_timer = 5500;
             buffed=false;
         }
 
@@ -2557,7 +2542,6 @@ public:
         }
     };
 };
-
 
 void AddSC_twilight_council()
 {
