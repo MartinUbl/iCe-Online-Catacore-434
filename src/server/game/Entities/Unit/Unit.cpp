@@ -9139,6 +9139,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // triggered the original spell, so we were trapped in a loop
             case 20424: // Seals of Command
             case 51292: // Soulthirst
+            case 82366: // Consecration
                 return false;
         }
     }
