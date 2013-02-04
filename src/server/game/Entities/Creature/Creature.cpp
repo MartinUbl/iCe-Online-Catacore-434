@@ -340,8 +340,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData *data
 
     SetSpeed(MOVE_WALK,     cinfo->speed_walk);
     SetSpeed(MOVE_RUN,      cinfo->speed_run);
-    SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
-    SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
+    SetSpeed(MOVE_SWIM,     cinfo->speed_run);
+    SetSpeed(MOVE_FLIGHT,   cinfo->speed_run);
 
     SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
     SetLevitate(canFly());
