@@ -1016,7 +1016,8 @@ enum Opcodes
     CMSG_GUILD_BANK_DEPOSIT_MONEY                    = 0x00707, // 4.3.4 15595
     CMSG_GUILD_BANK_WITHDRAW_MONEY                   = 0x00037, // 4.3.4 15595
     CMSG_GUILD_BANK_NOTE                             = 0x1015A, //
-    MSG_GUILD_BANK_LOG_QUERY                         = 0x03224, // 4.3.4 15595
+    CMSG_GUILD_BANK_LOG_QUERY                        = 0x03224, // 4.3.4 15595
+    SMSG_GUILD_BANK_LOG_QUERY_RESULT                 = 0x030B2, // 4.3.4 15595
     CMSG_SET_CHANNEL_WATCH                           = 0x04517, // 4.3.4 15595
     SMSG_USERLIST_ADD                                = 0x00F37, // 4.3.4 15595
     SMSG_USERLIST_REMOVE                             = 0x02006, // 4.3.4 15595
@@ -1489,7 +1490,6 @@ enum Opcodes
     CMSG_GROUP_REQUEST_JOIN_UPDATES                   = 0x2583,
     CMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x3025,
     CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY             = 0x3235,
-    CMSG_GUILD_BANK_LOG_QUERY                         = 0x3224,
     CMSG_GUILD_BANK_QUERY_TEXT                        = 0x3220,
     CMSG_GUILD_CHANGE_NAME_REQUEST                    = 0x1232,
     CMSG_GUILD_MEMBER_SEND_SOR_REQUEST                = 0x3225,
@@ -1601,7 +1601,6 @@ enum Opcodes
     SMSG_GUILD_ACHIEVEMENT_DELETED                    = 0x35A0,
     SMSG_GUILD_ACHIEVEMENT_EARNED                     = 0x50B5,
     SMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x38A5,
-    SMSG_GUILD_BANK_LOG_QUERY_RESULT                  = 0x30B2,
     SMSG_GUILD_BANK_QUERY_TEXT_RESULT                 = 0x75A3,
     SMSG_GUILD_CHALLENGE_COMPLETED                    = 0x39A3,
     SMSG_GUILD_CHALLENGE_UPDATED                      = 0x18B1,

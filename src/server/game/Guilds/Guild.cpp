@@ -2915,11 +2915,12 @@ void Guild::SendBankLog(WorldSession *session, uint8 tabId) const
     if (tabId < _GetPurchasedTabsSize() || tabId == GUILD_BANK_MAX_TABS)
     {
         const LogHolder* pLog = m_bankEventLog[tabId];
-        WorldPacket data(MSG_GUILD_BANK_LOG_QUERY, pLog->GetSize() * (4 * 4 + 1) + 1 + 1);
-        data << uint8(tabId);
+        WorldPacket data(SMSG_GUILD_BANK_LOG_QUERY_RESULT, pLog->GetSize() * (4 * 4 + 1) + 1 + 1);
+        data.WriteBit(GetLevel() >= 5 && tabId == GUILD_BANK_MAX_TABS);     // has Cash Flow perk
         pLog->WritePacket(data);
+        data << uint32(tabId);
         session->SendPacket(&data);
-        sLog->outDebug("WORLD: Sent (MSG_GUILD_BANK_LOG_QUERY)");
+        sLog->outDebug("WORLD: Sent (SMSG_GUILD_BANK_LOG_QUERY_RESULT)");
     }
 }
 

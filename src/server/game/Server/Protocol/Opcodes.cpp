@@ -1035,7 +1035,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_GUILD_BANK_UPDATE_TAB,                   STATUS_LOGGEDIN, &WorldSession::HandleGuildBankUpdateTab        );
     OPCODE( CMSG_GUILD_BANK_DEPOSIT_MONEY,                STATUS_LOGGEDIN, &WorldSession::HandleGuildBankDepositMoney     );
     OPCODE( CMSG_GUILD_BANK_WITHDRAW_MONEY,               STATUS_LOGGEDIN, &WorldSession::HandleGuildBankWithdrawMoney    );
-    OPCODE( MSG_GUILD_BANK_LOG_QUERY,                     STATUS_LOGGEDIN, &WorldSession::HandleGuildBankLogQuery         );
+    OPCODE( CMSG_GUILD_BANK_LOG_QUERY,                    STATUS_LOGGEDIN, &WorldSession::HandleGuildBankLogQuery         );
     OPCODE( CMSG_SET_CHANNEL_WATCH,                       STATUS_LOGGEDIN, &WorldSession::HandleSetChannelWatch           );
     OPCODE( SMSG_USERLIST_ADD,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_USERLIST_REMOVE,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
