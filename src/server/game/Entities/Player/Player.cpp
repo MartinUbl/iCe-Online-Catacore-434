@@ -21623,44 +21623,64 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
     }
 
-    uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
-
-    float discountMod = GetReputationPriceDiscount(pCreature);
-    discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
-
-    // reputation discount
-    if (price)
-        price = uint32(floor(price * discountMod));
-
-    // If item is listed as guild reward, check whether player is capable to buy
-    if (Guild::IsListedAsGuildReward(pProto->ItemId))
-    {
-        // If player doesn't have guild, do not display
-        if (!GetGuildId())
-        {
-            SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
-            return false;
-        }
-        else
-        {
-            // Get price in copper from reward template
-            if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
-            {
-                if (pGuild->IsRewardReachable(this, pProto->ItemId))
-                    price = Guild::GetRewardData(pProto->ItemId)->price;
-                else
-                {
-                    SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
-                    return false;
-                }
-            }
-        }
-    }
-
     if (pProto->RequiredReputationFaction && (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank))
     {
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
         return false;
+    }
+
+    uint32 price = 0;
+
+    if ((crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0) || Guild::IsListedAsGuildReward(pProto->ItemId))
+    {
+        float discountMod = GetReputationPriceDiscount(pCreature);
+        discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
+
+        // If item is listed as guild reward, check whether player is capable to buy
+        if (Guild::IsListedAsGuildReward(pProto->ItemId))
+        {
+            // If player doesn't have guild, do not display
+            if (!GetGuildId())
+            {
+                SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+                return false;
+            }
+            else
+            {
+                // Get price in copper from reward template
+                if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+                {
+                    if (pGuild->IsRewardReachable(this, pProto->ItemId))
+                        price = Guild::GetRewardData(pProto->ItemId)->price;
+                    else
+                    {
+                        SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+                        return false;
+                    }
+                }
+            }
+        }
+        else
+            price = pProto->BuyPrice;
+
+        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
+        // this check will avoid buying more items of the same kind, that will exceed limit and cause gold overflow
+        if ((uint32)count > maxCount)
+        {
+            sLog->outChar("Exploit attempt: Player %s (%u) tried to buy %u of item %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
+            count = (uint8)maxCount;
+        }
+        price = price * count;
+
+        // reputation discount
+        if (price)
+            price = uint32(floor(price * discountMod));
+
+        if (!HasEnoughMoney(price))
+        {
+            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+            return false;
+        }
     }
 
     if (crItem->ExtendedCost)
@@ -21706,12 +21726,6 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
             return false;
         }
-    }
-
-    if (!HasEnoughMoney(price))
-    {
-        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-        return false;
     }
 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
