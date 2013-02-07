@@ -21686,7 +21686,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         // this check will avoid buying more items of the same kind, that will exceed limit and cause gold overflow
         if ((uint32)count > maxCount)
         {
-            sLog->outChar("Exploit attempt: Player %s (%u) tried to buy %u of item %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
+            sLog->outChar("Exploit attempt: Player %s (%u) tried to buy %u of item %u, causing overflow", GetName(), GetGUIDLow(), (uint32)count, pProto->ItemId);
             count = (uint8)maxCount;
         }
         price = price * count;
