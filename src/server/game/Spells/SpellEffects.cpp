@@ -2957,24 +2957,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             case 49560: // Death Grip
                 Position pos;
-                float dist, speedXY, speedZ;
                 GetSummonPosition(effIndex, pos);
                 if (Unit *unit = unitTarget->GetVehicleBase()) // what is this for?
                     unit->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
-                else
-                {
-                    if (unitTarget->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
-                        return;
+                else if (!unitTarget->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
+                    unitTarget->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
 
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER) // Deterrence
-                    {
-                        dist = m_caster->GetExactDist2d(pos.GetPositionX(), pos.GetPositionY());
-                        speedZ = 10.0f;
-                        speedXY = dist * 10.0f / speedZ;
-                        unitTarget->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ);
-                    }
-                    else
-                        unitTarget->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
+                if (m_caster->GetTypeId() == TYPEID_PLAYER // is Player
+                    && m_caster->HasAura(59309)) // Has Glyph of Resilient Grip
+                {
+                    if (unitTarget->IsImmunedToSpell(sSpellStore.LookupEntry(49560))) // if is target immune
+                        m_caster->ToPlayer()->RemoveSpellCooldown(49560, true); // remove spell cooldown
                 }
                 return;
             case 46584: // Raise Dead
