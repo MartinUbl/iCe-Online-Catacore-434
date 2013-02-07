@@ -7858,8 +7858,9 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 break;
             }
 
-            // do not queue spells with cooldown started
-            if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
+            // do not queue spells with cooldown started, don't cast another spell while looting and don't allow to target items
+            if (player->HasSpellCooldown(spellInfo->Id) || player->GetLootGUID() || spellInfo->researchProjectId
+                || m_Spell->m_targets.getItemTarget() || m_Spell->m_targets.getGOTarget())
             {
                 m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
                 m_Spell->finish(false);
@@ -7878,7 +7879,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             }
 
             // not ready or another action in progress - wait more
-            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
+            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(true, true, true))
             {
                 // cast time of current spell
                 uint32 cast = 0;
@@ -7887,8 +7888,8 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     cast = current->GetRemainingCastTime();
                 // remaining global cooldown on queued spell
                 uint32 cd = player->GetGlobalCooldown(spellInfo);
-                uint32 available = std::max(cast, cd);
 
+                uint32 available = std::max(cast, cd) + 1;      // 1ms after previous spell cast
                 if (available <= 0)
                     available = 1;
 
