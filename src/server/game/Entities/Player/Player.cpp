@@ -11296,6 +11296,25 @@ void Player::DiggedCreature(uint64 guidlow)
     }
 }
 
+bool Player::HasResearchProject(uint32 project)
+{
+    for (uint32 slot = 0; slot < 16; slot++)
+    {
+        if (slot < 8)
+        {
+            if (GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+slot, 0) == project)
+                return true;
+        }
+        else if (slot >= 8 && slot < 16)
+        {
+            if (GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(slot-8), 1) == project)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 void Player::SetNewResearchProject(uint8 slot, bool completed)
 {
     if (slot >= 9 || GetSkillValue(SKILL_ARCHAEOLOGY) < 1)

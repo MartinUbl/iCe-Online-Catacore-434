@@ -5500,6 +5500,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!pBranch)
                 return SPELL_FAILED_BAD_TARGETS;
 
+            if (!m_caster->ToPlayer()->HasResearchProject(m_spellInfo->researchProjectId))
+                return SPELL_FAILED_NOT_READY;
+
             // Disallow using more than maximum keystones
             if (pProject->keyStonesNeeded < m_keyStonesCount)
                 m_keyStonesCount = pProject->keyStonesNeeded;
