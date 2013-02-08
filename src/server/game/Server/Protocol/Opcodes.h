@@ -107,7 +107,7 @@ enum Opcodes
     CMSG_DEL_FRIEND                                  = 0x06A15, // 4.3.4 15595
     CMSG_SET_CONTACT_NOTES                           = 0x06135, // 4.3.4 15595
     CMSG_ADD_IGNORE                                  = 0x04726, // 4.3.4 15595
-    CMSG_DEL_IGNORE                                  = 0x04727, // 4.3.4 15595
+    CMSG_DEL_IGNORE                                  = 0x06D26, // 4.3.4 15595
     CMSG_GROUP_INVITE                                = 0x00513, // 4.3.4 15595
     SMSG_GROUP_INVITE                                = 0x031B2, // 4.3.4 15595
     CMSG_GROUP_CANCEL                                = 0x1000B, //
