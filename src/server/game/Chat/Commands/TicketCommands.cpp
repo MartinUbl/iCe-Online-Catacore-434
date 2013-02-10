@@ -435,13 +435,22 @@ bool ChatHandler::HandleGMTicketDeleteByIdCommand(const char* args)
 
 bool ChatHandler::HandleGMTicketReloadCommand(const char* /* args */)
 {
+    sLog->outString("Re-Loading gm_tickets...");
     sTicketMgr->LoadGMTickets();
+    SendGlobalGMSysMessage("DB table `gm_tickets` reloaded.");
     return true;
 }
 
 bool ChatHandler::HandleToggleGMTicketSystem(const char* /* args */)
 {
     sTicketMgr->SetStatus(!sTicketMgr->GetStatus());
+    std::stringstream ss;
+    ss << "|cff00ff00GM Tickets are now: ";
+    if (sTicketMgr->GetStatus())
+        ss << "|c1f00FFFFenabled.";
+    else
+        ss << "|c1f00FFFFdisabled.";
+    SendGlobalGMSysMessage(ss.str().c_str());
     return true;
 }
 
