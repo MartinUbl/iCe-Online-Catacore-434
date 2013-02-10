@@ -3482,14 +3482,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     switch (m_spellInfo->Id)
     {
         case 36563:    // Shadowstep
-            if (Player * plr = unitTarget->ToPlayer())
+            if (Unit * target = m_targets.getUnitTarget())
             {
-                if (Unit * target = plr->GetSelectedUnit())
-                {
-                    Position pos;
-                    target->GetFirstCollisionPosition(pos, 2.0f, M_PI);
-                    m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
-                }
+                Position pos;
+                target->GetFirstCollisionPosition(pos, 2.0f, M_PI);
+                m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
             }
             break;
         case 48129:  // Scroll of Recall
