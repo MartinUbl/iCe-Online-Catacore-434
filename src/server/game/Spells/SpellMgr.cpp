@@ -4137,6 +4137,14 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_DST_CASTER;
             count++;
             break;
+        case 89024: // Pursuit of Justice
+        case 86698: // Guardian of Ancient Kings
+        case 89023: // Blessed Life
+            spellInfo->Effect[1] = 0; // removed non-exist triggered spell
+            break;
+        case 23257: // Demonic Enrage
+            spellInfo->Effect[2] = 0; // removed non-exist triggered spell
+            break;
         case 41376: // Spite
         case 39992: // Needle Spine
         case 29576: // Multi-Shot
