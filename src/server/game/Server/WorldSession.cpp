@@ -168,7 +168,20 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     #endif                                                  // !TRINITY_DEBUG
 
 #if defined WINVER
-    sLog->outString("sent opcode 0x%.4X (%s)", packet->GetRealOpcode(), LookupOpcodeName(packet->GetRealOpcode()));
+    switch (packet->GetRealOpcode())
+    {
+        case SMSG_MONSTER_MOVE:
+        case SMSG_TIME_SYNC_REQ:
+        case SMSG_WORLD_STATE_UI_TIMER_UPDATE:
+        case SMSG_SPLINE_MOVE_SET_WALK_MODE:
+        case SMSG_UPDATE_OBJECT:
+        case SMSG_DESTROY_OBJECT:
+        case SMSG_THREAT_UPDATE:
+            break;
+        default:
+            sLog->outString("sent opcode 0x%.4X (%s)", packet->GetRealOpcode(), LookupOpcodeName(packet->GetRealOpcode()));
+            break;
+    }
 #endif
 
     if (m_Socket->SendPacket (*packet) == -1)
@@ -224,7 +237,15 @@ bool WorldSession::Update(uint32 diff)
         #endif*/
 
 #if defined WINVER
-        sLog->outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+        switch (packet->GetOpcode())
+        {
+            case CMSG_TIME_SYNC_RESP:
+            case CMSG_WORLD_STATE_UI_TIMER_UPDATE:
+                break;
+            default:
+                sLog->outString("received opcode 0x%.4X (%s)", packet->GetOpcode(), LookupOpcodeName(packet->GetOpcode()));
+                break;
+        }
 #endif
         if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
