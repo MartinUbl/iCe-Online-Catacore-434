@@ -2056,6 +2056,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             || (GetQuestStatus(14126) != QUEST_STATUS_COMPLETE && GetZoneId() == 4737))
             return false;
 
+        // Special exclusion for "plantaz"
+        if (HasAura(15007) && GetAura(15007)->IsPermanent() && GetMapId() == 746)
+        {
+            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
+            GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
+            return false;
+        }
+
         // far teleport to another map
         Map* oldmap = IsInWorld() ? GetMap() : NULL;
         // check if we can enter before stopping combat / removing pet / totems / interrupting spells
@@ -7518,7 +7526,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
          }
         if (GetMapId() == 746) // Special for Plantaz
         {
-            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurection Sickness)
+            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Resurrection Sickness)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
             uint32 counter = 0;
             std::string duvod;
@@ -7530,15 +7538,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             }
             ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
             ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
-        }
-
-        Aura* aur = GetAura(15007);
-
-        if (aur && aur->IsPermanent() && GetMapId() != 746) // Exiting Plantaz
-        {
-            TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f); // Plantaz
-            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
-            GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
         }
     }
 
