@@ -1333,6 +1333,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_SAVE_CUF_PROFILES,                       STATUS_LOGGEDIN, &WorldSession::HandleSaveCUFProfiles           );
     OPCODE( SMSG_LOAD_CUF_PROFILES,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAYER_MOVE,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_REQUEST_CEMETERY_LIST,                   STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
 };
 
 void DestroyOpcodeTable()
