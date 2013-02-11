@@ -11657,6 +11657,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
 
         itr->second.seasonCount = newSeasonCount;
 
+        CurrencyModifyQuestCheck(id);
+
         // probably excessive checks
         if (IsInWorld() && !GetSession()->PlayerLoading())
         {
@@ -15336,6 +15338,12 @@ bool Player::CanCompleteQuest(uint32 quest_id)
                     if (qInfo->ReqItemCount[i]!= 0 && q_status.m_itemcount[i] < qInfo->ReqItemCount[i])
                         return false;
                 }
+
+                for (uint8 i = 0; i < QUEST_CURRENCY_COUNT; i++)
+                {
+                    if (qInfo->ReqCurrencyId[i] != 0 && qInfo->ReqCurrencyCount[i] != 0 && !HasCurrency(qInfo->ReqCurrencyId[i], qInfo->ReqCurrencyCount[i], true))
+                        return false;
+                }
             }
 
             if (qInfo->HasFlag(QUEST_TRINITY_FLAGS_KILL_OR_CAST | QUEST_TRINITY_FLAGS_SPEAKTO))
@@ -15385,9 +15393,15 @@ bool Player::CanCompleteRepeatableQuest(Quest const *pQuest)
         return false;
 
     if (pQuest->HasFlag(QUEST_TRINITY_FLAGS_DELIVER))
+    {
         for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
             if (pQuest->ReqItemId[i] && pQuest->ReqItemCount[i] && !HasItemCount(pQuest->ReqItemId[i],pQuest->ReqItemCount[i]))
                 return false;
+
+        for (uint8 i = 0; i < QUEST_CURRENCY_COUNT; i++)
+            if (pQuest->ReqCurrencyId[i] && pQuest->ReqCurrencyCount[i] && !HasCurrency(pQuest->ReqCurrencyId[i], pQuest->ReqCurrencyCount[i], true))
+                return false;
+    }
 
     if (!CanRewardQuest(pQuest, false))
         return false;
@@ -15421,6 +15435,16 @@ bool Player::CanRewardQuest(Quest const *pQuest, bool msg)
                     SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, pQuest->ReqItemId[i]);
                 return false;
             }
+        }
+    }
+
+    for (uint8 i = 0; i < QUEST_CURRENCY_COUNT; i++)
+    {
+        if (pQuest->ReqCurrencyId[i] && pQuest->ReqCurrencyCount[i] &&
+            !HasCurrency(pQuest->ReqCurrencyId[i], pQuest->ReqCurrencyCount[i], true))
+        {
+            // some message?
+            return false;
         }
     }
 
@@ -15639,6 +15663,12 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     {
         if (pQuest->RewCurrencyId[i] && pQuest->RewCurrencyCount[i])
             ModifyCurrency(pQuest->RewCurrencyId[i],pQuest->RewCurrencyCount[i],CURRENCY_SOURCE_OTHER);
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (pQuest->ReqCurrencyId[i] && pQuest->ReqCurrencyCount[i])
+            ModifyCurrency(pQuest->ReqCurrencyId[i],-int32(pQuest->ReqCurrencyCount[i]),CURRENCY_SOURCE_OTHER);
     }
 
     RewardReputation(pQuest);
@@ -16488,6 +16518,39 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
         }
     }
     UpdateForQuestWorldObjects();
+}
+
+void Player::CurrencyModifyQuestCheck(uint32 entry)
+{
+    for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
+        uint32 questid = GetQuestSlotQuestId(i);
+        if (questid == 0)
+            continue;
+
+        QuestStatusData& q_status = mQuestStatus[questid];
+
+        if (q_status.m_status != QUEST_STATUS_INCOMPLETE)
+            continue;
+
+        Quest const* qInfo = sObjectMgr->GetQuestTemplate(questid);
+        if (!qInfo || !qInfo->HasFlag(QUEST_TRINITY_FLAGS_DELIVER))
+            continue;
+
+        for (uint8 j = 0; j < QUEST_ITEM_OBJECTIVES_COUNT; ++j)
+        {
+            uint32 reqcurr = qInfo->ReqCurrencyId[j];
+            if (reqcurr == entry)
+            {
+                if (CanCompleteQuest(questid))
+                    CompleteQuest(questid);
+                else
+                    IncompleteQuest(questid);
+
+                return;
+            }
+        }
+    }
 }
 
 void Player::KilledMonster(CreatureInfo const* cInfo, uint64 guid)

@@ -4432,6 +4432,13 @@ void ObjectMgr::LoadQuests()
             }
         }
 
+        // set "deliver" flag if the quest has currencies as objective
+        for (uint8 j = 0; j < QUEST_CURRENCY_COUNT; j++)
+        {
+            if (qinfo->ReqCurrencyId[j])
+                qinfo->SetFlag(QUEST_TRINITY_FLAGS_DELIVER);
+        }
+
         for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
         {
             uint32 id = qinfo->ReqSourceId[j];
