@@ -2048,6 +2048,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (getClass() == CLASS_DEATH_KNIGHT && GetMapId() == 609 && !isGameMaster() && !HasSpell(50977))
             return false;
 
+        if (getRace() == RACE_WORGEN && GetMapId() == 654 && GetSession()->GetSecurity() == SEC_PLAYER && GetQuestStatus(14434) != QUEST_STATUS_COMPLETE)
+            return false;
+
+        if (getRace() == RACE_GOBLIN && GetSession()->GetSecurity() == SEC_PLAYER
+            && GetMapId() == 648 && (GetQuestStatus(25266) != QUEST_STATUS_COMPLETE && GetZoneId() == 4720)
+            || (GetQuestStatus(14126) != QUEST_STATUS_COMPLETE && GetZoneId() == 4737))
+            return false;
+
         // far teleport to another map
         Map* oldmap = IsInWorld() ? GetMap() : NULL;
         // check if we can enter before stopping combat / removing pet / totems / interrupting spells
