@@ -13684,8 +13684,8 @@ float Unit::GetSpeed(UnitMoveType mtype) const
 
 void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 {
-    if (rate < 0)
-        rate = 0.0f;
+    if (rate < 0.0001f)
+        rate = 0.0001f;
 
     // Update speed only on change
     if (m_speed_rate[mtype] == rate && !forced)
