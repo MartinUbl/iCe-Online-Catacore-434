@@ -2815,6 +2815,8 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&amount), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_CHANGED, 0, aux.c_str());
+
+    _SendBankMoneyUpdate(session);
 }
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
@@ -2866,6 +2868,8 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
 
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&amount), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_CHANGED, 0, aux.c_str());
+
+    _SendBankMoneyUpdate(session);
     return true;
 }
 
@@ -3174,7 +3178,7 @@ void Guild::SendLoginInfo(WorldSession* session)
     session->SendPacket(&data);
     sLog->outDebug("WORLD: Sent guild MOTD (SMSG_GUILD_EVENT)");
 
-    SendBankTabsInfo(session);
+    SendBankList(session, 0, true, true);
     _BroadcastEvent(GE_SIGNED_ON, player->GetGUID(), player->GetName());
 
     // Send to self separately, player is not in world yet and is not found by _BroadcastEvent
@@ -4102,11 +4106,18 @@ void Guild::_SendBankMoneyUpdate(WorldSession *session) const
 {
     WorldPacket data(SMSG_GUILD_BANK_LIST, 8 + 1 + 4 + 1 + 1);
 
+    data.WriteBit(0);
+    data.WriteBits(0, 20);                                            // Item count
+    data.WriteBits(0, 22);                                            // Tab count
+
+    data.FlushBits();
+
     data << uint64(m_bankMoney);
-    data << uint8(0);                                       // tabId, default 0
+
+    data << uint8(0);                                                 // tabId, default 0
+
     data << uint32(_GetMemberRemainingSlots(session->GetPlayer()->GetGUID(), 0));
-    data << uint8(0);                                       // Tell that there's no tab info in this packet
-    data << uint8(0);                                       // No items
+
     BroadcastPacket(&data);
 
     sLog->outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
@@ -4145,31 +4156,65 @@ void Guild::_SendBankContentUpdate(MoveItemData* pSrc, MoveItemData* pDest) cons
 
 void Guild::_SendBankContentUpdate(uint8 tabId, SlotIds slots) const
 {
-    if (const BankTab* pTab = GetBankTab(tabId))
+    if (BankTab const* tab = GetBankTab(tabId))
     {
+        ByteBuffer tabData;
         WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
+        data.WriteBit(0);
+        data.WriteBits(slots.size(), 20);                                           // Item count
+        data.WriteBits(0, 22);                                                      // Tab count
+
+        for (SlotIds::const_iterator itr = slots.begin(); itr != slots.end(); ++itr)
+        {
+            data.WriteBit(0);
+
+            Item const* tabItem = tab->GetItem(*itr);
+            uint32 enchantCount = 0;
+            if (tabItem)
+            {
+                for (uint32 enchSlot = 0; enchSlot < MAX_ENCHANTMENT_SLOT; ++enchSlot)
+                {
+                    if (uint32 enchantId = tabItem->GetEnchantmentId(EnchantmentSlot(enchSlot)))
+                    {
+                        tabData << uint32(enchantId);
+                        tabData << uint32(enchSlot);
+                        ++enchantCount;
+                    }
+                }
+            }
+
+            data.WriteBits(enchantCount, 23);                                       // enchantment count
+
+            tabData << uint32(0);
+            tabData << uint32(0);
+            tabData << uint32(0);
+            tabData << uint32(tabItem ? tabItem->GetCount() : 0);                   // ITEM_FIELD_STACK_COUNT
+            tabData << uint32(*itr);
+            tabData << uint32(0);
+            tabData << uint32(tabItem ? tabItem->GetEntry() : 0);
+            tabData << uint32(tabItem ? tabItem->GetItemRandomPropertyId() : 0);
+            tabData << uint32(tabItem ? abs(tabItem->GetSpellCharges()) : 0);       // Spell charges
+            tabData << uint32(tabItem ? tabItem->GetItemSuffixFactor() : 0);        // SuffixFactor
+        }
+
+        data.FlushBits();
 
         data << uint64(m_bankMoney);
-        data << uint8(tabId);
+        if (!tabData.empty())
+            data.append(tabData);
+
+        data << uint32(tabId);
 
         size_t rempos = data.wpos();
         data << uint32(0);                                      // Item withdraw amount, will be filled later
-        data << uint8(0);                                       // Tell client that there's no tab info in this packet
-
-        data << uint8(slots.size());
-        for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
-            if (slots.find(slotId) != slots.end())
-                pTab->WriteSlotPacket(data, slotId);
 
         for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
             if (_MemberHasTabRights(itr->second->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
-                if (Player *player = itr->second->FindPlayer())
+                if (Player* player = itr->second->FindPlayer())
                 {
-                    data.put<uint32>(rempos, uint32(_GetMemberRemainingSlots(player->GetGUID(), tabId)));
+                    data.put<uint32>(rempos, uint32(_GetMemberRemainingSlots(itr->second->GetGUID(), tabId)));
                     player->GetSession()->SendPacket(&data);
                 }
-
-        sLog->outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
     }
 }
 
