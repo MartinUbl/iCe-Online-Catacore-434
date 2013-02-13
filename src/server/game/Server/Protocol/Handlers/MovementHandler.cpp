@@ -1101,6 +1101,8 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 int8 seatId;
                 uint64 accessory = 0;
 
+                bool hasPosition = false;
+
                 ObjectGuid vg, ag;
 
                 vg[3] = 0; // dafuq?
@@ -1109,7 +1111,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 recv_data >> y >> x >> z;
                 recv_data >> seatId;
 
-                recv_data.ReadBit(); // v2 + 10 !
+                bool someGuid = recv_data.ReadBit(); // v2 + 10 !
                 bool hasAdditionalData = recv_data.ReadBit(); // v2 + 72 // accessory?
                 ag[2] = recv_data.ReadBit(); // v2 + 34
                 ag[6] = recv_data.ReadBit(); // v2 + 38
@@ -1132,24 +1134,48 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 vg[0] = recv_data.ReadBit(); // v2 + 16
                 ag[0] = recv_data.ReadBit(); // v2 + 32
                 vg[1] = recv_data.ReadBit(); // v2 + 17
-                recv_data.ReadBit(); // v2 + 132
+                bool unkFlags = recv_data.ReadBit(); // v2 + 132
                 ag[1] = recv_data.ReadBit(); // v2 + 33
                 recv_data.ReadBit(); // v2 + 164
 
-                if (hasAdditionalData)
+                if (!someGuid)
                 {
-                    // wtf omg?
-                    // probably accessory guid? who knows
-                    // TODO: fix this
+                    for (uint32 i = 0; i < 24; i += 8)
+                        recv_data.read_skip<uint8>();
 
-                    // for now, just abort
-                    sLog->outError("MovementHandler::ChangeSeatsOnControlledVehicle: unhandled data input");
-                    recv_data.rfinish();
-                    return;
+                    recv_data.read_skip<uint8>();
                 }
 
-                recv_data.read_skip<uint8>(); // unk.. flags?
-                recv_data.read_skip<uint8>(); // unk
+                if (hasAdditionalData)
+                {
+                    // probably accessory data?
+
+                    recv_data.ReadBit(); // v2 + 19
+                    recv_data.ReadBit(); // v2 + 35
+                    recv_data.ReadBit(); // v2 + 83
+                    recv_data.ReadBit(); // v2 + 80
+                    recv_data.ReadBit(); // v2 + 87
+                    recv_data.ReadBit(); // v2 + 85
+                    recv_data.ReadBit(); // v2 + 120
+                    recv_data.ReadBit(); // v2 + 81
+
+                    recv_data.FlushBits();
+
+                    //recv_data.read_skip<uint8>();
+                }
+
+                if (vg[6])
+                {
+                    recv_data.read_skip<uint8>(); // unk
+                }
+
+                if (unkFlags)
+                {
+                    hasPosition = recv_data.ReadBit(); // v2 + 144
+                    recv_data.ReadBit(); // v13 ?
+
+                    recv_data.FlushBits();
+                }
 
                 recv_data.ReadByteSeq(ag[6]);
                 recv_data.ReadByteSeq(vg[7]);
@@ -1167,6 +1193,23 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 recv_data.ReadByteSeq(vg[1]);
                 recv_data.ReadByteSeq(ag[7]);
                 recv_data.ReadByteSeq(vg[2]);
+
+                if (unkFlags)
+                {
+                    if (hasPosition)
+                    {
+                        recv_data.read_skip<float>(); // y (v2 + 38)
+                        recv_data.read_skip<float>(); // x (v2 + 37)
+                        recv_data.read_skip<float>(); // z (v2 + 39)
+                    }
+                    recv_data.read_skip<uint32>(); // v2 + 34
+                    recv_data.read_skip<float>();  // orientation? v2 + 35
+                }
+
+                if (hasAdditionalData)
+                {
+                    //
+                }
 
                 // Unfinished support for the rest of the packet, sorry
                 recv_data.rfinish();
