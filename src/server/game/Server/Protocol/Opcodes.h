@@ -1326,6 +1326,7 @@ enum Opcodes
     SMSG_GUILDFINDER_SEARCH_RESULT                   = 0x00000, // Unknown
     CMSG_GUILD_ASSIGN_MEMBER_RANK                    = 0x03032, // 4.3.4 Build 15595
     SMSG_GUILD_PARTY_STATE_RESPONSE                  = 0x050A6, // 4.3.4 Build 15595
+    CMSG_GUILD_SET_RANK_PERMISSIONS                  = 0x01024, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1498,7 +1499,6 @@ enum Opcodes
     CMSG_GUILD_REPLACE_GUILD_MASTER                   = 0x1034,
     CMSG_GUILD_REQUEST_CHALLENGE_UPDATE               = 0x1224,
     CMSG_GUILD_REQUEST_MAX_DAILY_XP                   = 0x3232,
-    CMSG_GUILD_SET_RANK_PERMISSIONS                   = 0x1024,
     CMSG_LFG_GET_STATUS                               = 0x2581,
     CMSG_LFG_LFR_LEAVE                                = 0x0500,
     CMSG_LFG_SET_COMMENT                              = 0x0530,

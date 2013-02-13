@@ -542,15 +542,18 @@ private:
     class RankInfo
     {
     public:
-        RankInfo(uint32 guildId) : m_guildId(guildId), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0) { }
-        RankInfo(uint32 guildId, uint8 rankId, const std::string& name, uint32 rights, uint32 money) : 
-            m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(money) { }
+        RankInfo(uint32 guildId) : m_guildId(guildId), m_rankId(GUILD_RANK_NONE), m_rights(GR_RIGHT_EMPTY), m_bankMoneyPerDay(0), m_rankPos(GUILD_RANK_NONE) { }
+        RankInfo(uint32 guildId, uint8 rankId, const std::string& name, uint32 rights, uint32 money, uint8 rankPos) : 
+            m_guildId(guildId), m_rankId(rankId), m_name(name), m_rights(rights), m_bankMoneyPerDay(money), m_rankPos(rankPos) { }
 
         bool LoadFromDB(Field* fields);
         void SaveToDB(SQLTransaction& trans) const;
         void WritePacket(WorldPacket& data) const;
 
         uint8 GetId() const { return m_rankId; }
+
+        uint8 GetRankPos() const { return m_rankPos; };
+        void SetRankPos(uint8 pos) { if (pos < GUILD_RANKS_MAX_COUNT) m_rankPos = pos; };
 
         std::string GetName() const { return m_name; }
         void SetName(const std::string& name);
@@ -576,6 +579,7 @@ private:
         std::string m_name;
         uint32 m_rights;
         uint32 m_bankMoneyPerDay;
+        uint8 m_rankPos;
         GuildBankRightsAndSlots m_bankTabRightsAndSlots[GUILD_BANK_MAX_TABS];
     };
 
@@ -746,6 +750,7 @@ public:
     void HandleRemoveMember(WorldSession* session, uint64 guid);
     void HandleUpdateMemberRank(WorldSession* session, uint64 guid, bool demote);
     void HandleAddNewRank(WorldSession* session, const std::string& name);
+    void HandleSwitchRank(WorldSession* session, uint8 rankId, bool up);
     void HandleRemoveRank(WorldSession* session, uint8 rankId);
     void HandleSetMemberRank(WorldSession *session, uint64 targetGuid, uint64 setterGuid, uint32 rank);
     void HandleMemberDepositMoney(WorldSession* session, uint32 amount);

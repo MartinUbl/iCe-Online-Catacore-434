@@ -929,6 +929,7 @@ bool Guild::RankInfo::LoadFromDB(Field* fields)
     m_name              = fields[2].GetString();
     m_rights            = fields[3].GetUInt32();
     m_bankMoneyPerDay   = fields[4].GetUInt32();
+    m_rankPos           = m_rankId; // TODO: implement its saving!
     if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         m_rights |= GR_RIGHT_ALL;
     return true;
@@ -2271,7 +2272,10 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
         if (rankInfo->GetName().length())
             rankData.WriteString(rankInfo->GetName());
 
-        rankData << uint32(i);
+        if (rankInfo->GetRankPos() != GUILD_RANK_NONE)
+            rankData << uint32(rankInfo->GetRankPos());
+        else
+            rankData << uint32(i);
     }
 
     data.FlushBits();
@@ -2709,6 +2713,27 @@ void Guild::HandleAddNewRank(WorldSession* session, const std::string& name)
         if (_CreateRank(name, GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK))
             _BroadcastEvent(GE_RANK_CREATED, 0);
     }
+}
+
+void Guild::HandleSwitchRank(WorldSession* session, uint8 rankId, bool up)
+{
+    /*if (rankId == 0 && up)
+        return;
+
+    if (rankId > _GetRanksSize() && !up)
+        return;
+
+    RankInfo* src = GetRankInfo((uint8)rankId);
+    RankInfo* dst = up ? GetRankInfo((uint8)(rankId - 1)) : GetRankInfo((uint8)(rankId + 1));
+
+    if (src && dst)
+    {
+        uint8 srcPos = src->GetRankPos();
+        dst->SetRankPos(srcPos);
+        src->SetRankPos(up ? (srcPos - 1) : (srcPos + 1));
+    }*/
+
+    SendGuildRankInfo(session);
 }
 
 void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
@@ -3711,7 +3736,7 @@ bool Guild::_CreateRank(const std::string& name, uint32 rights)
     // Ranks represent sequence 0,1,2,... where 0 means guildmaster
     uint8 newRankId = _GetRanksSize();
 
-    RankInfo info(m_id, newRankId, name, rights, 0);
+    RankInfo info(m_id, newRankId, name, rights, 0, m_id);
     m_ranks.push_back(info);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();

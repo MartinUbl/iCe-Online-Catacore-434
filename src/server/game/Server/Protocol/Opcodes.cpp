@@ -600,7 +600,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_GUILD_RANK,                              STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GUILD_ADD_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildAddRankOpcode        );
     OPCODE( CMSG_GUILD_DEL_RANK,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode        );
-    OPCODE( CMSG_GUILD_SWITCH_RANK,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_GUILD_SWITCH_RANK,                       STATUS_LOGGEDIN, &WorldSession::HandleGuildSwitchRankOpcode     );
     OPCODE( CMSG_GUILD_SET_NOTE,                          STATUS_LOGGEDIN, &WorldSession::HandleGuildSetNoteOpcode        );
     OPCODE( SMSG_LOGIN_VERIFY_WORLD,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_CLEAR_EXPLORATION,                       STATUS_NEVER,    &WorldSession::Handle_NULL                     );
@@ -1334,6 +1334,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_LOAD_CUF_PROFILES,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAYER_MOVE,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_CEMETERY_LIST,                   STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
+    OPCODE( CMSG_GUILD_SET_RANK_PERMISSIONS,              STATUS_LOGGEDIN, &WorldSession::HandleGuildSetRankPermissionsOpcode);
 };
 
 void DestroyOpcodeTable()

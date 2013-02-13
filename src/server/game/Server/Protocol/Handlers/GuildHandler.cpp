@@ -459,6 +459,61 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         pGuild->HandleAddNewRank(this, rankName);
 }
 
+void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket &recvPacket)
+{
+    sLog->outDebug("WORLD: Received CMSG_GUILD_SWITCH_RANK");
+
+    uint32 rankId = 0;
+    uint8 direction = 0;
+
+    recvPacket >> rankId;
+    recvPacket >> direction; // 0 = down, 128 = up
+
+    if (Guild* pGuild = _GetPlayerGuild(this, true))
+        pGuild->HandleSwitchRank(this, rankId, (direction != 0));
+}
+
+void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
+{
+    Guild* guild = GetPlayer()->GetGuild();
+    if (!guild)
+    {
+        recvPacket.rfinish();
+        return;
+    }
+
+    uint32 oldRankId;
+    uint32 newRankId;
+    uint32 oldRights;
+    uint32 newRights;
+    uint32 moneyPerDay;
+
+    recvPacket >> oldRankId;
+    recvPacket >> oldRights;
+    recvPacket >> newRights;
+
+    GuildBankRightsAndSlotsVec rightsAndSlots(GUILD_BANK_MAX_TABS);
+    for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
+    {
+        uint32 bankRights;
+        uint32 slots;
+
+        recvPacket >> bankRights;
+        recvPacket >> slots;
+
+        rightsAndSlots[tabId] = GuildBankRightsAndSlots(uint8(bankRights), slots);
+    }
+
+    recvPacket >> moneyPerDay;
+    recvPacket >> newRankId;
+    uint32 nameLength = recvPacket.ReadBits(7);
+    std::string rankName = recvPacket.ReadString(nameLength);
+
+    sLog->outDebug("CMSG_GUILD_SET_RANK_PERMISSIONS [%s]: Rank: %s (%u)", GetPlayer()->GetName(), rankName.c_str(), newRankId);
+
+    guild->HandleSetRankInfo(this, newRankId, rankName, newRights, moneyPerDay, rightsAndSlots);
+}
+
 // Cata Status: Done
 void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 {
