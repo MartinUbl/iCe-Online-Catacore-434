@@ -23425,7 +23425,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
-    m_achievementMgr.SendAllAchievementData();  //marker1
 
     SendCurrencies();
 	SendEquipmentSetList();
@@ -23490,6 +23489,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     // Also update group to allow profit from i.e. guild runs
     if (Group* pGroup = GetGroup())
         pGroup->SendUpdate();
+
+    m_achievementMgr.SendAllAchievementData();  //marker1
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
