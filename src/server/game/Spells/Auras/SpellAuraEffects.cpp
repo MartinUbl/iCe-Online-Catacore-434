@@ -6114,6 +6114,8 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, 
     // Update manaregen value
     if (GetMiscValue() == POWER_MANA)
         target->ToPlayer()->UpdateManaRegen();
+
+    target->ToPlayer()->UpdateHaste();
     // other powers are not immediate effects - implemented in Player::Regenerate, Creature::Regenerate
 }
 

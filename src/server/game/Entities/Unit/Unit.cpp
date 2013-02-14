@@ -16476,14 +16476,26 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply)
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att,-val,apply);
     }
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
+
+    if (Player *pl = ToPlayer())
+        pl->UpdateHaste();
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
 {
     if (val > 0)
-        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,val,!apply);
+    {
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, val, !apply);
+    }
     else
-        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-val,apply);
+    {
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, -val, apply);
+    }
+
+    if (Player *pl = ToPlayer())
+        pl->UpdateHaste();
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime)

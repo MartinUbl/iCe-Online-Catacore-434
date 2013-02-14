@@ -2386,18 +2386,9 @@ void Player::RegenerateAll()
 
             if (cd1 || cd2)
             {
-                float totalmod = 0.0f;
-                AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-                for (AuraEffectList::const_iterator it = regenAura.begin(); it != regenAura.end(); ++it)
-                {
-                    if ((*it)->GetMiscValue() == POWER_RUNE && (*it)->GetMiscValueB() == int32(i))
-                        totalmod += (*it)->GetAmount();
-                }
-                float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
-                haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
-                haste += totalmod / 100.0f;
+                float haste = 10.0f * GetFloatValue(PLAYER_RUNE_REGEN_1 + i / 2);
 
-                uint32 realRegenTimer = m_regenTimer * (1.0f + haste);
+                uint32 realRegenTimer = m_regenTimer * haste;
 
                 if (cd1 && (!cd2 || cd1 <= cd2))
                     SetRuneCooldown(i, (cd1 > realRegenTimer) ? cd1 - realRegenTimer : 0);
@@ -2436,9 +2427,9 @@ void Player::Regenerate(Powers power)
 
     float addvalue = 0.0f;
 
-    //powers now benefit from haste.
-    float haste = (2 - GetFloatValue(UNIT_MOD_CAST_SPEED));
-    
+    // powers now benefit from haste.
+    float haste = 1.0f / GetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN);
+
     switch (power)
     {
         case POWER_MANA:
@@ -2478,12 +2469,8 @@ void Player::Regenerate(Powers power)
     // Mana regen calculated in Player::UpdateManaRegen()
     if (power != POWER_MANA)
     {
-        AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-        for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-            if (Powers((*i)->GetMiscValue()) == power)
-                addvalue *= ((*i)->GetAmount() + 100) / 100.0f;
-
-        // Butchery requires combat for this effect
+        // flat power generation from auras
+          // Butchery requires combat for this effect
         if (power != POWER_RUNIC_POWER || isInCombat())
             addvalue += (float) GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power == POWER_HEALTH) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
     }
@@ -3083,6 +3070,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // set default cast time multiplier
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+    SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
+    SetFloatValue(PLAYER_FIELD_MOD_HASTE, 1.0f);
+    SetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE, 1.0f);
+    SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, 1.0f);
 
     // reset size before reapply auras
     SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
@@ -5928,14 +5919,6 @@ void Player::UpdateRating(CombatRating cr)
         amount = 0;
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr, uint32(amount));
 
-    // Update also rune regeneration speed (affected by haste since 4.0.x)
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
-    {
-        float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
-        haste += float(GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE)) / 100.0f;
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, (1 + haste)*0.1f);
-    }
-
     bool affectStats = CanModifyStats();
 
     switch (cr)
@@ -5987,8 +5970,10 @@ void Player::UpdateRating(CombatRating cr)
         //    break;
         case CR_CRIT_TAKEN_SPELL:                           // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
             break;
-        case CR_HASTE_MELEE:                                // Implemented in Player::ApplyRatingMod
+        case CR_HASTE_MELEE:
         case CR_HASTE_RANGED:
+            UpdateHaste();
+            break;
         case CR_HASTE_SPELL:
             break;
         case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
@@ -25354,7 +25339,7 @@ void Player::InitRunes()
     }
 
     for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, (2 - GetFloatValue(UNIT_MOD_CAST_SPEED))*0.1f);
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const

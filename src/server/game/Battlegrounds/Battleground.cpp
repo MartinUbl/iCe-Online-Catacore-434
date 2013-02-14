@@ -1678,6 +1678,7 @@ bool Battleground::AddSpiritGuide(uint32 type, float x, float y, float z, float 
         pCreature->SetUInt32Value(UNIT_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
         // correct cast speed
         pCreature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+        pCreature->SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
         //pCreature->CastSpell(pCreature, SPELL_SPIRIT_HEAL_CHANNEL, true);
         return true;
     }
