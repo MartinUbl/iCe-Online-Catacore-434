@@ -8983,14 +8983,16 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
         return false;
     }
 
-    if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS)
+    // Vendors have theirs item count limited to 300, but if the vendor has items for all classes, then only some of them would be displayed
+    // we limit it explicitly in WorldSession::SendListInventory by counting sent item count
+    /*if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS)
     {
         if (pl)
             ChatHandler(pl).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         else
             sLog->outErrorDb("Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vItems->GetItemCount(), MAX_VENDOR_ITEMS, vendor_entry);
         return false;
-    }
+    }*/
 
     return true;
 }

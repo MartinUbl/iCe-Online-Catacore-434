@@ -1112,6 +1112,10 @@ void WorldSession::SendListInventory(uint64 vendorguid)
             itemsData << uint32(vendorItem->maxcount * precision);
         }
         // else error
+
+        // Client limitation of 300 items (but the max value of uint8 is 255, what the heck?)
+        if (count >= 255)
+            break;
     }
 
     ObjectGuid guid = vendorguid;
