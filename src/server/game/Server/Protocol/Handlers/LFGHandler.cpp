@@ -201,42 +201,149 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
                     qRew = sObjectMgr->GetQuestTemplate(reward->reward[1].questId);
             }
         }
-        if (qRew)
+
+        // We don't know exactly, what is the first par of the packet for. It seems to work fine only with the second part
+        // of packet implemented. If you uncomment this block, you will probably get wrong currency/item rewards by every
+        // dungeon.
+
+        /*if (qRew)
         {
             data << uint8(done);
-            data << uint32(qRew->GetRewOrReqMoney());
-            data << uint32(qRew->XPValue(GetPlayer()));
-            data << uint32(reward->reward[done].variableMoney);
-            data << uint32(reward->reward[done].variableXP);
+            data << uint32(0);
+            data << uint32(0);
+
+            data << uint32(0); // uint32(reward->reward[done].variableMoney)
+            data << uint32(0); // uint32(reward->reward[done].variableXP)
+
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
 
             uint8 currCount = 0;
             for (uint8 k = 0; k < QUEST_REWARDS_COUNT; k++)
+            {
                 if (qRew->RewCurrencyId[k] > 0)
                     currCount++;
+                if (qRew->RewItemId[k] > 0)
+                    currCount++;
+            }
 
-            data << uint8(currCount);
-            if (currCount)
+            data << uint8(0); // some kind of boolean field
+
+            for (uint32 j = 0; j < 3; j++)
             {
-                for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+                data << uint32(currCount);
+                if (currCount)
                 {
-                    if (!qRew->RewCurrencyId[i])
-                        continue;
+                    data << uint32(qRew->GetRewOrReqMoney());
+                    data << uint32(qRew->XPValue(GetPlayer()));
 
-                    data << uint32(qRew->RewCurrencyId[i]);
-                    data << uint32(0); // unk?
-                    data << uint32(qRew->RewCurrencyCount[i] * GetCurrencyPrecision(qRew->RewCurrencyId[i]));
+                    size_t pos = data.wpos();
+                    uint8 rewCount = 0;
+                    data << uint8(0);
+
+                    for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+                    {
+                        if (qRew->RewCurrencyId[i])
+                        {
+                            data << uint32(qRew->RewCurrencyId[i]);
+                            data << uint32(qRew->RewCurrencyId[i]);
+                            data << uint32(qRew->RewCurrencyCount[i] * GetCurrencyPrecision(qRew->RewCurrencyId[i]));
+
+                            data << uint8(1);  // is currency
+
+                            rewCount++;
+                        }
+                        if (qRew->RewItemId[i])
+                        {
+                            data << uint32(qRew->RewItemId[i]);
+                            data << uint32(qRew->RewItemId[i]);
+                            data << uint32(qRew->RewItemCount[i]);
+
+                            data << uint8(0);  // is currency
+
+                            rewCount++;
+                        }
+                    }
+
+                    data.put<uint8>(pos, rewCount);
                 }
             }
         }
+        else*/
+        {
+            data << uint8(done);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+
+            for (uint32 j = 0; j < 3; j++)
+            {
+                data << uint32(0);
+            }
+        }
+
+        uint8 secRewCount = 0;
+
+        if (qRew)
+        {
+            data << uint32(qRew->GetRewOrReqMoney());
+            data << uint32(qRew->XPValue(GetPlayer()));
+        }
         else
         {
-            data << uint8(0);
             data << uint32(0);
             data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint8(0);
         }
+
+        uint8 pos = data.wpos();
+        data << uint8(secRewCount);
+
+        if (qRew)
+        {
+            for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+            {
+                if (qRew->RewCurrencyId[i])
+                {
+                    data << uint32(qRew->RewCurrencyId[i]);
+                    data << uint32(qRew->RewCurrencyId[i]);
+                    data << uint32(qRew->RewCurrencyCount[i] * GetCurrencyPrecision(qRew->RewCurrencyId[i]));
+
+                    data << uint8(1);  // is currency
+
+                    secRewCount++;
+                }
+                if (qRew->RewItemId[i])
+                {
+                    data << uint32(qRew->RewItemId[i]);
+                    data << uint32(qRew->RewItemId[i]);
+                    data << uint32(qRew->RewItemCount[i]);
+
+                    data << uint8(0);  // is currency
+
+                    secRewCount++;
+                }
+            }
+        }
+
+        data.put<uint8>(pos, secRewCount);
     }
     BuildPlayerLockDungeonBlock(data, lock);
     SendPacket(&data);
