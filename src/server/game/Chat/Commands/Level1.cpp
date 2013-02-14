@@ -301,36 +301,20 @@ bool ChatHandler::HandleReloadSpellGrandSkillupCommand(const char* args)
 bool ChatHandler::HandleBanankyCommandAdd(const char* args)
 {
     if (!args)
-    {
-        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet>");
-        SetSentErrorMessage(true);
         return false;
-    }
 
     char* chname = strtok((char*)args, " ");
     char* pocet = strtok(NULL, " ");
-    char* duvod = strtok(NULL, "");
+    char* tailStr = *args != '"' ? strtok(NULL, "") : (char*)args;
 
-    if (!chname)
-    {
-        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
-        SetSentErrorMessage(true);
+    if (!chname || !pocet || !tailStr)
         return false;
-    }
 
-    if (!pocet)
-    {
-        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
-        SetSentErrorMessage(true);
-        return false;
-    }
+
+    char* duvod = extractQuotedArg(tailStr);
 
     if (!duvod)
-    {
-        SendSysMessage("Syntaxe prikazu je \n .bananky <jmeno> <pocet> <duvod>");
-        SetSentErrorMessage(true);
         return false;
-    }
 
     uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname);
     Player* target = sObjectMgr->GetPlayer(pguid);
@@ -356,6 +340,75 @@ bool ChatHandler::HandleBanankyCommandAdd(const char* args)
     return true;
 
 }
+
+bool ChatHandler::HandleBanankyCommandModify(const char* args)
+{
+    char* chname = strtok((char*)args, " ");
+    char* pocet = strtok(NULL, " ");
+    const char* duvod = strtok(NULL, "");
+
+    if (!args || !chname)
+    {
+        SetSentErrorMessage(false);
+        return false;
+    }
+
+    if (!pocet)
+    {
+        SendSysMessage("Nebyl zadan novy pocet.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint64 pguid = sObjectMgr->GetPlayerGUIDByName(chname);
+
+    QueryResult result = ScriptDatabase.PQuery("SELECT duvod FROM ice_bananky WHERE guid = %u AND done = 0",pguid);
+
+    if (result)
+    {
+        Field* fields = result->Fetch();
+        const char* old_duvod = fields[0].GetCString();
+
+        if (!duvod)
+            duvod = old_duvod;
+
+        Player* target = sObjectMgr->GetPlayer(pguid);
+
+        std::stringstream ss;
+
+        ss << "Your punishment was changed to " << pocet << " bananas ";
+
+        if (duvod != old_duvod)
+            ss << "with new reason: " << duvod;
+
+        if (target)
+        {
+            if (HasLowerSecurity(target, 0))
+                return false;
+
+            target->GetSession()->SendNotification(ss.str().c_str());
+        }
+        else
+        {
+            if (HasLowerSecurity(target, pguid))
+                return false;
+        }
+
+        ScriptDatabase.PExecute("UPDATE ice_bananky SET count = '%s', duvod = '%s' WHERE guid = %u",pocet,duvod,GUID_LOPART(pguid));
+
+    }
+    else
+    {
+        PSendSysMessage("Hrac %s neni na plantazi nebo jiz trest splnil.",chname);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage("Hraci %s (guid %u) byl zmenen trest na %s bananku s duvodem %s", chname,GUID_LOPART(pguid),pocet,duvod);
+
+    return true;
+}
+
 bool ChatHandler::HandleBanankyCommandBlist(const char *args)
 {
     uint64 guid;

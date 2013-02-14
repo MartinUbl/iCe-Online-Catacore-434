@@ -1515,6 +1515,12 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                         //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
                         m_caster->ModifyPower(POWER_ECLIPSE, bp0);
                     }
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886); // reset spell cooldown of Nature's Grace
+                    }
                 }
                 break;
             //Starfire
@@ -1530,15 +1536,41 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
-                        m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                    {
+                        // Doesn't work as intended, leave alone and modify manually
+                        //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
+                        m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                    }
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) >= 100)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
                 }
                 break;
             //Starsurge
             case 78674:
                 if(EclipseLeft)
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE,-15);
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
+                }
                 else
+                {
                     m_caster->ModifyPower(POWER_ECLIPSE, 15);
+
+                    if (m_caster->HasAura(16880) || m_caster->HasAura(61345) || m_caster->HasAura(61346) ) // If player has Nature's Grace talent
+                    {
+                        if (m_caster->GetPower(POWER_ECLIPSE) >= 100)
+                            m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+                    }
+                }
                 break;
         }
     }
@@ -3015,21 +3047,6 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 case SPELLFAMILY_GENERIC:
                     switch (m_spellInfo->Id)
                     {
-                        case 12355: // Impact scripted effect
-                        {
-                            // Limit only effect no. 1
-                            if (i != 1)
-                                break;
-                            // Exclude targets which are out of combat
-                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
-                            {
-                                if (!(*itr)->isInCombat())
-                                    itr = unitList.erase(itr);
-                                else
-                                    ++itr;
-                            }
-                            break;
-                        }
                         case 26073: // Fire Nova (Quest spell)
                         {
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
@@ -4946,9 +4963,6 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
     WorldPacket data(MSG_CHANNEL_UPDATE, 8+4);
     data.append(m_caster->GetPackGUID());
     data << uint32(time);
@@ -5553,6 +5567,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!pBranch)
                 return SPELL_FAILED_BAD_TARGETS;
 
+            if (!m_caster->ToPlayer()->HasResearchProject(m_spellInfo->researchProjectId))
+                return SPELL_FAILED_NOT_READY;
+
             // Disallow using more than maximum keystones
             if (pProject->keyStonesNeeded < m_keyStonesCount)
                 m_keyStonesCount = pProject->keyStonesNeeded;
@@ -5598,6 +5615,11 @@ SpellCastResult Spell::CheckCast(bool strict)
     // Explicitly allow usage of spell Dropping Heavy Bomb used for quest Mission: Abyssal Shelf only when riding taxi
     if (m_spellInfo->Id == 33836 && (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->ToPlayer()->isInFlight()))
         return SPELL_FAILED_NOT_HERE;
+
+    // Do not allow to use gameobject which was already used and is going to disappear on next update
+    GameObject *go = m_targets.getGOTarget();
+    if (go && go->GetGoType() == GAMEOBJECT_TYPE_GOOBER && go->getLootState() != GO_READY)
+        return SPELL_FAILED_CHEST_IN_USE;
 
     // Check add guild bank condition
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
@@ -7906,8 +7928,9 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 break;
             }
 
-            // do not queue spells with cooldown started
-            if (player->HasSpellCooldown(spellInfo->Id) && !player->HasGlobalCooldown(spellInfo))
+            // do not queue spells with cooldown started, don't cast another spell while looting and don't allow to target items
+            if (player->HasSpellCooldown(spellInfo->Id) || player->GetLootGUID() || spellInfo->researchProjectId
+                || m_Spell->m_targets.getItemTarget() || m_Spell->m_targets.getGOTarget())
             {
                 m_Spell->SendCastResult(SPELL_FAILED_NOT_READY);
                 m_Spell->finish(false);
@@ -7926,7 +7949,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             }
 
             // not ready or another action in progress - wait more
-            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
+            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(true, true, true))
             {
                 // cast time of current spell
                 uint32 cast = 0;
@@ -7935,8 +7958,8 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     cast = current->GetRemainingCastTime();
                 // remaining global cooldown on queued spell
                 uint32 cd = player->GetGlobalCooldown(spellInfo);
-                uint32 available = std::max(cast, cd);
 
+                uint32 available = std::max(cast, cd) + 1;      // 1ms after previous spell cast
                 if (available <= 0)
                     available = 1;
 

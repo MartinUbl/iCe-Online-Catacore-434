@@ -1085,6 +1085,7 @@ class ObjectMgr
         uint32 GenerateGuildId();
         uint32 GenerateMailID();
         uint32 GeneratePetNumber();
+        uint32 GenerateGuildNewsID();
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
@@ -1353,6 +1354,7 @@ class ObjectMgr
         uint32 m_ItemTextId;
         uint32 m_mailid;
         uint32 m_hiPetNumber;
+        uint32 m_hiGuildNewsId;
 
         // first free low guid for selected guid type
         uint32 m_hiCharGuid;

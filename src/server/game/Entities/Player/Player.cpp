@@ -2095,6 +2095,22 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (getClass() == CLASS_DEATH_KNIGHT && GetMapId() == 609 && !isGameMaster() && !HasSpell(50977))
             return false;
 
+        if (getRace() == RACE_WORGEN && GetMapId() == 654 && GetSession()->GetSecurity() == SEC_PLAYER && GetQuestStatus(14434) != QUEST_STATUS_COMPLETE)
+            return false;
+
+        if (getRace() == RACE_GOBLIN && GetSession()->GetSecurity() == SEC_PLAYER
+            && GetMapId() == 648 && (GetQuestStatus(25266) != QUEST_STATUS_COMPLETE && GetZoneId() == 4720)
+            || (GetQuestStatus(14126) != QUEST_STATUS_COMPLETE && GetZoneId() == 4737))
+            return false;
+
+        // Special exclusion for "plantaz"
+        if (HasAura(15007) && GetAura(15007)->IsPermanent() && GetMapId() == 746)
+        {
+            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
+            GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
+            return false;
+        }
+
         // far teleport to another map
         Map* oldmap = IsInWorld() ? GetMap() : NULL;
         // check if we can enter before stopping combat / removing pet / totems / interrupting spells
@@ -2433,9 +2449,9 @@ void Player::Regenerate(Powers power)
                 ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (getLevel() * 0.066f));
 
             if (isInCombat()) // Trinity updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer * haste;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer;
             else
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
         }   break;
         case POWER_RAGE:                                    // deplete rage
         case POWER_RUNIC_POWER:                             // deplete runic power
@@ -7517,7 +7533,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
          }
         if (GetMapId() == 746) // Special for Plantaz
         {
-            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Ressurection Sickness)
+            AddAura(15007,GetSession()->GetPlayer()); // Add aura (Resurrection Sickness)
             QueryResult result = ScriptDatabase.PQuery("SELECT count, duvod FROM ice_bananky WHERE guid = %u and done = 0",GetSession()->GetPlayer()->GetGUID()); // Select duvod and count
             uint32 counter = 0;
             std::string duvod;
@@ -7529,15 +7545,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             }
             ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA, counter, duvod.c_str()); // Send Sys Message (Czech)
             ChatHandler(this).PSendSysMessage(LANG_BANAKY_PRAVIDLA_2, counter, duvod.c_str()); // Send Sys Message  (English)
-        }
-
-        Aura* aur = GetAura(15007);
-
-        if (aur && aur->IsPermanent() && GetMapId() != 746) // Exiting Plantaz
-        {
-            TeleportTo(746, -10936.1f, -400.671f, 23.1415f, 0.0f); // Plantaz
-            GetSession()->SendNotification("Nemuzes se portovat z plantaze, dokud nebudes mit splneny svuj trest!"); // Czech
-            GetSession()->SendNotification("You can't teleport yourself out of banana's field until you have filled your punishment!"); // English
         }
     }
 
@@ -11361,6 +11368,25 @@ void Player::DiggedCreature(uint64 guidlow)
         if (new_digsite)
             m_researchSites.site_dig_count[pos] = 0;
     }
+}
+
+bool Player::HasResearchProject(uint32 project)
+{
+    for (uint32 slot = 0; slot < 16; slot++)
+    {
+        if (slot < 8)
+        {
+            if (GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+slot, 0) == project)
+                return true;
+        }
+        else if (slot >= 8 && slot < 16)
+        {
+            if (GetUInt16Value(PLAYER_FIELD_RESEARCHING_1+(slot-8), 1) == project)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 void Player::SetNewResearchProject(uint8 slot, bool completed)
@@ -21970,44 +21996,64 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
     }
 
-    uint32 price  = crItem->IsGoldRequired(pProto) ? pProto->BuyPrice * count : 0;
-
-    float discountMod = GetReputationPriceDiscount(pCreature);
-    discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
-
-    // reputation discount
-    if (price)
-        price = uint32(floor(price * discountMod));
-
-    // If item is listed as guild reward, check whether player is capable to buy
-    if (Guild::IsListedAsGuildReward(pProto->ItemId))
-    {
-        // If player doesn't have guild, do not display
-        if (!GetGuildId())
-        {
-            SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
-            return false;
-        }
-        else
-        {
-            // Get price in copper from reward template
-            if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
-            {
-                if (pGuild->IsRewardReachable(this, pProto->ItemId))
-                    price = Guild::GetRewardData(pProto->ItemId)->price;
-                else
-                {
-                    SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
-                    return false;
-                }
-            }
-        }
-    }
-
     if (pProto->RequiredReputationFaction && (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank))
     {
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
         return false;
+    }
+
+    uint32 price = 0;
+
+    if ((crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0) || Guild::IsListedAsGuildReward(pProto->ItemId))
+    {
+        float discountMod = GetReputationPriceDiscount(pCreature);
+        discountMod -= GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_COST)/100.0f;
+
+        // If item is listed as guild reward, check whether player is capable to buy
+        if (Guild::IsListedAsGuildReward(pProto->ItemId))
+        {
+            // If player doesn't have guild, do not display
+            if (!GetGuildId())
+            {
+                SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+                return false;
+            }
+            else
+            {
+                // Get price in copper from reward template
+                if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+                {
+                    if (pGuild->IsRewardReachable(this, pProto->ItemId))
+                        price = Guild::GetRewardData(pProto->ItemId)->price;
+                    else
+                    {
+                        SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+                        return false;
+                    }
+                }
+            }
+        }
+        else
+            price = pProto->BuyPrice;
+
+        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
+        // this check will avoid buying more items of the same kind, that will exceed limit and cause gold overflow
+        if ((uint32)count > maxCount)
+        {
+            sLog->outChar("Exploit attempt: Player %s (%u) tried to buy %u of item %u, causing overflow", GetName(), GetGUIDLow(), (uint32)count, pProto->ItemId);
+            count = (uint8)maxCount;
+        }
+        price = price * count;
+
+        // reputation discount
+        if (price)
+            price = uint32(floor(price * discountMod));
+
+        if (!HasEnoughMoney(price))
+        {
+            SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+            return false;
+        }
     }
 
     if (crItem->ExtendedCost)
@@ -22046,12 +22092,6 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
             return false;
         }
-    }
-
-    if (!HasEnoughMoney(price))
-    {
-        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-        return false;
     }
 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))

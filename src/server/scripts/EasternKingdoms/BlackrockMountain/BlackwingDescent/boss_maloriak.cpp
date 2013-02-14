@@ -347,7 +347,6 @@ public:
             c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             c->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             c->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-            Reset();
         }
         // uint32 pro spelly
         uint32 uiAbsoluteZero;
@@ -1271,8 +1270,8 @@ public:
         {
             if (pSummon->GetEntry() == NPC_ABERRATION)
             {
-                /*me->AI()->DoAction(RECORD_DEATH);
-                me->AI()->DoAction(CHECK_COUNTER);*/
+                me->AI()->DoAction(RECORD_DEATH);
+                me->AI()->DoAction(CHECK_COUNTER);
             }
         }
 

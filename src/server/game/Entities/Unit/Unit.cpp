@@ -61,6 +61,7 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "UpdateFieldFlags.h"
+#include "InstanceScript.h"
 
 #include <math.h>
 
@@ -1953,6 +1954,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             // Aura cannot absorb anything more - remove it
             if (absorbAurEff->GetAmount() <= 0)
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            else     // Aura can absorb more - update value in client tooltip
+                absorbAurEff->GetBase()->SetNeedClientUpdateForTargets();
         }
     }
 
@@ -2012,6 +2015,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
             if ((absorbAurEff->GetAmount() <= 0))
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            else
+                absorbAurEff->GetBase()->SetNeedClientUpdateForTargets();
         }
     }
 
@@ -5933,6 +5938,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     int32 bp0 = damage * triggeredByAura->GetAmount() / 100.0f;
                     CastCustomSpell(this, 91394, &bp0, 0, 0, true);
                 }
+                //TODO On 4.3.4  healing reduction increase by 8,16,25 % from 3,7,10 %
+
+                if (HasAura(11175)) // Permafrost (Rank 1)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -3, pVictim, true);
+                else if (HasAura(12569)) // Permafrost (Rank 2)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -7, pVictim, true);
+                else if (HasAura(12571)) // Permafrost (Rank 3)
+                    CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -10, pVictim, true); 
             }
         //UPDATE `spell_proc_event` SET SpellFamilyMask0=4194323 WHERE entry IN (44445,44446,44448);
             // Hot Streak
@@ -5991,14 +6004,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             }
             switch(dummySpell->Id)
             {
-                // Glyph of Polymorph
-                case 56375:
-                {
-                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
-                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
-                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
-                    return true;
-                }
                 // Glyph of Icy Veins
                 case 56374:
                 {
@@ -8473,8 +8478,8 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
         {
             // Blood of the North
             // Reaping
-            // Death Rune Mastery
-            if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2622)
+            // Blood Rites
+            if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2724)
             {
                 *handled = true;
                 // Convert recently used Blood Rune to Death Rune
@@ -8490,9 +8495,8 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     aurEff->ResetPeriodic(true);
                     uint32 runesLeft;
 
-                    if (dummySpell->SpellIconID == 2622)
-                        runesLeft = 2;
-                    else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948) // Reaping / Festering Strike
+                    if ((dummySpell->SpellIconID == 2724 /* Blood Rites */ && (procSpell->Id == 49998 || procSpell->Id == 49020)) // Death Strike / Obliterate
+                     || (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)) // Reaping / Festering Strike
                         runesLeft = 2;
                     else
                         runesLeft = 1;
@@ -8502,7 +8506,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                         if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH)
                             continue;
 
-                        if (dummySpell->SpellIconID == 2622)
+                        if (dummySpell->SpellIconID == 2724 && (procSpell->Id == 49998 || procSpell->Id == 49020))
                         {
                             if (((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
                                 continue;
@@ -9070,6 +9074,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // triggered the original spell, so we were trapped in a loop
             case 20424: // Seals of Command
             case 51292: // Soulthirst
+            case 82366: // Consecration
                 return false;
         }
     }
@@ -9278,8 +9283,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Decimation
         case 63156:
         case 63158:
-            // Can proc only if target has hp below 35%
-            if (!pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
+            // Can proc only if target has hp below 25%
+            if (!pVictim->HealthBelowPct(26))
                 return false;
             break;
         // Deep Freeze Immunity State (hack)
@@ -9348,6 +9353,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 80129:
             // Should proc only from Devastate
             if (procSpell->Id != 20243 || pVictim->GetHealthPct() > 20.0f)
+                return false;
+            break;
+        // Rude Interruption
+        case 61216:
+        case 61221:
+        {
+            // Should proc only from Pummel
+            if (procSpell->Id != 6552)
+                return false;
+            break;
+        }
+        case 56414: // Glyph of Dazing Shield
+            // only proc from Avenger's Shield
+            if (procSpell->Id != 31935)
                 return false;
             break;
         // Soul Leech
@@ -11477,10 +11496,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                             break;
                         }
                 }
-            // Drain Soul - increased damage for targets under 25 % HP
-            if (spellProto->SpellFamilyFlags[0] & 0x00004000)
-                if (HasAura(200000))
-                    DoneTotalMod *= 2;
         break;
         case SPELLFAMILY_HUNTER:
             // Steady Shot
@@ -12097,6 +12112,16 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
 
     if (crit_bonus > 0)
         damage += crit_bonus;
+
+    if (spellProto && spellProto->Id == 116 &&  HasAura(83156)) // Piercing Chill rank 1
+    {
+        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS,1, pVictim, true);// Piercing chill to one additional target
+    }
+
+    if (spellProto && spellProto->Id == 116 &&  HasAura(83157)) // Piercing Chill rank 2
+    {
+        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS, 2 , pVictim, true); // Piercing chill to 2 additional target
+    }
 
     return damage;
 }
@@ -12818,7 +12843,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                     else if (HasAura(77700))
                         bonusApp = 0.1f;
 
-                    if (Aura* pAura = pVictim->GetAura(77661))
+                    if (Aura* pAura = pVictim->GetAura(77661, GetGUID()))
                     {
                         DoneTotalMod += bonusApp * pAura->GetStackAmount();
                         pAura->Remove();
@@ -13208,13 +13233,18 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         if (enemy)
         {
+            Creature* crea = this->ToCreature();
             if (IsAIEnabled)
             {
-                this->ToCreature()->AI()->EnterCombat(enemy);
+                crea->AI()->EnterCombat(enemy);
                 RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);//always remove Out of Combat Non Attackable flag if we enter combat and AI is enabled
+
+                InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
+                if (map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
+                    map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, this);
             }
-            if (this->ToCreature()->GetFormation())
-                this->ToCreature()->GetFormation()->MemberAttackStart(this->ToCreature(), enemy);
+            if (crea->GetFormation())
+                crea->GetFormation()->MemberAttackStart(crea, enemy);
         }
 
         if (isPet())
@@ -14438,6 +14468,11 @@ Unit* Creature::SelectVictim()
 
     // enter in evade mode in other case
     AI()->EnterEvadeMode();
+
+    Creature* crea = ToCreature();
+    InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
+    if (crea && crea->IsAIEnabled && map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
+        map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, this);
 
     return NULL;
 }
@@ -17123,7 +17158,13 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
 
         // Call creature just died function
         if (creature->IsAIEnabled)
+        {
             creature->AI()->JustDied(this);
+
+            InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
+            if(map && map->GetInstanceScript() && creature->GetCreatureInfo()->rank == 3)
+                map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
+        }
         
         if (creature->ToTempSummon())
         {
@@ -17145,14 +17186,20 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 case 1860:  // Voidwalker
                 case 1863:  // Succubus
                 case 691:   // Felhunter
-                case 11859: // Doomguard
+                case 17252: // Felguard
                     if (pOwner->HasAura(88447))
                         bp0 = -100;
                     if (pOwner->HasAura(88446))
                         bp0 = -50;
 
                     if(bp0)
-                        pOwner->CastCustomSpell(pOwner, 88448, &bp0, 0, 0, true);
+                    {
+                        if (!pOwner->ToPlayer()->HasSpellCooldown(88448))
+                        {
+                            pOwner->CastCustomSpell(pOwner, 88448, &bp0, 0, 0, true);
+                            pOwner->ToPlayer()->AddSpellCooldown(88448, 0, time(NULL)+120); // add 2 min cd
+                        }
+                    }
                     break;
             }
         }

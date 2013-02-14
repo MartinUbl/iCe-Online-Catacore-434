@@ -33,19 +33,15 @@ DisableMgr::DisableMgr()
 
 DisableMgr::~DisableMgr()
 {
-    for (DisableMap::iterator itr = m_DisableMap.begin(); itr != m_DisableMap.end(); ++itr)
-        itr->second.clear();
-
-    m_DisableMap.clear();
+    for (uint8 i = 0; i < MAX_DISABLE_TYPES; i++)
+        m_DisableMap[i].clear();
 }
 
 void DisableMgr::LoadDisables()
 {
     // reload case
-    for (DisableMap::iterator itr = m_DisableMap.begin(); itr != m_DisableMap.end(); ++itr)
-        itr->second.clear();
-
-    m_DisableMap.clear();
+    for (uint8 i = 0; i < MAX_DISABLE_TYPES; i++)
+        m_DisableMap[i].clear();
 
     QueryResult result = WorldDatabase.Query("SELECT sourceType,entry,flags FROM disables");
 

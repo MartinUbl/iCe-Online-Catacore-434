@@ -797,11 +797,10 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
 
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
             {
-                // Replenishment (0.25% from max)
-                // Infinite Replenishment
+                // Replenishment (1.5% from max)
                 if (m_spellProto->SpellIconID == 3184 && m_spellProto->SpellVisual[0] == 12495)
                 {
-                    amount = owner->GetMaxPower(POWER_MANA) * 25 / 10000;
+                    amount = ((owner->GetMaxPower(POWER_MANA) / 100 )* 1.5) / 15; 
                     break;
                 }
             }
@@ -2921,8 +2920,8 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             }
             // Blood of the North
             // Reaping
-            // Death Rune Mastery
-            if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2622)
+            // Blood Rites
+            if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
@@ -3555,9 +3554,9 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
     else
     {
         if (spellId)
-            target->RemoveAurasDueToSpell(spellId);
+            target->RemoveOwnedAura(spellId);
         if (spellId2)
-            target->RemoveAurasDueToSpell(spellId2);
+            target->RemoveOwnedAura(spellId2);
 
         // Improved Barkskin - apply/remove armor bonus due to shapeshift
         if (Player* pl = target->ToPlayer())
@@ -4010,6 +4009,16 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
             return;
+
+        switch(form)
+        {
+            case FORM_FLIGHT:
+            case FORM_FLIGHT_EPIC:
+                target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNT);
+                break;
+            default:
+                break;
+        }
 
         target->SetShapeshiftForm(form);
     }
@@ -5048,6 +5057,22 @@ void AuraEffect::HandleModConfuse(AuraApplication const *aurApp, uint8 mode, boo
         return;
 
     Unit *target = aurApp->GetTarget();
+    Unit* caster = GetCaster();
+
+    if (apply)
+    {
+        if (caster && caster->ToPlayer()
+            && caster->HasAura(56375) // Glyph of Polymorph
+            && m_spellProto->Id == 118) // Polymorph
+        {
+            if (target)
+            {
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+            }
+        }
+    }
 
     target->SetControlled(apply, UNIT_STAT_CONFUSED);
 }

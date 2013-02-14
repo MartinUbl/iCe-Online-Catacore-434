@@ -118,7 +118,7 @@ public:
                 case DATA_CHIMAERON_GUID:               return ChimaeronGUID;
                 case DATA_MAGMAW_GUID:                  return MagmawGUID;
                 case DATA_DEFENSE_SYSTEM_GUID:          return OmnotronDefenceMatrixGUID;
-                case DATA_NEFARIAN1:                    return Nefarian2GUID;
+                case DATA_NEFARIAN1:                    return Nefarian1GUID;
                 case DATA_NEFARIAN2:                    return Nefarian2GUID;
             }
             return 0;
@@ -169,7 +169,10 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            return 0;
+            if (type < MAX_ENCOUNTER)
+                return auiEncounter[type];
+            else
+                return 0;
         }
 
        std::string GetSaveData()

@@ -188,7 +188,7 @@ class spell_mage_incanters_absorbtion_absorb : public SpellScriptLoader
 public:
     spell_mage_incanters_absorbtion_absorb() : SpellScriptLoader("spell_mage_incanters_absorbtion_absorb") { }
 
-    class spell_mage_incanters_absorbtion_absorb_AuraScript : public AuraScript
+class spell_mage_incanters_absorbtion_absorb_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_mage_incanters_absorbtion_absorb_AuraScript);
 
@@ -225,9 +225,21 @@ public:
             }
         }
 
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if(!GetOwner() || !GetOwner()->ToPlayer() || !GetOwner()->ToPlayer()->HasAura(11094) ) // Molten shields talent
+                return;
+
+            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+            {
+                GetOwner()->ToPlayer()->CastSpell(GetOwner()->ToPlayer(),31643,true); // Blazing speed
+            }
+        }
+
         void Register()
         {
              AfterEffectAbsorb += AuraEffectAbsorbFn(spell_mage_incanters_absorbtion_absorb_AuraScript::Trigger, EFFECT_0);
+             OnEffectRemove += AuraEffectRemoveFn(spell_mage_incanters_absorbtion_absorb_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -236,7 +248,6 @@ public:
         return new spell_mage_incanters_absorbtion_absorb_AuraScript();
     }
 };
-
 // Incanter's Absorption (Mana Shield)
 class spell_mage_incanters_absorbtion_manashield : public SpellScriptLoader
 {
@@ -272,15 +283,19 @@ public:
             {
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+
+                if (dmgInfo.GetDamage() != 0) // Mana Shield broken
+                    target->CastSpell(target, 86261, true); // Knockback to nearby enemies
             }
             else if (AuraEffect * talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R2, EFFECT_0))
             {
                 int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
                 target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+
+                if (dmgInfo.GetDamage() != 0) // Mana Shield broken
+                    target->CastSpell(target, 86261, true); // Knockback to nearby enemies
             }
 
-            if (dmgInfo.GetDamage() != 0) // Mana Shield broken
-                target->CastSpell(target, 86261, true); // Knockback to nearby enemies
         }
 
         void Register()
@@ -367,6 +382,392 @@ public:
     }
 };
 
+// Impact
+class spell_mage_impact : public SpellScriptLoader
+{
+public:
+    spell_mage_impact() : SpellScriptLoader("spell_mage_impact") { }
+
+    class spell_mage_impact_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_impact_SpellScript);
+
+        typedef struct auraRecord
+        {
+            uint32 aura_id;
+            int32 aura_duration;
+            int32 aura_per_timer;
+            uint8 auraEff_id;
+            uint32 aura_bp;
+            struct auraRecord *next;
+        }DOT;
+
+        #define LIVING_BOMB 44457
+
+        Player * caster;
+        DOT* begin;
+        Unit * exclude_target;
+        uint32 living_bomb_counter;
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+
+            caster = GetCaster()->ToPlayer();
+            begin = NULL;
+            exclude_target = NULL;
+            return true;
+        }
+
+        DOT * alloc(void)
+        {
+            DOT * temp;
+            temp = (DOT*)malloc(sizeof(DOT));
+            if(!temp)
+                return NULL;
+            else
+            {
+                temp->next = NULL;
+                return temp;
+            }
+        }
+
+        void Push(DOT *_new)
+        {
+            if(begin == NULL) // Inserting first time
+            {
+                begin =_new;
+                return;
+            }
+
+            DOT* akt = begin;
+
+            while(akt->next) // Look up end of SLL
+            {
+                akt= akt->next;
+            }
+
+            akt->next = _new; // And insert at the end  (cause there were trouble with inserting in beginning)
+        }
+
+
+        void HandleImpactEffect(SpellEffIndex /*effIndex*/)
+        {
+            living_bomb_counter = 0;
+            exclude_target = GetHitUnit();
+
+            if(!exclude_target)
+                return;
+
+            Unit::AuraApplicationMap const& auras = exclude_target->GetAppliedAuras();
+            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
+                Aura* aura = itr->second->GetBase();
+
+                if(aura && aura->GetCaster() != NULL && aura->GetCaster()->ToPlayer()
+                  && (aura->GetCaster()->ToPlayer() == caster) && aura->GetSpellProto() && aura->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE &&
+                  (aura->HasEffectType(SPELL_AURA_PERIODIC_DAMAGE) || aura->HasEffectType(SPELL_AURA_PERIODIC_TRIGGER_SPELL)))
+                {
+                    DOT *current = alloc();
+                    if(!current)
+                        continue;
+
+                    current->aura_id = aura->GetId();
+                    current->aura_duration = aura->GetDuration();
+                    current->auraEff_id = -1; // For sure -1 means fail
+
+                    for(uint8 i = 0; i < MAX_SPELL_EFFECTS ; i++) // Need to find right id of effect where needed aura' are
+                    {
+                        AuraEffect* aurEff = aura->GetEffect(i);
+
+                        if(aurEff && ( aurEff->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE || aurEff->GetAuraType() == SPELL_AURA_PERIODIC_TRIGGER_SPELL))
+                        {
+                            current->auraEff_id = i;
+                            current->aura_per_timer = aurEff->GetPeriodicTimer();
+                            current->aura_bp =aurEff->GetAmount();
+                            break;
+                        }
+                    }
+
+                    Push(current); // Push current aura record to SLL
+                }
+            }
+        }
+
+        void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit() || GetHitUnit() == exclude_target || !begin)
+                return;
+
+            Unit * hit_unit = GetHitUnit();
+
+            if(!exclude_target->IsWithinLOS(hit_unit->GetPositionX(),hit_unit->GetPositionY(),hit_unit->GetPositionZ())) // Blizz hotfix
+                return;
+
+            DOT* akt = begin;
+
+            while(akt)
+            {
+                if(akt->aura_id == LIVING_BOMB)
+                    living_bomb_counter++;
+
+                if(akt->aura_id != LIVING_BOMB || living_bomb_counter < 3) // We can copy LIVING_BOMB max 2 times
+                {
+                    caster->AddAura(akt->aura_id,hit_unit);// Add according aura
+
+                    if(Aura *nova = hit_unit->GetAura(akt->aura_id,caster->GetGUID()))
+                    {
+                        nova->SetDuration(akt->aura_duration); // Set according duration
+
+                        if(akt->auraEff_id != -1)
+                            if (AuraEffect* aurEff = nova->GetEffect(akt->auraEff_id))
+                            {
+                                aurEff->SetPeriodicTimer(akt->aura_per_timer); // Need synchronize periodic timer
+                                aurEff->SetAmount(akt->aura_bp);
+                            }
+                    }
+                 }
+
+                akt = akt->next; // look for another aura in list
+            }
+        }
+
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_impact_SpellScript();
+    }
+};
+
+// Blizzard
+class spell_mage_blizzard : public SpellScriptLoader
+{
+public:
+    spell_mage_blizzard() : SpellScriptLoader("spell_mage_blizzard") { }
+
+    class spell_mage_blizzard_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_blizzard_SpellScript);
+
+        Player *caster;
+
+        enum spells
+        {
+            // Talents
+            ICE_SHARDS_R1 = 11185,
+            ICE_SHARDS_R2 = 12487,
+            // Chill effects
+            CHILLED_R1 = 12484,
+            CHILLED_R2 = 12485,
+        };
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+
+            caster = GetCaster()->ToPlayer();
+            return true;
+        }
+
+        void HandleBlizzard(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if(caster->HasAura(11175)) // Permafrost (Rank 1)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -3, GetHitUnit(), true); // - 3% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -3, GetHitUnit(), true); // - 3% healing
+            }
+
+            else if(caster->HasAura(12569)) // Permafrost (Rank 2)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -7, GetHitUnit(), true); // - 7% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -7, GetHitUnit(), true); // - 7% healing
+            }
+
+            else if(caster->HasAura(12571)) // Permafrost (Rank 3)
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastCustomSpell(CHILLED_R1, SPELLVALUE_BASE_POINT1, -10, GetHitUnit(), true); // - 10% healing
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastCustomSpell(CHILLED_R2, SPELLVALUE_BASE_POINT1, -10, GetHitUnit(), true); // - 10% healing
+            }
+            else // Don't have talent Permafrost -> regular chill effect without healing reduction
+            {
+                if(caster->HasAura(ICE_SHARDS_R1))
+                    caster->CastSpell(GetHitUnit(),CHILLED_R1,true);
+                else if(caster->HasAura(ICE_SHARDS_R2))
+                    caster->CastSpell(GetHitUnit(),CHILLED_R2,true);
+            }
+        }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_blizzard_SpellScript::HandleBlizzard, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_blizzard_SpellScript();
+    }
+};
+
+class spell_mage_invocation : public SpellScriptLoader
+{
+public:
+    spell_mage_invocation() : SpellScriptLoader("spell_mage_invocation") { }
+
+    class spell_mage_invocation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_invocation_SpellScript);
+
+        Player *caster;
+        bool success;
+
+        enum talents
+        {
+            INVOCATION_RANK1 = 84722,
+            INVOCATION_RANK2 = 84723,
+            INVOCATION_BUFF  = 87098,
+        };
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+
+            caster = GetCaster()->ToPlayer();
+            return true;
+        }
+
+        void HandleInvocation(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            success = false;
+
+            if(GetHitUnit()->hasUnitState(UNIT_STAT_CASTING))
+                success = true;
+        }
+
+        void HandleInterrupt(void)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if(success)
+            {
+                if(caster->HasAura(INVOCATION_RANK1))
+                    caster->CastCustomSpell(INVOCATION_BUFF, SPELLVALUE_BASE_POINT0, 5, caster, true);// 5 % dmg boost
+
+                else if(caster->HasAura(INVOCATION_RANK2))
+                    caster->CastCustomSpell(INVOCATION_BUFF, SPELLVALUE_BASE_POINT0, 10, caster, true);// 10 % dmg boost
+            }
+        }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_invocation_SpellScript::HandleInvocation, EFFECT_0, SPELL_EFFECT_INTERRUPT_CAST);
+                AfterHit += SpellHitFn(spell_mage_invocation_SpellScript::HandleInterrupt);
+            }
+        };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_invocation_SpellScript();
+    }
+};
+
+class spell_mage_reactive_barrier : public SpellScriptLoader
+{
+public:
+    spell_mage_reactive_barrier() : SpellScriptLoader("spell_mage_reactive_barrier") { }
+
+    class spell_mage_reactive_barrier_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_reactive_barrier_AuraScript);
+
+        Player * caster;
+
+        enum Spels
+        {
+            ICE_BARRIER = 11426,
+            REACTIVE_BARRIER_R1 =  86303,
+            REACTIVE_BARRIER_R2 =  86304,
+            RB_REDUCE_MANA_COST =  86347,
+        };
+
+        bool Load()
+        {
+            if(!GetCaster() || !GetCaster()->ToPlayer() || GetCaster()->ToPlayer()->getClass() != CLASS_MAGE )
+                return false;
+            else
+            {
+                caster = GetCaster()->ToPlayer();
+                return true;
+            }
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            amount = -1; // Set absorbtion amount to unlimited
+        }
+
+        void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            if (caster->GetHealth() < caster->GetMaxHealth() / 2 ) // must be above 50 % of health
+                return;
+
+            if (caster->GetHealth() - dmgInfo.GetDamage() > caster->GetMaxHealth() / 2 ) // Health after damage have to be less than 50 % of health
+                return;
+
+            if (caster->HasSpellCooldown(ICE_BARRIER)) // This talent obeys Ice Barrier's cooldown
+                return;
+
+            if(caster->HasAura(REACTIVE_BARRIER_R1))
+            {
+                if (roll_chance_i(50)) // 50 % chance for rank 1
+                {
+                    caster->CastSpell(caster, RB_REDUCE_MANA_COST, true);
+                    caster->CastSpell(caster, ICE_BARRIER, true);
+                }
+            }
+            else // 100 % chance for rank 2
+            {
+                caster->CastSpell(caster, RB_REDUCE_MANA_COST, true);
+                caster->CastSpell(caster, ICE_BARRIER, true);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_reactive_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_reactive_barrier_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_mage_reactive_barrier_AuraScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
@@ -375,4 +776,8 @@ void AddSC_mage_spell_scripts()
     new spell_mage_incanters_absorbtion_manashield();
     new spell_mage_polymorph_cast_visual;
     new spell_mage_cauterize();
+    new spell_mage_impact();
+    new spell_mage_blizzard();
+    new spell_mage_invocation();
+    new spell_mage_reactive_barrier();
 }

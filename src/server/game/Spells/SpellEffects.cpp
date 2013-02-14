@@ -2924,6 +2924,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bp = int32(m_caster->GetDamageTakenHistory(5) * 15.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
+
+                    if (m_caster->HasAura(96279) // Glyph of Dark Succor
+                        && (m_caster->HasAura(48266) || m_caster->HasAura(48265)))
+                        min = int32(m_caster->CountPctFromMaxHealth(15));
+
                     bp = bp > min ? bp : min;
                     // Improved Death Strike
                     if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
@@ -3476,14 +3481,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     switch (m_spellInfo->Id)
     {
         case 36563:    // Shadowstep
-            if (Player * plr = unitTarget->ToPlayer())
+            if (Unit * target = m_targets.getUnitTarget())
             {
-                if (Unit * target = plr->GetSelectedUnit())
-                {
-                    Position pos;
-                    target->GetFirstCollisionPosition(pos, 2.0f, M_PI);
-                    m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
-                }
+                Position pos;
+                target->GetFirstCollisionPosition(pos, 2.0f, M_PI);
+                m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
             }
             break;
         case 48129:  // Scroll of Recall
@@ -6367,6 +6369,19 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 m_caster->RemoveAurasDueToSpell(89140); // enabler spell
                 m_caster->RemoveAurasDueToSpell(81021); // Stampede buff rank 1
                 m_caster->RemoveAurasDueToSpell(81022); // Stampede buff rank 2
+
+                if (m_caster->HasAura(48483)) // Infected Wounds (Rank 1)
+                    m_caster->CastSpell(unitTarget, 58179, true);
+                else if (m_caster->HasAura(48484)) // Infected Wounds (Rank 2)
+                    m_caster->CastSpell(unitTarget, 58180, true);
+
+            }
+            else if (m_spellInfo->Id == 6785) // Ravage
+            {
+                if (m_caster->HasAura(48483)) // Infected Wounds (Rank 1)
+                    m_caster->CastSpell(unitTarget, 58179, true);
+                else if (m_caster->HasAura(48484)) // Infected Wounds (Rank 2)
+                    m_caster->CastSpell(unitTarget, 58180, true);
             }
             break;
         }
@@ -7898,6 +7913,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             tmp->SetDuration(tmp->GetDuration()+m_spellInfo->EffectBasePoints[effIndex]*1000);
                     }
                 }
+            }
+            // Acherus Deathcharger
+            else if (m_spellInfo->Id == 48778)
+            {
+                m_caster->CastSpell(m_caster, 50772, true); // Summon Unholy Mount Visual
             }
             break;
         }

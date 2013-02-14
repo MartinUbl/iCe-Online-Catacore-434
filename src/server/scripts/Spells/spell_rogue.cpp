@@ -367,14 +367,12 @@ public:
 
         bool Load()
         {
+            Unit *owner = GetUnitOwner();
             caster = GetCaster();
-            if(!caster)
+            if(!caster || !owner)
                 return false;
 
-            if (GetOwner() && GetOwner()->ToUnit())
-                buff = GetOwner()->ToUnit()->GetAura(84748);
-            else
-                buff = NULL;
+            buff = owner->GetAura(84748, caster->GetGUID());
 
             if (buff)
             {

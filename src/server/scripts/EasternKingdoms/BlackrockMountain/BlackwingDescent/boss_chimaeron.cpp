@@ -98,6 +98,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
 
             if (instance)
                 instance->SetData(DATA_CHIMAERON_GUID, NOT_STARTED);
@@ -446,6 +448,8 @@ public:
             me->CastSpell(me,MORTALITY_HEALING_DEBUFF,true);
             me->CastSpell(me,MORTALITY_BOSS_BUFF,true);
             me->SetReactState(REACT_AGGRESSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->InterruptNonMeleeSpells(false);
             if( IsHeroic())
             {

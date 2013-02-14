@@ -78,6 +78,7 @@
 #include "WeatherMgr.h"
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
+#include "TicketMgr.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -896,6 +897,13 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_GM_VISIBLE_STATE]      = sConfig->GetIntDefault("GM.Visible", 2);
     m_int_configs[CONFIG_GM_CHAT]               = sConfig->GetIntDefault("GM.Chat", 2);
     m_int_configs[CONFIG_GM_WHISPERING_TO]      = sConfig->GetIntDefault("GM.WhisperingTo", 2);
+
+    m_bool_configs[CONFIG_GM_ACCEPT_TICKETS]    = sConfig->GetBoolDefault("GM.AcceptTickets", true);
+
+    if (m_bool_configs[CONFIG_GM_ACCEPT_TICKETS])
+        sTicketMgr->SetStatus(true);
+    else
+        sTicketMgr->SetStatus(false);
 
     m_int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfig->GetIntDefault("GM.InGMList.Level", SEC_ADMINISTRATOR);
     m_int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfig->GetIntDefault("GM.InWhoList.Level", SEC_ADMINISTRATOR);

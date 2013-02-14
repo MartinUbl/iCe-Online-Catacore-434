@@ -172,7 +172,7 @@ void GuildAchievementMgr::LoadFromDB()
 
 void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, Unit *unit, uint32 time, Player* player)
 {
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetGuildAchievementCriteriaByType(type);
     for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
     {
         AchievementCriteriaEntry const *achievementCriteria = (*i);
@@ -382,7 +382,7 @@ void GuildAchievementMgr::SendCriteriaUpdate(AchievementCriteriaEntry const* ent
 
 void GuildAchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscvalue1, uint64 miscvalue2, bool evenIfCriteriaComplete)
 {
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr->GetGuildAchievementCriteriaByType(type);
     for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
     {
         AchievementCriteriaEntry const *achievementCriteria = (*i);
@@ -600,7 +600,7 @@ bool GuildAchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     uint32 achievmentForTestId = entry->refAchievement ? entry->refAchievement : entry->ID;
     uint32 achievmentForTestCount = entry->count;
 
-    AchievementCriteriaEntryList const* cList = sAchievementMgr->GetAchievementCriteriaByAchievement(achievmentForTestId);
+    AchievementCriteriaEntryList const* cList = sAchievementMgr->GetGuildAchievementCriteriaByAchievement(achievmentForTestId);
     if (!cList)
         return false;
     uint32 count = 0;
@@ -1985,7 +1985,7 @@ void Guild::UpdateMemberData(Player* plr, uint8 dataid, uint32 value)
             sLog->outError("Guild::UpdateMemberData: Called with incorrect DATAID %u (value %u)", dataid, value);
             break;
         }
-    }    
+    }
 }
 
 void Guild::OnPlayerStatusChange(Player* plr, uint32 flag, bool state)
@@ -1995,7 +1995,7 @@ void Guild::OnPlayerStatusChange(Player* plr, uint32 flag, bool state)
         if(state)
             pMember->AddFlag(flag);
         else pMember->RemFlag(flag);
-    }    
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2092,31 +2092,19 @@ void Guild::UpdateGuildNews(WorldSession* session)
     if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
 
-    QueryResult qr = CharacterDatabase.PQuery("SELECT id, event_type, param, date, playerguid FROM guild_news WHERE guildid=%u",m_id);
-    if(!qr)
-        return;
+    uint32 count = m_guildNews.size();
 
-    uint32 count = qr->GetRowCount();
+    ByteBuffer ids(4*count), types(4*count), dates(4*count), params(8*count), guids(8*count), unks(4*count);
 
-    std::list<uint32> IDList;
-    std::list<uint32> EventTypeList;
-    std::list<uint32> DateList;
-    std::list<uint64> ParamList;
-    std::list<uint64> GUIDList;
-
-    Field* fd = qr->Fetch();
-    while (fd)
+    for (GuildNewsList::const_iterator itr = m_guildNews.begin(); itr != m_guildNews.end(); ++itr)
     {
-        IDList.push_back(fd[0].GetUInt32());
-        EventTypeList.push_back(fd[1].GetUInt32());
-        ParamList.push_back(fd[2].GetUInt64());
-        DateList.push_back(fd[3].GetUInt64());
-        GUIDList.push_back(fd[4].GetUInt64());
+        ids << uint32((*itr).id);
+        types << uint32((*itr).type);
+        dates << uint32((*itr).date);
+        params << uint64((*itr).param);
+        guids << uint64((*itr).guid);
 
-        if (!qr->NextRow())
-            break;
-
-        fd = qr->Fetch();
+        unks << uint32(0);
     }
 
     /*
@@ -2130,36 +2118,30 @@ void Guild::UpdateGuildNews(WorldSession* session)
      6 = guild level,         param = level
     */
 
-    WorldPacket data(SMSG_GUILD_NEWS_UPDATE);
+    WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 4+(5*4+2*8)*count);
     data << uint32(count);   //count
 
     // Unknown
-    for (uint32 i = 0; i < count; i++)
-        data << uint32(0);
+    data.append(unks);
 
-    // Date and time, unknown for now (wierd structure)
-    for (std::list<uint32>::const_iterator itr = DateList.begin(); itr != DateList.end(); ++itr)
-        data << uint32(*itr);
+    // Date and time
+    data.append(dates);
 
     // Player GUIDs
-    for (std::list<uint64>::const_iterator itr = GUIDList.begin(); itr != GUIDList.end(); ++itr)
-        data << uint64(*itr);
+    data.append(guids);
 
     // Parameters
-    for (std::list<uint64>::const_iterator itr = ParamList.begin(); itr != ParamList.end(); ++itr)
-        data << uint64(*itr);
+    data.append(params);
 
     // Event types
-    for (std::list<uint32>::const_iterator itr = EventTypeList.begin(); itr != EventTypeList.end(); ++itr)
-        data << uint32(*itr);
+    data.append(types);
 
     // Unknown
-    for (uint32 i = 0; i < count; i++)
-        data << uint32(0);
+    // future development warning: this unk field is not equal to the first unk field !
+    data.append(unks);
 
     // Identificator - to avoid double displaying, each news has its own "ID"
-    for (std::list<uint32>::const_iterator itr = IDList.begin(); itr != IDList.end(); ++itr)
-        data << uint32(*itr);
+    data.append(ids);
 
     if (session)
         session->SendPacket(&data);
@@ -2175,15 +2157,20 @@ void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
     if (!pPlayer || type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
-    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
-    if (!result)
-        return;
-
-    uint32 new_id = (*result)[0].GetUInt32() + 1;
+    uint32 new_id = sObjectMgr->GenerateGuildNewsID();
     uint32 date = secsToTimeBitFields(time(NULL));
 
-    CharacterDatabase.PQuery("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
+    CharacterDatabase.PExecute("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
         uint32(new_id), uint32(m_id), uint32(type), uint32(param), uint32(date), uint32(pPlayer->GetGUID()));
+
+    // And save it to guild news list
+    GuildNewsEntry gn;
+    gn.id = new_id;
+    gn.type = type;
+    gn.param = param;
+    gn.date = date;
+    gn.guid = pPlayer->GetGUID();
+    m_guildNews.push_back(gn);
 }
 
 void Guild::AddGuildNews(GuildNewsType type, uint64 param)
@@ -2194,15 +2181,20 @@ void Guild::AddGuildNews(GuildNewsType type, uint64 param)
     if (type > GUILD_NEWS_GUILD_LEVEL || type < GUILD_NEWS_GUILD_ACHIEVEMENT)
         return;
 
-    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
-    if (!result)
-        return;
-
-    uint32 new_id = (*result)[0].GetUInt32() + 1;
+    uint32 new_id = sObjectMgr->GenerateGuildNewsID();
     uint32 date = secsToTimeBitFields(time(NULL));
 
-    CharacterDatabase.PQuery("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
+    CharacterDatabase.PExecute("INSERT INTO guild_news (id, guildid, event_type, param, date, playerguid) VALUES (%u,%u,%u,%u,%u,%u)",
         uint32(new_id), uint32(m_id), uint32(type), uint32(param), uint32(date), 0);
+
+    // And save it to guild news list
+    GuildNewsEntry gn;
+    gn.id = new_id;
+    gn.type = type;
+    gn.param = param;
+    gn.date = date;
+    gn.guid = 0;
+    m_guildNews.push_back(gn);
 }
 
 void Guild::HandleQuery(WorldSession *session)
@@ -3248,6 +3240,32 @@ bool Guild::LoadFromDB(Field* fields)
             m_todayXP = xpfields[0].GetUInt64();
         }
     }
+
+    QueryResult newsquery = CharacterDatabase.PQuery("SELECT id, event_type, param, date, playerguid FROM guild_news WHERE guildid = '%u' ORDER BY id DESC LIMIT 100;", m_id);
+    if (newsquery && newsquery->GetRowCount() > 0)
+    {
+        uint32 tmptype;
+        do
+        {
+            Field* newsfields = newsquery->Fetch();
+
+            tmptype = newsfields[1].GetUInt32();
+            if (tmptype < GUILD_NEWS_MIN || tmptype >= GUILD_NEWS_MAX)
+                continue;
+
+            GuildNewsEntry gn;
+
+            gn.id = newsfields[0].GetUInt32();
+            gn.type = (GuildNewsType)tmptype;
+            gn.param = newsfields[2].GetUInt64();
+            gn.date = newsfields[3].GetUInt32();
+            gn.guid = MAKE_NEW_GUID(newsfields[4].GetUInt32(), 0, HIGHGUID_PLAYER);
+
+            m_guildNews.push_back(gn);
+        } while (newsquery->NextRow());
+    }
+
+    // id, type, date, param, guid
 
     _CreateLogHolders();
     return true;

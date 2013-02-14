@@ -1539,6 +1539,17 @@ bool ChatHandler::HandleCooldownCommand(const char *args)
     if (!*args)
     {
         target->RemoveAllSpellCooldown();
+
+        if (target->getClass() == CLASS_DEATH_KNIGHT)
+        {
+            for (uint8 i = RUNE_BLOOD; i < MAX_RUNES;i++)
+            {
+                if (target->GetRuneCooldown(i))
+                    target->SetRuneCooldown(i, 0);
+            }
+
+        }
+
         PSendSysMessage(LANG_REMOVEALL_COOLDOWN, tNameLink.c_str());
     }
     else

@@ -1783,7 +1783,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     recv_data >> newname;
     recv_data >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face >> race;
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT class, level, at_login FROM characters WHERE guid ='%u'", GUID_LOPART(guid));
+    QueryResult result = CharacterDatabase.PQuery("SELECT class, level, at_login, name FROM characters WHERE guid ='%u'", GUID_LOPART(guid));
     if (!result)
     {
         WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
@@ -1796,6 +1796,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     uint32 playerClass = fields[0].GetUInt32();
     uint32 level = fields[1].GetUInt32();
     uint32 at_loginFlags = fields[2].GetUInt32();
+    newname = fields[3].GetString();
     uint32 used_loginFlag = ((recv_data.GetOpcode() == CMSG_CHAR_RACE_CHANGE) ? AT_LOGIN_CHANGE_RACE : AT_LOGIN_CHANGE_FACTION);
 
     if (!sObjectMgr->GetPlayerInfo(race, playerClass))
@@ -2008,7 +2009,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
 
                     // Transaction for Portal quests
                     trans->PAppend("UPDATE character_queststatus SET quest = '262450' WHERE guid = '%u' AND quest = '26245'", GUID_LOPART(guid)); // Deepholm
-                    trans->PAppend("UPDATE character_queststatus SET quest = '27537' WHERE guid = '%u' AND quest = '26784", GUID_LOPART(guid)); // Twilight Highlands
+                    trans->PAppend("UPDATE character_queststatus SET quest = '27537' WHERE guid = '%u' AND quest = '26784'", GUID_LOPART(guid)); // Twilight Highlands
                     trans->PAppend("UPDATE character_queststatus SET quest = '14482' WHERE guid = '%u' AND quest = '25924'", GUID_LOPART(guid)); // Vashj'ir
                 }
                 else // if (team == BG_TEAM_HORDE)

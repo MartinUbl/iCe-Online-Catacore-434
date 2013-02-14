@@ -103,10 +103,22 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player *plr, uint32 trigger)
             UpdateWorldState();
             // reward player
             plr->CastSpell(plr,SI_TRACES_OF_SILITHYST,true);
-            // add 19 honor
-            plr->RewardHonor(NULL,1,19);
-            // add 20 cenarion circle repu
-            plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),20);
+
+            if (plr->getLevel() == 85)
+            {
+                // reward 3 honor
+                plr->RewardHonor(NULL,1,3);
+                // add 3 cenarion circle repu
+                plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),3);
+            }
+            else
+            {
+                // reward 2 honor
+                plr->RewardHonor(NULL,1,2);
+                // add 2 cenarion circle repu
+                plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),2);
+            }
+
             // complete quest
             plr->KilledMonsterCredit(SI_TURNIN_QUEST_CM_A,0);
         }
@@ -128,10 +140,22 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player *plr, uint32 trigger)
             UpdateWorldState();
             // reward player
             plr->CastSpell(plr,SI_TRACES_OF_SILITHYST,true);
-            // add 19 honor
-            plr->RewardHonor(NULL,1,19);
-            // add 20 cenarion circle repu
-            plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),20);
+
+            if (plr->getLevel() == 85)
+            {
+                // reward 3 honor
+                plr->RewardHonor(NULL,1,3);
+                // add 3 cenarion circle repu
+                plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),3);
+            }
+            else
+            {
+                // reward 2 honor
+                plr->RewardHonor(NULL,1,2);
+                // add 2 cenarion circle repu
+                plr->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609),2);
+            }
+
             // complete quest
             plr->KilledMonsterCredit(SI_TURNIN_QUEST_CM_H,0);
         }
@@ -217,6 +241,10 @@ bool OutdoorPvPSI::HandleCustomSpell(Player *plr, uint32 spellId, GameObject *go
     if (!go || spellId != SI_SILITHYST_FLAG_GO_SPELL)
         return false;
     plr->CastSpell(plr,SI_SILITHYST_FLAG,true);
+
+    if (plr->IsMounted() || plr->IsMountedShape())
+        plr->Unmount();
+
     if (go->GetGOInfo()->id == SI_SILITHYST_MOUND)
     {
         // despawn go

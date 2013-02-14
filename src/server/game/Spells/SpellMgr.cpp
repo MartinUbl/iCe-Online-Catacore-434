@@ -3895,6 +3895,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 1978:  // Serpent Sting
         case 2818:  // Deadly Poison
         case 84617: // Revealing Strike
+        case 84748: // Bandit's Guile
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
         case 89299: case 92953: // Twilight Spit
@@ -4028,6 +4029,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[1] = 7;
             count++;
             break;
+        case 86303: // Reactive barrier (rank 1)
+        case 86304: // Reactvie barrier (rank 2)
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_SCHOOL_ABSORB;
+            spellInfo->EffectMiscValue[0] = 127;
+            break;
         case 46841: // Escape to the Isle of Quel'Danas
             // not sure why this is needed
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
@@ -4135,6 +4141,14 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_DST_CASTER;
             spellInfo->EffectImplicitTargetA[1] = TARGET_DST_CASTER;
             count++;
+            break;
+        case 89024: // Pursuit of Justice
+        case 86698: // Guardian of Ancient Kings
+        case 89023: // Blessed Life
+            spellInfo->Effect[1] = 0; // removed non-exist triggered spell
+            break;
+        case 23257: // Demonic Enrage
+            spellInfo->Effect[2] = 0; // removed non-exist triggered spell
             break;
         case 41376: // Spite
         case 39992: // Needle Spine
@@ -4791,6 +4805,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 96644: // Thousand Blades
         case 96645:
             spellInfo->EffectRadiusIndex[0] = 21; // 35 yd
+        case 83154: // Piercing Chill
+            spellInfo->EffectRadiusIndex[0] = 9; // 20 yd
+            spellInfo->EffectRadiusIndex[1] = 9; // 20 yd
+            break;
+        case 30213: // Legion Strike
+            spellInfo->EffectRadiusIndex[1] = 29; // 6 yd
             break;
         default:
             break;

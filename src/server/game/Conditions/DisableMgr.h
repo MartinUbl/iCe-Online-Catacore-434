@@ -38,8 +38,8 @@ enum DisableType
 
 #define MAX_DISABLE_TYPES 6
 
-typedef std::map<uint32, uint8> DisableTypeMap;             // single disables here with optional data
-typedef std::map<DisableType, DisableTypeMap> DisableMap;   // global disable map by source
+typedef UNORDERED_MAP<uint32, uint8> DisableTypeMap;                  // single disables here with optional data
+typedef DisableTypeMap DisableMap[MAX_DISABLE_TYPES];                 // global disable map by source
 
 class DisableMgr
 {

@@ -2356,6 +2356,11 @@ AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteria
     return m_AchievementCriteriasByType[type];
 }
 
+AchievementCriteriaEntryList const& AchievementGlobalMgr::GetGuildAchievementCriteriaByType(AchievementCriteriaTypes type)
+{
+    return m_GuildAchievementCriteriasByType[type];
+}
+
 AchievementCriteriaEntryList const& AchievementGlobalMgr::GetTimedAchievementCriteriaByType(AchievementCriteriaTimedTypes type)
 {
     return m_AchievementCriteriasByTimedType[type];
@@ -2376,8 +2381,20 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
         if (!criteria)
             continue;
 
-        m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
-        m_AchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
+        AchievementEntry const* ach = sAchievementStore.LookupEntry(criteria->referredAchievement);
+        if (!ach)
+            continue;
+
+        if (ach->flags & ACHIEVEMENT_FLAG_GUILD_ACHIEVEMENT)
+        {
+            m_GuildAchievementCriteriasByType[criteria->requiredType].push_back(criteria);
+            m_GuildAchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
+        }
+        else
+        {
+            m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
+            m_AchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
+        }
 
         if (criteria->timeLimit)
             m_AchievementCriteriasByTimedType[criteria->timedType].push_back(criteria);

@@ -299,11 +299,19 @@ class AchievementGlobalMgr
 {
     public:
         AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type);
+        AchievementCriteriaEntryList const& GetGuildAchievementCriteriaByType(AchievementCriteriaTypes type);
         AchievementCriteriaEntryList const& GetTimedAchievementCriteriaByType(AchievementCriteriaTimedTypes type);
+
         AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id)
         {
             AchievementCriteriaListByAchievement::const_iterator itr = m_AchievementCriteriaListByAchievement.find(id);
             return itr != m_AchievementCriteriaListByAchievement.end() ? &itr->second : NULL;
+        }
+
+        AchievementCriteriaEntryList const* GetGuildAchievementCriteriaByAchievement(uint32 id)
+        {
+            AchievementCriteriaListByAchievement::const_iterator itr = m_GuildAchievementCriteriaListByAchievement.find(id);
+            return itr != m_GuildAchievementCriteriaListByAchievement.end() ? &itr->second : NULL;
         }
 
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const
@@ -352,6 +360,9 @@ class AchievementGlobalMgr
         // store achievement criterias by type to speed up lookup
         AchievementCriteriaEntryList m_AchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
         AchievementCriteriaEntryList m_AchievementCriteriasByTimedType[ACHIEVEMENT_TIMED_TYPE_MAX];
+        // store guild achievement criterias in separate arrays for faster lookup
+        AchievementCriteriaEntryList m_GuildAchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
+        AchievementCriteriaListByAchievement m_GuildAchievementCriteriaListByAchievement;
         // store achievement criterias by achievement to speed up lookup
         AchievementCriteriaListByAchievement m_AchievementCriteriaListByAchievement;
         // store achievements by referenced achievement id to speed up lookup

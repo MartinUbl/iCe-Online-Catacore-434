@@ -111,6 +111,7 @@ void AuraApplication::_Remove()
     // update for out of range group members
     if (slot < MAX_AURAS)
     {
+        ClientUpdate(false);    // send last effect values first and then send remove
         GetTarget()->RemoveVisibleAura(slot);
         ClientUpdate(true);
     }
@@ -1905,8 +1906,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_DEATHKNIGHT:
                 // Blood of the North
                 // Reaping
-                // Death Rune Mastery
-                if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2622)
+                // Blood Rites
+                if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
                 {
                     if (!GetEffect(0) || GetEffect(0)->GetAuraType() != SPELL_AURA_PERIODIC_DUMMY)
                         break;
@@ -2211,7 +2212,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->CastCustomSpell(target,63622,&basePoints0 ,&basePoints0,&basePoints0,true,0,unholyPresenceAura);
                             target->CastCustomSpell(target,65095,&basePoints0 ,NULL,NULL,true,0,unholyPresenceAura);
                         }
-                        target->CastSpell(target,49772, true);
                     }
                     else if (unholyPresenceAura)
                     {
@@ -2252,17 +2252,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             {
                 if (!caster)
                     break;
-                if (apply)
-                {
-                    if (target != caster && !target->HealthAbovePct(25))
-                        caster->CastSpell(caster, 200000, true);
-                }
-                else
+                if (!apply)
                 {
                     if (target != caster)
                         caster->RemoveAurasDueToSpell(GetId());
-                    else
-                        caster->RemoveAurasDueToSpell(200000);
                 }
             }
             // Curse of Weakness

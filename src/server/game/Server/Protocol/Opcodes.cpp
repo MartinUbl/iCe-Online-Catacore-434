@@ -580,7 +580,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_GMTICKET_GETTICKET,                      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketGetTicketOpcode   );
     OPCODE( SMSG_GMTICKET_GETTICKET,                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_UNLEARN_TALENTS,                         STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE,          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT,          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_GAMEOBJECT_DESPAWN_ANIM,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( MSG_CORPSE_QUERY,                             STATUS_LOGGEDIN, &WorldSession::HandleCorpseQueryOpcode         );
     OPCODE( CMSG_GMTICKET_DELETETICKET,                   STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode      );
