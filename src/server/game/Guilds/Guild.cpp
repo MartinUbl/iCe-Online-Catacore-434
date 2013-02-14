@@ -929,7 +929,6 @@ bool Guild::RankInfo::LoadFromDB(Field* fields)
     m_name              = fields[2].GetString();
     m_rights            = fields[3].GetUInt32();
     m_bankMoneyPerDay   = fields[4].GetUInt32();
-    m_rankPos           = m_rankId; // TODO: implement its saving!
     if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         m_rights |= GR_RIGHT_ALL;
     return true;
@@ -2264,10 +2263,7 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
         if (rankInfo->GetName().length())
             rankData.WriteString(rankInfo->GetName());
 
-        if (rankInfo->GetRankPos() != GUILD_RANK_NONE)
-            rankData << uint32(rankInfo->GetRankPos());
-        else
-            rankData << uint32(i);
+        rankData << uint32(i);
     }
 
     data.FlushBits();
@@ -3758,7 +3754,7 @@ bool Guild::_CreateRank(const std::string& name, uint32 rights)
     // Ranks represent sequence 0,1,2,... where 0 means guildmaster
     uint8 newRankId = _GetRanksSize();
 
-    RankInfo info(m_id, newRankId, name, rights, 0, m_id);
+    RankInfo info(m_id, newRankId, name, rights, 0);
     m_ranks.push_back(info);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
