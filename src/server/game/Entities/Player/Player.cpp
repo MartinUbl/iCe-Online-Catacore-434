@@ -2052,8 +2052,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             return false;
 
         if (getRace() == RACE_GOBLIN && GetSession()->GetSecurity() == SEC_PLAYER
-            && GetMapId() == 648 && (GetQuestStatus(25266) != QUEST_STATUS_COMPLETE && GetZoneId() == 4720)
-            || (GetQuestStatus(14126) != QUEST_STATUS_COMPLETE && GetZoneId() == 4737))
+            && GetMapId() == 648 && ((GetQuestStatus(25266) != QUEST_STATUS_COMPLETE && GetZoneId() == 4720)
+            || (GetQuestStatus(14126) != QUEST_STATUS_COMPLETE && GetZoneId() == 4737)))
             return false;
 
         // Special exclusion for "plantaz"
