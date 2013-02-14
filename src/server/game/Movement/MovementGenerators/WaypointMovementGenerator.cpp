@@ -239,6 +239,7 @@ void FlightPathMovementGenerator::Reset(Player & player)
     }
     init.SetFirstPointId(GetCurrentNode());
     init.EnableTaxiFlight();
+    init.SetSmooth();
     init.SetVelocity(PLAYER_FLIGHT_SPEED);
     init.Launch();
 }
