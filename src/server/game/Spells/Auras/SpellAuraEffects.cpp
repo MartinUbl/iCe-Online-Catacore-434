@@ -1030,6 +1030,17 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f;
             }
             break;
+        case SPELL_AURA_MOD_ACTION_BUTTON:
+        case SPELL_AURA_MOD_ACTION_BUTTON_2:
+            switch (GetId())
+            {
+                case 94338: // Eclipse (Solar) - Change Moonfire to Sunfire
+                    amount = 93402;
+                    break;
+                default:
+                    break;
+            }
+            break;
         default:
             break;
     }
