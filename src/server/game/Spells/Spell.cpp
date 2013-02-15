@@ -6344,11 +6344,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
-                if (!m_caster->ToPlayer()->GetSelection())
+                if (!m_caster->ToPlayer()->GetSelection() && m_spellInfo->Id != 85592)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 Player* target = sObjectMgr->GetPlayer(m_caster->ToPlayer()->GetSelection());
-                if (!target || m_caster->ToPlayer() == target || !target->IsInSameRaidWith(m_caster->ToPlayer()))
+                if ((!target || m_caster->ToPlayer() == target || !target->IsInSameRaidWith(m_caster->ToPlayer())) && m_spellInfo->Id != 85592)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // check if our map is dungeon
