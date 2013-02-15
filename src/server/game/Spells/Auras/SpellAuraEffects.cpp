@@ -1041,6 +1041,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     break;
             }
             break;
+        case SPELL_AURA_BYPASS_ARMOR:
+            if (GetId() == 86346) // Colossus Smash
+            {
+                // has only 50% in PvP
+                if (GetBase()->GetUnitOwner() && GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
+                    amount = 50;
+            }
+            break;
         default:
             break;
     }
