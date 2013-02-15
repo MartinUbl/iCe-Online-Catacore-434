@@ -63,20 +63,21 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 
     uint32 i;
     uint32 roles, unk[3], dungeonCount;
-    uint8 unk1, unk2;
+    uint8 unk1, unk2, commentLength;
+    std::string comment;
 
     recv_data >> roles;
 
     for (i = 0; i < 3; i++)
         recv_data >> unk[i];
 
-    recv_data >> unk1;
+    commentLength = recv_data.ReadBits(9);
 
-    //if (v8)
-        recv_data >> unk2;
-
-    dungeonCount = recv_data.ReadBits(17);
+    dungeonCount = recv_data.ReadBits(24);
     recv_data.FlushBits();
+
+    if (commentLength)
+        recv_data.ReadString(commentLength);
 
     uint32 dungeon;
     LfgDungeonSet newDungeons;
@@ -134,11 +135,16 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recv_data)
 {
+    uint32 length;
     std::string comment;
-    recv_data >> comment;
+
+    length = recv_data.ReadBits(9);
+    if (length)
+        comment = recv_data.ReadString(length);
+
     uint64 guid = GetPlayer()->GetGUID();
     sLog->outDebug("CMSG_SET_LFG_COMMENT [" UI64FMTD "] comment: %s", guid, comment.c_str());
-    
+
     sLFGMgr->SetComment(guid, comment);
 }
 
@@ -403,11 +409,7 @@ void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
 {
-    // Unused for now - since we don't have opcode ID
-
-    return;
-
-/*    bool join = false;
+    bool join = false;
     bool extrainfo = false;
     bool queued = false;
 
@@ -436,7 +438,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     ObjectGuid guid = GetPlayer()->GetGUID();
     uint8 size = uint8(updateData.dungeons.size());
 
-    WorldPacket data(SMSG_LFG_UPDATE_STATUS);
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 100, true);
 
     data.WriteBit(guid[1]);
     data.WriteBit(true);       // unk
@@ -447,15 +449,17 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     data.WriteBit(guid[4]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
-    data.WriteBit(join);       // value described as "LFGJoined"
+    data.WriteBit(true);       // value described as "LFGJoined"
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
     data.WriteBit(queued);
+    data.FlushBits();
+
     data << uint8(0);          // unk
     data.WriteString(updateData.comment);
     data << uint32(0);         // queue id
-    data << uint32(secsToTimeBitFields(time(NULL))); // join date
+    data << int32(time(NULL)); // join date
 
     data.WriteByteSeq(guid[6]);
 
@@ -477,7 +481,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
         for (LfgDungeonSet::const_iterator it = updateData.dungeons.begin(); it != updateData.dungeons.end(); ++it)
             data << uint32(*it);
 
-    SendPacket(&data);*/
+    SendPacket(&data);
 }
 
 void WorldSession::SendLfgRoleChosen(uint64 guid, uint8 roles)
@@ -656,7 +660,7 @@ void WorldSession::SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgW
     data.WriteByteSeq(guid[6]);
 
     data << int32(avgWaitTime);                            // Average Wait time
-    data << uint32(secsToTimeBitFields(time(NULL)));       // join time
+    data << uint32(time(NULL));                            // join time
     data << uint32(dungeon);                               // Dungeon
 
     data << uint32(queuedTime);                            // Player wait time in queue

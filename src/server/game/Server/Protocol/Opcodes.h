@@ -882,7 +882,7 @@ enum Opcodes
     CMSG_LFG_PROPOSAL_RESULT                         = 0x00403, // 4.3.4 15595 (remap)
     SMSG_LFG_ROLE_CHECK_UPDATE                       = 0x00336, // 4.3.4 15595
     SMSG_LFG_JOIN_RESULT                             = 0x038B6, // 4.3.4 15595
-    SMSG_LFG_QUEUE_STATUS                            = 0x031A4, // 4.3.4 15595
+    SMSG_LFG_QUEUE_STATUS                            = 0x078B4, // 4.3.4 15595
     CMSG_SET_LFG_COMMENT                             = 0x10110, //
     SMSG_LFG_UPDATE_PLAYER                           = 0x10111, //
     SMSG_LFG_UPDATE_PARTY                            = 0x10112, //
