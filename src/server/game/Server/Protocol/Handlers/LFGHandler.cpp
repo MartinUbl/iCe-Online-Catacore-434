@@ -63,7 +63,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 
     uint32 i;
     uint32 roles, unk[3], dungeonCount;
-    uint8 unk1, unk2, commentLength;
+    uint8 commentLength;
     std::string comment;
 
     recv_data >> roles;
@@ -457,8 +457,11 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     data.FlushBits();
 
     data << uint8(0);          // unk
-    data.WriteString(updateData.comment);
-    data << uint32(0);         // queue id
+
+    if (updateData.comment.size() > 0)
+        data.WriteString(updateData.comment);
+
+    data << uint32(1);         // queue id
     data << int32(time(NULL)); // join date
 
     data.WriteByteSeq(guid[6]);
@@ -559,9 +562,9 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     sLog->outDebug("SMSG_LFG_JOIN_RESULT [" UI64FMTD "] checkResult: %u checkValue: %u", GetPlayer()->GetGUID(), joinData.result, joinData.state);
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size, true);
 
-    data << uint32(0);
+    data << uint32(3); // unk
     data << uint8(joinData.result);
-    data << uint32(0);
+    data << uint32(1); // queue id
     data << uint8(joinData.state);
     data << uint32(secsToTimeBitFields(time(NULL)));
 
@@ -669,7 +672,7 @@ void WorldSession::SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgW
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[3]);
 
-    data << uint32(0);                                     // queue ID ?
+    data << uint32(1);                                     // queue ID ?
 
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[2]);
