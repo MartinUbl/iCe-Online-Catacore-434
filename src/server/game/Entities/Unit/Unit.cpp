@@ -1885,7 +1885,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
     {
         AuraEffect * absorbAurEff = (*itr);
         // Check if aura was removed during iteration - we don't need to work on such auras
-        AuraApplication const * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
+        AuraApplication * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
         if (!aurApp)
             continue;
         if (!(absorbAurEff->GetMiscValue() & schoolMask))
@@ -1953,7 +1953,11 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
             // Aura cannot absorb anything more - remove it
             if (absorbAurEff->GetAmount() <= 0)
+            {
+                absorbAurEff->SetAmount(0);
+                aurApp->ClientUpdate(false);
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            }
             else     // Aura can absorb more - update value in client tooltip
                 absorbAurEff->GetBase()->SetNeedClientUpdateForTargets();
         }
@@ -1965,7 +1969,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
     {
         AuraEffect * absorbAurEff = (*itr);
         // Check if aura was removed during iteration - we don't need to work on such auras
-        AuraApplication const * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
+        AuraApplication * aurApp = absorbAurEff->GetBase()->GetApplicationOfTarget(pVictim->GetGUID());
         if (!aurApp)
             continue;
         // check damage school mask
@@ -2014,7 +2018,11 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
         {
             absorbAurEff->SetAmount(absorbAurEff->GetAmount() - currentAbsorb);
             if ((absorbAurEff->GetAmount() <= 0))
+            {
+                absorbAurEff->SetAmount(0);
+                aurApp->ClientUpdate(false);
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            }
             else
                 absorbAurEff->GetBase()->SetNeedClientUpdateForTargets();
         }
