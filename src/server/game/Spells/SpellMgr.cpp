@@ -3642,6 +3642,216 @@ void SpellMgr::LoadCustomSpells()
     INSERT_SPELLENTRY(pSpell);
 }
 
+void SpellMgr::LoadSpellCustomCrafts(uint32 i, SpellEntry* spellInfo)
+{
+
+// ice-like preparation spell custom craft items - we need 333 ilvl, not 370, it's TEMPORARY!
+
+    for (uint8 j = 0; j < MAX_SPELL_EFFECTS; j++)
+    {
+        if (spellInfo->Effect[j] == SPELL_EFFECT_CREATE_ITEM)
+        {
+            switch (i)
+            {
+                case 78473:
+                    spellInfo->EffectItemType[j] = 56546;
+                    break;
+                case 78458:
+                    spellInfo->EffectItemType[j] = 56534;
+                    break;
+                case 78450:
+                    spellInfo->EffectItemType[j] = 56526;
+                    break;
+                case 78459:
+                    spellInfo->EffectItemType[j] = 56535;
+                    break;
+                case 78474:
+                    spellInfo->EffectItemType[j] = 56547;
+                    break;
+                case 78486:
+                    spellInfo->EffectItemType[j] = 56559;
+                    break;
+                case 78485:
+                    spellInfo->EffectItemType[j] = 56558;
+                    break;
+                case 78451:
+                    spellInfo->EffectItemType[j] = 56527;
+                    break;
+                case 75293:
+                    spellInfo->EffectItemType[j] = 54500;
+                    break;
+                case 75297:
+                    spellInfo->EffectItemType[j] = 54499;
+                    break;
+                case 75270:
+                    spellInfo->EffectItemType[j] = 54501;
+                    break;
+                case 75306:
+                    spellInfo->EffectItemType[j] = 54496;
+                    break;
+                case 75295:
+                    spellInfo->EffectItemType[j] = 54497;
+                    break;
+                case 75307:
+                    spellInfo->EffectItemType[j] = 54498;
+                    break;
+                case 75305:
+                    spellInfo->EffectItemType[j] = 54495;
+                    break;
+                case 75291:
+                    spellInfo->EffectItemType[j] = 54502;
+                    break;
+                case 75269:
+                    spellInfo->EffectItemType[j] = 54489;
+                    break;
+                case 75294:
+                    spellInfo->EffectItemType[j] = 54490;
+                    break;
+                case 75290:
+                    spellInfo->EffectItemType[j] = 54488;
+                    break;
+                case 75304:
+                    spellInfo->EffectItemType[j] = 54493;
+                    break;
+                case 75296:
+                    spellInfo->EffectItemType[j] = 54492;
+                    break;
+                case 75302:
+                    spellInfo->EffectItemType[j] = 54491;
+                    break;
+                case 75303:
+                    spellInfo->EffectItemType[j] = 54494;
+                    break;
+                case 75292:
+                    spellInfo->EffectItemType[j] = 54487;
+                    break;
+                case 78457:
+                    spellInfo->EffectItemType[j] = 56533;
+                    break;
+                case 78456:
+                    spellInfo->EffectItemType[j] = 56532;
+                    break;
+                case 78448:
+                    spellInfo->EffectItemType[j] = 56524;
+                    break;
+                case 78449:
+                    spellInfo->EffectItemType[j] = 56525;
+                    break;
+                case 78484:
+                    spellInfo->EffectItemType[j] = 56557;
+                    break;
+                case 78483:
+                    spellInfo->EffectItemType[j] = 56556;
+                    break;
+                case 78471:
+                    spellInfo->EffectItemType[j] = 56545;
+                    break;
+                case 78470:
+                    spellInfo->EffectItemType[j] = 56544;
+                    break;
+                case 78468:
+                    spellInfo->EffectItemType[j] = 56542;
+                    break;
+                case 78454:
+                    spellInfo->EffectItemType[j] = 56530;
+                    break;
+                case 78446:
+                    spellInfo->EffectItemType[j] = 56522;
+                    break;
+                case 78447:
+                    spellInfo->EffectItemType[j] = 56523;
+                    break;
+                case 78469:
+                    spellInfo->EffectItemType[j] = 56543;
+                    break;
+                case 78481:
+                    spellInfo->EffectItemType[j] = 56554;
+                    break;
+                case 78482:
+                    spellInfo->EffectItemType[j] = 56555;
+                    break;
+                case 78455:
+                    spellInfo->EffectItemType[j] = 56531;
+                    break;
+                case 76467:
+                    spellInfo->EffectItemType[j] = 55079;
+                    break;
+                case 76468:
+                    spellInfo->EffectItemType[j] = 55080;
+                    break;
+                case 76465:
+                    spellInfo->EffectItemType[j] = 55081;
+                    break;
+                case 76472:
+                    spellInfo->EffectItemType[j] = 55082;
+                    break;
+                case 76466:
+                    spellInfo->EffectItemType[j] = 55083;
+                    break;
+                case 76471:
+                    spellInfo->EffectItemType[j] = 55084;
+                    break;
+                case 76470:
+                    spellInfo->EffectItemType[j] = 55085;
+                    break;
+                case 76469:
+                    spellInfo->EffectItemType[j] = 55086;
+                    break;
+                case 76458:
+                    spellInfo->EffectItemType[j] = 55073;
+                    break;
+                case 76459:
+                    spellInfo->EffectItemType[j] = 55074;
+                    break;
+                case 76456:
+                    spellInfo->EffectItemType[j] = 55071;
+                    break;
+                case 76464:
+                    spellInfo->EffectItemType[j] = 55078;
+                    break;
+                case 76457:
+                    spellInfo->EffectItemType[j] = 55072;
+                    break;
+                case 76463:
+                    spellInfo->EffectItemType[j] = 55077;
+                    break;
+                case 76462:
+                    spellInfo->EffectItemType[j] = 55076;
+                    break;
+                case 76461:
+                    spellInfo->EffectItemType[j] = 55075;
+                    break;
+                case 78445:
+                    spellInfo->EffectItemType[j] = 56521;
+                    break;
+                case 78453:
+                    spellInfo->EffectItemType[j] = 56529;
+                    break;
+                case 78444:
+                    spellInfo->EffectItemType[j] = 56520;
+                    break;
+                case 78452:
+                    spellInfo->EffectItemType[j] = 56528;
+                    break;
+                case 78480:
+                    spellInfo->EffectItemType[j] = 56553;
+                    break;
+                case 78467:
+                    spellInfo->EffectItemType[j] = 56541;
+                    break;
+                case 78479:
+                    spellInfo->EffectItemType[j] = 56552;
+                    break;
+                case 78464:
+                    spellInfo->EffectItemType[j] = 56540;
+                    break;
+                default:
+                    break;
+            }
+        }
+     }
+}
+
 // set data in core for now
 void SpellMgr::LoadSpellCustomAttr()
 {
@@ -3655,6 +3865,8 @@ void SpellMgr::LoadSpellCustomAttr()
         spellInfo = (SpellEntry*)sSpellStore.LookupEntry(i);
         if (!spellInfo)
             continue;
+
+        LoadSpellCustomCrafts(i, spellInfo);
 
         for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
         {
