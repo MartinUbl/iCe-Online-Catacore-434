@@ -727,7 +727,7 @@ void WorldSession::WriteMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasTransportTime2 = mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
     bool hasTransportTime3 = false;
     bool hasPitch = mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mi->HasExtraMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-    bool hasFallData = mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING);
+    bool hasFallData = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasFallDirection = mi->HasMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasSplineElevation = mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
     bool hasSpline = false;
