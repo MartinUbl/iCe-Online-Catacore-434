@@ -4111,9 +4111,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
         case 89299: case 92953: // Twilight Spit
-        case 97358: case 97357: // Gaping Wound
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
+            break;
+        case 97358: // Gaping Wound + difficulty entries
+        case 97357:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            spellInfo->EffectRadiusIndex[0] = 28;
+            spellInfo->EffectRadiusIndex[1] = 28;
             break;
         case 31700: // Black Qiraji Battle Tank
         case 44824: // Flying Reindeer
@@ -5017,6 +5022,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 96644: // Thousand Blades
         case 96645:
             spellInfo->EffectRadiusIndex[0] = 21; // 35 yd
+            break;
         case 83154: // Piercing Chill
             spellInfo->EffectRadiusIndex[0] = 9; // 20 yd
             spellInfo->EffectRadiusIndex[1] = 9; // 20 yd
