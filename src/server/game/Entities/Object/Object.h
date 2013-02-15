@@ -24,6 +24,7 @@
 #define _OBJECT_H
 
 #include "Common.h"
+#include "UpdateMask.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"
 #include "GridReference.h"
@@ -335,6 +336,8 @@ class Object
         const Unit* ToUnit() const {if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
         GameObject* ToGameObject(){ if (GetTypeId() == TYPEID_GAMEOBJECT) return reinterpret_cast<GameObject*>(this); else return NULL; }
         const GameObject* ToGameObject() const {if (GetTypeId() == TYPEID_GAMEOBJECT) return (const GameObject*)((GameObject*)this); else return NULL; }
+        Corpse* ToCorpse() { if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse*>(this); else return NULL; }
+        Corpse const* ToCorpse() const { if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse const*>(this); else return NULL; }
     protected:
 
         Object ();
@@ -344,9 +347,7 @@ class Object
         void _Create(uint32 guidlow, uint32 entry, HighGuid guidhigh);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
-        void GetUpdateFieldData(Player const* target, uint32*& flags, bool& isOwner, bool& isItemOwner, bool& hasSpecialInfo, bool& isPartyMember) const;
-
-        bool IsUpdateFieldVisible(uint32 flags, bool isSelf, bool isOwner, bool isItemOwner, bool isPartyMember) const;
+        uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
 
         void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
         void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
@@ -365,7 +366,7 @@ class Object
             float  *m_floatValues;
         };
 
-        bool* _changedFields;
+        UpdateMask _changesMask;
 
         uint16 m_valuesCount;
 
