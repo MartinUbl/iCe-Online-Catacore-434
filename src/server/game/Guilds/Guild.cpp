@@ -2253,12 +2253,28 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
 
         for (uint8 j = 0; j < GUILD_BANK_MAX_TABS; ++j)
         {
-            rankData << uint32(rankInfo->GetBankTabSlotsPerDay(j));
-            rankData << uint32(rankInfo->GetBankTabRights(j));
+            if (i == 0)
+            {
+                rankData << uint32(-1);
+                rankData << uint32(-1);
+            }
+            else
+            {
+                rankData << uint32(rankInfo->GetBankTabSlotsPerDay(j));
+                rankData << uint32(rankInfo->GetBankTabRights(j));
+            }
         }
 
-        rankData << uint32(rankInfo->GetBankMoneyPerDay());
-        rankData << uint32(rankInfo->GetRights());
+        if (i == 0)
+        {
+            rankData << uint32(-1);
+            rankData << uint32(-1);
+        }
+        else
+        {
+            rankData << uint32(rankInfo->GetBankMoneyPerDay());
+            rankData << uint32(rankInfo->GetRights());
+        }
 
         if (rankInfo->GetName().length())
             rankData.WriteString(rankInfo->GetName());
@@ -3120,13 +3136,26 @@ void Guild::SendPermissions(WorldSession *session) const
     WorldPacket data(SMSG_GUILD_PERMISSIONS_QUERY_RESULTS, 4 * 15 + 1);
     data << uint32(rankId);
     data << uint32(_GetPurchasedTabsSize());
-    data << uint32(_GetRankRights(rankId));
+
+    if (rankId == 0)
+        data << uint32(-1);
+    else
+        data << uint32(_GetRankRights(rankId));
+
     data << uint32(_GetMemberRemainingMoney(member));
     data.WriteBits(GUILD_BANK_MAX_TABS, 23);
     for (uint8 tabId = 0; tabId < GUILD_BANK_MAX_TABS; ++tabId)
     {
-        data << uint32(_GetRankBankTabRights(rankId, tabId));
-        data << uint32(_GetMemberRemainingSlots(member->GetGUID(), tabId));
+        if (rankId == 0)
+        {
+            data << uint32(-1);
+            data << uint32(-1);
+        }
+        else
+        {
+            data << uint32(_GetRankBankTabRights(rankId, tabId));
+            data << uint32(_GetMemberRemainingSlots(member->GetGUID(), tabId));
+        }
     }
 
     session->SendPacket(&data);
