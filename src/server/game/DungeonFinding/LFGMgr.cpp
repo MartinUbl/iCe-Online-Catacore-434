@@ -287,10 +287,10 @@ void LFGMgr::Update(uint32 diff)
                          {
                             uint64 gguid = grp->GetGUID();
                             SetState(gguid, LFG_STATE_PROPOSAL);
-                            plr->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
+                            plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
                         }
                         else
-                            plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
+                            plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
                         plr->GetSession()->SendLfgUpdateProposal(m_lfgProposalId, pProposal);
                     }
                 }
@@ -516,7 +516,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             {
                 for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                     if (itr->getSource() && itr->getSource()->GetSession())
-                        itr->getSource()->GetSession()->SendLfgUpdateParty(updateData);
+                        itr->getSource()->GetSession()->SendLfgUpdateStatus(updateData);
             }
             return;
         }
@@ -647,7 +647,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             if (Player* plrg = itr->getSource())
             {
                 uint64 pguid = plrg->GetGUID();
-                plrg->GetSession()->SendLfgUpdateParty(updateData);
+                plrg->GetSession()->SendLfgUpdateStatus(updateData);
                 SetState(pguid, LFG_STATE_ROLECHECK);
                 if (!isContinue)
                     SetSelectedDungeons(pguid, dungeons);
@@ -674,7 +674,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
 
         // Send update to player
         plr->GetSession()->SendLfgJoinResult(joinData);
-        plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_PROPOSAL, dungeons, comment));
+        plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_JOIN_PROPOSAL, dungeons, comment));
         SetState(gguid, LFG_STATE_QUEUED);
         SetRoles(guid, roles);
         if (!isContinue)
@@ -687,6 +687,9 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             SetSelectedDungeons(guid, dungeons);
         }
         AddToQueue(guid, uint8(plr->GetTeam()));
+
+        if (!dungeons.empty())
+            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,1,0,0);
     }
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
 }
@@ -719,14 +722,14 @@ void LFGMgr::Leave(Player* plr, Group* grp /* = NULL*/)
                     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                         if (Player* plrg = itr->getSource())
                         {
-                            plrg->GetSession()->SendLfgUpdateParty(updateData);
+                            plrg->GetSession()->SendLfgUpdateStatus(updateData);
                             uint64 pguid = plrg->GetGUID();
                             ClearState(pguid);
                         }
                 }
                 else
                 {
-                    plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                    plr->GetSession()->SendLfgUpdateStatus(updateData);
                     ClearState(guid);
                 }
             }
@@ -1101,12 +1104,12 @@ void LFGMgr::UpdateRoleCheck(uint64& gguid, uint64 guid /* = 0 */, uint8 roles /
                 continue;
             case LFG_ROLECHECK_FINISHED:
                 SetState(pguid, LFG_STATE_QUEUED);
-                plrg->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, dungeons, GetComment(pguid)));
+                plrg->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, dungeons, GetComment(pguid)));
                 break;
             default:
                 if (roleCheck->leader == pguid)
                     plrg->GetSession()->SendLfgJoinResult(joinData);
-                plrg->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ROLECHECK_FAILED));
+                plrg->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ROLECHECK_FAILED));
                 ClearState(pguid);
                 break;
         }
@@ -1390,12 +1393,12 @@ void LFGMgr::UpdateProposal(uint32 proposalId, const uint64& guid, bool accept)
                 plr->GetSession()->SendLfgUpdateProposal(proposalId, pProposal);
             if (group)
             {
-                plr->GetSession()->SendLfgUpdateParty(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
                 if (group != grp)
                     plr->RemoveFromGroup();
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
 
             if (!grp)
             {
@@ -1524,10 +1527,10 @@ void LFGMgr::RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType t
             if (grp)
             {
                 RestoreState(gguid);
-                plr->GetSession()->SendLfgUpdateParty(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
         }
         else
         {
@@ -1536,10 +1539,10 @@ void LFGMgr::RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType t
             if (grp)
             {
                 SetState(gguid, LFG_STATE_QUEUED);
-                plr->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
+                plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
+                plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
         }
     }
 

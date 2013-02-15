@@ -898,7 +898,7 @@ void ArenaTeam::UpdateMembersConquestPointCap()
         {
             // Also update database data if the player is not online
             // (online players will save theirs cap automatically on next logout / autosave / .save
-            CharacterDatabase.PExecute("REPLACE INTO character_currency_weekcap VALUES ('%u', '%u', '%u', '%u', '%u', '%u');", itr->guid, CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, newcap * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS), 0);
+            CharacterDatabase.PExecute("REPLACE INTO character_currency_weekcap VALUES ('%u', '%u', '%u', '%u', '%u');", GUID_LOPART(itr->guid), CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, newcap * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS), 0);
         }
     }
 }

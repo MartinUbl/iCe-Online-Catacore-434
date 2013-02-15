@@ -46,10 +46,7 @@ void LFGScripts::OnAddMember(Group* group, uint64 guid)
     for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         if (Player *plrg = itr->getSource())
-        {
-            plrg->GetSession()->SendLfgUpdatePlayer(updateData);
-            plrg->GetSession()->SendLfgUpdateParty(updateData);
-        }
+            plrg->GetSession()->SendLfgUpdateStatus(updateData);
     }
 
     // TODO - if group is queued and new player is added convert to rolecheck without notify the current players queued
@@ -98,7 +95,7 @@ void LFGScripts::OnRemoveMember(Group* group, uint64 guid, RemoveMethod& method,
         */
 
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_LEADER);
-        plr->GetSession()->SendLfgUpdateParty(updateData);
+        plr->GetSession()->SendLfgUpdateStatus(updateData);
         if (plr->GetMap()->IsDungeon())                    // Teleport player out the dungeon
             sLFGMgr->TeleportPlayer(plr, true);
     }
@@ -126,14 +123,14 @@ void LFGScripts::OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLe
 
     LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_LEADER);
     if (plr)
-        plr->GetSession()->SendLfgUpdateParty(updateData);
+        plr->GetSession()->SendLfgUpdateStatus(updateData);
 
 
     plr = sObjectMgr->GetPlayer(oldLeaderGuid);
     if (plr)
     {
         updateData.updateType = LFG_UPDATETYPE_GROUP_DISBAND;
-        plr->GetSession()->SendLfgUpdateParty(updateData);
+        plr->GetSession()->SendLfgUpdateStatus(updateData);
     }
 }
 
@@ -156,8 +153,7 @@ void LFGScripts::OnLogout(Player* player)
 {
     sLFGMgr->Leave(player);
     LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-    player->GetSession()->SendLfgUpdateParty(updateData);
-    player->GetSession()->SendLfgUpdatePlayer(updateData);
+    player->GetSession()->SendLfgUpdateStatus(updateData);
     player->GetSession()->SendLfgUpdateSearch(false);
     uint64 guid = player->GetGUID();
     // TODO - Do not remove, add timer before deleting
