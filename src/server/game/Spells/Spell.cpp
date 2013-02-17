@@ -5552,6 +5552,47 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
+    // Dispel Magic - can be cast on friend target only when caster has aura Absolution
+    // also check if target has anything to dispel
+    if (m_spellInfo->Id == 527)
+    {
+        // check if can dispel target
+        bool enemy = !m_caster->IsFriendlyTo(Target);
+        if (!Target || (!enemy && m_caster != Target))      // without aura caster can dispel only self and enemies
+        {
+            if (!m_caster->HasAura(33167))
+                return SPELL_FAILED_TARGET_FRIENDLY;
+        }
+
+        // check if target has anything to dispel
+        bool hasMagic = false;
+
+        Unit::AuraMap const &auras = Target->GetOwnedAuras();
+        for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            Aura *aura = itr->second;
+            if (aura->IsPassive())
+                continue;
+
+            const SpellEntry *spellInfo = aura->GetSpellProto();
+            if (spellInfo->Dispel == DISPEL_MAGIC)
+            {
+                AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
+                if (!aurApp)
+                    continue;
+                bool negative = (spellInfo->AttributesEx & SPELL_ATTR1_NEGATIVE) || aurApp->IsNegative();
+                if (enemy != negative)  // only positive from enemies and negative from friends
+                {
+                    hasMagic = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasMagic)
+            return SPELL_FAILED_NOTHING_TO_DISPEL;
+    }
+
     // Archaeology project check - reagents / keystones
     if (m_spellInfo->researchProjectId)
     {

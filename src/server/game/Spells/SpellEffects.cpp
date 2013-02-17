@@ -2888,6 +2888,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 79106, true); // Shadow Protection (Caster)
                 }
             }
+            if (m_spellInfo->Id == 527) // Dispel Magic
+            {
+                if (!unitTarget)
+                    return;
+                if (m_caster->IsFriendlyTo(unitTarget))
+                    bp = 2;     // 2 effects from friendly target
+                else
+                    bp = 1;     // 1 effect from enemy target
+
+                spell_id = 97690;
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Chains of Ice
@@ -5484,11 +5495,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
     switch(m_spellInfo->Id)
     {
-    // Priest Dispell Magic (the actual ability ID - not real dispell ?? )
-    case 527:
+        // Priest Dispel Magic (real dispel)
+        case 97690:
         {
             // Glyph of Dispel Magic
-            if (m_caster->HasAura(55677) && unitTarget && unitTarget->IsFriendlyTo(m_caster))
+            if (m_caster->HasAura(55677) && unitTarget && unitTarget->IsFriendlyTo(m_caster) && !success_list.empty())
             {
                 // Heal the taget for 3% of their max health
                 int32 bp0 = unitTarget->CountPctFromMaxHealth(3);
