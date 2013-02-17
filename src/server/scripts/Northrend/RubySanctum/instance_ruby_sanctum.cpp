@@ -170,19 +170,49 @@ public:
         {
             switch(pCreature->GetEntry())
             {
-                case NPC_HALION_REAL:             m_uiHalion_pGUID = pCreature->GetGUID();        break;
-                case NPC_HALION_TWILIGHT:         m_uiHalion_tGUID = pCreature->GetGUID();        break;
-                case NPC_HALION_CONTROL:          m_uiHalionControlGUID = pCreature->GetGUID();   break;
-                case NPC_RAGEFIRE:                m_uiRagefireGUID = pCreature->GetGUID();        break;
-                case NPC_ZARITHIAN:               m_uiZarithianGUID = pCreature->GetGUID();       break;
-                case NPC_BALTHARUS:               m_uiBaltharusGUID = pCreature->GetGUID();       break;
-                case NPC_BALTHARUS_TARGET:        m_uiBaltharusTargetGUID = pCreature->GetGUID(); break;
-                case NPC_CLONE:                   m_uiCloneGUID = pCreature->GetGUID();           break;
-                case NPC_XERESTRASZA:             m_uiXerestraszaGUID = pCreature->GetGUID();     break;
-                case NPC_SHADOW_PULSAR_N:         m_uiOrbNGUID = pCreature->GetGUID();            break;
-                case NPC_SHADOW_PULSAR_S:         m_uiOrbSGUID = pCreature->GetGUID();            break;
-                case NPC_ORB_ROTATION_FOCUS:      m_uiOrbFocusGUID = pCreature->GetGUID();        break;
-                case NPC_ORB_CARRIER:             m_uiOrbCarrierGUID = pCreature->GetGUID();      break;
+                case NPC_HALION_REAL:
+                    m_uiHalion_pGUID = pCreature->GetGUID();
+                    break;
+                case NPC_HALION_TWILIGHT:
+                    m_uiHalion_tGUID = pCreature->GetGUID();
+                    break;
+                case NPC_HALION_CONTROL:
+                    m_uiHalionControlGUID = pCreature->GetGUID();
+                    break;
+                case NPC_RAGEFIRE:
+                    m_uiRagefireGUID = pCreature->GetGUID();
+                    break;
+                case NPC_ZARITHIAN:
+                    m_uiZarithianGUID = pCreature->GetGUID();
+                    if (m_auiEncounter[TYPE_XERESTRASZA] == DONE
+                        && m_auiEncounter[TYPE_BALTHARUS] == DONE
+                        && m_auiEncounter[TYPE_RAGEFIRE] == DONE)
+                        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    break;
+                case NPC_BALTHARUS:
+                    m_uiBaltharusGUID = pCreature->GetGUID();
+                    break;
+                case NPC_BALTHARUS_TARGET:
+                    m_uiBaltharusTargetGUID = pCreature->GetGUID();
+                    break;
+                case NPC_CLONE:
+                     m_uiCloneGUID = pCreature->GetGUID();
+                     break;
+                case NPC_XERESTRASZA:
+                    m_uiXerestraszaGUID = pCreature->GetGUID();
+                    break;
+                case NPC_SHADOW_PULSAR_N:
+                    m_uiOrbNGUID = pCreature->GetGUID();
+                    break;
+                case NPC_SHADOW_PULSAR_S:
+                    m_uiOrbSGUID = pCreature->GetGUID();
+                    break;
+                case NPC_ORB_ROTATION_FOCUS:
+                    m_uiOrbFocusGUID = pCreature->GetGUID();
+                    break;
+                case NPC_ORB_CARRIER:
+                    m_uiOrbCarrierGUID = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -204,65 +234,91 @@ public:
         {
             switch(uiType)
             {
-                case TYPE_EVENT:        m_auiEncounter[uiType] = uiData; uiData = NOT_STARTED; break;
-                case TYPE_RAGEFIRE:     m_auiEncounter[uiType] = uiData; 
-                                           OpenAllDoors();
-                                        break;
-                case TYPE_BALTHARUS:    m_auiEncounter[uiType] = uiData; 
-                                           OpenAllDoors();
-                                        break;
-                case TYPE_XERESTRASZA:  m_auiEncounter[uiType] = uiData;
-                                        if (uiData == IN_PROGRESS)
-                                           OpenDoor(m_uiFireFieldGUID);
-                                        else if (uiData == NOT_STARTED)
-                                        {
-                                           CloseDoor(m_uiFireFieldGUID);
-                                           OpenAllDoors();
-                                        }
-                                        else if (uiData == DONE)
-                                        {
-                                           OpenAllDoors();
-                                           if (m_auiEncounter[TYPE_ZARITHRIAN] == DONE)
-                                           {
-                                               m_auiEncounter[TYPE_EVENT] = 200;
-                                               m_auiEventTimer = 30000;
-                                           };
-                                        }
-                                        break;
-                case TYPE_ZARITHRIAN:    m_auiEncounter[uiType] = uiData;
-                                        if (uiData == DONE)
-                                        {
-                                           OpenDoor(m_uiFlameWallsGUID);
-                                           m_auiEncounter[TYPE_EVENT] = 200;
-                                           m_auiEventTimer = 30000;
-                                        }
-                                        else if (uiData == IN_PROGRESS)
-                                           CloseDoor(m_uiFlameWallsGUID);
-                                        else if (uiData == FAIL)
-                                           OpenDoor(m_uiFlameWallsGUID);
-                                        break;
-                case TYPE_HALION:       m_auiEncounter[uiType] = uiData;
-                                        if (uiData == IN_PROGRESS)
-                                        {
-                                            CloseDoor(m_uiFlameRingGUID);
-                                        }
-                                        else
-                                        {
-                                              OpenDoor(m_uiFlameRingGUID);
-                                        }
-                                        break;
-                case TYPE_HALION_EVENT: m_auiHalionEvent  = uiData; uiData = NOT_STARTED; break;
-                case TYPE_EVENT_TIMER:  m_auiEventTimer = uiData; uiData = NOT_STARTED;   break;
-
-                case DATA_ORB_DIRECTION:        m_auiOrbDirection = uiData; uiData = NOT_STARTED; break;
-                case DATA_ORB_N:                m_auiOrbNState = uiData; uiData = NOT_STARTED;    break;
-                case DATA_ORB_S:                m_auiOrbSState = uiData; uiData = NOT_STARTED;    break;
+                case TYPE_EVENT:
+                    m_auiEncounter[uiType] = uiData;
+                    uiData = NOT_STARTED;
+                    break;
+                case TYPE_RAGEFIRE:
+                    m_auiEncounter[uiType] = uiData; 
+                    OpenAllDoors();
+                    break;
+                case TYPE_BALTHARUS:
+                    m_auiEncounter[uiType] = uiData; 
+                    OpenAllDoors();
+                    break;
+                case TYPE_XERESTRASZA:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData == IN_PROGRESS)
+                        OpenDoor(m_uiFireFieldGUID);
+                    else if (uiData == NOT_STARTED)
+                    {
+                        CloseDoor(m_uiFireFieldGUID);
+                        OpenAllDoors();
+                    }
+                    else if (uiData == DONE)
+                    {
+                        OpenAllDoors();
+                        if (m_auiEncounter[TYPE_ZARITHRIAN] == DONE)
+                        {
+                            m_auiEncounter[TYPE_EVENT] = 200;
+                            m_auiEventTimer = 30000;
+                        }
+                    }
+                    break;
+                case TYPE_ZARITHRIAN:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData == DONE)
+                    {
+                        OpenDoor(m_uiFlameWallsGUID);
+                        m_auiEncounter[TYPE_EVENT] = 200;
+                        m_auiEventTimer = 30000;
+                    }
+                    else if (uiData == IN_PROGRESS)
+                        CloseDoor(m_uiFlameWallsGUID);
+                    else if (uiData == FAIL)
+                        OpenDoor(m_uiFlameWallsGUID);
+                    break;
+                case TYPE_HALION:
+                    m_auiEncounter[uiType] = uiData;
+                    if (uiData == IN_PROGRESS)
+                        CloseDoor(m_uiFlameRingGUID);
+                    else
+                        OpenDoor(m_uiFlameRingGUID);
+                    break;
+                case TYPE_HALION_EVENT:
+                    m_auiHalionEvent = uiData;
+                    uiData = NOT_STARTED;
+                    break;
+                case TYPE_EVENT_TIMER:
+                    m_auiEventTimer = uiData;
+                    uiData = NOT_STARTED;
+                    break;
+                case DATA_ORB_DIRECTION:
+                    m_auiOrbDirection = uiData;
+                    uiData = NOT_STARTED;
+                    break;
+                case DATA_ORB_N:
+                    m_auiOrbNState = uiData;
+                    uiData = NOT_STARTED;
+                    break;
+                case DATA_ORB_S:
+                    m_auiOrbSState = uiData;
+                    uiData = NOT_STARTED;
+                    break;
                 case TYPE_COUNTER:
-                                       if (uiData == 0)
-                                           UpdateWorldState(false,0);
-                                       else UpdateWorldState(true,uiData);
-                                       uiData = NOT_STARTED;
-                                       break;
+                    if (uiData == 0)
+                        UpdateWorldState(false,0);
+                    else UpdateWorldState(true,uiData);
+                        uiData = NOT_STARTED;
+                    break;
+            }
+
+            if (m_auiEncounter[TYPE_XERESTRASZA] == DONE
+                && m_auiEncounter[TYPE_BALTHARUS] == DONE
+                && m_auiEncounter[TYPE_RAGEFIRE] == DONE)
+            {
+                if (Creature* zarithrian = this->instance->GetCreature(m_uiZarithianGUID))
+                    zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
 
             if (uiData == DONE)
