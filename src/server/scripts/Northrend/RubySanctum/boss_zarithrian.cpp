@@ -70,6 +70,7 @@ public:
         {
             pInstance = (InstanceScript*)pCreature->GetInstanceScript();
             Reset();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         InstanceScript* pInstance;
@@ -90,22 +91,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             if (me->isAlive())
-            {
                 pInstance->SetData(TYPE_ZARITHRIAN, NOT_STARTED);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            }
-        }
-
-        void MoveInLineOfSight(Unit* pWho) 
-        {
-            if (pInstance->GetData(TYPE_XERESTRASZA) == DONE &&
-                 pInstance->GetData(TYPE_BALTHARUS) == DONE &&
-                 pInstance->GetData(TYPE_RAGEFIRE) == DONE)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);    
-                }
         }
 
         void KilledUnit(Unit* pVictim)
