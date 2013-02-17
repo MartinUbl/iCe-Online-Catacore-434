@@ -3027,9 +3027,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Intimidating Shout
             else if (spellproto->SpellFamilyFlags[0] & 0x40000)
                 return DIMINISHING_FEAR_BLIND;
-            // Charge and Intercept Stun
-            else if ((spellproto->SpellFamilyFlags[0] & 0x01000000 || spellproto->Id == 96273) || spellproto->Id == 20253)
-                return DIMINISHING_CONTROL_STUN;
             break;
         }
         case SPELLFAMILY_PALADIN:
