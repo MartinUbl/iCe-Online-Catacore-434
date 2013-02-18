@@ -1095,7 +1095,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     if (m_caster)
                     {
-                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.24f;
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.19f;
 
                         if (unitTarget->HasAuraState(AURA_STATE_BLEEDING))
                         {
