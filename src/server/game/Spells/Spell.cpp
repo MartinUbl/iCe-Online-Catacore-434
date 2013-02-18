@@ -7882,7 +7882,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             }
 
             // not ready or another action in progress - wait more
-            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(true, true, true))
+            if (result != SPELL_CAST_OK || player->IsNonMeleeSpellCasted(false, true, true))
             {
                 // cast time of current spell
                 uint32 cast = 0;
