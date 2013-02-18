@@ -783,7 +783,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetId() == 33745)
             {
                 amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.00369f;
-                amount *= 5;
             }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:

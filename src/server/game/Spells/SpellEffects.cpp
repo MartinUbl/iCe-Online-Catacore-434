@@ -1088,7 +1088,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 33745)
                 {
                     if (m_caster)
-                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0766f;
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0552f;
                 }
                 // Maul
                 else if (m_spellInfo->Id == 6807)
