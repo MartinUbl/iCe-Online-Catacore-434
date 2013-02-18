@@ -1101,12 +1101,9 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 int8 seatId;
                 uint64 accessory = 0;
 
-                bool hasPosition = false;
+                bool hasPosition = false, hasUnkInt1 = false, hasUnkInt2 = false, hasUnkInt3 = false;
 
-                ObjectGuid vg, ag;
-
-                vg[3] = 0; // dafuq?
-                ag[3] = 0;
+                ObjectGuid vg, ag, ng;
 
                 recv_data >> y >> x >> z;
                 recv_data >> seatId;
@@ -1124,7 +1121,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 vg[7] = recv_data.ReadBit(); // v2 + 23
                 ag[7] = recv_data.ReadBit(); // v2 + 39
                 vg[6] = recv_data.ReadBit(); // v2 + 22
-                recv_data.ReadBit(); // v2 + 12 !
+                hasUnkInt3 = !recv_data.ReadBit(); // v2 + 12 !
                 recv_data.ReadBit(); // ??
                 ag[5] = recv_data.ReadBit(); // v2 + 37
                 vg[5] = recv_data.ReadBit(); // v2 + 21
@@ -1138,31 +1135,36 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 ag[1] = recv_data.ReadBit(); // v2 + 33
                 recv_data.ReadBit(); // v2 + 164
 
+                ag[3] = recv_data.ReadBit(); // v2 + 35
+                vg[3] = recv_data.ReadBit(); // v2 + 19
+
                 if (!someGuid)
                 {
                     for (uint32 i = 0; i < 24; i += 8)
                         recv_data.read_skip<uint8>();
 
-                    recv_data.read_skip<uint8>();
+                    //recv_data.read_skip<uint8>();
                 }
 
                 if (hasAdditionalData)
                 {
                     // probably accessory data?
 
-                    recv_data.ReadBit(); // v2 + 19
-                    recv_data.ReadBit(); // v2 + 35
-                    recv_data.ReadBit(); // v2 + 83
-                    recv_data.ReadBit(); // v2 + 80
-                    recv_data.ReadBit(); // v2 + 87
-                    recv_data.ReadBit(); // v2 + 85
-                    recv_data.ReadBit(); // v2 + 120
-                    recv_data.ReadBit(); // v2 + 81
-
-                    recv_data.FlushBits();
+                    ng[3] = recv_data.ReadBit(); // v2 + 83
+                    ng[0] = recv_data.ReadBit(); // v2 + 80
+                    ng[7] = recv_data.ReadBit(); // v2 + 87
+                    ng[5] = recv_data.ReadBit(); // v2 + 85
+                    hasUnkInt2 = recv_data.ReadBit(); // v2 + 120
+                    ng[1] = recv_data.ReadBit(); // v2 + 81
+                    ng[2] = recv_data.ReadBit(); // v2 + 82
+                    hasUnkInt1 = recv_data.ReadBit(); // v2 + 112
+                    ng[4] = recv_data.ReadBit(); // v2 + 84
+                    ng[6] = recv_data.ReadBit(); // v2 + 86
 
                     //recv_data.read_skip<uint8>();
                 }
+
+                recv_data.ReadBit(); // v2 + 81
 
                 if (vg[6])
                 {
@@ -1173,9 +1175,8 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
                 {
                     hasPosition = recv_data.ReadBit(); // v2 + 144
                     recv_data.ReadBit(); // v13 ?
-
-                    recv_data.FlushBits();
                 }
+                recv_data.FlushBits();
 
                 recv_data.ReadByteSeq(ag[6]);
                 recv_data.ReadByteSeq(vg[7]);
@@ -1208,8 +1209,39 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
 
                 if (hasAdditionalData)
                 {
-                    //
+                    recv_data.ReadByteSeq(ng[2]);
+
+                    if (hasUnkInt1)
+                        recv_data.read_skip<uint32>(); // v2 + 29
+                    if (hasUnkInt2)
+                        recv_data.read_skip<uint32>(); // v2 + 31
+
+                    recv_data.ReadByteSeq(ng[0]);
+
+                    recv_data.read_skip<uint32>(); // v2 + 27
+                    recv_data.read_skip<uint8>();  // v2 + 104
+                    recv_data.read_skip<float>();  // v2 + 22 (x)
+                    recv_data.read_skip<float>();  // v2 + 25 (orientation)
+
+                    recv_data.ReadByteSeq(ng[7]);
+                    recv_data.ReadByteSeq(ng[4]);
+                    recv_data.ReadByteSeq(ng[3]);
+                    recv_data.ReadByteSeq(ng[5]);
+
+                    recv_data.read_skip<float>();  // v2 + 24 (z)
+
+                    recv_data.ReadByteSeq(ng[1]);
+                    recv_data.ReadByteSeq(ng[6]);
+
+                    recv_data.read_skip<float>();  // v2 + 23 (y)
                 }
+
+                // condition for two floats? dont know how to deal with it
+                //
+                //
+
+                if (hasUnkInt3)
+                    recv_data.read_skip<uint32>();
 
                 // Unfinished support for the rest of the packet, sorry
                 recv_data.rfinish();
