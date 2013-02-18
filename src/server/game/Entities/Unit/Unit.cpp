@@ -11601,6 +11601,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 }
                 break;
         }
+        switch ((*i)->GetSpellProto()->Id)
+        {
+            // Inner Sanctum
+            case 14747:
+            case 14770:
+            case 14771:
+                if (pVictim->HasAura(588))     // Inner Fire
+                    AddPctN(TakenTotalMod, -(*i)->GetAmount());
+                break;
+        }
     }
 
     // From caster spells
