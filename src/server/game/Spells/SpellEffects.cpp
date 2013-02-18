@@ -1113,6 +1113,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Trash (Bear form)
+                else if (m_spellInfo->Id == 77758)
+                {
+                    if (m_caster)
+                        damage += int32((m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0982f)+ urand(932, 1150));
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
