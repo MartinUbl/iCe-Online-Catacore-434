@@ -642,8 +642,8 @@ void WorldSession::SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgW
     WorldPacket data(SMSG_LFG_QUEUE_STATUS, 100, true);
 
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[2]);
     data.WriteBit(guid[0]);
+    data.WriteBit(guid[2]);
     data.WriteBit(guid[6]);
     data.WriteBit(guid[5]);
     data.WriteBit(guid[7]);
