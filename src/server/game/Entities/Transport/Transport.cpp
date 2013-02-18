@@ -56,27 +56,24 @@ void MapManager::LoadTransports()
         uint32 period = fields[3].GetUInt32();
         uint32 scriptId = sObjectMgr->GetScriptId(fields[4].GetCString());
 
-        Transport *t = new Transport(period, scriptId);
-
         const GameObjectInfo *goinfo = sObjectMgr->GetGameObjectInfo(entry);
 
         if (!goinfo)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template missing", entry, name.c_str());
-            delete t;
             continue;
         }
 
         if (goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());
-            delete t;
             continue;
         }
 
         // sLog->outString("Loading transport %d between %s, %s", entry, name.c_str(), goinfo->name);
 
         std::set<uint32> mapsUsed;
+        Transport *t = new Transport(period, scriptId);
 
         if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
             // skip transports with empty waypoints list
@@ -112,9 +109,6 @@ void MapManager::LoadTransports()
     }
     while (result->NextRow());
 
-    sLog->outString();
-    sLog->outString(">> Loaded %u transports", count);
-
     // check transport data DB integrity
     result = WorldDatabase.Query("SELECT gameobject.guid,gameobject.id,transports.name FROM gameobject,transports WHERE gameobject.id = transports.entry");
     if (result)                                              // wrong data found
@@ -126,10 +120,14 @@ void MapManager::LoadTransports()
             uint32 guid  = fields[0].GetUInt32();
             uint32 entry = fields[1].GetUInt32();
             std::string name = fields[2].GetString();
-            sLog->outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports DON'T must have any records in `gameobject` or its behavior will be unpredictable/bugged.",entry,name.c_str(),guid);
+            sLog->outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports must not have any records in `gameobject` or its behavior will be unpredictable/bugged.",entry,name.c_str(),guid);
         }
         while (result->NextRow());
     }
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u transports", count);
+
 }
 
 void MapManager::LoadTransportNPCs()
@@ -173,10 +171,10 @@ void MapManager::LoadTransportNPCs()
     sLog->outString(">> Loaded %u transport npcs", count);
 }
 
-Transport::Transport(uint32 period, uint32 script) : GameObject(), m_period(period), ScriptId(script)
+Transport::Transport(uint32 period, uint32 script) : GameObject(), m_pathTime(0), m_timer(0),
+currenttguid(0), m_period(period), ScriptId(script), m_nextNodeTime(0)
 {
     m_updateFlag = (UPDATEFLAG_HAS_GO_TRANSPORT_TIME | UPDATEFLAG_HAS_STATIONARY_POSITION | UPDATEFLAG_HAS_GO_ROTATION);
-    currenttguid = 0;
 }
 
 Transport::~Transport()
