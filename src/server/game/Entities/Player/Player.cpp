@@ -78,6 +78,7 @@
 #include <cmath>
 #include "Pet.h"
 #include "Guild.h"
+#include "TicketMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -4775,6 +4776,16 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                         }
                     }
                 } while (resultFriends->NextRow());
+            }
+
+            // delete gm ticket also from memory
+            for (GmTicketList::const_iterator itr = sTicketMgr->m_GMTicketList.begin(); itr != sTicketMgr->m_GMTicketList.end(); ++itr)
+            {
+                if ((*itr)->playerGuid == guid)
+                {
+                    sTicketMgr->m_GMTicketList.remove((*itr));
+                    break;
+                }
             }
 
             trans->PAppend("DELETE FROM characters WHERE guid = '%u'",guid);
