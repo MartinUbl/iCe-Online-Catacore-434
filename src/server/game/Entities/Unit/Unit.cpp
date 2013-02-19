@@ -1955,7 +1955,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             if (absorbAurEff->GetAmount() <= 0)
             {
                 absorbAurEff->SetAmount(0);
-                aurApp->ClientUpdate(false);
+                if (aurApp->GetSlot() != MAX_AURAS)
+                    aurApp->ClientUpdate(false);
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
             }
             else     // Aura can absorb more - update value in client tooltip
@@ -2020,7 +2021,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
             if ((absorbAurEff->GetAmount() <= 0))
             {
                 absorbAurEff->SetAmount(0);
-                aurApp->ClientUpdate(false);
+                if (aurApp->GetSlot() != MAX_AURAS)
+                    aurApp->ClientUpdate(false);
                 absorbAurEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
             }
             else
@@ -11755,6 +11757,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         DoneTotal += int32(DoneAdvertisedBenefit * coeff * coeff2);
     }
 
+    // apply spellmod to Done damage (flat and pct)
+    if (Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, DoneTotal);
+
     // Some spells don't benefit from done mods
     if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
     {
@@ -11763,9 +11769,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     }
 
     float tmpDamage = (int32(pdamage) + DoneTotal) * DoneTotalMod;
-    // apply spellmod to Done damage (flat and pct)
-    if (Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
 
     tmpDamage = (tmpDamage + TakenTotal) * TakenTotalMod;
 
