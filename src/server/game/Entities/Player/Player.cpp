@@ -3886,7 +3886,10 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     //unlearn spells dependent from recently removed spells
     SpellsRequiringSpellMapBounds spellsRequiringSpell = sSpellMgr->GetSpellsRequiringSpellBounds(spell_id);
     for (SpellsRequiringSpellMap::const_iterator itr2 = spellsRequiringSpell.first; itr2 != spellsRequiringSpell.second; ++itr2)
-        removeSpell(itr2->second,disabled);
+    {
+        if (spell_id != itr2->second)
+            removeSpell(itr2->second,disabled);
+    }
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
