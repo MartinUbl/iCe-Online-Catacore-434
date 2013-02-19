@@ -72,6 +72,7 @@
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
 #include "ScriptedCreature.h"
+#include "MoveSpline.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -3485,7 +3486,7 @@ void Spell::CalculateJumpSpeeds(uint8 i, float dist, float & speedXY, float & sp
         speedZ = float(m_spellInfo->EffectMiscValueB[i])/10;
     else
         speedZ = 10.0f;
-    speedXY = dist * 10.0f / speedZ;
+    speedXY = dist * Movement::gravity / speedZ;
 }
 
 void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
