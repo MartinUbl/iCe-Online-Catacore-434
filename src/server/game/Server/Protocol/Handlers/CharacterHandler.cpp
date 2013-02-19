@@ -779,8 +779,24 @@ void WorldSession::HandleWorldLoginOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug("WORLD: Recvd World Login Message");
     uint32 unk;
-    uint8 unk1;
-    recv_data >> unk >> unk1;
+    uint8 loadingState; // 0x00 = loading end, 0x80 = loading started
+    recv_data >> unk >> loadingState;
+
+    // on loading end
+    if (loadingState == 0x00)
+    {
+        if (GetPlayer()->GetVehicle())
+        {
+            Unit* veh = GetPlayer()->GetVehicleBase();
+            Player* pl = GetPlayer();
+
+            pl->SetClientControl(veh, 1);
+            pl->SetMover(veh);
+            pl->SetViewpoint(veh, false);
+            pl->SetViewpoint(veh, true);
+            pl->VehicleSpellInitialize();
+        }
+    }
 }
 
 void WorldSession::HandlePlayerLoginOpcode(WorldPacket & recv_data)
