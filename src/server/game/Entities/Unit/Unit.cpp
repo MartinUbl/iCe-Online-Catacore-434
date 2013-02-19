@@ -15239,7 +15239,7 @@ void Unit::SetPower(Powers power, int32 val)
         }
 
         // Update the pet's character sheet with happiness damage bonus
-        if (pet->getPetType() == HUNTER_PET && power == POWER_HAPPINESS)
+        if (pet->getPetType() == HUNTER_PET)
             pet->UpdateDamagePhysical(BASE_ATTACK);
     }
 }
