@@ -3887,6 +3887,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     SpellsRequiringSpellMapBounds spellsRequiringSpell = sSpellMgr->GetSpellsRequiringSpellBounds(spell_id);
     for (SpellsRequiringSpellMap::const_iterator itr2 = spellsRequiringSpell.first; itr2 != spellsRequiringSpell.second; ++itr2)
     {
+        sLog->outString("Chain unlearn: %u unlearns dependency %u", spell_id, itr2->second);
         if (spell_id != itr2->second)
             removeSpell(itr2->second,disabled);
     }
