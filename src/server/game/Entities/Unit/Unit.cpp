@@ -18360,7 +18360,7 @@ void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float 
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[0]);
 
-    player->GetSession()->SendPacket(&data);
+    player->SendMessageToSet(&data, true);
 }
 
 void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
