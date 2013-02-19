@@ -785,7 +785,7 @@ void WorldSession::HandleWorldLoginOpcode(WorldPacket& recv_data)
     // on loading end
     if (loadingState == 0x00)
     {
-        if (GetPlayer()->GetVehicle())
+        if (GetPlayer() && GetPlayer()->IsInWorld() && GetPlayer()->GetVehicle() && GetPlayer()->GetVehicleBase())
         {
             Unit* veh = GetPlayer()->GetVehicleBase();
             Player* pl = GetPlayer();
