@@ -3475,6 +3475,11 @@ void SpellMgr::LoadSpellRequired()
             sLog->outErrorDb("duplicated entry of req_spell %u and spell_id %u in `spell_required`, skipped", spell_req, spell_id);
             continue;
         }
+        if (IsSpellRequiringSpell(spell_req, spell_id))
+        {
+            sLog->outErrorDb("avoiding indefinite recursion - entry of req_spell %u and spell_id %u in `spell_required` - skipped", spell_req, spell_id);
+            continue;
+        }
 
         mSpellReq.insert (std::pair<uint32, uint32>(spell_id, spell_req));
         mSpellsReqSpell.insert (std::pair<uint32, uint32>(spell_req, spell_id));
