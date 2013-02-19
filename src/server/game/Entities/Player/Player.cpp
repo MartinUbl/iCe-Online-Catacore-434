@@ -21882,10 +21882,13 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
                 DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
         }
 
+        uint32 prevCurr = 0; // for season count - do not take season count required
         for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->RequiredCurrency[i])
+            if (iece->RequiredCurrency[i] && prevCurr != iece->RequiredCurrency[i])
                 ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] * count / (float)GetCurrencyPrecision(iece->RequiredCurrency[i]))));
+
+            prevCurr = iece->RequiredCurrency[i];
         }
     }
 
@@ -22062,12 +22065,26 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
 
         // currency price
+        uint32 prevCurr = 0; // to determine, if it's season required
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->RequiredCurrency[i] && !HasCurrency(iece->RequiredCurrency[i], ceil(float(iece->RequiredCurrencyCount[i])), false))
+            if (iece->RequiredCurrency[i])
             {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
+                // second currency record means "total seasonal count"
+                if (prevCurr && prevCurr == iece->RequiredCurrency[i])
+                {
+                    if (GetCurrencySeasonCount(prevCurr) < iece->RequiredCurrencyCount[i])
+                    {
+                        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                        return false;
+                    }
+                }
+                else if (!HasCurrency(iece->RequiredCurrency[i], ceil(float(iece->RequiredCurrencyCount[i])), false))
+                {
+                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                    return false;
+                }
+                prevCurr = iece->RequiredCurrency[i];
             }
         }
 
@@ -22160,6 +22177,7 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             }
         }
 
+        uint32 prevCurr = 0; // to determine, if it's season required
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
             if (!iece->RequiredCurrency[i])
@@ -22172,11 +22190,21 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
                 return false;
             }
 
+            // second currency record means "total seasonal count"
+            if (prevCurr && prevCurr == iece->RequiredCurrency[i])
+            {
+                if (GetCurrencySeasonCount(prevCurr) < iece->RequiredCurrencyCount[i])
+                {
+                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                    return false;
+                }
+            }
             if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] / GetCurrencyPrecision(iece->RequiredCurrency[i]), true))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
                 return false;
             }
+            prevCurr = iece->RequiredCurrency[i];
         }
 
         // check for personal arena rating requirement
@@ -22199,10 +22227,13 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             DestroyItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count), true);
     }
 
+    uint32 prevCurr = 0;
     for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
     {
-        if (iece->RequiredCurrency[i])
+        if (iece->RequiredCurrency[i] && prevCurr != iece->RequiredCurrency[i])
             ModifyCurrency(iece->RequiredCurrency[i], -int32(ceil(iece->RequiredCurrencyCount[i] / (float)GetCurrencyPrecision(iece->RequiredCurrency[i]))));
+
+        prevCurr = iece->RequiredCurrency[i];
     }
 
     ModifyCurrency(currency, crItem->maxcount ? crItem->maxcount : 1, CURRENCY_SOURCE_ALL, true, true);
