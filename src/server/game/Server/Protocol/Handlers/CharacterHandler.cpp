@@ -785,16 +785,26 @@ void WorldSession::HandleWorldLoginOpcode(WorldPacket& recv_data)
     // on loading end
     if (loadingState == 0x00)
     {
-        if (GetPlayer() && GetPlayer()->IsInWorld() && GetPlayer()->GetVehicle() && GetPlayer()->GetVehicleBase())
+        if (GetPlayer() && GetPlayer()->IsInWorld())
         {
-            Unit* veh = GetPlayer()->GetVehicleBase();
             Player* pl = GetPlayer();
 
-            pl->SetClientControl(veh, 1);
-            pl->SetMover(veh);
-            pl->SetViewpoint(veh, false);
-            pl->SetViewpoint(veh, true);
-            pl->VehicleSpellInitialize();
+            // If player has vehicle, then send everything about that
+            // this avoids actionbar glitches after /reload
+            if (pl->GetVehicle() && pl->GetVehicleBase())
+            {
+                Unit* veh = GetPlayer()->GetVehicleBase();
+
+                pl->SetClientControl(veh, 1);
+                pl->SetMover(veh);
+                pl->SetViewpoint(veh, false);
+                pl->SetViewpoint(veh, true);
+                pl->VehicleSpellInitialize();
+            }
+
+            // Send update for players in arena
+            if (pl->GetBattleground() && pl->GetBattleground()->isArena())
+                pl->UpdateObjectVisibility(true);
         }
     }
 }
