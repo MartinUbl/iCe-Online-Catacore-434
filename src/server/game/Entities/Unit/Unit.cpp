@@ -15115,6 +15115,9 @@ void Unit::SetPower(Powers power, int32 val)
     if (powerIndex == MAX_POWERS)
         return;
 
+    if (GetPower(power) == uint32(val))
+        return;
+
     // Special case for eclipse power (druid system)
     if(power == POWER_ECLIPSE && getClass() == CLASS_DRUID)
     {
