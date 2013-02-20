@@ -1225,7 +1225,6 @@ enum Opcodes
     SMSG_TALENTS_INFO                                = 0x06F26, // 4.3.4 15595
     CMSG_LEARN_PREVIEW_TALENTS                       = 0x02415, // 4.3.4 15595
     CMSG_LEARN_PREVIEW_TALENTS_PET                   = 0x06E24, // 4.3.4 15595 (remap)
-    SMSG_ARENA_OPPONENT_UPDATE                       = 0x02637, // 4.3.4 15595
     SMSG_ARENA_TEAM_CHANGE_FAILED_QUEUED             = 0x06E34, // 4.3.4 15595
     SMSG_MULTIPLE_PACKETS                            = 0x06736, // 4.3.4 15595
     SMSG_FORCE_UNK1_SPEED_CHANGE                     = 0x101CC, //
@@ -1327,6 +1326,7 @@ enum Opcodes
     CMSG_GUILD_ASSIGN_MEMBER_RANK                    = 0x03032, // 4.3.4 Build 15595
     SMSG_GUILD_PARTY_STATE_RESPONSE                  = 0x050A6, // 4.3.4 Build 15595
     CMSG_GUILD_SET_RANK_PERMISSIONS                  = 0x01024, // 4.3.4 15595
+    SMSG_ARENA_UNIT_DESTROYED                        = 0x02637, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595

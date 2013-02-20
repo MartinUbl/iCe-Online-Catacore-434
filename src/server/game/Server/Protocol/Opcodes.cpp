@@ -1242,7 +1242,6 @@ void InitOpcodeTable()
     OPCODE( SMSG_TALENTS_INFO,                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_LEARN_PREVIEW_TALENTS,                   STATUS_LOGGEDIN, &WorldSession::HandleLearnPreviewTalents       );
     OPCODE( CMSG_LEARN_PREVIEW_TALENTS_PET,               STATUS_LOGGEDIN, &WorldSession::HandleLearnPreviewTalentsPet    );
-    OPCODE( SMSG_ARENA_OPPONENT_UPDATE,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_ARENA_TEAM_CHANGE_FAILED_QUEUED,         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_MULTIPLE_PACKETS,                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_FORCE_UNK1_SPEED_CHANGE,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -1335,6 +1334,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_PLAYER_MOVE,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_CEMETERY_LIST,                   STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
     OPCODE( CMSG_GUILD_SET_RANK_PERMISSIONS,              STATUS_LOGGEDIN, &WorldSession::HandleGuildSetRankPermissionsOpcode);
+    OPCODE( SMSG_ARENA_UNIT_DESTROYED,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()
