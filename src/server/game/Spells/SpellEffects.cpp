@@ -8559,7 +8559,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!pet->isAlive())
         return;
 
-    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetProto()->ItemLevel);
+    int32 benefit = m_spellInfo->EffectBasePoints[effIndex];
     if (benefit <= 0)
         return;
 
