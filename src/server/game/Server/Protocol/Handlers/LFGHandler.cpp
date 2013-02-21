@@ -412,11 +412,15 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     bool join = false;
     bool extrainfo = false;
     bool queued = false;
+    bool lfgjoined = false;
 
     switch(updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_PROPOSAL:
             extrainfo = true;
+            join = true;
+            lfgjoined = true;
+            queued = true;
             break;
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:
             extrainfo = true;
@@ -438,10 +442,10 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     ObjectGuid guid = GetPlayer()->GetGUID();
     uint8 size = uint8(updateData.dungeons.size());
 
-    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 100, true);
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS);
 
     data.WriteBit(guid[1]);
-    data.WriteBit(true);       // unk
+    data.WriteBit(false);       // unk, "silent" ? If true, doesn't show minimap icon
     data.WriteBits(size, 24);
     data.WriteBit(guid[6]);
     data.WriteBit(join);
@@ -449,7 +453,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     data.WriteBit(guid[4]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
-    data.WriteBit(true);       // value described as "LFGJoined"
+    data.WriteBit(lfgjoined);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
@@ -560,13 +564,13 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     // IDA address: 0x006F7C20
 
     sLog->outDebug("SMSG_LFG_JOIN_RESULT [" UI64FMTD "] checkResult: %u checkValue: %u", GetPlayer()->GetGUID(), joinData.result, joinData.state);
-    WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size, true);
+    WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
 
     data << uint32(3); // unk
     data << uint8(joinData.result);
     data << uint32(1); // queue id
     data << uint8(joinData.state);
-    data << uint32(secsToTimeBitFields(time(NULL)));
+    data << uint32(time(NULL));
 
     ObjectGuid plGuid = GetPlayer()->GetGUID();
     data.WriteBit(plGuid[2]);
@@ -639,7 +643,7 @@ void WorldSession::SendLfgQueueStatus(uint32 dungeon, int32 waitTime, int32 avgW
 
     ObjectGuid guid = GetPlayer()->GetGUID();
 
-    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 100, true);
+    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 52, true);
 
     data.WriteBit(guid[3]);
     data.WriteBit(guid[0]);

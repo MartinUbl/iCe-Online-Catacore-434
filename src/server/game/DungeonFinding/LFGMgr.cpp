@@ -689,7 +689,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
         AddToQueue(guid, uint8(plr->GetTeam()));
 
         if (!dungeons.empty())
-            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,1,0,0);
+            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,-1,-1,-1);
     }
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
 }
