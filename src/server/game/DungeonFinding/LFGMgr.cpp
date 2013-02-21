@@ -712,8 +712,31 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
         }
         AddToQueue(guid, uint8(plr->GetTeam()));
 
+        uint8 tanks   = LFG_TANKS_NEEDED;
+        uint8 healers = LFG_HEALERS_NEEDED;
+        uint8 dpss    = LFG_DPS_NEEDED;
+
+        uint32 dungeonId = (*dungeons.begin());
+        if (plr)
+        {
+            tanks = GetRoleCountInDungeonQueue(dungeonId, ROLE_TANK, plr->GetTeam());
+            healers = GetRoleCountInDungeonQueue(dungeonId, ROLE_HEALER, plr->GetTeam());
+            dpss = GetRoleCountInDungeonQueue(dungeonId, ROLE_DAMAGE, plr->GetTeam());
+
+            if (tanks > LFG_TANKS_NEEDED)
+                tanks = LFG_TANKS_NEEDED;
+            if (healers > LFG_HEALERS_NEEDED)
+                healers = LFG_HEALERS_NEEDED;
+            if (dpss > LFG_DPS_NEEDED)
+                dpss = LFG_DPS_NEEDED;
+
+            tanks   = LFG_TANKS_NEEDED - tanks;
+            healers = LFG_HEALERS_NEEDED - healers;
+            dpss    = LFG_DPS_NEEDED - dpss;
+        }
+
         if (!dungeons.empty())
-            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,-1,-1,-1);
+            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,tanks,healers,dpss);
     }
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
 }
