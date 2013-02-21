@@ -8344,7 +8344,7 @@ void Player::UpdateEquipSpellsAtFormChange()
         }
     }
 }
-void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx)
+void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, SpellEntry const * triggerSpell)
 {
     if (!target || !target->isAlive() || target == this)
         return;
@@ -8375,12 +8375,12 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
                             if (!IsUseEquipedWeapon(true) && !IsInFeralForm())
                                 continue;
                     }
-                    CastItemCombatSpell(target, attType, procVictim, procEx, item, proto);
+                    CastItemCombatSpell(target, attType, procVictim, procEx, item, proto, triggerSpell);
                 }
     }
 }
 
-void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemPrototype const * proto)
+void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemPrototype const * proto, SpellEntry const * triggerSpell)
 {
     // Can do effect if any damage done to target
     if (procVictim & PROC_FLAG_TAKEN_DAMAGE)
@@ -8491,6 +8491,10 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
             // Windwalk increased chance
             if (pEnchant->spellid[s] == 74243 && chance < 6.0f)
                 chance *= 2.25f;
+
+            // Do not allow spell to trigger self
+            if (triggerSpell && triggerSpell->Id == pEnchant->spellid[s])
+                continue;
 
             if (roll_chance_f(chance))
             {
