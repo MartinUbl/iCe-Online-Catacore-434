@@ -6342,7 +6342,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 switch(SummonProperties->Category)
                 {
                     case SUMMON_CATEGORY_PET:
-                        m_caster->RemoveAllMinionsByEntry(m_spellInfo->EffectMiscValue[i]);
+                        if (m_caster->GetPetGUID())
+                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                         break;
                     case SUMMON_CATEGORY_PUPPET:
                         if (m_caster->GetCharmGUID())
