@@ -572,10 +572,8 @@ float SpellEntry::GetSpellRadius(Unit *caster, uint32 effIndex) const
     {
         radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusMaxIndex[effIndex]);
 
-        if (radiusEntry)
-            return radiusEntry->RadiusMin;
-
-        return 0.0f;
+        if (!radiusEntry)
+            return 0.0f;
     }
 
     float radius = radiusEntry->RadiusMin;
