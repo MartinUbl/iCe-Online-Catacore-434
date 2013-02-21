@@ -317,8 +317,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     {
         Unit* self = ((Unit*)this);
         ObjectGuid guid = GetGUID();
-        uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
-        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
+        uint32 movementFlags = self->m_movementInfo.GetMovementFlags() & ~MOVEMENTFLAG_FALLING;
+        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags() & ~MOVEMENTFLAG2_INTERPOLATED_PITCHING;
         if (GetTypeId() == TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
@@ -417,8 +417,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     {
         Unit* self = ((Unit*)this);
         ObjectGuid guid = GetGUID();
-        uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
-        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
+        uint32 movementFlags = self->m_movementInfo.GetMovementFlags() & ~MOVEMENTFLAG_FALLING;
+        uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags() & ~MOVEMENTFLAG2_INTERPOLATED_PITCHING;
         if (GetTypeId() == TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
 
