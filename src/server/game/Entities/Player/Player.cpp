@@ -14746,6 +14746,14 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId, bool showQue
             PrepareQuestMenu(pSource->GetGUID());
     }
 
+    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        GameObject *pGo = (GameObject*)pSource;
+
+        if (pGo->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+            PrepareQuestMenu(pSource->GetGUID());
+    }
+
     for (GossipMenuItemsMap::const_iterator itr = pMenuItemBounds.first; itr != pMenuItemBounds.second; ++itr)
     {
         bool bCanTalk = true;
@@ -14832,8 +14840,8 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId, bool showQue
             switch(itr->second.option_id)
             {
                 case GOSSIP_OPTION_QUESTGIVER:
-                    if (pGo->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
-                        PrepareQuestMenu(pSource->GetGUID());
+                    //if (pGo->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+                    //    PrepareQuestMenu(pSource->GetGUID());
                     bCanTalk = false;
                     break;
                 case GOSSIP_OPTION_GOSSIP:
