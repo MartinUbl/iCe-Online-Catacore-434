@@ -344,9 +344,33 @@ void LFGMgr::Update(uint32 diff)
                     break;
             }
 
+            Player* src = sObjectMgr->GetPlayer(itQueue->first);
+
+            uint8 tanks   = LFG_TANKS_NEEDED;
+            uint8 healers = LFG_HEALERS_NEEDED;
+            uint8 dpss    = LFG_DPS_NEEDED;
+
+            if (src)
+            {
+                tanks = GetRoleCountInDungeonQueue(dungeonId, ROLE_TANK, src->GetTeam());
+                healers = GetRoleCountInDungeonQueue(dungeonId, ROLE_HEALER, src->GetTeam());
+                dpss = GetRoleCountInDungeonQueue(dungeonId, ROLE_DAMAGE, src->GetTeam());
+
+                if (tanks > LFG_TANKS_NEEDED)
+                    tanks = LFG_TANKS_NEEDED;
+                if (healers > LFG_HEALERS_NEEDED)
+                    healers = LFG_HEALERS_NEEDED;
+                if (dpss > LFG_DPS_NEEDED)
+                    dpss = LFG_DPS_NEEDED;
+
+                tanks   = LFG_TANKS_NEEDED - tanks;
+                healers = LFG_HEALERS_NEEDED - healers;
+                dpss    = LFG_DPS_NEEDED - dpss;
+            }
+
             for (LfgRolesMap::const_iterator itPlayer = queue->roles.begin(); itPlayer != queue->roles.end(); ++itPlayer)
                 if (Player* plr = sObjectMgr->GetPlayer(itPlayer->first))
-                    plr->GetSession()->SendLfgQueueStatus(dungeonId, waitTime, m_WaitTimeAvg, m_WaitTimeTank, m_WaitTimeHealer, m_WaitTimeDps, queuedTime, queue->tanks, queue->healers, queue->dps);
+                    plr->GetSession()->SendLfgQueueStatus(dungeonId, waitTime, m_WaitTimeAvg, m_WaitTimeTank, m_WaitTimeHealer, m_WaitTimeDps, queuedTime, tanks, healers, dpss);
         }
     }
     else
@@ -692,6 +716,40 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,-1,-1,-1);
     }
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
+}
+
+uint32 LFGMgr::GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint8 team)
+{
+    uint32 count = 0;
+    Player* src = NULL;
+
+    for (LfgQueueInfoMap::const_iterator itr = m_QueueInfoMap.begin(); itr != m_QueueInfoMap.end(); ++itr)
+    {
+        if (!(*itr).second)
+            continue;
+
+        src = sObjectMgr->GetPlayer((*itr).first);
+
+        if (!src)
+            continue;
+
+        for (LfgDungeonSet::const_iterator itr2 = (*itr).second->dungeons.begin(); itr2 != (*itr).second->dungeons.end(); ++itr2)
+        {
+            if ((*itr2) == dungeonId && src->GetTeam() == team)
+            {
+                if (role == ROLE_TANK)
+                    count += (LFG_TANKS_NEEDED - (*itr).second->tanks);
+                else if (role == ROLE_HEALER)
+                    count += (LFG_HEALERS_NEEDED - (*itr).second->healers);
+                else if (role == ROLE_DAMAGE)
+                    count += (LFG_DPS_NEEDED - (*itr).second->dps);
+
+                break;
+            }
+        }
+    }
+
+    return count;
 }
 
 /**

@@ -110,8 +110,50 @@ void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recv_data)
 {
     uint32 lfgGroupID;                                     // Internal lfgGroupID
     bool accept;                                           // Accept to join?
+
     recv_data >> lfgGroupID;
-    recv_data >> accept;
+    recv_data.read_skip<int32>();   // time
+    recv_data.read_skip<uint32>();  // roles
+    recv_data.read_skip<uint32>();  // unk
+
+    ObjectGuid guid1;
+    guid1[4] = recv_data.ReadBit();
+    guid1[5] = recv_data.ReadBit();
+    guid1[0] = recv_data.ReadBit();
+    guid1[6] = recv_data.ReadBit();
+    guid1[2] = recv_data.ReadBit();
+    guid1[7] = recv_data.ReadBit();
+    guid1[1] = recv_data.ReadBit();
+    guid1[3] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(guid1[7]);
+    recv_data.ReadByteSeq(guid1[4]);
+    recv_data.ReadByteSeq(guid1[3]);
+    recv_data.ReadByteSeq(guid1[2]);
+    recv_data.ReadByteSeq(guid1[6]);
+    recv_data.ReadByteSeq(guid1[0]);
+    recv_data.ReadByteSeq(guid1[1]);
+    recv_data.ReadByteSeq(guid1[5]);
+
+    ObjectGuid guid2;
+    guid2[7] = recv_data.ReadBit();
+    accept = recv_data.ReadBit();
+    guid2[1] = recv_data.ReadBit();
+    guid2[3] = recv_data.ReadBit();
+    guid2[0] = recv_data.ReadBit();
+    guid2[5] = recv_data.ReadBit();
+    guid2[4] = recv_data.ReadBit();
+    guid2[6] = recv_data.ReadBit();
+    guid2[2] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(guid2[7]);
+    recv_data.ReadByteSeq(guid2[1]);
+    recv_data.ReadByteSeq(guid2[5]);
+    recv_data.ReadByteSeq(guid2[6]);
+    recv_data.ReadByteSeq(guid2[3]);
+    recv_data.ReadByteSeq(guid2[4]);
+    recv_data.ReadByteSeq(guid2[0]);
+    recv_data.ReadByteSeq(guid2[2]);
 
     sLog->outDebug("CMSG_LFG_PROPOSAL_RESULT [" UI64FMTD "] proposal: %u accept: %u", GetPlayer()->GetGUID(), lfgGroupID, accept ? 1 : 0);
     sLFGMgr->UpdateProposal(lfgGroupID, GetPlayer()->GetGUID(), accept);
@@ -159,7 +201,7 @@ void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recv_data)
 {
-    bool out;
+    uint8 out;
     recv_data >> out;
 
     sLog->outDebug("CMSG_LFG_TELEPORT [" UI64FMTD "] out: %u", GetPlayer()->GetGUID(), out ? 1 : 0);
@@ -410,20 +452,18 @@ void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recv_data)
 void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
 {
     bool join = false;
-    bool extrainfo = false;
     bool queued = false;
     bool lfgjoined = false;
+    bool silent = false;
 
     switch(updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_PROPOSAL:
-            extrainfo = true;
             join = true;
             lfgjoined = true;
             queued = true;
             break;
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:
-            extrainfo = true;
             join = true;
             queued = true;
             break;
@@ -432,8 +472,9 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
             queued = true;
             break;
         case LFG_UPDATETYPE_PROPOSAL_BEGIN:
-            extrainfo = true;
             join = true;
+            lfgjoined = true;
+            queued = true;
             break;
         default:
             break;
@@ -445,7 +486,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     WorldPacket data(SMSG_LFG_UPDATE_STATUS);
 
     data.WriteBit(guid[1]);
-    data.WriteBit(false);       // unk, "silent" ? If true, doesn't show minimap icon
+    data.WriteBit(silent);       // unk, "silent" ? If true, doesn't show minimap icon
     data.WriteBits(size, 24);
     data.WriteBit(guid[6]);
     data.WriteBit(join);
@@ -460,7 +501,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     data.WriteBit(queued);
     data.FlushBits();
 
-    data << uint8(0);          // unk
+    data << uint8(-1);          // unk
 
     if (updateData.comment.size() > 0)
         data.WriteString(updateData.comment);
@@ -471,7 +512,7 @@ void WorldSession::SendLfgUpdateStatus(const LfgUpdateData &updateData)
     data.WriteByteSeq(guid[6]);
 
     for (uint32 i = 0; i < 3; i++)
-        data << uint8(0);
+        data << uint8(-1);
 
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[2]);
@@ -806,12 +847,12 @@ void WorldSession::SendLfgUpdateProposal(uint32 proposalId, const LfgProposal* p
     sLog->outDebug("SMSG_LFG_PROPOSAL_UPDATE [" UI64FMTD "] state: %u", GetPlayer()->GetGUID(), pProp->state);
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + pProp->players.size() * (4 + 1 + 1 + 1 + 1 +1));
 
-    data << uint32(secsToTimeBitFields(time(NULL)));
+    data << uint32(time(NULL));
     data << uint32(0);                                     // Bosses killed - FIXME
-    data << int32(0); // unk
-    data << uint32(0); // unk
+    data << int32(0);                                      // unk
+    data << uint32(0);                                     // unk
     data << uint32(dungeonId);                             // Dungeon
-    data << uint32(0); // unk
+    data << uint32(proposalId);                            // probably proposalId - client sends it back
     data << uint8(pProp->state);                           // Result state
 
     // why two guids?!
@@ -872,9 +913,6 @@ void WorldSession::SendLfgUpdateProposal(uint32 proposalId, const LfgProposal* p
     data.WriteByteSeq(guid2[2]);
     data.WriteByteSeq(guid1[3]);
     data.WriteByteSeq(guid2[4]);
-
-    // unused field, nowhere in packet since 4.3.x
-    //data << uint32(proposalId);                            // Internal Proposal ID
 
     SendPacket(&data);
 }
