@@ -6327,6 +6327,11 @@ void Player::UpdateSkillsForLevel()
         if (GetSkillRangeType(pSkill, false) != SKILL_RANGE_LEVEL)
             continue;
 
+        // do not update weapon skills
+        // in Cataclysm, weapon skills was removed from game
+        if (pSkill->categoryId == SKILL_CATEGORY_WEAPON)
+            continue;
+
         uint16 field = itr->second.pos / 2;
         uint8 offset = itr->second.pos & 1; // itr->second.pos % 2
 
