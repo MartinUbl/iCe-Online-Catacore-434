@@ -1220,14 +1220,15 @@ bool Guild::BankTab::SetItem(SQLTransaction& trans, uint8 slotId, Item* pItem)
 
 void Guild::BankTab::SendText(const Guild* pGuild, WorldSession* session) const
 {
-    WorldPacket data(MSG_QUERY_GUILD_BANK_TEXT, 1 + m_text.size() + 1);
-    data << uint8(m_tabId);
-    data << m_text;
+    WorldPacket data(SMSG_QUERY_GUILD_BANK_TEXT, 6 + m_text.size());
+    data.WriteBits(m_text.length(), 14);
+    data << uint32(m_tabId);
+    data.WriteString(m_text);
 
     if (session)
         session->SendPacket(&data);
-    //else
-    //    pGuild->BroadcastPacket(&data);
+    else
+        pGuild->BroadcastPacket(&data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

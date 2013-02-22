@@ -1047,7 +1047,8 @@ enum Opcodes
     CMSG_KEEP_ALIVE                                  = 0x00015, // 4.3.4 15595
     SMSG_RAID_READY_CHECK_ERROR                      = 0x10166, //
     CMSG_OPT_OUT_OF_LOOT                             = 0x06B16, // 4.3.4 15595
-    MSG_QUERY_GUILD_BANK_TEXT                        = 0x075A3, // 4.3.4 15595
+    CMSG_QUERY_GUILD_BANK_TEXT                       = 0x03220, // 4.3.4 15595
+    SMSG_QUERY_GUILD_BANK_TEXT                       = 0x075A3, // 4.3.4 15595
     CMSG_SET_GUILD_BANK_TEXT                         = 0x03023, // 4.3.4 15595 (remap)
     CMSG_SET_GRANTABLE_LEVELS                        = 0x10168, //
     CMSG_GRANT_LEVEL                                 = 0x06D16, // 4.3.4 15595 (remap)
@@ -1491,7 +1492,6 @@ enum Opcodes
     CMSG_GROUP_REQUEST_JOIN_UPDATES                   = 0x2583,
     CMSG_GUILD_ACHIEVEMENT_MEMBERS                    = 0x3025,
     CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY             = 0x3235,
-    CMSG_GUILD_BANK_QUERY_TEXT                        = 0x3220,
     CMSG_GUILD_CHANGE_NAME_REQUEST                    = 0x1232,
     CMSG_GUILD_MEMBER_SEND_SOR_REQUEST                = 0x3225,
     CMSG_GUILD_NEWS_UPDATE_STICKY                     = 0x3223,

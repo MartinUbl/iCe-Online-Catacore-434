@@ -1064,7 +1064,8 @@ void InitOpcodeTable()
     OPCODE( CMSG_KEEP_ALIVE,                              STATUS_NEVER,    &WorldSession::Handle_EarlyProccess            );
     OPCODE( SMSG_RAID_READY_CHECK_ERROR,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_OPT_OUT_OF_LOOT,                         STATUS_AUTHED,   &WorldSession::HandleOptOutOfLootOpcode        );
-    OPCODE( MSG_QUERY_GUILD_BANK_TEXT,                    STATUS_LOGGEDIN, &WorldSession::HandleQueryGuildBankTabText     );
+    OPCODE( CMSG_QUERY_GUILD_BANK_TEXT,                   STATUS_LOGGEDIN, &WorldSession::HandleQueryGuildBankTabText     );
+    OPCODE( SMSG_QUERY_GUILD_BANK_TEXT,                   STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_SET_GUILD_BANK_TEXT,                     STATUS_LOGGEDIN, &WorldSession::HandleSetGuildBankTabText       );
     OPCODE( CMSG_SET_GRANTABLE_LEVELS,                    STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_GRANT_LEVEL,                             STATUS_NEVER,    &WorldSession::Handle_NULL                     );

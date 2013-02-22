@@ -822,11 +822,13 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket &recv_data)
 {
     sLog->outDebug("WORLD: Received CMSG_SET_GUILD_BANK_TEXT");
 
-    uint8 tabId;
+    uint32 tabId;
     recv_data >> tabId;
 
+    uint16 textLen;
+    textLen = recv_data.ReadBits(14);
     std::string text;
-    recv_data >> text;
+    text = recv_data.ReadString(textLen);
 
     if (Guild* pGuild = _GetPlayerGuild(this))
         pGuild->SetBankTabText(tabId, text);
