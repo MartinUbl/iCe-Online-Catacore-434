@@ -2420,8 +2420,9 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::st
         for (GuildBankRightsAndSlotsVec::const_iterator itr = rightsAndSlots.begin(); itr != rightsAndSlots.end(); ++itr)
             _SetRankBankTabRightsAndSlots(rankId, tabId++, *itr);
 
-        HandleQuery(session);
-        HandleRoster();                                     // Broadcast for tab rights update
+        char aux[2];
+        sprintf(aux, "%u", rankId);
+        _BroadcastEvent(GE_RANK_UPDATED, 0, aux);
     }
 }
 
@@ -2819,8 +2820,6 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&amount), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_CHANGED, 0, aux.c_str());
-
-    _SendBankMoneyUpdate(session);
 }
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
@@ -2873,7 +2872,6 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&amount), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_CHANGED, 0, aux.c_str());
 
-    _SendBankMoneyUpdate(session);
     return true;
 }
 
@@ -4145,6 +4143,7 @@ void Guild::_SendBankContent(WorldSession *session, uint8 tabId) const
 }
 */
 
+/*
 void Guild::_SendBankMoneyUpdate(WorldSession *session) const
 {
     WorldPacket data(SMSG_GUILD_BANK_LIST, 8 + 1 + 4 + 1 + 1);
@@ -4165,6 +4164,7 @@ void Guild::_SendBankMoneyUpdate(WorldSession *session) const
 
     sLog->outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
+*/
 
 void Guild::_SendBankContentUpdate(MoveItemData* pSrc, MoveItemData* pDest) const
 {

@@ -93,7 +93,9 @@ enum GuildRankRights
     GR_RIGHT_WITHDRAW_REPAIR    = 0x00040000,                   // withdraw for repair
     GR_RIGHT_WITHDRAW_GOLD      = 0x00080000,                   // withdraw gold
     GR_RIGHT_CREATE_GUILD_EVENT = 0x00100000,                   // wotlk
-    GR_RIGHT_ALL                = 0x001FFFBF,
+    GR_RIGHT_MODIFY_BANK_TABS   = 0x00400000,
+    GR_RIGHT_REMOVE_GUILD_EVENT = 0x00800000,
+    GR_RIGHT_ALL                = 0x00dfffbf,
 };
 
 enum GuildCommandType
@@ -963,7 +965,7 @@ private:
     bool _DoItemsMove(MoveItemData* pSrc, MoveItemData* pDest, bool sendError, uint32 splitedAmount = 0);
 
     //void _SendBankContent(WorldSession *session, uint8 tabId) const;
-    void _SendBankMoneyUpdate(WorldSession *session) const;
+    //void _SendBankMoneyUpdate(WorldSession *session) const;
     void _SendBankContentUpdate(MoveItemData* pSrc, MoveItemData* pDest) const;
     void _SendBankContentUpdate(uint8 tabId, SlotIds slots) const;
     void SendGuildReputationWeeklyCap(WorldSession *session, uint32 reputation) const;
