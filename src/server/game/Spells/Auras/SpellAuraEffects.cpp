@@ -1985,6 +1985,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 88427: // Electrocute (Al'akir)
                         damage = (10000 + urand(0,4000)) * m_tickNumber;
                         break;
+                    case 879: // Exorcism
+                        // Glyph of Exorcism
+                        if (caster->HasAura(54934))
+                            damage *= 1.2;
+                        break;
                     default:
                         break;
                 }
