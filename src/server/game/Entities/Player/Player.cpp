@@ -4666,6 +4666,9 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     // Remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(playerguid, 10);
 
+    // Remove tickets from DB
+    CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE playerGuid = '%u'", guid);
+
     // delete gm ticket also from memory
     for (GmTicketList::const_iterator itr = sTicketMgr->m_GMTicketList.begin(); itr != sTicketMgr->m_GMTicketList.end(); ++itr)
     {
@@ -4801,7 +4804,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->PAppend("DELETE FROM character_reputation WHERE guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_spell WHERE guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_spell_cooldown WHERE guid = '%u'",guid);
-            trans->PAppend("DELETE FROM gm_tickets WHERE playerGuid = '%u'", guid);
             trans->PAppend("DELETE FROM item_instance WHERE owner_guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_social WHERE guid = '%u' OR friend='%u'",guid,guid);
             trans->PAppend("DELETE FROM mail WHERE receiver = '%u'",guid);
