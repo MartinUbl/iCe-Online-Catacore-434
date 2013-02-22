@@ -779,11 +779,12 @@ namespace Trinity
         uint32 i_entry;
         const Position * const i_pos;
         bool i_requireDeadTarget;
+        const SpellEntry *m_spellInfo;
 
-        SpellNotifierCreatureAndPlayer(Unit *source, std::list<Unit*> &data, float radius, SpellNotifyPushType type,
+        SpellNotifierCreatureAndPlayer(Unit *source, std::list<Unit*> &data, float radius, SpellNotifyPushType type, SpellEntry const *spellInfo = NULL,
             SpellTargets TargetType = SPELL_TARGETS_ENEMY, const Position *pos = NULL, uint32 entry = 0, bool requireDeadTarget = false)
-            : i_data(&data), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
-            i_source(source), i_entry(entry), i_pos(pos), i_requireDeadTarget(requireDeadTarget)
+            : i_data(&data), i_push_type(type), i_radius(radius), i_TargetType(TargetType), i_source(source),
+            i_entry(entry), i_pos(pos), i_requireDeadTarget(requireDeadTarget), m_spellInfo(spellInfo)
         {
             ASSERT(i_source);
         }
@@ -802,7 +803,7 @@ namespace Trinity
                     case SPELL_TARGETS_ENEMY:
                         if (target->isTotem())
                             continue;
-                        if (!target->isAttackableByAOE(i_requireDeadTarget))
+                        if (!target->isAttackableByAOE(i_requireDeadTarget, m_spellInfo))
                             continue;
                         if (i_source->IsControlledByPlayer())
                         {

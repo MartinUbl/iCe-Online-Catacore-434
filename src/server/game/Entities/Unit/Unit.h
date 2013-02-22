@@ -1483,7 +1483,7 @@ class Unit : public WorldObject
         bool isFrozen() const;
 
         bool isTargetableForAttack() const;
-        bool isAttackableByAOE(bool requireDeadTarget = false) const;
+        bool isAttackableByAOE(bool requireDeadTarget = false, SpellEntry const *spellProto = NULL) const;
         bool canAttack(Unit const* target, bool force = true) const;
         virtual bool IsInWater() const;
         virtual bool IsUnderWater() const;
