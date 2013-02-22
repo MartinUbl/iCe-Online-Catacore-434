@@ -1048,6 +1048,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     amount = 50;
             }
             break;
+        case SPELL_AURA_MOD_DECREASE_SPEED:
+            if (GetId() == 16914) // Hurricane
+            {
+                // Glyph of Hurricane
+                if (caster->HasAura(54831))
+                    amount = -50;
+            }
+            break;
         default:
             break;
     }
