@@ -571,7 +571,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                 }
             }
             _player->RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player, queueSlot, STATUS_NONE, _player->GetBattlegroundQueueJoinTime(bgTypeId), 0, 0);
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player, queueSlot, STATUS_NONE, _player->GetBattlegroundQueueJoinTime(bgTypeId), 0, ginfo.ArenaType);
             bgQueue.RemovePlayer(_player->GetGUID(), true);
             // player left queue, we should update it - do not update Arena Queue
             if (!ginfo.ArenaType)
@@ -858,7 +858,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
             member->AddBattlegroundQueueJoinTime(bgTypeId, ginfo ? ginfo->JoinTime : 0);
 
             // send status packet (in queue)
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype);
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, ginfo->JoinTime, arenatype);
             member->GetSession()->SendPacket(&data);
             sLog->outDebug("Battleground: player joined queue for arena as group bg queue type %u bg type %u: GUID %u, NAME %s",bgQueueTypeId,bgTypeId,member->GetGUIDLow(), member->GetName());
         }

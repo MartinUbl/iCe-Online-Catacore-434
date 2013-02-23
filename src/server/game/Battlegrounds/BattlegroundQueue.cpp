@@ -406,7 +406,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
             plr2->RemoveBattlegroundQueueId(bgQueueTypeId); // must be called this way, because if you move this call to
                                                             // queue->removeplayer, it causes bugs
             WorldPacket data;
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, plr2, queueSlot, STATUS_NONE, plr2->GetBattlegroundQueueJoinTime(group->BgTypeId), 0, 0);
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, plr2, queueSlot, STATUS_NONE, plr2->GetBattlegroundQueueJoinTime(group->BgTypeId), 0, group->ArenaType);
             plr2->GetSession()->SendPacket(&data);
         }
         // then actually delete, this may delete the group as well!
@@ -1216,6 +1216,11 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         {
             sLog->outDebug("Battleground: removing player %u from bg queue for instance %u because of not pressing enter battle in time.",plr->GetGUIDLow(),m_BgInstanceGUID);
 
+            uint8 arenaSize = 1;
+            GroupQueueInfo ginfo;
+            if (bgQueue.GetPlayerGroupInfoData(m_PlayerGuid, &ginfo))
+                arenaSize = ginfo.ArenaType;
+
             plr->RemoveBattlegroundQueueId(m_BgQueueTypeId);
             bgQueue.RemovePlayer(m_PlayerGuid, true);
             //update queues if battleground isn't ended
@@ -1223,7 +1228,7 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 sBattlegroundMgr->ScheduleQueueUpdate(0, 0, m_BgQueueTypeId, m_BgTypeId, bg->GetBracketId(), twink);
 
             WorldPacket data;
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, plr, queueSlot, STATUS_NONE, plr->GetBattlegroundQueueJoinTime(m_BgTypeId), 0, 0);
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, plr, queueSlot, STATUS_NONE, plr->GetBattlegroundQueueJoinTime(m_BgTypeId), 0, arenaSize);
             plr->GetSession()->SendPacket(&data);
         }
     }

@@ -236,7 +236,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteByteSeq(playerGuid[6]);
             data->WriteByteSeq(playerGuid[7]);
             data->WriteByteSeq(playerGuid[2]);
-            *data << uint32(1);                         // unk, always 1
+            *data << uint32(bg->isArena() ? arenatype : 1);  // 1 for battlegrounds, team size for arenas
             data->WriteByteSeq(playerGuid[3]);
             data->WriteByteSeq(playerGuid[1]);
             *data << uint32(QueueSlot);                 // Queue slot
