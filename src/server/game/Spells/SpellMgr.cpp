@@ -4184,6 +4184,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->procChance = 0;
             ++count;
             break;
+        case 97499: // Lightning Totem
+        case 43302: // Lightning Totem
+            spellInfo->EffectBasePoints[0] = 1;
+            break;
         // Heroism
         case 32182:
             spellInfo->excludeCasterAuraSpell = 57723; // Exhaustion
