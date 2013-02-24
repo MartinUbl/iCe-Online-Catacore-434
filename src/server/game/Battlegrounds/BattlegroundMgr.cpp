@@ -418,7 +418,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
     }
 }
 
-void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
+void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg, Player *receiver)
 {
     uint8 isRated = (bg->isRated() ? 1 : 0);               // type (normal=0/rated=1) -- ATM arena or bg, RBG NYI
     uint8 isArena = (bg->isArena() ? 1 : 0);               // Arena names
@@ -426,6 +426,9 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
     data->WriteBit(isArena);
     data->WriteBit(isRated);
+
+    uint8 playerTeam = 0;
+    uint8 oppositeTeam = 1;
 
     if (isArena)
     {
@@ -462,7 +465,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
         data->WriteBit(guid[2]);
         data->WriteBit(!isArena); // Unk 3 -- Prolly if (bg)
         data->WriteBit(0); // Unk 4
-        data->WriteBit(0); // Unk 5
+        data->WriteBit(isRated);    // send personal rating change
         data->WriteBit(0); // Unk 6
         data->WriteBit(guid[3]);
         data->WriteBit(guid[0]);
@@ -485,7 +488,17 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
         buff.WriteByteSeq(guid[4]);
         buff << uint32(itr2->second->KillingBlows);
 
-        // if (unk 5) << uint32() unk
+        if (isRated)
+        {
+            uint8 team = bg->GetPlayerTeam(player->GetGUID()) == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE;
+            buff << uint32(bg->m_ArenaTeamRatingChanges[team]);      // personal rating change
+
+            if (receiver == player)
+            {
+                playerTeam = team;
+                oppositeTeam = (playerTeam == TEAM_ALLIANCE) ? TEAM_HORDE : TEAM_ALLIANCE;
+            }
+        }
 
         buff.WriteByteSeq(guid[5]);
 
@@ -620,22 +633,14 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     data->FlushBits();
     data->PutBits<int32>(count_pos, count, 21);              // Number of Players
 
-    if (isRated)                                             // arena TODO : Fix Order on Rated Implementation
+    if (isArena)                                             // arena TODO : Fix Order on Rated Implementation
     {
-        // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 0; i < 2; ++i)
-        {
-            int32 rating_change = bg->m_ArenaTeamRatingChanges[i];
-
-            uint32 pointsLost = rating_change < 0 ? -rating_change : 0;
-            uint32 pointsGained = rating_change > 0 ? rating_change : 0;
-            uint32 MatchmakerRating = bg->m_ArenaTeamRatingChanges[i];
-
-            *data << uint32(pointsLost);                    // Rating Lost
-            *data << uint32(pointsGained);                  // Rating gained
-            *data << uint32(MatchmakerRating);              // Matchmaking Value
-            sLog->outDebug("rating change: %d", rating_change);
-        }
+        *data << uint32(bg->m_ArenaTeamMMR[playerTeam]);
+        *data << uint32(0);
+        *data << uint32(0);
+        *data << uint32(bg->m_ArenaTeamMMR[oppositeTeam]);
+        *data << uint32(0);
+        *data << uint32(0);
     }
 
     data->append(buff);

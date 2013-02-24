@@ -901,7 +901,7 @@ void Battleground::EndBattleground(uint32 winner)
 
         BlockMovement(plr);
 
-        sBattlegroundMgr->BuildPvpLogDataPacket(&data, this);
+        sBattlegroundMgr->BuildPvpLogDataPacket(&data, this, plr);
         plr->GetSession()->SendPacket(&data);
 
         BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
@@ -1860,7 +1860,7 @@ void Battleground::PlayerAddedToBGCheckIfBGIsRunning(Player* plr)
 
     BlockMovement(plr);
 
-    sBattlegroundMgr->BuildPvpLogDataPacket(&data, this);
+    sBattlegroundMgr->BuildPvpLogDataPacket(&data, this, plr);
     plr->GetSession()->SendPacket(&data);
 
     sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, this, plr, plr->GetBattlegroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, plr->GetBattlegroundQueueJoinTime(GetTypeID()), GetStartTime(), GetArenaType());
