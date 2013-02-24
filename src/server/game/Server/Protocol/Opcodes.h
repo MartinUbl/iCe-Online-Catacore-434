@@ -1328,6 +1328,7 @@ enum Opcodes
     SMSG_GUILD_PARTY_STATE_RESPONSE                  = 0x050A6, // 4.3.4 Build 15595
     CMSG_GUILD_SET_RANK_PERMISSIONS                  = 0x01024, // 4.3.4 15595
     SMSG_ARENA_UNIT_DESTROYED                        = 0x02637, // 4.3.4 15595
+    SMSG_START_TIMER                                 = 0x059A5, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1710,7 +1711,6 @@ enum Opcodes
     SMSG_SPLINE_MOVE_SET_SWIM_SPEED                   = 0x39A4,
     SMSG_SPLINE_MOVE_SET_TURN_RATE                    = 0x78B5,
     SMSG_SPLINE_MOVE_SET_WALK_SPEED                   = 0x34A5,
-    SMSG_START_TIMER                                  = 0x59A5,
     SMSG_STREAMING_MOVIE                              = 0x15B7,
     SMSG_SUPPRESS_NPC_GREETINGS                       = 0x74B1,
     SMSG_TEST_DROP_RATE_RESULT                        = 0x6816,

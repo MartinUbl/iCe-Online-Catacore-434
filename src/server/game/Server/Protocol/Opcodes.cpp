@@ -1337,6 +1337,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_GUILD_SET_RANK_PERMISSIONS,              STATUS_LOGGEDIN, &WorldSession::HandleGuildSetRankPermissionsOpcode);
     OPCODE( SMSG_ARENA_UNIT_DESTROYED,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LFG_UPDATE_STATUS,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_START_TIMER,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()
