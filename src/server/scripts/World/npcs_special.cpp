@@ -1237,23 +1237,25 @@ public:
                     pPlayer->SEND_GOSSIP_MENU(10239, pCreature->GetGUID());
                 else canBuy = true;
                 break;
+            case 48510: // Kall Worthaton
+                if (pPlayer->GetReputationRank(1133) != REP_EXALTED && race != RACE_GOBLIN)
+                    pPlayer->SEND_GOSSIP_MENU(10240, pCreature->GetGUID());
+                else canBuy = true;
+                break;
+            case 43694: // Katie Stokx
+                if (pPlayer->GetReputationRank(72) != REP_EXALTED && race != RACE_HUMAN)
+                    pPlayer->SEND_GOSSIP_MENU(10241, pCreature->GetGUID());
+                else canBuy = true;
+                break;
         }
 
         if (canBuy)
         {
             if (pCreature->isVendor())
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
         }
-        return true;
-    }
-
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-    {
-        pPlayer->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
-
         return true;
     }
 };
