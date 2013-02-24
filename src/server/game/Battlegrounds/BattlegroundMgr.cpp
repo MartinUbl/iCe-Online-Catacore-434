@@ -1037,7 +1037,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
     else
         bg->SetTypeID(bgTypeId);
     bg->SetRandomTypeID(bgTypeId);
-    bg->SetGUID(MAKE_NEW_GUID(bgTypeId, 0, HIGHGUID_BATTLEGROUND));
+    bg->SetGUID(MAKE_NEW_GUID(bg->GetTypeID(false), 0, HIGHGUID_BATTLEGROUND));
 
     return bg;
 }
