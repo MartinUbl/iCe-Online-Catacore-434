@@ -36,41 +36,86 @@
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data)
 {
-    uint64 mailbox, unk3, money, COD;
+    ObjectGuid mailbox;
+
+    uint64 money, COD;
+
     std::string receiver, subject, body;
+
+    uint32 bodyLength, subjectLength, receiverLength;
     uint32 unk1, unk2;
-    uint8 unk4;
-    recv_data >> mailbox;
-    recv_data >> receiver;
 
-    recv_data >> subject;
+    recv_data >> unk1;
+    recv_data >> unk2; // stationery ?
 
-    recv_data >> body;
+    recv_data >> COD >> money; // money and cod
 
-    recv_data >> unk1;                                      // stationery?
-    recv_data >> unk2;                                      // 0x00000000
+    bodyLength = recv_data.ReadBits(12);
+    subjectLength = recv_data.ReadBits(9);
 
-    uint8 items_count;
-    recv_data >> items_count;                               // attached items count
+    uint8 items_count = recv_data.ReadBits(5);              // attached items count
 
     if (items_count > MAX_MAIL_ITEMS)                       // client limit
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_TOO_MANY_ATTACHMENTS);
-        recv_data.rpos(recv_data.wpos());                   // set to end to avoid warnings spam
+        recv_data.rfinish();                   // set to end to avoid warnings spam
         return;
     }
 
-    uint64 itemGUIDs[MAX_MAIL_ITEMS];
+    mailbox[0] = recv_data.ReadBit();
+
+    ObjectGuid itemGUIDs[MAX_MAIL_ITEMS];
 
     for (uint8 i = 0; i < items_count; ++i)
     {
-        recv_data.read_skip<uint8>();                       // item slot in mail, not used
-        recv_data >> itemGUIDs[i];
+        itemGUIDs[i][2] = recv_data.ReadBit();
+        itemGUIDs[i][6] = recv_data.ReadBit();
+        itemGUIDs[i][3] = recv_data.ReadBit();
+        itemGUIDs[i][7] = recv_data.ReadBit();
+        itemGUIDs[i][1] = recv_data.ReadBit();
+        itemGUIDs[i][0] = recv_data.ReadBit();
+        itemGUIDs[i][4] = recv_data.ReadBit();
+        itemGUIDs[i][5] = recv_data.ReadBit();
     }
 
-    recv_data >> money >> COD;                              // money and cod
-    recv_data >> unk3;                                      // const 0
-    recv_data >> unk4;                                      // const 0
+    mailbox[3] = recv_data.ReadBit();
+    mailbox[4] = recv_data.ReadBit();
+    receiverLength = recv_data.ReadBits(7);
+    mailbox[2] = recv_data.ReadBit();
+    mailbox[6] = recv_data.ReadBit();
+    mailbox[1] = recv_data.ReadBit();
+    mailbox[7] = recv_data.ReadBit();
+    mailbox[5] = recv_data.ReadBit();
+
+    recv_data.ReadByteSeq(mailbox[4]);
+
+    for (uint8 i = 0; i < items_count; ++i)
+    {
+        recv_data.ReadByteSeq(itemGUIDs[i][6]);
+        recv_data.ReadByteSeq(itemGUIDs[i][1]);
+        recv_data.ReadByteSeq(itemGUIDs[i][7]);
+        recv_data.ReadByteSeq(itemGUIDs[i][2]);
+        recv_data.read_skip<uint8>();            // item slot in mail, not used
+        recv_data.ReadByteSeq(itemGUIDs[i][3]);
+        recv_data.ReadByteSeq(itemGUIDs[i][0]);
+        recv_data.ReadByteSeq(itemGUIDs[i][4]);
+        recv_data.ReadByteSeq(itemGUIDs[i][5]);
+    }
+
+    recv_data.ReadByteSeq(mailbox[7]);
+    recv_data.ReadByteSeq(mailbox[3]);
+    recv_data.ReadByteSeq(mailbox[6]);
+    recv_data.ReadByteSeq(mailbox[5]);
+
+    subject = recv_data.ReadString(subjectLength);
+    receiver = recv_data.ReadString(receiverLength);
+
+    recv_data.ReadByteSeq(mailbox[2]);
+    recv_data.ReadByteSeq(mailbox[0]);
+
+    body = recv_data.ReadString(bodyLength);
+
+    recv_data.ReadByteSeq(mailbox[1]);
 
     // packet read complete, now do check
 
