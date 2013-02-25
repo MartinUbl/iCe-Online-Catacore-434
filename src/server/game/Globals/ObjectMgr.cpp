@@ -6628,7 +6628,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         case HIGHGUID_UNIT:
             return GenerateLowGuidForUnit(false);
         case HIGHGUID_PET:
-            if (m_hiPetGuid >= 0x00FFFFFE)
+            if (m_hiPetGuid >= 0x00600000)
             {
                 sLog->outError("Pet guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Pet guid overflow!" && false);
