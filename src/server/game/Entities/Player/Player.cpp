@@ -605,6 +605,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_summon_y = 0.0f;
     m_summon_z = 0.0f;
 
+    m_graveyard = NULL;
+
     //Default movement to run mode
     //m_unit_movement_flags = 0;
 
