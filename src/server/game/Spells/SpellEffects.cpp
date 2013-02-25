@@ -3231,12 +3231,12 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             // Stampede
             if (m_caster->HasAura(78893))
             {
-                m_caster->CastSpell(m_caster, 89140, true); // Ravage! (Stampede) enabler spell: Demonic Rebirth Marker
+                m_caster->CastSpell(m_caster, 109881, true); // Ravage! (Stampede) enabler spell: Stampede Ravage Marker
                 m_caster->CastSpell(m_caster, 81022, true); // rank 2
             }
             else if (m_caster->HasAura(78892))
             {
-                m_caster->CastSpell(m_caster, 89140, true); // Ravage! (Stampede) enabler spell: Demonic Rebirth Marker
+                m_caster->CastSpell(m_caster, 109881, true); // Ravage! (Stampede) enabler spell: Stampede Ravage Marker
                 m_caster->CastSpell(m_caster, 81021, true); // rank 1
             }
             break;
