@@ -619,7 +619,7 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     data.WriteBit(plGuid[3]);
     data.WriteBit(plGuid[0]);
 
-    uint32 dsize = joinData.lockmap.size();
+    uint32 dsize = 0;//joinData.lockmap.size();
 
     // temp and hack and shit
     // please, fix me
@@ -633,7 +633,7 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
 
     uint32 limit = 0;
 
-    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    /*for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         tmpGuid = it->first;
 
@@ -652,7 +652,7 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
 
         if (limit >= dsize)
             break;
-    }
+    }*/
 
     data.WriteBit(plGuid[4]);
     data.WriteBit(plGuid[5]);
@@ -661,7 +661,7 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
 
     limit = 0;
 
-    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    /*for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         tmpGuid = it->first;
 
@@ -686,7 +686,7 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
 
         if (limit >= dsize)
             break;
-    }
+    }*/
 
     data.WriteByteSeq(plGuid[1]);
     data.WriteByteSeq(plGuid[4]);
