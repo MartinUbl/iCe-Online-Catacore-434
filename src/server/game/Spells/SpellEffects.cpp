@@ -2594,6 +2594,51 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             break;
         case SPELLFAMILY_PALADIN:
+            // Judgement (seal trigger)
+            if (m_spellInfo->Id == 20271)
+            {
+                if (!unitTarget || !unitTarget->isAlive())
+                    return;
+
+                uint32 spellId = 54158; // Judgement
+
+                // Seal of Righteousness and Seal of Truth have triggered spell ID in the third effect (dummy)
+                Unit::AuraApplicationMap & sealAuras = m_caster->GetAppliedAuras();
+                for (Unit::AuraApplicationMap::iterator iter = sealAuras.begin(); iter != sealAuras.end();)
+                {
+                    Aura * aura = iter->second->GetBase();
+                    if (IsSealSpell(aura->GetSpellProto()))
+                    {
+                        if (AuraEffect * aureff = aura->GetEffect(2))
+                            if (aureff->GetAuraType() == SPELL_AURA_DUMMY)
+                            {
+                                // Judgement of Righteousness, Judgement of Truth
+                                if (sSpellStore.LookupEntry(aureff->GetAmount()))
+                                    spellId = aureff->GetAmount();
+                            }
+                        break;
+                    }
+                    else
+                        ++iter;
+                }
+                m_caster->CastSpell(unitTarget, spellId, true);
+
+                // Long Arm of the Law
+                if ((m_caster->HasAura(87168) && roll_chance_i(50)) || m_caster->HasAura(87172))
+                {
+                    // If target is at or further than 15 yards (6.0f 2D dist)
+                    if (unitTarget->GetDistance2d(m_caster) >= 6.0f) 
+                        m_caster->CastSpell(m_caster,87173,true);
+                }
+
+                // Communion
+                if (m_caster->HasAura(31876))
+                {
+                    // replenishment
+                    m_caster->CastSpell(m_caster, 57669, true);
+                }
+                return;
+            }
             switch(m_spellInfo->Id)
             {
                 case 31789:                                 // Righteous Defense (step 1)
@@ -7694,51 +7739,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Judgement (seal trigger)
-            if (m_spellInfo->Id == 20271)
-            {
-                if (!unitTarget || !unitTarget->isAlive())
-                    return;
-
-                uint32 spellId = 54158; // Judgement
-
-                // Seal of Righteousness and Seal of Truth have triggered spell ID in the third effect (dummy)
-                Unit::AuraApplicationMap & sealAuras = m_caster->GetAppliedAuras();
-                for (Unit::AuraApplicationMap::iterator iter = sealAuras.begin(); iter != sealAuras.end();)
-                {
-                    Aura * aura = iter->second->GetBase();
-                    if (IsSealSpell(aura->GetSpellProto()))
-                    {
-                        if (AuraEffect * aureff = aura->GetEffect(2))
-                            if (aureff->GetAuraType() == SPELL_AURA_DUMMY)
-                            {
-                                // Judgement of Righteousness, Judgement of Truth
-                                if (sSpellStore.LookupEntry(aureff->GetAmount()))
-                                    spellId = aureff->GetAmount();
-                            }
-                        break;
-                    }
-                    else
-                        ++iter;
-                }
-                m_caster->CastSpell(unitTarget, spellId, true);
-
-                // Long Arm of the Law
-                if ((m_caster->HasAura(87168) && roll_chance_i(50)) || m_caster->HasAura(87172))
-                {
-                    // If target is at or further than 15 yards (6.0f 2D dist)
-                    if (unitTarget->GetDistance2d(m_caster) >= 6.0f) 
-                        m_caster->CastSpell(m_caster,87173,true);
-                }
-
-                // Communion
-                if (m_caster->HasAura(31876))
-                {
-                    // replenishment
-                    m_caster->CastSpell(m_caster, 57669, true);
-                }
-                return;
-            }
+            break;
         }
         case SPELLFAMILY_WARLOCK:
         {
