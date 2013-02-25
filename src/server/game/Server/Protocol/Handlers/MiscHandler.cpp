@@ -743,6 +743,9 @@ void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket &recv_data)
 
     // no data to process, just empty packet
 
+    if (!GetPlayer() || !GetPlayer()->IsInWorld())
+        return;
+
     // Tell player to return to graveyard
     GetPlayer()->ReturnToGraveyard();
 }
