@@ -70,10 +70,14 @@ void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)
     //recvPacket.hexlike();
 
     uint32 unk0; //unknown 4 bytes, read as uint32 (4.0.3)
-    std::string channelname, unk1;
+    uint8 channelNameSize;
+    std::string channelname;
 
     recvPacket >> unk0;
-    recvPacket >> channelname >> unk1;
+    recvPacket >> channelNameSize;
+
+    if (channelNameSize)
+        channelname = recvPacket.ReadString(channelNameSize);
 
     if (channelname.empty())
         return;
