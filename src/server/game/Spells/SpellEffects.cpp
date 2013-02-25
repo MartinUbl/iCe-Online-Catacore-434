@@ -7838,6 +7838,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         pPet->CastSpell(pPet->getVictim(),83381,true);
                 }
             }
+            // Master's Call
+            else if (m_spellInfo->Id == 53271)
+            {
+                if (unitTarget)
+                {
+                    unitTarget->CastSpell(m_caster, 54216, true);
+                    unitTarget->CastSpell(unitTarget, 62305, true);
+                }
+            }
             return;
         }
         case SPELLFAMILY_POTION:
