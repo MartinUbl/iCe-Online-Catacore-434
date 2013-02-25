@@ -879,7 +879,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         *data << (uint16) player->GetZoneId();
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
-        *data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY();
+        *data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY() << (uint16)player->GetPositionZ();
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
