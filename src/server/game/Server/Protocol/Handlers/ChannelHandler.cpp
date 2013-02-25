@@ -137,8 +137,14 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
     sLog->outDebug("Opcode %u", recvPacket.GetOpcode());
     //recvPacket.hexlike();
+    uint8 channelnameSize;
     std::string channelname;
-    recvPacket >> channelname;
+
+    recvPacket >> channelnameSize;
+
+    if (channelnameSize)
+        channelname = recvPacket.ReadString(channelnameSize);
+
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->SendWhoOwner(_player->GetGUID());
