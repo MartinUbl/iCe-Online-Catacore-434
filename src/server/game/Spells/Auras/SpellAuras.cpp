@@ -1884,8 +1884,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     if (!target->HasAura(2818) && !target->HasAura(3409) && !target->HasAura(5760) && !target->HasAura(13218))
                     {
-                        target->RemoveAurasDueToSpell(58683, caster->GetGUID());
-                        target->RemoveAurasDueToSpell(58684, caster->GetGUID());
+                        if (caster)
+                        {
+                            target->RemoveAurasDueToSpell(58683, caster->GetGUID());
+                            target->RemoveAurasDueToSpell(58684, caster->GetGUID());
+                        }
                     }
                 }
                 break;
