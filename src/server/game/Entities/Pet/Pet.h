@@ -36,13 +36,6 @@ enum PetType
 
 extern char const* petTypeSuffix[MAX_PET_TYPE];
 
-enum HappinessState
-{
-    UNHAPPY = 1,
-    CONTENT = 2,
-    HAPPY   = 3
-};
-
 enum PetSpellState
 {
     PETSPELL_UNCHANGED = 0,
@@ -150,8 +143,6 @@ class Pet : public Guardian
                 return m_autospells[pos];
         }
 
-        void LooseHappiness();
-        HappinessState GetHappinessState();
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint8 level);
         void SynchronizeLevelWithOwner();

@@ -129,7 +129,7 @@ class ArenaTeam
         ArenaTeam();
         ~ArenaTeam();
 
-        bool Create(uint64 captainGuid, uint32 type, std::string ArenaTeamName);
+        bool Create(Player *captain, uint32 type, std::string ArenaTeamName);
         void Disband(WorldSession *session);
 
         typedef std::list<ArenaTeamMember> MemberList;
@@ -138,6 +138,7 @@ class ArenaTeam
         uint32 GetType() const            { return m_Type; }
         uint8  GetSlot() const            { return GetSlotByType(GetType()); }
         static uint8 GetSlotByType(uint32 type);
+        static uint8 GetTypeBySlot(uint8 slot);
         const uint64& GetCaptain() const  { return m_CaptainGuid; }
         std::string GetName() const       { return m_Name; }
         const ArenaTeamStats& GetStats() const { return m_stats; }

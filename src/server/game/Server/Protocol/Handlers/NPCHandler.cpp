@@ -197,10 +197,10 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
 void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
 {
     uint64 guid;
-    uint32 spellId, unk = 0, result = ERR_TRAINER_OK;
+    uint32 spellId = 0, trainerId, result = ERR_TRAINER_OK;
 
     // unk uint32 added in 4.0.1
-    recv_data >> guid >> unk >> spellId;
+    recv_data >> guid >> trainerId >> spellId;
     sLog->outDebug("WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId);
 
     Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
@@ -214,43 +214,47 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    if (!unit->isCanTrainingOf(_player,true))
+    if (!unit->isCanTrainingOf(_player,true)) {
+        SendTrainerBuyFailed(guid, spellId, 0);
         return;
+    }
 
     // check present spell in trainer spell list
     TrainerSpellData const* trainer_spells = unit->GetTrainerSpells();
-    if (!trainer_spells)
+    if (!trainer_spells) {
+        SendTrainerBuyFailed(guid, spellId, 0);
         return;
+    }
 
     // not found, cheat?
     TrainerSpell const* trainer_spell = trainer_spells->Find(spellId);
-    if (!trainer_spell)
+    if (!trainer_spell) {
+        SendTrainerBuyFailed(guid, spellId, 0);
         return;
+    }
 
     // can't be learn, cheat? Or double learn with lags...
-    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_CAN_LEARN)
+    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_CAN_LEARN) {
+        SendTrainerBuyFailed(guid, spellId, 0);
         return;
+    }
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
-    if (!_player->HasEnoughMoney(nSpellCost))
+    if (!_player->HasEnoughMoney(nSpellCost)) {
+        SendTrainerBuyFailed(guid, spellId, 1);
         result = ERR_TRAINER_NOT_ENOUGH_MONEY;
+        return;
+    }
 
     if(result == ERR_TRAINER_OK)
     {
         _player->ModifyMoney(-int32(nSpellCost));
 
-        WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
-        data << uint64(guid);
-        data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
-        SendPacket(&data);
-
-        data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
-        data << uint64(_player->GetGUID());
-        data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
-        SendPacket(&data);
+        unit->SendPlaySpellVisualKit(179, 0);       // 53 SpellCastDirected
+        _player->SendPlaySpellVisualKit(362, 1);    // 113 EmoteSalute
 
         // learn explicitly or cast explicitly
         if (trainer_spell->IsCastable())
@@ -259,10 +263,18 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
             _player->learnSpell(spellId, false);
     }
 
-    WorldPacket data(SMSG_TRAINER_BUY_RESULT, 16);
+    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
     data << uint64(guid);
-    data << uint32(spellId);  
-    data << uint32(result);
+    data << uint32(spellId);
+    SendPacket(&data);
+}
+
+void WorldSession::SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 reason)
+{
+    WorldPacket data(SMSG_TRAINER_BUY_FAILED, 16);
+    data << uint64(guid);
+    data << uint32(spellId);        // should be same as in packet from client
+    data << uint32(reason);         // 1 == "Not enough money for trainer service." 0 == "Trainer service %d unavailable."
     SendPacket(&data);
 }
 
@@ -449,10 +461,16 @@ void WorldSession::SendBindPoint(Creature *npc)
     _player->m_homebindY = _player->GetPositionY();
     _player->m_homebindZ = _player->GetPositionZ();
 
-	// send spell for homebinding (3286)
+    // send spell for homebinding (3286)
     npc->CastSpell(_player, bindspell, true);
 
-	_player->PlayerTalkClass->CloseGossip();
+
+    WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
+    data << uint64(npc->GetGUID());
+    data << uint32(bindspell);
+    SendPacket(&data);
+
+    _player->PlayerTalkClass->CloseGossip();
 }
 
 void WorldSession::HandleListStabledPetsOpcode(WorldPacket & recv_data)

@@ -130,6 +130,10 @@ void Totem::InitSummon()
     // Glyph of Healing Stream Totem adds new passive spell
     if (GetEntry() == 3527 && GetOwner() && GetOwner()->HasAura(55456))
         CastSpell(this, 8185, true);
+
+    // Spirit Link totem also has periodic aura, which takes care of additional things
+    if (GetEntry() == 53006)
+        CastSpell(this, 98017, true);
 }
 
 void Totem::UnSummon()

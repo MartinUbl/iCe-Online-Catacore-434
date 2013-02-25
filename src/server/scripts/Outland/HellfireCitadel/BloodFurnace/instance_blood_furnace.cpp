@@ -221,6 +221,8 @@ class instance_blood_furnace : public InstanceMapScript
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
+            virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+            virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* pMap) const

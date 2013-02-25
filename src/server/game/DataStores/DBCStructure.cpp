@@ -48,6 +48,8 @@ SpellEntry::SpellEntry(SpellEntry_n const* spell)
     AttributesEx6 = spell->AttributesEx6;
     AttributesEx7 = spell->AttributesEx7;
     AttributesEx8 = spell->AttributesEx8;
+    AttributesEx9 = spell->AttributesEx9;
+    AttributesEx10 = spell->AttributesEx10;
     CastingTimeIndex = spell->CastingTimeIndex;
     DurationIndex = spell->DurationIndex;
     powerType = spell->powerType;
@@ -140,11 +142,13 @@ void SpellEntry::LoadSpellAddons()
         EffectMiscValueB[i] = SpellEffect ? SpellEffect->EffectMiscValueB : 0;
         EffectPointsPerComboPoint[i] = SpellEffect ? SpellEffect->EffectPointsPerComboPoint : 0;
         EffectRadiusIndex[i] = SpellEffect ? SpellEffect->EffectRadiusIndex : 0;
+        EffectRadiusMaxIndex[i] = SpellEffect ? SpellEffect->EffectRadiusMaxIndex : 0;
         EffectRealPointsPerLevel[i] = SpellEffect ? SpellEffect->EffectRealPointsPerLevel : 0;
         EffectSpellClassMask[i] = SpellEffect ? SpellEffect->EffectSpellClassMask : flag96(0);
         EffectTriggerSpell[i] = SpellEffect ? SpellEffect->EffectTriggerSpell : 0;
         EffectImplicitTargetA[i] = SpellEffect ? SpellEffect->EffectImplicitTargetA : 0;
         EffectImplicitTargetB[i] = SpellEffect ? SpellEffect->EffectImplicitTargetB : 0;
+        EffectFlags[i] = SpellEffect ? SpellEffect->EffectFlags : 0;
     }
     
     SpellEquippedItemsEntry const* SpellEquippedItems = GetSpellEquippedItems();
@@ -555,4 +559,33 @@ bool SpellEntry::AppliesAuraType(uint32 type) const
     }
 
     return false;
+}
+
+float SpellEntry::GetSpellRadius(Unit *caster, uint32 effIndex) const
+{
+    if (effIndex < 0 || effIndex >= MAX_SPELL_EFFECTS)
+        return 0.0f;
+
+    const SpellRadiusEntry *radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusIndex[effIndex]);
+
+    if (!radiusEntry)
+    {
+        radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusMaxIndex[effIndex]);
+
+        if (!radiusEntry)
+            return 0.0f;
+    }
+
+    float radius = radiusEntry->RadiusMin;
+    if (caster)
+    {
+        radius += radiusEntry->RadiusPerLevel * caster->getLevel();
+        if (radius > radiusEntry->RadiusMax)
+            radius = radiusEntry->RadiusMax;
+
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(Id, SPELLMOD_RADIUS, radius, NULL);
+    }
+
+    return radius;
 }

@@ -341,6 +341,7 @@ class ChatHandler
         bool HandleResearchingCommand(const char* args);
         bool HandleNpcSpawncircle(const char* args);
         bool HandleNpcSetSite(const char* args);
+        bool HandleNpcNearCommand(const char* args);
 
         //-----------------------Npc Commands-----------------------
         bool HandleNpcAddCommand(const char* args);

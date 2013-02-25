@@ -23,6 +23,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <bitset>
 #include "Common.h"
 #include "ItemPrototype.h"
 #include "Unit.h"
@@ -54,12 +55,13 @@ class UpdateMask;
 class SpellCastTargets;
 class PlayerSocial;
 class OutdoorPvP;
+class Guild;
 
 typedef std::deque<Mail*> PlayerMails;
 
-#define PLAYER_MAX_SKILLS           127
+#define PLAYER_MAX_SKILLS           128
 #define PLAYER_MAX_DAILY_QUESTS     25
-#define PLAYER_EXPLORED_ZONES_SIZE  144
+#define PLAYER_EXPLORED_ZONES_SIZE  156
 
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
@@ -143,14 +145,26 @@ enum PlayerCurrencyState
     PLAYERCURRENCY_REMOVED   = 3
 };
 
+enum CurrencySource
+{
+    CURRENCY_SOURCE_ALL    = 0,
+    CURRENCY_SOURCE_ARENA  = 1,
+    CURRENCY_SOURCE_BG     = 2,
+    CURRENCY_SOURCE_OTHER  = 3,
+    CURRENCY_SOURCE_MAX
+};
+
+typedef std::map<CurrencySource, uint32> CurrencySourceMap;
+
 struct PlayerCurrency
 {
     PlayerCurrencyState state;
     uint32 totalCount;
-    uint32 weekCount;
-};
+    uint32 seasonCount;
 
-#define PLAYER_CURRENCY_PRECISION   100
+    CurrencySourceMap weekCap;
+    CurrencySourceMap weekCount;
+};
 
 // Spell modifier (used for modify other spells)
 struct SpellModifier
@@ -169,6 +183,94 @@ typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
 typedef UNORDERED_MAP<uint32, PlayerSpell*> PlayerSpellMap;
 typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
 typedef std::list<SpellModifier*> SpellModList;
+
+/// Maximum number of CompactUnitFrames profiles
+#define MAX_CUF_PROFILES 5
+
+/// Bit index used in the many bool options of CompactUnitFrames
+enum CUFBoolOptions
+{
+    CUF_KEEP_GROUPS_TOGETHER,
+    CUF_DISPLAY_PETS,
+    CUF_DISPLAY_MAIN_TANK_AND_ASSIST,
+    CUF_DISPLAY_HEAL_PREDICTION,
+    CUF_DISPLAY_AGGRO_HIGHLIGHT,
+    CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS,
+    CUF_DISPLAY_POWER_BAR,
+    CUF_DISPLAY_BORDER,
+    CUF_USE_CLASS_COLORS,
+    CUF_DISPLAY_NON_BOSS_DEBUFFS,
+    CUF_DISPLAY_HORIZONTAL_GROUPS,
+    CUF_LOCKED,
+    CUF_SHOWN,
+    CUF_AUTO_ACTIVATE_2_PLAYERS,
+    CUF_AUTO_ACTIVATE_3_PLAYERS,
+    CUF_AUTO_ACTIVATE_5_PLAYERS,
+    CUF_AUTO_ACTIVATE_10_PLAYERS,
+    CUF_AUTO_ACTIVATE_15_PLAYERS,
+    CUF_AUTO_ACTIVATE_25_PLAYERS,
+    CUF_AUTO_ACTIVATE_40_PLAYERS,
+    CUF_AUTO_ACTIVATE_SPEC_1,
+    CUF_AUTO_ACTIVATE_SPEC_2,
+    CUF_AUTO_ACTIVATE_PVP,
+    CUF_AUTO_ACTIVATE_PVE,
+    CUF_UNK_145,
+    CUF_UNK_156,
+    CUF_UNK_157,
+
+    CUF_BOOL_OPTIONS_COUNT,
+};
+
+/// Represents a CompactUnitFrame profile
+struct CUFProfile
+{
+    CUFProfile() : ProfileName(), BoolOptions() // might want to change default value for options
+    {
+        FrameHeight = 0;
+        FrameWidth  = 0;
+        SortBy      = 0;
+        HealthText  = 0;
+        Unk146      = 0;
+        Unk147      = 0;
+        Unk148      = 0;
+        Unk150      = 0;
+        Unk152      = 0;
+        Unk154      = 0;
+    }
+
+    CUFProfile(const std::string& name, uint16 frameHeight, uint16 frameWidth, uint8 sortBy, uint8 healthText, uint32 boolOptions,
+        uint8 unk146, uint8 unk147, uint8 unk148, uint16 unk150, uint16 unk152, uint16 unk154)
+        : ProfileName(name), BoolOptions((int)boolOptions)
+    {
+        FrameHeight = frameHeight;
+        FrameWidth  = frameWidth;
+        SortBy      = sortBy;
+        HealthText  = healthText;
+        Unk146      = unk146;
+        Unk147      = unk147;
+        Unk148      = unk148;
+        Unk150      = unk150;
+        Unk152      = unk152;
+        Unk154      = unk154;
+    }
+
+    std::string ProfileName;
+    uint16 FrameHeight;
+    uint16 FrameWidth;
+    uint8 SortBy;
+    uint8 HealthText;
+
+    uint8 Unk146;
+    uint8 Unk147;
+    uint8 Unk148;
+    uint16 Unk150;
+    uint16 Unk152;
+    uint16 Unk154;
+
+    std::bitset<CUF_BOOL_OPTIONS_COUNT> BoolOptions;
+
+    // More fields can be added to BoolOptions without changing DB schema (up to 31, currently 24)
+};
 
 struct SpellCooldown
 {
@@ -431,6 +533,9 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK26          = 0x04000000,
     PLAYER_FLAGS_UNK27          = 0x08000000,
     PLAYER_FLAGS_GLEVEL_ENABLED = 0x10000000,
+    PLAYER_FLAGS_VOID_UNLOCKED  = 0x20000000,       // void storage
+    PLAYER_FLAGS_UNK30          = 0x40000000,
+    PLAYER_FLAGS_UNK31          = 0x80000000
 };
 
 // used for PLAYER__FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
@@ -478,8 +583,8 @@ enum PlayerFlags
 #define PLAYER_TITLE_HAND_OF_ADAL          UI64LIT(0x0000008000000000) // 39
 #define PLAYER_TITLE_VENGEFUL_GLADIATOR    UI64LIT(0x0000010000000000) // 40
 
-#define KNOWN_TITLES_SIZE   6
-#define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 3 uint64 fields
+#define KNOWN_TITLES_SIZE   4
+#define MAX_TITLE_INDEX     (KNOWN_TITLES_SIZE*64)          // 4 uint64 fields
 
 // used in PLAYER_FIELD_BYTES values
 enum PlayerFieldByteFlags
@@ -675,7 +780,7 @@ enum EquipmentSetUpdateState
 
 struct EquipmentSet
 {
-    EquipmentSet() : Guid(0), state(EQUIPMENT_SET_NEW)
+    EquipmentSet() : Guid(0), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
     {
         for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
             Items[i] = 0;
@@ -684,6 +789,7 @@ struct EquipmentSet
     uint64 Guid;
     std::string Name;
     std::string IconName;
+    uint32 IgnoreMask;
     uint32 Items[EQUIPMENT_SLOT_END];
     EquipmentSetUpdateState state;
 };
@@ -833,7 +939,9 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS    = 30,
     PLAYER_LOGIN_QUERY_LOADPETSLOT              = 31,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
-    MAX_PLAYER_LOGIN_QUERY                      = 36
+    PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP    = 36,
+    PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES        = 37,
+    MAX_PLAYER_LOGIN_QUERY                      = 38
 };
 
 enum PlayerDelayedOperations
@@ -995,11 +1103,13 @@ class Player;
 struct BGData
 {
     BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
-        bgTeam(0), mountSpell(0) { ClearTaxiPath(); }
+        bgTeam(0), mountSpell(0) { bgQueuesJoinedTime.clear(); ClearTaxiPath(); }
 
     uint32 bgInstanceID;                    ///< This variable is set to bg->m_InstanceID,
                                             ///  when player is teleported to BG - (it is battleground's GUID)
     BattlegroundTypeId bgTypeID;
+
+    std::map<uint32, uint32> bgQueuesJoinedTime;
 
     std::set<uint32>   bgAfkReporter;
     uint8              bgAfkReportedCount;
@@ -1083,9 +1193,6 @@ class Player : public Unit, public GridObject<Player>
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
-        static UpdateMask updateVisualBits;
-        static void InitVisibleBits();
-
         void AddToWorld();
         void RemoveFromWorld();
 
@@ -1113,7 +1220,7 @@ class Player : public Unit, public GridObject<Player>
 
         void Update(uint32 time);
 
-        static bool BuildEnumData(QueryResult result,  WorldPacket * p_data);
+        static bool BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer);
 
         virtual uint8 getClass() const = 0;
     
@@ -1164,6 +1271,7 @@ class Player : public Unit, public GridObject<Player>
         void SetGMVisible(bool on);
         bool Has310Flyer(bool checkAllSpells, uint32 excludeSpellId = 0);
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
+        void SetSendFlyPacket(bool apply);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
@@ -1299,11 +1407,28 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
+        void SendNewCurrency(uint32 id);
         void SendCurrencies();
-        uint32 GetCurrency(uint32 id);
-        bool HasCurrency(uint32 id, uint32 count);
+        void SendUpdateCurrencyWeekCap(uint32 id, uint32 cap);
+        uint32 GetCurrency(uint32 id, bool countprecision = false);
+        bool HasCurrency(uint32 id, uint32 count, bool countprecision = false);
         void SetCurrency(uint32 id, uint32 count);
-        void ModifyCurrency(uint32 id, int32 count, bool ignoreweekcap = false, bool ignorebonuses = false);
+        uint32 GetCurrencyWeekCap(const CurrencyTypesEntry* currency, CurrencySource src);
+        uint32 GetCurrencyWeekCap(uint32 id, CurrencySource src)
+        {
+            CurrencyTypesEntry const* curr = sCurrencyTypesStore.LookupEntry(id);
+            if (curr)
+                return GetCurrencyWeekCap(curr, src);
+
+            return 0;
+        }
+        uint32 GetCurrencyWeekCount(uint32 id, CurrencySource src);
+        uint32 GetCurrencySeasonCount(uint32 id);
+        void SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap);
+        void SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count);
+        void ModifyCurrency(uint32 id, int32 count, CurrencySource src = CURRENCY_SOURCE_ALL, bool ignoreweekcap = false, bool ignorebonuses = false);
+
+        void ResetCurrencyWeekCount();
 
         void SendCompletedArtifacts();
         void DiggedCreature(uint64 guidlow);
@@ -1359,6 +1484,7 @@ class Player : public Unit, public GridObject<Player>
         }
         void SendNewItem(Item *item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
+        bool BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uint32 currency, uint32 count);
         bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore);
         void CheckArmorSpecialization();
 
@@ -1449,9 +1575,6 @@ class Player : public Unit, public GridObject<Player>
         void ResetDailyQuestStatus();
         void ResetWeeklyQuestStatus();
 
-        //uint16 GetConquestPointsWeekCap(ConquestPointsSources source) const { return _conquestPointsWeekCap[source]; }
-        uint16 GetConquestPointsThisWeek();
-
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
         uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
@@ -1491,6 +1614,7 @@ class Player : public Unit, public GridObject<Player>
         void GroupEventHappens(uint32 questId, WorldObject const* pEventObject);
         void ItemAddedQuestCheck(uint32 entry, uint32 count);
         void ItemRemovedQuestCheck(uint32 entry, uint32 count);
+        void CurrencyModifyQuestCheck(uint32 entry);
         void KilledMonster(CreatureInfo const* cInfo, uint64 guid);
         void KilledMonsterCredit(uint32 entry, uint64 guid);
         void CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id);
@@ -1522,6 +1646,17 @@ class Player : public Unit, public GridObject<Player>
 
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
+
+        void SaveCUFProfile(uint8 id, CUFProfile* profile) { delete _CUFProfiles[id]; _CUFProfiles[id] = profile; } ///> Replaces a CUF profile at position 0-4
+        CUFProfile* GetCUFProfile(uint8 id) const { return _CUFProfiles[id]; } ///> Retrieves a CUF profile at position 0-4
+        uint8 GetCUFProfilesCount() const
+        {
+            uint8 count = 0;
+            for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+                if (_CUFProfiles[i])
+                    ++count;
+            return count;
+        }
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -1759,6 +1894,7 @@ class Player : public Unit, public GridObject<Player>
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
         void SendClearCooldown(uint32 spell_id, Unit* target);
+        void SendClearAllCooldowns(Unit* target);
         void ModifySpellCooldown(uint32 spell_id, int32 mod, bool update = true);
 
         void RemoveCategoryCooldown(uint32 cat);
@@ -1789,6 +1925,8 @@ class Player : public Unit, public GridObject<Player>
         bool isRessurectRequestedBy(uint64 guid) const { return m_resurrectGUID == guid; }
         bool isRessurectRequested() const { return m_resurrectGUID != 0; }
         void ResurectUsingRequestData();
+
+        bool FallGround(uint8 FallMode);
 
         uint8 getCinematic()
         {
@@ -1853,6 +1991,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetRank() { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() { return m_guildId; }
+        Guild *GetGuild();
         uint32 GetLastGuildId() { return m_lastGuildId; }
         void SetLastGuildId(uint32 guildid) { m_lastGuildId = guildid; }
         static uint32 GetGuildIdFromDB(uint64 guid);
@@ -1881,8 +2020,6 @@ class Player : public Unit, public GridObject<Player>
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(uint64 guid);
-        void SetConquestPointCap(uint32 newcap) { m_ConquestPointCap = newcap; };
-        uint32 GetConquestPointCap() { return m_ConquestPointCap; };
 
         // Research mechanisms (Archaeology)
         uint16 GetResearchSite(uint8 slot);
@@ -1968,6 +2105,7 @@ class Player : public Unit, public GridObject<Player>
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void ApplyHealthRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
+        void UpdateHaste();
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -2011,7 +2149,6 @@ class Player : public Unit, public GridObject<Player>
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
-        bool FallGround(uint8 FallMode = 0);
         void KillPlayer();
         uint32 GetResurrectionSpellId();
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
@@ -2034,8 +2171,6 @@ class Player : public Unit, public GridObject<Player>
             StopMirrorTimer(BREATH_TIMER);
             StopMirrorTimer(FIRE_TIMER);
         }
-
-        void SetMovement(PlayerMovementType pType);
 
         bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
@@ -2158,9 +2293,9 @@ class Player : public Unit, public GridObject<Player>
         void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
         void ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change = false);
         void UpdateEquipSpellsAtFormChange();
-        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
+        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, SpellEntry const * triggerSpell = NULL);
         void CastItemUseSpell(Item *item,SpellCastTargets const& targets,uint8 cast_count);
-        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemPrototype const * proto);
+        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemPrototype const * proto, SpellEntry const * triggerSpell = NULL);
 
         void SendEquipmentSetList();
         void SetEquipmentSet(uint32 index, EquipmentSet eqset);
@@ -2193,6 +2328,17 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetBattlegroundId()  const                { return m_bgData.bgInstanceID; }
         BattlegroundTypeId GetBattlegroundTypeId() const { return m_bgData.bgTypeID; }
         Battleground* GetBattleground() const;
+        uint8 GetTwinkType()        const;
+
+        uint32 GetBattlegroundQueueJoinTime(uint32 bgTypeId) const { return m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second; }
+        void AddBattlegroundQueueJoinTime(uint32 bgTypeId, uint32 joinTime)
+        {
+            m_bgData.bgQueuesJoinedTime[bgTypeId] = joinTime;
+        }
+        void RemoveBattlegroundQueueJoinTime(uint32 bgTypeId)
+        {
+            m_bgData.bgQueuesJoinedTime.erase(m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second);
+        }
 
         bool InBattlegroundQueue() const
         {
@@ -2347,12 +2493,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SetClientControl(Unit* target, uint8 allowMove);
 
-        void SetMover(Unit* target)
-        {
-            m_mover->m_movedPlayer = NULL;
-            m_mover = target;
-            m_mover->m_movedPlayer = this;
-        }
+        void SetMover(Unit* target);
         void SetSeer(WorldObject *target) { m_seer = target; }
         void SetViewpoint(WorldObject *target, bool apply);
         WorldObject* GetViewpoint() const;
@@ -2714,6 +2855,8 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadTalentBranchSpecs(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
+        void _LoadCurrencyWeekcap(PreparedQueryResult result);
+        void _LoadCUFProfiles(PreparedQueryResult result);
         void _LoadArchaeologyData();
 
         /*********************************************************/
@@ -2735,11 +2878,10 @@ class Player : public Unit, public GridObject<Player>
         void _SaveTalents(SQLTransaction& trans);
         void _SaveTalentBranchSpecs(SQLTransaction& trans);
         void _SaveCurrency();
+        void _SaveCurrencyWeekcap();
         void _SaveStats(SQLTransaction& trans);
         void _SaveArchaeologyData();
-
-        void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
-        void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
+        void _SaveCUFProfiles(SQLTransaction& trans);
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/
@@ -2772,7 +2914,6 @@ class Player : public Unit, public GridObject<Player>
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
         PlayerCurrenciesMap m_currencies;
-        uint32 _GetCurrencyWeekCap(const CurrencyTypesEntry* currency);
 
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
@@ -2933,6 +3074,8 @@ class Player : public Unit, public GridObject<Player>
         DeclinedName *m_declinedname;
         Runes *m_runes;
         EquipmentSets m_EquipmentSets;
+
+        CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
     private:
         // internal common parts for CanStore/StoreItem functions
         uint8 _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem) const;
@@ -2942,6 +3085,7 @@ class Player : public Unit, public GridObject<Player>
 
         std::set<uint32> m_refundableItems;
         void SendRefundInfo(Item* item);
+        void SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece, uint8 error);
         void RefundItem(Item* item);
 
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, int32 faction, bool for_quest, bool noQuestBonus = false);

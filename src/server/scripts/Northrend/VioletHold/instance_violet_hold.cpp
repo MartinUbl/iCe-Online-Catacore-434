@@ -155,7 +155,7 @@ public:
 
         uint8 uiDoorIntegrity;
 
-        uint16 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint8 uiCountErekemGuards;
         uint8 uiCountActivationCrystals;
         uint8 uiCyanigosaEventPhase;
@@ -660,6 +660,8 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         bool CheckWipe()
         {
             Map::PlayerList const &players = instance->GetPlayers();

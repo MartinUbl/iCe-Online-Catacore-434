@@ -430,6 +430,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "follow",         SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcFollowCommand>,           "", NULL },
         { "info",           SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleNpcInfoCommand>,             "", NULL },
         { "move",           SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcMoveCommand>,             "", NULL },
+        { "near",           SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcNearCommand>,             "", NULL },
         { "playemote",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleNpcPlayEmoteCommand>,        "", NULL },
         { "setmodel",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcSetModelCommand>,         "", NULL },
         { "setmovetype",    SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleNpcSetMoveTypeCommand>,      "", NULL },

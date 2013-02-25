@@ -253,9 +253,9 @@ void BattlegroundEY::UpdatePointStatuses()
 
         uint32 pointOwnerTeamId = 0;
         //find which team should own this point
-        if (m_PointBarStatus[point] <= BG_EY_PROGRESS_BAR_NEUTRAL_LOW)
+        if (m_PointBarStatus[point] < BG_EY_PROGRESS_BAR_NEUTRAL_LOW)
             pointOwnerTeamId = HORDE;
-        else if (m_PointBarStatus[point] >= BG_EY_PROGRESS_BAR_NEUTRAL_HIGH)
+        else if (m_PointBarStatus[point] > BG_EY_PROGRESS_BAR_NEUTRAL_HIGH)
             pointOwnerTeamId = ALLIANCE;
         else
             pointOwnerTeamId = EY_POINT_NO_OWNER;

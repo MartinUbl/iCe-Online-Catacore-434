@@ -49,7 +49,7 @@ public:
         uint32 m_uiManyWhelpsCounter;
         uint32 m_uiEruptTimer;
 
-        uint8  m_auiEncounter[MAX_ENCOUNTER];
+        uint32  m_auiEncounter[MAX_ENCOUNTER];
 
         bool   m_bAchievManyWhelpsHandleIt;
         bool   m_bAchievSheDeepBreathMore;
@@ -243,6 +243,8 @@ public:
             }
             return false;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

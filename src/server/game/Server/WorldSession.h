@@ -32,6 +32,7 @@
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
 #include "World.h"
+#include <zlib.h>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -143,6 +144,9 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
+#define DB2_REPLY_SPARSE 2442913102
+#define DB2_REPLY_ITEM   1344507586
+
 /// Player session in the World
 class WorldSession
 {
@@ -161,7 +165,7 @@ class WorldSession
         void SendAddonsInfo();
 
         void ReadMovementInfo(WorldPacket &data, MovementInfo *mi);
-        void WriteMovementInfo(WorldPacket *data, MovementInfo *mi);
+        void WriteMovementInfo(WorldPacket &data, MovementInfo *mi);
 
         void SendPacket(WorldPacket const* packet);
         void SendNotification(const char *format,...) ATTR_PRINTF(2,3);
@@ -221,6 +225,7 @@ class WorldSession
         void SendTabardVendorActivate(uint64 guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
+        void SendTrainerBuyFailed(uint64 guid, uint32 spellId, uint32 trainState);
 
         void SendAttackStop(Unit const* enemy);
 
@@ -231,6 +236,9 @@ class WorldSession
         void SendCancelTrade();
 
         void SendPetitionQueryOpcode(uint64 petitionguid);
+
+        void SendItemDb2Reply(uint32 entry);
+        void SendItemSparseDb2Reply(uint32 entry);
 
         // Spell
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);
@@ -268,10 +276,10 @@ class WorldSession
         bool SendItemInfo(uint32 itemid, WorldPacket data);
         //auction
         void SendAuctionHello(uint64 guid, Creature * unit);
-        void SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint64 bidError = 0);
+        void SendAuctionCommandResult(AuctionEntry* auction, uint32 Action, uint32 ErrorCode, uint64 bidError = 0);
         void SendAuctionBidderNotification(uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template);
         void SendAuctionOwnerNotification(AuctionEntry * auction);
-        void SendAuctionRemovedNotification(AuctionEntry * auction);
+        void SendAuctionRemovedNotification(uint32 auctionId, uint32 itemEntry, int32 randomPropertyId);
 
         //Item Enchantment
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
@@ -326,6 +334,8 @@ class WorldSession
 
         // Recruit-A-Friend Handling
         uint32 GetRecruiterId() { return recruiterId; }
+
+        z_stream_s* GetCompressionStream() { return _compressionStream; }
 
     public:                                                 // opcodes handlers
 
@@ -410,6 +420,7 @@ class WorldSession
         void HandleTogglePvP(WorldPacket& recvPacket);
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
+        void HandleViolenceLevel(WorldPacket& recvPacket);
         void HandleSetTargetOpcode(WorldPacket& recvPacket);
         void HandleSetSelectionOpcode(WorldPacket& recvPacket);
         void HandleStandStateChangeOpcode(WorldPacket& recvPacket);
@@ -436,6 +447,8 @@ class WorldSession
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
+
+        void HandleObjectUpdateFailed(WorldPacket& recPacket);
 
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
         void HandleMeetingStoneInfo(WorldPacket& recPacket);
@@ -467,8 +480,7 @@ class WorldSession
 
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
         //void HandleGroupCancelOpcode(WorldPacket& recvPacket);
-        void HandleGroupAcceptOpcode(WorldPacket& recvPacket);
-        void HandleGroupDeclineOpcode(WorldPacket& recvPacket);
+        void HandleGroupInviteResponseOpcode(WorldPacket &recv_data);
         void HandleGroupUninviteOpcode(WorldPacket& recvPacket);
         void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
@@ -506,6 +518,7 @@ class WorldSession
         void HandleGuildRosterOpcode(WorldPacket& recvPacket);
         void HandleGuildPromoteOpcode(WorldPacket& recvPacket);
         void HandleGuildDemoteOpcode(WorldPacket& recvPacket);
+        void HandleGuildAssignRankOpcode(WorldPacket& recvPacket);
         void HandleGuildLeaveOpcode(WorldPacket& recvPacket);
         void HandleGuildDisbandOpcode(WorldPacket& recvPacket);
         void HandleGuildLeaderOpcode(WorldPacket& recvPacket);
@@ -514,12 +527,14 @@ class WorldSession
         void HandleGuildMaxExperienceOpcode(WorldPacket& recvPacket);
         void HandleGuildRewardsOpcode(WorldPacket& recvPacket);
         void HandleGuildSetNoteOpcode(WorldPacket& recvPacket);
-        void HandleGuildRankOpcode(WorldPacket& recvPacket);
+        void HandleGuildQueryRanksOpcode(WorldPacket& recvPacket);
         void HandleGuildAddRankOpcode(WorldPacket& recvPacket);
         void HandleGuildDelRankOpcode(WorldPacket& recvPacket);
         void HandleGuildSwitchRankOpcode(WorldPacket& recvPacket);
         void HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket);
         void HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket);
+        void HandleGuildRequestPartyState(WorldPacket& recvPacket);
+        void HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleTaxiQueryAvailableNodes(WorldPacket& recvPacket);
@@ -548,7 +563,7 @@ class WorldSession
 
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);
-        void HandleBusyTradeOpcode(WorldPacket& recvPacket);
+        void HandleBlockTradeOpcode(WorldPacket& recvPacket);
         void HandleCancelTradeOpcode(WorldPacket& recvPacket);
         void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
         void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
@@ -756,8 +771,7 @@ class WorldSession
         void HandleLfrSearchOpcode(WorldPacket &recv_data);
         void HandleLfrLeaveOpcode(WorldPacket &recv_data);
 
-        void SendLfgUpdatePlayer(const LfgUpdateData& updateData);
-        void SendLfgUpdateParty(const LfgUpdateData& updateData);
+        void SendLfgUpdateStatus(const LfgUpdateData& updateData);
         void SendLfgRoleChosen(uint64 guid, uint8 roles);
         void SendLfgRoleCheckUpdate(const LfgRoleCheck *pRoleCheck);
         void SendLfgUpdateSearch(bool update);
@@ -835,6 +849,10 @@ class WorldSession
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
 
+        // Transmogrification
+        void HandleTransmogrifyItems(WorldPacket& recv_data);
+        static bool CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier);
+
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleMirrrorImageDataRequest(WorldPacket & recv_data);
         void HandleAlterAppearance(WorldPacket& recv_data);
@@ -851,6 +869,11 @@ class WorldSession
         void HandleEjectPasenger(WorldPacket &data);
         void HandleEnterPlayerVehicle(WorldPacket &data);
         void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
+        void HandleOpeningCinematic(WorldPacket& recvData);
+
+        // Compact Unit Frames (4.x)
+        void HandleSaveCUFProfiles(WorldPacket& recvPacket);
+        void SendLoadCUFProfiles();
 
     private:
         void ProcessQueryCallbacks();
@@ -902,6 +925,7 @@ class WorldSession
         AddonsList m_addonsList;
         uint32 recruiterId;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        z_stream_s* _compressionStream;
 };
 #endif
 /// @}

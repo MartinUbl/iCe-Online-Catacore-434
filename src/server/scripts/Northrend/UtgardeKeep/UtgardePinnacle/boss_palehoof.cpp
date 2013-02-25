@@ -147,7 +147,7 @@ public:
                 if (pGo)
                 {
                     pGo->SetGoState(GO_STATE_READY);
-                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 }
             }
         }
@@ -850,7 +850,7 @@ public:
         if (pPalehoof && pPalehoof->isAlive())
         {
             // maybe these are hacks :(
-            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1/*|GO_FLAG_INTERACT_COND*/);
+            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE/*|GO_FLAG_INTERACT_COND*/);
             pGO->SetGoState(GO_STATE_ACTIVE);
 
             CAST_AI(boss_palehoof::boss_palehoofAI, pPalehoof->AI())->NextPhase();

@@ -127,6 +127,7 @@ class instance_forge_of_souls : public InstanceMapScript
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
+            virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
 
         private:
             uint64 bronjahm;

@@ -428,7 +428,7 @@ public:
         {
             me->SetVisibility(VISIBILITY_OFF);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
+            me->AddUnitMovementFlag(/*MOVEMENTFLAG_ONTRANSPORT |*/ MOVEMENTFLAG_LEVITATING);
             me->SetSpeed(MOVE_WALK,5.0f,true);
             wp_reached = false;
             count = 0;
@@ -461,7 +461,7 @@ public:
                         pInstance->SetData(GAMEOBJECT_PUMPKIN_SHRINE, 0);   //hide gameobject
                     break;
                 case 19:
-                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
+                    me->RemoveUnitMovementFlag(/*MOVEMENTFLAG_ONTRANSPORT |*/ MOVEMENTFLAG_LEVITATING);
                     break;
                 case 20:
                 {

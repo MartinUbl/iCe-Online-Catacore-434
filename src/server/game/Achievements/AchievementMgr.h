@@ -287,9 +287,6 @@ class AchievementMgr
         bool IsCompletedAchievement(AchievementEntry const* entry);
         //void CompleteAchievementsWithRefs(AchievementEntry const* entry);
 
-        void Compress(WorldPacket& data, uint32 newOpcode);
-        void Compress(void* dst, uint32 *dst_size, void* src, int src_size);
-
         Player* m_player;
         CriteriaProgressMap m_criteriaProgress;
         CompletedAchievementMap m_completedAchievements;

@@ -31,6 +31,8 @@
 #include "ScriptMgr.h"
 #include "CreatureAI.h"
 #include "ZoneScript.h"
+#include "MoveSplineInit.h"
+#include "MoveSpline.h"
 
 Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
 {
@@ -319,10 +321,9 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
         }
     }
 
-    if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK11))
+    if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
         unit->addUnitState(UNIT_STAT_ONVEHICLE);
 
-    unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_ROOT);
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
     unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
@@ -330,6 +331,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     unit->m_movementInfo.t_pos.m_orientation = 0;
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
+    unit->m_movementInfo.t_guid = me->GetGUID();
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
@@ -354,7 +356,12 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
     if (me->IsInWorld())
     {
-        unit->SendMonsterMoveTransport(me);
+        Movement::MoveSplineInit init(*unit);
+        init.DisableTransportPathTransformations();
+        init.MoveTo(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);
+        init.SetFacing(0.0f);
+        init.SetTransportEnter();
+        init.Launch();
 
         if (me->GetTypeId() == TYPEID_UNIT)
         {
@@ -362,6 +369,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
                 me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
 
             // update all passenger's positions
+            // spline system will relocate passengers automatically
             RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         }
     }
@@ -435,15 +443,16 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 
     // not sure that absolute position calculation is correct, it must depend on vehicle orientation and pitch angle
     for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+    {
         if (Unit *passenger = itr->second.passenger)
         {
-            float px = x + passenger->m_movementInfo.t_pos.m_positionX;
-            float py = y + passenger->m_movementInfo.t_pos.m_positionY;
-            float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
-            float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
+            float px, py, pz, po;
+            passenger->m_movementInfo.t_pos.GetPosition(px, py, pz, po);
+            CalculatePassengerPosition(px, py, pz, po);
 
             passenger->SetPosition(px, py, pz, po);
         }
+    }
 }
 
 void Vehicle::Dismiss()
@@ -487,4 +496,24 @@ uint16 Vehicle::GetExtraMovementFlagsForBase() const
 
     sLog->outDebug("Vehicle::GetExtraMovementFlagsForBase() returned %u", movementMask);
     return movementMask;
+}
+
+void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+{
+    float inx = x, iny = y, inz = z, ino = o;
+    o = MapManager::NormalizeOrientation(GetBase()->GetOrientation() + ino);
+    x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
+    y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
+    z = GetBase()->GetPositionZ() + inz;
+}
+
+void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+{
+    o -= MapManager::NormalizeOrientation(GetBase()->GetOrientation());
+    z -= GetBase()->GetPositionZ();
+    y -= GetBase()->GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
+    x -= GetBase()->GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)
+    float inx = x, iny = y;
+    y = (iny - inx * tan(GetBase()->GetOrientation())) / (cos(GetBase()->GetOrientation()) + std::sin(GetBase()->GetOrientation()) * tan(GetBase()->GetOrientation()));
+    x = (inx + iny * tan(GetBase()->GetOrientation())) / (cos(GetBase()->GetOrientation()) + std::sin(GetBase()->GetOrientation()) * tan(GetBase()->GetOrientation()));
 }

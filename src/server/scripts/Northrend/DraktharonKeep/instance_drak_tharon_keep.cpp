@@ -63,7 +63,7 @@ public:
         uint64 uiNovosCrystal3;
         uint64 uiNovosCrystal4;
 
-        uint16 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
 
         std::string str_data;
 
@@ -230,6 +230,8 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

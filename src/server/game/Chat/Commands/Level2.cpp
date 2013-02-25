@@ -846,6 +846,45 @@ bool ChatHandler::HandleGameObjectNearCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleNpcNearCommand(const char* args)
+{
+    float distance = (!*args) ? 10.0f : (float)(atof(args));
+    uint32 count = 0;
+
+    Player* pl = m_session->GetPlayer();
+    QueryResult result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, map, "
+        "(POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ "
+        "FROM creature WHERE map='%u' AND (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) <= '%f' ORDER BY order_",
+        pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),
+        pl->GetMapId(),pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),distance*distance);
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            uint32 entry = fields[1].GetUInt32();
+            float x = fields[2].GetFloat();
+            float y = fields[3].GetFloat();
+            float z = fields[4].GetFloat();
+            int mapid = fields[5].GetUInt16();
+
+            CreatureInfo const * cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+
+            if (!cInfo)
+                continue;
+
+            PSendSysMessage("%d - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r ", guid, guid, cInfo->Name, x, y, z, mapid);
+
+            ++count;
+        } while (result->NextRow());
+    }
+
+    PSendSysMessage("Found near creatures (distance %f): %u ", distance, count);
+    return true;
+}
+
 bool ChatHandler::HandleGUIDCommand(const char* /*args*/)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();
@@ -1055,7 +1094,7 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(const char* args)
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
 
-    if (!sObjectMgr->IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,extendedcost,m_session->GetPlayer()))
+    if (!sObjectMgr->IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,extendedcost,VENDOR_ITEM_ITEM,m_session->GetPlayer()))
     {
         SetSentErrorMessage(true);
         return false;
@@ -1668,15 +1707,15 @@ bool ChatHandler::HandleNpcUnFollowCommand(const char* /*args*/)
     }
 
     if (/*creature->GetMotionMaster()->empty() ||*/
-        creature->GetMotionMaster()->GetCurrentMovementGeneratorType () != TARGETED_MOTION_TYPE)
+        creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
     {
         PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU, creature->GetName());
         SetSentErrorMessage(true);
         return false;
     }
 
-    TargetedMovementGenerator<Creature> const* mgen
-        = static_cast<TargetedMovementGenerator<Creature> const*>((creature->GetMotionMaster()->top()));
+    ChaseMovementGenerator<Creature> const* mgen
+        = static_cast<ChaseMovementGenerator<Creature> const*>((creature->GetMotionMaster()->top()));
 
     if (mgen->GetTarget() != player)
     {
@@ -3968,9 +4007,9 @@ bool ChatHandler::HandleWaterwalkCommand(const char* args)
         return false;
 
     if (strncmp(args, "on", 3) == 0)
-        player->SetMovement(MOVE_WATER_WALK);               // ON
+        player->SetWaterWalk(true);
     else if (strncmp(args, "off", 4) == 0)
-        player->SetMovement(MOVE_LAND_WALK);                // OFF
+       player->SetWaterWalk(false);
     else
     {
         SendSysMessage(LANG_USE_BOL);

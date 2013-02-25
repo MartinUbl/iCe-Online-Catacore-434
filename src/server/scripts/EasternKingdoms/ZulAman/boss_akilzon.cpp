@@ -67,9 +67,7 @@ class boss_akilzon : public CreatureScript
     public:
 
         boss_akilzon()
-            : CreatureScript("boss_akilzon")
-        {
-        }
+            : CreatureScript("boss_akilzon") { }
 
         struct boss_akilzonAI : public ScriptedAI
         {
@@ -254,10 +252,27 @@ class boss_akilzon : public CreatureScript
                 StormSequenceTimer = 1000;
             }
 
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (id == 0 && type == POINT_MOTION_TYPE)
+                {
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                }
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
+
+                if (me->getVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
+                {
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveFall();
+                    float x,y,z;
+                    me->getVictim()->GetPosition(x,y,z);
+                    me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+                }
 
                 if (StormCount)
                 {
@@ -321,31 +336,12 @@ class boss_akilzon : public CreatureScript
 
                 if (ElectricalStorm_Timer <= diff) {
                     Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
-                    if (!pTarget)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-                    pTarget->CastSpell(pTarget, 44007, true);//cloud visual
                     DoCast(pTarget, SPELL_ELECTRICAL_STORM, false);//storm cyclon + visual
                     float x,y,z;
                     pTarget->GetPosition(x,y,z);
                     if (pTarget)
                     {
-                        pTarget->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
-                        pTarget->SendMonsterMove(x,y,me->GetPositionZ()+15,0);
-                    }
-                    Unit *Cloud = me->SummonTrigger(x, y, me->GetPositionZ()+16, 0, 15000);
-                    if (Cloud)
-                    {
-                        CloudGUID = Cloud->GetGUID();
-                        Cloud->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
-                        Cloud->StopMoving();
-                        Cloud->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-                        Cloud->setFaction(35);
-                        Cloud->SetMaxHealth(9999999);
-                        Cloud->SetHealth(9999999);
-                        Cloud->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pTarget->GetMotionMaster()->MoveJump(x, y, me->GetPositionZ()+7, 10, 1);
                     }
                     ElectricalStorm_Timer = 60000; //60 seconds(bosskillers)
                     StormCount = 1;
@@ -384,7 +380,6 @@ class boss_akilzon : public CreatureScript
                     }
                     SummonEagles_Timer = 999999;
                 } else SummonEagles_Timer -= diff;
-
                 DoMeleeAttackIfReady();
             }
         };

@@ -46,7 +46,7 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
 {
     ASSERT(GetTarget() && GetBase());
 
-    if (GetBase()->IsVisible())
+    if (GetBase()->CanBeSentToClient())
     {
         // Try find slot for aura
         uint8 slot = MAX_AURAS;
@@ -111,7 +111,6 @@ void AuraApplication::_Remove()
     // update for out of range group members
     if (slot < MAX_AURAS)
     {
-        ClientUpdate(false);    // send last effect values first and then send remove
         GetTarget()->RemoveVisibleAura(slot);
         ClientUpdate(true);
     }
@@ -152,6 +151,9 @@ void AuraApplication::_InitFlags(Unit * caster, uint8 effMask)
         }
         m_flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
     }
+
+    if (GetBase()->GetSpellProto()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+        m_flags |= AFLAG_BASEPOINT;
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
@@ -182,76 +184,28 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
     SetNeedClientUpdate();
 }
 
-void AuraApplication::ClientUpdate(bool remove)
+void AuraApplication::BuildUpdatePacket(ByteBuffer &data, bool remove) const
 {
-    m_needClientUpdate = false;
-
-    WorldPacket data(SMSG_AURA_UPDATE);
-    data.append(GetTarget()->GetPackGUID());
     data << uint8(m_slot);
 
     if (remove)
     {
         ASSERT(!m_target->GetVisibleAura(m_slot));
         data << uint32(0);
-        sLog->outDebug("Aura %u removed slot %u",GetBase()->GetId(), m_slot);
-        m_target->SendMessageToSet(&data, true);
         return;
     }
     ASSERT(m_target->GetVisibleAura(m_slot));
 
-    Aura const * aura = GetBase();
-
+    Aura const *aura = GetBase();
     data << uint32(aura->GetId());
     uint32 flags = m_flags;
-    if (aura->GetMaxDuration() > 0)
+    if (aura->GetMaxDuration() > 0 && !(aura->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
         flags |= AFLAG_DURATION;
-
-    AuraBasepointType bptype = BP_NONE;
-
-    int32 idx = 0;
-    if (aura->IsModActionButton())
-    {
-        bptype = BP_MOD_ACTION_BUTTON;
-        flags |= AFLAG_BASEPOINT;
-    }
-    else
-    {
-        idx = aura->GetSpellProto()->GetEffectMiscValueB(0);
-        if (aura->GetCasterGUID() == GetTarget()->GetGUID())
-        {
-            if (m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                if (aura->GetSpellProto()->Id == 87840)
-                    idx = m_target->ToPlayer()->GetMountCapabilityIndex(230);
-                else
-                    idx = m_target->ToPlayer()->GetMountCapabilityIndex(idx);
-
-                if (idx)
-                {
-                    bptype = BP_MOUNT_CAPATIBILITY;
-                    flags |= AFLAG_BASEPOINT;
-                }
-            }
-        }
-    }
-
-    // If we still haven't got basepoint replacement
-    if (bptype == BP_NONE)
-    {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
-        {
-            if (aura->GetEffect(i) && aura->GetEffect(i)->GetAmount())
-            {
-                bptype = BP_AMOUNT;
-                flags |= AFLAG_BASEPOINT;
-            }
-        }
-    }
-
-    data << uint8(flags);
+    data << uint16(flags);
     data << uint8(aura->GetCasterLevel());
-    data << uint8(aura->GetStackAmount() > 1 ? aura->GetStackAmount() : (aura->GetCharges()) ? aura->GetCharges() : 1);
+    // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
+    // stack amount has priority over charges (checked on retail with spell 50262)
+    data << uint8(aura->GetSpellProto()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
 
     if (!(flags & AFLAG_CASTER))
         data.appendPackGUID(aura->GetCasterGUID());
@@ -263,34 +217,30 @@ void AuraApplication::ClientUpdate(bool remove)
     }
 
     if (flags & AFLAG_BASEPOINT)
-    {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
-            if ( (1 << i) & flags )
+            if (flags & (1 << i))
             {
-                switch (bptype)
-                {
-                    case BP_MOD_ACTION_BUTTON:
-                        data << uint32(aura->GetActionButtonSpellForEffect(i));
-                        break;
-                    case BP_MOUNT_CAPATIBILITY:
-                        data << uint32(idx);
-                        break;
-                    case BP_AMOUNT:
-                        data << uint32(aura->GetEffect(i) ? aura->GetEffect(i)->GetAmount() : 0);
-                        break;
-                    default:
-                        data << uint32(0);
-                        break;
-                }
+                if (AuraEffect const* eff = aura->GetEffect(i)) // NULL if effect flag not set
+                    data << int32(eff->GetAmount());
+                else
+                    data << int32(0);
             }
         }
-    }
+}
+
+void AuraApplication::ClientUpdate(bool remove)
+{
+    m_needClientUpdate = false;
+
+    WorldPacket data(SMSG_AURA_UPDATE);
+    data.append(GetTarget()->GetPackGUID());
+    BuildUpdatePacket(data, remove);
 
     m_target->SendMessageToSet(&data, true);
 }
 
-Aura * Aura::TryCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
+Aura * Aura::TryCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
 {
     ASSERT(spellproto);
     ASSERT(owner);
@@ -318,11 +268,11 @@ Aura * Aura::TryCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObje
             break;
     }
     if (uint8 realMask = effMask & tryEffMask)
-        return Create(spellproto,realMask,owner,caster,baseAmount,castItem,casterGUID);
+        return Create(spellproto,realMask,owner,caster,baseAmount,scriptedAmount,castItem,casterGUID);
     return NULL;
 }
 
-Aura * Aura::TryCreate(SpellEntry const* spellproto, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
+Aura * Aura::TryCreate(SpellEntry const* spellproto, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
 {
     ASSERT(spellproto);
     ASSERT(owner);
@@ -349,11 +299,11 @@ Aura * Aura::TryCreate(SpellEntry const* spellproto, WorldObject * owner, Unit *
             break;
     }
     if (effMask)
-        return Create(spellproto,effMask,owner,caster,baseAmount,castItem,casterGUID);
+        return Create(spellproto,effMask,owner,caster,baseAmount,scriptedAmount,castItem,casterGUID);
     return NULL;
 }
 
-Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
+Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
 {
     ASSERT(effMask);
     ASSERT(spellproto);
@@ -388,10 +338,10 @@ Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject * o
     {
         case TYPEID_UNIT:
         case TYPEID_PLAYER:
-            aura = new UnitAura(spellproto,effMask,owner,caster,baseAmount,castItem, casterGUID);
+            aura = new UnitAura(spellproto,effMask,owner,caster,baseAmount,scriptedAmount,castItem, casterGUID);
             break;
         case TYPEID_DYNAMICOBJECT:
-            aura = new DynObjAura(spellproto,effMask,owner,caster,baseAmount,castItem, casterGUID);
+            aura = new DynObjAura(spellproto,effMask,owner,caster,baseAmount,scriptedAmount,castItem, casterGUID);
             break;
         default:
             ASSERT(false);
@@ -435,13 +385,13 @@ m_isRemoved(false), m_isSingleTarget(false)
     if (modOwner)
         modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, m_procCharges);
 }
-void Aura::_InitEffects(uint8 effMask, Unit * caster, int32 *baseAmount)
+void Aura::_InitEffects(uint8 effMask, Unit * caster, int32 *baseAmount, int32 *scriptedAmount)
 {
     // shouldn't be in constructor - functions in AuraEffect::AuraEffect use polymorphism
     for (uint8 i=0 ; i<MAX_SPELL_EFFECTS; ++i)
     {
         if (effMask & (uint8(1) << i))
-            m_effects[i] = new AuraEffect(this, i, baseAmount ? baseAmount + i : NULL, caster);
+            m_effects[i] = new AuraEffect(this, i, baseAmount ? baseAmount + i : NULL, scriptedAmount ? scriptedAmount + i : NULL, caster);
         else
             m_effects[i] = NULL;
     }
@@ -1021,9 +971,9 @@ bool Aura::CanBeSaved() const
     return true;
 }
 
-bool Aura::IsVisible() const
+bool Aura::CanBeSentToClient() const
 {
-    return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_WALK_AND_CAST);
 }
 
 void Aura::UnregisterSingleTarget()
@@ -1160,6 +1110,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 45182: // Cheating Death (from rogue talent Cheat Death)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->SetHealth(target->GetMaxHealth()*0.1f); // Set health to 10% of maximum
+                        break;
+                    case 43648: // Electrical Storm
+                        target->SetStunned(true);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -1707,6 +1661,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             }
                         }
                         break;
+                    case 43648: // Electrical Storm
+                        target->SetStunned(false);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -1922,6 +1879,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 else if (GetId() == 2983) // Glyph of Blurred speed
                 {
                     caster->RemoveAurasDueToSpell(61922);
+                }
+                else if (GetId() == 2818 || GetId() == 3409 || GetId() == 5760 || GetId() == 13218)
+                {
+                    if (!target->HasAura(2818) && !target->HasAura(3409) && !target->HasAura(5760) && !target->HasAura(13218))
+                    {
+                        target->RemoveAurasDueToSpell(58683, caster->GetGUID());
+                        target->RemoveAurasDueToSpell(58684, caster->GetGUID());
+                    }
                 }
                 break;
             case SPELLFAMILY_PALADIN:
@@ -2604,12 +2569,12 @@ void Aura::CallScriptEffectAfterManaShieldHandlers(AuraEffect * aurEff, AuraAppl
     }
 }
 
-UnitAura::UnitAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
+UnitAura::UnitAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32 *scriptedAmount, Item * castItem, uint64 casterGUID)
     : Aura(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID)
 {
     m_AuraDRGroup = DIMINISHING_NONE;
     LoadScripts();
-    _InitEffects(effMask, caster, baseAmount);
+    _InitEffects(effMask, caster, baseAmount, scriptedAmount);
     GetUnitOwner()->_AddAura(this, caster);
    if (GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
        sScriptMgr->OnPlayerAura(GetUnitOwner()->ToPlayer(), spellproto);
@@ -2659,13 +2624,7 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
         else
         {
             float radius;
-            if (GetSpellProto()->Effect[effIndex] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
-                radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[effIndex]));
-            else
-                radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[effIndex]));
-
-            if (modOwner)
-                modOwner->ApplySpellMod(GetId(), SPELLMOD_RADIUS, radius);
+            radius = GetSpellProto()->GetSpellRadius(caster, effIndex);
 
             if (!GetUnitOwner()->hasUnitState(UNIT_STAT_ISOLATED))
             {
@@ -2680,7 +2639,7 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
                         GetUnitOwner()->GetRaidMember(targetList, radius);
                         // Strength of Earth totem
                         if (GetSpellProto()->SpellIconID == 691)
-                            GetUnitOwner()->GetRaidMember(targetList, GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[1])));
+                            GetUnitOwner()->GetRaidMember(targetList, GetSpellProto()->GetSpellRadius(GetUnitOwner(), 1));
                         break;
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
                     {
@@ -2721,14 +2680,14 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
     }
 }
 
-DynObjAura::DynObjAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
+DynObjAura::DynObjAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, int32* scriptedAmount, Item * castItem, uint64 casterGUID)
     : Aura(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID)
 {
     LoadScripts();
     ASSERT(GetDynobjOwner());
     ASSERT(GetDynobjOwner()->IsInWorld());
     ASSERT(GetDynobjOwner()->GetMap() == caster->GetMap());
-    _InitEffects(effMask, caster, baseAmount);
+    _InitEffects(effMask, caster, baseAmount, scriptedAmount);
     GetDynobjOwner()->SetAura(this);
 }
 

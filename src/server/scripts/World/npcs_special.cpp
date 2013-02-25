@@ -1237,23 +1237,25 @@ public:
                     pPlayer->SEND_GOSSIP_MENU(10239, pCreature->GetGUID());
                 else canBuy = true;
                 break;
+            case 48510: // Kall Worthaton
+                if (pPlayer->GetReputationRank(1133) != REP_EXALTED && race != RACE_GOBLIN)
+                    pPlayer->SEND_GOSSIP_MENU(10240, pCreature->GetGUID());
+                else canBuy = true;
+                break;
+            case 43694: // Katie Stokx
+                if (pPlayer->GetReputationRank(72) != REP_EXALTED && race != RACE_HUMAN)
+                    pPlayer->SEND_GOSSIP_MENU(10241, pCreature->GetGUID());
+                else canBuy = true;
+                break;
         }
 
         if (canBuy)
         {
             if (pCreature->isVendor())
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
         }
-        return true;
-    }
-
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-    {
-        pPlayer->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_TRADE)
-            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
-
         return true;
     }
 };
@@ -2611,15 +2613,20 @@ public:
         {
             if (!pPlayer->HasEnoughMoney(EXP_COST))
                 pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
-            else if (noXPGain)
+            // allow only if the player is not in the battleground queue
+            // TODO: remove the player from the queues instead of this check
+            else if (!pPlayer->InBattlegroundQueue())
             {
-                pPlayer->ModifyMoney(-EXP_COST);
-                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
-            }
-            else if (!noXPGain)
-            {
-                pPlayer->ModifyMoney(-EXP_COST);
-                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                if (noXPGain)
+                {
+                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                }
+                else if (!noXPGain)
+                {
+                    pPlayer->ModifyMoney(-EXP_COST);
+                    pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                }
             }
         }
         pPlayer->PlayerTalkClass->CloseGossip();
@@ -2742,8 +2749,8 @@ public:
 
             for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
             {
-                if(Player* pPlayer = me->GetPlayer(*me, *i))
-                    me->SendMonsterMove(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), uint32(dist/6.8f), pPlayer);
+                if(me->GetPlayer(*me, *i))
+                    me->MonsterMoveWithSpeed(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), uint32(dist/6.8f));
             }
             return true;
         }

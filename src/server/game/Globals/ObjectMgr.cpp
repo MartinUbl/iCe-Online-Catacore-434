@@ -345,6 +345,17 @@ Guild* ObjectMgr::GetGuildById(uint32 guildId) const
     return NULL;
 }
 
+Guild* ObjectMgr::GetGuildByGuid(uint64 guid) const
+{
+    // Full guids are only used when receiving/sending data to client
+    // everywhere else guild id is used
+    if (IS_GUILD(guid))
+        if (uint32 guildId = GUID_LOPART(guid))
+            return GetGuildById(guildId);
+
+    return NULL;
+}
+
 Guild* ObjectMgr::GetGuildByName(const std::string& guildname) const
 {
     std::string search = guildname;
@@ -1382,6 +1393,8 @@ void ObjectMgr::LoadCreatures()
         return;
     }
 
+    mCreatureDataMap.rehash(result->GetRowCount() * 1.1f);
+
     // build single time for check creature data
     std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
     for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
@@ -1606,6 +1619,7 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     data.dbData = false;
 
     AddGameobjectToGrid(guid, &data);
+    SetGameObjectSpawned(entry);
 
     // Spawn if necessary (loaded grids only)
     // We use spawn coords to spawn
@@ -1751,6 +1765,8 @@ void ObjectMgr::LoadGameobjects()
         sLog->outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
         return;
     }
+
+    mGameObjectDataMap.rehash(result->GetRowCount() * 1.1f);
 
     // build single time for check spawnmask
     std::map<uint32,uint32> spawnMasks;
@@ -2138,7 +2154,7 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (db2item)
         {
-            if (proto->Class != db2item->Class)
+            /*if (proto->Class != db2item->Class)
             {
                 sLog->outErrorDb("Item (Entry: %u) does not have a correct class %u, must be %u .", i, proto->Class, db2item->Class);
             }
@@ -2165,16 +2181,16 @@ void ObjectMgr::LoadItemPrototypes()
             {
                 sLog->outErrorDb("Item (Entry: %u) does not have a correct inventory type (%u), must be %u (still using DB value).",i,proto->InventoryType,db2item->InventoryType);
                 // It is safe to use InventoryType from DB
-            }
+            }*/
 
             if (proto->DisplayInfoID != db2item->DisplayId)
             {
-                sLog->outErrorDb("Item (Entry: %u) does not have a correct display id (%u), must be %u (using it).", i, proto->DisplayInfoID, db2item->DisplayId);
+                //sLog->outErrorDb("Item (Entry: %u) does not have a correct display id (%u), must be %u (using it).", i, proto->DisplayInfoID, db2item->DisplayId);
                 const_cast<ItemPrototype*>(proto)->DisplayInfoID = db2item->DisplayId;
             }
             if (proto->Sheath != db2item->Sheath)
             {
-                sLog->outErrorDb("Item (Entry: %u) does not have a correct sheathid (%u), must be %u  (using it).",i,proto->Sheath,db2item->Sheath);
+                //sLog->outErrorDb("Item (Entry: %u) does not have a correct sheathid (%u), must be %u  (using it).",i,proto->Sheath,db2item->Sheath);
                 const_cast<ItemPrototype*>(proto)->Sheath = db2item->Sheath;
             }
         }
@@ -4415,6 +4431,13 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(), j + 1, j + 1, qinfo->ReqItemCount[j]);
                 qinfo->ReqItemCount[j] = 0;                 // prevent incorrect work of quest
             }
+        }
+
+        // set "deliver" flag if the quest has currencies as objective
+        for (uint8 j = 0; j < QUEST_CURRENCY_COUNT; j++)
+        {
+            if (qinfo->ReqCurrencyId[j])
+                qinfo->SetFlag(QUEST_TRINITY_FLAGS_DELIVER);
         }
 
         for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
@@ -8620,12 +8643,12 @@ int ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32> *s
             uint32 incrtime     = fields[2].GetUInt32();
             uint32 ExtendedCost = fields[3].GetUInt32();
 
-            if (!IsVendorItemValid(vendor, item_id, maxcount, incrtime, ExtendedCost, NULL, skip_vendors))
+            if (!IsVendorItemValid(vendor, item_id, maxcount, incrtime, ExtendedCost, VENDOR_ITEM_ITEM, NULL, skip_vendors))
                 continue;
 
             VendorItemData& vList = m_mCacheVendorItemMap[vendor];
 
-            vList.AddItem(item_id, maxcount, incrtime, ExtendedCost);
+            vList.AddItem(item_id, maxcount, incrtime, ExtendedCost, VENDOR_ITEM_ITEM);
             ++count;
         }
 
@@ -8643,7 +8666,7 @@ void ObjectMgr::LoadVendors()
 
     std::set<uint32> skip_vendors;
 
-    QueryResult result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor ORDER BY entry, slot ASC");
+    QueryResult result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type FROM npc_vendor ORDER BY entry, slot ASC");
     if (!result)
     {
         sLog->outString();
@@ -8667,13 +8690,14 @@ void ObjectMgr::LoadVendors()
             int32  maxcount     = fields[2].GetInt32();
             uint32 incrtime     = fields[3].GetUInt32();
             uint32 ExtendedCost = fields[4].GetUInt32();
+            uint8  type         = fields[5].GetInt8();
 
-            if (!IsVendorItemValid(entry, item_id, maxcount, incrtime, ExtendedCost, NULL, &skip_vendors))
+            if (!IsVendorItemValid(entry, item_id, maxcount, incrtime, ExtendedCost, type, NULL, &skip_vendors))
                 continue;
 
             VendorItemData& vList = m_mCacheVendorItemMap[entry];
 
-            vList.AddItem(item_id, maxcount, incrtime, ExtendedCost);
+            vList.AddItem(item_id, maxcount, incrtime, ExtendedCost,type);
             ++count;
         }
 
@@ -8859,7 +8883,7 @@ void ObjectMgr::LoadGossipMenuItems()
 void ObjectMgr::AddVendorItem(uint32 entry,uint32 item, int32 maxcount, uint32 incrtime, uint32 extendedcost, bool savetodb)
 {
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
-    vList.AddItem(item, maxcount, incrtime, extendedcost);
+    vList.AddItem(item, maxcount, incrtime, extendedcost, VENDOR_ITEM_ITEM);
 
     if (savetodb)
         WorldDatabase.PExecute("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')", entry, item, maxcount, incrtime, extendedcost);
@@ -8878,7 +8902,7 @@ bool ObjectMgr::RemoveVendorItem(uint32 entry,uint32 item, bool savetodb)
     return true;
 }
 
-bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 maxcount, uint32 incrtime, uint32 ExtendedCost, Player* pl, std::set<uint32>* skip_vendors, uint32 ORnpcflag) const
+bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint8 type, Player* pl, std::set<uint32>* skip_vendors, uint32 ORnpcflag) const
 {
     CreatureInfo const* cInfo = GetCreatureTemplate(vendor_entry);
     if (!cInfo)
@@ -8905,12 +8929,30 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
         return false;
     }
 
-    if (!GetItemPrototype(item_id))
+    if (type != VENDOR_ITEM_ITEM && type != VENDOR_ITEM_CURRENCY)
+    {
+        if (pl)
+            ChatHandler(pl).PSendSysMessage("Item %u has wrong type %u", item_id, type);
+        else
+            sLog->outErrorDb("Table `npc_vendor` has wrong type %u for item %u of vendor (Entry: %u), ignore", type, item_id, vendor_entry);
+        return false;
+    }
+
+    if (type == VENDOR_ITEM_ITEM && !GetItemPrototype(item_id))
     {
         if (pl)
             ChatHandler(pl).PSendSysMessage(LANG_ITEM_NOT_FOUND, item_id);
         else
             sLog->outErrorDb("Table `(game_event_)npc_vendor` for Vendor (Entry: %u) have in item list non-existed item (%u), ignore", vendor_entry, item_id);
+        return false;
+    }
+
+    if (type == VENDOR_ITEM_CURRENCY && !sCurrencyTypesStore.LookupEntry(item_id))
+    {
+        if (pl)
+            ChatHandler(pl).PSendSysMessage(LANG_ITEM_NOT_FOUND, item_id);
+        else
+            sLog->outErrorDb("Table `(game_event_)npc_vendor` for Vendor (Entry: %u) have in item list non-existed currency (%u), ignore", vendor_entry, item_id);
         return false;
     }
 
@@ -8923,21 +8965,24 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
         return false;
     }
 
-    if (maxcount > 0 && incrtime == 0)
+    if (type == VENDOR_ITEM_ITEM) // only items has these kind of checks
     {
-        if (pl)
-            ChatHandler(pl).PSendSysMessage("MaxCount != 0 (%u) but IncrTime == 0", maxcount);
-        else
-            sLog->outErrorDb("Table `(game_event_)npc_vendor` has `maxcount` (%u) for item %u of vendor (Entry: %u) but `incrtime`=0, ignore", maxcount, item_id, vendor_entry);
-        return false;
-    }
-    else if (maxcount == 0 && incrtime > 0)
-    {
-        if (pl)
-            ChatHandler(pl).PSendSysMessage("MaxCount == 0 but IncrTime<>= 0");
-        else
-            sLog->outErrorDb("Table `(game_event_)npc_vendor` has `maxcount`=0 for item %u of vendor (Entry: %u) but `incrtime`<>0, ignore", item_id, vendor_entry);
-        return false;
+        if (maxcount > 0 && incrtime == 0)
+        {
+            if (pl)
+                ChatHandler(pl).PSendSysMessage("MaxCount != 0 (%u) but IncrTime == 0", maxcount);
+            else
+                sLog->outErrorDb("Table `(game_event_)npc_vendor` has `maxcount` (%u) for item %u of vendor (Entry: %u) but `incrtime`=0, ignore", maxcount, item_id, vendor_entry);
+            return false;
+        }
+        else if (maxcount == 0 && incrtime > 0)
+        {
+            if (pl)
+                ChatHandler(pl).PSendSysMessage("MaxCount == 0 but IncrTime<>= 0");
+            else
+                sLog->outErrorDb("Table `(game_event_)npc_vendor` has `maxcount`=0 for item %u of vendor (Entry: %u) but `incrtime`<>0, ignore", item_id, vendor_entry);
+            return false;
+        }
     }
 
     VendorItemData const* vItems = GetNpcVendorItemList(vendor_entry);
@@ -8953,14 +8998,16 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
         return false;
     }
 
-    if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS)
+    // Vendors have theirs item count limited to 300, but if the vendor has items for all classes, then only some of them would be displayed
+    // we limit it explicitly in WorldSession::SendListInventory by counting sent item count
+    /*if (vItems->GetItemCount() >= MAX_VENDOR_ITEMS)
     {
         if (pl)
             ChatHandler(pl).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         else
             sLog->outErrorDb("Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vItems->GetItemCount(), MAX_VENDOR_ITEMS, vendor_entry);
         return false;
-    }
+    }*/
 
     return true;
 }

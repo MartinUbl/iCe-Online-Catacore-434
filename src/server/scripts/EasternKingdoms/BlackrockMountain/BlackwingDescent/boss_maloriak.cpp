@@ -1202,7 +1202,7 @@ public:
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                     if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        me->SetFacing(target->GetOrientation());
+                        me->SetFacingTo(target->GetOrientation());
                         //DoCast(SPELL_MAGMA_JETS);
                         me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+5,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
                         me->SummonCreature(NPC_MAGMA_JETS,target->GetPositionX()+10,target->GetPositionY(),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);

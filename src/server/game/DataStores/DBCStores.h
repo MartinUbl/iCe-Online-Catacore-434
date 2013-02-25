@@ -24,6 +24,10 @@
 #define TRINITY_DBCSTORES_H
 
 #include "Common.h"
+
+#include "DB2Stores.h"
+#include "DB2Structure.h"
+
 #include "DBCStore.h"
 #include "DBCStructure.h"
 
@@ -71,6 +75,9 @@ uint32 const* /*[MAX_TALENT_TABS]*/ GetTalentTabPages(uint8 cls);
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level);
 PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundBracketId id);
 
+uint32 GetCurrencyPrecision(uint32 currId);
+float GetCurrencyPrecisionCoef(uint32 currId);
+
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
@@ -87,6 +94,7 @@ extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
 extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
+extern DBCStorage <ChrPowerTypesEntry>           sChrPowerTypesStore;
 extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
 extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
 extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
@@ -111,6 +119,7 @@ extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
 extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
 extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
 extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
+extern DBCStorage <GtOCTClassCombatRatingScalarEntry> sGtOCTClassCombatRatingScalarStore;
 //extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
 //extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
 //extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
@@ -120,6 +129,12 @@ extern DBCStorage <HolidaysEntry>                sHolidaysStore;
 extern DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore;
 extern DBCStorage <ItemArmorShieldEntry>         sItemArmorShieldStore;
 extern DBCStorage <ItemArmorTotalEntry>          sItemArmorTotalStore;
+extern DBCStorage <ImportPriceArmorEntry>        sImportPriceArmorStore;
+extern DBCStorage <ImportPriceQualityEntry>      sImportPriceQualityStore;
+extern DBCStorage <ImportPriceShieldEntry>       sImportPriceShieldStore;
+extern DBCStorage <ImportPriceWeaponEntry>       sImportPriceWeaponStore;
+extern DBCStorage <ItemPriceBaseEntry>           sItemPriceBaseStore;
+extern DBCStorage <ItemClassEntry>               sItemClassStore;
 extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageAmmoStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageOneHandStore;
@@ -130,7 +145,6 @@ extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandCasterStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageWandStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
-extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
 extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;

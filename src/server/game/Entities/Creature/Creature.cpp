@@ -51,6 +51,8 @@
 #include "CreatureGroups.h"
 #include "Vehicle.h"
 #include "SpellAuraEffects.h"
+#include "MoveSplineInit.h"
+#include "MoveSpline.h"
 // apply implementation of the singletons
 
 
@@ -148,7 +150,7 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_creatureInfo(NULL), m_creatureData(NULL),
-m_formation(NULL)
+m_path_id(0), m_formation(NULL)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -248,10 +250,11 @@ void Creature::RemoveCorpse(bool setSpawnTime)
     if(setSpawnTime)
         m_respawnTime = time(NULL) + respawnDelay;
 
-    float x,y,z,o;
+    float x, y, z, o;
     GetRespawnCoord(x, y, z, &o);
-    SetHomePosition(x,y,z,o);
-    GetMap()->CreatureRelocation(this,x,y,z,o);
+    o = MapManager::NormalizeOrientation(o);
+    SetHomePosition(x, y, z, o);
+    GetMap()->CreatureRelocation(this, x, y, z, o);
 }
 
 /**
@@ -334,13 +337,15 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData *data
     SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach);
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+    SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);
 
     SetSpeed(MOVE_WALK,     cinfo->speed_walk);
     SetSpeed(MOVE_RUN,      cinfo->speed_run);
-    SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
-    SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
+    SetSpeed(MOVE_SWIM,     cinfo->speed_run);
+    SetSpeed(MOVE_FLIGHT,   cinfo->speed_run);
 
     SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
+    SetLevitate(canFly());
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -447,6 +452,17 @@ void Creature::Update(uint32 diff)
         AI()->JustRespawned();
     }
 
+    if (IsInWater())
+    {
+        if (canSwim())
+            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+    else
+    {
+        if (canWalk() || canFly())
+            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+
     switch(m_deathState)
     {
         case JUST_ALIVED:
@@ -487,7 +503,7 @@ void Creature::Update(uint32 diff)
             if (m_groupLootTimer && lootingGroupLowGUID)
             {
                 // for delayed spells
-                m_Events.Update(diff);
+                Unit::Update(diff);
 
                 if (m_groupLootTimer <= diff)
                 {
@@ -589,9 +605,6 @@ void Creature::Update(uint32 diff)
             m_regenTimer = CREATURE_REGEN_INTERVAL;
             break;
         }
-        case DEAD_FALLING:
-            GetMotionMaster()->UpdateMotion(diff);
-            break;
         default:
             break;
     }
@@ -928,7 +941,8 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint3
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x, y, z, time);
+    float speed = GetDistance(x, y, z) / ((float)time * 0.001f);
+    MonsterMoveWithSpeed(x, y, z, speed);
 }
 
 Player *Creature::GetLootRecipient() const
@@ -1265,7 +1279,7 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
         m_deathState = DEAD;
         if (canFly())
         {
-            float tz = map->GetHeight(data->posX,data->posY,data->posZ,false);
+            float tz = map->GetHeight(GetPhaseMask(), data->posX,data->posY,data->posZ,false);
             if (data->posZ - tz > 0.1)
                 Relocate(data->posX,data->posY,tz);
         }
@@ -1516,8 +1530,8 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if ((canFly() || IsFlying()) && FallGround())
-            return;
+        if (canFly() || IsFlying())
+            i_motionMaster.MoveFall();
 
         Unit::setDeathState(CORPSE);
     }
@@ -1529,7 +1543,7 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
         CreatureInfo const *cinfo = GetCreatureInfo();
-        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        SetWalk(true);
         if (GetCreatureInfo()->InhabitType & INHABIT_AIR)
             AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
         if (GetCreatureInfo()->InhabitType & INHABIT_WATER)
@@ -1542,26 +1556,20 @@ void Creature::setDeathState(DeathState s)
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
         if (m_vehicleKit) m_vehicleKit->Reset();
+
+        if (IsInWater())
+        {
+            if (canSwim())
+                AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        }
+        else
+        {
+            if (canWalk())
+                RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        }
+
         Unit::setDeathState(ALIVE);
     }
-}
-
-bool Creature::FallGround()
-{
-    // Let's abort after we called this function one time
-    if (getDeathState() == DEAD_FALLING)
-        return false;
-
-    float x, y, z;
-    GetPosition(x, y, z);
-    // use larger distance for vmap height search than in most other cases
-    float ground_Z = GetMap()->GetHeight(x, y, z, true, MAX_FALL_DISTANCE);
-    if (fabs(ground_Z - z) < 0.1f)
-        return false;
-
-    GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
-    Unit::setDeathState(DEAD_FALLING);
-    return true;
 }
 
 void Creature::Respawn(bool force)
@@ -2462,8 +2470,75 @@ void Creature::FarTeleportTo(Map* map, float X, float Y, float Z, float O)
 
     RemoveFromWorld();
     ResetMap();
+
+    Relocate(X, Y, Z, O);
+
     SetMap(map);
     AddToWorld();
-    
-    SetPosition(X, Y, Z, O, true);
+}
+
+bool Creature::SetWalk(bool enable)
+{
+    if (!Unit::SetWalk(enable))
+        return false;
+
+    ObjectGuid guid = GetGUID();
+    WorldPacket data;
+    if (enable)
+    {
+        data.Initialize(SMSG_SPLINE_MOVE_SET_WALK_MODE, 9);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[3]);
+    }
+    else
+    {
+        data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[1]);
+
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[3]);
+    }
+
+    SendMessageToSet(&data, false);
+    return true;
+}
+
+void Creature::SetLevitate(bool enable)
+{
+    if (enable)
+        AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+    else
+        RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+
+    WorldPacket data(enable ? SMSG_MOVE_SET_HOVER : SMSG_MOVE_UNSET_HOVER, 9);
+    data.append(GetPackGUID());
+    SendMessageToSet(&data, true);
 }

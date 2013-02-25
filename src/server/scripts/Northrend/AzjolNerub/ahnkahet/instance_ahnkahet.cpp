@@ -117,17 +117,17 @@ public:
                     if (spheres[0] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case 193094:     Prince_TaldaramSpheres[1] = go->GetGUID();
                     if (spheres[1] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case 192236:    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
                     if (m_auiEncounter[1] == DONE)HandleGameObject(0,true,go);break;
@@ -300,6 +300,8 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

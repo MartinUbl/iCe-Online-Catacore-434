@@ -72,6 +72,7 @@
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
 #include "ScriptedCreature.h"
+#include "MoveSpline.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -120,7 +121,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectJumpDest,                                 // 42 SPELL_EFFECT_JUMP_DEST
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectAddHonor,                                 // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
+    &Spell::EffectPlayMovie,                                // 45 SPELL_EFFECT_PLAY_MOVIE
     &Spell::EffectUnused,                                   // 46 SPELL_EFFECT_SPAWN clientside, unit appears as if it was just spawned
     &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectUnused,                                   // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
@@ -240,7 +241,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectNULL,                                     //163 unused
     &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
-    &Spell::EffectNULL,                                     //165
+    &Spell::EffectDamageFromMaxHealthPCT,                   //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT
     &Spell::EffectNULL,                                     //166
     &Spell::EffectNULL,                                     //167
     &Spell::EffectNULL,                                     //168
@@ -250,6 +251,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectResurrect,                                //172 SPELL_EFFECT_MASS_RESURRECT
     &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
     &Spell::EffectNULL,                                     //174
+    &Spell::EffectUnused,                                   //175 unused
+    &Spell::EffectSanctuary,                                //176 SPELL_EFFECT_SANCTUARY_2
+    &Spell::EffectNULL,                                     //177
+    &Spell::EffectUnused,                                   //178 unused
+    &Spell::EffectNULL,                                     //179
+    &Spell::EffectUnused,                                   //180 unused
+    &Spell::EffectUnused,                                   //181 unused
+    &Spell::EffectNULL,                                     //182
 };
 
 void Spell::EffectNULL(SpellEffIndex /*effIndex*/)
@@ -437,7 +446,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
                             return;
 
-                        float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[0]));
+                        float radius = GetEffectRadius(0);
                         if (!radius) return;
                         float distance = m_caster->GetDistance2d(unitTarget);
                         damage = (distance > radius) ? 0 : int32(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 0) * ((radius - distance)/radius));
@@ -484,7 +493,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if(unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
                             return;
 
-                        float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[0]));
+                        float radius = GetEffectRadius(0);
                         if (!radius)
                             return;
                         float distance = m_caster->GetDistance2d(unitTarget);
@@ -704,9 +713,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Shadow Bolt, Incinerate and Hand of Gul'dan
+                // Shadow Bolt, Incinerate and Hand of Gul'dan, Soul Fire
                 if (m_caster->ToPlayer()
-                    && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521))
+                    && (m_spellInfo->Id == 686 || m_spellInfo->Id == 29722 || m_spellInfo->Id == 71521 || m_spellInfo->Id == 6353))
                 {
                     // Impending Doom talent
                     if ((m_caster->HasAura(85108) && roll_chance_i(15)) ||
@@ -792,15 +801,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Soul Swap
                 else if (m_spellInfo->Id == 86121)
                 {
-                    if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasSpellCooldown(94229))
-                    {
-                        // Maybe a little hack, but works
-                        SendCastResult(SPELL_FAILED_NOT_READY);
-                        m_caster->ModifyPower(POWER_MANA, m_powerCost);
-                        damage = 0;
-                        return;
-                    }
-
                     int32 bp0 = 0;
                     std::list<uint32> DoTList;
                     Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
@@ -843,21 +843,21 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             unitTarget->RemoveAurasDueToSpell((*itr));
                     }
                     // Cast spell which changes AB spell to Exhale one
-                    Aura* pMarkAura = unitTarget->AddAura(86211, m_caster);//m_caster->CastCustomSpell(m_caster, 86211, &bp0, 0, 0, true);
-                    if (pMarkAura)
-                        pMarkAura->GetEffect(0)->SetAmount(bp0);
+                    Aura* pMarkAura = unitTarget->AddAura(86211, m_caster);
+                    if (pMarkAura && pMarkAura->GetEffect(0))
+                        pMarkAura->GetEffect(0)->SetScriptedAmount(bp0);
                     // ..and cast visual
                     unitTarget->CastSpell(m_caster, 92795, true);
 
                     // Glyph of Soul Swap also makes this spell to have cooldown
-                    //m_caster->CastSpell(m_caster, 94229, true);
-                    m_caster->ToPlayer()->AddSpellCooldown(94229, 0, time(NULL)+30);
+                    if (m_caster->HasAura(56226))
+                        m_caster->ToPlayer()->AddSpellCooldown(86121, 0, time(NULL)+30);
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
                 {
                     Aura* pMarkAura = m_caster->GetAura(86211);
-                    if (!pMarkAura)
+                    if (!pMarkAura || !pMarkAura->GetEffect(0))
                         return;
 
                     if (pMarkAura->GetCaster() == unitTarget)
@@ -866,7 +866,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // -100% cast time
                     m_caster->CastSpell(m_caster, 92794, true);
 
-                    int32 bp0 = pMarkAura->GetEffect(0)->GetAmount();
+                    int32 bp0 = pMarkAura->GetEffect(0)->GetScriptedAmount();
                     if (bp0 & (1 << 0))
                         m_caster->CastSpell(unitTarget, 172, true);
                     if (bp0 & (1 << 1))
@@ -899,20 +899,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Burning Embers talent
                     bp0 = 0;
                     if (m_caster->HasAura(85112))
-                        bp0 = 30;
+                        bp0 = 50;
                     else if (m_caster->HasAura(91986))
-                        bp0 = 15;
+                        bp0 = 25;
 
                     // We must calculate maximal basepoints manually
                     int32 maxbp = m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
-                    if (bp0 == 30)
+                    if (bp0 == 50)
                         maxbp *= 0.85f;
                     else
                         maxbp *= 0.425f;
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
                     if (pSpell)
                     {
-                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
                         SpellScaling pScaling(m_caster->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
@@ -941,20 +941,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Burning Embers talent
                     int32 bp0 = 0;
                     if (pOwner->HasAura(85112))
-                        bp0 = 30;
+                        bp0 = 50;
                     else if (pOwner->HasAura(91986))
-                        bp0 = 15;
+                        bp0 = 25;
 
                     // We must calculate maximal basepoints manually
                     int32 maxbp = pOwner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
-                    if (bp0 == 30)
+                    if (bp0 == 50)
                         maxbp *= 0.85f;
                     else
                         maxbp *= 0.425f;
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 30)?85112:((bp0 == 15)?91986:0));
+                    SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
                     if (pSpell)
                     {
-                        // Burning Embers inflicts 15/30% of damage dealt OR damage based by formula
+                        // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
                         SpellScaling pScaling(pOwner->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
@@ -1089,14 +1089,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 33745)
                 {
                     if (m_caster)
-                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0766f;
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0552f;
                 }
                 // Maul
                 else if (m_spellInfo->Id == 6807)
                 {
                     if (m_caster)
                     {
-                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.24f;
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.19f;
 
                         if (unitTarget->HasAuraState(AURA_STATE_BLEEDING))
                         {
@@ -1113,6 +1113,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                                 damage *= coef;
                         }
                     }
+                }
+                // Trash (Bear form)
+                else if (m_spellInfo->Id == 77758)
+                {
+                    if (m_caster)
+                        damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0982f;
                 }
                 break;
             }
@@ -2095,7 +2101,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                                                     }
                                                 }
                                 }
-                                if (target && target->GetBase()->IsWithinDist2d(&m_targets.m_dstPos, GetSpellRadius(m_spellInfo, effIndex, false) * 2)) // now we use *2 because the location of the seat is not correct
+                                if (target && target->GetBase()->IsWithinDist2d(&m_targets.m_dstPos, GetEffectRadius(effIndex) * 2)) // now we use *2 because the location of the seat is not correct
                                     passenger->EnterVehicle(target, 0);
                                 else
                                 {
@@ -2889,6 +2895,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 79106, true); // Shadow Protection (Caster)
                 }
             }
+            if (m_spellInfo->Id == 527) // Dispel Magic
+            {
+                if (!unitTarget)
+                    return;
+                if (m_caster->IsFriendlyTo(unitTarget))
+                    bp = 2;     // 2 effects from friendly target
+                else
+                    bp = 1;     // 1 effect from enemy target
+
+                spell_id = 97690;
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Chains of Ice
@@ -3469,7 +3486,7 @@ void Spell::CalculateJumpSpeeds(uint8 i, float dist, float & speedXY, float & sp
         speedZ = float(m_spellInfo->EffectMiscValueB[i])/10;
     else
         speedZ = 10.0f;
-    speedXY = dist * 10.0f / speedZ;
+    speedXY = dist * Movement::gravity / speedZ;
 }
 
 void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
@@ -4567,16 +4584,14 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 {
     if (!m_spellAura)
     {
-        float radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
-        if (Player* modOwner = m_originalCaster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
+        float radius = GetEffectRadius(effIndex);
 
         Unit *caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
         // Caster not in world, might be spell triggered from aura removal
         if (!caster->IsInWorld())
             return;
         DynamicObject* dynObj = new DynamicObject;
-        if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo->Id, m_targets.m_dstPos, radius, false))
+        if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo, m_targets.m_dstPos, radius, false, DYNAMIC_OBJECT_AREA_SPELL))
         {
             delete dynObj;
             return;
@@ -5225,7 +5240,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 }
                 default:
                 {
-                    float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+                    float radius = GetEffectRadius(effIndex);
 
                     uint32 amount = damage > 0 ? damage : 1;
 
@@ -5234,6 +5249,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     {
                         case 18662: // Curse of Doom
                         case 88747: // Wild Mushroom
+                        case 62618: // Power Word: Barrier
                             amount = 1;
                             break;
                         default:
@@ -5251,7 +5267,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             continue;
                         if (properties->Category == SUMMON_CATEGORY_ALLY)
                         {
-                            summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCaster->GetGUID());
+                            summon->SetOwnerGUID(m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
                             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
@@ -5486,11 +5502,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
     switch(m_spellInfo->Id)
     {
-    // Priest Dispell Magic (the actual ability ID - not real dispell ?? )
-    case 527:
+        // Priest Dispel Magic (real dispel)
+        case 97690:
         {
             // Glyph of Dispel Magic
-            if (m_caster->HasAura(55677) && unitTarget && unitTarget->IsFriendlyTo(m_caster))
+            if (m_caster->HasAura(55677) && unitTarget && unitTarget->IsFriendlyTo(m_caster) && !success_list.empty())
             {
                 // Heal the taget for 3% of their max health
                 int32 bp0 = unitTarget->CountPctFromMaxHealth(3);
@@ -5561,19 +5577,18 @@ void Spell::EffectAddFarsight(SpellEffIndex effIndex)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    float radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+    float radius = GetEffectRadius(effIndex);
     int32 duration = GetSpellDuration(m_spellInfo);
     // Caster not in world, might be spell triggered from aura removal
     if (!m_caster->IsInWorld())
         return;
     DynamicObject* dynObj = new DynamicObject;
-    if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, m_targets.m_dstPos, radius, true))
+    if (!dynObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_dstPos, radius, true, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
     {
         delete dynObj;
         return;
     }
     dynObj->SetDuration(duration);
-    dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
     
     dynObj->setActive(true);    //must before add to map to be put in world container
     dynObj->GetMap()->Add(dynObj); //grid will also be loaded
@@ -5598,7 +5613,7 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffIndex effIndex)
     if (unitTarget->isInFlight())
         return;
 
-    float dis = (float)m_caster->GetSpellRadiusForTarget(unitTarget, sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+    float dis = GetEffectRadius(effIndex);
 
     float fx,fy,fz;
     m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize(),dis);
@@ -5625,32 +5640,16 @@ void Spell::EffectLearnSkill(SpellEffIndex effIndex)
     unitTarget->ToPlayer()->SetSkill(skillid, SpellMgr::CalculateSpellEffectAmount(m_spellInfo, effIndex), skillval?skillval:1, damage*75);
 }
 
-void Spell::EffectAddHonor(SpellEffIndex /*effIndex*/)
+void Spell::EffectPlayMovie(SpellEffIndex effIndex)
 {
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // not scale value for item based reward (/10 value expected)
-    if (m_CastItem)
-    {
-        unitTarget->ToPlayer()->RewardHonor(NULL, 1, damage/10);
-        sLog->outDebug("SpellEffect::AddHonor (spell_id %u) rewards %d honor points (item %u) for player: %u", m_spellInfo->Id, damage/10, m_CastItem->GetEntry(),unitTarget->ToPlayer()->GetGUIDLow());
+    uint32 movieId = m_spellInfo->EffectMiscValue[effIndex];
+    if (!sMovieStore.LookupEntry(movieId))
         return;
-    }
 
-    // do not allow to add too many honor for player (50 * 21) = 1040 at level 70, or (50 * 31) = 1550 at level 80
-    if (damage <= 50)
-    {
-        uint32 honor_reward = Trinity::Honor::hk_honor_at_level(unitTarget->getLevel(), float(damage));
-        unitTarget->ToPlayer()->RewardHonor(NULL, 1, honor_reward);
-        sLog->outDebug("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (scale) to player: %u", m_spellInfo->Id, honor_reward, unitTarget->ToPlayer()->GetGUIDLow());
-    }
-    else
-    {
-        //maybe we have correct honor_gain in damage already
-        unitTarget->ToPlayer()->RewardHonor(NULL, 1, damage);
-        sLog->outDebug("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, unitTarget->ToPlayer()->GetGUIDLow());
-    }
+    unitTarget->ToPlayer()->SendMovieStart(movieId);
 }
 
 void Spell::EffectTradeSkill(SpellEffIndex /*effIndex*/)
@@ -7095,7 +7094,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 45151:
                 {
                     //Workaround for Range ... should be global for every ScriptEffect
-                    float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+                    float radius = GetEffectRadius(effIndex);
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetDistance(m_caster) >= radius && !unitTarget->HasAura(46394) && unitTarget != m_caster)
                         unitTarget->CastSpell(unitTarget, 46394, true);
 
@@ -7227,7 +7226,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         return;
 
                     float x, y, z;
-                    float radius = GetSpellRadius(m_spellInfo, effIndex, true);
+                    float radius = GetEffectRadius(effIndex);
                     for (uint8 i = 0; i < 15; ++i)
                     {
                         m_caster->GetRandomPoint(m_targets.m_dstPos, radius, x, y, z);
@@ -7670,6 +7669,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     break;
                 }
                 case 64142:                                 // Upper Deck - Create Foam Sword
+                {
                     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
                     Player *plr = unitTarget->ToPlayer();
@@ -7680,6 +7680,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             return;
                     DoCreateItem(effIndex, itemId[urand(0,4)]);
                     return;
+                }
+                case 14181:                                 // Relentless Strikes
+                {
+                    if (effIndex == 0)
+                    {
+                        unitTarget->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, POWER_ENERGY);
+                        return;
+                    }
+                }
             }
             break;
         }
@@ -8534,7 +8543,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!pet->isAlive())
         return;
 
-    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetProto()->ItemLevel);
+    int32 benefit = m_spellInfo->EffectBasePoints[effIndex];
     if (benefit <= 0)
         return;
 
@@ -9321,7 +9330,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
     //FIXME: this can be better check for most objects but still hack
     else if (m_spellInfo->EffectRadiusIndex[effIndex] && m_spellInfo->speed == 0)
     {
-        float dis = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+        float dis = GetEffectRadius(effIndex);
         m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
@@ -10067,6 +10076,14 @@ void Spell::EffectPlayerNotification(SpellEffIndex /*effIndex*/)
             unitTarget->PlayDirectSound(9417); // Fel Reaver sound
             break;
     }
+}
+
+void Spell::EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex)
+{
+    if (!unitTarget)
+        return;
+
+    m_damage += unitTarget->CountPctFromMaxHealth(damage);
 }
 
 void Spell::EffectRemoveAura(SpellEffIndex effIndex)

@@ -37,7 +37,7 @@ enum GuildMisc
     GUILD_BANK_MAX_TABS                 = 8,                    // send by client for money log also
     GUILD_BANK_MAX_SLOTS                = 98,
     GUILD_BANK_MONEY_LOGS_TAB           = 100,                  // used for money log in DB
-    GUILD_RANKS_MIN_COUNT               = 3, // Seems to be 3 starting from Cataclysm
+    GUILD_RANKS_MIN_COUNT               = 2,
     GUILD_RANKS_MAX_COUNT               = 10,
     GUILD_RANK_NONE                     = 0xFF,
     GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
@@ -93,72 +93,95 @@ enum GuildRankRights
     GR_RIGHT_WITHDRAW_REPAIR    = 0x00040000,                   // withdraw for repair
     GR_RIGHT_WITHDRAW_GOLD      = 0x00080000,                   // withdraw gold
     GR_RIGHT_CREATE_GUILD_EVENT = 0x00100000,                   // wotlk
-    GR_RIGHT_ALL                = 0x001FFFBF,
+    GR_RIGHT_MODIFY_BANK_TABS   = 0x00400000,
+    GR_RIGHT_REMOVE_GUILD_EVENT = 0x00800000,
+    GR_RIGHT_ALL                = 0x00dfffbf,
 };
 
 enum GuildCommandType
 {
-    GUILD_CREATE_S  = 0x00,
-    GUILD_INVITE_S  = 0x01,
-    GUILD_QUIT_S    = 0x03,
-    GUILD_FOUNDER_S = 0x0E,
-    GUILD_UNK1      = 0x13,
-    GUILD_UNK2      = 0x14
+    GUILD_COMMAND_CREATE                = 0,
+    GUILD_COMMAND_INVITE                = 1,
+    GUILD_COMMAND_QUIT                  = 3,
+    GUILD_COMMAND_ROSTER                = 5,
+    GUILD_COMMAND_PROMOTE               = 6,
+    GUILD_COMMAND_DEMOTE                = 7,
+    GUILD_COMMAND_REMOVE                = 8,
+    GUILD_COMMAND_CHANGE_LEADER         = 10,
+    GUILD_COMMAND_EDIT_MOTD             = 11,
+    GUILD_COMMAND_GUILD_CHAT            = 13,
+    GUILD_COMMAND_FOUNDER               = 14,
+    GUILD_COMMAND_CHANGE_RANK           = 16,
+    GUILD_COMMAND_PUBLIC_NOTE           = 19,
+    GUILD_COMMAND_VIEW_TAB              = 21,
+    GUILD_COMMAND_MOVE_ITEM             = 22,
+    GUILD_COMMAND_REPAIR                = 25,
 };
 
 enum GuildCommandError
 {
-    ERR_PLAYER_NO_MORE_IN_GUILD     = 0x00,
-    ERR_GUILD_INTERNAL              = 0x01,
-    ERR_ALREADY_IN_GUILD            = 0x02,
-    ERR_ALREADY_IN_GUILD_S          = 0x03,
-    ERR_INVITED_TO_GUILD            = 0x04,
-    ERR_ALREADY_INVITED_TO_GUILD_S  = 0x05,
-    ERR_GUILD_NAME_INVALID          = 0x06,
-    ERR_GUILD_NAME_EXISTS_S         = 0x07,
-    ERR_GUILD_LEADER_LEAVE          = 0x08,
-    ERR_GUILD_PERMISSIONS           = 0x08,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD   = 0x09,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD_S = 0x0A,
-    ERR_GUILD_PLAYER_NOT_FOUND_S    = 0x0B,
-    ERR_GUILD_NOT_ALLIED            = 0x0C,
-    ERR_GUILD_RANK_TOO_HIGH_S       = 0x0D,
-    ERR_GUILD_RANK_TOO_LOW_S        = 0x0E,
-    ERR_GUILD_RANKS_LOCKED          = 0x11,
-    ERR_GUILD_RANK_IN_USE           = 0x12,
-    ERR_GUILD_IGNORING_YOU_S        = 0x13,
-    ERR_GUILD_UNK1                  = 0x14,
-    ERR_GUILD_WITHDRAW_LIMIT        = 0x19,
-    ERR_GUILD_NOT_ENOUGH_MONEY      = 0x1A,
-    ERR_GUILD_BANK_FULL             = 0x1C,
-    ERR_GUILD_ITEM_NOT_FOUND        = 0x1D
+    ERR_GUILD_COMMAND_SUCCESS           = 0,
+    ERR_GUILD_INTERNAL                  = 1,
+    ERR_ALREADY_IN_GUILD                = 2,
+    ERR_ALREADY_IN_GUILD_S              = 3,
+    ERR_INVITED_TO_GUILD                = 4,
+    ERR_ALREADY_INVITED_TO_GUILD_S      = 5,
+    ERR_GUILD_NAME_INVALID              = 6,
+    ERR_GUILD_NAME_EXISTS_S             = 7,
+    ERR_GUILD_LEADER_LEAVE              = 8,
+    ERR_GUILD_PERMISSIONS               = 8,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD       = 9,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD_S     = 10,
+    ERR_GUILD_PLAYER_NOT_FOUND_S        = 11,
+    ERR_GUILD_NOT_ALLIED                = 12,
+    ERR_GUILD_RANK_TOO_HIGH_S           = 13,
+    ERR_GUILD_RANK_TOO_LOW_S            = 14,
+    ERR_GUILD_RANKS_LOCKED              = 17,
+    ERR_GUILD_RANK_IN_USE               = 18,
+    ERR_GUILD_IGNORING_YOU_S            = 19,
+    ERR_GUILD_UNK1                      = 20, // Forces roster update
+    ERR_GUILD_WITHDRAW_LIMIT            = 25,
+    ERR_GUILD_NOT_ENOUGH_MONEY          = 26,
+    ERR_GUILD_BANK_FULL                 = 28,
+    ERR_GUILD_ITEM_NOT_FOUND            = 29,
+    ERR_GUILD_TOO_MUCH_MONEY            = 31,
+    ERR_GUILD_BANK_WRONG_TAB            = 32,
+    ERR_RANK_REQUIRES_AUTHENTICATOR     = 34,
+    ERR_GUILD_BANK_VOUCHER_FAILED       = 35,
+    ERR_GUILD_TRIAL_ACCOUNT             = 36,
+    ERR_GUILD_UNDELETABLE_DUE_TO_LEVEL  = 37,
+    ERR_GUILD_MOVE_STARTING             = 38,
+    ERR_GUILD_REP_TOO_LOW               = 39
 };
 
 enum GuildEvents
 {
-    GE_PROMOTION                    = 0x01,
-    GE_DEMOTION                     = 0x02,
-    GE_MOTD                         = 0x03,
-    GE_JOINED                       = 0x04,
-    GE_LEFT                         = 0x05,
-    GE_REMOVED                      = 0x06,
-    GE_LEADER_IS                    = 0x07,
-    GE_LEADER_CHANGED               = 0x08,
-    GE_DISBANDED                    = 0x09,
-    GE_TABARDCHANGE                 = 0x0A,
-    GE_UNK1                         = 0x0B,                 // string, uint64 (guid) EVENT_GUILD_ROSTER_UPDATE tab content change?
-    GE_UPDATE_ROSTER                = 0x0C,                 // EVENT_GUILD_ROSTER_UPDATE
-    GE_UNK2                         = 0x0D,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
-    GE_UNK3                         = 0x0E,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
-    GE_UNK4                         = 0x0F,                 // EVENT_GUILD_ROSTER_UPDATE, in same case level in disassembly
-    GE_SIGNED_ON                    = 0x10,                 // ERR_FRIEND_ONLINE_SS
-    GE_SIGNED_OFF                   = 0x11,                 // ERR_FRIEND_OFFLINE_S
-    GE_GUILDBANKBAGSLOTS_CHANGED    = 0x12,                 // EVENT_GUILDBANKBAGSLOTS_CHANGED
-    GE_BANKTAB_PURCHASED            = 0x13,                 // EVENT_GUILDBANK_UPDATE_TABS
-    GE_UNK5                         = 0x14,                 // EVENT_GUILDBANK_UPDATE_TABS
-    GE_GUILDBANK_UPDATE_MONEY       = 0x15,                 // EVENT_GUILDBANK_UPDATE_MONEY, string 0000000000002710 is 1 gold
-    GE_GUILD_BANK_MONEY_WITHDRAWN   = 0x16,                 // MSG_GUILD_BANK_MONEY_WITHDRAWN
-    GE_GUILDBANK_TEXT_CHANGED       = 0x17,                 // EVENT_GUILDBANK_TEXT_CHANGED
+    GE_PROMOTION                        = 1,
+    GE_DEMOTION                         = 2,
+    GE_MOTD                             = 3,
+    GE_JOINED                           = 4,
+    GE_LEFT                             = 5,
+    GE_REMOVED                          = 6,
+    GE_LEADER_IS                        = 7,
+    GE_LEADER_CHANGED                   = 8,
+    GE_DISBANDED                        = 9,
+    GE_TABARDCHANGE                     = 10,
+    GE_RANK_UPDATED                     = 11,
+    GE_RANK_CREATED                     = 12,
+    GE_RANK_DELETED                     = 13,
+    GE_RANK_ORDER_CHANGED               = 14,
+    GE_FOUNDER                          = 15,
+    GE_SIGNED_ON                        = 16,
+    GE_SIGNED_OFF                       = 17,
+    GE_GUILDBANKBAGSLOTS_CHANGED        = 18,
+    GE_BANK_TAB_PURCHASED               = 19,
+    GE_BANK_TAB_UPDATED                 = 20,
+    GE_BANK_MONEY_SET                   = 21,
+    GE_BANK_MONEY_CHANGED               = 22,
+    GE_BANK_TEXT_CHANGED                = 23,
+    // 24 - error 795
+    GE_SIGNED_ON_MOBILE                 = 25,
+    GE_SIGNED_Off_MOBILE                = 26,
 };
 
 enum GuildNewsType
@@ -293,6 +316,7 @@ class GuildAchievementMgr
         // Make it private for making appending to AllAchievementData easier
         CriteriaProgressMap m_criteriaProgress;
         CompletedAchievementMap m_completedAchievements;
+        void SendAllAchievementData(Player *receiver) const;
 
     private:
         enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
@@ -410,7 +434,7 @@ private:
         uint32 m_zoneId;
         uint8  m_level;
         uint8  m_class;
-		uint8 m_flags;
+        uint8 m_flags;
         uint64 m_logoutTime;
         uint32 m_accountId;
         // Fields from guild_member table
@@ -434,7 +458,7 @@ private:
         uint32 GetGUID() const { return m_guid; }
 
         virtual void SaveToDB(SQLTransaction& trans) const = 0;
-        virtual void WritePacket(WorldPacket& data) const = 0;
+        virtual void WritePacket(WorldPacket& data, ByteBuffer& content) const = 0;
 
     protected:
         uint32 m_guildId;
@@ -455,7 +479,7 @@ private:
         ~EventLogEntry() { }
 
         void SaveToDB(SQLTransaction& trans) const;
-        void WritePacket(WorldPacket& data) const;
+        void WritePacket(WorldPacket& data, ByteBuffer& content) const;
 
     private:
         GuildEventLogTypes m_eventType;
@@ -476,6 +500,11 @@ private:
                 eventType == GUILD_BANK_LOG_REPAIR_MONEY;
         }
 
+        bool IsMoneyEvent() const
+        {
+            return IsMoneyEvent(m_eventType);
+        }
+
         BankEventLogEntry(uint32 guildId, uint32 guid, GuildBankEventLogTypes eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId) : 
             LogEntry(guildId, guid), m_eventType(eventType), m_bankTabId(tabId), m_playerGuid(playerGuid), 
             m_itemOrMoney(itemOrMoney), m_itemStackCount(itemStackCount), m_destTabId(destTabId) { }
@@ -487,7 +516,7 @@ private:
         ~BankEventLogEntry() { }
 
         void SaveToDB(SQLTransaction& trans) const;
-        void WritePacket(WorldPacket& data) const;
+        void WritePacket(WorldPacket& data, ByteBuffer& content) const;
 
     private:
         GuildBankEventLogTypes m_eventType;
@@ -588,6 +617,10 @@ private:
         void SetInfo(const std::string& name, const std::string& icon);
         void SetText(const std::string& text);
         void SendText(const Guild* pGuild, WorldSession* session) const;
+
+        std::string const& GetName() const { return m_name; }
+        std::string const& GetIcon() const { return m_icon; }
+        std::string const& GetText() const { return m_text; }
 
         inline Item* GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ?  m_items[slotId] : NULL; }
         bool SetItem(SQLTransaction& trans, uint8 slotId, Item* pItem);
@@ -704,6 +737,7 @@ public:
 
     // Getters
     uint32 GetId() const { return m_id; }
+    uint64 GetGUID() const { return MAKE_NEW_GUID(m_id, 0, HIGHGUID_GUILD); }
     const uint64& GetLeaderGUID() const { return m_leaderGuid; }
     const std::string& GetName() const { return m_name; }
     const std::string& GetMOTD() const { return m_motd; }
@@ -727,28 +761,31 @@ public:
     void HandleRemoveMember(WorldSession* session, uint64 guid);
     void HandleUpdateMemberRank(WorldSession* session, uint64 guid, bool demote);
     void HandleAddNewRank(WorldSession* session, const std::string& name);
+    void HandleSwitchRank(WorldSession* session, uint8 rankId, bool up);
     void HandleRemoveRank(WorldSession* session, uint8 rankId);
+    void HandleSetMemberRank(WorldSession *session, uint64 targetGuid, uint64 setterGuid, uint32 rank);
     void HandleMemberDepositMoney(WorldSession* session, uint32 amount);
     bool HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair = false);
     void HandleMemberLogout(WorldSession* session);
     void HandleDisband(WorldSession* session);
+    void HandleGuildPartyRequest(WorldSession* session);
 
     void DepositBankMoneyFromLoot(uint32 amount);
 
     void UpdateMemberData(Player* plr, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* plr, uint32 flag, bool state);
-    void SendUpdateRoster(WorldSession* session = NULL);
 
     // Send info to client
     void SendInfo(WorldSession* session) const;
     void SendEventLog(WorldSession *session) const;
     void SendBankLog(WorldSession *session, uint8 tabId) const;
+    void SendBankList(WorldSession *session, uint8 tabId, bool withContent, bool withTabInfo) const;
     void SendBankTabsInfo(WorldSession *session) const;
-    void SendBankTabData(WorldSession* session, uint8 tabId) const;
     void SendBankTabText(WorldSession *session, uint8 tabId) const;
     void SendPermissions(WorldSession *session) const;
     void SendMoneyInfo(WorldSession *session) const;
     void SendLoginInfo(WorldSession* session);
+    void SendGuildRankInfo(WorldSession* session) const;
 
     // Load from DB
     bool LoadFromDB(Field* fields);
@@ -781,6 +818,7 @@ public:
     void DeleteMember(const uint64& guid, bool isDisbanding = false, bool isKicked = false);
     bool ChangeMemberRank(const uint64& guid, uint8 newRank);
     RankInfo & GetRankInfo(uint32 rankId) {return m_ranks[rankId]; }
+    bool IsMember(uint64 guid) const;
     uint32 GetMembersCount() { return m_members.size(); };
 
     // Bank
@@ -791,10 +829,11 @@ public:
     void SetBankTabText(uint8 tabId, const std::string& text);
 
     // Guild advancement
-    uint8 GetLevel() { return m_level; }
-    uint64 GetCurrentXP() { return m_xp; }
-    uint64 GetNextLevelXP() { return m_nextLevelXP; }
-    uint64 GetTodayXP() { return m_todayXP; }
+    uint8 GetLevel() const { return m_level; }
+    uint64 GetCurrentXP() const { return m_xp; }
+    uint64 GetNextLevelXP() const { return m_nextLevelXP; }
+    uint64 GetTodayXP() const { return m_todayXP; }
+    void SendGuildXP(WorldSession* session = NULL ) const;
 
     void UpdateGuildNews(WorldSession* session);
     void AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param);
@@ -876,7 +915,7 @@ private:
             if (itr->second->GetName() == name)
                 return itr->second;
 
-        SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PLAYER_NOT_IN_GUILD_S, name);
+        SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_GUILD_PLAYER_NOT_IN_GUILD_S, name);
         return NULL;
     }
     inline void _DeleteMemberFromDB(uint32 lowguid) const
@@ -895,7 +934,7 @@ private:
     // Creates default guild ranks with names in given locale
     void _CreateDefaultGuildRanks(LocaleConstant loc);
     // Creates new rank
-    void _CreateRank(const std::string& name, uint32 rights);
+    bool _CreateRank(const std::string& name, uint32 rights);
     // Update account number when member added/removed from guild
     void _UpdateAccountsNumber();
     bool _IsLeader(Player* player) const;
@@ -912,6 +951,7 @@ private:
     std::string _GetRankName(uint8 rankId) const;
 
     uint32 _GetMemberRemainingSlots(const uint64& guid, uint8 tabId) const;
+    uint32 _GetMemberRemainingMoney(const Member *member) const;
     uint32 _GetMemberRemainingMoney(const uint64& guid) const;
     void _DecreaseMemberRemainingSlots(SQLTransaction& trans, const uint64& guid, uint8 tabId);
     bool _MemberHasTabRights(const uint64& guid, uint8 tabId, uint32 rights) const;
@@ -924,10 +964,12 @@ private:
     void _MoveItems(MoveItemData* pSrc, MoveItemData* pDest, uint32 splitedAmount);
     bool _DoItemsMove(MoveItemData* pSrc, MoveItemData* pDest, bool sendError, uint32 splitedAmount = 0);
 
-    void _SendBankContent(WorldSession *session, uint8 tabId) const;
-    void _SendBankMoneyUpdate(WorldSession *session) const;
+    //void _SendBankContent(WorldSession *session, uint8 tabId) const;
+    //void _SendBankMoneyUpdate(WorldSession *session) const;
     void _SendBankContentUpdate(MoveItemData* pSrc, MoveItemData* pDest) const;
     void _SendBankContentUpdate(uint8 tabId, SlotIds slots) const;
+    void SendGuildReputationWeeklyCap(WorldSession *session, uint32 reputation) const;
+    void SendGuildRanksUpdate(uint64 setterGuid, uint64 targetGuid, uint32 rank);
 
     void _BroadcastEvent(GuildEvents guildEvent, const uint64& guid, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL) const;
 };

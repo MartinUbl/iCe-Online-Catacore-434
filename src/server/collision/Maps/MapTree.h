@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _MAPTREE_H
@@ -36,8 +32,8 @@ namespace VMAP
     struct LocationInfo
     {
         LocationInfo(): hitInstance(0), hitModel(0), ground_Z(-G3D::inf()) {};
-        const ModelInstance *hitInstance;
-        const GroupModel *hitModel;
+        const ModelInstance* hitInstance;
+        const GroupModel* hitModel;
         float ground_Z;
     };
 
@@ -49,7 +45,7 @@ namespace VMAP
             uint32 iMapID;
             bool iIsTiled;
             BIH iTree;
-            ModelInstance *iTreeValues; // the tree entries
+            ModelInstance* iTreeValues; // the tree entries
             uint32 iNTreeValues;
 
             // Store all the map tile idents that are loaded for that map
@@ -78,10 +74,10 @@ namespace VMAP
             bool getAreaInfo(G3D::Vector3 &pos, uint32 &flags, int32 &adtId, int32 &rootId, int32 &groupId) const;
             bool GetLocationInfo(const Vector3 &pos, LocationInfo &info) const;
 
-            bool InitMap(const std::string &fname, VMapManager2 *vm);
-            void UnloadMap(VMapManager2 *vm);
-            bool LoadMapTile(uint32 tileX, uint32 tileY, VMapManager2 *vm);
-            void UnloadMapTile(uint32 tileX, uint32 tileY, VMapManager2 *vm);
+            bool InitMap(const std::string &fname, VMapManager2* vm);
+            void UnloadMap(VMapManager2* vm);
+            bool LoadMapTile(uint32 tileX, uint32 tileY, VMapManager2* vm);
+            void UnloadMapTile(uint32 tileX, uint32 tileY, VMapManager2* vm);
             bool isTiled() const { return iIsTiled; }
             uint32 numLoadedTiles() const { return iLoadedTiles.size(); }
     };

@@ -135,6 +135,9 @@ enum SpellValueMod
     SPELLVALUE_BASE_POINT2,
     SPELLVALUE_RADIUS_MOD,
     SPELLVALUE_MAX_TARGETS,
+    SPELLVALUE_SCRIPTED_POINT0,
+    SPELLVALUE_SCRIPTED_POINT1,
+    SPELLVALUE_SCRIPTED_POINT2,
 };
 
 typedef std::pair<SpellValueMod, int32>     CustomSpellValueMod;
@@ -339,6 +342,7 @@ class Guardian;
 class UnitAI;
 class Totem;
 class Transport;
+class TransportBase;
 class Vehicle;
 
 struct SpellImmune
@@ -444,8 +448,7 @@ enum DeathState
     JUST_DIED   = 1,
     CORPSE      = 2,
     DEAD        = 3,
-    JUST_ALIVED = 4,
-    DEAD_FALLING= 5
+    JUST_ALIVED = 4
 };
 
 enum UnitState
@@ -473,13 +476,19 @@ enum UnitState
     UNIT_STAT_MOVE            = 0x00100000,
     UNIT_STAT_ROTATING        = 0x00200000,
     UNIT_STAT_EVADE           = 0x00400000,
+    UNIT_STAT_ROAMING_MOVE    = 0x00800000,
+    UNIT_STAT_CONFUSED_MOVE   = 0x01000000,
+    UNIT_STAT_FLEEING_MOVE    = 0x02000000,
+    UNIT_STAT_CHASE_MOVE      = 0x04000000,
+    UNIT_STAT_FOLLOW_MOVE     = 0x08000000,
     UNIT_STAT_UNATTACKABLE    = (UNIT_STAT_IN_FLIGHT | UNIT_STAT_ONVEHICLE),
-    UNIT_STAT_MOVING          = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE),
+    UNIT_STAT_MOVING          = UNIT_STAT_ROAMING_MOVE | UNIT_STAT_CONFUSED_MOVE | UNIT_STAT_FLEEING_MOVE| UNIT_STAT_CHASE_MOVE | UNIT_STAT_FOLLOW_MOVE ,
     UNIT_STAT_CONTROLLED      = (UNIT_STAT_CONFUSED | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING),
     UNIT_STAT_LOST_CONTROL    = (UNIT_STAT_CONTROLLED | UNIT_STAT_JUMPING | UNIT_STAT_CHARGING),
     UNIT_STAT_SIGHTLESS       = (UNIT_STAT_LOST_CONTROL | UNIT_STAT_EVADE),
     UNIT_STAT_CANNOT_AUTOATTACK     = (UNIT_STAT_LOST_CONTROL | UNIT_STAT_CASTING),
     UNIT_STAT_CANNOT_TURN     = (UNIT_STAT_LOST_CONTROL | UNIT_STAT_ROTATING),
+    UNIT_STAT_NOT_MOVE        = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DIED | UNIT_STAT_DISTRACTED,
     UNIT_STAT_ALL_STATE       = 0xffffffff                      //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
@@ -647,8 +656,11 @@ enum NPCFlags
     UNIT_NPC_FLAG_GUILD_BANKER          = 0x00800000,       // cause client to send 997 opcode
     UNIT_NPC_FLAG_SPELLCLICK            = 0x01000000,       // cause client to send 1015 opcode (spell click), dynamic, set at loading and don't must be set in DB
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
-    UNIT_NPC_FLAG_GUARD                 = 0x10000000,       // custom flag for guards
-    UNIT_NPC_FLAG_OUTDOORPVP            = 0x20000000,       // custom flag for outdoor pvp creatures
+    UNIT_NPC_FLAG_REFORGER              = 0x08000000,       // reforging
+    UNIT_NPC_FLAG_TRANSMOGRIFIER        = 0x10000000,       // transmogrification
+    UNIT_NPC_FLAG_VAULTKEEPER           = 0x20000000,       // void storage
+    UNIT_NPC_FLAG_GUARD                 = 0x40000000,       // custom flag for guards
+    UNIT_NPC_FLAG_OUTDOORPVP            = 0x80000000,       // custom flag for outdoor pvp creatures
 };
 
 enum MovementFlags
@@ -663,55 +675,64 @@ enum MovementFlags
     MOVEMENTFLAG_PITCH_UP              = 0x00000040,
     MOVEMENTFLAG_PITCH_DOWN            = 0x00000080,
     MOVEMENTFLAG_WALKING               = 0x00000100,               // Walking
-    MOVEMENTFLAG_ONTRANSPORT           = 0x00000200,               // Used for flying on some creatures
-    MOVEMENTFLAG_LEVITATING            = 0x00000400,
-    MOVEMENTFLAG_ROOT                  = 0x00000800,
-    MOVEMENTFLAG_JUMPING               = 0x00001000,
-    MOVEMENTFLAG_FALLING               = 0x00002000,               // damage dealt on that type of falling
-    MOVEMENTFLAG_PENDING_STOP          = 0x00004000,
-    MOVEMENTFLAG_PENDING_STRAFE_STOP   = 0x00008000,
-    MOVEMENTFLAG_PENDING_FORWARD       = 0x00010000,
-    MOVEMENTFLAG_PENDING_BACKWARD      = 0x00020000,
-    MOVEMENTFLAG_PENDING_STRAFE_LEFT   = 0x00040000,
-    MOVEMENTFLAG_PENDING_STRAFE_RIGHT  = 0x00080000,
-    MOVEMENTFLAG_PENDING_ROOT          = 0x00100000,
-    MOVEMENTFLAG_SWIMMING              = 0x00200000,               // appears with fly flag also
-    MOVEMENTFLAG_ASCENDING             = 0x00400000,               // press "space" when flying
-    MOVEMENTFLAG_DESCENDING            = 0x00800000,
-    MOVEMENTFLAG_CAN_FLY               = 0x01000000,               // can fly
-    MOVEMENTFLAG_FLYING                = 0x02000000,               // hover
-    MOVEMENTFLAG_SPLINE_ELEVATION      = 0x04000000,               // used for flight paths
-    MOVEMENTFLAG_SPLINE_ENABLED        = 0x08000000,               // used for flight paths
-    MOVEMENTFLAG_WATERWALKING          = 0x10000000,               // prevent unit from falling through water
-    MOVEMENTFLAG_FALLING_SLOW          = 0x20000000,               // active rogue safe fall spell (passive)
-    MOVEMENTFLAG_HOVER                 = 0x40000000,               // hover, cannot jump
+    MOVEMENTFLAG_LEVITATING            = 0x00000200,
+    MOVEMENTFLAG_ROOT                  = 0x00000400,               // Must not be set along with MOVEMENTFLAG_MASK_MOVING
+    MOVEMENTFLAG_FALLING               = 0x00000800,               // damage dealt on that type of falling
+    MOVEMENTFLAG_FALLING_FAR           = 0x00001000,
+    MOVEMENTFLAG_PENDING_STOP          = 0x00002000,
+    MOVEMENTFLAG_PENDING_STRAFE_STOP   = 0x00004000,
+    MOVEMENTFLAG_PENDING_FORWARD       = 0x00008000,
+    MOVEMENTFLAG_PENDING_BACKWARD      = 0x00010000,
+    MOVEMENTFLAG_PENDING_STRAFE_LEFT   = 0x00020000,
+    MOVEMENTFLAG_PENDING_STRAFE_RIGHT  = 0x00040000,
+    MOVEMENTFLAG_PENDING_ROOT          = 0x00080000,
+    MOVEMENTFLAG_SWIMMING              = 0x00100000,               // appears with fly flag also
+    MOVEMENTFLAG_ASCENDING             = 0x00200000,               // press "space" when flying
+    MOVEMENTFLAG_DESCENDING            = 0x00400000,
+    MOVEMENTFLAG_CAN_FLY               = 0x00800000,               // Appears when unit can fly AND also walk
+    MOVEMENTFLAG_FLYING                = 0x01000000,               // unit is actually flying. pretty sure this is only used for players. creatures use disable_gravity
+    MOVEMENTFLAG_SPLINE_ELEVATION      = 0x02000000,               // used for flight paths
+    MOVEMENTFLAG_WATERWALKING          = 0x04000000,               // prevent unit from falling through water
+    MOVEMENTFLAG_FALLING_SLOW          = 0x08000000,               // active rogue safe fall spell (passive)
+    MOVEMENTFLAG_HOVER                 = 0x10000000,               // hover, cannot jump
 
-    MOVEMENTFLAG_MOVING         =
-        MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD  |MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
-        MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_JUMPING
-        |MOVEMENTFLAG_FALLING|MOVEMENTFLAG_ASCENDING| MOVEMENTFLAG_SPLINE_ELEVATION,
-    MOVEMENTFLAG_TURNING        =
-        MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT,
+    // TODO: Check if PITCH_UP and PITCH_DOWN really belong here..
+    MOVEMENTFLAG_MASK_MOVING =
+    MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT |
+    MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN | MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING |
+    MOVEMENTFLAG_SPLINE_ELEVATION,
+
+    MOVEMENTFLAG_MASK_TURNING =
+    MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT,
+
+    MOVEMENTFLAG_MASK_MOVING_FLY =
+    MOVEMENTFLAG_FLYING | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING,
+
+    // Movement flags allowed for creature in CreateObject - we need to keep all other enabled serverside
+    // to properly calculate all movement
+    MOVEMENTFLAG_MASK_CREATURE_ALLOWED =
+    MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_ROOT | MOVEMENTFLAG_SWIMMING |
+    MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_WATERWALKING | MOVEMENTFLAG_FALLING_SLOW | MOVEMENTFLAG_HOVER,
+
+    //! TODO if needed: add more flags to this masks that are exclusive to players
+    MOVEMENTFLAG_MASK_PLAYER_ONLY =
+    MOVEMENTFLAG_FLYING
 };
 enum MovementFlags2
 {
     MOVEMENTFLAG2_NONE                     = 0x00000000,
     MOVEMENTFLAG2_NO_STRAFE                = 0x00000001,
     MOVEMENTFLAG2_NO_JUMPING               = 0x00000002,
-    MOVEMENTFLAG2_UNK3                     = 0x00000004,        // Overrides various clientside checks
-    MOVEMENTFLAG2_FULL_SPEED_TURNING       = 0x00000008,
-    MOVEMENTFLAG2_FULL_SPEED_PITCHING      = 0x00000010,
-    MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING    = 0x00000020,
-    MOVEMENTFLAG2_UNK7                     = 0x00000040,
-    MOVEMENTFLAG2_UNK8                     = 0x00000080,
-    MOVEMENTFLAG2_UNK9                     = 0x00000100,
-    MOVEMENTFLAG2_UNK10                    = 0x00000200,
-    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000400,
-    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000800,
-    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00001000,
-    MOVEMENTFLAG2_UNK14                    = 0x00002000,
-    MOVEMENTFLAG2_UNK15                    = 0x00004000,
-    MOVEMENTFLAG2_UNK16                    = 0x00008000,
+    MOVEMENTFLAG2_FULL_SPEED_TURNING       = 0x00000004,
+    MOVEMENTFLAG2_FULL_SPEED_PITCHING      = 0x00000008,
+    MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING    = 0x00000010,
+    MOVEMENTFLAG2_UNK7                     = 0x00000020,
+    MOVEMENTFLAG2_UNK8                     = 0x00000040,
+    MOVEMENTFLAG2_UNK9                     = 0x00000080,
+    MOVEMENTFLAG2_UNK10                    = 0x00000100,
+    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000200,
+    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000400,
+    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00000800,
 
     // player only?
     MOVEMENTFLAG2_INTERPOLATED =
@@ -721,57 +742,15 @@ enum MovementFlags2
 };
 enum SplineFlags
 {
-    SPLINEFLAG_NONE           = 0x00000000,
-    SPLINEFLAG_FORWARD        = 0x00000001,
-    SPLINEFLAG_BACKWARD       = 0x00000002,
-    SPLINEFLAG_STRAFE_LEFT    = 0x00000004,
-    SPLINEFLAG_STRAFE_RIGHT   = 0x00000008,
-    SPLINEFLAG_LEFT           = 0x00000010,
-    SPLINEFLAG_RIGHT          = 0x00000020,
-    SPLINEFLAG_PITCH_UP       = 0x00000040,
-    SPLINEFLAG_PITCH_DOWN     = 0x00000080,
-    SPLINEFLAG_DONE           = 0x00000100,
-    SPLINEFLAG_FALLING        = 0x00000200,
-    SPLINEFLAG_NO_SPLINE      = 0x00000400,
-    SPLINEFLAG_TRAJECTORY     = 0x00000800,
-    SPLINEFLAG_WALKING        = 0x00001000,
-    SPLINEFLAG_FLYING         = 0x00002000,
-    SPLINEFLAG_KNOCKBACK      = 0x00004000,
-    SPLINEFLAG_FINAL_POINT    = 0x00008000,
-    SPLINEFLAG_FINAL_TARGET   = 0x00010000,
-    SPLINEFLAG_FINAL_FACING   = 0x00020000,
-    SPLINEFLAG_CATMULL_ROM    = 0x00040000,
-    SPLINEFLAG_UNKNOWN20      = 0x00080000,
-    SPLINEFLAG_UNKNOWN21      = 0x00100000,
-    SPLINEFLAG_UNKNOWN22      = 0x00200000,
-    SPLINEFLAG_UNKNOWN23      = 0x00400000,
-    SPLINEFLAG_TRANSPORT      = 0x00800000,
-    SPLINEFLAG_UNKNOWN25      = 0x01000000,
-    SPLINEFLAG_UNKNOWN26      = 0x02000000,
-    SPLINEFLAG_UNKNOWN27      = 0x04000000,
-    SPLINEFLAG_UNKNOWN28      = 0x08000000,
-    SPLINEFLAG_UNKNOWN29      = 0x10000000,
-    SPLINEFLAG_ANIMATION      = 0x20000000,
-    SPLINEFLAG_UNKNOWN31      = 0x40000000,
-    SPLINEFLAG_UNKNOWN32      = 0x80000000,
-
-    SPLINEFLAG_GLIDE = SPLINEFLAG_WALKING | SPLINEFLAG_FLYING,
-};
-
-enum SplineMode
-{
-    SPLINEMODE_LINEAR       = 0,
-    SPLINEMODE_CATMULL_ROM  = 1,
-    SPLINEMODE_BEZIER3      = 2
+    SPLINEFLAG_WALKMODE     = 0x00001000,
+    SPLINEFLAG_FLYING       = 0x00002000,
+    SPLINEFLAG_TRANSPORT    = 0x00800000,
+    SPLINEFLAG_EXIT_VEHICLE = 0x01000000
 };
 
 enum SplineType
 {
-    SPLINETYPE_NORMAL        = 0,
-    SPLINETYPE_STOP          = 1,
-    SPLINETYPE_FACING_SPOT   = 2,
-    SPLINETYPE_FACING_TARGET = 3,
-    SPLINETYPE_FACING_ANGLE  = 4
+    SPLINETYPE_FACING_ANGLE  = 4,
 };
 
 enum UnitTypeMask
@@ -788,6 +767,9 @@ enum UnitTypeMask
     UNIT_MASK_CONTROLABLE_GUARDIAN  = 0x00000100,
     UNIT_MASK_ACCESSORY             = 0x00000200,
 };
+namespace Movement{
+    class MoveSpline;
+}
 
 enum DiminishingLevels
 {
@@ -1184,7 +1166,6 @@ class Unit : public WorldObject
         //target dependent range checks
         uint32 GetSpellMaxRangeForTarget(Unit* target,const SpellRangeEntry * rangeEntry);
         uint32 GetSpellMinRangeForTarget(Unit* target,const SpellRangeEntry * rangeEntry);
-        uint32 GetSpellRadiusForTarget(Unit* target,const SpellRadiusEntry * radiusEntry);
 
         virtual void Update(uint32 time);
 
@@ -1235,6 +1216,8 @@ class Unit : public WorldObject
         Unit* SelectNearbyTarget(float dist = NOMINAL_MELEE_RANGE) const;
         void SendMeleeAttackStop(Unit* victim);
         void SendMeleeAttackStart(Unit* pVictim);
+
+        void SendPlaySpellVisualKit(uint32 id, uint32 unkParam);
 
         bool IsVisionObscured(Unit* pVictim);
 
@@ -1289,10 +1272,11 @@ class Unit : public WorldObject
         int32 ModifyHealth(int32 val);
         int32 GetHealthGain(int32 dVal);
 
+        uint32 GetPowerIndexByClass(uint32 powerId, uint32 classId) const;
         Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
         void setPowerType(Powers power);
-        uint32 GetPower(Powers power) const { return (uint32)GetInt32Value(UNIT_FIELD_POWER1+power); }
-        uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1+power); }
+        uint32 GetPower(Powers power) const;
+        uint32 GetMaxPower(Powers power) const;
         void SetPower(Powers power, int32 val);
         void SetMaxPower(Powers power, uint32 val);
         // returns the change in power
@@ -1371,6 +1355,12 @@ class Unit : public WorldObject
         void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount();
 
+        void PlayOneShotAnimKit(uint32 id);
+        void SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin);
+        void SendMoveRoot(uint32 value);
+        void SendMoveUnroot(uint32 value);
+        void SendDurabilityLoss(Player* receiver, uint32 percent);
+
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb);
         uint32 DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellEntry const *spellProto = NULL, bool durabilityLoss = true);
@@ -1396,7 +1386,7 @@ class Unit : public WorldObject
 
         void ApplyResilience(const Unit * pVictim, int32 * damage) const;
 
-        float MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, int32 skillDiff, uint32 spellId) const;
+        float MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, uint32 spellId) const;
         SpellMissInfo MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell);
         SpellMissInfo MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell);
         SpellMissInfo SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool canReflect = false);
@@ -1434,7 +1424,6 @@ class Unit : public WorldObject
         }
         uint32 GetUnitMeleeSkill(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         uint32 GetDefenseSkillValue(Unit const* target = NULL) const;
-        uint32 GetWeaponSkillValue(WeaponAttackType attType, Unit const* target = NULL) const;
         float GetWeaponProcChance() const;
         float GetPPMProcChance(uint32 WeaponSpeed, float PPM,  const SpellEntry * spellProto) const;
 
@@ -1455,13 +1444,17 @@ class Unit : public WorldObject
         bool isTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
         bool isAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
         bool isArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+        bool isReforger()     const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REFORGER); }
+        bool isTransmogrifier() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRANSMOGRIFIER); }
+        bool isVoidKeeper() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VAULTKEEPER); }
         bool isServiceProvider() const
         {
             return HasFlag(UNIT_NPC_FLAGS,
                 UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_FLIGHTMASTER |
                 UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_BATTLEMASTER | UNIT_NPC_FLAG_BANKER |
                 UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_GUARD | UNIT_NPC_FLAG_SPIRITHEALER |
-                UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER);
+                UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER |
+                UNIT_NPC_FLAG_REFORGER | UNIT_NPC_FLAG_TRANSMOGRIFIER | UNIT_NPC_FLAG_VAULTKEEPER);
         }
         bool isSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
@@ -1504,6 +1497,7 @@ class Unit : public WorldObject
         void CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, Item *castItem= NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0);
         void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item *castItem = NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0,  Unit* originalVictim = 0);
         void CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem= NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, int32 const* sp0, int32 const* sp1, int32 const* sp2, bool triggered, Item *castItem= NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0);
         void CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* Victim = NULL, bool triggered = true, Item *castItem = NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0);
         void CastCustomSpell(uint32 spellId, CustomSpellValues const &value, Unit* Victim = NULL, bool triggered = true, Item *castItem = NULL, AuraEffect const * triggeredByAura = NULL, uint64 originalCaster = 0);
         void CastSpell(GameObject *go, uint32 spellId, bool triggered, Item *castItem = NULL, AuraEffect* triggeredByAura = NULL, uint64 originalCaster = 0);
@@ -1528,22 +1522,29 @@ class Unit : public WorldObject
         // returns true if unit's position really changed
         bool SetPosition(const Position &pos, bool teleport = false) { return SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
 
+        float GetPositionZMinusOffset() const
+        {
+            float offset = 0.0f;
+            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                offset = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+
+            return GetPositionZ() - offset;
+        }
+
         void KnockbackFrom(float x, float y, float speedXY, float speedZ);
         void JumpTo(float speedXY, float speedZ, bool forward = true);
         void JumpTo(WorldObject *obj, float speedZ);
 
-        void SetFacing(float ori, WorldObject* obj = NULL);
-        void SendMonsterStop(bool on_death = false);
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 Time, Player* player = NULL);
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 MoveFlags, uint32 time, float speedZ, Player *player = NULL);
-        //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
+        void MonsterMoveWithSpeed(float x, float y, float z, float speed);
         void SendMonsterMoveTransport(Unit *vehicleOwner);
-        void SendMonsterMoveWithSpeed(float x, float y, float z, uint32 transitTime = 0, Player* player = NULL);
-        void SendMonsterMoveWithSpeedToCurrentDestination(Player* player = NULL);
         void SendMovementFlagUpdate();
+        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_LEVITATING);}
+        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);}
+        virtual bool SetWalk(bool enable);
 
-        template<typename PathElem, typename PathNode>
-        void SendMonsterMoveByPath(Path<PathElem,PathNode> const& path, uint32 start, uint32 end);
+        void SetInFront(Unit const* target);
+        void SetFacingTo(float ori);
+        void SetFacingToObject(WorldObject* pObject);
 
         void SendChangeCurrentVictimOpcode(HostileReference* pHostileReference);
         void SendClearThreatListOpcode();
@@ -1559,6 +1560,7 @@ class Unit : public WorldObject
         virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
 
         uint64 GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
+        void SetOwnerGUID(uint64 owner);
         uint64 GetCreatorGUID() const { return GetUInt64Value(UNIT_FIELD_CREATEDBY); }
         void SetCreatorGUID(uint64 creator) { SetUInt64Value(UNIT_FIELD_CREATEDBY, creator); }
         uint64 GetMinionGUID() const { return GetUInt64Value(UNIT_FIELD_SUMMON); }
@@ -1717,6 +1719,7 @@ class Unit : public WorldObject
         uint32 GetAuraCount(uint32 spellId) const;
         bool HasAura(uint32 spellId, uint64 casterGUID = 0, uint64 itemCasterGUID = 0, uint8 reqEffMask = 0) const;
         bool HasAuraType(AuraType auraType) const;
+        bool HasAuraTypeWithCaster(AuraType auratype, uint64 caster) const;
         bool HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const;
         bool HasAuraTypeWithAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const;
         bool HasAuraTypeWithValue(AuraType auratype, int32 value) const;
@@ -1803,11 +1806,6 @@ class Unit : public WorldObject
         void SetShapeshiftForm(ShapeshiftForm form)
         {
             SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
-
-            // force update as too quick shapeshifting and back
-            // causes the value to stay the same serverside
-            // causes issues clientside (player gets stuck)
-            ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
         }
 
         inline bool IsInFeralForm() const
@@ -1858,13 +1856,7 @@ class Unit : public WorldObject
         void SetBaseWeaponDamage(WeaponAttackType attType ,WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
 
         bool isInFrontInMap(Unit const* target,float distance, float arc = M_PI) const;
-        void SetInFront(Unit const* target)
-        {
-            if (!hasUnitState(UNIT_STAT_CANNOT_TURN))
-                SetOrientation(GetAngle(target));
-        }
         bool isInBackInMap(Unit const* target, float distance, float arc = M_PI) const;
-        void SetFacingToObject(WorldObject* pObject);
 
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
@@ -2015,6 +2007,7 @@ class Unit : public WorldObject
         uint16 HasExtraUnitMovementFlag(uint16 f) const { return m_movementInfo.flags2 & f; }
         uint16 GetExtraUnitMovementFlags() const { return m_movementInfo.flags2; }
         void SetExtraUnitMovementFlags(uint16 f) { m_movementInfo.flags2 = f; }
+        bool IsSplineEnabled() const;
 
         void SetControlled(bool apply, UnitState state);
 
@@ -2085,6 +2078,8 @@ class Unit : public WorldObject
         int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         uint64 GetTransGUID()   const;
 
+        TransportBase* GetDirectTransport() const;
+
         bool m_ControlledByPlayer;
 
         bool CheckPlayerCondition(Player* pPlayer);
@@ -2095,8 +2090,8 @@ class Unit : public WorldObject
 
         void BuildMovementPacket(ByteBuffer *data) const;
 
-        bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MOVING); }
-        bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_TURNING); }
+        bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING); }
+        bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }
         bool canFly() const     { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING); }
         void SetFlying(bool apply);
@@ -2109,12 +2104,18 @@ class Unit : public WorldObject
         virtual bool isBeingLoaded() const { return false;}
         bool IsDuringRemoveFromWorld() const {return m_duringRemoveFromWorld;}
 
-        Pet* ToPet(){ if (isPet()) return reinterpret_cast<Pet*>(this); else return NULL; }
-        Totem* ToTotem(){ if (isTotem()) return reinterpret_cast<Totem*>(this); else return NULL; }
+        Pet* ToPet() { if (isPet()) return reinterpret_cast<Pet*>(this); else return NULL; }
+        Pet const* ToPet() const { if (isPet()) return reinterpret_cast<Pet const*>(this); else return NULL; }
+
+        Totem* ToTotem() { if (isTotem()) return reinterpret_cast<Totem*>(this); else return NULL; }
+        Totem const* ToTotem() const { if (isTotem()) return reinterpret_cast<Totem const*>(this); else return NULL; }
+
         TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
-        const TempSummon* ToTempSummon() const { if (isSummon()) return reinterpret_cast<const TempSummon*>(this); else return NULL; }
+        TempSummon const* ToTempSummon() const { if (isSummon()) return reinterpret_cast<TempSummon const*>(this); else return NULL; }
 
         uint32 GetDamageTakenHistory(uint32 seconds);
+
+        Movement::MoveSpline * movespline;
 
         uint64 GetDamageTakenByUnit(uint64 guid);
         uint64 GetDamageTakenByUnit(Unit* dealer);
@@ -2127,6 +2128,12 @@ class Unit : public WorldObject
             m_damageTakenMap.clear();
         }
         uint64 GetTotalDamageTaken();
+
+        void SetRooted(bool apply);
+        void SetFeared(bool apply);
+        void SetConfused(bool apply);
+        void SetStunned(bool apply);
+        void SetWaterWalk(bool apply);
 
     protected:
         explicit Unit ();
@@ -2195,6 +2202,7 @@ class Unit : public WorldObject
         Vehicle *m_vehicleKit;
 
         uint32 m_unitTypeMask;
+        void DisableSpline();
 
         // Type for storing damage outcome/income per-player. Map fields: guid (key) - damage (value)
         typedef std::map<uint64, uint64> DamageMap;
@@ -2215,20 +2223,19 @@ class Unit : public WorldObject
         bool HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura);
         bool HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura);
 
+        void UpdateSplineMovement(uint32 t_diff);
+        void UpdateSplinePosition();
+
         // player or player's pet
         float GetCombatRatingReduction(CombatRating cr) const;
         uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
-
-        void SetFeared(bool apply);
-        void SetConfused(bool apply);
-        void SetStunned(bool apply);
-        void SetRooted(bool apply);
 
         uint32 m_rootTimes;
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs
+        TimeTrackerSmall m_movesplineTimer;
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
 
@@ -2289,33 +2296,5 @@ namespace Trinity
         private:
             const bool m_ascending;
     };
-}
-
-template<typename Elem, typename Node>
-inline void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 start, uint32 end)
-{
-    uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
-    uint32 pathSize = end - start;
-    WorldPacket data(SMSG_MULTIPLE_PACKETS, (2+GetPackGUID().size()+1+4+4+4+4+1+4+4+4+pathSize*4*3));
-    data << uint16(SMSG_MONSTER_MOVE);
-    data.append(GetPackGUID());
-    data << uint8(0);
-    data << GetPositionX();
-    data << GetPositionY();
-    data << GetPositionZ();
-    data << uint32(getMSTime());
-    data << uint8(0);
-    data << uint32(((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) || isInFlight()) ? (0x60042000) : SPLINEFLAG_WALKING);
-    data << uint32(traveltime);
-    data << uint32(pathSize);
-
-    for (uint32 i = start; i < end; ++i)
-    {
-        data << float(path[i].x);
-        data << float(path[i].y);
-        data << float(path[i].z);
-    }
-
-    SendMessageToSet(&data, true);
 }
 #endif

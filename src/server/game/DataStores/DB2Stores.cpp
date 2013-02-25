@@ -23,17 +23,23 @@
  */
 
 #include "gamePCH.h"
-#include "DB2Stores.h"
-
 #include "Logging/Log.h"
 #include "SharedDefines.h"
 #include "SpellMgr.h"
 
+#include "DB2Store.h"
+
 #include "DB2fmt.h"
+
+DB2Storage <ItemEntry>                    sItemStore(Itemfmt);
+DB2Storage <ItemCurrencyCostEntry>        sItemCurrencyCostStore(ItemCurrencyCostEntryfmt);
+DB2Storage <ItemExtendedCostEntry>        sItemExtendedCostStore(ItemExtendedCostEntryfmt);
+DB2Storage <ItemSparseEntry>              sItemSparseStore (ItemSparsefmt);
+
+#include "DB2Stores.h"
 
 #include <map>
 
-DB2Storage <ItemEntry> sItemStore(Itemfmt);
 typedef std::list<std::string> StoreProblemList1;
 
 uint32 DB2FileCount = 0;
@@ -92,6 +98,9 @@ void LoadDB2Stores(const std::string& dataPath)
     uint32 availableDb2Locales = 0xFFFFFFFF;
 
     LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path,"ItemCurrencyCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path,"ItemExtendedCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
 
     // error checks
     if (bad_db2_files.size() >= DB2FileCount)
@@ -110,7 +119,8 @@ void LoadDB2Stores(const std::string& dataPath)
     }
 
     // Check loaded DBC files proper version
-    if (!sItemStore.LookupEntry(68815))                     // last client known item added in 4.0.6a
+    if (!sItemStore.LookupEntry(79062)         ||            // last client known item added in 4.3.4
+        !sItemExtendedCostStore.LookupEntry(3872))           // last item extended cost added in 4.3.4
     {
         sLog->outString(" ");
         sLog->outError("Please extract correct db2 files from client 4.0.6a 13623.");

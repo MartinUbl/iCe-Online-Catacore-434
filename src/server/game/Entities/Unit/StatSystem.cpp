@@ -623,8 +623,6 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     }
 
     float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(cr);
-    // Modify crit from weapon skill and maximized defense skill of same level victim difference
-    value += (int32(GetWeaponSkillValue(attType)) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(index, value);
 }
@@ -650,8 +648,6 @@ void Player::UpdateParryPercentage()
     {
         // Base parry
         value  = 5.0f;
-        // Modify value from defense skill
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         // Parry from rating
@@ -665,8 +661,6 @@ void Player::UpdateDodgePercentage()
 {
     // Dodge from agility
     float value = GetDodgeFromAgility();
-    // Modify value from defense skill
-    value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
@@ -795,6 +789,66 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, 
         baseCombatRegen + power_regen * modManaRegenInterrupt / 100.0f);
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER,  baseCombatRegen + power_regen);
+}
+
+void Player::UpdateHaste()
+{
+    float meleeRegen = 1.0f +  GetRatingBonusValue(CR_HASTE_MELEE) / 100.0f,
+          rangedRegen = 1.0f + GetRatingBonusValue(CR_HASTE_RANGED) / 100.0f;
+
+
+    meleeRegen *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_HASTE);
+    meleeRegen *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+
+    rangedRegen *= GetTotalAuraMultiplier(SPELL_AURA_MOD_RANGED_HASTE);
+    rangedRegen *= GetTotalAuraMultiplier(SPELL_AURA_HASTE_RANGED);
+    rangedRegen *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+
+    float runeRegen = meleeRegen;
+
+    SetFloatValue(PLAYER_FIELD_MOD_HASTE, 1.0f / meleeRegen);
+    SetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE, 1.0f / rangedRegen);
+
+    // update power regeneration
+    AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+    {
+        float coeff = ((*i)->GetAmount() + 100) / 100.0f;
+        switch (Powers((*i)->GetMiscValue()))
+        {
+            case POWER_ENERGY:
+                meleeRegen *= coeff;
+                break;
+            case POWER_RUNE:
+                runeRegen *= coeff;
+                break;
+            case POWER_FOCUS:
+                rangedRegen *= coeff;
+                break;
+            default:
+                break;
+        }
+    }
+
+    switch (getPowerType())
+    {
+        case POWER_ENERGY:
+            SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, 1.0f / meleeRegen);
+            break;
+        case POWER_FOCUS:
+            SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, 1.0f / rangedRegen);
+            break;
+        default:        // other base power types don't benefit from haste
+            break;
+    }
+
+    uint8 cl = getClass();
+
+    if (cl == CLASS_DRUID)                   // regenerate energy for druid by correct rate outside cat form
+        SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, 1.0f / meleeRegen);
+    else if (cl == CLASS_DEATH_KNIGHT)       // rune regeneration is affected by haste
+        for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+            SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f * runeRegen);       // number of complete rune refreshes per second
 }
 
 void Player::_ApplyAllStatBonuses()
@@ -1490,22 +1544,8 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
     //  Pet's base damage changes depending on happiness
     if (isHunterPet() && attType == BASE_ATTACK)
     {
-        switch(ToPet()->GetHappinessState())
-        {
-            case HAPPY:
-                // 125% of normal damage
-                mindamage = mindamage * 1.25f;
-                maxdamage = maxdamage * 1.25f;
-                break;
-            case CONTENT:
-                // 100% of normal damage, nothing to modify
-                break;
-            case UNHAPPY:
-                // 75% of normal damage
-                mindamage = mindamage * 0.75f;
-                maxdamage = maxdamage * 0.75f;
-                break;
-        }
+        mindamage = mindamage * 1.25f;
+        maxdamage = maxdamage * 1.25f;
     }
 
     // Implementation of Beast Mastery hunter mastery proficiency

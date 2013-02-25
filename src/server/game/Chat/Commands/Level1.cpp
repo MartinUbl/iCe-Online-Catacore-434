@@ -897,8 +897,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     Map2ZoneCoordinates(zone_x,zone_y,zone_id);
 
     Map const *map = obj->GetMap();
-    float ground_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
-    float floor_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+    float ground_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
+    float floor_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
 
     GridPair p = Trinity::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -913,7 +913,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     FILE *GPSOut = fopen("gps.txt","a");
     if (GPSOut)
     {
-        fprintf(GPSOut, "%ff, %ff, %ff, %ff", obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+        fprintf(GPSOut, "%ff, %ff, %ff, %ff\n", obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
         fclose(GPSOut);
     }
 #endif
@@ -2330,23 +2330,24 @@ bool ChatHandler::HandleModifyCurrencyCommand (const char* args)
         if (HasLowerSecurity(target, 0))
             return false;
 
-		char* currencyid_s = strtok((char*)args, " ");
-		char* amount_s = strtok(NULL, "");
-		if (!currencyid_s || !amount_s)
-			return false;
+        char* currencyid_s = strtok((char*)args, " ");
+        char* amount_s = strtok(NULL, "");
+        if (!currencyid_s || !amount_s)
+            return false;
 
-		int32 currencyid = (int32)atoi(currencyid_s);
-		int32 amount = (int32)atoi(amount_s);
-		if (!sCurrencyTypesStore.LookupEntry(uint32(currencyid)))
-		{
-			PSendSysMessage("Currency %u does not exist.", currencyid);
-			SetSentErrorMessage(true);
-			return false;
-        }  
+        int32 currencyid = (int32)atoi(currencyid_s);
+        int32 amount = (int32)atoi(amount_s);
+        CurrencyTypesEntry const* ce = sCurrencyTypesStore.LookupEntry(uint32(currencyid));
+        if (!ce)
+        {
+            PSendSysMessage("Currency %u does not exist.", currencyid);
+            SetSentErrorMessage(true);
+            return false;
+        }
 
-        target->ModifyCurrency(uint32(currencyid), amount);
+        target->ModifyCurrency(uint32(currencyid), amount, CURRENCY_SOURCE_ALL, true, true);
 
-        PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, GetNameLink(target).c_str(), target->GetCurrency(uint32(currencyid)));
+        PSendSysMessage("%s of player %s is now %u", ce->name, GetNameLink(target).c_str(), target->GetCurrency(uint32(currencyid), true));
         return true;
 }
 

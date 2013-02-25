@@ -105,7 +105,7 @@ public:
             {
                 if (Unit *pTarget = Unit::GetUnit(*summoned,targetGUID))
                 {
-                    pTarget->SendMonsterMove(pTarget->GetPositionX(), pTarget->GetPositionY(), me->GetPositionZ()+15.0f,0);
+                    pTarget->MonsterMoveWithSpeed(pTarget->GetPositionX(), pTarget->GetPositionY(), me->GetPositionZ()+15.0f,0);
                     pTarget->GetMap()->CreatureRelocation(me, pTarget->GetPositionX(), pTarget->GetPositionY(), me->GetPositionZ()+15.0f, 0.0f);
                     summoned->CastSpell(pTarget, SPELL_RIBBON_OF_SOULS, false);
                 }
@@ -183,7 +183,7 @@ public:
                 if (EventMove_Timer <= diff)
                 {
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                    me->SendMonsterMoveWithSpeed(me->GetPositionX(),me->GetPositionY(),HIGHBORNE_LOC_Y_NEW,5000);
+                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+15.0f, 0);
                     me->GetMap()->CreatureRelocation(me,me->GetPositionX(),me->GetPositionY(),HIGHBORNE_LOC_Y_NEW,me->GetOrientation());
                     EventMove = false;
                 } else EventMove_Timer -= diff;

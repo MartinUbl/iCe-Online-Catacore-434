@@ -57,12 +57,13 @@ enum SpellCastTargetFlags
     TARGET_FLAG_STRING          = 0x00002000,               // string, 0 spells
     TARGET_FLAG_OPEN_LOCK       = 0x00004000,               // 199 spells, opening object/lock
     TARGET_FLAG_CORPSE          = 0x00008000,               // pguid, resurrection spells
-    TARGET_FLAG_UNK17           = 0x00010000,               // pguid, not used in any spells as of 3.2.2a (can be set dynamically)
+    TARGET_FLAG_UNIT_MINIPET    = 0x00010000,               // pguid, used to validate target (if non combat pet)
     TARGET_FLAG_GLYPH           = 0x00020000,               // used in glyph spells
-    TARGET_FLAG_UNK19           = 0x00040000,               //
-    TARGET_FLAG_UNUSED20        = 0x00080000                // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
+    TARGET_FLAG_DEST_TARGET     = 0x00040000,               // sometimes appears with DEST_TARGET spells (may appear or not for a given spell)
+    TARGET_FLAG_EXTRA_TARGETS   = 0x00080000,               // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
+    TARGET_FLAG_UNIT_PASSENGER  = 0x00100000,               // guessed, used to validate target (if vehicle passenger)
 };
-#define MAX_TARGET_FLAGS 21
+#define MAX_TARGET_FLAGS 22
 
 enum SpellCastFlags
 {
@@ -84,16 +85,16 @@ enum SpellCastFlags
     CAST_FLAG_UNKNOWN_15         = 0x00004000,
     CAST_FLAG_UNKNOWN_16         = 0x00008000,
     CAST_FLAG_UNKNOWN_17         = 0x00010000,
-    CAST_FLAG_UNKNOWN_18         = 0x00020000,
+    CAST_FLAG_ADJUST_MISSILE     = 0x00020000, // wotlk, originally unknown_18
     CAST_FLAG_UNKNOWN_19         = 0x00040000,
-    CAST_FLAG_UNKNOWN_20         = 0x00080000,
+    CAST_FLAG_VISUAL_CHAIN       = 0x00080000, // wotlk, _20
     CAST_FLAG_UNKNOWN_21         = 0x00100000,
     CAST_FLAG_RUNE_LIST          = 0x00200000,
     CAST_FLAG_UNKNOWN_23         = 0x00400000,
     CAST_FLAG_UNKNOWN_24         = 0x00800000,
     CAST_FLAG_UNKNOWN_25         = 0x01000000,
     CAST_FLAG_UNKNOWN_26         = 0x02000000,
-    CAST_FLAG_UNKNOWN_27         = 0x04000000,
+    CAST_FLAG_IMMUNITY           = 0x04000000,
     CAST_FLAG_UNKNOWN_28         = 0x08000000,
     CAST_FLAG_UNKNOWN_29         = 0x10000000,
     CAST_FLAG_UNKNOWN_30         = 0x20000000,
@@ -258,11 +259,15 @@ struct SpellValue
     explicit SpellValue(SpellEntry const *proto)
     {
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
             EffectBasePoints[i] = proto->EffectBasePoints[i];
+            EffectScriptedPoints[i] = 0;
+        }
         MaxAffectedTargets = proto->MaxAffectedTargets;
         RadiusMod = 1.0f;
     }
-    int32     EffectBasePoints[3];
+    int32     EffectBasePoints[MAX_SPELL_EFFECTS];
+    int32     EffectScriptedPoints[MAX_SPELL_EFFECTS];
     uint32    MaxAffectedTargets;
     float     RadiusMod;
 };
@@ -344,7 +349,7 @@ class Spell
         void EffectQuestClear(SpellEffIndex effIndex);
         void EffectTeleUnitsFaceCaster(SpellEffIndex effIndex);
         void EffectLearnSkill(SpellEffIndex effIndex);
-        void EffectAddHonor(SpellEffIndex effIndex);
+        void EffectPlayMovie(SpellEffIndex effIndex);
         void EffectTradeSkill(SpellEffIndex effIndex);
         void EffectEnchantItemPerm(SpellEffIndex effIndex);
         void EffectEnchantItemTmp(SpellEffIndex effIndex);
@@ -428,6 +433,7 @@ class Spell
         void EffectActivateSpec(SpellEffIndex effIndex);
         void EffectPlayerNotification(SpellEffIndex effIndex);
         void EffectRemoveAura(SpellEffIndex effIndex);
+        void EffectDamageFromMaxHealthPCT(SpellEffIndex effIndex);
         void EffectCastButtons(SpellEffIndex effIndex);
         void EffectRechargeManaGem(SpellEffIndex effIndex);
         void EffectActivateGuildBankSlot(SpellEffIndex effIndex);
@@ -512,7 +518,6 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
-        void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
         void HandleThreatSpells(uint32 spellId);
@@ -691,6 +696,7 @@ class Spell
         void DoAllEffectOnTarget(GOTargetInfo *target);
         void DoAllEffectOnTarget(ItemTargetInfo *target);
         bool UpdateChanneledTargetList();
+        float GetEffectRadius(uint32 effIndex);
         void SearchAreaTarget(std::list<Unit*> &unitList, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry = 0);
         void SearchGOAreaTarget(std::list<GameObject*> &gobjectList, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry = 0);
         void SearchChainTarget(std::list<Unit*> &unitList, float radius, uint32 unMaxTargets, SpellTargets TargetType);

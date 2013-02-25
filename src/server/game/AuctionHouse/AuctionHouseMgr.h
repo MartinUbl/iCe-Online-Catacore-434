@@ -37,11 +37,15 @@ class WorldPacket;
 
 enum AuctionError
 {
-    AUCTION_OK = 0,
-    AUCTION_INTERNAL_ERROR = 2,
-    AUCTION_NOT_ENOUGHT_MONEY = 3,
-    AUCTION_ITEM_NOT_FOUND = 4,
-    CANNOT_BID_YOUR_AUCTION_ERROR = 10
+    ERR_AUCTION_OK                  = 0,
+    ERR_AUCTION_INVENTORY           = 1,
+    ERR_AUCTION_DATABASE_ERROR      = 2,
+    ERR_AUCTION_NOT_ENOUGHT_MONEY   = 3,
+    ERR_AUCTION_ITEM_NOT_FOUND      = 4,
+    ERR_AUCTION_HIGHER_BID          = 5,
+    ERR_AUCTION_BID_INCREMENT       = 7,
+    ERR_AUCTION_BID_OWN             = 10,
+    ERR_RESTRICTED_ACCOUNT          = 13,
 };
 
 enum AuctionAction
@@ -56,7 +60,7 @@ struct AuctionEntry
     uint32 Id;
     uint32 auctioneer;                                      // creature low guid
     uint32 item_guidlow;
-    uint32 item_template;
+    uint32 itemEntry;
     uint64 owner;
     uint64 startbid;                                        //maybe useless
     uint64 bid;
@@ -105,7 +109,7 @@ class AuctionHouseObject
 
     void AddAuction(AuctionEntry *auction);
 
-    bool RemoveAuction(AuctionEntry *auction, uint32 item_template);
+    bool RemoveAuction(AuctionEntry *auction, uint32 itemEntry);
 
     void Update();
 
@@ -152,7 +156,7 @@ class AuctionHouseMgr
         void SendAuctionExpiredMail(AuctionEntry * auction, SQLTransaction& trans);
         void SendAuctionRemovedMail(AuctionEntry * auction, SQLTransaction& trans);
         void SendAuctionOutbiddedMail(AuctionEntry * auction, uint64 newPrice, Player* newBidder, SQLTransaction& trans);
-        void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans);
+        void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item);
 
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem, uint32 count);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);

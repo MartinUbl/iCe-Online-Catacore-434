@@ -282,12 +282,14 @@ World::AddSession_ (WorldSession* s)
     }
 
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1 + 1);
-    packet << uint8(AUTH_OK);
+    packet << uint8(0x40);                                 // 4.3.4 flags (isQueued, hasAccountInfo; TODO: implement)
     packet << uint32(0);                                   // BillingTimeRemaining
-    packet << uint8(0);                                    // BillingPlanFlags
-    packet << uint32(0);                                   // BillingTimeRested
     packet << uint8(s->Expansion());                       // payed expansion
+    packet << uint32(0);                                   // 4.3.4, unknown
     packet << uint8(s->Expansion());                       // server expansion
+    packet << uint32(0);                                   // BillingTimeRested
+    packet << uint8(0);                                    // BillingPlanFlags
+    packet << uint8(AUTH_OK);
     s->SendPacket(&packet);
 
     s->SendAddonsInfo();
@@ -1217,7 +1219,6 @@ void World::LoadConfigSettings(bool reload)
     std::string ignoreSpellIds = sConfig->GetStringDefault("vmap.ignoreSpellIds", "");
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
-    VMAP::VMapFactory::createOrGetVMapManager()->preventMapsFromBeingUsed(ignoreMapIds.c_str());
     VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
     sLog->outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i",enableLOS, enableHeight);
     sLog->outString("WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
@@ -1281,6 +1282,8 @@ void World::LoadConfigSettings(bool reload)
     sScriptMgr->OnConfigLoad(reload);
 }
 
+extern void LoadGameObjectModelList();
+
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
@@ -1307,7 +1310,8 @@ void World::SetInitialWorldSettings()
             !MapManager::ExistMapAndVMap(530,10349.6f,-6357.29f) ||
             !MapManager::ExistMapAndVMap(530,-3961.64f,-13931.2f))))
     {
-        exit(1);
+        sLog->outError("Maps are not present in data directory, or have wrong format!");
+        //exit(1);
     }
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
@@ -1339,6 +1343,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Initialize db2 stores...");
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
+
+    sLog->outString("Loading GameObject models...");
+    LoadGameObjectModelList();
 
     sLog->outString("Loading Script Names...");
     sObjectMgr->LoadScriptNames();
@@ -1769,7 +1776,6 @@ void World::SetInitialWorldSettings()
 
     ///- Initilize static helper structures
     AIRegistry::Initialize();
-    Player::InitVisibleBits();
 
     ///- Initialize MapManager
     sLog->outString("Starting Map System");
@@ -1988,7 +1994,12 @@ void World::Update(uint32 diff)
     }
 
     if (m_gameTime > m_NextWeeklyQuestReset)
+    {
         ResetWeeklyQuests();
+
+        // For now, we reset currency week cap at the same time
+        ResetCurrencyWeekCount();
+    }
 
     if (m_gameTime > m_NextRandomBGReset)
         ResetRandomBG();
@@ -2807,9 +2818,6 @@ void World::ResetWeeklyQuests()
 {
     CharacterDatabase.Execute("DELETE FROM character_queststatus_weekly");
 
-    CharacterDatabase.Execute("UPDATE character_currency SET thisweek = 0");
-    sBattlegroundMgr->DistributeArenaCurrency();
-
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
@@ -2819,6 +2827,16 @@ void World::ResetWeeklyQuests()
 
     // change available weeklies
     sPoolMgr->ChangeWeeklyQuests();
+}
+
+void World::ResetCurrencyWeekCount()
+{
+    CharacterDatabase.Execute("UPDATE character_currency_weekcap SET thisweek = 0");
+    sBattlegroundMgr->DistributeArenaCurrency();
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetCurrencyWeekCount();
 }
 
 void World::ResetRandomBG()

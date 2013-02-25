@@ -29,6 +29,13 @@ class Unit;
 class Aura;
 struct SpellEntry;
 
+enum DynamicObjectType
+{
+    DYNAMIC_OBJECT_PORTAL           = 0x0,      // unused
+    DYNAMIC_OBJECT_AREA_SPELL       = 0x1,
+    DYNAMIC_OBJECT_FARSIGHT_FOCUS   = 0x2
+};
+
 class DynamicObject : public WorldObject, public GridObject<DynamicObject>
 {
     public:
@@ -38,7 +45,7 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
         void AddToWorld();
         void RemoveFromWorld();
 
-        bool Create(uint32 guidlow, Unit *caster, uint32 spellId, const Position &pos, float radius, bool active);
+        bool Create(uint32 guidlow, Unit *caster, SpellEntry const *spell, const Position &pos, float radius, bool active, DynamicObjectType type);
         void Update(uint32 p_time);
         void Remove();
         void SetDuration(int32 newDuration);

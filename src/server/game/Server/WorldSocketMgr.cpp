@@ -229,6 +229,7 @@ WorldSocketMgr::WorldSocketMgr() :
 
 WorldSocketMgr::~WorldSocketMgr()
 {
+    DestroyOpcodeTable();
     delete [] m_NetThreads;
     delete m_Acceptor;
 }

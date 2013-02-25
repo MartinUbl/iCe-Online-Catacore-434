@@ -398,7 +398,7 @@ enum SpellAttr3
     SPELL_ATTR3_UNK15                            = 0x00008000, // 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
     SPELL_ATTR3_UNK16                            = 0x00010000, // 16 no triggers effects that trigger on casting a spell?? (15290 - 2.2ptr change)
     SPELL_ATTR3_NO_INITIAL_AGGRO                 = 0x00020000, // 17 Soothe Animal, 39758, Mind Soothe
-    SPELL_ATTR3_UNK18                            = 0x00040000, // 18 added to Explosive Trap Effect 3.3.0, removed from Mutilate 3.3.0
+    SPELL_ATTR3_IGNORE_HIT_RESULT                = 0x00040000, // 18 Spell should always hit its target
     SPELL_ATTR3_DISABLE_PROC                     = 0x00080000, // 19 during aura proc no spells can trigger (20178, 20375)
     SPELL_ATTR3_DEATH_PERSISTENT                 = 0x00100000, // 20 Death persistent spells
     SPELL_ATTR3_UNK21                            = 0x00200000, // 21
@@ -461,8 +461,8 @@ enum SpellAttr5
     SPELL_ATTR5_UNK6                             = 0x00000040, //  6
     SPELL_ATTR5_UNK7                             = 0x00000080, //  7
     SPELL_ATTR5_UNK8                             = 0x00000100, //  8
-    SPELL_ATTR5_START_PERIODIC_AT_APPLY          = 0x00000200, //  9  begin periodic tick at aura apply
-    SPELL_ATTR5_UNK10                            = 0x00000400, // 10
+    SPELL_ATTR5_START_PERIODIC_AT_APPLY          = 0x00000200, //  9 begin periodic tick at aura apply
+    SPELL_ATTR5_HIDE_DURATION                    = 0x00000400, // 10 do not send duration to client
     SPELL_ATTR5_UNK11                            = 0x00000800, // 11
     SPELL_ATTR5_UNK12                            = 0x00001000, // 12
     SPELL_ATTR5_HASTE_AFFECT_DURATION            = 0x00002000, // 13 haste effects decrease duration of this
@@ -544,6 +544,114 @@ enum SpellAttr7
     SPELL_ATTR7_UNK17                            = 0x00020000, // 17 Only 27965 (Suicide) spell.
     SPELL_ATTR7_HAS_CHARGE_EFFECT                = 0x00040000, // 18 Only spells that have Charge among effects.
     SPELL_ATTR7_ZONE_TELEPORT                    = 0x00080000  // 19 Teleports to specific zones.
+};
+
+enum SpellAttr8
+{
+    SPELL_ATTR8_CANT_MISS                        = 0x00000001, //  0
+    SPELL_ATTR8_UNK1                             = 0x00000002, //  1
+    SPELL_ATTR8_UNK2                             = 0x00000004, //  2
+    SPELL_ATTR8_UNK3                             = 0x00000008, //  3
+    SPELL_ATTR8_UNK4                             = 0x00000010, //  4
+    SPELL_ATTR8_UNK5                             = 0x00000020, //  5
+    SPELL_ATTR8_UNK6                             = 0x00000040, //  6
+    SPELL_ATTR8_UNK7                             = 0x00000080, //  7
+    SPELL_ATTR8_AFFECT_PARTY_AND_RAID            = 0x00000100, //  8 Nearly all spells have "all party and raid" in description
+    SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER        = 0x00000200, //  9 Periodic auras with this flag keep old periodic timer when refreshing at close to one tick remaining (kind of anti DoT clipping)
+    SPELL_ATTR8_NAME_CHANGED_DURING_TRANSFORM    = 0x00000400, // 10 according to wowhead comments, name changes, title remains
+    SPELL_ATTR8_UNK11                            = 0x00000800, // 11
+    SPELL_ATTR8_AURA_SEND_AMOUNT                 = 0x00001000, // 12 Aura must have flag AFLAG_BASEPOINT to send amount
+    SPELL_ATTR8_UNK13                            = 0x00002000, // 13
+    SPELL_ATTR8_UNK14                            = 0x00004000, // 14
+    SPELL_ATTR8_WATER_MOUNT                      = 0x00008000, // 15 only one River Boat used in Thousand Needles
+    SPELL_ATTR8_UNK16                            = 0x00010000, // 16
+    SPELL_ATTR8_UNK17                            = 0x00020000, // 17
+    SPELL_ATTR8_REMEMBER_SPELLS                  = 0x00040000, // 18 at some point in time, these auras remember spells and allow to cast them later
+    SPELL_ATTR8_USE_COMBO_POINTS_ON_ANY_TARGET   = 0x00080000, // 19 allows to consume combo points from dead targets
+    SPELL_ATTR8_ARMOR_SPECIALIZATION             = 0x00100000, // 20
+    SPELL_ATTR8_UNK21                            = 0x00200000, // 21
+    SPELL_ATTR8_UNK22                            = 0x00400000, // 22
+    SPELL_ATTR8_UNK23                            = 0x00800000, // 23
+    SPELL_ATTR8_HEALING_SPELL                    = 0x01000000, // 24
+    SPELL_ATTR8_UNK25                            = 0x02000000, // 25
+    SPELL_ATTR8_RAID_MARKER                      = 0x04000000, // 26 probably spell no need learn to cast
+    SPELL_ATTR8_UNK27                            = 0x08000000, // 27
+    SPELL_ATTR8_NOT_IN_BG_OR_ARENA               = 0x10000000, // 28 not allow to cast or deactivate currently active effect, not sure about Fast Track
+    SPELL_ATTR8_MASTERY_SPECIALIZATION           = 0x20000000, // 29
+    SPELL_ATTR8_UNK30                            = 0x40000000, // 30
+    SPELL_ATTR8_UNK31                            = 0x80000000  // 31
+};
+
+enum SpellAttr9
+{
+    SPELL_ATTR9_UNK0                             = 0x00000001, //  0
+    SPELL_ATTR9_UNK1                             = 0x00000002, //  1
+    SPELL_ATTR9_RESTRICTED_FLIGHT_AREA           = 0x00000004, //  2 Dalaran and Wintergrasp flight area auras have it
+    SPELL_ATTR9_UNK3                             = 0x00000008, //  3
+    SPELL_ATTR9_SPECIAL_DELAY_CALCULATION        = 0x00000010, //  4
+    SPELL_ATTR9_SUMMON_PLAYER_TOTEM              = 0x00000020, //  5
+    SPELL_ATTR9_UNK6                             = 0x00000040, //  6
+    SPELL_ATTR9_UNK7                             = 0x00000080, //  7
+    SPELL_ATTR9_AIMED_SHOT                       = 0x00000100, //  8
+    SPELL_ATTR9_NOT_USABLE_IN_ARENA              = 0x00000200, //  9 Cannot be used in arenas
+    SPELL_ATTR9_UNK10                            = 0x00000400, // 10
+    SPELL_ATTR9_UNK11                            = 0x00000800, // 11
+    SPELL_ATTR9_UNK12                            = 0x00001000, // 12
+    SPELL_ATTR9_SLAM                             = 0x00002000, // 13
+    SPELL_ATTR9_USABLE_IN_RATED_BATTLEGROUNDS    = 0x00004000, // 14 Can be used in Rated Battlegrounds
+    SPELL_ATTR9_UNK15                            = 0x00008000, // 15
+    SPELL_ATTR9_UNK16                            = 0x00010000, // 16
+    SPELL_ATTR9_UNK17                            = 0x00020000, // 17
+    SPELL_ATTR9_UNK18                            = 0x00040000, // 18
+    SPELL_ATTR9_UNK19                            = 0x00080000, // 19
+    SPELL_ATTR9_UNK20                            = 0x00100000, // 20
+    SPELL_ATTR9_UNK21                            = 0x00200000, // 21
+    SPELL_ATTR9_UNK22                            = 0x00400000, // 22
+    SPELL_ATTR9_UNK23                            = 0x00800000, // 23
+    SPELL_ATTR9_UNK24                            = 0x01000000, // 24
+    SPELL_ATTR9_UNK25                            = 0x02000000, // 25
+    SPELL_ATTR9_UNK26                            = 0x04000000, // 26
+    SPELL_ATTR9_UNK27                            = 0x08000000, // 27
+    SPELL_ATTR9_UNK28                            = 0x10000000, // 28
+    SPELL_ATTR9_UNK29                            = 0x20000000, // 29
+    SPELL_ATTR9_UNK30                            = 0x40000000, // 30
+    SPELL_ATTR9_UNK31                            = 0x80000000  // 31
+};
+
+enum SpellAttr10
+{
+    SPELL_ATTR10_UNK0                             = 0x00000001, //  0
+    SPELL_ATTR10_UNK1                             = 0x00000002, //  1
+    SPELL_ATTR10_UNK2                             = 0x00000004, //  2
+    SPELL_ATTR10_UNK3                             = 0x00000008, //  3
+    SPELL_ATTR10_WATER_SPOUT                      = 0x00000010, //  4
+    SPELL_ATTR10_UNK5                             = 0x00000020, //  5
+    SPELL_ATTR10_UNK6                             = 0x00000040, //  6
+    SPELL_ATTR10_TELEPORT_PLAYER                  = 0x00000080, //  7 4 Teleport Player spells
+    SPELL_ATTR10_UNK8                             = 0x00000100, //  8
+    SPELL_ATTR10_UNK9                             = 0x00000200, //  9
+    SPELL_ATTR10_UNK10                            = 0x00000400, // 10
+    SPELL_ATTR10_HERB_GATHERING_MINING            = 0x00000800, // 11 Only Herb Gathering and Mining
+    SPELL_ATTR10_UNK12                            = 0x00001000, // 12
+    SPELL_ATTR10_UNK13                            = 0x00002000, // 13
+    SPELL_ATTR10_UNK14                            = 0x00004000, // 14
+    SPELL_ATTR10_UNK15                            = 0x00008000, // 15
+    SPELL_ATTR10_UNK16                            = 0x00010000, // 16
+    SPELL_ATTR10_UNK17                            = 0x00020000, // 17
+    SPELL_ATTR10_UNK18                            = 0x00040000, // 18
+    SPELL_ATTR10_UNK19                            = 0x00080000, // 19
+    SPELL_ATTR10_UNK20                            = 0x00100000, // 20
+    SPELL_ATTR10_UNK21                            = 0x00200000, // 21
+    SPELL_ATTR10_UNK22                            = 0x00400000, // 22
+    SPELL_ATTR10_UNK23                            = 0x00800000, // 23
+    SPELL_ATTR10_UNK24                            = 0x01000000, // 24
+    SPELL_ATTR10_UNK25                            = 0x02000000, // 25
+    SPELL_ATTR10_UNK26                            = 0x04000000, // 26
+    SPELL_ATTR10_UNK27                            = 0x08000000, // 27
+    SPELL_ATTR10_UNK28                            = 0x10000000, // 28
+    SPELL_ATTR10_UNK29                            = 0x20000000, // 29
+    SPELL_ATTR10_UNK30                            = 0x40000000, // 30
+    SPELL_ATTR10_UNK31                            = 0x80000000  // 31
 };
 
 #define MIN_TALENT_SPEC         0
@@ -699,7 +807,7 @@ enum SpellEffects
     SPELL_EFFECT_JUMP_DEST                 = 42,
     SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER= 43,
     SPELL_EFFECT_SKILL_STEP                = 44,
-    SPELL_EFFECT_ADD_HONOR                 = 45,
+    SPELL_EFFECT_PLAY_MOVIE                = 45,
     SPELL_EFFECT_SPAWN                     = 46,
     SPELL_EFFECT_TRADE_SKILL               = 47,
     SPELL_EFFECT_STEALTH                   = 48,
@@ -819,7 +927,7 @@ enum SpellEffects
     SPELL_EFFECT_TALENT_SPEC_SELECT        = 162,
     SPELL_EFFECT_163                       = 163,
     SPELL_EFFECT_REMOVE_AURA               = 164,
-    SPELL_EFFECT_165                       = 165,
+    SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT = 165,
     SPELL_EFFECT_GAIN_CURRENCY             = 166,
     SPELL_EFFECT_167                       = 167,
     SPELL_EFFECT_CONTROL_PET               = 168,
@@ -829,7 +937,15 @@ enum SpellEffects
     SPELL_EFFECT_MASS_RESURRECTION         = 172,
     SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT  = 173,
     SPELL_EFFECT_APPLY_AURA_FORCED         = 174,
-    TOTAL_SPELL_EFFECTS                    = 175
+    SPELL_EFFECT_175                       = 175,
+    SPELL_EFFECT_SANCTUARY_2               = 176,
+    SPELL_EFFECT_177                       = 177,
+    SPELL_EFFECT_178                       = 178,
+    SPELL_EFFECT_179                       = 179,
+    SPELL_EFFECT_180                       = 180,
+    SPELL_EFFECT_181                       = 181,
+    SPELL_EFFECT_182                       = 182,
+    TOTAL_SPELL_EFFECTS                    = 183
 };
 
 enum SpellCastResult
@@ -1278,6 +1394,13 @@ enum Targets
     TARGET_DEST_UNK_118                = 118, // same as above
     TARGET_UNIT_AREA_PARTY_SRC_2       = 119, // target all dead party & raid members - used only in Mass Resurrection
     TARGET_DEST_UNK_120                = 120, // some generic spells
+    TARGET_UNK_121                     = 121,
+    TARGET_UNK_122                     = 122,
+    TARGET_UNK_123                     = 123,
+    TARGET_UNK_124                     = 124,
+    TARGET_UNK_125                     = 125,
+    TARGET_UNK_126                     = 126,
+    TARGET_UNK_127                     = 127,
     TOTAL_SPELL_TARGETS
 };
 
@@ -1374,7 +1497,7 @@ enum GameObjectFlags
     GO_FLAG_LOCKED          = 0x00000002,                   //require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
     GO_FLAG_INTERACT_COND   = 0x00000004,                   //cannot interact (condition to interact)
     GO_FLAG_TRANSPORT       = 0x00000008,                   //any kind of transport? Object can transport (elevator, boat, car)
-    GO_FLAG_UNK1            = 0x00000010,                   //
+    GO_FLAG_NOT_SELECTABLE  = 0x00000010,                   //not selectable
     GO_FLAG_NODESPAWN       = 0x00000020,                   //never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   //typically, summoned objects. Triggered by spell or other events
     GO_FLAG_DAMAGED         = 0x00000200,
@@ -2178,30 +2301,49 @@ enum CreatureFamily
 
 enum CreatureTypeFlags
 {
-    CREATURE_TYPEFLAGS_TAMEABLE         = 0x000001,         // Tameable by any hunter
-    CREATURE_TYPEFLAGS_GHOST            = 0x000002,         // Creature are also visible for not alive player. Allow gossip interaction if npcflag allow?
-    CREATURE_TYPEFLAGS_UNK3             = 0x000004,
-    CREATURE_TYPEFLAGS_UNK4             = 0x000008,
-    CREATURE_TYPEFLAGS_UNK5             = 0x000010,
-    CREATURE_TYPEFLAGS_UNK6             = 0x000020,
-    CREATURE_TYPEFLAGS_UNK7             = 0x000040,
-    CREATURE_TYPEFLAGS_DEAD_INTERACT    = 0x000080,         // Player can interact with the creature if its dead (not player dead)
-    CREATURE_TYPEFLAGS_HERBLOOT         = 0x000100,         // Can be looted by herbalist
-    CREATURE_TYPEFLAGS_MININGLOOT       = 0x000200,         // Can be looted by miner
-    CREATURE_TYPEFLAGS_UNK11            = 0x000400,
-    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x000800,         // Creature can remain mounted when entering combat
-    CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x001000,         // ? Can aid any player in combat if in range?
-    CREATURE_TYPEFLAGS_UNK14            = 0x002000,
-    CREATURE_TYPEFLAGS_UNK15            = 0x004000,         // ? Possibly not in use
-    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x008000,         // Can be looted by engineer
-    CREATURE_TYPEFLAGS_EXOTIC           = 0x010000,         // Can be tamed by hunter as exotic pet
-    CREATURE_TYPEFLAGS_UNK18            = 0x020000,         // ? Related to vehicles/pvp?
-    CREATURE_TYPEFLAGS_UNK19            = 0x040000,         // ? Related to vehicle/siege weapons?
-    CREATURE_TYPEFLAGS_UNK20            = 0x080000,
-    CREATURE_TYPEFLAGS_UNK21            = 0x100000,
-    CREATURE_TYPEFLAGS_UNK22            = 0x200000,
-    CREATURE_TYPEFLAGS_UNK23            = 0x400000,
-    CREATURE_TYPEFLAGS_UNK24            = 0x800000          // ? First seen in 3.2.2. Related to banner/backpack of creature/companion?
+    CREATURE_TYPEFLAGS_TAMEABLE         = 0x00000001,         // Tameable by any hunter
+    CREATURE_TYPEFLAGS_GHOST            = 0x00000002,         // Creature are also visible for not alive player. Allow gossip interaction if npcflag allow?
+    CREATURE_TYPEFLAGS_UNK3             = 0x00000004,
+    CREATURE_TYPEFLAGS_UNK4             = 0x00000008,
+    CREATURE_TYPEFLAGS_UNK5             = 0x00000010,
+    CREATURE_TYPEFLAGS_UNK6             = 0x00000020,
+    CREATURE_TYPEFLAGS_UNK7             = 0x00000040,
+    CREATURE_TYPEFLAGS_DEAD_INTERACT    = 0x00000080,         // Player can interact with the creature if its dead (not player dead)
+    CREATURE_TYPEFLAGS_HERBLOOT         = 0x00000100,         // Can be looted by herbalist
+    CREATURE_TYPEFLAGS_MININGLOOT       = 0x00000200,         // Can be looted by miner
+    CREATURE_TYPEFLAGS_UNK11            = 0x00000400,
+    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x00000800,         // Creature can remain mounted when entering combat
+    CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x00001000,         // ? Can aid any player in combat if in range?
+    CREATURE_TYPEFLAGS_UNK14            = 0x00002000,
+    CREATURE_TYPEFLAGS_UNK15            = 0x00004000,         // ? Possibly not in use
+    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x00008000,         // Can be looted by engineer
+    CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,         // Can be tamed by hunter as exotic pet
+    CREATURE_TYPEFLAGS_UNK18            = 0x00020000,         // ? Related to vehicles/pvp?
+    CREATURE_TYPEFLAGS_UNK19            = 0x00040000,         // ? Related to vehicle/siege weapons?
+    CREATURE_TYPEFLAGS_UNK20            = 0x00080000,
+    CREATURE_TYPEFLAGS_UNK21            = 0x00100000,
+    CREATURE_TYPEFLAGS_UNK22            = 0x00200000,
+    CREATURE_TYPEFLAGS_UNK23            = 0x00400000,
+    CREATURE_TYPEFLAGS_UNK24            = 0x00800000,          // ? First seen in 3.2.2. Related to banner/backpack of creature/companion?
+    CREATURE_TYPEFLAGS_UNK25            = 0x02000000,
+    CREATURE_TYPEFLAGS_PARTY_MEMBER     = 0x04000000,         //! Creature can be targeted by spells that require target to be in caster's party/raid
+    CREATURE_TYPEFLAGS_UNK27            = 0x08000000,
+    CREATURE_TYPEFLAGS_UNK28            = 0x10000000,
+    CREATURE_TYPEFLAGS_UNK29            = 0x20000000,
+    CREATURE_TYPEFLAGS_UNK30            = 0x40000000,
+    CREATURE_TYPEFLAGS_UNK31            = 0x80000000
+};
+
+enum CreatureTypeFlags2
+{
+    CREATURE_TYPEFLAGS_2_UNK1           = 0x00000001,
+    CREATURE_TYPEFLAGS_2_UNK2           = 0x00000002,
+    CREATURE_TYPEFLAGS_2_UNK3           = 0x00000004,
+    CREATURE_TYPEFLAGS_2_UNK4           = 0x00000008,
+    CREATURE_TYPEFLAGS_2_UNK5           = 0x00000010,
+    CREATURE_TYPEFLAGS_2_UNK6           = 0x00000020,
+    CREATURE_TYPEFLAGS_2_UNK7           = 0x00000040,
+    CREATURE_TYPEFLAGS_2_UNK8           = 0x00000080,
 };
 
 enum CreatureEliteType
@@ -2249,7 +2391,10 @@ enum HolidayIds
     HOLIDAY_CALL_TO_ARMS_TP          = 436,                 // Call to Arms: Twin Peaks
     HOLIDAY_10_V_10                  = 441,                 // Rated BG: 10v10
     HOLIDAY_15_V_15                  = 442,                 // Rated BG: 15v15
-    HOLIDAY_25_V_25                  = 443                  // Rated BG: 25v25
+    HOLIDAY_25_V_25                  = 443,                 // Rated BG: 25v25
+    HOLIDAY_ANNIVERSARY_7_YEARS      = 467,
+    HOLIDAY_DARKMOON_FAIRE_TEROKKAR  = 479,
+    HOLIDAY_ANNIVERSARY_8_YEARS      = 484,
 };
 
 // values based at QuestInfo.dbc
@@ -2312,7 +2457,11 @@ enum QuestSort
     QUEST_SORT_NOBLEGARDEN         = 374,
     QUEST_SORT_PILGRIMS_BOUNTY     = 375,
     QUEST_SORT_LOVE_IS_IN_THE_AIR  = 376,
-    QUEST_SORT_ARCHAEOLOGY         = 377
+    QUEST_SORT_ARCHAEOLOGY         = 377,
+    QUEST_SORT_CHILDRENS_WEEK      = 378,
+    QUEST_SORT_FIRELANDS_INVASION  = 379,
+    QUEST_SORT_ZANDALARI           = 380,
+    QUEST_SORT_ELEMENTAL_BONDS     = 381
 };
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
@@ -2509,10 +2658,11 @@ enum SkillType
     SKILL_MONKEY                   = 815,
     SKILL_SHALE_SPIDER             = 817,
     SKILL_BEETLE                   = 818,
-    SKILL_GUILD_PERKS_ALL          = 821
+    SKILL_GUILD_PERKS_ALL          = 821,
+    SKILL_PET_HYDRA                = 824,
 };
 
-#define MAX_SKILL_TYPE               822
+#define MAX_SKILL_TYPE               825
 
 inline SkillType SkillByLockType(LockType locktype)
 {
@@ -2793,6 +2943,8 @@ enum SummonType
     SUMMON_TYPE_VEHICLE     = 9,
     SUMMON_TYPE_VEHICLE2    = 10,
     SUMMON_TYPE_OBJECT      = 11,
+    SUMMON_TYPE_UNK12       = 12,
+    SUMMON_TYPE_UNK13       = 13
 };
 
 enum EventId
@@ -2961,15 +3113,18 @@ enum BattlegroundTypeId
     BATTLEGROUND_BG            = 120,                       // The Battle for Gilneas
     BATTLEGROUND_ICD           = 441,                       // Icecrown Citadel
     BATTLEGROUND_RS            = 443,                       // The Ruby Sanctum
-    BATTLEGROUND_FL            = 522,                       // Firelands
-    BATTLEGROUND_FL2           = 523,                       // Firelands Terrain 2
-    BATTLEGROUND_TFW           = 530,                       // Throne of the Four Winds
-    BATTLEGROUND_BD            = 531,                       // Blackwing Descent
-    BATTLEGROUND_BT            = 532,                       // The Bastion of Twilight
-    BATTLEGROUND_BH            = 533                        // Baradin Hold
+    BATTLEGROUND_RA_EOS        = 656,                       // Rated Eye of the Storm
 };
 
-#define MAX_BATTLEGROUND_TYPE_ID 543
+#define MAX_BATTLEGROUND_TYPE_ID 657
+
+enum BattlegroundTwinkType
+{
+    BATTLEGROUND_NOTWINK       = 0,
+    BATTLEGROUND_TWINK         = 1,
+
+    BATTLEGROUND_TWINK_TYPES   = 2
+};
 
 enum MailResponseType
 {
@@ -3047,30 +3202,38 @@ enum PetSlot
 
 enum TradeStatus
 {
-    TRADE_STATUS_BUSY           = 0,
-    TRADE_STATUS_BEGIN_TRADE    = 1,
-    TRADE_STATUS_OPEN_WINDOW    = 2,
-    TRADE_STATUS_TRADE_CANCELED = 3,
-    TRADE_STATUS_TRADE_ACCEPT   = 4,
-    TRADE_STATUS_BUSY_2         = 5,
-    TRADE_STATUS_NO_TARGET      = 6,
-    TRADE_STATUS_BACK_TO_TRADE  = 7,
-    TRADE_STATUS_TRADE_COMPLETE = 8,
-    // 9?
-    TRADE_STATUS_TARGET_TO_FAR  = 10,
-    TRADE_STATUS_WRONG_FACTION  = 11,
-    TRADE_STATUS_CLOSE_WINDOW   = 12,
-    // 13?
-    TRADE_STATUS_IGNORE_YOU     = 14,
-    TRADE_STATUS_YOU_STUNNED    = 15,
-    TRADE_STATUS_TARGET_STUNNED = 16,
-    TRADE_STATUS_YOU_DEAD       = 17,
-    TRADE_STATUS_TARGET_DEAD    = 18,
-    TRADE_STATUS_YOU_LOGOUT     = 19,
-    TRADE_STATUS_TARGET_LOGOUT  = 20,
-    TRADE_STATUS_TRIAL_ACCOUNT  = 21,                       // Trial accounts can not perform that action
-    TRADE_STATUS_ONLY_CONJURED  = 22,                       // You can only trade conjured items... (cross realm BG related).
-    TRADE_STATUS_NOT_ELIGIBLE   = 23                        // Related to trading soulbound loot items
+    TRADE_STATUS_OPEN_WINDOW = 0,
+    // 1 - Related to EVENT_PLAYER_MONEY
+    TRADE_STATUS_NOT_ELIGIBLE = 2,           // Related to trading soulbound loot items
+    TRADE_STATUS_YOU_LOGOUT = 3,
+    TRADE_STATUS_IGNORE_YOU = 4,
+    TRADE_STATUS_TARGET_DEAD = 5,
+    TRADE_STATUS_TRADE_ACCEPT = 6,
+    TRADE_STATUS_TARGET_LOGOUT = 7,
+    // 8 - nonexistent
+    TRADE_STATUS_TRADE_COMPLETE = 9,
+    TRADE_STATUS_TRIAL_ACCOUNT = 10,         // Trial accounts can not perform that action
+    // 11 - nonexistent
+    TRADE_STATUS_BEGIN_TRADE = 12,
+    TRADE_STATUS_YOU_DEAD = 13,
+    // 14 - nonexistent
+    // 15 - nonexistent
+    TRADE_STATUS_TARGET_TO_FAR = 16,
+    TRADE_STATUS_NO_TARGET = 17,
+    TRADE_STATUS_BUSY_2 = 18,
+    TRADE_STATUS_CURRENCY_NOT_TRADABLE = 19, // new 4.x
+    TRADE_STATUS_WRONG_FACTION = 20,
+    TRADE_STATUS_BUSY = 21,
+    // 22 - equivalent to 335 unk status 9
+    TRADE_STATUS_TRADE_CANCELED = 23,
+    TRADE_STATUS_CURRENCY = 24,              // new 4.x
+    TRADE_STATUS_BACK_TO_TRADE = 25,
+    TRADE_STATUS_ONLY_CONJURED = 26,         // You can only trade conjured items... (cross realm BG related).
+    TRADE_STATUS_YOU_STUNNED = 27,
+    // 28 - nonexistent
+    TRADE_STATUS_TARGET_STUNNED = 29,
+    // 30 - nonexistent
+    TRADE_STATUS_CLOSE_WINDOW = 31,
 };
 
 enum XPColorChar

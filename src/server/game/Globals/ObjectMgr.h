@@ -169,7 +169,7 @@ struct ScriptInfo
         struct                      // SCRIPT_COMMAND_MOVE_TO (3)
         {
             uint32 Unused1;         // datalong
-            uint32 TravelTime;      // datalong2
+            uint32 Speed;      // datalong2
             int32  Unused2;         // dataint
 
             float DestX;
@@ -438,6 +438,7 @@ struct TrinityStringLocale
 typedef std::map<uint32,uint32> CreatureLinkedRespawnMap;
 typedef UNORDERED_MAP<uint32,CreatureData> CreatureDataMap;
 typedef UNORDERED_MAP<uint32,GameObjectData> GameObjectDataMap;
+typedef UNORDERED_MAP<uint32,bool> GameObjectSpawnedMap;
 typedef UNORDERED_MAP<uint32,CreatureLocale> CreatureLocaleMap;
 typedef UNORDERED_MAP<uint32,GameObjectLocale> GameObjectLocaleMap;
 typedef UNORDERED_MAP<uint32,ItemLocale> ItemLocaleMap;
@@ -704,6 +705,7 @@ class ObjectMgr
 
         Guild* GetGuildByLeader(uint64 const&guid) const;
         Guild* GetGuildById(uint32 guildId) const;
+        Guild* GetGuildByGuid(uint64 guid) const;
         Guild* GetGuildByName(const std::string& guildname) const;
         std::string GetGuildNameById(uint32 guildId) const;
         void AddGuild(Guild* pGuild);
@@ -1177,11 +1179,7 @@ class ObjectMgr
 
         bool IsGoOfSpecificEntrySpawned(uint32 entry) const
         {
-            for (GameObjectDataMap::const_iterator it = mGameObjectDataMap.begin(); it != mGameObjectDataMap.end(); ++it)
-                if (it->second.id == entry)
-                    return true;
-
-            return false;
+            return mGameObjectSpawnedMap.find(entry) != mGameObjectSpawnedMap.end();
         }
 
         GameObjectData const* GetGOData(uint32 guid) const
@@ -1192,6 +1190,7 @@ class ObjectMgr
         }
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
+        void SetGameObjectSpawned(uint32 entry) { mGameObjectSpawnedMap[entry] = true; }
 
         TrinityStringLocale const* GetTrinityStringLocale(int32 entry) const
         {
@@ -1282,7 +1281,7 @@ class ObjectMgr
         }
         void AddVendorItem(uint32 entry,uint32 item, int32 maxcount, uint32 incrtime, uint32 ExtendedCost, bool savetodb = true); // for event
         bool RemoveVendorItem(uint32 entry, uint32 item, bool savetodb = true); // for event
-        bool IsVendorItemValid(uint32 vendor_entry, uint32 item, int32 maxcount, uint32 ptime, uint32 ExtendedCost, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL, uint32 ORnpcflag = 0) const;
+        bool IsVendorItemValid(uint32 vendor_entry, uint32 item, int32 maxcount, uint32 ptime, uint32 ExtendedCost, uint8 type, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL, uint32 ORnpcflag = 0) const;
 
         void LoadScriptNames();
         ScriptNameMap &GetScriptNames() { return m_scriptNames; }
@@ -1478,6 +1477,7 @@ class ObjectMgr
         CreatureLinkedRespawnMap mCreatureLinkedRespawnMap;
         CreatureLocaleMap mCreatureLocaleMap;
         GameObjectDataMap mGameObjectDataMap;
+        GameObjectSpawnedMap mGameObjectSpawnedMap;
         GameObjectLocaleMap mGameObjectLocaleMap;
         ItemLocaleMap mItemLocaleMap;
         ItemSetNameLocaleMap mItemSetNameLocaleMap;

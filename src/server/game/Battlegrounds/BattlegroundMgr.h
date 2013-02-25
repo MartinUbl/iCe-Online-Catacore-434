@@ -30,6 +30,7 @@
 #include <ace/Singleton.h>
 
 typedef std::map<uint32, Battleground*> BattlegroundSet;
+typedef std::set<uint32> BattlegroundClientIdsContainer;
 
 typedef UNORDERED_MAP<uint32, BattlegroundTypeId> BattleMastersMap;
 
@@ -51,10 +52,10 @@ class BattlegroundMgr
         void BuildPlayerJoinedBattlegroundPacket(WorldPacket *data, Player *plr);
         void BuildPlayerLeftBattlegroundPacket(WorldPacket *data, const uint64& guid);
         void BuildBattlegroundListPacket(WorldPacket *data, const uint64& guid, Player *plr, BattlegroundTypeId bgtypeid);
-        void BuildGroupJoinedBattlegroundPacket(WorldPacket *data, GroupJoinBattlegroundResult result);
+        void BuildStatusFailedPacket(WorldPacket *data, Battleground *bg, Player *pPlayer, uint8 QueueSlot, GroupJoinBattlegroundResult result);
         void BuildUpdateWorldStatePacket(WorldPacket *data, uint32 field, uint32 value);
-        void BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg);
-        void BuildBattlegroundStatusPacket(WorldPacket *data, Battleground *bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint8 arenatype, uint8 uiFrame = 1);
+        void BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg, Player *receiver);
+        void BuildBattlegroundStatusPacket(WorldPacket *data, Battleground *bg, Player *player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint8 arenatype, uint8 uiFrame = 1);
         void BuildPlaySoundPacket(WorldPacket *data, uint32 soundid);
         void SendAreaSpiritHealerQueryOpcode(Player *pl, Battleground *bg, const uint64& guid);
 
@@ -78,11 +79,11 @@ class BattlegroundMgr
 
         /* Battleground queues */
         //these queues are instantiated when creating BattlegroundMrg
-        BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES]; // public, because we need to access them in BG handler code
+        BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES][BATTLEGROUND_TWINK_TYPES]; // public, because we need to access them in BG handler code
 
-        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID];
+        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID][BATTLEGROUND_TWINK_TYPES];
 
-        void ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id);
+        void ScheduleQueueUpdate(uint32 arenaMatchmakerRating, uint8 arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id, uint8 twink);
         uint32 GetMaxRatingDifference() const;
         uint32 GetRatingDiscardTimer()  const;
         uint32 GetPrematureFinishTime() const;
@@ -121,7 +122,7 @@ class BattlegroundMgr
         BattlegroundSelectionWeightMap m_ArenaSelectionWeights;
         BattlegroundSelectionWeightMap m_BGSelectionWeights;
         std::vector<uint64> m_QueueUpdateScheduler;
-        std::set<uint32> m_ClientBattlegroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; //the instanceids just visible for the client
+        BattlegroundClientIdsContainer m_ClientBattlegroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; //the instanceids just visible for the client
         uint32 m_NextRatingDiscardUpdate;
         time_t m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;

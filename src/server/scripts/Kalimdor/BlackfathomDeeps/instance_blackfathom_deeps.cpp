@@ -74,7 +74,7 @@ public:
         uint64 m_uiAltarOfTheDeepsGUID;
         uint64 m_uiMainDoorGUID;
 
-        uint8 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint8 m_uiCountFires;
         uint8 uiDeathTimes;
 
@@ -126,12 +126,12 @@ public:
                 case GO_SHRINE_OF_GELIHAST:
                     m_uiShrineOfGelihastGUID = pGo->GetGUID();
                     if (m_auiEncounter[0] != DONE)
-                        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_ALTAR_OF_THE_DEEPS:
                     m_uiAltarOfTheDeepsGUID = pGo->GetGUID();
                     if (m_auiEncounter[3] != DONE)
-                        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_AKU_MAI_DOOR:
                     if (m_auiEncounter[2] == DONE)
@@ -149,14 +149,14 @@ public:
                     m_auiEncounter[0] = uiData;
                     if (uiData == DONE)
                         if (GameObject *pGo = instance->GetGameObject(m_uiShrineOfGelihastGUID))
-                            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case TYPE_AKU_MAI:
                     m_auiEncounter[3] = uiData;
                     if (uiData == DONE)
                         if (GameObject *pGo = instance->GetGameObject(m_uiAltarOfTheDeepsGUID))
                         {
-                            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             pGo->SummonCreature(NPC_MORRIDUNE,SpawnsLocation[4], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
                         }
                     break;
@@ -254,6 +254,8 @@ public:
 
             return 0;
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

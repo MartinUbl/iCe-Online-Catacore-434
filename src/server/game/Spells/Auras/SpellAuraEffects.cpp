@@ -41,6 +41,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ScriptMgr.h"
+#include "WeatherMgr.h"
 
 class Aura;
 //
@@ -389,7 +390,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //328
     &AuraEffect::HandleNULL,                                      //329
     &AuraEffect::HandleNULL,                                      //330
-    &AuraEffect::HandleNULL,                                      //331
+    &AuraEffect::HandleAuraForceWeather,                          //331 SPELL_AURA_FORCE_WEATHER
     &AuraEffect::HandleModActionButton,                           //332
     &AuraEffect::HandleModActionButton,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      //334
@@ -412,21 +413,40 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //351
     &AuraEffect::HandleNULL,                                      //352
     &AuraEffect::HandleModCamouflage,                             //353 SPELL_AURA_CAMOUFLAGE
+    &AuraEffect::HandleNULL,                                      //354
+    &AuraEffect::HandleNULL,                                      //355
+    &AuraEffect::HandleNULL,                                      //356
+    &AuraEffect::HandleNULL,                                      //357
+    &AuraEffect::HandleAuraTransform,                             //358 SPELL_AURA_TRANSFORM_2
+    &AuraEffect::HandleNULL,                                      //359
+    &AuraEffect::HandleNULL,                                      //360
+    &AuraEffect::HandleNULL,                                      //361
+    &AuraEffect::HandleNULL,                                      //362
+    &AuraEffect::HandleNULL,                                      //363
+    &AuraEffect::HandleNULL,                                      //364
+    &AuraEffect::HandleNULL,                                      //365
+    &AuraEffect::HandleNoImmediateEffect,                         //366 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2
+    &AuraEffect::HandleNULL,                                      //367
+    &AuraEffect::HandleNULL,                                      //368
+    &AuraEffect::HandleNULL,                                      //369
+    &AuraEffect::HandleNULL,                                      //370
 };
 
-AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, Unit *caster) :
+AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, int32 *scriptedAmount, Unit *caster) :
 m_base(base), m_spellProto(base->GetSpellProto()), m_effIndex(effIndex),
 m_baseAmount(baseAmount ? *baseAmount : m_spellProto->EffectBasePoints[m_effIndex]),
+m_scriptedAmount(scriptedAmount? *scriptedAmount : 0 ),
 m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTimer(0), m_tickNumber(0)
 {
     CalculatePeriodic(caster, true);
 
     m_amount = CalculateAmount(caster);
+    m_scriptedAmount = 0;
 
     CalculateSpellMod();
-    
-    if (m_spellProto) 
-       return; 
+
+    if (m_spellProto)
+       return;
 }
 
 AuraEffect::~AuraEffect()
@@ -727,7 +747,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Rake
             else if (GetId() == 1822)
             {
-                amount += int32((caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.378f)/3);
+                amount += int32((caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.441f)/3);
             }
             // Rend
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
@@ -763,7 +783,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetId() == 33745)
             {
                 amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.00369f;
-                amount *= 5;
             }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
@@ -967,7 +986,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             // Aspect of the Hawk - increase by larger amount
             // Hack, probably not properly added from Blizzard
             if (GetId() == 13165)
-                amount *= 3.1348f;
+                amount *= 1.3500022339379858815119292288446f;
             break;
         }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
@@ -1008,6 +1027,33 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 if (caster)
                     amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f;
+            }
+            break;
+        case SPELL_AURA_MOD_ACTION_BUTTON:
+        case SPELL_AURA_MOD_ACTION_BUTTON_2:
+            switch (GetId())
+            {
+                case 94338: // Eclipse (Solar) - Change Moonfire to Sunfire
+                    amount = 93402;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case SPELL_AURA_BYPASS_ARMOR:
+            if (GetId() == 86346) // Colossus Smash
+            {
+                // has only 50% in PvP
+                if (GetBase()->GetUnitOwner() && GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
+                    amount = 50;
+            }
+            break;
+        case SPELL_AURA_MOD_DECREASE_SPEED:
+            if (GetId() == 16914) // Hurricane
+            {
+                // Glyph of Hurricane
+                if (caster->HasAura(54831))
+                    amount = -50;
             }
             break;
         default:
@@ -1721,11 +1767,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
                         break;
                     case 1120:   // Drain Soul
-                        // Pandemic - refresh duration of Unstable Affliction
+                        // Pandemic - refresh duration of Unstable Affliction if target have below 25%
                         if (caster->HasAura(85100) || (caster->HasAura(85099) && roll_chance_i(50)))
                         {
-                            if (Aura* pAura = target->GetAura(30108))
-                                pAura->RefreshDuration();
+                            if (Aura* pAura = target->GetAura(30108)) {
+                                if (target->HealthBelowPct(25))
+                                    pAura->RefreshDuration();
+                            }
                         }
                         break;
                     case 589:   // Shadow Word: Pain
@@ -1936,6 +1984,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         break;
                     case 88427: // Electrocute (Al'akir)
                         damage = (10000 + urand(0,4000)) * m_tickNumber;
+                        break;
+                    case 879: // Exorcism
+                        // Glyph of Exorcism
+                        if (caster->HasAura(54934))
+                            damage *= 1.2;
                         break;
                     default:
                         break;
@@ -2182,6 +2235,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
                 if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellIconID == 2864)
                     damage += int32(float(damage * GetTotalTicks()) * ((6 - float(2 * (GetTickNumber() - 1))) / 100));
+
+                // Recuperate
+                if (m_spellProto->Id == 73651)
+                {
+                    float percent = (float) damage;
+                    Aura *aura;
+                    if ((aura = target->GetAura(79007)) || (aura = target->GetAura(79008)))     // Improved Recuperate
+                        percent += aura->GetEffect(0)->GetAmount() / 1000.0f;
+
+                    damage = percent * target->GetMaxHealth() / 100.0f;
+                }
 
                 damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
@@ -2689,6 +2753,10 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                         else
                             target->RemoveAura(62388);
                     }
+                    break;
+                case 79268: // Soul Harvest
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->CastSpell(caster, 101977, true); // Soul Harvest (Energize +1 shard per 3s tick)
                     break;
             }
             break;
@@ -3342,7 +3410,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             break;
         case FORM_MOONKIN:
             spellId = 24905;
-            spellId2 = 69366;
+            spellId2 = 24907;
             break;
         case FORM_FLIGHT:
             //spellId = 33948;
@@ -3650,6 +3718,39 @@ void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode, 
     {
         target->RemoveAura(80326);
         target->RemoveAura(80325);
+    }
+}
+
+void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+
+    if (!target)
+        return;
+
+    if (apply)
+    {
+        WorldPacket data(SMSG_WEATHER, (4 + 4 + 1));
+
+        data << uint32(GetMiscValue()) << 1.0f << uint8(0);
+        target->GetSession()->SendPacket(&data);
+    }
+    else
+    {
+        // send weather for current zone
+        if (Weather* weather = sWeatherMgr->FindWeather(target->GetZoneId()))
+            weather->SendWeatherUpdateToPlayer(target);
+        else
+        {
+            if (!sWeatherMgr->AddWeather(target->GetZoneId()))
+            {
+                // send fine weather packet to remove old weather
+                Weather::SendFineWeatherUpdateToPlayer(target);
+            }
+        }
     }
 }
 
@@ -4772,21 +4873,8 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp, uint8 mode
             return;
     }
 
-    if (target->GetTypeId() == TYPEID_UNIT)
-        target->SetFlying(apply);
-
     if (Player *plr = target->m_movedPlayer)
-    {
-        // allow fly
-        WorldPacket data;
-        if (apply)
-            data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12, true);
-        else
-            data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12, true);
-        data.append(target->GetPackGUID());
-        data << uint32(0);                                      // unk
-        plr->SendDirectMessage(&data);
-    }
+        plr->SetSendFlyPacket(apply);
 }
 
 void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -4803,14 +4891,7 @@ void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, 
             return;
     }
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK, 8 + 4, true);
-    else
-        data.Initialize(SMSG_MOVE_LAND_WALK, 8 + 4, true);
-    data.append(target->GetPackGUID());
-    data << uint32(0);
-    target->SendMessageToSet(&data,true);
+   target->SetWaterWalk(apply);
 }
 
 void AuraEffect::HandleAuraFeatherFall(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -4855,13 +4936,52 @@ void AuraEffect::HandleAuraHover(AuraApplication const *aurApp, uint8 mode, bool
             return;
     }
 
+    ObjectGuid guid = target->GetGUID();
     WorldPacket data;
     if (apply)
-        data.Initialize(SMSG_MOVE_SET_HOVER, 8+4, true);
+    {
+        data.Initialize(SMSG_MOVE_SET_HOVER, 12);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[7]);
+
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[7]);
+        data << uint32(0);          // movement counter
+    }
     else
-        data.Initialize(SMSG_MOVE_UNSET_HOVER, 8+4, true);
-    data.append(target->GetPackGUID());
-    data << uint32(0);
+    {
+        data.Initialize(SMSG_MOVE_UNSET_HOVER, 12);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[0]);
+
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[5]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[1]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[0]);
+        data << uint32(0);          // movement counter
+    }
     target->SendMessageToSet(&data,true);
 }
 
@@ -5240,14 +5360,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const *aurApp,
         {
             if (Player *plr = target->m_movedPlayer)
             {
-                WorldPacket data;
-                if (apply)
-                    data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12, true);
-                else
-                    data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12, true);
-                data.append(plr->GetPackGUID());
-                data << uint32(0);                                      // unknown
-                plr->SendDirectMessage(&data);
+                plr->SetSendFlyPacket(apply);
             }
         }
 
@@ -5263,7 +5376,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const *aurApp,
         }
     }
 
-    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK)
+    if ((mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK) || (mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT))
         target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
@@ -6032,6 +6145,8 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, 
     // Update manaregen value
     if (GetMiscValue() == POWER_MANA)
         target->ToPlayer()->UpdateManaRegen();
+
+    target->ToPlayer()->UpdateHaste();
     // other powers are not immediate effects - implemented in Player::Regenerate, Creature::Regenerate
 }
 
@@ -7745,9 +7860,6 @@ void AuraEffect::HandleAuraEmpathy(AuraApplication const *aurApp, uint8 mode, bo
 
     Unit *target = aurApp->GetTarget();
 
-    if (target->GetTypeId() != TYPEID_UNIT)
-        return;
-
     if (!(apply))
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -7755,8 +7867,7 @@ void AuraEffect::HandleAuraEmpathy(AuraApplication const *aurApp, uint8 mode, bo
             return;
     }
 
-    CreatureInfo const * ci = sObjectMgr->GetCreatureTemplate(target->GetEntry());
-    if (ci && ci->type == CREATURE_TYPE_BEAST)
+    if (target->GetCreatureType() == CREATURE_TYPE_BEAST)
         target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 

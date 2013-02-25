@@ -24,6 +24,7 @@
 #define _OBJECT_H
 
 #include "Common.h"
+#include "UpdateMask.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"
 #include "GridReference.h"
@@ -320,6 +321,9 @@ class Object
         virtual void BuildUpdate(UpdateDataMapType&) {}
         void BuildFieldsUpdate(Player *, UpdateDataMapType &) const;
 
+        void SetFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags |= flag; }
+        void RemoveFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags &= ~flag; }
+
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
 
@@ -332,17 +336,21 @@ class Object
         const Unit* ToUnit() const {if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
         GameObject* ToGameObject(){ if (GetTypeId() == TYPEID_GAMEOBJECT) return reinterpret_cast<GameObject*>(this); else return NULL; }
         const GameObject* ToGameObject() const {if (GetTypeId() == TYPEID_GAMEOBJECT) return (const GameObject*)((GameObject*)this); else return NULL; }
+        Corpse* ToCorpse() { if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse*>(this); else return NULL; }
+        Corpse const* ToCorpse() const { if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse const*>(this); else return NULL; }
     protected:
 
         Object ();
 
         void _InitValues();
-        void _Create (uint32 guidlow, uint32 entry, HighGuid guidhigh);
+
+        void _Create(uint32 guidlow, uint32 entry, HighGuid guidhigh);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
-        virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
+        uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
 
-        virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
+        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
+        void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
         void _BuildMovementUpdate(ByteBuffer * data, uint16 flags) const;
         void _BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target) const;
 
@@ -358,9 +366,11 @@ class Object
             float  *m_floatValues;
         };
 
-        uint32 *m_uint32Values_mirror;
+        UpdateMask _changesMask;
 
         uint16 m_valuesCount;
+
+        uint16 _fieldNotifyFlags;
 
         bool m_objectUpdated;
 
@@ -373,6 +383,60 @@ class Object
         bool PrintIndexError(uint32 index, bool set) const;
         Object(const Object&);                              // prevent generation copy constructor
         Object& operator=(Object const&);                   // prevent generation assigment operator
+};
+
+struct ObjectGuid
+{
+public:
+    ObjectGuid() { _data.u64 = 0lu; }
+    ObjectGuid(uint64 guid) { _data.u64 = guid; }
+    ObjectGuid(ObjectGuid const& other) { _data.u64 = other._data.u64; }
+
+    uint8& operator[](uint32 index)
+    {
+        ASSERT(index < sizeof(uint64));
+
+#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+        return _data.byte[index];
+#else
+        return _data.byte[7 - index];
+#endif
+    }
+
+    uint8 const& operator[](uint32 index) const
+    {
+        ASSERT(index < sizeof(uint64));
+
+#if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
+        return _data.byte[index];
+#else
+        return _data.byte[7 - index];
+#endif
+    }
+
+    operator uint64()
+    {
+        return _data.u64;
+    }
+
+    ObjectGuid& operator=(uint64 guid)
+    {
+        _data.u64 = guid;
+        return *this;
+    }
+
+    ObjectGuid& operator=(ObjectGuid const& other)
+    {
+        _data.u64 = other._data.u64;
+        return *this;
+    }
+
+private:
+    union
+    {
+        uint64 u64;
+        uint8 byte[8];
+    } _data;
 };
 
 struct Position
@@ -399,14 +463,14 @@ struct Position
     void Relocate(float x, float y, float z)
         { m_positionX = x; m_positionY = y; m_positionZ = z; }
     void Relocate(float x, float y, float z, float orientation)
-        { m_positionX = x; m_positionY = y; m_positionZ = z; m_orientation = orientation; }
+        { m_positionX = x; m_positionY = y; m_positionZ = z; SetOrientation(orientation); }
     void Relocate(const Position &pos)
-        { m_positionX = pos.m_positionX; m_positionY = pos.m_positionY; m_positionZ = pos.m_positionZ; m_orientation = pos.m_orientation; }
+        { m_positionX = pos.m_positionX; m_positionY = pos.m_positionY; m_positionZ = pos.m_positionZ; SetOrientation(pos.m_orientation); }
     void Relocate(const Position *pos)
-        { m_positionX = pos->m_positionX; m_positionY = pos->m_positionY; m_positionZ = pos->m_positionZ; m_orientation = pos->m_orientation; }
+        { m_positionX = pos->m_positionX; m_positionY = pos->m_positionY; m_positionZ = pos->m_positionZ; SetOrientation(pos->m_orientation); }
     void RelocateOffset(const Position &offset);
     void SetOrientation(float orientation)
-        { m_orientation = orientation; }
+        { m_orientation = NormalizeOrientation(orientation); }
 
     float GetPositionX() const { return m_positionX; }
     float GetPositionY() const { return m_positionY; }
@@ -473,6 +537,21 @@ struct Position
     bool HasInArc(float arcangle, const Position *pos) const;
     bool HasInLine(const Unit *target, float distance, float width) const;
     std::string ToString() const;
+
+    // modulos a radian orientation to the range of 0..2PI
+    static float NormalizeOrientation(float o)
+    {
+        // fmod only supports positive numbers. Thus we have
+        // to emulate negative numbers
+        if (o < 0)
+        {
+            float mod = o *-1;
+            mod = fmod(mod, 2.0f * static_cast<float>(M_PI));
+            mod = -mod + 2.0f * static_cast<float>(M_PI);
+            return mod;
+        }
+        return fmod(o, 2.0f * static_cast<float>(M_PI));
+    }
 };
 ByteBuffer &operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const & streamer);
 ByteBuffer & operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const & streamer);
@@ -492,6 +571,7 @@ struct MovementInfo
     Position t_pos;
     uint32  t_time;
     uint32  t_time2;
+    uint32  t_time3;
     int8    t_seat;
     // swimming/flying
     float   pitch;
@@ -508,7 +588,7 @@ struct MovementInfo
         guid = 0;
         flags = 0;
         flags2 = 0;
-        time = t_time = t_time2 = fallTime = 0;
+        time = t_time = t_time2 = t_time3 = fallTime = 0;
         splineElevation = 0;
         pitch = j_zspeed = j_sinAngle = j_cosAngle = j_xyspeed = 0.0f;
         t_guid = 0;
@@ -516,13 +596,17 @@ struct MovementInfo
         t_seat = -1;
     }
 
-    uint32 GetMovementFlags() { return flags; }
+    uint32 GetMovementFlags() const { return flags; }
     void AddMovementFlag(uint32 flag) { flags |= flag; }
+    void SetMovementFlags(uint32 flag) { flags = flag; }
     bool HasMovementFlag(uint32 flag) const { return flags & flag; }
+    void RemoveMovementFlag(uint32 flag) { flags &= ~flag; }
 
-    uint16 GetExtraMovementFlags() { return flags2; }
+    uint16 GetExtraMovementFlags() const { return flags2; }
     void AddExtraMovementFlag(uint16 flag) { flags2 |= flag; }
     bool HasExtraMovementFlag(uint16 flag) const { return flags2 & flag; }
+
+    void SetFallTime(uint32 time) { fallTime = time; }
 
     void OutDebug();
 };
@@ -599,6 +683,7 @@ class WorldObject : public Object, public WorldLocation
             return (m_valuesCount > UNIT_FIELD_COMBATREACH) ? m_floatValues[UNIT_FIELD_COMBATREACH] : DEFAULT_WORLD_OBJECT_SIZE;
         }
         void UpdateGroundPositionZ(float x, float y, float &z) const;
+        void UpdateAllowedPositionZ(float x, float y, float &z) const;
 
         void GetRandomPoint(const Position &srcPos, float distance, float &rand_x, float &rand_y, float &rand_z) const;
         void GetRandomPoint(const Position &srcPos, float distance, Position &pos) const

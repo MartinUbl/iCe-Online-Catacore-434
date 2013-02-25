@@ -34,6 +34,7 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include "DynamicTree.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -382,6 +383,7 @@ bool Map::EnsureGridLoaded(const Cell &cell)
 
         // Add resurrectable corpses to world object list in grid
         sObjectAccessor->AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
+        Balance();
         return true;
     }
 
@@ -473,6 +475,8 @@ bool Map::loaded(const GridPair &p) const
 
 void Map::Update(const uint32 &t_diff)
 {
+    m_dyn_tree.update(t_diff);
+
     /// update players at tick
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
@@ -1584,6 +1588,35 @@ inline GridMap *Map::GetGrid(float x, float y)
     return GridMaps[gx][gy];
 }
 
+float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NULL*/, bool swim /*= false*/) const
+{
+    if (const_cast<Map*>(this)->GetGrid(x, y))
+    {
+        // we need ground level (including grid height version) for proper return water level in point
+        float ground_z = GetHeight(PHASEMASK_NORMAL, x, y, z, true, 50.0f);
+        if (ground)
+            *ground = ground_z;
+
+        LiquidData liquid_status;
+
+        ZLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
+        return res ? ( swim ? liquid_status.level - 2.0f : liquid_status.level) : ground_z;
+    }
+
+    return VMAP_INVALID_HEIGHT_VALUE;
+}
+
+bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), x1, y1, z1, x2, y2, z2)
+        && m_dyn_tree.isInLineOfSight(x1, y1, z1, x2, y2, z2, phasemask);
+}
+
+float Map::GetHeight(uint32 phasemask, float x, float y, float z, bool vmap/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
+{
+    return std::max<float>(GetHeight(x, y, z, vmap, maxSearchDist), m_dyn_tree.getHeight(x, y, z, maxSearchDist, phasemask));
+}
+
 float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchDist) const
 {
     // find raw .map surface under Z coordinates
@@ -1959,8 +1992,7 @@ void Map::SendInitSelf(Player * player)
 {
     sLog->outDetail("Creating player data for himself %u", player->GetGUIDLow());
 
-    UpdateData data;
-    data.m_map = uint16(player->GetMapId());
+    UpdateData data(player->GetMapId());
 
     // attach to player data current transport data
     if (Transport* transport = player->GetTransport())
@@ -1997,8 +2029,7 @@ void Map::SendInitTransports(Player * player)
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData transData;
-    transData.m_map = uint16(player->GetMapId());
+    UpdateData transData(player->GetMapId());
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
@@ -2025,8 +2056,7 @@ void Map::SendRemoveTransports(Player * player)
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData transData;
-    transData.m_map = uint16(player->GetMapId());
+    UpdateData transData(player->GetMapId());
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 

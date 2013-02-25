@@ -391,6 +391,9 @@ Item::Item()
     m_refundRecipient = 0;
     m_paidMoney = 0;
     m_paidExtendedCost = 0;
+
+    for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; slot++)
+        m_enchantmentChanges[slot] = UNCHANGED;
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -461,9 +464,6 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_FLAGS));
 
-            // delete enchantments
-            trans->PAppend("DELETE FROM item_enchantments where guid = %d", guid);
-
             stmt->setInt32 (++index, GetItemRandomPropertyId());
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
@@ -480,27 +480,7 @@ void Item::SaveToDB(SQLTransaction& trans)
                 trans->Append(stmt);
             }
 
-            // insert new enchantments
-            for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            {
-                EnchantmentSlot slot = EnchantmentSlot(i);
-                uint32 id = GetEnchantmentId(slot);
-                if (id != 0)
-                {
-                    uint32 duration = GetEnchantmentDuration(slot);
-                    uint32 charges = GetEnchantmentCharges(slot);
-
-                    std::ostringstream ssEnchants;
-                    ssEnchants << "(" << guid << ", ";
-                    ssEnchants << i << ", ";
-                    ssEnchants << id << ", ";
-                    ssEnchants << duration << ", ";
-                    ssEnchants << charges << ");";
-
-                    trans->PAppend("INSERT INTO item_enchantments (guid, slot, id, duration, charges) "
-                                   "VALUES %s", ssEnchants.str().c_str());
-                }
-            }
+            SaveEnchantmentsToDB(trans);
 
             break;
         }
@@ -633,9 +613,93 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
 
 void Item::DeleteFromDB(SQLTransaction& trans)
 {
+    trans->PAppend("DELETE FROM item_enchantments WHERE guid = %d;", GetGUIDLow());
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
+}
+
+void Item::SaveEnchantmentsToDB(SQLTransaction& trans)
+{
+    uint64 guid = GetGUIDLow();
+
+
+    // delete old non-existing enchantments
+
+    std::vector<uint32> enchantments;
+    enchantments.reserve(MAX_ENCHANTMENT_SLOT);
+    for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; slot++)
+    {
+        if (m_enchantmentChanges[slot] == DELETED)
+        {
+            m_enchantmentChanges[slot] = UNCHANGED;
+            enchantments.push_back(slot);
+        }
+    }
+
+    if (!enchantments.empty())
+    {
+        std::stringstream sqlDelete;
+        sqlDelete << "DELETE FROM item_enchantments WHERE guid = " << guid << " AND slot IN ( ";
+        for (uint8 i = 0; i < enchantments.size() - 1; i++)
+            sqlDelete << enchantments[i] << ", ";
+        sqlDelete << enchantments.back() << " );";
+
+        trans->PAppend(sqlDelete.str().c_str());
+    }
+
+
+    // update existing enchantments
+
+    for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+    {
+        if (m_enchantmentChanges[i] == CHANGED)
+        {
+            m_enchantmentChanges[i] = UNCHANGED;
+
+            EnchantmentSlot slot = (EnchantmentSlot) i;
+
+            uint32 id = GetEnchantmentId(slot);
+            uint32 duration = GetEnchantmentDuration(slot);
+            uint32 charges = GetEnchantmentCharges(slot);
+
+            std::stringstream sqlUpdate;
+            sqlUpdate << "UPDATE item_enchantments SET "
+                <<   "id = " << id << ", "
+                <<   "duration = " << duration << ", "
+                <<   "charges = " << charges
+                << " WHERE guid = " << guid
+                <<   " AND slot = " << slot << ";";
+
+            trans->PAppend(sqlUpdate.str().c_str());
+        }
+    }
+
+
+    // insert new enchantments
+    for (uint32 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+    {
+        EnchantmentSlot slot = EnchantmentSlot(i);
+        uint32 id = GetEnchantmentId(slot);
+        if (m_enchantmentChanges[i] == ADDED)
+        {
+            m_enchantmentChanges[i] = UNCHANGED;
+
+            uint32 duration = GetEnchantmentDuration(slot);
+            uint32 charges = GetEnchantmentCharges(slot);
+
+            std::stringstream sqlInsert;
+            sqlInsert << "(" << guid << ", ";
+            sqlInsert << slot << ", ";
+            sqlInsert << id << ", ";
+            sqlInsert << duration << ", ";
+            sqlInsert << charges << ")";
+
+            trans->PAppend("REPLACE INTO item_enchantments (guid, slot, id, duration, charges) "
+                "VALUES %s;", sqlInsert.str().c_str());
+        }
+    }
 }
 
 void Item::DeleteFromInventoryDB(SQLTransaction& trans)
@@ -1042,6 +1106,13 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
     if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
         return;
 
+    if (id == 0)        // deleting enchantment
+        SetDeletedEnchantment(slot);
+    else if (GetEnchantmentId(slot) == 0)       // inserting enchantment
+        SetInsertedEnchantment(slot);
+    else            // changing enchantment
+        SetChangedEnchantment(slot);
+
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET,id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET,duration);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET,charges);
@@ -1056,6 +1127,8 @@ void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration, Player*
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED, owner);
     // Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
+
+    SetChangedEnchantment(slot);
 }
 
 void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
@@ -1065,6 +1138,8 @@ void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET,charges);
     SetState(ITEM_CHANGED, GetOwner());
+
+    SetChangedEnchantment(slot);
 }
 
 void Item::ClearEnchantment(EnchantmentSlot slot)
@@ -1075,6 +1150,8 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     for (uint8 x = 0; x < MAX_ITEM_ENCHANTMENT_EFFECTS; ++x)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + x, 0);
     SetState(ITEM_CHANGED, GetOwner());
+
+    SetDeletedEnchantment(slot);
 }
 
 
@@ -1511,6 +1588,19 @@ void Item::SetSoulboundTradeable(AllowedLooterSet* allowedLooters, Player* curre
     }
 }
 
+void Item::ClearSoulboundTradeable(Player* currentOwner)
+{
+    RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
+    if (allowedGUIDs.empty())
+        return;
+
+    allowedGUIDs.clear();
+    SetState(ITEM_CHANGED, currentOwner);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_BOP_TRADE);
+    stmt->setUInt32(0, GetGUIDLow());
+    CharacterDatabase.Execute(stmt);
+}
+
 bool Item::CheckSoulboundTradeExpire()
 {
     // called from owner's update - GetOwner() MUST be valid
@@ -1521,4 +1611,284 @@ bool Item::CheckSoulboundTradeExpire()
     }
 
     return false;
+}
+
+bool Item::HasStats() const
+{
+    if (GetItemRandomPropertyId() != 0)
+        return true;
+
+    ItemPrototype const* pProto = GetProto();
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+        if (pProto->ItemStat[i].ItemStatValue != 0)
+            return true;
+
+    return false;
+}
+
+bool Item::CanBeTransmogrified() const
+{
+    ItemPrototype const* pProto = GetProto();
+
+    if (!pProto)
+        return false;
+
+    if (pProto->Quality == ITEM_QUALITY_LEGENDARY)
+        return false;
+
+    if (pProto->Class != ITEM_CLASS_ARMOR &&
+        pProto->Class != ITEM_CLASS_WEAPON)
+        return false;
+
+    if (pProto->Class == ITEM_CLASS_WEAPON && pProto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+        return false;
+
+    if (pProto->Flags2 & ITEM_FLAGS_EXTRA_CANNOT_BE_TRANSMOG)
+        return false;
+
+    if (!HasStats())
+        return false;
+
+    return true;
+}
+
+bool Item::CanTransmogrify() const
+{
+    ItemPrototype const* pProto = GetProto();
+
+    if (!pProto)
+        return false;
+
+    if (pProto->Flags2 & ITEM_FLAGS_EXTRA_CANNOT_TRANSMOG)
+        return false;
+
+    if (pProto->Quality == ITEM_QUALITY_LEGENDARY)
+        return false;
+
+    if (pProto->Class != ITEM_CLASS_ARMOR &&
+        pProto->Class != ITEM_CLASS_WEAPON)
+        return false;
+
+    if (pProto->Class == ITEM_CLASS_WEAPON && pProto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+        return false;
+
+    if (pProto->Flags2 & ITEM_FLAGS_EXTRA_CAN_TRANSMOG)
+        return true;
+
+    if (!HasStats())
+        return false;
+
+    return true;
+}
+bool Item::CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier)
+{
+    if (!transmogrifier || !transmogrified)
+        return false;
+
+    ItemPrototype const* proto1 = transmogrifier->GetProto(); // source
+    ItemPrototype const* proto2 = transmogrified->GetProto(); // dest
+
+    if (proto1->ItemId == proto2->ItemId)
+        return false;
+
+    if (!transmogrified->CanTransmogrify() || !transmogrifier->CanBeTransmogrified())
+        return false;
+
+    if (proto1->InventoryType == INVTYPE_BAG ||
+        proto1->InventoryType == INVTYPE_RELIC ||
+        proto1->InventoryType == INVTYPE_BODY ||
+        proto1->InventoryType == INVTYPE_FINGER ||
+        proto1->InventoryType == INVTYPE_TRINKET ||
+        proto1->InventoryType == INVTYPE_AMMO ||
+        proto1->InventoryType == INVTYPE_QUIVER)
+        return false;
+
+    if (proto1->SubClass != proto2->SubClass && (proto1->Class != ITEM_CLASS_WEAPON || !proto2->IsRangedWeapon() || !proto1->IsRangedWeapon()))
+        return false;
+
+    if (proto1->InventoryType != proto2->InventoryType &&
+        (proto1->Class != ITEM_CLASS_WEAPON || (proto2->InventoryType != INVTYPE_WEAPONMAINHAND && proto2->InventoryType != INVTYPE_WEAPONOFFHAND)) &&
+        (proto1->Class != ITEM_CLASS_ARMOR || (proto1->InventoryType != INVTYPE_CHEST && proto2->InventoryType != INVTYPE_ROBE && proto1->InventoryType != INVTYPE_ROBE && proto2->InventoryType != INVTYPE_CHEST)))
+        return false;
+
+    return true;
+}
+
+// used by mail items, transmog cost, stationeryinfo, etc..
+uint32 Item::GetSellPrice(ItemPrototype const* pProto, bool& normalSellPrice)
+{
+    normalSellPrice = true;
+
+    if (pProto->Flags2 & ITEM_FLAGS_EXTRA_HAS_NORMAL_PRICE)
+        return pProto->BuyPrice;
+    else
+    {
+        ImportPriceQualityEntry const* qualityPrice = sImportPriceQualityStore.LookupEntry(pProto->Quality + 1);
+        ItemPriceBaseEntry const* basePrice = sItemPriceBaseStore.LookupEntry(pProto->ItemLevel);
+
+        if (!qualityPrice || !basePrice)
+            return 0;
+
+        float qualityFactor = qualityPrice->Factor;
+        float baseFactor = 0.0f;
+
+        uint32 inventoryType = pProto->InventoryType;
+
+        if (inventoryType == INVTYPE_WEAPON ||
+            inventoryType == INVTYPE_2HWEAPON ||
+            inventoryType == INVTYPE_WEAPONMAINHAND ||
+            inventoryType == INVTYPE_WEAPONOFFHAND ||
+            inventoryType == INVTYPE_RANGED ||
+            inventoryType == INVTYPE_THROWN ||
+            inventoryType == INVTYPE_RANGEDRIGHT)
+            baseFactor = basePrice->WeaponFactor;
+        else
+            baseFactor = basePrice->ArmorFactor;
+
+        if (inventoryType == INVTYPE_ROBE)
+            inventoryType = INVTYPE_CHEST;
+
+        float typeFactor = 0.0f;
+        uint8 wepType = -1;
+
+        switch (inventoryType)
+        {
+            case INVTYPE_HEAD:
+            case INVTYPE_SHOULDERS:
+            case INVTYPE_CHEST:
+            case INVTYPE_WAIST:
+            case INVTYPE_LEGS:
+            case INVTYPE_FEET:
+            case INVTYPE_WRISTS:
+            case INVTYPE_HANDS:
+            case INVTYPE_CLOAK:
+            {
+                ImportPriceArmorEntry const* armorPrice = sImportPriceArmorStore.LookupEntry(inventoryType);
+                if (!armorPrice)
+                    return 0;
+
+                switch (pProto->SubClass)
+                {
+                    case ITEM_SUBCLASS_ARMOR_MISC:
+                    case ITEM_SUBCLASS_ARMOR_CLOTH:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_LEATHER:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_MAIL:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_PLATE:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    default:
+                    {
+                        return 0;
+                    }
+                }
+
+                break;
+            }
+            case INVTYPE_SHIELD:
+            {
+                ImportPriceShieldEntry const* shieldPrice = sImportPriceShieldStore.LookupEntry(1); // it only has two rows, it's unclear which is the one used
+                if (!shieldPrice)
+                    return 0;
+
+                typeFactor = shieldPrice->Factor;
+                break;
+            }
+            case INVTYPE_WEAPONMAINHAND:
+                wepType = 0;             // unk enum, fall back
+            case INVTYPE_WEAPONOFFHAND:
+                wepType = 1;             // unk enum, fall back
+            case INVTYPE_WEAPON:
+                wepType = 2;             // unk enum, fall back
+            case INVTYPE_2HWEAPON:
+                wepType = 3;             // unk enum, fall back
+            case INVTYPE_RANGED:
+            case INVTYPE_RANGEDRIGHT:
+            case INVTYPE_RELIC:
+            {
+                wepType = 4;             // unk enum
+
+                ImportPriceWeaponEntry const* weaponPrice = sImportPriceWeaponStore.LookupEntry(wepType + 1);
+                if (!weaponPrice)
+                    return 0;
+
+                typeFactor = weaponPrice->Factor;
+                break;
+            }
+            default:
+                return pProto->BuyPrice;
+        }
+
+        normalSellPrice = false;
+        return (uint32)(qualityFactor * typeFactor * baseFactor);
+    }
+}
+uint32 Item::GetTransmogrifyCost() const
+{
+    ItemPrototype const* pProto = GetProto();
+    uint32 cost = 0;
+
+    if (pProto->Flags2 & ITEM_FLAGS_EXTRA_HAS_NORMAL_PRICE)
+        cost = pProto->SellPrice;
+    else
+    {
+        bool normalPrice;
+        cost = GetSellPrice(pProto,normalPrice);
+        
+        if (!normalPrice)
+        {
+            if (pProto->BuyCount <= 1)
+            {
+                ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(pProto->Class);
+                if (classEntry)
+                    cost *= classEntry->PriceFactor;
+                else
+                    cost = 0;
+            }
+            else
+                cost /= 4 * pProto->BuyCount;
+        }
+        else
+            cost = pProto->SellPrice;
+    }
+    
+    if (cost < 10000)
+        cost = 10000;
+    
+    return cost;
+}
+
+void Item::SetInsertedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] == DELETED)
+        m_enchantmentChanges[slot] = CHANGED;       // update instead of delete followed by insert
+    else
+        m_enchantmentChanges[slot] = ADDED;
+}
+
+void Item::SetChangedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] != ADDED)
+        m_enchantmentChanges[slot] = CHANGED;
+}
+
+void Item::SetDeletedEnchantment(EnchantmentSlot slot)
+{
+    if (m_enchantmentChanges[slot] == ADDED)
+        m_enchantmentChanges[slot] = UNCHANGED;     // added and then deleted again - no need to do anything in DB
+    else
+        m_enchantmentChanges[slot] = DELETED;
 }

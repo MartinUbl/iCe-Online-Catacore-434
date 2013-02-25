@@ -590,7 +590,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                     me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                     me->SendMovementFlagUpdate();
                     me->Relocate(me->GetPositionX(), me->GetPositionY(), 539.2917f);
-                    me->SendMonsterMove(me->GetPositionX(), me->GetPositionY(), 539.2917f, SPLINEFLAG_FALLING, 0, 0.0f);
+                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 0.0f);
                     for (std::list<Creature*>::iterator itr = guardList.begin(); itr != guardList.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_DESPAWN);
                 }
@@ -783,7 +783,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                     me->SendMovementFlagUpdate();
                     me->Relocate(me->GetPositionX(), me->GetPositionY(), 539.2917f);
-                    me->SendMonsterMove(me->GetPositionX(), me->GetPositionY(), 539.2917f, SPLINEFLAG_FALLING, 0, 0.0f);
+                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 0.0f);
                     for (std::list<Creature*>::iterator itr = guardList.begin(); itr != guardList.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_DESPAWN);
                 }

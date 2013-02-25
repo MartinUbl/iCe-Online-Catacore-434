@@ -130,9 +130,9 @@ bool GrandChampionsOutVehicle(Creature* me)
 
     if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
     {
-        if (!pGrandChampion1->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) &&
-            !pGrandChampion2->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) &&
-            !pGrandChampion3->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+        if (!pGrandChampion1->GetTransGUID() &&
+            !pGrandChampion2->GetTransGUID() &&
+            !pGrandChampion3->GetTransGUID())
             return true;
     }
 
@@ -382,7 +382,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->GetTransGUID())
                 return;
 
             if (uiInterceptTimer <= uiDiff)
@@ -527,7 +527,7 @@ public:
             } else uiFireBallTimer -= uiDiff;
 
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->GetTransGUID())
                 return;
 
             if (uiFireBallTimer <= uiDiff)
@@ -665,7 +665,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->GetTransGUID())
                 return;
 
             if (uiChainLightningTimer <= uiDiff)
@@ -812,7 +812,7 @@ public:
                 }
             }else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->GetTransGUID())
                 return;
 
             if (uiLightningArrowsTimer <= uiDiff)
@@ -960,7 +960,7 @@ public:
                 }
             } else uiPhaseTimer -= uiDiff;
 
-            if (!UpdateVictim() || me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+            if (!UpdateVictim() || me->GetTransGUID())
                 return;
 
             if (uiEviscerateTimer <= uiDiff)

@@ -288,6 +288,7 @@ class npc_coldflame : public CreatureScript
                     Unit* target = creOwner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f, true, -SPELL_IMPALED);
                     if (!target)
                         target = creOwner->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true); // or the tank if its solo
+
                     if (!target)
                     {
                         if (TempSummon* summ = me->ToTempSummon())
@@ -308,7 +309,7 @@ class npc_coldflame : public CreatureScript
                     MarrowgarAI* marrowgarAI = CAST_AI(MarrowgarAI, creOwner->AI());
                     Position const* ownerPos = marrowgarAI->GetLastColdflamePosition();
                     float ang = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
-                    MapManager::NormalizeOrientation(ang);
+                    ang = MapManager::NormalizeOrientation(ang);
                     x += 50.0f * cosf(ang);
                     y += 50.0f * sinf(ang);
                 }

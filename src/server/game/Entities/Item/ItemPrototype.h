@@ -26,6 +26,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "DBCStructure.h"
+#include "DB2Structure.h"
 
 enum ItemModType
 {
@@ -204,6 +205,24 @@ enum ItemFlagsExtra
     ITEM_FLAGS_EXTRA_EXT_COST_REQUIRES_GOLD  = 0x00000004, // when item uses extended cost, gold is also required
     ITEM_FLAGS_EXTRA_NEED_ROLL_DISABLED      = 0x00000100,
     ITEM_FLAGS_EXTRA_CASTER_WEAPON           = 0x00000200, // uses caster specific dbc file for DPS calculations
+    ITEM_FLAGS_EXTRA_HAS_NORMAL_PRICE        = 0x00004000,
+    ITEM_FLAGS_EXTRA_BNET_ACCOUNT_BOUND      = 0x00020000,
+    ITEM_FLAGS_EXTRA_CANNOT_BE_TRANSMOG      = 0x00200000,
+    ITEM_FLAGS_EXTRA_CANNOT_TRANSMOG         = 0x00400000,
+    ITEM_FLAGS_EXTRA_CAN_TRANSMOG            = 0x00800000,
+};
+
+// other cathegories are unlisted here, because we don't use them - these are directly from CurrencyCategory.dbc
+enum CurrencyCategory
+{
+    CURRENCY_CATEGORY_PVP           = 2,
+    CURRENCY_CATEGORY_META_CONQUEST = 89,
+};
+
+enum VendorItemType
+{
+    VENDOR_ITEM_ITEM      = 0,
+    VENDOR_ITEM_CURRENCY  = 1,
 };
 
 enum BAG_FAMILY_MASK
@@ -744,6 +763,13 @@ struct ItemPrototype
     bool IsWeaponVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT; }
     bool IsArmorVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_PROTO_FLAG_CONJURED); }
+    bool IsRangedWeapon() const
+    {
+        return Class == ITEM_CLASS_WEAPON ||
+               SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+               SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
+               SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
+    }
 };
 
 struct ItemLocale

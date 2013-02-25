@@ -136,6 +136,8 @@ public:
                     break;
             }
         }
+        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
 
         void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {

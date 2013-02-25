@@ -55,7 +55,7 @@ void BattlegroundDS::Update(uint32 diff)
 
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
-        if (GetStartTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
+        if (GetElapsedTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
         {
             UpdateArenaWorldState();
             CheckArenaAfterTimerConditions();
@@ -67,15 +67,19 @@ void BattlegroundDS::Update(uint32 diff)
         if (isWaterFallActive())
         {
             setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
-            for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
-                SpawnBGObject(i, getWaterFallTimer());
+            SpawnBGObject(BG_DS_OBJECT_WATER_2, getWaterFallTimer());
+            // turn off collision
+            if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+                gob->EnableCollision(false);
             setWaterFallActive(false);
         }
         else
         {
             setWaterFallTimer(BG_DS_WATERFALL_DURATION);
-            for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
-                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
+            SpawnBGObject(BG_DS_OBJECT_WATER_2, RESPAWN_IMMEDIATELY);
+            // Turn on collision
+            if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+                gob->EnableCollision(true);
             setWaterFallActive(true);
         }
     }

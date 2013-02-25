@@ -90,12 +90,12 @@ public:
             case 17:
             case 18:
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_JUMPING);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING);
                 me->SetSpeed(MOVE_SWIM, 0.85f, true);
                 me->AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_LEVITATING);
                 break;
             case 19:
-                me->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
+                me->SetUnitMovementFlags(MOVEMENTFLAG_FALLING);
                 break;
             case 28:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -140,7 +140,7 @@ public:
         {
             CAST_AI(npc_escortAI, (pCreature->AI()))->Start(true, false, pPlayer->GetGUID());
             CAST_AI(npc_escortAI, (pCreature->AI()))->SetMaxPlayerDistance(35.0f);
-            pCreature->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
+            pCreature->SetUnitMovementFlags(MOVEMENTFLAG_FALLING);
             DoScriptText(SAY_START_IRO, pCreature);
 
             switch (pPlayer->GetTeam()){

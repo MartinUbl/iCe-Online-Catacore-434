@@ -41,19 +41,13 @@ void MapManager::LoadTransports()
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
         sLog->outString(">> Loaded %u transports", count);
         return;
     }
 
-    
-
     do
     {
-        
 
         Field *fields = result->Fetch();
         uint32 lowguid = fields[0].GetUInt32();
@@ -62,27 +56,24 @@ void MapManager::LoadTransports()
         uint32 period = fields[3].GetUInt32();
         uint32 scriptId = sObjectMgr->GetScriptId(fields[4].GetCString());
 
-        Transport *t = new Transport(period, scriptId);
-
         const GameObjectInfo *goinfo = sObjectMgr->GetGameObjectInfo(entry);
 
         if (!goinfo)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template missing", entry, name.c_str());
-            delete t;
             continue;
         }
 
         if (goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());
-            delete t;
             continue;
         }
 
         // sLog->outString("Loading transport %d between %s, %s", entry, name.c_str(), goinfo->name);
 
         std::set<uint32> mapsUsed;
+        Transport *t = new Transport(period, scriptId);
 
         if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
             // skip transports with empty waypoints list
@@ -118,9 +109,6 @@ void MapManager::LoadTransports()
     }
     while (result->NextRow());
 
-    sLog->outString();
-    sLog->outString(">> Loaded %u transports", count);
-
     // check transport data DB integrity
     result = WorldDatabase.Query("SELECT gameobject.guid,gameobject.id,transports.name FROM gameobject,transports WHERE gameobject.id = transports.entry");
     if (result)                                              // wrong data found
@@ -132,34 +120,32 @@ void MapManager::LoadTransports()
             uint32 guid  = fields[0].GetUInt32();
             uint32 entry = fields[1].GetUInt32();
             std::string name = fields[2].GetString();
-            sLog->outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports DON'T must have any records in `gameobject` or its behavior will be unpredictable/bugged.",entry,name.c_str(),guid);
+            sLog->outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports must not have any records in `gameobject` or its behavior will be unpredictable/bugged.",entry,name.c_str(),guid);
         }
         while (result->NextRow());
     }
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u transports", count);
+
 }
 
 void MapManager::LoadTransportNPCs()
 {
     // Spawn NPCs linked to the transport
-    //                                                         0    1          2                3             4             5             6             7
+    //                                                0     1          2                3             4             5             6             7
     QueryResult result = WorldDatabase.PQuery("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
     uint32 count = 0;
 
     if (!result)
     {
-        
-        
-
         sLog->outString();
-        sLog->outString(">> Loaded %u transport NPCs.", count);
+        sLog->outString(">> Loaded 0 transport NPCs.");
         return;
     }
 
-    
-
     do
     {
-        
         Field *fields = result->Fetch();
         uint32 guid = fields[0].GetUInt32();
         uint32 entry = fields[1].GetUInt32();
@@ -185,10 +171,10 @@ void MapManager::LoadTransportNPCs()
     sLog->outString(">> Loaded %u transport npcs", count);
 }
 
-Transport::Transport(uint32 period, uint32 script) : GameObject(), m_period(period), ScriptId(script)
+Transport::Transport(uint32 period, uint32 script) : GameObject(), m_pathTime(0), m_timer(0),
+currenttguid(0), m_period(period), ScriptId(script), m_nextNodeTime(0)
 {
-    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
-    currenttguid = 0;
+    m_updateFlag = (UPDATEFLAG_HAS_GO_TRANSPORT_TIME | UPDATEFLAG_HAS_STATIONARY_POSITION | UPDATEFLAG_HAS_GO_ROTATION);
 }
 
 Transport::~Transport()
@@ -234,7 +220,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetUInt32Value(GAMEOBJECT_LEVEL, m_period);
     SetEntry(goinfo->id);
 
-    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
+    SetDisplayId(goinfo->displayId);
 
     SetGoState(GO_STATE_READY);
     SetGoType(GameobjectTypes(goinfo->type));
@@ -607,8 +593,7 @@ void Transport::UpdateForMap(Map const* targetMap)
         {
             if (this != itr->getSource()->GetTransport())
             {
-                UpdateData transData;
-                transData.m_map = uint16(GetMapId());
+                UpdateData transData(GetMapId());
                 BuildCreateUpdateBlockForPlayer(&transData, itr->getSource());
                 WorldPacket packet;
                 transData.BuildPacket(&packet);
@@ -618,8 +603,7 @@ void Transport::UpdateForMap(Map const* targetMap)
     }
     else
     {
-        UpdateData transData;
-        transData.m_map = uint16(GetMapId());
+        UpdateData transData(targetMap->GetId());
         BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket out_packet;
         transData.BuildPacket(&out_packet);
@@ -657,15 +641,15 @@ void Transport::BuildStopMovePacket(Map const* targetMap)
 uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, float z, float o, uint32 anim)
 {
     Map* map = GetMap();
-    
+
     CreatureInfo const *ci = sObjectMgr->GetCreatureTemplate(entry);
+
     if (!ci)
         return 0;
-    
+
     Creature* pCreature = NULL;
-    if(ci->ScriptID)
-        pCreature = sScriptMgr->GetCreatureScriptedClass(ci->ScriptID);
-    if(pCreature == NULL)
+
+    if (pCreature == NULL)
         pCreature = new Creature();
 
     if (!pCreature->Create(sObjectMgr->GenerateLowGuidForUnit(true), map, GetPhaseMask(), entry, 0, GetGOInfo()->faction, 0, 0, 0, 0))
@@ -675,24 +659,24 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     }
 
     pCreature->SetTransport(this);
-    pCreature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    pCreature->m_movementInfo.guid = GetGUID();
+    pCreature->m_movementInfo.t_guid = GetGUID();
     pCreature->m_movementInfo.t_pos.Relocate(x, y, z, o);
 
     if (anim)
         pCreature->SetUInt32Value(UNIT_NPC_EMOTESTATE, anim);
 
     pCreature->Relocate(
-        GetPositionX() + (x * cos(GetOrientation()) + y * sin(GetOrientation() + float(M_PI))),
-        GetPositionY() + (y * cos(GetOrientation()) + x * sin(GetOrientation())),
-        z + GetPositionZ() ,
+        GetPositionX() + (x * std::cos(GetOrientation()) + y * std::sin(GetOrientation() + float(M_PI))),
+        GetPositionY() + (y * std::cos(GetOrientation()) + x * std::sin(GetOrientation())),
+        z + GetPositionZ(),
         o + GetOrientation());
 
     pCreature->SetHomePosition(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ(), pCreature->GetOrientation());
+    pCreature->SetTransportHomePosition(pCreature->m_movementInfo.t_pos);
 
-    if(!pCreature->IsPositionValid())
+    if (!pCreature->IsPositionValid())
     {
-        sLog->outError("Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
+        sLog->outError("Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)", pCreature->GetGUIDLow(), pCreature->GetEntry(), pCreature->GetPositionX(), pCreature->GetPositionY());
         delete pCreature;
         return 0;
     }
@@ -731,11 +715,31 @@ void Transport::UpdateNPCPositions()
         Creature* npc = *itr;
 
         float x, y, z, o;
-        o = GetOrientation() + npc->m_movementInfo.t_pos.m_orientation;
-        x = GetPositionX() + (npc->m_movementInfo.t_pos.m_positionX * cos(GetOrientation()) + npc->m_movementInfo.t_pos.m_positionY * sin(GetOrientation() + M_PI));
-        y = GetPositionY() + (npc->m_movementInfo.t_pos.m_positionY * cos(GetOrientation()) + npc->m_movementInfo.t_pos.m_positionX * sin(GetOrientation()));
-        z = GetPositionZ() + npc->m_movementInfo.t_pos.m_positionZ;
-        npc->SetHomePosition(x, y, z, o);
+        npc->m_movementInfo.t_pos.GetPosition(x, y, z, o);
+        CalculatePassengerPosition(x, y, z, o);
         GetMap()->CreatureRelocation(npc, x, y, z, o, false);
+        npc->GetTransportHomePosition(x, y, z, o);
+        CalculatePassengerPosition(x, y, z, o);
+        npc->SetHomePosition(x, y, z, o);
     }
+}
+
+void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+{
+    float inx = x, iny = y, inz = z, ino = o;
+    o = MapManager::NormalizeOrientation(GetOrientation() + ino);
+    x = GetPositionX() + inx * std::cos(GetOrientation()) - iny * std::sin(GetOrientation());
+    y = GetPositionY() + iny * std::cos(GetOrientation()) + inx * std::sin(GetOrientation());
+    z = GetPositionZ() + inz;
+}
+
+void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+{
+    o = MapManager::NormalizeOrientation(o - GetOrientation());
+    z -= GetPositionZ();
+    y -= GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
+    x -= GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)
+    float inx = x, iny = y;
+    y = (iny - inx * tan(GetOrientation())) / (cos(GetOrientation()) + std::sin(GetOrientation()) * tan(GetOrientation()));
+    x = (inx + iny * tan(GetOrientation())) / (cos(GetOrientation()) + std::sin(GetOrientation()) * tan(GetOrientation()));
 }

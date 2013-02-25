@@ -669,6 +669,44 @@ class spell_gen_parachute_ic : public SpellScriptLoader
         }
 };
 
+class spell_gen_blades : public SpellScriptLoader
+{
+public:
+    spell_gen_blades() : SpellScriptLoader("spell_gen_blades") {}
+
+    class spell_gen_blades_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_blades_SpellScript);
+
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            Unit * caster = GetCaster();
+            Unit * hit_unit = GetHitUnit();
+
+            if( !caster || !hit_unit )
+                return;
+
+            float damage = 0.0f;
+            float distance = caster->GetDistance(hit_unit);
+            const SpellRadiusEntry *radiusEntry = sSpellRadiusStore.LookupEntry(GetSpellInfo()->EffectRadiusIndex[0]);
+
+            damage = GetHitDamage() * ( 1.0f - (distance / radiusEntry->RadiusMax)); // requires properly set radius !!!
+
+            SetHitDamage((int32)damage);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_gen_blades_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_blades_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -686,4 +724,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();
     new spell_gen_gunship_portal();
+    new spell_gen_blades();
 }

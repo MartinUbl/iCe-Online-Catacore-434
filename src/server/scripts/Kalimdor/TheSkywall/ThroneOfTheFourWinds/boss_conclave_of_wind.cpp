@@ -532,7 +532,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
             if(who)
             {
                 AttackStartNoMove(who);
-                me->SetFacing(0.0f, who); // permanent (turns and always faces victiom)
+                me->SetFacingTo(0.0f); // permanent (turns and always faces victiom)
                 me->Attack(who, false);
             }
         }

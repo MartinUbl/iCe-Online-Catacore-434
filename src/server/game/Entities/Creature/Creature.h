@@ -316,13 +316,14 @@ enum ChatType
 // Vendors
 struct VendorItem
 {
-    VendorItem(uint32 _item, int32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost)
-        : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost) {}
+    VendorItem(uint32 _item, int32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint8 _type)
+        : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), type(_type) {}
 
     uint32 item;
     uint32  maxcount;                                       // 0 for infinity item amount
     uint32 incrtime;                                        // time for restore items amount if maxcount != 0
     uint32 ExtendedCost;
+    uint8  type;
 
     //helpers
     bool IsGoldRequired(ItemPrototype const* pProto) const { return pProto->Flags2 & ITEM_FLAGS_EXTRA_EXT_COST_REQUIRES_GOLD || !ExtendedCost; }
@@ -340,9 +341,9 @@ struct VendorItemData
     }
     bool Empty() const { return m_items.empty(); }
     uint32 GetItemCount() const { return m_items.size(); }
-    void AddItem(uint32 item, int32 maxcount, uint32 ptime, uint32 ExtendedCost)
+    void AddItem(uint32 item, int32 maxcount, uint32 ptime, uint32 ExtendedCost, uint8 type)
     {
-        m_items.push_back(new VendorItem(item, maxcount, ptime, ExtendedCost));
+        m_items.push_back(new VendorItem(item, maxcount, ptime, ExtendedCost, type));
     }
     bool RemoveItem(uint32 item_id);
     VendorItem const* FindItemCostPair(uint32 item_id, uint32 extendedCost) const;
@@ -436,7 +437,9 @@ class Creature : public Unit, public GridObject<Creature>
         bool isTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        //bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
+        bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
+        bool SetWalk(bool enable);
+        void SetLevitate(bool enable);
 
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
@@ -540,7 +543,6 @@ class Creature : public Unit, public GridObject<Creature>
         const char* GetNameForLocaleIdx(LocaleConstant locale_idx) const;
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
-        bool FallGround();
 
         bool LoadFromDB(uint32 guid, Map *map);
         void SaveToDB();
@@ -645,8 +647,8 @@ class Creature : public Unit, public GridObject<Creature>
 
         void SetHomePosition(float x, float y, float z, float o) { m_homePosition.Relocate(x, y, z, o); }
         void SetHomePosition(const Position &pos) { m_homePosition.Relocate(pos); }
-        void GetHomePosition(float &x, float &y, float &z, float &ori) { m_homePosition.GetPosition(x, y, z, ori); }
-        Position GetHomePosition() { return m_homePosition; }
+        void GetHomePosition(float &x, float &y, float &z, float &ori) const { m_homePosition.GetPosition(x, y, z, ori); }
+        Position GetHomePosition() const { return m_homePosition; }
 
         uint32 GetGlobalCooldown() const { return m_GlobalCooldown; }
 
@@ -682,6 +684,11 @@ class Creature : public Unit, public GridObject<Creature>
 
         void SetGUIDTransport(uint32 guid) { guid_transport=guid; }
         uint32 GetGUIDTransport() { return guid_transport; }
+
+        void SetTransportHomePosition(float x, float y, float z, float o) { m_transportHomePosition.Relocate(x, y, z, o); }
+        void SetTransportHomePosition(const Position &pos) { m_transportHomePosition.Relocate(pos); }
+        void GetTransportHomePosition(float &x, float &y, float &z, float &ori) { m_transportHomePosition.GetPosition(x, y, z, ori); }
+        Position GetTransportHomePosition() { return m_transportHomePosition; }
 
         void FarTeleportTo(Map* map, float X, float Y, float Z, float O);
     protected:
@@ -725,6 +732,7 @@ class Creature : public Unit, public GridObject<Creature>
         uint32 m_originalEntry;
 
         Position m_homePosition;
+        Position m_transportHomePosition;
 
         bool DisableReputationGain;
 

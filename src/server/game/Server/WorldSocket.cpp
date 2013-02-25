@@ -193,21 +193,30 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         sLog->outDebug("Packet %s (%X) not send.\n", LookupOpcodeName (pct.GetOpcode()), pct.GetOpcode());
         return 0;
     }
-    
-    // Create a copy of the original packet; this is to avoid issues if a hook modifies it.
-    sScriptMgr->OnPacketSend(this, WorldPacket(pct));
 
-    ServerPktHeader header(pct.size()+2, pct.GetOpcode());
+    WorldPacket const* pkt = &pct;
+
+    // Empty buffer used in case packet should be compressed
+    WorldPacket buff;
+    if (m_Session && pkt->size() > 0x400)
+    {
+        buff.Compress(m_Session->GetCompressionStream(), pkt);
+        pkt = &buff;
+    }
+
+    sScriptMgr->OnPacketSend(this, *pkt);
+
+    ServerPktHeader header(pkt->size()+2, pkt->GetOpcode());
     m_Crypt.EncryptSend ((uint8*)header.header, header.getHeaderLength());
 
-    if (m_OutBuffer->space() >= pct.size() + header.getHeaderLength() && msg_queue()->is_empty())
+    if (m_OutBuffer->space() >= pkt->size() + header.getHeaderLength() && msg_queue()->is_empty())
     {
         // Put the packet on the buffer.
         if (m_OutBuffer->copy((char*) header.header, header.getHeaderLength()) == -1)
             ACE_ASSERT (false);
 
-        if (!pct.empty())
-            if (m_OutBuffer->copy((char*) pct.contents(), pct.size()) == -1)
+        if (!pkt->empty())
+            if (m_OutBuffer->copy((char*)pkt->contents(), pkt->size()) == -1)
                 ACE_ASSERT (false);
     }
     else
@@ -215,12 +224,12 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         // Enqueue the packet.
         ACE_Message_Block* mb;
 
-        ACE_NEW_RETURN(mb, ACE_Message_Block(pct.size() + header.getHeaderLength()), -1);
+        ACE_NEW_RETURN(mb, ACE_Message_Block(pkt->size() + header.getHeaderLength()), -1);
 
         mb->copy((char*) header.header, header.getHeaderLength());
 
-        if (!pct.empty())
-            mb->copy((const char*)pct.contents(), pct.size());
+        if (!pkt->empty())
+            mb->copy((const char*)pkt->contents(), pkt->size());
 
         if (msg_queue()->enqueue_tail(mb,(ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
@@ -274,20 +283,21 @@ int WorldSocket::open (void *a)
     m_Address = remote_addr.get_host_addr();
 
     // Send startup packet.
-    WorldPacket packet (SMSG_AUTH_CHALLENGE, 37);
-    
-    BigNumber seed1;
-    seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16), 16);               // new encryption seeds
-    
-    packet << uint8(1);
-    packet << uint32(m_Seed);
+    WorldPacket packet(MSG_VERIFY_CONNECTIVITY, 46);
+    packet << "RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
 
-    BigNumber seed2;
-    seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16), 16);               // new encryption seeds
-    
     if (SendPacket(packet) == -1)
+        return -1;
+
+    WorldPacket authch(SMSG_AUTH_CHALLENGE, 37);
+
+    for (uint32 i = 0; i < 8; i++)
+        authch << uint32(0);
+
+    authch << uint32(m_Seed);
+    authch << uint8(1);
+
+    if (SendPacket(authch) == -1)
         return -1;
 
     // Register with ACE Reactor
@@ -756,6 +766,17 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                 }
                 else
                 {
+                    if (new_pct->GetOpcode() == MSG_VERIFY_CONNECTIVITY)
+                    {
+                        // Verification packet for us
+                        return 0;
+                    }
+                    // "Cancel" on Connecting progress bar push
+                    else if (new_pct->GetOpcode() == 0x446D)
+                    {
+                        // We don't care about that packet
+                        return 0;
+                    }
                     sLog->outError ("WorldSocket::ProcessIncoming: Client not authed opcode = %u", uint32(opcode));
                     return -1;
                 }
@@ -794,21 +815,24 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     BigNumber v, s, g, N, K;
     WorldPacket packet;
 
-    recvPacket.read(digest, 7);
+    //recvPacket.read(digest, 7); 406a
     recvPacket.read_skip<uint32>();
     recvPacket.read(digest, 1);
     recvPacket.read_skip<uint64>();
     recvPacket.read_skip<uint32>();
     recvPacket.read(digest, 1);
-    recvPacket.read_skip<uint8>();
-    recvPacket.read(digest, 2);
-    recvPacket >> clientSeed;
+    //recvPacket.read_skip<uint8>(); 406a
+    //recvPacket.read(digest, 2); 406a
+    //recvPacket >> clientSeed;  406a
     recvPacket.read_skip<uint32>();
-    recvPacket.read(digest, 6);
-    recvPacket >> clientBuild;
     recvPacket.read(digest, 1);
-    recvPacket.read_skip<uint8>();
     recvPacket.read_skip<uint32>();
+    recvPacket.read(digest, 7);
+    recvPacket >> clientBuild;
+    recvPacket.read(digest, 8);
+    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>();
+    recvPacket >> clientSeed;
     recvPacket.read(digest, 2);
 
     recvPacket >> m_addonSize;
@@ -823,8 +847,11 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         }
     }
 
+    recvPacket.read_skip<uint8>();
+    recvPacket.read_skip<uint8>();
+
     recvPacket >> accountName;
-   
+
     if (sWorld->IsClosed())
     {
         packet.Initialize(SMSG_AUTH_RESPONSE, 1);

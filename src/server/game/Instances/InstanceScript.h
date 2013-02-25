@@ -206,6 +206,8 @@ class InstanceScript : public ZoneScript
         // Achievement criteria additional requirements check
         // NOTE: not use this if same can be checked existed requirement types from AchievementCriteriaRequirementType
         virtual bool CheckAchievementCriteriaMeet(uint32 /*criteria_id*/, Player const* /*source*/, Unit const* /*target*/ = NULL, uint32 /*miscvalue1*/ = 0);
+        virtual uint32* GetUiEncounter(){return NULL;}
+        virtual uint32 GetMaxEncounter(){return 0;}
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(const DoorData *data);

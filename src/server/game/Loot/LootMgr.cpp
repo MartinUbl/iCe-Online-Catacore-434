@@ -104,12 +104,28 @@ void LootStore::LoadLootTable()
 
     sLog->outString("%s :", GetName());
 
-    //                                                        0      1     2                    3         4        5              6
+    //                                                  0      1           2               3         4          5            6
     QueryResult result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount FROM %s",GetName());
 
     if (result)
     {
         uint32 count = 0;
+
+        QueryResult resCount = WorldDatabase.PQuery("SELECT entry, count(*) as cnt FROM %s where groupid = 0 or mincountorref = 0 GROUP BY entry", GetName());
+        if (resCount)
+        {
+            m_LootTemplates.rehash(resCount->GetRowCount() * 1.1f);     // it is only "reserve" (missing function) in this case as it is empty
+            do
+            {
+                Field *fields = resCount->Fetch();
+                uint32 entry = fields[0].GetUInt32();
+                uint32 cnt = fields[1].GetUInt32();
+                std::pair< LootTemplateMap::iterator, bool > pr = m_LootTemplates.insert(LootTemplateMap::value_type(entry, new LootTemplate));
+                pr.first->second->ReserveSpaceForEntries(cnt);
+            } while (resCount->NextRow());
+        }
+
+        tab = m_LootTemplates.begin();
 
         do
         {

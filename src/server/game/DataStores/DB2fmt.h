@@ -19,5 +19,8 @@
 #define TRINITY_DB2SFRM_H
 
 const char Itemfmt[]="niiiiiii";
+const char ItemCurrencyCostEntryfmt[]="ni";
+const char ItemExtendedCostEntryfmt[]="niiiiiiiiiiiiiixiiiiiiiiiixxxxx";
+const char ItemSparsefmt[]="niiiffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisssssiiiiiiiiiiiiiiiiiiiiiifiiifii";
 
 #endif

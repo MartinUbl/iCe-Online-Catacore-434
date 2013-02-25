@@ -1,25 +1,18 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2011 TrintiyCore <http://www.trinitycore.org/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Strawberry-Pr0jcts <http://www.strawberry-pr0jcts.com/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -62,7 +55,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
         return false;                                       //'WDB2'
     }
 
-    if (fread(&recordCount, 4, 1, f) != 1)                       // Number of records
+    if (fread(&recordCount, 4, 1, f) != 1)                 // Number of records
     {
         fclose(f);
         return false;
@@ -70,7 +63,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(recordCount);
 
-    if (fread(&fieldCount, 4, 1, f) != 1)                         // Number of fields
+    if (fread(&fieldCount, 4, 1, f) != 1)                 // Number of fields
     {
         fclose(f);
         return false;
@@ -78,7 +71,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(fieldCount);
 
-    if (fread(&recordSize, 4, 1, f) != 1)                         // Size of a record
+    if (fread(&recordSize, 4, 1, f) != 1)                 // Size of a record
     {
         fclose(f);
         return false;
@@ -86,7 +79,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(recordSize);
 
-    if (fread(&stringSize, 4, 1, f) != 1)                         // String size
+    if (fread(&stringSize, 4, 1, f) != 1)                 // String size
     {
         fclose(f);
         return false;
@@ -95,7 +88,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
     EndianConvert(stringSize);
 
     /* NEW WDB2 FIELDS*/
-    if (fread(&tableHash, 4, 1, f) != 1)                          // Table hash
+    if (fread(&tableHash, 4, 1, f) != 1)                  // Table hash
     {
         fclose(f);
         return false;
@@ -103,7 +96,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(tableHash);
 
-    if (fread(&build, 4, 1, f) != 1)                              // Build
+    if (fread(&build, 4, 1, f) != 1)                     // Build
     {
         fclose(f);
         return false;
@@ -111,7 +104,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(build);
 
-    if (fread(&unk1, 4, 1, f) != 1)                               // Unknown WDB2
+    if (fread(&unk1, 4, 1, f) != 1)                     // Unknown WDB2
     {
         fclose(f);
         return false;
@@ -119,46 +112,51 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(unk1);
 
-    if (fread(&unk2, 4, 1, f) != 1)                               // Unknown WDB2
+    if (build > 12880)
     {
-        fclose(f);
-        return false;
+        if (fread(&unk2, 4, 1, f) != 1)                // Unknown WDB2
+        {
+            fclose(f);
+            return false;
+        }
+        EndianConvert(unk2);
+
+        if (fread(&maxIndex, 4, 1, f) != 1)                           // MaxIndex WDB2
+        {
+            fclose(f);
+            return false;
+        }
+        EndianConvert(maxIndex);
+
+        if (fread(&locale, 4, 1, f) != 1)                             // Locales
+        {
+            fclose(f);
+            return false;
+        }
+        EndianConvert(locale);
+
+        if (fread(&unk5, 4, 1, f) != 1)                               // Unknown WDB2
+        {
+            fclose(f);
+            return false;
+        }
+        EndianConvert(unk5);
     }
 
-    EndianConvert(unk2);
-
-    if (fread(&unk3, 4, 1, f) != 1)                               // Unknown WDB2
+    if (maxIndex != 0)
     {
-        fclose(f);
-        return false;
+        int32 diff = maxIndex - unk2 + 1;
+        fseek(f, diff * 4 + diff * 2, SEEK_CUR);    // diff * 4: an index for rows, diff * 2: a memory allocation bank
     }
-
-    EndianConvert(unk3);
-
-    if (fread(&locale, 4, 1, f) != 1)                             // Locales
-    {
-        fclose(f);
-        return false;
-    }
-
-    EndianConvert(locale);
-
-    if (fread(&unk5, 4, 1, f) != 1)                               // Unknown WDB2
-    {
-        fclose(f);
-        return false;
-    }
-
-    EndianConvert(unk5);
 
     fieldsOffset = new uint32[fieldCount];
     fieldsOffset[0] = 0;
     for (uint32 i = 1; i < fieldCount; i++)
     {
         fieldsOffset[i] = fieldsOffset[i - 1];
-        if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')         // byte fields
+        if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')
             fieldsOffset[i] += 1;
-        else                                                // 4 byte fields (int32/float/strings)
+        else
             fieldsOffset[i] += 4;
     }
 
@@ -189,7 +187,7 @@ DB2FileLoader::Record DB2FileLoader::getRecord(size_t id)
     return Record(*this, data + id*recordSize);
 }
 
-uint32 DB2FileLoader::GetFormatRecordSize(const char * format,int32* index_pos)
+uint32 DB2FileLoader::GetFormatRecordSize(const char * format, int32* index_pos)
 {
     uint32 recordsize = 0;
     int32 i = -1;
@@ -235,16 +233,6 @@ uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
 
 char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**& indexTable)
 {
-    /*
-    format STRING, NA, FLOAT,NA,INT <=>
-    struct{
-    char* field0,
-    float field1,
-    int field2
-    }entry;
-
-    this func will generate  entry[rows] data;
-    */
 
     typedef char * ptr;
     if (strlen(format) != fieldCount)
@@ -323,27 +311,27 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
 {
     if (strlen(format) != fieldCount)
         return NULL;
-    
+
     // we store flat holders pool as single memory block
     size_t stringFields = GetFormatStringsFields(format);
     // each string field at load have array of string for each locale
     size_t stringHolderSize = sizeof(char*) * TOTAL_LOCALES;
     size_t stringHoldersRecordPoolSize = stringFields * stringHolderSize;
     size_t stringHoldersPoolSize = stringHoldersRecordPoolSize * recordCount;
-    
+
     char* stringHoldersPool = new char[stringHoldersPoolSize];
-    
+
     // DB2 strings expected to have at least empty string
     for (size_t i = 0; i < stringHoldersPoolSize / sizeof(char*); ++i)
         ((char const**)stringHoldersPool)[i] = nullStr;
-    
+
     uint32 offset=0;
-    
+
     // assign string holders to string field slots
     for (uint32 y = 0; y < recordCount; y++)
     {
         uint32 stringFieldNum = 0;
-        
+
         for(uint32 x = 0; x < fieldCount; x++)
             switch(format[x])
             {
@@ -372,7 +360,7 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
                     assert(false && "unknown format character");
         }
     }
-    
+
     //send as char* for store in char* pool list for free at unload
     return stringHoldersPool;
 }
@@ -381,7 +369,7 @@ char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable)
 {
     if (strlen(format) != fieldCount)
         return NULL;
-    
+
     char* stringPool= new char[stringSize];
     memcpy(stringPool, stringTable, stringSize);
 
@@ -403,8 +391,8 @@ char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable)
             case FT_STRING:
             {
                 // fill only not filled entries
-                char** slot = *((char***)(&dataTable[offset]));
-                if (*slot == nullStr)
+                char** slot = (char**)(&dataTable[offset]);
+                if (**((char***)slot) == nullStr)
                 {
                     const char * st = getRecord(y).getString(x);
                     *slot=stringPool + (st-(const char*)stringTable);

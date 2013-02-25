@@ -238,6 +238,8 @@ class LootTemplate
         bool addConditionItem(Condition* cond);
         bool isReference(uint32 id);
 
+        void ReserveSpaceForEntries(uint32 space) { Entries.reserve(space); }
+
     private:
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimised) processing, grouped entries go there

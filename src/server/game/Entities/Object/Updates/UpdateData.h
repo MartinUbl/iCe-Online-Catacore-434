@@ -36,7 +36,7 @@ enum OBJECT_UPDATE_TYPE
     //UPDATETYPE_NEAR_OBJECTS         = 0xFF //deleted in 4.0.3.
 };
 
-enum OBJECT_UPDATE_FLAGS
+/*enum OBJECT_UPDATE_FLAGS
 {
     UPDATEFLAG_NONE         = 0x0000,
     UPDATEFLAG_SELF         = 0x0001,
@@ -52,18 +52,40 @@ enum OBJECT_UPDATE_FLAGS
     UPDATEFLAG_UNK1         = 0x0400, //not found.
     UPDATEFLAG_UNK2         = 0x0800, //added in 4.0.3
     UPDATEFLAG_UNK3         = 0x1000, //added in 4.0.3
+};*/
+
+enum OBJECT_UPDATE_FLAGS
+{
+    UPDATEFLAG_HAS_NONE                    = 0x0000,
+    UPDATEFLAG_HAS_SELF                    = 0x0001,
+    UPDATEFLAG_HAS_GO_TRANSPORT_TIME       = 0x0002,
+    UPDATEFLAG_HAS_ATTACKING_TARGET        = 0x0004,
+    UPDATEFLAG_HAS_ORIENTATION             = 0x0008,
+    UPDATEFLAG_HAS_LOWGUID                 = 0x0010,
+    UPDATEFLAG_HAS_LIVING                  = 0x0020,
+    UPDATEFLAG_HAS_STATIONARY_POSITION     = 0x0040,
+    UPDATEFLAG_HAS_VEHICLE                 = 0x0080,
+    UPDATEFLAG_HAS_GO_POSITION             = 0x0100,
+    UPDATEFLAG_HAS_GO_ROTATION             = 0x0200,
+    UPDATEFLAG_HAS_UNK                     = 0x0400,
+    UPDATEFLAG_HAS_ANIMKITS                = 0x0800,
+    UPDATEFLAG_HAS_GO_TRANSPORT_TIME_ARRAY = 0x1000,
+    UPDATEFLAG_HAS_ENABLE_PORTAL           = 0x2000,
+    UPDATEFLAG_HAS_UNK2                    = 0x4000,
 };
 
 class UpdateData
 {
     public:
-        UpdateData();
+        UpdateData(uint32 map);
 
         void AddOutOfRangeGUID(std::set<uint64>& guids);
         void AddOutOfRangeGUID(const uint64 &guid);
         void AddUpdateBlock(const ByteBuffer &block);
         bool BuildPacket(WorldPacket *packet);
         bool HasData() { return m_blockCount > 0 || !m_outOfRangeGUIDs.empty(); }
+        uint32 GetBlockCount() { return m_blockCount; }
+        size_t GetDataSize() { return m_data.size(); };
         void Clear();
 
         std::set<uint64> const& GetOutOfRangeGUIDs() const { return m_outOfRangeGUIDs; }
@@ -73,8 +95,6 @@ class UpdateData
         uint32 m_blockCount;
         std::set<uint64> m_outOfRangeGUIDs;
         ByteBuffer m_data;
-
-        void Compress(void* dst, uint32 *dst_size, void* src, int src_size);
 };
 #endif
 

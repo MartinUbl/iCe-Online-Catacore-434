@@ -39,6 +39,8 @@
 #include "Util.h"
 #include "LFGMgr.h"
 #include "Guild.h"
+#include "UpdateFieldFlags.h"
+#include "ObjectAccessor.h"
 
 Group::Group() : m_leaderGuid(0), m_groupType(GROUPTYPE_NORMAL), m_bgGroup(NULL),
 m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_looterGuid(0), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
@@ -362,6 +364,47 @@ bool Group::AddMember(const uint64 &guid, const char* name)
         if (isRaidGroup())
             player->UpdateForQuestWorldObjects();
 
+        {
+            // Broadcast new player group member fields to rest of the group
+            player->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+
+            UpdateData groupData(player->GetMapId());
+            WorldPacket groupDataPacket;
+
+            // Broadcast group members' fields to player
+            for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (itr->getSource() == player)
+                    continue;
+
+                if (Player* member = itr->getSource())
+                {
+                    if (player->HaveAtClient(member))
+                    {
+                        member->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+                        member->BuildValuesUpdateBlockForPlayer(&groupData, player);
+                        member->RemoveFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+                    }
+
+                    if (member->HaveAtClient(player))
+                    {
+                        UpdateData newData(member->GetMapId());
+                        WorldPacket newDataPacket;
+                        player->BuildValuesUpdateBlockForPlayer(&newData, member);
+                        member->SendDirectMessage(&newDataPacket);
+                    }
+                }
+            }
+
+            if (groupData.HasData())
+            {
+                groupData.BuildPacket(&groupDataPacket);
+                player->SendDirectMessage(&groupDataPacket);
+            }
+
+            player->RemoveFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+        }
+
         if (m_maxEnchantingLevel < player->GetSkillValue(SKILL_ENCHANTING))
             m_maxEnchantingLevel = player->GetSkillValue(SKILL_ENCHANTING);
     }
@@ -427,6 +470,10 @@ uint32 Group::RemoveMember(const uint64 &guid, const RemoveMethod &method /* = G
         Disband();
 
     return m_memberSlots.size();
+}
+Player* Group::GetLeader()
+{
+    return ObjectAccessor::FindPlayer(m_leaderGuid);
 }
 
 void Group::ChangeLeader(const uint64 &guid)
@@ -1325,6 +1372,7 @@ void Group::SendUpdate()
         {
             data << uint8(sLFGMgr->GetState(m_guid) == LFG_STATE_FINISHED_DUNGEON ? 2 : 0); // FIXME - Dungeon save status? 2 = done
             data << uint32(sLFGMgr->GetDungeon(m_guid));
+            data << uint8(0); // 4.x new
         }
 
         data << uint64(m_guid);
@@ -1360,33 +1408,6 @@ void Group::SendUpdate()
         }
 
         player->GetSession()->SendPacket(&data);
-
-        // Guild members present
-        uint32 gmembers = GetGuildMembersCount(player->GetGuildId());
-        // Max group size
-        uint32 maxgsize = 5;
-        uint32 guildprofit = GROUP_MEMBERS_DUNGEON_PROFIT;
-        if (isRaidGroup())
-        {
-            if (m_raidDifficulty == RAID_DIFFICULTY_10MAN_NORMAL ||
-                m_raidDifficulty == RAID_DIFFICULTY_10MAN_HEROIC)
-            {
-                maxgsize = 10;
-                guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
-            }
-            else
-            {
-                maxgsize = 25;
-                guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
-            }
-        }
-
-        WorldPacket guilddata(SMSG_GUILD_GROUP_UPDATE, 1+4+4+4, true);
-        guilddata << uint8( (gmembers >= guildprofit) ? 0x80 : 0x00 ); // value is 1 << 7 if it is guild group
-        guilddata << uint32(gmembers);                                 // members of guild present (also online)
-        guilddata << uint32(maxgsize);                                 // unknown
-        guilddata << float(GetGuildProfitCoef(player->GetGuildId()));  // % of guild profit
-        player->GetSession()->SendPacket(&guilddata);
     }
 }
 
@@ -1867,6 +1888,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
 
     uint32 arenaTeamId = reference->GetArenaTeamId(arenaSlot);
     uint32 team = reference->GetTeam();
+    uint8 twinkType = reference->GetTwinkType();
 
     BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
     BattlegroundQueueTypeId bgQueueTypeIdRated_10 = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RA_BG_10, 10);
@@ -1918,6 +1940,9 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         // check if someone in party is using dungeon system
         if (member->isUsingLfg())
             return ERR_LFG_CANT_USE_BATTLEGROUND;
+        // player has set different value for flag PLAYER_FLAGS_NO_XP_GAIN than a leader
+        if (member->GetTwinkType() != twinkType)
+            return ERR_BATTLEGROUND_JOIN_XP_GAIN;
     }
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...

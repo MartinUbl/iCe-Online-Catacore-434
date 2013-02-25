@@ -36,15 +36,29 @@ void WorldSession::HandleArenaTeamCreate(WorldPacket & recv_data)
 {
     sLog->outDebug("CMSG_ARENA_TEAM_CREATE");
 
-    uint32 type, icon, iconcolor, border, bordercolor, background;
+    uint32 slot, icon, iconcolor, border, bordercolor, background;
     std::string name;
 
-    recv_data >> background >> icon >> iconcolor >> border >> bordercolor;
-    recv_data >> type;
-    recv_data >> name;
+    recv_data >> slot;
+    recv_data >> iconcolor;
+    recv_data >> bordercolor;
+    recv_data >> icon;
+    recv_data >> background;
+    recv_data >> border;
+    name = recv_data.ReadString(recv_data.ReadBits(8));
+
+    uint8 type = ArenaTeam::GetTypeBySlot(slot);
+
+    // do not crash server if the read value is out of range
+    if (type == 0xFF)
+    {
+        if (GetPlayer())
+            sLog->outChar("ArenaTeamHandler: out of range slot (%d) for character %s\n", slot, GetPlayer()->GetName());
+        return;
+    }
 
     ArenaTeam* at = new ArenaTeam;
-    if (!at->Create(_player->GetGUID(), type, name))
+    if (!at->Create(_player, type, name))
     {
         sLog->outError("ArenaTeamHandler: arena team create failed.");
         delete at;
@@ -359,11 +373,16 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket & recv_data)
 
 void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id)
 {
-    WorldPacket data(SMSG_ARENA_TEAM_COMMAND_RESULT, 4+team.length()+1+player.length()+1+4, true);
+    WorldPacket data(SMSG_ARENA_TEAM_COMMAND_RESULT, 2 + team.length() + player.length() + 4 + 4);
+
+    data.WriteBits(player.length(), 7);
+    data.WriteBits(team.length(), 8);
+    data.FlushBits();
+
+    data.WriteString(player);
     data << uint32(team_action);
-    data << team;
-    data << player;
     data << uint32(error_id);
+    data.WriteString(team);
     SendPacket(&data);
 }
 

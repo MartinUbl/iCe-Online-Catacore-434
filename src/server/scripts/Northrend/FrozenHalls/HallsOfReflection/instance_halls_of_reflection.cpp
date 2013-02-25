@@ -419,6 +419,8 @@ public:
                     break;
             }
         }
+        virtual uint32* GetUiEncounter(){return uiEncounter;}
+        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

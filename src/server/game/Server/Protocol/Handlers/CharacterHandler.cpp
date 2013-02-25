@@ -171,10 +171,14 @@ bool LoginQueryHolder::Initialize()
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PLAYER_TALENTBRANCHSPECS);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS, stmt);
-              
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PLAYER_CURRENCY);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CURRENCY, stmt);
+
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PLAYER_CURRENCY_WEEKCAP);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP, stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PLAYER_TALENTS);
     stmt->setUInt32(0, lowGuid);
@@ -200,34 +204,51 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOADBANNED, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_CUF_PROFILES);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES, stmt);
+
     return res;
 }
 
 void WorldSession::HandleCharEnum(QueryResult result)
 {
-    WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
+    uint32 charCount = 0;
+    ByteBuffer bitBuffer;
+    ByteBuffer dataBuffer;
 
-    uint8 num = 0;
-
-    data << num;
-
-    _allowedCharsToLogin.clear();
+    bitBuffer.WriteBits(0, 23);
+    bitBuffer.WriteBit(1);
     if (result)
     {
+        _allowedCharsToLogin.clear();
+
+        charCount = uint32(result->GetRowCount());
+        bitBuffer.reserve(24 * charCount / 8);
+        dataBuffer.reserve(charCount * 381);
+
+        bitBuffer.WriteBits(charCount, 17);
+
         do
         {
-            uint32 guidlow = (*result)[0].GetUInt32();
-            sLog->outDetail("Loading char guid %u from account %u.",guidlow,GetAccountId());
-            if (Player::BuildEnumData(result, &data))
-            {
-                _allowedCharsToLogin.insert(guidlow);
-                ++num;
-            }
-        }
-        while (result->NextRow());
-    }
+            uint32 guidLow = (*result)[0].GetUInt32();
 
-    data.put<uint8>(0, num);
+            sLog->outDetail("Loading char guid %u from account %u.", guidLow, GetAccountId());
+
+            Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
+
+            _allowedCharsToLogin.insert(guidLow);
+        } while (result->NextRow());
+
+        bitBuffer.FlushBits();
+    }
+    else
+        bitBuffer.WriteBits(0, 17);
+
+    WorldPacket data(SMSG_CHAR_ENUM, 7 + bitBuffer.size() + dataBuffer.size());
+    data.append(bitBuffer);
+    if (charCount)
+        data.append(dataBuffer);
 
     SendPacket(&data);
 }
@@ -758,8 +779,34 @@ void WorldSession::HandleWorldLoginOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug("WORLD: Recvd World Login Message");
     uint32 unk;
-    uint8 unk1;
-    recv_data >> unk >> unk1;
+    uint8 loadingState; // 0x00 = loading end, 0x80 = loading started
+    recv_data >> unk >> loadingState;
+
+    // on loading end
+    if (loadingState == 0x00)
+    {
+        if (GetPlayer() && GetPlayer()->IsInWorld())
+        {
+            Player* pl = GetPlayer();
+
+            // If player has vehicle, then send everything about that
+            // this avoids actionbar glitches after /reload
+            if (pl->GetVehicle() && pl->GetVehicleBase())
+            {
+                Unit* veh = GetPlayer()->GetVehicleBase();
+
+                pl->SetClientControl(veh, 1);
+                pl->SetMover(veh);
+                pl->SetViewpoint(veh, false);
+                pl->SetViewpoint(veh, true);
+                pl->VehicleSpellInitialize();
+            }
+
+            // Send update for players in arena
+            if (pl->GetBattleground() && pl->GetBattleground()->isArena())
+                pl->UpdateObjectVisibility(true);
+        }
+    }
 }
 
 void WorldSession::HandlePlayerLoginOpcode(WorldPacket & recv_data)
@@ -775,7 +822,20 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket & recv_data)
 
     sLog->outStaticDebug("WORLD: Recvd Player Logon Message");
 
-    recv_data >> playerGuid;
+    BitStream mask = recv_data.ReadBitStream(8);
+
+    ByteBuffer bytes(8, true);
+    //15595
+    recv_data.ReadXorByte(mask[0], bytes[2]);
+    recv_data.ReadXorByte(mask[7], bytes[7]);
+    recv_data.ReadXorByte(mask[2], bytes[0]);
+    recv_data.ReadXorByte(mask[1], bytes[3]);
+    recv_data.ReadXorByte(mask[5], bytes[5]);
+    recv_data.ReadXorByte(mask[3], bytes[6]);
+    recv_data.ReadXorByte(mask[6], bytes[1]);
+    recv_data.ReadXorByte(mask[4], bytes[4]);
+
+    playerGuid = BitConverter::ToUInt64(bytes);
 
     if (!CharCanLogin(playerGuid))
     {
@@ -831,9 +891,35 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACCOUNTDATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
+    bool featureBit4 = true;
+    bool featureBit5 = false;
     data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
     data << uint8(2);                                       // unknown value
-    data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
+    data << uint32(1);
+    data << uint32(1);
+    data << uint32(2);
+    data << uint32(0);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(featureBit4);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.FlushBits();
+    if (featureBit4)
+    {
+        data << uint32(1);
+        data << uint32(0);
+        data << uint32(10);
+        data << uint32(60);
+    }
+
+    if (featureBit5)
+    {
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+    }
     SendPacket(&data);
 
     // Send MOTD
@@ -907,8 +993,20 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     }
 
     data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
-    data << uint32(0);
-    data << uint32(0);
+    data << uint64(0);
+    SendPacket(&data);
+
+    data.Initialize(SMSG_HOTFIX_INFO);
+    data.WriteBits(0, 22); // size of hotfix info
+    data.FlushBits();
+    /*
+    for (uint32 i = 0; i < hotfix.size(); ++i)
+    {
+        data << uint32(hotfix[i].Type);
+        data << uint32(hotfix[i].Timestamp);
+        data << uint32(hotfix[i].Entry);
+    }
+    */
     SendPacket(&data);
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
@@ -975,7 +1073,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         if (pCurrChar->HasAura(83950))
             pCurrChar->CastSpell(pCurrChar, 84559, true);
 
-        pCurrChar->SetMovement(MOVE_WATER_WALK);
+        pCurrChar->SetWaterWalk(true);
     }
 
     pCurrChar->ContinueTaxiFlight();
@@ -1418,10 +1516,28 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
 {
     uint32 slot;      // bag slot
     uint32 reforgeID; // ID of reforge entry in ItemReforge.dbc
-    uint64 guid;      // NPC guid
+    ObjectGuid guid; // NPC guid
     uint32 unk2;      // mostly 0xFF
 
-    recvPacket >> slot >> reforgeID >> guid >> unk2;
+    recvPacket >> reforgeID >> slot >> unk2;
+
+    guid[2] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[3] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[5]);
 
     ItemReforgeEntry const* ref_info = sItemReforgeStore.LookupEntry(reforgeID);
     if(!ref_info && reforgeID != 0)
@@ -1472,8 +1588,9 @@ void WorldSession::HandleItemReforge(WorldPacket& recvPacket)
         sLog->outDebug("Removing reforge from item");
     sLog->outDebug("Item: %u - %s", dstItem->GetEntry(), dstItem->GetProto()->Name1);
 
-    WorldPacket data(0x451C,1,true);
-    data << uint8(reforgeID); //is that true? 0 in all cases
+    WorldPacket data(SMSG_REFORGE_RESULT,1);
+    data.WriteBit(reforgeID);
+    data.FlushBits();
     SendPacket(&data);
 
     dstItem->SetReforge(reforgeID);
@@ -1608,6 +1725,14 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket &recv_data)
     {
         uint64 itemGuid;
         recv_data.readPackGUID(itemGuid);
+
+        // equipment manager sends "1" (as raw GUID) for slots set to "ignore" (don't touch slot at equip set)
+        if (itemGuid == 1)
+        {
+            // ignored slots saved as bit mask because we have no free special values for Items[i]
+            eqSet.IgnoreMask |= 1 << i;
+            continue;
+        }
 
         Item *item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
 
@@ -2043,4 +2168,20 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     data << uint8(facialHair);
     data << uint8(race);
     SendPacket(&data);
+}
+
+void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
+{
+    Player* player = GetPlayer();
+    // Only players that has not yet gained any experience can use this
+    if (player->GetUInt32Value(PLAYER_XP))
+        return;
+
+    if (ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(player->getClass()))
+    {
+        if (classEntry->CinematicSequence)
+            player->SendCinematicStart(classEntry->CinematicSequence);
+        else if (ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(player->getRace()))
+            player->SendCinematicStart(raceEntry->CinematicSequence);
+    }
 }

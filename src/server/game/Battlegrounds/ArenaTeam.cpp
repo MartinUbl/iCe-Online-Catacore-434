@@ -71,12 +71,15 @@ ArenaTeam::~ArenaTeam()
 {
 }
 
-bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string ArenaTeamName)
+bool ArenaTeam::Create(Player *captain, uint32 type, std::string ArenaTeamName)
 {
-    if (!sObjectMgr->GetPlayer(captainGuid))                      // player not exist
-        return false;
+    uint64 captainGuid = captain->GetGUID();
+
     if (sObjectMgr->GetArenaTeamByName(ArenaTeamName))            // arena team with this name already exist
+    {
+        captain->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", captain->GetName(), ERR_ARENA_TEAM_NAME_EXISTS_S);
         return false;
+    }
 
     uint32 captainLowGuid = GUID_LOPART(captainGuid);
     sLog->outDebug("GUILD: creating arena team %s to leader: %u", ArenaTeamName.c_str(), captainLowGuid);
@@ -159,12 +162,13 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating, conquest_point_cap FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
+    QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
     if (result)
-    {
         plMMRating = (*result)[0].GetUInt32();
-        plPCap = (*result)[1].GetUInt32();
-    }
+
+    QueryResult capresult = CharacterDatabase.PQuery("SELECT cap FROM character_currency_weekcap WHERE guid = '%u' AND currency = '%u' AND source = '%u';", GUID_LOPART(PlayerGuid), CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA);
+    if (capresult)
+        plPCap = (*capresult)[0].GetUInt32();
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
@@ -256,11 +260,14 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
         uint32 player_guid = fields[1].GetUInt32();
 
         QueryResult result = CharacterDatabase.PQuery(
-            "SELECT personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap FROM character_arena_stats WHERE guid = '%u' AND slot = '%u'", player_guid, GetSlot());
+            "SELECT personal_rating, matchmaker_rating, highest_week_rating FROM character_arena_stats WHERE guid = '%u' AND slot = '%u'", player_guid, GetSlot());
+
+        QueryResult capresult = CharacterDatabase.PQuery("SELECT cap FROM character_currency_weekcap WHERE guid = '%u' AND currency = '%u' AND source = '%u';", player_guid, CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA);
 
         uint32 personalrating = 0;
         uint32 matchmakerrating = 1500;
         uint32 highestweekrating = 0;
+
         uint32 conquestpointcap = 1343;
 
         if (result)
@@ -268,8 +275,10 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
             personalrating = (*result)[0].GetUInt32();
             matchmakerrating = (*result)[1].GetUInt32();
             highestweekrating = (*result)[2].GetUInt32();
-            conquestpointcap = (*result)[3].GetUInt32();
         }
+
+        if (capresult)
+            conquestpointcap = (*capresult)[0].GetUInt32() / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
 
         ArenaTeamMember newmember;
         newmember.guid              = MAKE_NEW_GUID(player_guid, 0, HIGHGUID_PLAYER);
@@ -568,6 +577,20 @@ uint8 ArenaTeam::GetSlotByType(uint32 type)
     return 0xFF;
 }
 
+uint8 ArenaTeam::GetTypeBySlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case 0: return ARENA_TEAM_2v2;
+        case 1: return ARENA_TEAM_3v3;
+        case 2: return ARENA_TEAM_5v5;
+        default:
+            break;
+    }
+    sLog->outError("FATAL: Unknown arena team slot %u for some arena team", slot);
+    return 0xFF;
+}
+
 bool ArenaTeam::HaveMember(const uint64& guid) const
 {
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -799,7 +822,7 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating, int32 te
             // reward conquest points (new in 4.x)
             // TODO: verify the coefficient 1/5
             if (plr)
-                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, itr->conquest_point_cap / 5);
+                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, itr->conquest_point_cap / 5, CURRENCY_SOURCE_ARENA);
 
             // update personal stats
             itr->games_week +=1;
@@ -851,7 +874,7 @@ void ArenaTeam::UpdateMembersConquestPointCap()
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         // cap is higher than 1343 only if player has rating > 1500
-        if (itr->personal_rating > 1500)
+        if (itr->personal_rating > 1500 && itr->personal_rating <= 2985)
             newcap = -1.00844494413448 * pow(10.0,-12) * pow(double(itr->personal_rating),5) + 1.2356986230482 * pow(10.0,-8) * pow(double(itr->personal_rating),4)
                      + -5.94771172066112 * pow(10.0,-5) * pow(double(itr->personal_rating),3) + 0.139443656834417 * pow(double(itr->personal_rating),2) + -156.936920229832 * itr->personal_rating + 68836.3;
         // formula has maximum in 2985, avoid lower cap for higher ratings
@@ -864,18 +887,18 @@ void ArenaTeam::UpdateMembersConquestPointCap()
 
         itr->conquest_point_cap = newcap;
 
-        // And notify also player class (if new cap is higher than old cap to not scare players)
+        // And notify also player class (if new cap is different from old cap)
         pSource = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(itr->guid));
-        if (pSource && newcap > oldcap)
+        if (pSource && newcap != oldcap)
         {
-            pSource->SetConquestPointCap(newcap);
-            if (pSource->IsInWorld() && !pSource->GetSession()->PlayerLoading())
-            {
-                WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
-                packet << uint32(newcap);
-                packet << uint32(CURRENCY_TYPE_CONQUEST_POINTS);
-                pSource->GetSession()->SendPacket(&packet);
-            }
+            pSource->SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, newcap * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
+            pSource->SendUpdateCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, newcap);
+        }
+        else
+        {
+            // Also update database data if the player is not online
+            // (online players will save theirs cap automatically on next logout / autosave / .save
+            CharacterDatabase.PExecute("REPLACE INTO character_currency_weekcap VALUES ('%u', '%u', '%u', '%u', '%u');", GUID_LOPART(itr->guid), CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, newcap * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS), 0);
         }
     }
 }
@@ -889,7 +912,7 @@ void ArenaTeam::SaveToDB()
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         trans->PAppend("UPDATE arena_team_member SET played_week = '%u', wons_week = '%u', played_season = '%u', wons_season = '%u' WHERE arenateamid = '%u' AND guid = '%u'", itr->games_week, itr->wins_week, itr->games_season, itr->wins_season, m_TeamId, GUID_LOPART(itr->guid));
-        trans->PAppend("UPDATE character_arena_stats SET personal_rating = '%u',matchmaker_rating = '%u',highest_week_rating = '%u', conquest_point_cap = '%u' WHERE guid = '%u' AND slot = '%u';", itr->personal_rating, itr->matchmaker_rating, itr->highest_week_rating, itr->conquest_point_cap, GUID_LOPART(itr->guid), GetSlot());
+        trans->PAppend("UPDATE character_arena_stats SET personal_rating = '%u',matchmaker_rating = '%u',highest_week_rating = '%u' WHERE guid = '%u' AND slot = '%u';", itr->personal_rating, itr->matchmaker_rating, itr->highest_week_rating, GUID_LOPART(itr->guid), GetSlot());
     }
     CharacterDatabase.CommitTransaction(trans);
 }

@@ -287,10 +287,10 @@ void LFGMgr::Update(uint32 diff)
                          {
                             uint64 gguid = grp->GetGUID();
                             SetState(gguid, LFG_STATE_PROPOSAL);
-                            plr->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
+                            plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
                         }
                         else
-                            plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
+                            plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetSelectedDungeons(guid), GetComment(guid)));
                         plr->GetSession()->SendLfgUpdateProposal(m_lfgProposalId, pProposal);
                     }
                 }
@@ -344,9 +344,33 @@ void LFGMgr::Update(uint32 diff)
                     break;
             }
 
+            Player* src = sObjectMgr->GetPlayer(itQueue->first);
+
+            uint8 tanks   = LFG_TANKS_NEEDED;
+            uint8 healers = LFG_HEALERS_NEEDED;
+            uint8 dpss    = LFG_DPS_NEEDED;
+
+            if (src)
+            {
+                tanks = GetRoleCountInDungeonQueue(dungeonId, ROLE_TANK, src->GetTeam());
+                healers = GetRoleCountInDungeonQueue(dungeonId, ROLE_HEALER, src->GetTeam());
+                dpss = GetRoleCountInDungeonQueue(dungeonId, ROLE_DAMAGE, src->GetTeam());
+
+                if (tanks > LFG_TANKS_NEEDED)
+                    tanks = LFG_TANKS_NEEDED;
+                if (healers > LFG_HEALERS_NEEDED)
+                    healers = LFG_HEALERS_NEEDED;
+                if (dpss > LFG_DPS_NEEDED)
+                    dpss = LFG_DPS_NEEDED;
+
+                tanks   = LFG_TANKS_NEEDED - tanks;
+                healers = LFG_HEALERS_NEEDED - healers;
+                dpss    = LFG_DPS_NEEDED - dpss;
+            }
+
             for (LfgRolesMap::const_iterator itPlayer = queue->roles.begin(); itPlayer != queue->roles.end(); ++itPlayer)
                 if (Player* plr = sObjectMgr->GetPlayer(itPlayer->first))
-                    plr->GetSession()->SendLfgQueueStatus(dungeonId, waitTime, m_WaitTimeAvg, m_WaitTimeTank, m_WaitTimeHealer, m_WaitTimeDps, queuedTime, queue->tanks, queue->healers, queue->dps);
+                    plr->GetSession()->SendLfgQueueStatus(dungeonId, waitTime, m_WaitTimeAvg, m_WaitTimeTank, m_WaitTimeHealer, m_WaitTimeDps, queuedTime, tanks, healers, dpss);
         }
     }
     else
@@ -516,7 +540,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             {
                 for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                     if (itr->getSource() && itr->getSource()->GetSession())
-                        itr->getSource()->GetSession()->SendLfgUpdateParty(updateData);
+                        itr->getSource()->GetSession()->SendLfgUpdateStatus(updateData);
             }
             return;
         }
@@ -647,7 +671,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             if (Player* plrg = itr->getSource())
             {
                 uint64 pguid = plrg->GetGUID();
-                plrg->GetSession()->SendLfgUpdateParty(updateData);
+                plrg->GetSession()->SendLfgUpdateStatus(updateData);
                 SetState(pguid, LFG_STATE_ROLECHECK);
                 if (!isContinue)
                     SetSelectedDungeons(pguid, dungeons);
@@ -674,7 +698,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
 
         // Send update to player
         plr->GetSession()->SendLfgJoinResult(joinData);
-        plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_PROPOSAL, dungeons, comment));
+        plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_JOIN_PROPOSAL, dungeons, comment));
         SetState(gguid, LFG_STATE_QUEUED);
         SetRoles(guid, roles);
         if (!isContinue)
@@ -687,8 +711,68 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
             SetSelectedDungeons(guid, dungeons);
         }
         AddToQueue(guid, uint8(plr->GetTeam()));
+
+        uint8 tanks   = LFG_TANKS_NEEDED;
+        uint8 healers = LFG_HEALERS_NEEDED;
+        uint8 dpss    = LFG_DPS_NEEDED;
+
+        uint32 dungeonId = (*dungeons.begin());
+        if (plr)
+        {
+            tanks = GetRoleCountInDungeonQueue(dungeonId, ROLE_TANK, plr->GetTeam());
+            healers = GetRoleCountInDungeonQueue(dungeonId, ROLE_HEALER, plr->GetTeam());
+            dpss = GetRoleCountInDungeonQueue(dungeonId, ROLE_DAMAGE, plr->GetTeam());
+
+            if (tanks > LFG_TANKS_NEEDED)
+                tanks = LFG_TANKS_NEEDED;
+            if (healers > LFG_HEALERS_NEEDED)
+                healers = LFG_HEALERS_NEEDED;
+            if (dpss > LFG_DPS_NEEDED)
+                dpss = LFG_DPS_NEEDED;
+
+            tanks   = LFG_TANKS_NEEDED - tanks;
+            healers = LFG_HEALERS_NEEDED - healers;
+            dpss    = LFG_DPS_NEEDED - dpss;
+        }
+
+        if (!dungeons.empty())
+            plr->GetSession()->SendLfgQueueStatus((*dungeons.begin()),-1,-1,-1,-1,-1,-1,tanks,healers,dpss);
     }
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
+}
+
+uint32 LFGMgr::GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint8 team)
+{
+    uint32 count = 0;
+    Player* src = NULL;
+
+    for (LfgQueueInfoMap::const_iterator itr = m_QueueInfoMap.begin(); itr != m_QueueInfoMap.end(); ++itr)
+    {
+        if (!(*itr).second)
+            continue;
+
+        src = sObjectMgr->GetPlayer((*itr).first);
+
+        if (!src)
+            continue;
+
+        for (LfgDungeonSet::const_iterator itr2 = (*itr).second->dungeons.begin(); itr2 != (*itr).second->dungeons.end(); ++itr2)
+        {
+            if ((*itr2) == dungeonId && src->GetTeam() == team)
+            {
+                if (role == ROLE_TANK)
+                    count += (LFG_TANKS_NEEDED - (*itr).second->tanks);
+                else if (role == ROLE_HEALER)
+                    count += (LFG_HEALERS_NEEDED - (*itr).second->healers);
+                else if (role == ROLE_DAMAGE)
+                    count += (LFG_DPS_NEEDED - (*itr).second->dps);
+
+                break;
+            }
+        }
+    }
+
+    return count;
 }
 
 /**
@@ -719,14 +803,14 @@ void LFGMgr::Leave(Player* plr, Group* grp /* = NULL*/)
                     for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                         if (Player* plrg = itr->getSource())
                         {
-                            plrg->GetSession()->SendLfgUpdateParty(updateData);
+                            plrg->GetSession()->SendLfgUpdateStatus(updateData);
                             uint64 pguid = plrg->GetGUID();
                             ClearState(pguid);
                         }
                 }
                 else
                 {
-                    plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                    plr->GetSession()->SendLfgUpdateStatus(updateData);
                     ClearState(guid);
                 }
             }
@@ -1101,12 +1185,12 @@ void LFGMgr::UpdateRoleCheck(uint64& gguid, uint64 guid /* = 0 */, uint8 roles /
                 continue;
             case LFG_ROLECHECK_FINISHED:
                 SetState(pguid, LFG_STATE_QUEUED);
-                plrg->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, dungeons, GetComment(pguid)));
+                plrg->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, dungeons, GetComment(pguid)));
                 break;
             default:
                 if (roleCheck->leader == pguid)
                     plrg->GetSession()->SendLfgJoinResult(joinData);
-                plrg->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ROLECHECK_FAILED));
+                plrg->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ROLECHECK_FAILED));
                 ClearState(pguid);
                 break;
         }
@@ -1390,12 +1474,12 @@ void LFGMgr::UpdateProposal(uint32 proposalId, const uint64& guid, bool accept)
                 plr->GetSession()->SendLfgUpdateProposal(proposalId, pProposal);
             if (group)
             {
-                plr->GetSession()->SendLfgUpdateParty(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
                 if (group != grp)
                     plr->RemoveFromGroup();
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
 
             if (!grp)
             {
@@ -1524,10 +1608,10 @@ void LFGMgr::RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType t
             if (grp)
             {
                 RestoreState(gguid);
-                plr->GetSession()->SendLfgUpdateParty(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(updateData);
+                plr->GetSession()->SendLfgUpdateStatus(updateData);
         }
         else
         {
@@ -1536,10 +1620,10 @@ void LFGMgr::RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType t
             if (grp)
             {
                 SetState(gguid, LFG_STATE_QUEUED);
-                plr->GetSession()->SendLfgUpdateParty(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
+                plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
             }
             else
-                plr->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
+                plr->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, GetSelectedDungeons(guid), GetComment(guid)));
         }
     }
 

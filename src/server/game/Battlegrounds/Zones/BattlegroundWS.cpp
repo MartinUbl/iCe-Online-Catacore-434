@@ -65,7 +65,7 @@ void BattlegroundWS::Update(uint32 diff)
 
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
-        if (GetStartTime() >= 25*MINUTE*IN_MILLISECONDS)
+        if (GetElapsedTime() >= 27*MINUTE*IN_MILLISECONDS)
         {
             if (GetTeamScore(ALLIANCE) == 0)
             {
@@ -101,10 +101,10 @@ void BattlegroundWS::Update(uint32 diff)
                 EndBattleground(ALLIANCE);
             }
         }
-        else if (GetStartTime() > uint32(m_minutesElapsed * MINUTE * IN_MILLISECONDS))
+        else if (GetElapsedTime() > uint32(m_minutesElapsed * MINUTE * IN_MILLISECONDS))
         {
             ++m_minutesElapsed;
-            UpdateWorldState(BG_WS_STATE_TIMER, 25 - m_minutesElapsed);
+            UpdateWorldState(BG_WS_STATE_TIMER, 27 - m_minutesElapsed);
         }
 
         if (m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_WAIT_RESPAWN)

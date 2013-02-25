@@ -1657,6 +1657,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILLS_GUILD:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE_GUILD:
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE:
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_2:
                 break;
         }
 
@@ -2197,12 +2199,18 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, b
     }
 }
 
+struct VisibleAchievementPred
+{
+    bool operator()(CompletedAchievementMap::value_type const& val)
+    {
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(val.first);
+        return achievement && !(achievement->flags & ACHIEVEMENT_FLAG_HIDDEN);
+    }
+};
+
 void AchievementMgr::SendAllAchievementData()
 {
-    time_t now = time(NULL);
-    uint32 criterias = 0;
     uint32 achievements = 0;
-    uint32 flagBytesCount = 0;
 
     // A first, send guild achievements done
     // Next packet will only append his data in client
@@ -2211,82 +2219,89 @@ void AchievementMgr::SendAllAchievementData()
     if (pPlGuild)
     {
         pGuildMgr = &pPlGuild->GetAchievementMgr();
-        criterias = pGuildMgr->m_criteriaProgress.size();
         achievements = pGuildMgr->m_completedAchievements.size();
 
-        flagBytesCount = uint32(ceil(float(criterias) * 2.0f / 8.0f));
-
         // Send guild achievements
-        WorldPacket datas(SMSG_ALL_ACHIEVEMENT_DATA, 4, true);
-        datas << uint32(achievements);
-        datas << uint32(criterias);
-
+        WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DATA, achievements);
+        data.WriteBits(achievements, 23);
         for (CompletedAchievementMap::const_iterator iter = pGuildMgr->m_completedAchievements.begin(); iter!=pGuildMgr->m_completedAchievements.end(); ++iter)
-            datas << uint32(iter->first);
-        for (CompletedAchievementMap::const_iterator iter = pGuildMgr->m_completedAchievements.begin(); iter!=pGuildMgr->m_completedAchievements.end(); ++iter)
-            datas << uint32(secsToTimeBitFields(iter->second.date));
-        for (CriteriaProgressMap::const_iterator iter = pGuildMgr->m_criteriaProgress.begin(); iter!=pGuildMgr->m_criteriaProgress.end(); ++iter)
-            datas << uint64(iter->second.counter);
-        for (CriteriaProgressMap::const_iterator iter = pGuildMgr->m_criteriaProgress.begin(); iter!=pGuildMgr->m_criteriaProgress.end(); ++iter)
-            datas << uint32(now - iter->second.date);
-        for (CriteriaProgressMap::const_iterator iter = pGuildMgr->m_criteriaProgress.begin(); iter!=pGuildMgr->m_criteriaProgress.end(); ++iter)
-            datas << uint32(secsToTimeBitFields(iter->second.date));
+        {
+            data.AppendPackedTime(iter->second.date);
+            data << uint32(iter->first);
+        }
 
-        for (uint32 i = 0; i < criterias; ++i)
-            datas << uint64(GetPlayer()->GetGUID());
-
-        for (CriteriaProgressMap::const_iterator iter = pGuildMgr->m_criteriaProgress.begin(); iter!=pGuildMgr->m_criteriaProgress.end(); ++iter)
-            datas << uint32(now - iter->second.date);
-
-        for (uint32 i = 0; i < flagBytesCount; ++i)
-            datas << uint8(0);
-
-        for (CriteriaProgressMap::const_iterator iter = pGuildMgr->m_criteriaProgress.begin(); iter!=pGuildMgr->m_criteriaProgress.end(); ++iter)
-            datas << uint32(iter->first);
-
-        GetPlayer()->GetSession()->SendPacket(&datas);
+        GetPlayer()->GetSession()->SendPacket(&data);
     }
 
     // Now we are ready to send player achievements
 
-    criterias = m_criteriaProgress.size();
-    achievements = m_completedAchievements.size();
+    VisibleAchievementPred isVisible;
 
-    // 2 is flag count, 8 is bits in byte
-    flagBytesCount = uint32(ceil(float(criterias) * 2.0f / 8.0f));
+    size_t numCriterias = m_criteriaProgress.size();
+    size_t achievementCount = std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible);
+    ByteBuffer criteriaData(numCriterias * (4 + 4 + 4 + 4 + 8 + 8));
+    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid counter;
 
-    // since we don't know the exact size of the packed GUIDs this is just an approximation
-    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4 + criterias * (8 + 4 + 4 + 8) + 8 + 4 + achievements * (4 + 4 + 4) + flagBytesCount);
+    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4, true);
+    data.WriteBits(numCriterias, 21);
+    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+    {
+        counter = uint64(iter->second.counter);
 
-    data << uint32(achievements);
-    data << uint32(criterias);
+        data.WriteBit(guid[4]);
+        data.WriteBit(counter[3]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(counter[0]);
+        data.WriteBit(counter[6]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(counter[4]);
+        data.WriteBit(guid[2]);
+        data.WriteBit(counter[7]);
+        data.WriteBit(guid[7]);
+        data.WriteBits(0u, 2);
+        data.WriteBit(guid[6]);
+        data.WriteBit(counter[2]);
+        data.WriteBit(counter[1]);
+        data.WriteBit(counter[5]);
+        data.WriteBit(guid[1]);
 
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter!=m_completedAchievements.end(); ++iter)
+        criteriaData.WriteByteSeq(guid[3]);
+        criteriaData.WriteByteSeq(counter[5]);
+        criteriaData.WriteByteSeq(counter[6]);
+        criteriaData.WriteByteSeq(guid[4]);
+        criteriaData.WriteByteSeq(guid[6]);
+        criteriaData.WriteByteSeq(counter[2]);
+        criteriaData << uint32(0); // timer 2
+        criteriaData.WriteByteSeq(guid[2]);
+        criteriaData << uint32(iter->first); // criteria id
+        criteriaData.WriteByteSeq(guid[5]);
+        criteriaData.WriteByteSeq(counter[0]);
+        criteriaData.WriteByteSeq(counter[3]);
+        criteriaData.WriteByteSeq(counter[1]);
+        criteriaData.WriteByteSeq(counter[4]);
+        criteriaData.WriteByteSeq(guid[0]);
+        criteriaData.WriteByteSeq(guid[7]);
+        criteriaData.WriteByteSeq(counter[7]);
+        criteriaData << uint32(0); // timer 1
+        criteriaData.AppendPackedTime(iter->second.date);  // criteria date
+        criteriaData.WriteByteSeq(guid[1]);
+    }
+
+    data.WriteBits(achievementCount, 23);
+    data.FlushBits();
+    data.append(criteriaData);
+
+    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    {
+        // Skip hidden achievements
+        if (!isVisible(*iter))
+            continue;
+
         data << uint32(iter->first);
-
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter!=m_completedAchievements.end(); ++iter)
-        data << uint32(secsToTimeBitFields(iter->second.date));
-
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
-        data << uint64(iter->second.counter);
-
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
-        data << uint32(now - iter->second.date);
-
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
-        data << uint32(secsToTimeBitFields(iter->second.date));
-
-    for (uint32 i = 0; i < criterias; ++i)
-        data << uint64(GetPlayer()->GetGUID());
-
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
-        data << uint32(now - iter->second.date);
-
-    for (uint32 i = 0; i < flagBytesCount; ++i)
-        data << uint8(0);
-
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
-        data << uint32(iter->first);
+        data.AppendPackedTime(iter->second.date);
+    }
 
     GetPlayer()->GetSession()->SendPacket(&data);
 }
@@ -2748,75 +2763,4 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
     sLog->outString();
     sLog->outString(">> Loaded %lu achievement reward locale strings", (unsigned long)m_achievementRewardLocales.size());
-}
-
-void AchievementMgr::Compress(WorldPacket &packet, uint32 newOpcode)
-{
-    uint32 pSize = packet.wpos();
-    uint32 destsize = compressBound(pSize);
-    packet.resize(destsize + sizeof(uint32));
-    packet.put<uint32>(0, pSize);
-
-    Compress(const_cast<uint8*>(packet.contents()) + sizeof(uint32), &destsize, (void*)packet.contents(), pSize);
-    if (destsize == 0)
-        return;
-
-    packet.resize(destsize + sizeof(uint32));
-    packet.SetOpcode(newOpcode);
-}
-
-void AchievementMgr::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
-{
-    z_stream c_stream;
-
-    c_stream.zalloc = (alloc_func)0;
-    c_stream.zfree = (free_func)0;
-    c_stream.opaque = (voidpf)0;
-
-    // default Z_BEST_SPEED (1)
-    int z_res = deflateInit(&c_stream, sWorld->getIntConfig(CONFIG_COMPRESSION));
-    if (z_res != Z_OK)
-    {
-        sLog->outError("Can't compress update packet (zlib: deflateInit) Error code: %i (%s)",z_res,zError(z_res));
-        *dst_size = 0;
-        return;
-    }
-
-    c_stream.next_out = (Bytef*)dst;
-    c_stream.avail_out = *dst_size;
-    c_stream.next_in = (Bytef*)src;
-    c_stream.avail_in = (uInt)src_size;
-
-    z_res = deflate(&c_stream, Z_NO_FLUSH);
-    if (z_res != Z_OK)
-    {
-        sLog->outError("Can't compress update packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
-        *dst_size = 0;
-        return;
-    }
-
-    if (c_stream.avail_in != 0)
-    {
-        sLog->outError("Can't compress update packet (zlib: deflate not greedy)");
-        *dst_size = 0;
-        return;
-    }
-
-    z_res = deflate(&c_stream, Z_FINISH);
-    if (z_res != Z_STREAM_END)
-    {
-        sLog->outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END instead %i (%s)",z_res,zError(z_res));
-        *dst_size = 0;
-        return;
-    }
-
-    z_res = deflateEnd(&c_stream);
-    if (z_res != Z_OK)
-    {
-        sLog->outError("Can't compress update packet (zlib: deflateEnd) Error code: %i (%s)",z_res,zError(z_res));
-        *dst_size = 0;
-        return;
-    }
-
-    *dst_size = c_stream.total_out;
 }

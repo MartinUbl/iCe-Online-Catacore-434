@@ -116,6 +116,8 @@ enum BattlegroundTimeIntervals
     RESPAWN_ONE_DAY                 = 86400,                // secs
     RESPAWN_IMMEDIATELY             = 0,                    // secs
     BUFF_RESPAWN_TIME               = 180,                  // secs
+    BATTLEGROUND_COUNTDOWN_MAX      = 120,                  // secs
+    ARENA_COUNTDOWN_MAX             = 60,                   // secs
 };
 
 enum BattlegroundStartTimeIntervals
@@ -137,11 +139,11 @@ enum BattlegroundBuffObjects
 enum BattlegroundRandomRewards
 {
     BG_REWARD_WINNER_HONOR_FIRST    = 30,
-    BG_REWARD_WINNER_ARENA_FIRST    = 25,
+    BG_REWARD_WINNER_CONQUEST_FIRST = 25,
     BG_REWARD_WINNER_HONOR_LAST     = 15,
-    BG_REWARD_WINNER_ARENA_LAST     = 0,
-    BG_REWARD_LOSER_HONOR_FIRST    = 5,
-    BG_REWARD_LOSER_HONOR_LAST     = 5
+    BG_REWARD_WINNER_CONQUEST_LAST  =  0,
+    BG_REWARD_LOSER_HONOR_FIRST     =  5,
+    BG_REWARD_LOSER_HONOR_LAST      =  5
 };
 
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
@@ -369,9 +371,10 @@ class Battleground
         BattlegroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
         BattlegroundBracketId GetBracketId() const { return m_BracketId; }
         uint32 GetInstanceID() const        { return m_InstanceID; }
+        uint64 GetGUID() const              { return m_Guid; }
         BattlegroundStatus GetStatus() const { return m_Status; }
         uint32 GetClientInstanceID() const  { return m_ClientInstanceID; }
-        uint32 GetStartTime() const         { return m_StartTime; }
+        uint32 GetElapsedTime() const         { return m_StartTime; }
         uint32 GetEndTime() const           { return m_EndTime; }
         uint32 GetLastResurrectTime() const { return m_LastResurrectTime; }
         uint32 GetMaxPlayers() const        { return m_MaxPlayers; }
@@ -398,9 +401,10 @@ class Battleground
         //here we can count minlevel and maxlevel for players
         void SetBracket(PvPDifficultyEntry const* bracketEntry);
         void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; }
+        void SetGUID(uint64 guid) { m_Guid = guid; }
         void SetStatus(BattlegroundStatus Status) { m_Status = Status; }
         void SetClientInstanceID(uint32 InstanceID) { m_ClientInstanceID = InstanceID; }
-        void SetStartTime(uint32 Time)      { m_StartTime = Time; }
+        void SetElapsedTime(uint32 Time)      { m_StartTime = Time; }
         void SetEndTime(uint32 Time)        { m_EndTime = Time; }
         void SetLastResurrectTime(uint32 Time) { m_LastResurrectTime = Time; }
         void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; }
@@ -447,7 +451,7 @@ class Battleground
         void AddPlayerToResurrectQueue(const uint64& npc_guid, const uint64& player_guid);
         void RemovePlayerFromResurrectQueue(const uint64& player_guid);
 
-        void StartBattleground();
+        void StartBattleground(uint8 twink);
 
         GameObject* GetBGObject(uint32 type);
         Creature* GetBGCreature(uint32 type);
@@ -605,6 +609,8 @@ class Battleground
         void RatedBattlegroundLost(Player *player);
         void RatedBattlegroundLostOffline(uint64 guid);
 
+        virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
+
     protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends Battleground
         void EndNow();
@@ -647,9 +653,11 @@ class Battleground
         BattlegroundTypeId m_TypeID;
         BattlegroundTypeId m_RandomTypeID;
         uint32 m_InstanceID;                                // Battleground Instance's GUID!
+        uint64 m_Guid;
         BattlegroundStatus m_Status;
         uint32 m_ClientInstanceID;                          // the instance-id which is sent to the client and without any other internal use
         uint32 m_StartTime;
+        uint32 m_CountdownTimer;
         uint32 m_ResetStatTimer;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         uint32 m_LastResurrectTime;
@@ -665,6 +673,8 @@ class Battleground
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
         char const *m_Name;
+
+        uint8 m_twink;
 
         // Player lists
         std::vector<uint64> m_ResurrectQueue;               // Player GUID

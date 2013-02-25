@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _BIH_H
@@ -85,13 +81,26 @@ struct AABound
 
 class BIH
 {
-    public:
-        BIH() {};
-        template< class T, class BoundsFunc >
-        void build(const std::vector<T> &primitives, BoundsFunc &getBounds, uint32 leafSize = 3, bool printStats=false)
+    private:
+        void init_empty()
         {
-            if(primitives.size() == 0)
+            tree.clear();
+            objects.clear();
+            // create space for the first node
+            tree.push_back(3 << 30); // dummy leaf
+            tree.insert(tree.end(), 2, 0);
+        }
+    public:
+        BIH() { init_empty(); }
+        template< class BoundsFunc, class PrimArray >
+        void build(const PrimArray &primitives, BoundsFunc &getBounds, uint32 leafSize = 3, bool printStats=false)
+        {
+            if (primitives.size() == 0)
+            {
+                init_empty();
                 return;
+            }
+
             buildData dat;
             dat.maxPrims = leafSize;
             dat.numPrims = primitives.size();
@@ -119,7 +128,7 @@ class BIH
             delete[] dat.primBound;
             delete[] dat.indices;
         }
-        uint32 primCount() { return objects.size(); }
+        uint32 primCount() const { return objects.size(); }
 
         template<typename RayCallback>
         void intersectRay(const Ray &r, RayCallback& intersectCallback, float &maxDist, bool stopAtFirst=false) const
@@ -160,7 +169,7 @@ class BIH
             uint32 offsetBack3[3];
             // compute custom offsets from direction sign bit
 
-            for(int i=0; i<3; ++i)
+            for (int i=0; i<3; ++i)
             {
                 offsetFront[i] = floatToRawIntBits(dir[i]) >> 31;
                 offsetBack[i] = offsetFront[i] ^ 1;
@@ -222,7 +231,7 @@ class BIH
                             int n = tree[node + 1];
                             while (n > 0) {
                                 bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst);
-                                if(stopAtFirst && hit) return;
+                                if (stopAtFirst && hit) return;
                                 --n;
                                 ++offset;
                             }
@@ -338,8 +347,8 @@ class BIH
             }
         }
 
-        bool writeToFile(FILE *wf) const;
-        bool readFromFile(FILE *rf);
+        bool writeToFile(FILE* wf) const;
+        bool readFromFile(FILE* rf);
 
     protected:
         std::vector<uint32> tree;
@@ -380,7 +389,7 @@ class BIH
                 maxObjects(0xFFFFFFFF), sumDepth(0), minDepth(0x0FFFFFFF),
                 maxDepth(0xFFFFFFFF), numBVH2(0)
             {
-                for(int i=0; i<6; ++i) numLeavesN[i] = 0;
+                for (int i=0; i<6; ++i) numLeavesN[i] = 0;
             }
 
             void updateInner() { numNodes++; }
@@ -391,7 +400,8 @@ class BIH
 
         void buildHierarchy(std::vector<uint32> &tempTree, buildData &dat, BuildStats &stats);
 
-        void createNode(std::vector<uint32> &tempTree, int nodeIndex, uint32 left, uint32 right) {
+        void createNode(std::vector<uint32> &tempTree, int nodeIndex, uint32 left, uint32 right) const
+        {
             // write leaf node
             tempTree[nodeIndex + 0] = (3 << 30) | left;
             tempTree[nodeIndex + 1] = right - left + 1;
