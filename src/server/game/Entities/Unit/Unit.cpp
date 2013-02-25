@@ -17921,7 +17921,6 @@ void Unit::RemoveVehicleKit()
 
     m_vehicleKit->Uninstall();
     delete m_vehicleKit;
-    delete movespline;
 
     m_vehicleKit = NULL;
 
