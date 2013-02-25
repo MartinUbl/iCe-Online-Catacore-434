@@ -619,9 +619,19 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     data.WriteBit(plGuid[3]);
     data.WriteBit(plGuid[0]);
 
-    data.WriteBits(joinData.lockmap.size(), 24);
+    uint32 dsize = joinData.lockmap.size();
+
+    // temp and hack and shit
+    // please, fix me
+    // without it, it causes ByteBuffer to overflow over 10000000 bytes allocated, and thats wrong
+    if (dsize > 50)
+        dsize = 50;
+
+    data.WriteBits(dsize, 24);
 
     ObjectGuid tmpGuid;
+
+    uint32 limit = 0;
 
     for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
@@ -637,12 +647,19 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
         data.WriteBit(tmpGuid[1]);
 
         data.WriteBits(it->second.size(), 22);
+
+        limit++;
+
+        if (limit >= dsize)
+            break;
     }
 
     data.WriteBit(plGuid[4]);
     data.WriteBit(plGuid[5]);
     data.WriteBit(plGuid[1]);
     data.WriteBit(plGuid[6]);
+
+    limit = 0;
 
     for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
@@ -664,6 +681,11 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
         data.WriteByteSeq(tmpGuid[3]);
         data.WriteByteSeq(tmpGuid[6]);
         data.WriteByteSeq(tmpGuid[7]);
+
+        limit++;
+
+        if (limit >= dsize)
+            break;
     }
 
     data.WriteByteSeq(plGuid[1]);
