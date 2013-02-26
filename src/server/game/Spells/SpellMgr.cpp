@@ -449,9 +449,6 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
     if (spell && spell->GetCaster())
         spell->GetCaster()->ModSpellCastTime(spellInfo, castTime, spell);
 
-    if (spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO && (!spell || !(spell->IsAutoRepeat())) && spellInfo->CastingTimeIndex != 1)
-        castTime += 500;
-
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
