@@ -548,7 +548,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     }
 
     // Implementation of "extra attacks" mastery proficiencies
-    if (cleanDamage && (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE))
+    if (cleanDamage && (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
+                    && (!spellProto || !(spellProto->AttributesEx4 & SPELL_ATTR4_TRIGGERED)))
     {
         uint32 spellId = 0;
         if (spellProto)
