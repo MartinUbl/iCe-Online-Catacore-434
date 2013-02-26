@@ -5316,7 +5316,9 @@ void Spell::TakeRunePower()
                 plr->SetLastUsedRune(RuneType(rune));
                 runeCost[rune]--;
 
-                plr->RestoreBaseRune(i);
+                // Blood of the North (permanent convert)
+                if (!((i == 0 || i == 1) && (plr->HasAura(54637) || plr->HasAura(98056))))
+                    plr->RestoreBaseRune(i);
 
                 if (runeCost[RUNE_DEATH] == 0)
                     break;
