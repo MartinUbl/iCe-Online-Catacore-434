@@ -1252,10 +1252,19 @@ public:
         if (canBuy)
         {
             if (pCreature->isVendor())
-                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
         }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_TRADE)
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+
         return true;
     }
 };
