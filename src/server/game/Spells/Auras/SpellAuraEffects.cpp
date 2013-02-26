@@ -1036,6 +1036,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 case 94338: // Eclipse (Solar) - Change Moonfire to Sunfire
                     amount = 93402;
                     break;
+                case 687:   // Demon Armor
+                case 28176: // Fel Armor
+                    // Nether Ward (if has talent, otherwise Shadow Ward)
+                    if (caster && caster->HasAura(91713))
+                        amount = 91711;
+                    else
+                        amount = 6229;
                 default:
                     break;
             }
