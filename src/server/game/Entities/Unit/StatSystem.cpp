@@ -771,6 +771,11 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
+    // only mana users regenerate mana, other classes use these float values for their power regen
+    uint8 cl = getClass();
+    if (cl == CLASS_DEATH_KNIGHT || cl == CLASS_ROGUE || cl == CLASS_HUNTER)
+        return;
+
     float Intellect = GetStat(STAT_INTELLECT);
     // Mana regen from spirit and intellect
     float power_regen = sqrt(Intellect) * OCTRegenMPPerSpirit();
