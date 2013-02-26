@@ -8564,6 +8564,15 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
             }
             break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Do not allow Fire! to be dropped by another spell than Aimed Shot (handled elsewhere)
+            if (triggeredByAura && triggeredByAura->GetId() == 82926)
+            {
+                *handled = true;
+                break;
+            }
+        }
     }
     return false;
 }
