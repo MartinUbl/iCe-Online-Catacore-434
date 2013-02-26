@@ -914,7 +914,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
-                        SpellScaling pScaling(m_caster->getLevel(), pSpell);
+                        SpellScaling pScaling;
+                        pScaling.Init(m_caster->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
                         bp0 *= damage/100;
                         if (bp0 > maxbp)
@@ -956,7 +957,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
                         // - the lower of them
-                        SpellScaling pScaling(pOwner->getLevel(), pSpell);
+                        SpellScaling pScaling;
+                        pScaling.Init(pOwner->getLevel(), pSpell);
                         maxbp = (maxbp + pScaling.avg[1])/7;
                         bp0 *= damage/100;
                         if (bp0 > maxbp)

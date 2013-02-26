@@ -937,16 +937,17 @@ struct SpellScaling
 {
     uint8 playerLevel;
     const SpellEntry * spellEntry;
-    
+
     float avg[3];
     float min[3];
     float max[3];
     float pts[3];
-    
+
     int32 cast;
-    
+
     bool canScale;
-    SpellScaling(uint8 playerLevel_, const SpellEntry * spellEntry_);
+    SpellScaling();
+    void Init(uint8 playerLevel_, const SpellEntry * spellEntry_);
 };
 
 bool IsPartOfSkillLine(uint32 skillId, uint32 spellId);

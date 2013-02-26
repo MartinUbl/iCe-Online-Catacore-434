@@ -275,10 +275,8 @@ SpellMgr& SpellMgr::Instance()
     return spellMgr;
 }
 
-SpellScaling::SpellScaling(uint8 playerLevel_, const SpellEntry * spellEntry_)
+SpellScaling::SpellScaling()
 {
-    playerLevel = playerLevel_;
-    spellEntry = spellEntry_;
     for(int i = 0; i < 3; i++)
     {
         avg[i] = 0.f;
@@ -288,6 +286,15 @@ SpellScaling::SpellScaling(uint8 playerLevel_, const SpellEntry * spellEntry_)
     }
     cast = 0;
     canScale = false;
+
+    playerLevel = 1;
+    spellEntry = NULL;
+}
+
+void SpellScaling::Init(uint8 playerLevel_, const SpellEntry * spellEntry_)
+{
+    playerLevel = playerLevel_;
+    spellEntry = spellEntry_;
 
     if(!spellEntry->SpellScalingId)
         return;
@@ -415,7 +422,9 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
 
     if (spell && spell->GetCaster() && spellInfo->CastingTimeIndex != 1)
     {
-        SpellScaling values(spell->GetCaster()->getLevel(), spell->GetSpellInfo());
+        SpellScaling values;
+        values.Init(spell->GetCaster()->getLevel(), spellInfo);
+
         if(values.canScale)
         {
             castTime = values.cast;
@@ -1945,7 +1954,8 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
             )
             level = target->getLevel();
 
-        SpellScaling values(level, spellEntry);
+        SpellScaling values;
+        values.Init(level, spellEntry);
         if (values.canScale && (int32)values.min[effIndex] != 0)
         {
             basePoints = (int32)values.min[effIndex];
