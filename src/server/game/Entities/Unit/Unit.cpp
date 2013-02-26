@@ -15056,7 +15056,7 @@ void Unit::SetMaxHealth(uint32 val)
 
 uint32 Unit::GetPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return 0;
 
@@ -15065,7 +15065,7 @@ uint32 Unit::GetPower(Powers power) const
 
 uint32 Unit::GetMaxPower(Powers power) const
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return 0;
 
@@ -15074,13 +15074,7 @@ uint32 Unit::GetMaxPower(Powers power) const
 
 void Unit::SetPower(Powers power, int32 val)
 {
-    uint32 powerIndex = MAX_POWERS;
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        powerIndex = GetPowerIndexByClass(power, getClass());
-    else
-        powerIndex = 0;
-
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
 
@@ -15219,6 +15213,15 @@ void Unit::SetPower(Powers power, int32 val)
     }
 }
 
+uint32 Unit::GetPowerIndex(Powers power) const
+{
+    uint8 classId = getClass();
+    if (isPet() && ToPet()->getPetType() == HUNTER_PET)
+        classId = CLASS_HUNTER;
+
+    return GetPowerIndexByClass(power, classId);
+}
+
 uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
 {
     ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(classId);
@@ -15247,7 +15250,7 @@ uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
 
 void Unit::SetMaxPower(Powers power, uint32 val)
 {
-    uint32 powerIndex = GetPowerIndexByClass(power, getClass());
+    uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
 
