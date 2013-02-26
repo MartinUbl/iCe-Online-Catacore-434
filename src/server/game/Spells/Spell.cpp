@@ -6399,7 +6399,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(pMap->GetId());
                     if (!instance)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
-                    if (!target->Satisfy(sObjectMgr->GetAccessRequirement(pMap->GetId(), pMap->GetDifficulty()), pMap->GetId()))
+                    if (!target || !target->Satisfy(sObjectMgr->GetAccessRequirement(pMap->GetId(), pMap->GetDifficulty()), pMap->GetId()))
                         return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
