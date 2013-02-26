@@ -1657,6 +1657,15 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
                         return;
                     }
                     break;
+                case SPELLFAMILY_PALADIN:
+                    // Holy Radiance
+                    if (GetSpellProto()->Id == 82327)
+                    {
+                        // cast triggered spell
+                        if (caster && GetBase())
+                            caster->CastSpell(caster, 86452, true, 0, 0, GetBase()->GetCasterGUID());
+                    }
+                    break;
                 default:
                     break;
            }

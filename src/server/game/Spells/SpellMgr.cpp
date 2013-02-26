@@ -4203,7 +4203,6 @@ void SpellMgr::LoadSpellCustomAttr()
         // Holy Radiance
         case 82327:
             spellInfo->MaxAffectedTargets = 6;
-            spellInfo->EffectRadiusIndex[0] = 9; // radius 20y instead of 10y
             break;
         // Blazing Harpoon
         case 61588:

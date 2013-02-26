@@ -2821,7 +2821,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     || m_spellInfo->Id == 93294
                     || m_spellInfo->Id == 93295)
                 {
-                    radius = 20.0f;
+                    radius = 10.0f;
                     targetType = SPELL_TARGETS_ALLY;
                     break;
                 }
@@ -3035,6 +3035,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     }
                 }
                 break;
+            }
+
+            switch (m_spellInfo->SpellFamilyName)
+            {
+                case SPELLFAMILY_PALADIN:
+                {
+                    // Holy Radiance - include target in target list also (he is somehow ignored)
+                    if (m_spellInfo->Id == 82327 || m_spellInfo->Id == 86452)
+                        unitList.push_back(m_targets.getUnitTarget());
+                    break;
+                }
             }
 
         if (!unitList.empty())
