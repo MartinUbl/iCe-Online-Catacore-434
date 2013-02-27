@@ -4187,9 +4187,28 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_HOLY &&
             addhealth > 1)
         {
-            // Illuminated Healing absorb value and spellcast
-            int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f);
-            m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
+            // Illuminated Healing absorb value and spellcast. Base is 10% of healing done.
+            int32 bp0 = addhealth*(0.1f+(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f));
+
+            // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
+            if (bp0 > m_caster->GetHealth()*0.33f)
+                bp0 = m_caster->GetHealth()*0.33f;
+
+            if (Aura* pAura = unitTarget->GetAura(86273, m_caster->GetGUID()))
+            {
+                if (AuraEffect* pEff = pAura->GetEffect(EFFECT_0))
+                {
+                    bp0 += pEff->GetAmount();
+                    if (bp0 > m_caster->GetHealth()*0.33f)
+                        bp0 = m_caster->GetHealth()*0.33f;
+
+                    pEff->SetAmount(bp0);
+                    pAura->SetNeedClientUpdateForTargets();
+                    pAura->SetDuration(pAura->GetMaxDuration());
+                }
+            }
+            else
+                m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
         }
 
         // Implementation of Symbiosis mastery proficiency
