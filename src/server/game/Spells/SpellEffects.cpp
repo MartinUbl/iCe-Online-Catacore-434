@@ -1362,6 +1362,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                // Earthquake triggered effect
+                else if (m_spellInfo->Id == 77478)
+                {
+                    if (m_caster)
+                        damage += m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)*0.11f;
+                }
 
                 // Focused Insight - on every shock spell
                 if (m_spellInfo->Id == 8056 || m_spellInfo->Id == 8050 || m_spellInfo->Id == 8042)

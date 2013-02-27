@@ -1673,6 +1673,15 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
                             caster->CastSpell(caster, 86452, true, 0, 0, GetBase()->GetCasterGUID());
                     }
                     break;
+                case SPELLFAMILY_SHAMAN:
+                    // Earthquake
+                    if (GetSpellProto()->Id == 61882)
+                    {
+                        DynamicObject* dynobj = caster->GetDynObject(61882);
+                        if (dynobj)
+                            caster->CastSpell(dynobj->GetPositionX(), dynobj->GetPositionY(), dynobj->GetPositionZ(), 77478, true);
+                    }
+                    break;
                 default:
                     break;
            }
