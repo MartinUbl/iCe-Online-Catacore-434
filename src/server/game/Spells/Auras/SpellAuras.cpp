@@ -836,6 +836,7 @@ bool Aura::IsModActionButton() const
         case 77616: // Dark Simulacrum
         case 81206: // Chakra: Sanctuary
         case 81208: // Chakra: Serenity
+        case 88688: // Surge of Light
             return true;
         case 687:   // Demon Armor - condition for talent Nether Ward
         case 28176: // Fel Armor
@@ -872,6 +873,7 @@ uint8 Aura::GetModActionButtonEffectMask() const
         case 77616: // Dark Simulacrum
         case 81021: // Stampede (Cat Form)
         case 81022: // Stampede (Bear Form)
+        case 88688: // Surge of Light
             effMask |= 1 << 0;
             break;
         case 74434: // Soulburn
@@ -917,6 +919,7 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
         case 82926: // Fire! (Master Marksman proc)
         case 84728: // Frostfire Orb Override
         case 86211: // Soul Swap (marker)
+        case 88688: // Surge of Light
             return GetSpellProto()->EffectBasePoints[effIndex];
         case 77616: // Dark Simulacrum
             return (m_effects[effIndex] != NULL) ? m_effects[effIndex]->GetBaseAmount() : 0;

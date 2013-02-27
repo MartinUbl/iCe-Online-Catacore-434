@@ -4277,6 +4277,12 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             if (m_caster->ToPlayer() && (m_caster->HasAura(92297) || (m_caster->HasAura(92295) && roll_chance_i(50))))
                 m_caster->ToPlayer()->ModifySpellCooldown(89485, -5000, true);
         }
+        // Flash Heal (the instant one from Surge of Light)
+        else if (m_spellInfo->Id == 101062)
+        {
+            // Remove talent proc Surge of Light (instant cast)
+            m_caster->RemoveAurasDueToSpell(88688);
+        }
 
         m_damage -= addhealth;
     }

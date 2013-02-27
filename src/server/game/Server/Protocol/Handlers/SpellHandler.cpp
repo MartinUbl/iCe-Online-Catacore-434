@@ -348,6 +348,7 @@ const uint32 ModABSpellMap[][3] = {
     {77606,            77616,         0}, // Dark Simulacrum
     {88625,            81206,         2}, // Chakra: Sanctuary
     {88625,            81208,         2}, // Chakra: Sanctuary
+    {2061,             88688,         0}, // Flash Light (talent Surge of Light)
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
