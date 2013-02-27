@@ -104,7 +104,7 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, uint32 /*zone */ )
         if (m_PlayersInWar[player->GetTeamId()].find(player->GetGUID()) != m_PlayersInWar[player->GetTeamId()].end())
         {
             m_PlayersInWar[player->GetTeamId()].erase(player->GetGUID());
-            player->GetSession()->SendBfLeaveMessage(m_BattleId);
+            player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_EXITED);
             if (Group* group = GetGroupPlayer(player->GetGUID(), player->GetTeamId()))       // remove from raid group if player is member
             {
                 // I think that now is not a hack
@@ -459,7 +459,7 @@ void Battlefield::AskToLeaveQueue(Player *player)
     }
 
     if (sendLeaveMessage)
-        player->GetSession()->SendBfLeaveMessage(m_BattleId);
+        player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_EXITED);
 }
 
 // Called in WorldSession::HandleBfEntryInviteResponse
@@ -544,8 +544,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
 {
     if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
-            // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-            sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_ZONE);
+            stalker->MonsterYellToZone(entry, LANG_ADDON, 0);
 }
 
 /*void Battlefield::SendWarningToAllInWar(int32 entry,...)
@@ -568,7 +567,7 @@ void Battlefield::SendWarningToPlayer(Player *player, uint32 entry)
 
     if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
-            sCreatureTextMgr->SendChat(stalker, (uint8)entry, player->GetGUID());
+            stalker->MonsterYellToZone(entry, LANG_ADDON, player->GetGUID());
 }
 
 void Battlefield::SendUpdateWorldState(uint32 field, uint32 value)
@@ -1027,9 +1026,6 @@ void BfCapturePoint::HandlePlayerLeave(Player *player)
 
     if (m_capturePoint)
         player->SendUpdateWorldState(m_capturePoint->GetGOInfo()->capturePoint.worldState1, 0);
-
-    if (!m_activePlayers[player->GetTeamId()].empty())
-        m_activePlayers[player->GetTeamId()].erase(player->GetGUID());
 }
 
 void BfCapturePoint::SendChangePhase()
@@ -1098,24 +1094,41 @@ bool BfCapturePoint::Update(uint32 diff)
 
     float radius = m_capturePoint->GetGOInfo()->capturePoint.radius;
 
+    std::list<uint64> toErase;
     for (uint8 team = 0; team < 2; ++team)
     {
-        if (!m_activePlayers->empty() && !m_activePlayers[team].empty())
+        if (!m_activePlayers[team].empty())
+        {
             for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)
                 if (Player* player = ObjectAccessor::FindPlayer(*itr))
                     if (!m_capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
+                    {
                         HandlePlayerLeave(player);
+                        toErase.push_back(player->GetGUID());
+                        continue;
+                    }
+        }
+
+        for (std::list<uint64>::const_iterator itr = toErase.begin(); itr != toErase.end(); ++itr)
+            m_activePlayers[team].erase(*itr);
+
+        toErase.clear();
     }
 
-    std::list < Player * >players;
+    std::list<Player*> players;
     Trinity::AnyPlayerInObjectRangeCheck checker(m_capturePoint, radius);
-    Trinity::PlayerListSearcher < Trinity::AnyPlayerInObjectRangeCheck > searcher(m_capturePoint, players, checker);
+    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(m_capturePoint, players, checker);
     m_capturePoint->VisitNearbyWorldObject(radius, searcher);
 
-    for (std::list < Player * >::iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
         if ((*itr)->IsOutdoorPvPActive())
-            if (m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID()).second)
+        {
+            if (m_activePlayers[(*itr)->GetTeamId()].find((*itr)->GetGUID()) == m_activePlayers[(*itr)->GetTeamId()].end())
+            {
+                m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID());
                 HandlePlayerEnter(*itr);
+            }
+        }
 
     // get the difference of numbers
     float fact_diff = ((float) m_activePlayers[0].size() - (float) m_activePlayers[1].size()) * diff / BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL;
@@ -1207,7 +1220,7 @@ void BfCapturePoint::SendUpdateWorldState(uint32 field, uint32 value)
 {
     for (uint8 team = 0; team < 2; ++team)
     {
-        if (!m_activePlayers->empty() && !m_activePlayers[team].empty())
+        if (!m_activePlayers[team].empty())
             for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)  // send to all players present in the area
                 if (Player* player = ObjectAccessor::FindPlayer(*itr))
                     player->SendUpdateWorldState(field, value);

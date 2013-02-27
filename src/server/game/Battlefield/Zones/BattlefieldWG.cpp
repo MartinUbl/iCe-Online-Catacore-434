@@ -915,9 +915,9 @@ void BattlefieldWG::OnPlayerEnterZone(Player* player)
 }
 
 // Method sending worldsate to player
-WorldPacket BattlefieldWG::BuildInitWorldStates()
+void BattlefieldWG::BuildInitWorldStates(WorldPacket &data)
 {
-    WorldPacket data(SMSG_INIT_WORLD_STATES, (4 + 4 + 4 + 2 + (BuildingsInZone.size() * 8) + (WorkShopList.size() * 8)));
+    data.Initialize(SMSG_INIT_WORLD_STATES, (4 + 4 + 4 + 2 + (BuildingsInZone.size() * 8) + (WorkShopList.size() * 8)));
 
     data << uint32(m_MapId);
     data << uint32(m_ZoneId);
@@ -945,18 +945,20 @@ WorldPacket BattlefieldWG::BuildInitWorldStates()
     {
         data << (*itr)->m_WorldState << (*itr)->m_State;
     }
-    return data;
 }
 
 void BattlefieldWG::SendInitWorldStatesTo(Player *player)
 {
-    WorldPacket data = BuildInitWorldStates();
+    WorldPacket data;
+    BuildInitWorldStates(data);
+
     player->GetSession()->SendPacket(&data);
 }
 
 void BattlefieldWG::SendInitWorldStatesToAll()
 {
-    WorldPacket data = BuildInitWorldStates();
+    WorldPacket data;
+    BuildInitWorldStates(data);
     for (uint8 team = 0; team < 2; team++)
         for (GuidSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))

@@ -406,7 +406,7 @@ class BattlefieldWG : public Battlefield
         void UpdateVehicleCountWG();
         void UpdateCounterVehicle(bool init);
 
-        WorldPacket BuildInitWorldStates();
+        void BuildInitWorldStates(WorldPacket &data);
         void SendInitWorldStatesTo(Player* player);
         void SendInitWorldStatesToAll();
 

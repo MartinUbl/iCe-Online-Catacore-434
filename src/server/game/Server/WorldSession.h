@@ -144,6 +144,15 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
+enum BFLeaveReason
+{
+    BF_LEAVE_REASON_CLOSE     = 0x00000001,
+    BF_LEAVE_REASON_UNK1      = 0x00000002,
+    BF_LEAVE_REASON_UNK2      = 0x00000004,
+    BF_LEAVE_REASON_EXITED    = 0x00000008,
+    BF_LEAVE_REASON_LOW_LEVEL = 0x00000010
+};
+
 #define DB2_REPLY_SPARSE 2442913102
 #define DB2_REPLY_ITEM   1344507586
 
@@ -752,7 +761,7 @@ class WorldSession
         void SendBfInvitePlayerToQueue(uint32 BattleId);
         void SendBfQueueInviteResponse(uint32 BattleId,uint32 ZoneId,bool inProgress, bool canJoin);
         void SendBfEntered(uint32 BattleId);
-        void SendBfLeaveMessage(uint32 BattleId);
+        void SendBfLeaveMessage(uint32 BattleId, BFLeaveReason reason);
         void HandleBfQueueInviteResponse(WorldPacket &recv_data);
         void HandleBfEntryInviteResponse(WorldPacket &recv_data);
         void HandleBfQueueRequest(WorldPacket &recv_data);
