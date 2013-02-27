@@ -187,6 +187,11 @@ void DynamicObject::SetAura(Aura * aura)
     m_aura = aura;
 }
 
+Aura* DynamicObject::GetAura()
+{
+    return m_aura;
+}
+
 void DynamicObject::RemoveAura()
 {
     ASSERT (m_aura);
