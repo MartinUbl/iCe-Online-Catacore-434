@@ -4195,6 +4195,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 43302: // Lightning Totem
             spellInfo->EffectBasePoints[0] = 1;
             break;
+        // Sweeping Strikes
+        case 12328:
+            // this allows keeping spell even when changing stances
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_NEED_SHAPESHIFT;
+            break;
         // Heroism
         case 32182:
             spellInfo->excludeCasterAuraSpell = 57723; // Exhaustion
