@@ -20,11 +20,11 @@
 #include "Opcodes.h"
 #include <zlib.h>
 
-WorldPacket::WorldPacket() : ByteBuffer(0), m_opcode(0)
+WorldPacket::WorldPacket() : ByteBuffer(0), m_opcode(0), m_realOpcode(0)
 {
 }
 
-WorldPacket::WorldPacket(const WorldPacket &packet) : ByteBuffer(packet), m_opcode(packet.m_opcode)
+WorldPacket::WorldPacket(const WorldPacket &packet) : ByteBuffer(packet), m_opcode(packet.m_opcode), m_realOpcode(packet.m_realOpcode)
 {
 }
 
@@ -55,7 +55,8 @@ void WorldPacket::Initialize(uint32 opcode, size_t newres, bool hack)
         m_opcode = SMSG_MULTIPLE_PACKETS;
         *this << uint16(opcode);
     }
-    else m_opcode = opcode;
+    else
+        m_opcode = opcode;
 
     m_realOpcode = opcode;
 }

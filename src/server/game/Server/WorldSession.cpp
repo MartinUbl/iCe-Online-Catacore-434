@@ -131,6 +131,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     if (sWorld->debugOpcode != 0 && packet->GetOpcode() != sWorld->debugOpcode)
         return;
 
+    // "real opcode" is 32bit number which stores the real opcode no matter if it was hackwrapped
+    // in multiple_packets packet or not
+    // we deny sending of packets with opcodes greater than 16bit limit. This will avoid some glitches
+    if (packet->GetRealOpcode() >= OPCODES_MAX)
+        return;
+
     #ifdef TRINITY_DEBUG
 
     // Code for network use statistic
