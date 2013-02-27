@@ -5954,7 +5954,7 @@ void AuraEffect::HandleModPercentStat(AuraApplication const *aurApp, uint8 mode,
 
     if (GetMiscValue() < -1 || GetMiscValue() > 4)
     {
-        sLog->outError("WARNING: Misc Value (%i) for SPELL_AURA_MOD_PERCENT_STAT (spell: %u) not valid", GetMiscValue(), GetSpellProto()->Id);
+        sLog->outError("WARNING: Misc Value (%i) and Misc Value B (%i) for SPELL_AURA_MOD_PERCENT_STAT (spell: %u) not valid", GetMiscValue(), GetMiscValueB(), GetSpellProto()->Id);
         return;
     }
 
@@ -6078,9 +6078,9 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
             amount += 2.0f;
     }
 
-    if (miscValue < -1 || miscValue > 4)
+    if ((miscValue < -1 || miscValue > 4) && (miscB < 1 || miscB > 31))
     {
-        sLog->outError("WARNING: Misc Value (%i) for SPELL_AURA_MOD_PERCENT_STAT (spell: %u) not valid", miscValue, GetSpellProto()->Id);
+        sLog->outError("WARNING: Misc Value (%i) ans Misc Value B (%i) for SPELL_AURA_MOD_TOTAL_PERCENT_STAT (spell: %u) not valid", miscValue, miscB, GetSpellProto()->Id);
         return;
     }
 
@@ -6090,7 +6090,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        if ((miscValue == i && (miscB & (1 << i))) || miscValue == -1 || (miscB & (1 << i)))
+        if (miscValue == i || miscB & (1 << i))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
