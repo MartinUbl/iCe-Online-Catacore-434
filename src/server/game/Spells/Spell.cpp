@@ -5516,6 +5516,11 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             if (effIndex == EFFECT_2 && !m_caster->HasAura(56244))
                 result = false;
             break;
+        case 8122: // Psychic Scream
+            // Glyph of Psychic Scream - apply effect #3, rooting effect
+            if (effIndex == EFFECT_2 && !m_caster->HasAura(55676))
+                result = false;
+            break;
         case 85673: // Word of Glory
             // Glyph of the Long Word - apply effect #2, HoT effect
             if (effIndex == EFFECT_1 && !m_caster->HasAura(93466))
