@@ -401,18 +401,31 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
     sLog->outDebug("WORLD: Received CMSG_GUILD_SET_NOTE");
 
-    uint8 ispublic;
-    uint64 guid;
-    recvPacket >> ispublic;
-    recvPacket >> guid; // target guid
-    recvPacket.read_skip<uint64>(); // issuer's guid (?)
-    recvPacket.read_skip<uint64>(); // guild guid (not using it)
+    ObjectGuid playerGuid;
 
-    std::string Note;
-    recvPacket >> Note;
+    playerGuid[1] = recvPacket.ReadBit();
+    playerGuid[4] = recvPacket.ReadBit();
+    playerGuid[5] = recvPacket.ReadBit();
+    playerGuid[3] = recvPacket.ReadBit();
+    playerGuid[0] = recvPacket.ReadBit();
+    playerGuid[7] = recvPacket.ReadBit();
+    bool ispublic = recvPacket.ReadBit();      // 0 == Officer, 1 == Public
+    playerGuid[6] = recvPacket.ReadBit();
+    uint32 noteLength = recvPacket.ReadBits(8);
+    playerGuid[2] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(playerGuid[4]);
+    recvPacket.ReadByteSeq(playerGuid[5]);
+    recvPacket.ReadByteSeq(playerGuid[0]);
+    recvPacket.ReadByteSeq(playerGuid[3]);
+    recvPacket.ReadByteSeq(playerGuid[1]);
+    recvPacket.ReadByteSeq(playerGuid[6]);
+    recvPacket.ReadByteSeq(playerGuid[7]);
+    std::string note = recvPacket.ReadString(noteLength);
+    recvPacket.ReadByteSeq(playerGuid[2]);
 
     if (Guild* pGuild = _GetPlayerGuild(this, true))
-        pGuild->HandleSetMemberNote(this, guid, Note, !ispublic);
+        pGuild->HandleSetMemberNote(this, playerGuid, note, !ispublic);
 }
 
 void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
