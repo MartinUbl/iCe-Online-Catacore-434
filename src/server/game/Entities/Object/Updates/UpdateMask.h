@@ -46,7 +46,7 @@ class UpdateMask
             memcpy(_bits, right._bits, sizeof(uint8) * _blockCount * 32);
         }
 
-        ~UpdateMask() { delete[] _bits; }
+        ~UpdateMask() { if (_bits != NULL) delete[] _bits; }
 
         void SetBit(uint32 index) { _bits[index] = 1; }
         void UnsetBit(uint32 index) { _bits[index] = 0; }
