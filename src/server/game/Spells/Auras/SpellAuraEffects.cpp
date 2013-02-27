@@ -4843,7 +4843,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         }
         else
         {
-            plr->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+            plr->toggleWorgenForm();
             target->SetDisplayId(plr->getGender() == GENDER_FEMALE ? 29423 : 29422);
             target->Mount(plr->getGender() == GENDER_FEMALE ? 29423 : 29422, 0, GetMiscValue());
         }
@@ -5175,7 +5175,7 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const *aurApp, uint8 mode, bo
             case 69001: //Transform: Worgen. not used?
             {
                 if(target->GetTypeId() == TYPEID_PLAYER)
-                    target->ToPlayer()->setInWorgenForm();
+                    target->ToPlayer()->toggleWorgenForm();
                 break;
             }
             default:
@@ -5347,7 +5347,7 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp, uint8
             case 68992: // Darkflight, worgen's sprint spell.
             {
                 if (target->GetTypeId() == TYPEID_PLAYER)
-                    target->ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM2);
+                    target->ToPlayer()->toggleWorgenForm();
                 break;
             }
             default:

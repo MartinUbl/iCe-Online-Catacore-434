@@ -2653,12 +2653,10 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
-    
         //Worgen Transformations
-        bool isInWorgenForm();
-        void setInHumanForm();
-        void setInWorgenForm(uint32 form = UNIT_FLAG2_WORGEN_TRANSFORM);
-        bool toggleWorgenForm(uint32 form = UNIT_FLAG2_WORGEN_TRANSFORM);
+
+        void toggleWorgenForm(bool apply = true);
+        bool isInWorgenForm() { return HasAura(97709); };
     
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/

@@ -13258,7 +13258,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         if (ToPlayer()->getRace() == RACE_WORGEN && ToPlayer()->HasSpell(68996) /* Two forms */)
         {
-            ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+            ToPlayer()->toggleWorgenForm();
         }
     }
 
