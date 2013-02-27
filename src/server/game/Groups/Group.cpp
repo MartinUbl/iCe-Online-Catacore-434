@@ -593,16 +593,16 @@ void Group::SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll &r)
     }
 }
 
-void Group::SendLootRoll(const uint64& SourceGuid, const uint64& TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r)
+void Group::SendLootRoll(const uint64& SourceGuid, const uint64& TargetGuid, uint32 RollNumber, uint8 RollType, const Roll &r)
 {
     WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1+1));
     data << uint64(SourceGuid);                             // guid of the item rolled
-    data << uint32(0);                                      // unknown, maybe amount of players
+    data << uint32(r.itemSlot);                             // slot
     data << uint64(TargetGuid);
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomSuffix);                     // randomSuffix
     data << uint32(r.itemRandomPropId);                     // Item random property ID
-    data << uint8(RollNumber);                              // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
+    data << uint32(RollNumber);                             // 0: "Need for: [item name]" >= 0x80000000: don't show roll number for other types than need
     data << uint8(RollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
     data << uint8(0);                                       // auto pass on NeedBeforeGreed loot because player cannot use the object
 
@@ -621,12 +621,12 @@ void Group::SendLootRollWon(const uint64& SourceGuid, const uint64& TargetGuid, 
 {
     WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+8+1+1));
     data << uint64(SourceGuid);                             // guid of the item rolled
-    data << uint32(0);                                      // unknown, maybe amount of players
+    data << uint32(r.itemSlot);                             // unknown, maybe amount of players
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomSuffix);                     // randomSuffix
     data << uint32(r.itemRandomPropId);                     // Item random property
     data << uint64(TargetGuid);                             // guid of the player who won.
-    data << uint8(RollNumber);                              // rollnumber realted to SMSG_LOOT_ROLL
+    data << uint32(RollNumber);                             // rollnumber realted to SMSG_LOOT_ROLL
     data << uint8(RollType);                                // Rolltype related to SMSG_LOOT_ROLL
 
     for (Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
@@ -909,7 +909,7 @@ void Group::CountRollVote(const uint64& playerGUID, const uint64& Guid, uint32 N
     switch (Choice)
     {
         case ROLL_PASS:                                     // Player choose pass
-            SendLootRoll(0, playerGUID, 128, ROLL_PASS, *roll);
+            SendLootRoll(0, playerGUID, 0x80000000, ROLL_PASS, *roll);
             ++roll->totalPass;
             itr->second = PASS;
             break;
@@ -919,12 +919,12 @@ void Group::CountRollVote(const uint64& playerGUID, const uint64& Guid, uint32 N
             itr->second = NEED;
             break;
         case ROLL_GREED:                                    // player choose Greed
-            SendLootRoll(0, playerGUID, 128, ROLL_GREED, *roll);
+            SendLootRoll(0, playerGUID, 0x80000000, ROLL_GREED, *roll);
             ++roll->totalGreed;
             itr->second = GREED;
             break;
         case ROLL_DISENCHANT:                               // player choose Disenchant
-            SendLootRoll(0, playerGUID, 128, ROLL_DISENCHANT, *roll);
+            SendLootRoll(0, playerGUID, 0x80000000, ROLL_DISENCHANT, *roll);
             ++roll->totalGreed;
             itr->second = DISENCHANT;
             break;
