@@ -2268,6 +2268,30 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 47468: // Claw (risen ghoul spell)
+                {
+                    if (m_caster->HasAura(63560))
+                        m_caster->CastSpell(unitTarget, 91778, true);
+                    else
+                        m_caster->CastSpell(unitTarget, 91776, true);
+                    break;
+                }
+                case 47484: // Huddle (risen ghoul spell)
+                {
+                    if (m_caster->HasAura(63560))
+                        m_caster->CastSpell(unitTarget, 91837, true);
+                    else
+                        m_caster->CastSpell(unitTarget, 91838, true);
+                    break;
+                }
+                case 47482: // Leap (risen ghoul spell)
+                {
+                    if (m_caster->HasAura(63560))
+                        m_caster->CastSpell(unitTarget, 91807, true);
+                    else
+                        m_caster->CastSpell(unitTarget, 91809, true);
+                    break;
+                }
             }
 
             break;
@@ -3078,6 +3102,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER &&
                     (unitTarget->ToPlayer()->IsInPartyWith(m_caster) || unitTarget->ToPlayer()->IsInRaidWith(m_caster)))
                     unitTarget->CastSpell(unitTarget, 46619, true);
+                break;
+            // Gnaw (risen ghoul spell)
+            case 47481:
+                if (m_caster->HasAura(63560))
+                    m_caster->CastSpell(unitTarget, 91797, true);
+                else
+                    m_caster->CastSpell(unitTarget, 91800, true);
                 break;
             }
             break;

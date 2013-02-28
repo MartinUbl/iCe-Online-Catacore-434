@@ -1484,6 +1484,15 @@ void Pet::InitLevelupSpellsForLevel()
 {
     uint8 level = getLevel();
 
+    // Death Knight's ghoul
+    if (GetEntry() == 26125)
+    {
+        learnSpell(47468); // Claw
+        learnSpell(47481); // Gnaw
+        learnSpell(47484); // Huddle
+        learnSpell(47482); // Leap
+    }
+
     if (PetLevelupSpellSet const *levelupSpells = GetCreatureInfo()->family ? sSpellMgr->GetPetLevelupSpellList(GetCreatureInfo()->family) : NULL)
     {
         // PetLevelupSpellSet ordered by levels, process in reversed order
@@ -1603,8 +1612,14 @@ void Pet::InitPetCreateSpells()
     m_charmInfo->InitPetActionBar();
     m_spells.clear();
 
+    // this is there to avoid massive "your pet has learned ..." spam
+    bool loadingState = m_loading;
+    m_loading = true;
+
     LearnPetPassives();
     InitLevelupSpellsForLevel();
+
+    m_loading = loadingState;
 
     CastPetAuras(false);
 }

@@ -2333,7 +2333,12 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         case SUMMON_PET:
             // this enables pet details window (Shift+P)
             pet->GetCharmInfo()->SetPetNumber(pet_number, true);
-            pet->SetByteValue(UNIT_FIELD_BYTES_0, 1, 0x8);
+
+            if (pet->IsPetGhoul())
+                pet->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_ROGUE); // technically, it's a rogue (has energy)
+            else
+                pet->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+
             pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             pet->SetFullHealth();
