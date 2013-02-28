@@ -2929,7 +2929,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 else
                     pTarget = unitTarget;
 
-                pTarget->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 10, 1);
+                unitTarget->CastSpell(m_caster, 92832, true);   // cast movement spell
 
                 // Body and Soul
                 if (m_caster->HasAura(64127))                  // rank #1
