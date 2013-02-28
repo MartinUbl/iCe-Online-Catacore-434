@@ -2133,7 +2133,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 68996:                                 // Two forms (worgen transformation spell)
                 {
                     if(m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->isInCombat())
-                        m_caster->ToPlayer()->toggleWorgenForm(!m_caster->ToPlayer()->isInWorgenForm());
+                        m_caster->ToPlayer()->toggleWorgenForm(!m_caster->ToPlayer()->isInWorgenForm(), true);
                     return;
                 }
                 case 53808:                                 // Pygmy Oil

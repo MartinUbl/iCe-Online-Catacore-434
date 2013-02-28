@@ -2655,7 +2655,7 @@ class Player : public Unit, public GridObject<Player>
         void SendMovieStart(uint32 MovieId);
         //Worgen Transformations
 
-        void toggleWorgenForm(bool apply = true);
+        void toggleWorgenForm(bool apply = true, bool with_anim = false);
         bool isInWorgenForm() { return HasAura(97709); };
     
         /*********************************************************/

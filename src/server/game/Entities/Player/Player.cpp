@@ -6865,10 +6865,19 @@ void Player::SendMovieStart(uint32 MovieId)
     SendDirectMessage(&data);
 }
 
-void Player::toggleWorgenForm(bool apply)
+void Player::toggleWorgenForm(bool apply, bool with_anim)
 {
     if (apply)
-        CastSpell(this, 97709, true); // cast Altered Form (Racial) for transform
+    {
+        int32 bp0;
+
+        if (with_anim)
+             bp0 = 1;
+        else
+            bp0 = 0;
+
+        CastCustomSpell(this, 97709, &bp0, 0, 0, true); // cast Altered Form (Racial) for transform
+    }
     else
         RemoveAurasDueToSpell(97709);
 }

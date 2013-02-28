@@ -13256,7 +13256,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 ToPlayer()->InterruptSpell(CURRENT_GENERIC_SPELL);
         }
 
-        if (ToPlayer()->getRace() == RACE_WORGEN && ToPlayer()->HasSpell(68996) /* Two forms */)
+        if (ToPlayer()->getRace() == RACE_WORGEN
+        && ToPlayer()->HasSpell(68996) // Two forms
+        && !ToPlayer()->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         {
             ToPlayer()->toggleWorgenForm();
         }
