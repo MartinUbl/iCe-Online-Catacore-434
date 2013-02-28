@@ -11736,12 +11736,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     float tmpDamage = (int32(pdamage) + DoneTotal) * DoneTotalMod;
 
-    if (!(spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS))
-    {
-        // apply spellmod to Done damage (flat and pct)
-        if (Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
-    }
+    // apply spellmod to Done damage (flat and pct)
+    if (Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, DoneTotal);
 
     tmpDamage = (tmpDamage + TakenTotal) * TakenTotalMod;
 
