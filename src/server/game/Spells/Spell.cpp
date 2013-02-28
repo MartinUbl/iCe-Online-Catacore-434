@@ -7332,7 +7332,7 @@ SpellCastResult Spell::CheckItems()
             }
             case SPELL_EFFECT_ENCHANT_ITEM:
                 if (m_spellInfo->EffectItemType[i] && m_targets.getItemTarget()
-                    && (m_targets.getItemTarget()->IsWeaponVellum() || m_targets.getItemTarget()->IsArmorVellum()))
+                    && m_targets.getItemTarget()->IsVellum())
                 {
                     // cannot enchant vellum for other player
                     if (m_targets.getItemTarget()->GetOwner() != m_caster)

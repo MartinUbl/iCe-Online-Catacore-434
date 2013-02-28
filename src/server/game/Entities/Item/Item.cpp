@@ -991,21 +991,20 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     if (spellInfo->EquippedItemClass != -1)                 // -1 == any item class
     {
         // Special case - accept vellum for armor/weapon requirements
-        if ((spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR && proto->IsArmorVellum())
-            ||(spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && proto->IsWeaponVellum()))
-            if (sSpellMgr->IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
+        if ((spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR ||
+            spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON) && proto->IsVellum())
                 return true;
-        
+
         if (spellInfo->EquippedItemClass != int32(proto->Class))
             return false;                                   //  wrong item class
-        
+
         if (spellInfo->EquippedItemSubClassMask != 0)        // 0 == any subclass
         {
             if ((spellInfo->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
                 return false;                               // subclass not present in mask
         }
     }
-    
+
     if (spellInfo->EquippedItemInventoryTypeMask != 0)       // 0 == any inventory type
     {
         // Special case - accept weapon type for main and offhand requirements
@@ -1016,7 +1015,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         else if ((spellInfo->EquippedItemInventoryTypeMask & (1 << proto->InventoryType)) == 0)
             return false;                                   // inventory type not present in mask
     }
-    
+
     return true;
 }
 
