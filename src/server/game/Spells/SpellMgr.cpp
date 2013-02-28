@@ -320,7 +320,7 @@ void SpellScaling::Init(uint8 playerLevel_, const SpellEntry * spellEntry_)
 
     //cast time
     cast = 0;
-    if(ct_max>0 && playerLevel_>1)
+    if(ct_max>0 && playerLevel_>1 && ct_level>1)
         cast = ct_min+(((playerLevel-1)*(ct_max-ct_min))/(ct_level-1));
     else
         cast = ct_min;
