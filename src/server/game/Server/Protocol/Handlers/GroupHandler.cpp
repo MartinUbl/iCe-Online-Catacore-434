@@ -1215,7 +1215,7 @@ void WorldSession::HandleGroupSetRoles(WorldPacket &recv_data)
     Player * plr = sObjectMgr->GetPlayer(guid);
     if(!plr)
     {
-        sLog->outDebug("CMSG_GROUP_SET_ROLES [" UI64FMTD "] Player not found", guid);
+        sLog->outDebug("CMSG_GROUP_SET_ROLES [" UI64FMTD "] Player not found", (uint64)guid);
         return;
     }
     
@@ -1237,6 +1237,6 @@ void WorldSession::HandleGroupSetRoles(WorldPacket &recv_data)
     if (grp->isLFGGroup())
     {
         uint64 gguid = grp->GetGUID();
-        sLFGMgr->UpdateRoleCheck(gguid, guid, roles);
+        sLFGMgr->UpdateRoleCheck(gguid, (uint64)guid, roles);
     }
 }
