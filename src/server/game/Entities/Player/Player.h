@@ -2657,6 +2657,7 @@ class Player : public Unit, public GridObject<Player>
 
         void toggleWorgenForm(bool apply = true, bool with_anim = false);
         bool isInWorgenForm() { return HasAura(97709); };
+        void setInWorgenForm(uint32 form);
     
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/

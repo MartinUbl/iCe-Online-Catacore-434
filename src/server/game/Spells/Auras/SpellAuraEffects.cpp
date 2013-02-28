@@ -4087,6 +4087,12 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
                 pl->RemoveAurasDueToSpell(80879);
             if (pl->HasAura(80886)) // Rank 2
                 pl->RemoveAurasDueToSpell(80886);
+
+            // special case for worgen's form
+
+            if (pl->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM3))
+                pl->toggleWorgenForm();
+
         }
 
         // Exception for Vanish (will not be removing Stealth)

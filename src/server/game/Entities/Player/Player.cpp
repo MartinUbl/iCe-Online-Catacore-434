@@ -6865,6 +6865,15 @@ void Player::SendMovieStart(uint32 MovieId)
     SendDirectMessage(&data);
 }
 
+void Player::setInWorgenForm(uint32 form)
+{
+    if(isInWorgenForm())
+        return;
+
+    SetFlag(UNIT_FIELD_FLAGS_2, form);
+    m_ExtraFlags |= PLAYER_EXTRA_WORGEN_FORM;
+}
+
 void Player::toggleWorgenForm(bool apply, bool with_anim)
 {
     if (apply)
@@ -6872,14 +6881,30 @@ void Player::toggleWorgenForm(bool apply, bool with_anim)
         int32 bp0;
 
         if (with_anim)
+        {
              bp0 = 1;
+             if (!HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM))
+                SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM);
+        }
         else
+        {
             bp0 = 0;
+            if (!HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM3))
+                SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_WORGEN_TRANSFORM3);
+        }
 
         CastCustomSpell(this, 97709, &bp0, 0, 0, true); // cast Altered Form (Racial) for transform
+
+        if (!(m_ExtraFlags & PLAYER_EXTRA_WORGEN_FORM))
+            m_ExtraFlags |= PLAYER_EXTRA_WORGEN_FORM;
     }
     else
+    {
+        uint32 newFlag = GetUInt32Value(UNIT_FIELD_FLAGS_2) & ~IN_WORGEN_FORM;
+        SetUInt32Value(UNIT_FIELD_FLAGS_2, newFlag);
         RemoveAurasDueToSpell(97709);
+        m_ExtraFlags &= ~PLAYER_EXTRA_WORGEN_FORM;
+    }
 }
 
 void Player::CheckAreaExploreAndOutdoor()

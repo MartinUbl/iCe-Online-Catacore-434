@@ -13257,10 +13257,12 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         }
 
         if (ToPlayer()->getRace() == RACE_WORGEN
-        && ToPlayer()->HasSpell(68996) // Two forms
-        && !ToPlayer()->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+        && ToPlayer()->HasSpell(68996) /* Two forms */)
         {
-            ToPlayer()->toggleWorgenForm();
+            if (ToPlayer()->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+                ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+            else
+                ToPlayer()->toggleWorgenForm();
         }
     }
 
