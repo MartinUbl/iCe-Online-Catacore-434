@@ -5047,6 +5047,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 30213: // Legion Strike
             spellInfo->EffectRadiusIndex[1] = 29; // 6 yd
             break;
+        case 95799: // Empowered shadow
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // disable applying spell modifier for direct damage
+            count++;
+            break;
         default:
             break;
         }
