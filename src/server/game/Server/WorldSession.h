@@ -564,8 +564,8 @@ class WorldSession
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
         void HandleStableRevivePet(WorldPacket& recvPacket);
-        void HandleStableChangeSlot(WorldPacket& recvPacket);
         void HandleStableChangeSlotCallback(QueryResult result, uint8 slot);
+        void HandleSetPetSlotOpcode(WorldPacket& recvPacket);
 
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);

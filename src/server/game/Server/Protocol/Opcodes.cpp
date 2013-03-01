@@ -662,7 +662,6 @@ void InitOpcodeTable()
     OPCODE( MSG_LIST_STABLED_PETS,                        STATUS_LOGGEDIN, &WorldSession::HandleListStabledPetsOpcode     );
     OPCODE( SMSG_STABLE_RESULT,                           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_STABLE_REVIVE_PET,                       STATUS_LOGGEDIN, &WorldSession::HandleStableRevivePet           );
-    OPCODE( CMSG_STABLE_CHANGE_SLOT,                      STATUS_LOGGEDIN, &WorldSession::HandleStableChangeSlot          );
     OPCODE( MSG_QUEST_PUSH_RESULT,                        STATUS_LOGGEDIN, &WorldSession::HandleQuestPushResult           );
     OPCODE( SMSG_PLAY_MUSIC,                              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PLAY_OBJECT_SOUND,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -1338,6 +1337,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_ARENA_UNIT_DESTROYED,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LFG_UPDATE_STATUS,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_START_TIMER,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_SET_PET_SLOT,                            STATUS_LOGGEDIN, &WorldSession::HandleSetPetSlotOpcode          );
 };
 
 void DestroyOpcodeTable()

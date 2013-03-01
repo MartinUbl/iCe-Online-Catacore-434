@@ -8010,7 +8010,10 @@ void AuraEffect::HandleAuraOpenStable(AuraApplication const *aurApp, uint8 mode,
         return;
 
     if (apply)
+    {
+        target->ToPlayer()->GetSession()->SendStableResult(8);
         target->ToPlayer()->GetSession()->SendStablePet(target->GetGUID());
+    }
 
      // client auto close stable dialog at !apply aura
 }

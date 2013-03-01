@@ -555,46 +555,61 @@ void WorldSession::HandleStableRevivePet(WorldPacket &/* recv_data */)
     sLog->outDebug("HandleStableRevivePet: Not implemented");
 }
 
-void WorldSession::HandleStableChangeSlot(WorldPacket & recv_data)
+void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recvPacket)
 {
-    sLog->outDebug("WORLD: Recv CMSG_STABLE_CHANGE_SLOT.");
-    uint32 pet_number;
-    uint64 npcGUID;
-    uint8 new_slot;
+    uint32 petnumber;
+    uint8 slot;
+    ObjectGuid guid;
 
-    recv_data >> new_slot >> pet_number >> npcGUID;
+    recvPacket >> petnumber;
+    recvPacket >> slot;
 
-    if (!CheckStableMaster(npcGUID))
+    guid[3] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[4]);
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[2]);
+
+    if (!CheckStableMaster((uint64)guid))
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
 
-    if(new_slot > MAX_PET_STABLES)
+    if (slot > MAX_PET_STABLES)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
-    
+
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     Pet* pet = _player->GetPet();
-    
+
     //If we move the pet already summoned...
-    if(pet && pet->GetCharmInfo() && pet->GetCharmInfo()->GetPetNumber() == pet_number)
+    if (pet && pet->GetCharmInfo() && pet->GetCharmInfo()->GetPetNumber() == petnumber)
         _player->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
 
     //If we move to the pet already summoned...
-    if(pet && GetPlayer()->m_currentPetSlot == new_slot)
+    if (pet && GetPlayer()->m_currentPetSlot == slot)
         _player->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
-    
-    m_stableChangeSlotCallback.SetParam(new_slot);
-    m_stableChangeSlotCallback.SetFutureResult(
-                                               CharacterDatabase.PQuery("SELECT slot,entry,id FROM character_pet WHERE owner = '%u' AND id = '%u'",
-                                                                        _player->GetGUIDLow(), pet_number)
-                                               );
+
+    m_stableChangeSlotCallback.SetParam(slot);
+    m_stableChangeSlotCallback.SetFutureResult(CharacterDatabase.PQuery("SELECT slot,entry,id FROM character_pet WHERE owner = '%u' AND id = '%u'", _player->GetGUIDLow(), petnumber));
 }
 
 void WorldSession::HandleStableChangeSlotCallback(QueryResult result, uint8 new_slot)
