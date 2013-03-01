@@ -4194,6 +4194,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             addhealth = (float(addhealth)/100.0f)*caster->GetCreateHealth();
 
+            // Glyph of Healthstone
+            if (caster->HasAura(56224))
+                addhealth *= 1.3f;
+
             // Soulburn: Healthstone
             if (caster->HasAura(74434))
                 caster->CastSpell(caster, 79437, true);
