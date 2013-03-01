@@ -1416,7 +1416,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
 
             case SPELLFAMILY_PALADIN: // Speed of Light (talent)
-                if(GetId() == 82327)
+                if(GetId() == 498)
                 {
                     if(target->HasAura(85495)) // r1
                     {
