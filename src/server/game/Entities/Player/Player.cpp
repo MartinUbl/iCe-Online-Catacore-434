@@ -5640,7 +5640,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
                             else
                                 joinChannel = NULL;
                     }
-                    else
+                    else if (!(channel->flags & CHANNEL_DBC_FLAG_ZONE_DEP))
                         joinChannel = cMgr->GetJoinChannel(channel->pattern, channel->ChannelID);
                 }
                 else
