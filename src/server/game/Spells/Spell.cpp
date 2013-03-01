@@ -5583,32 +5583,35 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         // check if target has anything to dispel
-        bool hasMagic = false;
-
-        Unit::AuraMap const &auras = Target->GetOwnedAuras();
-        for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        if (Target)
         {
-            Aura *aura = itr->second;
-            if (aura->IsPassive())
-                continue;
+            bool hasMagic = false;
 
-            const SpellEntry *spellInfo = aura->GetSpellProto();
-            if (spellInfo->Dispel == DISPEL_MAGIC)
+            Unit::AuraMap const &auras = Target->GetOwnedAuras();
+            for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {
-                AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
-                if (!aurApp)
+                Aura *aura = itr->second;
+                if (aura->IsPassive())
                     continue;
-                bool negative = (spellInfo->AttributesEx & SPELL_ATTR1_NEGATIVE) || aurApp->IsNegative();
-                if (enemy != negative)  // only positive from enemies and negative from friends
+
+                const SpellEntry *spellInfo = aura->GetSpellProto();
+                if (spellInfo->Dispel == DISPEL_MAGIC)
                 {
-                    hasMagic = true;
-                    break;
+                    AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
+                    if (!aurApp)
+                        continue;
+                    bool negative = (spellInfo->AttributesEx & SPELL_ATTR1_NEGATIVE) || aurApp->IsNegative();
+                    if (enemy != negative)  // only positive from enemies and negative from friends
+                    {
+                        hasMagic = true;
+                        break;
+                    }
                 }
             }
-        }
 
-        if (!hasMagic)
-            return SPELL_FAILED_NOTHING_TO_DISPEL;
+            if (!hasMagic)
+                return SPELL_FAILED_NOTHING_TO_DISPEL;
+        }
     }
 
     // Archaeology project check - reagents / keystones
