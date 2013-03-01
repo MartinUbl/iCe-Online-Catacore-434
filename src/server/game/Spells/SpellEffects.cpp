@@ -6328,6 +6328,14 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
             }
+            // Mortal Strike
+            else if (m_spellInfo->Id == 12294)
+            {
+                // talent Lambs to the Slaughter
+                if (m_caster->HasAura(84583) || m_caster->HasAura(84587) || m_caster->HasAura(84588))
+                    if (unitTarget->HasAura(94009)) // rend
+                        unitTarget->GetAura(94009)->RefreshDuration(); // refresh rend
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
