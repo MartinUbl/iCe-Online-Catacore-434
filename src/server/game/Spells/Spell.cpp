@@ -7942,12 +7942,15 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     else
                     {
                         // Set last not triggered spell for apply spellmods
-                        ((Player*)m_Spell->GetCaster())->SetSpellModTakingSpell(m_Spell, true);
+                        if (m_Spell->GetCaster() && m_Spell->GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                            ((Player*)m_Spell->GetCaster())->SetSpellModTakingSpell(m_Spell, true);
+
                         // do the action (pass spell to channeling state)
                         m_Spell->handle_immediate();
 
                         // And remove after effect handling
-                        ((Player*)m_Spell->GetCaster())->SetSpellModTakingSpell(m_Spell, false);
+                        if (m_Spell->GetCaster() && m_Spell->GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                            ((Player*)m_Spell->GetCaster())->SetSpellModTakingSpell(m_Spell, false);
                     }
                     // event will be re-added automatically at the end of routine)
                 }
