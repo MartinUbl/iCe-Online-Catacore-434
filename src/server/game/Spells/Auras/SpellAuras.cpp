@@ -1107,10 +1107,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (GetStackAmount() >= 5 && !target->HasAura(50812))
                             target->CastSpell(target, 50812, true);
                         break;
-                    case 60970: // Heroic Fury (remove Intercept cooldown)
-                        if (target->GetTypeId() == TYPEID_PLAYER)
-                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
-                        break;
                     case 85474: // [DND] Hide text (unused)
                         if (target->GetTypeId() == TYPEID_UNIT)
                         {
@@ -1412,6 +1408,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     if (caster->HasAura(89003)) // Glyph of Colossus Smash
                         caster->CastSpell(target, 58567, true);
+                }
+
+                switch (GetId())
+                {
+                    case 60970: // Heroic Fury (remove Intercept cooldown)
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
+                        break;
                 }
                 break;
 
