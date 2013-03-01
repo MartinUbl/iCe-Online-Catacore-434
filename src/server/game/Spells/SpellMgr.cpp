@@ -4172,6 +4172,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectSpellClassMask[0] = flag96(0x4088, 0x1000, 0x802A0);
             count++;
             break;
+        case 96434: // Zanzil's Graveyard Gas
+        case 96335: // Zanzil's Graveyard Gas
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_DEATH_PERSISTENT;
+            break;
         case 81782: // Power Word : Barrier
             spellInfo->DurationIndex = 39;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ALLY;
