@@ -2480,6 +2480,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 96215, true);
                     return;
                 }
+                case 97462: // Rallying Cry
+                {
+                    int32 bp0 = unitTarget->GetMaxHealth()*(float)damage/100.0f;
+
+                    m_caster->CastCustomSpell(unitTarget, 97463, &bp0, 0, 0, true);
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_WARLOCK:
