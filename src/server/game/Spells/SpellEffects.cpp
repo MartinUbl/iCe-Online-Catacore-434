@@ -2526,8 +2526,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Soul Link activation
             else if (m_spellInfo->Id == 19028)
             {
-                // Trigger linked spell
-                unitTarget->CastSpell(unitTarget,25228,true);
+                int32 bp0 = 20;
+
+                if (m_caster->HasAura(63312)) // Glyph of Soul Link
+                    bp0 = 25;
+
+                 unitTarget->CastCustomSpell(unitTarget, 25228,&bp0, 0, 0, true);
             }
             break;
         case SPELLFAMILY_DRUID:

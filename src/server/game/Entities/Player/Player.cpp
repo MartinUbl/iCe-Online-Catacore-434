@@ -26251,7 +26251,14 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
 
     // Hackfix for reapplying Soul Link
     if (HasAura(25228))
-        NewPet->CastSpell(this, 25228, true);
+    {
+        int32 bp0 = 20;
+
+        if (HasAura(63312)) // Glyph of Soul Link
+            bp0 = 25;
+
+        NewPet->CastCustomSpell(NewPet, 25228,&bp0, 0, 0, true);
+    }
 
     m_temporaryUnsummonedPetNumber = 0;
 }
