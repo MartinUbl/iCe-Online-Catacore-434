@@ -359,8 +359,8 @@ void InitOpcodeTable()
     OPCODE( CMSG_CANCEL_AURA,                             STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode          );
     OPCODE( SMSG_EQUIPMENT_SET_SAVED,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PET_CAST_FAILED,                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( MSG_CHANNEL_START,                            STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( MSG_CHANNEL_UPDATE,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( SMSG_CHANNEL_START,                           STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( SMSG_CHANNEL_UPDATE,                          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_CANCEL_CHANNELLING,                      STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling          );
     OPCODE( SMSG_AI_REACTION,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_SET_SELECTION,                           STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode        );

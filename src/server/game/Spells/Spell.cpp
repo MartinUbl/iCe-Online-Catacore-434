@@ -4974,7 +4974,7 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    WorldPacket data(MSG_CHANNEL_UPDATE, 8+4);
+    WorldPacket data(SMSG_CHANNEL_UPDATE, 8+4);
     data.append(m_caster->GetPackGUID());
     data << uint32(time);
 
@@ -5009,11 +5009,29 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    WorldPacket data(MSG_CHANNEL_START, (8+4+4));
+    WorldPacket data(SMSG_CHANNEL_START, (8+4+4+1+1));
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
     data << uint32(duration);
-
+    data << uint8(0);                           // immunity (castflag & 0x04000000)
+    /*
+    if (immunity)
+    {
+        data << uint32();                       // CastSchoolImmunities
+        data << uint32();                       // CastImmunities
+    }
+    */
+    data << uint8(0);                           // healPrediction (castflag & 0x40000000)
+    /*
+    if (healPrediction)
+    {
+        data.appendPackGUID(channelTarget);     // target packguid
+        data << uint32();                       // spellid
+        data << uint8(0);                       // unk3
+        if (unk3 == 2)
+            data.append();                      // unk packed guid (unused ?)
+    }
+    */
     m_caster->SendMessageToSet(&data, true);
 
     m_timer = duration;

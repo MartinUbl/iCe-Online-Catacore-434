@@ -336,8 +336,8 @@ enum Opcodes
     CMSG_CANCEL_AURA                                 = 0x00E26, // 4.3.4 15595
     SMSG_EQUIPMENT_SET_SAVED                         = 0x02216, // 4.3.4 15595
     SMSG_PET_CAST_FAILED                             = 0x02B15, // 4.3.4 15595
-    MSG_CHANNEL_START                                = 0x00A15, // 4.3.4 15595
-    MSG_CHANNEL_UPDATE                               = 0x02417, // 4.3.4 15595
+    SMSG_CHANNEL_START                               = 0x00A15, // 4.3.4 15595
+    SMSG_CHANNEL_UPDATE                              = 0x02417, // 4.3.4 15595
     CMSG_CANCEL_CHANNELLING                          = 0x06C25, // 4.3.4 15595
     SMSG_AI_REACTION                                 = 0x00637, // 4.3.4 15595
     CMSG_SET_SELECTION                               = 0x00506, // 4.3.4 15595
