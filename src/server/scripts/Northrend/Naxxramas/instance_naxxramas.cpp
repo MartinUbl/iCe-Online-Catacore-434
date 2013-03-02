@@ -149,6 +149,31 @@ public:
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
 
+        void Initialize()
+        {
+            for (uint8 i = 0; i < 4; i++)
+            {
+                uiPortals[i] = 0;
+            }
+
+            GothikGateGUID = 0;
+            HorsemenChestGUID = 0;
+            SapphironGUID = 0;
+            uiFaerlina = 0;
+            uiThane = 0;
+            uiLady = 0;
+            uiBaron = 0;
+            uiSir = 0;
+            uiThaddius = 0;
+            uiFeugen = 0;
+            uiStalagg = 0;
+            uiKelthuzad = 0;
+            uiKelthuzadTrigger = 0;
+            minHorsemenDiedTime = 0;
+            maxHorsemenDiedTime = 0;
+            gothikDoorState = GO_STATE_READY;
+        }
+
         void OnCreatureCreate(Creature* creature, bool add)
         {
             switch(creature->GetEntry())
