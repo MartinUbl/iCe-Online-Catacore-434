@@ -5559,6 +5559,11 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
             // Actually we should apply immunities here, too, but the aura has only 100 ms duration, so there is practically no point
             break;
+        case 60970: // Heroic Fury
+            mechanic = (1 << MECHANIC_STUN) | (1 << MECHANIC_ROOT);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
+            break;
         case 54508: // Demonic Empowerment
             mechanic = (1 << MECHANIC_SNARE) | (1 << MECHANIC_ROOT);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
