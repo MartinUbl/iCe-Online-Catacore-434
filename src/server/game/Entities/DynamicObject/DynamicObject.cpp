@@ -118,12 +118,6 @@ bool DynamicObject::Create(uint32 guidlow, Unit *caster, SpellEntry const *spell
 
 void DynamicObject::Update(uint32 p_time)
 {
-    if (m_removedAura)
-    {
-        delete m_removedAura;
-        m_removedAura = NULL;
-    }
-
     // caster has to be always available and in the same map
     ASSERT(m_caster);
     ASSERT(m_caster->GetMap() == GetMap());
