@@ -4843,6 +4843,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 29;
             break;
         case 92270: // Summon effekt u Frozen orbu
+        case 97318: // Plucked
             spellInfo->Effect[0] = 0;
             break;
         case 93362: // Flamestrike summon effekt
