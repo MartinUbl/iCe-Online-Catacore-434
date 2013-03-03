@@ -42,6 +42,7 @@ DynamicObject::DynamicObject() : WorldObject()
     m_valuesCount = DYNAMICOBJECT_END;
 
     m_aura = NULL;
+    m_removedAura = NULL;
     m_duration = 0;
     m_caster = NULL;
     m_isViewpoint = false;
@@ -53,6 +54,8 @@ DynamicObject::~DynamicObject()
     ASSERT(!m_aura);
     ASSERT(!m_caster);
     ASSERT(!m_isViewpoint);
+
+    delete m_removedAura;
 }
 
 void DynamicObject::AddToWorld()
@@ -115,7 +118,13 @@ bool DynamicObject::Create(uint32 guidlow, Unit *caster, SpellEntry const *spell
 
 void DynamicObject::Update(uint32 p_time)
 {
-    // caster has to be always avalable and in the same map
+    if (m_removedAura)
+    {
+        delete m_removedAura;
+        m_removedAura = NULL;
+    }
+
+    // caster has to be always available and in the same map
     ASSERT(m_caster);
     ASSERT(m_caster->GetMap() == GetMap());
 
@@ -197,7 +206,11 @@ void DynamicObject::RemoveAura()
     ASSERT (m_aura);
     if (!m_aura->IsRemoved())
         m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
-    delete m_aura;
+
+    if (m_removedAura)
+        delete m_removedAura;
+
+    m_removedAura = m_aura;
     m_aura = NULL;
 }
 

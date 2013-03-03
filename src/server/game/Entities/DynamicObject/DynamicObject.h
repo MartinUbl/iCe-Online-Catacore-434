@@ -73,6 +73,7 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
     protected:
         int32 m_duration; // for non-aura dynobjects
         Aura * m_aura;
+        Aura * m_removedAura;
         Unit * m_caster;
         bool m_isViewpoint;
 };
