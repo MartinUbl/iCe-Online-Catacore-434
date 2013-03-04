@@ -5055,6 +5055,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // disable applying spell modifier for direct damage
             count++;
             break;
+        case 82691: // Ring of Frost
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY; // disable spreading of freeze from frozen target to his allies
+            count++;
+            break;
         default:
             break;
         }
