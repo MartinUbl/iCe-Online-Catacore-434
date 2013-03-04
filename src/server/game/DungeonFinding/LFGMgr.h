@@ -320,7 +320,7 @@ class LFGMgr
         // Queue
         void AddToQueue(const uint64& guid, uint8 queueId);
         bool RemoveFromQueue(const uint64& guid);
-        uint32 GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint8 team);
+        uint32 GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint32 team);
 
         // Proposals
         void RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType type);

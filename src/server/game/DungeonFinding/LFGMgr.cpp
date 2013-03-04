@@ -741,7 +741,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
     sLog->outDebug("LFGMgr::Join: [" UI64FMTD "] joined with %u members. dungeons: %u", guid, grp ? grp->GetMembersCount() : 1, uint8(dungeons.size()));
 }
 
-uint32 LFGMgr::GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint8 team)
+uint32 LFGMgr::GetRoleCountInDungeonQueue(uint32 dungeonId, uint8 role, uint32 team)
 {
     uint32 count = 0;
     Player* src = NULL;
