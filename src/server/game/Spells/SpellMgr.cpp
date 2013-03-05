@@ -4107,6 +4107,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;
             break;
+        case 42402: // Surge
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+            break;
         case 81170: // Stampede
             spellInfo->Attributes &= ~SPELL_ATTR0_ONLY_STEALTHED;
             count++;

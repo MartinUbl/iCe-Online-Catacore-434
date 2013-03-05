@@ -67,25 +67,26 @@ float NalorakkWay[8][3] =
 #define YELL_BERSERK            "You had your chance, now it be too late!" //Never seen this being used, so just guessing from what I hear.
 #define SOUND_YELL_BERSERK      12074
 
-#define SPELL_BERSERK           45078
-
-//Defines for Troll form
-#define SPELL_BRUTALSWIPE       42384
-#define SPELL_MANGLE            42389
-#define SPELL_MANGLEEFFECT      44955
-#define SPELL_SURGE             42402
-#define SPELL_BEARFORM          42377
+enum Spells
+{
+    // Defines for Troll form
+    SPELL_BRUTALSWIPE     = 42384,
+    SPELL_MANGLE          = 42389,
+    SPELL_MANGLEEFFECT    = 44955,
+    SPELL_SURGE           = 42402,
+    SPELL_BEARFORM        = 42377,
+    SPELL_BERSERK         = 45078,
+    //Defines for Bear form
+    SPELL_LACERATINGSLASH  = 42395,
+    SPELL_RENDFLESH        = 42397,
+    SPELL_DEAFENINGROAR    = 42398,
+};
 
 #define YELL_SURGE              "I bring da pain!"
 #define SOUND_YELL_SURGE        12071
 
 #define YELL_SHIFTEDTOTROLL     "Make way for Nalorakk!"
 #define SOUND_YELL_TOTROLL      12073
-
-//Defines for Bear form
-#define SPELL_LACERATINGSLASH   42395
-#define SPELL_RENDFLESH         42397
-#define SPELL_DEAFENINGROAR     42398
 
 #define YELL_SHIFTEDTOBEAR      "You call on da beast, you gonna get more dan you bargain for!"
 #define SOUND_YELL_TOBEAR       12072
@@ -94,10 +95,7 @@ class boss_nalorakk : public CreatureScript
 {
     public:
 
-        boss_nalorakk()
-            : CreatureScript("boss_nalorakk")
-        {
-        }
+        boss_nalorakk() : CreatureScript("boss_nalorakk") { }
 
         struct boss_nalorakkAI : public ScriptedAI
         {
@@ -110,8 +108,7 @@ class boss_nalorakk : public CreatureScript
 
             InstanceScript *pInstance;
 
-            uint32 BrutalSwipe_Timer;
-            uint32 Mangle_Timer;
+            uint32 BrutalStrike_Timer;
             uint32 Surge_Timer;
 
             uint32 LaceratingSlash_Timer;
@@ -145,10 +142,9 @@ class boss_nalorakk : public CreatureScript
                 if (pInstance)
                     pInstance->SetData(DATA_NALORAKKEVENT, NOT_STARTED);
 
-                Surge_Timer = 15000 + rand()%5000;
-                BrutalSwipe_Timer = 7000 + rand()%5000;
-                Mangle_Timer = 10000 + rand()%5000;
-                ShapeShift_Timer = 45000 + rand()%5000;
+                Surge_Timer = 8000;
+                BrutalStrike_Timer = 20000;
+                ShapeShift_Timer = 30000;
                 Berserk_Timer = 600000;
 
                 inBearForm = false;
@@ -317,7 +313,7 @@ class boss_nalorakk : public CreatureScript
                     switch(MovePhase)
                     {
                         case 2:
-                            me->SetOrientation(3.1415f*2);
+                            me->SetFacingTo(3.1415f*2);
                             inMove = false;
                             return;
                         case 1:
@@ -329,11 +325,11 @@ class boss_nalorakk : public CreatureScript
                             inMove = true;
                             return;
                         case 5:
-                            me->SetOrientation(3.1415f*0.5f);
+                            me->SetFacingTo(3.1415f*0.5f);
                             inMove = false;
                             return;
                         case 7:
-                            me->SetOrientation(3.1415f*0.5f);
+                            me->SetFacingTo(3.1415f*0.5f);
                             inMove = false;
                             return;
                     }
@@ -372,10 +368,9 @@ class boss_nalorakk : public CreatureScript
                         me->MonsterYell(YELL_SHIFTEDTOTROLL, LANG_UNIVERSAL, 0);
                         DoPlaySoundToSet(me, SOUND_YELL_TOTROLL);
                         me->RemoveAurasDueToSpell(SPELL_BEARFORM);
-                        Surge_Timer = 15000 + rand()%5000;
-                        BrutalSwipe_Timer = 7000 + rand()%5000;
-                        Mangle_Timer = 10000 + rand()%5000;
-                        ShapeShift_Timer = 45000 + rand()%5000;
+                        Surge_Timer = 8000;
+                        BrutalStrike_Timer = 20000;
+                        ShapeShift_Timer = 30000;
                         inBearForm = false;
                     }
                     else
@@ -384,40 +379,35 @@ class boss_nalorakk : public CreatureScript
                         me->MonsterYell(YELL_SHIFTEDTOBEAR, LANG_UNIVERSAL, 0);
                         DoPlaySoundToSet(me, SOUND_YELL_TOBEAR);
                         DoCast(me, SPELL_BEARFORM, true);
-                        LaceratingSlash_Timer = 2000; // dur 18s
-                        RendFlesh_Timer = 3000;  // dur 5s
-                        DeafeningRoar_Timer = 5000 + rand()%5000;  // dur 2s
-                        ShapeShift_Timer = 20000 + rand()%5000; // dur 30s
+                        LaceratingSlash_Timer = 4000;
+                        RendFlesh_Timer = 6000;
+                        DeafeningRoar_Timer = 10000;
+                        ShapeShift_Timer = 30000;
                         inBearForm = true;
                     }
                 } else ShapeShift_Timer -= diff;
 
                 if (!inBearForm)
                 {
-                    if (BrutalSwipe_Timer <= diff)
+                    if (BrutalStrike_Timer <= diff) // blizzlike status: done
                     {
                         DoCast(me->getVictim(), SPELL_BRUTALSWIPE);
-                        BrutalSwipe_Timer = 7000 + rand()%5000;
-                    } else BrutalSwipe_Timer -= diff;
 
-                    if (Mangle_Timer <= diff)
-                    {
-                        if (me->getVictim() && !me->getVictim()->HasAura(SPELL_MANGLEEFFECT))
-                        {
-                            DoCast(me->getVictim(), SPELL_MANGLE);
-                            Mangle_Timer = 1000;
-                        }
-                        else Mangle_Timer = 10000 + rand()%5000;
-                    } else Mangle_Timer -= diff;
+                        BrutalStrike_Timer = 20000;
+                    } else BrutalStrike_Timer -= diff;
 
-                    if (Surge_Timer <= diff)
+                    if (Surge_Timer <= diff) // blizzlike status: done
                     {
-                        me->MonsterYell(YELL_SURGE, LANG_UNIVERSAL, 0);
-                        DoPlaySoundToSet(me, SOUND_YELL_SURGE);
-                        Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 45, true);
+                        Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
+
                         if (pTarget)
-                            DoCast(pTarget, SPELL_SURGE);
-                        Surge_Timer = 15000 + rand()%5000;
+                        {
+                            DoCast(pTarget, SPELL_SURGE, true);
+                            me->MonsterYell(YELL_SURGE, LANG_UNIVERSAL, 0);
+                            DoPlaySoundToSet(me, SOUND_YELL_SURGE);
+                        }
+
+                        Surge_Timer = 8000;
                     } else Surge_Timer -= diff;
                 }
                 else
@@ -425,19 +415,19 @@ class boss_nalorakk : public CreatureScript
                     if (LaceratingSlash_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_LACERATINGSLASH);
-                        LaceratingSlash_Timer = 18000 + rand()%5000;
+                        LaceratingSlash_Timer = 4000;
                     } else LaceratingSlash_Timer -= diff;
 
                     if (RendFlesh_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_RENDFLESH);
-                        RendFlesh_Timer = 5000 + rand()%5000;
+                        RendFlesh_Timer = 6000;
                     } else RendFlesh_Timer -= diff;
 
                     if (DeafeningRoar_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_DEAFENINGROAR);
-                        DeafeningRoar_Timer = 15000 + rand()%5000;
+                        DeafeningRoar_Timer = 10000;
                     } else DeafeningRoar_Timer -= diff;
                 }
 
