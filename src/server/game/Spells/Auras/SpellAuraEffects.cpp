@@ -2974,10 +2974,9 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     caster->CastCustomSpell(target, 52212, &m_amount, NULL, NULL, true, 0, this);
                 break;
             }
-            // Blood of the North
             // Reaping
             // Blood Rites
-            if (GetSpellProto()->SpellIconID == 3041 || GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
+            if (GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
