@@ -1406,7 +1406,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_WARRIOR:
                 if (GetId() == 86346) // Colossus Smash
                 {
-                    if (caster->HasAura(89003)) // Glyph of Colossus Smash
+                    if (caster && caster->HasAura(89003)) // Glyph of Colossus Smash
                         caster->CastSpell(target, 58567, true);
                 }
 
