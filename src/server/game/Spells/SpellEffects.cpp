@@ -6456,10 +6456,10 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         totalDamagePercentMod *= 1.0f;                // stay on 30%
                         break;
                     case 2:
-                        totalDamagePercentMod *= 4.0f;                // 90%
+                        totalDamagePercentMod *= 3.0f;                // 90%
                         break;
                     case 3:
-                        totalDamagePercentMod *= 1.0f+(235.0f/30.0f); // 225%
+                        totalDamagePercentMod *= 235.0f/30.0f;        // 235%
                         break;
                 }
                 if (takePower)
@@ -6705,7 +6705,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             spell_bonus = int32(spell_bonus * weapon_total_pct);
     }
 
-    int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
+    float weaponDamage = (float) m_caster->CalculateDamage(m_attackType, normalized, true);
 
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
@@ -6720,7 +6720,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 weaponDamage += fixed_bonus;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamage = int32(weaponDamage * weaponDamagePercentMod);
+                weaponDamage = weaponDamage * weaponDamagePercentMod;
             default:
                 break;                                      // not weapon damage effect, just skip
         }
@@ -6730,7 +6730,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         weaponDamage += spell_bonus;
 
     if (totalDamagePercentMod != 1.0f)
-        weaponDamage = int32(weaponDamage * totalDamagePercentMod);
+        weaponDamage = weaponDamage * totalDamagePercentMod;
 
     // prevent negative damage
     uint32 eff_damage = uint32(weaponDamage > 0 ? weaponDamage : 0);
