@@ -5065,6 +5065,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 82691: // Ring of Frost
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY; // disable spreading of freeze from frozen target to his allies
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             count++;
             break;
         default:
