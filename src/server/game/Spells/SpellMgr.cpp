@@ -4201,8 +4201,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->procChance = 0;
             ++count;
             break;
-        case 97499: // Lightning Totem
+        case 97499: // Water Totem
+        case 97500: // Water Totem
         case 43302: // Lightning Totem
+        case 97492: // Lightning Totem
             spellInfo->EffectBasePoints[0] = 1;
             break;
         // Sweeping Strikes

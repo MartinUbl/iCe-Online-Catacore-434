@@ -73,6 +73,7 @@ class instance_zulaman : public InstanceMapScript
             uint64 AkilzonDoorGUID;
             uint64 ZulJinDoorGUID;
             uint64 HalazziDoorGUID;
+            uint64 HalazziGUID;
 
             uint32 QuestTimer;
             uint16 BossKilled;
@@ -96,6 +97,7 @@ class instance_zulaman : public InstanceMapScript
                 AkilzonDoorGUID = 0;
                 HalazziDoorGUID = 0;
                 ZulJinDoorGUID = 0;
+                HalazziGUID = 0;
 
                 QuestTimer = 0;
                 QuestMinute = 21;
@@ -119,9 +121,14 @@ class instance_zulaman : public InstanceMapScript
                 switch(pCreature->GetEntry())
                 {
                 case 23578://janalai
+                    break;
                 case 23863://zuljin
+                    break;
                 case 24239://hexlord
+                    break;
                 case 23577://halazzi
+                    HalazziGUID = pCreature->GetGUID();
+                    break;
                 case 23576://nalorakk
                 default: break;
                 }
@@ -292,6 +299,14 @@ class instance_zulaman : public InstanceMapScript
                 case TYPE_RAND_VENDOR_2: return RandVendor[1];
                 default:                 return 0;
                 }
+            }
+
+            uint64 GetData64(uint32 type)
+            {
+                if (type == DATA_HALAZZIEVENT)
+                    return HalazziGUID;
+
+                return 0;
             }
 
             void Update(uint32 diff)
