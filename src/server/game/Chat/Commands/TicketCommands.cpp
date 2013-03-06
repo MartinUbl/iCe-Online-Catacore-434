@@ -45,10 +45,12 @@ std::string ChatHandler::PGetParseString(int32 entry, ...)
 bool ChatHandler::HandleGMTicketListCommand(const char* /*args*/)
 {
     SendSysMessage(LANG_COMMAND_TICKETSHOWLIST);
+    uint32 count = 0;
     for (GmTicketList::iterator itr = sTicketMgr->m_GMTicketList.begin(); itr != sTicketMgr->m_GMTicketList.end(); ++itr)
     {
         if ((*itr)->closed != 0 || (*itr)->completed)
             continue;
+        count++;
         std::string gmname;
         std::stringstream ss;
         ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, (*itr)->guid);
@@ -61,6 +63,7 @@ bool ChatHandler::HandleGMTicketListCommand(const char* /*args*/)
 
         SendSysMessage(ss.str().c_str());
     }
+    PSendSysMessage("Opened %u tickets",count);
     return true;
 }
 
