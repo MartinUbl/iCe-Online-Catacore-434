@@ -11719,7 +11719,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
 
             packet.WriteBit(weekCap != 0);
             packet.WriteBit(currency->Category == CURRENCY_CATEGORY_PVP); // hasSeasonCount
-            packet.WriteBit(1); // print in log
+            packet.WriteBit(0); // print in log (negated, false = show, true = don't show)
 
             if (currency->Category == CURRENCY_CATEGORY_PVP)
                 packet << uint32(newSeasonCount / precision);
