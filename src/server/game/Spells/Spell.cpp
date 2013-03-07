@@ -3118,6 +3118,16 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                     ++itr;
                             }
                             break;
+                        case 43657: // Electrical Storm
+                        case 97300:
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                            {
+                                if ((*itr)->GetDistance(m_caster) < 20.0f)
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)

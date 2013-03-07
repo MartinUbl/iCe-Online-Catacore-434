@@ -27,6 +27,18 @@ enum Spells
     SPELL_PLUCKED               = 97318
 };
 
+static const Position waypoints[8] =
+{
+    {364.865417f, 1404.369507f, 84.291031f},
+    {364.392792f, 1414.388550f, 84.291031f},
+    {376.387482f, 1419.080566f, 84.291031f},
+    {382.988220f, 1408.728394f, 84.291031f},
+    {383.818695f, 1397.635254f, 84.291031f},
+    {372.548553f, 1393.551636f, 84.291031f},
+    {379.149109f, 1394.477661f, 84.291031f},
+    {368.549194f, 1397.899536f, 84.291031f}
+};
+
 //"Your death gonna be quick, strangers. You shoulda never have come to this place..."
 #define SAY_ONAGGRO "I be da predator! You da prey..."
 #define SAY_ONDEATH "You can't... kill... me spirit!"
@@ -80,6 +92,9 @@ class boss_akilzon : public CreatureScript
 
             uint32 EnrageTimer;
             uint32 sayTick;
+            bool electrical_enter;
+            Unit* pElectricalTarget;
+            Unit* pElectricalVehicle;
 
             void Reset()
             {
@@ -100,6 +115,9 @@ class boss_akilzon : public CreatureScript
                     BirdGUIDs[i] = 0;
 
                 AmaniKiddnaperGUID = 0;
+                electrical_enter = false;
+                pElectricalTarget = NULL;
+                pElectricalVehicle = NULL;
             }
 
             void EnterCombat(Unit * /*who*/)
@@ -145,16 +163,12 @@ class boss_akilzon : public CreatureScript
                     Unit* bird = Unit::GetUnit(*me,BirdGUIDs[i]);
                     if (bird && bird->isAlive())
                     {
-                        bird->SetVisibility(VISIBILITY_OFF);
-                        bird->setDeathState(JUST_DIED);
+                        bird->ToCreature()->ForcedDespawn();
                     }
                 }
 
                 if (Unit* pBird = Unit::GetUnit(*me, AmaniKiddnaperGUID))
-                {
-                    pBird->SetVisibility(VISIBILITY_OFF);
-                    pBird->setDeathState(JUST_DIED);
-                }
+                    pBird->ToCreature()->ForcedDespawn();
             }
 
             void MovementInform(uint32 type, uint32 id)
@@ -200,8 +214,9 @@ class boss_akilzon : public CreatureScript
                     if (!pTarget)
                         pTarget = me->getVictim();
 
+                    me->SetFacingToObject(pTarget);
+
                     DoCast(pTarget, SPELL_STATIC_DISRUPTION, false);
-                    me->SetInFront(me->getVictim());
 
                     StaticDisruptionTimer = 10000;
                 } else StaticDisruptionTimer -= diff;
@@ -216,38 +231,39 @@ class boss_akilzon : public CreatureScript
 
                 if (ElectricalStormTimer <= diff) // blizzlike status: done
                 {
-                    Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
+                    pElectricalTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
 
-                    if (pTarget)
+                    if (pElectricalTarget)
                     {
                         float x,y,z;
-                        pTarget->GetPosition(x,y,z);
+                        pElectricalTarget->GetPosition(x,y,z);
 
-                        Unit* pVehicle = me->SummonCreature(npc_electrical_storm_vehicle, x, y, me->GetPositionZ(), pTarget->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 80000);
-
-                        if (pVehicle)
-                        {
-                            pTarget->StopMoving();
-                            pVehicle->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
-                            pVehicle->setFaction(pTarget->getFaction());
-                            pVehicle->SetDisplayId(11686);
-                            pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            pTarget->EnterVehicle(pVehicle, 0);
-                            Vehicle* pVeh = pVehicle->GetVehicleKit();
-
-                            if (pVeh)
-                            {
-                                pVehicle->GetMotionMaster()->MoveJump(x,y,me->GetPositionZ()+7,5,1);
-                                pVehicle->SetFacingTo(pTarget->GetOrientation());
-                                pVeh->GetPassenger(0)->clearUnitState(UNIT_STAT_UNATTACKABLE);
-                            }
-
-                            DoCast(pTarget, SPELL_ELECTRICAL_STORM, false);
-                        }
+                        pElectricalVehicle = me->SummonCreature(npc_electrical_storm_vehicle, x, y, me->GetPositionZ(), pElectricalTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 80000);
+                        electrical_enter = true;
                     }
 
                     ElectricalStormTimer = 50000;
                 } else ElectricalStormTimer -= diff;
+
+                if (electrical_enter)
+                {
+                    if (pElectricalTarget && pElectricalVehicle)
+                    {
+                        pElectricalTarget->StopMoving();
+                        pElectricalVehicle->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+                        pElectricalVehicle->setFaction(pElectricalTarget->getFaction());
+                        pElectricalVehicle->SetDisplayId(11686);
+                        pElectricalVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pElectricalTarget->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                        pElectricalTarget->EnterVehicle(pElectricalVehicle, 0);
+                        DoCast(pElectricalVehicle, SPELL_ELECTRICAL_STORM, false);
+                        pElectricalVehicle->SetFacingTo(pElectricalTarget->GetOrientation());
+                        pElectricalVehicle->GetMotionMaster()->MoveJump(pElectricalTarget->GetPositionX(),pElectricalTarget->GetPositionY(),me->GetPositionZ()+7,5,1);
+
+                        electrical_enter = false;
+
+                    }
+                }
 
                 if (100.0f - me->GetHealthPct() > SummonEaglesCounter * 5) // blizzlike status: done
                 {
@@ -314,7 +330,7 @@ class boss_akilzon : public CreatureScript
                         if (pCreature)
                         {
                             pCreature->AddThreat(me->getVictim(), 1.0f);
-                            pCreature->AI()->AttackStart(me->getVictim());
+                            pCreature->AI()->DoZoneInCombat();
                             AmaniKiddnaperGUID = pCreature->GetGUID();
                         }
                     }
@@ -417,14 +433,113 @@ class mob_amani_kiddnaper : public CreatureScript
 
         struct mob_amani_kiddnaperAI : public ScriptedAI
         {
-            mob_amani_kiddnaperAI(Creature *c) : ScriptedAI(c) {}
+            mob_amani_kiddnaperAI(Creature *c) : ScriptedAI(c)
+            {
+                c->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+            }
 
+            bool prepinac;
+            uint32 pathid;
+            Unit* pTarget;
+            Position pos;
+
+            void Reset()
+            {
+                prepinac = false;
+                pos = me->GetHomePosition();
+                pathid = 0;
+                pTarget = NULL;
+            }
+
+            void JustDied(Unit* /*pKiller*/)
+            {
+                if (pTarget)
+                {
+                    if (pTarget->HasAura(SPELL_PLUCKED))
+                        pTarget->RemoveAurasDueToSpell(SPELL_PLUCKED);
+                }
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (type != POINT_MOTION_TYPE)
+                    return;
+
+                pos.m_positionX = waypoints[pathid].GetPositionX();
+                pos.m_positionY = waypoints[pathid].GetPositionY();
+                pos.m_positionZ = waypoints[pathid].GetPositionZ();
+
+                switch (id)
+                {
+                    case 0:
+                        if (pTarget)
+                        {
+                            prepinac = true;
+                            me->SetSpeed(MOVE_RUN, 3.0f);
+
+                            pTarget->StopMoving();
+                            pTarget->EnterVehicle(me, 1);
+                            Vehicle* pVeh = me->GetVehicleKit();
+
+                            if (pVeh)
+                            {
+                                //pVeh->GetPassenger(1)->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                                me->AddAura(SPELL_PLUCKED, pTarget);
+                            }
+                        }
+                        pathid = 1;
+                        break;
+                    case 1:
+                        pathid = 2;
+                        break;
+                    case 2:
+                        pathid = 3;
+                        break;
+                    case 3:
+                        pathid = 4;
+                        break;
+                    case 4:
+                        pathid = 5;
+                        break;
+                    case 5:
+                        pathid = 6;
+                        break;
+                    case 6:
+                        pathid = 7;
+                        break;
+                    case 7:
+                        pathid = 8;
+                    case 8:
+                        pos.m_positionX = waypoints[1].GetPositionX();
+                        pos.m_positionY = waypoints[1].GetPositionY();
+                        pos.m_positionZ = waypoints[1].GetPositionZ();
+                        pathid = 1;
+                        break;
+                }
+            }
 
             void UpdateAI(const uint32 diff)
             {
-            
+                if (prepinac) // random fly
+                {
+
+                    me->GetMotionMaster()->MovePoint(pathid, pos);
+                }
+                else
+                {
+                    if (pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    {
+                        if ((pTarget->ToPlayer() && pTarget->ToPlayer()->isTank()) || !pTarget->isAlive())
+                            pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+
+                        float x,y,z;
+                        pTarget->GetContactPoint(me, x, y, z);
+                        z += 2;
+                        me->SetSpeed(MOVE_RUN, 5.0f);
+                        me->GetMotionMaster()->MovePoint(pathid, x, y, z);
+                    }
+                }
             }
-            
         };
 
         CreatureAI* GetAI(Creature* creature) const

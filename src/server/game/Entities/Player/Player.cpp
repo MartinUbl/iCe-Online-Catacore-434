@@ -4546,6 +4546,24 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
     return (itr != m_talents[spec]->end() && itr->second->state != PLAYERSPELL_REMOVED);
 }
 
+bool Player::isTank()
+{
+    switch (getClass())
+    {
+        case CLASS_WARRIOR:
+            return HasSpell(93098);
+        case CLASS_DEATH_KNIGHT:
+            return HasSpell(93099);
+        case CLASS_PALADIN:
+            return HasSpell(84839);
+        case CLASS_DRUID:
+            return HasSpell(84840) && HasTalent(57880, GetActiveSpec())
+                && HasTalent(16931, GetActiveSpec()) && HasTalent(61336, GetActiveSpec());
+        default:
+            return false;
+    }
+}
+
 bool Player::HasActiveSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);

@@ -1826,6 +1826,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SetTalentBranchSpec(uint32 branchSpec, uint8 spec) { m_branchSpec[spec] = branchSpec; }
         BranchSpec GetTalentBranchSpec(uint8 spec) const { return BranchSpec(m_branchSpec[spec]); }
+        bool isTank();
 
         uint32 CalculateTalentsPoints() const;
 
