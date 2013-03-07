@@ -2082,7 +2082,10 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
     data << uint32(0);
 
     if (session)
+    {
         session->SendPacket(&data);
+        UpdateGuildNews(session);
+    }
     else
         BroadcastPacket(&data);
 }
@@ -2091,21 +2094,6 @@ void Guild::UpdateGuildNews(WorldSession* session)
 {
     if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
         return;
-
-    uint32 count = m_guildNews.size();
-
-    ByteBuffer ids(4*count), types(4*count), dates(4*count), params(8*count), guids(8*count), unks(4*count);
-
-    for (GuildNewsList::const_iterator itr = m_guildNews.begin(); itr != m_guildNews.end(); ++itr)
-    {
-        ids << uint32((*itr).id);
-        types << uint32((*itr).type);
-        dates << uint32((*itr).date);
-        params << uint64((*itr).param);
-        guids << uint64((*itr).guid);
-
-        unks << uint32(0);
-    }
 
     /*
     Event Types:
@@ -2118,35 +2106,53 @@ void Guild::UpdateGuildNews(WorldSession* session)
      6 = guild level,         param = level
     */
 
+    ObjectGuid guid;
+    uint32 count = m_guildNews.size();
+
     WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 4+(5*4+2*8)*count);
-    data << uint32(count);   //count
+    data.WriteBits(count, 21);
 
-    // Unknown
-    data.append(unks);
+    for (GuildNewsList::const_iterator itr = m_guildNews.begin(); itr != m_guildNews.end(); ++itr)
+    {
+        data.WriteBits(0, 26); // Not yet implemented used for guild achievements
+        guid = (*itr).guid;
 
-    // Date and time
-    data.append(dates);
+        data.WriteBit(guid[7]);
+        data.WriteBit(guid[0]);
+        data.WriteBit(guid[6]);
+        data.WriteBit(guid[5]);
+        data.WriteBit(guid[4]);
+        data.WriteBit(guid[3]);
+        data.WriteBit(guid[1]);
+        data.WriteBit(guid[2]);
+    }
 
-    // Player GUIDs
-    data.append(guids);
+    data.FlushBits();
 
-    // Parameters
-    data.append(params);
+    for (GuildNewsList::const_iterator itr = m_guildNews.begin(); itr != m_guildNews.end(); ++itr)
+    {
+        guid = (*itr).guid;
+        data.WriteByteSeq(guid[5]);
 
-    // Event types
-    data.append(types);
+        data << uint32(0);            // flags, 1 sticky
+        data << uint32((*itr).param);
+        data << uint32(0);            // unk
 
-    // Unknown
-    // future development warning: this unk field is not equal to the first unk field !
-    data.append(unks);
+        data.WriteByteSeq(guid[7]);
+        data.WriteByteSeq(guid[6]);
+        data.WriteByteSeq(guid[2]);
+        data.WriteByteSeq(guid[3]);
+        data.WriteByteSeq(guid[0]);
+        data.WriteByteSeq(guid[4]);
+        data.WriteByteSeq(guid[1]);
 
-    // Identificator - to avoid double displaying, each news has its own "ID"
-    data.append(ids);
+        data << uint32((*itr).id);
+        data << uint32((*itr).type);
+        data << uint32((*itr).date);
+    }
 
     if (session)
         session->SendPacket(&data);
-    //else
-    //    BroadcastPacket(&data);
 }
 
 void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
