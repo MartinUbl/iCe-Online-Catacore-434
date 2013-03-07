@@ -371,14 +371,22 @@ private:
         
         struct Profession
         {
-            uint32 skillID;
+            uint32 skillId;
             uint32 title;
-            uint32 level;
+            uint32 skillValue;
         };
 
     public:
         Member(uint32 guildId, const uint64& guid, uint8 rankId) :
-          m_guildId(guildId), m_guid(guid), m_flags(GUILD_MEMBER_FLAG_OFFLINE), m_logoutTime(::time(NULL)), m_rankId(rankId) { }
+          m_guildId(guildId), m_guid(guid), m_flags(GUILD_MEMBER_FLAG_OFFLINE), m_logoutTime(::time(NULL)), m_rankId(rankId)
+        {
+            for (uint32 i = 0; i < 2; i++)
+            {
+                professions[i].skillId = 0;
+                professions[i].skillValue = 0;
+                professions[i].title = 0;
+            }
+        }
 
         void SetStats(Player* player);
         void SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId);
@@ -817,6 +825,8 @@ public:
     bool AddMember(const uint64& guid, uint8 rankId = GUILD_RANK_NONE);
     void DeleteMember(const uint64& guid, bool isDisbanding = false, bool isKicked = false);
     bool ChangeMemberRank(const uint64& guid, uint8 newRank);
+    void SetMemberProfessionData(const uint64& guid, uint32 skillId, uint32 skillValue, uint32 title = 0);
+    void RemoveMemberProfession(const uint64& guid, uint32 skillId);
     RankInfo & GetRankInfo(uint32 rankId) {return m_ranks[rankId]; }
     bool IsMember(uint64 guid) const;
     uint32 GetMembersCount() { return m_members.size(); };

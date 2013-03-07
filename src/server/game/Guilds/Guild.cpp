@@ -2036,9 +2036,8 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         memberData << uint32(member->GetRankId());
         memberData << uint32(member->GetAchievementPoints());
 
-        // for (2 professions)
-        memberData << uint32(0) << uint32(0) << uint32(0);
-        memberData << uint32(0) << uint32(0) << uint32(0);
+        for (uint32 i = 0; i < 2; i++)
+            memberData << uint32(member->professions[i].title) << uint32(member->professions[i].skillValue) << uint32(member->professions[i].skillId);
 
         memberData.WriteByteSeq(guid[2]);
         memberData << uint8(member->GetFlags());
@@ -3679,6 +3678,48 @@ bool Guild::ChangeMemberRank(const uint64& guid, uint8 newRank)
             return true;
         }
     return false;
+}
+
+void Guild::SetMemberProfessionData(const uint64& guid, uint32 skillId, uint32 skillValue, uint32 title)
+{
+    if (Member* pMember = GetMember(guid))
+    {
+        for (uint32 i = 0; i < 2; i++)
+        {
+            if (pMember->professions[i].skillId == skillId)
+            {
+                pMember->professions[i].skillValue = skillValue;
+                pMember->professions[i].title = title;
+                return;
+            }
+        }
+
+        // this means that profession hasn't been found
+        for (uint32 i = 0; i < 2; i++)
+        {
+            if (pMember->professions[i].skillId == 0)
+            {
+                pMember->professions[i].skillId = skillId;
+                pMember->professions[i].skillValue = skillValue;
+                pMember->professions[i].title = title;
+                return;
+            }
+        }
+    }
+}
+
+void Guild::RemoveMemberProfession(const uint64& guid, uint32 skillId)
+{
+    if (Member* pMember = GetMember(guid))
+    {
+        for (uint32 i = 0; i < 2; i++)
+            if (pMember->professions[i].skillId == skillId)
+            {
+                pMember->professions[i].skillId = 0;
+                pMember->professions[i].skillValue = 0;
+                pMember->professions[i].title = 0;
+            }
+    }
 }
 
 bool Guild::IsMember(uint64 guid) const

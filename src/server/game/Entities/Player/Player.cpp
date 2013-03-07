@@ -6418,6 +6418,9 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
             SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, newVal);
             SetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset, maxVal);
 
+            if (GetGuild())
+                GetGuild()->SetMemberProfessionData((uint64)GetGUID(), id, newVal, 0);
+
             if (itr->second.uState != SKILL_NEW)
                 itr->second.uState = SKILL_CHANGED;
             learnSkillRewardedSpells(id, newVal);
@@ -6456,6 +6459,9 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1, 0);
             else if (GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1) == id)
                 SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1, 0);
+
+            if (GetGuild())
+                GetGuild()->RemoveMemberProfession((uint64)GetGUID(), id);
         }
     }
     else if (newVal)                                        //add
@@ -6481,6 +6487,9 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                         SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1, id);
                     else if (!GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1))
                         SetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1, id);
+
+                    if (GetGuild())
+                        GetGuild()->SetMemberProfessionData((uint64)GetGUID(), id, newVal, 0);
                 }
 
                 SetUInt16Value(PLAYER_SKILL_STEP_0 + field, offset, step);
