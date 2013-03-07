@@ -14595,7 +14595,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                             sLog->outDebug("+ %u HEALTH_REGENERATION", enchant_amount);
                             break;
                         case ITEM_MOD_SPELL_PENETRATION:
-                            ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, enchant_amount, apply);
+                            ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -int32(enchant_amount), apply);
                             m_spellPenetrationItemMod += apply ? int32(enchant_amount) : -int32(enchant_amount);
                             sLog->outDebug("+ %u SPELL_PENETRATION", enchant_amount);
                             break;
