@@ -14300,8 +14300,8 @@ void Player::ApplyEnchantment(Item *item,bool apply)
         return;
 
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
-        // do not add "bonus" enchant with reforge ID
-        if (slot != REFORGING_ENCHANTMENT_SLOT)
+        // do not add "bonus" enchant with reforge and/or transmog ID
+        if (slot != REFORGING_ENCHANTMENT_SLOT && slot != TRANSMOGRIFY_ENCHANTMENT_SLOT)
             ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
