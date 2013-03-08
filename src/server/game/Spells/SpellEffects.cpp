@@ -4323,6 +4323,21 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 int32 bp0 = addhealth*0.2f;
                 m_caster->CastCustomSpell(m_caster, 55533, &bp0, 0, 0, true);
             }
+
+            // any shaman heal should trigger Ancestral Vigor if talent Ancestral Healing is present
+            if (m_caster->HasAura(16235) || m_caster->HasAura(16176))
+            {
+                int32 bp0 = 5;
+                if (m_caster->HasAura(16235))
+                    bp0 = 10;
+
+                // the amount is 10% of healing done and cannot exceed 10% of targets total HP
+                bp0 = (int32)(bp0*addhealth/100.0f);
+                if (bp0 > unitTarget->GetMaxHealth()*0.1f)
+                    bp0 = unitTarget->GetMaxHealth()*0.1f;
+
+                m_caster->CastCustomSpell(unitTarget, 105284, &bp0, 0, 0, true);
+            }
         }
         // Greater Heal
         else if (m_spellInfo->Id == 2060)
