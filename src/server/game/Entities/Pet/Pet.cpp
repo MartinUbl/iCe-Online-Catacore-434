@@ -546,7 +546,7 @@ void Pet::Update(uint32 diff)
             //regenerate focus for hunter pets or energy for deathknight's ghoul
             if (m_regenTimer)
             {
-                if (m_regenTimer > diff)
+                if (m_regenTimer > int32(diff))
                     m_regenTimer -= diff;
                 else
                 {
@@ -555,7 +555,7 @@ void Pet::Update(uint32 diff)
                         case POWER_FOCUS:
                             Regenerate(POWER_FOCUS);
                             m_regenTimer += PET_FOCUS_REGEN_INTERVAL - diff;
-                            if (!m_regenTimer) ++m_regenTimer;
+                            if (m_regenTimer <= 0) m_regenTimer = 1;
                             break;
                         // in creature::update
                         //case POWER_ENERGY:
@@ -569,9 +569,6 @@ void Pet::Update(uint32 diff)
                     }
                 }
             }
-
-            if (getPetType() != HUNTER_PET)
-                break;
 
             break;
         }
