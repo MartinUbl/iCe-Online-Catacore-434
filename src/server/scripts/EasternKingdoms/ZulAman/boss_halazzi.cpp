@@ -169,11 +169,6 @@ class boss_halazzi : public CreatureScript
                     EnterPhase(PHASE_SPLIT);
             }
 
-            void AttackStart(Unit *who)
-            {
-                if (Phase != PHASE_MERGE) ScriptedAI::AttackStart(who);
-            }
-
             void EnterPhase(PhaseHalazzi NextPhase)
             {
                 switch(NextPhase)
@@ -213,8 +208,6 @@ class boss_halazzi : public CreatureScript
                         pLynx->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         pLynx->GetMotionMaster()->Clear();
                         pLynx->GetMotionMaster()->MoveFollow(me, 0, 0);
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveFollow(pLynx, 0, 0);
                     }
                     break;
                 default:
@@ -317,8 +310,7 @@ class boss_halazzi : public CreatureScript
                     } else MergeTimer -= diff;
                 }
 
-                if (Phase != PHASE_MERGE)
-                    DoMeleeAttackIfReady();
+                DoMeleeAttackIfReady();
             }
 
             void KilledUnit(Unit* /*victim*/)
