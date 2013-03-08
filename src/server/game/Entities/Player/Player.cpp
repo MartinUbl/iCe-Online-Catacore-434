@@ -21822,6 +21822,13 @@ void Player::ContinueTaxiFlight()
 
 void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
 {
+    bool isDualSchoolSource = false;
+    uint8 tmp = 0;
+    for (uint8 i = 0; i <= SPELL_SCHOOL_ARCANE; i++)
+        tmp += ((idSchoolMask >> i) & 1);
+    if (tmp > 1)
+        isDualSchoolSource = true;
+
                                                             // last check 2.0.10
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
     data << uint64(GetGUID());
@@ -21846,7 +21853,12 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
         if (spellInfo->PreventionType != SPELL_PREVENTION_TYPE_SILENCE)
             continue;
 
-        if ((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetSpellCooldownDelay(unSpellId) < unTimeMs)
+        // From patch 4.2, when interrupted single-school spell, players are still able to cast dual-school spells (i.e. Frostfire Bolt, ..)
+        // interrupting dual-school spell will lead to prohibit both of spells
+
+        SpellSchoolMask schoolMask = GetSpellSchoolMask(spellInfo);
+
+        if (((!isDualSchoolSource && idSchoolMask == schoolMask) || (isDualSchoolSource && (idSchoolMask & schoolMask))) && GetSpellCooldownDelay(unSpellId) < unTimeMs)
         {
             data << uint32(unSpellId);
             data << uint32(unTimeMs);                       // in m.secs
