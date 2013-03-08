@@ -2332,6 +2332,19 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Camouflage
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
                 m_caster->CastSpell(m_caster,51755,true);
+            // Master's Call
+            else if (m_spellInfo->Id == 53271)
+            {
+                if (m_caster)
+                {
+                    Unit* pPet = Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
+                    if (unitTarget && pPet)
+                    {
+                        pPet->CastSpell(unitTarget, 54216, true);
+                        pPet->CastSpell(pPet, 62305, true);
+                    }
+                }
+            }
             break;
         case SPELLFAMILY_MAGE:
         {
@@ -7918,15 +7931,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     Pet* pPet = (Pet*)Unit::GetUnit(*m_caster,m_caster->GetPetGUID());
                     if(pPet && pPet->getVictim())
                         pPet->CastSpell(pPet->getVictim(),83381,true);
-                }
-            }
-            // Master's Call
-            else if (m_spellInfo->Id == 53271)
-            {
-                if (unitTarget)
-                {
-                    unitTarget->CastSpell(m_caster, 54216, true);
-                    unitTarget->CastSpell(unitTarget, 62305, true);
                 }
             }
             return;
