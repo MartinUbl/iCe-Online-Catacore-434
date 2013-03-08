@@ -1836,6 +1836,7 @@ uint8 Guild::BankMoveItemData::_CanStore(Item* pItem, bool swap)
 Guild::Guild() : m_id(0), m_leaderGuid(0), m_createdDate(0), m_accountsNumber(0), m_bankMoney(0), m_achievementMgr(this), m_lastXPSave(0), m_eventLog(NULL)
 {
     memset(&m_bankEventLog, 0, (GUILD_BANK_MAX_TABS + 1) * sizeof(LogHolder*));
+    memset(&m_guildChallenges, 0, GUILD_CHALLENGE_ARRAY_SIZE*sizeof(GuildChallenge));
 }
 
 Guild::~Guild()
@@ -2149,6 +2150,131 @@ void Guild::UpdateGuildNews(WorldSession* session)
         data << uint32((*itr).type);
         data << uint32((*itr).date);
     }
+
+    if (session)
+        session->SendPacket(&data);
+}
+
+void Guild::SendChallengeCompleted(WorldSession* session, GuildChallengeType type)
+{
+    WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED);
+
+    uint32 xprew = 0;
+    uint32 moneyrew = 0;
+    uint32 totalCount = 0;
+
+    if (m_level >= 5 && m_level <= 24)
+    {
+        if (type == GUILD_CHALLENGE_DUNGEON)
+        {
+            xprew = GCH_REWARD_XP_DUNGEON;
+            moneyrew = GCH_REWARD_MONEY_DUNGEON;
+        }
+        else if (type == GUILD_CHALLENGE_RAID)
+        {
+            xprew = GCH_REWARD_XP_RAID;
+            moneyrew = GCH_REWARD_MONEY_RAID;
+        }
+        else if (type == GUILD_CHALLENGE_BG)
+        {
+            xprew = GCH_REWARD_XP_BG;
+            moneyrew = GCH_REWARD_MONEY_BG;
+        }
+    }
+    else if (m_level == 25)
+    {
+        xprew = 0;
+
+        if (type == GUILD_CHALLENGE_DUNGEON)
+            moneyrew = GCH_REWARD_MONEY_DUNGEON_25;
+        else if (type == GUILD_CHALLENGE_RAID)
+            moneyrew = GCH_REWARD_MONEY_RAID_25;
+        else if (type == GUILD_CHALLENGE_BG)
+            moneyrew = GCH_REWARD_MONEY_BG_25;
+    }
+
+    if (type == GUILD_CHALLENGE_DUNGEON)
+        totalCount = GUILD_CHALLENGE_WEEK_DUNGEON_COUNT;
+    else if (type == GUILD_CHALLENGE_RAID)
+        totalCount = GUILD_CHALLENGE_WEEK_RAID_COUNT;
+    else if (type == GUILD_CHALLENGE_BG)
+        totalCount = GUILD_CHALLENGE_WEEK_BG_COUNT;
+
+    data << uint32(type);                             // type, 1 dung, 2 raid, 3 rbg
+    data << uint32(moneyrew);                         // gold reward
+    data << uint32(m_guildChallenges[type-1].count);  // count
+    data << uint32(xprew);                            // XP reward
+    data << uint32(totalCount);                       // total count
+
+    if (session)
+        session->SendPacket(&data);
+}
+
+void Guild::SendChallengeUpdate(WorldSession* session)
+{
+    WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED);
+
+    // guilds with level lower than two don't have challenges active
+    if (m_level < 5)
+    {
+        for (uint32 i = 0; i < 5; i++)
+            for (uint32 j = 0; j < 4; j++)
+                data << uint32(0);
+
+        if (session)
+            session->SendPacket(&data);
+
+        return;
+    }
+
+    // indexes are moved by one (array indexes 0-2, client types 1-3)
+
+    uint32 xprew[GUILD_CHALLENGE_ARRAY_SIZE];
+    uint32 moneyrew[GUILD_CHALLENGE_ARRAY_SIZE];
+    if (m_level >= 5 && m_level <= 24)
+    {
+        xprew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_XP_DUNGEON;
+        moneyrew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_MONEY_DUNGEON;
+        xprew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_XP_RAID;
+        moneyrew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_MONEY_RAID;
+        xprew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_XP_BG;
+        moneyrew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_MONEY_BG;
+    }
+    else if (m_level == 25)
+    {
+        xprew[GUILD_CHALLENGE_DUNGEON-1] = 0;
+        moneyrew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_MONEY_DUNGEON;
+        xprew[GUILD_CHALLENGE_RAID-1] = 0;
+        moneyrew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_MONEY_RAID;
+        xprew[GUILD_CHALLENGE_BG-1] = 0;
+        moneyrew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_MONEY_BG;
+    }
+
+    data << uint32(0);                                // unk
+    data << uint32(xprew[GUILD_CHALLENGE_DUNGEON-1]); // XP reward dungeons
+    data << uint32(xprew[GUILD_CHALLENGE_RAID-1]);    // XP reward raids
+    data << uint32(xprew[GUILD_CHALLENGE_BG-1]);      // XP reward rbgs
+
+    data << uint32(0);                                // unk
+    data << uint32(0);                                // unk
+    data << uint32(0);                                // unk
+    data << uint32(0);                                // unk
+
+    // hardcoded values for now, does it need to be variable?
+    data << uint32(0);                                  // unk
+    data << uint32(GUILD_CHALLENGE_WEEK_DUNGEON_COUNT); // total dungeons
+    data << uint32(GUILD_CHALLENGE_WEEK_RAID_COUNT);    // total raids
+    data << uint32(GUILD_CHALLENGE_WEEK_BG_COUNT);      // total rbgs
+
+    data << uint32(0);                                   // unk
+    data << uint32(moneyrew[GUILD_CHALLENGE_DUNGEON-1]); // gold reward dungeons
+    data << uint32(moneyrew[GUILD_CHALLENGE_RAID-1]);    // gold reward raids
+    data << uint32(moneyrew[GUILD_CHALLENGE_BG-1]);      // gold reward rbgs
+
+    data << uint32(0);                                                  // unk
+    data << uint32(m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count); // dungeons done
+    data << uint32(m_guildChallenges[GUILD_CHALLENGE_RAID-1].count);    // raids done
+    data << uint32(m_guildChallenges[GUILD_CHALLENGE_BG-1].count);      // rbgs done
 
     if (session)
         session->SendPacket(&data);

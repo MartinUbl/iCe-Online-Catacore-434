@@ -527,6 +527,16 @@ void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
     guild->HandleSetRankInfo(this, newRankId, rankName, newRights, moneyPerDay, rightsAndSlots);
 }
 
+void WorldSession::HandleGuildRequestChallenges(WorldPacket& recvPacket)
+{
+    if (GetPlayer() && GetPlayer()->GetGuildId())
+    {
+        Guild* pGuild = GetPlayer()->GetGuild();
+        if (pGuild)
+            pGuild->SendChallengeUpdate(this);
+    }
+}
+
 // Cata Status: Done
 void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 {

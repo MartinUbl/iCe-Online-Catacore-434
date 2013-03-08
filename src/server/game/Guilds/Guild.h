@@ -208,6 +208,41 @@ struct GuildNewsEntry
 
 typedef std::list<GuildNewsEntry> GuildNewsList;
 
+enum GuildChallengeType
+{
+    GUILD_CHALLENGE_DUNGEON = 1,
+    GUILD_CHALLENGE_RAID    = 2,
+    GUILD_CHALLENGE_BG      = 3,
+};
+
+#define GUILD_CHALLENGE_ARRAY_SIZE 3
+
+struct GuildChallenge
+{
+    uint32 count;
+    uint32 totalCount;
+};
+
+enum GuildChallengeRewards
+{
+    // rewards for levels 5 - 24
+    GCH_REWARD_XP_DUNGEON       = 300000,
+    GCH_REWARD_MONEY_DUNGEON    = 125 * GOLD,
+    GCH_REWARD_XP_RAID          = 3000000,
+    GCH_REWARD_MONEY_RAID       = 500 * GOLD,
+    GCH_REWARD_XP_BG            = 1500000,
+    GCH_REWARD_MONEY_BG         = 250 * GOLD,
+
+    // rewards for level 25
+    GCH_REWARD_MONEY_DUNGEON_25 = 250 * GOLD,
+    GCH_REWARD_MONEY_RAID_25    = 1000 * GOLD,
+    GCH_REWARD_MONEY_BG_25      = 500 * GOLD,
+};
+
+#define GUILD_CHALLENGE_WEEK_DUNGEON_COUNT  7
+#define GUILD_CHALLENGE_WEEK_RAID_COUNT     1
+#define GUILD_CHALLENGE_WEEK_BG_COUNT       3
+
 enum PetitionTurns
 {
     PETITION_TURN_OK                    = 0,
@@ -795,6 +830,9 @@ public:
     void SendLoginInfo(WorldSession* session);
     void SendGuildRankInfo(WorldSession* session) const;
 
+    void SendChallengeCompleted(WorldSession* session, GuildChallengeType type);
+    void SendChallengeUpdate(WorldSession* session);
+
     // Load from DB
     bool LoadFromDB(Field* fields);
     bool LoadRankFromDB(Field* fields);
@@ -883,6 +921,7 @@ protected:
     uint64 m_nextLevelXP;
     uint64 m_todayXP;
     GuildNewsList m_guildNews;
+    GuildChallenge m_guildChallenges[GUILD_CHALLENGE_ARRAY_SIZE];
 
     EmblemInfo m_emblemInfo;
     uint32 m_accountsNumber;

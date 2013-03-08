@@ -1334,6 +1334,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_PLAYER_MOVE,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_CEMETERY_LIST,                   STATUS_UNHANDLED,&WorldSession::Handle_NULL                     );
     OPCODE( CMSG_GUILD_SET_RANK_PERMISSIONS,              STATUS_LOGGEDIN, &WorldSession::HandleGuildSetRankPermissionsOpcode);
+    OPCODE( CMSG_GUILD_REQUEST_CHALLENGE_UPDATE,          STATUS_LOGGEDIN, &WorldSession::HandleGuildRequestChallenges    );
     OPCODE( SMSG_ARENA_UNIT_DESTROYED,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LFG_UPDATE_STATUS,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_START_TIMER,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
