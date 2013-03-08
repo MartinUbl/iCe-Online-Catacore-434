@@ -596,7 +596,7 @@ void Creature::Regenerate(Powers power)
         case POWER_FOCUS:
         {
             // For hunter pets.
-            addvalue = 24 * sWorld->getRate(RATE_POWER_FOCUS);
+            addvalue = 20 * sWorld->getRate(RATE_POWER_FOCUS);      // 5 per second
             break;
         }
         case POWER_ENERGY:
