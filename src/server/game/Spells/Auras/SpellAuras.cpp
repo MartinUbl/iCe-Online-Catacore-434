@@ -2146,6 +2146,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 caster->ModifyAuraState(AURA_STATE_DEFENSE, apply);
             }
 
+            // Pillar of Frost
+            if (GetId() == 51271)
+            {
+                // Glyph of Pillar of Frost
+                if (caster && caster->HasAura(58635))
+                {
+                    if (apply)
+                        caster->CastSpell(caster, 90259, true);
+                    else
+                        caster->RemoveAurasDueToSpell(90259);
+                }
+            }
+
             // Blood and Frost Presence
             if (GetId() == 48263 || GetId() == 48266)
             {
