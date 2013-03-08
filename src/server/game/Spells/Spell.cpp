@@ -6946,6 +6946,10 @@ SpellCastResult Spell::CheckCasterAuras() const
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
+    // this aura type disallows any attacks coming from player
+    if (m_caster && m_caster->HasAuraType(SPELL_AURA_CANNOT_ATTACK))
+        return SPELL_FAILED_PACIFIED;
+
     // Attr must make flag drop spell totally immune from all effects
     if (prevented_reason != SPELL_CAST_OK)
     {

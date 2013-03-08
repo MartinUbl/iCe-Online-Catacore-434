@@ -3130,6 +3130,10 @@ void Unit::_UpdateAutoRepeatSpell()
         }
     }
 
+    // this aura type will avoid all attacks made by player
+    if (HasAuraType(SPELL_AURA_CANNOT_ATTACK))
+        return;
+
     //apply delay (Auto Shot (spellID 75) not affected)
     if (m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500 && m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
         setAttackTimer(RANGED_ATTACK,500);
