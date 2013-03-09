@@ -2326,6 +2326,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
             }
             break;
+        case SPELLFAMILY_PRIEST:
+            // Shadowform
+            if (GetSpellProto()->Id == 15473)
+            {
+                if (target)
+                {
+                    if (apply)
+                    {
+                        // Glyph of Shadow (less transparency)
+                        if (target->HasAura(107906))
+                            target->CastSpell(target, 107904, true);
+                        else
+                            target->CastSpell(target, 107903, true);
+                    }
+                    else
+                    {
+                        target->RemoveAurasDueToSpell(107903);
+                        target->RemoveAurasDueToSpell(107904);
+                    }
+                }
+            }
     }
 }
 
