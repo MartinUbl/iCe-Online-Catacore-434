@@ -3173,7 +3173,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     }
                     else if (m_spellInfo->Id == 64844) // Divine Hymn
                     {
-                        maxSize = 3;
+                        maxSize = 5;
                         power = POWER_HEALTH;
                     }
                     else if (m_spellInfo->Id == 64904) // Hymn of Hope
