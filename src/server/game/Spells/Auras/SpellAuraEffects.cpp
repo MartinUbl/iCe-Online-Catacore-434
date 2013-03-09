@@ -7268,14 +7268,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellProto()->StackAmount);
                     break;
-                case 85416: // Grand Crusader
-                    {
-                        // wierd, but true - refreshing cooldown of Avenger's Shield on apply
-                        Player* pPlayer = (Player*)caster;
-                        if(pPlayer && pPlayer->HasSpellCooldown(31935))
-                            pPlayer->RemoveSpellCooldown(31935, true);
-                    }
-                    break;
                 case 52437: // Sudden Death
                     if (caster->ToPlayer()->HasSpellCooldown(86346)) // Colossus Smash
                         caster->ToPlayer()->RemoveSpellCooldown(86346, true); // removing cooldown for spell Colossus Smash

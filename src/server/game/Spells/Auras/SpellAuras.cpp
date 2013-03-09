@@ -1462,6 +1462,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->RemoveAurasDueToSpell(57318);
                     }
                 }
+                else if (GetId() == 85416) // Grand Crusader
+                {
+                    if(caster && caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->HasSpellCooldown(31935))
+                        caster->ToPlayer()->RemoveSpellCooldown(31935, true);
+                }
                 break;
             case SPELLFAMILY_SHAMAN:
                 {
