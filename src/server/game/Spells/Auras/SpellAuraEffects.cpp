@@ -4092,7 +4092,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
 
         // Exception for Vanish (will not be removing Stealth)
         // removing Vanish will also unapply Stealth, so this is fine
-        if (GetBase()->GetSpellProto()->Id != 11327)
+        if (GetBase()->GetSpellProto()->Id != 11327 || !target->HasAura(1784))
         {
             if (modelid > 0)
                 target->SetDisplayId(target->GetNativeDisplayId());

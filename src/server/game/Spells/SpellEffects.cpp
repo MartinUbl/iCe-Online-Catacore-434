@@ -3357,17 +3357,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             }
             break;
         }
-        // Vanish (change Stealth with nonexisting Vanish)
-        case 11327:
-        {
-            // Reset cooldown on stealth if needed
-            if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
-                unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
-
-            triggered_spell_id = 1784;
-            break;
-        }
-        // Vanish (not exist, change with Stealth - needs stealth to be cast)
+        // Vanish (not exist, do stuff needed for vanishing)
         case 18461:
         {
             unitTarget->CombatStop(true);
