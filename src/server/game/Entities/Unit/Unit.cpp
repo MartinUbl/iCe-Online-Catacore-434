@@ -7830,29 +7830,31 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 CastCustomSpell(pVictim,triggered_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
                 return true;
             }
-            // Improved Water Shield
+            // Resurgence
             if (dummySpell->Id == 16196 || dummySpell->Id == 16180)
             {
-                // Default chance for Healing Wave, Greater Healing Wave and Riptide
-                float chance = (float)triggeredByAura->GetAmount();
-
-                if (procSpell->Id == 8004)
-                    // Healing Surge - 0.6 of default
-                    chance *= 0.6f;
-                else if (procSpell->Id == 1064)
-                    // Chain heal - 0.3 of default
-                    chance *= 0.3f;
-
-                if (!roll_chance_f(chance))
-                    return false;
-
                 // Water Shield
-                if (HasAura(52127))
+                if (HasAura(52127) && procSpell)
                 {
-                    // Spell that is triggered by Water Shield
-                    uint32 spell = 52128;
-                    CastSpell(this, spell, true, castItem, triggeredByAura);
-                    return true;
+                    // spell Resurgence, that is responsible for mana gain
+                    SpellEntry const* spell = sSpellStore.LookupEntry(101033);
+                    if (spell)
+                    {
+                        int32 amount = SpellMgr::CalculateSpellEffectAmount(spell, EFFECT_0, this);
+
+                        // Healing Wave and Greater Healing Wave - 100% of amount
+                        if (procSpell->Id == 331 || procSpell->Id == 77472)
+                            amount *= 1.0f;
+                        // Healing Surge, Riptide, Unleash Life - 60%
+                        else if (procSpell->Id == 8004 || procSpell->Id == 61295 || procSpell->Id == 73685)
+                            amount *= 0.6f;
+                        // Chain Heal
+                        else if (procSpell->Id == 1064)
+                            amount *= 0.33f;
+
+                        CastCustomSpell(this, 101033, &amount, 0, 0, true);
+                        return true;
+                    }
                 }
                 return false;
             }
