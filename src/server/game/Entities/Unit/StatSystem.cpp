@@ -383,7 +383,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_CAT:
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
-                        val2 = (getLevel() * 3.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) * 2.0f - 20.0f) * 1.25f;
+                        val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) * 2.0f - 20.0f;
 
                         // druids in cat/bear form are also affected by weapon DPS
                         val2 += m_baseFeralAP;
