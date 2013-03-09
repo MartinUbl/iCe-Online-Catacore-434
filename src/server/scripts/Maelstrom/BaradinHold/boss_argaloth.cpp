@@ -149,14 +149,7 @@ public:
             // Consuming Darknes timer. RaidMode-dependent count of DoTs
             if (darkness_timer < diff)
             {
-                for (int i = 0; i < RAID_MODE(3,8); i++) // add check not to afflict the same target (does not stack) ?
-                {
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                    {
-                        me->CastSpell(pTarget, SPELL_CONSUMING_DARKNESS, false);
-                        me->AddAura(SPELL_CONSUMING_DARKNESS, pTarget); // Aura needs to be applied manually
-                    }
-                }
+                me->CastCustomSpell(SPELL_CONSUMING_DARKNESS, SPELLVALUE_MAX_TARGETS, RAID_MODE(3,8), me);  // caster is excluded
                 darkness_timer = urand(12000,14000);
             } else darkness_timer -= diff;
 
