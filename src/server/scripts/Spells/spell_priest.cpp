@@ -361,6 +361,73 @@ class mob_shadowy_apparition: public CreatureScript
         }
 };
 
+class spell_pri_spirit_of_redemption : public SpellScriptLoader
+{
+public:
+    spell_pri_spirit_of_redemption() : SpellScriptLoader("spell_pri_spirit_of_redemption") { }
+
+    class spell_pri_spirit_of_redemption_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_spirit_of_redemption_AuraScript);
+
+        enum Spell
+        {
+            PRI_SPELL_SPIRIT_OF_REDEMPTION_SRC = 20711,
+            PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_0 = 27827, // shapeshift   + waterbreath             + heal self
+            PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_1 = 27792, // unattackable + zero mana cost          + root
+            PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_2 = 27795, // pacify       + spiritofredemption aura + interrupt regen
+        };
+
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            return sSpellStore.LookupEntry(PRI_SPELL_SPIRIT_OF_REDEMPTION_SRC);
+        }
+
+        bool Load()
+        {
+            return GetUnitOwner()->ToPlayer();
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
+        {
+            // Set absorbtion amount to unlimited
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            Unit * target = GetTarget();
+            if (dmgInfo.GetDamage() < target->GetHealth() || target->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 ressSpellId = target->GetUInt32Value(PLAYER_SELF_RES_SPELL);
+            if (!ressSpellId)
+                ressSpellId = target->ToPlayer()->GetResurrectionSpellId();
+            //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
+            target->RemoveAllAurasOnDeath();
+            // restore for use at real death
+            target->SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
+
+            target->CastSpell(target, PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_0, true);
+            target->CastSpell(target, PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_1, true);
+            target->CastSpell(target, PRI_SPELL_SPIRIT_OF_REDEMPTION_TRIGGER_2, true);
+
+            absorbAmount = dmgInfo.GetDamage();
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_spirit_of_redemption_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_spirit_of_redemption_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_pri_spirit_of_redemption_AuraScript();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_guardian_spirit();
@@ -370,4 +437,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_reflective_shield_trigger();
     new spell_pri_cure_disease();
     new mob_shadowy_apparition;
+    new spell_pri_spirit_of_redemption();
 }

@@ -17099,38 +17099,8 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
         }
     }
 
-    // if talent known but not triggered (check priest class for speedup check)
-    bool SpiritOfRedemption = false;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_PRIEST)
-    {
-        AuraEffectList const& vDummyAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_DUMMY);
-        for (AuraEffectList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
-        {
-            if ((*itr)->GetSpellProto()->SpellIconID == 1654)
-            {
-                AuraEffect * aurEff = *itr;
-                // save value before aura remove
-                uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
-                if (!ressSpellId)
-                    ressSpellId = pVictim->ToPlayer()->GetResurrectionSpellId();
-                //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
-                pVictim->RemoveAllAurasOnDeath();
-                // restore for use at real death
-                pVictim->SetUInt32Value(PLAYER_SELF_RES_SPELL,ressSpellId);
-
-                // FORM_SPIRITOFREDEMPTION and related auras
-                pVictim->CastSpell(pVictim,27827,true,NULL,aurEff);
-                SpiritOfRedemption = true;
-                break;
-            }
-        }
-    }
-
-    if (!SpiritOfRedemption)
-    {
-        sLog->outStaticDebug("SET JUST_DIED");
-        pVictim->setDeathState(JUST_DIED);
-    }
+    sLog->outStaticDebug("SET JUST_DIED");
+    pVictim->setDeathState(JUST_DIED);
 
     // 10% durability loss on death
     // clean InHateListOf
