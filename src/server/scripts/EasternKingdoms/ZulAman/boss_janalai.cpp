@@ -457,7 +457,10 @@ class mob_janalai_firebomb : public CreatureScript
 
         struct mob_janalai_firebombAI : public ScriptedAI
         {
-            mob_janalai_firebombAI(Creature *c) : ScriptedAI(c){}
+            mob_janalai_firebombAI(Creature *c) : ScriptedAI(c)
+            {
+                c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
 
             void Reset() {}
 
