@@ -983,10 +983,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         }
         case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
         {
-            // Aspect of the Hawk - increase by larger amount
-            // Hack, probably not properly added from Blizzard
-            if (GetId() == 13165)
-                amount *= 1.3500022339379858815119292288446f;
             break;
         }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
