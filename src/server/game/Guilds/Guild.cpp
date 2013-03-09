@@ -2229,8 +2229,8 @@ void Guild::SendChallengeUpdate(WorldSession* session)
 
     // indexes are moved by one (array indexes 0-2, client types 1-3)
 
-    uint32 xprew[GUILD_CHALLENGE_ARRAY_SIZE];
-    uint32 moneyrew[GUILD_CHALLENGE_ARRAY_SIZE];
+    uint32 xprew[GUILD_CHALLENGE_ARRAY_SIZE] = {0};
+    uint32 moneyrew[GUILD_CHALLENGE_ARRAY_SIZE] = {0};
     if (m_level >= 5 && m_level <= 24)
     {
         xprew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_XP_DUNGEON;
