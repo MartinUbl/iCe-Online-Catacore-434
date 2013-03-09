@@ -1114,10 +1114,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             RefreshDuration();
                         }
                         break;
-                    case 45182: // Cheating Death (from rogue talent Cheat Death)
-                        if (target->GetTypeId() == TYPEID_PLAYER)
-                            target->SetHealth(target->GetMaxHealth()*0.1f); // Set health to 10% of maximum
-                        break;
                     case 43648: // Electrical Storm
                         target->SetStunned(true);
                         break;
