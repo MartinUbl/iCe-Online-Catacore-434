@@ -6096,7 +6096,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        if (miscValue == i || miscB & (1 << i))
+        if (miscB == 0 || miscB & (1 << i))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
