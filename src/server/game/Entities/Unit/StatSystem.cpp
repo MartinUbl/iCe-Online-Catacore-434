@@ -1241,15 +1241,6 @@ bool Guardian::UpdateStats(Stats stat)
                         break;
                 }
                 
-                PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
-                if (itr == ToPet()->m_spells.end())
-                    itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
-
-                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                {
-                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first); // Then get the SpellProto and add the dummy effect value
-                    mod += mod * (SpellMgr::CalculateSpellEffectAmount(sProto, 0) / 100.0f);
-                }
             }
             ownersBonus = float(owner->GetStat(stat)) * mod;
             // ownersBonus is multiplied by TOTAL_PCT too
@@ -1428,24 +1419,10 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (isHunterPet())                      //hunter pets benefit from owner's attack power
         {
-            float mod = 1.0f;                                                 //Hunter contribution modifier
-            if (isPet())
-            {
-                PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758);    //Wild Hunt rank 1
-                if (itr == ToPet()->m_spells.end())
-                    itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
-
-                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                {
-                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first); // Then get the SpellProto and add the dummy effect value
-                    mod += (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f);
-                }
-            }
-
             // pre-Cata it used to be 0.22f coefficient for bonusAP and 0.425f for bonus damage
             // now hunter pets damage scales equally with hunter
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod));
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK)));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
