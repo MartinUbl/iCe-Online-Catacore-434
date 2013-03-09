@@ -3030,11 +3030,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bp = int32(m_caster->GetDamageTakenHistory(5) * 15.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
-
-                    if (m_caster->HasAura(96279) // Glyph of Dark Succor
-                        && (m_caster->HasAura(48266) || m_caster->HasAura(48265)))
-                        min = int32(m_caster->CountPctFromMaxHealth(15));
-
                     bp = bp > min ? bp : min;
                     // Improved Death Strike
                     if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
