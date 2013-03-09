@@ -192,7 +192,7 @@ class spell_pri_penance : public SpellScriptLoader
                 if (caster->IsFriendlyTo(unitTarget))
                 {
                     caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PRIEST_SPELL_PENANCE_R1_HEAL, rank), false, 0);
-                    if (caster->HasAura(89911) && unitTarget->HasAura(6788))
+                    if (caster->HasAura(89911)) // T11 4p bonus
                         caster->CastSpell(caster, 89913, true);
                 }
                 else
