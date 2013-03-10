@@ -2331,7 +2331,14 @@ class Player : public Unit, public GridObject<Player>
         Battleground* GetBattleground() const;
         uint8 GetTwinkType()        const;
 
-        uint32 GetBattlegroundQueueJoinTime(uint32 bgTypeId) const { return m_bgData.bgQueuesJoinedTime.find(bgTypeId)->second; }
+        uint32 GetBattlegroundQueueJoinTime(uint32 bgTypeId) const
+        {
+            std::map<uint32, uint32>::const_iterator itr = m_bgData.bgQueuesJoinedTime.find(bgTypeId);
+            if (itr != m_bgData.bgQueuesJoinedTime.end())
+                return itr->second;
+
+            return 0;
+        }
         void AddBattlegroundQueueJoinTime(uint32 bgTypeId, uint32 joinTime)
         {
             m_bgData.bgQueuesJoinedTime[bgTypeId] = joinTime;
