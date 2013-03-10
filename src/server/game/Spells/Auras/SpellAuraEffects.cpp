@@ -980,8 +980,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         }
         case SPELL_AURA_MOD_STAT:
         {
+            // Mana Tide Totem - spread 200% of caster's spirit
             if (caster && caster->GetCharmerOrOwnerPlayerOrPlayerItself() && GetId() == 16191)
-                amount = caster->GetCharmerOrOwnerPlayerOrPlayerItself()->GetStat(STAT_SPIRIT)*4.0f;
+                amount = caster->GetCharmerOrOwnerPlayerOrPlayerItself()->GetStat(STAT_SPIRIT)*2.0f;
             break;
         }
         case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
