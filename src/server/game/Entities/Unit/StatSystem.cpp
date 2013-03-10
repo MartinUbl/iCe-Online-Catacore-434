@@ -385,9 +385,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_DIREBEAR:
                         val2 = getLevel() * 3.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) * 2.0f - 20.0f;
 
-                        // druids in cat/bear form are also affected by weapon DPS
-                        val2 += m_baseFeralAP;
-
                         // Cat Form profit of Heart of the Wild
                         if (GetShapeshiftForm() == FORM_CAT)
                         {
@@ -521,12 +518,9 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
 
     if (IsInFeralForm())                                    //check if player is druid and in cat or bear forms
     {
-        uint8 lvl = getLevel();
-        if (lvl > 60)
-            lvl = 60;
-
-        weapon_mindamage = lvl*0.85f*att_speed;
-        weapon_maxdamage = lvl*1.25f*att_speed;
+        float weapon_average = m_baseFeralAP / 14.0f * att_speed;  // damage of equipped weapon recalculated to a new speed
+        weapon_mindamage = weapon_average * 0.8f;
+        weapon_maxdamage = weapon_average * 1.2f;
     }
     else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
     {
