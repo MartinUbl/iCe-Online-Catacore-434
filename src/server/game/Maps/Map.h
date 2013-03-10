@@ -70,8 +70,10 @@ struct ScriptAction
 //******************************************
 //#define MAP_MAGIC             'SPAM'
 #  define MAP_MAGIC             0x5350414d
-//#define MAP_VERSION_MAGIC     '1.1v'
-#  define MAP_VERSION_MAGIC     0x312e3176
+//#define MAP_VERSION_MAGIC     '3.1v'
+#  define MAP_VERSION_MAGIC     0x332e3176
+//#define MAP_VERSION_MAGIC_ALT '1.1v'
+#  define MAP_VERSION_MAGIC_ALT 0x312e3176
 //#define MAP_AREA_MAGIC        'AERA'
 #  define MAP_AREA_MAGIC        0x41455241
 //#define MAP_HEIGHT_MAGIC      'TGHM'
@@ -90,6 +92,8 @@ struct map_fileheader
     uint32 heightMapSize;
     uint32 liquidMapOffset;
     uint32 liquidMapSize;
+    uint32 holesOffset;
+    uint32 holesSize;
 };
 
 #define MAP_AREA_NO_AREA      0x0001
@@ -150,7 +154,8 @@ enum ZLiquidStatus
 
 struct LiquidData
 {
-    uint32 type;
+    uint32 type_flags;
+    uint32 entry;
     float  level;
     float  depth_level;
 };
@@ -175,14 +180,15 @@ class GridMap
         uint8  *m_uint8_V8;
     };
     // Liquid data
-    uint16  m_liquidType;
-    uint8   m_liquid_offX;
-    uint8   m_liquid_offY;
-    uint8   m_liquid_width;
-    uint8   m_liquid_height;
-    float   m_liquidLevel;
-    uint8  *m_liquid_type;
-    float  *m_liquid_map;
+    float m_liquidLevel;
+    uint16 m_liquidType;
+    uint16* m_liquidEntry;
+    uint8* m_liquidFlags;
+    float* m_liquidMap;
+    uint8 m_liquidOffX;
+    uint8 m_liquidOffY;
+    uint8 m_liquidWidth;
+    uint8 m_liquidHeight;
 
     bool  loadAreaData(FILE *in, uint32 offset, uint32 size);
     bool  loadHeihgtData(FILE *in, uint32 offset, uint32 size);

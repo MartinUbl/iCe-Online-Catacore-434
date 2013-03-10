@@ -579,18 +579,25 @@ struct AreaTableEntry
     uint32  mapid;                                          // 1
     uint32  zone;                                           // 2 if 0 then it's zone, else it's zone id of this area
     uint32  exploreFlag;                                    // 3, main index
-    uint32  flags;                                          // 4, unknown value but 312 for all cities
-                                                            // 5-9 unused
+    uint32  flags;                                          // 4,
+    //uint32 unk5;                                          // 5,
+    //uint32 unk6;                                          // 6,
+    //uint32 unk7;                                          // 7,
+    //uint32 unk8;                                          // 8,
+    //uint32 unk9;                                          // 9,
     int32   area_level;                                     // 10
-    DBCString area_name;                                    // 11
+    char*   area_name;                                      // 11
     uint32  team;                                           // 12
-                                                            // 13-19 unknown
-    //uint32 unk20;                                         // 20 4.0.0
+    uint32  LiquidTypeOverride[4];                          // 13-16 liquid override by type
+    float   MaxDepth;                                       // 17,
+    float   AmbientMultiplier;                              // 18 client only?
+    uint32  LightId;                                        // 19
+    //uint32 unk20;                                         // 20 4.0.0 - Mounting related
     //uint32 unk21;                                         // 21 4.0.0
     //uint32 unk22;                                         // 22 4.0.0
     //uint32 unk23;                                         // 23 4.0.0
-    //uint32 unk24;                                         // 24 4.0.1, worldstateid?
-    //uint32 unk25;                                         // 25 4.3.4
+    //uint32 unk24;                                         // 24 - worldStateId
+    //uint32 unk25                                          // 25
 
     // helpers
     bool IsSanctuary() const
@@ -1352,6 +1359,29 @@ struct LFGDungeonEntry
 
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
+};
+
+struct LiquidTypeEntry
+{
+    uint32      Id;                                         // 0
+    //char*     Name;                                       // 1
+    //uint32    Flags;                                      // 2
+    uint32      Type;                                       // 3
+    //uint32    SoundId;                                    // 4
+    uint32      SpellId;                                    // 5
+    //float     MaxDarkenDepth;                             // 6
+    //float     FogDarkenIntensity;                         // 7
+    //float     AmbDarkenIntensity;                         // 8
+    //float     DirDarkenIntensity;                         // 9
+    //uint32    LightID;                                    // 10
+    //float     ParticleScale;                              // 11
+    //uint32    ParticleMovement;                           // 12
+    //uint32    ParticleTexSlots;                           // 13
+    //uint32    LiquidMaterialID;                           // 14
+    //char*     Texture[6];                                 // 15-20
+    //uint32    Color[2];                                   // 21-22
+    //float     Unk1[18];                                   // 23-40
+    //uint32    Unk2[4];                                    // 41-44
 };
 
 #define MAX_LOCK_CASE 8

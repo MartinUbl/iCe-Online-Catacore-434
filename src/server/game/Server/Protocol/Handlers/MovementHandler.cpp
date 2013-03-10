@@ -413,7 +413,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-        if (movementInfo.pos.GetPositionZ() < sObjectMgr->GetFatalDepthForZone(plMover->GetZoneId()) || movementInfo.pos.GetPositionZ() > 10000.0f)
+        AreaTableEntry const* zone = GetAreaEntryByAreaID(plMover->GetAreaId());
+        float depth = zone ? zone->MaxDepth : -500.0f;
+
+        if (movementInfo.pos.GetPositionZ() < depth)
         {
             if (!(plMover->InBattleground()
                 && plMover->GetBattleground()
