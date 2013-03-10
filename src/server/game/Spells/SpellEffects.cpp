@@ -4328,12 +4328,34 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 if (m_caster->HasAura(16235))
                     bp0 = 10;
 
+                uint32 maxHealth = unitTarget->GetMaxHealth();
+
                 // the amount is 10% of healing done and cannot exceed 10% of targets total HP
                 bp0 = (int32)(bp0*addhealth/100.0f);
-                if (bp0 > unitTarget->GetMaxHealth()*0.1f)
-                    bp0 = unitTarget->GetMaxHealth()*0.1f;
+                if (bp0 > maxHealth*0.1f)
+                    bp0 = maxHealth*0.1f;
 
-                m_caster->CastCustomSpell(unitTarget, 105284, &bp0, 0, 0, true);
+                Aura* pAura = unitTarget->GetAura(105284);
+                AuraEffect* pEff = pAura ? pAura->GetEffect(EFFECT_0) : NULL;
+
+                if (pAura && pEff)
+                {
+                    bp0 += pEff->GetAmount();
+
+                    if (bp0 > pEff->GetScriptedAmount()*0.1f)
+                        bp0 = pEff->GetScriptedAmount()*0.1f;
+
+                    pEff->ChangeAmount(bp0);
+                    pAura->RefreshDuration();
+                    pAura->SetNeedClientUpdateForTargets();
+                }
+                else
+                {
+                    m_caster->CastCustomSpell(unitTarget, 105284, &bp0, 0, 0, true);
+
+                    if ((pAura = unitTarget->GetAura(105284)) != NULL && pAura->GetEffect(0))
+                        pAura->GetEffect(0)->SetScriptedAmount(maxHealth);
+                }
             }
         }
         // Greater Heal
