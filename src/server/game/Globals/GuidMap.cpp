@@ -11,7 +11,7 @@
 
 /* private */
 
-inline void GuidMap::setbit(unsigned long *arr, long long idx)
+void GuidMap::setbit(unsigned long *arr, long long idx)
 {
     arr[idx/UL_BITS] |= ((unsigned long)1<<(idx%UL_BITS));
 }

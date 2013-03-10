@@ -12,7 +12,7 @@ class GuidMap
         unsigned long slice_cnt;
         unsigned long slice_size;
 
-        inline void setbit(unsigned long *arr, long long idx);
+        void setbit(unsigned long *arr, long long idx);
         long long find_empty(unsigned long *arr, unsigned long arrsize);
         int addslice();
 
