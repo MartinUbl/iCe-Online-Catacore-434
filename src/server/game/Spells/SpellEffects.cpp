@@ -4929,6 +4929,14 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
     if (maxPower == 0)
         return;
 
+    if (m_spellInfo->Id == 30294) // mana regen (Soul Leech)
+    {
+        if (m_caster->HasAura(30293)) // Soul Leech rank 1
+            damage = 2;
+        else if (m_caster->HasAura(30295)) // Soul Leech rank 2
+            damage = 4;
+    }
+
     uint32 gain = damage * maxPower / 100;
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);
 
