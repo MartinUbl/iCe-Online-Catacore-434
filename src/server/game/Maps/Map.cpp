@@ -1888,7 +1888,7 @@ ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidTyp
                     {
                         uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
                         if (!overrideLiquid && area->zone)
-                            if (area = GetAreaEntryByAreaID(area->zone))
+                            if ((area = GetAreaEntryByAreaID(area->zone)) != NULL)
                                 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
 
                         if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
