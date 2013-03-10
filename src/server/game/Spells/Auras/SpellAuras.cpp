@@ -1912,8 +1912,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 // Vanish -> trigger Stealth
                 else if (GetId() == 11327)
                 {
-                    if (target && aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                    if (target && target->ToPlayer() && aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                    {
+                        // if Stealth has cooldown, remove it
+                        if (target->ToPlayer()->HasSpellCooldown(1784))
+                            target->ToPlayer()->RemoveSpellCooldown(1784);
+
                         target->CastSpell(target, 1784, true);
+                    }
                 }
                 break;
             case SPELLFAMILY_PALADIN:
