@@ -27,8 +27,6 @@
 enum ShamanSpells
 {
     SHAMAN_SPELL_GLYPH_OF_MANA_TIDE     = 55441,
-    SHAMAN_SPELL_FIRE_NOVA           = 1535,
-    SHAMAN_SPELL_FIRE_NOVA_TRIGGERED = 8349,
     SHAMAN_SPELL_EARTH_SHOCK            = 8042,
     SHAMAN_SPELL_FULMINATION            = 88766,
     SHAMAN_SPELL_FULMINATION_TRIGGERED  = 88767,
@@ -89,51 +87,6 @@ public:
     AuraScript *GetAuraScript() const
     {
         return new spell_sha_astral_shift_AuraScript();
-    }
-};
-
-// 1535 Fire Nova
-class spell_sha_fire_nova : public SpellScriptLoader
-{
-public:
-    spell_sha_fire_nova() : SpellScriptLoader("spell_sha_fire_nova") { }
-
-    class spell_sha_fire_nova_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_sha_fire_nova_SpellScript)
-        bool Validate(SpellEntry const * spellEntry)
-        {
-            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_FIRE_NOVA))
-                return false;
-
-            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_FIRE_NOVA_TRIGGERED))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                // fire slot
-                if (caster->m_SummonSlot[1])
-                {
-                    Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]);
-                    if (totem && totem->isTotem())
-                        totem->CastSpell(totem, SHAMAN_SPELL_FIRE_NOVA_TRIGGERED, true);
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_sha_fire_nova_SpellScript();
     }
 };
 
@@ -437,7 +390,6 @@ public:
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_astral_shift();
-    new spell_sha_fire_nova();
     new spell_sha_earthbind_totem();
     new spell_sha_unleash_elements();
     new spell_sha_totemic_wrath();
