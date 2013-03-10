@@ -815,6 +815,9 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     if (caster->HasAura(33599))  // Dreamstate rank2
                         amount += 30;
                 }
+                else
+                    amount = 5;             // innervate used on another target restores only 5% of maximum mana
+
                 int32 total_ticks = GetTotalTicks();
                 if (total_ticks > 0)
                     amount = int32(owner->GetMaxPower(POWER_MANA) * amount / (total_ticks * 100.0f));
