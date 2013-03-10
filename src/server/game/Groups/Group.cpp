@@ -86,6 +86,10 @@ bool Group::Create(const uint64 &guid, const char * name)
     m_leaderGuid = guid;
     m_leaderName = name;
 
+    if (m_leaderGuid)
+        if (Player* newLeader = sObjectMgr->GetPlayer(m_leaderGuid))
+            newLeader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
     m_groupType  = (isBGGroup() || isBFGroup()) ? GROUPTYPE_BGRAID : GROUPTYPE_NORMAL;
 
     if (m_groupType & GROUPTYPE_RAID)
@@ -1586,6 +1590,14 @@ void Group::_setLeader(const uint64 &guid)
         return;
 
     sScriptMgr->OnGroupChangeLeader(this, m_leaderGuid, guid);
+
+    if (m_leaderGuid)
+        if (Player* oldLeader = sObjectMgr->GetPlayer(m_leaderGuid))
+            oldLeader->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
+    if (guid)
+        if (Player* newLeader = sObjectMgr->GetPlayer(guid))
+            newLeader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 
     if (!isBGGroup() && !isBFGroup())
     {

@@ -23540,6 +23540,11 @@ void Player::SetGroup(Group *group, int8 subgroup)
         ASSERT(subgroup >= 0);
         m_group.link(group, this);
         m_group.setSubGroup((uint8)subgroup);
+
+        if (group->GetLeaderGUID() == GetGUID())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+        else
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
     }
 }
 
