@@ -2970,7 +2970,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             if (GetSpellProto()->SpellFamilyFlags[0] & 0x20)
             {
                 if (caster)
-                    caster->CastCustomSpell(target, 52212, &m_amount, NULL, NULL, true, 0, this);
+                {
+                    DynamicObject* dynobj = caster->GetDynObject(43265);
+                    if (dynobj)
+                        caster->CastSpell(dynobj->GetPositionX(), dynobj->GetPositionY(), dynobj->GetPositionZ(), 52212, true, NULL, this);
+                }
                 break;
             }
             // Reaping
