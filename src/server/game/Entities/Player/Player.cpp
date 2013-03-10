@@ -5553,7 +5553,7 @@ void Player::RepopAtGraveyard()
             m_graveyard = (WorldSafeLocsEntry*)ClosestGrave;
         }
     }
-    else if (GetPositionZ() < zone->MaxDepth)
+    else if (GetPositionZ() < depth)
         TeleportTo(GetStartPosition());
 }
 
