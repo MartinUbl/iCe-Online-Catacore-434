@@ -11,7 +11,7 @@
 
 /* private */
 
-void GuidMap::setbit(unsigned long *arr, long long idx)
+inline void GuidMap::set_bit(unsigned long *arr, long long idx)
 {
     arr[idx/UL_BITS] |= ((unsigned long)1<<(idx%UL_BITS));
 }
@@ -110,7 +110,7 @@ void GuidMap::SetBit(long long index)
     while (slice_offset+1 > this->slice_cnt)
         addslice();
 
-    setbit(this->slices[slice_offset], index);
+    set_bit(this->slices[slice_offset], index);
 }
 
 long long GuidMap::UseEmpty()
@@ -122,13 +122,13 @@ long long GuidMap::UseEmpty()
     for (i = 0; i < this->slice_cnt; i++) {
         ret = find_empty(this->slices[i], this->slice_size);
         if (ret != -1) {
-            setbit(this->slices[i], ret);
+            set_bit(this->slices[i], ret);
             return i*this->slice_size*UL_BITS + ret;
         }
     }
 
     /* all slices full, allocate another one */
     addslice();
-    setbit(this->slices[i], 0);
+    set_bit(this->slices[i], 0);
     return i*this->slice_size*UL_BITS;
 }

@@ -7,15 +7,6 @@
 
 class GuidMap
 {
-    private:
-        unsigned long **slices;
-        unsigned long slice_cnt;
-        unsigned long slice_size;
-
-        void setbit(unsigned long *arr, long long idx);
-        long long find_empty(unsigned long *arr, unsigned long arrsize);
-        int addslice();
-
     public:
         /* slice_bits: minimum size for one slice in bits (granularity),
          * IT HAS TO BE ALWAYS MORE THAN 0 AND LESS THAN ULONG_MAX */
@@ -24,6 +15,15 @@ class GuidMap
 
         void SetBit(long long index);
         long long UseEmpty();
+
+    private:
+        inline void set_bit(unsigned long *arr, long long idx);
+        long long find_empty(unsigned long *arr, unsigned long arrsize);
+        int addslice();
+
+        unsigned long **slices;
+        unsigned long slice_cnt;
+        unsigned long slice_size;
 };
 
 #endif
