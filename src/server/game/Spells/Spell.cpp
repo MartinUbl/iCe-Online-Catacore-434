@@ -5557,6 +5557,11 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             if (effIndex == EFFECT_1 && !m_caster->HasAura(93466))
                 result = false;
             break;
+        case 879: // Exorcism
+            // DoT from glyph - apply only if caster has the glyph
+            if (effIndex == EFFECT_1 && !m_caster->HasAura(54934))
+                result = false;
+            break;
     }
 
     return result;
