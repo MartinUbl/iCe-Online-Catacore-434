@@ -390,7 +390,7 @@ void fixNULLfields(std::string &line)
 
 DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, std::string name, uint32 guid)
 {
-    uint32 charcount = sAccountMgr->GetCharactersCount(account);
+    /*uint32 charcount = sAccountMgr->GetCharactersCount(account);
     if (charcount >= 10)
         return DUMP_TOO_MANY_CHARS;
 
@@ -463,17 +463,6 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
             (line.substr(nw_pos,15) == "IMPORTANT NOTE:") ||
             (line.substr(nw_pos,14) == "== END DUMP =="))
             continue;
-
-        // add required_ check
-        /*
-        if (line.substr(nw_pos,41) == "UPDATE character_db_version SET required_")
-        {
-            if (!CharacterDatabase.Execute(line.c_str()))
-                ROLLBACK(DUMP_FILE_BROKEN);
-
-            continue;
-        }
-        */
 
         // determine table name and load type
         std::string tn = gettablename(line);
@@ -629,17 +618,6 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
             }
             case DTT_PET_TABLE:                             // pet_aura, pet_spell, pet_spell_cooldown
             {
-                /*snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
-
-                // lookup currpetid and match to new inserted pet id
-                std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
-                if (petids_iter == petids.end())             // couldn't find new inserted id
-                    ROLLBACK(DUMP_FILE_BROKEN);
-
-                snprintf(newpetid, 20, "%d", petids_iter->second);
-
-                if (!changenth(line, 1, newpetid))
-                    ROLLBACK(DUMP_FILE_BROKEN);*/
                 continue;
 
                 break;
@@ -713,6 +691,8 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
     fclose(fin);
 
-    return DUMP_SUCCESS;
+    return DUMP_SUCCESS;*/
+
+    return DUMP_FILE_OPEN_ERROR;
 }
 
