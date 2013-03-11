@@ -784,8 +784,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*1.228f*0.5f;
 
-                        // Get DoTs on target by owner (5% increase by dot)
-                        damage *= 1.0f+unitTarget->GetDoTsByCaster(m_caster->GetOwnerGUID())*0.15f;
+                        // 30% damage increase per every caster's dot
+                        damage *= 1.0f+unitTarget->GetDoTsByCaster(m_caster->GetOwnerGUID())*0.30f;
                     }
                 }
                 // Searing Pain
