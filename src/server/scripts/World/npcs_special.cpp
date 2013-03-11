@@ -4088,6 +4088,115 @@ class npc_fac_race_changer : public CreatureScript
         }
 };
 
+class npc_gender_changer : public CreatureScript
+{
+#define REALLY "Are you sure want to change gender? \n Tax is 3 000 gold."
+#define OPRAVDU "Opravdu si prejete zmenit pohlavi? \n Poplatek je 3 000 goldu."
+    public:
+        npc_gender_changer(): CreatureScript("npc_gender_changer") {}
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "Chci si zmenit pohlavi, prosim.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, OPRAVDU, 0, 0);
+            pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "I would like to change the gender please.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, REALLY, 0, 0);
+
+            pPlayer->SEND_GOSSIP_MENU(1, pCreature->GetGUID());
+            return true;
+        }
+
+        void RandomYell(Creature* pCreature, bool woman = true)
+        {
+            #define YELL(a) pCreature->MonsterYell(a, LANG_UNIVERSAL, 0)
+            if (woman)
+            {
+                switch (urand(0,5))
+                {
+                    case 0:
+                        YELL("You became the woman, sweetie. Please don't forget that your airbags will fight for you now!");
+                        break;
+                    case 1:
+                        YELL("Welcome to womanhood, your first period is designated week from now.");
+                        break;
+                    case 2:
+                        YELL("I always thought that you are strange. Now, your body and soul are perfect!");
+                        break;
+                    case 3:
+                        YELL("Sorry, you haven't got enough Justice points for epic boobs.");
+                        break;
+                    case 4:
+                        YELL("Now, you can telling, that you have a headache!");
+                        break;
+                    case 5:
+                        YELL("Needles to say the emptines in your head is not just temporary..");
+                        break;
+                }
+            }
+            else
+            {
+                switch (urand(0,7))
+                {
+                    case 0:
+                        YELL("I always thought that you are strange. Now, your body and soul are perfect!");
+                        break;
+                    case 1:
+                        YELL("This is life. GO. Manual isn't added.");
+                        break;
+                    case 2:
+                        YELL("Now YOU are the hunter!");
+                        break;
+                    case 3:
+                        YELL("The greatest pleasure is to vanquish your enemies and chase them before you, to rob them of their wealth and see those dear to them bathed in tears, to ride their horses and clasp to your bosom their wives and daughters.");
+                        break;
+                    case 4:
+                        YELL("Well, now you can going to the pub and nobody can't stop you!");
+                        break;
+                    case 5:
+                        YELL("Suddently, You really hate shopping.");
+                        break;
+                    case 6:
+                        YELL("Hoorayy, You know what you want!");
+                        break;
+                }
+            }
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+        {
+            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+            {
+                if (pPlayer->HasEnoughMoney(3000*GOLD))
+                {
+                    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(pPlayer->getRace(), pPlayer->getClass());
+                    if (info)
+                    {
+
+                        Gender gender = GENDER_NONE;
+
+                        if (pPlayer->getGender() == GENDER_MALE)
+                            gender = GENDER_FEMALE;
+                        else
+                            gender = GENDER_MALE;
+
+                        if (gender == GENDER_FEMALE)
+                            RandomYell(pCreature);
+                        else
+                            RandomYell(pCreature, false);
+
+                        pPlayer->SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
+                        pPlayer->SetByteValue(PLAYER_BYTES_3, 0, gender);
+                        pPlayer->InitDisplayIds();
+                        pPlayer->ModifyMoney(-3000*GOLD);
+                        pCreature->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                    }
+                 }
+                 else
+                    pPlayer->GetSession()->SendNotification(LANG_NOT_ENOUGH_GOLD);
+            }
+            pPlayer->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4137,4 +4246,5 @@ void AddSC_npcs_special()
     new npc_odevzdavac;
     new npc_areatrigger_completer;
     new npc_fac_race_changer;
+    new npc_gender_changer;
 }
