@@ -49,14 +49,14 @@ int GuidMap::addslice()
 
     /* allocate new slice separately, with zeros */
     newarray = (unsigned long*)
-                   calloc(this->slice_size, sizeof(unsigned long));
+                   calloc(slice_size, sizeof(unsigned long));
     if (newarray == NULL)
         return -1;
 
     /* resize slices array */
-    array_num = this->slice_cnt + 1;
+    array_num = slice_cnt + 1;
     arrays = (unsigned long**)
-                   realloc(this->slices, array_num*sizeof(unsigned long *));
+                   realloc(slices, array_num*sizeof(unsigned long *));
     if (arrays == NULL) {
         free(newarray);
         return -1;
@@ -66,8 +66,8 @@ int GuidMap::addslice()
     arrays[array_num-1] = newarray;
 
     /* update bitarray struct only when all allocations passed */
-    this->slices = arrays;
-    this->slice_cnt++;
+    slices = arrays;
+    slice_cnt++;
 
     return 0;
 }
@@ -75,7 +75,13 @@ int GuidMap::addslice()
 
 /* public */
 
-GuidMap::GuidMap(long long slice_bits)
+GuidMap::GuidMap()
+{
+    /* unspecified struct bitarray members need to be 0 */
+    memset(this, 0, sizeof(GuidMap));
+}
+
+void GuidMap::Init(long long slice_bits)
 {
     unsigned long long slice_size;
 
@@ -83,9 +89,10 @@ GuidMap::GuidMap(long long slice_bits)
     slice_size = slice_bits / UL_BITS;
     slice_size += !!(slice_bits % UL_BITS);
 
-    /* unspecified struct bitarray members need to be 0 */
-    memset(this, 0, sizeof(GuidMap));
     this->slice_size = slice_size;
+
+    /* only for this emulator purposes - there mustn't be any GUID == 0 */
+    SetBit(0);
 }
 
 GuidMap::~GuidMap()

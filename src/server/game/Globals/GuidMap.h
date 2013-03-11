@@ -3,15 +3,16 @@
  */
 
 #ifndef GCORE_GUIDMAP_H
-#define GCODE_GUIDMAP_H
+#define GCORE_GUIDMAP_H
 
 class GuidMap
 {
     public:
         /* slice_bits: minimum size for one slice in bits (granularity),
          * IT HAS TO BE ALWAYS MORE THAN 0 AND LESS THAN ULONG_MAX */
-        GuidMap(long long slice_bits);
+        GuidMap();
         ~GuidMap();
+        void Init(long long slice_bits);
 
         void SetBit(long long index);
         long long UseEmpty();
