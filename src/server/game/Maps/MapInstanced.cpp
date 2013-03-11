@@ -130,7 +130,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         NewInstanceId = player->GetBattlegroundId();
         if (!NewInstanceId) return NULL;
         map = _FindMap(NewInstanceId);
-        if (!map)
+        if (!map && player->GetBattleground())
             map = CreateBattleground(NewInstanceId, player->GetBattleground());
     }
     else
@@ -258,6 +258,9 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
 
 BattlegroundMap* MapInstanced::CreateBattleground(uint32 InstanceId, Battleground* bg)
 {
+    if (!bg)
+        return NULL;
+
     // load/create a map
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, NULL);
 
