@@ -4074,8 +4074,12 @@ class npc_fac_race_changer : public CreatureScript
                     ChatHandler(pPlayer).PSendSysMessage("After next login you'll have the icon to race change next to your character.");
                     break;
                 case GOSSIP_ACTION_INFO_DEF+2:
-                    pPlayer->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
-                    ChatHandler(pPlayer).PSendSysMessage("After next login you'll have the icon to faction change next to your character.");
+                    if (pPlayer->GetGuildId() != 0)
+                        pPlayer->GetSession()->SendNotification("You must leave guild first.");
+                    else {
+                        pPlayer->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+                        ChatHandler(pPlayer).PSendSysMessage("After next login you'll have the icon to faction change next to your character.");
+                    }
                     break;
             }
 
