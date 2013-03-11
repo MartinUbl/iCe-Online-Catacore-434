@@ -16630,13 +16630,13 @@ void Unit::SetContestedPvP(Player *attackedPlayer)
         player->addUnitState(UNIT_STAT_ATTACK_PLAYER);
         player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
         // call MoveInLineOfSight for nearby contested guards
-        player->SetVisibility(player->GetVisibility());
+        UpdateObjectVisibility();
     }
     if (!hasUnitState(UNIT_STAT_ATTACK_PLAYER))
     {
         addUnitState(UNIT_STAT_ATTACK_PLAYER);
         // call MoveInLineOfSight for nearby contested guards
-        SetVisibility(GetVisibility());
+        UpdateObjectVisibility();
     }
 }
 
@@ -19040,6 +19040,7 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
     {
         SetPosition(x, y, z, orientation, true);
         SendMovementFlagUpdate();
+        UpdateObjectVisibility();
     }
 }
 
