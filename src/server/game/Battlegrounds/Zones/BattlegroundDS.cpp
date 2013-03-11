@@ -69,8 +69,9 @@ void BattlegroundDS::Update(uint32 diff)
             setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
             SpawnBGObject(BG_DS_OBJECT_WATER_2, getWaterFallTimer());
             // turn off collision
-            if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
-                gob->SetGoState(GO_STATE_ACTIVE);
+            if (GetBgMap())
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+                    gob->SetGoState(GO_STATE_ACTIVE);
             setWaterFallActive(false);
         }
         else
@@ -78,8 +79,9 @@ void BattlegroundDS::Update(uint32 diff)
             setWaterFallTimer(BG_DS_WATERFALL_DURATION);
             SpawnBGObject(BG_DS_OBJECT_WATER_2, RESPAWN_IMMEDIATELY);
             // Turn on collision
-            if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
-                gob->SetGoState(GO_STATE_READY);
+            if (GetBgMap())
+                if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+                    gob->SetGoState(GO_STATE_READY);
             setWaterFallActive(true);
         }
     }
@@ -106,8 +108,9 @@ void BattlegroundDS::StartingEventOpenDoors()
 
     SpawnBGObject(BG_DS_OBJECT_WATER_2, getWaterFallTimer());
     // Turn off collision
-    if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
-        gob->SetGoState(GO_STATE_ACTIVE);
+    if (GetBgMap())
+        if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+            gob->SetGoState(GO_STATE_ACTIVE);
 }
 
 void BattlegroundDS::AddPlayer(Player *plr)
