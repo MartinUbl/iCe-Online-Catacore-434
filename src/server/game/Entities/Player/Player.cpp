@@ -2424,6 +2424,10 @@ void Player::Regenerate(Powers power)
     if (!maxValue)
         return;
 
+    uint32 powerIndex = GetPowerIndex(power);
+    if (powerIndex == MAX_POWERS)
+        return;     // this class doesn't use this power
+
     uint32 curValue = GetPower(power);
 
     // TODO: possible use of miscvalueb instead of amount
@@ -2433,7 +2437,9 @@ void Player::Regenerate(Powers power)
     float addvalue = 0.0f;
 
     // powers now benefit from haste.
-    float haste = 1.0f / GetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN);
+    float haste = 1.0f;
+    if (power == POWER_ENERGY || power == POWER_FOCUS)
+        haste = GetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN);
 
     switch (power)
     {
@@ -2445,9 +2451,9 @@ void Player::Regenerate(Powers power)
                 ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (getLevel() * 0.066f));
 
             if (isInCombat()) // Trinity updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + powerIndex) *  ManaIncreaseRate * 0.001f * m_regenTimer;
             else
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex) * ManaIncreaseRate * 0.001f * m_regenTimer;
         }   break;
         case POWER_RAGE:                                    // deplete rage
         case POWER_RUNIC_POWER:                             // deplete runic power
@@ -2458,10 +2464,10 @@ void Player::Regenerate(Powers power)
             }
         }   break;
         case POWER_FOCUS:                                   // Regenerate focus (hunter)
-            addvalue += 0.005f * m_regenTimer * haste;      // 5 per second
+            addvalue += 0.005f * m_regenTimer;              // 5 per second
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);  // 10 per second
+            addvalue += 0.01f * m_regenTimer * sWorld->getRate(RATE_POWER_ENERGY);  // 10 per second
             break;
         case POWER_RUNE:
         case POWER_HAPPINESS:
@@ -2471,14 +2477,20 @@ void Player::Regenerate(Powers power)
             break;
     }
 
-    // Mana regen calculated in Player::UpdateManaRegen()
+    // Mana regen calculated in the switch above, health regen in Player::RegenerateHealth
     if (power != POWER_MANA)
     {
-        // flat power generation from auras
-          // Butchery requires combat for this effect
-        if (power != POWER_RUNIC_POWER || isInCombat())
-            addvalue += (float) GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power == POWER_HEALTH) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
+        // bonus regeneration from auras on player (e.g. Anger Management)
+        float timer = float(m_regenTimer) / IN_MILLISECONDS;
+        if (!isInCombat())
+            addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex) * timer;
+        else
+            addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + powerIndex) * timer;
     }
+
+    // add haste bonus
+    if (haste != 0)
+        addvalue /= haste;
 
     if (addvalue < 0.0f)
     {
@@ -2525,7 +2537,6 @@ void Player::Regenerate(Powers power)
         SetPower(power, curValue);
     else
     {
-        uint32 powerIndex = GetPowerIndexByClass(power, getClass());
         if (powerIndex != MAX_POWERS)
             UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, curValue);
     }

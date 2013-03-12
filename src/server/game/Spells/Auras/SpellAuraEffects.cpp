@@ -144,7 +144,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleWaterBreathing,                            // 82 SPELL_AURA_WATER_BREATHING
     &AuraEffect::HandleModBaseResistance,                         // 83 SPELL_AURA_MOD_BASE_RESISTANCE
     &AuraEffect::HandleNoImmediateEffect,                         // 84 SPELL_AURA_MOD_REGEN implemented in Player::RegenerateHealth
-    &AuraEffect::HandleModPowerRegen,                             // 85 SPELL_AURA_MOD_POWER_REGEN implemented in Player::Regenerate
+    &AuraEffect::HandleModPowerRegen,                             // 85 SPELL_AURA_MOD_POWER_REGEN
     &AuraEffect::HandleChannelDeathItem,                          // 86 SPELL_AURA_CHANNEL_DEATH_ITEM
     &AuraEffect::HandleNoImmediateEffect,                         // 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN implemented in Unit::MeleeDamageBonus and Unit::SpellDamageBonus
     &AuraEffect::HandleNoImmediateEffect,                         // 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT implemented in Player::RegenerateHealth
@@ -6372,7 +6372,7 @@ void AuraEffect::HandleAuraModExpertise(AuraApplication const *aurApp, uint8 mod
 /********************************/
 /***      HEAL & ENERGIZE     ***/
 /********************************/
-void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, bool /*apply*/) const
+void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
@@ -6382,12 +6382,29 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, 
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // Update manaregen value
+    // Update regen value
     if (GetMiscValue() == POWER_MANA)
         target->ToPlayer()->UpdateManaRegen();
+    else
+    {
+        Powers power = (Powers) GetMiscValue();
+        uint32 powerIndex = target->GetPowerIndex(power);
+        if (powerIndex == MAX_POWERS)       // player doesn't use this power type
+            return;
 
-    target->ToPlayer()->UpdateHaste();
-    // other powers are not immediate effects - implemented in Player::Regenerate, Creature::Regenerate
+        float bonus = GetAmount() / 5.0f;
+        if (!apply)
+            bonus = -bonus;
+
+        float val1 = target->GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex);
+        float val2 = target->GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + powerIndex);
+
+        // Butchery and Anger Management require combat for this effect
+        if (power != POWER_RAGE && power != POWER_RUNIC_POWER)
+            target->SetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex, val1 + bonus);     // regen outside combat
+
+        target->SetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + powerIndex, val2 + bonus); // regen inside combat
+    }
 }
 
 void AuraEffect::HandleModPowerRegenPCT(AuraApplication const * aurApp, uint8 mode, bool apply) const

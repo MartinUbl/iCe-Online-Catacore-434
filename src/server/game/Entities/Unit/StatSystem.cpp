@@ -823,8 +823,8 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 void Player::UpdateManaRegen()
 {
     // only mana users regenerate mana, other classes use these float values for their power regen
-    uint8 cl = getClass();
-    if (cl == CLASS_DEATH_KNIGHT || cl == CLASS_ROGUE || cl == CLASS_HUNTER)
+    uint32 powerIndex = GetPowerIndex(POWER_MANA);
+    if (powerIndex == MAX_POWERS)
         return;
 
     float Intellect = GetStat(STAT_INTELLECT);
@@ -842,9 +842,9 @@ void Player::UpdateManaRegen()
     float baseCombatRegen = GetCreateMana() * 0.01f + 
         GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
-    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, 
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + powerIndex, 
         baseCombatRegen + power_regen * modManaRegenInterrupt / 100.0f);
-    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER,  baseCombatRegen + power_regen);
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex,  baseCombatRegen + power_regen);
 }
 
 void Player::UpdateHaste()
