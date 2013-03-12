@@ -4845,6 +4845,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->PAppend("DELETE FROM character_queststatus_daily WHERE guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_talent WHERE guid = '%u'",guid);
             trans->PAppend("DELETE FROM character_skills WHERE guid = '%u'",guid);
+            trans->PAppend("DELETE FROM character_cuf_profiles WHERE guid = '%u'",guid);
 
             CharacterDatabase.CommitTransaction(trans);
             break;
