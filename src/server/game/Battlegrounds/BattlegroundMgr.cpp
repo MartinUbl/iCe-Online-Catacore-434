@@ -942,7 +942,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 BATTLEGROUND_BE, // Blade's Edge Arena
                 BATTLEGROUND_RL, // Ruins of Lordaeron
                 //BATTLEGROUND_RV, // Ring of Valor
-                BATTLEGROUND_DS, // Dalaran Severs
+                //BATTLEGROUND_DS, // Dalaran Severs
             };
 
             bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
