@@ -6860,11 +6860,21 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
         SPELL_AURA_MOD_FEAR,
         SPELL_AURA_MOD_SILENCE,
         SPELL_AURA_MOD_DISARM,
-        SPELL_AURA_MOD_POSSESS
+        SPELL_AURA_MOD_POSSESS,
+        SPELL_AURA_MOD_ROOT
     };
     const uint8 CCDArraySize = sizeof(auraWithCCD) / sizeof(auraWithCCD[0]);
 
-    const uint32 ccDelay = 350;
+    const uint32 ccDelay = 100;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+    {
+        switch (_spell->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_MOD_STUN:
+                return ccDelay + 50;
+        }
+    }
 
     switch(_spell->SpellFamilyName)
     {
@@ -6888,11 +6898,24 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
             // Blind
             if (_spell->Id == 2094)
                 return ccDelay;
+            // Smoke Bomb
+            if (_spell->Id == 76577)
+                return ccDelay + 900;
             break;
         case SPELLFAMILY_PRIEST:
             // Mind Control - for both caster and victim
             if(_spell->Id == 605)
                 return ccDelay;
+            break;
+        case SPELLFAMILY_WARRIOR:
+            // Charge + intercept
+            if (_spell->Id == 96273 || _spell->Id == 20253)
+                return ccDelay + 275;
+            break;
+        case SPELLFAMILY_DRUID:
+            // Feral Charge (cat + bear form)
+            if (_spell->Id == 49376 || _spell->Id == 16979)
+                return ccDelay + 275;
             break;
     }
 
