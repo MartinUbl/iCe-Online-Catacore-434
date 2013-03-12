@@ -6475,6 +6475,37 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
             else
                 mSkillStatus.erase(itr);
 
+            // remove all quests that related to this skill
+            for (QuestStatusMap::const_iterator itr = mQuestStatus.begin(); itr != mQuestStatus.end(); ++itr)
+            {
+                Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->first);
+                if (!pQuest)
+                    continue;
+
+                // skip no rewarded spell or spell cast quests
+                if (!pQuest->GetRewSpell() || !pQuest->GetRewSpellCast())
+                    continue;
+
+                if (pQuest->GetSkillOrClassMask() == id)
+                {
+                    SetQuestStatus(pQuest->GetQuestId(), QUEST_STATUS_NONE);
+                    // reset rewarded for restart repeatable quest
+                    QuestStatusData data = itr->second;
+                    data.m_rewarded = false;
+
+                    // we ignore unequippable quest items in this case, it's still be equipped
+                    TakeQuestSourceItem(pQuest->GetQuestId(), false);
+
+                    for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+                    {
+                        uint32 quest = GetQuestSlotQuestId(slot);
+
+                        if (pQuest->GetQuestId() == quest)
+                            SetQuestSlot(slot, 0);
+                    }
+                }
+            }
+
             // remove all spells that related to this skill
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                 if (SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j))
