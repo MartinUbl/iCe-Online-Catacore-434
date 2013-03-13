@@ -7498,6 +7498,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (caster->ToPlayer()->HasSpellCooldown(86346)) // Colossus Smash
                         caster->ToPlayer()->RemoveSpellCooldown(86346, true); // removing cooldown for spell Colossus Smash
                     break;
+                case 87649: // Satisfield
+                {
+                    // because achievement criteria script doesn't work for this achievement, we must use this way
+                    if (aurApp->GetBase()->GetStackAmount() == 91 && caster && caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5779));
+
+                    break;
+                }
             }
         }
         // AT REMOVE
