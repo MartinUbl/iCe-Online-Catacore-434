@@ -15334,6 +15334,12 @@ void Unit::RemoveFromWorld()
             }
         }
 
+        if (m_movedPlayer && m_movedPlayer != this && m_movedPlayer->m_mover == this)
+        {
+            sLog->outError("Player %s has mover %u who is being removed from world", m_movedPlayer->GetName(), GetEntry());
+            m_movedPlayer->SetMover(m_movedPlayer);
+        }
+
         WorldObject::RemoveFromWorld();
         m_duringRemoveFromWorld = false;
     }
