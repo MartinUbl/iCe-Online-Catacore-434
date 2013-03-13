@@ -80,6 +80,8 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundB
 uint32 GetCurrencyPrecision(uint32 currId);
 float GetCurrencyPrecisionCoef(uint32 currId);
 
+uint32 GetPowerIndexByClass(uint32 powerType, uint32 classId);
+
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions

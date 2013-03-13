@@ -1273,7 +1273,6 @@ class Unit : public WorldObject
         int32 GetHealthGain(int32 dVal);
 
         uint32 GetPowerIndex(Powers power) const;
-        uint32 GetPowerIndexByClass(uint32 powerId, uint32 classId) const;
         Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
         void setPowerType(Powers power);
         uint32 GetPower(Powers power) const;
