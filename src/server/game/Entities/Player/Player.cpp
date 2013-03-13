@@ -8346,7 +8346,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType att
         HandleStatModifier(unitMod, unitModType, float(aura->GetAmount()),apply);
 
         if (unitModType == TOTAL_PCT)
-            ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,aura->GetAmount()/100.0f,apply);
+            ApplyModSignedFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS + attackType, aura->GetAmount()/100.0f, apply);
         else
             ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,aura->GetAmount(),apply);
     }
