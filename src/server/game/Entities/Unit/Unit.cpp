@@ -579,14 +579,14 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && getPowerType() == POWER_RAGE)
     {
-        uint32 weaponSpeedHitFactor;
+        float weaponSpeedHitFactor;
         uint32 rage_damage = damage + cleanDamage->absorbed_damage;
 
         switch(cleanDamage->attackType)
         {
             case BASE_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f);
+                weaponSpeedHitFactor = GetAttackTime(cleanDamage->attackType) / 1000.0f * 6.5f;
 
                 if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
                     RewardRage(rage_damage, weaponSpeedHitFactor, true);
@@ -595,7 +595,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
             case OFF_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f);
+                weaponSpeedHitFactor = GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.25f;
 
                 if (cleanDamage->hitOutCome != MELEE_HIT_MISS)
                     RewardRage(rage_damage, weaponSpeedHitFactor, true);
@@ -19133,7 +19133,7 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
     SendMessageToSet(&data, false);
 }
 
-void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker, DamageEffectType damageType)
+void Unit::RewardRage(uint32 damage, float weaponSpeedHitFactor, bool attacker, DamageEffectType damageType)
 {
     float addRage = 0;
 

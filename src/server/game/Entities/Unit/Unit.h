@@ -2097,7 +2097,7 @@ class Unit : public WorldObject
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING); }
         void SetFlying(bool apply);
 
-        void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker, DamageEffectType damageType = DIRECT_DAMAGE);
+        void RewardRage(uint32 damage, float weaponSpeedHitFactor, bool attacker, DamageEffectType damageType = DIRECT_DAMAGE);
 
         virtual float GetFollowAngle() const { return static_cast<float>(M_PI/2); }
 
