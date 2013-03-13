@@ -2370,6 +2370,9 @@ void Player::RegenerateAll()
     m_regenTimerCount += m_regenTimer;
     uint8 cl = getClass();
 
+    if (cl == CLASS_PALADIN)
+        Regenerate(POWER_HOLY_POWER);
+
     if (cl == CLASS_HUNTER)
         Regenerate(POWER_FOCUS);
     else if (cl == CLASS_DEATH_KNIGHT)
@@ -2536,10 +2539,7 @@ void Player::Regenerate(Powers power)
     if (m_regenTimerCount >= 2000)
         SetPower(power, curValue);
     else
-    {
-        if (powerIndex != MAX_POWERS)
-            UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, curValue);
-    }
+        UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, curValue);
 }
 
 void Player::RegenerateHealth()
@@ -3228,6 +3228,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetPower(POWER_FOCUS, 0);
     SetPower(POWER_HAPPINESS, 0);
     SetPower(POWER_RUNIC_POWER, 0);
+    // make holy power disappear every 10 seconds when not in combat
+    uint32 powerIndex = GetPowerIndex(POWER_HOLY_POWER);
+    if (powerIndex != MAX_POWERS)
+        SetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex, -0.1f);
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())
