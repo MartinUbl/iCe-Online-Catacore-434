@@ -6901,6 +6901,9 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
             // Smoke Bomb
             if (_spell->Id == 76577)
                 return ccDelay + 350;
+            // Vanish
+            if (_spell->Id == 18461 || _spell->Id == 11327)
+                return ccDelay + 50;
             break;
         case SPELLFAMILY_PRIEST:
             // Mind Control - for both caster and victim
