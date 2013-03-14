@@ -1762,6 +1762,8 @@ void Battleground::SendWarningToAll(int32 entry, ...)
     data << (uint32)(strlen(msg.c_str())+1);
     data << msg.c_str();
     data << (uint8)0;
+    data << float(0.0f);
+    data << uint8(0);
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player *plr = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
             if (plr->GetSession())

@@ -721,6 +721,8 @@ void Channel::Say(uint64 p, const char *what, uint32 lang)
         data << uint32(0);                                  // 2.1.0
         data << m_name;
         data << p;
+        if (lang == LANG_ADDON)
+            data << uint8(0);
         data << messageLength;
         data << what;
         data << uint8(plr ? plr->GetChatTag() : 0);

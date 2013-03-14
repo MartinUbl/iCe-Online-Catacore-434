@@ -1934,16 +1934,13 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 }
 
 //Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
-void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker)
+void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker, const char* addonPrefix)
 {
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
+    uint64 listener_guid = 0;
 
-    data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
-    *data << uint8(type);
-    if ((type != CHAT_MSG_CHANNEL && type != CHAT_MSG_WHISPER) || language == LANG_ADDON)
-        *data << uint32(language);
-    else
-        *data << uint32(LANG_UNIVERSAL);
+    if (language == LANG_ADDON && addonPrefix == NULL)
+        addonPrefix = "someAddon";
 
     switch(type)
     {
@@ -1973,45 +1970,130 @@ void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint
         case CHAT_MSG_RAID_BOSS_WHISPER:
         case CHAT_MSG_RAID_BOSS_EMOTE:
         case CHAT_MSG_BATTLENET:
-        {
-            *data << uint64(speaker->GetGUID());
-            *data << uint32(0);                             // 2.1.0
-            *data << uint32(strlen(speaker->GetName()) + 1);
-            *data << speaker->GetName();
-            uint64 listener_guid = 0;
-            *data << uint64(listener_guid);
-            if (listener_guid && !IS_PLAYER_GUID(listener_guid))
-            {
-                *data << uint32(1);                         // string listener_name_length
-                *data << uint8(0);                          // string listener_name
-            }
-            *data << uint32(messageLength);
-            *data << message;
-            *data << uint8(0);
-            return;
-        }
+            target_guid = speaker ? speaker->GetGUID() : 0;
+            break;
         default:
             if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
                 target_guid = 0;                            // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
             break;
     }
 
+    data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
+    *data << uint8(type);
+    if ((type != CHAT_MSG_CHANNEL && type != CHAT_MSG_WHISPER) || language == LANG_ADDON)
+        *data << uint32(language);
+    else
+        *data << uint32(LANG_UNIVERSAL);
+
     *data << uint64(target_guid);                           // there 0 for BG messages
     *data << uint32(0);                                     // can be chat msg group or something
 
-    if (type == CHAT_MSG_CHANNEL)
+    switch (type)
     {
-        ASSERT(channelName);
-        *data << channelName;
-    }
+        case CHAT_MSG_MONSTER_SAY:
+        case CHAT_MSG_MONSTER_PARTY:
+        case CHAT_MSG_MONSTER_YELL:
+        case CHAT_MSG_MONSTER_WHISPER:
+        case CHAT_MSG_MONSTER_EMOTE:
+        case CHAT_MSG_RAID_BOSS_EMOTE:
+        case CHAT_MSG_RAID_BOSS_WHISPER:
+        case CHAT_MSG_BATTLENET:
+            *data << uint32(strlen(speaker->GetName()) + 1);
+            *data << speaker->GetName();
+            *data << uint64(target_guid);
 
-    *data << uint64(target_guid);
-    *data << uint32(messageLength);
-    *data << message;
-    if (session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
-        *data << uint8(session->GetPlayer()->GetChatTag());
-    else
-        *data << uint8(0);
+            if (listener_guid && !IS_PLAYER_GUID(listener_guid))
+            {
+                *data << uint32(1);                         // string listener_name_length
+                *data << uint8(0);                          // string listener_name
+            }
+
+            if (language == LANG_ADDON)
+                *data << addonPrefix;
+
+            *data << uint32(messageLength);
+            *data << message;
+
+            *data << uint8(0);
+
+            if (type == CHAT_MSG_RAID_BOSS_EMOTE || type == CHAT_MSG_RAID_BOSS_WHISPER)
+            {
+                *data << float(0.0f);
+                *data << uint8(0);
+            }
+            break;
+        case CHAT_MSG_BG_SYSTEM_NEUTRAL:
+        case CHAT_MSG_BG_SYSTEM_ALLIANCE:
+        case CHAT_MSG_BG_SYSTEM_HORDE:
+            *data << uint64(target_guid);
+
+            // not verified (one condition less, if (guid && (GUID_HIPART(guid) & 0xF0000000 || !(GUID_HIPART(guid) & 0xF07FFFFF | guid))) )
+            if (listener_guid && !IS_PLAYER_GUID(listener_guid))
+            {
+                *data << uint32(1);                         // string listener_name_length
+                *data << uint8(0);                          // string listener_name
+            }
+
+            if (language == LANG_ADDON)
+                *data << addonPrefix;
+
+            *data << uint32(messageLength);
+            *data << message;
+
+            *data << uint8(0);
+            break;
+        case CHAT_MSG_ACHIEVEMENT:
+        case CHAT_MSG_GUILD_ACHIEVEMENT:
+            *data << uint64(target_guid);
+
+            if (language == LANG_ADDON)
+                *data << addonPrefix;
+
+            *data << uint32(messageLength);
+            *data << message;
+
+            *data << uint8(0);
+            *data << uint32(0); // probably achievement ID ?
+            break;
+        case CHAT_MSG_WHISPER_FOREIGN:
+            *data << uint32(strlen(speaker->GetName()) + 1);
+            *data << speaker->GetName();
+            *data << uint64(target_guid);
+
+            if (language == LANG_ADDON)
+                *data << addonPrefix;
+
+            *data << uint32(messageLength);
+            *data << message;
+
+            if (session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+                *data << uint8(session->GetPlayer()->GetChatTag());
+            else
+                *data << uint8(0);
+            break;
+        default:
+            if (type == CHAT_MSG_CHANNEL)
+            {
+                if (channelName)
+                    *data << channelName;
+                else
+                    *data << uint8(0);
+            }
+
+            *data << uint64(target_guid);
+
+            if (language == LANG_ADDON)
+                *data << addonPrefix;
+
+            *data << uint32(messageLength);
+            *data << message;
+
+            if (session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+                *data << uint8(session->GetPlayer()->GetChatTag());
+            else
+                *data << uint8(0);
+            break;
+    }
 }
 
 Player * ChatHandler::getSelectedPlayer()
