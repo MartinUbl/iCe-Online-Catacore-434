@@ -41,7 +41,7 @@ JEMALLOC_INLINE void
 malloc_mutex_lock(malloc_mutex_t *mutex)
 {
 
-	if (isthreaded)
+	if (isthreaded && mutex)
 		pthread_mutex_lock(mutex);
 }
 
@@ -59,7 +59,7 @@ JEMALLOC_INLINE void
 malloc_mutex_unlock(malloc_mutex_t *mutex)
 {
 
-	if (isthreaded)
+	if (isthreaded && mutex)
 		pthread_mutex_unlock(mutex);
 }
 #endif
