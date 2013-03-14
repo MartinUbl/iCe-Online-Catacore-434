@@ -4091,6 +4091,13 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
         SetCanTitanGrip(false);
     if (spell_id == 674 && m_canDualWield)
         SetCanDualWield(false);
+    if (spell_id == 14751) //Chakra
+    {
+        RemoveAurasDueToSpell(81209);
+        RemoveAurasDueToSpell(81206);
+        RemoveAurasDueToSpell(81208);
+        RemoveAurasDueToSpell(81207);
+    }
 
     if (sWorld->getBoolConfig(CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN))
         AutoUnequipOffhandIfNeed();
