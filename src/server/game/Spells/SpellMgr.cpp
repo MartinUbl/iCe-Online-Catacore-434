@@ -4781,10 +4781,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 11374; // Changing fish instead pig :D
             count++;
             break;
-        case 57669: // Replenishment
-            // Because of bug in DBC, we must set corrected periodic tick.
-            spellInfo->EffectAmplitude[0] = 10000; // 10 sec
-            break;
         case 43681: // Inactive (Spell for AFK Reporter)
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_REFLECTED;
             count++;
