@@ -869,7 +869,10 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
             if (!caster)
                 break;
-            if (GetSpellProto()->Id == 77987) // Growth Cataclyst
+            if (GetSpellProto()->Id == 77987  // Growth Cataclyst
+                || GetSpellProto()->Id == 101440 // + difficulty entries
+                || GetSpellProto()->Id == 101441
+                || GetSpellProto()->Id == 101442)
             {
                 if (caster->GetTypeId() == TYPEID_UNIT)
                     amount += GetBase()->GetUnitOwner()->ToCreature()->GetMap()->IsHeroic() ? 20.0 : 10.0;
@@ -878,10 +881,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
             if (!caster)
                 break;
-            if (GetSpellProto()->Id == 77987) // Growth Cataclyst
+            if (GetSpellProto()->Id == 77987  // Growth Cataclyst
+                || GetSpellProto()->Id == 101440 // + difficulty entries
+                || GetSpellProto()->Id == 101441
+                || GetSpellProto()->Id == 101442)
             {
                 if (GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_UNIT)
-                    amount += 10.0;
+                    amount -= 20.0;
             }
             // Icebound Fortitude
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellProto->SpellFamilyFlags[0] & 0x00100000)
