@@ -6415,7 +6415,19 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const *aurApp, uint8 mode, 
 
 void AuraEffect::HandleModPowerRegenPCT(AuraApplication const * aurApp, uint8 mode, bool apply) const
 {
-    HandleModPowerRegen(aurApp, mode, apply);
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *player = target->ToPlayer();
+
+    if (GetMiscValue() == POWER_MANA)
+        player->UpdateManaRegen();
+    else
+        player->UpdateHaste();
 }
 
 void AuraEffect::HandleModManaRegen(AuraApplication const *aurApp, uint8 mode, bool /*apply*/) const
