@@ -6977,9 +6977,32 @@ SpellCastResult Spell::CheckCasterAuras() const
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
-    // this aura type disallows any attacks coming from player
+    // this aura type disallows any damaging attacks coming from player
     if (m_caster && m_caster->HasAuraType(SPELL_AURA_CANNOT_ATTACK))
-        return SPELL_FAILED_PACIFIED;
+    {
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        {
+            switch (m_spellInfo->Effect[i])
+            {
+                case SPELL_EFFECT_APPLY_AURA:
+                    if (!(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE ||
+                        m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
+                        m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_TRIGGER_SPELL ||
+                        m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_LEECH ||
+                        m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DUMMY))
+                        break;
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT:
+                    return SPELL_FAILED_PACIFIED;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     // Attr must make flag drop spell totally immune from all effects
     if (prevented_reason != SPELL_CAST_OK)
