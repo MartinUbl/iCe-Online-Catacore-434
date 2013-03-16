@@ -462,10 +462,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 
     MovementStatusElements *sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (sequence == NULL)
-    {
-        sLog->outError("WorldSession::ReadMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
         return;
-    }
 
     ObjectGuid guid;
     ObjectGuid tguid;
