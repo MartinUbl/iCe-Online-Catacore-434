@@ -9423,6 +9423,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 85103: //Cremation
+        case 85104:
+        case 89603:
+            if(procSpell->Id != 71521) //shoul proc only from Hand of Gul'dan
+                return false;
         default:
             break;
     }
