@@ -416,6 +416,21 @@ bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugSpellCritCommand(const char* args)
+{
+    if (sObjectMgr->GetSpellCritDebug())
+    {
+        PSendSysMessage("SpellCrit debug is OFF");
+        sObjectMgr->SetSpellCritDebug(false);
+    }
+    else
+    {
+        PSendSysMessage("SpellCrit debug is ON");
+        sObjectMgr->SetSpellCritDebug(true);
+    }
+    return true;
+}
+
 bool ChatHandler::HandleDebugGetItemStateCommand(const char* args)
 {
     if (!*args)

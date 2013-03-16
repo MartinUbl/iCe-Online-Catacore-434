@@ -720,6 +720,9 @@ class ObjectMgr
         ArenaTeamMap::iterator GetArenaTeamMapBegin() { return mArenaTeamMap.begin(); }
         ArenaTeamMap::iterator GetArenaTeamMapEnd()   { return mArenaTeamMap.end(); }
 
+        void SetSpellCritDebug(bool state) { m_spellCritDebug = state; }
+        bool GetSpellCritDebug() { return m_spellCritDebug; }
+
         static CreatureInfo const *GetCreatureTemplate(uint32 id);
         CreatureModelInfo const *GetCreatureModelInfo(uint32 modelid);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
@@ -1431,6 +1434,8 @@ class ObjectMgr
         LocalForIndex        m_LocalForIndex;
 
         LocaleConstant DBCLocaleIndex;
+
+        bool m_spellCritDebug;
 
     private:
         void LoadScripts(ScriptsType type);

@@ -235,8 +235,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "uws",            SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugUpdateWorldStateCommand>,    "", NULL },
         { "update",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugUpdateCommand>,              "", NULL },
         { "itemexpire",     SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugItemExpireCommand>,          "", NULL },
-        { "opcode",            SEC_ADMINISTRATOR, false, OldHandler<&ChatHandler::HandleDebugOpcodeCommand>, "", NULL },
+        { "opcode",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugOpcodeCommand>, "", NULL },
         { "ratedbg",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleDebugRatedBGCommand>, "", NULL },
+        { "spellcrit",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSpellCritCommand>, "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 

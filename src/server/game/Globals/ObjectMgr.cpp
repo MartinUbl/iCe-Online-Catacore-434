@@ -286,6 +286,8 @@ ObjectMgr::ObjectMgr()
     m_arenaTeamId       = 1;
     m_auctionid         = 1;
     m_hiGuildNewsId     = 1;
+
+    m_spellCritDebug = false;
 }
 
 ObjectMgr::~ObjectMgr()
