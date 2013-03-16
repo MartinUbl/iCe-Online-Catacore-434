@@ -27,6 +27,7 @@
 #include "DBCEnums.h"
 #include "Battleground.h"
 #include "BattlegroundQueue.h"
+#include "LCG.h"
 #include <ace/Singleton.h>
 
 typedef std::map<uint32, Battleground*> BattlegroundSet;
@@ -132,6 +133,9 @@ class BattlegroundMgr
         uint32 m_ratedBgWeek;
         uint32 m_ratedBgNextWeek;
         uint32 m_ratedBgWeekCheckTimer;
+
+        // random number generators
+        LCG m_ArenaGenerator, m_RandomBGGenerator;
 };
 
 #define sBattlegroundMgr ACE_Singleton<BattlegroundMgr, ACE_Null_Mutex>::instance()

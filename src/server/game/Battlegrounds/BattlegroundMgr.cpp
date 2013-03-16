@@ -73,6 +73,9 @@ BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
     m_ratedBgWeek = RATED_BATTLEGROUND_WEEK_NONE;
     m_ratedBgNextWeek = 0;
     m_ratedBgWeekCheckTimer = 0;
+
+    m_ArenaGenerator.Seed(urand(0, 0xffffffff));
+    m_RandomBGGenerator.Seed(urand(0, 0xffffffff));
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -922,7 +925,8 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                     BATTLEGROUND_BG,
                 };
 
-                bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+                uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
+                bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
             }
             else
             {
@@ -932,7 +936,8 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                     BATTLEGROUND_EY,
                 };
 
-                bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+                uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
+                bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
             }
         }
         else
@@ -945,7 +950,8 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 //BATTLEGROUND_DS, // Dalaran Severs
             };
 
-            bgTypeId = avail_RBGs[urand(0, (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId))-1)];
+            uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
+            bgTypeId = avail_RBGs[m_ArenaGenerator.Generate(bgCount)];
         }
 
         bg_template = GetBattlegroundTemplate(bgTypeId);
