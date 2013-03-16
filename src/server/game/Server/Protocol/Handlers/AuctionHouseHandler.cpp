@@ -602,9 +602,8 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     recv_data.read_skip<uint8>();                           // unk
     recv_data.read_skip<uint8>();                           // unk
 
-    // this block looks like it uses some lame byte packing or similar...
-    for (uint8 i = 0; i < 15; i++)
-        recv_data.read_skip<uint8>();
+    // unknown data, size varies
+    recv_data.rpos(recv_data.wpos());
 
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid,UNIT_NPC_FLAG_AUCTIONEER);
     if (!pCreature)
