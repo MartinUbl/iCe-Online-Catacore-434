@@ -6515,8 +6515,8 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const *aurApp, uint
 
     Unit *target = aurApp->GetTarget();
 
-    Powers powerType = target->getPowerType();
-    if (int32(powerType) != GetMiscValue())
+    Powers powerType = (Powers) GetMiscValue();
+    if (target->GetPowerIndex(powerType) == MAX_POWERS)
         return;
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
