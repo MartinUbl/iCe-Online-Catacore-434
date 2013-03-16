@@ -19430,6 +19430,7 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 14751:
         case 53576:
         case 53569:
+        case 85767:
             return true; // Continue handling
     }
 
@@ -19528,6 +19529,72 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
         {
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+            // Dark Intent
+            if (dummySpell->Id == 85767)
+            {
+                // proc only on periodic crit (heal / damage)
+                if ((procExtra & PROC_EX_CRITICAL_HIT) && (procFlag & PROC_FLAG_DONE_PERIODIC))
+                {
+                    Unit* triggerTarget = NULL;
+                    int32 bp0 = 0;
+                    uint32 triggeredSpellId = 0;
+
+                    if (aura->GetCaster())
+                    {
+                        triggerTarget = aura->GetCaster();
+
+                        // Caster's spell is different. Caster get 3%, target gets only 1% bonus
+                        if (aura->GetEffect(EFFECT_0) && aura->GetEffect(EFFECT_0)->GetScriptedAmount() > 0)
+                            bp0 = 1;
+                        else
+                            bp0 = 3;
+
+                        if (triggerTarget->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            switch (triggerTarget->getClass())
+                            {
+                                case CLASS_WARLOCK:
+                                    triggeredSpellId = 94310;
+                                    break;
+                                case CLASS_MAGE:
+                                    triggeredSpellId = 85759;
+                                    break;
+                                case CLASS_PRIEST:
+                                    triggeredSpellId = 94311;
+                                    break;
+                                case CLASS_DEATH_KNIGHT:
+                                    triggeredSpellId = 94312;
+                                    break;
+                                case CLASS_WARRIOR:
+                                    triggeredSpellId = 94313;
+                                    break;
+                                case CLASS_DRUID:
+                                    triggeredSpellId = 94318;
+                                    break;
+                                case CLASS_SHAMAN:
+                                    triggeredSpellId = 94319;
+                                    break;
+                                case CLASS_HUNTER:
+                                    triggeredSpellId = 94320;
+                                    break;
+                                case CLASS_PALADIN:
+                                    triggeredSpellId = 94323;
+                                    break;
+                                case CLASS_ROGUE:
+                                    triggeredSpellId = 94324;
+                                    break;
+                            }
+                        }
+                        else
+                            triggeredSpellId = 94310;
+                    }
+
+                    if (triggerTarget && bp0 && triggeredSpellId)
+                        triggerTarget->CastCustomSpell(triggerTarget, triggeredSpellId, &bp0, NULL, NULL, true);
+                }
+            }
+            break;
         default:
             break;
     }

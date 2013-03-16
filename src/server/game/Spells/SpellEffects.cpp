@@ -3347,6 +3347,10 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         {
             // Cast also on self
             unitTarget->CastSpell(m_caster, 85767, true);
+
+            // Mark aura as "casters aura"
+            if (m_caster->GetAura(85767) && m_caster->GetAura(85767)->GetEffect(EFFECT_0))
+                m_caster->GetAura(85767)->GetEffect(EFFECT_0)->SetScriptedAmount(1);
             break;
         }
         // Snake Trap
