@@ -1241,7 +1241,7 @@ bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 /*size*/)
     if (!(header.flags & MAP_LIQUID_NO_TYPE))
     {
         m_liquidEntry = new uint16 [16*16];
-        if (fread(m_liquidEntry, sizeof(uint8), 16*16, in) != 16*16)
+        if (fread(m_liquidEntry, sizeof(uint16), 16*16, in) != 16*16)
             return false;
 
         m_liquidFlags = new uint8[16*16];
