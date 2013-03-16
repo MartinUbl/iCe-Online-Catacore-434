@@ -1568,9 +1568,6 @@ void World::SetInitialWorldSettings()
 
     CharacterDatabaseCleaner::CleanDatabase();
 
-    sLog->outString("Loading the max pet number...");
-    sObjectMgr->LoadPetNumber();
-
     sLog->outString("Loading pet level stats...");
     sObjectMgr->LoadPetLevelInfo();
 

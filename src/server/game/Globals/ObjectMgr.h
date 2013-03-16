@@ -46,6 +46,7 @@
 #include <map>
 #include <limits>
 #include "ConditionMgr.h"
+#include "GuidMap.h"
 
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sCreatureDataAddonStorage;
@@ -1038,7 +1039,6 @@ class ObjectMgr
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
-        void LoadPetNumber();
         void LoadCorpses();
         void LoadFishingBaseSkillLevel();
 
@@ -1350,27 +1350,32 @@ class ObjectMgr
     protected:
 
         // first free id for selected id type
-        uint32 m_arenaTeamId;
-        uint32 m_auctionid;
-        uint64 m_equipmentSetGuid;
-        uint32 m_guildId;
         uint32 m_ItemTextId;
-        uint32 m_mailid;
-        uint32 m_hiPetNumber;
         uint32 m_hiGuildNewsId;
 
         // first free low guid for selected guid type
-        uint32 m_hiCharGuid;
-        uint32 m_hiCreatureGuid;
         uint32 m_hiTempCreatureGuid;
-        uint32 m_hiPetGuid;
-        uint32 m_hiVehicleGuid;
-        uint32 m_hiItemGuid;
-        uint32 m_hiGoGuid;
-        uint32 m_hiDoGuid;
-        uint32 m_hiCorpseGuid;
-        uint32 m_hiGroupGuid;
-        uint32 m_hiMoTransGuid;
+
+        // guid maps used for storing existing guids
+        // and generating free guids for new entities
+        GuidMap m_charGuidMap;
+        GuidMap m_creatureGuidMap;
+        GuidMap m_goGuidMap;
+        GuidMap m_petGuidMap;
+        GuidMap m_vehicleGuidMap;
+        GuidMap m_itemGuidMap;
+        GuidMap m_doGuidMap;
+        GuidMap m_corpseGuidMap;
+        GuidMap m_groupGuidMap;
+        GuidMap m_moTransGuidMap;
+
+        // other persistent storage guids
+        GuidMap m_arenaTeamGuidMap;
+        GuidMap m_auctionGuidMap;
+        GuidMap m_equipmentSetGuidMap;
+        GuidMap m_guildGuidMap;
+        GuidMap m_mailGuidMap;
+        GuidMap m_petNumberGuidMap;
 
         QuestMap            mQuestTemplates;
 

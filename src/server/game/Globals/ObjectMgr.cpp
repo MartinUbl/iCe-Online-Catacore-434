@@ -55,6 +55,32 @@
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 
+/*
+ * Granularities for guid map bitfields
+ * these bitfields needs initial slice values to properly allocate really needed piece of memory
+ * if the slice isn't big enough, the guidmap class will allocate another slice
+ */
+enum GuidMapGranularity
+{
+    PLAYER_GRANULARITY         = 100000,
+    CREATURE_GRANULARITY       = 150000,
+    GAMEOBJECT_GRANULARITY     = 100000,  // persistent should not exceed 85000
+    PET_RUNTIME_GRANULARITY    = 250000,  // very dynamic, should be greater
+    VEHICLE_GRANULARITY        = 20000,   // should be very low, generated only runtime
+    ITEM_GRANULARITY           = 2500000, // probably the greatest storage
+    DYNAMIC_OBJECT_GRANULARITY = 35000,
+    CORPSE_GRANULARITY         = 50000,
+    GROUP_GRANULARITY          = 500,
+    MO_GRANULARITY             = 25,
+
+    ARENA_TEAM_GRANULARITY     = 10000,
+    AUCTION_GRANULARITY        = 20000,
+    EQUIPMENT_SET_GRANULARITY  = 20000,
+    GUILD_GRANULARITY          = 2000,
+    MAIL_GRANULARITY           = 100000,
+    PET_PERSISTENT_GRANULARITY = 250000,
+};
+
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
@@ -267,25 +293,27 @@ bool SpellClickInfo::IsFitToRequirements(Player const* player, Creature const * 
 
 ObjectMgr::ObjectMgr()
 {
-    m_hiCharGuid        = 1;
-    m_hiCreatureGuid    = 1;
     m_hiTempCreatureGuid = 0x0FFFFFFE; // the same guid space as for normal creature guids, but from highest possible to lowest
-    m_hiPetGuid         = 1;
-    m_hiVehicleGuid     = 1;
-    m_hiItemGuid        = 1;
-    m_hiGoGuid          = 1;
-    m_hiDoGuid          = 1;
-    m_hiCorpseGuid      = 1;
-    m_hiPetNumber       = 1;
-    m_hiGroupGuid       = 1;
-    m_hiMoTransGuid     = 1;
     m_ItemTextId        = 1;
-    m_mailid            = 1;
-    m_equipmentSetGuid  = 1;
-    m_guildId           = 1;
-    m_arenaTeamId       = 1;
-    m_auctionid         = 1;
     m_hiGuildNewsId     = 1;
+
+    m_charGuidMap.Init(PLAYER_GRANULARITY);
+    m_creatureGuidMap.Init(CREATURE_GRANULARITY);
+    m_goGuidMap.Init(GAMEOBJECT_GRANULARITY);
+    m_petGuidMap.Init(PET_RUNTIME_GRANULARITY);
+    m_vehicleGuidMap.Init(VEHICLE_GRANULARITY);
+    m_itemGuidMap.Init(ITEM_GRANULARITY);
+    m_doGuidMap.Init(DYNAMIC_OBJECT_GRANULARITY);
+    m_corpseGuidMap.Init(CORPSE_GRANULARITY);
+    m_groupGuidMap.Init(GROUP_GRANULARITY);
+    m_moTransGuidMap.Init(MO_GRANULARITY);
+
+    m_arenaTeamGuidMap.Init(ARENA_TEAM_GRANULARITY);
+    m_auctionGuidMap.Init(AUCTION_GRANULARITY);
+    m_equipmentSetGuidMap.Init(EQUIPMENT_SET_GRANULARITY);
+    m_guildGuidMap.Init(GUILD_GRANULARITY);
+    m_mailGuidMap.Init(MAIL_GRANULARITY);
+    m_petNumberGuidMap.Init(PET_PERSISTENT_GRANULARITY);
 
     m_spellCritDebug = false;
 }
@@ -3644,7 +3672,12 @@ void ObjectMgr::LoadGuilds()
         return;
     }
 
-    mGuildMap.resize(m_guildId, NULL);         // Reserve space and initialize storage for loading guilds
+    uint32 gmapSize = 0;
+    QueryResult res = CharacterDatabase.Query("SELECT MAX(guildid) FROM guild");
+    if (res)
+        gmapSize = (*result)[0].GetUInt32();
+
+    mGuildMap.resize(gmapSize, NULL);         // Reserve space and initialize storage for loading guilds
     // 1. Load all guilds
     uint64 rowCount = result->GetRowCount();
     do
@@ -6493,87 +6526,153 @@ bool ObjectMgr::IsFlatGround(Map *tmap, float x, float y, float z)
 
 void ObjectMgr::SetHighestGuids()
 {
-    QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");
+    QueryResult result = CharacterDatabase.Query("SELECT guid FROM characters");
     if (result)
-        m_hiCharGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_charGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = WorldDatabase.Query("SELECT MAX(guid) FROM creature");
+    result = WorldDatabase.Query("SELECT guid FROM creature");
     if (result)
-        m_hiCreatureGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_creatureGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(id) FROM character_pet");
+    result = CharacterDatabase.Query("SELECT id FROM character_pet");
     if (result)
-        m_hiPetGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            // these are set hand-in-hand
+            // persistent pet numbers will be always not consistent due to generating temporary pet guids between the persistent ones
+            m_petGuidMap.SetBit((*result)[0].GetUInt32());
+            m_petNumberGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
+    result = CharacterDatabase.Query("SELECT guid FROM item_instance");
     if (result)
-        m_hiItemGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_itemGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    // Cleanup other tables from not existed guids ( >= m_hiItemGuid)
-    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item >= '%u'", m_hiItemGuid);
-    CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid >= '%u'", m_hiItemGuid);
-    CharacterDatabase.PExecute("DELETE FROM auctionhouse WHERE itemguid >= '%u'", m_hiItemGuid);
-    CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE item_guid >= '%u'", m_hiItemGuid);
-
-    result = WorldDatabase.Query("SELECT MAX(guid) FROM gameobject");
+    result = WorldDatabase.Query("SELECT guid FROM gameobject");
     if (result)
-        m_hiGoGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_goGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = WorldDatabase.Query("SELECT MAX(guid) FROM transports");
+    result = WorldDatabase.Query("SELECT guid FROM transports");
     if (result)
-        m_hiMoTransGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_moTransGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(id) FROM auctionhouse");
+    result = CharacterDatabase.Query("SELECT id FROM auctionhouse");
     if (result)
-        m_auctionid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_auctionGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
     result = CharacterDatabase.Query("SELECT MAX(id) FROM guild_news");
     if (result)
         m_hiGuildNewsId = (*result)[0].GetUInt32()+1;
 
-    result = CharacterDatabase.Query("SELECT MAX(id) FROM mail");
+    result = CharacterDatabase.Query("SELECT id FROM mail");
     if (result)
-        m_mailid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_mailGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(guid) FROM corpse");
+    result = CharacterDatabase.Query("SELECT guid FROM corpse");
     if (result)
-        m_hiCorpseGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_corpseGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(arenateamid) FROM arena_team");
+    result = CharacterDatabase.Query("SELECT arenateamid FROM arena_team");
     if (result)
-        m_arenaTeamId = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_arenaTeamGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(setguid) FROM character_equipmentsets");
+    result = CharacterDatabase.Query("SELECT setguid FROM character_equipmentsets");
     if (result)
-        m_equipmentSetGuid = (*result)[0].GetUInt64()+1;
+    {
+        do
+        {
+            m_equipmentSetGuidMap.SetBit((*result)[0].GetUInt64());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(guildid) FROM guild");
+    result = CharacterDatabase.Query("SELECT guildid FROM guild");
     if (result)
-        m_guildId = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_guildGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 
-    result = CharacterDatabase.Query("SELECT MAX(guid) FROM groups");
+    result = CharacterDatabase.Query("SELECT guid FROM groups");
     if (result)
-        m_hiGroupGuid = (*result)[0].GetUInt32()+1;
+    {
+        do
+        {
+            m_groupGuidMap.SetBit((*result)[0].GetUInt32());
+        } while (result->NextRow());
+    }
 }
 
 uint32 ObjectMgr::GenerateArenaTeamId()
 {
-    if (m_arenaTeamId >= 0xFFFFFFFE)
+    uint32 id = m_arenaTeamGuidMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFE)
     {
         sLog->outError("Arena team ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Arena team ids overflow!" && false);
     }
-    return m_arenaTeamId++;
+    return id;
 }
 
 uint32 ObjectMgr::GenerateAuctionID()
 {
-    if (m_auctionid >= 0xFFFFFFFE)
+    uint32 id = m_auctionGuidMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFE)
     {
         sLog->outError("Auctions ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Auction ids overflow!" && false);
     }
-    return m_auctionid++;
+    return id;
 }
 
 uint32 ObjectMgr::GenerateGuildNewsID()
@@ -6588,103 +6687,120 @@ uint32 ObjectMgr::GenerateGuildNewsID()
 
 uint64 ObjectMgr::GenerateEquipmentSetGuid()
 {
-    if (m_equipmentSetGuid >= 0xFFFFFFFFFFFFFFFEll)
+    uint64 id = m_equipmentSetGuidMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFFFFFFFFFEll)
     {
         sLog->outError("EquipmentSet guid overflow!! Can't continue, shutting down server. ");
         ASSERT("EquipmentSet guid overflow!" && false);
     }
-    return m_equipmentSetGuid++;
+    return id;
 }
 
 uint32 ObjectMgr::GenerateGuildId()
 {
-    if (m_guildId >= 0xFFFFFFFE)
+    uint32 id = m_guildGuidMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFE)
     {
         sLog->outError("Guild ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Guild ids overflow!" && false);
     }
-    return m_guildId++;
+    return id;
 }
 
 uint32 ObjectMgr::GenerateMailID()
 {
-    if (m_mailid >= 0xFFFFFFFE)
+    uint32 id = m_mailGuidMap.UseEmpty();
+
+    if (id >= 0xFFFFFFFE)
     {
         sLog->outError("Mail ids overflow!! Can't continue, shutting down server. ");
         ASSERT("Mail ids overflow!" && false);
     }
-    return m_mailid++;
+    return id;
 }
 
 uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 {
+    uint32 id;
+
     switch(guidhigh)
     {
         case HIGHGUID_ITEM:
-            if (m_hiItemGuid >= 0xFFFFFFFE)
+            id = m_itemGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("Item guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Item guid overflow!" && false);
             }
-            return m_hiItemGuid++;
+            return id;
         case HIGHGUID_UNIT:
             return GenerateLowGuidForUnit(false);
         case HIGHGUID_PET:
-            if (m_hiPetGuid >= 0x00600000)
+            id = m_petGuidMap.UseEmpty();
+            if (id >= 0x00600000)
             {
                 sLog->outError("Pet guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Pet guid overflow!" && false);
             }
-            return m_hiPetGuid++;
+            return id;
         case HIGHGUID_VEHICLE:
-            if (m_hiVehicleGuid >= 0x00FFFFFF)
+            id = m_vehicleGuidMap.UseEmpty();
+            if (id >= 0x00FFFFFF)
             {
                 sLog->outError("Vehicle guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Vehicle guid overflow!" && false);
             }
-            return m_hiVehicleGuid++;
+            return id;
         case HIGHGUID_PLAYER:
-            if (m_hiCharGuid >= 0xFFFFFFFE)
+            id = m_charGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("Players guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Player guid overflow!" && false);
             }
-            return m_hiCharGuid++;
+            return id;
         case HIGHGUID_GAMEOBJECT:
-            if (m_hiGoGuid >= 0x00FFFFFE)
+            id = m_goGuidMap.UseEmpty();
+            if (id >= 0x00FFFFFE)
             {
                 sLog->outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Gameobject guid overflow!" && false);
             }
-            return m_hiGoGuid++;
+            return id;
         case HIGHGUID_CORPSE:
-            if (m_hiCorpseGuid >= 0xFFFFFFFE)
+            id = m_corpseGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("Corpse guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Corpse guid overflow!" && false);
             }
-            return m_hiCorpseGuid++;
+            return id;
         case HIGHGUID_DYNAMICOBJECT:
-            if (m_hiDoGuid >= 0xFFFFFFFE)
+            id = m_doGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("DynamicObject guid overflow!" && false);
             }
-            return m_hiDoGuid++;
+            return id;
         case HIGHGUID_GROUP:
-            if (m_hiGroupGuid >= 0xFFFFFFFE)
+            id = m_groupGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("Group guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("Group guid overflow!" && false);
             }
-            return m_hiGroupGuid++;
+            return id;
         case HIGHGUID_MO_TRANSPORT:
-            if (m_hiMoTransGuid >= 0xFFFFFFFE)
+            id = m_moTransGuidMap.UseEmpty();
+            if (id >= 0xFFFFFFFE)
             {
                 sLog->outError("MO Transport guid overflow!! Can't continue, shutting down server. ");
                 ASSERT("MO Transport guid overflow!" && false);
             }
-            return m_hiMoTransGuid++;
+            return id;
         default:
             ASSERT(0);
     }
@@ -6695,18 +6811,22 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 
 uint32 ObjectMgr::GenerateLowGuidForUnit(bool temporary)
 {
+    // let's say we have temporary unit limit at the exact half of whole range (0x7FF FFFF)
+
     if (!temporary)
     {
-        if (m_hiCreatureGuid >= m_hiTempCreatureGuid)
+        uint32 id = m_creatureGuidMap.UseEmpty();
+
+        if (id >= m_hiTempCreatureGuid)
         {
             sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
             ASSERT("Creature guid overflow!" && false);
         }
-        return m_hiCreatureGuid++;
+        return id;
     }
     else
     {
-        if (m_hiTempCreatureGuid <= m_hiCreatureGuid)
+        if (m_hiTempCreatureGuid <= 0x7FFFFFF)
         {
             sLog->outError("Temporary creature guid uderflow!! Can't continue, shutting down server. ");
             ASSERT("Temporary creature guid underflow!" && false);
@@ -7047,19 +7167,6 @@ void ObjectMgr::LoadPetNames()
     sLog->outString(">> Loaded %u pet name parts", count);
 }
 
-void ObjectMgr::LoadPetNumber()
-{
-    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM character_pet");
-    if (result)
-    {
-        Field *fields = result->Fetch();
-        m_hiPetNumber = fields[0].GetUInt32()+1;
-    }
-
-    sLog->outString();
-    sLog->outString(">> Loaded the max pet number: %d", m_hiPetNumber-1);
-}
-
 std::string ObjectMgr::GeneratePetName(uint32 entry)
 {
     StringVector & list0 = PetHalfName0[entry];
@@ -7079,7 +7186,7 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
 
 uint32 ObjectMgr::GeneratePetNumber()
 {
-    return ++m_hiPetNumber;
+    return m_petNumberGuidMap.UseEmpty();
 }
 
 void ObjectMgr::LoadCorpses()
