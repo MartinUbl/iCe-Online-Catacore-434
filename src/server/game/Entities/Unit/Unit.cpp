@@ -1047,6 +1047,35 @@ void Unit::CastCustomSpell(uint32 spellId, CustomSpellValues const &value, Unit*
     spell->prepare(&targets, triggeredByAura);
 }
 
+void Unit::CastCustomSpell(uint32 spellId, CustomSpellValues const &value, Position &pos, bool triggered, Item *castItem, AuraEffect const * triggeredByAura, uint64 originalCaster)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+    {
+        sLog->outError("CastSpell: unknown spell id %i by caster: %s %u)", spellId,(GetTypeId() == TYPEID_PLAYER ? "player (GUID:" : "creature (Entry:"),(GetTypeId() == TYPEID_PLAYER ? GetGUIDLow() : GetEntry()));
+        return;
+    }
+
+    SpellCastTargets targets;
+    targets.setDst(pos);
+
+    if (!originalCaster && triggeredByAura)
+        originalCaster = triggeredByAura->GetCasterGUID();
+
+    Spell *spell = new Spell(this, spellInfo, triggered, originalCaster);
+
+    if (castItem)
+    {
+        sLog->outStaticDebug("WORLD: cast Item spellId - %i", spellInfo->Id);
+        spell->m_CastItem = castItem;
+    }
+
+    for (CustomSpellValues::const_iterator itr = value.begin(); itr != value.end(); ++itr)
+        spell->SetSpellValue(itr->first, itr->second);
+
+    spell->prepare(&targets, triggeredByAura);
+}
+
 // used for scripting
 void Unit::CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item *castItem, AuraEffect const * triggeredByAura, uint64 originalCaster, Unit* OriginalVictim)
 {
