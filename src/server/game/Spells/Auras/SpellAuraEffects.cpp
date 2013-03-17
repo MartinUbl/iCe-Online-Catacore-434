@@ -4903,9 +4903,8 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp, uint8 mode
 
     if (!apply)
     {
-        // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-        if (target->HasAuraType(GetAuraType()) || target->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
-            return;
+        target->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING_FLY);
+        target->GetMotionMaster()->MoveFall();
     }
 
     if (Player *plr = target->m_movedPlayer)
@@ -4945,12 +4944,23 @@ void AuraEffect::HandleAuraFeatherFall(AuraApplication const *aurApp, uint8 mode
 
     WorldPacket data;
     if (apply)
+    {
         data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
+        target->AddUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
+    }
     else
+    {
         data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
+        target->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
+    }
     data.append(target->GetPackGUID());
     data << uint32(0);
     target->SendMessageToSet(&data, true);
+
+    WorldPacket data2(SMSG_MOVE_FEATHER_FALL, 64);
+    data.append(target->GetPackGUID());
+    target->BuildMovementPacket(&data);
+    target->SendMessageToSet(&data, false);
 
     // start fall from current height
     if (!apply && target->GetTypeId() == TYPEID_PLAYER)
