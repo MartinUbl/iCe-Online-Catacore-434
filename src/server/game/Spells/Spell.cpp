@@ -4812,42 +4812,51 @@ void Spell::WriteAmmoToPacket(WorldPacket * data)
     *data << uint32(ammoDisplayID);
     *data << uint32(ammoInventoryType);*/
 }
-
+// Writes miss and hit targets for a SMSG_SPELL_GO packet
 void Spell::WriteSpellGoTargets(WorldPacket * data)
 {
     // This function also fill data for channeled spells:
     // m_needAliveTargetMask req for stop channelig if one target die
-    uint32 hit  = m_UniqueGOTargetInfo.size(); // Always hits on GO
-    uint32 miss = 0;
     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
         if ((*ihit).effectMask == 0)                  // No effect apply - all immuned add state
-        {
             // possibly SPELL_MISS_IMMUNE2 for this??
             ihit->missCondition = SPELL_MISS_IMMUNE2;
-            ++miss;
-        }
-        else if ((*ihit).missCondition == SPELL_MISS_NONE)
-            ++hit;
-        else
-            ++miss;
     }
 
-    *data << (uint8)hit;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+    /** Hit and miss target counts are both uint8, that limits us to 255 targets for each
+    *   sending more than 255 targets crashes the client (since count sent would be wrong)
+    *   Spells like 40647 (with a huge radius) can easily reach this limit (spell might need
+    *   target conditions but we still need to limit the number of targets sent and keeping
+    *   correct count for both hit and miss). **/
+
+    uint32 hit = 0; 
+    size_t hitPos = data->wpos(); 
+    *data << (uint8)0; // placeholder 
+
+    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && hit <= 255; ++ihit)
     {
-        if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
+        if ((*ihit).missCondition == SPELL_MISS_NONE) // Add only hits
         {
             *data << uint64(ihit->targetGUID);
             m_channelTargetEffectMask |=ihit->effectMask;
+            ++hit;
         }
     }
 
-    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
-        *data << uint64(ighit->targetGUID);                 // Always hits
+    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end() && hit <= 255; ++ighit)
+    {
+        *data << uint64(ighit->targetGUID); // Always hits
+        ++hit;
+    }
 
-    *data << (uint8)miss;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+    uint32 miss = 0;
+
+    size_t missPos = data->wpos();
+
+    *data << (uint8)0; // placeholder 
+
+    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && miss <= 255; ++ihit)
     {
         if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
         {
@@ -4855,11 +4864,15 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
             *data << uint8(ihit->missCondition);
             if (ihit->missCondition == SPELL_MISS_REFLECT)
                 *data << uint8(ihit->reflectResult);
+            ++miss;
         }
     }
     // Reset m_needAliveTargetMask for non channeled spell
     if (!IsChanneledSpell(m_spellInfo))
         m_channelTargetEffectMask = 0;
+
+    data->put<uint8>(hitPos, (uint8)hit);
+    data->put<uint8>(missPos, (uint8)miss);
 }
 
 void Spell::SendLogExecute()
@@ -5006,7 +5019,7 @@ void Spell::SendChannelStart(uint32 duration)
         {
             for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; effIndex++)
             {
-                if (if ((itr->effectMask & (1 << effIndex)) && itr->reflectResult == SPELL_MISS_NONE && itr->targetGUID != m_caster->GetGUID()))
+                if ((itr->effectMask & (1 << effIndex)) && itr->reflectResult == SPELL_MISS_NONE && itr->targetGUID != m_caster->GetGUID())
                 {
                     target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
                     break;
