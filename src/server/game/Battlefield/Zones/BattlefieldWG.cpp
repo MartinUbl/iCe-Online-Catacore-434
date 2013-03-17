@@ -355,6 +355,8 @@ void BattlefieldWG::OnBattleStart()
     }
     else
         sLog->outError("WG: Failed to spawn titan relic.");
+
+    m_CanClickOnOrb = false;
 }
 
 void BattlefieldWG::UpdateCounterVehicle(bool init)
@@ -1029,11 +1031,18 @@ void BattlefieldWG::ProcessEvent(GameObject *obj, uint32 eventId)
     // On click on titan relic
     if (obj->GetEntry() == BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC)
     {
+        sLog->outChar("BattlefieldWG: clicked on relic");
         // Check that the door is break
         if (m_CanClickOnOrb)
+        {
+            sLog->outChar("BattlefieldWG: relic clickable, ending battle");
             EndBattle(false);
+        }
         else // if door is not break, respawn relic.
+        {
+            sLog->outChar("BattlefieldWG: relic NOT clickable, respawning");
             obj->SetRespawnTime(RESPAWN_IMMEDIATELY);
+        }
     }
 
     // if destroy or damage event, search the wall/tower and update worldstate/send warning message

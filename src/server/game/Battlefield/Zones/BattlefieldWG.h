@@ -1390,6 +1390,8 @@ struct BfWGGameObjectBuilding
         m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_DAMAGE - (m_Team * 3);
         m_WG->SendUpdateWorldState(m_WorldState, m_State);
 
+        sLog->outChar("BattlefieldWG: damaged object type %u", m_Type);
+
         // Send warning message
         if (m_NameId)                                       // tower damage + name
             m_WG->SendWarningToAllInZone(m_NameId);
@@ -1420,6 +1422,8 @@ struct BfWGGameObjectBuilding
         // Warn players
         if (m_NameId)
             m_WG->SendWarningToAllInZone(m_NameId);
+
+        sLog->outChar("BattlefieldWG: destroyed object type %u", m_Type);
 
         switch (m_Type)
         {

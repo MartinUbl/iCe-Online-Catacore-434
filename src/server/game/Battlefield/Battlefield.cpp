@@ -544,7 +544,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
 {
     if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
-            stalker->MonsterYellToZone(entry, LANG_ADDON, 0);
+            stalker->MonsterYellToZone(entry, LANG_UNIVERSAL, 0);
 }
 
 /*void Battlefield::SendWarningToAllInWar(int32 entry,...)
@@ -567,7 +567,7 @@ void Battlefield::SendWarningToPlayer(Player *player, uint32 entry)
 
     if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
-            stalker->MonsterYellToZone(entry, LANG_ADDON, player->GetGUID());
+            stalker->MonsterYellToZone(entry, LANG_UNIVERSAL, player->GetGUID());
 }
 
 void Battlefield::SendUpdateWorldState(uint32 field, uint32 value)
