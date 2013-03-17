@@ -288,15 +288,19 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     // TODO: pets should be summoned from real cast instead of just faking it?
     if (GetUInt32Value(UNIT_CREATED_BY_SPELL))
     {
-        WorldPacket data(SMSG_SPELL_GO, (8+8+4+4+2));
-        data.append(owner->GetPackGUID());
-        data.append(owner->GetPackGUID());
-        data << uint8(0);
-        data << uint32(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-        data << uint32(256); // CAST_FLAG_UNKNOWN3
-        data << uint32(0);
-        data << uint32(0);
-        owner->SendMessageToSet(&data, true);
+        // don't summon water elemental if we haven't frost specs
+        if (!owner->HasSpell(31687) && GetUInt32Value(UNIT_CREATED_BY_SPELL) != 31687)
+        {
+            WorldPacket data(SMSG_SPELL_GO, (8+8+4+4+2));
+            data.append(owner->GetPackGUID());
+            data.append(owner->GetPackGUID());
+            data << uint8(0);
+            data << uint32(GetUInt32Value(UNIT_CREATED_BY_SPELL));
+            data << uint32(256); // CAST_FLAG_UNKNOWN3
+            data << uint32(0);
+            data << uint32(0);
+            owner->SendMessageToSet(&data, true);
+        }
     }
 
     owner->SetMinion(this, true, slotID == PET_SLOT_UNK_SLOT ? PET_SLOT_OTHER_PET : slotID);
