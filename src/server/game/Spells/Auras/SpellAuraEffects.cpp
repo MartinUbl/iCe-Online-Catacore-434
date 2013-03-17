@@ -4918,12 +4918,10 @@ void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, 
 
     Unit *target = aurApp->GetTarget();
 
-    if (!(apply))
-    {
-        // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-        if (target->HasAuraType(GetAuraType()))
-            return;
-    }
+    if (apply)
+        target->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+    else
+        target->RemoveUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
 
    target->SetWaterWalk(apply);
 }
