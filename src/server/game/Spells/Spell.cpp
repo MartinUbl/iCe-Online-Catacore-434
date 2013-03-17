@@ -3222,6 +3222,13 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         unitList.push_back(m_caster);
                         break;
                     }
+                    // Efflorescence
+                    else if (m_spellInfo->Id == 81269)
+                    {
+                        maxSize = 3;
+                        power = POWER_HEALTH;
+                        break;
+                    }
                     else
                         break;
 

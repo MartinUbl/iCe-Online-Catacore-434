@@ -4149,13 +4149,11 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             // Efflorescence
             int32 bp0 = 0;
             if (caster->HasAura(34151))
-                bp0 = addhealth*0.1f/7.0f;
+                bp0 = addhealth*0.04f;
             else if (caster->HasAura(81274))
-                bp0 = addhealth*0.2f/7.0f;
+                bp0 = addhealth*0.08f;
             else if (caster->HasAura(81275))
-                bp0 = addhealth*0.3f/7.0f;
-
-            // Amount needs to be divided by 7 because of 7 ticks
+                bp0 = addhealth*0.12f;
 
             if (bp0)
                 unitTarget->CastCustomSpell(unitTarget, 81262, &bp0, &bp0, &bp0, true, 0, 0, caster->GetGUID());
@@ -4224,6 +4222,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         }
         // Glyph of Power Word: Shield
         else if (m_spellInfo->Id == 56160)
+        {
+        }
+        // Efflorescence
+        else if (m_spellInfo->Id == 81269)
         {
         }
         else

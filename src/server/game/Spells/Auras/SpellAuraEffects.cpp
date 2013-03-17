@@ -2820,11 +2820,17 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->SetPower(POWER_RAGE, (rage-mod)*10.0f); // multiply our modified rage by 10 also
                     break;
                 }
-                // Efflorescence
+                // Efflorescence - periodic tick
                 case 81262:
                 {
-                    int32 bp0 = GetAmount();
-                    caster->CastCustomSpell(target, 81269, &bp0, 0, 0, true);
+                    if (DynamicObject *dynobj = caster->GetDynObject(81262))
+                    {
+                        CustomSpellValues values;
+                        values.AddSpellMod(SPELLVALUE_BASE_POINT0, GetAmount());
+                        Position pos;
+                        dynobj->GetPosition(&pos);
+                        caster->CastCustomSpell(81269, values, pos, true, NULL, this, caster->GetGUID());
+                    }
                     break;
                 }
                 // Force of Nature
