@@ -1331,6 +1331,10 @@ enum Opcodes
     CMSG_REQUEST_PVP_REWARDS                         = 0x0780C, // 4.3.4 15595
     CMSG_REQUEST_RATED_BG_STATS                      = 0x005B3, // 4.3.4 15595
     SMSG_REQUEST_PVP_REWARDS_RESPONSE                = 0x05DA4, // 4.3.4 15595
+    CMSG_WARGAME_ACCEPT                              = 0x02410, // 4.3.4 15595
+    CMSG_WARGAME_START                               = 0x005A0, // 4.3.4 15595
+    SMSG_WARGAME_CHECK_ENTRY                         = 0x03DA4, // 4.3.4 15595
+    SMSG_WARGAME_REQUEST_SENT                        = 0x059B2, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1555,8 +1559,6 @@ enum Opcodes
     CMSG_VOID_STORAGE_TRANSFER                        = 0x380E,
     CMSG_VOID_STORAGE_UNLOCK                          = 0x7B14,
     CMSG_VOID_SWAP_ITEM                               = 0x3204,
-    CMSG_WARGAME_ACCEPT                               = 0x2410,
-    CMSG_WARGAME_START                                = 0x05A0,
     MSG_MOVE_UPDATE_RUN_SPEED                         = 0x14A6,
     MSG_VERIFY_CONNECTIVITY                           = 0x4F57,
     SMSG_ACCOUNT_INFO_RESPONSE                        = 0x10A7,
@@ -1721,8 +1723,6 @@ enum Opcodes
     SMSG_VOID_TRANSFER_RESULT                         = 0x1DA6,
     SMSG_WAIT_QUEUE_FINISH                            = 0x75B7,
     SMSG_WAIT_QUEUE_UPDATE                            = 0x58A1,
-    SMSG_WARGAME_CHECK_ENTRY                          = 0x3DA4,
-    SMSG_WARGAME_REQUEST_SENT                         = 0x59B2,
     SMSG_WEEKLY_LAST_RESET                            = 0x50A5,
     SMSG_WEEKLY_RESET_CURRENCY                        = 0x3CA1,
     SMSG_WEEKLY_SPELL_USAGE_UPDATE                    = 0x11B5,

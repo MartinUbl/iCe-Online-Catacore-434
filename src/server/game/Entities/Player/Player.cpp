@@ -11852,6 +11852,78 @@ void Player::SendUpdateCurrencyWeekCap(uint32 id, uint32 cap)
     }
 }
 
+void Player::SendWargameRequest(Player *target, uint64 battlegroundGuid) const
+{
+    if (!target || battlegroundGuid == 0)
+        return;
+
+    // we need those values in objects due to access to bytes via overloaded operators
+    ObjectGuid sourceGuid = GetGUID();
+    ObjectGuid bgGuid = battlegroundGuid;
+
+    WorldPacket data(SMSG_WARGAME_CHECK_ENTRY, 50, true);
+    data.WriteBit(sourceGuid[1]);
+    data.WriteBit(sourceGuid[2]);
+    data.WriteBit(bgGuid[7]);
+    data.WriteBit(bgGuid[4]);
+    data.WriteBit(sourceGuid[4]);
+    data.WriteBit(bgGuid[1]);
+    data.WriteBit(sourceGuid[5]);
+    data.WriteBit(bgGuid[5]);
+
+    data.WriteBit(sourceGuid[7]);
+    data.WriteBit(bgGuid[6]);
+    data.WriteBit(bgGuid[3]);
+    data.WriteBit(sourceGuid[0]);
+    data.WriteBit(sourceGuid[3]);
+    data.WriteBit(bgGuid[2]);
+    data.WriteBit(sourceGuid[6]);
+    data.WriteBit(bgGuid[0]);
+
+    data.WriteByteSeq(bgGuid[2]);
+    data << uint32(120);                        // time to accept
+    data.WriteByteSeq(sourceGuid[0]);
+    data.WriteByteSeq(sourceGuid[2]);
+    data.WriteByteSeq(sourceGuid[4]);
+    data.WriteByteSeq(sourceGuid[6]);
+    data.WriteByteSeq(bgGuid[0]);
+    data.WriteByteSeq(sourceGuid[5]);
+    data.WriteByteSeq(sourceGuid[7]);
+    data.WriteByteSeq(bgGuid[3]);
+    data.WriteByteSeq(bgGuid[5]);
+    data.WriteByteSeq(sourceGuid[1]);
+    data.WriteByteSeq(bgGuid[7]);
+    data.WriteByteSeq(bgGuid[4]);
+    data.WriteByteSeq(bgGuid[1]);
+    data.WriteByteSeq(bgGuid[6]);
+    data.WriteByteSeq(sourceGuid[3]);
+    target->GetSession()->SendPacket(&data);
+}
+
+void Player::SendWargameRequestSentNotify(Player* target) const
+{
+    ObjectGuid reqGuid = target->GetGUID();
+
+    WorldPacket data(SMSG_WARGAME_REQUEST_SENT);
+    data.WriteBit(reqGuid[7]);
+    data.WriteBit(reqGuid[6]);
+    data.WriteBit(reqGuid[0]);
+    data.WriteBit(reqGuid[3]);
+    data.WriteBit(reqGuid[5]);
+    data.WriteBit(reqGuid[2]);
+    data.WriteBit(reqGuid[1]);
+    data.WriteBit(reqGuid[4]);
+    data.WriteByteSeq(reqGuid[5]);
+    data.WriteByteSeq(reqGuid[6]);
+    data.WriteByteSeq(reqGuid[3]);
+    data.WriteByteSeq(reqGuid[0]);
+    data.WriteByteSeq(reqGuid[7]);
+    data.WriteByteSeq(reqGuid[4]);
+    data.WriteByteSeq(reqGuid[2]);
+    data.WriteByteSeq(reqGuid[1]);
+    GetSession()->SendPacket(&data);
+}
+
 //////////////////////////////////////////////////////////////////////////
 uint8 Player::CanStoreItems(Item **pItems,int count) const
 {

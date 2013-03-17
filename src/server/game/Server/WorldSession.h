@@ -743,6 +743,10 @@ class WorldSession
         void HandleRequestPvPOptions(WorldPacket& recv_data);
         void HandleRequestPvpReward(WorldPacket& recvData);
 
+        //Wargame
+        void HandleWargameAccept(WorldPacket& recvData);
+        void HandleWargameStart(WorldPacket& recvData);
+
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);

@@ -1342,6 +1342,10 @@ void InitOpcodeTable()
     OPCODE( CMSG_REQUEST_PVP_REWARDS,                     STATUS_LOGGEDIN, &WorldSession::HandleRequestPvpReward          );
     OPCODE( SMSG_REQUEST_PVP_REWARDS_RESPONSE,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_PVP_OPTIONS_ENABLED,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_WARGAME_ACCEPT,                          STATUS_LOGGEDIN, &WorldSession::HandleWargameAccept             );
+    OPCODE( CMSG_WARGAME_START,                           STATUS_LOGGEDIN, &WorldSession::HandleWargameStart              );
+    OPCODE( SMSG_WARGAME_CHECK_ENTRY,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_WARGAME_REQUEST_SENT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

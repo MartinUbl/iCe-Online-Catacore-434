@@ -1429,6 +1429,9 @@ class Player : public Unit, public GridObject<Player>
         void ModifyCurrency(uint32 id, int32 count, CurrencySource src = CURRENCY_SOURCE_ALL, bool ignoreweekcap = false, bool ignorebonuses = false);
         void SendConquestRewards();
 
+        void SendWargameRequest(Player* target, uint64 battlegroundGuid) const;
+        void SendWargameRequestSentNotify(Player* target) const;
+
         void ResetCurrencyWeekCount();
 
         void SendCompletedArtifacts();

@@ -967,6 +967,108 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
     sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG stats", _player->GetName(), _player->GetGUIDLow());
 }
 
+void WorldSession::HandleWargameAccept(WorldPacket& recvData)
+{
+    bool accepted;
+    ObjectGuid bgGuid = 0, reqGuid = 0;
+
+    accepted = recvData.ReadBit();
+    bgGuid[3] = recvData.ReadBit();
+    reqGuid[3] = recvData.ReadBit();
+    bgGuid[7] = recvData.ReadBit();
+    reqGuid[2] = recvData.ReadBit();
+    reqGuid[0] = recvData.ReadBit();
+    bgGuid[1] = recvData.ReadBit();
+    reqGuid[5] = recvData.ReadBit();
+
+    bgGuid[6] = recvData.ReadBit();
+    reqGuid[6] = recvData.ReadBit();
+    reqGuid[1] = recvData.ReadBit();
+    bgGuid[0] = recvData.ReadBit();
+    reqGuid[7] = recvData.ReadBit();
+    reqGuid[4] = recvData.ReadBit();
+    bgGuid[5] = recvData.ReadBit();
+    bgGuid[4] = recvData.ReadBit();
+
+    bgGuid[2] = recvData.ReadBit();
+
+    recvData.FlushBits();
+
+    recvData.ReadByteSeq(bgGuid[2]);
+    recvData.ReadByteSeq(bgGuid[6]);
+    recvData.ReadByteSeq(bgGuid[4]);
+    recvData.ReadByteSeq(reqGuid[0]);
+    recvData.ReadByteSeq(bgGuid[5]);
+    recvData.ReadByteSeq(reqGuid[1]);
+    recvData.ReadByteSeq(reqGuid[6]);
+    recvData.ReadByteSeq(reqGuid[3]);
+    recvData.ReadByteSeq(reqGuid[5]);
+    recvData.ReadByteSeq(reqGuid[2]);
+    recvData.ReadByteSeq(bgGuid[3]);
+    recvData.ReadByteSeq(bgGuid[1]);
+    recvData.ReadByteSeq(reqGuid[7]);
+    recvData.ReadByteSeq(bgGuid[0]);
+    recvData.ReadByteSeq(bgGuid[7]);
+    recvData.ReadByteSeq(reqGuid[4]);
+
+    // TODO: handle
+}
+
+void WorldSession::HandleWargameStart(WorldPacket& recvData)
+{
+    ObjectGuid reqGuid;
+    ObjectGuid bgGuid;
+
+    reqGuid[0] = recvData.ReadBit();
+    reqGuid[7] = recvData.ReadBit();
+    bgGuid[3] = recvData.ReadBit();
+    bgGuid[7] = recvData.ReadBit();
+    bgGuid[1] = recvData.ReadBit();
+    reqGuid[5] = recvData.ReadBit();
+    reqGuid[1] = recvData.ReadBit();
+    reqGuid[2] = recvData.ReadBit();
+
+    bgGuid[6] = recvData.ReadBit();
+    bgGuid[5] = recvData.ReadBit();
+    bgGuid[2] = recvData.ReadBit();
+    bgGuid[0] = recvData.ReadBit();
+    bgGuid[4] = recvData.ReadBit();
+    reqGuid[4] = recvData.ReadBit();
+    reqGuid[3] = recvData.ReadBit();
+    reqGuid[6] = recvData.ReadBit();
+
+    // here some magic !! ..sometimes
+
+    recvData.ReadByteSeq(reqGuid[6]);
+    recvData.ReadByteSeq(bgGuid[7]);
+    recvData.ReadByteSeq(bgGuid[3]);
+    recvData.ReadByteSeq(reqGuid[4]);
+    recvData.ReadByteSeq(bgGuid[5]);
+    recvData.ReadByteSeq(bgGuid[2]);
+    recvData.ReadByteSeq(reqGuid[1]);
+    recvData.ReadByteSeq(reqGuid[3]);
+    recvData.ReadByteSeq(reqGuid[5]);
+    recvData.ReadByteSeq(bgGuid[0]);
+    recvData.ReadByteSeq(reqGuid[2]);
+    recvData.ReadByteSeq(reqGuid[7]);
+    recvData.ReadByteSeq(bgGuid[6]);
+    recvData.ReadByteSeq(reqGuid[0]);
+    recvData.ReadByteSeq(bgGuid[1]);
+    recvData.ReadByteSeq(bgGuid[4]);
+
+    // we don't use BG guid, we use only its last 2 bytes
+    // i left this here for future use, if there would be any
+    //uint16 bgTypeId = (uint16)bgGuid;
+
+    Player* target = sObjectMgr->GetPlayer((uint64)reqGuid);
+    if (!target)
+        return;
+
+    GetPlayer()->SendWargameRequest(target, (uint64)bgGuid);
+
+    GetPlayer()->SendWargameRequestSentNotify(target);
+}
+
 void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
 {
     if (!(sWorld->getBoolConfig(CONFIG_RATED_BATTLEGROUND_ENABLED)))
