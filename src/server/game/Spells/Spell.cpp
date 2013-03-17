@@ -4539,8 +4539,9 @@ void Spell::SendSpellStart()
     //sLog->outDebug("Sending SMSG_SPELL_START id=%u", m_spellInfo->Id);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_2;
-    //if (m_spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO)
-    //    castFlags |= CAST_FLAG_AMMO;
+    if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell) 
+         castFlags |= CAST_FLAG_PENDING;
+
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
          && m_spellInfo->powerType != POWER_HEALTH)
@@ -5003,10 +5004,13 @@ void Spell::SendChannelStart(uint32 duration)
     {
         for (std::list<TargetInfo>::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
         {
-            if ((itr->effectMask & (1 << 0)) && itr->reflectResult == SPELL_MISS_NONE && itr->targetGUID != m_caster->GetGUID())
+            for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; effIndex++)
             {
-                target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
-                break;
+                if (if ((itr->effectMask & (1 << effIndex)) && itr->reflectResult == SPELL_MISS_NONE && itr->targetGUID != m_caster->GetGUID()))
+                {
+                    target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
+                    break;
+                }
             }
         }
     }
@@ -5014,10 +5018,13 @@ void Spell::SendChannelStart(uint32 duration)
     {
         for (std::list<GOTargetInfo>::const_iterator itr = m_UniqueGOTargetInfo.begin(); itr != m_UniqueGOTargetInfo.end(); ++itr)
         {
-            if (itr->effectMask & (1 << 0))
+            for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; effIndex++)
             {
-                target = m_caster->GetMap()->GetGameObject(itr->targetGUID);
-                break;
+                if (itr->effectMask & (1 << effIndex))
+                {
+                    target = m_caster->GetMap()->GetGameObject(itr->targetGUID);
+                    break;
+                }
             }
         }
     }
