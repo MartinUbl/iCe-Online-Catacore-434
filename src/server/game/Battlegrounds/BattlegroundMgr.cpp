@@ -365,7 +365,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             data->WriteBit(bgGuid[7]);
             data->WriteBit(bgGuid[1]);
             data->WriteBit(playerGuid[5]);
-            data->WriteBit(bg->isArena() && bg->GetStatus() == STATUS_IN_PROGRESS);       // show unit frames
+            if (bg->isArena())
+                data->WriteBit(bg->GetStatus() == STATUS_IN_PROGRESS);      // show unit frames
+            else
+                data->WriteBit(player->GetBGTeam() == ALLIANCE);
             data->WriteBit(bgGuid[0]);
             data->WriteBit(playerGuid[1]);
             data->WriteBit(bgGuid[3]);
