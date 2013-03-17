@@ -2823,13 +2823,16 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                 // Efflorescence - periodic tick
                 case 81262:
                 {
-                    if (DynamicObject *dynobj = caster->GetDynObject(81262))
+                    if (caster)
                     {
-                        CustomSpellValues values;
-                        values.AddSpellMod(SPELLVALUE_BASE_POINT0, GetAmount());
-                        Position pos;
-                        dynobj->GetPosition(&pos);
-                        caster->CastCustomSpell(81269, values, pos, true, NULL, this, caster->GetGUID());
+                        if (DynamicObject *dynobj = caster->GetDynObject(81262))
+                        {
+                            CustomSpellValues values;
+                            values.AddSpellMod(SPELLVALUE_BASE_POINT0, GetAmount());
+                            Position pos;
+                            dynobj->GetPosition(&pos);
+                            caster->CastCustomSpell(81269, values, pos, true, NULL, this, caster->GetGUID());
+                        }
                     }
                     break;
                 }
