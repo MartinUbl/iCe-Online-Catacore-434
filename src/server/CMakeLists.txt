@@ -13,7 +13,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions(-fno-delete-null-pointer-checks)
+  add_definitions(-fno-delete-null-pointer-checks -fno-optimize-sibling-calls)
 endif()
 
 if( SERVERS )
