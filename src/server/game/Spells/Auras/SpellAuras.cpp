@@ -1228,9 +1228,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                         // Jinx, casting Jinx: Curse of the Elements
                         if (caster->HasAura(85479))
-                            caster->CastSpell(target, 86105, true);
+                            caster->CastSpell(caster, 86105, true);
                         else if (caster->HasAura(18179))
-                            caster->CastSpell(target, 85547, true);
+                            caster->CastSpell(caster, 85547, true);
                         break;
                 }
                 break;
