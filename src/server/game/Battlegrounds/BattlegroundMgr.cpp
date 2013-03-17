@@ -923,10 +923,30 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                     BATTLEGROUND_EY,
                     BATTLEGROUND_TP,
                     BATTLEGROUND_BG,
+                    BATTLEGROUND_TYPE_NONE,
                 };
 
+                time_t secs = time(NULL);
+                tm* date = localtime(&secs);
+
+                // Allow Alterac Valley only from 16:00 to 22:00 every day
+                if (date && date->tm_hour >= 16 && date->tm_hour <= 22)
+                {
+                    for (uint8 i = 0; i < (sizeof(avail_RBGs)/sizeof(BattlegroundTypeId)); i++)
+                    {
+                        if (avail_RBGs[i] == BATTLEGROUND_TYPE_NONE)
+                        {
+                            avail_RBGs[i] = BATTLEGROUND_AV;
+                            break;
+                        }
+                    }
+                }
+
                 uint32 bgCount = sizeof(avail_RBGs)/sizeof(BattlegroundTypeId);
-                bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
+
+                do {
+                    bgTypeId = avail_RBGs[m_RandomBGGenerator.Generate(bgCount)];
+                } while (bgTypeId == BATTLEGROUND_TYPE_NONE);
             }
             else
             {
