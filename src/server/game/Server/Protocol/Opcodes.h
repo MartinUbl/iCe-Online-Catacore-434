@@ -587,7 +587,7 @@ enum Opcodes
     CMSG_JOIN_RATED_BATTLEFIELD                      = 0x1008E, //
     SMSG_PVP_RATED_STATS_UPDATE                      = 0x1008F, //
     SMSG_JOINED_BATTLEGROUND_QUEUE                   = 0x10090, //
-    CMSG_REQUEST_RATED_BG_INFO                       = 0x034A1, // 4.3.4 15595
+    CMSG_REQUEST_RATED_BG_INFO                       = 0x02423, // 4.3.4 15595
     CMSG_REQUEST_PVP_OPTIONS_ENABLED                 = 0x024A1, // 4.3.4 15595 (remap)
     CMSG_BATTLEMASTER_JOIN_RATED                     = 0x03B18, // 4.3.4 15595 (remap)
     CMSG_TAXICLEARNODE                               = 0x10093, //
