@@ -3434,6 +3434,16 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
                 {
                     aura->ModStackAmount(foundAura->GetStackAmount());
                 }
+
+                // Necrotic Strike heal absorb part
+                if (aura->GetSpellProto()->Id == 73975)
+                {
+                    uint32 oldAmount = foundAura->GetEffect(EFFECT_0)->GetAmount();
+
+                    if (oldAmount > 0) // only positive values
+                        aura->GetEffect(EFFECT_0)->SetAmount(oldAmount+aura->GetEffect(EFFECT_0)->GetAmount());
+                }
+
                 // Update periodic timers from the previous aura
                 // ToDo Fix me
                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
