@@ -11292,6 +11292,19 @@ void Player::SendCurrencies()
     GetSession()->SendPacket(&packet);
 }
 
+void Player::SendConquestRewards()
+{
+    WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
+    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    GetSession()->SendPacket(&packet);
+}
+
 void Player::SendCompletedArtifacts()
 {
     WorldPacket data(SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE, 200, true);

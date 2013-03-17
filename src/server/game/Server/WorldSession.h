@@ -741,6 +741,7 @@ class WorldSession
         void HandleRequestRatedBgStats(WorldPacket& recv_data);
         void HandleBattlemasterJoinRated(WorldPacket& recv_data);
         void HandleRequestPvPOptions(WorldPacket& recv_data);
+        void HandleRequestPvpReward(WorldPacket& recvData);
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);

@@ -711,7 +711,21 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleRequestPvPOptions(WorldPacket &recv_data)
 {
-    // TODO: implement
+    WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
+    data.WriteBit(1);
+    data.WriteBit(1);       // WargamesEnabled
+    data.WriteBit(1);
+    data.WriteBit(1);       // RatedBGsEnabled
+    data.WriteBit(1);       // RatedArenasEnabled
+
+    data.FlushBits();
+
+    SendPacket(&data);
+}
+
+void WorldSession::HandleRequestPvpReward(WorldPacket& /*recvData*/)
+{
+    _player->SendConquestRewards();
 }
 
 void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
@@ -897,31 +911,28 @@ void WorldSession::HandleReportPvPAFK(WorldPacket & recv_data)
 
 void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
 {
-    /*
     uint8 unk_byte;
     recv_data >> unk_byte; // always 3
 
     uint32 rating = _player->GetRatedBattlegroundRating();
-    uint32 current_CP = _player->GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG);
-    uint32 CP_cap = _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG);
-    uint32 CP_for_win = (uint32)std::ceil(_player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINT, CURRENCY_SOURCE_BG) / 6.0f);
+    uint32 current_CP = _player->GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG);
+    uint32 CP_cap = _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG);
+    uint32 CP_for_win = (uint32)std::ceil(_player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f);
 
     WorldPacket data(SMSG_RATED_BATTLEFIELD_INFO, 5 * 4 + 1);
     data << uint32(rating);             // rating
     data << uint8(3);                   // unk byte, always 3
+    data << uint32(0);                  // unk
+    data << uint32(0);                  // unk
     data << uint32(CP_cap);             // conquest point weekly cap
     data << uint32(CP_for_win);         // conquest points for win
     data << uint32(0);                  // unk
     data << uint32(current_CP);         // current conquest points
     SendPacket(&data);
-
-    sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG info", _player->GetName(), _player->GetGUIDLow());
-    */
 }
 
 void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
 {
-    /*
     // client calculation
     // 11th uint32 + 15th uint32 + 17th uint32 == total games
     // 1st uint32 + 12th uint32 + 18th uint32 == games won
@@ -932,29 +943,28 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
     uint32 matches_won = _player->GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON);
     uint32 matches_lost = _player->GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST);
 
-    WorldPacket data(SMSG_PVP_RATED_STATS_UPDATE, 18 * 4);
-    data << uint32(matches_won); // games won
+    WorldPacket data(SMSG_RATED_BG_STATS, 18 * 4);
+    data << uint32(matches_won);      // BgWeeklyWins20vs20
+    data << uint32(0);                // BgWeeklyPlayed20vs20
+    data << uint32(0);                // BgWeeklyPlayed15vs15
     data << uint32(0);
-    data << uint32(0);
-    data << uint32(0); // unk1
-    data << uint32(0);
-    data << uint32(0); // unk2
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(matches_won + matches_lost); // total games
+    data << uint32(0);                // BgWeeklyWins10vs10
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
+    data << uint32(0);                // BgWeeklyWins15vs15
+    data << uint32(0);
+    data << uint32(matches_won + matches_lost);
     data << uint32(0);
     data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);                // BgWeeklyPlayed10vs10
     data << uint32(0);
     data << uint32(0);
     SendPacket(&data);
 
     sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG stats", _player->GetName(), _player->GetGUIDLow());
-    */
 }
 
 void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)

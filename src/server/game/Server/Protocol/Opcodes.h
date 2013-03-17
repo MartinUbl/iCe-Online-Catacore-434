@@ -585,7 +585,6 @@ enum Opcodes
     SMSG_BATTLEFIELD_LIST                            = 0x071B5, // 4.3.4 15595
     CMSG_BATTLEFIELD_JOIN                            = 0x07902, // 4.3.4 15595
     CMSG_JOIN_RATED_BATTLEFIELD                      = 0x1008E, //
-    SMSG_PVP_RATED_STATS_UPDATE                      = 0x1008F, //
     SMSG_JOINED_BATTLEGROUND_QUEUE                   = 0x10090, //
     CMSG_REQUEST_RATED_BG_INFO                       = 0x02423, // 4.3.4 15595
     CMSG_REQUEST_PVP_OPTIONS_ENABLED                 = 0x024A1, // 4.3.4 15595 (remap)
@@ -1329,6 +1328,9 @@ enum Opcodes
     CMSG_GUILD_SET_RANK_PERMISSIONS                  = 0x01024, // 4.3.4 15595
     SMSG_ARENA_UNIT_DESTROYED                        = 0x02637, // 4.3.4 15595
     SMSG_START_TIMER                                 = 0x059A5, // 4.3.4 15595
+    CMSG_REQUEST_PVP_REWARDS                         = 0x0780C, // 4.3.4 15595
+    CMSG_REQUEST_RATED_BG_STATS                      = 0x005B3, // 4.3.4 15595
+    SMSG_REQUEST_PVP_REWARDS_RESPONSE                = 0x05DA4, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1531,8 +1533,6 @@ enum Opcodes
     CMSG_REFORGE_ITEM                                 = 0x331A,
     CMSG_REORDER_CHARACTERS                           = 0x0593,
     CMSG_REQUEST_INSPECT_RATED_BG_STATS               = 0x3010,
-    CMSG_REQUEST_PVP_REWARDS                          = 0x780C,
-    CMSG_REQUEST_RATED_BG_STATS                       = 0x05B3,
     CMSG_REQUEST_RESEARCH_HISTORY                     = 0x3306,
     CMSG_ROLE_POLL_BEGIN                              = 0x0430,
     CMSG_SEND_SOR_REQUEST_VIA_ADDRESS                 = 0x0420,
@@ -1685,7 +1685,6 @@ enum Opcodes
     SMSG_RATED_BG_RATING                              = 0x15A1,
     SMSG_RATED_BG_STATS                               = 0x34A1,
     SMSG_REFORGE_RESULT                               = 0x58A4,
-    SMSG_REQUEST_PVP_REWARDS_RESPONSE                 = 0x5DA4,
     SMSG_RESEARCH_SETUP_HISTORY                       = 0x10B6,
     SMSG_RESET_COMPRESSION_CONTEXT                    = 0x0142,
     SMSG_ROLE_POLL_BEGIN                              = 0x70B0,

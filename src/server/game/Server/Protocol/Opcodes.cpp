@@ -1315,7 +1315,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_ENTERED_INSTANCE_IN_PROGRESS,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_RATED_BATTLEFIELD_INFO,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REQUEST_RATED_BG_STATS,                  STATUS_LOGGEDIN, &WorldSession::HandleRequestRatedBgStats       );
-    OPCODE( SMSG_PVP_RATED_STATS_UPDATE,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_RATED_BG_STATS,                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_BATTLEMASTER_JOIN_RATED,                 STATUS_LOGGEDIN, &WorldSession::HandleBattlemasterJoinRated     );
     OPCODE( SMSG_PLAY_ONE_SHOT_ANIM_KIT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_GUILD_ASSIGN_MEMBER_RANK,                STATUS_LOGGEDIN, &WorldSession::HandleGuildAssignRankOpcode     );
@@ -1339,6 +1339,9 @@ void InitOpcodeTable()
     OPCODE( SMSG_LFG_UPDATE_STATUS,                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_START_TIMER,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_SET_PET_SLOT,                            STATUS_LOGGEDIN, &WorldSession::HandleSetPetSlotOpcode          );
+    OPCODE( CMSG_REQUEST_PVP_REWARDS,                     STATUS_LOGGEDIN, &WorldSession::HandleRequestPvpReward          );
+    OPCODE( SMSG_REQUEST_PVP_REWARDS_RESPONSE,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_PVP_OPTIONS_ENABLED,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

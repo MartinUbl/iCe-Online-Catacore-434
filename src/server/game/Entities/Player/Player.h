@@ -1427,6 +1427,7 @@ class Player : public Unit, public GridObject<Player>
         void SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap);
         void SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count);
         void ModifyCurrency(uint32 id, int32 count, CurrencySource src = CURRENCY_SOURCE_ALL, bool ignoreweekcap = false, bool ignorebonuses = false);
+        void SendConquestRewards();
 
         void ResetCurrencyWeekCount();
 
