@@ -1830,13 +1830,14 @@ class Player : public Unit, public GridObject<Player>
 
         void SetTalentBranchSpec(uint32 branchSpec, uint8 spec) { m_branchSpec[spec] = branchSpec; }
         BranchSpec GetTalentBranchSpec(uint8 spec) const { return BranchSpec(m_branchSpec[spec]); }
+        BranchSpec GetActiveTalentBranchSpec() const { return GetTalentBranchSpec(GetActiveSpec()); }
         bool isTank();
 
         uint32 CalculateTalentsPoints() const;
 
         // Dual Spec
         void UpdateSpecCount(uint8 count);
-        uint32 GetActiveSpec() { return m_activeSpec; }
+        uint32 GetActiveSpec() const { return m_activeSpec; }
         void SetActiveSpec(uint8 spec){ m_activeSpec = spec; }
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
