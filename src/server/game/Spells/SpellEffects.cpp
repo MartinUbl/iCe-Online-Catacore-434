@@ -3029,12 +3029,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
                 if (m_caster->IsFriendlyTo(unitTarget))
                 {
-                    int32 bp = (damage+0.3f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 3.5 + 1;
+                    int32 bp = (damage + 0.23f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 3.5 + 1;
                     m_caster->CastCustomSpell(unitTarget, 47633, &bp, NULL, NULL, true);
                 }
                 else
                 {
-                    int32 bp = damage+0.408f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    int32 bp = damage + 0.23f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     m_caster->CastCustomSpell(unitTarget, 47632, &bp, NULL, NULL, true);
                 }
                 return;
