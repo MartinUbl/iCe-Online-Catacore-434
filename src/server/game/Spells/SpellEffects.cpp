@@ -4274,19 +4274,14 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
         }
 
-        // Implementation of Symbiosis mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_RESTORATION &&
-            addhealth > 1)
-        {
-            // Symbiosis increases potency of healing if target already affected by some of HoT spells
-            if (m_caster->HasAura(94447) || m_caster->HasAura(33763) || m_caster->HasAura(8936) ||
-                m_caster->HasAura(774) || m_caster->HasAura(48438))
-            {
-                addhealth += addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
-            }
-        }
+        // Implementation of Harmony mastery proficiency
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
+            if (Player *player = m_caster->ToPlayer())
+                if (player->HasMastery() && player->GetActiveTalentBranchSpec() == SPEC_DRUID_RESTORATION)
+                {
+                    int32 bp = player->GetMasteryPoints() * 1.25f;
+                    player->CastCustomSpell(player, 100977, &bp, &bp, NULL, true);
+                }
 
         // Implementation of Deep Healing mastery proficiency
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
