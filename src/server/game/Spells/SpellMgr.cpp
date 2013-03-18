@@ -3355,6 +3355,10 @@ bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2, bool sameCast
         if (aura1->GetCastItemGUID() && aura2->GetCastItemGUID())
             if (aura1->GetCastItemGUID() != aura2->GetCastItemGUID() && (GetSpellCustomAttr(spellId_1) & SPELL_ATTR0_CU_ENCHANT_PROC))
                 return true;
+        // two auras with same id but different effects to apply can stack
+        // this solves a problem of persistent area aura dropping other effects from caster
+        if (!(aura1->GetEffectMask() & aura2->GetEffectMask()))
+            return true;
         // same spell with same caster should not stack
         return false;
     }
