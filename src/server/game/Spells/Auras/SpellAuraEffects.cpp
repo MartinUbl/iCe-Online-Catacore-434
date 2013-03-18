@@ -1078,16 +1078,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         amount += (int32)DoneActualBenefit;
     }
 
+    // set aura amount based on player's mastery
     if (caster && GetSpellProto() && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        TalentTabEntry const * entry = sTalentTabStore.LookupEntry(caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()));
+        Player *player = caster->ToPlayer();
+        BranchSpec spec = player->GetActiveTalentBranchSpec();
+        TalentTabEntry const * entry = sTalentTabStore.LookupEntry(spec);
         if(entry)
         {
             for(uint8 masteryId = 0; masteryId <= 1; masteryId++)
             {
                 if (GetSpellProto()->Id == entry->masterySpells[masteryId])
                 {
-                    BranchSpec spec = caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec());
                     float modifier = 0.0f;
 
                     switch (spec)
@@ -1163,7 +1165,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     }
 
                     // And modify amount by new calculated value
-                    amount = caster->ToPlayer()->GetMasteryPoints()*modifier;
+                    amount = player->GetMasteryPoints() * modifier;
                 }
             }
         }

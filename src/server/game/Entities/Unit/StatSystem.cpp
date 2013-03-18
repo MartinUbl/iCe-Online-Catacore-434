@@ -940,7 +940,6 @@ void Player::UpdateMastery()
         if (BaseMastery < 0.0f)
             BaseMastery = 0.0f;
 
-        SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, m_baseRatingValue[CR_MASTERY]+BaseMastery);
         SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
 
         // Update aura base points
@@ -955,94 +954,8 @@ void Player::UpdateMastery()
                     {
                         if (AuraEffect* pEffect = pAura->GetEffect(i))
                         {
-                            BranchSpec spec = GetTalentBranchSpec(m_activeSpec);
-                            float modifier = 0.0f;
-
-                            // TODO: implement base mastery points for each level even without wearing any item with mastery bonus
-
-                            switch (spec)
-                            {
-                                case SPEC_WARRIOR_PROTECTION:
-                                    modifier = 1.5f;
-                                    break;
-                                case SPEC_WARRIOR_FURY:
-                                    modifier = 5.6f;
-                                    break;
-                                case SPEC_WARLOCK_DESTRUCTION:
-                                    modifier = 1.35f;
-                                    break;
-                                case SPEC_WARLOCK_AFFLICTION:
-                                    modifier = 1.63f;
-                                    break;
-                                case SPEC_SHAMAN_ENHANCEMENT:
-                                case SPEC_ROGUE_SUBTLETY:
-                                    modifier = 2.5f;
-                                    break;
-                                case SPEC_ROGUE_ASSASSINATION:
-                                    modifier = 3.5f;
-                                    break;
-                                case SPEC_PALADIN_RETRIBUTION:
-                                    modifier = 2.1f;
-                                    break;
-                                case SPEC_PALADIN_PROTECTION:
-                                    modifier = 2.25f;
-                                    break;
-                                case SPEC_MAGE_FIRE:
-                                    modifier = 2.8f;
-                                    break;
-                                case SPEC_HUNTER_SURVIVAL:
-                                    modifier = 1.0f;
-                                    break;
-                                case SPEC_DRUID_FERAL:
-                                    if (masteryId == 0)
-                                        break;
-                                    else if (masteryId == 1)
-                                        modifier = 3.1f;
-                                    break;
-                                case SPEC_DRUID_BALANCE:
-                                    modifier = 2.0f;
-                                    break;
-                                case SPEC_DK_UNHOLY:
-                                    modifier = 2.5f;
-                                    break;
-                                case SPEC_DK_FROST:
-                                    modifier = 2.0f;
-                                    break;
-                                case SPEC_WARRIOR_ARMS:
-                                case SPEC_WARLOCK_DEMONOLOGY:
-                                case SPEC_SHAMAN_RESTORATION:  // NYI
-                                case SPEC_SHAMAN_ELEMENTAL:
-                                case SPEC_ROGUE_COMBAT:
-                                case SPEC_PRIEST_SHADOW:
-                                case SPEC_PRIEST_HOLY:
-                                case SPEC_PRIEST_DISCIPLINE:
-                                case SPEC_PALADIN_HOLY:
-                                case SPEC_MAGE_FROST:
-                                case SPEC_MAGE_ARCANE:
-                                case SPEC_HUNTER_MARKSMANSHIP:
-                                case SPEC_HUNTER_BEASTMASTERY:
-                                case SPEC_DRUID_RESTORATION:   // NYI
-                                case SPEC_DK_BLOOD:
-                                    modifier = 0.0f;
-                                    // These specs are handled externally
-                                    // Generally these masteries are used as proc chance or direct damage increase
-                                    break;
-                                default:
-                                    sLog->outError("Player::UpdateMastery: Unknown branchSpec %u",spec);
-                                    break;
-                            }
-
-                            // And modify amount by new calculated value
-                            pEffect->ChangeAmount(GetMasteryPoints()*modifier);
-
-                            // Update mastery-modified auras
-                            if (GetTalentBranchSpec(m_activeSpec) == SPEC_DRUID_BALANCE)
-                            {
-                                // Solar Eclipse, Lunar Eclipse
-                                AuraEffect* eff = HasAura(48517) ? GetAuraEffect(48517,EFFECT_0) : GetAuraEffect(48518,EFFECT_0);
-                                if (eff)
-                                    eff->RecalculateAmount();
-                            }
+                            pEffect->SetCanBeRecalculated(true);
+                            pEffect->RecalculateAmount(this);
                         }
                     }
                 }
@@ -1053,6 +966,15 @@ void Player::UpdateMastery()
     {
         SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, 0);
         SetFloatValue(PLAYER_MASTERY, 0);
+    }
+
+    // Update mastery-modified auras
+    if (GetTalentBranchSpec(m_activeSpec) == SPEC_DRUID_BALANCE)
+    {
+        // Solar Eclipse, Lunar Eclipse
+        AuraEffect* eff = HasAura(48517) ? GetAuraEffect(48517,EFFECT_0) : GetAuraEffect(48518,EFFECT_0);
+        if (eff)
+            eff->RecalculateAmount();
     }
 }
 
