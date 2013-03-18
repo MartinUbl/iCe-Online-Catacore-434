@@ -4233,68 +4233,69 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
         /**** Mastery System for healing spells**************/
 
-        // Implementation of Echo of Light mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_HOLY &&
-            addhealth > 1)
+        if (Player *player = m_caster->ToPlayer())
         {
-            // Echo of Light HoT effect
-            int32 bp0 = addhealth*(m_caster->ToPlayer()->GetMasteryPoints()*1.25f/100.0f);
-            m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
-        }
-
-        // Implementation of Illuminated Healing mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_PALADIN_HOLY &&
-            addhealth > 1)
-        {
-            // Illuminated Healing absorb value and spellcast. Base is 10% of healing done.
-            int32 bp0 = addhealth*(0.1f+(m_caster->ToPlayer()->GetMasteryPoints()*1.5f/100.0f));
-
-            // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
-            if (bp0 > m_caster->GetHealth()*0.33f)
-                bp0 = m_caster->GetHealth()*0.33f;
-
-            if (Aura* pAura = unitTarget->GetAura(86273, m_caster->GetGUID()))
+            if (player->HasMastery() && addhealth > 1)
             {
-                if (AuraEffect* pEff = pAura->GetEffect(EFFECT_0))
+                BranchSpec playerSpec = player->GetActiveTalentBranchSpec();
+
+                // Implementation of Echo of Light mastery proficiency
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
+                    playerSpec == SPEC_PRIEST_HOLY)
                 {
-                    bp0 += pEff->GetAmount();
+                    // Echo of Light HoT effect
+                    int32 bp0 = addhealth*(player->GetMasteryPoints()*1.25f/100.0f);
+                    m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
+                }
+
+                // Implementation of Illuminated Healing mastery proficiency
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+                    playerSpec == SPEC_PALADIN_HOLY)
+                {
+                    // Illuminated Healing absorb value and spellcast. Base is 10% of healing done.
+                    int32 bp0 = addhealth*(0.1f+(player->GetMasteryPoints()*1.5f/100.0f));
+
+                    // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
                     if (bp0 > m_caster->GetHealth()*0.33f)
                         bp0 = m_caster->GetHealth()*0.33f;
 
-                    pEff->SetAmount(bp0);
-                    pAura->SetNeedClientUpdateForTargets();
-                    pAura->SetDuration(pAura->GetMaxDuration());
-                }
-            }
-            else
-                m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
-        }
+                    if (Aura* pAura = unitTarget->GetAura(86273, m_caster->GetGUID()))
+                    {
+                        if (AuraEffect* pEff = pAura->GetEffect(EFFECT_0))
+                        {
+                            bp0 += pEff->GetAmount();
+                            if (bp0 > m_caster->GetHealth()*0.33f)
+                                bp0 = m_caster->GetHealth()*0.33f;
 
-        // Implementation of Harmony mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-            if (Player *player = m_caster->ToPlayer())
-                if (player->HasMastery() && player->GetActiveTalentBranchSpec() == SPEC_DRUID_RESTORATION)
+                            pEff->SetAmount(bp0);
+                            pAura->SetNeedClientUpdateForTargets();
+                            pAura->SetDuration(pAura->GetMaxDuration());
+                        }
+                    }
+                    else
+                        m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
+                }
+
+                // Implementation of Harmony mastery proficiency
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
+                    playerSpec == SPEC_DRUID_RESTORATION)
                 {
                     int32 bp = player->GetMasteryPoints() * 1.25f;
                     player->CastCustomSpell(player, 100977, &bp, &bp, NULL, true);
                 }
 
-        // Implementation of Deep Healing mastery proficiency
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-            m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-            m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_SHAMAN_RESTORATION &&
-            addhealth > 1)
-        {
-            // Mastery gives 3% per mastery point
-            float masterybonus = m_caster->ToPlayer()->GetMasteryPoints()*3.0f/100.0f;
-            // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
-            float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
+                // Implementation of Deep Healing mastery proficiency
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                    playerSpec == SPEC_SHAMAN_RESTORATION)
+                {
+                    // Mastery gives 3% per mastery point
+                    float masterybonus = player->GetMasteryPoints()*3.0f/100.0f;
+                    // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
+                    float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
 
-            addhealth += addhealth*masterybonus*healthcoef;
+                    addhealth += addhealth*masterybonus*healthcoef;
+                }
+            }
         }
         /****************************************************/
 
