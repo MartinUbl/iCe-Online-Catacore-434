@@ -2902,11 +2902,16 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->RemoveAurasDueToSpell(52179);
                 break;
             }
-            else if (GetId() == 73920) // Healing Rain
+            else if (GetId() == 73920) // Healing Rain - periodic tick
             {
-                if (caster && target)
-                    caster->CastSpell(target, 73921, true);
-                break;
+                if (caster)
+                {
+                    if (DynamicObject *dynobj = caster->GetDynObject(73920))
+                    {
+                        caster->CastSpell(dynobj->GetPositionX(), dynobj->GetPositionY(), dynobj->GetPositionZ(),
+                                          73921, true, NULL, this, caster->GetGUID());
+                    }
+                }
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
