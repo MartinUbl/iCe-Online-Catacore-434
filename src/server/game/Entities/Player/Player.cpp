@@ -3146,6 +3146,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_NEG,0);
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
+    for (uint8 i = 0; i < MAX_ATTACK; i++)
+        SetFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS, 1.0f);
+
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     SetFloatValue(PLAYER_CRIT_PERCENTAGE,0.0f);
     SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0.0f);
@@ -8357,7 +8360,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType att
         HandleStatModifier(unitMod, unitModType, float(aura->GetAmount()),apply);
 
         if (unitModType == TOTAL_PCT)
-            ApplyModSignedFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS + attackType, aura->GetAmount()/100.0f, apply);
+            ApplyPercentModFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS + attackType, aura->GetAmount() / 100.0f, apply);
         else
             ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,aura->GetAmount(),apply);
     }
