@@ -1994,6 +1994,26 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else
                         target->SetReducedThreatPercent(0,0);
                     break;
+                case 50365: //  Improved Blood Presence rank 1
+                    if (apply)
+                    {
+                        int32 bp0 = 10;
+                        if (bp0)
+                            caster->CastCustomSpell(caster, 63611, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
+                    }
+                    else
+                        caster->RemoveAurasDueToSpell(63611);
+                    break;
+                case 50371: // Improved Blood Presence rank 2
+                    if (apply)
+                    {
+                        int32 bp0 = 20;
+                        if (bp0)
+                            caster->CastCustomSpell(caster, 63611, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
+                    }
+                    else
+                        caster->RemoveAurasDueToSpell(63611);
+                    break;
             }
             break;
         case SPELLFAMILY_ROGUE:
@@ -2199,95 +2219,86 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
             if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_PRESENCE)
             {
-                AuraEffect *bloodPresenceAura=0;  // healing by damage done
-                AuraEffect *frostPresenceAura=0;  // increased health
-                AuraEffect *unholyPresenceAura=0; // increased movement speed, faster rune recovery
-
                 // Consume all runic power when switching presences
                 caster->SetPower(POWER_RUNIC_POWER, 0);
 
-                // Improved Presences
-                Unit::AuraEffectList const& vDummyAuras = target->GetAuraEffectsByType(SPELL_AURA_DUMMY);
-                for (Unit::AuraEffectList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
-                {
-                    switch((*itr)->GetId())
-                    {
-                        // Improved Blood Presence
-                        case 50365:
-                        case 50371:
-                        {
-                            bloodPresenceAura = (*itr);
-                            break;
-                        }
-                        // Improved Frost Presence
-                        case 50384:
-                        case 50385:
-                        {
-                            frostPresenceAura = (*itr);
-                            break;
-                        }
-                        // Improved Unholy Presence
-                        case 50391:
-                        case 50392:
-                        {
-                            unholyPresenceAura = (*itr);
-                            break;
-                        }
-                    }
-                }
+                uint32 presence = GetId();
+                int32 bp0 = 0;
 
-                uint32 presence=GetId();
                 if (apply)
                 {
-                    // Blood Presence bonus
-                    if (presence == 48266)
-                        target->CastSpell(target, 63611, true);
-                    else if (bloodPresenceAura)
+                    switch (presence)
                     {
-                        int32 basePoints1=bloodPresenceAura->GetAmount();
-                        target->CastCustomSpell(target,63611,NULL,&basePoints1,NULL,true,0,bloodPresenceAura);
-                    }
-                    // Frost Presence bonus
-                    if (presence == 48263)
-                        target->CastSpell(target, 61261, true);
-                    else if (frostPresenceAura)
-                    {
-                        int32 basePoints0=frostPresenceAura->GetAmount();
-                        target->CastCustomSpell(target,61261,&basePoints0,NULL,NULL,true,0,frostPresenceAura);
-                    }
-                    // Unholy Presence bonus
-                    if (presence == 48265)
-                    {
-                        if (unholyPresenceAura)
+                        case 48266: // Frost Presence
+                            if (caster->HasAura(50384) || caster->HasAura(50365)) // Improved Blood / Frost Presence rank 1
+                                bp0 = 2;
+                            else if (caster->HasAura(50385) || caster->HasAura(50371)) // Improved Blood / Frost Presence rank 2
+                                bp0 = 4;
+
+                            if (caster->HasAura(50384) || caster->HasAura(50385))
+                                caster->CastCustomSpell(caster, 63621, &bp0, NULL, NULL, true); // Improved Frost Presence bonus
+
+                            if (caster->HasAura(50365) || caster->HasAura(50371))
+                                caster->CastCustomSpell(caster, 61261, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
+
+                            break;
+                        case 48265: // Unholy Presence
                         {
-                            // Not listed as any effect, only base points set
-                            int32 basePoints0 = SpellMgr::CalculateSpellEffectAmount(unholyPresenceAura->GetSpellProto(), 1);
-                            target->CastCustomSpell(target,63622,&basePoints0 ,&basePoints0,&basePoints0,true,0,unholyPresenceAura);
-                            target->CastCustomSpell(target,65095,&basePoints0 ,NULL,NULL,true,0,unholyPresenceAura);
+                            if (caster->HasAura(50384) || caster->HasAura(50365)) // Improved Blood / Frost Presence rank 1
+                                bp0 = 2;
+                            else if (caster->HasAura(50385) || caster->HasAura(50371)) // Improved Blood / Frost Presence rank 2
+                                bp0 = 4;
+
+                            // prevent to overflow
+                            if (caster->HasAura(50384) || caster->HasAura(50385))
+                                caster->CastCustomSpell(caster, 63621, &bp0, NULL, NULL, true); // Improved Frost Presence bonus
+
+                            // prevent to overflow
+                            if (caster->HasAura(50365) || caster->HasAura(50371))
+                                caster->CastCustomSpell(caster, 61261, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
+
+                            break;
                         }
-                    }
-                    else if (unholyPresenceAura)
-                    {
-                        int32 basePoints0=unholyPresenceAura->GetAmount();
-                        target->CastCustomSpell(target,49772,&basePoints0,NULL,NULL,true,0,unholyPresenceAura);
+                        case 48263: // Blood Presence
+                        {
+                            if (caster->HasAura(50384)) // Improved Frost Presence rank 1
+                                bp0 = 2;
+                            else if (caster->HasAura(50385)) // Improved Frost Presence rank 2
+                                bp0 = 4;
+
+                            // prevent to overflow
+                            if (caster->HasAura(50384) || caster->HasAura(50385))
+                                caster->CastCustomSpell(caster, 63621, &bp0, NULL, NULL, true); // Improved Frost Presence bonus
+
+                            // Improved Blood Presence rank 1 / 2 - re-apply again, because if we change presence, this bonus must be removed
+                            if (caster->HasAura(50365))
+                                bp0 = 10;
+                            else if (caster->HasAura(50371))
+                                bp0 = 20;
+
+                            // prevent to overflow
+                            if (caster->HasAura(50365) || caster->HasAura(50371))
+                                caster->CastCustomSpell(caster, 63611, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
+
+                            break;
+                        }
                     }
                 }
                 else
                 {
                     // Remove passive auras
-                    if (presence == 48266 || bloodPresenceAura)
-                        target->RemoveAurasDueToSpell(63611);
-                    if (presence == 48263 || frostPresenceAura)
-                        target->RemoveAurasDueToSpell(61261);
-                    if (presence == 48265 || unholyPresenceAura)
+                    if (presence == 48263) // Blood Presence
                     {
-                        if (presence == 48265 && unholyPresenceAura)
-                        {
-                            target->RemoveAurasDueToSpell(63622);
-                            target->RemoveAurasDueToSpell(65095);
-                        }
-                        target->RemoveAurasDueToSpell(49772);
+                        target->RemoveAurasDueToSpell(63621); // Improved Frost Presence bonus
+                        target->RemoveAurasDueToSpell(63611); // Improved Blood Presence bonus
                     }
+                    if (presence == 48265) // Unholy Presence
+                    {
+                        target->RemoveAurasDueToSpell(61261); // Blood Presence bonus
+                        target->RemoveAurasDueToSpell(63621); // Improved Frost Presence bonus
+                    }
+                    if (presence == 48266) // Frost Presence
+                        target->RemoveAurasDueToSpell(61261); // Blood Presence bonus
                 }
             }
             break;

@@ -5387,6 +5387,10 @@ void Spell::TakeRunePower()
     // you can gain some runic power when use runes
     float rp = (float)src->runePowerGain;
     rp *= sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME);
+
+    if (plr->HasAuraType(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT))
+        rp *= 1.0f + plr->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT) / 100.0f;
+
     plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
 }
 
