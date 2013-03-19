@@ -4296,7 +4296,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92970:                             // (4 heroic entries)
         case 88917: case 88916: case 88915: // Caustic Slime
         case 82935:                         // (4 heroic entries)
-        case 86013: case 86014:                 // Twilight Meteorite (Valiona)
+        case 86014: case 92863: case 92864: case 92865: // Twilight Meteorite (Valiona)
+        case 86825: case 92879: case 92880: case 92881: // Blackout (Valiona)
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;
