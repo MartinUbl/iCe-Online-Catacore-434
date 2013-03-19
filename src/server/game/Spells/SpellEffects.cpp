@@ -6573,14 +6573,13 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_HUNTER:
         {
-            // bonus damage from attack power is increased by weapon damage multiplier - therefore the coefficients are correct
             float shotMod = 0;
             switch(m_spellInfo->Id)
             {
                 case 53351: // Kill Shot
                 {
                     // "You attempt to finish the wounded target off, firing a long range attack dealing % weapon damage plus RAP*0.30+543."
-                    shotMod = 0.2f;     // 0.3 / 150%
+                    shotMod = 0.3f;
                     break;
                 }
                 case 56641: // Steady Shot
@@ -6594,7 +6593,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 case 82928: // Aimed Shot (Master Marksman)
                 {
                     // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
-                    shotMod = 0.4525f;    // 0.724 / 160%;
+                    shotMod = 0.724f;
                     // Remove Master Marksman proc spell "Fire!"
                     if (m_caster->HasAura(82926) && m_spellInfo->Id == 82928)
                         m_caster->RemoveAurasDueToSpell(82926);
