@@ -425,7 +425,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //363
     &AuraEffect::HandleNULL,                                      //364
     &AuraEffect::HandleNULL,                                      //365
-    &AuraEffect::HandleNoImmediateEffect,                         //366 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2
+    &AuraEffect::HandleModOverrideSpellPowerByAttackPowerPercent, //366 SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT
     &AuraEffect::HandleNULL,                                      //367
     &AuraEffect::HandleNULL,                                      //368
     &AuraEffect::HandleNULL,                                      //369
@@ -6243,6 +6243,20 @@ void AuraEffect::HandleModSpellHealingPercentFromAttackPower(AuraApplication con
 
     // Recalculate bonus
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleModOverrideSpellPowerByAttackPowerPercent(AuraApplication const * aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Recalculate bonus (no rounding errors are allowed when it reaches zero)
+    target->SetStatFloatValue(PLAYER_FIELD_OVERRIDE_SPELL_POWER_BY_AP_PCT, target->GetTotalAuraModifier(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT));
 }
 
 void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, uint8 mode, bool apply) const

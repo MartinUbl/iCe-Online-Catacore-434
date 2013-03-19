@@ -11764,9 +11764,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
 int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
 {
-    // SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2:
+    // SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT:
     // Your spell power is now equal to ??% of your attack power, and you no longer benefit from other sources of spell power
-    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2);
+    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);
     if (!mDamageDonebyAP.empty())
     {
         float AP = GetTotalAttackPowerValue(BASE_ATTACK);
@@ -12452,9 +12452,9 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
 
 int32 Unit::SpellBaseHealingBonus(SpellSchoolMask schoolMask)
 {
-    // SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2:
+    // SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT:
     // Your spell power is now equal to ??% of your attack power, and you no longer benefit from other sources of spell power
-    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER_2);
+    AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);
     if (!mDamageDonebyAP.empty())
     {
         float AP = GetTotalAttackPowerValue(BASE_ATTACK);
