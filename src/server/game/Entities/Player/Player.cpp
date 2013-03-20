@@ -33,7 +33,6 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "Player.h"
-#include "ClassPlayer.h"
 #include "Vehicle.h"
 #include "SkillDiscovery.h"
 #include "QuestDef.h"
@@ -450,6 +449,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     m_lastBattlegroundTypeId = 0;
 
+    m_eclipseDriverLeft = false;
+
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
     m_groupUpdateMask = 0;
@@ -717,8 +718,6 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     Object::_Create(guidlow, 0, HIGHGUID_PLAYER);
 
-    ASSERT(getClass() == class_);
-    
     m_name = name;
 
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(race, class_);
@@ -17533,44 +17532,12 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
 
     uint8 pClass = fields[4].GetUInt8();
 
-    Player* player = NULL;
-    switch(pClass)
-    {
-        case CLASS_WARRIOR:
-            player = new WarriorPlayer(session);
-            break;
-        case CLASS_PALADIN:
-            player = new PaladinPlayer(session);
-            break;
-        case CLASS_HUNTER:
-            player = new HunterPlayer(session);
-            break;
-        case CLASS_ROGUE:
-            player = new RoguePlayer(session);
-            break;
-        case CLASS_PRIEST:
-            player = new PriestPlayer(session);
-            break;
-        case CLASS_DEATH_KNIGHT:
-            player = new DKPlayer(session);
-            break;
-        case CLASS_SHAMAN:
-            player = new ShamanPlayer(session);
-            break;
-        case CLASS_MAGE:
-            player = new MagePlayer(session);
-            break;
-        case CLASS_WARLOCK:
-            player = new WarlockPlayer(session);
-            break;
-        case CLASS_DRUID:
-            player = new DruidPlayer(session);
-            break;
-        default:
-            printf("\nClass %u doesn't exist.\n", pClass);
-            break;
-    }
-    
+    Player* player = new Player(session);
+
+    ASSERT(player);
+
+    player->setClass(pClass);
+
     if (player)
         if (player->_LoadFromDB(guid, holder, result))
             return player;
@@ -25792,6 +25759,40 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);
+}
+
+void Player::TurnEclipseDriver(bool left)
+{
+    m_eclipseDriverLeft = left;
+
+    if(left)
+    {
+        RemoveAurasDueToSpell(67483);
+        CastSpell(this,67484,true);
+    }
+    else
+    {
+        RemoveAurasDueToSpell(67484);
+        CastSpell(this,67483,true);
+    }
+}
+
+void Player::ClearEclipseState()
+{
+    // clear power
+    SetPower(POWER_ECLIPSE,0);
+
+    // we are moving to solar eclipse
+    TurnEclipseDriver(false);
+
+    // remove all eclipse spells
+    RemoveAurasDueToSpell(48517);
+    RemoveAurasDueToSpell(48518);
+
+    // and hardly set eclipse power to zero
+    uint32 powerIndex = GetPowerIndexByClass(POWER_ECLIPSE, getClass());
+    if (powerIndex != MAX_POWERS)
+        SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
 }
 
 uint32 Player::CalculateTalentsPoints() const

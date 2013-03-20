@@ -34,7 +34,6 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Player.h"
-#include "DruidPlayer.h"
 #include "Pet.h"
 #include "Unit.h"
 #include "Totem.h"
@@ -1494,7 +1493,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID && ((Player*)m_caster)->GetTalentBranchSpec(((Player*)m_caster)->GetActiveSpec()) == 752)
     {
-        bool EclipseLeft = ((DruidPlayer*)m_caster)->IsEclipseDriverLeft();
+        bool EclipseLeft = m_caster->ToPlayer()->IsEclipseDriverLeft();
         switch(m_spellInfo->Id)
         {
             //Wrath
@@ -1503,7 +1502,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 {
                     m_caster->ModifyPower(POWER_ECLIPSE,-13);
 
-                    if (!((DruidPlayer*)m_caster)->IsEclipseDriverLeft())
+                    if (!m_caster->ToPlayer()->IsEclipseDriverLeft())
                         break;
                     // talent Euphoria - generate 2x eclipse
                     int32 bp0 = -13;
@@ -1529,7 +1528,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 {
                     m_caster->ModifyPower(POWER_ECLIPSE, 20);
 
-                    if (((DruidPlayer*)m_caster)->IsEclipseDriverLeft())
+                    if (m_caster->ToPlayer()->IsEclipseDriverLeft())
                         break;
                     // talent Euphoria - generate 2x eclipse
                     int32 bp0 = 20;

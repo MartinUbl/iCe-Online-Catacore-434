@@ -1222,8 +1222,9 @@ class Player : public Unit, public GridObject<Player>
 
         static bool BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer);
 
-        virtual uint8 getClass() const = 0;
-    
+        void setClass(uint8 new_class) { m_class = new_class; };
+        uint8 getClass() const { return m_class; };
+
         void SetInWater(bool apply);
 
         bool IsInWater() const { return m_isInWater; }
@@ -2071,6 +2072,10 @@ class Player : public Unit, public GridObject<Player>
         void ApplyRatingMod(CombatRating cr, int32 value, bool apply);
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
+
+        bool IsEclipseDriverLeft() { return m_eclipseDriverLeft; };
+        void TurnEclipseDriver(bool left);
+        void ClearEclipseState();
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 
@@ -2934,6 +2939,8 @@ class Player : public Unit, public GridObject<Player>
         uint64 m_comboTarget;
         int8 m_comboPoints;
 
+        bool m_eclipseDriverLeft;
+
         uint32 m_lastBattlegroundTypeId;
 
         WorldSafeLocsEntry* m_graveyard;
@@ -3113,6 +3120,7 @@ class Player : public Unit, public GridObject<Player>
         }
 
         MapReference m_mapRef;
+        uint8 m_class;
 
         void UpdateCharmedAI();
 

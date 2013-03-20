@@ -33,7 +33,6 @@
 #include "Unit.h"
 #include "QuestDef.h"
 #include "Player.h"
-#include "DruidPlayer.h"
 #include "Creature.h"
 #include "Spell.h"
 #include "Group.h"
@@ -15116,8 +15115,6 @@ void Unit::SetPower(Powers power, int32 val)
         if(val < -100)
             val = -100;
 
-        DruidPlayer* pPlayerDruid = (DruidPlayer*)this;
-
         // The visual part
         int32 actualPower = (int32)GetPower(POWER_ECLIPSE);
         int32 deltaPower = abs(val-actualPower);
@@ -15125,12 +15122,12 @@ void Unit::SetPower(Powers power, int32 val)
         if(val > actualPower)
         {
             realModify = deltaPower;
-            pPlayerDruid->TurnEclipseDriver(false);
+            ToPlayer()->TurnEclipseDriver(false);
         }
         else
         {
             realModify = -deltaPower;
-            pPlayerDruid->TurnEclipseDriver(true);
+            ToPlayer()->TurnEclipseDriver(true);
         }
 
         SendEnergizeSpellLog(this,89265,realModify,POWER_ECLIPSE);
@@ -15143,7 +15140,7 @@ void Unit::SetPower(Powers power, int32 val)
         {
             //run solar eclipse
             CastSpell(this, 48517, true);
-            pPlayerDruid->TurnEclipseDriver(true);
+            ToPlayer()->TurnEclipseDriver(true);
 
             // Euphoria
             int32 bp0 = 0;
@@ -15159,7 +15156,7 @@ void Unit::SetPower(Powers power, int32 val)
         {
             //run lunar eclipse
             CastSpell(this, 48518, true);
-            pPlayerDruid->TurnEclipseDriver(false);
+            ToPlayer()->TurnEclipseDriver(false);
 
             // Euphoria
             int32 bp0 = 0;
@@ -15171,12 +15168,12 @@ void Unit::SetPower(Powers power, int32 val)
             if (bp0)
                 CastCustomSpell(this, 81070, &bp0, 0, 0, true);
         }
-        else if(val >= 0 && !pPlayerDruid->IsEclipseDriverLeft() && HasAura(48518))
+        else if(val >= 0 && !ToPlayer()->IsEclipseDriverLeft() && HasAura(48518))
         {
             //cancel lunar eclipse
             RemoveAurasDueToSpell(48518);
         }
-        else if(val <= 0 && pPlayerDruid->IsEclipseDriverLeft() && HasAura(48517))
+        else if(val <= 0 && ToPlayer()->IsEclipseDriverLeft() && HasAura(48517))
         {
             //cancel solar eclipse
             RemoveAurasDueToSpell(48517);
