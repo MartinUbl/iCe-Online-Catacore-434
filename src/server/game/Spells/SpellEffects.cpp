@@ -3058,7 +3058,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                     // Implementation of Blood Shield mastery profficiency
                     if (m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
-                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DK_BLOOD)
+                        m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == SPEC_DK_BLOOD &&
+                        m_caster->HasAura(48263)) // in patch 4.1 blood shield activated only in blood presence
                     {
                         // Blood Shield effect stacks
                         int32 bonus = 0;
