@@ -1498,7 +1498,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.44f);
                     if (this->m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 60% of damage to non-primary targets
-                        damage = int32(damage * 0.6f);
+                        damage = int32(damage * 0.5f);
                 }
                 break;
             }
