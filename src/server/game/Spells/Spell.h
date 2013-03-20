@@ -452,7 +452,7 @@ class Spell
         void TakePower();
         void TakeAmmo();
 
-        void TakeRunePower();
+        void TakeRunePower(bool didhit);
         void TakeReagents();
         void TakeCastItem();
 

@@ -5168,15 +5168,14 @@ void Spell::TakePower()
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_spellInfo->powerType == POWER_RAGE || m_spellInfo->powerType == POWER_ENERGY)
+        if (m_spellInfo->powerType == POWER_RAGE || m_spellInfo->powerType == POWER_ENERGY || m_spellInfo->powerType == POWER_RUNE)
             if (uint64 targetGUID = m_targets.getUnitTargetGUID())
                 for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                     if (ihit->targetGUID == targetGUID)
                     {
-                        if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_MISS/* && ihit->targetGUID != m_caster->GetGUID()*/)
-                            hit = false;
-                        if (ihit->missCondition != SPELL_MISS_NONE)
+                        if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_ABSORB)
                         {
+                            hit = false;
                             //lower spell cost on fail (by talent aura)
                             if (Player *modOwner = m_caster->ToPlayer()->GetSpellModOwner())
                                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, m_powerCost);
@@ -5187,9 +5186,9 @@ void Spell::TakePower()
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    if (hit && powerType == POWER_RUNE)
+    if (powerType == POWER_RUNE)
     {
-        TakeRunePower();
+        TakeRunePower(hit);
         return;
     }
 
@@ -5321,7 +5320,7 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
     return SPELL_CAST_OK;
 }
 
-void Spell::TakeRunePower()
+void Spell::TakeRunePower(bool didhit)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -5354,7 +5353,7 @@ void Spell::TakeRunePower()
         RuneType rune = plr->GetCurrentRune(i);
         if ((plr->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
         {
-            plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));
+            plr->SetRuneCooldown(i, didhit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
             plr->SetLastUsedRune(RuneType(rune));
             runeCost[rune]--;
         }
@@ -5369,12 +5368,13 @@ void Spell::TakeRunePower()
             RuneType rune = plr->GetCurrentRune(i);
             if ((plr->GetRuneCooldown(i) == 0) && (rune == RUNE_DEATH))
             {
-                plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));
+                plr->SetRuneCooldown(i, didhit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
                 plr->SetLastUsedRune(RuneType(rune));
                 runeCost[rune]--;
 
                 // Blood of the North (permanent convert)
-                if (!((i == 0 || i == 1) && (plr->HasAura(54637) || plr->HasAura(98056))))
+                // keep Death Rune type if missed
+                if (didhit && !((i == RUNE_BLOOD || i == RUNE_UNHOLY) && (plr->HasAura(54637) || plr->HasAura(98056))))
                     plr->RestoreBaseRune(i);
 
                 if (runeCost[RUNE_DEATH] == 0)
@@ -5384,13 +5384,16 @@ void Spell::TakeRunePower()
     }
 
     // you can gain some runic power when use runes
-    float rp = (float)src->runePowerGain;
-    rp *= sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME);
+    if (didhit)
+    {
+        float rp = (float)src->runePowerGain;
+        rp *= sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME);
 
-    if (plr->HasAuraType(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT))
-        rp *= 1.0f + plr->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT) / 100.0f;
+        if (plr->HasAuraType(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT))
+            rp *= 1.0f + plr->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_FROM_DAMAGE_DEALT) / 100.0f;
 
-    plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
+        plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
+    }
 }
 
 void Spell::TakeReagents()

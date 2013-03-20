@@ -25505,7 +25505,7 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
     if (index > MAX_RUNES)
         return 0;
 
-    return RUNE_COOLDOWN;
+    return RUNE_BASE_COOLDOWN;
 }
 
 void Player::SetRuneCooldown(uint8 index, uint32 cooldown)
@@ -25541,11 +25541,11 @@ void Player::RemoveRunesByAuraEffect(AuraEffect const * aura)
 void Player::RestoreBaseRune(uint8 index)
 {
     AuraEffect const * aura = m_runes->runes[index].ConvertAura;
-    ConvertRune(index, GetBaseRune(index));
-    SetRuneConvertAura(index, NULL);
     // Don't drop passive talents providing rune convertion
     if (!aura || aura->GetAuraType() != SPELL_AURA_CONVERT_RUNE)
         return;
+    ConvertRune(index, GetBaseRune(index));
+    SetRuneConvertAura(index, NULL);
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
         if (aura == m_runes->runes[i].ConvertAura)
@@ -25571,7 +25571,7 @@ void Player::ResyncRunes(uint8 count)
     for (uint32 i = 0; i < count; ++i)
     {
         data << uint8(GetCurrentRune(i));                          // rune type
-        data << uint8(255 - 255*GetRuneCooldown(i)/RUNE_COOLDOWN); // passed cooldown (0-255, real cooldown is 10000-0)
+        data << uint8(255 - 255*GetRuneCooldown(i)/RUNE_BASE_COOLDOWN); // passed cooldown (0-255, real cooldown is 10000-0)
     }
     GetSession()->SendPacket(&data);
 }
