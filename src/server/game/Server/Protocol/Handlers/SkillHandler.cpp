@@ -181,6 +181,41 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket & recv_data)
     unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
 }
 
+void WorldSession::HandleUnlearnSpecialization(WorldPacket& recv_data)
+{
+    uint32 id;
+
+    recv_data >> id;
+
+    // specialization id is received as new id, we need to manually decide, what to unlearn
+    switch (id)
+    {
+        case 0: // Gnomish Engineer
+            _player->RemoveAurasDueToSpell(20219);
+            _player->removeSpell(20219);
+            break;
+        case 1: // Goblin Engineer
+            _player->RemoveAurasDueToSpell(20222);
+            _player->removeSpell(20222);
+            break;
+        case 2: // Elixir Master
+            _player->RemoveAurasDueToSpell(28677);
+            _player->removeSpell(28677);
+            break;
+        case 3: // Potion Master
+            _player->RemoveAurasDueToSpell(28675);
+            _player->removeSpell(28675);
+            break;
+        case 4: // Transmutation Master
+            _player->RemoveAurasDueToSpell(28672);
+            _player->removeSpell(28672);
+            break;
+        default:
+            sLog->outError("HandleUnlearnSpecialization: unknown spec id received: %u", id);
+            break;
+    }
+}
+
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)
 {
     uint32 skill_id;

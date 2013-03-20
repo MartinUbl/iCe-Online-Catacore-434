@@ -1346,6 +1346,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_WARGAME_START,                           STATUS_LOGGEDIN, &WorldSession::HandleWargameStart              );
     OPCODE( SMSG_WARGAME_CHECK_ENTRY,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_WARGAME_REQUEST_SENT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_UNLEARN_SPECIALIZATION,                  STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSpecialization     );
 };
 
 void DestroyOpcodeTable()

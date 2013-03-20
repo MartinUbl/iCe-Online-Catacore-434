@@ -1335,6 +1335,7 @@ enum Opcodes
     CMSG_WARGAME_START                               = 0x005A0, // 4.3.4 15595
     SMSG_WARGAME_CHECK_ENTRY                         = 0x03DA4, // 4.3.4 15595
     SMSG_WARGAME_REQUEST_SENT                        = 0x059B2, // 4.3.4 15595
+    CMSG_UNLEARN_SPECIALIZATION                      = 0x03210, // 4.3.4 15595
 
     // Unmapped SkyFire opcodes
     CMSG_ADDON_REGISTERED_PREFIXES                   = 0x00954, // 4.3.4 Build 15595
@@ -1553,7 +1554,6 @@ enum Opcodes
     CMSG_SUGGESTION_SUBMIT                            = 0x2512,
     CMSG_TIME_ADJUSTMENT_RESPONSE                     = 0x3818,
     CMSG_TIME_SYNC_RESP_FAILED                        = 0x710A,
-    CMSG_UNLEARN_SPECIALIZATION                       = 0x3210,
     CMSG_USED_FOLLOW                                  = 0x7912,
     CMSG_VOID_STORAGE_QUERY                           = 0x790A,
     CMSG_VOID_STORAGE_TRANSFER                        = 0x380E,

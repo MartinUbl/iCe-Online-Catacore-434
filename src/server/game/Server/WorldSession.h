@@ -638,6 +638,7 @@ class WorldSession
         void HandleLearnPreviewTalents(WorldPacket& recvPacket);
         void HandleTalentWipeConfirmOpcode(WorldPacket& recvPacket);
         void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
+        void HandleUnlearnSpecialization(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverStatusMultipleQuery(WorldPacket& recvPacket);
