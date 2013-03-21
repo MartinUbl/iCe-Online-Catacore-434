@@ -111,6 +111,14 @@ void AssistanceMovementGenerator::Finalize(Unit &unit)
         unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 
+void EffectMovementGenerator::Initialize(Unit &unit)
+{
+    if (unit.GetTypeId() != TYPEID_UNIT)
+        return;
+
+    unit.addUnitState(UNIT_STAT_JUMPING);
+}
+
 bool EffectMovementGenerator::Update(Unit &unit, const uint32&)
 {
     return !unit.movespline->Finalized();
@@ -120,6 +128,8 @@ void EffectMovementGenerator::Finalize(Unit &unit)
 {
     if (unit.GetTypeId() != TYPEID_UNIT)
         return;
+
+    unit.clearUnitState(UNIT_STAT_JUMPING);
 
     if (((Creature&)unit).AI() && unit.movespline->Finalized())
         ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
