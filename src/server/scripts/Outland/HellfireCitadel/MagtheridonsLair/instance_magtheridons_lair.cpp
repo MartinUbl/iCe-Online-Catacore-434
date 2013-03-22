@@ -78,12 +78,6 @@ class instance_magtheridons_lair : public InstanceMapScript
                 RespawnTimer = 0;
             }
 
-            bool IsEncounterInProgress() const
-            {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS) return true;
-                return false;
-            }
 
             void OnCreatureCreate(Creature* pCreature, bool /*add*/)
             {

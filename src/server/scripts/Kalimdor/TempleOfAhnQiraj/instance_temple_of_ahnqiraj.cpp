@@ -83,11 +83,6 @@ public:
             }
         }
 
-        bool IsEncounterInProgress() const
-        {
-            //not active in AQ40
-            return false;
-        }
 
         uint32 GetData(uint32 type)
         {

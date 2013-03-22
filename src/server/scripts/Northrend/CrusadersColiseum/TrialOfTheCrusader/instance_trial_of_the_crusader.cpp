@@ -114,13 +114,6 @@ public:
             m_bNeedSave = false;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for (uint8 i = 0; i < MAX_ENCOUNTERS ; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS)
-                    return true;
-            return false;
-        }
 
         void OnPlayerEnter(Player *m_player)
         {

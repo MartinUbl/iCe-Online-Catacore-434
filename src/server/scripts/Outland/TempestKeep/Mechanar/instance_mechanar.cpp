@@ -47,14 +47,6 @@ class instance_mechanar : public InstanceMapScript
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             }
 
-            bool IsEncounterInProgress() const
-            {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS)
-                        return true;
-
-                return false;
-            }
 
             uint32 GetData(uint32 type)
             {

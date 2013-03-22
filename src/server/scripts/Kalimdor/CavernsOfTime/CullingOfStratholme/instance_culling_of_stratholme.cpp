@@ -95,13 +95,6 @@ public:
             return false;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
-            return false;
-        }
 
         void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {

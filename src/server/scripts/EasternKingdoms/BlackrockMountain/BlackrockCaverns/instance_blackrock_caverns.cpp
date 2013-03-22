@@ -52,14 +52,6 @@ public:
             m_uiCorlaGUID = 0;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
-            return false;
-        }
-
         void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
         {
         }

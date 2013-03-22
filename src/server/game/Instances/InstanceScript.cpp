@@ -29,6 +29,7 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Log.h"
+#include "Unit.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -51,10 +52,23 @@ void InstanceScript::HandleGameObject(uint64 GUID, bool open, GameObject *go)
 
 bool InstanceScript::IsEncounterInProgress() const
 {
-    for (std::vector<BossInfo>::const_iterator itr = bosses.begin(); itr != bosses.end(); ++itr)
-        if (itr->state == IN_PROGRESS)
-            return true;
+    //for (std::vector<BossInfo>::const_iterator itr = bosses.begin(); itr != bosses.end(); ++itr)//
+    //   if (itr->state == IN_PROGRESS)//                        OLD bosses is not filled
+    //        return true;//
 
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+        {
+            Player* pPlayer = i->getSource();
+            Unit::AttackerSet attackers = pPlayer->getAttackers();
+            if (pPlayer->isInCombat())
+                for (Unit::AttackerSet::const_iterator k = attackers.begin(); k != attackers.end(); ++k)
+                {
+                    if ((*k) && (*k)->GetTypeId() == TYPEID_UNIT && (*k)->ToCreature()->GetCreatureInfo()->rank == 3) //is boss??
+                        return true;
+                }
+        }
     return false;
 }
 

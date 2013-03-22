@@ -114,13 +114,6 @@ public:
             DoUpdateWorldState(WORLD_STATE_BM_RIFT, 0);
         }
 
-        bool IsEncounterInProgress()
-        {
-            if (GetData(TYPE_MEDIVH) == IN_PROGRESS)
-                return true;
-
-            return false;
-        }
 
         void OnPlayerEnter(Player* pPlayer)
         {

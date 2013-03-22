@@ -102,14 +102,7 @@ public:
             m_auiOrbSState = NOT_STARTED;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for(uint8 i = 1; i < MAX_ENCOUNTERS ; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS)
-                    return true;
 
-            return false;
-        }
 
         void OpenDoor(uint64 guid)
         {

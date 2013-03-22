@@ -105,16 +105,6 @@ public:
 			BeaconEvent.clear();
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            {
-                if (uiEncounter[i] == IN_PROGRESS)
-                    return true;
-            }
-
-            return false;
-        }
 
         void OnCreatureCreate(Creature* creature, bool add)
         {

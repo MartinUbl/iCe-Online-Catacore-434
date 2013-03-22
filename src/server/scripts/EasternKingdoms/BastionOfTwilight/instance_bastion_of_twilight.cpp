@@ -52,10 +52,6 @@ public:
                 auiEncounter[i] = NOT_STARTED;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            return false;
-        }
 
         void OnGameObjectCreate(GameObject* go, bool add)
         {

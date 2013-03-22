@@ -67,10 +67,6 @@ public:
             wallGUID = 0;
         }
 
-        bool IsEncounterInProgress() const // not avaiable for this instance script
-        {
-            return false;
-        }
 
         void OnCreatureCreate(Creature* pCreature, bool add)
         {

@@ -100,10 +100,6 @@ public:
             IsBossDied[8] = false;
         }
 
-        bool IsEncounterInProgress() const
-        {
-            return false;
-        };
 
         void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
         {

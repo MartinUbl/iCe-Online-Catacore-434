@@ -48,15 +48,6 @@ public:
             
         }
 
-        bool IsEncounterInProgress() const
-        {
-            for(uint8 i=0; i < ENCOUNTERS; ++i)
-            {
-                if (uiEncounter[i] == IN_PROGRESS)
-                    return true;
-            }
-            return false;
-        }
 
         void OnCreatureCreate(Creature* pCreature, bool)
         {

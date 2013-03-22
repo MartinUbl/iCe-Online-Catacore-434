@@ -68,14 +68,6 @@ class instance_uldaman : public InstanceMapScript
                 bKeystoneCheck = false;
             }
 
-            bool IsEncounterInProgress() const
-            {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    if (m_auiEncounter[i] == IN_PROGRESS)
-                        return true;
-
-                return false;
-            }
 
             uint64 uiArchaedasGUID;
             uint64 uiIronayaGUID;

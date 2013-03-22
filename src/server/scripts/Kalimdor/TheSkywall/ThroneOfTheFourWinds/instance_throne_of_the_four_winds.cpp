@@ -148,17 +148,6 @@ public:
             m_summons.clear();
         }
 
-        bool IsEncounterInProgress() const
-        {
-            Map::PlayerList const &PlList = instance->GetPlayers();
-            if (PlList.isEmpty())
-                return false;
-
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (m_auiEncounter[i] == IN_PROGRESS) return true;
-
-            return false;
-        }
 
         void OnPlayerEnter(Player* plr)
         {
