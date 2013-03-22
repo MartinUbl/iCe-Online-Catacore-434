@@ -5446,6 +5446,8 @@ void Player::RepopAtGraveyard()
         case 719: // Mount Hyjal Phase map
             TeleportTo(719, 5157, -1378, 1356, 0);
             return;
+        case 764: // Celestius zone
+            return;
     }
 
     // Vashj'ir GraveYard fix
