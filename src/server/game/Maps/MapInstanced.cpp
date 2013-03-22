@@ -154,7 +154,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         }
         //instance bound merging when same bosses killed
         Group *group = player->GetGroup();
-        if (!player->isGameMaster() && group && pBind && pBind->perm &&
+        if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
             group->GetBoundInstance(this) && group->GetLeader() &&
             pBind->save != group->GetBoundInstance(this)->save)
         {
