@@ -4772,6 +4772,24 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 47841; // Dark Phoenix models
             count++;
             break;
+        case 54726: // Winged Steed of the Ebon Blade
+            spellInfo->EffectMiscValue[0] = 119965;// used custom model
+            break;
+        case 54727: // Winged Steed of the Ebon Blade
+            spellInfo->EffectMiscValue[0] = 119964; // used custom model
+            break;
+        case 47037: // Swift War Elekk
+            spellInfo->EffectMiscValue[0] = 119966; // used custom model
+            break;
+        case 18363: // Riding Kodo
+            spellInfo->EffectMiscValue[0] = 119967; // used custom model
+            break;
+        case 121805: // RAF Mount III
+            spellInfo->EffectMiscValue[0] = 119968; // used custom model
+            break;
+        case 55293: // Amani War Bear
+            spellInfo->EffectMiscValue[0] = 55293; // used custom model
+            break;
         case 89485: // Inner Focus
             spellInfo->procCharges = 1; // only one charge
             count++;
