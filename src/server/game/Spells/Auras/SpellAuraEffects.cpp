@@ -3889,7 +3889,6 @@ void AuraEffect::HandlePhase(AuraApplication const *aurApp, uint8 mode, bool app
             newPhase = 0xFFFFFFFF;
 
         pPlayer->SetPhaseMask(newPhase, false);
-        pPlayer->GetSession()->SendSetPhaseShift(newPhase);
 
         // drop flag at invisible in bg
         if (pPlayer->InBattleground())
