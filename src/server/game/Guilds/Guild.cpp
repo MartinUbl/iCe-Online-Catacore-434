@@ -23,6 +23,7 @@
 #include "gamePCH.h"
 #include "DatabaseEnv.h"
 #include "Guild.h"
+#include "GuildFinderMgr.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "Config.h"
@@ -1965,6 +1966,7 @@ void Guild::Disband()
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
+    sGuildFinderMgr->DeleteGuild(m_id);
     sObjectMgr->RemoveGuild(m_id);
 }
 
@@ -2586,7 +2588,8 @@ void Guild::HandleInviteMember(WorldSession* session, const std::string& name)
     Player* pInvitee = sObjectAccessor->FindPlayerByName(name.c_str());
     if (!pInvitee)
     {
-        SendCommandResult(session, GUILD_COMMAND_CREATE, ERR_GUILD_PLAYER_NOT_FOUND_S, name);
+        SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_GUILD_PLAYER_NOT_FOUND_S, name);
+        session->SendPlayerNotFoundNotice(name);
         return;
     }
 
@@ -2700,6 +2703,7 @@ void Guild::HandleAcceptMember(WorldSession* session)
     {
         _LogEvent(GUILD_EVENT_LOG_JOIN_GUILD, player->GetGUIDLow());
         _BroadcastEvent(GE_JOINED, player->GetGUID(), player->GetName());
+        sGuildFinderMgr->RemoveAllMembershipRequestsFromPlayer(player->GetGUIDLow());
     }
 }
 

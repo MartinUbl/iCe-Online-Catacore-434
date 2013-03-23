@@ -513,6 +513,16 @@ enum ScriptCommands
     SCRIPT_COMMAND_SET_REPUTATION        = 41                // source = player, datalong = rep_id, datalong2 = type, dataint = value
 };
 
+/// Character name data
+struct CharacterNameData
+{
+    std::string m_name;
+    uint8 m_class;
+    uint8 m_race;
+    uint8 m_gender;
+    uint8 m_level;
+};
+
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
 {
@@ -759,6 +769,13 @@ class World
 
         uint32 debugOpcode;
 
+        CharacterNameData const* GetCharacterNameData(uint32 guid) const;
+        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
+        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = RACE_NONE);
+        void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
+        void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
+        bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
+
         void ProcessStartEvent();
         void ProcessStopEvent();
         bool GetEventKill() const { return isEventKillStart; }
@@ -859,6 +876,9 @@ class World
         std::list<std::string> m_Autobroadcasts;
 
     private:
+        std::map<uint32, CharacterNameData> _characterNameDataMap;
+        void LoadCharacterNameData();
+
         void ProcessQueryCallbacks();
         QueryCallback<uint32> m_realmCharCallback;
 };

@@ -892,6 +892,8 @@ public:
     GuildAchievementMgr& GetAchievementMgr() { return m_achievementMgr; };
     GuildAchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
 
+    EmblemInfo const& GetEmblemInfo() const { return m_emblemInfo; }
+
     void GainXP(uint64 xp);
     void LevelUp();
     void ResetDailyXPCap();

@@ -1347,6 +1347,21 @@ void InitOpcodeTable()
     OPCODE( SMSG_WARGAME_CHECK_ENTRY,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_WARGAME_REQUEST_SENT,                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_UNLEARN_SPECIALIZATION,                  STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSpecialization     );
+    OPCODE( CMSG_LF_GUILD_ADD_RECRUIT,                    STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderAddRecruit     );
+    OPCODE( CMSG_LF_GUILD_BROWSE,                         STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderBrowse         );
+    OPCODE( CMSG_LF_GUILD_DECLINE_RECRUIT,                STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderDeclineRecruit );
+    OPCODE( CMSG_LF_GUILD_GET_APPLICATIONS,               STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderGetApplications);
+    OPCODE( CMSG_LF_GUILD_GET_RECRUITS,                   STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderGetRecruits    );
+    OPCODE( CMSG_LF_GUILD_POST_REQUEST,                   STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderPostRequest    );
+    OPCODE( CMSG_LF_GUILD_REMOVE_RECRUIT,                 STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderRemoveRecruit  );
+    OPCODE( CMSG_LF_GUILD_SET_GUILD_POST,                 STATUS_LOGGEDIN, &WorldSession::HandleGuildFinderSetGuildPost   );
+    OPCODE( SMSG_LF_GUILD_APPLICANT_LIST_UPDATED,         STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_APPLICATIONS_LIST_CHANGED,      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_BROWSE_UPDATED,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_COMMAND_RESULT,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED,        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_POST_UPDATED,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_LF_GUILD_RECRUIT_LIST_UPDATED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

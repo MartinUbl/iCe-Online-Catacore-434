@@ -45,6 +45,7 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "Battleground.h"
+#include "GuildFinderMgr.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -668,6 +669,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
                  pNewChar->GetGUIDLow());
 
     sScriptMgr->OnPlayerCreate(pNewChar);
+    sWorld->AddCharacterNameData(pNewChar->GetGUIDLow(), pNewChar->GetName(), pNewChar->getGender(), pNewChar->getRace(), pNewChar->getClass(), pNewChar->getLevel());
     delete pNewChar;                                        // created only to call SaveToDB()
 
 }
@@ -724,6 +726,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket & recv_data)
                  GUID_LOPART(guid));
 
     sScriptMgr->OnPlayerDelete(guid);
+
+    sGuildFinderMgr->RemoveAllMembershipRequestsFromPlayer(guid);
+    sWorld->DeleteCharacterNameData(GUID_LOPART(guid));
 
     if (sLog->IsOutCharDump())                                // optimize GetPlayerDump call
     {
@@ -1322,6 +1327,8 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult result, std:
     data << uint64(guid);
     data << newname;
     SendPacket(&data);
+
+    sWorld->UpdateCharacterNameData(guidLow, newname);
 }
 
 void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recv_data)
@@ -1658,6 +1665,8 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     Player::Customize(guid, gender, skin, face, hairStyle, hairColor, facialHair);
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_CUSTOMIZE), GUID_LOPART(guid));
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", GUID_LOPART(guid));
+
+    sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newname, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newname.size()+1)+6);
     data << uint8(RESPONSE_SUCCESS);
@@ -2131,6 +2140,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
 
     std::string IP_str = GetRemoteAddress();
     sLog->outDebug("Account: %d (IP: %s), Character guid: %u Change Race/Faction to: %s", GetAccountId(), IP_str.c_str(), GUID_LOPART(guid), newname.c_str());
+
+    sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newname, gender, race);
 
     WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1 + 8 + (newname.size() + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1);
     data << uint8(RESPONSE_SUCCESS);

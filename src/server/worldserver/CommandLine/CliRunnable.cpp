@@ -356,6 +356,10 @@ void ChatHandler::HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo
 
     CharacterDatabase.PExecute("UPDATE characters SET name='%s', account='%u', deleteDate=NULL, deleteInfos_Name=NULL, deleteInfos_Account=NULL WHERE deleteDate IS NOT NULL AND guid = %u",
         delInfo.name.c_str(), delInfo.accountId, delInfo.lowguid);
+
+    QueryResult res = CharacterDatabase.PQuery("SELECT gender, race, class, level FROM characters WHERE guid = %u", delInfo.lowguid);
+
+    sWorld->AddCharacterNameData(delInfo.lowguid, delInfo.name, (*res)[0].GetUInt8(), (*res)[1].GetUInt8(), (*res)[2].GetUInt8(), (*res)[3].GetUInt8());
 }
 
 /**

@@ -546,6 +546,15 @@ class WorldSession
         void HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket);
         void HandleGuildRequestChallenges(WorldPacket& recvPacket);
 
+        void HandleGuildFinderAddRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderBrowse(WorldPacket& recvPacket);
+        void HandleGuildFinderDeclineRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderGetApplications(WorldPacket& recvPacket);
+        void HandleGuildFinderGetRecruits(WorldPacket& recvPacket);
+        void HandleGuildFinderPostRequest(WorldPacket& recvPacket);
+        void HandleGuildFinderRemoveRecruit(WorldPacket& recvPacket);
+        void HandleGuildFinderSetGuildPost(WorldPacket& recvPacket);
+
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleTaxiQueryAvailableNodes(WorldPacket& recvPacket);
         void HandleActivateTaxiOpcode(WorldPacket& recvPacket);
