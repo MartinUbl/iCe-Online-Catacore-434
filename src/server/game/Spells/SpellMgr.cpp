@@ -4387,7 +4387,6 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 38310: // Multi-Shot
-        case 53385: // Divine Storm (Damage)
             spellInfo->MaxAffectedTargets = 4;
             count++;
             break;
