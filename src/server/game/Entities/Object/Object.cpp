@@ -2250,7 +2250,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 {
     Pet* pet = new Pet(this, petType);
 
-    if (petType == SUMMON_PET && pet->LoadPetFromDB(this, entry, 0, slotID != PET_SLOT_UNK_SLOT, slotID))
+    if (petType == SUMMON_PET && pet->LoadPetFromDB(this, entry, 0, false, slotID))
     {
         // Remove Demonic Sacrifice auras (known pet)
         Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
@@ -2326,7 +2326,8 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     pet->InitStatsForLevel(getLevel());
 
     // Slot 100 for other pets than hunters and warlocks
-    SetMinion(pet, true, (slotID == PET_SLOT_UNK_SLOT) ? PET_SLOT_OTHER_PET : slotID);
+    if (!pet->isHunterPet())
+        SetMinion(pet, true, PET_SLOT_OTHER_PET);
 
     switch(petType)
     {
@@ -2344,16 +2345,6 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
             pet->SetFullHealth();
             pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
             pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped in this case
-            break;
-        default:
-            break;
-    }
-
-    map->Add(pet->ToCreature());
-
-    switch(petType)
-    {
-        case SUMMON_PET:
             pet->InitPetCreateSpells();
             pet->InitTalentForLevel();
             pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
@@ -2382,6 +2373,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     if (duration > 0)
         pet->SetDuration(duration);
 
+    map->Add(pet->ToCreature());
     //ObjectAccessor::UpdateObjectVisibility(pet);
 
     return pet;

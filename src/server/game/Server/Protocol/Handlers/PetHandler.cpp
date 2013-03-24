@@ -790,7 +790,6 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     targets.read(recvPacket, caster);
     HandleClientCastFlags(recvPacket, castFlags, targets);
 
-    caster->clearUnitState(UNIT_STAT_FOLLOW);
 
     Spell *spell = new Spell(caster, spellInfo, false);
     spell->m_cast_count = castCount;                    // probably pending spell cast
