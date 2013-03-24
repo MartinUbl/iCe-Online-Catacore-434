@@ -723,6 +723,8 @@ class ObjectMgr
 
         void SetSpellCritDebug(bool state) { m_spellCritDebug = state; }
         bool GetSpellCritDebug() { return m_spellCritDebug; }
+        void SetAddonDebug(bool state) { m_addonDebug = state; }
+        bool GetAddonDebug() { return m_addonDebug; }
 
         static CreatureInfo const *GetCreatureTemplate(uint32 id);
         CreatureModelInfo const *GetCreatureModelInfo(uint32 modelid);
@@ -1441,6 +1443,7 @@ class ObjectMgr
         LocaleConstant DBCLocaleIndex;
 
         bool m_spellCritDebug;
+        bool m_addonDebug;
 
     private:
         void LoadScripts(ScriptsType type);

@@ -200,6 +200,7 @@ class ChatHandler
         bool HandleDebugUpdateCommand(const char* args);
         bool HandleDebugUpdateWorldStateCommand(const char* args);
         bool HandleDebugSpellCritCommand(const char* args);
+        bool HandleDebugAddonChannelCommand(const char* args);
 
         bool HandleDebugSet32Bit(const char* args);
         bool HandleDebugThreatList(const char * args);
@@ -212,6 +213,7 @@ class ChatHandler
         bool HandleDebugPlayCinematicCommand(const char* args);
         bool HandleDebugPlayMovieCommand(const char* args);
         bool HandleDebugPlaySoundCommand(const char* args);
+        bool HandleDebugAddonChannel(const char* args);
 
         bool HandleDebugSendBuyErrorCommand(const char* args);
         bool HandleDebugSendChannelNotifyCommand(const char* args);

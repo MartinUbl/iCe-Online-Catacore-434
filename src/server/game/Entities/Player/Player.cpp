@@ -21040,6 +21040,9 @@ void Player::Say(const std::string& text, const uint32 language)
 {
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_SAY, language, text);
 
+    if (language == LANG_ADDON && sObjectMgr->GetAddonDebug())
+        return;
+
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildPlayerChat(&data, CHAT_MSG_SAY, text, language);
     SendMessageToSetInRange(&data,sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY),true);
@@ -21048,6 +21051,9 @@ void Player::Say(const std::string& text, const uint32 language)
 void Player::Yell(const std::string& text, const uint32 language)
 {
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_YELL, language, text);
+
+    if (language == LANG_ADDON && sObjectMgr->GetAddonDebug())
+        return;
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildPlayerChat(&data, CHAT_MSG_YELL, text, language);
@@ -21067,6 +21073,9 @@ void Player::Whisper(const std::string& text, uint32 language,uint64 receiver)
 {
     if (language != LANG_ADDON)                             // if not addon data
         language = LANG_UNIVERSAL;                          // whispers should always be readable
+
+    if (language == LANG_ADDON && sObjectMgr->GetAddonDebug())
+        return;
 
     Player *rPlayer = sObjectMgr->GetPlayer(receiver);
 

@@ -431,6 +431,21 @@ bool ChatHandler::HandleDebugSpellCritCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugAddonChannelCommand(const char* args)
+{
+    if (sObjectMgr->GetAddonDebug())
+    {
+        PSendSysMessage("Addon channel turned ON");
+        sObjectMgr->SetAddonDebug(false);
+    }
+    else
+    {
+        PSendSysMessage("Addon channel turned OFF");
+        sObjectMgr->SetAddonDebug(true);
+    }
+    return true;
+}
+
 bool ChatHandler::HandleDebugGetItemStateCommand(const char* args)
 {
     if (!*args)

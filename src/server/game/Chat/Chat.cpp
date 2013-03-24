@@ -238,6 +238,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "opcode",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugOpcodeCommand>, "", NULL },
         { "ratedbg",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleDebugRatedBGCommand>, "", NULL },
         { "spellcrit",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSpellCritCommand>, "", NULL },
+        { "addon",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugAddonChannelCommand>, "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 
@@ -1939,6 +1940,9 @@ void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint
 {
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
     uint64 listener_guid = 0;
+
+    if (language == LANG_ADDON && sObjectMgr->GetAddonDebug())
+        return;
 
     if (language == LANG_ADDON && addonPrefix == NULL)
         addonPrefix = "someAddon";

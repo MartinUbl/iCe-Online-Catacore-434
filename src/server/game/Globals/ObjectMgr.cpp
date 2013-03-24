@@ -316,6 +316,7 @@ ObjectMgr::ObjectMgr()
     m_petNumberGuidMap.Init(PET_PERSISTENT_GRANULARITY);
 
     m_spellCritDebug = false;
+    m_addonDebug = false;
 }
 
 ObjectMgr::~ObjectMgr()
