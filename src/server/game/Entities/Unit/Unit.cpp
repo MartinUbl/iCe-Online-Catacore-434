@@ -18371,17 +18371,22 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
 
 float Unit::GetCombatRatingReduction(CombatRating cr) const
 {
+    const Player *player = NULL;
     if (GetTypeId() == TYPEID_PLAYER)
-        return ((Player const*)this)->GetRatingBonusValue(cr);
-    else if (((Creature const*)this)->isPet())
     {
-        // Player's pet get resilience from owner
-        if (Unit* owner = GetOwner())
-            if (owner->GetTypeId() == TYPEID_PLAYER)
-                return ((Player*)owner)->GetRatingBonusValue(cr);
+        player = ToPlayer();
+    }
+    else if (isPet())
+    {
+        if (Unit *owner = GetOwner())
+            player = owner->ToPlayer();
     }
 
-    return 0.0f;
+    if (!player || !player->IsInWorld())
+        return 0.0f;
+
+    float coeff = player->GetRatingBonusValue(cr);
+    return 100.0f - 100.0f * pow(0.99f, coeff);
 }
 
 uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const
