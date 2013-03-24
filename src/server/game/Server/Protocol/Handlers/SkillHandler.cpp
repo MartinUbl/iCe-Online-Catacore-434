@@ -193,22 +193,27 @@ void WorldSession::HandleUnlearnSpecialization(WorldPacket& recv_data)
         case 0: // Gnomish Engineer
             _player->RemoveAurasDueToSpell(20219);
             _player->removeSpell(20219);
+            _player->IncompleteQuest(29477);
             break;
         case 1: // Goblin Engineer
             _player->RemoveAurasDueToSpell(20222);
             _player->removeSpell(20222);
+            _player->IncompleteQuest(29475);
             break;
         case 2: // Elixir Master
             _player->RemoveAurasDueToSpell(28677);
             _player->removeSpell(28677);
+            _player->IncompleteQuest(29481);
             break;
         case 3: // Potion Master
             _player->RemoveAurasDueToSpell(28675);
             _player->removeSpell(28675);
+            _player->IncompleteQuest(29067);
             break;
         case 4: // Transmutation Master
             _player->RemoveAurasDueToSpell(28672);
             _player->removeSpell(28672);
+            _player->IncompleteQuest(29482);
             break;
         default:
             sLog->outError("HandleUnlearnSpecialization: unknown spec id received: %u", id);
