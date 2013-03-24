@@ -1032,6 +1032,18 @@ void BattlefieldWG::ProcessEvent(GameObject *obj, uint32 eventId)
     if (obj->GetEntry() == BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC)
     {
         sLog->outChar("BattlefieldWG: clicked on relic");
+
+        if (!m_CanClickOnOrb)
+        {
+            sLog->outChar("BattlefieldWG: relic NOT clickable, searching for destroyed last door");
+            if (GameObject* door = obj->FindNearestGameObject(191810 ,150.0f))
+                if (door->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+                {
+                    sLog->outChar("BattlefieldWG: door found, enabling relic");
+                    m_CanClickOnOrb = true;
+                }
+        }
+
         // Check that the door is break
         if (m_CanClickOnOrb)
         {
@@ -1040,7 +1052,7 @@ void BattlefieldWG::ProcessEvent(GameObject *obj, uint32 eventId)
         }
         else // if door is not break, respawn relic.
         {
-            sLog->outChar("BattlefieldWG: relic NOT clickable, respawning");
+            sLog->outChar("BattlefieldWG: relic still not clickable, respawning");
             obj->SetRespawnTime(RESPAWN_IMMEDIATELY);
         }
     }
