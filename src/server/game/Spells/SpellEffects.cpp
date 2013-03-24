@@ -6386,8 +6386,8 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             {
                 // talent Lambs to the Slaughter
                 if (m_caster->HasAura(84583) || m_caster->HasAura(84587) || m_caster->HasAura(84588))
-                    if (unitTarget->HasAura(94009)) // rend
-                        unitTarget->GetAura(94009)->RefreshDuration(); // refresh rend
+                    if (unitTarget->HasAura(94009, m_caster->GetGUID())) // rend
+                        unitTarget->GetAura(94009, m_caster->GetGUID())->RefreshDuration(); // refresh rend
             }
             break;
         }
