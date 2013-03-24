@@ -148,38 +148,12 @@ ScriptMgr::ScriptMgr()
 
 ScriptMgr::~ScriptMgr()
 {
-    #define SCR_CLEAR(T) \
-        FOR_SCRIPTS(T, itr, end) \
-            delete itr->second; \
-        SCR_REG_LST(T).clear();
-
-    // Clear scripts for every script type.
-    SCR_CLEAR(SpellScriptLoader);
-    SCR_CLEAR(ServerScript);
-    SCR_CLEAR(WorldScript);
-    SCR_CLEAR(FormulaScript);
-    SCR_CLEAR(WorldMapScript);
-    SCR_CLEAR(InstanceMapScript);
-    SCR_CLEAR(BattlegroundMapScript);
-    SCR_CLEAR(ItemScript);
-    SCR_CLEAR(CreatureScript);
-    SCR_CLEAR(GameObjectScript);
-    SCR_CLEAR(AreaTriggerScript);
-    SCR_CLEAR(BattlegroundScript);
-    SCR_CLEAR(OutdoorPvPScript);
-    SCR_CLEAR(CommandScript);
-    SCR_CLEAR(WeatherScript);
-    SCR_CLEAR(AuctionHouseScript);
-    SCR_CLEAR(ConditionScript);
-    SCR_CLEAR(VehicleScript);
-    SCR_CLEAR(DynamicObjectScript);
-    SCR_CLEAR(TransportScript);
-    SCR_CLEAR(AchievementCriteriaScript);
-    SCR_CLEAR(PlayerScript);
-    SCR_CLEAR(GuildScript);
-    SCR_CLEAR(GroupScript);
-
-    #undef SCR_CLEAR
+    /* There was script cleaning routines
+     * Due to HUGE inconsistency of non-alloc'd, free'd and still valid memory, we decided
+     * to remove those deletes and consider valid memory as memory leak, which is not
+     * a tragedy, because we are exiting our program right now (destructor of singleton =
+     * = static memory) and memory is free'd automatically by OS handlers.
+     */
 }
 
 void ScriptMgr::Initialize()
