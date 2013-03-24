@@ -2764,9 +2764,16 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
         }
         case SPELLFAMILY_PRIEST:
         {
-            // Holy Word: Sanctuary effect
-            if (GetSpellProto() && GetSpellProto()->Id == 88685)
-                caster->CastSpell(target, 88686, true);
+            // Holy Word: Sanctuary periodic effect
+            if (GetSpellProto()->Id == 88685 && caster)
+            {
+                if (DynamicObject *dynobj = caster->GetDynObject(88685))
+                {
+                    caster->CastSpell(dynobj->GetPositionX(), dynobj->GetPositionY(), dynobj->GetPositionZ(),
+                                      88686, true, NULL, this, caster->GetGUID());
+                }
+            }
+
             break;
         }
         case SPELLFAMILY_DRUID:
