@@ -52,7 +52,6 @@ void GuildFinderMgr::LoadGuildSettings()
     }
 
     uint32 count = 0;
-    uint32 oldMSTime = getMSTime();
     do
     {
         Field* fields = result->Fetch();
@@ -92,7 +91,6 @@ void GuildFinderMgr::LoadMembershipRequests()
     }
 
     uint32 count = 0;
-    uint32 oldMSTime = getMSTime();
     do
     {
         Field* fields = result->Fetch();
