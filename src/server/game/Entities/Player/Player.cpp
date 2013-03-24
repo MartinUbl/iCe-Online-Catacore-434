@@ -3147,7 +3147,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
     for (uint8 i = 0; i < MAX_ATTACK; i++)
-        SetFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS, 1.0f);
+        SetFloatValue(PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS + i, 1.0f);
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     SetFloatValue(PLAYER_CRIT_PERCENTAGE,0.0f);
