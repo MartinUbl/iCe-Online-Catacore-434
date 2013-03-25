@@ -417,7 +417,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //355
     &AuraEffect::HandleNULL,                                      //356
     &AuraEffect::HandleNULL,                                      //357
-    &AuraEffect::HandleAuraTransform,                             //358 SPELL_AURA_TRANSFORM_2
+    &AuraEffect::HandleNULL,                                      //358 SPELL_AURA_TRANSFORM_2
     &AuraEffect::HandleNULL,                                      //359
     &AuraEffect::HandleNULL,                                      //360
     &AuraEffect::HandleNULL,                                      //361
@@ -4857,7 +4857,6 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
         }
         else
         {
-            plr->toggleWorgenForm();
             target->SetDisplayId(plr->getGender() == GENDER_FEMALE ? 29423 : 29422);
             target->Mount(plr->getGender() == GENDER_FEMALE ? 29423 : 29422, 0, GetMiscValue());
         }
@@ -5361,21 +5360,6 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp, uint8
     Unit *target = aurApp->GetTarget();
 
     target->UpdateSpeed(MOVE_RUN, true);
-    
-    if (apply)
-    {
-        switch (GetId())
-        {
-            case 68992: // Darkflight, worgen's sprint spell.
-            {
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                    target->ToPlayer()->toggleWorgenForm();
-                break;
-            }
-            default:
-                break;
-        }
-    }
 }
 
 void AuraEffect::HandleAuraModIncreaseMountedSpeed(AuraApplication const * aurApp, uint8 mode, bool apply) const
