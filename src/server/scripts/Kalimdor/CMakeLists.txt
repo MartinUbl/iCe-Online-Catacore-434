@@ -51,6 +51,11 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/DragonSoul/boss_ultraxion.cpp
   Kalimdor/CavernsOfTime/DragonSoul/instance_dragonsoul.cpp
   Kalimdor/CavernsOfTime/DragonSoul/boss_warlord_zonozz.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_archbishop_benedictus.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_arcurion.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/instance_hour_of_twilight.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_asira_dawnslayer.cpp
   Kalimdor/BlackfathomDeeps/boss_kelris.cpp
   Kalimdor/BlackfathomDeeps/instance_blackfathom_deeps.cpp
   Kalimdor/BlackfathomDeeps/boss_gelihast.cpp

@@ -602,6 +602,10 @@ void AddSC_boss_ultraxion();
 void AddSC_boss_warlord_zonozz();
 void AddSC_boss_warmaster_blackhorn();
 void AddSC_boss_yorsahj_the_unsleeping();
+void AddSC_instance_hour_of_twilight();
+void AddSC_boss_archbishop_benedictus();
+void AddSC_boss_asira_dawnslayer();
+void AddSC_boss_arcurion();
 
 // battlegrounds
 
@@ -1244,6 +1248,11 @@ void AddCataclysmScripts()
     AddSC_boss_warlord_zonozz();
     AddSC_boss_warmaster_blackhorn();
     AddSC_boss_yorsahj_the_unsleeping();
+
+    AddSC_instance_hour_of_twilight();
+    AddSC_boss_archbishop_benedictus();
+    AddSC_boss_asira_dawnslayer();
+    AddSC_boss_arcurion();
 
 #endif
 }
