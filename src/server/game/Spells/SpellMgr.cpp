@@ -4849,6 +4849,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 97318: // Plucked
             spellInfo->Effect[0] = 0;
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_UNK26;
             break;
         case 93362: // Flamestrike summon effekt
         case 93383:

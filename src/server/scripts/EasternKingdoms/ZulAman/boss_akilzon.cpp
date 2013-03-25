@@ -56,7 +56,7 @@ static const Position waypoints[8] =
 enum NPCs
 {
     npc_soaring_eagle = 24858,
-    npc_electrical_storm_vehicle = 509449,
+    //npc_electrical_storm_vehicle = 509449,
     npc_amani_kiddnaper = 52638
 };
 
@@ -92,9 +92,6 @@ class boss_akilzon : public CreatureScript
 
             uint32 EnrageTimer;
             uint32 sayTick;
-            bool electrical_enter;
-            Unit* pElectricalTarget;
-            Unit* pElectricalVehicle;
 
             void Reset()
             {
@@ -115,9 +112,6 @@ class boss_akilzon : public CreatureScript
                     BirdGUIDs[i] = 0;
 
                 AmaniKiddnaperGUID = 0;
-                electrical_enter = false;
-                pElectricalTarget = NULL;
-                pElectricalVehicle = NULL;
             }
 
             void EnterCombat(Unit * /*who*/)
@@ -231,39 +225,15 @@ class boss_akilzon : public CreatureScript
 
                 if (ElectricalStormTimer <= diff) // blizzlike status: done
                 {
-                    pElectricalTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
+                    Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true);
 
-                    if (pElectricalTarget)
+                    if (pTarget)
                     {
-                        float x,y,z;
-                        pElectricalTarget->GetPosition(x,y,z);
-
-                        pElectricalVehicle = me->SummonCreature(npc_electrical_storm_vehicle, x, y, me->GetPositionZ(), pElectricalTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 80000);
-                        electrical_enter = true;
+                        DoCast(pTarget, SPELL_ELECTRICAL_STORM, false);
                     }
 
                     ElectricalStormTimer = 50000;
                 } else ElectricalStormTimer -= diff;
-
-                if (electrical_enter)
-                {
-                    if (pElectricalTarget && pElectricalVehicle)
-                    {
-                        pElectricalTarget->StopMoving();
-                        pElectricalVehicle->SetUnitMovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
-                        pElectricalVehicle->setFaction(pElectricalTarget->getFaction());
-                        pElectricalVehicle->SetDisplayId(11686);
-                        pElectricalVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        pElectricalTarget->clearUnitState(UNIT_STAT_UNATTACKABLE);
-                        pElectricalTarget->EnterVehicle(pElectricalVehicle, 0);
-                        DoCast(pElectricalVehicle, SPELL_ELECTRICAL_STORM, false);
-                        pElectricalVehicle->SetFacingTo(pElectricalTarget->GetOrientation());
-                        pElectricalVehicle->GetMotionMaster()->MoveJump(pElectricalTarget->GetPositionX(),pElectricalTarget->GetPositionY(),me->GetPositionZ()+7,5,1);
-
-                        electrical_enter = false;
-
-                    }
-                }
 
                 if (100.0f - me->GetHealthPct() > SummonEaglesCounter * 5) // blizzlike status: done
                 {

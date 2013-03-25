@@ -1680,9 +1680,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                     case 43648: // Electrical Storm
                         target->SetStunned(false);
-                        target->SetFlying(false);
-                        if (target->GetVehicle())
-                            target->ExitVehicle();
                         break;
                 }
                 break;
