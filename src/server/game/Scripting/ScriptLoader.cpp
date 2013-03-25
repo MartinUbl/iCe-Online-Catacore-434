@@ -1243,7 +1243,7 @@ void AddCataclysmScripts()
     AddSC_boss_ultraxion();
     AddSC_boss_warlord_zonozz();
     AddSC_boss_warmaster_blackhorn();
-    AddSC_boss_yorsahj_the_unsleeping()
+    AddSC_boss_yorsahj_the_unsleeping();
 
 #endif
 }
