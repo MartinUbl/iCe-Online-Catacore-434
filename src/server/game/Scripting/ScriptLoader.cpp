@@ -594,7 +594,14 @@ void AddSC_boss_lord_rhyolith();
 void AddSC_boss_majordomo_staghelm();
 void AddSC_boss_ragnaros_fl();
 void AddSC_boss_shannox();
-
+void AddSC_instance_dragonsoul();
+void AddSC_boss_deathwing();
+void AddSC_boss_hagara_the_stormbinder();
+void AddSC_boss_morchok();
+void AddSC_boss_ultraxion();
+void AddSC_boss_warlord_zonozz();
+void AddSC_boss_warmaster_blackhorn();
+void AddSC_boss_yorsahj_the_unsleeping();
 
 // battlegrounds
 
@@ -1228,6 +1235,15 @@ void AddCataclysmScripts()
     AddSC_boss_majordomo_staghelm();
     AddSC_boss_ragnaros_fl();
     AddSC_boss_shannox();
+
+    AddSC_instance_dragonsoul();
+    AddSC_boss_deathwing();
+    AddSC_boss_hagara_the_stormbinder();
+    AddSC_boss_morchok();
+    AddSC_boss_ultraxion();
+    AddSC_boss_warlord_zonozz();
+    AddSC_boss_warmaster_blackhorn();
+    AddSC_boss_yorsahj_the_unsleeping()
 
 #endif
 }

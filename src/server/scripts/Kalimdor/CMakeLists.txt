@@ -42,6 +42,15 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/DarkPortal/dark_portal.cpp
   Kalimdor/CavernsOfTime/DarkPortal/boss_aeonus.cpp
   Kalimdor/CavernsOfTime/DarkPortal/boss_temporus.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_deathwing.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_warmaster_blackhorn.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_hagara_the_stormbinder.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_yorsahj_the_unsleeping.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_morchok.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/dragonsoul.h
+  Kalimdor/CavernsOfTime/DragonSoul/boss_ultraxion.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/instance_dragonsoul.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/boss_warlord_zonozz.cpp
   Kalimdor/BlackfathomDeeps/boss_kelris.cpp
   Kalimdor/BlackfathomDeeps/instance_blackfathom_deeps.cpp
   Kalimdor/BlackfathomDeeps/boss_gelihast.cpp
