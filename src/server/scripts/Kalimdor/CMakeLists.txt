@@ -128,6 +128,15 @@ set(scripts_STAT_SRCS
   Kalimdor/ahnqiraj.cpp
   Kalimdor/mount_hyjal.cpp
   Kalimdor/uldum.cpp
+  Kalimdor/Firelands/instance_firelands.cpp
+  Kalimdor/Firelands/boss_shannox.cpp
+  Kalimdor/Firelands/boss_alysrazor.cpp
+  Kalimdor/Firelands/boss_baeloroc.cpp
+  Kalimdor/Firelands/boss_bethtilac.cpp
+  Kalimdor/Firelands/boss_lord_rhyolith.cpp
+  Kalimdor/Firelands/boss_majordomo_staghelm.cpp
+  Kalimdor/Firelands/boss_ragnaros.cpp
+  Kalimdor/Firelands/firelands.h
 )
 
 message("  -> Prepared: Kalimdor")

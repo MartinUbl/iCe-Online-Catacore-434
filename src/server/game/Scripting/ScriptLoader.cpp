@@ -586,6 +586,14 @@ void AddSC_instance_the_stonecore();
 void AddSC_instance_throne_of_the_tides();
 void AddSC_corborus();
 void AddSC_twilight_council();
+void AddSC_instance_firelands();
+void AddSC_boss_alysrazor();
+void AddSC_boss_baeloroc();
+void AddSC_boss_bethtilac();
+void AddSC_boss_lord_rhyolith();
+void AddSC_boss_majordomo_staghelm();
+void AddSC_boss_ragnaros_fl();
+void AddSC_boss_shannox();
 
 
 // battlegrounds
@@ -1211,6 +1219,16 @@ void AddCataclysmScripts()
     AddSC_boss_defensing_system();
     AddSC_boss_chimaeron();
     AddSC_instance_blackwing_descent();
+
+    AddSC_instance_firelands();
+    AddSC_boss_alysrazor();
+    AddSC_boss_baeloroc();
+    AddSC_boss_bethtilac();
+    AddSC_boss_lord_rhyolith();
+    AddSC_boss_majordomo_staghelm();
+    AddSC_boss_ragnaros_fl();
+    AddSC_boss_shannox();
+
 #endif
 }
 
