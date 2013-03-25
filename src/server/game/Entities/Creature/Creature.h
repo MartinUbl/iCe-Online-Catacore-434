@@ -714,9 +714,8 @@ class Creature : public Unit, public GridObject<Creature>
         float m_respawnradius;
 
         ReactStates m_reactState;                           // for AI, not charmInfo
-        void RegenerateMana();
         void RegenerateHealth();
-        void Regenerate(Powers power);
+        void Regenerate(Powers power, uint32 diff);
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
         uint32 m_DBTableGuid;                               ///< For new or temporary creatures is 0 for saved it is lowguid
@@ -727,6 +726,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool m_regenHealth;
         bool m_AI_locked;
         bool m_isDeadByDefault;
+        float m_powerFraction;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;

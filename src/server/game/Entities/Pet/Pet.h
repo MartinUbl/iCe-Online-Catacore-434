@@ -101,7 +101,6 @@ typedef std::vector<uint32> AutoSpellList;
 
 #define PET_FOLLOW_DIST  1.0f
 #define PET_FOLLOW_ANGLE (M_PI/2)
-#define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
 
 class Player;
 
@@ -222,7 +221,6 @@ class Pet : public Guardian
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         uint64  m_auraRaidUpdateMask;
         bool    m_loading;
-        int32   m_regenTimer;
 
         DeclinedName *m_declinedname;
 

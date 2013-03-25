@@ -152,7 +152,8 @@ m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_i
 m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_creatureInfo(NULL), m_creatureData(NULL),
 m_path_id(0), m_formation(NULL)
 {
-    m_regenTimer = CREATURE_REGEN_INTERVAL;
+    m_regenTimer = 0;
+    m_powerFraction = 0;
     m_valuesCount = UNIT_END;
 
     for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
@@ -354,6 +355,23 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData *data
 
     for (uint8 i=0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = GetCreatureInfo()->spells[i];
+
+    // turn on power regeneration
+    switch (Entry)
+    {
+        // Some creatures need to have no regen for AI purposes
+        case 45870: // Anshal
+        case 45871: // Nezir
+        case 45872: // Rohash
+        case 42179: // Electron
+        case 42166: // Arcanotron
+        case 42178: // Magmatron
+        case 42180: // Toxitron
+            break;
+        default:
+            SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
+            break;
+    }
 
     return true;
 }
@@ -566,7 +584,7 @@ void Creature::Update(uint32 diff)
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
             if (!isAlive())
                 break;
-
+            /*
             if (m_regenTimer > 0)
             {
                 if (diff >= m_regenTimer)
@@ -577,7 +595,8 @@ void Creature::Update(uint32 diff)
 
             if (m_regenTimer != 0)
                break;
-
+               */
+            m_regenTimer += diff;
             bool bIsPolymorphed = IsPolymorphed();
             bool bInCombat = isInCombat() && (!getVictim() ||                                        // if isInCombat() is true and this has no victim
                              !getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
@@ -585,16 +604,16 @@ void Creature::Update(uint32 diff)
 
             /*if (m_regenTimer <= diff)
             {*/
-            if (!bInCombat || bIsPolymorphed) // regenerate health if not in combat or if polymorphed
-                RegenerateHealth();
+            if (m_regenTimer >= CREATURE_REGEN_INTERVAL)
+                if (!bInCombat || bIsPolymorphed) // regenerate health if not in combat or if polymorphed
+                    RegenerateHealth();
 
-            if (getPowerType() == POWER_ENERGY)
+            if (HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER))
             {
-                if (!IsVehicle() || GetVehicleKit()->GetVehicleInfo()->m_powerType != POWER_PYRITE)
-                    Regenerate(POWER_ENERGY);
+                Powers power = getPowerType();
+                if (power == POWER_ENERGY || power == POWER_FOCUS || power == POWER_MANA)
+                    Regenerate(power, diff);
             }
-            else
-                RegenerateMana();
 
             /*if (!bIsPolymorphed) // only increase the timer if not polymorphed
                     m_regenTimer += CREATURE_REGEN_INTERVAL - diff;
@@ -602,7 +621,9 @@ void Creature::Update(uint32 diff)
             else
                 if (!bIsPolymorphed) // if polymorphed, skip the timer
                     m_regenTimer -= diff;*/
-            m_regenTimer = CREATURE_REGEN_INTERVAL;
+            if (m_regenTimer >= CREATURE_REGEN_INTERVAL)
+                m_regenTimer -= CREATURE_REGEN_INTERVAL;
+
             break;
         }
         default:
@@ -610,41 +631,6 @@ void Creature::Update(uint32 diff)
     }
 
     sScriptMgr->OnCreatureUpdate(this, diff);
-}
-
-void Creature::RegenerateMana()
-{
-    uint32 curValue = GetPower(POWER_MANA);
-    uint32 maxValue = GetMaxPower(POWER_MANA);
-
-    if (curValue >= maxValue)
-        return;
-
-    uint32 addvalue = 0;
-
-    // Combat and any controlled creature
-    if (isInCombat() || GetCharmerOrOwnerGUID())
-    {
-        if (!IsUnderLastManaUseEffect())
-        {
-            float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
-            float Spirit = GetStat(STAT_SPIRIT);
-
-            addvalue = uint32((Spirit/5.0f + 17.0f) * ManaIncreaseRate);
-        }
-    }
-    else
-        addvalue = maxValue/3;
-
-    // Apply modifiers (if any).
-    AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_MANA)
-            addvalue = uint32(addvalue * ((*i)->GetAmount() + 100) / 100.0f);
-
-    addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) * CREATURE_REGEN_INTERVAL / (5 * IN_MILLISECONDS);
-
-    ModifyPower(POWER_MANA, addvalue);
 }
 
 void Creature::RegenerateHealth()

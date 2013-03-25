@@ -94,6 +94,7 @@ void Vehicle::Install()
             case POWER_PYRITE:
                 me->setPowerType(POWER_ENERGY);
                 me->SetMaxPower(POWER_ENERGY, 50);
+                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
                 break;
             default:
                 for (uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)

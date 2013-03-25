@@ -61,7 +61,6 @@ m_duration(0), m_auraRaidUpdateMask(0), m_loading(false), m_declinedname(NULL)
     }
 
     m_name = "Pet";
-    m_regenTimer = PET_FOCUS_REGEN_INTERVAL;
 
     m_isWorldObject = true;
 }
@@ -548,6 +547,8 @@ void Pet::Update(uint32 diff)
             }
 
             //regenerate focus for hunter pets or energy for deathknight's ghoul
+            // in Creature::Update
+            /*
             if (m_regenTimer)
             {
                 if (m_regenTimer > int32(diff))
@@ -561,18 +562,18 @@ void Pet::Update(uint32 diff)
                             m_regenTimer += PET_FOCUS_REGEN_INTERVAL - diff;
                             if (m_regenTimer <= 0) m_regenTimer = 1;
                             break;
-                        // in creature::update
-                        //case POWER_ENERGY:
-                        //    Regenerate(POWER_ENERGY);
-                        //    m_regenTimer += CREATURE_REGEN_INTERVAL - diff;
-                        //    if (!m_regenTimer) ++m_regenTimer;
-                        //    break;
+                        case POWER_ENERGY:
+                            Regenerate(POWER_ENERGY);
+                            m_regenTimer += CREATURE_REGEN_INTERVAL - diff;
+                            if (!m_regenTimer) ++m_regenTimer;
+                            break;
                         default:
                             m_regenTimer = 0;
                             break;
                     }
                 }
             }
+            */
 
             break;
         }
@@ -582,12 +583,13 @@ void Pet::Update(uint32 diff)
     Creature::Update(diff);
 }
 
-void Creature::Regenerate(Powers power)
+void Creature::Regenerate(Powers power, uint32 diff)
 {
-    uint32 curValue = GetPower(power);
-    uint32 maxValue = GetMaxPower(power);
+    int32 curValue = GetPower(power);
+    int32 maxValue = GetMaxPower(power);
 
-    if (curValue >= maxValue)
+    uint32 powerIndex = GetPowerIndex(power);
+    if (power == MAX_POWERS)
         return;
 
     float addvalue = 0.0f;
@@ -597,32 +599,38 @@ void Creature::Regenerate(Powers power)
         case POWER_FOCUS:
         {
             // For hunter pets.
-            addvalue = 20 * sWorld->getRate(RATE_POWER_FOCUS);      // 5 per second
+            addvalue = 5.0f * diff / IN_MILLISECONDS * sWorld->getRate(RATE_POWER_FOCUS);      // 5 per second
             break;
         }
         case POWER_ENERGY:
         {
             // For deathknight's ghoul.
-            addvalue = 20;
+            addvalue = 10.0f * diff / IN_MILLISECONDS * sWorld->getRate(RATE_POWER_ENERGY);      // 10 per second
+            break;
+        }
+        case POWER_MANA:
+        {
+            // TODO: use correct formula, this one gives really tiny regeneration
+            // TODO: use UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER and UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER
+                // so client will display the regeneration smoothly
+            if (isInCombat() || GetCharmerOrOwnerGUID())
+            {
+                if (!IsUnderLastManaUseEffect())
+                {
+                    float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
+                    float Spirit = GetStat(STAT_SPIRIT);
+
+                    addvalue = (Spirit/5.0f + 17.0f) * ManaIncreaseRate * diff;
+                }
+            }
+            else
+                addvalue = maxValue * float(diff) / 3;
+
+            addvalue /= CREATURE_REGEN_INTERVAL;
             break;
         }
         default:
             return;
-    }
-
-    // Some creatures need to have no regen for AI purposes
-    switch(GetEntry())
-    {
-    case 45870: // Anshal
-    case 45871: // Nezir
-    case 45872: // Rohash
-    case 42179: // Electron
-    case 42166: // Arcanotron
-    case 42178: // Magmatron
-    case 42180: // Toxitron
-        return;
-    default:
-        break;
     }
 
     // Apply modifiers (if any).
@@ -631,9 +639,26 @@ void Creature::Regenerate(Powers power)
         if (Powers((*i)->GetMiscValue()) == power)
             addvalue *= ((*i)->GetAmount() + 100) / 100.0f;
 
-    addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * (isHunterPet()? PET_FOCUS_REGEN_INTERVAL : CREATURE_REGEN_INTERVAL) / (5 * IN_MILLISECONDS);
+    addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * diff / (5 * IN_MILLISECONDS);
 
-    ModifyPower(power, (int32)addvalue);
+    addvalue += m_powerFraction;
+    int32 addIntValue = floor(addvalue);
+    m_powerFraction = addvalue - addIntValue;
+
+    int32 newValue = curValue + addIntValue;
+
+    if (newValue < 0)
+        newValue = 0;
+    else if (newValue >= maxValue)
+    {
+        newValue = maxValue;
+        m_powerFraction = 0;
+    }
+
+    if (m_regenTimer >= CREATURE_REGEN_INTERVAL)
+        ModifyPower(power, newValue - curValue);
+    else
+        UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, newValue);
 }
 
 bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
