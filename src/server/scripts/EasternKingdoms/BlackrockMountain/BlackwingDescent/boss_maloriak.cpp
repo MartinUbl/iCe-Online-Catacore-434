@@ -83,7 +83,7 @@ enum Spells
     // <==== Aberration
 
     // Cauldron ====>
-    SPELL_DEBILITATING_SLIME     = 77615,
+    SPELL_DEBILITATING_SLIME     = 92910,
     SPELL_DEBILITATING_SLIME_VISUAL = 77602,
     // <==== Cauldron
 

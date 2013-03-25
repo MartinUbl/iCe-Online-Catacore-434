@@ -3107,7 +3107,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                     itr = unitList.erase(itr);
                             }
                             break;
-                        case 77615: // Debilitating Slime
+                        case 92910: // Debilitating Slime
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
                            {
                                 if ((*itr)->GetTypeId()== TYPEID_UNIT && ((*itr)->ToCreature()->GetEntry() == 415055 ||
