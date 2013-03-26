@@ -25482,6 +25482,10 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell)
         cdTime = 1500.0f;
 
     ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, cdTime, spell);
+
+    if (cdTime < 1000.0f && cdTime > 0)
+        cdTime = 1000.0f;
+
     if (cdTime > 0)
         m_globalCooldowns[spellInfo->StartRecoveryCategory] = uint32(cdTime);
 }
