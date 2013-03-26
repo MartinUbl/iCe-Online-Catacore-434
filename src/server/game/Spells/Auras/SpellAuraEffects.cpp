@@ -5714,13 +5714,13 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
             // Shares cooldown with Will of the Forsaken (undead)
-            if (target->ToPlayer() && target->HasSpell(7744) && target->ToPlayer()->GetSpellCooldownDelay(7744) < 30)
+            if (target->ToPlayer() && target->HasSpell(7744) && target->ToPlayer()->GetSpellCooldownDelay(7744) < 30000)
             {
                 if (target->ToPlayer()->HasSpellCooldown(7744))
                     target->ToPlayer()->ModifySpellCooldown(7744, 30-target->ToPlayer()->GetSpellCooldownDelay(7744), true);
                 else
                 {
-                    target->ToPlayer()->AddSpellCooldown(7744, 0, time(NULL)+30);
+                    target->ToPlayer()->AddSpellCooldown(7744, 0, 30000);
                     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
                     data << uint64(target->GetGUID());
                     data << uint8(1);
@@ -5732,13 +5732,13 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             break;
         case 7744: // Will of the Forsaken
             // Shares cooldown with PvP Trinket (undead)
-            if (target->ToPlayer() && target->ToPlayer()->GetSpellCooldownDelay(42292) < 30)
+            if (target->ToPlayer() && target->ToPlayer()->GetSpellCooldownDelay(42292) < 30000)
             {
                 if (target->ToPlayer()->HasSpellCooldown(42292))
                     target->ToPlayer()->ModifySpellCooldown(42292, 30-target->ToPlayer()->GetSpellCooldownDelay(42292), true);
                 else
                 {
-                    target->ToPlayer()->AddSpellCooldown(42292, 0, time(NULL)+30);
+                    target->ToPlayer()->AddSpellCooldown(42292, 0, 30000);
                     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
                     data << uint64(target->GetGUID());
                     data << uint8(1);

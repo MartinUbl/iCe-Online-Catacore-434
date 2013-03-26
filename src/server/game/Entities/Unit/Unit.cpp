@@ -193,6 +193,7 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
 
     m_CombatTimer = 0;
     m_lastManaUse = 0;
+    m_LogonTimer = 0;
 
     //m_victimThreat = 0.0f;
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -243,6 +244,7 @@ void Unit::Update(uint32 p_time)
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
+    m_LogonTimer += p_time;
     m_Events.Update(p_time);
 
     if (!IsInWorld())
@@ -766,7 +768,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if (pVictim->HasAura(33882) || (pVictim->HasAura(33881) && roll_chance_i(50) ))
             {
                 pVictim->CastSpell(pVictim, 774, true);
-                pVictim->ToPlayer()->AddSpellCooldown(45281, 0, time(NULL)+6);
+                pVictim->ToPlayer()->AddSpellCooldown(45281, 0, 6000);
             }
         }
 
@@ -5335,7 +5337,7 @@ bool Unit::HandleModPowerRegenAuraProc(Unit *pVictim, uint32 damage, AuraEffect*
         CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -5397,7 +5399,7 @@ bool Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, uint32 /*damage*/, AuraE
         CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -5819,7 +5821,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     for (std::vector<uint32>::iterator itr = RandomSpells.begin(); itr != RandomSpells.end(); ++itr)
                     {
                         if (!ToPlayer()->HasSpellCooldown(*itr))
-                            ToPlayer()->AddSpellCooldown(*itr,0,time(NULL) + cooldown);
+                            ToPlayer()->AddSpellCooldown(*itr,0,cooldown*1000);
                     }
                     break;
                 }
@@ -5865,7 +5867,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     for (std::vector<uint32>::iterator itr = RandomSpells.begin(); itr != RandomSpells.end(); ++itr)
                     {
                         if (!ToPlayer()->HasSpellCooldown(*itr))
-                            ToPlayer()->AddSpellCooldown(*itr,0,time(NULL) + cooldown);
+                            ToPlayer()->AddSpellCooldown(*itr,0,cooldown*1000);
                     }
                     break;
                 }
@@ -6062,16 +6064,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (GetTypeId() != TYPEID_PLAYER)
                         return false;
 
-                    SpellCooldowns const SpellCDs = this->ToPlayer()->GetSpellCooldowns();
-                    // remove cooldowns on all ranks of Frost Nova
-                    for (SpellCooldowns::const_iterator itr = SpellCDs.begin(); itr != SpellCDs.end(); itr++)
-                    {
-                        SpellEntry const* SpellCDs_entry = sSpellStore.LookupEntry(itr->first);
-                        // Frost Nova
-                        if (SpellCDs_entry && SpellCDs_entry->SpellFamilyName == SPELLFAMILY_MAGE
-                           && SpellCDs_entry->SpellFamilyFlags[0] && 0x00000040)
-                            this->ToPlayer()->RemoveSpellCooldown(SpellCDs_entry->Id, true);
-                    }
+                    // remove cooldown from Frost Nova
+                    ToPlayer()->RemoveSpellCooldown(122, true);
                     break;
                 }
             }
@@ -6845,7 +6839,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                                 if (!triggeredByAura->GetCaster()->ToPlayer()->HasSpellCooldown(51699))
                                 {
                                     triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster()->getVictim(), 51699, true);
-                                    triggeredByAura->GetCaster()->ToPlayer()->AddSpellCooldown(51699, 0, time(NULL)+2);
+                                    triggeredByAura->GetCaster()->ToPlayer()->AddSpellCooldown(51699, 0, 2000);
                                 }
                             }
                         }
@@ -7582,7 +7576,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                     // apply cooldown before cast to prevent processing itself
                     if (cooldown)
-                        ToPlayer()->AddSpellCooldown(dummySpell->Id,0,time(NULL) + cooldown);
+                        ToPlayer()->AddSpellCooldown(dummySpell->Id,0,cooldown*1000);
 
                     // triggering three extra attacks
                     for (uint32 i = 0; i < 3; ++i)
@@ -7682,24 +7676,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 70811:
                 {
                     // Lightning Bolt & Chain Lightning
-                    if(procSpell->SpellFamilyFlags[0] & 0x3)
+                    if (GetTypeId() == TYPEID_PLAYER && (procSpell->SpellFamilyFlags[0] & 0x3))
                     {
-                        if (ToPlayer()->HasSpellCooldown(16166))
-                        {
-                            uint32 newCooldownDelay = ToPlayer()->GetSpellCooldownDelay(16166);
-                            if (newCooldownDelay < 3)
-                                newCooldownDelay = 0;
-                            else
-                                newCooldownDelay -= 2;
-                            ToPlayer()->AddSpellCooldown(16166,0, uint32(time(NULL) + newCooldownDelay));
-
-                            WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
-                            data << uint32(16166);                  // Spell ID
-                            data << uint64(GetGUID());              // Player GUID
-                            data << int32(-2000);                   // Cooldown mod in milliseconds
-                            ToPlayer()->GetSession()->SendPacket(&data);
-                            return true;
-                        }
+                        // reduce the cooldown of Elemental Mastery by 1 second
+                        ToPlayer()->ModifySpellCooldown(16116, -1000, true);
+                        return true;
                     }
                     return false;
                 }
@@ -8211,7 +8192,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 CastCustomSpell(this, 76691, &bp, &bp, &bp, true);
             }
 
-            ToPlayer()->AddSpellCooldown(76691,0,time(NULL) + cooldown);
+            ToPlayer()->AddSpellCooldown(76691,0,cooldown*1000);
         }
 
         // we handled everything, leave
@@ -8249,7 +8230,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura, originalCaster);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(cooldown_spell_id,0,time(NULL) + cooldown);
+        ToPlayer()->AddSpellCooldown(cooldown_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -8307,7 +8288,7 @@ bool Unit::HandleObsModEnergyAuraProc(Unit *pVictim, uint32 /*damage*/, AuraEffe
         CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,cooldown*1000);
     return true;
 }
 bool Unit::HandleModDamagePctTakenAuraProc(Unit *pVictim, uint32 /*damage*/, AuraEffect* triggeredByAura, SpellEntry const * /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown)
@@ -8365,7 +8346,7 @@ bool Unit::HandleModDamagePctTakenAuraProc(Unit *pVictim, uint32 /*damage*/, Aur
         CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -9207,11 +9188,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 31829:
         {
             // Check for player origin and for spell cooldown
-            if(!ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+            if(!ToPlayer() || ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                 return false;
 
             // Add internal cooldown (8 seconds hardcoded value)
-            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+8);
+            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,8000);
             break;
         }
         // Will of the Necropolis
@@ -9220,11 +9201,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 81164:
         {
             // Check for player origin, health percentage and for spell cooldown
-            if(!HealthBelowPct(30) || !ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+            if(!HealthBelowPct(30) || !ToPlayer() || ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                 return false;
 
             // Add internal cooldown (45 seconds hardcoded value)
-            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+45);
+            ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,45000);
 
             // Also reset cooldown on Rune Tap if any
             ToPlayer()->RemoveSpellCooldown(48982, true);
@@ -9236,15 +9217,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 12668:
         {
             // Check for player origin and for spell cooldown
-            if(!ToPlayer() || ToPlayer()->GetSpellCooldownDelay(auraSpellInfo->Id))
+            if(!ToPlayer() || ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                 return false;
 
             // Add internal cooldown
             // Rank 1 - 60 seconds, Rank 2 - 30 seconds
             if (auraSpellInfo->Id == 12289)
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+60);
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,60000);
             else
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL)+30);
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,30000);
             break;
         }
         // Bonus Healing (Crystal Spire of Karabor mace)
@@ -9551,7 +9532,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                     return false;
 
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+60);
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 60000);
                 break;
             // 30 second cooldown
             case 92180: // Leaden Despair
@@ -9562,7 +9543,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                     return false;
 
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+30);
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 30000);
                 break;
             // 20 second cooldown and hp check
             case 90998: // Sorrowsong
@@ -9570,7 +9551,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id) || !pVictim || pVictim->GetHealthPct() > 35.0f)
                     return false;
 
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+20);
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 20000);
                 break;
 
             case 89183: // Darkmoon card: Tsunami
@@ -9579,7 +9560,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     return false;
 
                 if (ToPlayer()->GetAura(89183)->GetStackAmount() == 5)
-                    ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL)+30);
+                    ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 30000);
                 break;
             }
         }
@@ -9599,7 +9580,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             CastSpell(pVictim, procSpell->Id, true);
 
             if (cooldown)
-                plr->AddSpellCooldown(16459, 0, time(NULL) + cooldown);
+                plr->AddSpellCooldown(16459, 0, cooldown*1000);
             return true;
         }
     }
@@ -9647,7 +9628,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             target->CastSpell(target,trigger_spell_id,true,castItem,triggeredByAura);
 
             if (cooldown && GetTypeId() == TYPEID_PLAYER)
-                this->ToPlayer()->AddSpellCooldown(trigger_spell_id,0,time(NULL) + cooldown);
+                this->ToPlayer()->AddSpellCooldown(trigger_spell_id,0,cooldown*1000);
             return true;
         }
         // Cast positive spell on enemy target
@@ -9911,7 +9892,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (ToPlayer()->HasSpellCooldown(85285))
                 return false;
             // Add custom cooldown (proc cooldown doesn't work)
-            ToPlayer()->AddSpellCooldown(85285,0,time(NULL)+30);
+            ToPlayer()->AddSpellCooldown(85285,0,30000);
             // And set absorb points by formula
             basepoints0 = 1+ToPlayer()->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*2.5f;
             break;
@@ -9952,7 +9933,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         CastSpell(target,trigger_spell_id,true,castItem,triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(trigger_spell_id,0,time(NULL) + cooldown);
+        ToPlayer()->AddSpellCooldown(trigger_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -10054,7 +10035,7 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint32 /*damage*/, A
     CastSpell(pVictim, triggered_spell_id, true, castItem, triggeredByAura);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        this->ToPlayer()->AddSpellCooldown(triggered_spell_id,0,cooldown*1000);
 
     return true;
 }
@@ -15926,7 +15907,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                         bp0 = GetMaxPower(POWER_MANA)*0.08f;
                         CastCustomSpell(this, 68285, &bp0, 0, 0, true);
 
-                        ToPlayer()->AddSpellCooldown(34299, 0, time(NULL)+6);
+                        ToPlayer()->AddSpellCooldown(34299, 0, 6000);
                     }
                 }
 
@@ -17204,7 +17185,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                         if (!pOwner->ToPlayer()->HasSpellCooldown(88448))
                         {
                             pOwner->CastCustomSpell(pOwner, 88448, &bp0, 0, 0, true);
-                            pOwner->ToPlayer()->AddSpellCooldown(88448, 0, time(NULL)+120); // add 2 min cd
+                            pOwner->ToPlayer()->AddSpellCooldown(88448, 0, 120000); // add 2 min cd
                         }
                     }
                     break;

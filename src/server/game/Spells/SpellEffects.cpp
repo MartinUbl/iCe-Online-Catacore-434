@@ -851,7 +851,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                     // Glyph of Soul Swap also makes this spell to have cooldown
                     if (m_caster->HasAura(56226))
-                        m_caster->ToPlayer()->AddSpellCooldown(86121, 0, time(NULL)+30);
+                        m_caster->ToPlayer()->AddSpellCooldown(86121, 0, 30000);
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
@@ -4633,7 +4633,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         }
 
         while (!cd_spells.empty()) {
-            player->AddSpellCooldown(cd_spells.back(), 0, time(NULL)+cd_time);
+            player->AddSpellCooldown(cd_spells.back(), 0, cd_time * 1000);
             cd_spells.pop_back();
         }
 
@@ -4945,7 +4945,7 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
 
     // Revitalize - add cooldown, which was not set by default
     if (m_spellInfo->Id == 81094 && m_caster->ToPlayer())
-        m_caster->ToPlayer()->AddSpellCooldown(81094, 0, time(NULL)+12); // 12 seconds
+        m_caster->ToPlayer()->AddSpellCooldown(81094, 0, 12000); // 12 seconds
 }
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
@@ -8179,7 +8179,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     // Consume aura
                     m_caster->RemoveAurasDueToSpell(81661);
                     // Add cooldown
-                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, time(NULL)+30);
+                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, 30000);
                 }
                 // Dark Evangelism / Dark Archangel
                 else if (Aura* aura = m_caster->GetAura(87118))
@@ -8199,7 +8199,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     // Consume aura
                     m_caster->RemoveAurasDueToSpell(87118);
                     // Add cooldown
-                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, time(NULL)+90);
+                    m_caster->ToPlayer()->AddSpellCooldown(87151, 0, 90000);
                 }
 
                 // Disable spell
@@ -8474,9 +8474,9 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
 #endif
 
     /* trigger 30min hearthstone cooldown, 15min astral recall */
-    pTarget->AddSpellCooldown(8690, 0, time(NULL)+1800);
+    pTarget->AddSpellCooldown(8690, 0, 1800*1000);
     if (pTarget->HasSpell(556))
-        pTarget->AddSpellCooldown(556, 0, time(NULL)+900);
+        pTarget->AddSpellCooldown(556, 0, 900*1000);
 
     /* doesn't work (??) */
     //WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);

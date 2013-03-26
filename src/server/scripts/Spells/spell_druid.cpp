@@ -305,19 +305,19 @@ public:
             {
                 bp = 5;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
             }
             else if(caster->HasAura(NATURES_GRACE_R2))
             {
                 bp = 10;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
             }
             else if(caster->HasAura(NATURES_GRACE_R3))
             {
                 bp = 15;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,time(NULL) + 60);
+                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
             }
         }
 

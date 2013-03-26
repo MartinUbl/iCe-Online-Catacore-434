@@ -1467,42 +1467,42 @@ public:
                 break;
             case GOSSIP_SENDER_MAIN+1:
                 pCreature->CastSpell(pPlayer, SPELL_DMG, false);
-                pPlayer->AddSpellCooldown(SPELL_DMG,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_DMG,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+2:
                 pCreature->CastSpell(pPlayer, SPELL_RES, false);
-                pPlayer->AddSpellCooldown(SPELL_RES,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_RES,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+3:
                 pCreature->CastSpell(pPlayer, SPELL_ARM, false);
-                pPlayer->AddSpellCooldown(SPELL_ARM,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_ARM,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+4:
                 pCreature->CastSpell(pPlayer, SPELL_SPI, false);
-                pPlayer->AddSpellCooldown(SPELL_SPI,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_SPI,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+5:
                 pCreature->CastSpell(pPlayer, SPELL_INT, false);
-                pPlayer->AddSpellCooldown(SPELL_INT,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_INT,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+6:
                 pCreature->CastSpell(pPlayer, SPELL_STM, false);
-                pPlayer->AddSpellCooldown(SPELL_STM,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_STM,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+7:
                 pCreature->CastSpell(pPlayer, SPELL_STR, false);
-                pPlayer->AddSpellCooldown(SPELL_STR,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_STR,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
             case GOSSIP_SENDER_MAIN+8:
                 pCreature->CastSpell(pPlayer, SPELL_AGI, false);
-                pPlayer->AddSpellCooldown(SPELL_AGI,0,time(NULL) + 7200);
+                pPlayer->AddSpellCooldown(SPELL_AGI,0,7200*1000);
                 SendAction(pPlayer, pCreature, uiAction);
                 break;
         }

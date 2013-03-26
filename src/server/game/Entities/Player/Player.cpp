@@ -3244,7 +3244,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 void Player::SendInitialSpells()
 {
     time_t curTime = time(NULL);
-    time_t infTime = curTime + infinityCooldownDelayCheck;
+    uint32 infTime = infinityCooldownDelayCheck;
 
     uint16 spellCount = 0;
 
@@ -3291,7 +3291,7 @@ void Player::SendInitialSpells()
             continue;
         }
 
-        time_t cooldown = itr->second.end > curTime ? (itr->second.end-curTime)*IN_MILLISECONDS : 0;
+        uint32 cooldown = itr->second.end > m_LogonTimer ? itr->second.end - m_LogonTimer : 0;
 
         if (sEntry->Category)                          // may be wrong, but anyway better than nothing...
         {
@@ -4252,7 +4252,7 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         if (entry &&
             entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
             entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
-            itr->second.end <= time(NULL)+10*MINUTE)
+            itr->second.end <= m_LogonTimer + 10 * MINUTE * IN_MILLISECONDS)
         {
             // remove & notify
             RemoveSpellCooldown(itr->first, true);
@@ -4308,7 +4308,7 @@ void Player::_LoadSpellCooldowns(PreparedQueryResult result)
             if (db_time <= curTime)
                 continue;
 
-            AddSpellCooldown(spell_id, item_id, db_time);
+            AddSpellCooldown(spell_id, item_id, (db_time - curTime) * IN_MILLISECONDS);
 
             sLog->outDebug("Player (GUID: %u) spell %u, item %u cooldown loaded (%u secs).", GetGUIDLow(), spell_id, item_id, uint32(db_time-curTime));
         }
@@ -4321,7 +4321,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
     trans->PAppend("DELETE FROM character_spell_cooldown WHERE guid = '%u'", GetGUIDLow());
 
     time_t curTime = time(NULL);
-    time_t infTime = curTime + infinityCooldownDelayCheck;
+    uint32 infTime = infinityCooldownDelayCheck;
 
     bool first_round = true;
     std::ostringstream ss;
@@ -4329,10 +4329,12 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
     // remove outdated and save active
     for (SpellCooldowns::iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end();)
     {
-        if (itr->second.end <= curTime)
+        if (itr->second.end <= m_LogonTimer)
             m_spellCooldowns.erase(itr++);
         else if (itr->second.end <= infTime)                 // not save locked cooldowns, it will be reset or set at reload
         {
+            time_t cooldownEnd = time(NULL) + 1 + (itr->second.end - m_LogonTimer) / IN_MILLISECONDS;
+
             if (first_round)
             {
                 ss << "INSERT INTO character_spell_cooldown (guid,spell,item,time) VALUES ";
@@ -4341,7 +4343,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
             // next new/changed record prefix
             else
                 ss << ", ";
-            ss << "(" << GetGUIDLow() << "," << itr->first << "," << itr->second.itemid << "," << uint64(itr->second.end) << ")";
+            ss << "(" << GetGUIDLow() << "," << itr->first << "," << itr->second.itemid << "," << uint64(cooldownEnd) << ")";
             ++itr;
         }
         else
@@ -7599,9 +7601,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                 case 3521: // Zangarmarsh
                     TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
                     if (HasSpellCooldown(8690))
-                        ModifySpellCooldown(8690,1800, true);
+                        ModifySpellCooldown(8690,1800*1000, true);
 
-                    AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                    AddSpellCooldown(8690,0,1800*1000); // Add HearthStone Cooldown
                     GetSession()->SendNotification("You must be at least level 58 for enter");
                     break;
                 default:
@@ -7626,9 +7628,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                  case 3537: // Borean Tundra
                      TeleportTo(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f); // Teleport to homebind
                      if (HasSpellCooldown(8690))
-                         ModifySpellCooldown(8690,1800, true);
+                         ModifySpellCooldown(8690,1800*1000, true);
 
-                     AddSpellCooldown(8690,0,time(NULL)+1800); // Add HearthStone Cooldown
+                     AddSpellCooldown(8690,0,1800*1000);    // Add HearthStone Cooldown
                      GetSession()->SendNotification("You must be at least level 68 for enter");
                      break;
                  default:
@@ -21994,7 +21996,7 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
         {
             data << uint32(unSpellId);
             data << uint32(unTimeMs);                       // in m.secs
-            AddSpellCooldown(unSpellId, 0, curTime + unTimeMs/IN_MILLISECONDS);
+            AddSpellCooldown(unSpellId, 0, unTimeMs);
         }
     }
     GetSession()->SendPacket(&data);
@@ -22564,6 +22566,18 @@ void Player::UpdatePvP(bool state, bool override)
     }
 }
 
+bool Player::HasSpellCooldown(uint32 spell_id) const
+{
+    SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+    return itr != m_spellCooldowns.end() && (itr->second.end > m_LogonTimer);
+}
+
+uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
+{
+    SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+    return uint32(itr != m_spellCooldowns.end() && itr->second.end > m_LogonTimer ? itr->second.end - m_LogonTimer : 0);
+}
+
 void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
 {
     // init cooldown values
@@ -22600,18 +22614,13 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         catrec = spellInfo->CategoryRecoveryTime;
     }
 
-    time_t curTime = time(NULL);
-
-    time_t catrecTime;
-    time_t recTime;
-
     // overwrite time for selected category
     if (infinityCooldown)
     {
-        // use +MONTH as infinity mark for spell cooldown (will checked as MONTH/2 at save ans skipped)
+        // use MONTH as infinity mark for spell cooldown (will checked as MONTH/2 at save ans skipped)
         // but not allow ignore until reset or re-login
-        catrecTime = catrec > 0 ? curTime+infinityCooldownDelay : 0;
-        recTime    = rec    > 0 ? curTime+infinityCooldownDelay : catrecTime;
+        catrec = catrec > 0 ? infinityCooldownDelay : 0;
+        rec    = rec    > 0 ? infinityCooldownDelay : catrec;
     }
     else
     {
@@ -22635,8 +22644,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         if (rec == 0 && catrec == 0)
             return;
 
-        catrecTime = catrec ? curTime+catrec/IN_MILLISECONDS : 0;
-        recTime    = rec ? curTime+rec/IN_MILLISECONDS : catrecTime;
+        if (!rec)
+            rec = catrec;
     }
 
     // Apply cooldown modify auras
@@ -22670,8 +22679,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     }
 
     // self spell cooldown
-    if (recTime > 0)
-        AddSpellCooldown(spellInfo->Id, itemId, recTime);
+    if (rec > 0)
+        AddSpellCooldown(spellInfo->Id, itemId, rec);
 
     // category spells
     if (cat && catrec > 0)
@@ -22684,7 +22693,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
                 if (*i_scset == spellInfo->Id)                    // skip main spell, already handled above
                     continue;
 
-                AddSpellCooldown(*i_scset, itemId, catrecTime);
+                AddSpellCooldown(*i_scset, itemId, catrec);
             }
         }
     }
@@ -22696,38 +22705,32 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         ModifySpellCooldown(spellInfo->Id, catrecMod, true);
 }
 
-void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
+void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 msDuration)
 {
     SpellCooldown sc;
-    sc.end = end_time;
-    sc.milliseconds = 0;
+    sc.end = m_LogonTimer + msDuration;
     sc.itemid = itemid;
     m_spellCooldowns[spellid] = sc;
 }
 
 void Player::ModifySpellCooldown(uint32 spell_id, int32 mod, bool update)
 {
+    SpellCooldowns::iterator itr = m_spellCooldowns.find(spell_id);
+
     // We aren't on cooldown
-    if (m_spellCooldowns.find(spell_id) == m_spellCooldowns.end())
+    if (itr == m_spellCooldowns.end())
         return;
 
+    SpellCooldown &cooldown = itr->second;
+
     // If we would modify cooldown under current time, remove cooldown
-    if (m_spellCooldowns[spell_id].end <= time(NULL)+floor(float(mod)/IN_MILLISECONDS))
+    if (cooldown.end + mod <= m_LogonTimer)
     {
         RemoveSpellCooldown(spell_id, update);
         return;
     }
 
-    m_spellCooldowns[spell_id].end += mod/IN_MILLISECONDS;
-    if (mod % IN_MILLISECONDS > 0)
-    {
-        m_spellCooldowns[spell_id].milliseconds += mod%IN_MILLISECONDS;
-        if (abs(m_spellCooldowns[spell_id].milliseconds) >= 1000)
-        {
-            m_spellCooldowns[spell_id].end += m_spellCooldowns[spell_id].milliseconds/IN_MILLISECONDS;
-            m_spellCooldowns[spell_id].milliseconds += m_spellCooldowns[spell_id].milliseconds%IN_MILLISECONDS;
-        }
-    }
+    cooldown.end += mod;
 
     if (update)
     {
@@ -23857,7 +23860,7 @@ void Player::ApplyEquipCooldown(Item * pItem)
         if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
             continue;
 
-        AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
+        AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), 30000);
 
         WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
         data << pItem->GetGUID();

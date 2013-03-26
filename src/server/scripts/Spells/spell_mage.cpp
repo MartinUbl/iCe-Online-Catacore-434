@@ -354,7 +354,7 @@ public:
                 return;
 
             target->CastSpell(target, SPELL_CAUTERIZE_DAMAGE, true);
-            target->ToPlayer()->AddSpellCooldown(SPELL_CAUTERIZE_DAMAGE, 0, time(NULL) + 60);
+            target->ToPlayer()->AddSpellCooldown(SPELL_CAUTERIZE_DAMAGE, 0, 60000);
 
             uint32 health40 = target->CountPctFromMaxHealth(40);
 

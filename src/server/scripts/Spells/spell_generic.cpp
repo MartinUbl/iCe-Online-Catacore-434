@@ -490,7 +490,7 @@ public:
                 return;
             const SpellEntry* m_spellInfo = GetSpellInfo();
 
-            pCaster->AddSpellCooldown(m_spellInfo->Id, 0, time(NULL) + GetSpellRecoveryTime(sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)) / IN_MILLISECONDS);
+            pCaster->AddSpellCooldown(m_spellInfo->Id, 0, GetSpellRecoveryTime(sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)));
             WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
             data << uint64(pCaster->GetGUID());
             data << uint8(0);

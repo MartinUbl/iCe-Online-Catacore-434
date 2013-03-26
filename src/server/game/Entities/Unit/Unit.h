@@ -2198,6 +2198,8 @@ class Unit : public WorldObject
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
 
+        uint32 m_LogonTimer;     // time in miliseconds since creating in memory, used in cooldown calculations
+
         ThreatManager m_ThreatManager;
 
         Vehicle *m_vehicle;
