@@ -688,6 +688,18 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (me->getVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
+            {
+                if (!me->IsNonMeleeSpellCasted(false))
+                {
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveFall();
+                    float x,y,z;
+                    me->getVictim()->GetPosition(x, y, z);
+                    me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
+                 }
+            }
+
             if(AuraCheckTimer <= diff)
             {
                 me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
