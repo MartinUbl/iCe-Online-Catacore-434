@@ -57,7 +57,7 @@ public:
             if(!who)
                 return;
 
-            if(me->GetDistance(who) > 12.0f || who->hasUnitState(UNIT_STAT_JUMPING))
+            if(me->GetDistance(who) > 12.0f || who->HasAura(89771))
                 return;
 
             if(m_pInstance)
@@ -70,8 +70,8 @@ public:
                 float x = targetPos.GetPositionX() + (who->GetPositionX() - me->GetPositionX())/2;
                 float y = targetPos.GetPositionY() + (who->GetPositionY() - me->GetPositionY())/2;
                 float z = targetPos.GetPositionZ();
-                who->GetMotionMaster()->MoveJump(x, y, z, 30.0f, 9.0f);
-                me->CastSpell(who, 89771, true); // apply dummy aura
+                who->GetMotionMaster()->MoveJump(x, y, z, 40.0f, 35.0f);
+                me->AddAura(89771, who); // apply 8sec dummy aura
             }
         }
 
