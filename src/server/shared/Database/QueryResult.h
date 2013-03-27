@@ -66,6 +66,9 @@ typedef ACE_Refcounted_Auto_Ptr<ResultSet, ACE_Thread_Mutex> QueryResult;
 
 class PreparedResultSet
 {
+        typedef std::vector<Field*> Fields;
+        typedef Fields::size_type size_type;
+
     public:
         PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount);
         ~PreparedResultSet();
@@ -88,9 +91,9 @@ class PreparedResultSet
         }
 
     protected:
-        uint64 m_rowCount;
-        uint64 m_rowPosition;
-        std::vector<Field*> m_rows;
+        size_type m_rowCount;
+        size_type m_rowPosition;
+        Fields m_rows;
         uint32 m_fieldCount;
       
     private:

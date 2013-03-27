@@ -34,7 +34,7 @@ m_fields(fields)
 }
 
 PreparedResultSet::PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
-m_rowCount(rowCount),
+m_rowCount(size_type(rowCount)),
 m_rowPosition(0),
 m_fieldCount(fieldCount),
 m_rBind(NULL),
@@ -96,7 +96,7 @@ m_length(NULL)
         return;
     }
 
-    m_rowCount = mysql_stmt_num_rows(m_stmt);
+    m_rowCount = (size_type) mysql_stmt_num_rows(m_stmt);
 
     m_rows.resize(m_rowCount);
     while (_NextRow())
@@ -145,7 +145,7 @@ ResultSet::~ResultSet()
 
 PreparedResultSet::~PreparedResultSet()
 {
-    for (uint64 i = 0; i < m_rowCount; ++i)
+    for (size_type i = 0; i < m_rowCount; ++i)
         delete[] m_rows[i];
 }
 
