@@ -113,9 +113,6 @@ void AssistanceMovementGenerator::Finalize(Unit &unit)
 
 void EffectMovementGenerator::Initialize(Unit &unit)
 {
-    if (unit.GetTypeId() != TYPEID_UNIT)
-        return;
-
     unit.addUnitState(UNIT_STAT_JUMPING);
 }
 
@@ -126,10 +123,10 @@ bool EffectMovementGenerator::Update(Unit &unit, const uint32&)
 
 void EffectMovementGenerator::Finalize(Unit &unit)
 {
+    unit.clearUnitState(UNIT_STAT_JUMPING);
+
     if (unit.GetTypeId() != TYPEID_UNIT)
         return;
-
-    unit.clearUnitState(UNIT_STAT_JUMPING);
 
     if (((Creature&)unit).AI() && unit.movespline->Finalized())
         ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
