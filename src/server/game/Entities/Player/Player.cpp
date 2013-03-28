@@ -22679,6 +22679,9 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
                     continue;
 
                 AddSpellCooldown(*i_scset, itemId, catrec);
+
+                if (catrecMod != 0)
+                    ModifySpellCooldown(*i_scset, catrecMod, true);
             }
         }
     }
@@ -22686,8 +22689,6 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     // And finally modify spell cooldown in client too if needed
     if (recMod != 0)
         ModifySpellCooldown(spellInfo->Id, recMod, true);
-    if (catrecMod != 0)
-        ModifySpellCooldown(spellInfo->Id, catrecMod, true);
 }
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 msDuration)
