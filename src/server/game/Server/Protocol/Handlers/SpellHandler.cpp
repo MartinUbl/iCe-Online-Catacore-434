@@ -709,7 +709,7 @@ void WorldSession::HandleMirrrorImageDataRequest(WorldPacket & recv_data)
         data << uint8(pCreator->GetByteValue(PLAYER_BYTES, 2));   // hair
         data << uint8(pCreator->GetByteValue(PLAYER_BYTES, 3));   // haircolor
         data << uint8(pCreator->GetByteValue(PLAYER_BYTES_2, 0)); // facialhair
-        data << uint32(pCreator->GetGuildId());
+        data << uint64(pCreator->GetGuildId() ? MAKE_NEW_GUID(HIGHGUID_GUILD, 0, pCreator->GetGuildId()) : 0);
 
         static const EquipmentSlots ItemSlots[] =
         {
@@ -745,7 +745,7 @@ void WorldSession::HandleMirrrorImageDataRequest(WorldPacket & recv_data)
         // Skip player data for creatures
         data << uint8(0);
         data << uint32(0);
-        data << uint32(0);
+        data << uint64(0);
         data << uint32(0);
         data << uint32(0);
         data << uint32(0);
