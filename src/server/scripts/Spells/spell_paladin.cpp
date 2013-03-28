@@ -217,6 +217,9 @@ public:
             // Dummy visual
             me->CastSpell(me,81298,true);
             ticktimer = 1000;
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
         }
 
         uint32 ticktimer;
@@ -224,6 +227,10 @@ public:
         void DamageTaken(Unit* pAttacker, uint32& damage)
         {
             damage = 0;
+
+            // If we are still taking damage, something changed our flags and/or react state
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
         }
 
         void UpdateAI(const uint32 diff)
