@@ -119,7 +119,7 @@ class DatabaseWorkerPool
                 T* t = m_connections[IDX_ASYNC][i];
                 DatabaseWorker* worker = t->m_worker;
                 worker->wait(); // t->Close(); is called from worker thread
-                delete worker;
+                // delete worker; // worker is deleted when connection is closed - this causes double deletion and therefore segfaults
                 --m_connectionCount[IDX_ASYNC];
             }
 
