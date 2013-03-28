@@ -22663,20 +22663,6 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
         }
     }
 
-    float haste = 1 - GetFloatValue(UNIT_MOD_CAST_SPEED);
-    Unit::AuraEffectList const& auraHasteList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
-    if (!auraHasteList.empty())
-    {
-        for (Unit::AuraEffectList::const_iterator itr = auraHasteList.begin(); itr != auraHasteList.end(); ++itr)
-        {
-            if ((*itr)->IsAffectedOnSpell(spellInfo))
-            {
-                catrecMod += -((*itr)->GetAmount()/100.0f*haste*catrec);
-                recMod += -((*itr)->GetAmount()/100.0f*haste*rec);
-            }
-        }
-    }
-
     // self spell cooldown
     if (rec > 0)
         AddSpellCooldown(spellInfo->Id, itemId, rec);
@@ -23757,6 +23743,12 @@ void Player::SendInitialPacketsAfterAddToMap()
         if (!auraList.empty())
             auraList.front()->HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true);
     }
+
+    // Some talent bonuses needs to be recalculated after object fields has been set
+    Unit::AuraEffectList const& talentSpellModList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
+    if (!talentSpellModList.empty())
+        for (Unit::AuraEffectList::const_iterator itr = talentSpellModList.begin(); itr != talentSpellModList.end(); ++itr)
+            (*itr)->CalculateSpellMod();
 
     if (HasAuraType(SPELL_AURA_MOD_STUN))
         SetRooted(true);

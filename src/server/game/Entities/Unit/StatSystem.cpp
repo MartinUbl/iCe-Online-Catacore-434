@@ -905,6 +905,12 @@ void Player::UpdateHaste()
     else if (cl == CLASS_DEATH_KNIGHT)       // rune regeneration is affected by haste
         for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
             SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f * runeRegen);       // number of complete rune refreshes per second
+
+    // Recalculate spell mods related to haste
+    Unit::AuraEffectList const& talentSpellModList = GetAuraEffectsByType(SPELL_AURA_HASTE_MOD_COOLDOWN);
+    if (!talentSpellModList.empty())
+        for (Unit::AuraEffectList::const_iterator itr = talentSpellModList.begin(); itr != talentSpellModList.end(); ++itr)
+            (*itr)->CalculateSpellMod();
 }
 
 void Player::_ApplyAllStatBonuses()

@@ -1320,6 +1320,38 @@ void AuraEffect::CalculateSpellMod()
                     break;
             }
             break;
+        case SPELL_AURA_HASTE_MOD_COOLDOWN:
+        {
+            if (!GetBase()->GetUnitOwner() || GetBase()->GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            float haste = 1 - GetBase()->GetUnitOwner()->GetFloatValue(UNIT_MOD_CAST_SPEED);
+            if (!m_spellmod)
+            {
+                m_spellmod = new SpellModifier(GetBase());
+                m_spellmod->op = SpellModOp(GetMiscValue()); // should always be 11
+                if (m_spellmod->op >= MAX_SPELLMOD)
+                {
+                    delete m_spellmod;
+                    return;
+                }
+
+                m_spellmod->type = SPELLMOD_PCT;
+                m_spellmod->spellId = GetId();
+                m_spellmod->mask = GetSpellProto()->EffectSpellClassMask[GetEffIndex()];
+                m_spellmod->charges = GetBase()->GetCharges();
+                m_spellmod->value = -(float)GetAmount()*haste;
+            }
+            else
+            {
+                // spell mods, that are already applied needs to be dynamically updated in client
+                // TODO: make "SendSpellModChange" function in Player class and supply the difference as parameter to send
+                GetBase()->GetOwner()->ToPlayer()->AddSpellMod(m_spellmod, false);
+                m_spellmod->value = -(float)GetAmount()*haste;
+                GetBase()->GetOwner()->ToPlayer()->AddSpellMod(m_spellmod, true);
+            }
+            break;
+        }
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
             if (!m_spellmod)
