@@ -1445,17 +1445,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PALADIN:
             {
-                // Hammer of the Righteous
-                if (m_spellInfo->SpellFamilyFlags[1]&0x00040000)
+                // Hammer of the Righteous - AoE part
+                if (m_spellInfo->Id == 88263)
                 {
-                    // Add main hand dps * effect[2] amount
-                    float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
-                    int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_2);
-                    damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
-                    break;
+                    damage += m_spellInfo->ap_bonus*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    apply_direct_bonus = false;
                 }
                 // Shield of the Righteous
-                if (m_spellInfo->Id == 53600)
+                else if (m_spellInfo->Id == 53600)
                 {
                     // silently added bonus from Blizzard
                     damage += 0.1f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -3287,6 +3284,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
     Unit* originalCaster = NULL;
+    Unit* triggerTarget = unitTarget;
 
     const SpellEntry* baseSpellInfo = this->GetSpellInfo();
     if (baseSpellInfo)
@@ -3341,6 +3339,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             }
             else if (m_caster->HasAura(16858))
                 m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+            break;
+        }
+        // Hammer of the Righteous
+        case 88263:
+        {
+            // Trigger this spell to self - this will make the effect work properly
+            triggerTarget = m_caster;
             break;
         }
         // Dark Intent
@@ -3488,7 +3493,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     // so this just for speedup places in else
     Unit * caster = GetTriggeredSpellCaster(spellInfo, m_caster, unitTarget);
 
-    caster->CastSpell(unitTarget,spellInfo,true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+    caster->CastSpell(triggerTarget,spellInfo,true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
 }
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
