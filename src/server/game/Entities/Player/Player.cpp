@@ -24859,6 +24859,10 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
 
 void Player::SetMover(Unit* target)
 {
+    // Polymorfism is able to hide some things. This is present due to bad data usage analysis.
+    // Sometimes occur, that SetMover is called on Creature child class, so this should help us to recognize, where it does so.
+    ASSERT((this->GetTypeId() == TYPEID_PLAYER) && "Attempting to call SetMover on non-player object!");
+
     m_mover->m_movedPlayer = NULL;
     m_mover = target;
     m_mover->m_movedPlayer = this;
