@@ -962,6 +962,7 @@ void Player::UpdateMastery()
                         {
                             pEffect->SetCanBeRecalculated(true);
                             pEffect->RecalculateAmount(this);
+                            pEffect->CalculateSpellMod();
                         }
                     }
                 }

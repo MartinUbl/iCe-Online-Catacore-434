@@ -23750,6 +23750,9 @@ void Player::SendInitialPacketsAfterAddToMap()
         for (Unit::AuraEffectList::const_iterator itr = talentSpellModList.begin(); itr != talentSpellModList.end(); ++itr)
             (*itr)->CalculateSpellMod();
 
+    // Some stats depends on what is added after applying all other mods - update them
+    UpdateAllStats();
+
     if (HasAuraType(SPELL_AURA_MOD_STUN))
         SetRooted(true);
 

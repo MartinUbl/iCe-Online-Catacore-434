@@ -1114,8 +1114,10 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         case SPEC_DK_FROST:
                             modifier = 2.0f;
                             break;
-                        case SPEC_WARRIOR_ARMS:
                         case SPEC_WARLOCK_DEMONOLOGY:
+                            modifier = 2.3f;
+                            break;
+                        case SPEC_WARRIOR_ARMS:
                         case SPEC_SHAMAN_RESTORATION:
                         case SPEC_SHAMAN_ELEMENTAL:
                         case SPEC_ROGUE_COMBAT:
