@@ -473,6 +473,9 @@ void Battlefield::PlayerAcceptInviteToWar(Player *player)
 
     if (AddOrSetPlayerToCorrectBfGroup(player))
     {
+        // Unmount player to avoid flying mount usage when entered with flying mount aura
+        player->Unmount();
+
         player->GetSession()->SendBfEntered(m_BattleId);
         m_PlayersInWar[player->GetTeamId()].insert(player->GetGUID());
         m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
