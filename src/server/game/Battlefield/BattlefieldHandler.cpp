@@ -355,7 +355,11 @@ void WorldSession::HandleBfExitRequest(WorldPacket & recvData)
     {
         Battlefield* Bf = sBattlefieldMgr.GetBattlefieldToZoneId(_player->GetZoneId());
         if (!Bf)
+        {
+            if (_player->GetGroup() && _player->GetGroup()->isBFGroup())
+                _player->RemoveFromBattlegroundOrBattlefieldRaid();
             return;
+        }
 
         Bf->AskToLeaveQueue(_player);
         Bf->KickPlayerFromBf(_player->GetGUID());
@@ -391,7 +395,14 @@ void WorldSession::HandleBfExitRequest(WorldPacket & recvData)
 
     Battlefield* Bf = sBattlefieldMgr.GetBattlefieldByBattleId(BattleId);
     if (!Bf)
+    {
+        if (_player->GetGroup() && _player->GetGroup()->isBFGroup())
+            _player->RemoveFromBattlegroundOrBattlefieldRaid();
         return;
+    }
 
     Bf->AskToLeaveQueue(_player);
+
+    if (_player->GetGroup() && _player->GetGroup()->isBFGroup())
+        _player->RemoveFromBattlegroundOrBattlefieldRaid();
 }

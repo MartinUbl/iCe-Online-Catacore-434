@@ -120,6 +120,9 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, uint32 /*zone */ )
         }
     }
 
+    if (player->GetGroup() && player->GetGroup()->isBFGroup())
+        player->RemoveFromBattlegroundOrBattlefieldRaid();
+
     for (BfCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
         itr->second->HandlePlayerLeave(player);
 
