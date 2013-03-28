@@ -11966,17 +11966,27 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             pVictim->RemoveAurasDueToSpell(87178, GetGUID());
                     break;
                     case SPELLFAMILY_WARLOCK:
-                        // Searing Pain and Soulburn proficiency
-                        if (spellProto->Id == 5676 && HasAura(74434) && HasAura(79440) && ToPlayer())
+                        // Searing Pain
+                        if (spellProto->Id == 5676 && ToPlayer())
                         {
-                            if (Aura* pAura = GetAura(79440))
+                            // Soulburn proficiency
+                            if (HasAura(74434) && HasAura(79440))
                             {
-                                if (pAura->GetCharges() == 2)
+                                if (Aura* pAura = GetAura(79440))
                                 {
-                                    pAura->SetCharges(1);
-                                    return true;
+                                    if (pAura->GetCharges() == 2)
+                                    {
+                                        pAura->SetCharges(1);
+                                        return true;
+                                    }
                                 }
                             }
+
+                            // Improved Searing Pain
+                            if (HasAura(17927)) // rank 1
+                                crit_chance += 20.0f;
+                            if (HasAura(17929)) // rank 2
+                                crit_chance += 40.0f;
                         }
                         // Hand of Gul'dan increases crit chance of warlocks minions
                         if (pVictim->HasAura(86000) && GetTypeId() == TYPEID_UNIT)
