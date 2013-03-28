@@ -7425,9 +7425,6 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
     {
         if (groupsize > 1)
             honor_f /= groupsize;
-
-        // apply honor multiplier from aura (not stacking-get highest)
-        honor_f *= (GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HONOR_GAIN_PCT) + 100) / 100.0f;
     }
 
     honor_f *= sWorld->getRate(RATE_HONOR);
@@ -15942,6 +15939,10 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
                 rep_val = 30;
             if (rep_val < 15)
                 rep_val = 15;
+
+            if (HasAuraType(SPELL_AURA_MOD_GUILD_REPUTATION_GAIN_PCT))
+                rep_val *= GetTotalAuraMultiplier(SPELL_AURA_MOD_GUILD_REPUTATION_GAIN_PCT);
+
             SetReputation(FACTION_GUILD,GetReputation(FACTION_GUILD)+rep_val);
         }
     }
