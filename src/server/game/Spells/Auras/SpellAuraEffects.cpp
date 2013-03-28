@@ -4935,8 +4935,8 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp, uint8 mode
         target->GetMotionMaster()->MoveFall();
     }
 
-    if (Player *plr = target->m_movedPlayer)
-        plr->SetSendFlyPacket(apply);
+    if (target->m_movedPlayer && target->m_movedPlayer->GetTypeId() == TYPEID_PLAYER)
+        target->m_movedPlayer->SetSendFlyPacket(apply);
 }
 
 void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -5414,8 +5414,9 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const *aurApp,
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
         if (mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK && (apply || (!target->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !target->HasAuraType(SPELL_AURA_FLY))))
         {
-            if (Player *plr = target->m_movedPlayer)
+            if (target->m_movedPlayer && target->m_movedPlayer->GetTypeId() == TYPEID_PLAYER)
             {
+                Player *plr = target->m_movedPlayer;
                 plr->SetSendFlyPacket(apply);
             }
         }
