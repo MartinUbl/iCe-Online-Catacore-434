@@ -19331,6 +19331,69 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
+void Player::_LoadBoundInst()
+{
+    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        m_boundInstances[i].clear();
+
+    Group *group = GetGroup();
+
+    QueryResult result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(GetGUID()));
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            bool perm = fields[1].GetBool();
+            uint32 mapId = fields[2].GetUInt32();
+            uint32 instanceId = fields[0].GetUInt32();
+            uint8 difficulty = fields[3].GetUInt8();
+
+            time_t resetTime = (time_t)fields[4].GetUInt64();
+            // the resettime for normal instances is only saved when the InstanceSave is unloaded
+            // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
+            // and in that case it is not used
+
+            MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
+            if (!mapEntry || !mapEntry->IsDungeon())
+            {
+                sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed or not dungeon map %d", GetName(), GetGUIDLow(), mapId);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                continue;
+            }
+
+            if (difficulty >= MAX_DIFFICULTY)
+            {
+                sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed difficulty %d instance for map %u", GetName(), GetGUIDLow(), difficulty, mapId);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                continue;
+            }
+
+            MapDifficulty const* mapDiff = GetMapDifficultyData(mapId,Difficulty(difficulty));
+            if (!mapDiff)
+            {
+                sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed difficulty %d instance for map %u", GetName(), GetGUIDLow(), difficulty, mapId);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                continue;
+            }
+
+            if (!perm && group)
+            {
+                sLog->outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetGUID()), mapId, instanceId, difficulty);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                continue;
+            }
+
+            // since non permanent binds are always solo bind, they can always be reset
+            if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, Difficulty(difficulty), resetTime, !perm, true))
+                BindToInstance(save, perm, true);
+        }
+        while (result->NextRow());
+    }
+}
+
+
 InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
 {
     // some instances only have one difficulty
@@ -19373,7 +19436,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
     }
 }
 
-InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, bool load)
+InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, bool load, bool merge)
 {
     if (save)
     {
@@ -19386,7 +19449,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
                     CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u', permanent = '%u' WHERE guid = '%u' AND instance = '%u'", save->GetInstanceId(), permanent, GetGUIDLow(), bind.save->GetInstanceId());
         }
         else
-            if (!load)
+            if (!load&&!merge)
                 CharacterDatabase.PExecute("INSERT INTO character_instance (guid, instance, permanent) VALUES ('%u', '%u', '%u')", GetGUIDLow(), save->GetInstanceId(), permanent);
 
         if (bind.save != save)
@@ -19403,7 +19466,8 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
         bind.perm = permanent;
         if (!load)
             sLog->outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
-        sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
+        if(!merge)
+            sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
         return &bind;
     }
     else
