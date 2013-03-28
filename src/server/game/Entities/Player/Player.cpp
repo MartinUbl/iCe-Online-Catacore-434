@@ -3243,7 +3243,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::SendInitialSpells()
 {
-    time_t curTime = time(NULL);
     uint32 infTime = infinityCooldownDelayCheck;
 
     uint16 spellCount = 0;
@@ -4333,7 +4332,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
             m_spellCooldowns.erase(itr++);
         else if (itr->second.end <= infTime)                 // not save locked cooldowns, it will be reset or set at reload
         {
-            time_t cooldownEnd = time(NULL) + 1 + (itr->second.end - m_LogonTimer) / IN_MILLISECONDS;
+            time_t cooldownEnd = curTime + 1 + (itr->second.end - m_LogonTimer) / IN_MILLISECONDS;
 
             if (first_round)
             {
