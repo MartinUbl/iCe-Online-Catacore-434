@@ -6536,30 +6536,23 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         CastSpell(this, 87154, true);
 
                     return false;
-
-                    break;
                 }
                 // Atonement
                 case 14523:
                 case 81749:
                 {
-                    if (!pVictim || this == pVictim || !(procSpell->Id == 585)) // Smite
+                    if (!pVictim || (procSpell->Id != 585 && procSpell->Id != 14914)) // Smite, Holy Fire
+                        return false;
+
+                    // Holy Fire has also periodic part, which we exclude
+                    if (procFlag & PROC_FLAG_DONE_PERIODIC)
                         return false;
 
                     int32 bp0 = damage * dummySpell->GetSpellEffect(0)->EffectBasePoints / 100;
-                    uint32 spellId = 0;
 
-                    if (procEx & PROC_EX_NORMAL_HIT)
-                        spellId = 81751;
-                    else if (procEx & PROC_EX_CRITICAL_HIT)
-                        spellId = 94472;
-
-                    if (spellId)
-                        CastCustomSpell(pVictim, spellId, &bp0, NULL, NULL, true, 0, triggeredByAura, GetGUID());
-                        // Fails when cast on dummy target
-
+                    CastCustomSpell(this, 94472, &bp0, NULL, NULL, true, 0, triggeredByAura, GetGUID());
+                    // Fails when cast on dummy target
                     return false;
-                    break;
                 }
             }
             break;
@@ -11968,9 +11961,6 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         }
                     break;
                     case SPELLFAMILY_PRIEST:
-                        // Atonement (from crit Smite)
-                        if (spellProto->Id == 94472)
-                            return true; // Will probably add critical bonus
                         // remove Mind Spike debuff after casting Mind Blast
                         if (spellProto->Id == 8092)
                             pVictim->RemoveAurasDueToSpell(87178, GetGUID());
