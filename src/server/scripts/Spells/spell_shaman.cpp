@@ -324,7 +324,7 @@ public:
         // register functions used in spell script - names of these functions do not matter
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_sha_fulminationSpellScript::HandleFulmination, EFFECT_FIRST_FOUND, SPELL_EFFECT_ANY);
+            OnEffect += SpellEffectFn(spell_sha_fulminationSpellScript::HandleFulmination, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
