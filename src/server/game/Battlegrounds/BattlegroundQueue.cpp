@@ -130,7 +130,7 @@ bool BattlegroundQueue::SelectionPool::AddGroup(GroupQueueInfo *ginfo, uint32 de
 /*********************************************************/
 
 // add group or player (grp == NULL) to bg queue with the given leader and bg specifications
-GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, BattlegroundTypeId BgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 arenateamid)
+GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, BattlegroundTypeId BgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 arenateamid, bool isWargame)
 {
     BattlegroundBracketId bracketId =  bracketEntry->GetBracketId();
 
@@ -195,10 +195,13 @@ GroupQueueInfo * BattlegroundQueue::AddGroup(Player *leader, Group* grp, Battleg
         }
 
         //add GroupInfo to m_QueuedGroups
-        m_QueuedGroups[bracketId][index].push_back(ginfo);
+        if (m_twink != BATTLEGROUND_WARGAME)
+            m_QueuedGroups[bracketId][index].push_back(ginfo);
+        else
+            m_wargameGroups.push_back(ginfo);
 
         //announce to world, this code needs mutex
-        if (!isRated && !isPremade && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
+        if (!isRated && !isPremade && m_twink != BATTLEGROUND_WARGAME && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
         {
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
             {
@@ -313,21 +316,40 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     // variable index removes useless searching in other team's queue
     uint32 index = (group->Team == HORDE) ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE;
 
-    for (int32 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
+    // Differ wargame queue from normal queues
+    if (m_twink == BATTLEGROUND_WARGAME)
     {
-        //we must check premade and normal team's queue - because when players from premade are joining bg,
-        //they leave groupinfo so we can't use its players size to find out index
-        for (uint32 j = index; j < BG_QUEUE_GROUP_TYPES_COUNT; j += BG_QUEUE_NORMAL_ALLIANCE)
+        for (int32 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
         {
-            for (group_itr_tmp = m_QueuedGroups[bracket_id_tmp][j].begin(); group_itr_tmp != m_QueuedGroups[bracket_id_tmp][j].end(); ++group_itr_tmp)
+            for (group_itr_tmp = m_wargameGroups.begin(); group_itr_tmp != m_wargameGroups.end(); ++group_itr_tmp)
             {
                 if ((*group_itr_tmp) == group)
                 {
                     bracket_id = bracket_id_tmp;
                     group_itr = group_itr_tmp;
-                    //we must store index to be able to erase iterator
-                    index = j;
                     break;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int32 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
+        {
+            //we must check premade and normal team's queue - because when players from premade are joining bg,
+            //they leave groupinfo so we can't use its players size to find out index
+            for (uint32 j = index; j < BG_QUEUE_GROUP_TYPES_COUNT; j += BG_QUEUE_NORMAL_ALLIANCE)
+            {
+                for (group_itr_tmp = m_QueuedGroups[bracket_id_tmp][j].begin(); group_itr_tmp != m_QueuedGroups[bracket_id_tmp][j].end(); ++group_itr_tmp)
+                {
+                    if ((*group_itr_tmp) == group)
+                    {
+                        bracket_id = bracket_id_tmp;
+                        group_itr = group_itr_tmp;
+                        //we must store index to be able to erase iterator
+                        index = j;
+                        break;
+                    }
                 }
             }
         }
@@ -388,7 +410,11 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     // remove group queue info if needed
     if (group->Players.empty())
     {
-        m_QueuedGroups[bracket_id][index].erase(group_itr);
+        if (m_twink != BATTLEGROUND_WARGAME)
+            m_QueuedGroups[bracket_id][index].erase(group_itr);
+        else
+            m_wargameGroups.erase(group_itr);
+
         delete group;
     }
     // if group wasn't empty, so it wasn't deleted, and player have left a rated
@@ -751,7 +777,8 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
     if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].empty() &&
-        m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].empty())
+        m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].empty() &&
+        m_wargameGroups.empty())
         return;
 
     //battleground with free slot for player should be always in the beggining of the queue
@@ -763,7 +790,7 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         ++next;
         // DO NOT allow queue manager to invite new player to arena and rated battlegrounds
         if ((*itr)->isBattleground() && (*itr)->GetTypeID() == bgTypeId && (*itr)->GetBracketId() == bracket_id &&
-            (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE && !(*itr)->isRated())
+            (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE && !(*itr)->isRated() && m_twink != BATTLEGROUND_WARGAME)
         {
             Battleground* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
             // and iterator is invalid
@@ -856,6 +883,51 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
 
     m_SelectionPools[BG_TEAM_ALLIANCE].Init();
     m_SelectionPools[BG_TEAM_HORDE].Init();
+
+    // Wargames have their own handler here due to not look at ratings and conditions like if there is some group on the other side
+    if (m_twink == BATTLEGROUND_WARGAME)
+    {
+        bool selected = false;
+        GroupsQueueType::iterator front1;
+        GroupsQueueType::iterator front2;
+
+        if (!m_wargameGroups.empty())
+        {
+            selected = true;
+            front2 = m_wargameGroups.begin();
+            front1 = front2++;
+        }
+
+        // queues are empty
+        if (!selected)
+            return;
+
+        // groups already invited to fight
+        if ((*front1)->IsInvitedToBGInstanceGUID || (*front2)->IsInvitedToBGInstanceGUID)
+            return;
+
+        Battleground* wgame = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false, true);
+        if (!wgame)
+        {
+            sLog->outError("BattlegroundQueue::Update couldn't create bg/arena instance for wargame match!");
+            return;
+        }
+
+        (*front1)->OpponentsTeamRating = (*front2)->ArenaTeamRating;
+        (*front1)->OpponentsMatchmakerRating = (*front2)->ArenaMatchmakerRating;
+
+        (*front2)->OpponentsTeamRating = (*front1)->ArenaTeamRating;
+        (*front2)->OpponentsMatchmakerRating = (*front1)->ArenaMatchmakerRating;
+
+        wgame->SetArenaMatchmakerRating(ALLIANCE, 0);
+        wgame->SetArenaMatchmakerRating(HORDE, 0);
+        InviteGroupToBG(*front1, wgame, ALLIANCE);
+        InviteGroupToBG(*front2, wgame, HORDE);
+
+        wgame->StartBattleground(m_twink);
+
+        return;
+    }
 
     if (bg_template->isBattleground() && !isRated)
     {
@@ -1210,7 +1282,12 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue, or in Battleground
     {
         // check if player is in queue for this BG and if we are removing his invite event
-        int twink = plr->GetTwinkType();
+        int twink = BATTLEGROUND_NOTWINK;
+        if (plr->IsWargameForBattlegroundQueueType(m_BgQueueTypeId))
+            twink = BATTLEGROUND_WARGAME;
+        else
+            twink = plr->GetTwinkType();
+
         BattlegroundQueue &bgQueue = sBattlegroundMgr->m_BattlegroundQueues[m_BgQueueTypeId][twink];
         if (bgQueue.IsPlayerInvited(m_PlayerGuid, m_BgInstanceGUID, m_RemoveTime))
         {

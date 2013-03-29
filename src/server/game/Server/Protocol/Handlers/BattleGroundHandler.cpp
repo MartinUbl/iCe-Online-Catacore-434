@@ -451,7 +451,13 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         return;
     }
 
-    int twink = _player->GetTwinkType();
+    int twink = BATTLEGROUND_NOTWINK;
+
+    if (_player->IsWargameForBattlegroundQueueType(bgQueueTypeId))
+        twink = BATTLEGROUND_WARGAME;
+    else
+        twink = _player->GetTwinkType();
+
     BattlegroundQueue &bgQueue = sBattlegroundMgr->m_BattlegroundQueues[bgQueueTypeId][twink];
     BattlegroundTypeId bgTypeId = BattlegroundMgr::BGTemplateId(bgQueueTypeId);
 
@@ -1011,7 +1017,12 @@ void WorldSession::HandleWargameAccept(WorldPacket& recvData)
     recvData.ReadByteSeq(bgGuid[7]);
     recvData.ReadByteSeq(reqGuid[4]);
 
-    // TODO: handle
+    Player* target = sObjectMgr->GetPlayer((uint64)reqGuid);
+
+    if (!_player->GetGroup() || !target->GetGroup())
+        return;
+
+    sBattlegroundMgr->SetupWargame(_player->GetGroup(), target->GetGroup(), (BattlegroundTypeId)((uint16)bgGuid));
 }
 
 void WorldSession::HandleWargameStart(WorldPacket& recvData)
@@ -1063,6 +1074,21 @@ void WorldSession::HandleWargameStart(WorldPacket& recvData)
     Player* target = sObjectMgr->GetPlayer((uint64)reqGuid);
     if (!target)
         return;
+
+    BattlegroundTypeId bgTypeId = (BattlegroundTypeId)((uint16)bgGuid);
+
+    // there are several disabled battlegrounds / arenas
+    switch (bgTypeId)
+    {
+        case BATTLEGROUND_RV:
+        case BATTLEGROUND_DS:
+        case BATTLEGROUND_IC:
+        case BATTLEGROUND_SA:
+            SendNotification("This battleground is currently disabled.");
+            return;
+        default:
+            break;
+    }
 
     GetPlayer()->SendWargameRequest(target, (uint64)bgGuid);
 

@@ -829,7 +829,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
 }
 
 // create a new battleground that will really be used to play
-Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated)
+Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, bool isWargame)
 {
     // get the template BG
     Battleground *bg_template = GetBattlegroundTemplate(bgTypeId);
@@ -885,7 +885,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         }
     }
 
-    if (selectionWeights)
+    if (selectionWeights && (!isWargame || bgTypeId == BATTLEGROUND_AA))
     {
 #if 0
         if (!selectionWeights->size())
@@ -914,7 +914,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
         }
 #endif
         // We must differ arenas, because of they are using the same function to create instance
-        if (bgTypeId != BATTLEGROUND_AA)
+        if (!bg_template->isArena())
         {
             // Twin Peaks and Battle for Gilneas exists only for level 85 (PvpDifficulty.dbc)
             // We must select different list of BGs in our custom system
@@ -1624,6 +1624,123 @@ void BattlegroundMgr::DoCompleteAchievement(uint32 achievement, Player * player)
     {
         player->CompletedAchievement(AE);
     }
+}
+
+void BattlegroundMgr::SetupWargame(Group* first, Group* second, BattlegroundTypeId bgTypeId)
+{
+    if (!first || !second || !first->GetLeader() || !second->GetLeader())
+        return;
+
+    // wargames must have equal sized groups
+    if (first->GetMembersCount() != second->GetMembersCount())
+        return;
+
+    Player* initiator = first->GetLeader();
+    Player* receiver = second->GetLeader();
+
+    Battleground *bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
+
+    uint8 arenaType = 0;
+
+    switch (bgTypeId)
+    {
+        case BATTLEGROUND_AA:
+        case BATTLEGROUND_NA:
+        case BATTLEGROUND_RL:
+        case BATTLEGROUND_BE:
+        case BATTLEGROUND_DS:
+        case BATTLEGROUND_RV:
+        {
+            arenaType = first->GetMembersCount();
+
+            // only valid member count
+            if (arenaType != 2 && arenaType != 3 && arenaType != 5)
+                arenaType = 0;
+            break;
+        }
+        default:
+            break;
+    }
+
+    BattlegroundQueueTypeId bgQueueTypeId = BGQueueTypeId(bgTypeId, arenaType);
+
+    if (!bg)
+    {
+        sLog->outError("Battleground template for BG Type ID %u not found!", (uint32)bgTypeId);
+        return;
+    }
+
+    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),initiator->getLevel());
+    if (!bracketEntry)
+    {
+        sLog->outError("Unexpected level branch branch for player level %u",initiator->getLevel());
+        return;
+    }
+
+    // check if the group is sized to fit the battleground they chose and so
+    GroupJoinBattlegroundResult err1 = first->CanJoinBattlegroundQueue(bg, bgQueueTypeId, first->GetMembersCount(), bg->GetMaxPlayersPerTeam(), false, arenaType, true);
+    GroupJoinBattlegroundResult err2 = second->CanJoinBattlegroundQueue(bg, bgQueueTypeId, first->GetMembersCount(), bg->GetMaxPlayersPerTeam(), false, arenaType, true);
+
+    if (err1 != ERR_BATTLEGROUND_NONE || err2 != ERR_BATTLEGROUND_NONE)
+    {
+        // Notify initiator (first leader)
+        WorldPacket data;
+        sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, initiator, 0, err1);
+        initiator->GetSession()->SendPacket(&data);
+
+        // and also receiver (second leader)
+        data.clear();
+        sBattlegroundMgr->BuildStatusFailedPacket(&data, bg, receiver, 0, err1);
+        receiver->GetSession()->SendPacket(&data);
+        return;
+    }
+
+    BattlegroundQueue& bgQueue = sBattlegroundMgr->m_BattlegroundQueues[bgQueueTypeId][BATTLEGROUND_WARGAME];
+
+    GroupQueueInfo* ginfo1 = bgQueue.AddGroup(initiator, first, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
+    GroupQueueInfo* ginfo2 = bgQueue.AddGroup(receiver, second, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
+
+    uint32 queueSlot;
+    Player *member;
+
+    for (GroupReference *itr = first->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        member = itr->getSource();
+        if (!member) 
+            continue;
+
+        WorldPacket data;
+
+        // add to queue
+        queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId, true);
+
+        // add joined time data
+        member->AddBattlegroundQueueJoinTime(bgTypeId, ginfo1->JoinTime);
+
+        // send status packet (in queue)
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, ginfo1->JoinTime, ginfo1->ArenaType);
+        member->GetSession()->SendPacket(&data);
+    }
+    for (GroupReference *itr = second->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        member = itr->getSource();
+        if (!member) 
+            continue;
+
+        WorldPacket data;
+
+        // add to queue
+        queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId, true);
+
+        // add joined time data
+        member->AddBattlegroundQueueJoinTime(bgTypeId, ginfo2->JoinTime);
+
+        // send status packet (in queue)
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, ginfo2->JoinTime, ginfo2->ArenaType);
+        member->GetSession()->SendPacket(&data);
+    }
+
+    sBattlegroundMgr->ScheduleQueueUpdate(0, arenaType, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId(), BATTLEGROUND_WARGAME);
 }
 
 void BattlegroundMgr::InitRatedBattlegrounds()

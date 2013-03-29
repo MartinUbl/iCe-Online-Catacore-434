@@ -508,6 +508,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     {
         m_bgBattlegroundQueueID[j].bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
         m_bgBattlegroundQueueID[j].invitedToInstance = 0;
+        m_bgBattlegroundQueueID[j].isWargame = false;
     }
 
     m_logintime = time(NULL);

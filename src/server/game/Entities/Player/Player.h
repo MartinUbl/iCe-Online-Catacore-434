@@ -2374,6 +2374,13 @@ class Player : public Unit, public GridObject<Player>
                     return m_bgBattlegroundQueueID[i].invitedToInstance != 0;
             return false;
         }
+        bool IsWargameForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId) const
+        {
+            for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                    return m_bgBattlegroundQueueID[i].isWargame;
+            return false;
+        }
         bool InBattlegroundQueueForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId) const
         {
             return GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES;
@@ -2384,7 +2391,7 @@ class Player : public Unit, public GridObject<Player>
             m_bgData.bgInstanceID = val;
             m_bgData.bgTypeID = bgTypeId;
         }
-        uint32 AddBattlegroundQueueId(BattlegroundQueueTypeId val)
+        uint32 AddBattlegroundQueueId(BattlegroundQueueTypeId val, bool isWargame = false)
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             {
@@ -2392,6 +2399,7 @@ class Player : public Unit, public GridObject<Player>
                 {
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
+                    m_bgBattlegroundQueueID[i].isWargame = isWargame;
                     return i;
                 }
             }
@@ -2412,6 +2420,7 @@ class Player : public Unit, public GridObject<Player>
                 {
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
+                    m_bgBattlegroundQueueID[i].isWargame = false;
                     return;
                 }
             }
@@ -2815,6 +2824,7 @@ class Player : public Unit, public GridObject<Player>
         struct BgBattlegroundQueueID_Rec
         {
             BattlegroundQueueTypeId bgQueueTypeId;
+            bool isWargame;
             uint32 invitedToInstance;
         };
 

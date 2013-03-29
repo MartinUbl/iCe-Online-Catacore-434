@@ -3124,8 +3124,9 @@ enum BattlegroundTwinkType
 {
     BATTLEGROUND_NOTWINK       = 0,
     BATTLEGROUND_TWINK         = 1,
+    BATTLEGROUND_WARGAME       = 2,
 
-    BATTLEGROUND_TWINK_TYPES   = 2
+    BATTLEGROUND_TWINK_TYPES   = 3
 };
 
 enum MailResponseType
