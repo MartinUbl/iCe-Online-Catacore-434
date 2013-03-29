@@ -1780,8 +1780,13 @@ void GameObject::Rebuild()
 
 void GameObject::EventInform(uint32 eventId)
 {
-    if (eventId && m_zoneScript)
-        m_zoneScript->ProcessEvent(this, eventId);
+    if (eventId)
+    {
+        if (m_zoneScript)
+            m_zoneScript->ProcessEvent(this, eventId);
+        else if (Battlefield* bf = sBattlefieldMgr.GetBattlefieldToZoneId(GetZoneId()))
+            bf->ProcessEvent(this, eventId);
+    }
 }
 
 // overwrite WorldObject function for proper name localization

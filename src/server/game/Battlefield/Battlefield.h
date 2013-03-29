@@ -329,6 +329,8 @@ class Battlefield:public ZoneScript
 
     void InitStalker(uint32 entry, float x, float y, float z, float o);
 
+    virtual void ProcessEvent(GameObject * /*obj*/, uint32 /*eventId*/) {}
+
 protected:
     uint64 StalkerGuid;
     uint32 m_Timer;                                         // Global timer for event
