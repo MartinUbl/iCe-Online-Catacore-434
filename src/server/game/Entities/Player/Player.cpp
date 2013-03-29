@@ -25091,6 +25091,11 @@ void Player::RemoveFromBattlegroundOrBattlefieldRaid()
     {
         m_group.link(group, this);
         m_group.setSubGroup(GetOriginalSubGroup());
+
+        if (group->GetLeaderGUID() == GetGUID())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+        else
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
     }
     SetOriginalGroup(NULL);
 }
@@ -25105,6 +25110,11 @@ void Player::SetOriginalGroup(Group *group, int8 subgroup)
         ASSERT(subgroup >= 0);
         m_originalGroup.link(group, this);
         m_originalGroup.setSubGroup((uint8)subgroup);
+
+        if (group->GetLeaderGUID() == GetGUID())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+        else
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
     }
 }
 
