@@ -7694,6 +7694,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                         // If the target dies within duration of this 6sec debuff, gain 3 soul shards
                         if (caster && aurApp->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                             caster->SetPower(POWER_SOUL_SHARDS,3);
+
+                        // Glyph of Shadowburn implementation
+                        if (caster && caster->HasAura(56229) && aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE
+                            && target->GetHealthPct() <= 20.0f)
+                        {
+                            if (!caster->ToPlayer()->HasSpellCooldown(56229))
+                            {
+                                caster->ToPlayer()->RemoveSpellCooldown(17877, true); // reset cooldown for shadowburn
+                                caster->ToPlayer()->AddSpellCooldown(56229, 0, 6000); // set 6 sec cooldown
+                            }
+                        }
                     }
                     break;
                 case SPELLFAMILY_DRUID:

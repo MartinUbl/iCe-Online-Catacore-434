@@ -11890,10 +11890,6 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                     crit_chance *= 3;
                             }
                             break;
-                        case 7917: // Glyph of Shadowburn
-                            if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
-                                crit_chance+=(*i)->GetAmount();
-                            break;
                         case 7997: // Renewed Hope
                         case 7998:
                             if (pVictim->HasAura(6788))
