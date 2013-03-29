@@ -3160,6 +3160,24 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 58836: // Initialize Images (Mirror Image)
+                        {
+                            if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+                            {
+                                unitList.clear();
+                                break;
+                            }
+
+                            // Initialize Images spell should be applied only on summoned images
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                            {
+                                if ((*itr)->GetTypeId() != TYPEID_UNIT || (*itr)->GetEntry() != 31216  || (*itr)->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
