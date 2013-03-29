@@ -1859,14 +1859,22 @@ public:
 
     struct npc_mirror_imageAI : CasterAI
     {
-        npc_mirror_imageAI(Creature *c) : CasterAI(c) {}
+        npc_mirror_imageAI(Creature *c) : CasterAI(c) { castCounter = 0; }
+
+        Unit* owner;
+        uint32 castCounter;
 
         void InitializeAI()
         {
-            CasterAI::InitializeAI();
-            Unit * owner = me->GetOwner();
+            castCounter = 0;
+
+            owner = me->GetOwner();
             if (!owner)
                 return;
+
+            if (owner->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             // Inherit Master's Threat List (not yet implemented)
             owner->CastSpell((Unit*)NULL, 58838, true);
             // here mirror image casts on summoner spell (not present in client dbc) 49866
@@ -1888,6 +1896,66 @@ public:
             {
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // Custom updatevictim routine
+            if (!owner)
+                return;
+
+            HostileReference* top = NULL;
+            std::list<HostileReference*> &thrList = owner->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::iterator itr = thrList.begin(); itr != thrList.end(); ++itr)
+            {
+                if (!top || top->getThreat() < (*itr)->getThreat())
+                    top = (*itr);
+            }
+
+            if (top && top->getSource() && top->getSource()->getOwner() && me->getVictim() != top->getSource()->getOwner())
+            {
+                me->getThreatManager().clearReferences();
+                me->AddThreat(top->getSource()->getOwner(), top->getThreat());
+                me->Attack(owner->getVictim(), true);
+            }
+
+            if (!me->getVictim())
+            {
+                if (owner->getVictim())
+                {
+                    me->getThreatManager().clearReferences();
+                    me->AddThreat(owner->getVictim(), 1000.0f);
+                    me->Attack(owner->getVictim(), true);
+                }
+                if (!me->getVictim())
+                {
+                    if (me->isInCombat())
+                        me->AI()->EnterEvadeMode();
+                    return;
+                }
+            }
+
+            if (!me->hasUnitState(UNIT_STAT_CASTING))
+            {
+                uint32 spellToCast = 59638; // Frostbolt
+
+                // Glyph of Mirror Image
+                if (owner->HasAura(63093))
+                {
+                    if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_ARCANE)
+                        spellToCast = 59257; // Arcane Blast (probably right id)
+                    else if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_FIRE)
+                        spellToCast = 59994; // Fireball
+                }
+
+                if (castCounter % 2 == 0)
+                    if (urand(0,2) > 0)
+                        spellToCast = 59637; // Fire Blast (sometimes casts instead of main spell)
+
+                me->CastSpell(me->getVictim(), spellToCast, false);
+
+                castCounter++;
             }
         }
     };

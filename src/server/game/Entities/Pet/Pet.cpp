@@ -1046,7 +1046,18 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 31216: // Mirror Image
                 {
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+
+                    SpellSchoolMask srcSchool = SPELL_SCHOOL_MASK_FROST;
+                    if (m_owner && m_owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (m_owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_ARCANE)
+                            srcSchool = SPELL_SCHOOL_MASK_ARCANE;
+                        else if (m_owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_FIRE)
+                            srcSchool = SPELL_SCHOOL_MASK_FIRE;
+                    }
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(srcSchool) * 0.33f));
+
                     SetDisplayId(m_owner->GetDisplayId());
                     if (!pInfo)
                     {
