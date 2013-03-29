@@ -11983,9 +11983,9 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             }
 
                             // Improved Searing Pain
-                            if (HasAura(17927)) // rank 1
+                            if (HasAura(17927) && pVictim->GetHealthPct() <= 50.0f) // rank 1
                                 crit_chance += 20.0f;
-                            if (HasAura(17929)) // rank 2
+                            if (HasAura(17929) && pVictim->GetHealthPct() <= 50.0f) // rank 2
                                 crit_chance += 40.0f;
                         }
                         // Hand of Gul'dan increases crit chance of warlocks minions
