@@ -1019,8 +1019,14 @@ void WorldSession::HandleWargameAccept(WorldPacket& recvData)
 
     Player* target = sObjectMgr->GetPlayer((uint64)reqGuid);
 
-    if (!_player->GetGroup() || !target->GetGroup())
+    if (!target || !_player->GetGroup() || !target->GetGroup())
         return;
+
+    if (!accepted)
+    {
+        target->GetSession()->SendNotification("The other party leader declined your invitation.");
+        return;
+    }
 
     sBattlegroundMgr->SetupWargame(_player->GetGroup(), target->GetGroup(), (BattlegroundTypeId)((uint16)bgGuid));
 }
