@@ -1566,9 +1566,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     back_damage -= aurEff->GetAmount() * back_damage / 100;
                 m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
 
-                if (unitTarget->GetHealthPct() < 25.0f)
+                if (unitTarget->GetHealthPct() <= 25.0f)
                 {
-                    //TODO: Glyph of Shadow Word: Death
+                    // Glyph of Shadow Word: Death
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasAura(55682) && !m_caster->ToPlayer()->HasSpellCooldown(55682))
+                    {
+                        m_caster->ToPlayer()->RemoveSpellCooldown(32379, true);
+                        m_caster->ToPlayer()->AddSpellCooldown(55682, 0, 6000);
+                    }
                 }
             }
             break;
