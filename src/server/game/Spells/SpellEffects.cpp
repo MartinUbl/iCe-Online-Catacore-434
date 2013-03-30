@@ -3023,6 +3023,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                 // also apply Ebon Plague
                 m_caster->CastSpell(unitTarget, 65142, true);
+
+                // hack fix proc - Bonus Equip - generate 10 runic power.
+                if (m_caster->HasAura(62459))
+                    m_caster->CastSpell(m_caster, 62458, true);
             }
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
