@@ -8058,7 +8058,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             else if (m_spellInfo->Id == 85948)
             {
                 // increase duration of certain auras
-                uint32 affectAuras[] = {55078, 55095, 45524};
+                uint32 affectAuras[] = {65142, 55078, 55095, 45524};
                 Aura* tmp = NULL;
                 for (uint8 i = 0; i < sizeof(affectAuras)/sizeof(uint32); i++)
                 {
