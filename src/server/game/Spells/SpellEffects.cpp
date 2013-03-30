@@ -3021,8 +3021,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 else if (m_caster->HasAura(50041))
                     m_caster->CastSpell(unitTarget, 96294, true);
 
-                // also apply Ebon Plague
-                m_caster->CastSpell(unitTarget, 65142, true);
+                // apply Ebon Plague when we have Ebon Plaguebringer
+                if (m_caster->HasAura(51099) || m_caster->HasAura(51160))
+                    m_caster->CastSpell(unitTarget, 65142, true);
 
                 // hack fix proc - Bonus Equip - generate 10 runic power.
                 if (m_caster->HasAura(62459))
