@@ -4265,6 +4265,86 @@ class npc_gender_changer : public CreatureScript
         }
 };
 
+class npc_title_map_restorer : public CreatureScript
+{
+    public:
+        npc_title_map_restorer() : CreatureScript("npc_title_map_restorer") { }
+
+
+    std::list<uint64> m_donePlayers;
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I would like to restore my titles", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->SEND_GOSSIP_MENU(1, pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+    {
+        for (std::list<uint64>::const_iterator itr = m_donePlayers.begin(); itr != m_donePlayers.end(); ++itr)
+            if ((*itr) == pPlayer->GetGUID())
+            {
+                pPlayer->CLOSE_GOSSIP_MENU();
+                return false;
+            }
+
+        uint32 count = 0;
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            for (QuestStatusMap::const_iterator itr = pPlayer->getQuestStatusMap().begin(); itr != pPlayer->getQuestStatusMap().end(); ++itr)
+            {
+                Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->first);
+                if (!pQuest)
+                    continue;
+
+                if (pPlayer->GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+                    continue;
+
+                if (pQuest->GetCharTitleId() != 0)
+                {
+                   const CharTitlesEntry *titleInfo = sCharTitlesStore.LookupEntry(pQuest->GetCharTitleId());
+                   // skip non exist titles / already added titles.
+                   if (!titleInfo || pPlayer->HasTitle(titleInfo))
+                       continue;
+
+                   pPlayer->SetTitle(titleInfo);
+                   count++;
+                }
+            }
+
+            for (CompletedAchievementMap::const_iterator itr = pPlayer->GetAchievementMgr().GetCompletedAchievementMap().begin(); itr != pPlayer->GetAchievementMgr().GetCompletedAchievementMap().end(); ++itr)
+            {
+                const AchievementEntry* achiev = sAchievementStore.LookupEntry((*itr).first);
+                const CharTitlesEntry *titleInfo = NULL;
+                AchievementReward const* reward = NULL;
+
+                if (!achiev)
+                    continue;
+
+                reward = sAchievementMgr->GetAchievementReward(achiev);
+
+                if (!reward)
+                    continue;
+
+                titleInfo = sCharTitlesStore.LookupEntry(pPlayer->GetTeamId() == TEAM_ALLIANCE ? reward->titleId[0] : reward->titleId[1]);
+                if (!titleInfo || pPlayer->HasTitle(titleInfo))
+                    continue;
+
+                pPlayer->SetTitle(titleInfo);
+                count++;
+            }
+        }
+        std::stringstream ss;
+        ss << "Restored " << count << " titles";
+        pCreature->MonsterSay(ss.str().c_str(), LANG_UNIVERSAL, pPlayer->GetGUID());
+        pPlayer->CLOSE_GOSSIP_MENU();
+        m_donePlayers.push_back(pPlayer->GetGUID());
+        return true;
+    }
+
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4315,4 +4395,5 @@ void AddSC_npcs_special()
     new npc_areatrigger_completer;
     new npc_fac_race_changer;
     new npc_gender_changer;
+    new npc_title_map_restorer;
 }

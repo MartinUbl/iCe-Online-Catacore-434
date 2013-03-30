@@ -278,6 +278,7 @@ class AchievementMgr
         void RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);   // used for quest and scripted timed achievements
         uint32 GetAchievementPoints() { return achievementPoints; }
         CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
+        CompletedAchievementMap const& GetCompletedAchievementMap() { return m_completedAchievements; };
         bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
     private:
         void SendAchievementEarned(AchievementEntry const* achievement);
