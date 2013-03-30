@@ -673,6 +673,10 @@ void Battleground::YellToAll(Creature* creature, const char* text, uint32 langua
 
 void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 {
+    // Wargames does not reward
+    if (IsWargame())
+        return;
+
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardHonorToTeam"))
             UpdatePlayerScore(player, SCORE_BONUS_HONOR, Honor);
@@ -680,6 +684,10 @@ void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 
 void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
 {
+    // Wargames does not reward
+    if (IsWargame())
+        return;
+
     if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id))
         for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardReputationToTeam"))
@@ -917,7 +925,7 @@ void Battleground::EndBattleground(uint32 winner)
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
 
             uint32 xp = Trinity::XP::BattlegroundLossXP(plr->getLevel());
-            if (xp && !isArena())
+            if (xp && !isArena() && !isWargame())
                 plr->GiveXP(xp, NULL);
         }
 
@@ -935,7 +943,7 @@ void Battleground::EndBattleground(uint32 winner)
         plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, 1);
     }
 
-    if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+    if (isArena() && isRated() && !isWargame() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
     {
         // update arena points only after increasing the player's match count!
         //obsolete: winner_arena_team->UpdateArenaPointsHelper();
@@ -955,6 +963,10 @@ void Battleground::EndBattleground(uint32 winner)
 
 uint32 Battleground::GetBonusHonorFromKill(uint32 kills) const
 {
+    // Wargames does not reward
+    if (IsWargame())
+        return 0;
+
     //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
     uint32 maxLevel = std::min(GetMaxLevel(), 85U);
     return Trinity::Honor::hk_honor_at_level(maxLevel, float(kills));
@@ -1082,7 +1094,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
         }
         DecreaseInvitedCount(team);
         //we should update battleground queue, but only if bg isn't ending
-        if (isBattleground() && GetStatus() < STATUS_WAIT_LEAVE)
+        if (isBattleground() && !isWargame() && GetStatus() < STATUS_WAIT_LEAVE)
         {
             // a player has left the battleground, so there are free slots -> add to queue
             AddToBGFreeSlotQueue();
@@ -1121,6 +1133,7 @@ void Battleground::Reset()
     SetLastResurrectTime(0);
     SetArenaType(0);
     SetRated(false);
+    SetWargame(false);
 
     m_Events = 0;
 
@@ -1453,7 +1466,7 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, 
             if (isBattleground())
             {
                 // reward honor instantly
-                if (doAddHonor)
+                if (doAddHonor && !isWargame())
                     Source->RewardHonor(NULL, 1, value);    // RewardHonor calls UpdatePlayerScore with doAddHonor = false
                 else
                     itr->second->BonusHonor += value;
@@ -1857,7 +1870,7 @@ void Battleground::HandleKillPlayer(Player* player, Player* killer)
         }
     }
 
-    if (!isArena())
+    if (!isArena() && !isWargame())
     {
         // To be able to remove insignia -- ONLY IN Battlegrounds
         player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
@@ -1996,6 +2009,10 @@ void Battleground::SetBracket(PvPDifficultyEntry const* bracketEntry)
 void Battleground::RewardXPAtKill(Player* plr, Player* victim)
 {
     if (!plr || !victim)
+        return;
+
+    // Wargames does not reward
+    if (IsWargame())
         return;
 
     uint32 xp = 0;
