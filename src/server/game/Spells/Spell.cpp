@@ -3359,6 +3359,58 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         }
                     }
                     break;
+                case SPELLFAMILY_ROGUE:
+                    // Fan of Knives
+                    if (m_spellInfo->Id == 51723)
+                    {
+                        float roll = 1;
+                        if (m_caster->HasAura(16513))
+                            roll = 0.33f;
+                        else if (m_caster->HasAura(16514))
+                            roll = 0.67f;
+                        // Vile Poisons - second part of talent
+                        if (m_caster->HasAura(16513) || m_caster->HasAura(16514) || m_caster->HasAura(16515))
+                        {
+                            for (uint32 i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_OFFHAND;i++)
+                            {
+                                // find main / off hand
+                                Item* item = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+
+                                if (item)
+                                {
+                                    // find enchant
+                                    SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
+
+                                    if (enchantEntry && enchantEntry->spellid[0])
+                                    {
+                                        if (SpellEntry const* poison = sSpellStore.LookupEntry(enchantEntry->spellid[0]))
+                                        {
+                                            // find poisons
+                                            if (poison && poison->Dispel == DISPEL_POISON)
+                                            {
+                                                // apply to all targets in radius
+                                                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                                                {
+                                                    if ((*itr))
+                                                    {
+                                                        // roll chance by rank. r 1 = 33% from normal chance
+                                                        // r 2 = 67% from normal chance
+                                                        // r 3 = 100% from normal chance
+                                                        if (roll_chance_f(poison->procChance * roll))
+                                                        {
+                                                            m_caster->CastSpell((*itr), poison->Id, true);
+                                                            itr = unitList.erase(itr);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                     }
+                                }
+                            }
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
