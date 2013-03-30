@@ -3020,6 +3020,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, 96293, true);
                 else if (m_caster->HasAura(50041))
                     m_caster->CastSpell(unitTarget, 96294, true);
+
+                // also apply Ebon Plague
+                m_caster->CastSpell(unitTarget, 65142, true);
             }
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
