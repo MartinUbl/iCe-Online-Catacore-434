@@ -1574,6 +1574,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         }
     }
 
+    // Banish cancells all the effect if reapplied
+    if (m_caster && unit && unit->HasAura(710))
+    {
+        unit->RemoveAurasDueToSpell(710, m_caster->GetGUID());
+        return SPELL_MISS_NONE;
+    }
+
     if (m_caster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
