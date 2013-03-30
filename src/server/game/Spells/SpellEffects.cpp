@@ -3486,6 +3486,16 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         case 33801: // Coldflame
         case 89024: // Pursuit of Justice
             return;
+        // Blood Plague (only when is triggered from Outbreak)
+        case 55078:
+            // Outbreak
+            if (m_spellInfo->Id == 77575)
+            {
+                // Ebon Plaguebringer
+                if (m_caster->HasAura(51160) || m_caster->HasAura(51099))
+                    m_caster->CastSpell(unitTarget, 65142, true); // Ebon Plague
+            }
+            break;
     }
 
     // normal case
