@@ -600,7 +600,7 @@ class Battleground
         int32 m_TeamScores[BG_TEAMS_COUNT];
 
         void RewardXPAtKill(Player* killer, Player* victim);
-        bool CanAwardArenaPoints() const { return (m_LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL) && !isWargame; }
+        bool CanAwardArenaPoints() const { return (m_LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL) && !isWargame(); }
 
         typedef std::map<uint64, int32> BattlegroundRatingChangeMap;
         int32 GetBattlegroundRatingChangeForPlayer(uint64 guid) { return m_bgRatingChange[guid]; }

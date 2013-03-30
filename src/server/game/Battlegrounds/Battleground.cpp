@@ -674,7 +674,7 @@ void Battleground::YellToAll(Creature* creature, const char* text, uint32 langua
 void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 {
     // Wargames does not reward
-    if (IsWargame())
+    if (isWargame())
         return;
 
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
@@ -685,7 +685,7 @@ void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
 {
     // Wargames does not reward
-    if (IsWargame())
+    if (isWargame())
         return;
 
     if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id))
@@ -964,7 +964,7 @@ void Battleground::EndBattleground(uint32 winner)
 uint32 Battleground::GetBonusHonorFromKill(uint32 kills) const
 {
     // Wargames does not reward
-    if (IsWargame())
+    if (isWargame())
         return 0;
 
     //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
@@ -2012,7 +2012,7 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
         return;
 
     // Wargames does not reward
-    if (IsWargame())
+    if (isWargame())
         return;
 
     uint32 xp = 0;
