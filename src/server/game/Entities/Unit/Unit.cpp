@@ -7980,13 +7980,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Unholy Blight
             if (dummySpell->Id == 49194)
             {
-                basepoints0 = triggerAmount * damage / 100;
-                // Glyph of Unholy Blight
-                if (AuraEffect *glyph=GetAuraEffect(63332, 0))
-                    AddPctN(basepoints0, glyph->GetAmount());
-
+                basepoints0 = (triggerAmount * damage / 100) / 10;
                 triggered_spell_id = 50536;
-                basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id, EFFECT_0);
                 break;
             }
             // Vendetta
