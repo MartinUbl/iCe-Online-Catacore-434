@@ -513,7 +513,7 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
     m_autoRepeat = IsAutoRepeatRangedSpell(m_spellInfo);
 
     m_runesState = 0;
-    m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
+    m_powerCost = CalculatePowerCost(m_spellInfo, m_caster, m_spellSchoolMask); // this will be nullified in Spell::prepare if cast item will be set
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to castime in prepare
 
