@@ -3822,6 +3822,26 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
     //For some funky reason, some spells have to be cast as a spell on the enemy even if they're supposed to apply an aura.
     switch (m_spellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            // Soulstone Resurrection - resurrecting dead player, needs handling just before aura would be added
+            if (m_spellInfo->Id == 20707)
+            {
+                if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->isDead())
+                {
+                    if (unitTarget->ToPlayer()->isRessurectRequested())       // already have one active request
+                        return;
+
+                    ExecuteLogEffectResurrect(effIndex, unitTarget);
+
+                    unitTarget->ToPlayer()->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), unitTarget->GetMaxHealth()*0.3f, unitTarget->GetMaxPower(POWER_MANA)*0.3f);
+                    SendResurrectRequest(unitTarget->ToPlayer());
+
+                    m_spellAura->Remove();
+                    return;
+                }
+            }
+        }
         case SPELLFAMILY_ROGUE:
         {
             if (m_spellInfo->SpellFamilyFlags[0] == 0x8)    //Gouge
