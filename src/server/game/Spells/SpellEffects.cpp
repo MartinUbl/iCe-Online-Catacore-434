@@ -4447,7 +4447,12 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
 
     float healMultiplier = SpellMgr::CalculateSpellEffectValueMultiplier(m_spellInfo, effIndex, m_originalCaster, this);
 
+    // Leeching spells coming from player also counts spell power bonus
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, damage, SPELL_DIRECT_DAMAGE);
+
     m_damage += damage;
+
     // get max possible damage, don't count overkill for heal
     uint32 healthGain = uint32(-unitTarget->GetHealthGain(-damage) * healMultiplier);
 
