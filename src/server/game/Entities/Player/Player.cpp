@@ -27659,10 +27659,7 @@ float Player::GetAverageItemLevel()
 bool Player::HasMastery()
 {
     // Spell aura 318 is typical for Mastery auras
-    if (HasAuraType(SPELL_AURA_MOD_MASTERY))
-        return true;
-    else
-        return false;
+    return GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY) > 0;
 }
 
 uint32 Player::GetMountCapabilityIndex(uint32 amount)
