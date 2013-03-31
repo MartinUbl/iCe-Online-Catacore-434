@@ -5139,8 +5139,8 @@ void SpellMgr::LoadEnchantCustomAttr()
         if (!spellInfo)
             continue;
 
-        // TODO: find a better check
-        if (!(spellInfo->AttributesEx2 & SPELL_ATTR2_UNK13) || !(spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT))
+        // only rogue's poisons and shaman's weapon enchant
+        if (spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE || spellInfo->SpellFamilyName != SPELLFAMILY_SHAMAN)
             continue;
 
         for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
