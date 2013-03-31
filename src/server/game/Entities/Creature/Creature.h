@@ -399,7 +399,7 @@ struct TrainerSpellData
     TrainerSpell const* Find(uint32 spell_id) const;
 };
 
-typedef std::map<uint32,time_t> CreatureSpellCooldowns;
+typedef std::map<uint32,uint32> CreatureSpellCooldowns;
 
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
@@ -498,8 +498,8 @@ class Creature : public Unit, public GridObject<Creature>
         SpellSchoolMask GetMeleeDamageSchoolMask() const { return m_meleeDamageSchoolMask; }
         void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = SpellSchoolMask(1 << school); }
 
-        void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
-        void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
+        void _AddCreatureSpellCooldown(uint32 spell_id, uint32 msDuration);
+        void _AddCreatureCategoryCooldown(uint32 category, uint32 msDuration);
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;

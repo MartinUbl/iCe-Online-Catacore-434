@@ -4269,6 +4269,7 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
 
             // actually clear cooldowns
             pet->m_CreatureSpellCooldowns.clear();
+            pet->m_CreatureCategoryCooldowns.clear();
         }
 }
 
@@ -21164,11 +21165,11 @@ void Player::PetSpellInitialize()
     uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
     data << uint8(cooldownsCount);
 
-    time_t curTime = time(NULL);
-
     for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
     {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+        int32 cooldown = itr->second - m_LogonTimer;
+        if (cooldown < 0)
+            cooldown = 0;
 
         data << uint32(itr->first);                         // spellid
         data << uint16(0);                                  // spell category?
@@ -21178,7 +21179,9 @@ void Player::PetSpellInitialize()
 
     for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureCategoryCooldowns.begin(); itr != pet->m_CreatureCategoryCooldowns.end(); ++itr)
     {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+        int32 cooldown = itr->second - m_LogonTimer;
+        if (cooldown < 0)
+            cooldown = 0;
 
         data << uint32(itr->first);                         // spellid
         data << uint16(0);                                  // spell category?

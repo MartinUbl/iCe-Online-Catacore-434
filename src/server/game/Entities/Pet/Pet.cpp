@@ -1165,10 +1165,11 @@ void Pet::_LoadSpellCooldowns()
             if (db_time <= curTime)
                 continue;
 
+            uint32 duration = uint32(db_time - curTime) * IN_MILLISECONDS;
             data << uint32(spell_id);
-            data << uint32(uint32(db_time-curTime)*IN_MILLISECONDS);
+            data << uint32(duration);
 
-            _AddCreatureSpellCooldown(spell_id,db_time);
+            _AddCreatureSpellCooldown(spell_id, duration);
 
             sLog->outDebug("Pet (Number: %u) spell %u cooldown loaded (%u secs).", m_charmInfo->GetPetNumber(), spell_id, uint32(db_time-curTime));
         }
@@ -1188,11 +1189,12 @@ void Pet::_SaveSpellCooldowns(SQLTransaction& trans)
     // remove oudated and save active
     for (CreatureSpellCooldowns::iterator itr = m_CreatureSpellCooldowns.begin(); itr != m_CreatureSpellCooldowns.end();)
     {
-        if (itr->second <= curTime)
+        if (itr->second <= m_LogonTimer)
             m_CreatureSpellCooldowns.erase(itr++);
         else
         {
-            trans->PAppend("INSERT INTO pet_spell_cooldown (guid,spell,time) VALUES ('%u', '%u', '" UI64FMTD "')", m_charmInfo->GetPetNumber(), itr->first, uint64(itr->second));
+            time_t cdEnd = time(NULL) + (itr->second - m_LogonTimer) / IN_MILLISECONDS;
+            trans->PAppend("INSERT INTO pet_spell_cooldown (guid,spell,time) VALUES ('%u', '%u', '" UI64FMTD "')", m_charmInfo->GetPetNumber(), itr->first, uint64(cdEnd));
             ++itr;
         }
     }

@@ -2180,14 +2180,14 @@ void Creature::SetInCombatWithZone()
     }
 }
 
-void Creature::_AddCreatureSpellCooldown(uint32 spell_id, time_t end_time)
+void Creature::_AddCreatureSpellCooldown(uint32 spell_id, uint32 msDuration)
 {
-    m_CreatureSpellCooldowns[spell_id] = end_time;
+    m_CreatureSpellCooldowns[spell_id] = m_LogonTimer + msDuration;
 }
 
-void Creature::_AddCreatureCategoryCooldown(uint32 category, time_t apply_time)
+void Creature::_AddCreatureCategoryCooldown(uint32 category, uint32 msDuration)
 {
-    m_CreatureCategoryCooldowns[category] = apply_time;
+    m_CreatureCategoryCooldowns[category] = m_LogonTimer + msDuration;
 }
 
 void Creature::AddCreatureSpellCooldown(uint32 spellid)
@@ -2201,10 +2201,10 @@ void Creature::AddCreatureSpellCooldown(uint32 spellid)
         modOwner->ApplySpellMod(spellid, SPELLMOD_COOLDOWN, cooldown);
 
     if (cooldown)
-        _AddCreatureSpellCooldown(spellid, time(NULL) + cooldown/IN_MILLISECONDS);
+        _AddCreatureSpellCooldown(spellid, cooldown);
 
     if (spellInfo->Category)
-        _AddCreatureCategoryCooldown(spellInfo->Category, time(NULL));
+        _AddCreatureCategoryCooldown(spellInfo->Category, spellInfo->CategoryRecoveryTime);
 
     m_GlobalCooldown = spellInfo->StartRecoveryTime;
 }
@@ -2220,13 +2220,13 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
         return true;
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
-    return(itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / IN_MILLISECONDS)) > time(NULL));
+    return(itr != m_CreatureCategoryCooldowns.end() && itr->second > m_LogonTimer);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
-    return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
+    return (itr != m_CreatureSpellCooldowns.end() && itr->second > m_LogonTimer) || HasCategoryCooldown(spell_id);
 }
 
 bool Creature::HasSpell(uint32 spellID) const
