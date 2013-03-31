@@ -2400,6 +2400,21 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 m_caster->GetFirstCollisionPosition(pos, dist, angle);
             else
                 m_caster->GetNearPosition(pos, dist, angle);
+
+            if (cur == TARGET_DEST_CASTER_FRONT)
+            {
+                while (!m_caster->IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
+                {
+                    dist -= 1.0f;
+                    if (dist <= 1.0f)
+                        break;
+
+                    m_caster->GetFirstCollisionPosition(pos, dist, angle);
+                }
+
+                pos.m_positionZ = m_caster->GetMap()->GetHeight2(pos.m_positionX, pos.m_positionY, pos.m_positionZ+2.0f);
+            }
+
             m_targets.setDst(*m_caster);
             m_targets.modDst(pos);
             break;
