@@ -1594,6 +1594,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             if (unitTarget->HasAura(348))
                 m_damage += int32((float)m_damage/6.0f);
         }
+        // Haunt
+        case 48181:
+        {
+            if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            m_damage += m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
+        }
         default:
             break;
     }
