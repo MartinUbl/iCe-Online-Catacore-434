@@ -11307,11 +11307,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         {
             case 12368: // Molten Fury
             case 4919:
+            {
+                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
+                    DoneTotalMod *= (100.0f+(*i)->GetAmount())/100.0f;
+                break;
+            }
             case 6917: // Death's Embrace
             case 6926:
             case 6928:
             {
-                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
+                if (pVictim->GetHealthPct() < 25.0f)
                     DoneTotalMod *= (100.0f+(*i)->GetAmount())/100.0f;
                 break;
             }

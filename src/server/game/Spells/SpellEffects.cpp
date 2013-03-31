@@ -4451,6 +4451,18 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
     if (m_spellInfo->Id == 34428 && m_caster->HasAura(82368))
         damage = 5;
 
+    // Drain Life (Health Energize) heals more when under or at 25% health and have talent Death's Embrace
+    if (m_spellInfo->Id == 89653 && m_caster && m_caster->GetHealthPct() <= 25.0f)
+    {
+        // Death's Embrace
+        if (m_caster->HasAura(47200))
+            damage += 3;
+        else if (m_caster->HasAura(47199))
+            damage += 2;
+        else if (m_caster->HasAura(47198))
+            damage += 1;
+    }
+
     m_healing += m_originalCaster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, unitTarget->CountPctFromMaxHealth(damage), HEAL);
 }
 
