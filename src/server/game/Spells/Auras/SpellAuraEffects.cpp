@@ -7159,7 +7159,8 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const *aurApp, uint8
     // Send info to client
     if (target->GetTypeId() == TYPEID_PLAYER)
         for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-            target->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+i,GetAmount()/100.0f,apply);
+            if (GetMiscValue() & (1 << i))
+                target->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+i,GetAmount()/100.0f,apply);
 }
 
 void AuraEffect::HandleModOffhandDamagePercent(AuraApplication const *aurApp, uint8 mode, bool apply) const
