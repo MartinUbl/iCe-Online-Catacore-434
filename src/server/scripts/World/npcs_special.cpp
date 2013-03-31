@@ -4282,15 +4282,14 @@ class npc_title_map_restorer : public CreatureScript
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
     {
+        bool alreadyDone = false;
         for (std::list<uint64>::const_iterator itr = m_donePlayers.begin(); itr != m_donePlayers.end(); ++itr)
+        {
             if ((*itr) == pPlayer->GetGUID())
-            {
-                pPlayer->CLOSE_GOSSIP_MENU();
-                return false;
-            }
-
+                alreadyDone = true;
+        }
         uint32 count = 0;
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1 && !alreadyDone)
         {
             for (QuestStatusMap::const_iterator itr = pPlayer->getQuestStatusMap().begin(); itr != pPlayer->getQuestStatusMap().end(); ++itr)
             {
@@ -4334,10 +4333,10 @@ class npc_title_map_restorer : public CreatureScript
                 pPlayer->SetTitle(titleInfo);
                 count++;
             }
+            std::stringstream ss;
+            ss << "Restored " << count << " titles";
+            pCreature->MonsterSay(ss.str().c_str(), LANG_UNIVERSAL, pPlayer->GetGUID());
         }
-        std::stringstream ss;
-        ss << "Restored " << count << " titles";
-        pCreature->MonsterSay(ss.str().c_str(), LANG_UNIVERSAL, pPlayer->GetGUID());
         pPlayer->CLOSE_GOSSIP_MENU();
         m_donePlayers.push_back(pPlayer->GetGUID());
         return true;
