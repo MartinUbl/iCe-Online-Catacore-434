@@ -314,6 +314,9 @@ class npc_hand_of_guldan: public CreatureScript
             {
                 me->CastSpell(me, 85526, true);
                 me->CastSpell(me, 86000, true);
+
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
             }
 
             void AttackStart(Unit* pWho) { return; };
