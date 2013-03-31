@@ -1218,7 +1218,7 @@ void Pet::_SaveSpellCooldowns(SQLTransaction& trans)
             m_CreatureSpellCooldowns.erase(itr++);
         else
         {
-            time_t cdEnd = time(NULL) + (itr->second - m_LogonTimer) / IN_MILLISECONDS;
+            time_t cdEnd = curTime + (itr->second - m_LogonTimer) / IN_MILLISECONDS;
             trans->PAppend("INSERT INTO pet_spell_cooldown (guid,spell,time) VALUES ('%u', '%u', '" UI64FMTD "')", m_charmInfo->GetPetNumber(), itr->first, uint64(cdEnd));
             ++itr;
         }
