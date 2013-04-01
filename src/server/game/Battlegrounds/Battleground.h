@@ -221,6 +221,8 @@ enum ScoreType
     SCORE_DESTROYED_WALL        = 19,
     // Rated BG
     SCORE_BATTLEGROUND_RATING   = 20,
+    // Rated arena
+    SCORE_PERSONAL_RATING_CHANGE = 21,
 };
 
 enum ArenaType
@@ -307,7 +309,7 @@ class BattlegroundScore
 {
     public:
         BattlegroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
-            BonusHonor(0), DamageDone(0), HealingDone(0), BattlegroundRating(0)
+            BonusHonor(0), DamageDone(0), HealingDone(0), BattlegroundRating(0), PersonalRatingChange(0)
         {}
         virtual ~BattlegroundScore() {}                     //virtual destructor is used when deleting score from scores map
 
@@ -318,6 +320,7 @@ class BattlegroundScore
         uint32 DamageDone;
         uint32 HealingDone;
         uint32 BattlegroundRating;
+        int32  PersonalRatingChange;
 };
 
 enum BGHonorMode

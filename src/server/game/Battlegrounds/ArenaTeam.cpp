@@ -765,6 +765,8 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstMatchmakerRating, int32 t
             // update personal rating
             int32 mod = GetPersonalRatingMod(teamratingchange, itr->personal_rating, (m_stats.rating - teamratingchange));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
+            if (Battleground *bg = plr->GetBattleground())
+                bg->UpdatePlayerScore(plr, SCORE_PERSONAL_RATING_CHANGE, mod);
 
             // update matchmaker rating
             mod = GetRatingMod(itr->matchmaker_rating, againstMatchmakerRating, false, true);
@@ -818,6 +820,8 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating, int32 te
             // update matchmaker rating
             mod = GetRatingMod(itr->matchmaker_rating, againstMatchmakerRating, true, true);
             itr->ModifyMatchmakerRating(mod, GetSlot());
+            if (Battleground *bg = plr->GetBattleground())
+                bg->UpdatePlayerScore(plr, SCORE_PERSONAL_RATING_CHANGE, mod);
 
             // reward conquest points (new in 4.x)
             // TODO: verify the coefficient 1/5

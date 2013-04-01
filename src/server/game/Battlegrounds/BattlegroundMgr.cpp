@@ -497,7 +497,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg,
         if (isRated)
         {
             uint8 team = bg->GetPlayerTeam(player->GetGUID()) == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE;
-            buff << uint32(bg->m_ArenaTeamRatingChanges[team]);      // personal rating change
+            buff << int32(itr2->second->PersonalRatingChange);      // personal rating change
 
             if (receiver == player)
             {

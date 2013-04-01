@@ -1482,6 +1482,9 @@ void Battleground::UpdatePlayerScore(Player* Source, uint32 type, int32 value, b
         case SCORE_BATTLEGROUND_RATING:
             itr->second->BattlegroundRating += value;
             break;
+        case SCORE_PERSONAL_RATING_CHANGE:
+            itr->second->PersonalRatingChange += value;
+            break;
         default:
             sLog->outError("Battleground::UpdatePlayerScore: unknown score type (%u) for BG (map: %u, instance id: %u)!",
                 type, m_MapId, m_InstanceID);
