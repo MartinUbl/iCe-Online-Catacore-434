@@ -7873,13 +7873,25 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (HasAura(51462))
                 {
                     int32 bp = 100;
-                    CastCustomSpell(this, 51460, &bp, 0, 0, true);
+                    if (Aura* pAura = GetAura(51460))
+                    {
+                        pAura->SetMaxDuration(pAura->GetDuration() + 3000);
+                        pAura->RefreshDuration();
+                    }
+                    else
+                        CastCustomSpell(this, 51460, &bp, 0, 0, true);
                     return true;
                 }
                 else if (HasAura(51459))
                 {
                     int32 bp = 50;
-                    CastCustomSpell(this, 51460, &bp, 0, 0, true);
+                    if (Aura* pAura = GetAura(51460))
+                    {
+                        pAura->SetMaxDuration(pAura->GetDuration() + 3000);
+                        pAura->RefreshDuration();
+                    }
+                    else
+                        CastCustomSpell(this, 51460, &bp, 0, 0, true);
                     return true;
                 }
 
