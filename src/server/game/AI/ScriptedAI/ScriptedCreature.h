@@ -310,6 +310,7 @@ Creature *GetClosestCreatureWithEntry(WorldObject *pSource, uint32 uiEntry, floa
 GameObject *GetClosestGameObjectWithEntry(WorldObject *pSource, uint32 uiEntry, float fMaxSearchRange);
 void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
 void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
+Creature *GetRandomCreatureWithEntryInRange(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange, bool bAlive = true);
 
 #endif
 

@@ -675,3 +675,32 @@ void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, WorldObject
 {
     return pSource->GetGameObjectListWithEntryInGrid(lList, uiEntry, fMaxSearchRange);
 }
+
+Creature* GetRandomCreatureWithEntryInRange(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange, bool bAlive)
+{
+    std::list<Creature*> crList;
+    GetCreatureListWithEntryInGrid(crList, pSource, uiEntry, fMaxSearchRange);
+
+    // Cleanup alive / dead creatures (depending on parameter)
+    for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); )
+    {
+        // XOR results 0 when both of conditions are true or both are false, that's what we need
+        if (!(bAlive ^ (*itr)->isAlive()))
+            ++itr;
+        else
+            itr = crList.erase(itr);
+    }
+
+    if (crList.empty())
+        return NULL;
+
+    int32 pos = urand(0,crList.size());
+
+    std::list<Creature*>::iterator itr = crList.begin();
+    for ( ; itr != crList.end() && pos > 0; ++itr, --pos);
+
+    if (itr != crList.end())
+        return (*itr);
+
+    return NULL;
+}
