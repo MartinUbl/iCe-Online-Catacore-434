@@ -487,7 +487,7 @@ void BattlegroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
         return;
 }
 
-void BattlegroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundSA::UpdatePlayerScore(Player* Source, uint32 type, int32 value, bool doAddHonor)
 {
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if (itr == m_PlayerScores.end())                         // player not found...

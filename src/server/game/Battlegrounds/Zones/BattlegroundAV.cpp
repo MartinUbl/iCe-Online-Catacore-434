@@ -502,7 +502,7 @@ void BattlegroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
         Source->CastSpell(Source, SpellId, true);
 }
 
-void BattlegroundAV::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundAV::UpdatePlayerScore(Player* Source, uint32 type, int32 value, bool doAddHonor)
 {
 
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());

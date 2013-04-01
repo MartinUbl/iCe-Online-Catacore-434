@@ -677,9 +677,8 @@ void BattlegroundTP::EndBattleground(uint32 winner)
     Battleground::EndBattleground(winner);
 }
 
-void BattlegroundTP::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundTP::UpdatePlayerScore(Player* Source, uint32 type, int32 value, bool doAddHonor)
 {
-
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if (itr == m_PlayerScores.end())                         // player not found
         return;

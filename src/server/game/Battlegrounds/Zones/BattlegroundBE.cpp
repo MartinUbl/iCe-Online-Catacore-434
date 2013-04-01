@@ -180,7 +180,7 @@ bool BattlegroundBE::SetupBattleground()
     return true;
 }
 
-void BattlegroundBE::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundBE::UpdatePlayerScore(Player* Source, uint32 type, int32 value, bool doAddHonor)
 {
 
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());

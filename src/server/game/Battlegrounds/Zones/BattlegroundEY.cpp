@@ -820,7 +820,7 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player *Source, uint32 BgObjectType
         Source->GetAchievementMgr().SetCriteriaProgress(3693, 0, 1, PROGRESS_SET);
 }
 
-void BattlegroundEY::UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundEY::UpdatePlayerScore(Player *Source, uint32 type, int32 value, bool doAddHonor)
 {
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if (itr == m_PlayerScores.end())                         // player not found

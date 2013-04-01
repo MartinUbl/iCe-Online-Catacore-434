@@ -534,7 +534,7 @@ void BattlegroundBG::EventPlayerClickedOnFlag(Player *source, GameObject* /*targ
     PlaySoundToAll(sound);
 }
 
-void BattlegroundBG::UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor)
+void BattlegroundBG::UpdatePlayerScore(Player *Source, uint32 type, int32 value, bool doAddHonor)
 {
     BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if (itr == m_PlayerScores.end())                         // player not found...

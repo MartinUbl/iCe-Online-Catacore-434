@@ -1442,7 +1442,7 @@ bool Battleground::HasFreeSlots() const
     return GetPlayersSize() < GetMaxPlayers();
 }
 
-void Battleground::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+void Battleground::UpdatePlayerScore(Player* Source, uint32 type, int32 value, bool doAddHonor)
 {
     //this procedure is called from virtual function implemented in bg subclass
     BattlegroundScoreMap::const_iterator itr = m_PlayerScores.find(Source->GetGUID());
