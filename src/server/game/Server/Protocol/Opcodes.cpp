@@ -1362,6 +1362,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED,        STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LF_GUILD_POST_UPDATED,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LF_GUILD_RECRUIT_LIST_UPDATED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( CMSG_REORDER_CHARACTERS,                      STATUS_AUTHED,   &WorldSession::HandleReorderCharacters         );
 };
 
 void DestroyOpcodeTable()

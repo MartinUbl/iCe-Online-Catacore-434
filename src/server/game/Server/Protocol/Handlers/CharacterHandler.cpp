@@ -268,25 +268,25 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recv_data*/)
                 "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
             //   8                9               10                     11                     12                     13                    14
                 "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-            //  15                    16                         17                     18
-                "characters.at_login, characters.equipmentCache, character_banned.guid, characters.currentPetSlot "
+            //  15                    16                         17                     18                         19
+                "characters.at_login, characters.equipmentCache, character_banned.guid, characters.currentPetSlot, characters.charSlot "
                 "FROM characters "
                 "LEFT JOIN guild_member ON characters.guid = guild_member.guid "
                 "LEFT JOIN character_banned ON characters.guid = character_banned.guid AND character_banned.active = 1 "
-                "WHERE characters.account = '%u' ORDER BY characters.guid"
+                "WHERE characters.account = '%u'"
                 :
             //   --------- Query With Declined Names ---------
             //           0               1                2                3                 4                  5                       6                        7
                 "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
             //   8                9               10                     11                     12                     13                    14
                 "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-            //  15                    16                         17                     18                         19
-                "characters.at_login, characters.equipmentCache, character_banned.guid, characters.currentPetSlot, character_declinedname.genitive "
+            //  15                    16                         17                     18                         19                     20
+                "characters.at_login, characters.equipmentCache, character_banned.guid, characters.currentPetSlot, characters.charSlot , character_declinedname.genitive "
                 "FROM characters "
                 "LEFT JOIN character_declinedname ON characters.guid = character_declinedname.guid "
                 "LEFT JOIN guild_member ON characters.guid = guild_member.guid "
                 "LEFT JOIN character_banned ON characters.guid = character_banned.guid AND character_banned.active = 1 "
-                "WHERE characters.account = '%u' ORDER BY characters.guid",
+                "WHERE characters.account = '%u'",
                 GetAccountId()
             );
 }
@@ -672,6 +672,49 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
     sWorld->AddCharacterNameData(pNewChar->GetGUIDLow(), pNewChar->GetName(), pNewChar->getGender(), pNewChar->getRace(), pNewChar->getClass(), pNewChar->getLevel());
     delete pNewChar;                                        // created only to call SaveToDB()
 
+}
+
+void WorldSession::HandleReorderCharacters(WorldPacket& recv_data)
+{
+    uint32 charCount = recv_data.ReadBits(10);
+
+    std::vector<ObjectGuid> guid(charCount);
+    uint8 pos;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+    for (uint8 i = 0; i < charCount; ++i)
+    {
+        guid[i][1] = recv_data.ReadBit();
+        guid[i][4] = recv_data.ReadBit();
+        guid[i][5] = recv_data.ReadBit();
+        guid[i][3] = recv_data.ReadBit();
+        guid[i][0] = recv_data.ReadBit();
+        guid[i][7] = recv_data.ReadBit();
+        guid[i][6] = recv_data.ReadBit();
+        guid[i][2] = recv_data.ReadBit();
+    }
+
+    for (uint8 i = 0; i < charCount; ++i)
+    {
+        recv_data.ReadByteSeq(guid[i][6]);
+        recv_data.ReadByteSeq(guid[i][5]);
+        recv_data.ReadByteSeq(guid[i][1]);
+        recv_data.ReadByteSeq(guid[i][4]);
+        recv_data.ReadByteSeq(guid[i][0]);
+        recv_data.ReadByteSeq(guid[i][3]);
+
+        recv_data >> pos;
+
+        // we need save only 1, 2, 3, 4 not 10, 20, 30, 40
+        pos /= 10;
+
+        recv_data.ReadByteSeq(guid[i][2]);
+        recv_data.ReadByteSeq(guid[i][7]);
+
+        trans->PAppend("UPDATE characters SET charSlot = %u WHERE guid = %u", pos, GUID_LOPART((uint64)guid[i]));
+    }
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 void WorldSession::HandleCharDeleteOpcode(WorldPacket & recv_data)

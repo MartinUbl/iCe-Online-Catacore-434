@@ -1673,8 +1673,8 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
     //     8                9               10                     11                     12                     13                    14
     //    "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-    //    15                    16               17                     18                         19
-    //    "characters.at_login, characters.data, character_banned.guid, characters.currentPetSlot, character_declinedname.genitive "
+    //    15                    16               17                     18                         19                                 20
+    //    "characters.at_login, characters.data, character_banned.guid, characters.currentPetSlot, characters.charSlot,   character_declinedname.genitive"
 
     Field* fields = result->Fetch();
 
@@ -1699,6 +1699,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
     uint32 playerFlags = fields[14].GetUInt32();
     uint32 atLoginFlags = fields[15].GetUInt16();
     Tokens equipment(fields[16].GetString(), ' ');
+    uint8 orderSlot = fields[19].GetUInt8();
 
     uint32 charFlags = 0;
     if (playerFlags & PLAYER_FLAGS_HIDE_HELM)
@@ -1716,7 +1717,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
     if (fields[17].GetUInt32())
         charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
 
-    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED) && !fields[19].GetString().empty())
+    if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED) && !fields[20].GetString().empty())
         charFlags |= CHARACTER_FLAG_DECLINED;
 
     uint32 customizationFlag = 0;
@@ -1810,7 +1811,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
 
     *dataBuffer << uint32(petFamily);                           // Pet family
     dataBuffer->WriteByteSeq(guildGuid[2]);
-    *dataBuffer << uint8(0);                                    // List order
+    *dataBuffer << uint8(orderSlot);                            // List order
     *dataBuffer << uint8(hairStyle);                            // Hair style
     dataBuffer->WriteByteSeq(guildGuid[3]);
     *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID

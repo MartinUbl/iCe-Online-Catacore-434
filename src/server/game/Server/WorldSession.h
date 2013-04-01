@@ -357,6 +357,7 @@ class WorldSession
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
+        void HandleReorderCharacters(WorldPacket& recvPacket);
 
 		void HandleWorldLoginOpcode(WorldPacket& recvPacket);
 
