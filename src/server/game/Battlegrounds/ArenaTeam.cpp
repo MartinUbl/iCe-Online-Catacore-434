@@ -168,7 +168,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     QueryResult capresult = CharacterDatabase.PQuery("SELECT cap FROM character_currency_weekcap WHERE guid = '%u' AND currency = '%u' AND source = '%u';", GUID_LOPART(PlayerGuid), CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA);
     if (capresult)
-        plPCap = (*capresult)[0].GetUInt32();
+        plPCap = (*capresult)[0].GetUInt32() / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
