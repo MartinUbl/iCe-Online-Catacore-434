@@ -4487,7 +4487,7 @@ bool Guild::IsRewardReachable(Player* pPlayer, uint32 item)
         return false;
 
     // If guild has't achieved required achievement
-    if (!GetAchievementMgr().HasAchieved(itr->second->achievement))
+    if (itr->second->achievement > 0 && !GetAchievementMgr().HasAchieved(itr->second->achievement))
         return false;
 
     return true;
