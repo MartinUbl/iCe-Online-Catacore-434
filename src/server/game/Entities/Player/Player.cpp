@@ -6334,6 +6334,9 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
 
 void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, bool defence)
 {
+    if (!sWorld->getBoolConfig(CONFIG_USE_OLD_SKILL_SYSTEM))
+        return;
+
     uint8 plevel = getLevel();                              // if defense than pVictim == attacker
     uint8 greylevel = Trinity::XP::GetGrayLevel(plevel);
     uint8 moblevel = pVictim->getLevelForTarget(this);
