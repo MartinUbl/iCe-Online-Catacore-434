@@ -9445,6 +9445,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 89603:
             if(procSpell->Id != 71521) //shoul proc only from Hand of Gul'dan
                 return false;
+            break;
+        case 24943: // Fury of Stormrage
+        case 17104:
+            // Proc only from Wrath
+            if (procSpell->Id != 5176)
+                return false;
+            break;
         default:
             break;
     }
