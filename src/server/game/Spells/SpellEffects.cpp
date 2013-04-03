@@ -4308,8 +4308,8 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
                     playerSpec == SPEC_PALADIN_HOLY)
                 {
-                    // Illuminated Healing absorb value and spellcast. Base is 10% of healing done.
-                    int32 bp0 = addhealth*(0.1f+(player->GetMasteryPoints()*1.5f/100.0f));
+                    // Illuminated Healing absorb value and spellcast
+                    int32 bp0 = addhealth*(player->GetMasteryPoints()*1.5f/100.0f);
 
                     // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
                     if (bp0 > m_caster->GetHealth()*0.33f)
