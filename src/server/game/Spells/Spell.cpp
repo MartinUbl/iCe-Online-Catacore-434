@@ -1570,6 +1570,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                             m_caster->ToPlayer()->RemoveSpellCooldown(16886);
                     }
                 }
+                // Glyph of Starsurge
+                if (m_caster->HasAura(62971))
+                {
+                    // Starfall
+                    if (m_caster->ToPlayer()->HasSpell(48505) && m_caster->ToPlayer()->HasSpellCooldown(48505))
+                        m_caster->ToPlayer()->ModifySpellCooldown(48505, m_caster->ToPlayer()->GetSpellCooldownDelay(48505)-5000, true);
+                }
                 break;
         }
     }
