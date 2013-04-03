@@ -258,6 +258,19 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
             return;
         }
 
+        if (item->IsBoundAccountWide() && pl->GetTeam() != rc_team && pl->GetSession()->GetAccountId() == rc_account)
+        {
+            // Item conversion
+            for (std::map<uint32, uint32>::const_iterator it = sObjectMgr->factionchange_items.begin(); it != sObjectMgr->factionchange_items.end(); ++it)
+            {
+                uint32 item_alliance = it->first;
+                uint32 item_horde = it->second;
+
+                if (item->GetEntry() == item_alliance || item->GetEntry() == item_horde)
+                    item->SetEntry(rc_team == ALLIANCE ? item_alliance : item_horde);
+            }
+        }
+
         if (item->GetProto()->Flags & ITEM_PROTO_FLAG_CONJURED || item->GetUInt32Value(ITEM_FIELD_DURATION))
         {
             pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_EQUIP_ERROR, EQUIP_ERR_MAIL_BOUND_ITEM);
