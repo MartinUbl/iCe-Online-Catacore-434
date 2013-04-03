@@ -2604,11 +2604,11 @@ void Guild::HandleInviteMember(WorldSession* session, const std::string& name)
     }
 
     // Invited player cannot be in another guild
-    /*if (pInvitee->GetGuildId())
+    if (pInvitee->GetGuildId())
     {
         SendCommandResult(session, GUILD_COMMAND_CREATE, ERR_ALREADY_IN_GUILD_S, name);
         return;
-    }*/
+    }
 
     // Invited player cannot be invited
     if (pInvitee->GetGuildIdInvited())
