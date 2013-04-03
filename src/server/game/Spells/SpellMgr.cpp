@@ -3792,28 +3792,28 @@ void SpellMgr::LoadSpellCustomCrafts(uint32 i, SpellEntry* spellInfo)
                     spellInfo->EffectItemType[j] = 56531;
                     break;
                 case 76467:
-                    spellInfo->EffectItemType[j] = 55079;
-                    break;
-                case 76468:
-                    spellInfo->EffectItemType[j] = 55080;
-                    break;
-                case 76465:
                     spellInfo->EffectItemType[j] = 55081;
                     break;
-                case 76472:
+                case 76468:
                     spellInfo->EffectItemType[j] = 55082;
                     break;
+                case 76465:
+                    spellInfo->EffectItemType[j] = 55079;
+                    break;
+                case 76472:
+                    spellInfo->EffectItemType[j] = 55086;
+                    break;
                 case 76466:
-                    spellInfo->EffectItemType[j] = 55083;
+                    spellInfo->EffectItemType[j] = 55080;
                     break;
                 case 76471:
-                    spellInfo->EffectItemType[j] = 55084;
-                    break;
-                case 76470:
                     spellInfo->EffectItemType[j] = 55085;
                     break;
+                case 76470:
+                    spellInfo->EffectItemType[j] = 55084;
+                    break;
                 case 76469:
-                    spellInfo->EffectItemType[j] = 55086;
+                    spellInfo->EffectItemType[j] = 55083;
                     break;
                 case 76458:
                     spellInfo->EffectItemType[j] = 55073;
