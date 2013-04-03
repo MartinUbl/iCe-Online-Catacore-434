@@ -3279,6 +3279,19 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         else
                             ++itr;
                     }
+                    // Tranquility - heal only 5 targets with lowest health, 30% it's optional..maybe
+                    if (m_spellInfo->Id == 44203)
+                    {
+                        maxSize = 5;
+
+                        for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                        {
+                            if ((*itr) && (*itr)->GetHealthPct() <= 30.0f)
+                                ++itr;
+                            else
+                                itr = unitList.erase(itr);
+                        }
+                    }
                     break;
                 case SPELLFAMILY_PALADIN:
                     // Holy Wrath - affect only demons and undeads (with glyph also dragonkins and elementals)
