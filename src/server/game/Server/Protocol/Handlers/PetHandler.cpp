@@ -71,6 +71,13 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 
     Unit* pet= ObjectAccessor::GetUnit(*_player, guid1);
 
+    // if no pet, finish the packet and go away
+    if (!pet)
+    {
+        recv_data.rfinish();
+        return;
+    }
+
     float pos_x = pet->GetPositionX();
     float pos_y = pet->GetPositionY();
     float pos_z = pet->GetPositionZ();
