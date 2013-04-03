@@ -3290,6 +3290,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     if (m_spellInfo->Id == 44203)
                     {
                         maxSize = 5;
+                        power = POWER_HEALTH;
 
                         for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                         {
