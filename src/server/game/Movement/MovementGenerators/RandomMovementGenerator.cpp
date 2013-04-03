@@ -123,6 +123,9 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
 template<>
 void RandomMovementGenerator<Creature>::Initialize(Creature* creature)
 {
+    if (!creature)
+        return;
+
     if (!creature->isAlive())
         return;
 
@@ -149,6 +152,9 @@ void RandomMovementGenerator<Creature>::Finalize(Creature* creature)
 template<>
 bool RandomMovementGenerator<Creature>::Update(Creature *creature, const uint32 diff)
 {
+    if (!creature)
+        return;
+
     if (creature->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
     {
         i_nextMoveTime.Reset(0);  // Expire the timer
