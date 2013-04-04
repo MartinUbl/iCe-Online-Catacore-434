@@ -153,7 +153,7 @@ template<>
 bool RandomMovementGenerator<Creature>::Update(Creature *creature, const uint32 diff)
 {
     if (!creature)
-        return;
+        return false;
 
     if (creature->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
     {
