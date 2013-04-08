@@ -9901,24 +9901,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // And set absorb points by formula
             basepoints0 = 1+ToPlayer()->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*2.5f;
             break;
-        // Seal of Insight regen
-        case 20167:
-            // 15% of base mana when triggered by Judgement
-            if (procSpell)
-            {
-                if (procSpell->Id == 54158)
-                {
-                    int basepoints1 = triggerAmount;
-                    CastCustomSpell(this,trigger_spell_id,NULL,&basepoints1,NULL,true,castItem,triggeredByAura);
-                    return false;
-                }
-            }
-            // do not proc on non-melee hit
-            else if (!(procFlags & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS)))
-            {
-                return false;
-            }
-            break;
     }
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
