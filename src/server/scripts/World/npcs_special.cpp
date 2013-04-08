@@ -2918,20 +2918,13 @@ public:
     {
         guardian_of_ancient_kings_holyAI(Creature* c) : ScriptedAI(c) { }
 
-        void Reset()
+        void IsSummonedBy(Unit* summoner)
         {
             me->SetReactState(REACT_PASSIVE);
 
-            if (me->isSummon())
-            {
-                if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
-                {
-                    pOwner->CastSpell(pOwner, 86674, true);
-
-                    if (Aura* aura = pOwner->GetAura(86674)) // Init Ancient Healer charges to 5
-                        aura->SetCharges(5);
-                }
-            }
+            summoner->CastSpell(summoner, 86674, true);
+            if (Aura* aura = summoner->GetAura(86674)) // Init Ancient Healer charges to 5
+                aura->SetCharges(5);
         }
     };
 
