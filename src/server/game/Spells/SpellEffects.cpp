@@ -4046,14 +4046,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
-            //multiply by amount of holy power (+1 because TakePower takes 1 holy power to cast)
-            uint32 holypower = caster->GetPower(POWER_HOLY_POWER);
+            //multiply by amount of holy power
+            int32 holypower = caster->GetPower(POWER_HOLY_POWER);
+            int32 multiplier = holypower;
             bool takePower = true;
+
             // Divine Purpose effect
             if (caster->HasAura(90174))
             {
                 takePower = false;
-                holypower = 3;
+                multiplier = 3;
                 caster->RemoveAurasDueToSpell(90174);
             }
 
@@ -4063,7 +4065,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             // Apply spell power bonus
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
-            addhealth *= holypower;
+            addhealth *= multiplier;
 
             // Selfless Healer
             if (caster != unitTarget)
@@ -4077,7 +4079,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 if (bpmod)
                 {
                     addhealth *= 1.0f+bpmod*0.25f;
-                    bpmod *= 2*holypower;
+                    bpmod *= 2*multiplier;
                     caster->CastCustomSpell(caster, 90811, &bpmod, 0, 0, true);
                 }
             }
@@ -4104,12 +4106,27 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 }
             }
 
-            //and clear holy power (except if Eternal Glory talent procs)
-            if (!((caster->HasAura(87163) && roll_chance_i(15)) ||
-                 (caster->HasAura(87164) && roll_chance_i(30))) )
+            //and clear holy power
+            if (takePower)
             {
-                if (takePower)
-                    caster->SetPower(POWER_HOLY_POWER, 0);
+                caster->SetPower(POWER_HOLY_POWER, 0);
+
+                // Eternal Glory returns holy power back (15s cooldown)
+                if ((caster->HasAura(87163) && roll_chance_i(15)) ||
+                    (caster->HasAura(87164) && roll_chance_i(30)))
+                {
+                    Player *player = caster->ToPlayer();
+                    if (!player)
+                        return;
+
+                    if (player->HasSpellCooldown(88676))
+                        return;
+                    else
+                    {
+                        player->CastCustomSpell(caster, 88676, &holypower, NULL, NULL, true);
+                        player->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(88676), 0);
+                    }
+                }
             }
         }
         // Light of Dawn
@@ -4920,6 +4937,11 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
             if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetPetGUID())
                 m_caster->CastSpell(m_caster, 82728, true);
             break;
+        }
+        case 88676: // Eternal Glory
+        {
+            m_caster->ModifyPower(power, damage);   // energize spell log shows wrong numbers here - don't send it until it is fixed
+            return;
         }
         default:
             break;
