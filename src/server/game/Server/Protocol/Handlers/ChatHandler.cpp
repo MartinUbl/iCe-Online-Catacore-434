@@ -725,6 +725,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     if (strstr(msg.c_str(), (*itr).c_str()))
                         return;
 
+                /* players with level 10 and higher are able to write on krcma */
+                /* due to spammers, other server propagations and so.. */
+                if (_player->getLevel() < 10)
+                {
+                    SendNotification(GetTrinityString(LANG_CHANNEL_REQ), 10);
+                    return;
+                }
+
                 /* repeating messages */
                 if (_player->krcma_lastmsg.length() > msg.length()) {
                     if (sObjectMgr->SimilarStrings(_player->krcma_lastmsg, msg))
