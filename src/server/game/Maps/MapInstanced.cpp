@@ -191,7 +191,6 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
-                            player->UnbindInstance(pSave->GetMapId(), pSave->GetDifficulty(), true);
                             player->BindToInstance(pSave, true);
                         }
                      }
