@@ -206,6 +206,9 @@ MoveSpline::MoveSpline() : m_Id(0), time_passed(0),
 
 bool MoveSplineInitArgs::Validate(Unit* unit) const
 {
+    if (velocity <= 0.1f)
+        return false;
+
 #define CHECK(exp) \
     if (!(exp))\
     {\
@@ -213,7 +216,6 @@ bool MoveSplineInitArgs::Validate(Unit* unit) const
         return false;\
     }
     CHECK(path.size() > 1);
-    CHECK(velocity > 0.1f);
     CHECK(time_perc >= 0.f && time_perc <= 1.f);
     //CHECK(_checkPathBounds());
     return true;
