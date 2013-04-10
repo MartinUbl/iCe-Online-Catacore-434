@@ -483,6 +483,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_currentBuybackSlot = BUYBACK_SLOT_START;
 
     m_DailyQuestChanged = false;
+    m_WeeklyQuestChanged = false;
     m_lastDailyQuestTime = 0;
 
     for (uint8 i=0; i<MAX_TIMERS; i++)
@@ -25638,6 +25639,10 @@ void Player::InitRunes()
 
     m_runes->runeState = 0;
     m_runes->lastUsedRune = RUNE_BLOOD;
+
+    // Set rune cooldown to zero to avoid conditional jumps depending on uninitialized values later
+    for (uint32 i = 0; i < MAX_RUNES; ++i)
+        m_runes->runes[i].Cooldown = 0;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
