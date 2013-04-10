@@ -5150,6 +5150,15 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_CONE_BACK;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY; 
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY; 
+            count++;
+            break;
+        case 83703: // Shadow Nova (Halfus Wyrmbreaker)
+            spellInfo->CastingTimeIndex = 2;
+            count++;
+            break;
+        case 83487: // Chains (Halfus Wyrmbreaker)
+            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            count++;
             break;
         /*case 99476: // The Widow's Kiss (Beth'tilac)
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;

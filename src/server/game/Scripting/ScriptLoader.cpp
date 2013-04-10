@@ -587,6 +587,7 @@ void AddSC_instance_the_stonecore();
 void AddSC_instance_throne_of_the_tides();
 void AddSC_corborus();
 void AddSC_twilight_council();
+void AddSC_boss_halfus_wyrmbreaker();
 void AddSC_instance_firelands();
 void AddSC_boss_alysrazor();
 void AddSC_boss_baeloroc();
@@ -1225,6 +1226,7 @@ void AddCataclysmScripts()
     AddSC_instance_throne_of_the_tides();
     AddSC_corborus();
     AddSC_twilight_council();
+    AddSC_boss_halfus_wyrmbreaker();
 
     AddSC_magmaw();
     AddSC_maloriak();

@@ -206,7 +206,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/GrimBatol/boss_erudax.cpp
   EasternKingdoms/BastionOfTwilight/bastion_of_twilight.h
   EasternKingdoms/BastionOfTwilight/instance_bastion_of_twilight.cpp
-  EasternKingdoms/BastionOfTwilight/boss_halfus.cpp
+  EasternKingdoms/BastionOfTwilight/boss_halfus_wyrmbreaker.cpp
   EasternKingdoms/BastionOfTwilight/boss_valiona_and_theralion.cpp
   EasternKingdoms/BastionOfTwilight/boss_twilight_council.cpp
   EasternKingdoms/BastionOfTwilight/boss_chogall.cpp

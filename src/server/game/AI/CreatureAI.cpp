@@ -39,7 +39,7 @@ void CreatureAI::OnCharmed(bool /*apply*/)
 AISpellInfoType * UnitAI::AISpellInfo;
  AISpellInfoType * GetAISpellInfo(uint32 i) { return &CreatureAI::AISpellInfo[i]; }
 
-void CreatureAI::DoZoneInCombat(Creature* creature)
+void CreatureAI::DoZoneInCombat(Creature* creature,float maxRange)
 {
     if (!creature)
         creature = me;
@@ -56,7 +56,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature)
 
     if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
     {
-        if (Unit *target = creature->SelectNearestTarget(50))
+        if (Unit *target = creature->SelectNearestTarget(maxRange))
             creature->AI()->AttackStart(target);
         else if (creature->isSummon())
         {

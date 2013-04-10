@@ -38,7 +38,15 @@ public:
         uint64 ChogallGUID;
         uint64 SinestraGUID;
         uint64 GOfloorGUID;
-
+        uint8  EmeraldWhelpFlag;
+        uint64 EmeraldWhelp[8];
+        uint64 Proto_BehemothGUID;
+        uint32 StormRiderEvent;
+        uint32 TimeWardenEvent;
+        uint32 SlateDragonEvent;
+        uint32 NetherScionEvent;
+        uint32 EmeraldWhelpEvent;
+        uint32 HalfusIntro;
         void Initialize()
         {
             HalfusGUID = 0;
@@ -47,6 +55,61 @@ public:
             ChogallGUID = 0;
             SinestraGUID = 0;
             GOfloorGUID = 0;
+            HalfusIntro = 0;
+            EmeraldWhelpFlag = 0;
+            Proto_BehemothGUID = 0;
+            TimeWardenEvent = 1;
+            StormRiderEvent = 1;
+            SlateDragonEvent = 1;
+            NetherScionEvent = 1;
+            EmeraldWhelpEvent = 1;
+            
+            for (int i = 0; i < 8; ++i)
+                EmeraldWhelp[i] = 0;
+                       
+            switch (urand(1, 10))
+            {
+            case 1:
+                NetherScionEvent = 0;
+                SlateDragonEvent = 0;
+                break;
+            case 2:
+                NetherScionEvent = 0;
+                StormRiderEvent = 0;
+                break;
+            case 3:
+                NetherScionEvent = 0;
+                EmeraldWhelpEvent = 0;
+                break;
+            case 4:
+                NetherScionEvent = 0;
+                TimeWardenEvent = 0;
+                break;
+            case 5:
+                SlateDragonEvent = 0;
+                StormRiderEvent = 0;
+                break;
+            case 6:
+                SlateDragonEvent = 0;
+                EmeraldWhelpEvent = 0;
+                break;
+            case 7:
+                SlateDragonEvent = 0;
+                TimeWardenEvent = 0;
+                break;
+            case 8:
+                StormRiderEvent = 0;
+                EmeraldWhelpEvent = 0;
+                break;
+            case 9:
+                StormRiderEvent = 0;
+                TimeWardenEvent = 0;
+                break;
+            case 10:
+                TimeWardenEvent = 0;
+                EmeraldWhelpEvent = 0;
+                break;
+            };
 
             for(uint8 i=0; i < MAX_ENCOUNTER; ++i)
                 auiEncounter[i] = NOT_STARTED;
@@ -82,6 +145,9 @@ public:
                 case 44600: // Halfus
                     HalfusGUID = pCreature->GetGUID();
                     break;
+                case 44687:
+                    Proto_BehemothGUID = pCreature->GetGUID();
+                    break;
                 case 45992: // Valiona
                     ValionaGUID = pCreature->GetGUID();
                     break;
@@ -105,6 +171,8 @@ public:
                 case DATA_HALFUS:
                     return HalfusGUID;
                     break;
+                case DATA_PROTO_BEHEMOTH:		 
+                    return Proto_BehemothGUID;
                 case DATA_VALIONA:
                     return ValionaGUID;
                     break;
@@ -170,8 +238,24 @@ public:
        {
             if (type < MAX_ENCOUNTER)
                 return auiEncounter[type];
-            else
-                return 0;
+
+            switch (type)
+            {  
+                case DATA_HALFUS:                 return auiEncounter[0];
+                case DATA_PROTO_BEHEMOTH:         return auiEncounter[0];
+                case DATA_VALIONA:                return auiEncounter[1];
+                case DATA_COUNCIL:                return auiEncounter[2];
+                case DATA_CHOGALL:                return auiEncounter[3];
+                case DATA_SINESTRA:               return auiEncounter[4];
+                case DATA_STORM_RIDER:            return StormRiderEvent;
+                case DATA_THE_TIME_WARDEN:        return TimeWardenEvent;
+                case DATA_THE_SLATE_DRAGON:       return SlateDragonEvent;
+                case DATA_NETHER_SCION:           return NetherScionEvent;
+                case DATA_ORPHANED_EMERALD_WHELP: return EmeraldWhelpEvent;
+                case DATA_HALFUS_INTRO:           return HalfusIntro;
+            }
+
+            return 0;
        }
 
        std::string GetSaveData()
