@@ -113,8 +113,15 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     std::string password = recvPacket.ReadString(passLength);
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+    {
         if (Channel *chn = cMgr->GetChannel(channelName, _player))
-            chn->Password(_player->GetGUID(), password.c_str());
+        {
+            if (stricmp(channelName.c_str(), "krcma") == 0)
+                SendNotification("Setting password for channel krcma is not allowed.");
+            else
+                chn->Password(_player->GetGUID(), password.c_str());
+        }
+   }
 }
 
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
