@@ -148,7 +148,6 @@ class npc_vile_swill_preeffect: public CreatureScript
             
             void UpdateAI(uint32 const diff)
             {
-                    
                 if (Count >= 5)
                 {
                     me->DespawnOrUnsummon();
@@ -157,7 +156,12 @@ class npc_vile_swill_preeffect: public CreatureScript
                 if(Release_timer <= diff)
                 {
                     Count++;
-                    me->SummonCreature(NPC_VILE_SWILL,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    if (Creature* pSummon = me->SummonCreature(NPC_VILE_SWILL,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                    {
+                        if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                            if (pSummon->AI())
+                                pSummon->AI()->AttackStart(pTarget);
+                    }
                     me->CastSpell(me,92720,false);
                     Release_timer = 2000;
                 }
