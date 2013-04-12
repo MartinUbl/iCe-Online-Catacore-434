@@ -19455,6 +19455,7 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 53576:
         case 53569:
         case 85767:
+        case 77769:
             return true; // Continue handling
     }
 
@@ -19549,8 +19550,17 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
             }
             break;
         }
-        case SPELLFAMILY_MAGE:
+        case SPELLFAMILY_HUNTER:
         {
+            // Trap Launcher - drop aura after trap usage
+            if (dummySpell->Id == 77769 && procSpell)
+            {
+                if (procSpell->casterAuraSpell == 77769)
+                {
+                    RemoveAurasDueToSpell(77769);
+                    RemoveAurasDueToSpell(82946);
+                }
+            }
             break;
         }
         case SPELLFAMILY_WARLOCK:
