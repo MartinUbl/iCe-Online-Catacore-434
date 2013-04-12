@@ -10192,11 +10192,11 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
         {
             if (m_originalCaster && m_caster && m_originalCaster->isAlive() && m_caster->isAlive())
             {
-                summon->SetSpeed(MOVE_RUN, 0.3f);
+                summon->SetSpeed(MOVE_RUN, 0.5f, true);
                 summon->CastSpell(summon, 87427, true);
                 summon->SetDisplayId(m_originalCaster->GetDisplayId());
-                // Have to clone the caster, doesnt work as intended
-                //m_originalCaster->CastSpell(summon, 87213, true);
+                // Have to clone the caster
+                m_originalCaster->CastSpell(summon, 87213, true);
                 summon->getThreatManager().clearReferences();
                 summon->getThreatManager().addThreat(m_caster, 100000.0f);
                 summon->Attack(m_caster, true);
