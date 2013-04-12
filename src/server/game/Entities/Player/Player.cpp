@@ -20045,30 +20045,63 @@ void Player::SaveToDB()
 
     trans->Append(ss.str().c_str());
 
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
     if (m_mailsUpdated)                                     //save mails only when needed
         _SaveMail(trans);
-
+    _SaveEquipmentSets(trans);
+    GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveBGData(trans);
-    _SaveInventory(trans);
+    _SaveCUFProfiles(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
     _SaveWeeklyQuestStatus(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
+    _SaveInventory(trans);
     _SaveTalents(trans);
     _SaveTalentBranchSpecs(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
     _SaveSpells(trans);
     _SaveSpellCooldowns(trans);
-    _SaveActions(trans);
     _SaveAuras(trans);
     _SaveSkills(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
+    _SaveActions(trans);
+    _SaveGlyphs(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
     m_achievementMgr.SaveToDB(trans);
     m_reputationMgr.SaveToDB(trans);
-    _SaveEquipmentSets(trans);
-    GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
-    _SaveGlyphs(trans);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = CharacterDatabase.BeginTransaction();
+
     _SaveCurrency();
     _SaveCurrencyWeekcap();
     _SaveArchaeologyData();
-    _SaveCUFProfiles(trans);
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
