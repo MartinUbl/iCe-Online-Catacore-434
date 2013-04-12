@@ -7327,7 +7327,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
         {
             // Arcane Missiles
             if (caster && m_spellProto->Id == 5143)
-                caster->RemoveAurasDueToSpell(79808); // removes Arcane Missiles enabler spell
+                caster->RemoveAurasDueToSpell(79683); // removes Arcane Missiles enabler spell
 
             // Everlasting Affliction: Haunt has chance to refresh duration of Corruption
             if (caster && m_spellProto->Id == 48181)
@@ -7993,6 +7993,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
             break;
         }
         case SPELLFAMILY_MAGE:
+            // Arcane Missiles (enabler aura)
+            if (m_spellProto->Id == 79683)
+            {
+                if (target && target->IsInWorld() && target->ToPlayer())
+                {
+                    if (apply)
+                        target->CastSpell(target, 79808, true);
+                    else
+                        target->RemoveAurasDueToSpell(79808);
+                }
+            }
             break;
         case SPELLFAMILY_PRIEST:
             break;

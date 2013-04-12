@@ -19456,6 +19456,7 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 53569:
         case 85767:
         case 77769:
+        case 79683:
             return true; // Continue handling
     }
 
