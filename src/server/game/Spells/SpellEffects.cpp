@@ -8382,7 +8382,11 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     {
         // Rogue: Redirect
         if (GetSpellInfo()->Id == 73981 && plr->GetComboPoints() > 0 && plr->GetComboTarget())
-            plr->AddComboPoints(unitTarget, plr->GetComboPoints(), this);
+        {
+            uint8 combopoints = plr->GetComboPoints();
+            plr->ClearComboPoints();
+            plr->AddComboPoints(unitTarget, combopoints, this);
+        }
     }
 }
 
