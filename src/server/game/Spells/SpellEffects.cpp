@@ -5817,19 +5817,10 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
 
     float angle = unitTarget->GetAngle(&m_targets.m_dstPos);
 
-    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-    {
-        // For players just turn them
-        unitTarget->ToPlayer()->SetPosition(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), angle, false);
-        unitTarget->ToPlayer()->SendTeleportAckPacket();
-    }
-    else
-    {
-        // Set creature Distracted, Stop it, And turn it
-        unitTarget->SetOrientation(angle);
-        unitTarget->StopMoving();
+    unitTarget->SetFacingTo(angle);
+
+    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
-    }
 }
 
 void Spell::EffectPickPocket(SpellEffIndex /*effIndex*/)
