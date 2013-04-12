@@ -2007,6 +2007,18 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
                 value += ap*0.4f*0.2f;
                 break;
             }
+            case 90361: // Spirit Mend
+            {
+                if (Player* pl = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    if (effIndex == EFFECT_0)
+                        value += rap*0.35f*0.5f;
+                    else if (effIndex == EFFECT_1)
+                        value += rap*0.35f*0.335f;
+                }
+                break;
+            }
         }
 
         // bonus amount from combo points

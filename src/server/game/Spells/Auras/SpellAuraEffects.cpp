@@ -2315,6 +2315,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     caster->CastSpell(caster, 16870, true);
                 }
             }
+            // Spirit Mend (exotic pet ability)
+            else if (m_spellProto->Id == 90361)
+            {
+                // split total heal amount to all ticks
+                if (GetTotalTicks() != 0)
+                    damage = damage / GetTotalTicks();
+            }
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
