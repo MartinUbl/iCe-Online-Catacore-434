@@ -9285,6 +9285,9 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
         // Glyph of Thunderstorm
         if (m_caster->HasAura(62132))
             return;
+
+        // movement slowing aura
+        m_caster->CastSpell(unitTarget, 100955, true);
     }
 
     float ratio = 0.1f; // dbc value ratio
