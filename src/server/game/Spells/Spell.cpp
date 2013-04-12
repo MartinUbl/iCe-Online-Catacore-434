@@ -5727,6 +5727,13 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             if (effIndex == EFFECT_1 && !m_caster->HasAura(54934))
                 result = false;
             break;
+        case 44614: // Frostfire Bolt
+            // Without Glyph of Frostfire - apply effect 0, with glyph - apply effect 2
+            if (m_caster->HasAura(61205))
+                result = (effIndex != EFFECT_0);
+            else
+                result = (effIndex != EFFECT_2);
+            break;
     }
 
     return result;
