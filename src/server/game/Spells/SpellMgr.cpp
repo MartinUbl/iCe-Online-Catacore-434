@@ -2007,6 +2007,12 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
                 value += ap*0.4f*0.2f;
                 break;
             }
+            case 53508: // Wolverine Bite
+            {
+                uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                value += ap*0.4f*0.1f;
+                break;
+            }
             case 90361: // Spirit Mend
             {
                 if (Player* pl = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
