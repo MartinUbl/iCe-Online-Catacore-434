@@ -658,6 +658,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                             amount *= (1+float(caster->ToPlayer()->GetMasteryPoints())*4.0f/100.0f);
                         }
                     }
+                case SPELLFAMILY_HUNTER:
+                    // Intervene (pet ability)
+                    if (m_spellProto->Id == 53476)
+                    {
+                        if (caster)
+                            amount = amount*caster->GetMaxHealth() / 100.0f;
+                    }
                 default:
                     break;
             }
