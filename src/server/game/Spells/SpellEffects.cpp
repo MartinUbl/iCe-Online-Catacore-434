@@ -2340,7 +2340,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             // Camouflage
             if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
-                m_caster->CastSpell(m_caster,51755,true);
+            {
+                m_caster->CastSpell(m_caster, 51755, true); // main aura
+                m_caster->CastSpell(m_caster, 80326, true); // periodic stealth trigger aura
+            }
             // Master's Call
             else if (m_spellInfo->Id == 53271)
             {

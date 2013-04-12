@@ -3341,6 +3341,27 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                     return;
                 break;
             }
+            // Camouflage (hunter)
+            case 80326:
+            {
+                if (!caster)
+                    return;
+
+                // Apply to pet also
+                if (caster->GetPetGUID())
+                {
+                    Unit* pPet = Unit::GetUnit(*caster, caster->GetPetGUID());
+                    if (pPet && !pPet->HasAura(51755))
+                    {
+                        pPet->CastSpell(pPet, 51755, true);
+                        pPet->CastSpell(pPet, 80326, true);
+                    }
+                }
+
+                // Do not apply while moving or when already has one
+                if (caster->isMoving() || caster->HasAura(triggerSpellId))
+                    return;
+            }
         }
     }
 
@@ -3762,14 +3783,21 @@ void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode, 
 
     Unit *target = aurApp->GetTarget();
 
-    if (apply)
+    if (!apply && !(target->isCamouflaged()))
     {
-        target->CastSpell(target,80326,true);
-    }
-    else if (!(target->isCamouflaged()))
-    {
-        target->RemoveAura(80326);
-        target->RemoveAura(80325);
+        target->RemoveAurasDueToSpell(80325);
+        target->RemoveAurasDueToSpell(80326);
+
+        if (target->GetPetGUID())
+        {
+            Unit* pPet = Unit::GetUnit(*target, target->GetPetGUID());
+            if (pPet)
+            {
+                pPet->RemoveAurasDueToSpell(51755);
+                pPet->RemoveAurasDueToSpell(80326);
+                pPet->RemoveAurasDueToSpell(80325);
+            }
+        }
     }
 }
 

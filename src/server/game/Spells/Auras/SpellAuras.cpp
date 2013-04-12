@@ -1508,6 +1508,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
                         }
                     }
+                    // Camouflage
+                    if (GetId() == 80326 && caster)
+                        caster->RemoveAurasDueToSpell(80325); // remove triggered effect
                 }
                 break;
             case SPELLFAMILY_DRUID:
