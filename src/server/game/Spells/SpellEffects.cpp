@@ -2451,6 +2451,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
                 int32 bp0 = damage;
                 m_caster->CastCustomSpell(unitTarget, 50783, &bp0, NULL, NULL, true, 0);
+                // Single-minded fury (warrior): Slam off-hand
+                if (m_caster->HasAura(81099) && m_caster->haveOffhandWeapon())
+                    m_caster->CastCustomSpell(unitTarget, 97992, &bp0, NULL, NULL, true, 0);
                 return;
             }
             // Execute
@@ -6860,10 +6863,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     }
 
     float weaponDamage = (float) m_caster->CalculateDamage(m_attackType, normalized, true);
-
-    // Single-minded fury (warrior): Slam hits with both weapons
-    if (m_spellInfo->Id == 50783 && m_caster->HasAura(81099) && m_caster->haveOffhandWeapon())
-        weaponDamage += (float) m_caster->CalculateDamage(OFF_ATTACK, normalized, true);
 
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
