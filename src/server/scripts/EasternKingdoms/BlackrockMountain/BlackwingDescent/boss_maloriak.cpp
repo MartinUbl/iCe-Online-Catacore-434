@@ -630,6 +630,11 @@ public:
 
             switch (id)
             {
+                case 0:
+                {
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    break;
+                }
                 case 1:
                 {
                     DoScriptText(TEXT_RED_VIAL, me);
