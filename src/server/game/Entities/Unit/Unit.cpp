@@ -5438,19 +5438,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     return false;
                 }
-                // Eye for an Eye
-                case 9799:
-                case 25988:
-                {
-                    // Implicit 20/40% chance
-                    if ((dummySpell->Id == 9799 && !roll_chance_i(20)) || (dummySpell->Id == 25988 && !roll_chance_i(40)))
-                        return false;
-
-                    // return damage % back to attacker
-                    basepoints0 = int32((triggerAmount * damage) / 100.0f);
-                    triggered_spell_id = 25997;
-                    break;
-                }
                 // Sweeping Strikes
                 case 18765:
                 case 35429:
@@ -8654,6 +8641,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         if (pVictim && pVictim->isAlive())
                             CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
                         return true;
+                    }
+                    // Eye for an Eye
+                    case 9799:
+                    case 25988:
+                    {
+                        // return damage % back to attacker
+                        basepoints0 = int32((triggerAmount * damage) / 100.0f);
+                        trigger_spell_id = 25997;
+                        break;
                     }
                 }
                 break;
