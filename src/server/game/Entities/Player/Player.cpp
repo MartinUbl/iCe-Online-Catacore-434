@@ -3872,10 +3872,6 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         _LoadArchaeologyData();
     }
 
-    // After learning Swift flight form, we need remove older rank
-    if (spell_id == 40120 && HasSpell(33943))
-        removeSpell(33943);
-
     // learn all disabled higher ranks and required spells (recursive)
     if (disabled)
     {
