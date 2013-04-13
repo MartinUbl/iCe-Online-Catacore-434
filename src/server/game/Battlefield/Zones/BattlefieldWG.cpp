@@ -492,6 +492,7 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
             IncrementQuest(player, WGQuest[player->GetTeamId()][1], true);
             // Send Wintergrasp victory achievement
             DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG, player);
+            DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG_100, player);
             // Award achievement for succeeding in Wintergrasp in 10 minutes or less
             if (!endbytimer && GetTimer() <= 10000)
                 DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG_TIMER_10, player);
@@ -572,17 +573,24 @@ void BattlefieldWG::DoCompleteOrIncrementAchievement(uint32 achievement, Player 
 {
     AchievementEntry const* AE = GetAchievementStore()->LookupEntry(achievement);
 
+    if (player || !AE)
+        return;
+
     switch (achievement)
     {
+        case ACHIEVEMENTS_WIN_WG:
         case ACHIEVEMENTS_WIN_WG_100:
-            {
-                // player->GetAchievementMgr().UpdateAchievementCriteria();
-            }
+        {
+            player->CastSpell(player, 56902, true);
+            break;
+        }
+        case ACHIEVEMENTS_WIN_WG_TIMER_10:
+        case ACHIEVEMENTS_WG_TOWER_DESTROY:
+        {
+            player->CompletedAchievement(AE);
+            break;
+        }
         default:
-            {
-                if (player)
-                    player->CompletedAchievement(AE);
-            }
             break;
     }
 }
