@@ -975,8 +975,15 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
     ASSERT(grid != NULL);
 
     {
-        if (!unloadAll && ActiveObjectsNearGrid(x, y))
-             return false;
+        if (!unloadAll)
+        {
+            //pets, possessed creatures (must be active), transport passengers
+            if (grid->GetWorldObjectCountInNGrid<Creature>())
+                return false;
+
+            if (ActiveObjectsNearGrid(x, y))
+                return false;
+        }
 
         sLog->outDebug("Unloading grid[%u,%u] for map %u", x,y, GetId());
 

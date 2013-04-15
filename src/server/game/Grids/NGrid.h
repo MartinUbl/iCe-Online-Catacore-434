@@ -149,12 +149,24 @@ class NGrid
             getGridType(x, y).Visit(visitor);
         }
 
+        /*
         unsigned int ActiveObjectsInGrid(void) const
         {
             unsigned int count=0;
             for (unsigned int x=0; x < N; ++x)
                 for (unsigned int y=0; y < N; ++y)
                     count += i_cells[x][y].ActiveObjectsInGrid();
+            return count;
+        }
+        */
+
+        template<class T>
+        uint32 GetWorldObjectCountInNGrid() const
+        {
+            uint32 count = 0;
+            for (uint32 x = 0; x < N; ++x)
+                for (uint32 y = 0; y < N; ++y)
+                    count += i_cells[x][y].template GetWorldObjectCountInGrid<T>();
             return count;
         }
 

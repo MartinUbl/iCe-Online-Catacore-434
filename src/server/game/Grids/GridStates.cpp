@@ -38,7 +38,7 @@ ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, c
     info.UpdateTimeTracker(t_diff);
     if (info.getTimeTracker().Passed())
     {
-        if (grid.ActiveObjectsInGrid() == 0 && !m.ActiveObjectsNearGrid(x, y))
+        if (grid.GetWorldObjectCountInNGrid<Player>() == 0 && !m.ActiveObjectsNearGrid(x, y))
         {
             ObjectGridStoper stoper(grid);
             stoper.StopN();
