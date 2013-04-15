@@ -9448,6 +9448,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 5176)
                 return false;
             break;
+        case 53557: // Enlightnened Judgements
+            // Proc only from Judgement
+            if (procSpell->Id != 54158)
+                return false;
+            break;
         default:
             break;
     }
