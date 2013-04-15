@@ -110,7 +110,9 @@ void GuildAchievementMgr::SaveToDB()
             }
         }
     }
-    CharacterDatabase.CommitTransaction(trans);
+
+    if (trans->GetSize() > 0)
+        CharacterDatabase.CommitTransaction(trans);
 }
 
 void GuildAchievementMgr::LoadFromDB()
