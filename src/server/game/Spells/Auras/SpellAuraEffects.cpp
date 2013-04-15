@@ -3746,8 +3746,8 @@ void AuraEffect::HandleInvisibility(AuraApplication const *aurApp, uint8 mode, b
         if (mode & AURA_EFFECT_HANDLE_REAL)
             target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
-        // apply glow vision (not for Killing spree)
-        if (target->GetTypeId() == TYPEID_PLAYER && !target->HasAura(69107))
+        // apply glow vision (not for Killing spree and Arena)
+        if (target->GetTypeId() == TYPEID_PLAYER && !target->HasAura(69107) && aurApp->GetBase()->GetSpellProto()->Id != 32727)
             target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
         target->UpdateObjectVisibility();
