@@ -674,7 +674,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 // Necrotic Strike
                 if (GetSpellProto()->Id == 73975)
-                    return (0.75f * caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                {
+                    amount = 0.7f * caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    caster->ApplyResilience(GetBase()->GetUnitOwner(), &amount);
+                    return amount;
+                }
             }
             break;
         case SPELL_AURA_MANA_SHIELD:
