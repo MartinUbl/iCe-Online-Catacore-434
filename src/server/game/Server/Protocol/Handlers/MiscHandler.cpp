@@ -405,11 +405,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     if (GetPlayer()->CanFreeMove())
     {
         GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
-
-        WorldPacket data(SMSG_FORCE_MOVE_ROOT, (8+4));    // guess size
-        data.append(GetPlayer()->GetPackGUID());
-        data << (uint32)2;
-        SendPacket(&data);
+        GetPlayer()->SetRooted(true);
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
@@ -438,10 +434,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket & /*recv_data*/)
     if (GetPlayer()->CanFreeMove())
     {
         //!we can move again
-        data.Initialize(SMSG_FORCE_MOVE_UNROOT, 8);       // guess size
-        data.append(GetPlayer()->GetPackGUID());
-        data << uint32(0);
-        SendPacket(&data);
+        GetPlayer()->SetRooted(false);
 
         //! Stand Up
         GetPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
