@@ -546,7 +546,7 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string msg)
     return data;
 }
 
-void Battlefield::SendWarningToAllInZone(uint32 entry)
+void Battlefield::SendWarningToAllInZone(uint32 entry, ...)
 {
     /*if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
         if (Creature* stalker = unit->ToCreature())
@@ -577,7 +577,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
     WorldPacket data = BuildWarningAnnPacket(msg);
     BroadcastPacketWar(data);
 }*/
-void Battlefield::SendWarningToPlayer(Player *player, uint32 entry)
+void Battlefield::SendWarningToPlayer(Player *player, uint32 entry, ...)
 {
     if (!player || !player->IsInWorld())
         return;
