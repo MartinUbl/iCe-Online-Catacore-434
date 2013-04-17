@@ -7621,7 +7621,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
              switch(newZone)
              {
                  case 2817: // Crystalsong Forest
-                 case 4395: // Dalaran
                  case 65:   // Dragonblight
                  case 394:  // Grizzly Hills
                  case 495:  // Howling Fjord
