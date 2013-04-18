@@ -193,7 +193,9 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
+                            pBind->save->RemoveFlexiblePlayer(player);//remove from special list of flexible bound players
                             pBind->save=groupBind->save;
+                            groupBind->save->AddFlexiblePlayer(player);
                             player->m_boundInstances[pSave->GetDifficulty()][pSave->GetMapId()]=*pBind;
                             bool hero=true;
                             if(iGMap->GetDifficulty()==RAID_DIFFICULTY_10MAN_HEROIC||iGMap->GetDifficulty()==RAID_DIFFICULTY_25MAN_HEROIC) // if difficulty is heroic bind instantly, else after killing boss
