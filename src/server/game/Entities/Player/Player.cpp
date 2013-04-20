@@ -656,7 +656,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_globalCooldowns.clear();
 
     m_ConditionErrorMsgId = 0;
-    memset(_CUFProfiles, NULL, MAX_CUF_PROFILES * sizeof(CUFProfile*));
+    memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
 }
 
 Player::~Player ()
@@ -6511,7 +6511,7 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 mSkillStatus.erase(itr);
 
             // remove all quests that related to this skill
-            for (QuestStatusMap::const_iterator itr = mQuestStatus.begin(); itr != mQuestStatus.end(); ++itr)
+            for (QuestStatusMap::iterator itr = mQuestStatus.begin(); itr != mQuestStatus.end(); ++itr)
             {
                 Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->first);
                 if (!pQuest)
@@ -6525,8 +6525,7 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 {
                     SetQuestStatus(pQuest->GetQuestId(), QUEST_STATUS_NONE);
                     // reset rewarded for restart repeatable quest
-                    QuestStatusData data = itr->second;
-                    data.m_rewarded = false;
+                    itr->second.m_rewarded = false;
 
                     // we ignore unequippable quest items in this case, it's still be equipped
                     TakeQuestSourceItem(pQuest->GetQuestId(), false);

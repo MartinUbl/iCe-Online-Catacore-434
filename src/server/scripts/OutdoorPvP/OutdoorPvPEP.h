@@ -190,6 +190,7 @@ class OPvPCapturePointEP_EWT : public OPvPCapturePoint
     public:
 
         OPvPCapturePointEP_EWT(OutdoorPvP * pvp);
+        ~OPvPCapturePointEP_EWT() {};
 
         void ChangeState();
 
@@ -221,6 +222,7 @@ class OPvPCapturePointEP_NPT : public OPvPCapturePoint
     public:
 
         OPvPCapturePointEP_NPT(OutdoorPvP * pvp);
+        ~OPvPCapturePointEP_NPT() {};
 
         void ChangeState();
 
@@ -252,6 +254,7 @@ class OPvPCapturePointEP_CGT : public OPvPCapturePoint
     public:
 
         OPvPCapturePointEP_CGT(OutdoorPvP * pvp);
+        ~OPvPCapturePointEP_CGT() {};
 
         void ChangeState();
 
@@ -283,6 +286,7 @@ class OPvPCapturePointEP_PWT : public OPvPCapturePoint
     public:
 
         OPvPCapturePointEP_PWT(OutdoorPvP * pvp);
+        ~OPvPCapturePointEP_PWT() {};
 
         void ChangeState();
 
@@ -317,6 +321,7 @@ class OutdoorPvPEP : public OutdoorPvP
     public:
 
         OutdoorPvPEP();
+        ~OutdoorPvPEP() {};
 
         bool SetupOutdoorPvP();
 

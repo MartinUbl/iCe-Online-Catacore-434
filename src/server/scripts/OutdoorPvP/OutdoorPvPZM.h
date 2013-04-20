@@ -174,6 +174,7 @@ class OPvPCapturePointZM_Beacon : public OPvPCapturePoint
     public:
 
         OPvPCapturePointZM_Beacon(OutdoorPvP * pvp, ZM_BeaconType type);
+        ~OPvPCapturePointZM_Beacon() {};
 
         void ChangeState();
 
@@ -207,6 +208,7 @@ class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
     public:
 
         OPvPCapturePointZM_GraveYard(OutdoorPvP * pvp);
+        ~OPvPCapturePointZM_GraveYard() {};
 
         bool Update(uint32 diff);
 
@@ -244,6 +246,7 @@ class OutdoorPvPZM : public OutdoorPvP
     public:
 
         OutdoorPvPZM();
+        ~OutdoorPvPZM() {};
 
         bool SetupOutdoorPvP();
 

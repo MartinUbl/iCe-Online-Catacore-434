@@ -464,7 +464,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     bool hasFallData = false;
     bool hasFallDirection = false;
     bool hasSplineElevation = false;
-    bool hasSpline = false;
+    /*bool hasSpline = false;*/ // unused (for now)
 
     MovementStatusElements *sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (sequence == NULL)
@@ -546,7 +546,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
                 hasSplineElevation = !data.ReadBit();
                 break;
             case MSEHasSpline:
-                hasSpline = data.ReadBit();
+                /*hasSpline = */data.ReadBit();
                 break;
             case MSEMovementFlags:
                 if (hasMovementFlags)

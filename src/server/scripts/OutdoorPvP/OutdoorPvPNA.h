@@ -258,6 +258,7 @@ class OPvPCapturePointNA : public OPvPCapturePoint
     public:
 
         OPvPCapturePointNA(OutdoorPvP * pvp);
+        ~OPvPCapturePointNA() {};
 
         bool Update(uint32 diff);
 
@@ -318,6 +319,7 @@ class OutdoorPvPNA : public OutdoorPvP
     public:
 
         OutdoorPvPNA();
+        ~OutdoorPvPNA() {};
 
         bool SetupOutdoorPvP();
 

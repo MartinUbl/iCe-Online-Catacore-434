@@ -629,11 +629,11 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
 
     data.WriteBits(dsize, 24);
 
-    ObjectGuid tmpGuid;
+    /*ObjectGuid tmpGuid;
 
     uint32 limit = 0;
 
-    /*for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         tmpGuid = it->first;
 
@@ -659,9 +659,9 @@ void WorldSession::SendLfgJoinResult(const LfgJoinResultData& joinData)
     data.WriteBit(plGuid[1]);
     data.WriteBit(plGuid[6]);
 
-    limit = 0;
+    /*limit = 0;
 
-    /*for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    for (LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         tmpGuid = it->first;
 

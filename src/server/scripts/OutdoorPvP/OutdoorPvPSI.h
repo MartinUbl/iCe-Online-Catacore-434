@@ -57,6 +57,7 @@ class OutdoorPvPSI : public OutdoorPvP
     public:
 
         OutdoorPvPSI();
+        ~OutdoorPvPSI() {};
 
         bool SetupOutdoorPvP();
 

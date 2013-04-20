@@ -65,6 +65,7 @@ class _SpellScript
         virtual void _Register();
         virtual void _Unload();
         virtual void _Init(const std::string * scriptname, uint32 spellId);
+        virtual ~_SpellScript() {}
     protected:
         class EffectHook
         {

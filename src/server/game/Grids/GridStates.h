@@ -29,6 +29,7 @@
 class GridState
 {
     public:
+        virtual ~GridState() {}
 #ifdef TRINITY_DEBUG
 #define MAGIC_TESTVAL 0xFBE823BA
         GridState() { i_Magic = MAGIC_TESTVAL; }

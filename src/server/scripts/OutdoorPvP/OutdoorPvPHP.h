@@ -91,6 +91,7 @@ class OPvPCapturePointHP : public OPvPCapturePoint
     public:
 
         OPvPCapturePointHP(OutdoorPvP * pvp, OutdoorPvPHPTowerType type);
+        ~OPvPCapturePointHP() {};
 
         void ChangeState();
 
@@ -114,6 +115,7 @@ class OutdoorPvPHP : public OutdoorPvP
     public:
 
         OutdoorPvPHP();
+        ~OutdoorPvPHP() {};
 
         bool SetupOutdoorPvP();
 

@@ -1499,16 +1499,20 @@ void LFGMgr::UpdateProposal(uint32 proposalId, const uint64& guid, bool accept)
             switch(role)
             {
                 case ROLE_DAMAGE:
-                    m_WaitTimeDps = int32((m_WaitTimeDps * m_NumWaitTimeDps + waitTimesMap[plr->GetGUID()]) / ++m_NumWaitTimeDps);
+                    m_WaitTimeDps = int32((m_WaitTimeDps * m_NumWaitTimeDps + waitTimesMap[plr->GetGUID()]) / (m_NumWaitTimeDps + 1));
+                    m_NumWaitTimeDps++;
                     break;
                 case ROLE_HEALER:
-                    m_WaitTimeHealer = int32((m_WaitTimeHealer * m_NumWaitTimeHealer + waitTimesMap[plr->GetGUID()]) / ++m_NumWaitTimeHealer);
+                    m_WaitTimeHealer = int32((m_WaitTimeHealer * m_NumWaitTimeHealer + waitTimesMap[plr->GetGUID()]) / (m_NumWaitTimeHealer + 1));
+                    m_NumWaitTimeHealer++;
                     break;
                 case ROLE_TANK:
-                    m_WaitTimeTank = int32((m_WaitTimeTank * m_NumWaitTimeTank + waitTimesMap[plr->GetGUID()]) / ++m_NumWaitTimeTank);
+                    m_WaitTimeTank = int32((m_WaitTimeTank * m_NumWaitTimeTank + waitTimesMap[plr->GetGUID()]) / (m_NumWaitTimeTank + 1));
+                    m_NumWaitTimeTank++;
                     break;
                 default:
-                    m_WaitTimeAvg = int32((m_WaitTimeAvg * m_NumWaitTimeAvg + waitTimesMap[plr->GetGUID()]) / ++m_NumWaitTimeAvg);
+                    m_WaitTimeAvg = int32((m_WaitTimeAvg * m_NumWaitTimeAvg + waitTimesMap[plr->GetGUID()]) / (m_NumWaitTimeAvg + 1));
+                    m_NumWaitTimeAvg++;
                     break;
             }
             grp->SetLfgRoles(pguid, pProposal->players[pguid]->role);

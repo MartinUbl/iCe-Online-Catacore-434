@@ -127,6 +127,7 @@ class OPvPCapturePointTF : public OPvPCapturePoint
     public:
 
         OPvPCapturePointTF(OutdoorPvP * pvp, OutdoorPvPTF_TowerType type);
+        ~OPvPCapturePointTF() {};
 
         bool Update(uint32 diff);
 
@@ -156,6 +157,7 @@ class OutdoorPvPTF : public OutdoorPvP
     public:
 
         OutdoorPvPTF();
+        ~OutdoorPvPTF() {};
 
         bool SetupOutdoorPvP();
 
