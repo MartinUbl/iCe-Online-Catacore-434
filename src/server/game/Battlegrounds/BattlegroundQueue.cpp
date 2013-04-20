@@ -390,7 +390,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
             sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, Team->GetName().c_str(), group->ArenaType, group->ArenaType, group->ArenaTeamRating);
     }
 
-    //if player leaves queue and he is invited to rated arena match, then he have to loose
+    //if player leaves queue and he is invited to rated arena match, then he have to lose
     if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
     {
         ArenaTeam * at = sObjectMgr->GetArenaTeamById(group->ArenaTeamId);
@@ -399,9 +399,9 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
             sLog->outDebug("UPDATING memberLost's personal arena rating for %u by opponents rating: %u", GUID_LOPART(guid), group->OpponentsTeamRating);
             Player *plr = sObjectMgr->GetPlayer(guid);
             if (plr)
-                at->MemberLost(plr, group->OpponentsMatchmakerRating);
+                at->MemberLost(plr, at->GetAverageMMR(plr->GetGroup()));
             else
-                at->OfflineMemberLost(guid, group->OpponentsMatchmakerRating);
+                at->OfflineMemberLost(guid, at->GetTeamRating());       // TODO: use average MMR of whole group as if he were online instead of team rating
             at->SaveToDB();
         }
     }

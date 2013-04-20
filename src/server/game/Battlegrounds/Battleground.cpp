@@ -777,30 +777,30 @@ void Battleground::EndBattleground(uint32 winner)
         {
             if (winner != WINNER_NONE)
             {
-                loser_team_rating = loser_arena_team->GetRating();
+                loser_team_rating = loser_arena_team->GetTeamRating();
                 loser_matchmaker_rating = GetArenaMatchmakerRating(GetOtherTeam(winner));
-                winner_team_rating = winner_arena_team->GetRating();
+                winner_team_rating = winner_arena_team->GetTeamRating();
                 winner_matchmaker_rating = GetArenaMatchmakerRating(winner);
-                winner_change = winner_arena_team->WonAgainst(loser_matchmaker_rating);
-                loser_change = loser_arena_team->LostAgainst(winner_matchmaker_rating);
+                winner_change = winner_arena_team->WonAgainst(winner_matchmaker_rating, loser_matchmaker_rating);
+                loser_change = loser_arena_team->LostAgainst(loser_matchmaker_rating, winner_matchmaker_rating);
                 sLog->outArena("--- Winner rating: %u, Loser rating: %u, Winner MMR: %u, Loser MMR: %u, Winner change: %u, Loser change: %u ---", winner_team_rating, loser_team_rating,
                     winner_matchmaker_rating, loser_matchmaker_rating, winner_change, loser_change);
-                SetArenaTeamRatingChangeForTeam(winner, winner_change);
-                SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+                //SetArenaTeamRatingChangeForTeam(winner, winner_change);
+                //SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
             }
             // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
             else
             {
-                SetArenaTeamRatingChangeForTeam(ALLIANCE, ARENA_TIMELIMIT_POINTS_LOSS);
-                SetArenaTeamRatingChangeForTeam(HORDE, ARENA_TIMELIMIT_POINTS_LOSS);
+                //SetArenaTeamRatingChangeForTeam(ALLIANCE, ARENA_TIMELIMIT_POINTS_LOSS);
+                //SetArenaTeamRatingChangeForTeam(HORDE, ARENA_TIMELIMIT_POINTS_LOSS);
                 winner_arena_team->FinishGame(ARENA_TIMELIMIT_POINTS_LOSS);
                 loser_arena_team->FinishGame(ARENA_TIMELIMIT_POINTS_LOSS);
             }
         }
         else
         {
-            SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
-            SetArenaTeamRatingChangeForTeam(HORDE, 0);
+            //SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
+            //SetArenaTeamRatingChangeForTeam(HORDE, 0);
         }
     }
 
@@ -845,9 +845,9 @@ void Battleground::EndBattleground(uint32 winner)
             if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
             {
                 if (team == winner)
-                    winner_arena_team->OfflineMemberLost(itr->first, loser_matchmaker_rating, winner_change);
+                    winner_arena_team->OfflineMemberWon(itr->first, GetArenaMatchmakerRating(team));
                 else
-                    loser_arena_team->OfflineMemberLost(itr->first, winner_matchmaker_rating, loser_change);
+                    loser_arena_team->OfflineMemberLost(itr->first, GetArenaMatchmakerRating(team));
             }
             continue;
         }
@@ -887,40 +887,43 @@ void Battleground::EndBattleground(uint32 winner)
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
 
                     // Earn guild XP if in guild party
-                    if (Player* pPlayer = sObjectMgr->GetPlayer(member->guid))
+                    if (plr->GetGuildId() > 0)
                     {
-                        if (pPlayer->GetGuildId() > 0)
+                        Guild* pGuild = sObjectMgr->GetGuildById(plr->GetGuildId());
+                        if (Group* pGroup = plr->GetGroup())
                         {
-                            Guild* pGuild = sObjectMgr->GetGuildById(pPlayer->GetGuildId());
-                            if (Group* pGroup = pPlayer->GetGroup())
+                            uint32 guildMemberCount = pGroup->GetGuildMembersCount(plr->GetGuildId());
+                            switch (winner_arena_team->GetType())
                             {
-                                uint32 guildMemberCount = pGroup->GetGuildMembersCount(pPlayer->GetGuildId());
-                                switch (winner_arena_team->GetType())
-                                {
-                                    case ARENA_TEAM_5v5:
-                                        if (guildMemberCount < 5)
-                                            break;
-                                    case ARENA_TEAM_3v3:
-                                        if (guildMemberCount < 3)
-                                            break;
-                                    case ARENA_TEAM_2v2:
-                                        if (guildMemberCount < 2)
-                                            break;
-
-                                        if (pGuild)
-                                            pGuild->GainXP(12400);
+                                case ARENA_TEAM_5v5:
+                                    if (guildMemberCount < 5)
                                         break;
-                                }
+                                case ARENA_TEAM_3v3:
+                                    if (guildMemberCount < 3)
+                                        break;
+                                case ARENA_TEAM_2v2:
+                                    if (guildMemberCount < 2)
+                                        break;
+
+                                    if (pGuild)
+                                        pGuild->GainXP(12400);
+                                    break;
                             }
                         }
                     }
                 }
 
-                winner_arena_team->MemberWon(plr,loser_matchmaker_rating, winner_change);
+                if (member)
+                    member->SetMatchmakerRating(winner_matchmaker_rating + winner_change);
+
+                winner_arena_team->MemberWon(plr, winner_matchmaker_rating + winner_change);
             }
             else
             {
-                loser_arena_team->MemberLost(plr, winner_matchmaker_rating, loser_change);
+                if (ArenaTeamMember *member = loser_arena_team->GetMember(plr->GetGUID()))
+                    member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
+
+                loser_arena_team->MemberLost(plr, loser_matchmaker_rating + loser_change);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
@@ -1088,7 +1091,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
                     ArenaTeam * winner_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                     ArenaTeam * loser_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                     if (winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
-                        loser_arena_team->MemberLost(plr, GetArenaMatchmakerRating(GetOtherTeam(team)));
+                        loser_arena_team->MemberLost(plr, this->GetArenaMatchmakerRating(plr->GetTeam()));
                 }
             }
             if (SendPacket)
@@ -1110,7 +1113,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
                 ArenaTeam * others_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                 ArenaTeam * players_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                 if (others_arena_team && players_arena_team)
-                    players_arena_team->OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(team)));
+                    players_arena_team->OfflineMemberLost(guid, GetArenaMatchmakerRating(team));
             }
         }
 

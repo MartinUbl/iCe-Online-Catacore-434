@@ -600,7 +600,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                 if (at)
                 {
                     sLog->outDebug("UPDATING memberLost's personal arena rating for %u by opponents rating: %u, because he has left queue!", GUID_LOPART(_player->GetGUID()), ginfo.OpponentsTeamRating);
-                    at->MemberLost(_player, ginfo.OpponentsMatchmakerRating);
+                    at->MemberLost(_player, at->GetAverageMMR(_player->GetGroup()));
                     at->SaveToDB();
                 }
             }
@@ -863,7 +863,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
             return;
         }
         // get the team rating for queueing
-        arenaRating = at->GetRating();
+        arenaRating = at->GetTeamRating();
         matchmakerRating = at->GetAverageMMR(grp);
         // the arenateam id must match for everyone in the group
 

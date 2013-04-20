@@ -22565,7 +22565,7 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot)
         if (ArenaTeam * at = sObjectMgr->GetArenaTeamById(GetArenaTeamId(i)))
         {
             uint32 p_rating = GetArenaPersonalRating(i);
-            uint32 t_rating = at->GetRating();
+            uint32 t_rating = at->GetTeamRating();
             p_rating = p_rating < t_rating ? p_rating : t_rating;
             if (max_personal_rating < p_rating)
                 max_personal_rating = p_rating;

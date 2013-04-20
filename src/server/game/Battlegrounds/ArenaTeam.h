@@ -109,11 +109,12 @@ struct ArenaTeamMember
 
     void ModifyPersonalRating(Player* plr, int32 mod, uint32 slot);
     void ModifyMatchmakerRating(int32 mod, uint32 slot);
+    void SetMatchmakerRating(int32 value/*, uint32 slot*/);
 };
 
 struct ArenaTeamStats
 {
-    uint32 rating;
+    uint32 rating;      // team rating
     uint32 games_week;
     uint32 wins_week;
     uint32 games_season;
@@ -143,7 +144,7 @@ class ArenaTeam
         std::string GetName() const       { return m_Name; }
         const ArenaTeamStats& GetStats() const { return m_stats; }
         void SetStats(uint32 stat_type, uint32 value);
-        uint32 GetRating() const          { return m_stats.rating; }
+        uint32 GetTeamRating() const      { return m_stats.rating; }
         uint32 GetAverageMMR(Group *group) const;
 
         uint32 GetEmblemStyle() const     { return m_EmblemStyle; }
@@ -202,14 +203,15 @@ class ArenaTeam
         void InspectStats(WorldSession *session, uint64 guid);
 
         uint32 GetPoints(uint32 MemberRating);
-        int32 GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, bool calculating_mmr = false);
-        int32 GetPersonalRatingMod(int32 base_rating, uint32 own_rating, uint32 enemy_rating);
+        int32 GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, bool won);
+        int32 GetRatingMod(uint32 own_rating, uint32 own_matchmaker_rating, bool won);
         float GetChanceAgainst(uint32 own_rating, uint32 enemy_rating);
-        int32 WonAgainst(uint32 againstRating);
-        void MemberWon(Player * plr, uint32 againstMatchmakerRating, int32 teamratingchange = 12);
-        int32 LostAgainst(uint32 againstRating);
-        void MemberLost(Player * plr, uint32 againstMatchmakerRating, int32 teamratingchange = -12);
-        void OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 teamratingchange = -12);
+        int32 WonAgainst(uint32 selfMatchmakerRating, uint32 opponentMatchmakerRating);
+        void MemberWon(Player * plr, uint32 ownMatchmakerRating);
+        void OfflineMemberWon(uint64 guid, uint32 ownMatchmakerRating);
+        int32 LostAgainst(uint32 selfMatchmakerRating, uint32 opponentMatchmakerRating);
+        void MemberLost(Player * plr, uint32 ownMatchmakerRating);
+        void OfflineMemberLost(uint64 guid, uint32 ownMatchmakerRating);
 
         void UpdateArenaPointsHelper(std::map<uint32, uint32> & PlayerPoints);
         void UpdateMembersConquestPointCap();
@@ -217,7 +219,7 @@ class ArenaTeam
         void NotifyStatsChanged();
 
         void FinishWeek();
-        void FinishGame(int32 mod);
+        void FinishGame(int32 teamRatingMod);
 
     protected:
 
