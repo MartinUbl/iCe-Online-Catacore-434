@@ -397,7 +397,7 @@ public:
             uint32 aura_id;
             int32 aura_duration;
             int32 aura_per_timer;
-            uint8 auraEff_id;
+            int16 auraEff_id;
             uint32 aura_bp;
             struct auraRecord *next;
         }DOT;

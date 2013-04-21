@@ -248,7 +248,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
     uint32 count = recv_data.ReadBits(22);
     int32 cost = 0;
 
-    if (count < EQUIPMENT_SLOT_START || count >= EQUIPMENT_SLOT_END)
+    if (count >= EQUIPMENT_SLOT_END)
     {
         recv_data.rfinish();
         return;
@@ -320,7 +320,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
     for (uint8 i = 0; i < count; ++i)
     {
         // slot of the transmogrified item
-        if (slots[i] < EQUIPMENT_SLOT_START || slots[i] >= EQUIPMENT_SLOT_END)
+        if (slots[i] >= EQUIPMENT_SLOT_END)
             return;
 
         // entry of the transmogrifier item, if it's not 0

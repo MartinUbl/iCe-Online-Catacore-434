@@ -3411,7 +3411,7 @@ bool Guild::LoadFromDB(Field* fields)
             Field* newsfields = newsquery->Fetch();
 
             tmptype = newsfields[1].GetUInt32();
-            if (tmptype < GUILD_NEWS_MIN || tmptype >= GUILD_NEWS_MAX)
+            if (tmptype >= GUILD_NEWS_MAX)
                 continue;
 
             GuildNewsEntry gn;

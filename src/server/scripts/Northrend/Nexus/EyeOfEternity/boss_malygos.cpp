@@ -213,49 +213,49 @@ struct LocationsXY
 };
 static Locations GOPositions[]=
 {
-    {754.346f, 1300.87f, 256.249f, 3.14159f},   // Raid Platform position
-    {754.731f, 1300.12f, 266.171f, 5.01343f},   // Focusing iris and Alexstrazas gift
-    {724.684f, 1332.92f, 267.234f, -0.802851f}, // Exit Portal
+    {754.346f, 1300.87f, 256.249f, 3.14159f, 0},   // Raid Platform position
+    {754.731f, 1300.12f, 266.171f, 5.01343f, 0},   // Focusing iris and Alexstrazas gift
+    {724.684f, 1332.92f, 267.234f, -0.802851f, 0}, // Exit Portal
 };
 static LocationsXY SparkLoc[]=
 {
-    {652.417f, 1200.52f},
-    {847.67f, 1408.05f},
-    {647.675f, 1403.8f},
-    {843.182f, 1215.42f},
+    {652.417f, 1200.52f, 0},
+    {847.67f, 1408.05f, 0},
+    {647.675f, 1403.8f, 0},
+    {843.182f, 1215.42f, 0},
 };
  
 //Also spawn locations for scions of eternity
 static LocationsXY VortexLoc[]=
 {
-    {754.0f, 1311.0f},
-    {734.0f, 1334.0f},
-    {756.0f, 1339.0f},
-    {781.0f, 1329.0f},
-    {791.0f, 1311.0f},
-    {790.0f, 1283.0f},
-    {768.0f, 1264.0f},
-    {739.0f, 1261.0f},
-    {720.0f, 1280.0f},
-    {714.0f, 1299.0f},
-    {716.0f, 1318.0f},
-    {734.0f, 1334.0f},
-    {756.0f, 1339.0f},
-    {781.0f, 1329.0f},
-    {791.0f, 1311.0f},
-    {790.0f, 1283.0f},
-    {768.0f, 1264.0f},
-    {739.0f, 1261.0f},
-    {720.0f, 1280.0f},
-    {714.0f, 1299.0f},
-    {716.0f, 1318.0f},
+    {754.0f, 1311.0f, 0},
+    {734.0f, 1334.0f, 0},
+    {756.0f, 1339.0f, 0},
+    {781.0f, 1329.0f, 0},
+    {791.0f, 1311.0f, 0},
+    {790.0f, 1283.0f, 0},
+    {768.0f, 1264.0f, 0},
+    {739.0f, 1261.0f, 0},
+    {720.0f, 1280.0f, 0},
+    {714.0f, 1299.0f, 0},
+    {716.0f, 1318.0f, 0},
+    {734.0f, 1334.0f, 0},
+    {756.0f, 1339.0f, 0},
+    {781.0f, 1329.0f, 0},
+    {791.0f, 1311.0f, 0},
+    {790.0f, 1283.0f, 0},
+    {768.0f, 1264.0f, 0},
+    {739.0f, 1261.0f, 0},
+    {720.0f, 1280.0f, 0},
+    {714.0f, 1299.0f, 0},
+    {716.0f, 1318.0f, 0},
 };
 static Locations OtherLoc[]=
 {
-    {808.0f,  1301.0f,  268.0f,  0},      // Phase 3 position 
-    {749.0f,  1244.0f,  332.0f,  1.544f}, // Vortex FarSight loc
-    {754.29f, 1301.18f, 266.17f, 0},      // Center of the platform, ground.
-    {823.0f,  1241.0f,  299.0f,  0},      // Alexstrasza's  position
+    {808.0f,  1301.0f,  268.0f,  0, 0},      // Phase 3 position 
+    {749.0f,  1244.0f,  332.0f,  1.544f, 0}, // Vortex FarSight loc
+    {754.29f, 1301.18f, 266.17f, 0, 0},      // Center of the platform, ground.
+    {823.0f,  1241.0f,  299.0f,  0, 0},      // Alexstrasza's  position
 };
 #define MAX_VORTEX              21
 #define VORTEX_Z                268.0f

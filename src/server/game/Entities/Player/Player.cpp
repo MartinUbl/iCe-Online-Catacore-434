@@ -1696,7 +1696,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* dataBuffer, ByteBuffe
     float y = fields[11].GetFloat();
     float z = fields[12].GetFloat();
     uint32 guildId = fields[13].GetUInt32();
-    ObjectGuid guildGuid = MAKE_NEW_GUID(guildId, 0, guildId ? HIGHGUID_GUILD : 0);
+    ObjectGuid guildGuid = MAKE_NEW_GUID(guildId, 0, guildId ? (uint64)HIGHGUID_GUILD : 0);
     uint32 playerFlags = fields[14].GetUInt32();
     uint32 atLoginFlags = fields[15].GetUInt16();
     Tokens equipment(fields[16].GetString(), ' ');
@@ -11545,7 +11545,7 @@ void Player::SetNewResearchProject(uint8 slot, bool completed)
         currProjId = 0;
 
         // Assume that slots goes one by one and select branch ID with this
-        if (slot >= 0 && slot < 8) //0-7 assign to branch 1-8
+        if (slot < 8) //0-7 assign to branch 1-8
             currProjBranch = slot+1;
         else if (slot == 8)
             currProjBranch = 27;

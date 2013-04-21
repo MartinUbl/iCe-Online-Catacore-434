@@ -442,7 +442,7 @@ uint32 SpellEntry::GetRequiresSpellFocus() const
 uint32 SpellEntry::GetSpellEffectIdByIndex(uint32 index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->Effect : SPELL_EFFECT_NONE;
+    return effect ? effect->Effect : (uint32)SPELL_EFFECT_NONE;
 }
 
 uint32 SpellEntry::GetAuraInterruptFlags() const
@@ -454,7 +454,7 @@ uint32 SpellEntry::GetAuraInterruptFlags() const
 uint32 SpellEntry::GetEffectImplicitTargetAByIndex(uint32 index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectImplicitTargetA : TARGET_NONE;
+    return effect ? effect->EffectImplicitTargetA : (uint32)TARGET_NONE;
 }
 
 int32 SpellEntry::GetAreaGroupId() const
@@ -563,7 +563,7 @@ bool SpellEntry::AppliesAuraType(uint32 type) const
 
 float SpellEntry::GetSpellRadius(Unit *caster, uint32 effIndex) const
 {
-    if (effIndex < 0 || effIndex >= MAX_SPELL_EFFECTS)
+    if (effIndex >= MAX_SPELL_EFFECTS)
         return 0.0f;
 
     const SpellRadiusEntry *radiusEntry = sSpellRadiusStore.LookupEntry(EffectRadiusIndex[effIndex]);

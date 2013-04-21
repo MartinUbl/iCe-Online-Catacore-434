@@ -587,7 +587,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
                    duration = fields[2].GetInt32(),
                    charges = fields[3].GetInt32();
 
-            if (slot < 0 || slot >= MAX_ENCHANTMENT_SLOT)
+            if (slot >= MAX_ENCHANTMENT_SLOT)
             {
                 sLog->outError("Invalid enchantment slot (%d) for item %d.", slot, guid);
                 continue;

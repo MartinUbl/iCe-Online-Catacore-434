@@ -1575,7 +1575,7 @@ void GameObject::Use(Unit* user)
                                 bg->EventPlayerClickedOnFlag(player, this);
                             break;
                         case 184142:                        // Netherstorm Flag
-                            if (bg->IsRandom() ? bg->GetTypeID(true) : bg->GetTypeID(false) == BATTLEGROUND_EY)
+                            if (bg->GetTypeID(bg->IsRandom()) == BATTLEGROUND_EY)
                                 bg->EventPlayerClickedOnFlag(player, this);
                             break;
                     }
