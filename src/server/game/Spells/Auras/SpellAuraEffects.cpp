@@ -8307,7 +8307,7 @@ void AuraEffect::HandleAuraConvertRune(AuraApplication const *aurApp, uint8 mode
         {
             if (GetMiscValue() != plr->GetCurrentRune(i))
                 continue;
-            if (!plr->GetRuneCooldown(i))
+            if (!plr->GetRuneCooldown(i) || runes == 2)
             {
                 plr->AddRuneByAuraEffect(i, RuneType(GetMiscValueB()), this);
                 --runes;

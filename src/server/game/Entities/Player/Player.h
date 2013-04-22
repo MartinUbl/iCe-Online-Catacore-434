@@ -463,7 +463,8 @@ struct Runes
 {
     RuneInfo runes[MAX_RUNES];
     uint8 runeState;                                        // mask of available runes
-    RuneType lastUsedRune;
+    //RuneType lastUsedRune;
+    uint8 lastUsedRunes;
 
     void SetRuneState(uint8 index, bool set = true)
     {
@@ -2721,8 +2722,11 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
         uint32 GetRuneBaseCooldown(uint8 index);
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
-        RuneType GetLastUsedRune() { return m_runes->lastUsedRune; }
-        void SetLastUsedRune(RuneType type) { m_runes->lastUsedRune = type; }
+        //RuneType GetLastUsedRune() { return m_runes->lastUsedRune; }
+        //void SetLastUsedRune(RuneType type) { m_runes->lastUsedRune = type; }
+        void SetLastUsedRune(uint8 runeIndex) { m_runes->lastUsedRunes |= (1 << runeIndex); }
+        void ClearLastUsedRuneList()          { m_runes->lastUsedRunes = 0; }
+        bool HasLastUsedRune(uint8 runeIndex) { return m_runes->lastUsedRunes & (1 << runeIndex); }
         void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint32 cooldown);
@@ -2734,6 +2738,7 @@ class Player : public Unit, public GridObject<Player>
         void ResyncRunes(uint8 count);
         void AddRunePower(uint8 index);
         void InitRunes();
+        void SendConvertedRunes();
 
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }

@@ -23725,6 +23725,9 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialSpells();
 
+    if (getClass() == CLASS_DEATH_KNIGHT)
+        SendConvertedRunes();
+
     data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
     data << uint32(0);                                      // count, for (count) uint32;
     GetSession()->SendPacket(&data);
@@ -25670,7 +25673,8 @@ void Player::InitRunes()
     m_runes = new Runes;
 
     m_runes->runeState = 0;
-    m_runes->lastUsedRune = RUNE_BLOOD;
+    //m_runes->lastUsedRunes = RUNE_BLOOD;
+    ClearLastUsedRuneList();
 
     // Set rune cooldown to zero to avoid conditional jumps depending on uninitialized values later
     for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -25696,6 +25700,26 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
             return false;
 
     return true;
+}
+
+void Player::SendConvertedRunes()
+{
+    if (!m_runes)
+        return;
+
+    ResyncRunes(MAX_RUNES);
+
+    for (uint8 i = 0; i < MAX_RUNES; i++)
+    {
+        RuneType currentType = GetCurrentRune(i);
+        if (currentType != GetBaseRune(i))
+        {
+            WorldPacket data(SMSG_CONVERT_RUNE, 2);
+            data << uint8(i);
+            data << uint8(currentType);
+            GetSession()->SendPacket(&data);
+        }
+    }
 }
 
 void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast, uint16 lootMode)

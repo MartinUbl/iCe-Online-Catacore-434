@@ -8433,59 +8433,31 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Blood of the North
             // Reaping
             // Blood Rites
-            if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2724)
+            if (dummySpell->Id == 56835 || dummySpell->Id == 50034)
             {
                 *handled = true;
-                // Convert recently used Blood Rune to Death Rune
+                // Convert recently used runes to Death runes
                 if (GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (this->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
+                    Player *player = ToPlayer();
+                    if (player->getClass() != CLASS_DEATH_KNIGHT)
                         return false;
 
                     AuraEffect * aurEff = triggeredByAura->GetEffect(0);
                     if (!aurEff)
                         return false;
+
                     // Reset amplitude - set death rune remove timer to 30s
                     aurEff->ResetPeriodic(true);
-                    uint32 runesLeft;
 
-                    if ((dummySpell->SpellIconID == 2724 /* Blood Rites */ && (procSpell->Id == 49998 || procSpell->Id == 49020)) // Death Strike / Obliterate
-                     || (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)) // Reaping / Festering Strike
-                        runesLeft = 2;
-                    else
-                        runesLeft = 1;
-
-                    for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
+                    for (uint8 i = 0; i < MAX_RUNES; i++)
                     {
-                        if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH)
-                            continue;
-
-                        if (dummySpell->SpellIconID == 2724 && (procSpell->Id == 49998 || procSpell->Id == 49020))
-                        {
-                            if (((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
-                                continue;
-                        }
-                        else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)
-                        {
-                            if (((Player*)this)->GetBaseRune(i) == RUNE_UNHOLY)
-                                continue;
-                        }
-                        else
-                        {
-                            if (((Player*)this)->GetBaseRune(i) != RUNE_BLOOD)
-                                continue;
-                        }
-
-                        if (((Player*)this)->GetRuneCooldown(i) != ((Player*)this)->GetRuneBaseCooldown(i))
-                            continue;
-
-                        --runesLeft;
-                        // Mark aura as used
-                        ((Player*)this)->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                        if (player->HasLastUsedRune(i))
+                            player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
                     }
+
                     return true;
                 }
                 return false;

@@ -5479,6 +5479,7 @@ void Spell::TakeRunePower(bool didhit)
     }
 
     runeCost[RUNE_DEATH] = 0;                               // calculated later
+    plr->ClearLastUsedRuneList();
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
@@ -5486,7 +5487,7 @@ void Spell::TakeRunePower(bool didhit)
         if ((plr->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
         {
             plr->SetRuneCooldown(i, didhit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-            plr->SetLastUsedRune(RuneType(rune));
+            plr->SetLastUsedRune(i);
             runeCost[rune]--;
         }
     }
@@ -5501,7 +5502,7 @@ void Spell::TakeRunePower(bool didhit)
             if ((plr->GetRuneCooldown(i) == 0) && (rune == RUNE_DEATH))
             {
                 plr->SetRuneCooldown(i, didhit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-                plr->SetLastUsedRune(RuneType(rune));
+                plr->SetLastUsedRune(i);
                 runeCost[rune]--;
 
                 // Blood of the North (permanent convert)

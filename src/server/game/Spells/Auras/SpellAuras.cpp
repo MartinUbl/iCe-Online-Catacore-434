@@ -1948,7 +1948,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_DEATHKNIGHT:
                 // Reaping
                 // Blood Rites
-                if (GetSpellProto()->SpellIconID == 22 || GetSpellProto()->SpellIconID == 2724)
+                if (GetSpellProto()->Id == 56835 || GetSpellProto()->Id == 50034)
                 {
                     if (!GetEffect(0) || GetEffect(0)->GetAuraType() != SPELL_AURA_PERIODIC_DUMMY)
                         break;
