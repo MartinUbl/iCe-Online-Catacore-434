@@ -12573,7 +12573,11 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
             if (itr->type == spellInfo->Mechanic)
-                return true;
+            {
+                // Exception for Ice Block and Forbearance (same immunity type, but they can be active at once!)
+                if (itr->spellId != 25771 || spellInfo->Id != 45438)
+                    return true;
+            }
     }
 
     for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
