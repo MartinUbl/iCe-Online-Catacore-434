@@ -9898,7 +9898,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (ToPlayer()->HasSpellCooldown(85285))
                 return false;
             // Add custom cooldown (proc cooldown doesn't work)
-            ToPlayer()->AddSpellCooldown(85285,0,30000);
+            ToPlayer()->AddSpellCooldown(85285,0,60000);
             // And set absorb points by formula
             basepoints0 = 1+ToPlayer()->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*2.5f;
             break;
