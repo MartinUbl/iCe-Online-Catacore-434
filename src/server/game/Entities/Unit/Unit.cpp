@@ -3417,10 +3417,59 @@ void Unit::DeMorph()
     SetDisplayId(GetNativeDisplayId());
 }
 
+bool Unit::_OnAuraReapply(Aura* oldAura, Aura* newAura)
+{
+    /* Called when trying to apply aura with same ID as already existing aura
+     * Return values:
+     *    true = drop old aura
+     *   false = drop new aura (do not apply new, apply "need client update" flag, refresh aura duration)
+     */
+
+    SpellEntry const* spellProto = newAura->GetSpellProto();
+    Unit* oldCaster = oldAura->GetCaster();
+    Unit* newCaster = newAura->GetCaster();
+
+    switch (spellProto->Id)
+    {
+        // Necrotic Strike heal absorb part
+        case 73975:
+        {
+            uint32 oldAmount = oldAura->GetEffect(EFFECT_0)->GetAmount();
+
+            if (oldAmount > 0) // only positive values
+                oldAura->GetEffect(EFFECT_0)->SetAmount(oldAmount + newAura->GetEffect(EFFECT_0)->GetAmount());
+
+            return false;
+        }
+        // Hamstring
+        case 1715:
+        {
+            // Improved Hamstring
+            if (newCaster && newCaster->GetTypeId()== TYPEID_PLAYER && !newCaster->ToPlayer()->HasSpellCooldown(23694) && (newCaster->HasAura(12289) || newCaster->HasAura(12668)))
+            {
+                // rooting part
+                newCaster->CastSpell(this, 23694, true);
+
+                // Add internal cooldown
+                // Rank 1 - 60 seconds, Rank 2 - 30 seconds
+                if (newCaster->HasAura(12289))
+                    newCaster->ToPlayer()->AddSpellCooldown(23694,0,60000);
+                else
+                    newCaster->ToPlayer()->AddSpellCooldown(23694,0,30000);
+            }
+            return true;
+        }
+    }
+
+    return true;
+}
+
 void Unit::_AddAura(UnitAura * aura, Unit * caster)
 {
     ASSERT(!m_cleanupDone);
     m_ownedAuras.insert(AuraMap::value_type(aura->GetId(), aura));
+
+    bool preventRemoval = false;
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
     if (!aura->IsPassive() && aura->GetId() != 44413)
@@ -3436,15 +3485,6 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
                     aura->ModStackAmount(foundAura->GetStackAmount());
                 }
 
-                // Necrotic Strike heal absorb part
-                if (aura->GetSpellProto()->Id == 73975)
-                {
-                    uint32 oldAmount = foundAura->GetEffect(EFFECT_0)->GetAmount();
-
-                    if (oldAmount > 0) // only positive values
-                        aura->GetEffect(EFFECT_0)->SetAmount(oldAmount+aura->GetEffect(EFFECT_0)->GetAmount());
-                }
-
                 // Update periodic timers from the previous aura
                 // ToDo Fix me
                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -3457,13 +3497,26 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
                         newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
                 }
 
-                // Use the new one to replace the old one
-                // This is the only place where AURA_REMOVE_BY_STACK should be used
-                RemoveOwnedAura(foundAura, AURA_REMOVE_BY_STACK);
+                if (_OnAuraReapply(foundAura, aura))
+                {
+                    // Use the new one to replace the old one
+                    // This is the only place where AURA_REMOVE_BY_STACK should be used
+                    RemoveOwnedAura(foundAura, AURA_REMOVE_BY_STACK);
+                }
+                else
+                {
+                    // Use the modified old one instead of new application
+                    foundAura->RefreshDuration();
+                    foundAura->SetNeedClientUpdateForTargets();
+                    aura->Remove(AURA_REMOVE_BY_DEFAULT);
+                    preventRemoval = true;
+                }
             }
         }
     }
-    _RemoveNoStackAurasDueToAura(aura);
+
+    if (!preventRemoval)
+        _RemoveNoStackAurasDueToAura(aura);
 
     if (aura->IsRemoved())
         return;
@@ -9182,17 +9235,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 12289:
         case 12668:
         {
-            // Check for player origin and for spell cooldown
-            if(!ToPlayer() || ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
-                return false;
-
-            // Add internal cooldown
-            // Rank 1 - 60 seconds, Rank 2 - 30 seconds
-            if (auraSpellInfo->Id == 12289)
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,60000);
-            else
-                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id,0,30000);
-            break;
+            // handled elsewhere
+            return false;
         }
         // Bonus Healing (Crystal Spire of Karabor mace)
         case 40971:

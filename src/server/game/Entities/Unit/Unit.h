@@ -1656,6 +1656,8 @@ class Unit : public WorldObject
         bool _IsNoStackAuraDueToAura(Aura * appliedAura, Aura * existingAura) const;
         void _RegisterAuraEffect(AuraEffect * aurEff, bool apply);
 
+        bool _OnAuraReapply(Aura* oldAura, Aura* newAura);
+
         // m_ownedAuras container management
         AuraMap      & GetOwnedAuras()       { return m_ownedAuras; }
         AuraMap const& GetOwnedAuras() const { return m_ownedAuras; }
