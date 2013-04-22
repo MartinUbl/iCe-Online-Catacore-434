@@ -35,24 +35,25 @@ class Battleground;
 #define BG_AV_SCORE_INITIAL_POINTS       600
 #define SEND_MSG_NEAR_LOSE               120
 
-#define BG_AV_KILL_BOSS                 4
-#define BG_AV_REP_BOSS                  350
+#define BG_AV_KILL_BOSS                  300
+#define BG_AV_REP_BOSS                   350
 
-#define BG_AV_KILL_CAPTAIN              3
-#define BG_AV_REP_CAPTAIN               125
-#define BG_AV_RES_CAPTAIN               100
+#define BG_AV_KILL_CAPTAIN               250
+#define BG_AV_REP_CAPTAIN                125
+#define BG_AV_RES_CAPTAIN                100
 
-#define BG_AV_KILL_TOWER                3
-#define BG_AV_REP_TOWER                 12
-#define BG_AV_RES_TOWER                 75
+#define BG_AV_KILL_TOWER                 200
+#define BG_AV_REP_TOWER                  12
+#define BG_AV_RES_TOWER                  75
 
-#define BG_AV_GET_COMMANDER            1 //for a safely returned wingcommander
-//bonushonor at the end
-#define BG_AV_KILL_SURVIVING_TOWER      2
-#define BG_AV_REP_SURVIVING_TOWER       12
+#define BG_AV_GET_COMMANDER              1 //for a safely returned wingcommander
 
-#define BG_AV_KILL_SURVIVING_CAPTAIN    2
-#define BG_AV_REP_SURVIVING_CAPTAIN     125
+// bonushonor at the end
+#define BG_AV_KILL_SURVIVING_TOWER       150
+#define BG_AV_REP_SURVIVING_TOWER        12
+
+#define BG_AV_KILL_SURVIVING_CAPTAIN     100
+#define BG_AV_REP_SURVIVING_CAPTAIN      125
 
 enum BG_AV_Sounds
 { //TODO: get out if there comes a sound when neutral team captures mine

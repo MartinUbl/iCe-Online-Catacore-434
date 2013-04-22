@@ -650,6 +650,8 @@ class Battleground
 
         bool   m_BuffChange;
         bool   m_IsRandom;
+        bool   m_PrematureCountDown;
+        uint32 m_PrematureCountDownTimer;
 
         BGHonorMode m_HonorMode;
     private:
@@ -675,8 +677,6 @@ class Battleground
         uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_StartDelayTime;
         bool   m_IsRated;                                   // is this battle rated?
-        bool   m_PrematureCountDown;
-        uint32 m_PrematureCountDownTimer;
         char const *m_Name;
 
         uint8 m_twink;

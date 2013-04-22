@@ -82,7 +82,7 @@ void BattlegroundAV::HandleKillUnit(Creature *unit, Player *killer)
     {
         CastSpellOnTeam(23658,HORDE); //this is a spell which finishes a quest where a player has to kill the boss
         RewardReputationToTeam(729,BG_AV_REP_BOSS,HORDE);
-        RewardHonorToTeam(GetBonusHonor(BG_AV_KILL_BOSS),HORDE);
+        RewardHonorToTeam(BG_AV_KILL_BOSS,HORDE);
         EndBattleground(HORDE);
         DelCreature(AV_CPLACE_TRIGGER17);
     }
@@ -90,7 +90,7 @@ void BattlegroundAV::HandleKillUnit(Creature *unit, Player *killer)
     {
         CastSpellOnTeam(23658,ALLIANCE); //this is a spell which finishes a quest where a player has to kill the boss
         RewardReputationToTeam(730,BG_AV_REP_BOSS,ALLIANCE);
-        RewardHonorToTeam(GetBonusHonor(BG_AV_KILL_BOSS),ALLIANCE);
+        RewardHonorToTeam(BG_AV_KILL_BOSS,ALLIANCE);
         EndBattleground(ALLIANCE);
         DelCreature(AV_CPLACE_TRIGGER19);
     }
@@ -103,7 +103,7 @@ void BattlegroundAV::HandleKillUnit(Creature *unit, Player *killer)
         }
         m_CaptainAlive[0]=false;
         RewardReputationToTeam(729,BG_AV_REP_CAPTAIN,HORDE);
-        RewardHonorToTeam(GetBonusHonor(BG_AV_KILL_CAPTAIN),HORDE);
+        RewardHonorToTeam(BG_AV_KILL_CAPTAIN,HORDE);
         UpdateScore(ALLIANCE,(-1)*BG_AV_RES_CAPTAIN);
         //spawn destroyed aura
         for (uint8 i=0; i <= 9; i++)
@@ -122,7 +122,7 @@ void BattlegroundAV::HandleKillUnit(Creature *unit, Player *killer)
         }
         m_CaptainAlive[1]=false;
         RewardReputationToTeam(730,BG_AV_REP_CAPTAIN,ALLIANCE);
-        RewardHonorToTeam(GetBonusHonor(BG_AV_KILL_CAPTAIN),ALLIANCE);
+        RewardHonorToTeam(BG_AV_KILL_CAPTAIN,ALLIANCE);
         UpdateScore(HORDE,(-1)*BG_AV_RES_CAPTAIN);
         //spawn destroyed aura
         for (uint8 i=0; i <= 9; i++)
@@ -442,8 +442,33 @@ void BattlegroundAV::AddPlayer(Player *plr)
 
 void BattlegroundAV::EndBattleground(uint32 winner)
 {
-    for (int i=0; i <= 1; i++) //0=ally 1=horde
-        RewardReputationToTeam((i == 0)?730:729,20,(i == 0)?ALLIANCE:HORDE);
+    RewardReputationToTeam(730, 20, ALLIANCE);
+    RewardReputationToTeam(729, 20, HORDE);
+
+    // avoid rewarding when ended by premature timer
+    if (!m_PrematureCountDown)
+    {
+        // standing towers and bunkers
+        uint32 honorrew[2] = {0, 0};
+        for (uint32 i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_FROSTWOLF_WTOWER; i++)
+        {
+            if (m_Nodes[i].State == POINT_CONTROLED)
+            {
+                if (m_Nodes[i].TotalOwner == ALLIANCE)
+                    honorrew[0] += BG_AV_KILL_SURVIVING_TOWER;
+                else if (m_Nodes[i].TotalOwner == HORDE)
+                    honorrew[1] += BG_AV_KILL_SURVIVING_TOWER;
+            }
+        }
+        RewardHonorToTeam(honorrew[0], ALLIANCE);
+        RewardHonorToTeam(honorrew[1], HORDE);
+
+        // alive captains
+        if (m_CaptainAlive[0])
+            RewardHonorToTeam(BG_AV_KILL_SURVIVING_CAPTAIN, ALLIANCE);
+        if (m_CaptainAlive[1])
+            RewardHonorToTeam(BG_AV_KILL_SURVIVING_CAPTAIN, HORDE);
+    }
 
     //TODO add enterevademode for all attacking creatures
     Battleground::EndBattleground(winner);
@@ -568,7 +593,7 @@ void BattlegroundAV::EventPlayerDestroyedPoint(BG_AV_Nodes node)
 
         UpdateScore((owner == ALLIANCE) ? HORDE : ALLIANCE, (-1)*BG_AV_RES_TOWER);
         RewardReputationToTeam((owner == ALLIANCE)?730:729,BG_AV_REP_TOWER,owner);
-        RewardHonorToTeam(GetBonusHonor(BG_AV_KILL_TOWER),owner);
+        RewardHonorToTeam(BG_AV_KILL_TOWER,owner);
 
         SpawnBGObject(BG_AV_OBJECT_TAURA_A_DUNBALDAR_SOUTH+GetTeamIndexByTeamId(owner)+(2*tmp),RESPAWN_ONE_DAY);
         SpawnBGObject(BG_AV_OBJECT_TFLAG_A_DUNBALDAR_SOUTH+GetTeamIndexByTeamId(owner)+(2*tmp),RESPAWN_ONE_DAY);
