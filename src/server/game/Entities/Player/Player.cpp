@@ -25406,6 +25406,14 @@ bool Player::CanUseBattlegroundObject()
 );
 }
 
+void Player::RemoveAurasDueToBattlegroundObjectUse()
+{
+    // certain auras are removed, when attempting to take flag from flagdrop/flagstand, or when trying to capture point
+    RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+    RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+    RemoveAurasByType(SPELL_AURA_MOD_CAMOUFLAGE);
+}
+
 bool Player::CanCaptureTowerPoint()
 {
     return (!HasStealthAura() &&                           // not stealthed

@@ -1506,6 +1506,8 @@ void GameObject::Use(Unit* user)
 
             Player* player = (Player*)user;
 
+            player->RemoveAurasDueToBattlegroundObjectUse();
+
             if (player->CanUseBattlegroundObject())
             {
                 // in battleground check
@@ -1545,6 +1547,8 @@ void GameObject::Use(Unit* user)
                 return;
 
             Player* player = (Player*)user;
+
+            player->RemoveAurasDueToBattlegroundObjectUse();
 
             if (player->CanUseBattlegroundObject())
             {
