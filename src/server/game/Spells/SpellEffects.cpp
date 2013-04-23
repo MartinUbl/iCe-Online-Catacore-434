@@ -4115,12 +4115,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     (caster->HasAura(87164) && roll_chance_i(30)))
                 {
                     Player *player = caster->ToPlayer();
-                    if (!player)
-                        return;
-
-                    if (player->HasSpellCooldown(88676))
-                        return;
-                    else
+                    if (player && !player->HasSpellCooldown(88676))
                     {
                         player->CastCustomSpell(caster, 88676, &holypower, NULL, NULL, true);
                         player->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(88676), 0);
