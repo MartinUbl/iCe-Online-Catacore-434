@@ -3426,7 +3426,7 @@ bool Unit::_OnAuraReapply(Aura* oldAura, Aura* newAura)
      */
 
     SpellEntry const* spellProto = newAura->GetSpellProto();
-    Unit* oldCaster = oldAura->GetCaster();
+    //Unit* oldCaster = oldAura->GetCaster();
     Unit* newCaster = newAura->GetCaster();
 
     switch (spellProto->Id)
@@ -8519,7 +8519,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
             switch(dummySpell->Id)
             {
                 // Hungering Cold aura drop
-                case 51209:
+                case 49203:
                     *handled = true;
                     // Drop only in not disease case
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
@@ -15984,7 +15984,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 if (!isTriggerAura[aurEff->GetAuraType()] && triggerData.spellProcEvent == NULL)
                     continue;
                 // Some spells must always trigger
-                if (!triggered || isAlwaysTriggeredAura[aurEff->GetAuraType()])
+                if (!triggered || (isAlwaysTriggeredAura[aurEff->GetAuraType()] && procPrepared))
                     triggerData.effMask |= 1 << i;
             }
         }

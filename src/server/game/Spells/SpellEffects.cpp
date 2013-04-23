@@ -3064,10 +3064,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             switch (m_spellInfo->Id)
             {
-            case 49203: // Hungering Cold
-                m_caster->CastCustomSpell(m_caster, 51209, &bp, NULL, NULL, true);
-                break;
-            case 49998: // Death Strike (main hand only)
+                case 49998: // Death Strike (main hand only)
                 {
                     // Heal for 15% of the damage sustained in 5 preceding seconds
                     bp = int32(m_caster->GetDamageTakenHistory(5) * 15.0f / 100.0f);
