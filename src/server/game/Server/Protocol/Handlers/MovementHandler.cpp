@@ -392,15 +392,11 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 
     /*----------------------*/
 
-    /* process position-change */
-    WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
     movementInfo.time = getMSTime();
     movementInfo.guid = mover->GetGUID();
-    WriteMovementInfo(data, &movementInfo);
-    mover->SendMessageToSet(&data, _player);
-
     mover->m_movementInfo = movementInfo;
 
+    /* process position-change */
     // this is almost never true (not sure why it is sometimes, but it is), normally use mover->IsVehicle()
     if (mover->GetVehicle())
     {
@@ -410,8 +406,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 
     mover->SetPosition(movementInfo.pos);
 
+    WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
+    WriteMovementInfo(data, &movementInfo);
+    mover->SendMessageToSet(&data, _player);
+
     if (plMover)                                            // nothing is charmed, or player charmed
-    {    
+    {
         if (plMover->GetEmoteState() != 0 && opcode == MSG_MOVE_START_FORWARD && opcode != MSG_MOVE_SET_FACING &&
             opcode != MSG_MOVE_START_TURN_LEFT && opcode != MSG_MOVE_START_TURN_RIGHT &&
             opcode != MSG_MOVE_STOP_TURN)
