@@ -1612,6 +1612,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             // If the target is affected by Immolate spell, let's increase damage by 1/6 (info by DBC tooltip)
             if (unitTarget->HasAura(348))
                 m_damage += int32((float)m_damage/6.0f);
+            break;
         }
         // Haunt
         case 48181:
@@ -1620,6 +1621,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 break;
 
             m_damage += m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
+            break;
         }
         default:
             break;
