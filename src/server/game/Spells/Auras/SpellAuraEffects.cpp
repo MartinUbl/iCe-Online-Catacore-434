@@ -2333,6 +2333,15 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 if (GetTotalTicks() != 0)
                     damage = damage / GetTotalTicks();
             }
+            // Health Funnel (warlock)
+            else if (m_spellProto->Id == 755)
+            {
+                // Improved Health Funnel
+                if (caster->HasAura(18703))
+                    damage = damage * 1.1f;
+                else if (caster->HasAura(18704))
+                    damage = damage * 1.2f;
+            }
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
@@ -2358,14 +2367,23 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (target != caster && GetSpellProto()->AttributesEx2 & SPELL_ATTR2_HEALTH_FUNNEL)
             {
                 uint32 damage = caster->GetMaxHealth()*0.01f;
-                if ((int32)damage > gain)
-                    damage = gain;
+
+                // Health Funnel (warlock)
+                if (m_spellProto->Id == 755)
+                {
+                    // Improved Health Funnel
+                    if (caster->HasAura(18703))
+                        damage = damage * 0.9f;
+                    else if (caster->HasAura(18704))
+                        damage = damage * 0.8f;
+                }
+
                 uint32 absorb = 0;
                 caster->DealDamageMods(caster,damage,&absorb);
                 caster->SendSpellNonMeleeDamageLog(caster, GetId(), damage, GetSpellSchoolMask(GetSpellProto()), absorb, 0, false, 0, false);
 
                 CleanDamage cleanDamage =  CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
-                caster->DealDamage(caster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
+                caster->DealDamage(caster, damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
             }
 
             uint32 procAttacker = PROC_FLAG_DONE_PERIODIC;

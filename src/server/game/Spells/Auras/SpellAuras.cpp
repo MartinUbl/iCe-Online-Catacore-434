@@ -2356,6 +2356,29 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     target->RemoveAurasDueToSpell(85542);
                 }
             }
+            // Health Funnel (warlock)
+            else if (GetSpellProto()->Id == 755)
+            {
+                // Improved Health Funnel
+                if (apply)
+                {
+                    if (target && target->isPet())
+                    {
+                        if (caster->HasAura(18703))
+                            target->CastSpell(target, 60955, true);
+                        else if (caster->HasAura(18704))
+                            target->CastSpell(target, 60956, true);
+                    }
+                }
+                else
+                {
+                    if (target)
+                    {
+                        target->RemoveAurasDueToSpell(60955);
+                        target->RemoveAurasDueToSpell(60956);
+                    }
+                }
+            }
             break;
         case SPELLFAMILY_PRIEST:
             // Shadowform
