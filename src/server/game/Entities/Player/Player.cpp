@@ -11576,10 +11576,12 @@ void Player::SetNewResearchProject(uint8 slot, bool completed)
                     found = true;
                     itr->active = 1;
                 }
-                else if (itr->project_id == currProjId)
+                if (itr->project_id == currProjId)
                 {
                     // "deactivate" old project
-                    itr->active = 0;
+                    if (currProjId != newProjectId)
+                        itr->active = 0;
+
                     if (completed)
                     {
                         if (itr->completed_count == 0)
