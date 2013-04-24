@@ -176,6 +176,10 @@ void Player::UpdateSpellDamageAndHealingBonus()
     // Get damage bonus for all schools
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
         SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, SpellBaseDamageBonus(SpellSchoolMask(1 << i)));
+
+    // update also pet spellpower/attackpower
+    if (Pet* pPet = GetPet())
+        pPet->UpdateAttackPowerAndDamage(false);
 }
 
 bool Player::UpdateAllStats()
