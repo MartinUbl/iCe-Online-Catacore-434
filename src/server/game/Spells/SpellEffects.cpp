@@ -1076,6 +1076,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_caster->ToPlayer()->RemoveAurasDueToSpell(93400);
 
                 }
+                // Starfire
+                else if (m_spellInfo->Id == 2912)
+                {
+                    // Fury of Stormrage removal
+                    if (m_caster && m_caster->HasAura(81093))
+                        m_caster->RemoveAurasDueToSpell(81093);
+                }
                 // Lacerate
                 else if (m_spellInfo->Id == 33745)
                 {
