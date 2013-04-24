@@ -310,13 +310,21 @@ class npc_hand_of_guldan: public CreatureScript
                 Reset();
             }
 
-            void Reset()
+            void InitializeAI()
             {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                //me->SetReactState(REACT_PASSIVE);
+
                 me->CastSpell(me, 85526, true);
                 me->CastSpell(me, 86000, true);
 
+                me->SetRooted(true);
+            }
+
+            void Reset()
+            {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_PASSIVE);
+                //me->SetReactState(REACT_PASSIVE);
             }
 
             void AttackStart(Unit* pWho) { return; };
