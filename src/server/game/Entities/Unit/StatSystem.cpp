@@ -1532,8 +1532,8 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         if (pOwner && pOwner->HasMastery() &&
             pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
         {
-            mindamage = mindamage * (1+(pOwner->GetMasteryPoints()*2.0f/100.0f));
-            maxdamage = maxdamage * (1+(pOwner->GetMasteryPoints()*2.0f/100.0f));
+            mindamage = mindamage * (1+(pOwner->GetMasteryPoints()*2.3f/100.0f));
+            maxdamage = maxdamage * (1+(pOwner->GetMasteryPoints()*2.3f/100.0f));
         }
     }
 

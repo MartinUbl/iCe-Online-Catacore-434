@@ -775,6 +775,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                         // 30% damage increase per every caster's dot
                         damage *= 1.0f+unitTarget->GetDoTsByCaster(m_caster->GetOwnerGUID())*0.30f;
+
+                        apply_direct_bonus = false;
                     }
                 }
                 // Searing Pain
@@ -923,6 +925,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Damage fix
                     if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet())
                         damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.657f*0.5f;
+                    apply_direct_bonus = false;
 
                     Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
                     if (!pOwner)
@@ -962,13 +965,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 }
                 // Lash of Pain (succubus)
                 else if (m_spellInfo->Id == 7814 && m_caster->ToPet())
+                {
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.612f*0.5f;
+                    apply_direct_bonus = false;
+                }
                 // Whiplash (succubus)
                 else if (m_spellInfo->Id == 6360 && m_caster->ToPet())
+                {
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.85f*0.5f;
+                    apply_direct_bonus = false;
+                }
                 // Torment (voidwalker)
                 else if (m_spellInfo->Id == 3716 && m_caster->ToPet())
+                {
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.512f*0.5f;
+                    apply_direct_bonus = false;
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:
@@ -1611,6 +1623,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         }
         default:
             break;
+    }
+
+    // Implementation of demonolgy warlock mastery Master Demonologist proficiency
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_caster->isPet())
+    {
+        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (pOwner && pOwner->HasMastery() &&
+            pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+        {
+            m_damage = m_damage * (1+(pOwner->GetMasteryPoints()*2.3f/100.0f));
+        }
     }
 
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
