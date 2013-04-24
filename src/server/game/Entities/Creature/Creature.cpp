@@ -2169,6 +2169,11 @@ void Creature::SetInCombatWithZone()
 void Creature::_AddCreatureSpellCooldown(uint32 spell_id, uint32 msDuration)
 {
     m_CreatureSpellCooldowns[spell_id] = m_LogonTimer + msDuration;
+
+    if (isPet())
+        if (Unit* owner = GetOwner())
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                owner->ToPlayer()->AddPetSpellCooldown(spell_id, msDuration);
 }
 
 void Creature::_AddCreatureCategoryCooldown(uint32 category, uint32 msDuration)

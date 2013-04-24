@@ -7020,6 +7020,11 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
             return SPELL_FAILED_NOT_READY;
 
+        if (m_caster->isPet())
+            if (Unit* owner = m_caster->GetOwner())
+                if (owner->GetTypeId() == TYPEID_PLAYER && owner->ToPlayer()->HasPetSpellCooldown(m_spellInfo->Id))
+                    return SPELL_FAILED_NOT_READY;
+
     return CheckCast(true);
 }
 

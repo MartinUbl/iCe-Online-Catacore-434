@@ -419,7 +419,11 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                     pet->SendPetCastFail(spellid, result);
 
                 if (!pet->ToCreature()->HasSpellCooldown(spellid))
-                    GetPlayer()->SendClearCooldown(spellid, pet);
+                {
+                    if (Unit* owner = pet->GetOwner())
+                        if (owner->GetTypeId() != TYPEID_PLAYER || !owner->ToPlayer()->HasPetSpellCooldown(spellid))
+                            GetPlayer()->SendClearCooldown(spellid, pet);
+                }
 
                 spell->finish(false);
                 delete spell;

@@ -1847,12 +1847,15 @@ class Player : public Unit, public GridObject<Player>
         static uint32 const infinityCooldownDelay = uint32(MONTH) * uint32(IN_MILLISECONDS);  // used for set "infinity cooldowns" for spells and check
         static uint32 const infinityCooldownDelayCheck = MONTH / 2 * IN_MILLISECONDS;
         bool HasSpellCooldown(uint32 spell_id) const;
+        bool HasPetSpellCooldown(uint32 spell_id) const;
         uint32 GetSpellCooldownDelay(uint32 spell_id) const;    // remaining spell cooldown in milliseconds
         void AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false);
         void AddSpellCooldown(uint32 spell_id, uint32 itemid, uint32 msDuration);
+        void AddPetSpellCooldown(uint32 spell_id, uint32 msDuration);
         void SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId = 0, Spell* spell = NULL);
         void ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
+        void RemovePetSpellCooldown(uint32 spell_id);
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
         void SendClearCooldown(uint32 spell_id, Unit* target);
         void SendClearAllCooldowns(Unit* target);
@@ -3124,6 +3127,7 @@ class Player : public Unit, public GridObject<Player>
         ReputationMgr  m_reputationMgr;
 
         SpellCooldowns m_spellCooldowns;
+        SpellCooldowns m_petSpellCooldowns;
         std::map<uint32, uint32> m_globalCooldowns; // whole start recovery category stored in one
 
         uint32 m_ChampioningFaction;

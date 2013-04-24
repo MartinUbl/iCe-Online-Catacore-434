@@ -4215,6 +4215,11 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
         SendClearCooldown(spell_id, this);
 }
 
+void Player::RemovePetSpellCooldown(uint32 spell_id)
+{
+    m_petSpellCooldowns.erase(spell_id);
+}
+
 // I am not sure which one is more efficient
 void Player::RemoveCategoryCooldown(uint32 cat)
 {
@@ -21265,7 +21270,8 @@ void Player::PetSpellInitialize()
 
     data.put<uint8>(spellsCountPos, addlist);
 
-    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
+    uint8 cooldownsCount = 0;//pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
+    spellsCountPos = data.wpos();
     data << uint8(cooldownsCount);
 
     for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
@@ -21278,6 +21284,8 @@ void Player::PetSpellInitialize()
         data << uint16(0);                                  // spell category?
         data << uint32(cooldown);                           // cooldown
         data << uint32(0);                                  // category cooldown
+
+        cooldownsCount++;
     }
 
     for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureCategoryCooldowns.begin(); itr != pet->m_CreatureCategoryCooldowns.end(); ++itr)
@@ -21290,7 +21298,29 @@ void Player::PetSpellInitialize()
         data << uint16(0);                                  // spell category?
         data << uint32(0);                                  // cooldown
         data << uint32(cooldown);                           // category cooldown
+
+        cooldownsCount++;
     }
+
+    for (SpellCooldowns::const_iterator itr = m_petSpellCooldowns.begin(); itr != m_petSpellCooldowns.end(); ++itr)
+    {
+        // we will add only spells, that are not present in pet cooldown storage
+        if (pet->m_CreatureSpellCooldowns.find(itr->first) != pet->m_CreatureSpellCooldowns.end())
+            continue;
+
+        int32 cooldown = itr->second.end - m_LogonTimer;
+        if (cooldown < 0)
+            cooldown = 0;
+
+        data << uint32(itr->first);                         // spellid
+        data << uint16(0);                                  // spell category?
+        data << uint32(cooldown);                           // cooldown
+        data << uint32(0);                                  // category cooldown
+
+        cooldownsCount++;
+    }
+
+    data.put<uint8>(spellsCountPos, cooldownsCount);
 
     data.hexlike();
 
@@ -22678,6 +22708,12 @@ bool Player::HasSpellCooldown(uint32 spell_id) const
     return itr != m_spellCooldowns.end() && (itr->second.end > m_LogonTimer);
 }
 
+bool Player::HasPetSpellCooldown(uint32 spell_id) const
+{
+    SpellCooldowns::const_iterator itr = m_petSpellCooldowns.find(spell_id);
+    return itr != m_petSpellCooldowns.end() && (itr->second.end > m_LogonTimer);
+}
+
 uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
 {
     SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
@@ -22804,6 +22840,14 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, uint32 msDuration)
     sc.end = m_LogonTimer + msDuration;
     sc.itemid = itemid;
     m_spellCooldowns[spellid] = sc;
+}
+
+void Player::AddPetSpellCooldown(uint32 spellid, uint32 msDuration)
+{
+    SpellCooldown sc;
+    sc.end = m_LogonTimer + msDuration;
+    sc.itemid = 0;
+    m_petSpellCooldowns[spellid] = sc;
 }
 
 void Player::ModifySpellCooldown(uint32 spell_id, int32 mod, bool update)
