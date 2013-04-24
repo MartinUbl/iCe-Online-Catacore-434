@@ -1783,6 +1783,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->RemoveGameObject(GetId(), true);
                         target->RemoveAura(62388);
                         break;
+                    case 27243: // Seed of Corruption
+                        if (removeMode == AURA_REMOVE_BY_DEATH)
+                        {
+                            if (target && aurApp->GetBase() && aurApp->GetBase()->GetCaster())
+                                aurApp->GetBase()->GetCaster()->CastSpell(target, 27285, true);
+                        }
                     default:
                         break;
                 }
