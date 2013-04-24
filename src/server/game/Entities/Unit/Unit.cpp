@@ -9754,22 +9754,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        // Demonic Pact
-        case 48090:
-        {
-            // Get talent aura from owner
-            if (isPet())
-                if (Unit * owner = GetOwner())
-                {
-                    if (AuraEffect * aurEff = owner->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 3220, 0))
-                    {
-                        basepoints0 = int32((aurEff->GetAmount() * owner->SpellBaseDamageBonus(SpellSchoolMask(SPELL_SCHOOL_MASK_MAGIC)) + 100.0f) / 100.0f);
-                        CastCustomSpell(this,trigger_spell_id,&basepoints0,&basepoints0,NULL,true,castItem,triggeredByAura);
-                        return true;
-                    }
-                }
-            break;
-        }
         // Sword and Board
         case 50227:
         {

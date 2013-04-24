@@ -6321,10 +6321,6 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
             pet->SetReactState(REACT_DEFENSIVE);
     }
 
-    // Demonic Pact raid-wide buff cast
-    if (m_caster->HasAura(47236))
-        pet->CastSpell(pet, 53646, true);
-
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     // generate new name for summon pet
