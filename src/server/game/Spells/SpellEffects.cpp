@@ -3108,6 +3108,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 return;
             case 46584: // Raise Dead
+            {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return;
                 // 46584 has two dummy effects, we will handle only one of them
@@ -3130,9 +3131,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     triggered = true;
                 }
                 // Remove cooldown - summon spellls have category
-                m_caster->ToPlayer()->RemoveSpellCategoryCooldown(m_spellInfo->Category,true);
+                uint32 cd = m_caster->ToPlayer()->GetSpellCooldownDelay(46584);
+                m_caster->ToPlayer()->RemoveSpellCategoryCooldown(m_spellInfo->Category);
+                m_caster->ToPlayer()->AddSpellCooldown(46584, 0, cd);
                 spell_id = 48289;
                 break;
+            }
             // Raise dead - take reagents and trigger summon spells
             case 48289:
                 if (m_targets.HasDst())
