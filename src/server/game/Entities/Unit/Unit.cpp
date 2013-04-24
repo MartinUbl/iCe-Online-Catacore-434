@@ -17173,7 +17173,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 case 416:   // Imp
                 case 1860:  // Voidwalker
                 case 1863:  // Succubus
-                case 691:   // Felhunter
+                case 417:   // Felhunter
                 case 17252: // Felguard
                     if (pOwner->HasAura(88447))
                         bp0 = -100;
