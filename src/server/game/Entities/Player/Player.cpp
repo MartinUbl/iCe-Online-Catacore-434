@@ -11317,23 +11317,24 @@ void Player::SendCompletedArtifacts()
 {
     WorldPacket data(SMSG_QUERY_COMPLETED_ARTIFACTS_RESPONSE, 200, true);
 
-    uint32 count = 0;
+    uint16 count = 0;
 
     size_t count_pos = data.wpos();
-    data << uint32(0);
+    data << uint16(0);  // placeholder, count of sent projects will be here
+    data << uint8(0);
 
     for (std::list<ResearchProjectsElem>::const_iterator itr = m_researchProjects.begin(); itr != m_researchProjects.end(); ++itr)
     {
         if (itr->completed_count > 0)
         {
-            data << uint32(itr->completed_date);
             data << uint32(itr->project_id);
             data << uint32(itr->completed_count);
+            data << uint32(itr->completed_date);
             count++;
         }
     }
 
-    data.put<uint32>(count_pos, count);
+    data.put<uint16>(count_pos, count);
 
     GetSession()->SendPacket(&data);
 }
