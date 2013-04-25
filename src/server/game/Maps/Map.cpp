@@ -2738,13 +2738,10 @@ void InstanceMap::PermBindAllPlayers(Player *player)
     for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
     {
         Player* plr = itr->getSource();
-        if(player->GetSession()->GetSecurity()==SEC_PLAYER)
-            plr->_LoadBoundInst(); //reset of temporary instance bounds for flexible id because we need to bound it to new bound
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind *bind = plr->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
-
-        if (!bind || !bind->perm ||bind->save!=save)
+        if (!bind || !bind->perm)
         {
             plr->BindToInstance(save, true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
