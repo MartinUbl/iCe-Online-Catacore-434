@@ -1621,6 +1621,14 @@ bool Item::CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* t
     if (!transmogrified->CanTransmogrify() || !transmogrifier->CanBeTransmogrified())
         return false;
 
+    // special case exceptions: for bows, crossbows, guns <- -> gun, bow and crossbow can be transmogrified on gun, bow and crossbow.
+    if (proto1->Class == ITEM_CLASS_WEAPON && proto2->Class == ITEM_CLASS_WEAPON
+       && (proto1->SubClass == ITEM_SUBCLASS_WEAPON_GUN || proto1->SubClass == ITEM_SUBCLASS_WEAPON_BOW
+       || proto1->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW)
+       && (proto2->SubClass == ITEM_SUBCLASS_WEAPON_BOW || proto2->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW
+       || proto2->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
+       return true;
+
     if (proto1->InventoryType == INVTYPE_BAG ||
         proto1->InventoryType == INVTYPE_RELIC ||
         proto1->InventoryType == INVTYPE_BODY ||
