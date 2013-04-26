@@ -178,9 +178,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
     else if (pet_type == SUMMON_PET && summon_spell_id && !owner->HasSpell(summon_spell_id))
     {
-        // pet is summon but owner has no summon spell (e.g.: Water Elemental)
-        m_loading = false;
-        return false;
+        // Raise Dead exception - pet summoned by triggered spell
+        if (summon_spell_id != 52150)
+        {
+            // pet is summon but owner has no summon spell (e.g.: Water Elemental)
+            m_loading = false;
+            return false;
+        }
     }
 
     uint32 pet_number = fields[0].GetUInt32();
@@ -237,7 +241,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         case SUMMON_PET:
             petlevel=owner->getLevel();
 
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, 0x8); //class=mage
+            if (IsPetGhoul())
+                SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_ROGUE); // technically, it's a rogue (has energy)
+            else
+                SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet dismiss, cancel)
             break;
@@ -268,7 +276,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetCanModifyStats(true);
 
     if (getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    {
+        if (IsPetGhoul())
+            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+        else
+            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    }
     else
     {
         uint32 savedhealth = fields[10].GetUInt32();
