@@ -387,10 +387,13 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
             itemTransmogrified->SetOwnerGUID(pPlayer->GetGUID());
             itemTransmogrified->SetNotRefundable(pPlayer);
             itemTransmogrified->ClearSoulboundTradeable(pPlayer);
+            itemTransmogrified->SetState(ITEM_CHANGED, pPlayer);
 
-            if (itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_EQUIPED || itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_USE)
+            if ((itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_EQUIPED || itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_USE)
+                && !itemTransmogrifier->IsSoulBound())
                 itemTransmogrifier->SetBinding(true);
 
+            itemTransmogrifier->SetState(ITEM_CHANGED, pPlayer);
             itemTransmogrifier->SetOwnerGUID(pPlayer->GetGUID());
             itemTransmogrifier->SetNotRefundable(pPlayer);
             itemTransmogrifier->ClearSoulboundTradeable(pPlayer);
