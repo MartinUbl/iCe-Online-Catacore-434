@@ -7655,6 +7655,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
             // Dummy spell cooldown reset aura (500 ms)
             if (m_spellProto->Id == 77691)
             {
+            
+                // Glyph of Shadow Word: Death cooldown removal
+                if (caster->HasAura(55682))
+                {
+                    caster->ToPlayer()->RemoveSpellCooldown(32379, true);
+                    caster->ToPlayer()->AddSpellCooldown(55682, 0, 6000);
+                }
+
                 // Glyph of Kill Shot cooldown removal
                 if (caster->HasAura(90967))
                     caster->ToPlayer()->RemoveSpellCooldown(53351, true);

@@ -1577,11 +1577,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (unitTarget->GetHealthPct() <= 25.0f)
                 {
                     // Glyph of Shadow Word: Death
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasAura(55682) && !m_caster->ToPlayer()->HasSpellCooldown(55682))
-                    {
-                        m_caster->ToPlayer()->RemoveSpellCooldown(32379, true);
-                        m_caster->ToPlayer()->AddSpellCooldown(55682, 0, 6000);
-                    }
+                    if (!m_caster->ToPlayer()->HasSpellCooldown(55682) && m_caster->HasAura(55682))
+                        m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
                 }
             }
             break;
