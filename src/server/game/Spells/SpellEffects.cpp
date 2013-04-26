@@ -2553,7 +2553,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Life Tap
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARLOCK_LIFETAP)
             {
-                float coef = 2.2f;
+                float coef = 1.2f;
 
                 // Improved Life Tap
                 if(m_caster->HasAura(18183))
