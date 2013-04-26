@@ -26623,7 +26623,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
         return;
 
     Pet* NewPet = new Pet(this);
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
+    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, PET_SLOT_ACTUAL_PET_SLOT))
         delete NewPet;
 
     // Hackfix for reapplying Soul Link

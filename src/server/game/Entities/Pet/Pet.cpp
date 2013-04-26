@@ -469,10 +469,14 @@ void Pet::SavePetToDB(PetSlot mode)
     // delete
     else
     {
-        if(pOwner->m_currentPetSlot >= PET_SLOT_HUNTER_FIRST && pOwner->m_currentPetSlot <= PET_SLOT_HUNTER_LAST)
-            pOwner->setPetSlotUsed(pOwner->m_currentPetSlot, false);
-        RemoveAllAuras();
-        DeleteFromDB(m_charmInfo->GetPetNumber());
+        // warlocks pets doesn't get deleted
+        if (pOwner->getClass() != CLASS_WARLOCK)
+        {
+            if(pOwner->m_currentPetSlot >= PET_SLOT_HUNTER_FIRST && pOwner->m_currentPetSlot <= PET_SLOT_HUNTER_LAST)
+                pOwner->setPetSlotUsed(pOwner->m_currentPetSlot, false);
+            RemoveAllAuras();
+            DeleteFromDB(m_charmInfo->GetPetNumber());
+        }
     }
 }
 
