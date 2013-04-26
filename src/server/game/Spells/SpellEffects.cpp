@@ -1620,6 +1620,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             m_damage += m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
             break;
         }
+        // Shadowburn
+        case 17877:
+        {
+            // Glyph of Shadowburn implementation
+            if (m_caster && unitTarget->GetHealthPct() <= 20.0f // 20% hp
+                && m_damage < int32(unitTarget->GetHealth()) // target is still alve
+                && m_caster->HasAura(56229) // has glyph
+                && !m_caster->ToPlayer()->HasSpellCooldown(56229)) // without cd
+            {
+                m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
+            }
+            break;
+        }
         default:
             break;
     }
