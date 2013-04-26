@@ -410,28 +410,27 @@ void Pet::SavePetToDB(PetSlot mode)
     uint32 curhealth = GetHealth();
     uint32 curmana = GetPower(POWER_MANA);
 
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    // save auras before possibly removing them
-    _SaveAuras(trans);
-
-    // stable and not in slot saves
-    if (mode > PET_SLOT_HUNTER_LAST && getPetType() == HUNTER_PET)
-        RemoveAllAuras();
-
-    _SaveSpells(trans);
-    _SaveSpellCooldowns(trans);
-    CharacterDatabase.CommitTransaction(trans);
-
     // current/stable/not_in_slot
     if (mode >= PET_SLOT_HUNTER_FIRST)
     {
         uint32 owner = GUID_LOPART(GetOwnerGUID());
         std::string name = m_name;
         CharacterDatabase.escape_string(name);
+
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        // save auras before possibly removing them
+        _SaveAuras(trans);
+
+        // stable and not in slot saves
+        if (mode > PET_SLOT_HUNTER_LAST && getPetType() == HUNTER_PET)
+            RemoveAllAuras();
+
+        _SaveSpells(trans);
+        _SaveSpellCooldowns(trans);
+
         // remove current data
-        trans->PAppend("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner,m_charmInfo->GetPetNumber());
-        
+        trans->PAppend("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner, m_charmInfo->GetPetNumber());
+
         // save pet
         std::ostringstream ss;
         ss  << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, curhappiness, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
