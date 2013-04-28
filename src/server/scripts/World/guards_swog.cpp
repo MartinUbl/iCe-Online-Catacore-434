@@ -387,7 +387,8 @@ void guards_swogAI::UpdateAI(const uint32 diff)
                             (*cfriend)->AI()->AttackStart(me->getVictim());
                 }
 
-                me->getVictim()->CastSpell(me->getVictim(), 59908, true);  /* nice ebon blade mark, selfcast! */
+                if (me->getVictim())
+                    me->getVictim()->CastSpell(me->getVictim(), 59908, true);  /* nice ebon blade mark, selfcast! */
                 doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
                 break;
 
