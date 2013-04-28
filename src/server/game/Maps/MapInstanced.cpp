@@ -198,7 +198,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
-                            pBind->save->RemoveFlexiblePlayer(player);//remove from special list of flexible bound players
+                            pBind->save->RemovePlayer(player);//remove from list of normal and flexible players
                             pBind->save=groupBind->save;
                             groupBind->save->AddFlexiblePlayer(player);
                             player->m_boundInstances[pSave->GetDifficulty()][pSave->GetMapId()]=*pBind;
