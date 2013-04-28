@@ -5357,7 +5357,7 @@ void Spell::TakePower()
     if (powerType == POWER_MANA && m_caster->HasAura(77606))
     {
         Aura* pAura = m_caster->GetAura(77606);
-        if (pAura && pAura->GetCaster())
+        if (pAura && pAura->GetCaster() && !pAura->GetCaster()->HasAura(77616))
         {
             int32 bp0 = GetSpellInfo()->Id;
             pAura->GetCaster()->CastCustomSpell(pAura->GetCaster(), 77616, &bp0, 0, 0, true);
