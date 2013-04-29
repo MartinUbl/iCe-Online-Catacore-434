@@ -775,6 +775,7 @@ class ObjectMgr
             return info;
         }
         void GetPlayerLevelInfo(uint32 race, uint32 class_, uint8 level, PlayerLevelInfo* info) const;
+        std::list<uint32> *GetAllPlayerCreateInfoSpells() { return &playerCreateInfoSpells; };
 
         uint64 GetPlayerGUIDByName(std::string name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
@@ -1465,6 +1466,7 @@ class ObjectMgr
 
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
         PlayerInfo playerInfo[MAX_RACES][MAX_CLASSES];
+        std::list<uint32> playerCreateInfoSpells;
 
         typedef std::vector<uint32> PlayerXPperLevel;       // [level]
         PlayerXPperLevel mPlayerXPperLevel;
