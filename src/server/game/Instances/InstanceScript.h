@@ -191,7 +191,11 @@ class InstanceScript : public ZoneScript
 
         // Remove Auras due to Spell on all players in instance
         void DoRemoveAurasDueToSpellOnPlayers(uint32 spell);
-        
+
+        // Set scripted power to all players in instance
+        void DoSetScriptedPowerToPlayers(int32 amount);
+        void DoSetMaxScriptedPowerToPlayers(int32 amount);
+
         //add/remove boss frames (0=ADD,1=REMOVE)
         void SendEncounterUnit(uint32 type, Unit* unit, uint8 param1 = 0, uint8 param2 = 0);
 

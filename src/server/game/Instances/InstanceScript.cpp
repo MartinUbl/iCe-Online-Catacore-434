@@ -398,6 +398,28 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
                 pPlayer->RemoveAurasDueToSpell(spell);
 }
 
+// Set scripted power to all players in instance
+void InstanceScript::DoSetScriptedPowerToPlayers(int32 amount)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* pPlayer = i->getSource())
+                pPlayer->SetPower(POWER_SCRIPTED, amount);
+}
+
+// Set max scripted power to all players in instance
+void InstanceScript::DoSetMaxScriptedPowerToPlayers(int32 amount)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (Player* pPlayer = i->getSource())
+                pPlayer->SetMaxPower(POWER_SCRIPTED, amount);
+}
+
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= NULL*/, uint32 /*miscvalue1*/ /*= 0*/)
 {
     sLog->outError("Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map %u not have implementation for achievement criteria %u",
