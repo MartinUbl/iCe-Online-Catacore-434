@@ -14,3 +14,20 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef INSTANCE_FIRELANDS_H
+#define INSTANCE_FIRELANDS_H
+
+enum Encounters
+{
+    TYPE_BETHTILAC = 0,
+    TYPE_RHYOLITH  = 1,
+    TYPE_ALYSRAZOR = 2,
+    TYPE_SHANNOX   = 3,
+    TYPE_BALEROC   = 4,
+    TYPE_STAGHELM  = 5,
+    TYPE_RAGNAROS  = 6,
+    MAX_ENCOUNTER  = 7
+};
+
+#endif
