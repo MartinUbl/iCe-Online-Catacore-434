@@ -19715,12 +19715,12 @@ uint32 Unit::GetDamageTakenHistory(uint32 seconds)
     return damage_history;
 }
 
-void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
+void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam, uint32 unkParam2)
 {
     ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL_KIT, 4 + 4+ 4 + 8);
-    data << uint32(0);
+    data << uint32(unkParam2);
     data << uint32(id);     // SpellVisualKit.dbc index
     data << uint32(unkParam);
     data.WriteBit(guid[4]);
