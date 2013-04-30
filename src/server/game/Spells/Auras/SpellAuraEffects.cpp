@@ -2158,7 +2158,18 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             float gainMultiplier = SpellMgr::CalculateSpellEffectValueMultiplier(GetSpellProto(), GetEffIndex(), caster);
 
-            uint32 heal = uint32(caster->SpellHealingBonus(caster, GetSpellProto(), GetEffIndex(), uint32(new_damage * gainMultiplier), DOT, GetBase()->GetStackAmount()));
+            uint32 heal = new_damage * gainMultiplier;
+
+            bool preventHealingBonus = false;
+
+            // Special cases
+
+            // Devouring Plague - do not give healing bonus to leeched value (twice)
+            if (GetSpellProto()->Id == 2944)
+                preventHealingBonus = true;
+
+            if (!preventHealingBonus)
+                heal = uint32(caster->SpellHealingBonus(caster, GetSpellProto(), GetEffIndex(), heal, DOT, GetBase()->GetStackAmount()));
 
             int32 gain = caster->HealBySpell(caster, GetSpellProto(), heal);
             caster->getHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellProto());
