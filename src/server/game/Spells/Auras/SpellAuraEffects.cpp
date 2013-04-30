@@ -990,13 +990,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 {
                     case 20043: // Aspect of the Wild
                     case 8185: // Elemental Resistance
-                    case 19891: // Resistance Aura
                     case 79106: // Shadow Protection
                         amount = resist;
                         break;
                     case 79060: // Mark of the Wild
                     case 79062: // Blessing of Kings
                         amount = resist / 2;
+                        break;
+                    case 19891: // Resistance Aura
+                        amount = resist;
+                        // hack for Resistance Aura not reacting to Aura Mastery spell due to "custom" resist counting
+                        if (caster && caster->HasAura(31821))
+                            amount *= 2;
                         break;
                 }
                 break;
