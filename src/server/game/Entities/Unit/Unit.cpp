@@ -1487,7 +1487,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 damageInfo->TargetState = VICTIMSTATE_HIT;
                 damageInfo->HitInfo    |= HITINFO_BLOCK;
                 damageInfo->procEx     |= PROC_EX_BLOCK;
-                damageInfo->blocked_amount = damageInfo->damage * 0.3f;
+                damageInfo->blocked_amount = damageInfo->damage * (0.3f + damageInfo->target->GetTotalAuraModifier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT)/100.0f);
                 // double blocked amount if block is critical
                 if (damageInfo->target->isBlockCritical())
                     damageInfo->blocked_amount+=damageInfo->blocked_amount;
