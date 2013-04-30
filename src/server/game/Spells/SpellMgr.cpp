@@ -1969,6 +1969,19 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
             level -= int32(spellEntry->spellLevel);
             basePoints += int32(level * basePointsPerLevel);
         }
+
+        // Mixology - amount boost
+        if (caster && target && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (spellEntry->SpellFamilyName == SPELLFAMILY_POTION && (
+                sSpellMgr->IsSpellMemberOfSpellGroup(spellEntry->Id, SPELL_GROUP_ELIXIR_BATTLE) ||
+                sSpellMgr->IsSpellMemberOfSpellGroup(spellEntry->Id, SPELL_GROUP_ELIXIR_GUARDIAN) ||
+                sSpellMgr->IsSpellMemberOfSpellGroup(spellEntry->Id, SPELL_GROUP_FLASK)))
+            {
+                if (caster->HasAura(53042) && caster->HasSpell(spellEntry->EffectTriggerSpell[0]))
+                    basePoints *= 1.266667;
+            }
+        }
     }
 
     if (maxPoints != 0.00f)
