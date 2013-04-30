@@ -9118,6 +9118,47 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        // Vigilance
+        case 50720:
+            if (triggeredByAura)
+            {
+                // change target
+                target = triggeredByAura->GetCaster();
+
+                // trigger Vengeance if present
+                if (target && target->HasSpell(93098))
+                {
+                    if (Aura* pVengeance = target->GetAura(76691))
+                    {
+                        AuraEffect* pFrst = pVengeance->GetEffect(EFFECT_0);
+                        AuraEffect* pScnd = pVengeance->GetEffect(EFFECT_1);
+                        AuraEffect* pThrd = pVengeance->GetEffect(EFFECT_2);
+                        if (!pFrst || !pScnd || !pThrd)
+                            return true;
+
+                        int32 bp = (damage*0.2f)*0.05f;
+
+                        if (pFrst->GetAmount()+bp >= GetMaxHealth()*0.1f)
+                            bp = GetMaxHealth()*0.1f - pFrst->GetAmount();
+
+                        pFrst->ChangeAmount(pFrst->GetAmount()+bp);
+                        pScnd->ChangeAmount(pScnd->GetAmount()+bp);
+
+                        if (pFrst->GetAmount() > pThrd->GetAmount())
+                            pThrd->SetAmount(pFrst->GetAmount());
+
+                        pVengeance->SetNeedClientUpdateForTargets();
+                    }
+                    else
+                    {
+                        int32 bp = (damage*0.2f)*0.05f;
+                        target->CastCustomSpell(this, 76691, &bp, &bp, &bp, true);
+                    }
+
+                    target->ToPlayer()->AddSpellCooldown(76691,0,cooldown*1000);
+                }
+            }
+            break;
         // Entrapment
         case 19387:
         case 19184:
