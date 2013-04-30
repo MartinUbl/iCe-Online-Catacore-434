@@ -24011,19 +24011,28 @@ void Player::resetSpells(bool myClassOnly)
 
 void Player::learnDefaultSpells()
 {
+    uint32 tspell;
+
     // at first unlearn all default spells
     std::list<uint32> *startSpells = sObjectMgr->GetAllPlayerCreateInfoSpells();
     if (startSpells && !startSpells->empty())
     {
         for (std::list<uint32>::iterator itr = startSpells->begin(); itr != startSpells->end(); ++itr)
-            removeSpell(*itr, false, false);
+        {
+            tspell = *itr;
+
+            // do not remove Cloth, Leather, Plate Mail, Mail armor proficiencies, as well, as Bows, Crossbows, 2H and 1H Axes, 2H and 1H Maces, Daggers, Maces, Guns
+            if (tspell != 9078 && tspell != 9077 && tspell != 750 && tspell != 8737
+                && tspell != 264 && tspell != 5011 && tspell != 196 && tspell != 197 && tspell != 198 && tspell != 199 && tspell != 1180 && tspell != 227 && tspell != 266)
+                removeSpell(*itr, false, false);
+        }
     }
 
     // learn default race/class spells
     PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(),getClass());
     for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)
     {
-        uint32 tspell = *itr;
+        tspell = *itr;
         sLog->outDebug("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u",uint32(getClass()),uint32(getRace()), tspell);
         if (!IsInWorld())                                    // will send in INITIAL_SPELLS in list anyway at map add
             addSpell(tspell,true,true,true,false);
