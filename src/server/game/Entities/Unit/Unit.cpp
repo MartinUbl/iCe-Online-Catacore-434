@@ -2559,6 +2559,12 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
 
+    bool cannotMiss = false;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        if (spell->Effect[i] == SPELL_EFFECT_ATTACK_ME)
+            cannotMiss = true;
+
     WeaponAttackType attType = BASE_ATTACK;
 
     // Check damage class instead of attack type to correctly handle judgements
@@ -2573,7 +2579,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, spell->Id)*100.0f);
     // Roll miss
     uint32 tmp = missChance;
-    if (roll < tmp)
+    if (!cannotMiss && roll < tmp)
         return SPELL_MISS_MISS;
 
     // Chance resist mechanic (select max value from every mechanic spell effect)
@@ -2766,7 +2772,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 
     int32 rand = irand(0, 10000);
 
-    if (rand < tmp)
+    bool cannotMiss = false;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        if (spell->Effect[i] == SPELL_EFFECT_ATTACK_ME)
+            cannotMiss = true;
+
+    if (!cannotMiss && rand < tmp)
         return SPELL_MISS_MISS;
 
     // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
