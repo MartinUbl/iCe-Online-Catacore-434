@@ -24011,14 +24011,6 @@ void Player::resetSpells(bool myClassOnly)
 
 void Player::learnDefaultSpells()
 {
-    // at first unlearn all default spells
-    std::list<uint32> *startSpells = sObjectMgr->GetAllPlayerCreateInfoSpells();
-    if (startSpells && !startSpells->empty())
-    {
-        for (std::list<uint32>::iterator itr = startSpells->begin(); itr != startSpells->end(); ++itr)
-            removeSpell(*itr, false, false);
-    }
-
     // learn default race/class spells
     PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(),getClass());
     for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)

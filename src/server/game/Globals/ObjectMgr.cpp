@@ -3132,8 +3132,6 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
-    playerCreateInfoSpells.clear();
-
     // Load playercreate spells
     sLog->outString("Loading Player Create Spell Data...");
     {
@@ -3184,8 +3182,6 @@ void ObjectMgr::LoadPlayerInfo()
                 }
                 else
                     playerInfo[current_race][current_class].spell.push_back(fields[2].GetUInt32());
-
-                playerCreateInfoSpells.push_back(fields[2].GetUInt32());
 
                 ++count;
             }
