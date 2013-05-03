@@ -232,7 +232,13 @@ void TempSummon::SetTempSummonType(TempSummonType type)
 void TempSummon::UnSummon()
 {
     //ASSERT(!isPet());
-    if (isPet())
+    if (isHunterPet())
+    {
+        ((Pet*)this)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+        ASSERT(!IsInWorld());
+        return;
+    }
+    else if (isPet())
     {
         ((Pet*)this)->Remove(PET_SLOT_OTHER_PET);
         ASSERT(!IsInWorld());
