@@ -13453,10 +13453,6 @@ bool Unit::isAttackableByAOE(bool requireDeadTarget) const
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->isGameMaster())
         return false;
 
-    // arena spectators should not be hit by any spell, nor trigger
-    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->InArena() && ToPlayer()->GetSpectatorInstanceId())
-        return false;
-
     return !hasUnitState(UNIT_STAT_UNATTACKABLE);
 }
 

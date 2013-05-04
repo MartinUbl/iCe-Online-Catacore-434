@@ -1128,9 +1128,6 @@ namespace Trinity
         AnyPlayerInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
         bool operator()(Player* u)
         {
-            if (u->InArena() && u->GetSpectatorInstanceId() > 0)
-                return false;
-
             if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
                 return true;
 
