@@ -65,7 +65,7 @@ bool CharacterDatabaseConnection::Open()
         "resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask,"
         "arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
         "health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId," 
-        "knownTitles, actionBars, currentPetSlot, petSlotUsed, charSlot FROM characters WHERE guid = ?", true);
+        "knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_GROUP, "SELECT guid FROM group_member WHERE memberGuid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_BOUNDINSTANCES, "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_AURAS, "SELECT caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, "
@@ -132,6 +132,7 @@ bool CharacterDatabaseConnection::Open()
     PrepareStatement(CHAR_DEL_GIFT, "DELETE FROM character_gifts WHERE item_guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_TALENTBRANCHSPECS, "SELECT branchSpec, spec FROM character_branchspec WHERE guid = ?");
     PrepareStatement(CHAR_GET_ACCOUNT_BY_NAME, "SELECT account FROM characters WHERE name = ?");
+    PrepareStatement(CHAR_LOAD_PET_SLOTS, "SELECT bit_or(CASE WHEN slot = 100 THEN 0 ELSE 1 << slot END) as petSlotUsed FROM character_pet WHERE owner = ? GROUP BY owner");
 
     // Guild handling
     // 0: uint32, 1: string, 2: uint32, 3: string, 4: string, 5: uint64, 6-10: uint32, 11: uint64

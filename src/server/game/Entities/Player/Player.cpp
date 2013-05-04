@@ -17552,7 +17552,7 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * 
     // 50      51      52      53      54      55      56      57      58      59      60       61           62         63          64             65              66
     //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
     // 67           68          69              70
-    //"knownTitles, actionBars, currentPetSlot, petSlotUsed FROM characters WHERE guid = '%u'", guid);
+    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADFROM);
     
     if (!result)
@@ -17594,7 +17594,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     // 50      51      52      53      54      55      56      57      58      59      60       61           62         63          64             65              66
     //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
     // 67           68          69              70
-    //"knownTitles, actionBars, currentPetSlot, petSlotUsed FROM characters WHERE guid = '%u'", guid);
+    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
     
     Field* fields = result->Fetch();
 
@@ -17669,7 +17669,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     SetByteValue(PLAYER_FIELD_BYTES, 2, fields[68].GetUInt8());
 
     m_currentPetSlot = (PetSlot)fields[69].GetUInt32();
-    m_petSlotUsed = fields[70].GetUInt32();
+    _LoadPetSlots(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADPETSLOT));
 
     InitDisplayIds();
 
@@ -19259,6 +19259,12 @@ void Player::_LoadArchaeologyData()
     }
 }
 
+void Player::_LoadPetSlots(PreparedQueryResult result)
+{
+    if (result)
+        m_petSlotUsed = (*result)[0].GetUInt32();
+}
+
 void Player::_LoadSpells(PreparedQueryResult result)
 {
     //QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
@@ -19744,7 +19750,7 @@ bool Player::CreateInDB()
         "death_expire_time, taxi_path, totalKills, "
         "todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, "
         "power4, power5, power6, power7, power8, power9, power10, latency, speccount, activespec, exploredZones, equipmentCache, ammoId, "
-        "knownTitles, actionBars, currentPetSlot, petSlotUsed) VALUES ("
+        "knownTitles, actionBars, currentPetSlot) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << sql_name << "', "
@@ -19861,7 +19867,7 @@ bool Player::CreateInDB()
     ss << "',";
     ss << uint32(GetByteValue(PLAYER_FIELD_BYTES, 2));
     
-    ss << "," << m_currentPetSlot << "," << m_petSlotUsed;
+    ss << "," << m_currentPetSlot;
     
     ss << ")";
 
@@ -20053,8 +20059,7 @@ void Player::SaveToDB()
     ss << "',";
     ss << "actionBars = " << uint32(GetByteValue(PLAYER_FIELD_BYTES, 2)) << ", ";
 
-    ss << "currentPetSlot = " << m_currentPetSlot << ", ";
-    ss << "petSlotUsed = " << m_petSlotUsed;
+    ss << "currentPetSlot = " << m_currentPetSlot;
 
     ss << " WHERE guid = " << GetGUIDLow() << ";";
 

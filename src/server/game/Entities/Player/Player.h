@@ -2854,6 +2854,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadCurrencyWeekcap(PreparedQueryResult result);
         void _LoadCUFProfiles(PreparedQueryResult result);
         void _LoadArchaeologyData();
+        void _LoadPetSlots(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/

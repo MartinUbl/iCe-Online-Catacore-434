@@ -172,6 +172,10 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PET_SLOTS);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOADPETSLOT, stmt);
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_PLAYER_CURRENCY);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CURRENCY, stmt);
@@ -609,7 +613,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
     if (class_ == CLASS_WARLOCK)
     {
         CharacterDatabase.PExecute("REPLACE INTO character_pet (`id`, `entry`, `owner`, `modelid`, `CreatedBySpell`, `PetType`, `level`, `exp`, `Reactstate`, `name`, `renamed`, `slot`, `curhealth`, `curmana`, `curhappiness`, `savetime`, `resettalents_cost`, `resettalents_time`, `abdata`) VALUES (%u, 416, %u, 4449, 0, 0, 1, 0, 0, 'Imp', 1, 0, 282, 72, 0, 1295721046, 0, 0, '7 2 7 1 7 0 129 3110 1 0 1 0 1 0 6 2 6 1 6 0 ')",  pet_id, pNewChar->GetGUIDLow());
-        CharacterDatabase.PExecute("UPDATE characters SET currentPetSlot = '0', petSlotUsed = '1' WHERE guid = %u", pNewChar->GetGUIDLow());
+        CharacterDatabase.PExecute("UPDATE characters SET currentPetSlot = '0', WHERE guid = %u", pNewChar->GetGUIDLow());
         pNewChar->SetTemporaryUnsummonedPetNumber(pet_id);
     }
     if (class_ == CLASS_HUNTER)
@@ -650,7 +654,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
             CharacterDatabase.PExecute("REPLACE INTO character_pet (`id`, `entry`, `owner`, `modelid`, `CreatedBySpell`, `PetType`, `level`, `exp`, `Reactstate`, `name`, `renamed`, `slot`, `curhealth`, `curmana`, `curhappiness`, `savetime`, `resettalents_cost`, `resettalents_time`, `abdata`) VALUES (%u, 42722, %u, 30221, 13481, 1, 1, 0, 0, 'Dog', 0, 0, 192, 0, 166500, 1295728219, 0, 0, '7 2 7 1 7 0 129 2649 129 17253 1 0 1 0 6 2 6 1 6 0 ')",  pet_id, pNewChar->GetGUIDLow());
             break;
         }
-        CharacterDatabase.PExecute("UPDATE characters SET currentPetSlot = '0', petSlotUsed = '1' WHERE guid = %u", pNewChar->GetGUIDLow());
+        CharacterDatabase.PExecute("UPDATE characters SET currentPetSlot = '0' WHERE guid = %u", pNewChar->GetGUIDLow());
         pNewChar->SetTemporaryUnsummonedPetNumber(pet_id);
     }
 
