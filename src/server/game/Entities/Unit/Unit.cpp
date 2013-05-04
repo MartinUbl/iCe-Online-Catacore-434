@@ -10156,6 +10156,21 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return false;
 
+    if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
+    {
+        // arena player friendly to spectator
+        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() == 0)
+            return false;
+
+        // spectators are friendly too
+        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+            return false;
+
+        // spectators are friendly for arena players too
+        if (unit->ToPlayer()->GetSpectatorInstanceId() == 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+            return false;
+    }
+
     // always hostile to enemy
     if (getVictim() == unit || unit->getVictim() == this)
         return true;
@@ -10274,6 +10289,21 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // always friendly to GM in GM mode
     if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return true;
+
+    if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
+    {
+        // arena player friendly to spectator
+        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() == 0)
+            return true;
+
+        // spectators are friendly too
+        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+            return true;
+
+        // spectators are friendly for arena players too
+        if (unit->ToPlayer()->GetSpectatorInstanceId() == 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+            return true;
+    }
 
     // always non-friendly to enemy
     if (getVictim() == unit || unit->getVictim() == this)
@@ -13316,6 +13346,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             else
                 ToPlayer()->toggleWorgenForm();
         }
+
+        // entering combat will break spectator wait time
+        ToPlayer()->ViolateSpectatorWaitTime();
     }
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)

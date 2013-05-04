@@ -5728,6 +5728,10 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+    // Arena spectators are not able to cast spells while in arena
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena() && m_caster->ToPlayer()->GetSpectatorInstanceId() > 0)
+        return SPELL_FAILED_NO_VALID_TARGETS;
+
     Unit* Target = m_targets.getUnitTarget();
     if (m_spellInfo->Id == 30449 && Target) // Spellsteal Check
     {

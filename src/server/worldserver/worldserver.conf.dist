@@ -1883,6 +1883,15 @@ Battleground.Rated.RatingDiscardTimer = 300000
 #     Start matchmaker rating for players
 #     Default: 1500
 #
+#    Arena.Spectator.Enable
+#        Enable arena spectators
+#        Default: 0 (disable)
+#                 1 (enable)
+#
+#    Arena.Spectator.WaitTime
+#        Arena spectator join wait time
+#        Default: 10 (seconds)
+#
 ###############################################################################
 
 Arena.MaxRatingDifference = 150
@@ -1896,6 +1905,8 @@ Arena.ArenaSeason.InProgress = 1
 Arena.ArenaStartRating = 0
 Arena.ArenaStartPersonalRating = 0
 Arena.ArenaStartMatchmakerRating = 1500
+Arena.Spectator.Enable = 0
+Arena.Spectator.WaitTime = 10
 
 ###############################################################################
 # NETWORK CONFIG

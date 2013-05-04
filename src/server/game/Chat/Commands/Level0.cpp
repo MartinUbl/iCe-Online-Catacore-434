@@ -33,6 +33,7 @@
 #include "SystemConfig.h"
 #include "Util.h"
 #include "SpellAuras.h"
+#include "BattlegroundMgr.h"
 
 // Here only due to size of this file - quick Edit and continue build
 bool ChatHandler::HandleTestCommand(const char* args)
@@ -282,6 +283,99 @@ bool ChatHandler::HandleGMListIngameCommand(const char* /*args*/)
     if (first)
         SendSysMessage(LANG_GMS_NOT_LOGGED);
 
+    return true;
+}
+
+bool ChatHandler::HandleSpectatorListCommand(const char* args)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE))
+        return false;
+
+    BattlegroundSet tset;
+    sBattlegroundMgr->GetSpectatableArenas(&tset);
+
+    if (tset.empty())
+    {
+        PSendSysMessage("No arenas to spectate");
+        return true;
+    }
+
+    for (BattlegroundSet::iterator itr = tset.begin(); itr != tset.end(); ++itr)
+    {
+        if (!itr->second)
+            continue;
+
+        PSendSysMessage("|cff00ff00%u|r - %uv%u - %s vs. %s", itr->first, itr->second->GetArenaType(), itr->second->GetArenaType(),
+            "team 1", "team 2");
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleSpectatorJoinCommand(const char* args)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE))
+        return false;
+
+    if (!args)
+        return false;
+
+    uint32 instanceId = atoi(args);
+
+    if (instanceId <= 0)
+        return false;
+
+    Player* pl = m_session->GetPlayer();
+    if (!pl)
+        return false;
+
+    BattlegroundSet tset;
+    sBattlegroundMgr->GetSpectatableArenas(&tset);
+
+    if (tset.empty() || tset.find(instanceId) == tset.end())
+    {
+        PSendSysMessage("No arenas to spectate");
+        return true;
+    }
+
+    if (pl->isInCombat())
+    {
+        PSendSysMessage("You are in combat!");
+        return true;
+    }
+    if (pl->InBattleground())
+    {
+        PSendSysMessage("You are in battleground!");
+        return true;
+    }
+    if (pl->GetGroup() || pl->GetGroupInvite())
+    {
+        PSendSysMessage("You are in group!");
+        return true;
+    }
+    if (!pl->isAlive())
+    {
+        PSendSysMessage("You are dead!");
+        return true;
+    }
+    if (pl->isInFlight())
+    {
+        PSendSysMessage("You are flying!");
+        return true;
+    }
+
+    pl->SetSpectatorData(instanceId, time(NULL)+sWorld->getIntConfig(CONFIG_ARENA_SPECTATOR_WAITTIME));
+    PSendSysMessage("You have joined spectator mode for instance %u. Please, wait %u seconds, do not enter combat, battleground, flight, nor die.", instanceId, sWorld->getIntConfig(CONFIG_ARENA_SPECTATOR_WAITTIME));
+
+    return true;
+}
+
+bool ChatHandler::HandleSpectatorLeaveCommand(const char* args)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE))
+        return false;
+
+    sBattlegroundMgr->RemoveArenaSpectator(m_session->GetPlayer());
     return true;
 }
 

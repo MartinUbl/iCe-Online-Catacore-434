@@ -592,6 +592,10 @@ class Battleground
 
         virtual bool HandlePlayerUnderMap(Player * /*plr*/) { return false; }
 
+        void AddSpectator(Player* pl);
+        void RemoveSpectator(Player* pl);  // chat command / player class use
+        void RemoveSpectator(uint64 guid); // offline use (arena ended, safe version)
+
         // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
         uint32 GetPlayerTeam(const uint64& guid) const;
         uint32 GetOtherTeam(uint32 teamId) const;
@@ -641,6 +645,7 @@ class Battleground
         BattlegroundPlayerMap  m_Players;
         // Spirit Guide guid + Player list GUIDS
         std::map<uint64, std::vector<uint64> >  m_ReviveQueue;
+        std::set<uint64> m_Spectators;
 
         // these are important variables used for starting messages
         uint8 m_Events;

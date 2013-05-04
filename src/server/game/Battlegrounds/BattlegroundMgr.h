@@ -73,6 +73,10 @@ class BattlegroundMgr
         void RemoveBattleground(uint32 instanceID, BattlegroundTypeId bgTypeId) { m_Battlegrounds[bgTypeId].erase(instanceID); }
         uint32 CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id);
 
+        void GetSpectatableArenas(BattlegroundSet *target);
+        bool AddArenaSpectator(Player* pl, uint32 instanceId);
+        void RemoveArenaSpectator(Player* pl);
+
         void CreateInitialBattlegrounds();
         void DeleteAllBattlegrounds();
 

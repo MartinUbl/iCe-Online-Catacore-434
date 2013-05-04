@@ -67,6 +67,39 @@ bool ChatHandler::HandleDebugRatedBGCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleSpectatorStateCommand(const char *args)
+{
+    if (sWorld->getBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE))
+    {
+        PSendSysMessage("Arena spectator turned OFF");
+        sWorld->setBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE, false);
+    }
+    else
+    {
+        PSendSysMessage("Arena spectator turned ON");
+        sWorld->setBoolConfig(CONFIG_ARENA_SPECTATOR_ENABLE, true);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleSpectatorWaitTimeCommand(const char *args)
+{
+    if (!args)
+        return false;
+
+    int time = atoi(args);
+    if (time > 0)
+    {
+        PSendSysMessage("Arena spectator wait time set to %u seconds.", (uint32)time);
+        sWorld->setIntConfig(CONFIG_ARENA_SPECTATOR_WAITTIME, (uint32)time);
+    }
+    else
+        return false;
+
+    return true;
+}
+
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
 {

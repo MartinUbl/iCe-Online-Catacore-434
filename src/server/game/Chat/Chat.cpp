@@ -614,6 +614,16 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand spectatorCommandTable[] =
+    {
+        { "list",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSpectatorListCommand>,       "", NULL },
+        { "join",           SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSpectatorJoinCommand>,       "", NULL },
+        { "leave",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleSpectatorLeaveCommand>,      "", NULL },
+        { "state",          SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleSpectatorStateCommand>,      "", NULL },
+        { "waittime",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleSpectatorWaitTimeCommand>,   "", NULL },
+        { NULL,             0,                  false, NULL,                                                       "", NULL }
+    };
+
     static ChatCommand serverIdleRestartCommandTable[] =
     {
         { "cancel",         SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleServerShutDownCancelCommand>,"", NULL },
@@ -777,6 +787,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reset",          SEC_ADMINISTRATOR,  true,  NULL,                                           "", resetCommandTable    },
         { "instance",       SEC_ADMINISTRATOR,  true,  NULL,                                           "", instanceCommandTable },
         { "server",         SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverCommandTable   },
+        { "spectator",      SEC_PLAYER,         false, NULL,                                           "", spectatorCommandTable},
 
         { "channel",        SEC_ADMINISTRATOR,  true, NULL,                                            "", channelCommandTable  },
 

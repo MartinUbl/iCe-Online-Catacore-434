@@ -806,6 +806,87 @@ Battleground * BattlegroundMgr::GetBattlegroundTemplate(BattlegroundTypeId bgTyp
     return m_Battlegrounds[bgTypeId].empty() ? NULL : m_Battlegrounds[bgTypeId].begin()->second;
 }
 
+// static const field of battlegrounds capable to spectating
+static const BattlegroundTypeId spectableArenaTypes[] = {
+    BATTLEGROUND_AA,
+    BATTLEGROUND_NA,
+    BATTLEGROUND_BE,
+    BATTLEGROUND_RL,
+    BATTLEGROUND_DS,
+    BATTLEGROUND_RV};
+
+void BattlegroundMgr::GetSpectatableArenas(BattlegroundSet* target)
+{
+    if (!target)
+        return;
+
+    target->clear();
+
+    for (uint32 i = 0; i < sizeof(spectableArenaTypes)/sizeof(BattlegroundTypeId); i++)
+    {
+        for (BattlegroundSet::iterator itr = m_Battlegrounds[spectableArenaTypes[i]].begin(); itr != m_Battlegrounds[spectableArenaTypes[i]].end(); ++itr)
+        {
+            if (itr->second && itr->second->GetStatus() == STATUS_IN_PROGRESS)
+                (*target)[itr->first] = itr->second;
+        }
+    }
+}
+
+bool BattlegroundMgr::AddArenaSpectator(Player* pl, uint32 instanceID)
+{
+    if (!pl || instanceID == 0)
+        return false;
+
+    if (pl->isInCombat() || pl->InBattleground() || pl->isDead() || pl->isInFlight())
+    {
+        pl->GetSession()->SendNotification("Couldn't teleport to arena as spectator due combat/battleground/flight/death.");
+        return false;
+    }
+
+    for (uint32 i = 0; i < sizeof(spectableArenaTypes)/sizeof(BattlegroundTypeId); i++)
+    {
+        BattlegroundSet::iterator itr = m_Battlegrounds[spectableArenaTypes[i]].find(instanceID);
+        if (itr != m_Battlegrounds[spectableArenaTypes[i]].end())
+        {
+            if (itr->second && itr->second->GetStatus() == STATUS_IN_PROGRESS)
+            {
+                itr->second->AddSpectator(pl);
+                return true;
+            }
+            else
+            {
+                // process errors
+                return false;
+            }
+            break;
+        }
+    }
+
+    return false;
+}
+
+void BattlegroundMgr::RemoveArenaSpectator(Player* pl)
+{
+    if (!pl)
+        return;
+
+    uint32 instanceID = pl->GetSpectatorInstanceId();
+
+    for (uint32 i = 0; i < sizeof(spectableArenaTypes)/sizeof(BattlegroundTypeId); i++)
+    {
+        BattlegroundSet::iterator itr = m_Battlegrounds[spectableArenaTypes[i]].find(instanceID);
+        if (itr != m_Battlegrounds[spectableArenaTypes[i]].end())
+        {
+            if (itr->second)
+            {
+                itr->second->RemoveSpectator(pl);
+                pl->SetSpectatorData(0, 0);
+                return;
+            }
+        }
+    }
+}
+
 uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
 {
     if (IsArenaType(bgTypeId))

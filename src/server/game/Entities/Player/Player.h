@@ -2767,11 +2767,23 @@ class Player : public Unit, public GridObject<Player>
         // Only for use in current Update tick! Pointer can (and probably will) expire with next spellcast
         uint64 GetHistorySpell(uint8 slot);
 
+        void SetSpectatorData(uint32 instanceId, uint32 joinTime)
+        {
+            m_spectatorInstanceId = instanceId;
+            m_spectatorJoinTime = joinTime;
+        }
+        uint32 GetSpectatorInstanceId() const { return m_spectatorInstanceId; };
+        uint32 GetSpectatorJoinTime() const { return m_spectatorJoinTime; };
+        void ViolateSpectatorWaitTime();
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
         float m_powerFraction[MAX_POWERS];
         uint32 m_contestedPvPTimer;
+
+        uint32 m_spectatorInstanceId;
+        uint32 m_spectatorJoinTime;
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];

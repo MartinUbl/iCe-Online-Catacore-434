@@ -531,6 +531,12 @@ class ChatHandler
         bool HandleServerSetLogFileLevelCommand(const char* args);
         bool HandleServerSetDiffTimeCommand(const char* args);
 
+        bool HandleSpectatorListCommand(const char* args);
+        bool HandleSpectatorJoinCommand(const char* args);
+        bool HandleSpectatorLeaveCommand(const char* args);
+        bool HandleSpectatorStateCommand(const char* args);
+        bool HandleSpectatorWaitTimeCommand(const char* args);
+
         bool HandleTeleCommand(const char * args);
         bool HandleTeleAddCommand(const char * args);
         bool HandleTeleDelCommand(const char * args);

@@ -475,6 +475,9 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
 
+    m_spectatorInstanceId = 0;
+    m_spectatorJoinTime = 0;
+
     m_trade = NULL;
 
     m_cinematic = 0;
@@ -1598,6 +1601,18 @@ void Player::Update(uint32 p_time)
 
     // group update
     SendUpdateToOutOfRangeGroupMembers();
+
+    // process joining as arena spectator
+    if (m_spectatorInstanceId && m_spectatorJoinTime)
+    {
+        if (m_spectatorJoinTime <= time(NULL))
+        {
+            if (!sBattlegroundMgr->AddArenaSpectator(this, m_spectatorInstanceId))
+                m_spectatorInstanceId = 0;
+
+            m_spectatorJoinTime = 0;
+        }
+    }
 
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && !pet->isPossessed())
@@ -22147,6 +22162,12 @@ void Player::InitDisplayIds()
     }
 }
 
+void Player::ViolateSpectatorWaitTime()
+{
+    if (m_spectatorJoinTime > 0 && m_spectatorInstanceId)
+        sBattlegroundMgr->RemoveArenaSpectator(this);
+}
+
 inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore)
 {
     ItemPosCountVec vDest;
@@ -23210,6 +23231,26 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
     // Always can see self
     if (m_mover == u || this == u)
         return true;
+
+    if (InArena() && u->GetTypeId() == TYPEID_PLAYER)
+    {
+        // arena spectators can't see each other
+        if (GetSpectatorInstanceId() > 0 && u->ToPlayer()->GetSpectatorInstanceId() > 0)
+            return false;
+
+        // arena players can't see spectators
+        if (GetSpectatorInstanceId() == 0 && u->ToPlayer()->GetSpectatorInstanceId() > 0)
+            return false;
+
+        // arena spectators can see players
+        if (GetSpectatorInstanceId() > 0 && u->ToPlayer()->GetSpectatorInstanceId() == 0)
+        {
+            // except they're in stealth/invisibility/..
+            if (u->m_invisibilityMask || u->GetVisibility() == VISIBILITY_OFF || u->GetVisibility() == VISIBILITY_GROUP_STEALTH)
+                return false;
+            return true;
+        }
+    }
 
     // Arena visibility before arena start
     if (InArena() && GetBattleground()->GetStatus() == STATUS_WAIT_JOIN)

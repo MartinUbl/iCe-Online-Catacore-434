@@ -542,6 +542,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                 _player->CleanupAfterTaxiFlight();
             }
 
+            // reset spectator data to avoid assuming player as spectator
+            _player->SetSpectatorData(0, 0);
+
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player, queueSlot, STATUS_IN_PROGRESS, _player->GetBattlegroundQueueJoinTime(bgTypeId), bg->GetElapsedTime(), bg->GetArenaType());
             _player->GetSession()->SendPacket(&data);
             // remove battleground queue status from BGmgr

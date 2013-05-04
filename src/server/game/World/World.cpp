@@ -1083,6 +1083,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ARENA_START_MATCHMAKER_RATING]              = sConfig->GetIntDefault ("Arena.ArenaStartMatchmakerRating", 1500);
     m_bool_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = sConfig->GetBoolDefault("Arena.ArenaSeason.InProgress", true);
     m_bool_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = sConfig->GetBoolDefault("ArenaLog.ExtendedInfo", false);
+    m_bool_configs[CONFIG_ARENA_SPECTATOR_ENABLE]                    = sConfig->GetBoolDefault("Arena.Spectator.Enable", false);
+    m_int_configs[CONFIG_ARENA_SPECTATOR_WAITTIME]                   = sConfig->GetIntDefault ("Arena.Spectator.WaitTime", 10);
 
     m_bool_configs[CONFIG_RATED_BATTLEGROUND_ENABLED]                = sConfig->GetBoolDefault("Battleground.Rated.Enabled", true);
     m_int_configs[CONFIG_RATED_BATTLEGROUND_WEEKS_IN_ROTATION]       = sConfig->GetIntDefault("Battleground.Rated.WeeksInRotation", 3);

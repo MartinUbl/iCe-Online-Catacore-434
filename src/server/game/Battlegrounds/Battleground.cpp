@@ -564,6 +564,17 @@ inline void Battleground::_ProcessLeave(uint32 diff)
             RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
             // do not change any battleground's private variables
         }
+
+        // kick also spectators if any
+        std::set<uint64>::iterator sitr, snext;
+        for (sitr = m_Spectators.begin(); sitr != m_Spectators.end(); sitr = snext)
+        {
+            snext = sitr;
+            ++snext;
+            //itr is erased here!
+            RemoveSpectator(*sitr);
+            // do not change any battleground's private variables
+        }
     }
 }
 
@@ -2058,6 +2069,45 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
         if (Pet* pet = plr->GetPet())
             pet->GivePetXP(xp);
     }
+}
+
+void Battleground::AddSpectator(Player* pl)
+{
+    // cannot spectate own arena
+    if (m_Players.find(pl->GetGUID()) == m_Players.end())
+    {
+        // use mechanism like in bg queue invites
+        pl->SetBattlegroundEntryPoint();
+        pl->SetBattlegroundId(GetInstanceID(), GetTypeID());
+
+        pl->TeleportTo(GetMapId(), m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0], 0, false);
+    }
+}
+
+void Battleground::RemoveSpectator(Player* pl)
+{
+    if (m_Players.find(pl->GetGUID()) == m_Players.end())
+    {
+        pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
+        pl->SetBGTeam(0);
+
+        if (m_Spectators.find(pl->GetGUID()) != m_Spectators.end())
+        {
+            RemovePlayerAtLeave(pl->GetGUID(), true, true);
+            m_Spectators.erase(pl->GetGUID());
+        }
+    }
+}
+
+void Battleground::RemoveSpectator(uint64 guid)
+{
+    if (m_Spectators.find(guid) == m_Spectators.end())
+        return;
+
+    if (Player* pl = sObjectMgr->GetPlayer(guid))
+        RemoveSpectator(pl);
+    else
+        m_Spectators.erase(guid);
 }
 
 void Battleground::RatedBattlegroundWon(Player *player)
