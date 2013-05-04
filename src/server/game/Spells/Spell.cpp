@@ -3060,6 +3060,23 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
         if (!unitList.empty())
         {
+            // spectators in arena shouldn't be hit by any spell
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena())
+            {
+                Player* pl = NULL;
+                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                {
+                    if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                        continue;
+
+                    pl = (*itr)->ToPlayer();
+                    if (pl->GetSpectatorInstanceId() > 0)
+                        itr = unitList.erase(itr);
+                    else
+                        ++itr;
+                }
+            }
+
             // Special target selection for smart heals and energizes
             uint32 maxSize = 0;
             int32 power = -1;
