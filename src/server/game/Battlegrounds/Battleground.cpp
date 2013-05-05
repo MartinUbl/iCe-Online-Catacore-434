@@ -2079,6 +2079,8 @@ void Battleground::AddSpectator(Player* pl)
         // use mechanism like in bg queue invites
         pl->SetBattlegroundEntryPoint();
         pl->SetBattlegroundId(GetInstanceID(), GetTypeID());
+        pl->addUnitState(UNIT_STAT_UNATTACKABLE);
+        pl->addUnitState(UNIT_STAT_ISOLATED);
 
         pl->TeleportTo(GetMapId(), m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0], 0, false);
     }
@@ -2090,6 +2092,8 @@ void Battleground::RemoveSpectator(Player* pl)
     {
         pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
         pl->SetBGTeam(0);
+        pl->clearUnitState(UNIT_STAT_UNATTACKABLE);
+        pl->clearUnitState(UNIT_STAT_ISOLATED);
 
         if (m_Spectators.find(pl->GetGUID()) != m_Spectators.end())
         {
