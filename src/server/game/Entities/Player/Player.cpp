@@ -5970,6 +5970,21 @@ float Player::OCTRegenMPPerSpirit()
     return regen;
 }
 
+float Player::OCTHpPerStamina()
+{
+    uint8 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level > GT_MAX_LEVEL)
+        level = GT_MAX_LEVEL;
+
+    GtOCTHpPerStaminaEntry const *entry = sGtOCTHpPerStaminaStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    if (!entry)
+        return 10.0f;
+
+    return entry->ratio;
+}
+
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
 {
     m_baseRatingValue[cr]+=(apply ? value : -value);

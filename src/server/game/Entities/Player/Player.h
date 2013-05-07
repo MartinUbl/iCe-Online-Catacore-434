@@ -2039,6 +2039,7 @@ class Player : public Unit, public GridObject<Player>
         void  GetDodgeFromAgility(float &diminishing, float &nondiminishing);
         float GetSpellCritFromIntellect();
         float OCTRegenMPPerSpirit();
+        float OCTHpPerStamina();
         float GetRatingCoefficient(CombatRating cr) const;
         float GetRatingBonusValue(CombatRating cr) const;
         uint32 GetBaseSpellPowerBonus() { return m_spellPowerFromIntellect + m_baseSpellPower; }

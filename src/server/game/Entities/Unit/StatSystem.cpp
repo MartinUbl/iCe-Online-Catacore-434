@@ -279,7 +279,7 @@ float Player::GetHealthBonusFromStamina()
     float baseStam = stamina < 20 ? stamina : 20;
     float moreStam = stamina - baseStam;
 
-    return baseStam + (moreStam*14.0f);
+    return baseStam + (moreStam * OCTHpPerStamina());
 }
 
 float Player::GetManaBonusFromIntellect()
