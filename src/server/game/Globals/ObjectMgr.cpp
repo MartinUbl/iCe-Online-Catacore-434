@@ -3241,82 +3241,35 @@ void ObjectMgr::LoadPlayerInfo()
     // Loading levels data (class only dependent)
     sLog->outString("Loading Player Create Level HP/Mana Data...");
     {
-        //                                                 0      1      2       3
-        QueryResult result  = WorldDatabase.Query("SELECT class, level, basehp, basemana FROM player_classlevelstats");
-
         uint32 count = 0;
 
-        if (!result)
+        for (uint8 chrClass = 0; chrClass < MAX_CLASSES; chrClass++)
         {
-            sLog->outString();
-            sLog->outString(">> Loaded %u level health/mana definitions", count);
-            sLog->outErrorDb("Error loading `player_classlevelstats` table or empty table.");
-            exit(1);
-        }
-
-        do
-        {
-            Field* fields = result->Fetch();
-
-            uint32 current_class = fields[0].GetUInt32();
-            if (current_class >= MAX_CLASSES)
-            {
-                sLog->outErrorDb("Wrong class %u in `player_classlevelstats` table, ignoring.",current_class);
+            // skip non existed classes
+            if (!sChrClassesStore.LookupEntry(chrClass))
                 continue;
-            }
 
-            uint8 current_level = fields[1].GetUInt8();      // Can't be > than STRONG_MAX_LEVEL (hardcoded level maximum) due to var type
-            if (current_level > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-            {
-                sLog->outDetail("Unused (> MaxPlayerLevel in worldserver.conf) level %u in `player_classlevelstats` table, ignoring.",current_level);
-                ++count;                                    // make result loading percent "expected" correct in case disabled detail mode for example.
-                continue;
-            }
-
-            PlayerClassInfo* pClassInfo = &playerClassInfo[current_class];
-
+            PlayerClassInfo *pClassInfo = &playerClassInfo[chrClass];
             if (!pClassInfo->levelInfo)
-                pClassInfo->levelInfo = new PlayerClassLevelInfo[sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)];
+                pClassInfo->levelInfo = new PlayerClassLevelInfo[GT_MAX_LEVEL];
 
-            PlayerClassLevelInfo* pClassLevelInfo = &pClassInfo->levelInfo[current_level-1];
+            for (uint32 chrLevel = 1; chrLevel <= GT_MAX_LEVEL; chrLevel++)
+            {
+                uint32 index = (chrClass - 1) * GT_MAX_LEVEL + chrLevel - 1;
+                GtOCTBaseHPByClassEntry const *hpEntry = sGtOCTBaseHPByClassStore.LookupEntry(index);
+                GtOCTBaseMPByClassEntry const *mpEntry = sGtOCTBaseMPByClassStore.LookupEntry(index);
+                ASSERT(hpEntry);
+                ASSERT(mpEntry);
 
-            pClassLevelInfo->basehealth = fields[2].GetUInt16();
-            pClassLevelInfo->basemana   = fields[3].GetUInt16();
-
-            
-            ++count;
+                PlayerClassLevelInfo *pClassLevelInfo = &pClassInfo->levelInfo[chrLevel-1];
+                pClassLevelInfo->basehealth = hpEntry->hp;
+                pClassLevelInfo->basemana = mpEntry->mp;
+                count++;
+            }
         }
-        while (result->NextRow());
 
         sLog->outString();
         sLog->outString(">> Loaded %u level health/mana definitions", count);
-    }
-
-    // Fill gaps and check integrity
-    for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-    {
-        // skip non existed classes
-        if (!sChrClassesStore.LookupEntry(class_))
-            continue;
-
-        PlayerClassInfo* pClassInfo = &playerClassInfo[class_];
-
-        // fatal error if no level 1 data
-        if (!pClassInfo->levelInfo || pClassInfo->levelInfo[0].basehealth == 0)
-        {
-            sLog->outErrorDb("Class %i Level 1 does not have health/mana data!",class_);
-            exit(1);
-        }
-
-        // fill level gaps
-        for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
-        {
-            if (pClassInfo->levelInfo[level].basehealth == 0)
-            {
-                sLog->outErrorDb("Class %i Level %i does not have health/mana data. Using stats data of level %i.",class_,level+1, level);
-                pClassInfo->levelInfo[level] = pClassInfo->levelInfo[level-1];
-            }
-        }
     }
 
     // Loading levels data (class/race dependent)

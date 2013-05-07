@@ -1102,6 +1102,18 @@ struct GtChanceToSpellCritEntry
     float    ratio;
 };
 
+struct GtOCTBaseHPByClassEntry
+{
+    uint32  Id;
+    float   hp;
+};
+
+struct GtOCTBaseMPByClassEntry
+{
+    uint32  Id;
+    float   mp;
+};
+
 struct GtOCTClassCombatRatingScalarEntry
 {
     uint32   Id;
