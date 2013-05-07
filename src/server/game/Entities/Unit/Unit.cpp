@@ -9718,8 +9718,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         {
             if (HasAura(96268))
                 return false;
+
+            // can't trigger without talent
+            if (!HasAura(96269) && !HasAura(96270))
+                return false;
+
             Player *pl = ToPlayer();
-            if (!pl)
+            if (!pl || pl->getClass() != CLASS_DEATH_KNIGHT)
                 break;
 
             for (uint32 i = 0; i < MAX_RUNES; ++i)
