@@ -834,6 +834,26 @@ void Spell::SelectSpellTargets()
         }
     }
 
+    /* explicit target conditions here
+     * typically spells with "when more that X targets are hit, do XYZ" */
+
+    // Divine Storm
+    if (m_spellInfo->Id == 53385)
+    {
+        uint32 targetCount = 0;
+        for (std::list<TargetInfo>::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+            if ((*itr).effectMask & (1 << EFFECT_2))
+                targetCount++;
+
+        // if didn't hit more than 4 targets, do not energize
+        if (targetCount < 4)
+        {
+            for (std::list<TargetInfo>::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                if ((*itr).effectMask & (1 << EFFECT_0))
+                    (*itr).effectMask &= ~(1 << EFFECT_0);
+        }
+    }
+
     if (m_targets.HasDst())
     {
         if (m_targets.HasTraj())
