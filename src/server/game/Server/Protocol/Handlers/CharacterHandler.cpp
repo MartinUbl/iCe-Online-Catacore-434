@@ -821,6 +821,10 @@ void WorldSession::HandleWorldLoginOpcode(WorldPacket& recv_data)
             // Send update for players in arena
             if (pl->GetBattleground() && pl->GetBattleground()->isArena())
                 pl->UpdateObjectVisibility(true);
+
+            // Also resync runes and their types
+            if (pl->getClass() == CLASS_DEATH_KNIGHT)
+                pl->ResyncRunes(MAX_RUNES);
         }
     }
 }
