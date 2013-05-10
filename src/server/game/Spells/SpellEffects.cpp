@@ -427,6 +427,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             return;
                         break;
                     }
+                    case 98649: // Meltdown (Lord Rhyolith encounter)
+                    case 101646:
+                    case 101647:
+                    case 101648:
+                    {
+                        damage = m_caster->GetHealth();
+                        apply_direct_bonus = false;
+                        break;
+                    }
                     case 89667: // lightning rod (al'akir)
                     case 93293:
                     case 93294:

@@ -4146,6 +4146,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 16;
             count++;
             break;
+        case 98552: // Summon Spark of Rhyoloth
+        case 98136: // Summon Fragment of Rhyolith
+            spellInfo->DurationIndex = 21; // unlimited - despawned by AI
+            break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
             spellInfo->EffectRadiusIndex[1] = 8;

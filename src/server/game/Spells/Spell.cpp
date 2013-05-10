@@ -2488,6 +2488,17 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
             // must has dst, no need to set flag
             Position pos = m_targets.m_dstPos;
+
+            if (m_spellInfo->Id == 98010) // Volcanic Birth (Firelands)
+            {
+                // summon creature somewhere on his platform (cannot be identified different way)
+                dist  = ((float)urand(0,340))/10.0f;
+                angle = M_PI*((float)urand(0,360))/180.0f;
+                pos.m_positionX = -374.337006f;
+                pos.m_positionY = -318.489990f;
+                pos.m_positionZ =  100.413002f;
+            }
+
             m_caster->MovePosition(pos, dist, angle);
             m_targets.modDst(pos);
             break;
@@ -3134,6 +3145,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                 else
                                     ++itr;
                             }
+                            break;
+                        case 98493: // Heated Volcano
+                            maxSize = 1;
                             break;
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
