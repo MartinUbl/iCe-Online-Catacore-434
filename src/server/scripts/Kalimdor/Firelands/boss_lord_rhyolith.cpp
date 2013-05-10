@@ -682,7 +682,7 @@ public:
                     me->RemoveAurasDueToSpell(SPELL_ERUPTION);
 
                     // if it's in range, spawn crater and despawn us
-                    Creature* pCrater = pBoss->SummonCreature(NPC_CRATER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    /*Creature* pCrater = */pBoss->SummonCreature(NPC_CRATER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
                     /*if (pCrater)
                         pCrater->CastSpell(pCrater, SPELL_VOLCANIC_ERUPTION, true);*/
 
