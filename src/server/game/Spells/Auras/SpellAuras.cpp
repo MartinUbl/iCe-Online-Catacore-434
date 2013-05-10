@@ -1470,6 +1470,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if(caster && caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->HasSpellCooldown(31935))
                         caster->ToPlayer()->RemoveSpellCooldown(31935, true);
                 }
+                else if (GetId() == 642 || GetId() == 1022) // Divine Shield and Hand of Protection
+                {
+                    // causes Forbearance
+                    if (caster && target)
+                        caster->CastSpell(target, 25771, true);
+                }
                 break;
             case SPELLFAMILY_SHAMAN:
                 {
