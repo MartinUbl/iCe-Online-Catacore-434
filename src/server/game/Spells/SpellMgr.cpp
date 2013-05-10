@@ -4617,6 +4617,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 31230: // Cheat Death (rank 3)
             spellInfo->SpellCooldownsId = 398;
             break;
+        case 1953: // Blink
+            spellInfo->DurationIndex = 37;
+            break;
         case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
             count++;
