@@ -9309,95 +9309,17 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 {
     // data depends on zoneid/mapid...
     Battleground* bg = GetBattleground();
-    uint16 NumberOfFields = 0;
     uint32 mapid = GetMapId();
     OutdoorPvP * pvp = sOutdoorPvPMgr->GetOutdoorPvPToZoneId(zoneid);
 
     sLog->outDebug("Sending SMSG_INIT_WORLD_STATES to Map: %u, Zone: %u", mapid, zoneid);
 
-    // may be exist better way to do this...
-    switch (zoneid)
-    {
-        case 0:
-        case 1:
-        case 4:
-        case 8:
-        case 10:
-        case 11:
-        case 12:
-        case 36:
-        case 38:
-        case 40:
-        case 41:
-        case 51:
-        case 267:
-        case 1519:
-        case 1537:
-        case 2257:
-        case 2918:
-            NumberOfFields = 8;
-            break;
-        case 139:
-            NumberOfFields = 41;
-            break;
-        case 1377:
-            NumberOfFields = 15;
-            break;
-        case 2597:
-            NumberOfFields = 83;
-            break;
-        case 3277:
-            NumberOfFields = 16;
-            break;
-        case 5031:
-            NumberOfFields = 18;
-            break;
-        case 3358:
-        case 3820:
-            NumberOfFields = 40;
-            break;
-        case 3483:
-            NumberOfFields = 27;
-            break;
-        case 3518:
-            NumberOfFields = 39;
-            break;
-        case 3519:
-            NumberOfFields = 38;
-            break;
-        case 3521:
-            NumberOfFields = 37;
-            break;
-        case 3698:
-        case 3702:
-        case 3968:
-            NumberOfFields = 11;
-            break;
-        case 4378:
-            NumberOfFields = 11;
-            break;
-        case 3703:
-            NumberOfFields = 11;
-            break;
-        case 4384:
-            NumberOfFields = 30;
-            break;
-        case 4710:
-            NumberOfFields = 28;
-            break;
-        case 5449:
-            NumberOfFields = 32;
-            break;
-         default:
-            NumberOfFields = 12;
-            break;
-    }
-
-    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+(NumberOfFields*8)));
+    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+8*8));
     data << uint32(mapid);                                  // mapid
     data << uint32(zoneid);                                 // zone id
     data << uint32(areaid);                                 // area id, new 2.1.0
-    data << uint16(NumberOfFields);                         // count of uint64 blocks
+    size_t countPos = data.wpos();
+    data << uint16(0);                                      // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
     data << uint32(0x8d6) << uint32(0x0);                   // 3
@@ -9941,6 +9863,10 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             data << uint32(0x915) << uint32(0x0);           // 10
             break;
     }
+
+    uint16 length = (data.wpos() - countPos) / 8;
+    data.put<uint16>(countPos, length);
+
     GetSession()->SendPacket(&data);
     SendBGWeekendWorldStates();
 }
