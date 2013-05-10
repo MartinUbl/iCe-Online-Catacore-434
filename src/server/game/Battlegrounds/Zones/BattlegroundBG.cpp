@@ -318,6 +318,12 @@ void BattlegroundBG::FillInitialWorldStates(WorldPacket& data)
 
     // other unknown
     data << uint32(0x745) << uint32(0x2);           // 1861 unk
+
+    for (uint8 i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
+        data << uint32(BG_BG_OP_NODESTATES[i] + plusArray[m_Nodes[i]]) << uint32(1);
+
+    for (uint8 i = 0; i < BG_BG_DYNAMIC_NODES_COUNT; ++i)
+        data << uint32(BG_BG_OP_NODEICONS[i] + plusArray[m_Nodes[i]]) << uint32(1);
 }
 
 void BattlegroundBG::_SendNodeUpdate(uint8 node)
