@@ -936,6 +936,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.612f*0.5f;
                     apply_direct_bonus = false;
+
+                    Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!pOwner)
+                        break;
+
+                    int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
+                    if (bonuspct != 0)
+                        damage *= 1.0f+((float)bonuspct/100.0f);
                 }
                 // Whiplash (succubus)
                 else if (m_spellInfo->Id == 6360 && m_caster->ToPet())
