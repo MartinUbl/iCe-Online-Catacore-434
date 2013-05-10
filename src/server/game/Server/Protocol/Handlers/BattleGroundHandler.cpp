@@ -294,8 +294,8 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
     if (!bg)                                                 // can't be received if player not in battleground
         return;
 
-    uint32 acount = 0;
-    uint32 hcount = 0;
+    uint32 unkcount = 0;
+    uint32 flaggercount = 0;
     Player *aplr = NULL;
     Player *hplr = NULL;
 
@@ -303,14 +303,14 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
     {
         aplr = ObjectAccessor::FindPlayer(guid);
         if (aplr)
-            ++acount;
+            flaggercount++;
     }
 
     if (uint64 guid = bg->GetFlagPickerGUID(TEAM_HORDE))
     {
         hplr = ObjectAccessor::FindPlayer(guid);
         if (hplr)
-            ++hcount;
+            flaggercount++;
     }
 
     ObjectGuid aguid = aplr ? aplr->GetGUID() : 0;
@@ -318,21 +318,33 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
 
     WorldPacket data(SMSG_BATTLEFIELD_PLAYER_POSITIONS);
 
-    data.WriteBits(acount, 22);
-    for (uint8 i = 0; i < acount; i++)
-    {
-        data.WriteBit(aguid[3]);
-        data.WriteBit(aguid[5]);
-        data.WriteBit(aguid[1]);
-        data.WriteBit(aguid[6]);
-        data.WriteBit(aguid[7]);
-        data.WriteBit(aguid[0]);
-        data.WriteBit(aguid[2]);
-        data.WriteBit(aguid[4]);
-    }
+    data.WriteBits(unkcount, 22);
 
-    data.WriteBits(hcount, 22);
-    for (uint8 i = 0; i < hcount; i++)
+    /*for (uint8 i = 0; i < unkcount; i++)
+    {
+        data.WriteBit(unkguid[3]);
+        data.WriteBit(unkguid[5]);
+        data.WriteBit(unkguid[1]);
+        data.WriteBit(unkguid[6]);
+        data.WriteBit(unkguid[7]);
+        data.WriteBit(unkguid[0]);
+        data.WriteBit(unkguid[2]);
+        data.WriteBit(unkguid[4]);
+    }*/
+
+    data.WriteBits(flaggercount, 22);
+    if (aplr)
+    {
+        data.WriteBit(aguid[6]);
+        data.WriteBit(aguid[5]);
+        data.WriteBit(aguid[4]);
+        data.WriteBit(aguid[7]);
+        data.WriteBit(aguid[2]);
+        data.WriteBit(aguid[1]);
+        data.WriteBit(aguid[0]);
+        data.WriteBit(aguid[3]);
+    }
+    if (hplr)
     {
         data.WriteBit(hguid[6]);
         data.WriteBit(hguid[5]);
@@ -346,7 +358,20 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
 
     data.FlushBits();
 
-    for (uint8 i = 0; i < hcount; i++)
+    if (aplr)
+    {
+        data.WriteByteSeq(aguid[2]);
+        data.WriteByteSeq(aguid[1]);
+        data << float(aplr->GetPositionY());
+        data.WriteByteSeq(aguid[5]);
+        data.WriteByteSeq(aguid[4]);
+        data.WriteByteSeq(aguid[7]);
+        data.WriteByteSeq(aguid[0]);
+        data.WriteByteSeq(aguid[6]);
+        data.WriteByteSeq(aguid[3]);
+        data << float(aplr->GetPositionX());
+    }
+    if (hplr)
     {
         data.WriteByteSeq(hguid[2]);
         data.WriteByteSeq(hguid[1]);
@@ -360,19 +385,19 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_dat
         data << float(hplr->GetPositionX());
     }
 
-    for (uint8 i = 0; i < acount; i++)
+    /*for (uint8 i = 0; i < unkcount; i++)
     {
-        data.WriteByteSeq(aguid[6]);
-        data << float(aplr->GetPositionX());
-        data.WriteByteSeq(aguid[5]);
-        data.WriteByteSeq(aguid[3]);
-        data << float(aplr->GetPositionY());
-        data.WriteByteSeq(aguid[1]);
-        data.WriteByteSeq(aguid[7]);
-        data.WriteByteSeq(aguid[0]);
-        data.WriteByteSeq(aguid[2]);
-        data.WriteByteSeq(aguid[4]);
-    }
+        data.WriteByteSeq(unkguid[6]);
+        data << float(unkplr->GetPositionX());
+        data.WriteByteSeq(unkguid[5]);
+        data.WriteByteSeq(unkguid[3]);
+        data << float(unkplr->GetPositionY());
+        data.WriteByteSeq(unkguid[1]);
+        data.WriteByteSeq(unkguid[7]);
+        data.WriteByteSeq(unkguid[0]);
+        data.WriteByteSeq(unkguid[2]);
+        data.WriteByteSeq(unkguid[4]);
+    }*/
 
     SendPacket(&data);
 }
