@@ -2038,6 +2038,8 @@ void Pet::CastPetAuras(bool current)
     // Demonic Pact raid-wide buff cast, just to make sure we (un)apply it
     if (owner->HasAura(47236))
         CastSpell(this, 53646, true);
+    else
+        RemoveAurasDueToSpell(53646);
 }
 
 void Pet::CastPetAura(PetAura const* aura)
