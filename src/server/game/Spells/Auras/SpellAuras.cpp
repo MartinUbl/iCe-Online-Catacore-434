@@ -1999,20 +1999,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else
                         target->SetReducedThreatPercent(0,0);
                     break;
-                case 50365: //  Improved Blood Presence rank 1
-                    if (apply)
-                    {
-                        int32 bp0 = 10;
-                        if (bp0)
-                            caster->CastCustomSpell(caster, 63611, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
-                    }
-                    else
-                        caster->RemoveAurasDueToSpell(63611);
-                    break;
+                case 50365: // Improved Blood Presence rank 1
                 case 50371: // Improved Blood Presence rank 2
+                    // Improved Blood Presence is handled elsewhere due to exception in spell system
+                    // we apply the aura only to not break anything else and also to have Player::UpdateHaste function called
                     if (apply)
                     {
-                        int32 bp0 = 20;
+                        int32 bp0 = 0;
                         if (bp0)
                             caster->CastCustomSpell(caster, 63611, &bp0, NULL, NULL, true); // Improved Blood Presence bonus
                     }
@@ -2275,11 +2268,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             if (caster->HasAura(50384) || caster->HasAura(50385))
                                 caster->CastCustomSpell(caster, 63621, &bp0, NULL, NULL, true); // Improved Frost Presence bonus
 
-                            // Improved Blood Presence rank 1 / 2 - re-apply again, because if we change presence, this bonus must be removed
-                            if (caster->HasAura(50365))
-                                bp0 = 10;
-                            else if (caster->HasAura(50371))
-                                bp0 = 20;
+                            // Improved Blood Presence is handled elsewhere due to exception in spell system
+                            // we apply the aura only to not break anything else and also to have Player::UpdateHaste function called
+                            bp0 = 0;
 
                             // prevent to overflow
                             if (caster->HasAura(50365) || caster->HasAura(50371))

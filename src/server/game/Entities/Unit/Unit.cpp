@@ -7922,21 +7922,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 // Runic Corruption talent
                 // It suppresses the main function of that passive ability and replaces it by rune regen speed bonus
-                if (HasAura(51462))
+                if (HasAura(51462) || HasAura(51459))
                 {
-                    int32 bp = 100;
-                    if (Aura* pAura = GetAura(51460))
-                    {
-                        pAura->SetMaxDuration(pAura->GetDuration() + 3000);
-                        pAura->RefreshDuration();
-                    }
-                    else
-                        CastCustomSpell(this, 51460, &bp, 0, 0, true);
-                    return true;
-                }
-                else if (HasAura(51459))
-                {
-                    int32 bp = 50;
+                    // Due to exception in spellsystem we only apply the aura in order to Player::UpdateHaste be called
+                    // also use that as "dummy indicator" aura
+                    int32 bp = 0;
                     if (Aura* pAura = GetAura(51460))
                     {
                         pAura->SetMaxDuration(pAura->GetDuration() + 3000);

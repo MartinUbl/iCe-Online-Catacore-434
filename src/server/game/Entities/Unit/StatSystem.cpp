@@ -866,6 +866,28 @@ void Player::UpdateHaste()
 
     float runeRegen = meleeRegen;
 
+    /* Due to exceptions in spellsystem, we need to apply rune regen bonus manually
+     * These exceptions are mainly Improved Blood Presence and Runic Corruption */
+    /* without that, the auras would increase also melee haste, which will result in incredible dps boost*/
+
+    // Improved Blood Presence
+    if (HasAura(48263)) // just in Blood Presence
+    {
+        if (HasAura(50365))
+            runeRegen *= 1.1f;
+        else if (HasAura(50371))
+            runeRegen *= 1.2f;
+    }
+
+    // Runic Corruption
+    if (HasAura(51460))
+    {
+        if (HasAura(51459))
+            runeRegen *= 1.5f;
+        else if (HasAura(51462))
+            runeRegen *= 2.0f;
+    }
+
     SetFloatValue(PLAYER_FIELD_MOD_HASTE, 1.0f / meleeRegen);
     SetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE, 1.0f / rangedRegen);
 
