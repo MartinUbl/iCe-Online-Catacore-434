@@ -2403,7 +2403,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
             Position pos;
             if (cur == TARGET_DEST_CASTER_FRONT_LEAP)
-                m_caster->GetFirstCollisionPosition(pos, dist, angle);
+                m_caster->GetFirstIncrementalCollisionPosition(pos, dist, angle);
             else
                 m_caster->GetNearPosition(pos, dist, angle);
 

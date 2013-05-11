@@ -2734,7 +2734,8 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
             destx -= step * cos(angle);
             desty -= step * sin(angle);
             ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
-            floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+            floor = destz+2.0f;
+            UpdateAllowedPositionZ(destx, desty, floor);
             destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
         }
         // we have correct destz now
@@ -2744,6 +2745,63 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
             break;
         }
     }
+
+    Trinity::NormalizeMapCoord(pos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
+    UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    pos.m_orientation = m_orientation;
+}
+
+void WorldObject::MovePositionToFirstCollisionIncrementally(Position &pos, float dist, float angle)
+{
+    angle += m_orientation;
+    float destx, desty, destz, tmpx, tmpy, startz, ground, floor;
+
+    destx = pos.m_positionX;
+    desty = pos.m_positionY;
+    startz = pos.m_positionZ;
+
+    bool startOutdoors = GetMap()->IsOutdoors(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+
+    ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
+
+    floor = pos.m_positionZ;
+    UpdateAllowedPositionZ(destx, desty, floor);
+    destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+
+    float step = dist/10.0f;
+
+    for (uint8 j = 0; j < 10; ++j)
+    {
+        tmpx = destx + step * cos(angle);
+        tmpy = desty + step * sin(angle);
+
+        ground = GetMap()->GetHeight(GetPhaseMask(), tmpx, tmpy, MAX_HEIGHT, true);
+        floor = destz+2.0f;
+        UpdateAllowedPositionZ(tmpx, tmpy, floor);
+        destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+
+        // collision occured
+        if (VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(),pos.m_positionX,pos.m_positionY,pos.m_positionZ+0.5f,destx,desty,destz+0.5f,destx,desty,destz,-0.5f)
+            // or we are changing indoor/outdoor state
+            || startOutdoors != GetMap()->IsOutdoors(tmpx, tmpy, destz)
+            // or we are dealing with greater Z difference (6 yards, needs adjust?)
+            || (fabs(destz-startz) > 6.0f)
+            // or if we are dealing with some gameobject in way
+            || !GetMap()->isInLineOfSight(pos.m_positionX, pos.m_positionY, pos.m_positionZ, tmpx, tmpy, destz, GetPhaseMask()))
+        {
+            // move back a bit
+            destx -= CONTACT_DISTANCE * cos(angle);
+            desty -= CONTACT_DISTANCE * sin(angle);
+            dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+            break;
+        }
+
+        destx = tmpx;
+        desty = tmpy;
+    }
+
+    pos.Relocate(destx, desty, destz);
 
     Trinity::NormalizeMapCoord(pos.m_positionX);
     Trinity::NormalizeMapCoord(pos.m_positionY);
