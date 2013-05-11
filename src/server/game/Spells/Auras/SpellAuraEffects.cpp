@@ -7688,6 +7688,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 // Glyph of Kill Shot cooldown removal
                 if (caster->HasAura(90967))
                     caster->ToPlayer()->RemoveSpellCooldown(53351, true);
+
+                // Whirlwind target count >= 4
+                if (GetBase()->GetEffect(EFFECT_0) && GetBase()->GetEffect(EFFECT_0)->GetAmount() == 1680)
+                    caster->ToPlayer()->ModifySpellCooldown(1680, -6000, true);
             }
 
             if (m_spellProto->Id == 85474 && caster->GetTypeId() == TYPEID_UNIT) // [DND] Hide text (unused)

@@ -853,6 +853,15 @@ void Spell::SelectSpellTargets()
                     (*itr).effectMask &= ~(1 << EFFECT_0);
         }
     }
+    // Whirlwind
+    else if (m_spellInfo->Id == 1680)
+    {
+        if (m_UniqueTargetInfo.size() >= 4)
+        {
+            int32 bp = 1680;
+            m_caster->CastCustomSpell(m_caster, 77691, &bp, NULL, NULL, true); // dummy cooldown modifier
+        }
+    }
 
     if (m_targets.HasDst())
     {
