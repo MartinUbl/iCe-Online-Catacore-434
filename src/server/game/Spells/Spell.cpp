@@ -2419,6 +2419,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 }
 
                 pos.m_positionZ = m_caster->GetMap()->GetHeight2(pos.m_positionX, pos.m_positionY, pos.m_positionZ+2.0f);
+                m_caster->UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
             }
 
             m_targets.setDst(*m_caster);

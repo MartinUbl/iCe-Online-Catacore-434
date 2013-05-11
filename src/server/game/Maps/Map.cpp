@@ -1641,7 +1641,7 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
     if (const_cast<Map*>(this)->GetGrid(x, y))
     {
         // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeight(PHASEMASK_NORMAL, x, y, z, true, 50.0f);
+        float ground_z = GetHeight(PHASEMASK_NORMAL, x, y, z+2.0f, true, 50.0f);
         if (ground)
             *ground = ground_z;
 

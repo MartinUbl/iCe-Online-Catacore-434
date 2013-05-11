@@ -2568,7 +2568,7 @@ void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float 
 {
     GetNearPoint2D(x,y,distance2d+searcher_size,absAngle);
     z = GetPositionZ();
-    UpdateGroundPositionZ(x,y,z);
+    UpdateAllowedPositionZ(x,y,z);
 
     /*
     // if detection disabled, return first point
@@ -2697,7 +2697,7 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     pos.m_positionY += dist * sin(angle);
     Trinity::NormalizeMapCoord(pos.m_positionX);
     Trinity::NormalizeMapCoord(pos.m_positionY);
-    UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.m_orientation = m_orientation;
 }
 
@@ -2709,7 +2709,8 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     destx = pos.m_positionX + dist * cos(angle);
     desty = pos.m_positionY + dist * sin(angle);
     ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
-    floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+    floor = pos.m_positionZ;
+    UpdateAllowedPositionZ(destx, desty, floor);
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(),pos.m_positionX,pos.m_positionY,pos.m_positionZ+0.5f,destx,desty,destz+0.5f,destx,desty,destz,-0.5f);
@@ -2746,7 +2747,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
 
     Trinity::NormalizeMapCoord(pos.m_positionX);
     Trinity::NormalizeMapCoord(pos.m_positionY);
-    UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.m_orientation = m_orientation;
 }
 
@@ -2904,7 +2905,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                 float ground_z = z;
                 float max_z = canSwim
                     ? GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
-                    : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true)));
+                    : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z+2.0f, true)));
 
                 if (max_z > INVALID_HEIGHT)
                 {
@@ -2916,7 +2917,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             else
             {
-                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z+2.0f, true);
 
                 if (z < ground_z)
                     z = ground_z;
@@ -2938,7 +2939,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             else
             {
-                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z+2.0f, true);
 
                 if (z < ground_z)
                     z = ground_z;
@@ -2946,7 +2947,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             break;
         default:
         {
-            float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+            float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z+2.0f, true);
 
             if(ground_z > INVALID_HEIGHT)
                 z = ground_z;
