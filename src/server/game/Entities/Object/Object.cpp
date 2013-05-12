@@ -2755,11 +2755,12 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
 void WorldObject::MovePositionToFirstCollisionIncrementally(Position &pos, float dist, float angle)
 {
     angle += m_orientation;
-    float destx, desty, destz, tmpx, tmpy, startz, ground, floor;
+    float destx, desty, destz, tmpx, tmpy, startz, lastz, ground, floor;
 
     destx = pos.m_positionX;
     desty = pos.m_positionY;
     startz = pos.m_positionZ;
+    lastz = startz;
 
     bool startOutdoors = GetMap()->IsOutdoors(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
 
@@ -2782,13 +2783,13 @@ void WorldObject::MovePositionToFirstCollisionIncrementally(Position &pos, float
         destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
         // collision occured
-        if (VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(),pos.m_positionX,pos.m_positionY,pos.m_positionZ+0.5f,destx,desty,destz+0.5f,destx,desty,destz,-0.5f)
+        if (VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(),destx,desty,lastz+0.5f,tmpx,tmpy,destz+0.5f,destx,desty,destz,-0.5f)
             // or we are changing indoor/outdoor state
             || startOutdoors != GetMap()->IsOutdoors(tmpx, tmpy, destz)
             // or we are dealing with greater Z difference (6 yards, needs adjust?)
             || (fabs(destz-startz) > 6.0f)
             // or if we are dealing with some gameobject in way
-            || !GetMap()->isInLineOfSight(pos.m_positionX, pos.m_positionY, pos.m_positionZ, tmpx, tmpy, destz, GetPhaseMask()))
+            || !GetMap()->isInLineOfSight(destx, desty, lastz+2.0f, tmpx, tmpy, destz+2.0f, GetPhaseMask()))
         {
             // move back a bit
             destx -= CONTACT_DISTANCE * cos(angle);
@@ -2799,6 +2800,7 @@ void WorldObject::MovePositionToFirstCollisionIncrementally(Position &pos, float
 
         destx = tmpx;
         desty = tmpy;
+        lastz = destz;
     }
 
     pos.Relocate(destx, desty, destz);
