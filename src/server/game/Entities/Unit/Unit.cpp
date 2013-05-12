@@ -15305,7 +15305,15 @@ uint32 Unit::GetPowerIndex(Powers power) const
     if (isPet() && ToPet()->getPetType() == HUNTER_PET)
         classId = CLASS_HUNTER;
 
-    return GetPowerIndexByClass(power, classId);
+    uint32 powerIndex = GetPowerIndexByClass(power, classId);
+    if (powerIndex != MAX_POWERS)
+        return powerIndex;
+
+    if (GetTypeId() != TYPEID_PLAYER)
+        if (power == getPowerType())
+            return 0;
+
+    return MAX_POWERS;
 }
 
 uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
