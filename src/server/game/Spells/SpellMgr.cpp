@@ -4150,6 +4150,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 98136: // Summon Fragment of Rhyolith
             spellInfo->DurationIndex = 21; // unlimited - despawned by AI
             break;
+        case 99845: // Immolation (Rhyolith, Firelands)
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
             spellInfo->EffectRadiusIndex[1] = 8;

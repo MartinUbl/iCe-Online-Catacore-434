@@ -16,6 +16,7 @@
  */
 
 #include "ScriptPCH.h"
+#include "MapManager.h"
 #include "firelands.h"
 
 enum NPCs
@@ -59,6 +60,7 @@ enum Spells
     SPELL_VOLCANIC_BIRTH    = 98010, // spawn at nearby location
     SPELL_ERUPTION          = 98264, // the fire coming out of a volcano top // at unapply it explodes
     SPELL_LAVA_STRIKE       = 98491, // trigger damaging missile
+    SPELL_ERUPTION_DAMAGE   = 98492,
     SPELL_VOLCANIC_WRATH    = 93354, // missile of lava
     SPELL_VOLCANO_SMOKE     = 97699,
     SPELL_LAVA_TUBE         = 98265, // creates a tube, after stepping on active volcano
@@ -109,7 +111,7 @@ public:
             {
                 leftFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
-                pFoot->EnterVehicle(me, -1, false);
+                pFoot->EnterVehicle(me, 0, false);
                 pFoot->clearUnitState(UNIT_STAT_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
@@ -122,7 +124,7 @@ public:
             {
                 rightFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
-                pFoot->EnterVehicle(me, -1, false);
+                pFoot->EnterVehicle(me, 1, false);
                 pFoot->clearUnitState(UNIT_STAT_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
@@ -137,9 +139,12 @@ public:
         uint64 leftFootGUID, rightFootGUID;
 
         uint32 leftDamage, rightDamage, meDamage;
+        uint32 lastDamage;
         uint32 directionPower;
         float direction;
+        float moveAngle;
         uint32 directionUpdateTimer;
+        uint32 movementUpdateTimer;
 
         uint8 phase;
         uint32 concussiveStompTimer;
@@ -161,9 +166,12 @@ public:
             leftDamage  = 0;
             rightDamage = 0;
             meDamage    = 0;
+            lastDamage  = 0;
             direction   = 0.0f;
+            moveAngle   = me->GetOrientation();
             directionPower = 50;
             directionUpdateTimer = 1000;
+            movementUpdateTimer  = 1000;
 
             concussiveStompTimer = 3000;
             activateVolcanoTimer = 8000;
@@ -230,12 +238,16 @@ public:
 
             phase = 1;
 
+            directionUpdateTimer = 1000;
+            movementUpdateTimer  = 1000;
             concussiveStompTimer = 5000;
             activateVolcanoTimer = 10000;
             summonTimer          = 15000;
             lavaCheckTimer       = 1000;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
+            moveAngle            = me->GetOrientation();
+            lastDamage           = 0;
 
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
             if (foot)
@@ -262,7 +274,58 @@ public:
             if (pInstance)
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
+            Unit* foot = Unit::GetUnit(*me, leftFootGUID);
+            if (foot)
+            {
+                foot->SetVisibility(VISIBILITY_ON);
+                foot->CombatStop();
+                foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
+                if (Aura* armor = foot->GetAura(SPELL_OBSIDIAN_ARMOR))
+                    armor->SetStackAmount(80);
+            }
+
+            foot = Unit::GetUnit(*me, rightFootGUID);
+            if (foot)
+            {
+                foot->SetVisibility(VISIBILITY_ON);
+                foot->CombatStop();
+                foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
+                if (Aura* armor = foot->GetAura(SPELL_OBSIDIAN_ARMOR))
+                    armor->SetStackAmount(80);
+            }
+
             ScriptedAI::EnterEvadeMode();
+        }
+
+        void JustDied(Unit* killer)
+        {
+            Unit* foot = Unit::GetUnit(*me, leftFootGUID);
+            if (foot)
+                foot->Kill(foot);
+
+            foot = Unit::GetUnit(*me, rightFootGUID);
+            if (foot)
+                foot->Kill(foot);
+        }
+
+        void UpdateMovement()
+        {
+            moveAngle += direction*(M_PI/7);
+            moveAngle = MapManager::NormalizeOrientation(moveAngle);
+
+            // if too far away, move to the center of platform
+            if (me->GetDistance2d(platformCenter.m_positionX, platformCenter.m_positionY) > 75.0f)
+                moveAngle = me->GetAngle(&platformCenter);
+
+            float x, y, z;
+            //me->GetClosePoint(x, y, z, me->GetObjectSize(), 30.0f, moveAngle);
+            me->GetNearPoint2D(x, y, 30.0f, moveAngle);
+            z = me->GetPositionZ();
+
+            me->SetOrientation(moveAngle);
+            me->GetMotionMaster()->MovementExpired(false);
+            //me->GetMotionMaster()->MovePoint(1, x, y, z);
+            me->GetMotionMaster()->MoveCharge(x, y, z, 2.5f);
         }
 
         void RefreshPowerBar(uint32 now, bool removal)
@@ -354,6 +417,15 @@ public:
                 if (!pInstance)
                     return;
 
+                me->GetMotionMaster()->MovementExpired(false);
+
+                directionUpdateTimer = 3000;
+                movementUpdateTimer = 500;
+
+                // change orientation to allow movement update
+                moveAngle = me->GetAngle(&platformCenter);
+                me->SetFacingTo(moveAngle);
+
                 Map::PlayerList const& plList = pInstance->instance->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                     me->CastSpell((*itr).getSource(), SPELL_MAGMA_SPIT, true);
@@ -365,16 +437,27 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !me->getVictim())
                 return;
 
             // phase switch at 25%
             if (me->GetHealthPct() < 25.0f && phase != 2)
             {
+                // back to normal movement
+                me->GetMotionMaster()->MovementExpired(true);
+                me->GetMotionMaster()->MoveChase(me->getVictim());
+
                 me->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
                 me->SetDisplayId(DISPLAYID_SHATTERED);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, false);
+
+                me->RemoveAurasDueToSpell(SPELL_BALANCE_BAR);
+                if (pInstance)
+                    pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
+
+                me->CastSpell(me, SPELL_IMMOLATION, true);
+
                 Unit* foot = Unit::GetUnit(*me, leftFootGUID);
                 if (foot)
                     foot->SetVisibility(VISIBILITY_OFF);
@@ -394,6 +477,68 @@ public:
             else
                 concussiveStompTimer -= diff;
 
+            if (activateVolcanoTimer <= diff)
+            {
+                std::list<Creature*> volcanoList;
+                GetCreatureListWithEntryInGrid(volcanoList, me, NPC_VOLCANO, 200.0f);
+                for (std::list<Creature*>::iterator itr = volcanoList.begin(); itr != volcanoList.end(); )
+                {
+                    if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE))
+                        itr++;
+                    else
+                        itr = volcanoList.erase(itr);
+                }
+
+                if (volcanoList.size() > 0)
+                {
+                    uint32 randpos = urand(0,volcanoList.size()-1);
+
+                    std::list<Creature*>::iterator itr = volcanoList.begin();
+                    std::advance(itr, randpos);
+                    if (*itr)
+                        me->CastSpell(*itr, SPELL_ACTIVATE_VOLCANO, true);
+                }
+
+                activateVolcanoTimer = 25000;
+            }
+            else
+                activateVolcanoTimer -= diff;
+
+            if (lavaCheckTimer <= diff)
+            {
+                lavaCheckTimer = 1000;
+
+                if (pInstance)
+                {
+                    ZLiquidStatus res = pInstance->instance->getLiquidStatus(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), MAP_ALL_LIQUIDS);
+                    if (res != 0)
+                    {
+                        me->CastSpell(me, SPELL_DRINK_MAGMA, true);
+                        direction = 0.0f;
+                        lavaCheckTimer = 6000;
+                    }
+                }
+            }
+            else
+                lavaCheckTimer -= diff;
+
+            if (magmaDrinkTimer)
+            {
+                if (magmaDrinkTimer <= diff)
+                {
+                    Map::PlayerList const& plList = pInstance->instance->GetPlayers();
+                    for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                        me->CastSpell((*itr).getSource(), SPELL_MAGMA_SPIT, true);
+                    magmaDrinkTimer = 1000;
+                    magmaDrinkCount--;
+
+                    if (magmaDrinkCount == 0)
+                        magmaDrinkTimer = 0;
+                }
+                else
+                    magmaDrinkTimer -= diff;
+            }
+
             if (phase == 1)
             {
                 /* Direction stuff
@@ -403,12 +548,26 @@ public:
                 if (directionUpdateTimer <= diff)
                 {
                     uint32 totaldmg = leftDamage+rightDamage+meDamage;
+
+                    // moving left
+                    if (direction > 0.0f)
+                    {
+                        // would turn more left, but total damage isn't at least 90% of last damage
+                        if (leftDamage > rightDamage && totaldmg < lastDamage*0.9f)
+                            totaldmg = 0;
+                    }
+                    else // moving right
+                    {
+                        if (rightDamage > leftDamage && totaldmg < lastDamage*0.9f)
+                            totaldmg = 0;
+                    }
+
                     if (totaldmg != 0)
                     {
                         if (leftDamage > rightDamage)
-                            direction += (-(((float)leftDamage)/((float)totaldmg)))/10.0f;
+                            direction += ((((float)leftDamage)/((float)totaldmg)))/10.0f;
                         else
-                            direction += ((((float)rightDamage)/((float)totaldmg)))/10.0f;
+                            direction += (-(((float)rightDamage)/((float)totaldmg)))/10.0f;
                     }
                     else
                     {
@@ -422,21 +581,35 @@ public:
                     else if (direction < -1.0f)
                         direction = -1.0f;
 
+                    if (lastDamage = 0)
+                        lastDamage = totaldmg;
+                    else
+                        lastDamage = (lastDamage + totaldmg)/2.0f;
+
                     leftDamage = 0;
                     rightDamage = 0;
                     meDamage = 0;
 
-                    RefreshPowerBar(50+direction*50, false);
+                    RefreshPowerBar(50-direction*50, false);
 
                     directionUpdateTimer = 2000;
                 }
                 else
                     directionUpdateTimer -= diff;
 
+                if (movementUpdateTimer <= diff)
+                {
+                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                        UpdateMovement();
+
+                    movementUpdateTimer = 800;
+                }
+                else
+                    movementUpdateTimer -= diff;
+
                 /* Phase 1 spell stuff */
 
-                /* ENABLE AT DEVELOPMENT END !!!!!! */
-                /*if (summonTimer <= diff)
+                if (summonTimer <= diff)
                 {
                     // summon 1 spark OR 5 fragments, 50/50 chances
                     if (urand(1,4) > 2)
@@ -452,72 +625,12 @@ public:
                     summonTimer = urand(20000, 25000);
                 }
                 else
-                    summonTimer -= diff;*/
-
-                if (activateVolcanoTimer <= diff)
-                {
-                    std::list<Creature*> volcanoList;
-                    GetCreatureListWithEntryInGrid(volcanoList, me, NPC_VOLCANO, 200.0f);
-                    for (std::list<Creature*>::iterator itr = volcanoList.begin(); itr != volcanoList.end(); )
-                    {
-                        if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE))
-                            itr++;
-                        else
-                            itr = volcanoList.erase(itr);
-                    }
-
-                    if (volcanoList.size() > 0)
-                    {
-                        uint32 randpos = urand(0,volcanoList.size()-1);
-
-                        std::list<Creature*>::iterator itr = volcanoList.begin();
-                        std::advance(itr, randpos);
-                        if (*itr)
-                            me->CastSpell(*itr, SPELL_ACTIVATE_VOLCANO, true);
-                    }
-
-                    activateVolcanoTimer = 25000;
-                }
-                else
-                    activateVolcanoTimer -= diff;
-
-                if (lavaCheckTimer <= diff)
-                {
-                    lavaCheckTimer = 1000;
-
-                    if (pInstance)
-                    {
-                        ZLiquidStatus res = pInstance->instance->getLiquidStatus(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), MAP_ALL_LIQUIDS);
-                        if (res != 0)
-                        {
-                            me->CastSpell(me, SPELL_DRINK_MAGMA, true);
-                            lavaCheckTimer = 6000;
-                        }
-                    }
-                }
-                else
-                    lavaCheckTimer -= diff;
-
-                if (magmaDrinkTimer)
-                {
-                    if (magmaDrinkTimer <= diff)
-                    {
-                        Map::PlayerList const& plList = pInstance->instance->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-                            me->CastSpell((*itr).getSource(), SPELL_MAGMA_SPIT, true);
-                        magmaDrinkTimer = 1000;
-                        magmaDrinkCount--;
-
-                        if (magmaDrinkCount == 0)
-                            magmaDrinkTimer = 0;
-                    }
-                    else
-                        magmaDrinkTimer -= diff;
-                }
+                    summonTimer -= diff;
             }
             else if (phase == 2)
             {
-                /* */
+                /* TODO: HC version spell */
+
                 DoMeleeAttackIfReady();
             }
 
@@ -581,9 +694,9 @@ class npc_rhyolith_volcano: public CreatureScript
 public:
     npc_rhyolith_volcano(): CreatureScript("npc_rhyolith_volcano") {}
 
-    struct npc_rhyolith_volcanoAI: public ScriptedAI
+    struct npc_rhyolith_volcanoAI: public Scripted_NoMovementAI
     {
-        npc_rhyolith_volcanoAI(Creature* c): ScriptedAI(c)
+        npc_rhyolith_volcanoAI(Creature* c): Scripted_NoMovementAI(c)
         {
             pInstance = me->GetInstanceScript();
             Reset();
@@ -597,6 +710,8 @@ public:
 
         void Reset()
         {
+            me->setFaction(14);
+            me->SetReactState(REACT_PASSIVE);
             me->CastSpell(me, SPELL_VOLCANO_SMOKE, true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
@@ -662,7 +777,7 @@ public:
                         {
                             itr = targetList.begin();
                             std::advance(itr, urand(0, targetList.size()-1));
-                            me->CastSpell(*itr, SPELL_LAVA_STRIKE, true);
+                            me->CastSpell(*itr, SPELL_LAVA_STRIKE, false);
                             targetList.erase(itr);
                         }
                     }
@@ -973,3 +1088,25 @@ void AddSC_boss_lord_rhyolith()
     new npc_rhyolith_spark();
     new npc_rhyolith_fragment();
 }
+
+/*
+SQL:
+
+UPDATE creature_template SET AIName='', ScriptName='boss_lord_rhyolith', vehicleId=1606 WHERE entry=52558;
+
+UPDATE creature_template SET modelid1=38415, modelid2=0, modelid3=0, modelid4=0, ScriptName='npc_rhyolith_feet' WHERE entry=52577;
+UPDATE creature_template SET modelid1=38416, modelid2=0, modelid3=0, modelid4=0, ScriptName='npc_rhyolith_feet' WHERE entry=53087;
+
+UPDATE creature_template SET modelid1=38054, modelid2=0, modelid3=0, modelid4=0, ScriptName='npc_rhyolith_volcano' WHERE entry=52582;
+UPDATE creature_template SET modelid1=38063, modelid2=0, modelid3=0, modelid4=0, ScriptName='npc_rhyolith_crater' WHERE entry=52866;
+
+UPDATE creature_template SET AIName='', ScriptName='npc_rhyolith_spark' WHERE entry=53211;
+UPDATE creature_template SET AIName='', ScriptName='npc_rhyolith_fragment' WHERE entry=52620;
+
+UPDATE instance_template SET script='instance_firelands' WHERE map=720;
+
+-- lava flow npc
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (950000, 0, 0, 0, 0, 0, 17188, 0, 0, 0, 'Lava Flow', '', '', 0, 88, 88, 0, 14, 14, 0, 0.428571, 1.2, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554560, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 76, 1, 0, 0, 0, 'npc_rhyolith_lava_flow', 15595);
+
+INSERT INTO conditions VALUES (13, 0, 98493, 0, 18, 1, 52582, 0, 0, '', 'Lord Rhyolith - Heated Volcano');
+*/

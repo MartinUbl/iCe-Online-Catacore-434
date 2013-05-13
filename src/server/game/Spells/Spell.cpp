@@ -3177,7 +3177,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         case 98493: // Heated Volcano
-                            maxSize = 1;
+                            unitList.resize(1);
                             break;
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
