@@ -8432,7 +8432,9 @@ void Player::ApplyItemEquipSpell(Item *item, bool apply, bool form_change)
         if (!spellproto)
             continue;
 
-        ApplyEquipSpell(spellproto,item,apply,form_change);
+        //dont allow using transform items in BG/arena
+        if (!GetMap()->IsBattlegroundOrArena() || !spellproto->AppliesAuraType(SPELL_AURA_TRANSFORM))
+            ApplyEquipSpell(spellproto, item, apply, form_change);
     }
 }
 
