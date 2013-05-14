@@ -572,6 +572,7 @@ void AddSC_conclave_of_wind();
 void AddSC_alakir();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_boss_argaloth();
+void AddSC_boss_occuthar();
 void AddSC_instance_baradin_hold();
 void AddSC_magmaw();
 void AddSC_maloriak();
@@ -1215,6 +1216,7 @@ void AddCataclysmScripts()
     AddSC_alakir();
     AddSC_instance_throne_of_the_four_winds();
     AddSC_boss_argaloth();
+    AddSC_boss_occuthar();
     AddSC_instance_baradin_hold();
     AddSC_instance_lost_city_of_the_tolvir();
     AddSC_instance_grim_batol();

@@ -19,6 +19,7 @@ set(scripts_STAT_SRCS
   Maelstrom/BaradinHold/baradin_hold.h
   Maelstrom/BaradinHold/instance_baradin_hold.cpp
   Maelstrom/BaradinHold/boss_argaloth.cpp
+  Maelstrom/BaradinHold/boss_occuthar.cpp
 )
 
 message("  -> Prepared: Maelstrom")

@@ -4131,6 +4131,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 86346: // Colossus Smash
         case 91021: // Find Weakness
         case 89299: case 92953: // Twilight Spit
+        case 96886: // Occu'thar: Focused Fire eyebeam visual dummy aura
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
