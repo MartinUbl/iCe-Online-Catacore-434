@@ -581,7 +581,7 @@ public:
                     else if (direction < -1.0f)
                         direction = -1.0f;
 
-                    if (lastDamage = 0)
+                    if (lastDamage == 0)
                         lastDamage = totaldmg;
                     else
                         lastDamage = (lastDamage + totaldmg)/2.0f;
