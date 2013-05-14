@@ -20031,6 +20031,7 @@ void Player::SaveToDB()
     _SaveEquipmentSets(trans);
     GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
     _SaveBGData(trans);
+    _SaveRatedBGData();
     _SaveCUFProfiles(trans);
 
     CharacterDatabase.CommitTransaction(trans);
