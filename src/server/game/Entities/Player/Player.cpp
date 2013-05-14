@@ -7740,6 +7740,16 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             break;
     }
 
+    // If the map is not battleground map, remove faction force auras used for rated battlegrounds and BG wargames
+    if (Map* pMap = GetMap())
+    {
+        if (!pMap->IsBattleground() && HasAuraType(SPELL_AURA_MOD_FACTION))
+        {
+            RemoveAurasDueToSpell(SPELL_FACTION_HORDE);
+            RemoveAurasDueToSpell(SPELL_FACTION_ALLIANCE);
+        }
+    }
+
     pvpInfo.inNoPvPArea = false;
     bool ForcedSanctuary = false;
 
@@ -11674,6 +11684,7 @@ void Player::SetCurrencyWeekCap(uint32 id, CurrencySource src, uint32 cap)
     PlayerCurrency cur;
     cur.state = PLAYERCURRENCY_NEW;
     cur.totalCount = 0;
+    cur.seasonCount = 0;
     m_currencies[id] = cur;
     itr = m_currencies.find(id);
 
@@ -11700,6 +11711,7 @@ void Player::SetCurrencyWeekCount(uint32 id, CurrencySource src, uint32 count)
     PlayerCurrency cur;
     cur.state = PLAYERCURRENCY_NEW;
     cur.totalCount = 0;
+    cur.seasonCount = 0;
     m_currencies[id] = cur;
     itr = m_currencies.find(id);
 
@@ -23031,6 +23043,10 @@ void Player::SetBattlegroundEntryPoint()
 
 void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
 {
+    // Remove faction override spells
+    RemoveAurasDueToSpell(SPELL_FACTION_HORDE);
+    RemoveAurasDueToSpell(SPELL_FACTION_ALLIANCE);
+
     if (Battleground *bg = GetBattleground())
     {
         // leaving rated bg -> count it as a loose to prevent exploit

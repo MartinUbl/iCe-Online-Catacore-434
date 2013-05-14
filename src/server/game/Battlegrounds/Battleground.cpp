@@ -529,12 +529,21 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                     plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
                     plr->ResetAllPowers();
 
+                    // reapply faction override in rated battlegrounds + wargames if necessarry
+                    if (isRated() || isWargame())
+                    {
+                        if (plr->GetBGTeam() == ALLIANCE && plr->GetTeam() != ALLIANCE)
+                            plr->CastSpell(plr, SPELL_FACTION_ALLIANCE, true);
+                        else if (plr->GetBGTeam() == HORDE && plr->GetTeam() != HORDE)
+                            plr->CastSpell(plr, SPELL_FACTION_HORDE, true);
+                    }
+
                     /* teleport to team start point */
                     /* exclude AV - sometimes causes trouble */
                     if (GetTypeID() != BATTLEGROUND_AV)
                     {
                         float sx, sy, sz, so;
-                        GetTeamStartLoc(plr->GetTeam(), sx, sy, sz, so);
+                        GetTeamStartLoc(plr->GetBGTeam(), sx, sy, sz, so);
                         plr->GetMotionMaster()->MoveJump(sx, sy, sz, 10.0f, 5.0f);
                     }
                 }
@@ -1290,6 +1299,16 @@ void Battleground::AddPlayer(Player* plr)
 
     if (isBattleground() && isRated())
         UpdatePlayerScore(plr, SCORE_BATTLEGROUND_RATING, plr->GetRatedBattlegroundRating());
+
+    // faction override in rated battlegrounds + wargames
+    if (isBattleground() && (isRated() || isWargame()))
+    {
+        // override only when necessary
+        if (plr->GetBGTeam() == ALLIANCE && plr->GetTeam() != ALLIANCE)
+            plr->CastSpell(plr, SPELL_FACTION_ALLIANCE, true);
+        else if (plr->GetBGTeam() == HORDE && plr->GetTeam() != HORDE)
+            plr->CastSpell(plr, SPELL_FACTION_HORDE, true);
+    }
 
     // Log
     sLog->outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
@@ -2116,7 +2135,7 @@ void Battleground::RemoveSpectator(uint64 guid)
 
 void Battleground::RatedBattlegroundWon(Player *player)
 {
-    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetBGTeam() == ALLIANCE ? HORDE : ALLIANCE);
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponent_team_rating - (float)player->GetRatedBattlegroundRating()) / 650.0f));
     float win_mod = ceil((1.0f - chance) * 1000.0f) / 1000.0f;
 
@@ -2129,17 +2148,14 @@ void Battleground::RatedBattlegroundWon(Player *player)
     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, player->GetRatedBattlegroundRating() + rating_change);
     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
 
-    //player->UpdateMaxWeekRating(CP_SOURCE_RATED_BG, 0);
-    //player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)std::ceil(player->GetConquestPointsWeekCap(CP_SOURCE_RATED_BG) / 3.0f) * PLAYER_CURRENCY_PRECISION);
-
-    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)(player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f), CURRENCY_SOURCE_BG);
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)(player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f)/100, CURRENCY_SOURCE_BG);
 
     player->SaveToDB();
 }
 
 void Battleground::RatedBattlegroundLost(Player *player)
 {
-    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
+    uint32 opponent_team_rating = this->GetArenaMatchmakerRating(player->GetBGTeam() == ALLIANCE ? HORDE : ALLIANCE);
     uint32 player_rating = player->GetRatedBattlegroundRating();
 
     float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)player_rating - (float)opponent_team_rating) / 650.0f));

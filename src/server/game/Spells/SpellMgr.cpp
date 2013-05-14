@@ -4835,6 +4835,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = 4862;
             spellInfo->CastingTimeIndex = 16; // 1,5s casting time
             break;
+        case 88172: // Faction Override -> Horde
+        case 88174: // Faction Override -> Alliance
+            spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            break;
         case 89912: // Chakra Flow (Priest T11 4p bonus)
             spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL; // active during Chakra state - do not remove by right-click
             break;

@@ -8296,13 +8296,23 @@ void AuraEffect::HandleAuraModFaction(AuraApplication const *aurApp, uint8 mode,
     {
         target->setFaction(GetMiscValue());
         if (target->GetTypeId() == TYPEID_PLAYER)
-            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+        {
+            if (m_spellProto->Id != SPELL_FACTION_HORDE && m_spellProto->Id != SPELL_FACTION_ALLIANCE)
+                target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+            if (Pet* pPet = target->ToPlayer()->GetPet())
+                pPet->setFaction(GetMiscValue());
+        }
     }
     else
     {
         target->RestoreFaction();
         if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+            if (Pet* pPet = target->ToPlayer()->GetPet())
+                pPet->RestoreFaction();
+        }
     }
 }
 

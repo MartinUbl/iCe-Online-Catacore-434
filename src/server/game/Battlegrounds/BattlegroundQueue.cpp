@@ -313,8 +313,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     GroupsQueueType::iterator group_itr, group_itr_tmp;
     // mostly people with the highest levels are in battlegrounds, thats why
     // we count from MAX_BATTLEGROUND_QUEUES - 1 to 0
-    // variable index removes useless searching in other team's queue
-    uint32 index = (group->Team == HORDE) ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE;
+    int32 index = -1;
 
     // Differ wargame queue from normal queues
     if (m_twink == BATTLEGROUND_WARGAME)
@@ -338,7 +337,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
         {
             //we must check premade and normal team's queue - because when players from premade are joining bg,
             //they leave groupinfo so we can't use its players size to find out index
-            for (uint32 j = index; j < BG_QUEUE_GROUP_TYPES_COUNT; j += BG_QUEUE_NORMAL_ALLIANCE)
+            for (uint32 j = 0; j < BG_QUEUE_GROUP_TYPES_COUNT; j++)
             {
                 for (group_itr_tmp = m_QueuedGroups[bracket_id_tmp][j].begin(); group_itr_tmp != m_QueuedGroups[bracket_id_tmp][j].end(); ++group_itr_tmp)
                 {
@@ -355,7 +354,7 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
         }
     }
     //player can't be in queue without group, but just in case
-    if (bracket_id == -1)
+    if (bracket_id == -1 || index == -1)
     {
         sLog->outError("BattlegroundQueue: ERROR Cannot find groupinfo for player GUID: %u", GUID_LOPART(guid));
         return;
@@ -867,7 +866,7 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         }
     }
 
-    if (bg_template->isRated() && bg_template->isBattleground())
+    if (isRated && bg_template->isBattleground())
     {
         if (sBattlegroundMgr->isTesting())
         {
@@ -1116,8 +1115,15 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
     }
     else if (bg_template->isBattleground() && isRated)
     {
-        if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty() || m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
+        if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].size()+m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].size() <= 1)
             return;
+
+        GroupsQueueType tmpQueue;
+
+        if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty())
+            tmpQueue.insert(tmpQueue.begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end());
+        if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
+            tmpQueue.insert(tmpQueue.begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end());
 
         GroupQueueInfo *firstTeam = NULL;
         GroupQueueInfo *opponentTeam = NULL;
@@ -1131,39 +1137,31 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         if (!arenaRating)
         {
             // first find the group which is longest in queue
-            for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin(); itr != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(); ++itr)
+            for (GroupsQueueType::iterator itr = tmpQueue.begin(); itr != tmpQueue.end(); ++itr)
             {
                 if (!(*itr)->IsInvitedToBGInstanceGUID)
-                {
-                    firstTeam = *itr;
-                    break;
-                }
-            }
-
-            // compare it with the horde's team that is longest in queue
-            for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin(); itr != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(); ++itr)
-            {
-                if (!(*itr)->IsInvitedToBGInstanceGUID && (!firstTeam || (*itr)->JoinTime < firstTeam->JoinTime))
-                {
-                    firstTeam = *itr;
-                    break;
-                }
+                    if (!firstTeam || (*itr)->JoinTime < firstTeam->JoinTime)
+                    {
+                        firstTeam = *itr;
+                        break;
+                    }
             }
         }
         else
         {
             // find the team which is in range with this rating and joined first
-            for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin(); itr != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(); ++itr)
+            for (GroupsQueueType::iterator itr = tmpQueue.begin(); itr != tmpQueue.end(); ++itr)
             {
                 if (!(*itr)->IsInvitedToBGInstanceGUID && ((*itr)->ArenaTeamRating >= minRating || (*itr)->ArenaTeamRating <= maxRating))
-                {
-                    firstTeam = *itr;
-                    break;
-                }
+                    if (!firstTeam || (*itr)->JoinTime < firstTeam->JoinTime)
+                    {
+                        firstTeam = *itr;
+                        break;
+                    }
             }
 
             // compare it with the horde's team that is longest in queue and fits into rating requirement
-            for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin(); itr != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(); ++itr)
+            for (GroupsQueueType::iterator itr = tmpQueue.begin(); itr != tmpQueue.end(); ++itr)
             {
                 if (!(*itr)->IsInvitedToBGInstanceGUID && ((*itr)->ArenaTeamRating >= minRating || (*itr)->ArenaTeamRating <= maxRating)
                     && (!firstTeam || (*itr)->JoinTime < firstTeam->JoinTime))
@@ -1182,18 +1180,17 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
         arenaRating = firstTeam->ArenaTeamRating;
         minRating = std::max(int32(arenaRating - ratingDiff), 0);
         maxRating = arenaRating + ratingDiff;
-        uint32 opponentTeamQueue = (firstTeam->Team == HORDE) ? BG_QUEUE_PREMADE_ALLIANCE : BG_QUEUE_PREMADE_HORDE;
 
         // find the opponent for this team
         bool canIgnoreRatingDiff;
 
-        for (GroupsQueueType::iterator itr = m_QueuedGroups[bracket_id][opponentTeamQueue].begin(); itr != m_QueuedGroups[bracket_id][opponentTeamQueue].end(); ++itr)
+        for (GroupsQueueType::iterator itr = tmpQueue.begin(); itr != tmpQueue.end(); ++itr)
         {
             // only if both teams are long enough in queue, we can ignore the difference
             if ((canIgnoreRatingDiff = ((firstTeam->JoinTime + discardTime) < getMSTime())))
                 canIgnoreRatingDiff = (((*itr)->JoinTime + discardTime) < getMSTime());
 
-            if (!(*itr)->IsInvitedToBGInstanceGUID && ((*itr)->ArenaTeamRating >= minRating || (*itr)->ArenaTeamRating <= maxRating || canIgnoreRatingDiff))
+            if (*itr != firstTeam && !(*itr)->IsInvitedToBGInstanceGUID && ((*itr)->ArenaTeamRating >= minRating || (*itr)->ArenaTeamRating <= maxRating || canIgnoreRatingDiff))
             {
                 opponentTeam = *itr;
                 break;
@@ -1211,10 +1208,10 @@ void BattlegroundQueue::Update(BattlegroundTypeId bgTypeId, BattlegroundBracketI
             return;
         }
 
-        bg->SetArenaMatchmakerRating(firstTeam->Team, firstTeam->ArenaMatchmakerRating);
-        bg->SetArenaMatchmakerRating(opponentTeam->Team, opponentTeam->ArenaMatchmakerRating);
-        InviteGroupToBG(firstTeam, bg, firstTeam->Team);
-        InviteGroupToBG(opponentTeam, bg, opponentTeam->Team);
+        bg->SetArenaMatchmakerRating(ALLIANCE, firstTeam->ArenaMatchmakerRating);
+        bg->SetArenaMatchmakerRating(HORDE, opponentTeam->ArenaMatchmakerRating);
+        InviteGroupToBG(firstTeam, bg, ALLIANCE);
+        InviteGroupToBG(opponentTeam, bg, HORDE);
 
         bg->StartBattleground(m_twink);
     }

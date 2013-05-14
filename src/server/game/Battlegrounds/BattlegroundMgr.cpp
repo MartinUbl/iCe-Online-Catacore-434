@@ -368,7 +368,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             if (bg->isArena())
                 data->WriteBit(bg->GetStatus() == STATUS_IN_PROGRESS);      // show unit frames
             else
-                data->WriteBit(player->GetBGTeam() == ALLIANCE);
+                data->WriteBit(player->GetTeam() == ALLIANCE);
             data->WriteBit(bgGuid[0]);
             data->WriteBit(playerGuid[1]);
             data->WriteBit(bgGuid[3]);
@@ -639,7 +639,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg,
     data->FlushBits();
     data->PutBits<int32>(count_pos, count, 21);              // Number of Players
 
-    if (isArena)                                             // arena TODO : Fix Order on Rated Implementation
+    if (isRated)                                             // arena TODO : Fix Order on Rated Implementation
     {
         *data << uint32(bg->m_ArenaTeamMMR[playerTeam]);
         *data << uint32(0);

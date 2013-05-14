@@ -671,7 +671,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         if (ginfo.IsInvitedToBGInstanceGUID)
         {
             bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
-            if (!bg)
+            if (!bg || (_player->InBattleground() && _player->GetBattleground() == bg))
                 continue;
             uint32 remainingTime = getMSTimeDiff(getMSTime(), ginfo.RemoveInviteTime);
             // send status invited to Battleground
@@ -681,7 +681,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         else
         {
             bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
-            if (!bg)
+            if (!bg || (_player->InBattleground() && _player->GetBattleground() == bg))
                 continue;
 
             // expected bracket entry
@@ -952,14 +952,14 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
     uint32 current_CP = _player->GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG);
     uint32 CP_cap = _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG);
     uint32 CP_for_win = (uint32)std::ceil(_player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f);
-
+    sLog->outString("rating: %u",rating);
     WorldPacket data(SMSG_RATED_BATTLEFIELD_INFO, 5 * 4 + 1);
+    data << uint32(CP_for_win/100);     // conquest points for win
+    data << uint8(unk_byte);            // unk byte, always 3
     data << uint32(rating);             // rating
-    data << uint8(3);                   // unk byte, always 3
-    data << uint32(0);                  // unk
     data << uint32(0);                  // unk
     data << uint32(CP_cap);             // conquest point weekly cap
-    data << uint32(CP_for_win);         // conquest points for win
+    data << uint32(0);                  // unk
     data << uint32(0);                  // unk
     data << uint32(current_CP);         // current conquest points
     SendPacket(&data);
@@ -967,35 +967,28 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket& recv_data)
 
 void WorldSession::HandleRequestRatedBgStats(WorldPacket& recv_data)
 {
-    // client calculation
-    // 11th uint32 + 15th uint32 + 17th uint32 == total games
-    // 1st uint32 + 12th uint32 + 18th uint32 == games won
-    // 4th uint32 + 5th uint32 + 9th uint32 == unk1
-    // 6th uint32 + 13th uint32 + 16th uint32 == unk2
-    // rest is unknown
-
     uint32 matches_won = _player->GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON);
     uint32 matches_lost = _player->GetRatedBattlegroundStat(RATED_BG_STAT_MATCHES_LOST);
 
     WorldPacket data(SMSG_RATED_BG_STATS, 18 * 4);
-    data << uint32(matches_won);      // BgWeeklyWins20vs20
-    data << uint32(0);                // BgWeeklyPlayed20vs20
-    data << uint32(0);                // BgWeeklyPlayed15vs15
-    data << uint32(0);
-    data << uint32(0);                // BgWeeklyWins10vs10
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);                // BgWeeklyWins15vs15
-    data << uint32(0);
-    data << uint32(matches_won + matches_lost);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);                // BgWeeklyPlayed10vs10
-    data << uint32(0);
-    data << uint32(0);
+    data << uint32(0); // 1
+    data << uint32(0); // 2
+    data << uint32(0); // 3
+    data << uint32(0); // 4
+    data << uint32(0); // 5
+    data << uint32(matches_lost); // 10v10 losses
+    data << uint32(0); // 7
+    data << uint32(0); // 8
+    data << uint32(0); // 9
+    data << uint32(0); // 10
+    data << uint32(0); // 11
+    data << uint32(0); // 12
+    data << uint32(0); // 13
+    data << uint32(0); // 14
+    data << uint32(matches_won); // 10v10 wins
+    data << uint32(0); // 16
+    data << uint32(0); // 17
+    data << uint32(0); // 18
     SendPacket(&data);
 
     sLog->outDebug("WorldSession::HandleRequestRatedBgInfo: Player %s (GUID: %u) requested rated BG stats", _player->GetName(), _player->GetGUIDLow());
@@ -1150,7 +1143,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
     bg->SetRated(true);
     bg->SetArenaType(arenaType);
 
-    uint8 twink = _player->GetTwinkType();
+    uint8 twink = BATTLEGROUND_NOTWINK;
     BattlegroundQueueTypeId queueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenaType);
     BattlegroundQueue &queue = sBattlegroundMgr->m_BattlegroundQueues[queueTypeId][twink];
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
@@ -1161,7 +1154,7 @@ void WorldSession::HandleBattlemasterJoinRated(WorldPacket& recv_data)
     uint32 avgTime = 0;
     uint32 avgRating = 0;
 
-    if (err != ERR_BATTLEGROUND_NONE)
+    if (err == ERR_BATTLEGROUND_NONE)
     {
         avgRating = group->GetAverageBattlegroundRating();
         GroupQueueInfo *groupQueueInfo = queue.AddGroup(_player, group, bgTypeId, bracketEntry, arenaType, true, true, avgRating, avgRating);
