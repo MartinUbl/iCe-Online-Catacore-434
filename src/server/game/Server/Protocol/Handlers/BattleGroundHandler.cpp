@@ -671,7 +671,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         if (ginfo.IsInvitedToBGInstanceGUID)
         {
             bg = sBattlegroundMgr->GetBattleground(ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
-            if (!bg || (_player->InBattleground() && _player->GetBattleground() == bg))
+            if (!bg)
                 continue;
             uint32 remainingTime = getMSTimeDiff(getMSTime(), ginfo.RemoveInviteTime);
             // send status invited to Battleground
@@ -681,7 +681,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         else
         {
             bg = sBattlegroundMgr->GetBattlegroundTemplate(bgTypeId);
-            if (!bg || (_player->InBattleground() && _player->GetBattleground() == bg))
+            if (!bg)
                 continue;
 
             // expected bracket entry
