@@ -2045,6 +2045,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 break;
             }
+            // Vanish
+            if (GetSpellProto()->Id == 11327 && !target->HasAura(1784))
+            {
+                // Overkill
+                if (target->HasAura(58427))
+                {
+                    if(!apply)
+                        target->RemoveAurasDueToSpell(58427);
+                }
+                break;
+            }
             break;
         case SPELLFAMILY_DRUID:
             {
