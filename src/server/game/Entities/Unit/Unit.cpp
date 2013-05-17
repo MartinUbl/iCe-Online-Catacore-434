@@ -17956,6 +17956,24 @@ void Unit::RemoveCharmedBy(Unit *charmer)
         }
     }
 
+    // reapply all faction force auras
+    std::list<uint32> modFactionAuras;
+    AuraEffectList const &modFact = GetAuraEffectsByType(SPELL_AURA_MOD_FACTION);
+    if (!modFact.empty())
+    {
+        for (AuraEffectList::const_iterator itr = modFact.begin(); itr != modFact.end(); ++itr)
+            modFactionAuras.push_back((*itr)->GetBase()->GetId());
+
+        if (!modFactionAuras.empty())
+        {
+            for (std::list<uint32>::iterator itr = modFactionAuras.begin(); itr != modFactionAuras.end(); ++itr)
+            {
+                RemoveAurasDueToSpell(*itr);
+                CastSpell(this, *itr, true);
+            }
+        }
+    }
+
     //a guardian should always have charminfo
     if (charmer->GetTypeId() == TYPEID_PLAYER && this != charmer->GetFirstControlled())
         charmer->ToPlayer()->SendRemoveControlBar();
