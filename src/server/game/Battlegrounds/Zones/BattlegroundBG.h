@@ -176,7 +176,7 @@ const float BG_BG_DoorPositions[2][8] = {
     {1396.15f, 977.014f, 7.43169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f}
 };
 
-const uint32 BG_BG_TickIntervals[4] = {0, 12000, 6000, 1000};
+const uint32 BG_BG_TickIntervals[4] = {0, 9000, 3000, 1000};
 const uint32 BG_BG_TickPoints[4]    = {0, 10, 10, 30};
 
 // WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
