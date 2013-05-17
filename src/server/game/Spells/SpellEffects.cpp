@@ -3305,6 +3305,14 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
 
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
 
+    // Dalaran Sewers arena spell Flush triggering deleted spell
+    if (triggered_spell_id == 61698)
+    {
+        if (unitTarget)
+            unitTarget->KnockbackFrom(m_caster->GetPositionX(), m_caster->GetPositionY(), 20.0f, 20.0f);
+        return;
+    }
+
     // normal case
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(triggered_spell_id);
 
