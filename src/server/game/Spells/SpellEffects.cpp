@@ -4388,6 +4388,12 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 {
                     // Echo of Light HoT effect
                     int32 bp0 = addhealth*(player->GetMasteryPoints()*1.25f/100.0f);
+
+                    // stack with old aura
+                    if (Aura* echo = unitTarget->GetAura(77489))
+                        if (AuraEffect* hoteff = echo->GetEffect(EFFECT_0))
+                            bp0 += hoteff->GetAmount()*((float)(hoteff->GetTotalTicks()-hoteff->GetTickNumber())/(float)hoteff->GetTotalTicks());
+
                     m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
                 }
 
