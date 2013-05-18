@@ -5990,7 +5990,7 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const *aurApp, uint
         for (Unit::AuraApplicationMap::iterator iter = Auras.begin(); iter != Auras.end();)
         {
             SpellEntry const *spell = iter->second->GetBase()->GetSpellProto();
-            if ((GetSpellSchoolMask(spell) & school_mask) && CanSpellDispelAura(GetSpellProto(),spell) && !iter->second->IsPositive() && spell->Id != GetId())
+            if ((GetSpellSchoolMask(spell) & school_mask) && CanSpellDispelAura(GetSpellProto(),spell) && !iter->second->GetBase()->IsPassive() && !iter->second->IsPositive() && spell->Id != GetId())
                 target->RemoveAura(iter);
             else
                 ++iter;
