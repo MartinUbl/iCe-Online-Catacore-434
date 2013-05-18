@@ -6677,6 +6677,14 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             // Stormstrike
             if (AuraEffect * aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
                 m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
+
+            // Lava Lash
+            if (m_spellInfo->Id == 60103)
+            {
+                // Improved Lava Lash
+                if (unitTarget->HasAura(8050) && (m_caster->HasAura(77700) || m_caster->HasAura(77701)))
+                    m_caster->CastSpell(unitTarget, 105792, true);
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -8226,6 +8234,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 // 10% chance to stun (knockdown) enemies
                 if (roll_chance_i(10))
                     m_caster->CastSpell(unitTarget, 77505, true);
+            }
+            // Improved Lava Lash
+            else if (m_spellInfo->Id == 105792)
+            {
+                // Instantly spread flame shock to up to 4 nearby enemies
+                if (m_caster && unitTarget)
+                    m_caster->AddAura(8050, unitTarget);
             }
             break;
         }

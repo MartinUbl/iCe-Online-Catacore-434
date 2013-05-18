@@ -4234,6 +4234,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
+        // (Improved) Lava Lash
+        case 105792:
+            spellInfo->MaxAffectedTargets = 4;
+            count++;
+            break;
         // Bloodlust
         case 2825:
             spellInfo->excludeCasterAuraSpell = 57724; // Sated
