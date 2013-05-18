@@ -2232,6 +2232,7 @@ struct SpellEntry
     // some additional helper functions
     bool AppliesAuraType(uint32 type) const;
     float GetSpellRadius(Unit *caster, uint32 effIndex) const;
+    bool HasSpellEffect(uint32 effectId) const;
 
 private:
     // prevent creating custom entries (copy data from original in fact)

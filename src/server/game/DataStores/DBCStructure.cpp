@@ -589,3 +589,13 @@ float SpellEntry::GetSpellRadius(Unit *caster, uint32 effIndex) const
 
     return radius;
 }
+
+
+bool SpellEntry::HasSpellEffect(uint32 effectId) const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+        if (Effect[i] == effectId)
+            return true;
+
+    return false;
+}
