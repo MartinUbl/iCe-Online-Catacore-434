@@ -175,6 +175,7 @@ public:
                     if(TempSummon* pBridge = pGO->SummonCreature(NPC_BRIDGE, BridgePos[i]))
                         pBridge->AI()->DoAction(i);
                 }
+                pGO->EnableCollision(false);
                 m_Center_GUID = pGO->GetGUID();
                 break;
             default: break;
@@ -452,9 +453,9 @@ public:
                         // teleport player if under critical Z
                         if(m_auiEncounter[TYPE_CONCLAVE] == DONE)
                         {
-                            if(player->GetPositionZ() < 166.0f)
+                            if(player->GetPositionZ() < 169.0f)
                             {
-                                player->NearTeleportTo(-108.3f, 817.3f, 188.0f, 6.28f, false); // Al'akir's platform coords
+                                player->NearTeleportTo(-108.3f, 817.3f, 191.04f, 6.28f, false); // Al'akir's platform coords
                                 if(m_auiEncounter[TYPE_ALAKIR] == DONE)
                                     player->CastSpell(player, 82724, true); // aura Eye of the Storm grants flying
                                 //else if(m_auiEncounter[TYPE_ALAKIR] == IN_PROGRESS)
@@ -463,8 +464,8 @@ public:
                         }
                         else
                         {
-                            if(player->GetPositionZ() < 186.0f)
-                                player->NearTeleportTo(-291.2f, 819.0f, 196.5f, 6.28f, false); // Instance entrance coords
+                            if(player->GetPositionZ() < 189.0f)
+                                player->NearTeleportTo(-291.2f, 819.0f, 199.54f, 6.28f, false); // Instance entrance coords
                         }
                     }
 
@@ -638,11 +639,11 @@ VALUES
 INSERT INTO gameobject
   (id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state)
 VALUES
-  (4510369, 754, 15, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
-  (4510370, 754, 15, 1, -274.184, 817.184, 200, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
-  (4510136, 754, 15, 1, 185.588, 814.656, 200, 3.14662, 0, 0, 0.999997, -0.00251452, 300, 0, 1),
-  (4510135, 754, 15, 1, -50.642, 1055.37, 200, 4.71113, 0, 0, 0.707551, -0.706663, 300, 0, 1),
-  (4510137, 754, 15, 1, -54.9326, 578.428, 200, 1.55776, 0, 0, 0.702482, 0.711702, 300, 0, 1);
+  (4510369, 754, 15, 1, -274.184, 817.184, 203.04, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
+  (4510370, 754, 15, 1, -274.184, 817.184, 203.04, 3.14018, 0, 0, 0.00141254, -0.999999, 300, 0, 0),
+  (4510136, 754, 15, 1, 185.588, 814.656, 203.04, 3.14662, 0, 0, 0.999997, -0.00251452, 300, 0, 1),
+  (4510135, 754, 15, 1, -50.642, 1055.37, 203.04, 4.71113, 0, 0, 0.707551, -0.706663, 300, 0, 1),
+  (4510137, 754, 15, 1, -54.9326, 578.428, 203.04, 1.55776, 0, 0, 0.702482, 0.711702, 300, 0, 1);
 
 UPDATE `creature_template` SET difficulty_entry_1=50203, difficulty_entry_2=50217, difficulty_entry_3=50231 WHERE entry=46753;
 UPDATE `creature_template` SET difficulty_entry_1=50204, difficulty_entry_2=50218, difficulty_entry_3=50232 WHERE entry=48233;

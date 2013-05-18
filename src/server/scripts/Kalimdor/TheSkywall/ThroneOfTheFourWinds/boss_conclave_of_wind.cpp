@@ -127,10 +127,12 @@ public:
         float x, y, z, o;
         me->GetRespawnCoord(x, y, z, &o);
 
-        me->Relocate(x, y, z, o);
-        WorldPacket heart;
-        me->BuildHeartBeatMsg(&heart);
-        me->SendMessageToSet(&heart, false);
+        //me->NearTeleportTo(x, y, z, o);
+        //me->Relocate(x, y, z, o);
+        //WorldPacket heart;
+        //me->BuildHeartBeatMsg(&heart);
+        //me->SendMessageToSet(&heart, false);
+        DoTeleportTo(x, y, z, 0);
     }
 
     void AurasCleanup()
@@ -583,7 +585,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
             if(m_ability_phase == 41)
             {
                 // Prepare dummy for farsight
-                if(Creature* pDummy = me->SummonCreature(WORLD_TRIGGER, me->GetPositionX(), me->GetPositionY()+1, 237.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                if(Creature* pDummy = me->SummonCreature(WORLD_TRIGGER, me->GetPositionX(), me->GetPositionY()+1, 240.04f, 0, TEMPSUMMON_TIMED_DESPAWN, 15000))
                 {
                     //pDummy->SetVisibility(VISIBILITY_OFF);
                     pDummy->setFaction(14);
@@ -601,7 +603,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                                 if(me->GetDistance2d(pPlayer) < 80.0f && pPlayer->isAlive())
                                 {
                                     pPlayer->SetUInt64Value(PLAYER_FARSIGHT, pDummy->GetGUID());
-                                    pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), 197.0f, pPlayer->GetOrientation());
+                                    pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), 200.04f, pPlayer->GetOrientation());
                                 }
                             }
                         }
@@ -622,7 +624,10 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                             if(me->GetDistance2d(pPlayer) < 80.0f)
                             {
                                 if(pPlayer->isAlive())
-                                    pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY()+10.0f, 217.0f, pPlayer->GetOrientation());
+                                {
+                                    float a = ((float)urand(0,628))/100;
+                                    pPlayer->NearTeleportTo(me->GetPositionX()+10.0f*cos(a), me->GetPositionY()+10.0f*sin(a), 220.04f, pPlayer->GetOrientation());
+                                }
                             }
                             pPlayer->SetUInt64Value(PLAYER_FARSIGHT, 0);
                         }
@@ -866,12 +871,12 @@ public:
             if(TempSummon* summon = me->ToTempSummon())
                 summon->SetTempSummonType(TEMPSUMMON_DEAD_DESPAWN);
 
-            me->GetMotionMaster()->MoveRandom(18.0f);
+            me->GetMotionMaster()->MoveRandom(25.0f);
         }
 
         void MovementInform(uint32, uint32)
         {
-            me->GetMotionMaster()->MoveRandom(18.0f);
+            me->GetMotionMaster()->MoveRandom(25.0f);
         }
 
         void UpdateAI(const uint32 diff)

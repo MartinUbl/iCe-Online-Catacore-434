@@ -186,7 +186,7 @@ class boss_alakir: public CreatureScript
                 // summon loot chest
                 uint32 go_entry = GO_HEART_OF_WIND + map->GetDifficulty(); // 207891 + 0/1/2/3
                 GameObject* pGO = NULL;
-                pGO = me->SummonGameObject(go_entry, me->GetPositionX(), me->GetPositionY(), 240.0f, 0, 0, 0, 0, 0, 0);
+                pGO = me->SummonGameObject(go_entry, me->GetPositionX(), me->GetPositionY(), 243.04f, 0, 0, 0, 0, 0, 0);
 
                 Map::PlayerList const& plrList = map->GetPlayers();
                 if (plrList.isEmpty())
@@ -1010,7 +1010,7 @@ class npc_alakir_large_model: public CreatureScript
                 lightningCloudTimer = 30000;
 
                 // do initial Lightning Clouds at the bottom
-                DoLightningCloud(185.0f);
+                DoLightningCloud(188.0f);
             }
 
             void EnterEvadeMode()
