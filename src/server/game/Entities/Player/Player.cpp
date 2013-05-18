@@ -25692,6 +25692,10 @@ void Player::ConvertRune(uint8 index, RuneType newType)
 {
     SetCurrentRune(index, newType);
 
+    // T11 DPS 4p set bonus (there's no better place)
+    if (newType == RUNE_DEATH && HasAura(90459))
+        CastSpell(this, 90507, true);
+
     WorldPacket data(SMSG_CONVERT_RUNE, 2);
     data << uint8(index);
     data << uint8(newType);

@@ -1598,6 +1598,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                     }
                 }
+                else if (GetId() == 51124) // Killing Machine
+                {
+                    // T11 DPS 4p set bonus
+                    if (caster && caster->HasAura(90459))
+                        caster->CastSpell(caster, 90507, true);
+                }
                 break;
         }
 
