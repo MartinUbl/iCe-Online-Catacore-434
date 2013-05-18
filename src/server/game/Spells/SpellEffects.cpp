@@ -695,15 +695,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         if (unitTarget->HasAura(94009) && m_caster->ToPlayer())
                         {
-                            // Go through attackers and if its in range, cast rend
-                            const Unit::AttackerSet &refList = m_caster->ToPlayer()->getAttackers();
-                            if (refList.empty())
-                                break;
-                            for (Unit::AttackerSet::const_iterator itr = refList.begin(); itr != refList.end(); ++itr)
-                            {
-                                if ((*itr)->IsWithinDistInMap(m_caster,6.5f))
-                                    m_caster->CastSpell((*itr),94009,true);
-                            }
+                            // apply Rend to all targets of Thunder Clap
+                            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                                if (Unit* pl = Unit::GetUnit(*m_caster, ihit->targetGUID))
+                                    m_caster->CastSpell(pl, 772, true);
                         }
                     }
                 }
