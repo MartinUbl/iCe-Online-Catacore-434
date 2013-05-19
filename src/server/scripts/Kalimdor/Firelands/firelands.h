@@ -30,4 +30,10 @@ enum Encounters
     MAX_ENCOUNTER  = 7
 };
 
+enum AdditionNPCs
+{
+    DATA_RAGEFACE_GUID = 8,
+    DATA_RIPLIMB_GUID = 9
+};
+
 #endif

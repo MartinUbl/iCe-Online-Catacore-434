@@ -667,7 +667,15 @@ void Creature::RegenerateHealth()
 
     addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_REGEN) * CREATURE_REGEN_INTERVAL  / (5 * IN_MILLISECONDS);
 
-    ModifyHealth(addvalue);
+    switch (GetEntry())
+    {
+        // for some AI scripts its important disable regenerate health.
+        case 53819: // Crystal Prison (Shannox's trap)
+            break;
+        default:
+            ModifyHealth(addvalue);
+            break;
+    }
 }
 
 void Creature::DoFleeToGetAssistance()

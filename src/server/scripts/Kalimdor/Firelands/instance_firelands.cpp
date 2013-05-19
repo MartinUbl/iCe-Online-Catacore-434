@@ -28,6 +28,9 @@ public:
         instance_firelands_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint64 riplimbGuid;
+        uint64 ragefaceGuid;
+        uint64 shannoxGuid;
         std::string saveData;
 
         void Initialize()
@@ -70,6 +73,40 @@ public:
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+        void OnCreatureCreate(Creature* pCreature, bool add)
+        {
+            if (!add)
+                return;
+
+            switch (pCreature->GetEntry())
+            {
+                case 53694:
+                    riplimbGuid = pCreature->GetGUID();
+                    break;
+                case 53695:
+                    ragefaceGuid = pCreature->GetGUID();
+                    break;
+                case 53691:
+                    shannoxGuid = pCreature->GetGUID();
+                    break;
+            }
+        }
+
+
+        uint64 GetData64(uint32 type)
+        {
+            switch (type)
+            {
+                case TYPE_SHANNOX:
+                    return shannoxGuid;
+                case DATA_RAGEFACE_GUID:
+                    return ragefaceGuid;
+                case DATA_RIPLIMB_GUID:
+                    return riplimbGuid;
+            }
+                return 0;
         }
 
         virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
