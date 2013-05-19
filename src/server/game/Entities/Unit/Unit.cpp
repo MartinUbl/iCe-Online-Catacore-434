@@ -9911,6 +9911,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 62606:
         {
             basepoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100.0f);
+
+            Player* pl = ToPlayer();
+            // Savage Defender druid's feral mastery proficiency
+            if (pl && pl->HasMastery() &&
+                pl->GetTalentBranchSpec(pl->GetActiveSpec()) == SPEC_DRUID_FERAL)
+            {
+                // Each points increases damage absorbed by 4.0%
+                basepoints0 *= (1+float(pl->GetMasteryPoints())*4.0f/100.0f);
+            }
             break;
         }
         // Efflorescence - must be triggered with value --> handled elsewhere

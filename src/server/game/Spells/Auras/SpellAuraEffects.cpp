@@ -646,18 +646,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         return amount;
                     }
                     break;
-                case SPELLFAMILY_DRUID:
-                    // Savage Defense
-                    if (m_spellProto->Id == 62606)
-                    {
-                        // Savage Defender druid's feral mastery proficiency
-                        if (caster && caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
-                            caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_DRUID_FERAL)
-                        {
-                            // Each points increases damage absorbed by 4.0%
-                            amount *= (1+float(caster->ToPlayer()->GetMasteryPoints())*4.0f/100.0f);
-                        }
-                    }
                 case SPELLFAMILY_HUNTER:
                     // Intervene (pet ability)
                     if (m_spellProto->Id == 53476)

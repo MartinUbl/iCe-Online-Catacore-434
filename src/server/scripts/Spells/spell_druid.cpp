@@ -30,49 +30,6 @@ enum DruidSpells
     DRUID_NATURES_SPLENDOR              = 57865
 };
 
-// 62606 - Savage Defense
-class spell_dru_savage_defense : public SpellScriptLoader
-{
-public:
-    spell_dru_savage_defense() : SpellScriptLoader("spell_dru_savage_defense") { }
-
-    class spell_dru_savage_defense_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dru_savage_defense_AuraScript);
-
-        uint32 absorbPct;
-
-            bool Load()
-            {
-                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect * aurEff, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
-            {
-                absorbAmount = uint32(CalculatePctN(GetTarget()->GetTotalAttackPowerValue(BASE_ATTACK), absorbPct));
-                aurEff->SetAmount(0);
-            }
-
-            void Register()
-            {
-                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_savage_defense_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                 OnEffectAbsorb += AuraEffectAbsorbFn(spell_dru_savage_defense_AuraScript::Absorb, EFFECT_0);
-            }
-        };
-
-        AuraScript *GetAuraScript() const
-        {
-            return new spell_dru_savage_defense_AuraScript();
-        }
-};
-
 class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 {
     public:
@@ -335,7 +292,6 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
-    new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_blood_in_water();
     new spell_druid_pulverize();
