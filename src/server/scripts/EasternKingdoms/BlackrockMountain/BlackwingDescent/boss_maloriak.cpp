@@ -697,6 +697,9 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if(me->getVictim() && !me->IsWithinLOSInMap(me->getVictim()))
+                me->Kill(me->getVictim());
+
             if (me->getVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
             {
                 if (!me->IsNonMeleeSpellCasted(false))
