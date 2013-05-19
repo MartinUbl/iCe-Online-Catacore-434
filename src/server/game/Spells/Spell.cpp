@@ -716,11 +716,25 @@ void Spell::SelectSpellTargets()
                         AddUnitTarget(m_caster, i);
                     break;
                 case SPELL_EFFECT_SUMMON_PLAYER:
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetSelection())
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        Player* target = sObjectMgr->GetPlayer(m_caster->ToPlayer()->GetSelection());
-                        if (target)
-                            AddUnitTarget(target, i);
+                        // Have Group, Will Travel - target all party/raid members
+                        if (m_spellInfo->Id == 85592)
+                        {
+                            Group *pGroup = m_caster->ToPlayer()->GetGroup();
+                            if (pGroup)
+                            {
+                                for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                                    if (itr->getSource() != m_caster)
+                                        AddUnitTarget(itr->getSource(), i);
+                            }
+                        }
+                        else if (m_caster->ToPlayer()->GetSelection())
+                        {
+                            Player* target = sObjectMgr->GetPlayer(m_caster->ToPlayer()->GetSelection());
+                            if (target)
+                                AddUnitTarget(target, i);
+                        }
                     }
                     break;
                 case SPELL_EFFECT_RESURRECT:
@@ -2686,8 +2700,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
     }
     else if (pushType)
     {
-        // Dummy, just for client
-        if (EffectTargetType[m_spellInfo->Effect[i]] != SPELL_REQUIRE_UNIT)
+        // Dummy, just for client, except Have Group, Will Travel spell
+        if (EffectTargetType[m_spellInfo->Effect[i]] != SPELL_REQUIRE_UNIT && m_spellInfo->Id != 83967)
             return;
 
         float radius;
@@ -3057,7 +3071,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         m_caster->GetPartyMemberInDist(unitList, radius);
                         break;
                     case TARGET_UNIT_RAID_CASTER:
-                        m_caster->GetRaidMember(unitList, radius);
+                        // One huge exception - Have Group, Will Travel guild perk
+                        if (m_spellInfo->Id == 83967 && m_caster->GetTypeId() == TYPEID_PLAYER)
+                            unitList.push_back(m_caster);
+                        else
+                            m_caster->GetRaidMember(unitList, radius);
                         break;
                     case TARGET_UNIT_CLASS_TARGET:
                     {
@@ -6270,6 +6288,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (mapEntry->IsBattleArena())
                 return SPELL_FAILED_NOT_IN_ARENA;
 
+    // Have Group, Will Travel - do not use inside instances
+    if (m_spellInfo->Id == 83967)
+        if (MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
+            if (mapEntry->IsDungeon() || mapEntry->IsRaid() || mapEntry->Instanceable())
+                return SPELL_FAILED_NOT_HERE;
+
     // Special cases for spells which cannot be casted in arenas
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
         if (mapEntry->IsBattleArena())
@@ -7326,6 +7350,10 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     // Don't check for instant cast spells
     if (!strict && m_casttime == 0)
+        return SPELL_CAST_OK;
+
+    // Have Group, Will Travel spell do not check for range
+    if (m_spellInfo->Id == 85592)
         return SPELL_CAST_OK;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);

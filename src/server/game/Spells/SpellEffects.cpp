@@ -3290,6 +3290,11 @@ void Spell::EffectTriggerRitualOfSummoning(SpellEffIndex effIndex)
 
     finish();
 
+    // Have Group, Will Travel - exception, because our spellsystem doesn't support anything bigger
+    // force it to be cast to self
+    if (spellInfo->Id == 85592 && m_caster->GetTypeId() == TYPEID_PLAYER)
+        unitTarget = m_caster;
+
     m_caster->CastSpell(unitTarget,spellInfo,false);
 }
 
