@@ -157,6 +157,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
             if (instance)
                 instance->SetData(DATA_COUNCIL, NOT_STARTED);
+
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -1088,7 +1090,8 @@ public:
             if(aegis_used && !me->IsNonMeleeSpellCasted(false) && (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514))) //Cast rising flames hned po nahodeni stitu ( AEGIS_OF_FLAME)
             {
                 can_interrupt=true;
-                me->CastSpell(me,SPELL_RISING_FLAMES, true);
+                me->CastSpell(me,SPELL_RISING_FLAMES, false);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 aegis_used=false;
             }
 
@@ -1099,6 +1102,7 @@ public:
                    can_interrupt=false;
                    Stack=counter=0;
                    DoCast(me,SPELL_AEGIS_OF_FLAME);
+                   me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                    aegis_used=true;
                    Rising_flames_timer=64000;
                    me->MonsterYell("BURN!", LANG_UNIVERSAL, 0);
