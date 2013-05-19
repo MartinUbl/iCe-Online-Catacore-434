@@ -22296,7 +22296,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         else
             price = pProto->BuyPrice;
 
-        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
+        uint32 maxCount = MAX_MONEY_AMOUNT / (price > 0 ? price : 1);
         // this check will avoid buying more items of the same kind, that will exceed limit and cause gold overflow
         if ((uint32)count > maxCount)
         {
