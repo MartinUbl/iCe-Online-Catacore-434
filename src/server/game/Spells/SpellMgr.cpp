@@ -5119,6 +5119,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             count++;
             break;
+        case 82772: // Frozen (council)
+        case 92503: // + difficulty entries
+        case 92504:
+        case 92505:
+            spellInfo->procFlags = 0;
+            break;
         default:
             break;
         }
