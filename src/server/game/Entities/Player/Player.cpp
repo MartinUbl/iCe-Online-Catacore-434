@@ -25213,6 +25213,87 @@ void Player::SetOriginalGroup(Group *group, int8 subgroup)
     }
 }
 
+bool Player::SaveCastedAuraApplyCondition(Unit* target, const SpellEntry* spell)
+{
+    // Special conditions for saving spell auras even there for later reuse
+    // We have to set a condition for saving, to avoid huge overload by handling
+    // hundrets of auras per caster, that would really slow us down
+
+    if (getClass() == CLASS_MAGE)
+    {
+        // Pyromaniac
+        if (HasAura(34293) || HasAura(34295))
+        {
+            if (spell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+void Player::SaveCastedAuraApply(Aura* pAura)
+{
+    m_myCastedAuras.push_back(pAura);
+}
+
+bool Player::RemoveCastedAuraApply(Aura* pAura)
+{
+    for (std::list<Aura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+    {
+        if ((*itr) == pAura)
+        {
+            m_myCastedAuras.erase(itr);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Player::ProcessCastedAuraApplyMapChange()
+{
+    if (getClass() == CLASS_MAGE)
+    {
+        // Pyromaniac
+        if (HasAura(34293) || HasAura(34295))
+        {
+            std::list<uint64> dotTargets;
+            bool found;
+            for (std::list<Aura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+            {
+                if ((*itr)->GetSpellProto()->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
+                {
+                    found = false;
+                    for (std::list<uint64>::iterator iter = dotTargets.begin(); iter != dotTargets.end(); ++iter)
+                    {
+                        if (*iter == (*itr)->GetUnitOwner()->GetGUID())
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        dotTargets.push_back((*itr)->GetUnitOwner()->GetGUID());
+                }
+            }
+
+            if (dotTargets.size() >= 3)
+            {
+                int32 bp0 = 10;
+                if (HasAura(34293))
+                    bp0 = 5;
+                CastCustomSpell(this, 83582, &bp0, NULL, NULL, true);
+            }
+            else
+                RemoveAurasDueToSpell(83582);
+        }
+        // Pyromaniac saved aura without talent -> wrong
+        else if (HasAura(83582))
+            RemoveAurasDueToSpell(83582);
+    }
+}
+
 void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
     LiquidData liquid_status;
