@@ -579,19 +579,21 @@ public:
         case GOSSIP_ACTION_INFO_DEF+5:
             player->SEND_GOSSIP_MENU(90006, creature->GetGUID());
 
+            if (Creature* pChim = GetClosestCreatureWithEntry(creature, CHIMAERON, 200.0f))
+            {
+                pChim->SetInCombatWithZone();
+                pChim->SetReactState(REACT_AGGRESSIVE);
+                pChim->RemoveAurasDueToSpell(FAST_ASLEEP);
+            }
+            else
+                break;
+
             if (Creature* pRobot = GetClosestCreatureWithEntry(creature, BILE_O_TRON, 500.0f))
             {
                 pRobot->CastSpell(pRobot,FINKLE_MIXTURE,true);
                 pRobot->AddAura(FINKLE_MIXTURE,pRobot); // Sometimes it gets bugged
                 pRobot->CastSpell(pRobot,FINKLE_MIXTURE_SPRAY,true);
                 pRobot->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-            }
-
-            if (Creature* pChim = GetClosestCreatureWithEntry(creature, CHIMAERON, 200.0f))
-            {
-                pChim->SetInCombatWithZone();
-                pChim->SetReactState(REACT_AGGRESSIVE);
-                pChim->RemoveAurasDueToSpell(FAST_ASLEEP);
             }
             break;
         }
