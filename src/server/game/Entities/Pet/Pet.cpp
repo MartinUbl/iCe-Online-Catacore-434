@@ -1059,9 +1059,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 26125: // Risen Ghoul
                 {
-                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.45f);  // Bonus Stamina (45% of player stamina)
-                    SetModifierValue(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(m_owner->GetStat(STAT_STRENGTH)) * 0.70f);
-                    SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, GetModifierValue(UNIT_MOD_STAT_STRENGTH, BASE_VALUE)*2.0f);
+                    SetFloatValue(UNIT_MOD_CAST_SPEED, m_owner->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                    SetFloatValue(UNIT_MOD_CAST_HASTE, m_owner->GetFloatValue(UNIT_MOD_CAST_HASTE));
+                    m_modMeleeHitChance = (float)((int32)m_owner->m_modMeleeHitChance);
+                    m_modRangedHitChance = (float)((int32)m_owner->m_modRangedHitChance);
                     break;
                 }
                 case 29264: // Feral Spirit
@@ -1999,6 +2000,32 @@ void Pet::LearnPetPassives()
     CreatureInfo const* cInfo = GetCreatureInfo();
     if (!cInfo)
         return;
+
+    // Passive AoE avoidances for hunter pets, DK ghouls, warlock demons and priests shadowfiend
+    switch (GetEntry())
+    {
+        case 416:   // Imp
+        case 1860:  // Voidwalker
+        case 1863:  // Succubus
+        case 417:   // Felhunter
+        case 17252: // Felguard
+            CastSpell(this, 32233, true);
+            break;
+        case 19668: // Shadowfiend
+            CastSpell(this, 63623, true);
+            break;
+        default:
+        {
+            if (IsPetGhoul())
+            {
+                int bp0 = -90;
+                CastCustomSpell(this, 62137, &bp0, 0, 0, true);
+            }
+            if (isHunterPet())
+                CastSpell(this, 65220, true);
+            break;
+        }
+    }
 
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->family);
     if (!cFamily)

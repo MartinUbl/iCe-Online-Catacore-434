@@ -1195,27 +1195,14 @@ bool Guardian::UpdateStats(Stats stat)
     float mod = 0.75f;
     if (IsPetGhoul() && (stat == STAT_STAMINA || stat == STAT_STRENGTH))
     {
-        switch (stat)
-        {
-            case STAT_STAMINA:  mod = 0.3f; break;                // Default Owner's Stamina scale
-            case STAT_STRENGTH: mod = 0.7f; break;                // Default Owner's Strength scale
-            default: break;
-        }
-        // Ravenous Dead
-        AuraEffect const *aurEff = NULL;
-        // Check just if owner has Ravenous Dead since it's effect is not an aura
-        aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
-        if (aurEff)
-        {
-            SpellEntry const* sProto = aurEff->GetSpellProto();                                                       // Then get the SpellProto and add the dummy effect value
-            mod += mod * (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f);                                                      // Ravenous Dead edits the original scale
-        }
-        // Glyph of the Ghoul
-        aurEff = owner->GetAuraEffect(58686, 0);
-        if (aurEff)
-            mod += (aurEff->GetAmount() / 100.0f);                                                                    // Glyph of the Ghoul adds a flat value to the scale mod
-        ownersBonus = float(owner->GetStat(stat)) * mod;
-        value += ownersBonus;
+        // Ghoul retakes 100% (140% if has glyph) of owners stamina and strength
+
+        float mod = 1.0f;
+        // Glyph of Raise Dead
+        if (owner->HasAura(58686))
+            mod = 1.4f;
+
+        value += float(owner->GetStat(stat) * mod);
     }
     else if (stat == STAT_STAMINA)
     {
@@ -1365,13 +1352,13 @@ void Guardian::UpdateMaxHealth()
         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
         case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
         case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
-        case ENTRY_GHOUL:       multiplicator = 5.7f;   break;
+        case ENTRY_GHOUL:       multiplicator = 10.0f;   break;
         default:                multiplicator = 10.0f;  break;
     }
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
     value  *= GetModifierValue(unitMod, BASE_PCT);
-    value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
+    value  += GetModifierValue(unitMod, TOTAL_VALUE) + 20 + (stamina - 20) * multiplicator;
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxHealth((uint32)value);
