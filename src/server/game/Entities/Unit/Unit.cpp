@@ -3535,16 +3535,6 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
 
     if (caster && IsInWorld())
     {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player* plcaster = caster->ToPlayer();
-            if (plcaster->SaveCastedAuraApplyCondition(this, aura->GetSpellProto()))
-            {
-                plcaster->SaveCastedAuraApply(aura);
-                plcaster->ProcessCastedAuraApplyMapChange();
-            }
-        }
-
         bool isSingleTarget = false;
         switch (aura->GetSpellProto()->Id)
         {
@@ -3897,13 +3887,6 @@ void Unit::RemoveOwnedAura(AuraMap::iterator &i, AuraRemoveMode removeMode)
     // Unregister single target aura
     if (aura->IsSingleTarget())
         aura->UnregisterSingleTarget();
-
-    if (aura->GetCaster() && aura->GetCaster()->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player* plcaster = aura->GetCaster()->ToPlayer();
-        if (plcaster->RemoveCastedAuraApply(aura))
-            plcaster->ProcessCastedAuraApplyMapChange();
-    }
 
     aura->_Remove(removeMode);
 
