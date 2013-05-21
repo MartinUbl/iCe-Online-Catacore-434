@@ -101,6 +101,8 @@ public:
         uint32 Water;
         uint32 TrashCount;
 
+        uint64 lurkerFisherGUID;
+
         bool ShieldGeneratorDeactivated[4];
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         bool DoSpawnFrenzy;
@@ -137,6 +139,7 @@ public:
             DoSpawnFrenzy = false;
             TrashCount = 0;
 
+            lurkerFisherGUID = 0;
         }
 
 
@@ -149,6 +152,11 @@ public:
                 {
                     LurkerSubEvent = LURKER_HOOKED;
                     SetData(DATA_STRANGE_POOL, IN_PROGRESS);//just fished, signal Lurker script to emerge and start fight, we use IN_PROGRESS so it won't get saved and lurker will be alway invis at start if server restarted
+
+                    // The Lurker Above achievement
+                    if (Player* pl = sObjectMgr->GetPlayer(lurkerFisherGUID))
+                        pl->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(144));
+
                 } else FishingTimer -= diff;
             }
             //Water checks
@@ -229,6 +237,7 @@ public:
                 case GAMEOBJECT_FISHINGNODE_ENTRY://no way checking if fish is hooked, so we create a timed event
                     if (LurkerSubEvent == LURKER_NOT_STARTED)
                     {
+                        lurkerFisherGUID = pGo->GetOwnerGUID();
                         FishingTimer = 10000+rand()%30000;//random time before lurker emerges
                         LurkerSubEvent = LURKER_FISHING;
                     }
