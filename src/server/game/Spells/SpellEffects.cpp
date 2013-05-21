@@ -5019,6 +5019,12 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
             m_caster->ModifyPower(power, damage);   // energize spell log shows wrong numbers here - don't send it until it is fixed
             return;
         }
+        case 101033: // Resurgence
+        {
+            // we need to pass the values in scripted amount due to spell scaling overwriting our amount
+            damage = m_spellValue->EffectScriptedPoints[0];
+            break;
+        }
         default:
             break;
     }

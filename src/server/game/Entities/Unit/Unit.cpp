@@ -7873,7 +7873,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         else if (procSpell->Id == 1064)
                             amount *= 0.33f;
 
-                        CastCustomSpell(this, 101033, &amount, 0, 0, true);
+                        CastCustomSpell(this, 101033, &amount, 0, 0, &amount, 0, 0, true);
                         return true;
                     }
                 }
