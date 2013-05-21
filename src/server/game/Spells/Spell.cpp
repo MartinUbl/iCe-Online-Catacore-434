@@ -6140,7 +6140,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
             
-            if (!m_IsTriggeredSpell)
+            if (!m_IsTriggeredSpell && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS))
             {
                 if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                     if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
@@ -8166,7 +8166,9 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
                 caster = m_caster;
             if (target->GetEntry() == 5925)
                 return true;
-            if (target != m_caster && !target->IsWithinLOSInMap(caster))
+            // check LoS
+            if (target != m_caster && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) &&
+                !target->IsWithinLOSInMap(caster))
                 return false;
             break;
     }
