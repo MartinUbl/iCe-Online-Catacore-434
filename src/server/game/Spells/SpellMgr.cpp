@@ -5021,8 +5021,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 22;
             break;
         case 77987: // Growth Catalyst
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_STACK_FOR_DIFF_CASTERS;
-            spellInfo->StackAmount = 20;
+        case 101440: // + difficulty entries
+        case 101441:
+        case 101442:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->Effect[2] = 0;
             break;
         case 78095: // Magma Jets + difficulty entries

@@ -123,96 +123,96 @@ static const Position AberrationSpawnPos[3] =
 
 class npc_vile_swill_preeffect: public CreatureScript
 {
-    public:
-        npc_vile_swill_preeffect() : CreatureScript("npc_vile_swill_preeffect") { }
+public:
+    npc_vile_swill_preeffect() : CreatureScript("npc_vile_swill_preeffect") { }
 
-        struct npc_vile_swill_preeffectAI : public ScriptedAI
+    struct npc_vile_swill_preeffectAI : public ScriptedAI
+    {
+        npc_vile_swill_preeffectAI(Creature* creature) : ScriptedAI(creature){}
+
+        uint32 Release_timer;
+        int Count;
+
+        void Reset()
         {
-            npc_vile_swill_preeffectAI(Creature* creature) : ScriptedAI(creature){}
-            
-            uint32 Release_timer;
-            int Count;
-
-            void Reset()
-            {
-                Release_timer = 2000;
-                Count = 0;
-            }
-
-            void EnterCombat(Unit* /*target*/) { }
-
-            void DamageTaken(Unit* pTarget, uint32& damage)
-            {
-                damage = 0;
-            }
-            
-            void UpdateAI(uint32 const diff)
-            {
-                if (Count >= 5)
-                {
-                    me->DespawnOrUnsummon();
-                }
-
-                if(Release_timer <= diff)
-                {
-                    Count++;
-                    if (Creature* pSummon = me->SummonCreature(NPC_VILE_SWILL,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
-                    {
-                        if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                            if (pSummon->AI())
-                                pSummon->AI()->AttackStart(pTarget);
-                    }
-                    me->CastSpell(me,92720,false);
-                    Release_timer = 2000;
-                }
-                else
-                    Release_timer -= diff;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_vile_swill_preeffectAI(creature);
+            Release_timer = 2000;
+            Count = 0;
         }
+
+        void EnterCombat(Unit* /*target*/) { }
+
+        void DamageTaken(Unit* pTarget, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (Count >= 5)
+            {
+                me->DespawnOrUnsummon();
+            }
+
+            if(Release_timer <= diff)
+            {
+                Count++;
+                if (Creature* pSummon = me->SummonCreature(NPC_VILE_SWILL,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                {
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        if (pSummon->AI())
+                            pSummon->AI()->AttackStart(pTarget);
+                }
+                me->CastSpell(me,92720,false);
+                Release_timer = 2000;
+            }
+            else
+                Release_timer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vile_swill_preeffectAI(creature);
+    }
 };
 
 class npc_vile_swill: public CreatureScript
 {
-    public:
-        npc_vile_swill() : CreatureScript("npc_vile_swill") { }
+public:
+    npc_vile_swill() : CreatureScript("npc_vile_swill") { }
 
-        struct npc_vile_swillAI : public ScriptedAI
+    struct npc_vile_swillAI : public ScriptedAI
+    {
+        npc_vile_swillAI(Creature* creature) : ScriptedAI(creature){}
+        uint32 Dark_Sludge;
+
+        void Reset()
         {
-            npc_vile_swillAI(Creature* creature) : ScriptedAI(creature){}
-            uint32 Dark_Sludge;
+            Dark_Sludge = 3500;
+        }
 
-            void Reset()
+        void EnterCombat(Unit* /*target*/) { }
+
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if(Dark_Sludge <= diff)
             {
+                me->CastSpell(me, SPELL_DARK_SLUDGE, false);
                 Dark_Sludge = 3500;
             }
-
-            void EnterCombat(Unit* /*target*/) { }
-
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if(Dark_Sludge <= diff)
-                {
-                    me->CastSpell(me, SPELL_DARK_SLUDGE, false);
-                    Dark_Sludge = 3500;
-                }
-                else
-                    Dark_Sludge -= diff;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_vile_swillAI(creature);
+            else
+                Dark_Sludge -= diff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vile_swillAI(creature);
+    }
 };
 
 class npc_absolute_zero : public CreatureScript
@@ -229,55 +229,55 @@ public:
     {
         npc_absolute_zeroAI(Creature *c) : ScriptedAI(c) { }
 
-            uint32 uiPauseTimer; 
-            uint32 uiDespawnTimer;
-            bool CanExplode;
- 
-            void Reset()
-            {
-                uiPauseTimer = 3000;
-                uiDespawnTimer = 15000;
-                CanExplode = false;
-            }
+        uint32 uiPauseTimer; 
+        uint32 uiDespawnTimer;
+        bool CanExplode;
 
-            void IsSummonedBy(Unit* owner)
-            {
-                DoCast(SPELL_ABSOLUTE_ZERO_AURA);
-            }
+        void Reset()
+        {
+            uiPauseTimer = 3000;
+            uiDespawnTimer = 15000;
+            CanExplode = false;
+        }
 
-            void UpdateAI(const uint32 diff)
+        void IsSummonedBy(Unit* owner)
+        {
+            DoCast(SPELL_ABSOLUTE_ZERO_AURA);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!CanExplode)
             {
-                if (!CanExplode)
+                if(uiPauseTimer <= diff)
                 {
-                    if(uiPauseTimer <= diff)
+                    CanExplode = true;
+                    if (Unit* target = me->SelectNearestTarget())
                     {
-                        CanExplode = true;
-                        if (Unit* target = me->SelectNearestTarget())
-                        {
-                            me->AddThreat(target, 100000.0f);
-                            me->GetMotionMaster()->MoveFollow(target, 0.1f, 0.0f);
-                        }
+                        me->AddThreat(target, 100000.0f);
+                        me->GetMotionMaster()->MoveFollow(target, 0.1f, 0.0f);
                     }
-                    else
-                        uiPauseTimer -= diff;
                 }
-
-                if (uiDespawnTimer <= diff)
-                    me->DespawnOrUnsummon();
                 else
-                    uiDespawnTimer -= diff;
+                    uiPauseTimer -= diff;
+            }
 
-                if (Unit* target = me->SelectNearestTarget())
+            if (uiDespawnTimer <= diff)
+                me->DespawnOrUnsummon();
+            else
+                uiDespawnTimer -= diff;
+
+            if (Unit* target = me->SelectNearestTarget())
+            {
+                if ((me->GetDistance(target) <= 4.0f) && CanExplode)
                 {
-                    if ((me->GetDistance(target) <= 4.0f) && CanExplode)
-                    {
-                        DoCast(SPELL_ABSOLUTE_ZERO_DMG);
-                        me->DespawnOrUnsummon();
-                    }
+                    DoCast(SPELL_ABSOLUTE_ZERO_DMG);
+                    me->DespawnOrUnsummon();
                 }
+            }
 
-                if(!UpdateVictim())
-                    return;
+            if(!UpdateVictim())
+                return;
         }
     };
 };
@@ -379,7 +379,6 @@ public:
         uint32 CastTimer;
         uint32 Phase;
         uint32 SubPhase;
-        uint32 AuraCheckTimer;
 
         uint32 HeroicIntro;
 
@@ -410,8 +409,10 @@ public:
         void Reset()
         {
             OpenCell();
+
             if (pInstance)
                 pInstance->SetData(DATA_MALORIAK_GUID, NOT_STARTED);
+
             uiRemedy = 14000;
             uiphase = 0;
             Berserk = IsHeroic() ? 1200000 : 420000; // 7 minut
@@ -434,15 +435,12 @@ public:
             IntroDone = false;
             Jump = false;
             can_interrupt = false;
-            //StopTimer = false;
         }
 
         void CloseCell()
         {
-            if(GameObject* Cell= me->FindNearestGameObject(191722,100.0f))
-            {
+            if(GameObject* Cell = me->FindNearestGameObject(191722,100.0f))
                 Cell->SetGoState(GO_STATE_READY);
-            }
         }
 
         void ChangeCauldronColor(uint8 color) {
@@ -454,9 +452,7 @@ public:
         void OpenCell()
         {
             if(GameObject* Cell= me->FindNearestGameObject(191722,100.0f))
-            {
                 Cell->SetGoState(GO_STATE_ACTIVE);
-            }
         }
 
         void SpellHit(Unit* target, const SpellEntry* spell)
@@ -552,7 +548,7 @@ public:
                     {
                         me->SummonCreature(NPC_ABERRATION,AberrationSpawnPos[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                     }
-                 }
+                }
             }
             else if(SpellCounter == 5)
             {
@@ -567,13 +563,14 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-           if(IsHeroic())
+            if(IsHeroic())
                 HeroicIntro = 8000;
 
             DoScriptText(TEXT_AGGRO,me);
 
             if (pInstance)
                 pInstance->SetData(DATA_MALORIAK_GUID, IN_PROGRESS);
+
             SummonAll = false;
 
             uiSubPhaseTimer = 1000;
@@ -581,7 +578,6 @@ public:
             Phase = 0;
             SubPhase = 0;
             CloseCell();
-            AuraCheckTimer = 1000;
 
             if (pCauldron == NULL)
                 pCauldron = me->FindNearestGameObject(459554, 100.0f);
@@ -598,13 +594,13 @@ public:
         {
             switch (Action)
             {
-                case RECORD_DEATH:
+            case RECORD_DEATH:
                 {
                     AberrationDeathTimeStamp.push_back(getMSTime());
                     counter++;
                 }
                 break;
-                case CHECK_COUNTER:
+            case CHECK_COUNTER:
                 {
                     if (counter >= 12)
                     {
@@ -613,7 +609,7 @@ public:
                         for(std::list<uint32>::const_iterator itr = AberrationDeathTimeStamp.begin(); itr != AberrationDeathTimeStamp.end(); ++itr)
                         {
                             if (*itr >= (m_uiTime - 12000))
-                            counter++;
+                                counter++;
                         }
                         if (counter == 12)
                             AwardAchiev = true;
@@ -630,12 +626,12 @@ public:
 
             switch (id)
             {
-                case 0:
+            case 0:
                 {
                     me->GetMotionMaster()->MoveChase(me->getVictim());
                     break;
                 }
-                case 1:
+            case 1:
                 {
                     DoScriptText(TEXT_RED_VIAL, me);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -643,7 +639,7 @@ public:
                     ChangeCauldronColor(0);
                 }
                 break;
-                case 2:
+            case 2:
                 {
                     DoScriptText(TEXT_BLUE_VIAL,me);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -651,15 +647,15 @@ public:
                     ChangeCauldronColor(1);
                 }
                 break;
-                case 3:
+            case 3:
                 {
-                     FindPlayers();
-                     DoScriptText(TEXT_GREEN_VIAL,me);
-                     Jump = true;
-                     ChangeCauldronColor(2);
+                    FindPlayers();
+                    DoScriptText(TEXT_GREEN_VIAL,me);
+                    Jump = true;
+                    ChangeCauldronColor(2);
                 }
                 break;
-                case 4:
+            case 4:
                 {
                     ChangeCauldronColor(3);
                     uiEngulfingDarkness = 6000;
@@ -675,23 +671,6 @@ public:
             }
         }
 
-        void CheckAuraCount()
-        {
-            std::list<Creature*> AuraCount;
-            me->GetCreatureListWithEntryInGrid(AuraCount, NPC_ABERRATION, 10.0f);
-            if (!AuraCount.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = AuraCount.begin(); itr != AuraCount.end(); ++itr)
-                {
-                    for (uint32 i = 0; i < AuraCount.size(); ++i)
-                    {
-                        if (!me->HasAura(SPELL_DEBILITATING_SLIME))
-                            (*itr)->AddAura(SPELL_GROWTH_CATACLYST,me);
-                    }
-                }
-            }
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
@@ -699,27 +678,6 @@ public:
 
             if(me->getVictim() && !me->IsWithinLOSInMap(me->getVictim()))
                 me->Kill(me->getVictim());
-
-            if (me->getVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
-            {
-                if (!me->IsNonMeleeSpellCasted(false))
-                {
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveFall();
-                    float x,y,z;
-                    me->getVictim()->GetPosition(x, y, z);
-                    me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
-                 }
-            }
-
-            if(AuraCheckTimer <= diff)
-            {
-                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
-                CheckAuraCount();
-                AuraCheckTimer = 1000;
-            }
-            else
-                AuraCheckTimer -= diff;
 
             if (!IntroDone)
             {
@@ -787,18 +745,20 @@ public:
                 ReleaseAll();
             }
 
-           if (!LastPhase && uiRemedy<= diff)
-           {
-               DoCast(me,SPELL_REMEDY);
-               uiRemedy = urand(30*IN_MILLISECONDS,35*IN_MILLISECONDS);
-           } else uiRemedy-= diff;
-
-            if (!LastPhase && uiSwitchPhaseTimer <= diff)
+            if (!LastPhase)
             {
-                if(IsHeroic())
+                if (uiRemedy <= diff)
                 {
-                    switch (Phase)
+                    DoCast(me,SPELL_REMEDY);
+                    uiRemedy = urand(30*IN_MILLISECONDS,35*IN_MILLISECONDS);
+                } else uiRemedy-= diff;
+
+                if (uiSwitchPhaseTimer <= diff)
+                {
+                    if(IsHeroic())
                     {
+                        switch (Phase)
+                        {
                         case 0:
                             Phase = 1;
                             break;
@@ -813,206 +773,207 @@ public:
                             uiSwitchPhaseTimer = 194000;
                             PhaseOne = false;
                             PhaseTwo = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (Phase)
+                        {
+                        case 0:
+                            Phase = 1;
+                            break;
+                        case 1:
+                            Phase = 2;
+                            uiSwitchPhaseTimer = 122000;
+                            PhaseOne = true;
+                            PhaseTwo = false;
+                            break;
+                        case 2:
+                            Phase = 0;
+                            uiSwitchPhaseTimer = 122000;
+                            PhaseOne = false;
+                            PhaseTwo = true;
+                            break;
+                        }
+                    }
+                } else
+                    uiSwitchPhaseTimer -= diff;
+
+                if (PhaseOne == true)
+                {
+                    if(uiSubPhaseTimer <= diff)
+                    {
+                        if (IsHeroic())
+                        {
+                            switch(SubPhase)
+                            {
+                            case 0:
+                                SubPhase = 1;
+                                break;
+                            case 1:
+                                StopTimer = false;
+                                SubPhase = 2;
+                                uiphase = 5;
+                                uiSubPhaseTimer = 72000;
+                                maxspawncount = 0;
+                                me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
+                                me->AddAura(92716,me);
+                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
+                                break;
+                            case 2:
+                                SubPhase = 3;
+                                uiphase = 1;
+                                uiSubPhaseTimer = 50000;
+                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
+                                me->RemoveAurasDueToSpell(92716);
+                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                                CastTimer = 5000;
+                                Poradi = 0;
+                                break;
+                            case 3:
+                                SubPhase = 4;
+                                uiphase = 2;
+                                uiSubPhaseTimer = 50000;
+                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
+                                CastTimer = 5000;
+                                Poradi = 0;
+                                break;
+                            case 4:
+                                uiReleaseAberrations = 4000;
+                                SubPhase = 0;
+                                uiphase = 3;
+                                uiSubPhaseTimer = 50000;
+                                StopSlime = false;
+                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
+                                break;
+                            }
+                        }
+                        else // !IsHeroic()
+                        {
+                            switch(SubPhase)
+                            {
+                            case 0:
+                                SubPhase = 1;
+                                break;
+                            case 1:
+                                CastTimer = 5000;
+                                Poradi = 0;
+                                SubPhase = 2;
+                                uiphase = 1;
+                                uiSubPhaseTimer = 40000;
+                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
+                                break;
+                            case 2:
+                                CastTimer = 5000;
+                                Poradi = 0;
+                                SubPhase = 3;
+                                uiphase = 2;
+                                uiSubPhaseTimer = 40000;
+                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
+                                break;
+                            case 3:
+                                uiReleaseAberrations = 4000;
+                                SubPhase = 0;
+                                uiphase = 3;
+                                uiSubPhaseTimer = 40000;
+                                StopSlime = false;
+                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
+                                break;
+                            }
+                        }
+                    }else
+                        uiSubPhaseTimer -= diff;
+                }
+
+        if (PhaseTwo == true)
+        {
+            if(uiSubPhaseTimer <= diff)
+            {
+                if (IsHeroic())
+                {
+                    switch(SubPhase)
+                    {
+                        case 0:
+                            SubPhase = 1;
+                            break;
+                        case 1:
+                            StopTimer = false;
+                            SubPhase = 2;
+                            uiphase = 5;
+                            maxspawncount = 0;
+                            uiSubPhaseTimer = 72000;
+                            ChangeCauldronColor(3);
+                            me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
+                            me->AddAura(92716,me);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
+                            break;
+                        case 2:
+                            CastTimer = 5000;
+                            Poradi = 0;
+                            me->RemoveAurasDueToSpell(92716);
+                            SubPhase = 3;
+                            uiphase = 2;
+                            uiSubPhaseTimer = 40000;
+                            me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                            break;
+                        case 3:
+                            CastTimer = 5000;
+                            Poradi = 0;
+                            SubPhase = 4;
+                            uiphase = 1;
+                            uiSubPhaseTimer = 40000;
+                            me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
+                            break;
+                        case 4:
+                            SubPhase = 0;
+                            uiphase = 3;
+                            uiReleaseAberrations = 4000;
+                            uiSubPhaseTimer = 42000;
+                            StopSlime = false;
+                            me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
                             break;
                     }
                 }
-                else
+                else // !IsHeroic()
                 {
-                    switch (Phase)
+                    switch(SubPhase)
                     {
                         case 0:
-                            Phase = 1;
+                            SubPhase = 1;
                             break;
                         case 1:
-                            Phase = 2;
-                            uiSwitchPhaseTimer = 122000;
-                            PhaseOne = true;
-                            PhaseTwo = false;
-                        break;
+                            CastTimer = 5000;
+                            Poradi = 0;
+                            SubPhase = 2;
+                            uiphase = 2;
+                            uiSubPhaseTimer = 40000;
+                            me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
+                            break;
                         case 2:
-                            Phase = 0;
-                            uiSwitchPhaseTimer = 122000;
-                            PhaseOne = false;
-                            PhaseTwo = true;
-                        break;
+                            CastTimer = 5000;
+                            Poradi = 0;
+                            SubPhase = 3;
+                            uiphase = 1;
+                            uiSubPhaseTimer = 40000;
+                            me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
+                            break;
+                        case 3:
+                            SubPhase = 0;
+                            uiphase = 3;
+                            uiReleaseAberrations = 4000;
+                            uiSubPhaseTimer = 42000;
+                            StopSlime = false;
+                            me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
+                            break;
                     }
                 }
             }else
-                uiSwitchPhaseTimer -= diff;
+                uiSubPhaseTimer -= diff;
+        }
+    }
 
-            if (!LastPhase && PhaseOne == true)
-            {
-                if(uiSubPhaseTimer <= diff)
-                {
-                    if (IsHeroic())
-                    {
-                        switch(SubPhase)
-                        {
-                            case 0:
-                                SubPhase = 1;
-                                break;
-                            case 1:
-                                StopTimer = false;
-                                SubPhase = 2;
-                                uiphase = 5;
-                                uiSubPhaseTimer = 72000;
-                                maxspawncount = 0;
-                                me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
-                                me->AddAura(92716,me);
-                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
-                            break;
-                            case 2:
-                                SubPhase = 3;
-                                uiphase = 1;
-                                uiSubPhaseTimer = 50000;
-                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
-                                me->RemoveAurasDueToSpell(92716);
-                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-                                CastTimer = 5000;
-                                Poradi = 0;
-                            break;
-                            case 3:
-                                SubPhase = 4;
-                                uiphase = 2;
-                                uiSubPhaseTimer = 50000;
-                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
-                                CastTimer = 5000;
-                                Poradi = 0;
-                            break;
-                            case 4:
-                                uiReleaseAberrations = 4000;
-                                SubPhase = 0;
-                                uiphase = 3;
-                                uiSubPhaseTimer = 50000;
-                                StopSlime = false;
-                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                            break;
-                        }
-                    }
-                    else // !IsHeroic()
-                    {
-                        switch(SubPhase)
-                        {
-                            case 0:
-                                SubPhase = 1;
-                            break;
-                            case 1:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                SubPhase = 2;
-                                uiphase = 1;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                            case 2:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                SubPhase = 3;
-                                uiphase = 2;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                            case 3:
-                                uiReleaseAberrations = 4000;
-                                SubPhase = 0;
-                                uiphase = 3;
-                                uiSubPhaseTimer = 40000;
-                                StopSlime = false;
-                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                        }
-                    }
-                }else
-                    uiSubPhaseTimer -= diff;
-            }
-
-            if (!LastPhase && PhaseTwo == true)
-            {
-                if(uiSubPhaseTimer <= diff)
-                {
-                    if (IsHeroic())
-                    {
-                        switch(SubPhase)
-                        {
-                            case 0:
-                                SubPhase = 1;
-                                break;
-                            case 1:
-                                StopTimer = false;
-                                SubPhase = 2;
-                                uiphase = 5;
-                                maxspawncount = 0;
-                                uiSubPhaseTimer = 72000;
-                                ChangeCauldronColor(3);
-                                me->GetMotionMaster()->MovePoint(4,-105.134102f,-482.974426f,73.456650f);
-                                me->AddAura(92716,me);
-                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); 
-                            break;
-                            case 2:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                me->RemoveAurasDueToSpell(92716);
-                                SubPhase = 3;
-                                uiphase = 2;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
-                                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-                                break;
-                            case 3:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                SubPhase = 4;
-                                uiphase = 1;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
-                            break;
-                            case 4:
-                                SubPhase = 0;
-                                uiphase = 3;
-                                uiReleaseAberrations = 4000;
-                                uiSubPhaseTimer = 42000;
-                                StopSlime = false;
-                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                        }
-                    }
-                    else // !IsHeroic()
-                    {
-                        switch(SubPhase)
-                        {
-                            case 0:
-                                SubPhase = 1;
-                                break;
-                            case 1:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                SubPhase = 2;
-                                uiphase = 2;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(2,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                            case 2:
-                                CastTimer = 5000;
-                                Poradi = 0;
-                                SubPhase = 3;
-                                uiphase = 1;
-                                uiSubPhaseTimer = 40000;
-                                me->GetMotionMaster()->MovePoint(1,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                            case 3:
-                                SubPhase = 0;
-                                uiphase = 3;
-                                uiReleaseAberrations = 4000;
-                                uiSubPhaseTimer = 42000;
-                                StopSlime = false;
-                                me->GetMotionMaster()->MovePoint(3,-105.134102f,-482.974426f,73.456650f);
-                                break;
-                        }
-                    }
-                }else
-                    uiSubPhaseTimer -= diff;
-            }
-            
             if (uiphase == 1) //Red Phase 
             {
                 if (CastTimer <= diff)
@@ -1020,16 +981,16 @@ public:
 
                     switch(Poradi)
                     {
-                        case 0:
-                            Poradi = 1;
-                            break;
-                        case 1: //5 SEC
-                            Poradi = 2;
-                            CastTimer = 7000;
-                            me->CastSpell(me,SPELL_ARCANE_STORM,false);
-                            can_interrupt = true;
-                            break;
-                        case 2: //13
+                    case 0:
+                        Poradi = 1;
+                        break;
+                    case 1: //5 SEC
+                        Poradi = 2;
+                        CastTimer = 7000;
+                        me->CastSpell(me,SPELL_ARCANE_STORM,false);
+                        can_interrupt = true;
+                        break;
+                    case 2: //13
                         {
                             Poradi = 3;
                             CastTimer = 2000;
@@ -1038,7 +999,7 @@ public:
                             can_interrupt = false;
                             break;
                         }
-                        case 3: // 16
+                    case 3: // 16
                         {
                             can_interrupt = false;
                             Poradi = 4;
@@ -1048,19 +1009,19 @@ public:
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
                             break;
                         }
-                        case 4: //19
-                            Poradi = 5;
-                            CastTimer = 6000; 
-                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
-                            can_interrupt = true;
-                            break;
-                        case 5:// 25
-                            Poradi = 6;
-                            CastTimer = 7000;
-                            me->CastSpell(me,SPELL_ARCANE_STORM,false);
-                            can_interrupt = true;
-                            break;
-                        case 6://31
+                    case 4: //19
+                        Poradi = 5;
+                        CastTimer = 6000; 
+                        me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
+                        can_interrupt = true;
+                        break;
+                    case 5:// 25
+                        Poradi = 6;
+                        CastTimer = 7000;
+                        me->CastSpell(me,SPELL_ARCANE_STORM,false);
+                        can_interrupt = true;
+                        break;
+                    case 6://31
                         {
                             Poradi= 7;
                             CastTimer = 2000;
@@ -1070,20 +1031,20 @@ public:
                             can_interrupt = false;
                             break;
                         }
-                        case 7://34
-                            Poradi = 8;
-                            CastTimer = 5000;
-                            me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
-                            can_interrupt = true;
-                            break;
-                        case 8://40
+                    case 7://34
+                        Poradi = 8;
+                        CastTimer = 5000;
+                        me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
+                        can_interrupt = true;
+                        break;
+                    case 8://40
                         {
                             can_interrupt = false;
                             CastTimer = 20000;
                             Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
                             if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
-                        break;
+                            break;
                         }
                     }
                 }
@@ -1098,12 +1059,12 @@ public:
 
                     switch(Poradi)
                     {
-                        case 0:
+                    case 0:
                         {
                             Poradi = 1;
                         }
                         break;
-                        case 1: //5 SEC
+                    case 1: //5 SEC
                         {
                             Poradi = 2;
                             CastTimer = 7000; 
@@ -1111,16 +1072,16 @@ public:
                             can_interrupt = true;
                         }
                         break;
-                        case 2: //13
+                    case 2: //13
                         {
                             can_interrupt = false;
                             Poradi = 3;
                             CastTimer = 2000;
-                            if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast(SPELL_BITTING_CHILL);
+                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                                DoCast(pTarget, SPELL_BITTING_CHILL);
                         }
                         break;
-                        case 3: // 16
+                    case 3: // 16
                         {
                             can_interrupt = false;
                             Poradi = 4;
@@ -1135,11 +1096,11 @@ public:
                                         pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE_10M, true);
                                         pTarget->ToPlayer()->TeleportTo(pFlashFreeze->GetMapId(), pFlashFreeze->GetPositionX(),pFlashFreeze->GetPositionY(),pFlashFreeze->GetPositionZ(),pTarget->GetOrientation()); // Protoze nechcem aby to nestalo vizualne za houby
                                     }
-                                 }
+                                }
                             }
                         }
                         break;
-                        case 4: //19
+                    case 4: //19
                         {
                             can_interrupt = true;
                             Poradi = 5;
@@ -1147,7 +1108,7 @@ public:
                             me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                         }
                         break;
-                        case 5:// 25
+                    case 5:// 25
                         {
                             can_interrupt = true;
                             Poradi = 6;
@@ -1155,7 +1116,7 @@ public:
                             me->CastSpell(me,SPELL_ARCANE_STORM,false);
                         }
                         break;
-                        case 6://31
+                    case 6://31
                         {
                             can_interrupt = false;
                             Poradi = 7;
@@ -1170,11 +1131,11 @@ public:
                                         pFlashFreeze->CastSpell(pTarget, SPELL_FLASH_FREEZE_10M, true);
                                         pTarget->ToPlayer()->TeleportTo(pFlashFreeze->GetMapId(), pFlashFreeze->GetPositionX(),pFlashFreeze->GetPositionY(),pFlashFreeze->GetPositionZ(),pTarget->GetOrientation()); // Protoze nechcem aby to nestalo vizualne za houby
                                     }
-                                 }
+                                }
                             }
                         }
                         break;
-                        case 7://34
+                    case 7://34
                         {
                             can_interrupt = true;
                             Poradi = 8;
@@ -1182,12 +1143,12 @@ public:
                             me->CastSpell(me,SPELL_RELEASE_ABERRATION,false);
                         }
                         break;
-                        case 8://40
+                    case 8://40
                         {
                             can_interrupt = false;
                             CastTimer = 20000;
-                            if (SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast (SPELL_BITTING_CHILL);
+                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                                DoCast(pTarget, SPELL_BITTING_CHILL);
                         }
                         break;
                     }
@@ -1253,7 +1214,7 @@ public:
                 }
                 else
                     uiEngulfingDarkness -= diff;
-                
+
                 if(!StopTimer)
                 {
                     if(uiVilleSwill <= diff)
@@ -1273,21 +1234,21 @@ public:
         {
             switch(pSummon->GetEntry())
             {
-                case NPC_VILE_SWILL_PREEFECT:
-                    pSummon->CastSpell(pSummon,SPELL_VILE_SWILL_PREEFECT,true);
-                    break;
-                case NPC_MAGMA_JETS:
-                    pSummon->CastSpell(pSummon,78095,false);
-                    break;
-                case NPC_ABERRATION:
-                    pSummon->GetMotionMaster()->MoveJump(-106.564323f, -455.508728f, 73.458221f,1.0f,1.0f);
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0)) 
-                       if (pSummon->AI())
-                           pSummon->AI()->AttackStart(pTarget);
-                    break;
-                case NPC_FLASH_FREEZE:
-                    pSummon->AddAura(77712,pSummon);
-                    break;
+            case NPC_VILE_SWILL_PREEFECT:
+                pSummon->CastSpell(pSummon,SPELL_VILE_SWILL_PREEFECT,true);
+                break;
+            case NPC_MAGMA_JETS:
+                pSummon->CastSpell(pSummon,78095,false);
+                break;
+            case NPC_ABERRATION:
+                pSummon->GetMotionMaster()->MoveJump(-106.564323f, -455.508728f, 73.458221f,1.0f,1.0f);
+                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0)) 
+                    if (pSummon->AI())
+                        pSummon->AI()->AttackStart(pTarget);
+                break;
+            case NPC_FLASH_FREEZE:
+                pSummon->AddAura(77712,pSummon);
+                break;
             }
         }
 
@@ -1302,15 +1263,15 @@ public:
 
         void CleanPrimeSubject()
         {
-             Unit* Prime = NULL;
-             for (std::vector<uint64>::const_iterator itr = PrimeSubject.begin(); itr != PrimeSubject.end(); ++itr) {
+            Unit* Prime = NULL;
+            for (std::vector<uint64>::const_iterator itr = PrimeSubject.begin(); itr != PrimeSubject.end(); ++itr) {
                 Prime = me->GetMap()->GetCreature((*itr));
                 if (Prime) {
                     if (Prime->isAlive())
                         Prime->ToCreature()->ForcedDespawn();
                 }
-             }
-             PrimeSubject.clear();
+            }
+            PrimeSubject.clear();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -1332,7 +1293,7 @@ public:
                 pInstance->SetData(DATA_MALORIAK_GUID, DONE);
 
                 if (IsHeroic()) {
-                // because automatic assignment achievement doesn't work correctly,we must do it manually
+                    // because automatic assignment achievement doesn't work correctly,we must do it manually
                     pInstance->DoCompleteAchievement(5108);
                 }
             }
@@ -1341,8 +1302,8 @@ public:
             {
                 if(pInstance)
                 {
-                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
-                         pInstance->DoCompleteAchievement(5310);
+                    if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                        pInstance->DoCompleteAchievement(5310);
                 }
             }
         }
@@ -1371,17 +1332,21 @@ public:
         }
         uint32 AggroTimer;
         bool StopTimer;
+        bool castGrowth;
 
         void Reset()
         {
             AggroTimer = 4000;
             StopTimer = false;
+            castGrowth = false;
+            me->RemoveAllAuras();
         }
 
         void EnterCombat(Unit * /*who*/)
         {
             DoZoneInCombat();
-            me->AddAura(SPELL_GROWTH_CATACLYST,me);
+            castGrowth = false;
+            me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1401,76 +1366,78 @@ public:
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 } else AggroTimer -= diff;
             }
+                if (me->HasAura(SPELL_DEBILITATING_SLIME))
+                {
+                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+                    castGrowth = true;
+                }
+                else
+                {
+                    if (castGrowth == true)
+                    {
+                        me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+                        castGrowth = false;
+                    }
+                }
         }
     };
 };
 
 class npc_aberration: public CreatureScript
 {
-    public:
-        npc_aberration() : CreatureScript("npc_aberration") { }
+public:
+    npc_aberration() : CreatureScript("npc_aberration") { }
 
-        struct npc_aberrationAI : public ScriptedAI
+    struct npc_aberrationAI : public ScriptedAI
+    {
+        npc_aberrationAI(Creature *c) : ScriptedAI(c){}
+
+        uint32 ListSize;
+        bool castGrowth;
+
+        void Reset()
         {
-            npc_aberrationAI(Creature *c) : ScriptedAI(c){}
-
-            uint32 ListSize;
-            uint32 timer;
- 
-            void CheckAuraCount()
-            {
-                std::list<Creature*> AuraCount;
-                me->GetCreatureListWithEntryInGrid(AuraCount, NPC_ABERRATION, 10.0f);
-                if (!AuraCount.empty())
-                {
-                    
-                    for (std::list<Creature*>::const_iterator itr = AuraCount.begin(); itr != AuraCount.end(); ++itr)
-                    {
-                        for (uint32 i = 0; i < AuraCount.size(); ++i)
-                        {
-                            if (!me->HasAura(SPELL_DEBILITATING_SLIME))
-                                (*itr)->AddAura(SPELL_GROWTH_CATACLYST,me);
-                        }
-                    }
-                }
-            }
-
-            void Reset()
-            {
-                me->RemoveAllAuras();
-                timer = 1000;
-            }
-
-            void EnterCombat(Unit* /*target*/) 
-            { 
-                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                me->GetMotionMaster()->Clear(true);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if(timer <= diff)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
-                    CheckAuraCount();
-                    timer = 2000;
-                }
-                else
-                    timer -= diff;
-
-               DoMeleeAttackIfReady();
-            }
-
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_aberrationAI(creature);
+            castGrowth = false;
+            me->RemoveAllAuras();
         }
+
+        void EnterCombat(Unit* /*target*/) 
+        {
+            castGrowth = false;
+            me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            me->GetMotionMaster()->Clear(true);
+            me->GetMotionMaster()->MoveChase(me->getVictim());
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasAura(SPELL_DEBILITATING_SLIME))
+            {
+                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+                castGrowth = true;
+            }
+            else
+            {
+                if (castGrowth == true)
+                {
+                    me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+                    castGrowth = false;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_aberrationAI(creature);
+    }
 };
 
 class spell_gen_maloriak_remedy : public SpellScriptLoader
