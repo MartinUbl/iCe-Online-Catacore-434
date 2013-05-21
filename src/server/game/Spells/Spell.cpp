@@ -520,26 +520,9 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
     m_channelTargetEffectMask = 0;
 
     // determine reflection
-    m_canReflect = false;
-
-    if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !IsAreaOfEffectSpell(m_spellInfo) && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CANT_REFLECTED))
-    {
-        for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
-        {
-            if (m_spellInfo->Effect[j] == 0)
-                continue;
-
-            if (!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]))
-                m_canReflect = true;
-            else
-                m_canReflect = (m_spellInfo->AttributesEx & SPELL_ATTR1_NEGATIVE) ? true : false;
-
-            if (m_canReflect)
-                continue;
-            else
-                break;
-        }
-    }
+    m_canReflect = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !(m_spellInfo->Attributes & SPELL_ATTR0_ABILITY)
+        && !(m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REFLECTED) && !(m_spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+        && !IsPassiveSpell(m_spellInfo) && !IsPositiveSpell(m_spellInfo->Id);
 
     CleanupTargetList();
     CleanupEffectExecuteData();
@@ -5861,8 +5844,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
                     if (!aurApp)
                         continue;
-                    bool negative = (spellInfo->AttributesEx & SPELL_ATTR1_NEGATIVE) || aurApp->IsNegative();
-                    if (enemy != negative)  // only positive from enemies and negative from friends
+                    bool positive = IsPositiveSpell(m_spellInfo->Id) || aurApp->IsPositive();
+                    if (enemy == positive)  // only positive from enemies and negative from friends
                     {
                         hasMagic = true;
                         break;
@@ -6263,7 +6246,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         //Target must be facing you.
-        if (((m_spellInfo->Attributes == (SPELL_ATTR0_UNK4 | SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_UNK18 | SPELL_ATTR0_STOP_ATTACK_TARGET)) || (m_spellInfo->Id == 1776 && !m_caster->HasAura(56809))) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
+        if (((m_spellInfo->Attributes == (SPELL_ATTR0_ABILITY | SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_UNK18 | SPELL_ATTR0_STOP_ATTACK_TARGET)) || (m_spellInfo->Id == 1776 && !m_caster->HasAura(56809))) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;

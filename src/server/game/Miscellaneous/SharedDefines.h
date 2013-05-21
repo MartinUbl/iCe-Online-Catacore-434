@@ -278,7 +278,7 @@ enum SpellAttr0
     SPELL_ATTR0_REQ_AMMO                         = 0x00000002, //  1
     SPELL_ATTR0_ON_NEXT_SWING                    = 0x00000004, //  2 on next swing
     SPELL_ATTR0_UNK3                             = 0x00000008, //  3 not set in 3.0.3
-    SPELL_ATTR0_UNK4                             = 0x00000010, //  4
+    SPELL_ATTR0_ABILITY                          = 0x00000010, //  4 client puts 'ability' instead of 'spell' in game strings for these spells
     SPELL_ATTR0_TRADESPELL                       = 0x00000020, //  5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR0_PASSIVE                          = 0x00000040, //  6 Passive spell
     SPELL_ATTR0_UNK7                             = 0x00000080, //  7 visible?
@@ -317,7 +317,7 @@ enum SpellAttr1
     SPELL_ATTR1_UNK4                             = 0x00000010, //  4 stealth and whirlwind
     SPELL_ATTR1_NOT_BREAK_STEALTH                = 0x00000020, //  5 Not break stealth
     SPELL_ATTR1_CHANNELED_2                      = 0x00000040, //  6 channeled self
-    SPELL_ATTR1_NEGATIVE                         = 0x00000080, //  7
+    SPELL_ATTR1_CANT_BE_REFLECTED                = 0x00000080, //  7
     SPELL_ATTR1_NOT_IN_COMBAT_TARGET             = 0x00000100, //  8 Spell req target not to be in combat state
     SPELL_ATTR1_UNK9                             = 0x00000200, //  9 melee spells
     SPELL_ATTR1_NO_THREAT                        = 0x00000400, // 10 no generates threat on cast 100% (old NO_INITIAL_AGGRO)
@@ -348,7 +348,7 @@ enum SpellAttr2
 {
     SPELL_ATTR2_ALLOW_DEAD_TARGET                = 0x00000001, //  0
     SPELL_ATTR2_UNK1                             = 0x00000002, //  1 ? many triggered spells have this flag
-    SPELL_ATTR2_CANT_REFLECTED                   = 0x00000004, //  2 ? used for detect can or not spell reflected
+    SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS            = 0x00000004, //  2
     SPELL_ATTR2_UNK3                             = 0x00000008, //  3
     SPELL_ATTR2_ALWAYS_APPLY_MODIFIERS           = 0x00000010, //  4 ? spell modifiers are applied dynamically (even if aura is not passive)
     SPELL_ATTR2_AUTOREPEAT_FLAG                  = 0x00000020, //  5

@@ -1085,10 +1085,6 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
     if (!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex],spellproto->EffectImplicitTargetB[effIndex]))
         return false;
 
-    // AttributesEx check
-    if (spellproto->AttributesEx & SPELL_ATTR1_NEGATIVE)
-        return false;
-
     if (!deep && spellproto->EffectTriggerSpell[effIndex]
         && !spellproto->EffectApplyAuraName[effIndex]
         && IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex],spellproto->EffectImplicitTargetB[effIndex])
@@ -4350,11 +4346,6 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
             count++;
             break;
-        case 64844: // Divine Hymn
-        case 64904: // Hymn of Hope
-            spellInfo->AttributesEx &= ~SPELL_ATTR1_NEGATIVE;
-            ++count;
-            break;
         case 44978: case 45001: case 45002:     // Wild Magic
         case 45004: case 45006: case 45010:     // Wild Magic
         case 31347: // Doom
@@ -4505,7 +4496,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_PATH;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_PATH;
             spellInfo->EffectRadiusIndex[0] = 13;
-            spellInfo->AttributesEx |= SPELL_ATTR1_NEGATIVE;
+            spellInfo->AttributesEx |= SPELL_ATTR0_NEGATIVE_1;
             break;
         case 51852:    // The Eye of Acherus (no spawn in phase 2 in db)
             spellInfo->EffectMiscValue[0] |= 1;
@@ -4804,7 +4795,7 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 43681: // Inactive (Spell for AFK Reporter)
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_REFLECTED;
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
             count++;
             break;
         case 79361: // Twilight Phoenix (changing model from Twilight Phoenix to Dark Phoenix)
