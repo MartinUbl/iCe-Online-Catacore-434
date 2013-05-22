@@ -3181,6 +3181,41 @@ enum SpellFamilyNames
     SPELLFAMILY_MINIGAME    = 50
 };
 
+static const uint32 ClassSpellFamilyMap[] = {
+    SPELLFAMILY_GENERIC,        // CLASS_NONE
+    SPELLFAMILY_WARRIOR,        // CLASS_WARRIOR
+    SPELLFAMILY_PALADIN,        // CLASS_PALADIN
+    SPELLFAMILY_HUNTER,         // CLASS_HUNTER
+    SPELLFAMILY_ROGUE,          // CLASS_ROGUE
+    SPELLFAMILY_PRIEST,         // CLASS_PRIEST
+    SPELLFAMILY_DEATHKNIGHT,    // CLASS_DEATH_KNIGHT
+    SPELLFAMILY_SHAMAN,         // CLASS_SHAMAN
+    SPELLFAMILY_MAGE,           // CLASS_MAGE
+    SPELLFAMILY_WARLOCK,        // CLASS_WARLOCK
+    SPELLFAMILY_GENERIC,        // CLASS_UNK
+    SPELLFAMILY_DRUID           // CLASS_DRUID
+};
+
+static uint32 GetSpellFamilyFromClass(uint8 plclass)
+{
+    if (plclass > CLASS_DRUID)
+        return SPELLFAMILY_GENERIC;
+
+    return ClassSpellFamilyMap[plclass];
+}
+
+static uint8 GetClassFromSpellFamily(uint32 spellFamily)
+{
+    uint32 i;
+    for (i = 0; i < sizeof(ClassSpellFamilyMap)/sizeof(uint32); i++)
+    {
+        if (ClassSpellFamilyMap[i] == spellFamily)
+            return i;
+    }
+
+    return CLASS_NONE;
+}
+
 // stored in character_pet.slot
 enum PetSlot
 {
