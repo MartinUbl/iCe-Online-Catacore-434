@@ -5127,6 +5127,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92505:
             spellInfo->procFlags = 0;
             break;
+        case 93495:// Wake
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_CONE_BACK;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY; 
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY; 
+            break;
         default:
             break;
         }
