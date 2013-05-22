@@ -3196,7 +3196,7 @@ static const uint32 ClassSpellFamilyMap[] = {
     SPELLFAMILY_DRUID           // CLASS_DRUID
 };
 
-static uint32 GetSpellFamilyFromClass(uint8 plclass)
+inline uint32 GetSpellFamilyFromClass(uint8 plclass)
 {
     if (plclass > CLASS_DRUID)
         return SPELLFAMILY_GENERIC;
@@ -3204,7 +3204,7 @@ static uint32 GetSpellFamilyFromClass(uint8 plclass)
     return ClassSpellFamilyMap[plclass];
 }
 
-static uint8 GetClassFromSpellFamily(uint32 spellFamily)
+inline uint8 GetClassFromSpellFamily(uint32 spellFamily)
 {
     uint32 i;
     for (i = 0; i < sizeof(ClassSpellFamilyMap)/sizeof(uint32); i++)
