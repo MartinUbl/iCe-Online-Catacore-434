@@ -3668,6 +3668,7 @@ void Spell::EffectJump(SpellEffIndex effIndex)
 
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
+    m_caster->GetMotionMaster()->MovementExpired(false);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
 }
 
@@ -3690,6 +3691,7 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
 
     float speedXY, speedZ;
     CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
+    m_caster->GetMotionMaster()->MovementExpired(false);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
 }
 

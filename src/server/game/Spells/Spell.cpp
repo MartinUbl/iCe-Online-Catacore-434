@@ -6781,8 +6781,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (bg->GetStatus() != STATUS_IN_PROGRESS)
                         return SPELL_FAILED_TRY_AGAIN;
 
-                /* not while falling */
-                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && m_spellInfo->Id != 6544)
+                /* not while falling (exclude triggered spells - they are probably casted by another player like Death Grip while jumping) */
+                if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) && !IsTriggered() && m_spellInfo->Id != 6544)
                     return SPELL_FAILED_FALLING;
 
                 /* exclude flat ground for charge when not in BG */
