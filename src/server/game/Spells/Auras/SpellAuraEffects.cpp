@@ -2795,6 +2795,21 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
 
                 break;
             }
+            case 101111: // Dogged Determination
+            {
+                AuraEffect* pEffect = GetBase()->GetEffect(EFFECT_0);
+                if (pEffect)
+                {
+                    if (pEffect->GetAmount() == 100)
+                        target->RemoveAurasDueToSpell(101111);
+                    else
+                    {
+                        pEffect->ChangeAmount(pEffect->GetAmount() + 5);
+                        GetBase()->SetNeedClientUpdateForTargets();
+                    }
+                }
+                break;
+            }
         }
         break;
         case SPELLFAMILY_MAGE:

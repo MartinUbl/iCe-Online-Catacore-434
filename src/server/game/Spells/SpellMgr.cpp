@@ -5025,6 +5025,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 15; // 3yd
             spellInfo->EffectRadiusIndex[1] = 13; // 10yd
             break;
+        case 99842: // Magma Rupture
+        case 101205: // + difficulty entries
+        case 101206:
+        case 101207:
+            spellInfo->EffectRadiusIndex[0] = 15;
+            break;
         case 51466: // Elemental Oath (Rank 1)
         case 51470: // Elemental Oath (Rank 2)
             spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
