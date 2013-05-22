@@ -918,8 +918,14 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_NEGATIVE         = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };
 
+struct EnchantCustomProperties
+{
+    bool allowedInBattleground; // flag for not removing temp enchant on battleground entering
+    uint16 classOrigins;        // bitmask based on SpellFamilyName enum values (playable)
+};
+
 typedef std::vector<uint32> SpellCustomAttribute;
-typedef std::vector<bool> EnchantCustomAttribute;
+typedef std::vector<EnchantCustomProperties*> EnchantCustomAttribute;
 
 typedef std::map<int32, std::vector<int32> > SpellLinkedMap;
 
@@ -1236,9 +1242,15 @@ class SpellMgr
             return spell_id;
         }
 
-        uint32 IsArenaAllowedEnchancment(uint32 ench_id) const
+        uint32 IsArenaAllowedEnchantment(uint32 ench_id, uint8 playerClass = 0) const
         {
-            return mEnchantCustomAttr[ench_id];
+            if (!mEnchantCustomAttr[ench_id])
+                return false;
+
+            return (mEnchantCustomAttr[ench_id]->allowedInBattleground &&
+                       (playerClass == 0 ||
+                        mEnchantCustomAttr[ench_id]->classOrigins == 0 ||
+                        (mEnchantCustomAttr[ench_id]->classOrigins & (1 << playerClass)) != 0));
         }
 
         uint8 IsHighRankOfSpell(uint32 spell1,uint32 spell2) const

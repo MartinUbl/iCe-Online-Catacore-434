@@ -5189,7 +5189,7 @@ void SpellMgr::LoadEnchantCustomAttr()
     uint32 count = 0;
 
     for (uint32 i = 0; i < size; ++i)
-       mEnchantCustomAttr[i] = 0;
+       mEnchantCustomAttr[i] = NULL;
 
     for (uint32 i = 0; i < GetSpellStore()->GetNumRows(); ++i)
     {
@@ -5209,7 +5209,19 @@ void SpellMgr::LoadEnchantCustomAttr()
                 SpellItemEnchantmentEntry const *ench = sSpellItemEnchantmentStore.LookupEntry(enchId);
                 if (!ench)
                     continue;
-                mEnchantCustomAttr[enchId] = true;
+
+                // create structure
+                if (!mEnchantCustomAttr[enchId])
+                {
+                    mEnchantCustomAttr[enchId] = new EnchantCustomProperties;
+                    mEnchantCustomAttr[enchId]->classOrigins = 0;
+                    mEnchantCustomAttr[enchId]->allowedInBattleground = true;
+                }
+
+                // add class, who can cast that temp enchantment, to classOrigins bitfield
+                if (spellInfo->SpellFamilyName < 16)
+                    mEnchantCustomAttr[enchId]->classOrigins |= 1 << (GetClassFromSpellFamily(spellInfo->SpellFamilyName));
+
                 count++;
                 break;
             }
