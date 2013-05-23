@@ -11900,6 +11900,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                 case 379:   // Earth Shield
                 case 33778: // Lifebloom Final Bloom
                 case 64844: // Divine Hymn
+                case 85222: // Light of Dawn
                     break;
                 default:
                     return false;
