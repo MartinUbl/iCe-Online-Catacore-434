@@ -5123,6 +5123,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_CONE_ENEMY; 
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CONE_ENEMY; 
             break;
+        /*case 99476: // The Widow's Kiss (Beth'tilac)
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+            count++;
+            break;*/
         default:
             break;
         }

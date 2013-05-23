@@ -690,7 +690,7 @@ enum MovementFlags
     MOVEMENTFLAG_ASCENDING             = 0x00200000,               // press "space" when flying
     MOVEMENTFLAG_DESCENDING            = 0x00400000,
     MOVEMENTFLAG_CAN_FLY               = 0x00800000,               // Appears when unit can fly AND also walk
-    MOVEMENTFLAG_FLYING                = 0x01000000,               // unit is actually flying. pretty sure this is only used for players. creatures use disable_gravity
+    MOVEMENTFLAG_FLYING                = 0x01000000,               // unit is actually flying
     MOVEMENTFLAG_SPLINE_ELEVATION      = 0x02000000,               // used for flight paths
     MOVEMENTFLAG_WATERWALKING          = 0x04000000,               // prevent unit from falling through water
     MOVEMENTFLAG_FALLING_SLOW          = 0x08000000,               // active rogue safe fall spell (passive)

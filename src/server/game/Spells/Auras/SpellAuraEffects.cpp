@@ -3251,6 +3251,10 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                     // Ball of Flames Visual
                     case 71706:
                         return;
+                    // The Widow's Kiss (Beth'tilac)
+                    case 99476:
+                        triggerSpellId = 99506;
+                        break;
                 }
                 break;
             }
@@ -3401,6 +3405,14 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                 // Do not apply while moving or when already has one
                 if (caster->isMoving() || caster->HasAura(triggerSpellId))
                     return;
+                break;
+            }
+            // Consume (Beth'tilac)
+            case 99304:
+            {
+                // make the Cinderweb Spiderling edible
+                triggerTarget->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                break;
             }
         }
     }

@@ -47,6 +47,7 @@ enum PowerType
     POWER_TYPE_UNK_8                             = 150,
     POWER_TYPE_UNK_9                             = 151,
     POWER_TYPE_UNK_10                            = 153,
+    POWER_FIRE_ENERGY                            = 174,
 };
 
 enum VehicleFlags

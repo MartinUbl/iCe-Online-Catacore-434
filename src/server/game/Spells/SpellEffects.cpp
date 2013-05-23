@@ -2360,6 +2360,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 91809, true);
                     break;
                 }
+                case 99130: // Seeping Venom (Cinderweb Spiderling - Beth'tilac)
+                {
+                    m_caster->CastSpell(unitTarget, m_spellInfo->EffectBasePoints[effIndex], true);
+                    break;
+                }
             }
 
             break;
@@ -8049,6 +8054,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         unitTarget->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, POWER_ENERGY);
                         return;
                     }
+                    break;
+                }
+                case 99304:                                 // Consume (Beth'tilac)
+                {
+                    if (m_caster->IsVehicle() && unitTarget)
+                        unitTarget->CastSpell(m_caster, damage, false);  // Ride Vehicle
+                    break;
                 }
             }
             break;

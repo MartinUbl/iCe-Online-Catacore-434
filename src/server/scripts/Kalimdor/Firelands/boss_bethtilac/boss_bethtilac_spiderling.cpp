@@ -1,0 +1,149 @@
+/*
+ * Copyright (C) 2006-2013 iCe Online <http://ice-wow.eu>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * implementation of AI for summon Cinderweb Spiderling
+ * as part of the script of Beth'tilac
+ */
+
+
+#include "ScriptPCH.h"
+#include "../firelands.h"
+#include "boss_bethtilac_data.h"
+
+#include "boss_bethtilac_spiderling.h"
+
+
+static const uint32 MOVE_CHASE = 1;
+
+
+enum SpiderlingSpells
+{
+    SPELL_SEEPING_VENOM = 99130
+};
+
+
+
+CreatureAI *mob_spiderling::GetAI(Creature *creature) const
+{
+    if (creature->isSummon())
+        return new mob_spiderlingAI(creature);
+
+    return NULL;
+}
+
+
+mob_spiderling::mob_spiderlingAI::mob_spiderlingAI(Creature *creature)
+    : SpiderAI(creature)
+    , followedGuid(0)
+    , following(false)
+{
+}
+
+
+mob_spiderling::mob_spiderlingAI::~mob_spiderlingAI()
+{
+}
+
+
+void mob_spiderling::mob_spiderlingAI::EnterEvadeMode()
+{
+    // do nothing, don't evade
+}
+
+
+void mob_spiderling::mob_spiderlingAI::UpdateAI(const uint32 diff)
+{
+    if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
+    {
+        me->DespawnOrUnsummon();
+        return;
+    }
+}
+
+
+void mob_spiderling::mob_spiderlingAI::MovementInform(uint32 type, uint32 id)
+{
+    me->StopMoving();
+    FollowTarget();
+}
+
+
+void mob_spiderling::mob_spiderlingAI::MoveInLineOfSight(Unit *who)
+{
+    if (!me->HasSpellCooldown(SPELL_SEEPING_VENOM))
+    {
+        me->CastSpell(me, SPELL_SEEPING_VENOM, false);
+        me->AddCreatureSpellCooldown(SPELL_SEEPING_VENOM);
+    }
+}
+
+
+void mob_spiderling::mob_spiderlingAI::IsSummonedBy(Unit *summoner)
+{
+    FollowTarget();
+}
+
+
+Unit *mob_spiderling::mob_spiderlingAI::ChooseTarget()
+{
+    // find Drone or Beth'tilac to follow to be eaten
+    if (Creature *drone = me->FindNearestCreature(NPC_CINDERWEB_DRONE, 100.0f, true))
+        if (drone->IsVehicle())
+            return drone;
+
+    if (Creature *beth = me->FindNearestCreature(NPC_BETHTILAC, 100.0f, true))
+    {
+        if (beth->GetPositionZ() <= webZPosition && beth->IsVehicle())
+            return beth;
+    }
+
+    return NULL;
+}
+
+
+bool mob_spiderling::mob_spiderlingAI::FollowTarget()
+{
+    if (following)
+    {
+        if (Unit *followed = ObjectAccessor::GetUnit(*me, followedGuid))
+        {
+            if (followed->isAlive())
+            {
+                me->StopMoving();
+                me->GetMotionMaster()->MoveChase(followed);
+                return true;
+            }
+        }
+    }
+
+    if (Unit *unit = ChooseTarget())
+    {
+        following = true;
+        followedGuid = unit->GetGUID();
+        me->GetMotionMaster()->MoveChase(unit);
+
+        return true;
+    }
+
+    // move to the middle and wait
+    DoZoneInCombat();
+    following = false;
+    followedGuid = 0;
+
+    return false;
+}

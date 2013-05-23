@@ -109,6 +109,20 @@ public:
                 return 0;
         }
 
+        virtual uint32 GetData(uint32 DataId)
+        {
+            if (DataId < MAX_ENCOUNTER && DataId >= 0)
+                return m_auiEncounter[DataId];
+
+            return 0;
+        }
+
+        virtual void SetData(uint32 DataId, uint32 Value)
+        {
+            if (DataId <= MAX_ENCOUNTER && DataId >= 0)
+                m_auiEncounter[DataId] = Value;
+        }
+
         virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
         virtual uint32 GetMaxEncounter(){ return MAX_ENCOUNTER; }
     };

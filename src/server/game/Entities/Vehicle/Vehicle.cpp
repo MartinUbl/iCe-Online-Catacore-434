@@ -96,6 +96,10 @@ void Vehicle::Install()
                 me->SetMaxPower(POWER_ENERGY, 50);
                 me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
                 break;
+            case POWER_FIRE_ENERGY:
+                me->setPowerType(POWER_MANA);
+                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
+                break;
             default:
                 for (uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)
                 {

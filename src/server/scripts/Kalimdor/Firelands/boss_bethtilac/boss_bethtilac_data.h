@@ -15,9 +15,39 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
-#include "firelands.h"
+/*
+ * shared data used by creatures in Beth'tilac encounter
+ */
 
-void AddSC_boss_bethtilac()
+
+#ifndef BOSS_BETHTILAC_DATA_H
+#define BOSS_BETHTILAC_DATA_H
+
+
+// Encounter data
+
+static const float webZPosition = 111.7f;
+//static const float groundZPosition = 74.042f;
+
+enum BethtilacSpawns
 {
-}
+    NPC_BETHTILAC = 52498,
+
+    // spawns in waves
+    NPC_CINDERWEB_DRONE = 52581,
+    NPC_CINDERWEB_SPINNER = 52524,
+    NPC_CINDERWEB_SPIDERLING = 52447,
+};
+
+// movement IDs
+enum MovementId { MOVE_POINT_UP = 1, MOVE_POINT_DOWN };
+
+
+enum SharedSpells
+{
+    SPELL_SPIDERWEB_FILAMENT = 98623,
+    SPELL_CONSUME = 99304,
+};
+
+
+#endif // BOSS_BETHTILAC_DATA_H
