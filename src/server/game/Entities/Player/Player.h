@@ -459,6 +459,12 @@ struct RuneInfo
     AuraEffect const * ConvertAura;
 };
 
+struct SavedCastedAura
+{
+    uint64 targetGUID;
+    uint32 spell;
+};
+
 struct Runes
 {
     RuneInfo runes[MAX_RUNES];
@@ -1400,6 +1406,11 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetDigCreatureSlot(uint8 slot) { if (slot >= MAX_DIGSITES) return 0; return m_researchSites.site_creature[slot]; };
         void SetNewResearchProject(uint8 slot, bool completed = false);
         bool HasResearchProject(uint32 project);
+
+        bool SaveCastedAuraApplyCondition(Unit* target, const SpellEntry* spell);
+        void SaveCastedAuraApply(Aura* pAura);
+        bool RemoveCastedAuraApply(Aura* pAura);
+        void ProcessCastedAuraApplyMapChange();
 
         void ApplyEquipCooldown(Item * pItem);
         void SetAmmo(uint32 item);
@@ -2788,6 +2799,8 @@ class Player : public Unit, public GridObject<Player>
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];
+
+        std::list<SavedCastedAura*> m_myCastedAuras;
 
         uint32 m_ratedBgStats[RATED_BG_STATS_MAX]; // for won and lost games, rating is stored in PlayerFields
 

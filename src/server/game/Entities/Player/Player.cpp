@@ -699,6 +699,9 @@ Player::~Player ()
     for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
         delete _CUFProfiles[i];
 
+    for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+        delete (*itr);
+
     sWorld->DecreasePlayerCount();
 }
 
@@ -25212,6 +25215,172 @@ void Player::SetOriginalGroup(Group *group, int8 subgroup)
             SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
         else
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+    }
+}
+
+bool Player::SaveCastedAuraApplyCondition(Unit* target, const SpellEntry* spell)
+{
+    // Special conditions for saving spell auras even there for later reuse
+    // We have to set a condition for saving, to avoid huge overload by handling
+    // hundrets of auras per caster, that would really slow us down
+
+    if (!spell || !target)
+        return false;
+
+    if (getClass() == CLASS_MAGE)
+    {
+        // Pyromaniac
+        if (HasAura(34293) || HasAura(34295))
+        {
+            if (spell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
+                return true;
+        }
+    }
+    else if (getClass() == CLASS_DRUID)
+    {
+        // Rejuvenation
+        if (spell->Id == 774)
+        {
+            // Nature's Bounty
+            if (HasAura(17076) || HasAura(17075) || HasAura(17074))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+void Player::SaveCastedAuraApply(Aura* pAura)
+{
+    SavedCastedAura* save = new SavedCastedAura;
+    save->targetGUID = pAura->GetOwner() ? pAura->GetOwner()->GetGUID() : 0;
+    save->spell = pAura->GetSpellProto() ? pAura->GetSpellProto()->Id : 0;
+
+    m_myCastedAuras.push_back(save);
+}
+
+bool Player::RemoveCastedAuraApply(Aura* pAura)
+{
+    // Check for target existence and aura presence
+    // This place is suitable for this thing - it's impossible to catch it somewhere else more reliable
+    Unit* target = NULL;
+    for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); )
+    {
+        if (!(*itr))
+        {
+            delete (*itr);
+            itr = m_myCastedAuras.erase(itr);
+            continue;
+        }
+
+        target = Unit::GetUnit(*this, (*itr)->targetGUID);
+        if (!target)
+        {
+            delete (*itr);
+            itr = m_myCastedAuras.erase(itr);
+            continue;
+        }
+
+        if (!target->HasAura((*itr)->spell))
+        {
+            delete (*itr);
+            itr = m_myCastedAuras.erase(itr);
+            continue;
+        }
+
+        ++itr;
+    }
+
+    for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+    {
+        if ((*itr)->spell == pAura->GetSpellProto()->Id && (*itr)->targetGUID == (pAura->GetOwner() ? pAura->GetOwner()->GetGUID() : 0))
+        {
+            delete (*itr);
+            m_myCastedAuras.erase(itr);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Player::ProcessCastedAuraApplyMapChange()
+{
+    if (getClass() == CLASS_MAGE)
+    {
+        // Pyromaniac
+        if (HasAura(34293) || HasAura(34295))
+        {
+            std::list<uint64> dotTargets;
+            bool found;
+            SpellEntry const *spell = NULL;
+            for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+            {
+                if ((*itr)->spell)
+                    spell = sSpellStore.LookupEntry((*itr)->spell);
+                else
+                    continue;
+
+                if (!spell)
+                    continue;
+
+                if (spell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
+                {
+                    found = false;
+                    for (std::list<uint64>::iterator iter = dotTargets.begin(); iter != dotTargets.end(); ++iter)
+                    {
+                        if (*iter == (*itr)->targetGUID)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        dotTargets.push_back((*itr)->targetGUID);
+                }
+            }
+
+            if (dotTargets.size() >= 3)
+            {
+                int32 bp0 = 10;
+                if (HasAura(34293))
+                    bp0 = 5;
+                CastCustomSpell(this, 83582, &bp0, NULL, NULL, true);
+            }
+            else
+                RemoveAurasDueToSpell(83582);
+        }
+        // Pyromaniac saved aura without talent -> wrong
+        else if (HasAura(83582))
+            RemoveAurasDueToSpell(83582);
+    }
+    else if (getClass() == CLASS_DRUID)
+    {
+        // Nature's Bounty
+        if (HasAura(17076) || HasAura(17075) || HasAura(17074))
+        {
+            uint8 targets = 0;
+            for (std::list<SavedCastedAura*>::iterator itr = m_myCastedAuras.begin(); itr != m_myCastedAuras.end(); ++itr)
+            {
+                if ((*itr)->spell == 774)
+                    targets++;
+            }
+
+            if (targets >= 3)
+            {
+                int32 bp0 = -10;
+                if (HasAura(17076))
+                    bp0 = -30;
+                else if (HasAura(17075))
+                    bp0 = -20;
+                CastCustomSpell(this, 96206, &bp0, NULL, NULL, true);
+            }
+            else if (HasAura(96206))
+                RemoveAurasDueToSpell(96206);
+        }
+        // Nature's Bounty saved aura without talent
+        else if (HasAura(96206))
+            RemoveAurasDueToSpell(96206);
     }
 }
 
