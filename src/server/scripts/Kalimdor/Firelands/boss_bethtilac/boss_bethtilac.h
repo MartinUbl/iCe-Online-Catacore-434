@@ -78,7 +78,7 @@ private:
 
         void DoSmolderingDevastation();
 
-        void ShowWarnText(char *text);    // show warning text in the client screen (checked by videos)
+        void ShowWarnText(const char *text);    // show warning text in the client screen (checked by videos)
 
         // spawns
         void SummonDrone();

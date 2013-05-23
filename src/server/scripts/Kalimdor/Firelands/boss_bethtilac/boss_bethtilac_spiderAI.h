@@ -51,7 +51,7 @@ protected:
     void UpdateTimers(const uint32 diff);
 
     // common functions
-    void DebugOutput(char *str) const;
+    void DebugOutput(const char *str) const;
 
     // manipulating Fire energy (for NPCs who do have it)
     uint32 GetPower() const;

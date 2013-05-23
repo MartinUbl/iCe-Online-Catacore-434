@@ -537,7 +537,7 @@ void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::ShowWarnText(char *text)
+void boss_bethtilac::boss_bethtilacAI::ShowWarnText(const char *text)
 {
     me->MonsterTextEmote(text, 0, true);
 }

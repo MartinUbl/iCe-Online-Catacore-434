@@ -99,7 +99,7 @@ void SpiderAI::UpdateTimers(const uint32 diff)
 }
 
 
-void SpiderAI::DebugOutput(char *str) const
+void SpiderAI::DebugOutput(const char *str) const
 {
 #ifdef _DEBUG
     //me->MonsterTextEmote(str, 0, true);
