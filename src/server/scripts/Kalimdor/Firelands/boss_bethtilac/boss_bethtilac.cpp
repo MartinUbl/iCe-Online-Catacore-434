@@ -336,6 +336,8 @@ void boss_bethtilac::boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases ph
             AddTimer(SP_EMBER_FLARE_2, 6000, true);
             AddTimer(SP_WIDOW_KISS, 32000, true);
             break;
+        default:
+            break;
     }
 }
 
