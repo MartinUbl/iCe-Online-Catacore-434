@@ -33,8 +33,6 @@
 
 // Beth'tilac implementation
 
-enum BethtilacPhases { PHASE_IDLE, PHASE_TRANSFER_1, PHASE_1, PHASE_TRANSFER_2, PHASE_2 };
-
 enum BethtilacSpells
 {
     // phase 1

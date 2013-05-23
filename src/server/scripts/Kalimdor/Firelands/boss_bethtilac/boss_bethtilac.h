@@ -26,7 +26,7 @@
 
 #include "boss_bethtilac_spiderAI.h"
 
-enum BethtilacPhases;
+enum BethtilacPhases { PHASE_IDLE, PHASE_TRANSFER_1, PHASE_1, PHASE_TRANSFER_2, PHASE_2 };
 
 
 // definition of AI class used by Beth'tilac (Firelands)
