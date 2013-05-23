@@ -5031,6 +5031,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 101207:
             spellInfo->EffectRadiusIndex[0] = 15;
             break;
+        case 100002: // Hurl Spear
+        case 99840: // Magma Rupture (Shannox' spell)
+            spellInfo->EffectRadiusIndex[1] = 11; // 45yd
+            break;
         case 51466: // Elemental Oath (Rank 1)
         case 51470: // Elemental Oath (Rank 2)
             spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
