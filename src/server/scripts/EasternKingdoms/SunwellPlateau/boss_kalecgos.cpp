@@ -379,7 +379,7 @@ public:
                     {
                         Player* pPlayer = itr->getSource();
                         if (pPlayer)
-                            me->GetMap()->ToInstanceMap()->PermBindAllPlayers(pPlayer);
+                            me->GetMap()->ToInstanceMap()->PermBindAllPlayers(pPlayer, me);
                     }
                 }
             }

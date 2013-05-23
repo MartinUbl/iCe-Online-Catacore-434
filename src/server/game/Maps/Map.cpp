@@ -2721,9 +2721,12 @@ bool InstanceMap::Reset(uint8 method)
     return m_mapRefManager.isEmpty();
 }
 
-void InstanceMap::PermBindAllPlayers(Player *player)
+void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
 {
     if (!IsDungeon())
+        return;
+
+    if (!pUnit)
         return;
 
     InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
@@ -2748,6 +2751,20 @@ void InstanceMap::PermBindAllPlayers(Player *player)
             data << uint32(0);
             plr->GetSession()->SendPacket(&data);
         }
+
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) instance:(%s) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
+            plr->GetSession()->GetRemoteAddress().c_str(),
+            plr->GetSession()->GetAccountId(),
+            plr->GetName(),
+            "save bind",
+            pUnit->GetEntry(),
+            pUnit->GetName(),
+            GetMapName(),
+            "pos",
+            plr->GetPositionX(),
+            plr->GetPositionY(),
+            plr->GetPositionZ(),
+            plr->GetMapId());
 
         // if the leader is not in the instance the group will not get a perm bind
         if (group && group->GetLeaderGUID() == plr->GetGUID())
