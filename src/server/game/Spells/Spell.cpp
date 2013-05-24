@@ -5844,7 +5844,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
                     if (!aurApp)
                         continue;
-                    bool positive = IsPositiveSpell(m_spellInfo->Id) || aurApp->IsPositive();
+                    bool positive = aurApp->IsPositive();
                     if (enemy == positive)  // only positive from enemies and negative from friends
                     {
                         hasMagic = true;
