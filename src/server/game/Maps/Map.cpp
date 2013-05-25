@@ -2752,7 +2752,7 @@ void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
             plr->GetSession()->SendPacket(&data);
         }
 
-        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) instance:(%s) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
+        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) instance:(%s (id:(%u)) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",
             plr->GetSession()->GetRemoteAddress().c_str(),
             plr->GetSession()->GetAccountId(),
             plr->GetName(),
@@ -2760,6 +2760,7 @@ void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
             pUnit->GetEntry(),
             pUnit->GetName(),
             GetMapName(),
+            GetInstanceId(),
             "pos",
             plr->GetPositionX(),
             plr->GetPositionY(),
