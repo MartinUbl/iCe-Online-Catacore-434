@@ -78,20 +78,79 @@ enum Spells
 enum DisplayIDs
 {
     DISPLAYID_NORMAL         = 38414, // more than 25% HP
+    DISPLAYID_DAMAGED_1      = 38669,
+    DISPLAYID_DAMAGED_2      = 38676,
     DISPLAYID_SHATTERED      = 38594, // less than 25% HP
 
     DISPLAYID_VOLCANO_STILL  = 38054,
     DISPLAYID_VOLCANO_ACTIVE = 38848,
 };
 
-/*
+struct SoundTextEntry
+{
+    uint32 sound;
+    const char* text;
+};
 
-TODOs (Gregory):
+enum SoundTexts
+{
+    ST_AGGRO = 0,
+    ST_DEATH,
+    ST_ARMOR_WEAKEN_1,
+    ST_ARMOR_WEAKEN_2,
+    ST_ARMOR_WEAKEN_3,
+    ST_ARMOR_WEAKEN_4,
+    ST_ARMOR_WEAKEN_5,
+    ST_KILL_1,
+    ST_KILL_2,
+    ST_KILL_3,
+    ST_VOLCANO_1,
+    ST_VOLCANO_2,
+    ST_VOLCANO_3,
+    ST_VOLCANO_4,
+    ST_VOLCANO_5,
+    ST_STOMP_1,
+    ST_STOMP_2,
+    ST_SHATTER_ARMOR,
+    ST_MAX
+};
 
-- spell 98276 - chance to trigger is 0, increase to 100
-- limit targets of spell 98276 and make it trigger spell 98491 (stored in base points)
+static const SoundTextEntry rhyolithQuotes[ST_MAX] = {
+    // aggro
+    {24537, "Hah? Hruumph? Soft little fleshy-things? Here? Nuisances, nuisances!"},
+    // death
+    {24545, "Broken. Mnngghhh... broken..."},
+    // armor weaken
+    {24540, "Oww now hey."},
+    {24541, "Graaahh!"},
+    {24542, "Augh - smooshy little pests, look what you've done!"},
+    {24543, "Uurrghh now you... you infuriate me!"},
+    {24544, "Oh you little beasts..."},
+    // kill player
+    {24546, "Finished."},
+    {24547, "So soft!"},
+    {24548, "Squeak, little pest."},
+    // activating volcano
+    {24550, "Buuurrrnn!"},
+    {24551, "Succumb to living flame."},
+    {24552, "My inner fire can never die!"},
+    {24553, "Consuuuuuuume!"},
+    {24554, "Flesh, buuurrrns."},
+    // stomp
+    {24556, "Stomp now."},
+    {24557, "I'll crush you underfoot!"},
+    // shatter armor
+    {24558, "Eons I have slept undisturbed... Now this... Creatures of flesh, now you will BURN!"}
+};
 
-*/
+static void PlayAndYell(Unit* source, uint32 index)
+{
+    if (index >= ST_MAX)
+        return;
+
+    source->MonsterYell(rhyolithQuotes[index].text, LANG_UNIVERSAL, 0);
+    source->PlayDistanceSound(rhyolithQuotes[index].sound);
+}
 
 class boss_rhyolith: public CreatureScript
 {
@@ -145,6 +204,10 @@ public:
         float moveAngle;
         uint32 directionUpdateTimer;
         uint32 movementUpdateTimer;
+        uint8 directionTimes;
+        bool savedLeft;
+
+        uint8 displayIdPhase;
 
         uint8 phase;
         uint32 concussiveStompTimer;
@@ -179,6 +242,12 @@ public:
             lavaCheckTimer       = 1000;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
+            displayIdPhase       = 0;
+
+            me->SetWalk(true);
+
+            savedLeft      = true;
+            directionTimes = 0;
 
             uint32 mode = pInstance->instance->GetDifficulty();
             if (mode == RAID_DIFFICULTY_10MAN_HEROIC || mode == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -236,6 +305,8 @@ public:
                 directionPower = 50;
             }
 
+            PlayAndYell(me, ST_AGGRO);
+
             phase = 1;
 
             directionUpdateTimer = 1000;
@@ -248,6 +319,12 @@ public:
             magmaDrinkTimer      = 0;
             moveAngle            = me->GetOrientation();
             lastDamage           = 0;
+            displayIdPhase       = 0;
+
+            me->SetWalk(true);
+
+            savedLeft = true;
+            directionTimes = 0;
 
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
             if (foot)
@@ -266,6 +343,11 @@ public:
             me->CastSpell(me, SPELL_OBSIDIAN_ARMOR, true);
             if (Aura* armor = me->GetAura(SPELL_OBSIDIAN_ARMOR))
                 armor->SetStackAmount(80);
+        }
+
+        void KilledUnit(Unit* target)
+        {
+            PlayAndYell(me, ST_KILL_1+urand(0,2));
         }
 
         void EnterEvadeMode()
@@ -306,6 +388,8 @@ public:
             foot = Unit::GetUnit(*me, rightFootGUID);
             if (foot)
                 foot->Kill(foot);
+
+            PlayAndYell(me, ST_DEATH);
         }
 
         void UpdateMovement()
@@ -325,7 +409,7 @@ public:
             me->SetOrientation(moveAngle);
             me->GetMotionMaster()->MovementExpired(false);
             //me->GetMotionMaster()->MovePoint(1, x, y, z);
-            me->GetMotionMaster()->MoveCharge(x, y, z, 2.5f);
+            me->GetMotionMaster()->MoveCharge(x, y, z, 2.25f);
         }
 
         void RefreshPowerBar(uint32 now, bool removal)
@@ -440,6 +524,18 @@ public:
             if (!UpdateVictim() || !me->getVictim())
                 return;
 
+            // displayid switch at 75% and 50%
+            if (displayIdPhase < 1 && me->GetHealthPct() < 75.0f)
+            {
+                displayIdPhase = 1;
+                me->SetDisplayId(DISPLAYID_DAMAGED_1);
+            }
+            else if (displayIdPhase < 2 && me->GetHealthPct() < 50.0f)
+            {
+                displayIdPhase = 2;
+                me->SetDisplayId(DISPLAYID_DAMAGED_2);
+            }
+
             // phase switch at 25%
             if (me->GetHealthPct() < 25.0f && phase != 2)
             {
@@ -447,10 +543,15 @@ public:
                 me->GetMotionMaster()->MovementExpired(true);
                 me->GetMotionMaster()->MoveChase(me->getVictim());
 
+                displayIdPhase = 3;
                 me->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
                 me->SetDisplayId(DISPLAYID_SHATTERED);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, false);
+
+                me->SetWalk(false);
+
+                PlayAndYell(me, ST_SHATTER_ARMOR);
 
                 me->RemoveAurasDueToSpell(SPELL_BALANCE_BAR);
                 if (pInstance)
@@ -472,6 +573,7 @@ public:
             if (concussiveStompTimer <= diff)
             {
                 me->CastSpell(me, SPELL_CONCUSSIVE_STOMP, false);
+                PlayAndYell(me, ST_STOMP_1+urand(0,1));
                 concussiveStompTimer = 30000;
             }
             else
@@ -498,6 +600,8 @@ public:
                     if (*itr)
                         me->CastSpell(*itr, SPELL_ACTIVATE_VOLCANO, true);
                 }
+
+                PlayAndYell(me, ST_VOLCANO_1+urand(0,4));
 
                 activateVolcanoTimer = 25000;
             }
@@ -565,16 +669,35 @@ public:
                     if (totaldmg != 0)
                     {
                         if (leftDamage > rightDamage)
+                        {
+                            if (!savedLeft)
+                            {
+                                savedLeft = true;
+                                directionTimes = 0;
+                            }
                             direction += ((((float)leftDamage)/((float)totaldmg)))/10.0f;
+                        }
                         else
+                        {
+                            if (savedLeft)
+                            {
+                                savedLeft = false;
+                                directionTimes = 0;
+                            }
                             direction += (-(((float)rightDamage)/((float)totaldmg)))/10.0f;
+                        }
                     }
                     else
                     {
-                        direction = 2.0f*direction/3.0f;
+                        direction = 2.0f*direction/5.0f;
                         if (fabs(direction) <= 0.12f)
                             direction = 0.0f;
                     }
+
+                    if (directionTimes < 20)
+                        directionTimes++;
+
+                    //direction *= (1.0f - ((float)directionTimes)/25.0f);
 
                     if (direction > 1.0f)
                         direction = 1.0f;
@@ -733,6 +856,12 @@ public:
             }
         }
 
+        void SpellHitTarget(Unit* target, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_LAVA_STRIKE)
+                me->CastSpell(target, 98492, true);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (destroyed)
@@ -812,6 +941,8 @@ public:
                     {
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
                             pAI->ModObsidianArmorStack(-16);
+
+                        PlayAndYell(pBoss, ST_ARMOR_WEAKEN_1+urand(0,4));
                     }
 
                     me->ForcedDespawn(2000);
