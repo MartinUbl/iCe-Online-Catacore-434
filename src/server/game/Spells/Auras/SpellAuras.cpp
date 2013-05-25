@@ -1547,6 +1547,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Shooting Stars - reset cooldown of Starsurge
                     if (GetId() == 93400 && caster && caster->ToPlayer())
                         caster->ToPlayer()->RemoveSpellCooldown(78674, true);
+
+                    if (caster)
+                    {
+                        // Talent Feral Swiftness
+                        // Dash or Stampeding Roar cat / bear
+                        if (GetId() == 1850 || GetId() == 77761 || GetId() == 77764)
+                        {
+                            if (caster->HasAura(24867) && roll_chance_i(50)) // 50% chance
+                                caster->RemoveMovementImpairingAuras();
+                            else if (caster->HasAura(24864)) // 100% chance
+                                caster->RemoveMovementImpairingAuras();
+                        }
+                    }
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
