@@ -1705,6 +1705,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 43648: // Electrical Storm
                         target->SetStunned(false);
                         break;
+                    case 97028: // Gaze of Occu'thar
+                        if (removeMode == AURA_REMOVE_BY_EXPIRE)
+                        {
+                            caster->CastSpell(caster, 96968, true); // AoE
+                            if (caster->isAlive())
+                                caster->setDeathState(JUST_DIED);
+                        }
+                        else caster->ToCreature()->DisappearAndDie();
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
