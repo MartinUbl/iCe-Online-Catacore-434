@@ -3098,6 +3098,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         unitList.push_back(m_targets.getUnitTarget());
                     break;
                 }
+                case SPELLFAMILY_DRUID:
+                {
+                    // Stampeding Roar cat / bear form - include caster IF around is not any friendly target.
+                    if (m_spellInfo->Id == 77764 || m_spellInfo->Id == 77761) {
+                        if (unitList.empty())
+                            unitList.push_back(m_caster);
+                    }
+                    break;
+                }
             }
 
         if (!unitList.empty())
