@@ -34,7 +34,7 @@ enum Spells
     SPELL_EYES_OF_OCCUTHAR_VISUAL = 96932,  // also sets vehicle kit to a player
     SPELL_GAZE_OF_OCCUTHAR      = 97028,    // periodically triggers damage spell
     SPELL_GAZE_OF_OCCUTHAR_VISUAL = 96995,  // visual effect
-    SPELL_OCCUTHARS_DESTRUCTION = 96968,    // AoE used in HandleAuraSpecificMods
+  //SPELL_OCCUTHARS_DESTRUCTION = 96968,    // AoE used in HandleAuraSpecificMods
 };
 
 class boss_occuthar: public CreatureScript
@@ -171,7 +171,7 @@ public:
             {
             case NPC_EYEBEAM:
                 {
-                    me->CastSpell(summon, SPELL_FOCUSED_FIRE_VISUAL, true);
+                    summon->CastSpell(summon, SPELL_FOCUSED_FIRE_VISUAL, true);
                     me->CastSpell(summon, SPELL_FOCUSED_FIRE_ONESHOT, true);
                     me->CastSpell(summon, SPELL_FOCUSED_FIRE_AOE, true);
 
@@ -208,13 +208,13 @@ public:
                     if (Aura *aura = target->GetAura(SPELL_EYES_OF_OCCUTHAR_VISUAL)) 
                     {
                         aura->SetDuration(15000); // prevent vehicle kit aura from fading prematurely
-                    }
-                    if (Unit *eye = me->SummonCreature(NPC_EYE_OF_OCCUTHAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0))
-                    {
-                        eye->EnterVehicle(target,0);
-                        eye->clearUnitState(UNIT_STAT_UNATTACKABLE); // applied when entering vehicle
-                        eye->CastSpell(target, SPELL_GAZE_OF_OCCUTHAR, true);
-                        eye->CastSpell(eye, SPELL_GAZE_OF_OCCUTHAR_VISUAL, true);
+                        if (Unit *eye = me->SummonCreature(NPC_EYE_OF_OCCUTHAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0))
+                        {
+                            eye->EnterVehicle(target,0);
+                            eye->clearUnitState(UNIT_STAT_UNATTACKABLE); // applied when entering vehicle
+                            eye->CastSpell(target, SPELL_GAZE_OF_OCCUTHAR, true);
+                            eye->CastSpell(eye, SPELL_GAZE_OF_OCCUTHAR_VISUAL, true);
+                        }
                     }
                     break;
                 }

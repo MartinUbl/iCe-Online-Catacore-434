@@ -1710,9 +1710,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         {
                             caster->CastSpell(caster, 96968, true); // AoE
                             if (caster->isAlive())
-                                caster->setDeathState(JUST_DIED);
+                                caster->setDeathState(JUST_DIED); // must not despawn due to delayed AoE damage/animation
                         }
-                        else caster->ToCreature()->DisappearAndDie();
+                        else 
+                        {
+                            caster->ToCreature()->DisappearAndDie();
+                        }
+                        target->RemoveAurasDueToSpell(96932); // remove the vehicle kit form player
                         break;
                 }
                 break;

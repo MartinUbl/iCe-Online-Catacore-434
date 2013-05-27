@@ -4767,6 +4767,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
             count++;
+            break;
+        case 96872: // Occu'thar Focused Fire ability, triggers summoning spell
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            count++;
+            break;
         case 74434: // Soulburn
             spellInfo->procCharges = 1;
             count++;
