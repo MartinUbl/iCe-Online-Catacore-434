@@ -2365,6 +2365,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, m_spellInfo->EffectBasePoints[effIndex], true);
                     break;
                 }
+                case 100002: // Hurl Spear
+                {
+                    m_caster->CastSpell(unitTarget, 99978, true);
+
+                    if (unitTarget && unitTarget->ToCreature() && unitTarget->ToCreature()->AI() && unitTarget->GetEntry() == 53694)
+                        unitTarget->ToCreature()->AI()->DoAction(1);
+                    break;
+                }
             }
 
             break;

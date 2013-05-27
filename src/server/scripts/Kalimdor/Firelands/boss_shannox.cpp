@@ -77,11 +77,15 @@ class boss_shannox : public CreatureScript
         uint32 ImmolationTrapTimer;
         uint32 HurlSpearTimer;
         uint32 checkEverySecond;
+        uint32 aggroTime;
+        bool aggroBool;
 
         void Reset()
         {
             pRiplimb = NULL;
             pRageface = NULL;
+            aggroTime = 500;
+            aggroBool = false;
             checkEverySecond = 1000;
             ArcingSlashTimer = 7000;
             CrystalTrapTimer = 8000;
@@ -94,15 +98,7 @@ class boss_shannox : public CreatureScript
             summonedTraps.clear();
 
             if (pInstance)
-            {
                 pInstance->SetData(TYPE_SHANNOX, NOT_STARTED);
-
-                if (pRiplimb == NULL)
-                    pRiplimb = me->GetCreature(*me, pInstance->GetData64(DATA_RIPLIMB_GUID));
-
-                if (pRageface == NULL)
-                    pRageface = me->GetCreature(*me, pInstance->GetData64(DATA_RAGEFACE_GUID));
-            }
         }
 
         void DespawnTraps()
@@ -131,13 +127,16 @@ class boss_shannox : public CreatureScript
                 {
                     pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     pSummon->setFaction(35);
-                    Creature* bunny = pSummon->SummonCreature(NPC_IMMOLATION_TRAP_BUNNY, pSummon->GetPositionX(), pSummon->GetPositionY(), pSummon->GetPositionZ());
+                    float x,y,z;
+                    pSummon->GetPosition(x,y,z);
+                    summonedTraps.push_back(pSummon->GetGUID());
+                    Creature* bunny = me->SummonCreature(NPC_IMMOLATION_TRAP_BUNNY, x, y, z);
                     if (bunny)
                     {
+                        bunny->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.7f);
                         bunny->CastSpell(bunny, SPELL_SPEAR_TARGET_VISUAL, true);
                         summonedTraps.push_back(bunny->GetGUID());
                     }
-                    summonedTraps.push_back(pSummon->GetGUID());
                     break;
                 }
                 default:
@@ -197,15 +196,6 @@ class boss_shannox : public CreatureScript
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellEntry* spell)
-        {
-            if (spell->Id == SPELL_HURL_SPEAR)
-            {
-                me->CastSpell(pRiplimb, SPELL_SUMMON_SPEAR, true);
-                pRiplimb->AI()->DoAction(1);
-            }
-        }
-
         void DoYell(const char* text, uint32 soundid)
         {
             if (text)
@@ -217,29 +207,14 @@ class boss_shannox : public CreatureScript
 
         void EnterCombat(Unit* pWho)
         {
+            DoYell("Aha! The interlopers... Kill them! EAT THEM!", 0);
             if (pInstance)
             {
                 pInstance->SetData(TYPE_SHANNOX, IN_PROGRESS);
-            }
 
-            DoYell("Aha! The interlopers... Kill them! EAT THEM!", 0);
+                pRiplimb = me->GetCreature(*me, pInstance->GetData64(DATA_RIPLIMB_GUID));
 
-            if (pRiplimb)
-            {
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                {
-                    pRiplimb->MonsterSay("TEST", 0,0);
-                    pRiplimb->AI()->AttackStart(pTarget);
-                }
-            }
-
-            if (pRageface)
-            {
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                {
-                    pRageface->AI()->AttackStart(pTarget);
-                    pRageface->Attack(pTarget, true);
-                }
+                pRageface = me->GetCreature(*me, pInstance->GetData64(DATA_RAGEFACE_GUID));
             }
 
             me->SetReactState(REACT_AGGRESSIVE);
@@ -265,6 +240,37 @@ class boss_shannox : public CreatureScript
         {
             if (!UpdateVictim())
                 return;
+
+            if (!aggroBool)
+            {
+                if (aggroTime <= diff)
+                {
+                    if (pRiplimb)
+                    {
+                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        {
+                            pRiplimb->SetReactState(REACT_AGGRESSIVE);
+                            pRiplimb->AI()->AttackStart(pTarget);
+                            pRiplimb->GetMotionMaster()->Clear(false);
+                            pRiplimb->GetMotionMaster()->MoveChase(pTarget);
+                        }
+                    }
+
+                    if (pRageface)
+                    {
+                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        {
+                            pRageface->AddThreat(pTarget, 50000.0f);
+                            pRageface->AI()->AttackStart(pTarget);
+                            pRageface->GetMotionMaster()->MoveChase(pTarget);
+                        }
+                    }
+                    aggroTime = 500;
+                    aggroBool = true;
+                }
+                else
+                    aggroTime -= diff;
+            }
 
             if (ArcingSlashTimer <= diff)
             {
@@ -692,6 +698,7 @@ class npc_riplimb : public CreatureScript
 
         void Reset()
         {
+            me->SetReactState(REACT_PASSIVE);
             pSpear = NULL;
             pBoss = NULL;
             spearDropped = false;
@@ -703,9 +710,6 @@ class npc_riplimb : public CreatureScript
             if (me->GetInstanceScript())
             {
                 pInstance = me->GetInstanceScript();
-
-                if (pBoss == NULL)
-                    pBoss = Unit::GetCreature(*me, pInstance->GetData64(TYPE_SHANNOX));
             }
             else
                 pInstance = NULL;
@@ -714,6 +718,10 @@ class npc_riplimb : public CreatureScript
 
         void EnterCombat(Unit* target)
         {
+            if (pInstance)
+            {
+                pBoss = Unit::GetCreature(*me, pInstance->GetData64(TYPE_SHANNOX));
+            }
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -727,13 +735,13 @@ class npc_riplimb : public CreatureScript
                 {
                     pSpear->ToCreature()->ForcedDespawn();
                     me->CastSpell(me, SPELL_SPEAR_VISUAL, true);
-                    bossWait = 2;
+                    me->SetSpeed(MOVE_RUN, 1.7f);
+                    bossWait = 1;
                 }
             }
             if (id == 2)
             {
-                bossWait = 0;
-                me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
+                bossWait = 2;
             }
         }
 
@@ -747,10 +755,17 @@ class npc_riplimb : public CreatureScript
                 if (bossWait == 1) {
                     if (pBoss)
                         me->GetMotionMaster()->MovePoint(2, pBoss->GetPositionX(), pBoss->GetPositionY(), pBoss->GetPositionZ());
+
+                    me->CastSpell(me, SPELL_DOGGED_DETERMINATION, true);
                 }
 
                 if (bossWait == 2) {
+                    me->MonsterSay("test", 0, 0);
+                    me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
+                    me->SetSpeed(MOVE_RUN, 3.2f);
+                    bossWait = 0;
                 }
             }
 
@@ -844,18 +859,17 @@ class npc_rageface : public CreatureScript
 
         void Reset()
         {
+            me->SetReactState(REACT_PASSIVE);
             ragefaceHP = true;
-            changeTargetTimer = urand(8000, 10000);
+            changeTargetTimer = urand(5000, 8000);
             if (me->GetInstanceScript())
                 pInstance = me->GetInstanceScript();
             else
                 pInstance = NULL;
         }
 
-        void AttackStart(Unit* pWho)
+        void EnterCombat(Unit* pWho)
         {
-            if (me->getVictim())
-                me->AddThreat(me->getVictim(), 10000.0f);
         }
 
         void UpdateAI(const uint32 diff)
@@ -866,15 +880,39 @@ class npc_rageface : public CreatureScript
             if (changeTargetTimer <= diff)
             {
                 // little hack
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+                std::list<uint64> targets;
+                targets.clear();
+
+                if (!plrList.isEmpty())
                 {
-                    me->getVictim()->getHostileRefManager().deleteReference(me);
-                    pTarget->getHostileRefManager().deleteReference(me); // for safety..
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, pTarget->GetGUID());
-                    me->CastSpell(pTarget, SPELL_FACE_RAGE, false);
-                    me->AddThreat(pTarget, 10000.0f);
+                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                        targets.push_back(itr->getSource()->GetGUID());
                 }
-                changeTargetTimer = urand(8000, 10000);
+
+                for (std::list<uint64>::const_iterator i = targets.begin(); i != targets.end(); i++)
+                {
+                    if ((*i) == me->getVictim()->GetGUID())
+                    {
+                        i = targets.erase(i);
+                        continue;
+                    }
+
+                    advance(i, rand() % targets.size());
+
+                    if (Unit* pTarget = Unit::GetUnit(*me, *i))
+                    {
+                        me->getVictim()->getHostileRefManager().deleteReference(me);
+                        pTarget->getHostileRefManager().deleteReference(me); // for safety..
+                        me->SetUInt64Value(UNIT_FIELD_TARGET, pTarget->GetGUID());
+                        me->GetMotionMaster()->Clear(false);
+                        me->GetMotionMaster()->MoveChase(pTarget);
+                        me->AI()->AttackStart(pTarget);
+                        me->CastSpell(pTarget, SPELL_FACE_RAGE, false);
+                        me->AddThreat(pTarget, 50000.0f);
+                    }
+                }
+                changeTargetTimer = urand(5000, 8000);
             }
             else changeTargetTimer -= diff;
 
