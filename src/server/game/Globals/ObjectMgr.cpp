@@ -2225,8 +2225,6 @@ void ObjectMgr::LoadItemPrototypes()
                 const_cast<ItemPrototype*>(proto)->Sheath = db2item->Sheath;
             }
         }
-        else
-            sLog->outErrorDb("Item (Entry: %u) does not exist in item.db2! (not correct id?).",i);
 
         if (proto->Class >= MAX_ITEM_CLASS)
         {
