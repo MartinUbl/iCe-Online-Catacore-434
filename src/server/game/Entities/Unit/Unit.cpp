@@ -11556,14 +11556,14 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Merciless Combat
-            if (spellProto->SpellFamilyFlags[0] == 0x00000002       // Icy Touch
-                || spellProto->SpellFamilyFlags[1] == 0x00000002    // Howling Blast
-                || spellProto->SpellFamilyFlags[1] == 0x00020000    // Obliterate
-                || spellProto->SpellFamilyFlags[1] == 0x00000004)   // Frost Strike
+            if (pVictim->HealthBelowPct(35))
             {
-                if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
-                    if (!pVictim->HealthAbovePct(35))
-                        DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+                // Icy Touch, Howling Blast
+                if (spellProto->Id == 45477 || spellProto->Id == 49184)
+                {
+                    if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
+                        AddPctF(DoneTotalMod, aurEff->GetAmount());
+                }
             }
 
             // Improved Icy Touch
@@ -12818,14 +12818,6 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
             else if (!((*i)->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellProto()->EquippedItemSubClassMask == 0))
                 AddPctN(DoneTotalMod, amount);
         }
-
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // all DK attacks profit from Merciless Combat
-            if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
-                if (!pVictim->HealthAbovePct(35))
-                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
-        }
     }
 
 
@@ -12915,6 +12907,17 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                     if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
                         if (pVictim->GetDiseasesByCaster(owner->GetGUID()) > 0)
                             DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+
+                // Merciless Combat for melee spells
+                if (pVictim->HealthBelowPct(35))
+                {
+                    if (spellProto->Id == 49020 || spellProto->Id == 66198 || // Obliterate
+                        spellProto->Id == 49143 || spellProto->Id == 66196)   // Frost Strike
+                    {
+                        if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, EFFECT_0))
+                            AddPctF(DoneTotalMod, aurEff->GetAmount());
+                    }
+                }
                 break;
             }
         }
