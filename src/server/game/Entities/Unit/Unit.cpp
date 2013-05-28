@@ -741,10 +741,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // Brain Freeze
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            if (damagetype == SPELL_DIRECT_DAMAGE )
+            if (damagetype == SPELL_DIRECT_DAMAGE)
             {
-                if(GetSpellSchoolMask(spellProto) == SPELL_SCHOOL_MASK_FROST)
-                {       
+                if(GetSpellSchoolMask(spellProto) == SPELL_SCHOOL_MASK_FROST &&
+                   spellProto->AppliesAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
+                {
                     if (this->ToPlayer()->HasAura(44546))
                         if (roll_chance_f(5.0f))
                             this->CastSpell(this, 57761, true);
