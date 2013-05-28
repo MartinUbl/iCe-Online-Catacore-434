@@ -890,7 +890,7 @@ class npc_rageface : public CreatureScript
                         targets.push_back(itr->getSource()->GetGUID());
                 }
 
-                for (std::list<uint64>::const_iterator i = targets.begin(); i != targets.end(); i++)
+                for (std::list<uint64>::iterator i = targets.begin(); i != targets.end(); i++)
                 {
                     if ((*i) == me->getVictim()->GetGUID())
                     {
