@@ -1183,6 +1183,8 @@ void Group::OnGroupSlain(Unit* pVictim)
         {
             // Baradin Hold
             case 47120: // Argaloth
+            case 52363: // Occu'thar
+            case 55869: // Alizabal
             // Throne of the Four Winds
             case 45870: // Conclave: Anshal
             case 45871: // Conclave: Nazir
@@ -1201,6 +1203,23 @@ void Group::OnGroupSlain(Unit* pVictim)
             case 43735: // Elementium Monstrosity
             case 43324: // Cho'gall
             case 45213: // Sinestra
+            // Firelands
+            case 53691: // Shannox
+            case 52558: // Lord Rhyolith
+            case 52498: // Beth'tilac
+            case 52530: // Alysrazor
+            case 53494: // Baleroc
+            case 52571: // Majordomo Staghelm
+            case 52409: // Ragnaros
+            // Dragon Soul
+            case 55265: // Morchok
+            case 55308: // Warlord Zon'ozz
+            case 55312: // Yor'sahj
+            case 55689: // Hagara
+            case 55294: // Ultraxion
+            case 56427: // Warmaster Blackhorn
+            case 53879: // Deathwing (Spine) TODO: needs revision with script creating
+            case 56173: // Deathwing (Madness) TODO: as previous
                 guildXP = 78700;
                 break;
         }
@@ -1252,6 +1271,35 @@ void Group::OnGroupSlain(Unit* pVictim)
             case 43612: // High Propher Barim
             case 49045: // Augh
             case 44819: // Siamat
+            // Zul'Aman
+            case 23574: // Akil'zon
+            case 23576: // Nalorakk
+            case 23578: // Jan'alai
+            case 23577: // Halazzi
+            case 24239: // Malacrass
+            case 23863: // Daakara
+            // Zul'Gurub
+            case 52155: // Venoxis
+            case 52151: // Mandokir
+            case 52271: // Hazza'rah
+            case 52059: // Kilnara
+            case 52053: // Zanzil
+            case 52148: // Jin'do
+            // End Time
+            case 54431: // Echo of Baine
+            case 54445: // Echo of Jaina
+            case 54123: // Echo of Sylvanass
+            case 54544: // Echo of Tyrande
+            case 54432: // Murozond
+            // Hour of Twilight
+            case 54590: // Arcurion
+            case 54968: // Asira Dawnslayer
+            case 54938: // Benedictus
+            // Well of Eternity
+            case 55085: // Peroth'arn
+            case 54853: // Queen Azshara
+            case 54969: // Mannoroth
+            case 55419: // Varo'then
                 guildXP = 24800;
                 break;
             // Special cases for heroic-only XP rewarding creatures / bosses
