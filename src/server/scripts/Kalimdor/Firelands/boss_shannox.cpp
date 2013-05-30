@@ -20,7 +20,7 @@
 
 /*
  * Author: HyN3Q
- * Completed (in percent): approximately 90%
+ * Completed (in percent): approximately 99.5%
  */
 
 enum stuffs
@@ -53,6 +53,7 @@ enum stuffs
     NPC_IMMOLATION_TRAP_BUNNY = 537240,
     NPC_RAGEFACE = 53695,
     NPC_RIPLIMB = 53694,
+    NPC_HURL_SPEAR_WEAPON = 53752,
 };
 
 class boss_shannox : public CreatureScript
@@ -78,6 +79,7 @@ class boss_shannox : public CreatureScript
         uint32 HurlSpearTimer;
         uint32 checkEverySecond;
         uint32 aggroTime;
+        uint32 riplimbRespawnTimer;
         bool aggroBool;
 
         void Reset()
@@ -91,6 +93,7 @@ class boss_shannox : public CreatureScript
             CrystalTrapTimer = 8000;
             ImmolationTrapTimer = 10000;
             HurlSpearTimer = 20000;
+            riplimbRespawnTimer = 30000;
 
             me->SetReactState(REACT_PASSIVE);
 
@@ -123,7 +126,7 @@ class boss_shannox : public CreatureScript
                 case NPC_IMMOLATION_TRAP:
                     summonedTraps.push_back(pSummon->GetGUID());
                     break;
-                case 53752: // Hurl Spear weapon
+                case NPC_HURL_SPEAR_WEAPON: // Hurl Spear weapon
                 {
                     pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     pSummon->setFaction(35);
@@ -133,6 +136,7 @@ class boss_shannox : public CreatureScript
                     Creature* bunny = me->SummonCreature(NPC_IMMOLATION_TRAP_BUNNY, x, y, z);
                     if (bunny)
                     {
+                        bunny->setFaction(35);
                         bunny->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.7f);
                         bunny->CastSpell(bunny, SPELL_SPEAR_TARGET_VISUAL, true);
                         summonedTraps.push_back(bunny->GetGUID());
@@ -148,7 +152,7 @@ class boss_shannox : public CreatureScript
         {
             switch (pSummon->GetEntry())
             {
-                case 53752:
+                case NPC_HURL_SPEAR_WEAPON:
                 {
                     if (!summonedTraps.empty())
                     {
@@ -171,7 +175,7 @@ class boss_shannox : public CreatureScript
             if (pInstance)
                 pInstance->SetData(TYPE_SHANNOX, DONE);
 
-            DoYell("The pain... Lord of fire, it hurts...", 0);
+            DoYell("The pain... Lord of fire, it hurts...", 24568);
         }
 
         void KilledUnit(Unit* pTarget)
@@ -181,16 +185,16 @@ class boss_shannox : public CreatureScript
                 switch (urand(0,3))
                 {
                     case 0:
-                        DoYell("Yes... oh yes!", 0);
+                        DoYell("Yes... oh yes!", 24581);
                         break;
                     case 1:
-                        DoYell("The Firelord will be most pleased!", 0);
+                        DoYell("The Firelord will be most pleased!", 24580);
                         break;
                     case 2:
-                        DoYell("Now you stay dead!", 0);
+                        DoYell("Now you stay dead!", 24579);
                         break;
                     case 3:
-                        DoYell("Dog food!", 0);
+                        DoYell("Dog food!", 24578);
                         break;
                 }
             }
@@ -207,14 +211,14 @@ class boss_shannox : public CreatureScript
 
         void EnterCombat(Unit* pWho)
         {
-            DoYell("Aha! The interlopers... Kill them! EAT THEM!", 0);
+            DoYell("Aha! The interlopers... Kill them! EAT THEM!", 24565);
             if (pInstance)
             {
                 pInstance->SetData(TYPE_SHANNOX, IN_PROGRESS);
 
-                pRiplimb = me->GetCreature(*me, pInstance->GetData64(DATA_RIPLIMB_GUID));
+                pRiplimb = me->GetCreature((*me), pInstance->GetData64(DATA_RIPLIMB_GUID));
 
-                pRageface = me->GetCreature(*me, pInstance->GetData64(DATA_RAGEFACE_GUID));
+                pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID));
             }
 
             me->SetReactState(REACT_AGGRESSIVE);
@@ -226,13 +230,67 @@ class boss_shannox : public CreatureScript
             if (action == 1)
             {
                 me->CastSpell(me, SPELL_FRENZY, false);
-                DoYell("Riplimb! No... no! Oh, you terrible little beasts! HOW COULD YOU?!", 0);
+                DoYell("Riplimb! No... no! Oh, you terrible little beasts! HOW COULD YOU?!", 24574);
             }
             // rageface dies..
             if (action == 2)
             {
                 me->CastSpell(me, SPELL_FRENZY, false);
-                DoYell("You murderers! Why... why would you kill such a noble animal?!", 0);
+                DoYell("You murderers! Why... why would you kill such a noble animal?!", 24575);
+            }
+        }
+
+        void SpellHit(Unit* target, const SpellEntry* spell)
+        {
+            if (!spell)
+                return;
+
+            for (uint32 i = 0; i < 3; i++)
+            {
+                if(spell->Effect[i] == SPELL_EFFECT_ATTACK_ME)
+                {
+                    // Taunt sounds..why not use..
+                    switch (urand(0, 3))
+                    {
+                        case 0:
+                            me->PlayDirectSound(24595);
+                            break;
+                        case 1:
+                            me->PlayDirectSound(24594);
+                            break;
+                        case 2:
+                            me->PlayDirectSound(24593);
+                            break;
+                        case 3:
+                            me->PlayDirectSound(24592);
+                            break;
+                    }
+                }
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
+        {
+            if (!spell)
+                return;
+
+
+            // ToDo: complete semicircle - visual (Gregory ?)
+            // this doesn't work, its too late..
+            if (spell->Id == SPELL_MAGMA_RUPTURE && spell->Effect[0] == SPELL_EFFECT_DUMMY)
+            {
+                float angle, x, y, z, cx, cy;
+                pTarget->GetPosition(x,y,z);
+                uint32 pocet_ohnu = 0;
+                for (uint32 i = 0; i < 4; i++)
+                {
+                    pocet_ohnu += 5;
+                    angle = (((360 / pocet_ohnu)*3.14)/180);
+
+                    cx = x * angle + cos(angle) * 5;
+                    cy = y * angle + sin(angle) * 5;
+                    me->CastSpell(cx, cy, z, SPELL_MAGMA_RUPTURE_IMMOLATION, true);
+                }
             }
         }
 
@@ -262,6 +320,7 @@ class boss_shannox : public CreatureScript
                         {
                             pRageface->AddThreat(pTarget, 50000.0f);
                             pRageface->AI()->AttackStart(pTarget);
+                            pRageface->GetMotionMaster()->Clear(false);
                             pRageface->GetMotionMaster()->MoveChase(pTarget);
                         }
                     }
@@ -313,11 +372,39 @@ class boss_shannox : public CreatureScript
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
                     if (pRiplimb->isAlive())
+                    {
+                        switch (urand(0, 3))
+                        {
+                            case 0:
+                                me->PlayDirectSound(24588);
+                                break;
+                            case 1:
+                                me->PlayDirectSound(24587);
+                                break;
+                            case 2:
+                                me->PlayDirectSound(24586);
+                                break;
+                            case 3:
+                                me->PlayDirectSound(24585);
+                                break;
+                        }
                         me->CastSpell(pRiplimb, SPELL_HURL_SPEAR, false);
+                    }
                     else {
-                        if (IsHeroic()) {
+                        if (!IsHeroic()) {
                             if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            {
+                                switch (urand(1,2))
+                                {
+                                    case 1:
+                                        DoYell("Now you BURN!!", 24576);
+                                        break;
+                                    case 2:
+                                        DoYell("Twist in flames, interlopers!", 24577);
+                                        break;
+                                }
                                 me->CastSpell(pTarget, SPELL_MAGMA_RUPTURE, false);
+                            }
                         }
                     }
 
@@ -336,6 +423,25 @@ class boss_shannox : public CreatureScript
                 else
                     checkEverySecond = 1000;
             } else checkEverySecond -= diff;
+
+            if (IsHeroic() && pRiplimb && !pRiplimb->isAlive())
+            {
+                if (riplimbRespawnTimer <= diff)
+                {
+                    pRiplimb->Respawn(true);
+                    pRiplimb->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), true);
+                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    {
+                        pRiplimb->SetReactState(REACT_AGGRESSIVE);
+                        pRiplimb->AI()->AttackStart(pTarget);
+                        pRiplimb->GetMotionMaster()->Clear(false);
+                        pRiplimb->GetMotionMaster()->MoveChase(pTarget);
+                        me->RemoveAurasDueToSpell(SPELL_FRENZY); // remove ? who know..
+                    }
+                    riplimbRespawnTimer = 30000;
+                }
+                else riplimbRespawnTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
 
@@ -384,7 +490,7 @@ class npc_crystal_trap : public CreatureScript
             if (pInstance)
             {
                 if (pBoss == NULL)
-                    pBoss = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_SHANNOX));
+                    pBoss = Unit::GetCreature((*me), me->GetInstanceScript()->GetData64(TYPE_SHANNOX));
 
                 if (pBoss)
                     armtrapTimer = 2000 + uint32(me->GetDistance2d(pBoss) / 100) * 1000;
@@ -441,7 +547,7 @@ class npc_crystal_trap : public CreatureScript
 
         Unit* GetPrisoner()
         {
-            if (Unit* prisoner = Unit::GetUnit(*me, prisonerGuid))
+            if (Unit* prisoner = Unit::GetUnit((*me), prisonerGuid))
                 return prisoner;
             else
                 return NULL;
@@ -517,7 +623,7 @@ class npc_crystal_prison : public CreatureScript
 
         void UpdateAI(const uint32 diff)
         {
-            if (Creature* pTrap = Unit::GetCreature(*me, summonerGuid))
+            if (Creature* pTrap = Unit::GetCreature((*me), summonerGuid))
             {
                 if (((npc_crystal_trap::npc_crystal_trapAI*)pTrap->GetAI())->GetPrisoner())
                 {
@@ -541,7 +647,7 @@ class npc_crystal_prison : public CreatureScript
 
         void JustDied(Unit* pKiller)
         {
-            if (Creature* pTrap = Unit::GetCreature(*me, summonerGuid))
+            if (Creature* pTrap = Unit::GetCreature((*me), summonerGuid))
             {
                 pTrap->AI()->DoAction(1);
                 me->ForcedDespawn();
@@ -591,7 +697,7 @@ class npc_immolation_trap : public CreatureScript
             if (pInstance)
             {
                 if (pBoss == NULL)
-                    pBoss = Unit::GetCreature(*me, pInstance->GetData64(TYPE_SHANNOX));
+                    pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
 
                 if (pBoss)
                     armtrapTimer = 2000 + uint32(me->GetDistance2d(pBoss) / 100) * 1000;
@@ -707,10 +813,9 @@ class npc_riplimb : public CreatureScript
             spearDelayTimer = 3000;
             limbRipTimer = urand(8000, 10000);
             bossWait = 0;
+
             if (me->GetInstanceScript())
-            {
                 pInstance = me->GetInstanceScript();
-            }
             else
                 pInstance = NULL;
         }
@@ -719,9 +824,7 @@ class npc_riplimb : public CreatureScript
         void EnterCombat(Unit* target)
         {
             if (pInstance)
-            {
-                pBoss = Unit::GetCreature(*me, pInstance->GetData64(TYPE_SHANNOX));
-            }
+                pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -740,9 +843,7 @@ class npc_riplimb : public CreatureScript
                 }
             }
             if (id == 2)
-            {
                 bossWait = 2;
-            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -760,7 +861,6 @@ class npc_riplimb : public CreatureScript
                 }
 
                 if (bossWait == 2) {
-                    me->MonsterSay("test", 0, 0);
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
                     me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
@@ -773,7 +873,7 @@ class npc_riplimb : public CreatureScript
             {
                 if (spearDelayTimer <= diff)
                 {
-                    if ((pSpear = GetClosestCreatureWithEntry(me, 53752, 100)) != NULL)
+                    if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 1000)) != NULL)
                     {
                         me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
                         spearDropped = false;
@@ -814,20 +914,11 @@ class npc_riplimb : public CreatureScript
             }
         }
 
-        void JustRespawned()
-        {
-            if (pBoss && pBoss->isAlive())
-                me->SetPosition(pBoss->GetPositionX(), pBoss->GetPositionY(), pBoss->GetPositionZ(), pBoss->GetOrientation(), true);
-        }
-
         void JustDied(Unit* pKiller)
         {
             if (pBoss)
             {
                 pBoss->AI()->DoAction(1);
-
-                if (pBoss->isAlive())
-                    me->SetRespawnTime(30);
             }
         }
     };
@@ -870,6 +961,7 @@ class npc_rageface : public CreatureScript
 
         void EnterCombat(Unit* pWho)
         {
+
         }
 
         void UpdateAI(const uint32 diff)
@@ -883,28 +975,30 @@ class npc_rageface : public CreatureScript
                 Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
                 std::list<uint64> targets;
                 targets.clear();
+                uint32 plrCount;
+                plrCount = 0;
 
                 if (!plrList.isEmpty())
                 {
                     for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                        targets.push_back(itr->getSource()->GetGUID());
+                    {
+                        Player* plr = itr->getSource();
+                        plrCount += 1;
+                        if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->isTank() && plr->isAlive()))
+                            targets.push_back(plr->GetGUID());
+                    }
                 }
 
-                for (std::list<uint64>::iterator i = targets.begin(); i != targets.end(); i++)
+                if (targets.size() > 0)
                 {
-                    if ((*i) == me->getVictim()->GetGUID())
-                    {
-                        i = targets.erase(i);
-                        continue;
-                    }
+                    std::list<uint64>::iterator itr = targets.begin();
+                    uint32 randPos = urand(0, targets.size() - 1);
+                    std::advance(itr, randPos);
 
-                    advance(i, rand() % targets.size());
-
-                    if (Unit* pTarget = Unit::GetUnit(*me, *i))
+                    if (Unit* pTarget = Unit::GetUnit((*me), (*itr)))
                     {
                         me->getVictim()->getHostileRefManager().deleteReference(me);
                         pTarget->getHostileRefManager().deleteReference(me); // for safety..
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, pTarget->GetGUID());
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveChase(pTarget);
                         me->AI()->AttackStart(pTarget);
@@ -935,7 +1029,7 @@ class npc_rageface : public CreatureScript
 
         void JustDied(Unit* pKiller)
         {
-            if (Creature* pBoss = Unit::GetCreature(*me, pInstance->GetData64(TYPE_SHANNOX)))
+            if (Creature* pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX)))
                 pBoss->AI()->DoAction(2);
         }
     };
