@@ -830,6 +830,7 @@ public:
     void SendLoginInfo(WorldSession* session);
     void SendGuildRankInfo(WorldSession* session) const;
 
+    void CompleteChallenge(Group* pSource, GuildChallengeType type);
     void SendChallengeCompleted(WorldSession* session, GuildChallengeType type);
     void SendChallengeUpdate(WorldSession* session);
 

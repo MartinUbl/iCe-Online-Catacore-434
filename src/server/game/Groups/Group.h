@@ -452,6 +452,7 @@ class Group
         void BroadcastGroupUpdate(void);
 
         uint32 GetAverageBattlegroundRating();
+        uint8 GetAverageLevel();
 
     protected:
         bool _addMember(const uint64 &guid, const char* name);

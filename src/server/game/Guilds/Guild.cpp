@@ -2159,6 +2159,29 @@ void Guild::UpdateGuildNews(WorldSession* session)
         session->SendPacket(&data);
 }
 
+void Guild::CompleteChallenge(Group* pSource, GuildChallengeType type)
+{
+    if (type == GUILD_CHALLENGE_DUNGEON && m_guildChallenges[type-1].count >= GUILD_CHALLENGE_WEEK_DUNGEON_COUNT)
+        return;
+    if (type == GUILD_CHALLENGE_RAID && m_guildChallenges[type-1].count >= GUILD_CHALLENGE_WEEK_RAID_COUNT)
+        return;
+    if (type == GUILD_CHALLENGE_BG && m_guildChallenges[type-1].count >= GUILD_CHALLENGE_WEEK_BG_COUNT)
+        return;
+
+    m_guildChallenges[type-1].count++;
+
+    for (GroupReference* itr = pSource->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        if (itr->getSource()->GetGuildId() == GetId())
+        {
+            SendChallengeCompleted(itr->getSource()->GetSession(), type);
+            SendChallengeUpdate(itr->getSource()->GetSession());
+        }
+    }
+
+    /* TODO: rewards here after some testing */
+}
+
 void Guild::SendChallengeCompleted(WorldSession* session, GuildChallengeType type)
 {
     WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED);
@@ -2205,7 +2228,7 @@ void Guild::SendChallengeCompleted(WorldSession* session, GuildChallengeType typ
         totalCount = GUILD_CHALLENGE_WEEK_BG_COUNT;
 
     data << uint32(type);                             // type, 1 dung, 2 raid, 3 rbg
-    data << uint32(moneyrew);                         // gold reward
+    data << uint32(moneyrew / GOLD);                  // gold reward
     data << uint32(m_guildChallenges[type-1].count);  // count
     data << uint32(xprew);                            // XP reward
     data << uint32(totalCount);                       // total count
@@ -2254,7 +2277,7 @@ void Guild::SendChallengeUpdate(WorldSession* session)
         moneyrew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_MONEY_BG;
     }
 
-    data << uint32(0);                                // unk
+    data << uint32(0);                                // unk (MoP challenge mode dungeon?)
     data << uint32(xprew[GUILD_CHALLENGE_DUNGEON-1]); // XP reward dungeons
     data << uint32(xprew[GUILD_CHALLENGE_RAID-1]);    // XP reward raids
     data << uint32(xprew[GUILD_CHALLENGE_BG-1]);      // XP reward rbgs
@@ -2265,17 +2288,17 @@ void Guild::SendChallengeUpdate(WorldSession* session)
     data << uint32(0);                                // unk
 
     // hardcoded values for now, does it need to be variable?
-    data << uint32(0);                                  // unk
+    data << uint32(0);                                  // unk (MoP challenge mode dungeon?)
     data << uint32(GUILD_CHALLENGE_WEEK_DUNGEON_COUNT); // total dungeons
     data << uint32(GUILD_CHALLENGE_WEEK_RAID_COUNT);    // total raids
     data << uint32(GUILD_CHALLENGE_WEEK_BG_COUNT);      // total rbgs
 
-    data << uint32(0);                                   // unk
-    data << uint32(moneyrew[GUILD_CHALLENGE_DUNGEON-1]); // gold reward dungeons
-    data << uint32(moneyrew[GUILD_CHALLENGE_RAID-1]);    // gold reward raids
-    data << uint32(moneyrew[GUILD_CHALLENGE_BG-1]);      // gold reward rbgs
+    data << uint32(0);                                          // unk (MoP challenge mode dungeon?)
+    data << uint32(moneyrew[GUILD_CHALLENGE_DUNGEON-1] / GOLD); // gold reward dungeons
+    data << uint32(moneyrew[GUILD_CHALLENGE_RAID-1] / GOLD);    // gold reward raids
+    data << uint32(moneyrew[GUILD_CHALLENGE_BG-1] / GOLD);      // gold reward rbgs
 
-    data << uint32(0);                                                  // unk
+    data << uint32(0);                                                  // unk (MoP challenge mode dungeon?)
     data << uint32(m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count); // dungeons done
     data << uint32(m_guildChallenges[GUILD_CHALLENGE_RAID-1].count);    // raids done
     data << uint32(m_guildChallenges[GUILD_CHALLENGE_BG-1].count);      // rbgs done

@@ -806,9 +806,19 @@ void Battleground::EndBattleground(uint32 winner)
 
     if (isBattleground() && isRated())
     {
+        bool guildRewarded = false;
         for (BattlegroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         {
             Player *player = itr->second.OfflineRemoveTime ? NULL : ObjectAccessor::FindPlayer(itr->first);
+
+            // rated battleground guild challenge
+            if (!guildRewarded && player->GetGroup() && player->GetGuildId())
+                if (player->GetGroup()->IsGuildGroup(player->GetGuildId()))
+                {
+                    guildRewarded = true;
+                    if (Guild* pGuild = player->GetGuild())
+                        pGuild->CompleteChallenge(player->GetGroup(), GUILD_CHALLENGE_BG);
+                }
 
             if (itr->second.Team == winner)
             {

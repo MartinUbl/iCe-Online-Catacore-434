@@ -1174,6 +1174,8 @@ float Group::GetGuildProfitCoef(uint32 guildId)
 void Group::OnGroupSlain(Unit* pVictim)
 {
     uint32 guildXP = 0;
+    if (!pVictim || pVictim->GetTypeId() != TYPEID_UNIT)
+        return;
 
     // Set unmultiplied value of guild XP awarded (100%)
     // Raid group
@@ -1330,6 +1332,31 @@ void Group::OnGroupSlain(Unit* pVictim)
             guildXP = 0;
     }
 
+    // check for guild challenge condition
+    if (sObjectMgr->IsFinalBoss(pVictim->GetEntry(), GetDifficulty(isRaidGroup())))
+    {
+        CreatureEncounterData* ced = sObjectMgr->GetCreatureEncounter(pVictim->GetEntry(), GetDifficulty(isRaidGroup()));
+        // ced exists if IsFinalBoss returned true
+        DungeonEncounterEntry const* de = sDungeonEncountersStore.LookupEntry(ced->encounterId);
+        if (de)
+        {
+            AccessRequirement const* ar = sObjectMgr->GetAccessRequirement(de->mapId, GetDifficulty(isRaidGroup()));
+            // allow only 4 level difference between desired min level and average group member level
+            if (ar->levelMin == 0 || abs((int32)ar->levelMin - (int32)GetAverageLevel()) <= 4)
+            {
+                for (Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+                    if (Player* player = sObjectMgr->GetPlayer(itr->guid))
+                        if (player->GetMap() && (player->GetMap()->IsDungeon() || player->GetMap()->IsRaid()))
+                            if (IsGuildGroup(player->GetGuildId()))
+                                if (Guild* pGuild = sObjectMgr->GetGuildById(player->GetGuildId()))
+                                {
+                                    pGuild->CompleteChallenge(this, isRaidGroup() ? GUILD_CHALLENGE_RAID : GUILD_CHALLENGE_DUNGEON);
+                                    break;
+                                }
+            }
+        }
+    }
+
     if (guildXP > 0)
     {
         for(Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
@@ -1341,6 +1368,19 @@ void Group::OnGroupSlain(Unit* pVictim)
                             pGuild->GainXP(guildXP * GetGuildProfitCoef(pGuild->GetId()));
         }
     }
+}
+
+uint8 Group::GetAverageLevel()
+{
+    uint32 sum = 0, count = 0;
+    for (Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        if (Player* player = sObjectMgr->GetPlayer(itr->guid))
+        {
+            sum += player->getLevel();
+            count++;
+        }
+
+    return (uint8)(((float)sum)/((float)count));
 }
 
 void Group::SetTargetIcon(uint8 id, uint64 whoGuid, uint64 targetGuid)
