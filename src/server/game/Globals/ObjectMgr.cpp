@@ -448,6 +448,17 @@ void ObjectMgr::ResetGuildDailyXPCap()
     }
 }
 
+void ObjectMgr::ResetGuildChallenges()
+{
+    for (ObjectMgr::GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
+    {
+        if ((*itr))
+            (*itr)->ClearChallenges();
+    }
+
+    CharacterDatabase.Execute("UPDATE guild_week_challenge SET dungeon = 0, raid = 0, battleground = 0;");
+}
+
 // Arena teams collection
 ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
 {

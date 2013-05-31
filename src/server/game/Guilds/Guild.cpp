@@ -2311,6 +2311,11 @@ void Guild::SendChallengeUpdate(WorldSession* session)
         session->SendPacket(&data);
 }
 
+void Guild::ClearChallenges()
+{
+    memset(&m_guildChallenges, 0, GUILD_CHALLENGE_ARRAY_SIZE*sizeof(GuildChallenge));
+}
+
 void Guild::AddMemberNews(Player* pPlayer, GuildNewsType type, uint64 param)
 {
     if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))

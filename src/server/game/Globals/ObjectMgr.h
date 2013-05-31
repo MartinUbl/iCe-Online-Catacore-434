@@ -727,6 +727,7 @@ class ObjectMgr
         void AddGuild(Guild* pGuild);
         void RemoveGuild(uint32 guildId);
         void ResetGuildDailyXPCap();
+        void ResetGuildChallenges();
 
         ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
         ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;

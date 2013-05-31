@@ -834,6 +834,8 @@ public:
     void SendChallengeCompleted(WorldSession* session, GuildChallengeType type);
     void SendChallengeUpdate(WorldSession* session);
 
+    void ClearChallenges();
+
     // Load from DB
     bool LoadFromDB(Field* fields);
     bool LoadRankFromDB(Field* fields);
