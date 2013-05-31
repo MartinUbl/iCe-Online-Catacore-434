@@ -1121,6 +1121,13 @@ bool Group::IsGuildGroup(uint32 guildId)
         else
             guildprofit = GROUP_MEMBERS_25MAN_PROFIT;
     }
+    else if (isBGGroup())
+    {
+        if (sBattlegroundMgr->GetRatedBattlegroundSize() == 10)
+            guildprofit = GROUP_MEMBERS_10MAN_PROFIT;
+        else
+            guildprofit = 12; // TODO: verify
+    }
 
     return (gmembers >= guildprofit);
 }

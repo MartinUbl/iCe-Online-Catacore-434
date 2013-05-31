@@ -30,6 +30,7 @@
 #include "SocialMgr.h"
 #include "Log.h"
 #include "DisableMgr.h"
+#include "BattlegroundMgr.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -3070,11 +3071,30 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
+    data.WriteBit(group->IsGuildGroup(player->GetGuildId()));            // Is guild group
     data.FlushBits();
-    data << float(0.f);                                                             // Guild XP multiplier
-    data << uint32(0);                                                              // Current guild members
-    data << uint32(0);                                                              // Needed guild members
+    data << float(group->GetGuildProfitCoef(player->GetGuildId()));      // Guild XP multiplier
+    data << uint32(group->GetGuildMembersCount(player->GetGuildId()));   // Current guild members
+
+    uint32 neededcount = 0;
+    if (group->isRaidGroup())
+    {
+        if (group->GetRaidDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || group->GetRaidDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+            neededcount = GROUP_MEMBERS_10MAN_PROFIT;
+        else
+            neededcount = GROUP_MEMBERS_25MAN_PROFIT;
+    }
+    else if (group->isBGGroup())
+    {
+        if (sBattlegroundMgr->GetRatedBattlegroundSize() == 10)
+            neededcount = GROUP_MEMBERS_10MAN_PROFIT;
+        else
+            neededcount = 12; // TODO: verify
+    }
+    else
+        neededcount = GROUP_MEMBERS_DUNGEON_PROFIT;
+
+    data << uint32(neededcount);                                         // Needed guild members
 
     session->SendPacket(&data);
 }
