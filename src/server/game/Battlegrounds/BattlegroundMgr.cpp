@@ -941,6 +941,7 @@ Battleground * BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeI
                 possibleBgs.push_back(BATTLEGROUND_WS);
                 possibleBgs.push_back(BATTLEGROUND_BG);
                 possibleBgs.push_back(BATTLEGROUND_TP);
+                possibleBgs.push_back(BATTLEGROUND_AB);
                 break;
             case BATTLEGROUND_RA_BG_15:
                 possibleBgs.push_back(BATTLEGROUND_AB);
