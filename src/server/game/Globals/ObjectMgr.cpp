@@ -7940,6 +7940,105 @@ void ObjectMgr::LoadCreatureInvolvedRelations()
     }
 }
 
+void ObjectMgr::LoadCreatureEncounterData()
+{
+    mCreatureEncounterData.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT npc_entry, encounter_entry, flags FROM creature_encounter");
+
+    uint32 count = 0;
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outString(">> Loaded 0 creature encounters");
+        return;
+    }
+
+    uint32 npcentry;
+    uint32 dungeonentry;
+    uint32 flags;
+
+    Field* fields;
+    do
+    {
+        fields = result->Fetch();
+
+        npcentry = fields[0].GetUInt32();
+        dungeonentry = fields[1].GetUInt32();
+        flags = fields[2].GetUInt32();
+
+        CreatureEncounterData* ced = new CreatureEncounterData;
+        ced->entry = npcentry;
+        ced->encounterId = dungeonentry;
+        ced->flags = flags;
+
+        DungeonEncounterEntry const* dec = sDungeonEncountersStore.LookupEntry(dungeonentry);
+        if (!dec)
+        {
+            sLog->outErrorDb("Non-existing dungeon encounter %u listed in creature_encounter table. Skipping.", dungeonentry);
+            delete ced;
+            continue;
+        }
+
+        if (mCreatureEncounterData.find(npcentry) == mCreatureEncounterData.end() || mCreatureEncounterData[npcentry] == NULL)
+            mCreatureEncounterData[npcentry] = new EncounterDataList;
+
+        mCreatureEncounterData[npcentry]->push_back(ced);
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u creature encounters", count);
+}
+
+EncounterDataList* ObjectMgr::GetCreatureEncounterList(uint32 entry)
+{
+    if (mCreatureEncounterData.find(entry) != mCreatureEncounterData.end())
+        return mCreatureEncounterData[entry];
+
+    return NULL;
+}
+
+CreatureEncounterData* ObjectMgr::GetCreatureEncounter(uint32 entry, uint8 difficulty)
+{
+    EncounterDataList* dl = GetCreatureEncounterList(entry);
+    if (!dl)
+        return NULL;
+
+    CreatureEncounterData* ctmp = NULL;
+
+    for (EncounterDataList::iterator itr = dl->begin(); itr != dl->end(); ++itr)
+    {
+        DungeonEncounterEntry const* dec = sDungeonEncountersStore.LookupEntry((*itr)->encounterId);
+        if (!dec)
+            continue;
+
+        if (!ctmp || dec->difficulty == difficulty)
+            ctmp = (*itr);
+    }
+
+    return ctmp;
+}
+
+bool ObjectMgr::IsFinalBoss(uint32 entry, uint8 difficulty)
+{
+    CreatureEncounterData* ced = GetCreatureEncounter(entry, difficulty);
+    if (!ced)
+        return false;
+
+    // if it's last normal boss and we are on normal mode
+    if ((difficulty == DUNGEON_DIFFICULTY_NORMAL || difficulty == RAID_DIFFICULTY_10MAN_NORMAL || difficulty == RAID_DIFFICULTY_25MAN_NORMAL) && ced->flags & CE_FLAG_FINAL_NORMAL_BOSS)
+        return true;
+
+    // otherwise check for final boss flag
+    if (ced->flags & CE_FLAG_FINAL_BOSS)
+        return true;
+
+    return false;
+}
+
 void ObjectMgr::LoadReservedPlayersNames()
 {
     m_ReservedNames.clear();                                // need for reload case

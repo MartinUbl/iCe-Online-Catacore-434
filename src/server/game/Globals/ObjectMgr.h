@@ -597,6 +597,21 @@ struct GraveYardData
 };
 typedef std::multimap<uint32,GraveYardData> GraveYardMap;
 
+enum CreatureEncounterFlags
+{
+    CE_FLAG_FINAL_BOSS        = 0x01, // no heroic boss following, or i am last heroic boss
+    CE_FLAG_FINAL_NORMAL_BOSS = 0x02  // heroic boss would follow if it's heroic
+};
+
+struct CreatureEncounterData
+{
+    uint32 entry;
+    uint32 encounterId;
+    uint32 flags;
+};
+typedef std::list<CreatureEncounterData*> EncounterDataList;
+typedef std::map<uint32, EncounterDataList*> CreatureEncounterMap;
+
 // NPC gossip text id
 typedef UNORDERED_MAP<uint32, uint32> CacheNpcTextIdMap;
 
@@ -1055,6 +1070,8 @@ class ObjectMgr
 
         void LoadNPCSpellClickSpells();
 
+        void LoadCreatureEncounterData();
+
         void LoadGameTele();
 
         void LoadNpcTextId();
@@ -1317,6 +1334,10 @@ class ObjectMgr
             return GossipMenuItemsMapBoundsNonConst(m_mGossipMenuItemsMap.lower_bound(uiMenuId),m_mGossipMenuItemsMap.upper_bound(uiMenuId));
         }
 
+        EncounterDataList* GetCreatureEncounterList(uint32 entry);
+        CreatureEncounterData* GetCreatureEncounter(uint32 entry, uint8 difficulty);
+        bool IsFinalBoss(uint32 entry, uint8 difficulty);
+
         time_t SecsToMidnight();
 
         // for wintergrasp only
@@ -1404,6 +1425,7 @@ class ObjectMgr
         RepSpilloverTemplateMap m_RepSpilloverTemplateMap;
 
         CurOnKillMap        mCurOnKill;
+        CreatureEncounterMap mCreatureEncounterData;
 
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;
