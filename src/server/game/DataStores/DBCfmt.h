@@ -51,6 +51,7 @@ const char CurrencyTypesfmt[]="nisxxxiiiix";
 const char DestructibleModelDatafmt[]="nxxixxxixxxixxxixxx";
 const char DurabilityCostsfmt[]="niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[]="nf";
+const char DungeonEncountersfmt[]="niiiisii";
 const char EmotesEntryfmt[]="nxxiiixx";
 const char EmotesTextEntryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="niiiiiiiiiiiiiiiiiiffixsxx";

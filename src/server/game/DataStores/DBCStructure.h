@@ -909,7 +909,7 @@ struct DungeonEncounterEntry
     uint32    id;                                           // 0
     uint32    mapId;                                        // 1
     uint32    difficulty;                                   // 2
-    uint32    unk0;                                         // 3 probably related to next field, multiplied value?
+    uint32    weight;                                       // 3 seems like "weight" of the encounter - highest value = main boss (rewards?)
     uint32    encounterMapPosition;                         // 4
     DBCString name;                                         // 5
     uint32    unk1;                                         // 6
