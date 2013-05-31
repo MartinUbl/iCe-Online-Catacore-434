@@ -2181,6 +2181,9 @@ void Guild::CompleteChallenge(Group* pSource, GuildChallengeType type)
     }
 
     /* TODO: rewards here after some testing */
+
+    CharacterDatabase.PExecute("REPLACE INTO guild_week_challenge VALUES (%u, %u, %u, %u);", GetId(), m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count,
+        m_guildChallenges[GUILD_CHALLENGE_RAID-1].count, m_guildChallenges[GUILD_CHALLENGE_BG-1].count);
 }
 
 void Guild::SendChallengeCompleted(WorldSession* session, GuildChallengeType type)
@@ -3467,6 +3470,18 @@ bool Guild::LoadFromDB(Field* fields)
 
             m_guildNews.push_back(gn);
         } while (newsquery->NextRow());
+    }
+
+    QueryResult challengequery = CharacterDatabase.PQuery("SELECT dungeon, raid, battleground FROM guild_week_challenge WHERE guildid = %u;", m_id);
+    if (challengequery && challengequery->GetRowCount() > 0)
+    {
+        Field* chfields = challengequery->Fetch();
+        if (chfields)
+        {
+            m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count = chfields[0].GetUInt16();
+            m_guildChallenges[GUILD_CHALLENGE_RAID-1].count = chfields[1].GetUInt16();
+            m_guildChallenges[GUILD_CHALLENGE_BG-1].count = chfields[2].GetUInt16();
+        }
     }
 
     // id, type, date, param, guid
