@@ -1458,7 +1458,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         {
                             caster->RemoveAurasDueToSpell(90174);
                         }
-                        SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1));
+                        // + T11 4p bonus bonus
+                        SetDuration(GetMaxDuration() * (caster->GetPower(POWER_HOLY_POWER) + 1 + (caster->HasAura(90299) ? 1 : 0) ));
                         caster->SetPower(POWER_HOLY_POWER, 0);
                     }
                 }
