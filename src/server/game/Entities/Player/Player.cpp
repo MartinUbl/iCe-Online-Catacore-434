@@ -11278,14 +11278,20 @@ void Player::SendCurrencies()
 
 void Player::SendConquestRewards()
 {
+    float precision = GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
     WorldPacket packet(SMSG_REQUEST_PVP_REWARDS_RESPONSE, 24);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
-    packet << GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+    packet << uint32(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / precision);
+    packet << uint32(GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / precision);
+    packet << uint32(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / precision);
+    packet << uint32(GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / precision);
+    packet << uint32(GetCurrencyWeekCount(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / precision);
+
+    if (GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) > GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA))
+        packet << uint32(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / precision);
+    else
+        packet << uint32(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) / precision);
+
+    packet << uint32(GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ALL) / precision);
     GetSession()->SendPacket(&packet);
 }
 
@@ -11762,7 +11768,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
 
     int32 newSeasonCount = int32(oldSeasonCount);
     // only save season count in PvP currency cases
-    if (count > 0 && currency->Category == CURRENCY_CATEGORY_PVP)
+    if (!ignoreweekcap && count > 0 && currency->Category == CURRENCY_CATEGORY_PVP)
         newSeasonCount +=  count * precision;
 
     int32 newWeekCount = int32(oldWeekCount) + (count > 0 ? count * precision : 0);
@@ -11775,6 +11781,34 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         int32 delta = newWeekCount - int32(weekCap);
         newWeekCount = int32(weekCap);
         newTotalCount -= delta;
+        newSeasonCount -= delta;
+    }
+
+    uint32 totalCap = currency->TotalCap;
+    if (totalCap && int32(totalCap) < newTotalCount)
+    {
+        int32 delta = newTotalCount - int32(totalCap);
+        newWeekCount -= delta;
+        newTotalCount = int32(totalCap);
+        newSeasonCount -= delta;
+    }
+
+    if (!ignoreweekcap && src != CURRENCY_SOURCE_ALL && id == CURRENCY_TYPE_CONQUEST_POINTS)
+    {
+        weekCap = GetCurrencyWeekCap(currency, CURRENCY_SOURCE_ARENA);
+        if (GetCurrencyWeekCap(currency, CURRENCY_SOURCE_BG) > weekCap)
+            weekCap = GetCurrencyWeekCap(currency, CURRENCY_SOURCE_BG);
+
+        int32 weekCountTotal = GetCurrencyWeekCount(id, CURRENCY_SOURCE_ARENA) + GetCurrencyWeekCount(id, CURRENCY_SOURCE_BG);
+        int32 weekCountOther = GetCurrencyWeekCount(id, (src == CURRENCY_SOURCE_ARENA) ? CURRENCY_SOURCE_BG : CURRENCY_SOURCE_ARENA);
+
+        if (weekCap && int32(weekCap) < weekCountOther+newWeekCount)
+        {
+            int32 delta = weekCountOther+newWeekCount - int32(weekCap);
+            newWeekCount -= delta;
+            newTotalCount -= delta;
+            newSeasonCount -= delta;
+        }
     }
 
     // if we change total, we must change week
