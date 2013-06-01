@@ -2260,47 +2260,25 @@ void Guild::SendChallengeUpdate(WorldSession* session)
 
     // indexes are moved by one (array indexes 0-2, client types 1-3)
 
-    uint32 xprew[GUILD_CHALLENGE_ARRAY_SIZE] = {0};
-    uint32 moneyrew[GUILD_CHALLENGE_ARRAY_SIZE] = {0};
-    if (m_level >= 5 && m_level <= 24)
-    {
-        xprew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_XP_DUNGEON;
-        moneyrew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_MONEY_DUNGEON;
-        xprew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_XP_RAID;
-        moneyrew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_MONEY_RAID;
-        xprew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_XP_BG;
-        moneyrew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_MONEY_BG;
-    }
-    else if (m_level == 25)
-    {
-        xprew[GUILD_CHALLENGE_DUNGEON-1] = 0;
-        moneyrew[GUILD_CHALLENGE_DUNGEON-1] = GCH_REWARD_MONEY_DUNGEON;
-        xprew[GUILD_CHALLENGE_RAID-1] = 0;
-        moneyrew[GUILD_CHALLENGE_RAID-1] = GCH_REWARD_MONEY_RAID;
-        xprew[GUILD_CHALLENGE_BG-1] = 0;
-        moneyrew[GUILD_CHALLENGE_BG-1] = GCH_REWARD_MONEY_BG;
-    }
+    data << uint32(0);                                      // unk (MoP challenge mode dungeon?)
+    data << uint32(GCH_REWARD_XP_DUNGEON);                  // XP reward dungeons
+    data << uint32(GCH_REWARD_XP_RAID);                     // XP reward raids
+    data << uint32(GCH_REWARD_XP_BG);                       // XP reward rbgs
 
-    data << uint32(0);                                // unk (MoP challenge mode dungeon?)
-    data << uint32(xprew[GUILD_CHALLENGE_DUNGEON-1]); // XP reward dungeons
-    data << uint32(xprew[GUILD_CHALLENGE_RAID-1]);    // XP reward raids
-    data << uint32(xprew[GUILD_CHALLENGE_BG-1]);      // XP reward rbgs
+    data << uint32(0);                                      // unk (MoP challenge mode dungeon lvl 25?)
+    data << uint32(GCH_REWARD_MONEY_DUNGEON_25 / GOLD);     // gold reward dungeons lvl 25
+    data << uint32(GCH_REWARD_MONEY_RAID_25 / GOLD);        // gold reward raids lvl 25
+    data << uint32(GCH_REWARD_MONEY_BG_25 / GOLD);          // gold reward rbgs lvl 25
 
-    data << uint32(0);                                // unk
-    data << uint32(0);                                // unk
-    data << uint32(0);                                // unk
-    data << uint32(0);                                // unk
+    data << uint32(0);                                      // unk (MoP challenge mode dungeon?)
+    data << uint32(GUILD_CHALLENGE_WEEK_DUNGEON_COUNT);     // total dungeons
+    data << uint32(GUILD_CHALLENGE_WEEK_RAID_COUNT);        // total raids
+    data << uint32(GUILD_CHALLENGE_WEEK_BG_COUNT);          // total rbgs
 
-    // hardcoded values for now, does it need to be variable?
-    data << uint32(0);                                  // unk (MoP challenge mode dungeon?)
-    data << uint32(GUILD_CHALLENGE_WEEK_DUNGEON_COUNT); // total dungeons
-    data << uint32(GUILD_CHALLENGE_WEEK_RAID_COUNT);    // total raids
-    data << uint32(GUILD_CHALLENGE_WEEK_BG_COUNT);      // total rbgs
-
-    data << uint32(0);                                          // unk (MoP challenge mode dungeon?)
-    data << uint32(moneyrew[GUILD_CHALLENGE_DUNGEON-1] / GOLD); // gold reward dungeons
-    data << uint32(moneyrew[GUILD_CHALLENGE_RAID-1] / GOLD);    // gold reward raids
-    data << uint32(moneyrew[GUILD_CHALLENGE_BG-1] / GOLD);      // gold reward rbgs
+    data << uint32(0);                                      // unk (MoP challenge mode dungeon?)
+    data << uint32(GCH_REWARD_MONEY_DUNGEON / GOLD);        // gold reward dungeons
+    data << uint32(GCH_REWARD_MONEY_RAID / GOLD);           // gold reward raids
+    data << uint32(GCH_REWARD_MONEY_BG / GOLD);             // gold reward rbgs
 
     data << uint32(0);                                                  // unk (MoP challenge mode dungeon?)
     data << uint32(m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count); // dungeons done
