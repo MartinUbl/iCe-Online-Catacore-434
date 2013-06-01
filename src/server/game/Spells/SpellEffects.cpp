@@ -4149,6 +4149,14 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
         }
 
+        // Healing Touch + Glyph of Healing Touch
+        if (m_spellInfo->Id == 5185 && m_caster && m_caster->ToPlayer() && m_caster->HasAura(54825))
+        {
+            // reduce cooldown of Nature's Swiftness
+            if (m_caster->ToPlayer()->HasSpellCooldown(17116))
+                m_caster->ToPlayer()->ModifySpellCooldown(17116, -10000, true);
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
