@@ -1120,6 +1120,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 43648: // Electrical Storm
                         target->SetStunned(true);
                         break;
+                    case 91041: // Heart's Judgement
+                        if (target)
+                        {
+                            if (Aura* procbuff = target->GetAura(91027))
+                            {
+                                SetStackAmount(procbuff->GetStackAmount());
+                                procbuff->Remove();
+                            }
+                            else
+                                target->RemoveAurasDueToSpell(91041);
+                        }
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
