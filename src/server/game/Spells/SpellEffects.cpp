@@ -952,6 +952,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += (m_caster->ToPet()->GetBonusDamage()/0.15f)*0.512f*0.5f;
                     apply_direct_bonus = false;
                 }
+                // Doom Bolt (doomguard)
+                else if (m_spellInfo->Id == 85692 && m_caster->ToTempSummon())
+                {
+                    Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!pOwner)
+                        break;
+
+                    damage += pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)*0.9f;
+                    apply_direct_bonus = false;
+
+                    int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
+                    if (bonuspct != 0)
+                        damage *= 1.0f+((float)bonuspct/100.0f);
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:

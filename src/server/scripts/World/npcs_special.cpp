@@ -4337,6 +4337,74 @@ class npc_title_map_restorer : public CreatureScript
 
 };
 
+class npc_summon_doomguard: public CreatureScript
+{
+    public:
+        npc_summon_doomguard(): CreatureScript("npc_summon_doomguard") {}
+
+        struct npc_summon_doomguardAI: ScriptedAI
+        {
+            npc_summon_doomguardAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 doomBoltTimer;
+
+            void Reset()
+            {
+                doomBoltTimer = 2000;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (doomBoltTimer <= diff)
+                {
+                    Unit* target = me->getVictim();
+
+                    if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    {
+                        std::vector<Unit*> capableTargets;
+
+                        Unit::AttackerSet const& attackers = owner->getAttackers();
+                        for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
+                                capableTargets.push_back(*itr);
+                        }
+
+                        if (capableTargets.size() > 0)
+                            target = capableTargets[urand(0,capableTargets.size()-1)];
+                    }
+
+                    if (target)
+                    {
+                        if (target != me->getVictim())
+                        {
+                            me->AddThreat(me->getVictim(), -1000.0f);
+                            me->AddThreat(target, 1000.0f);
+                        }
+                        me->CastSpell(target, 85692, false);
+                    }
+
+                    doomBoltTimer = 3500;
+                }
+                else
+                    doomBoltTimer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_summon_doomguardAI(c);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4388,4 +4456,5 @@ void AddSC_npcs_special()
     new npc_fac_race_changer;
     new npc_gender_changer;
     new npc_title_map_restorer;
+    new npc_summon_doomguard;
 }
