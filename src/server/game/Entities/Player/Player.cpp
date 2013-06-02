@@ -11799,7 +11799,6 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         if (GetCurrencyWeekCap(currency, CURRENCY_SOURCE_BG) > weekCap)
             weekCap = GetCurrencyWeekCap(currency, CURRENCY_SOURCE_BG);
 
-        int32 weekCountTotal = GetCurrencyWeekCount(id, CURRENCY_SOURCE_ARENA) + GetCurrencyWeekCount(id, CURRENCY_SOURCE_BG);
         int32 weekCountOther = GetCurrencyWeekCount(id, (src == CURRENCY_SOURCE_ARENA) ? CURRENCY_SOURCE_BG : CURRENCY_SOURCE_ARENA);
 
         if (weekCap && int32(weekCap) < weekCountOther+newWeekCount)
