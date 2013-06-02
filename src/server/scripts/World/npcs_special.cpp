@@ -4405,6 +4405,75 @@ class npc_summon_doomguard: public CreatureScript
         }
 };
 
+class npc_summon_infernal: public CreatureScript
+{
+    public:
+        npc_summon_infernal(): CreatureScript("npc_summon_infernal") {}
+
+        struct npc_summon_infernalAI: ScriptedAI
+        {
+            npc_summon_infernalAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 victimUpdateTimer;
+
+            void Reset()
+            {
+                victimUpdateTimer = 2000;
+
+                me->CastSpell(me, 31304, true);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (victimUpdateTimer <= diff)
+                {
+                    Unit* target = me->getVictim();
+
+                    if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    {
+                        std::vector<Unit*> capableTargets;
+
+                        Unit::AttackerSet const& attackers = owner->getAttackers();
+                        for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
+                                capableTargets.push_back(*itr);
+                        }
+
+                        if (capableTargets.size() > 0)
+                            target = capableTargets[urand(0,capableTargets.size()-1)];
+                    }
+
+                    if (target)
+                    {
+                        if (target != me->getVictim())
+                        {
+                            me->AddThreat(me->getVictim(), -1000.0f);
+                            me->AddThreat(target, 1000.0f);
+                        }
+                    }
+
+                    victimUpdateTimer = 2000;
+                }
+                else
+                    victimUpdateTimer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_summon_infernalAI(c);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4457,4 +4526,5 @@ void AddSC_npcs_special()
     new npc_gender_changer;
     new npc_title_map_restorer;
     new npc_summon_doomguard;
+    new npc_summon_infernal;
 }

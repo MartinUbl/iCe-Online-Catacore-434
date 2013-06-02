@@ -549,6 +549,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         // Don't allow to modify damage with spellpower and so on
                         apply_direct_bonus = false;
                         break;
+                    // Immolation (infernal)
+                    case 31303:
+                    {
+                        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+
+                        damage = 40 + pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)*0.675f;
+
+                        apply_direct_bonus = false;
+
+                        int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
+                        if (bonuspct != 0)
+                            damage *= 1.0f+((float)bonuspct/100.0f);
+                        break;
+                    }
                 }
                 break;
             }
