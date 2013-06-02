@@ -793,12 +793,16 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         meets = false;
                     break;
                 case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID:
-                    if (GetPlayer()->GetAreaId() != achievementCriteria->moreRequirementValue[i])
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID2:
+                    if (GetPlayer()->GetAreaId() != achievementCriteria->moreRequirementValue[i] && GetPlayer()->GetZoneId() != achievementCriteria->moreRequirementValue[i])
                         meets = false;
                     break;
-                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID2:
                 case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_AREA_ID3:
                     if (GetPlayer()->GetZoneId() != achievementCriteria->moreRequirementValue[i])
+                        meets = false;
+                    break;
+                case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SPELL_ON_TARGET:
+                    if (!unit || !unit->HasAura(achievementCriteria->moreRequirementValue[i]))
                         meets = false;
                     break;
                 default:
