@@ -238,16 +238,9 @@ public:
             if(ticktimer <= diff)
             {
                 Unit* creator = me->GetOwner();
-                if(creator)
-                {
-                    int32 ap = creator->GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
-                    int32 intel = creator->GetStat(STAT_INTELLECT);
-                    int32 damage = int32(8*0.04f*(intel+ap)*0.04f);
+                if (creator)
+                    creator->CastSpell(me, 81297, true);
 
-                    creator->CastCustomSpell(me,81297,&damage,0,0,true);
-                }
-                else
-                    sLog->outString("Couldn't find creator of Consecration !");
                 ticktimer = 1000;
             } else ticktimer -= diff;
         }

@@ -1470,6 +1470,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     apply_direct_bonus = false;
                     damage = (m_caster->ToPlayer()->GetAttackTime(BASE_ATTACK)/1000.0f/1.8f)*0.011f*m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*0.022f*m_caster->GetStat(STAT_INTELLECT);
                 }
+                // Consecration triggered spell
+                else if (m_spellInfo->Id == 81297)
+                {
+                    if (!m_caster)
+                        break;
+
+                    int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    int32 sph = m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
+                    damage += int32(0.04f*(sph+ap)*0.675f); // 0.675 is magic number, present almost everywhere..
+
+                    int32 bonuspct = m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
+                    if (bonuspct != 0)
+                        damage *= 1.0f+((float)bonuspct /100.0f);
+
+                    damage += m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_FLAT_MODIFIER, m_spellInfo);
+
+                    apply_direct_bonus = false;
+                }
                 break;
             }
             case SPELLFAMILY_DEATHKNIGHT:
