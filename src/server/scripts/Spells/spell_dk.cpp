@@ -88,11 +88,17 @@ public:
             DK_SPELL_RUNIC_POWER_ENERGIZE = 49088,
         };
 
-        uint32 absorbPct, hpPct;
+        uint32 absorbPct, hpPct, absorbed;
+        bool hasSuppress;
         bool Load()
         {
+            if (!GetCaster())
+                return false;
+
+            absorbed = 0;
             absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
             hpPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1, GetCaster());
+            hasSuppress = GetCaster()->HasAura(49611) || GetCaster()->HasAura(49610) ||GetCaster()->HasAura(49224);
             return true;
         }
 
@@ -101,19 +107,25 @@ public:
             return sSpellStore.LookupEntry(DK_SPELL_RUNIC_POWER_ENERGIZE);
         }
 
-        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
+        void CalculateAmount(AuraEffect const * aurEff, int32 & amount, bool & canBeRecalculated)
         {
-            // Set absorbtion amount to unlimited
             amount = -1;
         }
 
         void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
             absorbAmount = std::min(CalculatePctN(dmgInfo.GetDamage(), absorbPct), GetTarget()->CountPctFromMaxHealth(hpPct));
+            absorbed += absorbAmount;
+
+            if (absorbed >= GetTarget()->CountPctFromMaxHealth(hpPct))
+                aurEff->GetBase()->Remove();
         }
 
         void Trigger(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
+            if (!hasSuppress)
+                return;
+
             Unit * target = GetTarget();
             // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
             // This, if I'm not mistaken, shows that we get back ~20% of the absorbed damage as runic power.
