@@ -883,6 +883,9 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Ignite    
             if (spellproto->SpellIconID == 45)
                 return true;
+            // Dragon's Breath
+            if (spellproto->Id == 31661)
+                return false;
             break;
         case SPELLFAMILY_WARRIOR:
             // Shockwave
