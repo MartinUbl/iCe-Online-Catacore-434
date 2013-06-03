@@ -486,14 +486,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = unitTarget->CountPctFromMaxHealth(damage);
                         break;
                     }
-                    // Gargoyle Strike
-                    case 51963:
-                    {
-                        // about +4 base spell dmg per level
-                        damage = (m_caster->getLevel() - 60) * 4 + 60;
-                        break;
-                    }
-
                     // Loken Pulsing Shockwave
                     case 59837:
                     case 52942:
@@ -557,6 +549,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             break;
 
                         damage = 40 + pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)*0.675f;
+
+                        apply_direct_bonus = false;
+
+                        int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
+                        if (bonuspct != 0)
+                            damage *= 1.0f+((float)bonuspct/100.0f);
+                        break;
+                    }
+                    // Gargoyle Strike (gargoyle, dk)
+                    case 51963:
+                    {
+                        Player* pOwner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (!pOwner)
+                            break;
+
+                        damage = 35 + pOwner->GetTotalAttackPowerValue(BASE_ATTACK)*0.453f;
 
                         apply_direct_bonus = false;
 
