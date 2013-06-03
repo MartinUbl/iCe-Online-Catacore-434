@@ -6045,13 +6045,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 else if (HasAura(12571)) // Permafrost (Rank 3)
                     CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -10, pVictim, true); 
             }
-        //UPDATE `spell_proc_event` SET SpellFamilyMask0=4194323 WHERE entry IN (44445,44446,44448);
             // Hot Streak
             if (dummySpell->Id == 44445)
             {
                 if (procEx & PROC_EX_CRITICAL_HIT)
-                    if (roll_chance_i(33))
+                {
+                    // y=125/(crit+4) - decreasing chance to proc with higher crit chances
+                    // + T12 4p set bonus
+                    if (roll_chance_i( (HasAura(99064) ? 155.0f : 125.0f) /(GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_MASK_FIRE)+4.0f) ))
                         CastSpell(this, 48108, true);
+                }
                 return true;
             }
             // Improved Hot Streak
