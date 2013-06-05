@@ -102,6 +102,9 @@ class boss_shannox : public CreatureScript
 
             if (pInstance)
                 pInstance->SetData(TYPE_SHANNOX, NOT_STARTED);
+
+            SetEquipmentSlots(false, 71557, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
+
         }
 
         void DespawnTraps()
@@ -238,6 +241,16 @@ class boss_shannox : public CreatureScript
                 me->CastSpell(me, SPELL_FRENZY, false);
                 DoYell("You murderers! Why... why would you kill such a noble animal?!", 24575);
             }
+
+            // unequip spear
+            if (action == 3) {
+                SetEquipmentSlots(false, 0, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
+            }
+
+            // equip spear
+            if (action == 4) {
+                SetEquipmentSlots(false, 71557, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
+            }
         }
 
         void SpellHit(Unit* target, const SpellEntry* spell)
@@ -274,10 +287,9 @@ class boss_shannox : public CreatureScript
             if (!spell)
                 return;
 
-
             // ToDo: complete semicircle - visual (Gregory ?)
             // this doesn't work, its too late..
-            if (spell->Id == SPELL_MAGMA_RUPTURE && spell->Effect[0] == SPELL_EFFECT_DUMMY)
+            /*if (spell->Id == SPELL_MAGMA_RUPTURE && spell->Effect[0] == SPELL_EFFECT_DUMMY)
             {
                 float angle, x, y, z, cx, cy;
                 pTarget->GetPosition(x,y,z);
@@ -291,7 +303,7 @@ class boss_shannox : public CreatureScript
                     cy = y * angle + sin(angle) * 5;
                     me->CastSpell(cx, cy, z, SPELL_MAGMA_RUPTURE_IMMOLATION, true);
                 }
-            }
+            }*/
         }
 
         void UpdateAI(const uint32 diff)
@@ -454,6 +466,164 @@ class boss_shannox : public CreatureScript
     }
 };
 
+class npc_riplimb : public CreatureScript
+{
+    public:
+        npc_riplimb() : CreatureScript("npc_riplimb") { }
+
+    struct npc_riplimbAI : public ScriptedAI
+    {
+        npc_riplimbAI(Creature* c) : ScriptedAI(c)
+        {
+        }
+
+        InstanceScript* pInstance;
+        bool spearDropped;
+        bool shannoxHP;
+        bool riplimbHP;
+        bool canBeTrapped;
+        uint32 spearDelayTimer;
+        uint32 limbRipTimer;
+        uint8 bossWait;
+        Unit* pSpear;
+        Creature* pBoss;
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            pSpear = NULL;
+            pBoss = NULL;
+            spearDropped = false;
+            shannoxHP = false;
+            riplimbHP = false;
+            canBeTrapped = true;
+            spearDelayTimer = 3000;
+            limbRipTimer = urand(8000, 10000);
+            bossWait = 0;
+
+            if (me->GetInstanceScript())
+                pInstance = me->GetInstanceScript();
+            else
+                pInstance = NULL;
+        }
+
+
+        void EnterCombat(Unit* target)
+        {
+            if (pInstance)
+                pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1)
+            {
+                if (pSpear)
+                {
+                    pSpear->ToCreature()->ForcedDespawn();
+                    me->CastSpell(me, SPELL_SPEAR_VISUAL, true);
+                    me->SetSpeed(MOVE_RUN, 1.7f);
+                    bossWait = 1;
+                }
+            }
+            if (id == 2) {
+                bossWait = 2;
+                me->SetSpeed(MOVE_RUN, 3.2f);
+                canBeTrapped = true;
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (bossWait > 0)
+            {
+                if (bossWait == 1) {
+                    if (pBoss)
+                        me->GetMotionMaster()->MovePoint(2, pBoss->GetPositionX(), pBoss->GetPositionY(), pBoss->GetPositionZ());
+
+                    me->CastSpell(me, SPELL_DOGGED_DETERMINATION, true);
+                }
+
+                if (bossWait == 2) {
+                    me->GetMotionMaster()->Clear(false);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
+
+                    if (pBoss)
+                        pBoss->AI()->DoAction(4); // equip spear
+
+                    bossWait = 0;
+                }
+            }
+
+            if (spearDropped == true)
+            {
+                if (spearDelayTimer <= diff)
+                {
+                    if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 1000)) != NULL)
+                    {
+                        me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
+                        canBeTrapped = false;
+                        spearDropped = false;
+                        spearDelayTimer = 3000;
+                    }
+                } else spearDelayTimer -= diff;
+            }
+
+            if (limbRipTimer <= diff)
+            {
+                me->CastSpell(me->getVictim(), SPELL_LIMB_RIP, false);
+                limbRipTimer = urand(8000, 10000);
+            }
+            else limbRipTimer -= diff;
+
+            if (!IsHeroic())
+            {
+                if ((pBoss && pBoss->HealthBelowPct(30) && !shannoxHP) || (!riplimbHP && me->HealthBelowPct(30)))
+                {
+                    me->CastSpell(me, SPELL_FRENZIED_DEVOTION, false);
+                    riplimbHP = true;
+                    shannoxHP = true;
+                }
+
+                DoMeleeAttackIfReady();
+            }
+            else
+            {
+                DoMeleeAttackIfReady();
+                DoSpellAttackIfReady(SPELL_FEEDING_FRENZY);
+            }
+        }
+
+        void DoAction(const int32 action)
+        {
+            if (action == 1) {
+                spearDropped = true;
+            }
+        }
+
+        void JustDied(Unit* pKiller)
+        {
+            if (pBoss)
+            {
+                pBoss->AI()->DoAction(1);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new npc_riplimbAI(c);
+    }
+};
+
+
 class npc_crystal_trap : public CreatureScript
 {
     public:
@@ -501,7 +671,10 @@ class npc_crystal_trap : public CreatureScript
 
         void MoveInLineOfSight(Unit* pWho)
         {
-            if (!pWho || pWho->GetDistance(me) > 0.3f || armTrap == false || trapActivated == true || pWho->HasAura(SPELL_WARY))
+            if (!pWho || pWho->GetDistance(me) > 0.3f || armTrap == false || trapActivated == true || pWho->HasAura(SPELL_WARY) || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
+                return;
+
+            if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && ((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped == false)
                 return;
 
             if (pWho->GetTypeId() == TYPEID_PLAYER || (pWho->GetCharmerOrOwnerPlayerOrPlayerItself() == NULL
@@ -778,154 +951,6 @@ class npc_immolation_trap : public CreatureScript
     CreatureAI* GetAI(Creature* c) const
     {
         return new npc_immolation_trapAI(c);
-    }
-};
-
-class npc_riplimb : public CreatureScript
-{
-    public:
-        npc_riplimb() : CreatureScript("npc_riplimb") { }
-
-    struct npc_riplimbAI : public ScriptedAI
-    {
-        npc_riplimbAI(Creature* c) : ScriptedAI(c)
-        {
-        }
-
-        InstanceScript* pInstance;
-        bool spearDropped;
-        bool shannoxHP;
-        bool riplimbHP;
-        uint32 spearDelayTimer;
-        uint32 limbRipTimer;
-        uint8 bossWait;
-        Unit* pSpear;
-        Creature* pBoss;
-
-        void Reset()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            pSpear = NULL;
-            pBoss = NULL;
-            spearDropped = false;
-            shannoxHP = false;
-            riplimbHP = false;
-            spearDelayTimer = 3000;
-            limbRipTimer = urand(8000, 10000);
-            bossWait = 0;
-
-            if (me->GetInstanceScript())
-                pInstance = me->GetInstanceScript();
-            else
-                pInstance = NULL;
-        }
-
-
-        void EnterCombat(Unit* target)
-        {
-            if (pInstance)
-                pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
-        }
-
-        void MovementInform(uint32 type, uint32 id)
-        {
-            if (type != POINT_MOTION_TYPE)
-                return;
-
-            if (id == 1)
-            {
-                if (pSpear)
-                {
-                    pSpear->ToCreature()->ForcedDespawn();
-                    me->CastSpell(me, SPELL_SPEAR_VISUAL, true);
-                    me->SetSpeed(MOVE_RUN, 1.7f);
-                    bossWait = 1;
-                }
-            }
-            if (id == 2)
-                bossWait = 2;
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (bossWait > 0)
-            {
-                if (bossWait == 1) {
-                    if (pBoss)
-                        me->GetMotionMaster()->MovePoint(2, pBoss->GetPositionX(), pBoss->GetPositionY(), pBoss->GetPositionZ());
-
-                    me->CastSpell(me, SPELL_DOGGED_DETERMINATION, true);
-                }
-
-                if (bossWait == 2) {
-                    me->GetMotionMaster()->Clear(false);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
-                    me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
-                    me->SetSpeed(MOVE_RUN, 3.2f);
-                    bossWait = 0;
-                }
-            }
-
-            if (spearDropped == true)
-            {
-                if (spearDelayTimer <= diff)
-                {
-                    if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 1000)) != NULL)
-                    {
-                        me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
-                        spearDropped = false;
-                        spearDelayTimer = 3000;
-                    }
-                } else spearDelayTimer -= diff;
-            }
-
-            if (limbRipTimer <= diff)
-            {
-                me->CastSpell(me->getVictim(), SPELL_LIMB_RIP, false);
-                limbRipTimer = urand(8000, 10000);
-            }
-            else limbRipTimer -= diff;
-
-            if (!IsHeroic())
-            {
-                if ((pBoss && pBoss->HealthBelowPct(30) && !shannoxHP) || (!riplimbHP && me->HealthBelowPct(30)))
-                {
-                    me->CastSpell(me, SPELL_FRENZIED_DEVOTION, false);
-                    riplimbHP = true;
-                    shannoxHP = true;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-            else
-            {
-                DoMeleeAttackIfReady();
-                DoSpellAttackIfReady(SPELL_FEEDING_FRENZY);
-            }
-        }
-
-        void DoAction(const int32 action)
-        {
-            if (action == 1) {
-                spearDropped = true;
-            }
-        }
-
-        void JustDied(Unit* pKiller)
-        {
-            if (pBoss)
-            {
-                pBoss->AI()->DoAction(1);
-            }
-        }
-    };
-
-    CreatureAI* GetAI(Creature* c) const
-    {
-        return new npc_riplimbAI(c);
     }
 };
 

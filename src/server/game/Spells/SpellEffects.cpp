@@ -2425,6 +2425,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     m_caster->CastSpell(unitTarget, 99978, true);
 
+                    if (m_caster && m_caster->ToCreature() && m_caster->ToCreature()->AI())
+                        m_caster->ToCreature()->AI()->DoAction(3); // unequip spear
+
                     if (unitTarget && unitTarget->ToCreature() && unitTarget->ToCreature()->AI() && unitTarget->GetEntry() == 53694)
                         unitTarget->ToCreature()->AI()->DoAction(1);
                     break;
