@@ -26,9 +26,9 @@ enum Spells
     SPELL_BIND_WILL             = 83432,
     SPELL_FRENZIED_ASSAULT      = 83693,
     SPELL_FURIOUS_ROAR          = 83710,
-    SPELL_PARALYSIS                = 84030,
+    //SPELL_PARALYSIS                = 84030,
     SPELL_SHADOW_NOVA           = 83703,
-    //SPELL_PETRIFICATION         = 84591,
+    SPELL_PETRIFICATION         = 84591,
 
     // minion's spells
     SPELL_CYCLONE_WINDS         = 84092,
@@ -133,7 +133,7 @@ public:
             {
                 if (IsHeroic())
                 {
-                    me->SetMaxHealth(2221601370);
+                    me->SetMaxHealth(184667808);
                 }
                 else me->SetMaxHealth(111312000);
             }
@@ -141,7 +141,7 @@ public:
             {
                 if (IsHeroic())
                 {
-                    me->SetMaxHealth(61842240);
+                    me->SetMaxHealth(51535200);
                 }
                 else me->SetMaxHealth(31161600);
             }
@@ -428,8 +428,8 @@ public:
                     Stack = vengeance->GetStackAmount();
                     AchievementCheck = true;
                     AchievementTimer = 10000;
-                };
-            };
+                }
+            }
 
             if (AchievementTimer <= diff && AchievementCheck)
             {
@@ -444,7 +444,7 @@ public:
             {
                 if (ShadowNovaTimer <= diff)
                     {
-                        if (me->GetAura(SPELL_PARALYSIS))
+                        if (me->GetAura(SPELL_PETRIFICATION))
                             {
                                 ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
                             };
@@ -464,15 +464,28 @@ public:
                 Interruptable = false;
             else InterruptTimer -= diff;
 
+            if (BerserkTimer <= diff)
+            {
+                me->AddAura(SPELL_BERSERK, me);
+                BerserkTimer = 600*IN_MILLISECONDS;
+            }
+            else
+                BerserkTimer -= diff;
+
+            if (Phase == PHASE_1 && me->HealthBelowPct(50))
+                Phase = PHASE_2;
+
             if (Phase == PHASE_2)
             {
                 if (FuriousRoarTimer <= diff)
                     {
-                        if (me->GetAura(SPELL_PARALYSIS))
+                        Interruptable = false;
+                        if (me->GetAura(SPELL_PETRIFICATION))
                         {
-                            FuriousRoarTimer = me->GetAura(SPELL_PARALYSIS)->GetDuration() + urand(2*IN_MILLISECONDS, 5*IN_MILLISECONDS);
-                            ShadowNovaTimer = me->GetAura(SPELL_PARALYSIS)->GetDuration() + urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
-                        }
+                            FuriousRoarTimer = urand(2*IN_MILLISECONDS, 5*IN_MILLISECONDS);
+                            return;
+                        };
+                        ShadowNovaTimer = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
 
                         if (FuriousRoarCount < 3)
                             {
@@ -497,17 +510,6 @@ public:
                 else
                     FuriousRoarTimer -= diff;
             }
-
-            if (BerserkTimer <= diff)
-                {
-                    DoCast(SPELL_BERSERK);
-                    BerserkTimer = 600*IN_MILLISECONDS;
-                }
-            else
-                BerserkTimer -= diff;
-
-            if (Phase == PHASE_1 && me->HealthBelowPct(50))
-                Phase = PHASE_2;
 
             DoMeleeAttackIfReady();
         }
@@ -541,17 +543,17 @@ public:
             {
                 if (IsHeroic())
                 {
-                    me->SetMaxHealth(19918560);
+                    me->SetMaxHealth(20705640);
                 }
-                else me->SetMaxHealth(14341360);
+                else me->SetMaxHealth(14941360);
             }
             else 
             {
                 if (IsHeroic())
                 {
-                    me->SetMaxHealth(6971496);
+                    me->SetMaxHealth(5807580);
                 }
-                else me->SetMaxHealth(4979640);
+                else me->SetMaxHealth(3979640);
             }
             me->SetHealth(me->GetMaxHealth());
         }
@@ -878,17 +880,17 @@ public:
                     {
                         if (IsHeroic())
                         {
-                            Whelps->SetMaxHealth(19918560);
+                            Whelps->SetMaxHealth(20705640);
                         }
-                        else Whelps->SetMaxHealth(1431360);
+                        else Whelps->SetMaxHealth(14941360);
                     }
                     else 
                     {
                         if (IsHeroic())
                         {
-                            Whelps->SetMaxHealth(6971496);
+                            Whelps->SetMaxHealth(5807580);
                         }
-                        else Whelps->SetMaxHealth(4979640);
+                        else Whelps->SetMaxHealth(3979640);
                     }
                     Whelps->SetMaxHealth(Whelps->GetMaxHealth()/8);
                     Whelps->SetHealth(Whelps->GetMaxHealth());
@@ -1113,7 +1115,7 @@ public:
 
         void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
-            GetTarget()->AddAura(SPELL_PARALYSIS, GetTarget());
+            GetTarget()->AddAura(SPELL_PETRIFICATION, GetTarget());
         }
 
         void Register()
