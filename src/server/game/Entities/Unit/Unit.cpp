@@ -6048,11 +6048,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Hot Streak
             if (dummySpell->Id == 44445)
             {
+                if (effIndex != 0)
+                    return false;
+
                 if (procEx & PROC_EX_CRITICAL_HIT)
                 {
-                    // y=125/(crit+4) - decreasing chance to proc with higher crit chances
-                    // + T12 4p set bonus
-                    if (roll_chance_i( (HasAura(99064) ? 155.0f : 125.0f) /(GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_MASK_FIRE)+4.0f) ))
+                    float critChance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_MASK_FIRE);
+                    float chance = 78.93f - 1.7106f * critChance;
+                    if (GetTypeId() == TYPEID_PLAYER)
+                        ToPlayer()->ApplySpellMod(44549, SPELLMOD_CHANCE_OF_SUCCESS, chance, NULL); // T12 4p set bonus
+
+                    if (roll_chance_f(chance))
                         CastSpell(this, 48108, true);
                 }
                 return true;
