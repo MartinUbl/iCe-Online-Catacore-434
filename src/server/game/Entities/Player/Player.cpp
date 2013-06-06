@@ -11737,6 +11737,10 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
     if (!currency)
         return;
 
+    /* disallow conquest point gain during arena season switch! */
+    if (id == CURRENCY_TYPE_CONQUEST_POINTS && count > 0)
+        return;
+
     // Check for auras modifying amount of currency gained
     if (!ignorebonuses)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);
