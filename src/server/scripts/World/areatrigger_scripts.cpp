@@ -321,6 +321,26 @@ class AreaTrigger_at_last_rites : public AreaTriggerScript
         }
 };
 
+class AreaTrigger_at_Widows_Clutch : public AreaTriggerScript
+{
+    public:
+        AreaTrigger_at_Widows_Clutch() : AreaTriggerScript("at_widows_clutch") { }
+
+    bool OnTrigger(Player* source, const AreaTriggerEntry* trigger)
+    {
+        if (!source || !trigger)
+            return false;
+
+        if (trigger->id == 6927)
+            source->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5872));
+
+        return false;
+    }
+
+ /* SQL: INSERT INTO areatrigger_scripts values(6927, "at_widows_clutch"); */
+
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_aldurthar_gate();
@@ -331,4 +351,6 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_stormwright_shelf();
     new AreaTrigger_at_scent_larkorwi();
     new AreaTrigger_at_last_rites();
+    new AreaTrigger_at_Widows_Clutch();
+
 }
