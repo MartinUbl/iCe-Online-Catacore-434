@@ -227,6 +227,23 @@ class boss_shannox : public CreatureScript
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
+        void EnterEvadeMode()
+        {
+            if (pRiplimb && !pRiplimb->isAlive())
+            {
+                pRiplimb->setDeathState(DEAD);
+                pRiplimb->Respawn(true);
+            }
+
+            if (pRageface && !pRageface->isAlive())
+            {
+                pRageface->setDeathState(DEAD);
+                pRageface->Respawn(true);
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
         void DoAction(const int32 action)
         {
             // Riblimb dies..
@@ -507,7 +524,6 @@ class npc_riplimb : public CreatureScript
                 pInstance = NULL;
         }
 
-
         void EnterCombat(Unit* target)
         {
             if (pInstance)
@@ -611,9 +627,7 @@ class npc_riplimb : public CreatureScript
         void JustDied(Unit* pKiller)
         {
             if (pBoss)
-            {
                 pBoss->AI()->DoAction(1);
-            }
         }
     };
 
@@ -713,6 +727,7 @@ class npc_crystal_trap : public CreatureScript
             {
                 for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 {
+                    itr->getSource()->DestroyForNearbyPlayers();
                     itr->getSource()->UpdateObjectVisibility();
                 }
             }
@@ -858,6 +873,8 @@ class npc_immolation_trap : public CreatureScript
 
         void Reset()
         {
+            me->RemoveAllAuras(); // because "Hurl Spear" visual in his mouth, safety.. safety
+
             doeffect = false;
             armTrap = false;
             trapActivated = false;
@@ -866,6 +883,8 @@ class npc_immolation_trap : public CreatureScript
 
             if (me->GetInstanceScript())
                 pInstance = me->GetInstanceScript();
+            else
+                pInstance = NULL;
 
             if (pInstance)
             {
@@ -975,6 +994,7 @@ class npc_rageface : public CreatureScript
 
         void Reset()
         {
+            me->RemoveAllAuras();
             me->SetReactState(REACT_PASSIVE);
             ragefaceHP = true;
             changeTargetTimer = urand(5000, 8000);
@@ -982,11 +1002,6 @@ class npc_rageface : public CreatureScript
                 pInstance = me->GetInstanceScript();
             else
                 pInstance = NULL;
-        }
-
-        void EnterCombat(Unit* pWho)
-        {
-
         }
 
         void UpdateAI(const uint32 diff)
@@ -1008,13 +1023,13 @@ class npc_rageface : public CreatureScript
                     for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                     {
                         Player* plr = itr->getSource();
-                        plrCount += 1;
+                        plrCount++;
                         if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->isTank() && plr->isAlive()))
                             targets.push_back(plr->GetGUID());
                     }
                 }
 
-                if (targets.size() > 0)
+                if (!targets.empty() && targets.size() > 0)
                 {
                     std::list<uint64>::iterator itr = targets.begin();
                     uint32 randPos = urand(0, targets.size() - 1);
@@ -1022,8 +1037,6 @@ class npc_rageface : public CreatureScript
 
                     if (Unit* pTarget = Unit::GetUnit((*me), (*itr)))
                     {
-                        me->getVictim()->getHostileRefManager().deleteReference(me);
-                        pTarget->getHostileRefManager().deleteReference(me); // for safety..
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveChase(pTarget);
                         me->AI()->AttackStart(pTarget);
