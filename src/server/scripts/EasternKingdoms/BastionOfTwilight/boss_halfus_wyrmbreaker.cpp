@@ -50,9 +50,10 @@ enum Spells
     SPELL_FIREBALL_BARRAGE      = 83706,
     SPELL_SCORCHING_BREATH      = 83707,
     SPELL_FIREBALL              = 86058,
+    SPELL_FIREBALL2             = 83862,
 
     //Chains
-    SPELL_SPIKE_VISUAL            = 83480,
+    SPELL_SPIKE_VISUAL          = 83480,
     SPELL_CHAINS                = 83487,
 };
 
@@ -172,6 +173,7 @@ public:
 
         void Reset()
         {
+            DespawnCreatures(44641);
             DespawnCreatures(44650);
             DespawnCreatures(44645);
             DespawnCreatures(44652);
@@ -1031,15 +1033,26 @@ public:
                     else
                         BarrageTimer -= diff;
                 };
-            if (!Whelp || !Warden)
+            if (!Warden)
             {
                 if (FireballTimer <= diff)
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                            if (!me->hasUnitState(UNIT_STAT_CASTING))
-                                me->CastSpell(target, SPELL_FIREBALL, false);
-                        BallTimer = 1499;
-                        FireballTimer = urand(2*IN_MILLISECONDS,4*IN_MILLISECONDS);
+                        if (Is25ManRaid())
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                                if (!me->hasUnitState(UNIT_STAT_CASTING))
+                                    me->CastSpell(target, SPELL_FIREBALL, false);
+                            BallTimer = 1400;
+                            FireballTimer = 1520;
+                        }
+                        else 
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                                if (!me->hasUnitState(UNIT_STAT_CASTING))
+                                    me->CastSpell(target, SPELL_FIREBALL2, false);
+                            BallTimer = 2900;
+                            FireballTimer = 3020;
+                        };
                     }
                     else
                         FireballTimer -= diff;
