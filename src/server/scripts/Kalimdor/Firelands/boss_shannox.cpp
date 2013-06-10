@@ -70,6 +70,7 @@ class boss_shannox : public CreatureScript
         }
 
         Creature* pRiplimb;
+        Creature* pSummonSpear;
         std::list<uint64> summonedTraps;
         Creature* pRageface;
         InstanceScript* pInstance;
@@ -86,14 +87,18 @@ class boss_shannox : public CreatureScript
         {
             pRiplimb = NULL;
             pRageface = NULL;
+
             aggroTime = 500;
             aggroBool = false;
+
             checkEverySecond = 1000;
             ArcingSlashTimer = 7000;
             CrystalTrapTimer = 8000;
             ImmolationTrapTimer = 10000;
             HurlSpearTimer = 20000;
             riplimbRespawnTimer = 30000;
+
+            pSummonSpear = NULL;
 
             me->SetReactState(REACT_PASSIVE);
 
@@ -119,6 +124,17 @@ class boss_shannox : public CreatureScript
                         pTraps->ForcedDespawn(5000);
                 }
             }
+
+            std::list<Creature*> cr;
+            cr.clear();
+            GetCreatureListWithEntryInGrid(cr, me, NPC_CRYSTAL_PRISON, 50000.0f);
+
+            if (!cr.empty())
+            {
+                for (std::list<Creature*>::const_iterator itr = cr.begin(); itr != cr.end(); itr++)
+                    me->Kill((*itr)); // we must kill'em, because we don't know if we have prisoner.
+            }
+
         }
 
         void JustSummoned(Creature* pSummon)
@@ -133,17 +149,7 @@ class boss_shannox : public CreatureScript
                 {
                     pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     pSummon->setFaction(35);
-                    float x,y,z;
-                    pSummon->GetPosition(x,y,z);
                     summonedTraps.push_back(pSummon->GetGUID());
-                    Creature* bunny = me->SummonCreature(NPC_IMMOLATION_TRAP_BUNNY, x, y, z);
-                    if (bunny)
-                    {
-                        bunny->setFaction(35);
-                        bunny->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.7f);
-                        bunny->CastSpell(bunny, SPELL_SPEAR_TARGET_VISUAL, true);
-                        summonedTraps.push_back(bunny->GetGUID());
-                    }
                     break;
                 }
                 default:
@@ -306,8 +312,11 @@ class boss_shannox : public CreatureScript
 
             // ToDo: complete semicircle - visual (Gregory ?)
             // this doesn't work, its too late..
-            /*if (spell->Id == SPELL_MAGMA_RUPTURE && spell->Effect[0] == SPELL_EFFECT_DUMMY)
+            /*if (spell->Id == SPELL_MAGMA_RUPTURE)
             {
+                if (spell->Id != SPELL_EFFECT_DUMMY)
+                    return;
+
                 float angle, x, y, z, cx, cy;
                 pTarget->GetPosition(x,y,z);
                 uint32 pocet_ohnu = 0;
@@ -321,6 +330,17 @@ class boss_shannox : public CreatureScript
                     me->CastSpell(cx, cy, z, SPELL_MAGMA_RUPTURE_IMMOLATION, true);
                 }
             }*/
+
+            if (spell->Id == SPELL_HURL_SPEAR)
+            {
+                if (pSummonSpear)
+                    pSummonSpear->SetVisibility(VISIBILITY_ON);
+
+                DoAction(3); // unequip spear
+
+                if (pRiplimb)
+                    pRiplimb->AI()->DoAction(1);
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -417,7 +437,22 @@ class boss_shannox : public CreatureScript
                                 me->PlayDirectSound(24585);
                                 break;
                         }
-                        me->CastSpell(pRiplimb, SPELL_HURL_SPEAR, false);
+                        float x,y,z;
+                        pRiplimb->GetPosition(x, y, z);
+                        Creature* pSpear = me->SummonCreature(NPC_IMMOLATION_TRAP_BUNNY, x, y, z);
+                        if (((pSummonSpear = me->SummonCreature(NPC_HURL_SPEAR_WEAPON, x, y, z))) != NULL)
+                        {
+                            pSummonSpear->SetVisibility(VISIBILITY_OFF);
+                        }
+                        if (pSpear)
+                        {
+                            pSpear->setFaction(35);
+                            pSpear->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                            pSpear->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+                            pSpear->CastSpell(pSpear, SPELL_SPEAR_TARGET_VISUAL, true);
+                            summonedTraps.push_back(pSpear->GetGUID());
+                        }
+                        me->CastSpell(pSpear, SPELL_HURL_SPEAR, false);
                     }
                     else {
                         if (!IsHeroic()) {
@@ -582,7 +617,7 @@ class npc_riplimb : public CreatureScript
             {
                 if (spearDelayTimer <= diff)
                 {
-                    if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 1000)) != NULL)
+                    if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 50000.0f)) != NULL)
                     {
                         me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
                         canBeTrapped = false;
@@ -1078,6 +1113,84 @@ class npc_rageface : public CreatureScript
     }
 };
 
+// NOT tested, yet
+class achi_bucket_list : public CreatureScript
+{
+    public:
+        achi_bucket_list() : CreatureScript("achi_bucket_list") { }
+
+    struct achi_bucket_listAI : public ScriptedAI
+    {
+        achi_bucket_listAI(Creature* c) : ScriptedAI(c)
+        {
+            c->SetVisibility(VISIBILITY_OFF);
+            c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        void DoCompleteCriteria(Unit* pWho)
+        {
+            Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+            AchievementEntry const* entry = sAchievementStore.LookupEntry(5829);
+            AchievementCriteriaEntryList const* cList = sAchievementMgr->GetAchievementCriteriaByAchievement(entry->ID);
+
+            if (!cList || !entry)
+                return;
+
+            if (!plrList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                {
+                    Player* plr = (*itr).getSource();
+
+                    for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+                    {
+                        AchievementCriteriaEntry const* criteria = (*itr);
+
+                        if (plr->GetAchievementMgr().HasAchieved(entry))
+                            continue;
+
+                        if (!pWho->isInCombat())
+                        {
+                            // reset criteria progress
+                            plr->GetAchievementMgr().SetCriteriaProgress(criteria, 0);
+                        }
+
+                        switch (me->GetEntry())
+                        {
+                            case 123630:
+                                plr->GetAchievementMgr().SetCriteriaProgress(17775, entry->ID, 1);
+                                break;
+                            case 123631:
+                                plr->GetAchievementMgr().SetCriteriaProgress(17776, entry->ID, 1);
+                                break;
+                            case 123632:
+                                plr->GetAchievementMgr().SetCriteriaProgress(17777, entry->ID, 1);
+                                break;
+                            case 123633:
+                                plr->GetAchievementMgr().SetCriteriaProgress(17778, entry->ID, 1);
+                                break;
+                            case 123634:
+                                plr->GetAchievementMgr().SetCriteriaProgress(17779, entry->ID, 1);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        void MoveInLineOfSight(Unit* pWho)
+        {
+            if (!pWho || pWho->GetDistance(me) > 10.0f || pWho->GetTypeId() != TYPEID_UNIT || pWho->GetEntry() != 53691)
+                return;
+
+            DoCompleteCriteria(pWho);
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+    };
+
+};
+
 void AddSC_boss_shannox()
 {
     new boss_shannox();
@@ -1086,6 +1199,7 @@ void AddSC_boss_shannox()
     new npc_immolation_trap();
     new npc_riplimb();
     new npc_rageface();
+    //new achi_bucket_list();
 }
 
 /*
@@ -1095,6 +1209,8 @@ UPDATE creature_template SET scriptname = "npc_crystal_prison" WHERE entry = 538
 UPDATE creature_template SET scriptname = "npc_immolation_trap" WHERE entry = 53724;
 UPDATE creature_template SET scriptname = "npc_riplimb" WHERE entry = 53694;
 UPDATE creature_template SET scriptname = "npc_rageface" WHERE entry = 53695;
+UPDATE creature_template SET scriptname = "boss_shannox" WHERE entry = 53691;
+
 
 INSERT INTO creature_template
   (entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, modelid4, name, subname, IconName, gossip_menu_id, minlevel, maxlevel, exp, faction_A, faction_H, npcflag, speed_walk, speed_run, scale, rank, mindmg, maxdmg, dmgschool, attackpower, dmg_multiplier, baseattacktime, rangeattacktime, unit_class, unit_flags, dynamicflags, family, trainer_type, trainer_spell, trainer_class, trainer_race, minrangedmg, maxrangedmg, rangedattackpower, type, type_flags, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, InhabitType, Health_mod, Mana_mod, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName, WDBVerified)
