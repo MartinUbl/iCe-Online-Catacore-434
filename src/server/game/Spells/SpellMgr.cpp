@@ -3690,6 +3690,18 @@ void SpellMgr::LoadCustomSpells()
     pSpell->DurationIndex = 21;
     pSpell->rangeIndex = 1;
     INSERT_SPELLENTRY(pSpell);
+
+    // spells for various (mostly Molten Front) achievements
+    static const uint32 dummySpellsList[] = {101174, 101175, 101173, 101170, 101176, 101177, 101179, 101182, 100979, 101098, 101097, 101099, 101100, 101101, 101103, 98102, 101181, 101167};
+    for (uint32 i = 0; i < sizeof(dummySpellsList)/sizeof(uint32); i++)
+    {
+        INIT_NEW_SPELLENTRY(pSpell, dummySpellsList[i]);
+        pSpell->SpellName = "Achievement Credit - Custom";
+        pSpell->CastingTimeIndex = 1;
+        pSpell->DurationIndex = 21;
+        pSpell->rangeIndex = 1;
+        INSERT_SPELLENTRY(pSpell);
+    }
 }
 
 void SpellMgr::LoadSpellCustomCrafts(uint32 i, SpellEntry* spellInfo)
@@ -4090,6 +4102,28 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            break;
+        case 101174: // spells for various (mostly Molten Front) achievements
+        case 101175:
+        case 101173:
+        case 101170:
+        case 101176:
+        case 101177:
+        case 101179:
+        case 101182:
+        case 100979:
+        case 101098:
+        case 101097:
+        case 101099:
+        case 101100:
+        case 101101:
+        case 101103:
+        case 98102:
+        case 101181:
+        case 101167:
+            spellInfo->EquippedItemClass = -1;
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             break;
         case 87934: //Serpent Spread
         case 87935:
