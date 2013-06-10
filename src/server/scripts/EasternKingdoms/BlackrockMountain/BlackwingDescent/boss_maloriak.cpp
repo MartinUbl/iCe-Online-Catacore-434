@@ -79,7 +79,10 @@ enum Spells
     // <==== Maloriak
 
     // Aberration ====>
-    SPELL_GROWTH_CATACLYST       = 77987,
+    SPELL_GROWTH_CATACLYST_10M       = 77987,
+    SPELL_GROWTH_CATACLYST_25M       = 101440,
+    SPELL_GROWTH_CATACLYST_10HC      = 101441,
+    SPELL_GROWTH_CATACLYST_25HC      = 101442,
     // <==== Aberration
 
     // Cauldron ====>
@@ -1346,7 +1349,7 @@ public:
         {
             DoZoneInCombat();
             castGrowth = false;
-            me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+            me->CastSpell(me, SPELL_GROWTH_CATACLYST_10M, true);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1368,14 +1371,14 @@ public:
             }
                 if (me->HasAura(SPELL_DEBILITATING_SLIME))
                 {
-                    me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+                    me->RemoveAurasDueToSpell(RAID_MODE(SPELL_GROWTH_CATACLYST_10M, SPELL_GROWTH_CATACLYST_25M, SPELL_GROWTH_CATACLYST_10HC, SPELL_GROWTH_CATACLYST_25HC));
                     castGrowth = true;
                 }
                 else
                 {
                     if (castGrowth == true)
                     {
-                        me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+                        me->CastSpell(me, SPELL_GROWTH_CATACLYST_10M, true);
                         castGrowth = false;
                     }
                 }
@@ -1404,7 +1407,7 @@ public:
         void EnterCombat(Unit* /*target*/) 
         {
             castGrowth = false;
-            me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+            me->CastSpell(me, SPELL_GROWTH_CATACLYST_10M, true);
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->GetMotionMaster()->Clear(true);
             me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -1417,14 +1420,14 @@ public:
 
             if (me->HasAura(SPELL_DEBILITATING_SLIME))
             {
-                me->RemoveAurasDueToSpell(SPELL_GROWTH_CATACLYST);
+                me->RemoveAurasDueToSpell(RAID_MODE(SPELL_GROWTH_CATACLYST_10M, SPELL_GROWTH_CATACLYST_25M, SPELL_GROWTH_CATACLYST_10HC, SPELL_GROWTH_CATACLYST_25HC));
                 castGrowth = true;
             }
             else
             {
                 if (castGrowth == true)
                 {
-                    me->CastSpell(me, SPELL_GROWTH_CATACLYST, true);
+                    me->CastSpell(me, SPELL_GROWTH_CATACLYST_10M, true);
                     castGrowth = false;
                 }
             }
