@@ -4505,18 +4505,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     int32 bp = player->GetMasteryPoints() * 1.25f;
                     player->CastCustomSpell(player, 100977, &bp, &bp, NULL, true);
                 }
-
-                // Implementation of Deep Healing mastery proficiency
-                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-                    playerSpec == SPEC_SHAMAN_RESTORATION)
-                {
-                    // Mastery gives 3% per mastery point
-                    float masterybonus = player->GetMasteryPoints()*3.0f/100.0f;
-                    // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
-                    float healthcoef = (100.0f-unitTarget->GetHealthPct()+1.0f)/100.0f;
-
-                    addhealth += addhealth*masterybonus*healthcoef;
-                }
             }
         }
         /****************************************************/

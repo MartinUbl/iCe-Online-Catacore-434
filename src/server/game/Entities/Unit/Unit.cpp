@@ -12458,6 +12458,21 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
             TakenTotalMod *= 1.2f;
     }
 
+    // Implementation of Deep Healing mastery proficiency
+    if (Player *player = ToPlayer())
+    {
+        if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+            player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_RESTORATION)
+        {
+            // Mastery gives 3% per mastery point
+            float masterybonus = player->GetMasteryPoints() * 3.0f / 100.0f;
+            // Healing scales linearly down (1% of bonus at 100% health, 100% of bonus at 0% health (hypotheticaly))
+            float healthcoef = (100.0f - pVictim->GetHealthPct() * 0.99f) / 100.0f;
+
+            TakenTotalMod *= 1.0f + masterybonus * healthcoef;
+        }
+    }
+
     // Taken mods
 
     // Healing Wave
