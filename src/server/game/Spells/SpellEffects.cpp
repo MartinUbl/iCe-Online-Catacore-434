@@ -4500,7 +4500,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
                 // Implementation of Harmony mastery proficiency
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
-                    playerSpec == SPEC_DRUID_RESTORATION)
+                    playerSpec == SPEC_DRUID_RESTORATION && !m_IsTriggeredSpell)
                 {
                     int32 bp = player->GetMasteryPoints() * 1.25f;
                     player->CastCustomSpell(player, 100977, &bp, &bp, NULL, true);
