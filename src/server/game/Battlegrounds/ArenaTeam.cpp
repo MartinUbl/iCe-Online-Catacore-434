@@ -687,15 +687,19 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 own_matchmaker_rating, b
 {
     float chance = GetChanceAgainst(own_rating, own_matchmaker_rating);
     float won_mod = (won) ? 1.0f : 0.0f;
-    float mod = 92.0f * (won_mod - chance);
+    float mod = 46.0f * (won_mod - chance);
 
-    if (mod < 0)
+    if (own_rating < 1400)
     {
-        // if below 1000, can't drop
-        if (own_rating < 1000)
-            mod = 0;
-        else if (own_rating < 1500)
-            mod *= float(own_rating - 1000) / (1500 - 1000);
+        if (!won)
+            mod = 0.0f;
+        else
+            mod *= 2.0f;
+    }
+    else if (own_rating < 1500)
+    {
+        if (!won)
+            mod *= 0.5f;
     }
 
     return (int32)ceil(mod);
