@@ -743,6 +743,8 @@ void Battleground::EndBattleground(uint32 winner)
     WorldPacket data;
     int32 winmsg_id = 0;
 
+    uint32 winner_conquest, winner_honor, loser_honor;
+
     if (winner == ALLIANCE)
     {
         winmsg_id = isBattleground() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
@@ -927,18 +929,27 @@ void Battleground::EndBattleground(uint32 winner)
             }
         }
 
-        uint32 winner_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-        uint32 loser_kills = plr->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_LAST : BG_REWARD_LOSER_HONOR_FIRST;
-        uint32 winner_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
+        if (plr->getLevel() >= 85)
+        {
+            winner_conquest = plr->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST_85 : BG_REWARD_WINNER_CONQUEST_85;
+            winner_honor    = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_FIRST_85 : BG_REWARD_WINNER_HONOR_85;
+            loser_honor     = BG_REWARD_LOSER_HONOR_85;
+        }
+        else
+        {
+            winner_conquest = 0;
+            winner_honor    = plr->GetRandomWinner() ? BG_REWARD_WINNER_FIRST : BG_REWARD_WINNER_HONOR_85;
+            loser_honor     = BG_REWARD_LOSER;
+        }
 
         // Reward winner team
         if (team == winner)
         {
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
             {
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_kills));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_honor));
                 if (CanAwardArenaPoints())
-                    plr->ModifyCurrency(390,winner_arena, CURRENCY_SOURCE_BG);
+                    plr->ModifyCurrency(390,winner_conquest, CURRENCY_SOURCE_BG);
                 if (!plr->GetRandomWinner())
                     plr->SetRandomWinner(true);
             }
@@ -952,7 +963,7 @@ void Battleground::EndBattleground(uint32 winner)
         else
         {
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_honor));
 
             uint32 xp = Trinity::XP::BattlegroundLossXP(plr->getLevel());
             if (xp && !isArena() && !isWargame())

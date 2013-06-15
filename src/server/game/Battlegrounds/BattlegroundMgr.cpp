@@ -1379,9 +1379,20 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket *data, const uint6
     if (!plr)
         return;
 
-    uint32 winner_conquest = plr->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST : BG_REWARD_WINNER_CONQUEST_LAST;
-    uint32 winner_honor = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_FIRST : BG_REWARD_WINNER_HONOR_LAST;
-    uint32 loser_honor = !plr->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_FIRST : BG_REWARD_LOSER_HONOR_LAST;
+    uint32 winner_conquest, winner_honor, loser_honor;
+
+    if (plr->getLevel() >= 85)
+    {
+        winner_conquest = plr->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST_85 : BG_REWARD_WINNER_CONQUEST_85;
+        winner_honor    = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_FIRST_85 : BG_REWARD_WINNER_HONOR_85;
+        loser_honor     = BG_REWARD_LOSER_HONOR_85;
+    }
+    else
+    {
+        winner_conquest = 0;
+        winner_honor    = plr->GetRandomWinner() ? BG_REWARD_WINNER_FIRST : BG_REWARD_WINNER_HONOR_85;
+        loser_honor     = BG_REWARD_LOSER;
+    }
 
     ObjectGuid guidBytes = guid;
 
