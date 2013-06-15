@@ -6155,7 +6155,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
                 if (m_caster->IsVisionObscured(target))
-                    return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
+                {
+                    // Camouflage should be ripped by melee abilities
+                    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE || ((m_spellInfo->EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED) != 0) || !target->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                        return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
+                }
             }
 
         }
