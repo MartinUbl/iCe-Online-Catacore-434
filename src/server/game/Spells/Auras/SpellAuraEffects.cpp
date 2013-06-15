@@ -8171,6 +8171,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     else 
                         target->RemoveAura(88611);
+
+                    // Smoke Bomb should break stealth
+                    if (!target->IsFriendlyTo(this->GetCaster()))
+                    {
+                        target->ApplySpellDispelImmunity(m_spellProto, DISPEL_STEALTH, apply);
+                        target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+                    }
                     break;
                 }
             }
