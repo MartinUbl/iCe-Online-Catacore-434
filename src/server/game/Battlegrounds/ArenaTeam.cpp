@@ -762,9 +762,8 @@ void ArenaTeam::MemberWon(Player * plr, uint32 ownMatchmakerRating)
                 bg->UpdatePlayerScore(plr, SCORE_PERSONAL_RATING_CHANGE, mod);
 
             // reward conquest points (new in 4.x)
-            // TODO: verify the coefficient 1/5
             if (plr)
-                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, itr->conquest_point_cap / 5, CURRENCY_SOURCE_ARENA);
+                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, 180, CURRENCY_SOURCE_ARENA, false);
 
             // update personal played stats
             itr->games_week +=1;
