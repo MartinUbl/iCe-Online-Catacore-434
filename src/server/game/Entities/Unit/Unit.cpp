@@ -13568,7 +13568,14 @@ bool Unit::canSeeOrDetect(Unit const* /*u*/, bool /*detect*/, bool /*inVisibleLi
 bool Unit::canDetectInvisibilityOf(Unit const* u) const
 {
     if (m_invisibilityMask & u->m_invisibilityMask) // same group
+    {
+        // Mage's Invisibility spell is exception - they cannot detect each other
+        if (HasAura(32612) && u->HasAura(32612))
+            return false;
+
         return true;
+    }
+
     AuraEffectList const& auras = u->GetAuraEffectsByType(SPELL_AURA_MOD_STALKED); // Hunter mark
     for (AuraEffectList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
         if ((*iter)->GetCasterGUID() == GetGUID())
