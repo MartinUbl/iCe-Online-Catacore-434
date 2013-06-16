@@ -105,6 +105,8 @@ public:
 
     void EraseEntry(uint32 id) { indexTable[id] = NULL; }
 
+    void SetEntry(uint32 id, T* record) { indexTable[id] = record; }
+
 private:
     uint32 nCount;
     uint32 fieldCount;
