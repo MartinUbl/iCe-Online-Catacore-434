@@ -1612,7 +1612,7 @@ struct ScalingStatDistributionEntry
     uint32  Id;                                             // 0
     int32   StatMod[10];                                    // 1-10
     uint32  Modifier[10];                                   // 11-20
-    //uint32 unk1;                                          // 21
+    uint32  MinLevel;                                       // 21 players below this can't equip the item (relevant only for id 393 as of patch 4.3.4)
     uint32  MaxLevel;                                       // 22
 };
 

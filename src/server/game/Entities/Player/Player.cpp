@@ -12196,9 +12196,13 @@ uint8 Player::CanEquipItem(uint8 slot, uint16 &dest, Item *pItem, bool swap, boo
             }
 
             ScalingStatDistributionEntry const *ssd = pProto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(pProto->ScalingStatDistribution) : 0;
-            // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
-            if (ssd && ssd->MaxLevel < DEFAULT_MAX_LEVEL && ssd->MaxLevel < getLevel())
-                return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+            // check allowed level
+            if (ssd)
+            {
+                uint8 playerLevel = getLevel();
+                if (playerLevel > ssd->MaxLevel || playerLevel < ssd->MinLevel)
+                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+            }
 
             uint8 eslot = FindEquipSlot(pProto, slot, swap);
             if (eslot == NULL_SLOT)
