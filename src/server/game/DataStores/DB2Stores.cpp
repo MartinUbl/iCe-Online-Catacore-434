@@ -129,4 +129,30 @@ void LoadDB2Stores(const std::string& dataPath)
 
     sLog->outString(">> Initialized %d data stores.", DB2FileCount);
     sLog->outString();
+
+    sLog->outString("Loading custom DB2 entries...");
+
+    // initialize
+    ItemExtendedCostEntry* a = new ItemExtendedCostEntry;
+    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a->ID = 78;
+    a->RequiredArenaSlot = 1;
+    a->RequiredPersonalArenaRating = 1650;
+    a->RequiredCurrency[0] = 390;
+    a->RequiredCurrencyCount[0] = 2200;
+    // insert
+    sItemExtendedCostStore.SetEntry(a->ID, a);
+
+    a = new ItemExtendedCostEntry;
+    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a->ID = 79;
+    a->RequiredArenaSlot = 1;
+    a->RequiredPersonalArenaRating = 1650;
+    a->RequiredCurrency[0] = 390;
+    a->RequiredCurrencyCount[0] = 1650;
+    // insert
+    sItemExtendedCostStore.SetEntry(a->ID, a);
+
+    sLog->outString(">> Custom entries successfully loaded.");
+    sLog->outString();
 }
