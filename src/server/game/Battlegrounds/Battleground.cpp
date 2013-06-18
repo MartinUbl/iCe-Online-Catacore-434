@@ -2169,10 +2169,10 @@ void Battleground::RatedBattlegroundWon(Player *player)
     player->SetRatedBattlegroundRating(player->GetRatedBattlegroundRating() + rating_change);
     player->AddRatedBattlegroundStat(RATED_BG_STAT_MATCHES_WON);
 
-    /*player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, player->GetRatedBattlegroundRating() + rating_change);
+    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BG_RATING, player->GetRatedBattlegroundRating() + rating_change);
     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
 
-    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)(player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f)/100, CURRENCY_SOURCE_BG);*/
+    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, (uint32)(player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) / 6.0f)/100, CURRENCY_SOURCE_BG);
 
     player->SaveToDB();
 }
