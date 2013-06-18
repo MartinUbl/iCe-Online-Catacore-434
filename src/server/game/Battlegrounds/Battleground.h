@@ -141,12 +141,17 @@ enum BattlegroundBuffObjects
 
 enum BattlegroundRandomRewards
 {
-    BG_REWARD_WINNER_HONOR_FIRST    = 30,
-    BG_REWARD_WINNER_CONQUEST_FIRST = 25,
-    BG_REWARD_WINNER_HONOR_LAST     = 15,
-    BG_REWARD_WINNER_CONQUEST_LAST  =  0,
-    BG_REWARD_LOSER_HONOR_FIRST     =  5,
-    BG_REWARD_LOSER_HONOR_LAST      =  5
+    // at max level
+    BG_REWARD_WINNER_HONOR_FIRST_85     = 270,
+    BG_REWARD_WINNER_CONQUEST_FIRST_85  = 100,
+    BG_REWARD_WINNER_HONOR_85           = 135,
+    BG_REWARD_WINNER_CONQUEST_85        = 50,
+    BG_REWARD_LOSER_HONOR_85            = 45,
+
+    // at levels lower than 85
+    BG_REWARD_WINNER_FIRST              = 90,
+    BG_REWARD_WINNER                    = 45,
+    BG_REWARD_LOSER                     = 15
 };
 
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
