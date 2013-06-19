@@ -418,22 +418,10 @@ void Pet::SavePetToDB(PetSlot mode)
         CharacterDatabase.escape_string(name);
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        // save auras before possibly removing them
-        _SaveAuras(trans);
-
-        // stable and not in slot saves
-        if (mode > PET_SLOT_HUNTER_LAST && getPetType() == HUNTER_PET)
-            RemoveAllAuras();
-
-        _SaveSpells(trans);
-        _SaveSpellCooldowns(trans);
-
-        // remove current data
-        trans->PAppend("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner, m_charmInfo->GetPetNumber());
 
         // save pet
         std::ostringstream ss;
-        ss  << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, curhappiness, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
+        ss  << "REPLACE INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, curhappiness, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
             << "VALUES ("
             << m_charmInfo->GetPetNumber() << ", "
             << GetEntry() << ", "
@@ -463,6 +451,17 @@ void Pet::SavePetToDB(PetSlot mode)
             << uint32(getPetType()) << ")";
 
         trans->Append(ss.str().c_str());
+
+        // save auras before possibly removing them
+        _SaveAuras(trans);
+
+        // stable and not in slot saves
+        if (mode > PET_SLOT_HUNTER_LAST && getPetType() == HUNTER_PET)
+            RemoveAllAuras();
+
+        _SaveSpells(trans);
+        _SaveSpellCooldowns(trans);
+
         CharacterDatabase.CommitTransaction(trans);
     }
     // delete
@@ -482,11 +481,11 @@ void Pet::SavePetToDB(PetSlot mode)
 void Pet::DeleteFromDB(uint32 guidlow)
 {
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-    trans->PAppend("DELETE FROM character_pet WHERE id = '%u'", guidlow);
     trans->PAppend("DELETE FROM character_pet_declinedname WHERE id = '%u'", guidlow);
     trans->PAppend("DELETE FROM pet_aura WHERE guid = '%u'", guidlow);
     trans->PAppend("DELETE FROM pet_spell WHERE guid = '%u'", guidlow);
     trans->PAppend("DELETE FROM pet_spell_cooldown WHERE guid = '%u'", guidlow);
+    trans->PAppend("DELETE FROM character_pet WHERE id = '%u'", guidlow);
     CharacterDatabase.CommitTransaction(trans);
 }
 
