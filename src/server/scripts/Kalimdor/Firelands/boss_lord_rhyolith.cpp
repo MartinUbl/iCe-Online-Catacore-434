@@ -264,6 +264,9 @@ public:
             }
 
             phase = 1;
+
+            if (pInstance)
+                pInstance->SetData(TYPE_RHYOLITH, NOT_STARTED);
         }
 
         void FootDamaged(uint64 guid, uint32 damage)
@@ -300,6 +303,7 @@ public:
             me->CastSpell(me, SPELL_BALANCE_BAR, true);
             if (pInstance)
             {
+                pInstance->SetData(TYPE_RHYOLITH, IN_PROGRESS);
                 pInstance->DoSetMaxScriptedPowerToPlayers(100);
                 pInstance->DoSetScriptedPowerToPlayers(50);
                 directionPower = 50;
@@ -381,6 +385,9 @@ public:
 
         void JustDied(Unit* killer)
         {
+            if (pInstance)
+                pInstance->SetData(TYPE_RHYOLITH, DONE);
+
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
             if (foot)
                 foot->Kill(foot);
