@@ -178,13 +178,18 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 if (count && bossP && bossG)
                 {
                     bool canMerge=true;
+                    bool anyKilled=false;
                     for (uint32 i = 0; i < count; i++)
+                    {
+                        if(bossG[i]==DONE)
+                            anyKilled=true;
                         if (bossP[i] != bossG[i])
                         {
                             canMerge=false;
                             break;
                         }
-                     if(canMerge)
+                    }
+                     if(canMerge&&anyKilled)
                      {
                         InstanceGroupBind *groupBind = NULL;
                         groupBind = group->GetBoundInstance(this);
