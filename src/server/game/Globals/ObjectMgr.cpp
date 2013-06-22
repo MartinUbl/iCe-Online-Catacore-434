@@ -2190,6 +2190,7 @@ void ObjectMgr::LoadItemPrototypes()
     {
         ItemPrototype* proto = (ItemPrototype*)sItemStorage.LookupEntry<ItemPrototype >(i);
         ItemEntry const* db2item = sItemStore.LookupEntry(i);
+        ItemSparseEntry const* sparseitem = sItemSparseStore.LookupEntry(i);
 
         if (!proto)
             continue;
@@ -2234,6 +2235,20 @@ void ObjectMgr::LoadItemPrototypes()
             {
                 //sLog->outErrorDb("Item (Entry: %u) does not have a correct sheathid (%u), must be %u  (using it).",i,proto->Sheath,db2item->Sheath);
                 const_cast<ItemPrototype*>(proto)->Sheath = db2item->Sheath;
+            }
+        }
+
+        if (sparseitem)
+        {
+            // WDBVerified == 0 points to items, which will be rewritten by DB2 stuff
+            if (proto->WDBVerified == 0)
+            {
+                proto->Delay = sparseitem->Delay;
+                for (uint32 j = 0; j < 10; j++)
+                {
+                    proto->ItemStat[j].ItemStatType = sparseitem->ItemStatType[j];
+                    proto->ItemStat[j].ItemStatValue = sparseitem->ItemStatValue[j];
+                }
             }
         }
 
