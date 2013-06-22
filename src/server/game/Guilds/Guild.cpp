@@ -345,6 +345,20 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_GENERIC:
+            {
+                // no additional checks
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_SPECIFIC:
+            {
+                if (!miscvalue1 || miscvalue1 != achievementCriteria->guild_challenge.type)
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            }
             default:
                 // Not implemented, sorry
                 continue;
@@ -588,6 +602,9 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
             return progress->counter >= achievementCriteria->be_spell_target.spellCount;
+        case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_SPECIFIC:
+        case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_GENERIC:
+            return progress->counter >= achievementCriteria->guild_challenge.count;
         default:
             break;
     }

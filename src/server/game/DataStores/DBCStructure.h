@@ -517,6 +517,13 @@ struct AchievementCriteriaEntry
             uint32 rating;
         } reach_bg_rating;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_*    = 138, 139
+        struct
+        {
+            uint32 type;
+            uint32 count;
+        } guild_challenge;
+
         struct
         {
             uint32  field3;                                 // 3 main requirement
