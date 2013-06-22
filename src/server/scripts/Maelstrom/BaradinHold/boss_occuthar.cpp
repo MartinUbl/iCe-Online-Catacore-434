@@ -31,6 +31,7 @@ enum Spells
 
     NPC_EYE_OF_OCCUTHAR         = 52389,
     SPELL_EYES_OF_OCCUTHAR      = 96920,    // boss ability
+    SPELL_EYES_OF_OCCUTHAR_H    = 101006,
     SPELL_EYES_OF_OCCUTHAR_VISUAL = 96932,  // also sets vehicle kit to a player
     SPELL_GAZE_OF_OCCUTHAR      = 97028,    // periodically triggers damage spell
     SPELL_GAZE_OF_OCCUTHAR_VISUAL = 96995,  // visual effect
@@ -197,6 +198,7 @@ public:
             switch (spell->Id)
             {
             case SPELL_EYES_OF_OCCUTHAR:
+            case SPELL_EYES_OF_OCCUTHAR_H:
                 {
                     if (target == me->getVictim() || target->GetTypeId() != TYPEID_PLAYER)
                         break;
