@@ -7469,7 +7469,11 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
     if (uVictim != NULL)
     {
         if (groupsize > 1)
+        {
             honor_f /= groupsize;
+            if (honor_f < 1.0f)
+                honor_f = 1.0f;
+        }
     }
 
     honor_f *= sWorld->getRate(RATE_HONOR);
