@@ -813,7 +813,7 @@ public:
     void HandleDisband(WorldSession* session);
     void HandleGuildPartyRequest(WorldSession* session);
 
-    void DepositBankMoneyFromLoot(uint32 amount);
+    void DepositBankMoney(uint32 amount);
 
     void UpdateMemberData(Player* plr, uint8 dataid, uint32 value);
     void OnPlayerStatusChange(Player* plr, uint32 flag, bool state);

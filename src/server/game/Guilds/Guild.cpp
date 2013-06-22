@@ -2180,7 +2180,41 @@ void Guild::CompleteChallenge(Group* pSource, GuildChallengeType type)
         }
     }
 
-    /* TODO: rewards here after some testing */
+    uint32 xprew = 0, moneyrew = 0;
+    // choose reward
+    if (m_level >= 5 && m_level <= 24)
+    {
+        if (type == GUILD_CHALLENGE_DUNGEON)
+        {
+            xprew = GCH_REWARD_XP_DUNGEON;
+            moneyrew = GCH_REWARD_MONEY_DUNGEON;
+        }
+        else if (type == GUILD_CHALLENGE_RAID)
+        {
+            xprew = GCH_REWARD_XP_RAID;
+            moneyrew = GCH_REWARD_MONEY_RAID;
+        }
+        else if (type == GUILD_CHALLENGE_BG)
+        {
+            xprew = GCH_REWARD_XP_BG;
+            moneyrew = GCH_REWARD_MONEY_BG;
+        }
+    }
+    else if (m_level == 25)
+    {
+        xprew = 0;
+
+        if (type == GUILD_CHALLENGE_DUNGEON)
+            moneyrew = GCH_REWARD_MONEY_DUNGEON_25;
+        else if (type == GUILD_CHALLENGE_RAID)
+            moneyrew = GCH_REWARD_MONEY_RAID_25;
+        else if (type == GUILD_CHALLENGE_BG)
+            moneyrew = GCH_REWARD_MONEY_BG_25;
+    }
+
+    if (xprew > 0)
+        GainXP(xprew);
+    DepositBankMoney(moneyrew);
 
     CharacterDatabase.PExecute("REPLACE INTO guild_week_challenge VALUES (%u, %u, %u, %u);", GetId(), m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count,
         m_guildChallenges[GUILD_CHALLENGE_RAID-1].count, m_guildChallenges[GUILD_CHALLENGE_BG-1].count);
@@ -2918,7 +2952,7 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
     }
 }
 
-void Guild::DepositBankMoneyFromLoot(uint32 amount)
+void Guild::DepositBankMoney(uint32 amount)
 {
     if (!_GetPurchasedTabsSize())
         return;

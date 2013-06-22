@@ -195,7 +195,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
                 for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
                 {
                     if (pGuild)
-                        pGuild->DepositBankMoneyFromLoot((*itr)->GetBaseAmount()*pLoot->gold/100);
+                        pGuild->DepositBankMoney((*itr)->GetBaseAmount()*pLoot->gold/100);
                 }
             }
         }
