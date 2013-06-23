@@ -682,7 +682,7 @@ int32 ArenaTeam::GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, 
 
     // can't drop below 1
     if (own_rating + mod < 1)
-        mod = -own_rating + 1;
+        mod = -float(own_rating) + 1;
 
     return (int32)ceil(mod);
 }
