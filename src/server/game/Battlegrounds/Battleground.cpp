@@ -920,7 +920,7 @@ void Battleground::EndBattleground(uint32 winner)
 
                 winner_arena_team->MemberWon(plr, winner_matchmaker_rating + winner_change);
             }
-            else
+            else if (winner != WINNER_NONE)     // player lost
             {
                 if (ArenaTeamMember *member = loser_arena_team->GetMember(plr->GetGUID()))
                     member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
