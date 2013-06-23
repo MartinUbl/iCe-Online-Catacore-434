@@ -1378,6 +1378,43 @@ uint32 BattlegroundMgr::CalculateRatedBattlegroundCap(uint32 rating)
     return (uint32)ceil(((float)CalculateArenaCap(rating))*1.222f);
 }
 
+void BattlegroundMgr::UpdateRatedBattlegroundCap()
+{
+    Player* tmp = NULL;
+    uint32 lowguid;
+    uint32 rating, cap;
+    Field* fields = NULL;
+
+    // at first, update online players BG conquest cap
+    for (SessionMap::const_iterator itr = sWorld->GetAllSessions().begin(); itr != sWorld->GetAllSessions().end(); ++itr)
+    {
+        tmp = itr->second->GetPlayer();
+        if (!itr->second || !tmp)
+            continue;
+
+        rating = tmp->GetRatedBattlegroundRating();
+        cap = CalculateRatedBattlegroundCap(rating)*GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+
+        tmp->SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG, cap);
+    }
+
+    QueryResult result = CharacterDatabase.PQuery("SELECT guid, rating FROM character_rated_bg_stats");
+    if (result)
+    {
+        do
+        {
+            fields = result->Fetch();
+            lowguid = fields[0].GetUInt32();
+            rating = fields[1].GetUInt32();
+
+            cap = CalculateRatedBattlegroundCap(rating)*GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS);
+
+            CharacterDatabase.PExecute("REPLACE INTO character_currency_weekcap VALUES (%u, %u, %u, %u, 0)",
+                lowguid, CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG, cap);
+        } while (result->NextRow());
+    }
+}
+
 void BattlegroundMgr::DistributeArenaCurrency()
 {
     // used to distribute arena points based on last week's stats
@@ -1389,6 +1426,8 @@ void BattlegroundMgr::DistributeArenaCurrency()
     for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
         if (ArenaTeam* at = team_itr->second)
             at->UpdateMembersConquestPointCap();
+
+    UpdateRatedBattlegroundCap();
 
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_END);
 

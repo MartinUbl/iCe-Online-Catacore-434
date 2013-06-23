@@ -99,6 +99,7 @@ class BattlegroundMgr
         static uint32 CalculateRatedBattlegroundCap(uint32 rating);
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaCurrency();
+        void UpdateRatedBattlegroundCap();
         void ToggleArenaTesting();
         void ToggleTesting();
 
