@@ -2233,6 +2233,9 @@ void Guild::CompleteChallenge(Group* pSource, GuildChallengeType type)
         GainXP(xprew);
     DepositBankMoney(moneyrew);
 
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_GENERIC);
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_SPECIFIC, type);
+
     CharacterDatabase.PExecute("REPLACE INTO guild_week_challenge VALUES (%u, %u, %u, %u);", GetId(), m_guildChallenges[GUILD_CHALLENGE_DUNGEON-1].count,
         m_guildChallenges[GUILD_CHALLENGE_RAID-1].count, m_guildChallenges[GUILD_CHALLENGE_BG-1].count);
 }
