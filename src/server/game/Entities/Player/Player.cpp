@@ -463,7 +463,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_GuildIdInvited = 0;
     m_ArenaTeamIdInvited = 0;
 
-    m_ConquestPointCap = 1343;
+    m_ConquestPointCap = 1350;
 
     m_atLoginFlags = AT_LOGIN_NONE;
 
@@ -17397,7 +17397,7 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
     {
         for (; slot <= 2; ++slot)
         {
-            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, 0, 1500, 0, 1343)", GetGUIDLow(), slot);
+            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, 0, 1500, 0, 1350)", GetGUIDLow(), slot);
             SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, 0);
         }
         return;
@@ -17410,10 +17410,9 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
         uint32 personalrating = 0;
         uint32 matchmakerrating = 1500;
         uint32 highestweekrating = 0;
-        uint32 conquestpointcap = 1343;
         if (fields[0].GetUInt8() > slot)
         {
-            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, %u, %u, %u, %u)", GetGUIDLow(), slot, personalrating, matchmakerrating, highestweekrating, conquestpointcap);
+            CharacterDatabase.PExecute("INSERT INTO character_arena_stats (guid, slot, personal_rating, matchmaker_rating, highest_week_rating, conquest_point_cap) VALUES (%u, %u, %u, %u, %u, %u)", GetGUIDLow(), slot, personalrating, matchmakerrating, highestweekrating, 1350);
             SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, personalrating);
             slot++;
             continue;
@@ -17422,7 +17421,6 @@ void Player::_LoadArenaStatsInfo(PreparedQueryResult result)
         personalrating = fields[1].GetUInt32();
         matchmakerrating = fields[2].GetUInt32();
         highestweekrating = fields[3].GetUInt32();
-        conquestpointcap = fields[4].GetUInt32();
         SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, personalrating);
         slot++;
     }
@@ -19056,10 +19054,10 @@ void Player::_LoadCurrencyWeekcap(PreparedQueryResult result)
 
     // Some hardcoded default values, which has to be set as default!
     if (GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA) == 0)
-        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
+        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_ARENA, 1350 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
 
     if (GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG) == 0)
-        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG, 1343 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
+        SetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_POINTS, CURRENCY_SOURCE_BG, 1650 * GetCurrencyPrecision(CURRENCY_TYPE_CONQUEST_POINTS));
 }
 
 void Player::_LoadArchaeologyData()

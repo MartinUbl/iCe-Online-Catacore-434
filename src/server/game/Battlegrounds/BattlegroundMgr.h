@@ -95,6 +95,8 @@ class BattlegroundMgr
         uint32 GetRatingDiscardTimer()  const;
         uint32 GetPrematureFinishTime() const;
 
+        static uint32 CalculateArenaCap(uint32 rating);
+        static uint32 CalculateRatedBattlegroundCap(uint32 rating);
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaCurrency();
         void ToggleArenaTesting();

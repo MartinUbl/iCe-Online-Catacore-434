@@ -23,7 +23,7 @@
 #include "gamePCH.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
-
+#include "BattlegroundMgr.h"
 #include "ArenaTeam.h"
 #include "World.h"
 
@@ -159,8 +159,8 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     plMMRating = sWorld->getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
     plPRating = 0;
-    plPCap = 1343;
-    
+    plPCap = 1350;
+
     if (sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
         plPRating = sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
     else if (GetTeamRating() >= 1000)
@@ -274,7 +274,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
         uint32 matchmakerrating = 1500;
         uint32 highestweekrating = 0;
 
-        uint32 conquestpointcap = 1343;
+        uint32 conquestpointcap = 1350;
 
         if (result)
         {
@@ -893,15 +893,7 @@ void ArenaTeam::UpdateMembersConquestPointCap()
     Player* pSource = NULL;
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
-        // cap is higher than 1343 only if player has rating > 1500
-        if (itr->personal_rating > 1500 && itr->personal_rating <= 2985)
-            newcap = -1.00844494413448 * pow(10.0,-12) * pow(double(itr->personal_rating),5) + 1.2356986230482 * pow(10.0,-8) * pow(double(itr->personal_rating),4)
-                     + -5.94771172066112 * pow(10.0,-5) * pow(double(itr->personal_rating),3) + 0.139443656834417 * pow(double(itr->personal_rating),2) + -156.936920229832 * itr->personal_rating + 68836.3;
-        // formula has maximum in 2985, avoid lower cap for higher ratings
-        else if (itr->personal_rating > 2985)
-            newcap = 3000;
-        else
-            newcap = 1343;
+        newcap = BattlegroundMgr::CalculateArenaCap(itr->personal_rating);
 
         oldcap = itr->conquest_point_cap;
 

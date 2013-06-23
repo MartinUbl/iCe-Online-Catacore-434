@@ -1344,6 +1344,40 @@ void BattlegroundMgr::InitAutomaticArenaPointDistribution()
     sLog->outDebug("Automatic Arena Point Distribution initialized.");
 }
 
+uint32 BattlegroundMgr::CalculateArenaCap(uint32 rating)
+{
+    float cap = 0;
+
+    // cap is higher than 1350 only if player has rating > 1500
+    if (rating > 1500 && rating <= 2985)
+    {
+        cap = -1.00844494413448 * pow(10.0,-12) * pow(double(rating),5) + 1.2356986230482 * pow(10.0,-8) * pow(double(rating),4)
+                    + -5.94771172066112 * pow(10.0,-5) * pow(double(rating),3) + 0.139443656834417 * pow(double(rating),2) + -156.936920229832 * rating + 68836.3;
+        /* we reuse original pre-4.1 formula
+         * The original formula ranged from 1343 to 3000. We move it to the beginning (-1343),
+         * shrink the difference (3000-1343 = 1657, 2700-1350 = 1350, 1350/1657 = ~0,8147254),
+         * and move it to the real start (+1350)
+         */
+
+        cap -= 1343.0f;
+        cap = cap*(1350.0f/1657.0f);
+        cap += 1350.0f;
+    }
+    // formula has maximum in 2985, avoid lower cap for higher ratings
+    else if (rating > 2985)
+        cap = 2700.0f;
+    else
+        cap = 1350.0f;
+
+    return (uint32)cap;
+}
+
+uint32 BattlegroundMgr::CalculateRatedBattlegroundCap(uint32 rating)
+{
+    // Rated battlegrounds has 22.2% higher cap than arenas
+    return (uint32)ceil(((float)CalculateArenaCap(rating))*1.222f);
+}
+
 void BattlegroundMgr::DistributeArenaCurrency()
 {
     // used to distribute arena points based on last week's stats
