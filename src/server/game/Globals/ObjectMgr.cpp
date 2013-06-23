@@ -2244,6 +2244,9 @@ void ObjectMgr::LoadItemPrototypes()
             if (proto->WDBVerified == 0)
             {
                 proto->Delay = sparseitem->Delay;
+                proto->Bonding = sparseitem->Bonding;
+                proto->MaxCount = sparseitem->MaxCount;
+                proto->Stackable = sparseitem->Stackable;
                 for (uint32 j = 0; j < 10; j++)
                 {
                     proto->ItemStat[j].ItemStatType = sparseitem->ItemStatType[j];
