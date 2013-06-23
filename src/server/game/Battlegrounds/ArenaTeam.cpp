@@ -680,6 +680,10 @@ int32 ArenaTeam::GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, 
     float won_mod = (won) ? 1.0f : 0.0f;
     float mod = 46.0f * (won_mod - chance);     // with the value 46 team needs to play 40 games at an average to get from 1300 to 1650 if they win 50% of games against 1650
 
+    // can't drop below 1
+    if (own_rating + mod < 1)
+        mod = -own_rating + 1;
+
     return (int32)ceil(mod);
 }
 
