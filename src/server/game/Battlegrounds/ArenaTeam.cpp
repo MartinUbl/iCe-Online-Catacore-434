@@ -893,6 +893,10 @@ void ArenaTeam::UpdateMembersConquestPointCap()
     Player* pSource = NULL;
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
+        // Calculate the cap for the highest rating only
+        if (BattlegroundMgr::GetHighestArenaRating(itr->guid) != itr->personal_rating)
+            continue;
+
         newcap = BattlegroundMgr::CalculateArenaCap(itr->personal_rating);
 
         oldcap = itr->conquest_point_cap;

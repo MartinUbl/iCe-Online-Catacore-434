@@ -1415,6 +1415,20 @@ void BattlegroundMgr::UpdateRatedBattlegroundCap()
     }
 }
 
+uint32 BattlegroundMgr::GetHighestArenaRating(uint32 lowguid)
+{
+    uint32 tmprat = 0;
+    uint64 fullguid = MAKE_NEW_GUID(lowguid, 0, HIGHGUID_PLAYER);
+
+    for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
+        if (ArenaTeam* at = team_itr->second)
+            if (ArenaTeamMember* atm = at->GetMember(fullguid))
+                if (atm->personal_rating > tmprat)
+                    tmprat = atm->personal_rating;
+
+    return tmprat;
+}
+
 void BattlegroundMgr::DistributeArenaCurrency()
 {
     // used to distribute arena points based on last week's stats
