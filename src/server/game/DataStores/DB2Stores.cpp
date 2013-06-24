@@ -139,7 +139,7 @@ void LoadDB2Stores(const std::string& dataPath)
     a->RequiredArenaSlot = 1;
     a->RequiredPersonalArenaRating = 1650;
     a->RequiredCurrency[0] = 390;
-    a->RequiredCurrencyCount[0] = 2200;
+    a->RequiredCurrencyCount[0] = 220000;
     // insert
     sItemExtendedCostStore.SetEntry(a->ID, a);
 
@@ -149,7 +149,7 @@ void LoadDB2Stores(const std::string& dataPath)
     a->RequiredArenaSlot = 1;
     a->RequiredPersonalArenaRating = 1650;
     a->RequiredCurrency[0] = 390;
-    a->RequiredCurrencyCount[0] = 1650;
+    a->RequiredCurrencyCount[0] = 165000;
     // insert
     sItemExtendedCostStore.SetEntry(a->ID, a);
 
