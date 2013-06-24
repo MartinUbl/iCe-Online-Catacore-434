@@ -1818,26 +1818,49 @@ void WorldSession::SendSetPhaseShift(uint32 PhaseShift, uint32 MapID)
 {
     if (!_player)
         return;
+    ObjectGuid guid = _player->GetGUID();
 
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 4);
-    data << uint64(_player->GetGUID());
-    data << uint32(0); // Count of bytes - Array1 - Unused
-    data << uint32(0); // Count of bytes - Array2 - TerrainSwap, unused.
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
 
-    data << uint32(2); // Count of bytes - Array3 - Phases
-    data << uint16(PhaseShift);
-    
-    if (MapID)
-    {
-        data << uint32(2); // Count of bytes - Array4 - TerrainSwap
-        data << uint16(MapID);
-    }
-    else data << uint32(0);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
 
-    if (!PhaseShift)
-        data << uint32(0x08);
-    else
-        data << uint32(0); // Flags (seem to be from Phase.dbc, not really sure)
+    data << uint32(0);
+    //for (uint8 i = 0; i < worldMapAreaCount; ++i)
+    //    data << uint16(0);                    // WorldMapArea.dbc id (controls map display)
+
+    data.WriteByteSeq(guid[1]);
+
+    data << uint32(8);//uint32(phaseIds.size() ? 0 : 8);  // flags (not phasemask)
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+
+    data << uint32(0);                          // Inactive terrain swaps
+    //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
+    //    data << uint16(0);
+
+    data << uint32(0);//uint32(phaseIds.size()) * 2;        // Phase.dbc ids
+    //for (std::set<uint32>::const_iterator itr = phaseIds.begin(); itr != phaseIds.end(); ++itr)
+    //    data << uint16(*itr);
+
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[0]);
+
+    data << uint32(0);//uint32(terrainswaps.size()) * 2;    // Active terrain swaps
+    //for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
+    //    data << uint16(*itr);
+
+    data.WriteByteSeq(guid[5]);
+
     SendPacket(&data);
 }
 

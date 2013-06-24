@@ -1526,6 +1526,13 @@ struct OverrideSpellDataEntry
     //uint32      unk0;                                     // 12
 };
 
+struct PhaseEntry
+{
+    uint32      id;                                         // 0
+    DBCString   name;                                       // 1
+    uint32      flags;                                      // 2
+};
+
 struct PvPDifficultyEntry
 {
     //uint32      id;                                       // 0        m_ID
