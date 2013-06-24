@@ -767,7 +767,7 @@ void ArenaTeam::MemberWon(Player * plr, uint32 ownMatchmakerRating)
 
             // reward conquest points (new in 4.x)
             if (plr)
-                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, 180, CURRENCY_SOURCE_ARENA, false);
+                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, CONQUEST_REWARD_ARENA, CURRENCY_SOURCE_ARENA, false);
 
             // update personal played stats
             itr->games_week +=1;

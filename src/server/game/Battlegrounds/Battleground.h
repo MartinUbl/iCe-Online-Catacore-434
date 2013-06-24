@@ -154,6 +154,12 @@ enum BattlegroundRandomRewards
     BG_REWARD_LOSER                     = 15
 };
 
+enum ConquestRewards
+{
+    CONQUEST_REWARD_ARENA               = 180,
+    CONQUEST_REWARD_RATED_BATTLEGROUND  = 400
+};
+
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
 
 enum BattlegroundStatus
