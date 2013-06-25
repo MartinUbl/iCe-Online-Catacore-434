@@ -6912,7 +6912,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                                 if (!triggeredByAura->GetCaster()->ToPlayer()->HasSpellCooldown(51699))
                                 {
                                     triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster()->getVictim(), 51699, true);
-                                    triggeredByAura->GetCaster()->ToPlayer()->AddSpellCooldown(51699, 0, 2000);
+                                    triggeredByAura->GetCaster()->ToPlayer()->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(51699), 0);
                                 }
                             }
                         }
