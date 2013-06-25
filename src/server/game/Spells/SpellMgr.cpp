@@ -610,6 +610,21 @@ AuraState GetSpellAuraState(SpellEntry const * spellInfo)
                 return AURA_STATE_FROZEN;
         }
     }
+
+     switch (spellInfo->Id)
+     {
+         case 99390: // Imprinted
+         case 71465: // Divine Surge
+         case 50241: // Evasive Charges
+             return AURA_STATE_UNKNOWN22;
+             break;
+         case 100360: // Imprinted2
+             return AURA_STATE_UNKNOWN20;
+             break;
+         default:
+             break;
+     }
+
     return AURA_STATE_NONE;
 }
 
@@ -4144,6 +4159,22 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[0] = 25;
             spellInfo->EffectBasePoints[1] = 25;
             count++;
+            break;
+        case 99816: // Fiery Tornado
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 26;
+            spellInfo->EffectRadiusIndex[EFFECT_1] = 26;
+            break;
+        case 100744: //Firestorm
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+        case 99844: // Blazing Claw
+            spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+            spellInfo->EffectValueMultiplier[2] = 10;
+            spellInfo->EffectBasePoints[2] = 10;
+            spellInfo->EffectMiscValue[2] = 1;
+            spellInfo->EffectMiscValueB[2] = 0;
+            spellInfo->EffectImplicitTargetA[2] = TARGET_DEST_UNK_110;
             break;
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
