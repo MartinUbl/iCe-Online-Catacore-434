@@ -460,57 +460,6 @@ class spell_creature_permanent_feign_death : public SpellScriptLoader
     }
 };
 
-enum PvPTrinketTriggeredSpells
-{
-    SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER         = 72752,
-    SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF    = 72757,
-};
-
-class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
-{
-public:
-    spell_pvp_trinket_wotf_shared_cd() : SpellScriptLoader("spell_pvp_trinket_wotf_shared_cd") {}
-
-    class spell_pvp_trinket_wotf_shared_cd_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pvp_trinket_wotf_shared_cd_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
-        {
-            if (!sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER))
-                return false;
-            if (!sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF))
-                return false;
-            return true;
-        }
-
-        void HandleScript(SpellEffIndex /*effIndex*/)
-        {
-            Player* pCaster = GetCaster()->ToPlayer();
-            if (!pCaster)
-                return;
-            const SpellEntry* m_spellInfo = GetSpellInfo();
-
-            pCaster->AddSpellCooldown(m_spellInfo->Id, 0, GetSpellRecoveryTime(sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)));
-            WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-            data << uint64(pCaster->GetGUID());
-            data << uint8(0);
-            data << uint32(m_spellInfo->Id);
-            data << uint32(0);
-            pCaster->GetSession()->SendPacket(&data);
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_pvp_trinket_wotf_shared_cd_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pvp_trinket_wotf_shared_cd_SpellScript();
-    }
-};
-
 enum AnimalBloodPoolSpell
 {
     SPELL_ANIMAL_BLOOD      = 46221,
@@ -719,7 +668,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_trick();
     new spell_gen_trick_or_treat();
     new spell_creature_permanent_feign_death();
-    new spell_pvp_trinket_wotf_shared_cd();
     new spell_gen_animal_blood();
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();

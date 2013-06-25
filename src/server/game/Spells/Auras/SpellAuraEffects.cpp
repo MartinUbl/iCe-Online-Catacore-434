@@ -5834,43 +5834,19 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
     switch (GetId())
     {
         case 42292: // PvP trinket
+            // trigger 30s category cooldown on Will of the Forsaken (undead)
+            if (apply && GetEffIndex() == 0)
+                target->CastSpell(target, 72752, false);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_DISARM, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SILENCE, apply);
             mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
-
-            // Shares cooldown with Will of the Forsaken (undead)
-            if (target->ToPlayer() && target->HasSpell(7744) && target->ToPlayer()->GetSpellCooldownDelay(7744) < 30000)
-            {
-                if (target->ToPlayer()->HasSpellCooldown(7744))
-                    target->ToPlayer()->ModifySpellCooldown(7744, 30-target->ToPlayer()->GetSpellCooldownDelay(7744), true);
-                else
-                {
-                    target->ToPlayer()->AddSpellCooldown(7744, 0, 30000);
-                    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-                    data << uint64(target->GetGUID());
-                    data << uint8(1);
-                    data << uint32(7744);
-                    data << uint32(30000);
-                    target->ToPlayer()->GetSession()->SendPacket(&data);
-                }
-            }
             break;
         case 7744: // Will of the Forsaken
-            // Shares cooldown with PvP Trinket (undead)
-            if (target->ToPlayer() && target->ToPlayer()->GetSpellCooldownDelay(42292) < 30000)
+            // trigger 30s category cooldown on PvP Trinket (undead)
+            if (apply && GetEffIndex() == 0)
             {
-                if (target->ToPlayer()->HasSpellCooldown(42292))
-                    target->ToPlayer()->ModifySpellCooldown(42292, 30-target->ToPlayer()->GetSpellCooldownDelay(42292), true);
-                else
-                {
-                    target->ToPlayer()->AddSpellCooldown(42292, 0, 30000);
-                    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-                    data << uint64(target->GetGUID());
-                    data << uint8(1);
-                    data << uint32(42292);
-                    data << uint32(30000);
-                    target->ToPlayer()->GetSession()->SendPacket(&data);
-                }
+                if (Player *player = target->ToPlayer()) player->RemoveSpellCooldown(72757);  // wrong cooldown is set in database
+                target->CastSpell(target, 72757, false);
             }
             if (GetMiscValue() < 1)
                 return;
