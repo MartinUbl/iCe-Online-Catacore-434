@@ -109,9 +109,31 @@ public:
                 return 0;
         }
 
+        bool CheckWipe()
+        {
+            Map::PlayerList const &players = instance->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                Player* player = itr->getSource();
+                if (player->isGameMaster())
+                    continue;
+
+                if (player->isAlive())
+                    return false;
+            }
+
+            return true;
+        }
+
+        void Update(uint32 diff)
+        {
+            if (CheckWipe() && m_auiEncounter[TYPE_ALYSRAZOR] == IN_PROGRESS)
+                m_auiEncounter[TYPE_ALYSRAZOR] = FAIL;
+        };
+
         virtual uint32 GetData(uint32 DataId)
         {
-            if (DataId < MAX_ENCOUNTER /*&& DataId >= 0*/)
+            if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
 
             return 0;
@@ -119,7 +141,7 @@ public:
 
         virtual void SetData(uint32 DataId, uint32 Value)
         {
-            if (DataId <= MAX_ENCOUNTER /*&& DataId >= 0*/)
+            if (DataId < MAX_ENCOUNTER)
                 m_auiEncounter[DataId] = Value;
         }
 

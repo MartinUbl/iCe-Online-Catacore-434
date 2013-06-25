@@ -36,4 +36,39 @@ enum AdditionNPCs
     DATA_RIPLIMB_GUID = 9
 };
 
+enum CreatureIds
+{
+    NPC_BLAZING_MONSTROSITY_LEFT    = 53786,
+    NPC_BLAZING_MONSTROSITY_RIGHT   = 53791,
+    NPC_EGG_PILE                    = 53795,
+    NPC_HARBINGER_OF_FLAME          = 53793,
+    NPC_MOLTEN_EGG_TRASH            = 53914,
+    NPC_SMOULDERING_HATCHLING       = 53794,
+};
+
+class DelayedAttackStartEvent : public BasicEvent
+{
+    public:
+        DelayedAttackStartEvent(Creature* owner) : _owner(owner) { }
+
+        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+        {
+            _owner->AI()->DoZoneInCombat(_owner, 200.0f);
+            return true;
+        }
+
+    private:
+        Creature* _owner;
+};
+
+template<class AI>
+CreatureAI* GetFirelandsAI(Creature* creature)
+{
+    if (InstanceMap* instance = creature->GetMap()->ToInstanceMap())
+        if (instance->GetInstanceScript())
+            if (instance->GetScriptId() == sObjectMgr->GetScriptId(FirelandsScriptName))
+                return new AI(creature);
+    return NULL;
+}
+
 #endif
