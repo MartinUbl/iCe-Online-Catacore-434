@@ -61,14 +61,4 @@ class DelayedAttackStartEvent : public BasicEvent
         Creature* _owner;
 };
 
-template<class AI>
-CreatureAI* GetFirelandsAI(Creature* creature)
-{
-    if (InstanceMap* instance = creature->GetMap()->ToInstanceMap())
-        if (instance->GetInstanceScript())
-            if (instance->GetScriptId() == sObjectMgr->GetScriptId(FirelandsScriptName))
-                return new AI(creature);
-    return NULL;
-}
-
 #endif
