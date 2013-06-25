@@ -2801,7 +2801,10 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                 if (pEffect)
                 {
                     if (pEffect->GetAmount() == 100)
+                    {
                         target->RemoveAurasDueToSpell(101111);
+                        target->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+                    }
                     else
                     {
                         pEffect->ChangeAmount(pEffect->GetAmount() + 5);
