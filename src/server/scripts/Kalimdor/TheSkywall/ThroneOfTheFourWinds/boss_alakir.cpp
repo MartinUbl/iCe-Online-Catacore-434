@@ -157,6 +157,9 @@ class boss_alakir: public CreatureScript
                 if (instance)
                     instance->SetData(TYPE_ALAKIR, NOT_STARTED);
 
+                if (GameObject* skywall = GetClosestGameObjectWithEntry(me, 4510369, 55555.0f))
+                    skywall->EnableCollision(false);
+
                 me->SetFlying(false);
                 me->SetVisibility(VISIBILITY_ON);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);

@@ -703,7 +703,7 @@ class boss_Alysrazor : public CreatureScript
                                 return;
                             }
                             if (IncendiaryCloudFront == 4)
-                                if (Creature* Power = me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10*cos(O), me->GetPositionY() + 10*sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
+                                if (me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10*cos(O), me->GetPositionY() + 10*sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
                                     {
                                         RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
                                         IncendiaryCloudFront = 1;
@@ -2656,14 +2656,17 @@ class spell_Blazing_Power : public SpellScriptLoader
                 void AddBuff(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
                 {
                     if (Aura* Blazing = GetTarget()->GetAura(SPELL_BLAZING_POWER_EFFECT))
+                    {
                         if (Blazing->GetStackAmount() >= 25)
+                        {
                             if (Aura* Power = GetTarget()->GetAura(SPELL_ALYSRAS_RAZOR))
-                            {
                                 Power->SetDuration(40000);
-                            }
-                            else GetTarget()->AddAura(SPELL_ALYSRAS_RAZOR, GetTarget());
+                            else
+                                GetTarget()->AddAura(SPELL_ALYSRAS_RAZOR, GetTarget());
+                        }
+                    }
 
-                    if (Aura* Wings = GetTarget()->GetAura(SPELL_WINGS_OF_FLAME_FLY))
+                    if (GetTarget()->GetAura(SPELL_WINGS_OF_FLAME_FLY))
                         GetTarget()->CastSpell(GetTarget(), SPELL_WINGS_OF_FLAME_FLY, true);
                 }
 
