@@ -639,8 +639,9 @@ class boss_Alysrazor : public CreatureScript
                                     }
                         break;
                         case NPC_INCENDIARY_CLOUD:
-                            float Z;
-                            float O;
+                        {
+                            float Z = 0;
+                            float O = 0;
 
                             switch (C)
                                 {
@@ -669,8 +670,8 @@ class boss_Alysrazor : public CreatureScript
                             if (!FlyUP)
                             {
                                 IncendiaryCloudFront = 1;
-                                float O;
-                                float Distance;
+                                float O = 0;
+                                float Distance = 0;
                                 for(uint8 i=1; i<=3 ; i++)
                                 {
                                     if (i == 1)
@@ -709,6 +710,7 @@ class boss_Alysrazor : public CreatureScript
                                         IncendiaryCloudFront = 1;
                                     }
                             break;
+                        }
                         case NPC_BLAZING_POWER:
                             for (uint32 i=0; i<4 ; i++)
                             {
