@@ -789,6 +789,7 @@ public:
     {
         npc_rhyolith_feetAI(Creature* c): ScriptedAI(c)
         {
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
