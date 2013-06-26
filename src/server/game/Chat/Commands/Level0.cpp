@@ -34,6 +34,7 @@
 #include "Util.h"
 #include "SpellAuras.h"
 #include "BattlegroundMgr.h"
+#include "ArenaTeam.h"
 
 // Here only due to size of this file - quick Edit and continue build
 bool ChatHandler::HandleTestCommand(const char* args)
@@ -300,13 +301,18 @@ bool ChatHandler::HandleSpectatorListCommand(const char* args)
         return true;
     }
 
+    ArenaTeam *at1, *at2;
+
     for (BattlegroundSet::iterator itr = tset.begin(); itr != tset.end(); ++itr)
     {
         if (!itr->second)
             continue;
 
-        PSendSysMessage("|cff00ff00%u|r - %uv%u - %s vs. %s", itr->first, itr->second->GetArenaType(), itr->second->GetArenaType(),
-            "team 1", "team 2");
+        at1 = sObjectMgr->GetArenaTeamById(itr->second->GetArenaTeamIdForTeam(TEAM_HORDE));
+        at2 = sObjectMgr->GetArenaTeamById(itr->second->GetArenaTeamIdForTeam(TEAM_ALLIANCE));
+
+        PSendSysMessage("|cff00ff00%u|r - %uv%u - %u vs. %u", itr->first, itr->second->GetArenaType(), itr->second->GetArenaType(),
+            at1 ? at1->GetTeamRating() : 0, at2 ? at2->GetTeamRating() : 0);
     }
 
     return true;
