@@ -2126,6 +2126,7 @@ void Battleground::AddSpectator(Player* pl)
         pl->addUnitState(UNIT_STAT_ISOLATED);
         pl->addUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
         pl->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+        pl->UnsummonPetTemporaryIfAny();
 
         pl->TeleportTo(GetMapId(), m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0], 0, false);
     }
@@ -2142,6 +2143,7 @@ void Battleground::RemoveSpectator(Player* pl)
         pl->clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
         pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         RemovePlayerAtLeave(pl->GetGUID(), true, true);
+        pl->ResummonPetTemporaryUnSummonedIfAny();
 
         if (m_Spectators.find(pl->GetGUID()) != m_Spectators.end())
             m_Spectators.erase(pl->GetGUID());
