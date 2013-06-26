@@ -842,8 +842,7 @@ void Item::SetState(ItemUpdateState state, Player *forplayer)
         if (uState != ITEM_NEW)
             uState = state;
 
-        if (forplayer)
-            AddToUpdateQueueOf(forplayer);
+        AddToUpdateQueueOf(forplayer);
     }
     else
     {

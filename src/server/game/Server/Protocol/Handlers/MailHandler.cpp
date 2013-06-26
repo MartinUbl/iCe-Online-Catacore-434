@@ -267,19 +267,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
                 uint32 item_horde = it->second;
 
                 if (item->GetEntry() == item_alliance || item->GetEntry() == item_horde)
-                {
                     item->SetEntry(rc_team == ALLIANCE ? item_alliance : item_horde);
-                    // We changed entry, so change state of item in memory
-                    item->SetState(ITEM_CHANGED);
-
-                    // and save it to DB to properly propagate changes everywhere
-                    SQLTransaction itemsave = CharacterDatabase.BeginTransaction();
-                    item->SaveToDB(itemsave);
-                    CharacterDatabase.CommitTransaction(itemsave);
-
-                    // Nothing to do here, we changed the item back
-                    break;
-                }
             }
         }
 
