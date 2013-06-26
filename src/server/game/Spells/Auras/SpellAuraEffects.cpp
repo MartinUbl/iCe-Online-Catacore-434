@@ -7022,19 +7022,10 @@ void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const *aurApp, 
     Unit *target = aurApp->GetTarget();
 
     //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    // attack power auras do not stack
     if(float(GetAmount()) > 0.f)
-    {
-        float modifier = 1.0f + target->GetMaxPositiveAuraModifier(GetAuraType()) / 100.0f;
-        target->SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, TOTAL_PCT, modifier);
-    }
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_POS, TOTAL_PCT, float(GetAmount()), apply);
     else
-    {
-        float modifier = 1.0f - target->GetMaxNegativeAuraModifier(GetAuraType()) / 100.0f;
-        target->SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, TOTAL_PCT, modifier);
-    }
-
-    target->UpdateAttackPowerAndDamage(false);
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_NEG, TOTAL_PCT, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -7048,19 +7039,10 @@ void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const *au
         return;
 
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    // attack power auras do not stack
     if(float(GetAmount()) > 0.f)
-    {
-        float modifier = 1.0f + target->GetMaxPositiveAuraModifier(GetAuraType()) / 100.0f;
-        target->SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_PCT, modifier);
-    }
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_PCT, float(GetAmount()), apply);
     else
-    {
-        float modifier = 1.0f - target->GetMaxNegativeAuraModifier(GetAuraType()) / 100.0f;
-        target->SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_PCT, modifier);
-    }
-
-    target->UpdateAttackPowerAndDamage(true);
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_PCT, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPowerOfStatPercent(AuraApplication const *aurApp, uint8 mode, bool /*apply*/) const
