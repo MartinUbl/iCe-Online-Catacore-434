@@ -464,8 +464,12 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg,
             sLog->outError("Player " UI64FMTD " has scoreboard entry for battleground %u but is not in battleground!", itr->first, bg->GetTypeID(true));
             continue;
         }
+
         ObjectGuid guid = itr2->first;
         Player* player = ObjectAccessor::FindPlayer(itr2->first);
+        if (!player)
+            continue;
+
         data->WriteBit(0); // Unk 1
         data->WriteBit(0); // Unk 2
         data->WriteBit(guid[2]);
