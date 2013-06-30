@@ -155,7 +155,7 @@ struct ItemSparseEntry
     uint32     Duration;                                     // 125
     uint32     ItemLimitCategory;                            // 126
     uint32     HolidayId;                                    // 127
-    float      StatScalingFactor;                            // 128
+    float      DamageRangeScale;                             // 128 distance between min. and max. damage relative to average damage (0 - 2)
     int32      CurrencySubstitutionId;                       // 129
     int32      CurrencySubstitutionCount;                    // 130
 };
