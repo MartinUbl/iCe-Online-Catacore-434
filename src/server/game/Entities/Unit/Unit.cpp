@@ -6053,7 +6053,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 if (procEx & PROC_EX_CRITICAL_HIT)
                 {
-                    float critChance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_MASK_FIRE);
+                    float critChance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_FIRE);
                     float chance = 78.93f - 1.7106f * critChance;
                     if (GetTypeId() == TYPEID_PLAYER)
                         ToPlayer()->ApplySpellMod(44549, SPELLMOD_CHANCE_OF_SUCCESS, chance, NULL); // T12 4p set bonus
