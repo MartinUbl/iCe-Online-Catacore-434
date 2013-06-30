@@ -546,6 +546,9 @@ public:
             // phase switch at 25%
             if (me->GetHealthPct() < 25.0f && phase != 2)
             {
+                //reset damage count dealt by players for getting loot
+                me->ResetPlayerDamageReq();
+
                 // back to normal movement
                 me->GetMotionMaster()->MovementExpired(true);
                 me->GetMotionMaster()->MoveChase(me->getVictim());
