@@ -843,13 +843,12 @@ void Battleground::EndBattleground(uint32 winner)
 
         if (itr->second.OfflineRemoveTime)
         {
-            //if rated arena match - make member lost!
             if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
             {
                 if (team == winner)
-                    winner_arena_team->OfflineMemberWon(itr->first, GetArenaMatchmakerRating(team));
+                    winner_arena_team->OfflineMemberWon(itr->first, GetArenaMatchmakerRating(winner));
                 else
-                    loser_arena_team->OfflineMemberLost(itr->first, GetArenaMatchmakerRating(team));
+                    loser_arena_team->OfflineMemberLost(itr->first, GetArenaMatchmakerRating(winner));
             }
             continue;
         }
@@ -918,14 +917,14 @@ void Battleground::EndBattleground(uint32 winner)
                 if (member)
                     member->SetMatchmakerRating(winner_matchmaker_rating + winner_change);
 
-                winner_arena_team->MemberWon(plr, winner_matchmaker_rating + winner_change);
+                winner_arena_team->MemberWon(plr, loser_matchmaker_rating + loser_change);
             }
             else if (winner != WINNER_NONE)     // player lost
             {
                 if (ArenaTeamMember *member = loser_arena_team->GetMember(plr->GetGUID()))
                     member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
 
-                loser_arena_team->MemberLost(plr, loser_matchmaker_rating + loser_change);
+                loser_arena_team->MemberLost(plr, winner_matchmaker_rating + winner_change);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);

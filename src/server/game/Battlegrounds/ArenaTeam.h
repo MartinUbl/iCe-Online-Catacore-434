@@ -204,14 +204,14 @@ class ArenaTeam
 
         uint32 GetPoints(uint32 MemberRating);
         int32 GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, bool won);
-        int32 GetRatingMod(uint32 own_rating, uint32 own_matchmaker_rating, bool won);
+        int32 GetRatingMod(uint32 own_rating, uint32 enemy_matchmaker_rating, bool won);
         float GetChanceAgainst(uint32 own_rating, uint32 enemy_rating);
         int32 WonAgainst(uint32 selfMatchmakerRating, uint32 opponentMatchmakerRating);
-        void MemberWon(Player * plr, uint32 ownMatchmakerRating);
-        void OfflineMemberWon(uint64 guid, uint32 ownMatchmakerRating);
+        void MemberWon(Player * plr, uint32 opponentMatchmakerRating);
+        void OfflineMemberWon(uint64 guid, uint32 opponentMatchmakerRating);
         int32 LostAgainst(uint32 selfMatchmakerRating, uint32 opponentMatchmakerRating);
-        void MemberLost(Player * plr, uint32 ownMatchmakerRating);
-        void OfflineMemberLost(uint64 guid, uint32 ownMatchmakerRating);
+        void MemberLost(Player * plr, uint32 opponentMatchmakerRating);
+        void OfflineMemberLost(uint64 guid, uint32 opponentMatchmakerRating);
 
         void UpdateArenaPointsHelper(std::map<uint32, uint32> & PlayerPoints);
         void UpdateMembersConquestPointCap();
