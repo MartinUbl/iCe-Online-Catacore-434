@@ -26170,24 +26170,34 @@ void Player::ClearEclipseState()
 
 uint32 Player::CalculateTalentsPoints() const
 {
-    uint8 level = GetUInt32Value(UNIT_FIELD_LEVEL);
-    uint32 talent_points = (level < 10 ? 0 : ((level - 9) / 2) + 1);
+    float talentRate = sWorld->getRate(RATE_TALENT);
 
-    if (level == 82 || level == 83)
-        talent_points += 1;
-    else if (level >= 84)
-        talent_points += 2;
+    uint8 level = getLevel();
+    if (level > GT_MAX_LEVEL)
+        level = GT_MAX_LEVEL;
+    if (level == 0)
+        level = 1;
+
+    NumTalentsAtLevelEntry const *talentsAtLevel = sNumTalentsAtLevelStore.LookupEntry(level);
+    if (!talentsAtLevel)
+        return 0;       // should never happen
+
+    int32 talentPoints = int32(talentsAtLevel->tp);
 
     if (getClass() != CLASS_DEATH_KNIGHT || GetMapId() != 609)
-        return uint32(talent_points * sWorld->getRate(RATE_TALENT));
+        return uint32(talentPoints * talentRate);
 
-    uint32 talentPointsForLevel = getLevel() < 56 ? 0 : getLevel() - 55;
-    talentPointsForLevel += m_questRewardTalentCount;
+    // Death Knights on map 609 have to gain talent points for levels at or below 55 by quests
+    NumTalentsAtLevelEntry const *skippedTalents = sNumTalentsAtLevelStore.LookupEntry(55);
+    if (!skippedTalents)
+        return uint32(talentPoints * talentRate);
 
-    if (talentPointsForLevel > talent_points)
-        talentPointsForLevel = talent_points;
+    int32 realTalentPoints = talentPoints - int32(skippedTalents->tp) + m_questRewardTalentCount;
 
-    return uint32(talentPointsForLevel * sWorld->getRate(RATE_TALENT));
+    if (realTalentPoints > talentPoints)
+        realTalentPoints = talentPoints;
+
+    return uint32(realTalentPoints * talentRate);
 }
 
 bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const

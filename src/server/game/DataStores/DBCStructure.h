@@ -1516,6 +1516,12 @@ struct MovieEntry
     //uint32      unk2;                                     // 3 4.0.0
 };
 
+struct NumTalentsAtLevelEntry
+{
+    uint32 id;      // 0 level
+    float tp;       // 1 talent points
+};
+
 #define MAX_OVERRIDE_SPELL 10
 
 struct OverrideSpellDataEntry

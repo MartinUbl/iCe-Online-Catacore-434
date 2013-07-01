@@ -104,6 +104,7 @@ const char MapDifficultyEntryfmt[]="diisiix";
 const char MovieEntryfmt[]="nxxx";
 const char MountCapabilityfmt[]="niixxiii";
 const char MountTypefmt[]="niiiiiiiiiiiiiiiiixxxxxxx";
+const char NumTalentsAtLevelfmt[]="nf";
 const char OverrideSpellDatafmt[]="niiiiiiiiiixx";
 const char QuestFactionRewardfmt[]="niiiiiiiiii";
 const char QuestSortEntryfmt[]="nx";
