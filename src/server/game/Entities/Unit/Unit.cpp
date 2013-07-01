@@ -5977,6 +5977,65 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 70701;
                     break;
                 }
+
+                //Matrix Restabilizer
+                case 96976:
+                case 97138:
+                {
+                    Player* owner=this->ToPlayer();
+                    if (owner->HasSpellCooldown(dummySpell->Id))
+                        return false;
+                    owner->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(dummySpell->Id), castItem->GetProto()->ItemId);
+                    float crit=owner->GetRatingBonusValue(CR_CRIT_MELEE);
+                    float haste=owner->GetRatingBonusValue(CR_HASTE_MELEE);
+                    float mastery=owner->GetRatingBonusValue(CR_MASTERY);
+                    if(crit>=haste&&crit>=mastery)
+                    {
+                        if(dummySpell->Id==96976)
+                        {
+                            triggered_spell_id = 96978;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                        else
+                        {
+                            triggered_spell_id = 97140;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                    }
+                    if(haste>=crit&&haste>=mastery)
+                    {
+                        if(dummySpell->Id==96976)
+                        {
+                            triggered_spell_id = 96977;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                        else
+                        {
+                            triggered_spell_id = 97139;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                    }
+                    if(mastery>=crit&&mastery>=haste)
+                    {
+                        if(dummySpell->Id==96976)
+                        {
+                            triggered_spell_id = 96979;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                        else
+                        {
+                            triggered_spell_id = 97141;
+                            target = triggeredByAura->GetCaster();
+                            break;
+                        }
+                    }
+                    break;
+                }
             }
             break;
         }
