@@ -818,6 +818,55 @@ public:
     }
 };
 
+class spell_item_apparatus_of_khazgoroth : public SpellScriptLoader
+{
+public:
+    spell_item_apparatus_of_khazgoroth() : SpellScriptLoader("spell_item_apparatus_of_khazgoroth") { }
+
+    class spell_item_apparatus_of_khazgoroth_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_item_apparatus_of_khazgoroth_SpellScript)
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pCaster = GetCaster();
+            if (pCaster->GetTypeId() != TYPEID_PLAYER)
+                return;
+            uint32 spellId=0;
+            float crit=pCaster->ToPlayer()->GetRatingBonusValue(CR_CRIT_MELEE);
+            float haste=pCaster->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
+            float mastery=pCaster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            uint32 stacks=pCaster->GetAuraCount(96923);
+            if(crit>=haste&&crit>=mastery)
+            {
+                spellId = 96928;
+            }
+            if(haste>=crit&&haste>=mastery)
+            {
+                spellId = 96927;
+            }
+            if(mastery>=crit&&mastery>=haste)
+            {
+                spellId = 96929;
+            }
+
+            pCaster->CastSpell(pCaster, spellId, true, NULL);
+            pCaster->RemoveAurasDueToSpell(96923,pCaster->GetGUID(),true);
+            pCaster->SetAuraStack(spellId,pCaster,stacks);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_item_apparatus_of_khazgoroth_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_apparatus_of_khazgoroth_SpellScript();
+    }
+};
+
 enum eGenericData
 {
     SPELL_ARCANITE_DRAGONLING           = 19804,
@@ -849,4 +898,5 @@ void AddSC_item_spell_scripts()
     new spell_item_six_demon_bag();
     new spell_item_underbelly_elixir();
     new spell_item_shadowmourne();
+    new spell_item_apparatus_of_khazgoroth();
 }
