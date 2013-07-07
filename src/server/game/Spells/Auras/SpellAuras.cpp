@@ -1120,6 +1120,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 43648: // Electrical Storm
                         target->SetStunned(true);
                         break;
+                    case 82724: // Eye of the Storm - Al'akir encounter fly aura
+                        target->StopMoving();
+                        break;
                     case 91041: // Heart's Judgement
                         if (target)
                         {
