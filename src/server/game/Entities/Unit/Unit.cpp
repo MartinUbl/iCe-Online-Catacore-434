@@ -6132,7 +6132,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     return true;
 
                 // Count spell criticals in a row in second aura
-                if (procEx & PROC_EX_CRITICAL_HIT)
+                if ((procEx & PROC_EX_CRITICAL_HIT) && !HasAura(48108))
                 {
                     counter->SetAmount(counter->GetAmount()*2);
                     if (counter->GetAmount() < 100) // not enough
