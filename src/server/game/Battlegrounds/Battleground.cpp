@@ -917,14 +917,14 @@ void Battleground::EndBattleground(uint32 winner)
                 if (member)
                     member->SetMatchmakerRating(winner_matchmaker_rating + winner_change);
 
-                winner_arena_team->MemberWon(plr, loser_matchmaker_rating + loser_change);
+                winner_arena_team->MemberWon(plr, loser_matchmaker_rating);
             }
             else if (winner != WINNER_NONE)     // player lost
             {
                 if (ArenaTeamMember *member = loser_arena_team->GetMember(plr->GetGUID()))
                     member->SetMatchmakerRating(loser_matchmaker_rating + loser_change);
 
-                loser_arena_team->MemberLost(plr, winner_matchmaker_rating + winner_change);
+                loser_arena_team->MemberLost(plr, winner_matchmaker_rating);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
