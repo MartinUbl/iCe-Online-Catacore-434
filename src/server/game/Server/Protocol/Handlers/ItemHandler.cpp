@@ -324,9 +324,10 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
             return;
 
         // entry of the transmogrifier item, if it's not 0
+        ItemPrototype const* pProto = sObjectMgr->GetItemPrototype(newEntries[i]);
+
         if (newEntries[i])
         {
-            ItemPrototype const* pProto = sObjectMgr->GetItemPrototype(newEntries[i]);
             if (!pProto)
                 return;
         }
@@ -340,6 +341,23 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket & recv_data)
 
             if (!itemTransmogrifier)
                 return;
+
+            // wrong read data
+            if (newEntries[i] && pProto->ItemId != itemTransmogrifier->GetProto()->ItemId)
+            {
+                sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s): exploit attempt to apply look of \"%s\" (%d) with item %d guid %d",
+                                _player->GetSession()->GetRemoteAddress().c_str(),
+                                _player->GetSession()->GetAccountId(),
+                                _player->GetName(),
+                                "transmogrify item",
+                                pProto->Name1, pProto->ItemId,
+                                itemTransmogrifier->GetProto()->ItemId,
+                                itemTransmogrifier->GetGUIDLow());
+
+                recv_data.rpos(recv_data.wpos());
+                KickPlayer();
+                return;
+            }
         }
 
         // transmogrified item
