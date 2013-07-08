@@ -5986,9 +5986,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (owner->HasSpellCooldown(dummySpell->Id))
                         return false;
                     owner->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(dummySpell->Id), castItem->GetProto()->ItemId);
-                    float crit=owner->GetRatingBonusValue(CR_CRIT_MELEE);
-                    float haste=owner->GetRatingBonusValue(CR_HASTE_MELEE);
-                    float mastery=owner->GetRatingBonusValue(CR_MASTERY);
+                    uint32 crit=owner->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_MELEE);
+                    uint32 haste=owner->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_MELEE);
+                    uint32 mastery=owner->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY);
                     if(crit>=haste&&crit>=mastery)
                     {
                         if(dummySpell->Id==96976)
