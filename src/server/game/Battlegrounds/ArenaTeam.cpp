@@ -662,15 +662,17 @@ uint32 ArenaTeam::GetAverageMMR(Group *group) const
     return matchmakerrating;
 }
 
-float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
+float ArenaTeam::GetChanceAgainst(int32 own_rating, int32 enemy_rating)
 {
     // returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system
 
-/*    if (sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) >= 6)
-        if (enemy_rating < 1000)
-            enemy_rating = 1000;*/
-    return 1.0f/(1.0f+exp(log(10.0f)*(float)((float)enemy_rating - (float)own_rating)/400.0f));
+    float chance = 1.0f / ( 1.0f + pow(10.0f, float(enemy_rating - own_rating) / 400.0f) );
+    if (chance < 0.0f)
+        return 0.0f;
+    if (chance > 1.0f)
+        return 1.0f;
+    return chance;
 }
 
 int32 ArenaTeam::GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, bool won)
