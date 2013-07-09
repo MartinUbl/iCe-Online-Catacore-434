@@ -54,7 +54,7 @@ enum Sounds
     //SAY_UKNOWN                = 24440, //Unknown
 };
 
-Position const SpawnPositions[16] =
+Position const SpawnPositions[18] =
 {
     {105.9f, -407.6f, 25.8f, 0.0f},     //Alysrazor
     {-10.7f, -269.7f, 55.3f, 0.0f},     //Worm 1-4
@@ -72,6 +72,8 @@ Position const SpawnPositions[16] =
     {-53.6f, -330.0f, 55.3f, 0.0f},     // E
     {-22.07f, -231.6f, 55.3f, 0.0f},    // W
     {-3.03f, -311.6f, 53.0f, 0.0f},     // Spawn Feather
+    {-47.0f, -266.0f, 90.0f, 0.0f}, //Molten Eggs
+    {-33.0f, -287.0f, 90.0f, 0.0f},
 };
 
 enum Spells
@@ -81,7 +83,6 @@ enum Spells
     SPELL_SMOULDERING_ROOTS_BUFF= 100555,
     SPELL_REMOVE_ROOTS          = 100561,
     SPELL_FIGHT_START           = 100570, // Cosmetic earthquake
-    SPELL_SMOULDERING_EOOTS     = 100559,
     SPELL_COSMETIC_DEATH        = 100564,
     SPELL_SACRIFICE             = 100557, // Cosmetic Instant Kill SACRIFICE OF THE FLAME
     SPELL_FENDRAL_TRANSFORM     = 100565,
@@ -219,8 +220,8 @@ class boss_Alysrazor : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetPower(POWER_MANA, 100);
                 me->SetFlying(true);
-                sx = -49.34f;
-                sy = -277.97f;
+                sx = -41.78f;
+                sy = -275.97f;
                 Phase = 4;
                 me->SetVisible(false);
                 instance = creature->GetInstanceScript();
@@ -364,7 +365,6 @@ class boss_Alysrazor : public CreatureScript
                     case DATA_STAGE_THREE_TIMER:
                         if (Phase == STAGE_FOUR)
                             return 5;
-                        else return 1;
                         break;
                     case DATA_ACHIEVEMENTBF:
                         return AchievementBF;
@@ -418,6 +418,7 @@ class boss_Alysrazor : public CreatureScript
                         break;
                     case 4: //FlyCenter
                         FlyTimer = 9000;
+                        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
                         me->SetSpeed(MOVE_FLIGHT, 1.4f);
                         i = 19.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 55*cos(i), sy + 55*sin(i), 70.0f);
@@ -448,6 +449,7 @@ class boss_Alysrazor : public CreatureScript
                     case 7: //FlyCenter 2/2
                         FlyTimer = 9000;
                         me->SetSpeed(MOVE_FLIGHT, 1.4f);
+                        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 55*cos(i), sy + 55*sin(i), 70.0);
                         me->CastSpell(me, 99844, true);
@@ -477,6 +479,10 @@ class boss_Alysrazor : public CreatureScript
                         for (Map::PlayerList::const_iterator l = PlList.begin(); l != PlList.end(); ++l)
                             if (Player* player = l->getSource())
                             {
+                                if (player->GetAura(97128) && player->GetPower(POWER_SCRIPTED))
+                                    if (player->GetAura(97128)->GetStackAmount() == 2 && player->GetPower(POWER_SCRIPTED) != 2)
+                                        player->SetPower(POWER_SCRIPTED, 2);
+
                                 if (remove)
                                 {
                                     if (spellentry == SPELL_MOLTEN_FEATHER)
@@ -509,15 +515,16 @@ class boss_Alysrazor : public CreatureScript
                 switch (entry)
                 {
                 case NPC_EGG_SATCHEL:
-                    if (Creature* Satchel1 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(4.0f), sy + 150*sin(4.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
+
+                    if (Creature* Satchel1 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(1.0f), sy + 150*sin(1.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
                     {
                         Satchel1->AI()->SetData(DATA_IMPRINTED, 1);
-                        Satchel1->GetMotionMaster()->MovePoint(3, sx - 20*cos(4.0f), sy + 20*sin(4.0f), 90.0f);
+                        Satchel1->GetMotionMaster()->MovePoint(3, SpawnPositions[16]);
                     }
-                    if (Creature* Satchel2 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(1.0), sy + 150*sin(1.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
+                    if (Creature* Satchel2 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(4.0), sy + 150*sin(4.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
                     {
                         Satchel2->AI()->SetData(DATA_IMPRINTED, 2);
-                        Satchel2->GetMotionMaster()->MovePoint(3, sx - 20*cos(1.0), sy + 20*sin(1.0f), 90.0f);
+                        Satchel2->GetMotionMaster()->MovePoint(3, SpawnPositions[17]);
                     }
                     break;
                 case NPC_PLUMP_LAVA_WORM:
@@ -1103,7 +1110,7 @@ class boss_Alysrazor : public CreatureScript
                 {
                     if (!FlyUP && FlyTimer <= diff)
                     {
-                        me->SetSpeed(MOVE_FLIGHT, 4.0f);
+                        me->SetSpeed(MOVE_FLIGHT, 1.5f);
                         me->RemoveAura(SPELL_BURNOUT);
                         me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+7.0f);
                         me->MonsterYell("Reborn in flame!", LANG_UNIVERSAL, 0);
@@ -1193,7 +1200,9 @@ class npc_Molten_Feather : public CreatureScript
                 InstanceScript* instance;
                 instance = creature->GetInstanceScript();
                 if (instance->GetData(TYPE_ALYSRAZOR) != IN_PROGRESS)
+                {
                     instance->SetData(TYPE_ALYSRAZOR, IN_PROGRESS);
+                }
                 else {
                         Powers Powere = (player->getPowerType());
                         if (!player->GetAura(SPELL_FEATHER_BAR))
@@ -1217,18 +1226,22 @@ class npc_Molten_Feather : public CreatureScript
         {
             npc_Molten_FeatherAI(Creature* creature) : ScriptedAI(creature) 
             {
+                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
                 cast = false;
+                FallTimer = 1500;
             }
 
             bool cast;
+            uint32 FallTimer;
 
             void UpdateAI(const uint32 diff)
             {
-                if (!cast)
+                if (!cast && FallTimer <= diff)
                 {
                     cast = true;
                     me->CastSpell(me, SPELL_MOLTEN_FEATHER_COS, false);
                 }
+                else FallTimer -= diff;
             }
         };
 
@@ -1328,6 +1341,7 @@ class npc_Fendral : public CreatureScript
                     me->MonsterYell("I wish I could watch her reduce your pitiful band to cinders, but I am needed elsewhere. Farewell!", LANG_UNIVERSAL, 0);
                     DoPlaySoundToSet(me, SAY_FENDRAL_03);
                     me->CastSpell(me, SPELL_FENDRAL_TRANSFORM, false);
+                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(3, 29.02f, -329.64f, 140.0f);
                     Timer = 100000;
                 }
@@ -1655,7 +1669,7 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
                 }
                 else IgnitionTimer -= diff;
 
-                if (Creature* Alysrazor = me->FindNearestCreature(NPC_ALYSRAZOR,200.0f))
+                if (Creature* Alysrazor = me->FindNearestCreature(NPC_ALYSRAZOR,200.0f, true))
                     if (Alysrazor->AI()->GetData(DATA_STAGE_THREE_TIMER) == 5)
                         FlyAway = true;
 
@@ -1665,8 +1679,8 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
                     FlyTimer = 1000000;
                     ElfForm = false;
                     FlyAway = false;
-                    float sx = -49.34f;
-                    float sy = -277.97f;
+                    float sx = 41.78f;
+                    float sy = -275.97f;
                     me->RemoveAura(SPELL_BLAZING_TALON_TRAN);
                     me->DespawnOrUnsummon(10000);
                     float Distance = me->GetDistance(sx, sy, 52.0f);
@@ -1778,8 +1792,8 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
 
                 if (BrushfireTimer <= diff)
                 {
-                    if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        me->CastSpell(Target, SPELL_BRUSHFIRE, false);
+                    if (SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                        me->CastSpell(me, SPELL_BRUSHFIRE, false);
                     BrushfireTimer = 12000;
                     FieroblastTimer = 4000;
                 }
@@ -1787,7 +1801,7 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
 
                 if (FieroblastTimer <= diff)
                 {
-                    if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30, true))
+                    if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
                         me->CastSpell(Target, SPELL_FIEROBLAST, false);
                     FieroblastTimer = 10000;
                     BrushfireTimer = 4000;
@@ -2081,9 +2095,9 @@ class npc_Plump_Lava_worm : public CreatureScript
 
                 if (RotationTimer <= diff && Casting)
                 {
-                    i = i + M_PI/15;
+                    i += (M_PI/15*O);
                     if (Creature* Target = me->FindNearestCreature(NPC_LAVA_WORM_TARGET, 50.0f))
-                        Target->GetMotionMaster()->MovePoint(4, me->GetPositionX()+(8*cos(i)*O), me->GetPositionY()+8*sin(i), me->GetPositionZ());
+                        Target->GetMotionMaster()->MovePoint(4, me->GetPositionX()+ 8*cos(i), me->GetPositionY()+8*sin(i), me->GetPositionZ());
                     RotationTimer = 500;
                 }
                 else RotationTimer -= diff;
@@ -2110,8 +2124,8 @@ class npc_Fiery_Tornado : public CreatureScript
                 Direction = 0;
                 Slot = 0;
                 Duration = false;
-                sx = -49.34f;
-                sy = -277.97f;
+                sx = me->GetPositionX();
+                sy = me->GetPositionY();
                 me->RemoveAllAuras();
                 me->SetSpeed(MOVE_RUN, 4.0f);
             }
