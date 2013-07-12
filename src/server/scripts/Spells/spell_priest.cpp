@@ -428,6 +428,62 @@ public:
     }
 };
 
+class spell_priest_inner_sanctum : public SpellScriptLoader
+{
+public:
+    spell_priest_inner_sanctum() : SpellScriptLoader("spell_priest_inner_sanctum") { }
+
+    class spell_priest_inner_sanctum_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_priest_inner_sanctum_AuraScript);
+
+        enum Talents
+        {
+            INNER_SANCTUM_R1    = 14747,
+            INNER_SANCTUM_R2    = 14770,
+            INNER_SANCTUM_R3    = 14771,
+            SPELL_WARDING       = 91724,
+        };
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* owner = GetOwner()->ToPlayer();
+            if (!owner)
+                return;
+
+            owner->RemoveAurasDueToSpell(SPELL_WARDING);
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+            if(target == NULL)
+                return;
+
+            if(target->HasAura(INNER_SANCTUM_R1))
+                target->CastCustomSpell(SPELL_WARDING, SPELLVALUE_BASE_POINT0, -2, target, true, NULL,NULL);
+
+            if(target->HasAura(INNER_SANCTUM_R2))
+                target->CastCustomSpell(SPELL_WARDING, SPELLVALUE_BASE_POINT0, -4, target, true, NULL,NULL);
+
+            if(target->HasAura(INNER_SANCTUM_R3))
+                target->CastCustomSpell(SPELL_WARDING, SPELLVALUE_BASE_POINT0, -6, target, true, NULL,NULL);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_priest_inner_sanctum_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove +=AuraEffectRemoveFn(spell_priest_inner_sanctum_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_priest_inner_sanctum_AuraScript();
+    }
+};
+
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_guardian_spirit();
@@ -438,4 +494,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_cure_disease();
     new mob_shadowy_apparition;
     new spell_pri_spirit_of_redemption();
+    new spell_priest_inner_sanctum();
 }
