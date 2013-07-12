@@ -9461,6 +9461,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Replenishment "proc"
             CastSpell(this, 57669, true);
             break;
+        // Paladin T12 Holy 2P bonus
+        case 99067:
+            // Should proc only from Holy Shock heals
+            if (procSpell->Id != 25914)
+                return false;
+            break;
         // Priest - Masochism
         case 88994:
         case 88995:
