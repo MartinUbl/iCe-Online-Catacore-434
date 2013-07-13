@@ -48,7 +48,7 @@ private:
         //void DamageTaken(Unit *attacker, uint32 &damage);
         void EnterEvadeMode();
         //void KilledUnit(Unit *victim);
-        //void JustDied(Unit *killer);
+        void JustDied(Unit *killer);
         void UpdateAI(const uint32 diff);
         void DoAction(const int32 event);
         void MovementInform(uint32 type, uint32 id);
@@ -61,6 +61,33 @@ private:
 
         bool hanging;       // spider is hanging on one place on the filament
         bool onGround;      // spider is moving on the ground (not hanging)
+        bool summoned;  // summoned a filament for the players (either after taunted or killed)
+    };
+};
+
+
+class npc_filament: public CreatureScript
+{
+public:
+    npc_filament(): CreatureScript("npc_spiderweb_filament") {}
+    CreatureAI *GetAI(Creature *creature) const;
+
+private:
+    // not quite a spider, but has same methods...
+    class filamentAI: public SpiderAI
+    {
+    public:
+        explicit filamentAI(Creature *creature);
+        virtual ~filamentAI();
+
+        void Reset();
+        void UpdateAI(const uint32 diff);
+        void MoveInLineOfSight(Unit *who);
+        void AttackStart(Unit *victim);
+        void EnterEvadeMode();
+        void MovementInform(uint32 type, uint32 id);
+        void PassengerBoarded(Unit *unit, int8 seat, bool apply);
+        void DoAction(const int32 event);
     };
 };
 

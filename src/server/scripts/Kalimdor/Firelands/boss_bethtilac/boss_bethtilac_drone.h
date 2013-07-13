@@ -54,7 +54,7 @@ private:
         void MovementInform(uint32 type, uint32 id);
         //void SummonedCreatureDespawn(Creature *creature);
         //void MoveInLineOfSight(Unit *who);
-        //void AttackStart(Unit *victim);
+        void AttackStart(Unit *victim);
         //void JustRespawned();
         void IsSummonedBy(Unit *summoner);
 

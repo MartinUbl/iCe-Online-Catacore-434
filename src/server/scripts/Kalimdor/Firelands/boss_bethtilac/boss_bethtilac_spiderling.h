@@ -50,13 +50,15 @@ private:
         //void KilledUnit(Unit *victim);
         //void JustDied(Unit *killer);
         void UpdateAI(const uint32 diff);
-        //void DoAction(const int32 event);
+        void DoAction(const int32 event);
         void MovementInform(uint32 type, uint32 id);
         //void SummonedCreatureDespawn(Creature *creature);
         void MoveInLineOfSight(Unit *who);
         //void AttackStart(Unit *victim);
         //void JustRespawned();
         void IsSummonedBy(Unit *summoner);
+
+        bool CanFollowTarget(Unit *target) const;
 
         // attributes
         uint64 followedGuid;

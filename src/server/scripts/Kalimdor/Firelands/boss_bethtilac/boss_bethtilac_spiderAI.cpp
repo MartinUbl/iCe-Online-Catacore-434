@@ -27,6 +27,11 @@
 #include <list>
 using namespace std;
 
+enum CommonEvents
+{
+    CHECK_CONSUME = -1
+};
+
 
 SpiderAI::SpiderAI(Creature *creature)
     : ScriptedAI(creature)
@@ -223,7 +228,8 @@ void SpiderAI::JustDied(Unit *killer)
 
 void SpiderAI::MoveInLineOfSight(Unit *who)
 {
-    if (me->IsVehicle() && !me->IsNonMeleeSpellCasted(false))        // can eat spiderlings
+    if (me->IsVehicle() && me->GetEntry() != NPC_SPIDERWEB_FILAMENT &&
+        !me->IsNonMeleeSpellCasted(false))        // can eat spiderlings
     {
         if (Creature *creature = who->ToCreature())
         {
@@ -233,6 +239,7 @@ void SpiderAI::MoveInLineOfSight(Unit *who)
                     < GetSpellMaxRange(SPELL_CONSUME, false)))
                 {
                     me->CastSpell(creature, SPELL_CONSUME, false);
+                    AddTimer(CHECK_CONSUME, 1200, false);   // check for another spiderling in range after eating this one
                     return;     // the spell is channeled - can not attack until finished
                 }
             }
@@ -254,5 +261,24 @@ void SpiderAI::SpellHit(Unit *victim, SpellEntry const *spell)
         {
             MoveInLineOfSight(nextVictim);
         }
+    }
+}
+
+
+void SpiderAI::DoAction(const int32 event)
+{
+    switch (event)
+    {
+        case CHECK_CONSUME:
+        {
+            // hack-fix to make the spider consume another spiderling after eating one
+            float range = GetSpellMaxRange(SPELL_CONSUME, false);
+            Unit *spiderling = me->FindNearestCreature(NPC_CINDERWEB_SPIDERLING, range, true);
+            if (spiderling)
+                MoveInLineOfSight(spiderling);
+        }
+            break;
+        default:
+            break;
     }
 }

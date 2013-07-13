@@ -32,6 +32,7 @@ static const float webZPosition = 111.7f;
 enum BethtilacSpawns
 {
     NPC_BETHTILAC = 52498,
+    NPC_SPIDERWEB_FILAMENT = 53082,     // "vehicle" dropped from the web after taunting or killing Cinderweb Spinner
 
     // spawns in waves
     NPC_CINDERWEB_DRONE = 52581,

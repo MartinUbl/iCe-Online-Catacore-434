@@ -36,4 +36,5 @@ void AddSC_boss_bethtilac()
     new mob_drone();
     new mob_spiderling();
     new mob_spinner();
+    new npc_filament();
 }

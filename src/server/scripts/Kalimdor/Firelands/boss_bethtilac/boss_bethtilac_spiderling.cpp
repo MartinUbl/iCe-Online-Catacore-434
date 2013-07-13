@@ -30,6 +30,11 @@
 
 static const uint32 MOVE_CHASE = 1;
 
+enum SpiderlingEvents
+{
+    MOVE_CHECK = 0
+};
+
 
 enum SpiderlingSpells
 {
@@ -76,6 +81,20 @@ void mob_spiderling::mob_spiderlingAI::UpdateAI(const uint32 diff)
 }
 
 
+void mob_spiderling::mob_spiderlingAI::DoAction(const int32 event)
+{
+    switch (event)
+    {
+        case MOVE_CHECK:
+            if (!following)
+                FollowTarget();
+            break;
+        default:
+            break;
+    }
+}
+
+
 void mob_spiderling::mob_spiderlingAI::MovementInform(uint32 type, uint32 id)
 {
     me->StopMoving();
@@ -103,12 +122,12 @@ Unit *mob_spiderling::mob_spiderlingAI::ChooseTarget()
 {
     // find Drone or Beth'tilac to follow to be eaten
     if (Creature *drone = me->FindNearestCreature(NPC_CINDERWEB_DRONE, 100.0f, true))
-        if (drone->IsVehicle())
+        if (CanFollowTarget(drone))
             return drone;
 
     if (Creature *beth = me->FindNearestCreature(NPC_BETHTILAC, 100.0f, true))
     {
-        if (beth->GetPositionZ() <= webZPosition && beth->IsVehicle())
+        if (CanFollowTarget(beth))
             return beth;
     }
 
@@ -122,7 +141,7 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
     {
         if (Unit *followed = ObjectAccessor::GetUnit(*me, followedGuid))
         {
-            if (followed->isAlive())
+            if (CanFollowTarget(followed))
             {
                 me->StopMoving();
                 me->GetMotionMaster()->MoveChase(followed);
@@ -145,5 +164,14 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
     following = false;
     followedGuid = 0;
 
+    // re-check after a second
+    AddTimer(MOVE_CHECK, 1000, false);
+
     return false;
+}
+
+
+bool mob_spiderling::mob_spiderlingAI::CanFollowTarget(Unit *target) const
+{
+    return target->isAlive() && target->GetPositionZ() < webZPosition - 20.0f;
 }

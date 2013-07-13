@@ -24,6 +24,7 @@
 
 #include "ScriptPCH.h"
 #include <math.h>
+#include <list>
 #include "../firelands.h"
 #include "Spell.h"
 
@@ -50,7 +51,7 @@ enum BethtilacSpells
 
 enum BethtilacEvents
 {
-    POWER_DECAY,        // decay 100 energy each second
+    POWER_DECAY = 0,        // decay 100 energy each second
 
     // combat check
     COMBAT_CHECK_ENABLE,
@@ -58,6 +59,7 @@ enum BethtilacEvents
     TRANSFER_TIMEOUT,     // transfer phases have limited duration - if they last longer, something went wrong
 
     // phase 1
+    TRANSFER1_START,
     SD_ENABLE,            // Smoldering Devastation enabled
     SP_EMBER_FLARE,       // cast Ember Flare
     SP_VENOM_RAIN,        // cast Venom Rain (instant) if no one is in range
@@ -82,8 +84,6 @@ boss_bethtilac::boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
     phase = PHASE_IDLE;
     devastationEnabled = true;
     devastationCounter = 0;
-
-    summonCombatChecker = NULL;
 }
 
 
@@ -124,11 +124,7 @@ void boss_bethtilac::boss_bethtilacAI::EnterCombat(Unit *who)
     if (instance)
         instance->SetData(TYPE_BETHTILAC, IN_PROGRESS);
 
-    this->DoZoneInCombat();
-
-    // summon combat checker
-    summonCombatChecker = me->SummonTrigger(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, 0);
-    summonCombatChecker->SetVisible(true);
+    DoZoneInCombat();
 
     devastationEnabled = true;
     devastationCounter = 0;
@@ -173,17 +169,27 @@ void boss_bethtilac::boss_bethtilacAI::EnterEvadeMode()
         return;
 
     // don't evade when players are on another floor
-    if (summonCombatChecker && summonCombatChecker->SelectNearestTarget())
-        return;
+      // search for all players, including unattackable and hidden
+    {
+        using namespace Trinity;
+        using namespace std;
+        typedef AnyPlayerInObjectRangeCheck Check;
+
+        float radius = 100.0f;
+
+        list<Player*> players;
+        me->VisitNearbyWorldObject(radius, PlayerListSearcher<Check>(me, players, Check(me, radius)));
+        for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
+        {
+            Player *player = *it;
+            if (player->IsInWorld() && player->isAlive() && !player->isGameMaster())
+                return;
+        }
+    }
+
 
     // really evade
     ScriptedAI::EnterEvadeMode();
-
-    if (summonCombatChecker)
-    {
-        summonCombatChecker->DespawnOrUnsummon();
-        summonCombatChecker = NULL;
-    }
 
     if (instance)
         instance->SetData(TYPE_BETHTILAC, FAIL);
@@ -209,7 +215,9 @@ void boss_bethtilac::boss_bethtilacAI::UpdateAI(const uint32 diff)
 {
     if (!UpdateVictim())
     {
-        if (me->isInCombat())
+        if (instance && instance->GetData(TYPE_BETHTILAC) == IN_PROGRESS)
+            EnterEvadeMode();
+        else if (me->isInCombat())
             SpiderAI::EnterEvadeMode();
         return;
     }
@@ -262,8 +270,8 @@ void boss_bethtilac::boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
         case PHASE_TRANSFER_1:
         {
             DebugOutput("phase transfer 1");
-
-            MoveToFilament(MOVE_POINT_UP);
+            // TODO: anim
+            AddTimer(TRANSFER1_START, 1000, false);
             break;
         }
 
@@ -278,6 +286,7 @@ void boss_bethtilac::boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
             UnSummonFilament();
 
             me->SetInCombatWithZone();
+            DoAction(SP_VENOM_RAIN);
             break;
         }
 
@@ -318,7 +327,6 @@ void boss_bethtilac::boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases ph
     switch (phase)
     {
         case PHASE_TRANSFER_1:
-            AddTimer(TRANSFER_TIMEOUT, 10000, false);
             // timers for phase 1 should start in the moment of entering to combat (except "auto-cast" spells)
             AddTimer(SUMMON_FIRST_DRONE, 45000, false);
             AddTimer(SUMMON_SPINNERS, 12000, false);
@@ -360,6 +368,10 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
 {
     switch (event)
     {
+        case TRANSFER1_START:
+            MoveToFilament(MOVE_POINT_UP);
+            AddTimer(TRANSFER_TIMEOUT, 10000, false);
+            break;
         case POWER_DECAY:
             DepletePower();
             if (phase == PHASE_1 && GetPower() == 0)
@@ -422,14 +434,9 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
             me->CastSpell(me->getVictim(), SPELL_WIDOW_KISS, false);
             break;
 
-        /*
-        case EVENT_SPELLCLICK:  // called when someone in GM mode enters me
-            break;
-
         default:
-            __debugbreak();
+            SpiderAI::DoAction(event);
             break;
-            */
     }
 }
 
@@ -465,15 +472,6 @@ void boss_bethtilac::boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
             break;
         }
     }
-}
-
-
-void boss_bethtilac::boss_bethtilacAI::SummonedCreatureDespawn(Creature *creature)
-{
-    SpiderAI::SummonedCreatureDespawn(creature);
-
-    if (summonCombatChecker == creature)
-        summonCombatChecker = NULL;
 }
 
 
@@ -523,10 +521,7 @@ void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
 
         if (devastationCounter == 3)
         {
-            Spell *spell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL);
-            ASSERT (spell);     // should be this Smoldering Devastation
-
-            AddTimer(END_OF_PHASE_1, spell->GetRemainingCastTime() + 200, false);
+            AddTimer(END_OF_PHASE_1, me->GetCurrentSpellCastTime(SPELL_SMOLDERING_DEVASTATION) + 200, false);
         }
         else
         {
@@ -588,6 +583,7 @@ UPDATE
     creature_template
   SET
     ScriptName = 'boss_bethtilac',
+    AIName = 'NullAI',
     VehicleId = 1652
   WHERE
     entry = 52498;
@@ -597,7 +593,7 @@ UPDATE
     creature_template
   SET
     ScriptName = 'mob_cinderweb_drone',
-    AIName = '',
+    AIName = 'NullAI',
     VehicleId = 1652,
     difficulty_entry_1 = 53582,
     difficulty_entry_2 = 53583,
@@ -610,7 +606,7 @@ UPDATE
     creature_template
   SET
     ScriptName = 'mob_cinderweb_spinner',
-    AIName = '',
+    AIName = 'NullAI',
     difficulty_entry_1 = 53599,
     difficulty_entry_2 = 53600,
     difficulty_entry_3 = 53601
@@ -622,12 +618,22 @@ UPDATE
     creature_template
   SET
     ScriptName = 'mob_cinderweb_spiderling',
-    AIName = '',
+    AIName = 'NullAI',
     difficulty_entry_1 = 53579,
     difficulty_entry_2 = 53580,
     difficulty_entry_3 = 53581
   WHERE
     entry = 52447;
+
+
+UPDATE
+    creature_template
+  SET
+    ScriptName = 'npc_spiderweb_filament',
+    AIName = 'NullAI',
+    VehicleId = 341
+  WHERE
+    entry = 53082;
 
 
 INSERT INTO

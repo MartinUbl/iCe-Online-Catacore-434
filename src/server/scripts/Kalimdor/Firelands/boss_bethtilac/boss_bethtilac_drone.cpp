@@ -31,12 +31,16 @@
 enum DroneSpells
 {
     SPELL_LEECH_VENOM = 99411,
+    SPELL_BOILING_SPATTER = 99463,
+    SPELL_DRONE_BURNING_ACID = 99934
 };
 
 enum DroneEvents
 {
-    POWER_DEPLETE,
+    POWER_DEPLETE = 0,
     END_OF_LEECH_VENOM_CAST,
+    CAST_BOILING_SPATTER,
+    CAST_BURNING_ACID,
 };
 
 
@@ -137,6 +141,18 @@ void mob_drone::mob_droneAI::DoAction(const int32 event)
                 MovementInform(POINT_MOTION_TYPE, MOVE_POINT_DOWN);
 
             break;
+
+        case CAST_BOILING_SPATTER:
+            me->CastSpell(me->getVictim(), SPELL_BOILING_SPATTER, false);
+            break;
+
+        case CAST_BURNING_ACID:
+            me->CastCustomSpell(SPELL_DRONE_BURNING_ACID, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
+            break;
+
+        default:
+            SpiderAI::DoAction(event);
+            break;
     }
 }
 
@@ -167,19 +183,29 @@ void mob_drone::mob_droneAI::MovementInform(uint32 type, uint32 id)
 }
 
 
+void mob_drone::mob_droneAI::AttackStart(Unit *victim)
+{
+    if (victim->GetPositionZ() < webZPosition - 10.0f)      // don't attack players above the web
+        SpiderAI::AttackStart(victim);
+}
+
+
 void mob_drone::mob_droneAI::IsSummonedBy(Unit *summoner)
 {
     SetMaxPower(85);
     SetPower(85);
 
     AddTimer(POWER_DEPLETE, 1000, true);
-    me->SetInCombatWithZone();
+    AddTimer(CAST_BOILING_SPATTER, 15000, true);
+    AddTimer(CAST_BURNING_ACID, 7000, true);
 
     Position pos;
     summoner->GetPosition(&pos);
-    pos.m_positionZ -= 10.0f;
-    pos.m_positionZ = summoner->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+    pos.m_positionZ -= 20.0f;
+    pos.m_positionZ = summoner->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); // get ground height
     me->GetMotionMaster()->MovePoint(0, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());    // go underneath Beth'tilac
+
+    DoZoneInCombat();
 
     onGround = true;
     onTop = false;

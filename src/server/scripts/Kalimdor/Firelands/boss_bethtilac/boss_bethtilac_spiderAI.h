@@ -62,7 +62,6 @@ protected:
     // web filament (string)
     void SummonFilament();
     void UnSummonFilament();
-    //Position GetFilamentPosition() const;
 
     // movement
     void MoveToGround(uint32 movementId);
@@ -73,6 +72,7 @@ protected:
     void JustDied(Unit *killer);
     void MoveInLineOfSight(Unit *who);
     void SpellHit(Unit *victim, SpellEntry const *spell);
+    void DoAction(const int32 event);
 
     // attributes
 private:

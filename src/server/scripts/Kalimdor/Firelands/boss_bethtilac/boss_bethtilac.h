@@ -56,7 +56,7 @@ private:
         void UpdateAI(const uint32 diff);
         void DoAction(const int32 event);
         void MovementInform(uint32 type, uint32 id);
-        void SummonedCreatureDespawn(Creature *creature);
+        //void SummonedCreatureDespawn(Creature *creature);
         void MoveInLineOfSight(Unit *who);
         void AttackStart(Unit *victim);
 
@@ -65,7 +65,6 @@ private:
         bool devastationEnabled;    // Smoldering devastation is disabled for a while after cast to avoid duplicate casts
         bool combatCheckEnabled;
         int devastationCounter;
-        Creature *summonCombatChecker;
 
         // methods
         void SetPhase(BethtilacPhases newPhase);
