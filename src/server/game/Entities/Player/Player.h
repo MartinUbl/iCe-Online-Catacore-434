@@ -2845,7 +2845,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadAuras(PreparedQueryResult result, uint32 timediff);
         void _LoadGlyphAuras();
         void _LoadBoundInstances(PreparedQueryResult result);
-        void _LoadBoundInst();
+        void _LoadBoundInst(uint32 mapId,uint32 difficulty);
         void _LoadInventory(PreparedQueryResult result, uint32 timediff);
         void _LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery);
         void _LoadMail();

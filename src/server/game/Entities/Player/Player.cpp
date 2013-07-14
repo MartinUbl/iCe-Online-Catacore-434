@@ -19354,14 +19354,14 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
-void Player::_LoadBoundInst()
+void Player::_LoadBoundInst(uint32 mapId,uint32 difficulty)
 {
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
         m_boundInstances[i].clear();
 
     Group *group = GetGroup();
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(GetGUID()));
+    QueryResult result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u' and map='%u' and difficulty='%u'", GUID_LOPART(GetGUID()),mapId,difficulty);
     if (result)
     {
         do

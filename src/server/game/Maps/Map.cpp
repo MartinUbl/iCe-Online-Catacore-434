@@ -2742,7 +2742,7 @@ void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
     {
         Player* plr = itr->getSource();
         if(player->GetSession()->GetSecurity()==SEC_PLAYER)
-            plr->_LoadBoundInst(); //reset of temporary instance bounds for flexible id because we need to bound it to new bound
+            plr->_LoadBoundInst(GetId(),GetDifficulty()); //reset of temporary instance bounds for flexible id because we need to bound it to new bound
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind *bind = plr->GetBoundInstance(save->GetMapId(), save->GetDifficulty());

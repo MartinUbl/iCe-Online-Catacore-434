@@ -119,8 +119,8 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 {
     if (GetId() != mapId || !player)
         return NULL;
-    if(player->GetSession()->GetSecurity()==SEC_PLAYER)
-        player->_LoadBoundInst(); //reset of temporary instance bounds for flexible id
+    if(player->GetSession()->GetSecurity()==SEC_PLAYER&&!IsBattlegroundOrArena())
+        player->_LoadBoundInst(mapId,GetDifficulty()); //reset of temporary instance bounds for flexible id
  
     Map* map = NULL;
     uint32 NewInstanceId = 0;                       // instanceId of the resulting map
