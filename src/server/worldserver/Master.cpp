@@ -479,6 +479,7 @@ void Master::_StopDB()
     CharacterDatabase.Close();
     WorldDatabase.Close();
     LoginDatabase.Close();
+    ScriptDatabase.Close();
 
     MySQL::Library_End();
 }
