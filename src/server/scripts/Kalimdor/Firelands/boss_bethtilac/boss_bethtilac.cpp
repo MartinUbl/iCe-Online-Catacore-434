@@ -178,7 +178,9 @@ void boss_bethtilac::boss_bethtilacAI::EnterEvadeMode()
         float radius = 100.0f;
 
         list<Player*> players;
-        me->VisitNearbyWorldObject(radius, PlayerListSearcher<Check>(me, players, Check(me, radius)));
+        Check checker(me, radius);
+        PlayerListSearcher<Check> searcher(me, players, checker);
+        me->VisitNearbyWorldObject(radius, searcher);
         for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
         {
             Player *player = *it;
