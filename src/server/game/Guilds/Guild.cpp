@@ -2472,7 +2472,7 @@ void Guild::SendGuildRankInfo(WorldSession* session) const
         }
         else
         {
-            rankData << uint32(rankInfo->GetBankMoneyPerDay());
+            rankData << uint32(rankInfo->GetBankMoneyPerDay() / GOLD);
             rankData << uint32(rankInfo->GetRights());
         }
 

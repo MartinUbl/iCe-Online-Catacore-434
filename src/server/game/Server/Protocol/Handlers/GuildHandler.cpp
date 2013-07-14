@@ -524,6 +524,7 @@ void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
 
     sLog->outDebug("CMSG_GUILD_SET_RANK_PERMISSIONS [%s]: Rank: %s (%u)", GetPlayer()->GetName(), rankName.c_str(), newRankId);
 
+    moneyPerDay *= GOLD;        // store the value in copper (read value is in gold)
     guild->HandleSetRankInfo(this, newRankId, rankName, newRights, moneyPerDay, rightsAndSlots);
 }
 
