@@ -608,7 +608,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
 
     LoginDatabase.PExecute("REPLACE INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
 
-    uint32 pet_id = sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
+    uint32 pet_id = sObjectMgr->GeneratePetNumber();
 
     if (class_ == CLASS_WARLOCK)
     {
