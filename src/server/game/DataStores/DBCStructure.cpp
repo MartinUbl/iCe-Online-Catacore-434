@@ -599,3 +599,41 @@ bool SpellEntry::HasSpellEffect(uint32 effectId) const
 
     return false;
 }
+
+
+uint32 ScalingStatValuesEntry::getssdMultiplier(uint32 inventoryType) const
+{
+    switch (inventoryType)
+    {
+        case INVTYPE_HEAD:
+        case INVTYPE_CHEST:
+        case INVTYPE_LEGS:
+        case INVTYPE_2HWEAPON:
+        case INVTYPE_ROBE:
+            return ssdMultiplier[0];
+        case INVTYPE_SHOULDERS:
+        case INVTYPE_WAIST:
+        case INVTYPE_FEET:
+        case INVTYPE_HANDS:
+        case INVTYPE_TRINKET:
+            return ssdMultiplier[1];
+        case INVTYPE_NECK:
+        case INVTYPE_WRISTS:
+        case INVTYPE_FINGER:
+        case INVTYPE_SHIELD:
+        case INVTYPE_CLOAK:
+        case INVTYPE_HOLDABLE:
+            return ssdMultiplier[2];
+        case INVTYPE_RANGED:
+        case INVTYPE_THROWN:
+        case INVTYPE_RANGEDRIGHT:
+        case INVTYPE_RELIC:
+            return ssdMultiplier[3];
+        case INVTYPE_WEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+        case INVTYPE_WEAPONOFFHAND:
+            return ssdMultiplier[4];
+        default:
+            return 0;
+    }
+}
