@@ -290,10 +290,102 @@ public:
     }
 };
 
+class spell_dru_mush_detonate : public SpellScriptLoader
+{
+    public:
+        spell_dru_mush_detonate() : SpellScriptLoader("spell_dru_mush_detonate") { }
+
+        class spell_dru_mush_detonate_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_mush_detonate_SpellScript);
+
+            enum spell
+            {
+                EARTH_AND_MOON_TALENT   = 48506,
+                EARTH_AND_MOON_DEBUFF   = 60433,
+
+                FUNGAL_GROWTH_RANK1     = 78788,
+                FUNGAL_GROWTH_RANK2     = 78789,
+
+                TRIGGERING_AURA_R1      = 81289,
+                TRIGGERING_SPELL_R1     = 81288,
+
+                TRIGGERING_AURA_R2      = 81282,
+                TRIGGERING_SPELL_R2     = 81281,
+
+                FUNGAL_VISUAL           = 94339
+            };
+
+            bool Load()
+            {
+                _summoned = false;
+                return true;
+            }
+
+            void HandleHit()
+            {
+                Player * player = GetOriginalCaster()->ToPlayer();
+                if (!player)
+                    return;
+
+                if (GetHitUnit() && player->HasAura(EARTH_AND_MOON_TALENT)) // Wild Mushrooms should apply Earth and moon debuff
+                    player->CastSpell(GetHitUnit(),EARTH_AND_MOON_DEBUFF,true);
+
+                if (!_summoned)
+                {
+                    if (GetCaster() && ( player->HasAura(FUNGAL_GROWTH_RANK1) || player->HasAura(FUNGAL_GROWTH_RANK2)) )
+                    {
+                        TempSummon* summon = player->SummonCreature(43484, GetCaster()->GetPositionX(),GetCaster()->GetPositionY(),GetCaster()->GetPositionZ(),0.0f,TEMPSUMMON_MANUAL_DESPAWN,0);
+
+                        if (!summon)
+                            return;
+
+                        _summoned = true;
+                        summon->DespawnOrUnsummon(20000);
+                        summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+                        summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, player->GetGUID());
+                        summon->setFaction(player->getFaction());
+                        summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, GetSpellInfo()->Id);
+
+                        summon->CastSpell(summon,FUNGAL_VISUAL,true);
+                        Aura * aur = summon->GetAura(FUNGAL_VISUAL);
+                        if (aur)
+                            aur->SetDuration(20000); // Mistake in DB ?? ( 30s before )
+
+                        if (player && player->getClass() == CLASS_DRUID)
+                        {
+                            if(player->HasAura(FUNGAL_GROWTH_RANK1))
+                            {
+                                summon->CastSpell(summon, TRIGGERING_AURA_R1, true, 0, 0, player->GetGUID());
+                            }
+                            else if(player->HasAura(FUNGAL_GROWTH_RANK2))
+                            {
+                                summon->CastSpell(summon, TRIGGERING_AURA_R2, true, 0, 0, player->GetGUID());
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_dru_mush_detonate_SpellScript::HandleHit);
+            }
+
+            bool _summoned;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_mush_detonate_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_blood_in_water();
     new spell_druid_pulverize();
     new spell_druid_insect_swarm();
+    new spell_dru_mush_detonate();
 }
