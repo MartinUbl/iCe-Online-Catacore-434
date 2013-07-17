@@ -8033,7 +8033,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
     if (ssd && ssd_level > ssd->MaxLevel)
         ssd_level = ssd->MaxLevel;
 
-    ScalingStatValuesEntry const *ssv = proto->ScalingStatValue ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
+    ScalingStatValuesEntry const *ssv = (ssd && proto->ScalingStatValue) ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
     if (only_level_scale && !ssv)
         return;
 
@@ -8277,9 +8277,11 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
     if (CanUseAttackType(attType))
         _ApplyWeaponDamage(slot, proto, ssv, apply);
 
-    int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
+    uint32 extraDPS = 0;
+    if (ssv)
+        extraDPS = ssv->getDPSMod(proto);
 
-    // Druids get feral AP bonus from weapon dps (lso use DPS from ScalingStat
+    // Druids get feral AP bonus from weapon dps (also use DPS from ScalingStat)
     if (getClass() == CLASS_DRUID)
     {
         int32 feral_bonus = proto->getFeralBonus(extraDPS);
@@ -8308,15 +8310,15 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto, ScalingS
     float maxDamage = proto->GetMaxDamage();
     int32 extraDPS = 0;
 
-    // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
+    // If set dpsMod in ScalingStatValue use it
     if (ssv)
     {
-        extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
+        extraDPS = ssv->getDPSMod(proto);
         if (extraDPS)
         {
             float average = extraDPS * proto->Delay / 1000.0f;
-            minDamage = 0.7f * average;
-            maxDamage = 1.3f * average;
+            minDamage = average * (1 - proto->GetDamageRange());
+            maxDamage = average * (1 + proto->GetDamageRange());
         }
     }
 

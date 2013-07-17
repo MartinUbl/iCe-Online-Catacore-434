@@ -372,26 +372,25 @@ float ItemPrototype::getDPS() const
     return 0.0f;
 }
 
+float ItemPrototype::GetDamageRange() const
+{
+    ItemSparseEntry const *sparse = sItemSparseStore.LookupEntry(ItemId);
+    if (!sparse)
+        return 0.3f;   // this value is accurate for many existing weapons
+
+    return sparse->DamageRangeScale / 2.0f;
+}
+
 float ItemPrototype::GetMinDamage() const
 {
     float avgDamage = getDPS() * float(Delay) / 1000.0f;
-
-    ItemSparseEntry const *sparse = sItemSparseStore.LookupEntry(ItemId);
-    if (!sparse)
-        return avgDamage * 0.7f;   // this value is accurate for many existing weapons
-
-    return avgDamage * (1.0f - sparse->DamageRangeScale / 2);
+    return avgDamage * (1.0f - GetDamageRange());
 }
 
 float ItemPrototype::GetMaxDamage() const
 {
     float avgDamage = getDPS() * float(Delay) / 1000.0f;
-
-    ItemSparseEntry const *sparse = sItemSparseStore.LookupEntry(ItemId);
-    if (!sparse)
-        return avgDamage * 1.3f;
-
-    return avgDamage * (1.0f + sparse->DamageRangeScale / 2);
+    return avgDamage * (1.0f + GetDamageRange());
 }
 
 

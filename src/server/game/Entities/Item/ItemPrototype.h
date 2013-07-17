@@ -756,6 +756,7 @@ struct ItemPrototype
     
     ItemDamageEntry const* getItemDamageEntry() const;
     float getDPS() const;
+    float GetDamageRange() const;
     float GetMinDamage() const;
     float GetMaxDamage() const;
 

@@ -637,3 +637,41 @@ uint32 ScalingStatValuesEntry::getssdMultiplier(uint32 inventoryType) const
             return 0;
     }
 }
+
+
+uint32 ScalingStatValuesEntry::getDPSMod(ItemPrototype const *proto) const
+{
+    uint32 subClass = proto->SubClass;
+
+    switch (subClass)
+    {
+        case ITEM_SUBCLASS_WEAPON_AXE:
+        case ITEM_SUBCLASS_WEAPON_MACE:
+        case ITEM_SUBCLASS_WEAPON_SWORD:
+        case ITEM_SUBCLASS_WEAPON_DAGGER:
+        case ITEM_SUBCLASS_WEAPON_THROWN:
+            return dpsMod[0];
+        case ITEM_SUBCLASS_WEAPON_AXE2:
+        case ITEM_SUBCLASS_WEAPON_MACE2:
+        case ITEM_SUBCLASS_WEAPON_POLEARM:
+        case ITEM_SUBCLASS_WEAPON_SWORD2:
+        case ITEM_SUBCLASS_WEAPON_STAFF:
+        case ITEM_SUBCLASS_WEAPON_FISHING_POLE:
+            return dpsMod[1];
+        case ITEM_SUBCLASS_WEAPON_BOW:
+        case ITEM_SUBCLASS_WEAPON_GUN:
+        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+            return dpsMod[4];
+        case ITEM_SUBCLASS_WEAPON_obsolete:
+        case ITEM_SUBCLASS_WEAPON_EXOTIC:
+        case ITEM_SUBCLASS_WEAPON_EXOTIC2:
+        case ITEM_SUBCLASS_WEAPON_FIST:
+        case ITEM_SUBCLASS_WEAPON_MISC:
+        case ITEM_SUBCLASS_WEAPON_SPEAR:
+            return dpsMod[2];
+        case ITEM_SUBCLASS_WEAPON_WAND:
+            return dpsMod[5];
+        default:
+            return 0;
+    }
+}

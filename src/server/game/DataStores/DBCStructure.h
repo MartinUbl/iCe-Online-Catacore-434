@@ -45,6 +45,7 @@
 #endif
 
 typedef char const* DBCString;
+struct ItemPrototype;
 
 struct AchievementEntry
 {
@@ -1666,19 +1667,7 @@ struct ScalingStatValuesEntry
         }
         return 0;
     }
-    uint32 getDPSMod(uint32 mask) const
-    {
-        if (mask&0x7E00)
-        {
-            if (mask & 0x00000200) return dpsMod[0];
-            if (mask & 0x00000400) return dpsMod[1];
-            if (mask & 0x00000800) return dpsMod[2];
-            if (mask & 0x00001000) return dpsMod[3];
-            if (mask & 0x00002000) return dpsMod[4];
-            if (mask & 0x00004000) return dpsMod[5];         // not used?
-        }
-        return 0;
-    }
+    uint32 getDPSMod(ItemPrototype const *proto) const;
     uint32 getSpellBonus(uint32 mask) const
     {
         if (mask & 0x00008000) return spellBonus;
