@@ -9673,7 +9673,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 20000);
                 break;
-
+            case 99622://Flintlocke's Woodchucker
+                {
+                    if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                        return false;
+                    ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 45000);
+                    break;
+                }
             case 89183: // Darkmoon card: Tsunami
             {
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
