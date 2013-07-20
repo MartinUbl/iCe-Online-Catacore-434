@@ -8154,8 +8154,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             // Fel Flame (increase duration part)
             else if (m_spellInfo->Id == 77799)
             {
-                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348) : NULL;
-                Aura* pUnstableAffliction = unitTarget ? unitTarget->GetAura(30108) : NULL;
+                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348, m_originalCasterGUID) : NULL;
+                Aura* pUnstableAffliction = unitTarget ? unitTarget->GetAura(30108, m_originalCasterGUID) : NULL;
                 if (pUnstableAffliction)
                 {
                     if (pUnstableAffliction->GetDuration()+6000 > pUnstableAffliction->GetMaxDuration())
