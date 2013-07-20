@@ -8146,7 +8146,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             else if (m_spellInfo->Id == 89603)
             {
                 // chance calculated in spell effect (this spell is triggered with this chance)
-                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348) : NULL;
+                Aura* pImmolate = unitTarget ? unitTarget->GetAura(348, m_originalCasterGUID) : NULL;
 
                 if (pImmolate)
                     pImmolate->RefreshDuration();
