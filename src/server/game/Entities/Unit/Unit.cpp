@@ -19672,6 +19672,7 @@ bool Unit::IsHackTriggeredAura(Unit *pVictim, Aura * aura, SpellEntry const* pro
         case 85767:
         case 77769:
         case 79683:
+        case 89523:
             return true; // Continue handling
     }
 
@@ -19845,6 +19846,15 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
                 }
             }
             break;
+        case SPELLFAMILY_WARRIOR:
+            // Grounding Totem glyphed spell, dunno why spellfamily warrior
+            if (dummySpell->Id == 89523 && ((procExtra & PROC_EX_REFLECT) != 0))
+            {
+                // reflect one spell, then die
+                if (Unit* caster = aura->GetUnitOwner())
+                    if (caster->isTotem())
+                        caster->Kill(caster);
+            }
         default:
             break;
     }

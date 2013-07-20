@@ -127,6 +127,13 @@ void Totem::InitSummon()
     if (GetSpell(1))
         CastSpell(this, GetSpell(1), true);
 
+    // Grounding Totem and Glyph of Grounding Totem
+    if (GetEntry() == 5925 && GetOwner() && GetOwner()->HasAura(55441))
+    {
+        RemoveAurasDueToSpell(8178);
+        CastSpell(this, 89523, true); // reflecting aura spell
+    }
+
     // Glyph of Healing Stream Totem adds new passive spell
     if (GetEntry() == 3527 && GetOwner() && GetOwner()->HasAura(55456))
         CastSpell(this, 8185, true);
