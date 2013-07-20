@@ -7114,15 +7114,16 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
 
     switch(_spell->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+            // Entrapment
+            if (_spell->SpellIconID == 20)
+                return 0;
+            break;
         case SPELLFAMILY_HUNTER:
             // Traps
             if (_spell->SpellFamilyFlags[0] & 0x8 ||      // Frozen trap
                 _spell->Id == 57879 ||                    // Snake Trap
                 _spell->SpellFamilyFlags[2] & 0x00024000) // Explosive and Immolation Trap
-                return 0;
-
-            // Entrapment
-            if (_spell->SpellIconID == 20)
                 return 0;
             break;
         case SPELLFAMILY_DEATHKNIGHT:
