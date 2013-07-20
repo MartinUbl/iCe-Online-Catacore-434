@@ -7376,7 +7376,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     (caster->HasAura(47202) && roll_chance_i(66)) ||
                     (caster->HasAura(47203)))
                 {
-                    if (Aura* pAura = target->GetAura(172))
+                    if (Aura* pAura = target->GetAura(172, caster->GetGUID()))
                         pAura->RefreshDuration();
                 }
             }
