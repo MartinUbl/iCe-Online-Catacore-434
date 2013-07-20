@@ -9567,6 +9567,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 54158)
                 return false;
             break;
+        case 46945: // Safeguard
+        case 46949:
+            // do not apply to self (second effect of Intervene)
+            if (pVictim == this)
+                return false;
+            break;
         default:
             break;
     }
