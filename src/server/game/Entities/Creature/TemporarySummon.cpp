@@ -231,11 +231,8 @@ void TempSummon::SetTempSummonType(TempSummonType type)
 
 void TempSummon::UnSummon()
 {
-    Unit* owner = GetSummoner();
-
     //ASSERT(!isPet());
-    if (isHunterPet() ||
-        (owner && owner->getClass() == CLASS_WARLOCK))
+    if (isHunterPet())
     {
         ((Pet*)this)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
         ASSERT(!IsInWorld());
@@ -248,6 +245,7 @@ void TempSummon::UnSummon()
         return;
     }
 
+    Unit* owner = GetSummoner();
     if (owner && owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
         owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
 
