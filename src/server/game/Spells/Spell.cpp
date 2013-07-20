@@ -5400,6 +5400,7 @@ void Spell::TakePower()
         {
             int32 bp0 = GetSpellInfo()->Id;
             pAura->GetCaster()->CastCustomSpell(pAura->GetCaster(), 77616, &bp0, 0, 0, true);
+            m_caster->RemoveAurasDueToSpell(77606);
         }
     }
 
