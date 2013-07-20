@@ -3383,19 +3383,18 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         // Exclude targets which aren't in party with caster
                         // and limit count to 6
 
-                        uint32 count = 6;
+                        maxSize = 6;
                         if (m_caster->HasAura(54940))
-                            count -= 2;
+                            maxSize -= 2;
+
+                        power = POWER_HEALTH;
 
                         for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                         {
-                            if (count == 0 || (*itr)->GetTypeId() != TYPEID_PLAYER || !((*itr)->ToPlayer()->IsInPartyWith(m_caster) || (*itr)->ToPlayer()->IsInRaidWith(m_caster)))
+                            if ((*itr)->GetTypeId() != TYPEID_PLAYER || !((*itr)->ToPlayer()->IsInPartyWith(m_caster) || (*itr)->ToPlayer()->IsInRaidWith(m_caster)))
                                 itr = unitList.erase(itr);
                             else
                                 ++itr;
-
-                            if (count > 0)
-                                count--;
                         }
                         break;
                     }
