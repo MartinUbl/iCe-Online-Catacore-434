@@ -1910,10 +1910,11 @@ public:
             for (std::list<HostileReference*>::iterator itr = thrList.begin(); itr != thrList.end(); ++itr)
             {
                 if (!top || top->getThreat() < (*itr)->getThreat())
-                    top = (*itr);
+                    if (me->canSeeOrDetect((*itr)->getSource()->getOwner(), false))
+                        top = (*itr);
             }
 
-            if (top && top->getSource() && top->getSource()->getOwner() && me->getVictim() != top->getSource()->getOwner())
+            if (top && top->getSource() && top->getSource()->getOwner() && me->getVictim() != top->getSource()->getOwner() && me->canSeeOrDetect(top->getSource()->getOwner(), false))
             {
                 me->getThreatManager().clearReferences();
                 me->AddThreat(top->getSource()->getOwner(), top->getThreat());
@@ -1922,7 +1923,7 @@ public:
 
             if (!me->getVictim())
             {
-                if (owner->getVictim())
+                if (owner->getVictim() && me->canSeeOrDetect(owner->getVictim(), false))
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(owner->getVictim(), 1000.0f);
