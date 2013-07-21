@@ -570,7 +570,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 // Implementation of Strikes of Opportunity warrior arms mastery proficiency
                 if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_WARRIOR_ARMS && spellId != 76858)
                 {
-                    if (roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
+                    if ((!spellProto || spellProto->Id != 26654) && roll_chance_f(ToPlayer()->GetMasteryPoints()*2.2f))
                         CastSpell(pVictim, 76858, true);
                 }
             }
