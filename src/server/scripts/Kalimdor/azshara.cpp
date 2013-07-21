@@ -519,6 +519,297 @@ public:
 
 };
 
+typedef struct
+{
+    uint32 entry;
+    uint16 wp_start;
+    uint16 wp_end;
+} entryStop;
+
+typedef struct
+{
+    uint16 wp;
+    const char* name;
+} stopDefine;
+
+static const entryStop rocketStops[] = {
+    {43211,1,38},
+    {43240,1,85},
+    {43251,1,103},
+    {43256,1,142},
+
+    {43283,38,1},
+    {43284,38,85},
+    {43285,38,103},
+    {43288,38,142},
+
+    {43306,85,1},
+    {43307,85,38},
+    {43308,85,103},
+    {43309,85,142},
+
+    {43310,103,1},
+    {43311,103,38},
+    {43312,103,85},
+    {43313,103,142},
+
+    {43314,142,1},
+    {43315,142,38},
+    {43316,142,85},
+    {43317,142,103}
+};
+
+static const stopDefine rocketStopsDefines[] = {
+    {1, "Bitter Reaches"},
+    {38, "Northern Rocketway Exchange"},
+    {85, "Forlorn Ridge"},
+    {103, "Orgrimmar Rocketway Exchange"},
+    {142, "Southern Rocketway Terminus"}
+};
+
+#define DB_WAYPOINTS_JOY_RIDE 21
+
+class npc_rocket_joy_ride: public CreatureScript
+{
+    public:
+        npc_rocket_joy_ride(): CreatureScript("npc_rocket_joy_ride")
+        {
+            m_WPPositionMap.clear();
+
+            QueryResult res = WorldDatabase.PQuery("SELECT * FROM waypoint_data WHERE id=%u;", DB_WAYPOINTS_JOY_RIDE);
+            if (res && res->GetRowCount() > 0)
+            {
+                Field* f = NULL;
+                do
+                {
+                    f = res->Fetch();
+                    uint16 id = f[1].GetUInt16();
+
+                    if (id >= m_WPPositionMap.size())
+                        m_WPPositionMap.resize(id+1);
+
+                    m_WPPositionMap[id].m_positionX = f[2].GetFloat();
+                    m_WPPositionMap[id].m_positionY = f[3].GetFloat();
+                    m_WPPositionMap[id].m_positionZ = f[4].GetFloat();
+                }
+                while (res->NextRow());
+            }
+        }
+
+        std::vector<Position> m_WPPositionMap;
+
+        /*
+            UPDATE creature_template SET ScriptName='npc_rocket_joy_ride', AIName='', vehicleId=1350 WHERE entry IN (
+                43211,43240,43251,43256,43283,43284,43285,43288,43306,43307,43308,43309,43310,43311,43312,43313,
+                43314,43315,43316,43317);
+
+            UPDATE creature_template SET ScriptName='npc_rocket_jockey' WHERE entry = 43217;
+        */
+
+        struct npc_rocket_joy_rideAI: public ScriptedAI
+        {
+            npc_rocket_joy_rideAI(Creature* c): ScriptedAI(c)
+            {
+                actualWP = 0;
+                endWP = 0;
+                parent = NULL;
+                switchWP = false;
+                joyRideAchiev = false;
+                passengerGUID = 0;
+                Reset();
+            }
+
+            void Reset()
+            {
+            }
+
+            bool joyRideAchiev;
+            bool switchWP;
+            uint32 actualWP;
+            uint32 endWP;
+            npc_rocket_joy_ride* parent;
+            uint64 passengerGUID;
+
+            void StartRide(uint64 plguid)
+            {
+                passengerGUID = plguid;
+                for (uint32 i = 0; i < sizeof(rocketStops)/sizeof(entryStop); i++)
+                {
+                    if (rocketStops[i].entry == me->GetEntry())
+                    {
+                        actualWP = rocketStops[i].wp_start;
+                        endWP = rocketStops[i].wp_end;
+                    }
+                }
+
+                // error
+                if (actualWP == endWP)
+                    return;
+
+                if ((actualWP == 1 && endWP == 142) || (actualWP == 142 && endWP == 1))
+                    joyRideAchiev = true;
+
+                switchWP = true;
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (actualWP == endWP)
+                {
+                    if (joyRideAchiev && passengerGUID > 0)
+                    {
+                        if (Player* pass = sObjectMgr->GetPlayer(passengerGUID))
+                        {
+                            AchievementEntry const* ae = sAchievementStore.LookupEntry(5454);
+                            if (ae)
+                                pass->CompletedAchievement(ae);
+                        }
+                    }
+
+                    me->Kill(me);
+                    me->ForcedDespawn();
+                }
+                else
+                {
+                    if (actualWP > endWP)
+                        actualWP--;
+                    else
+                        actualWP++;
+
+                    switchWP = true;
+                }
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!parent)
+                    return;
+
+                if (switchWP)
+                {
+                    me->GetMotionMaster()->MoveCharge(parent->m_WPPositionMap[actualWP].m_positionX, parent->m_WPPositionMap[actualWP].m_positionY, parent->m_WPPositionMap[actualWP].m_positionZ, 30.0f);
+                    switchWP = false;
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            npc_rocket_joy_rideAI* newAI = new npc_rocket_joy_rideAI(c);
+            newAI->parent = (npc_rocket_joy_ride*)this;
+            return newAI;
+        }
+};
+
+class npc_rocket_jockey: public CreatureScript
+{
+    public:
+        npc_rocket_jockey(): CreatureScript("npc_rocket_jockey")
+        {
+            m_WPPositionMap.clear();
+            QueryResult res = WorldDatabase.PQuery("SELECT * FROM waypoint_data WHERE id=%u AND point IN (1,38,85,103,142);", DB_WAYPOINTS_JOY_RIDE);
+            if (res && res->GetRowCount() > 0)
+            {
+                Field* f = NULL;
+                do
+                {
+                    f = res->Fetch();
+                    uint16 id = f[1].GetUInt16();
+                    m_WPPositionMap[id].m_positionX = f[2].GetFloat();
+                    m_WPPositionMap[id].m_positionY = f[3].GetFloat();
+                    m_WPPositionMap[id].m_positionZ = f[4].GetFloat();
+                }
+                while (res->NextRow());
+            }
+        }
+
+        std::map<uint32, Position> m_WPPositionMap;
+
+        struct npc_rocket_jockeyAI: public ScriptedAI
+        {
+            npc_rocket_jockeyAI(Creature* c): ScriptedAI(c)
+            {
+            }
+
+            uint16 myStartWP;
+            npc_rocket_jockey* m_parent;
+
+            void SetParent(npc_rocket_jockey* par)
+            {
+                m_parent = par;
+            }
+
+            void InitializePosition()
+            {
+                myStartWP = 1;
+                float frstdist = me->GetDistance2d(m_parent->m_WPPositionMap[1].m_positionX, m_parent->m_WPPositionMap[1].m_positionY);
+                float tmpdist;
+                for (std::map<uint32, Position>::iterator itr = m_parent->m_WPPositionMap.begin(); itr != m_parent->m_WPPositionMap.end(); ++itr)
+                {
+                    tmpdist = me->GetDistance2d((*itr).second.m_positionX, (*itr).second.m_positionY);
+                    if (tmpdist < frstdist)
+                    {
+                        frstdist = tmpdist;
+                        myStartWP = (*itr).first;
+                    }
+                }
+            }
+
+            uint16 GetMyStartWP()
+            {
+                return myStartWP;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            npc_rocket_jockeyAI* newAI = new npc_rocket_jockeyAI(c);
+            newAI->SetParent((npc_rocket_jockey*)this);
+            newAI->InitializePosition();
+            return newAI;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+        {
+            uint16 myStartWP = ((npc_rocket_jockey::npc_rocket_jockeyAI*)pCreature->AI())->GetMyStartWP();
+            uint16 targetWP = rocketStopsDefines[uiAction - GOSSIP_ACTION_INFO_DEF - 1].wp;
+
+            int16 index = -1;
+
+            for (uint32 i = 0; i < sizeof(rocketStops)/sizeof(entryStop); i++)
+            {
+                if (rocketStops[i].wp_end == targetWP && rocketStops[i].wp_start == myStartWP)
+                {
+                    index = (int16)i;
+                    break;
+                }
+            }
+
+            if (index == -1)
+                return false;
+
+            Creature* rocket = pPlayer->SummonCreature(rocketStops[index].entry, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0);
+            if (rocket && rocket->IsVehicle())
+            {
+                pPlayer->EnterVehicle(rocket);
+                ((npc_rocket_joy_ride::npc_rocket_joy_rideAI*)rocket->AI())->StartRide(pPlayer->GetGUID());
+            }
+            return true;
+        }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            uint16 myStartWP = ((npc_rocket_jockey::npc_rocket_jockeyAI*)pCreature->AI())->GetMyStartWP();
+
+            for (uint32 i = 0; i < sizeof(rocketStopsDefines)/sizeof(stopDefine); i++)
+            {
+                if (rocketStopsDefines[i].wp != myStartWP)
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, rocketStopsDefines[i].name, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1+i);
+            }
+            pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+            return true;
+        }
+};
 
 void AddSC_azshara()
 {
@@ -526,4 +817,6 @@ void AddSC_azshara()
     new npc_loramus_thalipedes();
     new mob_rizzle_sprysprocket();
     new mob_depth_charge();
+    new npc_rocket_joy_ride();
+    new npc_rocket_jockey();
 }
