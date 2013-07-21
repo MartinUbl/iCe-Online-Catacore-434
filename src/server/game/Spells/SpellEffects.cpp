@@ -2948,19 +2948,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (!unitTarget)
                     return;
 
-                if (Unit *owner = m_caster->GetOwner())
-                {
-                    // Restorative Totems
-                    if (AuraEffect *dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
-                        damage += damage * dummy->GetAmount() / 100;
-
-                    // Soothing Rains
-                    if (owner->HasAura(16187))
-                        damage *= 1.25f;
-                    else if (owner->HasAura(16205))
-                        damage *= 1.50f;
-                }
-
                 m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
             }
@@ -4594,6 +4581,18 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             // Remove talent proc Surge of Light (instant cast)
             m_caster->RemoveAurasDueToSpell(88688);
+        }
+        // Healing Stream Totem
+        else if (m_spellInfo->Id == 52042)
+        {
+            if (Unit *owner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                // Soothing Rains
+                if (owner->HasAura(16187))
+                    addhealth *= 1.25f;
+                else if (owner->HasAura(16205))
+                    addhealth *= 1.50f;
+            }
         }
 
         m_damage -= addhealth;
