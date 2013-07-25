@@ -431,6 +431,86 @@ class spell_dru_efflo_periodic : public SpellScriptLoader
         }
 };
 
+// Tranquility
+class spell_dru_tranquility : public SpellScriptLoader
+{
+    public:
+        spell_dru_tranquility() : SpellScriptLoader("spell_dru_tranquility") { }
+
+        class spell_dru_tranquility_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_tranquility_SpellScript);
+
+            typedef struct Record
+            {
+                float Health_pct;
+                Unit * target;
+            };
+
+            struct Comp
+            {
+                bool operator()(const Record& i1, const Record& i2)
+                {
+                    return i1.Health_pct < i2.Health_pct;
+                }
+            };
+
+            bool IsInPartyOrRaid(Unit *caster, Unit * u)
+            {
+                return ( caster->IsInRaidWith(u) || caster->IsInPartyWith(u) );
+            }
+
+            void FilterTargets(std::list<Unit*>& targets)
+            {
+                Unit * caster = GetCaster();
+                if(caster == NULL ) return;
+
+                std::vector<Record> temp_targets;
+
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ( (*itr)->ToUnit() == NULL || !IsInPartyOrRaid(caster,(*itr)->ToUnit()) ) // Security check + toolpit says
+                        continue;                                                               // "Heals nearby lowest health party or raid targets" so this should  be correct solution
+
+                    Record temp = {(*itr)->ToUnit()->GetHealthPct(),*itr }; // Fill new Structure
+
+                    temp_targets.push_back(temp); // Push it to temp list
+                }
+
+                std::make_heap (temp_targets.begin(),temp_targets.end(),Comp());
+                std::sort_heap (temp_targets.begin(),temp_targets.end(),Comp()); // This should make max heap ( due to Comp() function condition )
+
+                targets.clear(); // Clean final target list
+
+                std::vector<Record>::const_iterator itr = temp_targets.begin();
+                uint8 counter = 0;
+                const uint8 max_targets = 5; // Tranquility should affect only 5 targets with lowest HP
+
+                for (std::vector<Record>::iterator itr = temp_targets.begin(); itr != temp_targets.end();++itr)
+                {
+                    if(counter == max_targets)
+                        break;
+
+                    if((*itr).target && (*itr).target->IsInWorld() == true)
+                        targets.push_back((*itr).target); // Push correct target back to target list
+
+                    counter++;
+                }
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_tranquility_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ALLY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_tranquility_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ALLY_SRC);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_tranquility_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_t10_restoration_4p_bonus();
@@ -439,5 +519,6 @@ void AddSC_druid_spell_scripts()
     new spell_druid_insect_swarm();
     new spell_dru_mush_detonate();
 
+    new spell_dru_tranquility(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (44203, 'spell_dru_tranquility');
     new spell_dru_efflo_periodic(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (81262, 'spell_dru_efflo_periodic');
 }
