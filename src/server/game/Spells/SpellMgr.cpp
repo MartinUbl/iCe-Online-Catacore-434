@@ -4219,6 +4219,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 16;
             count++;
             break;
+        case 81281: // Fungal growth
+        case 81288:
+            spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
+        break;
         case 98552: // Summon Spark of Rhyoloth
         case 98136: // Summon Fragment of Rhyolith
             spellInfo->DurationIndex = 21; // unlimited - despawned by AI
