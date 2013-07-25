@@ -1666,7 +1666,7 @@ public:
                                 for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                 {
                                     Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                    if ( (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                                    if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive())
                                     {
                                         if(unit->HasAura(83500)) // Ak ma hrac auru swirling winds zhodim mu ju
                                             unit->RemoveAurasDueToSpell(83500);
