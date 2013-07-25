@@ -63,6 +63,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // possible errors in the coordinate validity check
     if (!MapManager::IsValidMapCoord(loc))
     {
+        GetPlayer()->SetSemaphoreTeleportFar(false); // to avoid recursion loop
         LogoutPlayer(false);
         return;
     }
