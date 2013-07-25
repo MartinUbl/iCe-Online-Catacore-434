@@ -656,6 +656,74 @@ public:
     }
 };
 
+//Healing rain ( 73921)
+//Holy word Sanctuary( 88686 )
+//Holy radiance ( 86452 or 82327 ?  or both  ??? ) -> probably both
+class aoe_heal_diminisher : public SpellScriptLoader
+{
+    public:
+        aoe_heal_diminisher() : SpellScriptLoader("aoe_heal_diminisher") { }
+
+        class aoe_heal_diminisher_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(aoe_heal_diminisher_SpellScript);
+
+            static const int32 DIMISHING_LIMIT = 6;
+            int32 hit_targets;
+
+            void CountTargets(std::list<Unit*>& targets)
+            {
+                hit_targets = (int32)targets.size();
+            }
+
+            void HandleDimishing(SpellEffIndex /*eff*/)
+            {
+                Player * p = GetCaster()->ToPlayer();
+                Unit * u = GetHitUnit();
+                int32 dim_heal = (hit_targets > DIMISHING_LIMIT) ? ((GetHitHeal()*DIMISHING_LIMIT) / hit_targets) : GetHitHeal(); // When healing more than 6 players at once
+
+                if(!u)
+                    return;
+
+                if( p && p->getClass() == CLASS_PALADIN) // Radiance part only
+                {
+                    float act_distance = p->GetExactDist(u->GetPositionX(),u->GetPositionY(),u->GetPositionZ());
+
+                    if(act_distance > 8.0f) //If hit unit is more than 8 yards from caster
+                    {
+                        float fdim_heal = (float)dim_heal ; // Float copy of diminishing heal
+                        float sub_percent = act_distance/ 40.0f;
+                        fdim_heal -= (fdim_heal * (sub_percent));
+
+                        if(fdim_heal <= 0)
+                            fdim_heal = 1.0f; // For sure
+
+                            dim_heal = (int32)fdim_heal;
+                    }
+                }
+
+                    SetHitHeal(dim_heal);
+
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(aoe_heal_diminisher_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_AREA_ALLY_DST);
+                OnEffect += SpellEffectFn(aoe_heal_diminisher_SpellScript::HandleDimishing, EFFECT_0, SPELL_EFFECT_HEAL);
+                // Holy radiance need EFFECT_1
+                OnUnitTargetSelect += SpellUnitTargetFn(aoe_heal_diminisher_SpellScript::CountTargets, EFFECT_1, TARGET_UNIT_AREA_ALLY_DST);
+                OnEffect += SpellEffectFn(aoe_heal_diminisher_SpellScript::HandleDimishing, EFFECT_1, SPELL_EFFECT_HEAL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new aoe_heal_diminisher_SpellScript();
+        }
+};
+
+
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -673,4 +741,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_parachute_ic();
     new spell_gen_gunship_portal();
     new spell_gen_blades();
+    new aoe_heal_diminisher();
 }
