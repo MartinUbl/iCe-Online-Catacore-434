@@ -387,6 +387,43 @@ public:
     }
 };
 
+
+class spell_sha_earth_shield : public SpellScriptLoader
+{
+public:
+    spell_sha_earth_shield() : SpellScriptLoader("spell_sha_earth_shield") { }
+
+    class spell_sha_earth_shieldSpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_earth_shieldSpellScript)
+
+        void HandleHeal(SpellEffIndex /*effIndex*/)
+        {
+            Unit *caster = GetCaster()->ToPlayer();
+            if(!caster)
+                return;
+
+            int32 sp_addittion = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE) * 0.152f; // 15.2 % sp coef
+            int32 total_heal = GetHitHeal() + sp_addittion;
+
+            if(caster->HasAura(16213)) // Purification ( + 25 % )
+                total_heal *= 1.25f;
+
+            SetHitHeal(total_heal);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_sha_earth_shieldSpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_sha_earth_shieldSpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_astral_shift();
@@ -395,4 +432,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_totemic_wrath();
     new spell_sha_fulmination();
     new spell_sha_ancestral_resolve();
+    new spell_sha_earth_shield(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (379, 'spell_sha_earth_shield');
 }
