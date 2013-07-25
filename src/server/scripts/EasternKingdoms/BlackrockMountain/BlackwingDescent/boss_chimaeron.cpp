@@ -438,7 +438,9 @@ public:
             }
             else Massacre_timer -= diff;
 
-            DoMeleeAttackIfReady();
+
+            if(!me->HasReactState(REACT_PASSIVE))
+                DoMeleeAttackIfReady();
 
         if(me->HealthBelowPct(20)) // Switching to PHASE 2
         {
