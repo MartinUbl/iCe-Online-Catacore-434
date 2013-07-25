@@ -387,7 +387,7 @@ class spell_dru_tranquility : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_tranquility_SpellScript);
 
-            typedef struct Record
+            struct Record
             {
                 float Health_pct;
                 Unit * target;
