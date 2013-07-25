@@ -1522,7 +1522,29 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         bool EclipseLeft = m_caster->ToPlayer()->IsEclipseDriverLeft();
         switch(m_spellInfo->Id)
         {
-            //Wrath
+            case 8921: // Moonfire - solar energy
+                if(!EclipseLeft)
+                {
+                    if(!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192) ) // only under effect of Lunar shower
+                        break;
+
+                    int32 bp0 = 8;
+                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                }
+                break;
+
+            case 93402: // Sunfire - lunar energy
+                if(EclipseLeft)
+                {
+                    if(!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192) ) // only under effect of Lunar shower
+                        break;
+
+                    int32 bp0 = -8;
+                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
+                }
+                break;
+
+            //Wrath - Lunar energy
             case 5176:
                 if(EclipseLeft)
                 {
@@ -1548,7 +1570,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                     }
                 }
                 break;
-            //Starfire
+            //Starfire - solar energy
             case 2912:
                 if(!EclipseLeft)
                 {
