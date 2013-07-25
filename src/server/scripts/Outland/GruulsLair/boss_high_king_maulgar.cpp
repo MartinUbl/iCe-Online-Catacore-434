@@ -370,7 +370,7 @@ public:
                 Creature *Maulgar = NULL;
                 Maulgar = (Unit::GetCreature((*me), pInstance->GetData64(DATA_MAULGAR)));
 
-                if (Maulgar)
+                if (Maulgar && Maulgar->AI())
                     CAST_AI(boss_high_king_maulgar::boss_high_king_maulgarAI, Maulgar->AI())->AddDeath();
 
                 if (CheckAllBossDied(pInstance, me))
@@ -485,7 +485,7 @@ public:
                 Creature *Maulgar = NULL;
                 Maulgar = (Unit::GetCreature((*me), pInstance->GetData64(DATA_MAULGAR)));
 
-                if (Maulgar)
+                if (Maulgar && Maulgar->AI())
                     CAST_AI(boss_high_king_maulgar::boss_high_king_maulgarAI, Maulgar->AI())->AddDeath();
 
                 if (CheckAllBossDied(pInstance, me))
@@ -605,7 +605,7 @@ public:
                 Creature *Maulgar = NULL;
                 Maulgar = (Unit::GetCreature((*me), pInstance->GetData64(DATA_MAULGAR)));
 
-                if (Maulgar)
+                if (Maulgar && Maulgar->AI())
                     CAST_AI(boss_high_king_maulgar::boss_high_king_maulgarAI, Maulgar->AI())->AddDeath();
 
                 if (CheckAllBossDied(pInstance, me))
@@ -715,7 +715,7 @@ public:
                 Creature *Maulgar = NULL;
                 Maulgar = (Unit::GetCreature((*me), pInstance->GetData64(DATA_MAULGAR)));
 
-                if (Maulgar)
+                if (Maulgar && Maulgar->AI())
                     CAST_AI(boss_high_king_maulgar::boss_high_king_maulgarAI, Maulgar->AI())->AddDeath();
 
                 if (CheckAllBossDied(pInstance, me))
