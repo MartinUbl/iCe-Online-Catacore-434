@@ -299,80 +299,26 @@ class spell_dru_mush_detonate : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_mush_detonate_SpellScript);
 
-            enum spell
+            enum spells
             {
                 EARTH_AND_MOON_TALENT   = 48506,
-                EARTH_AND_MOON_DEBUFF   = 60433,
-
-                FUNGAL_GROWTH_RANK1     = 78788,
-                FUNGAL_GROWTH_RANK2     = 78789,
-
-                TRIGGERING_AURA_R1      = 81289,
-                TRIGGERING_SPELL_R1     = 81288,
-
-                TRIGGERING_AURA_R2      = 81282,
-                TRIGGERING_SPELL_R2     = 81281,
-
-                FUNGAL_VISUAL           = 94339
+                EARTH_AND_MOON_DEBUFF   = 60433
             };
 
-            bool Load()
+            void HandleEffect(SpellEffIndex effIndex)
             {
-                _summoned = false;
-                return true;
-            }
-
-            void HandleHit()
-            {
-                Player * player = GetOriginalCaster()->ToPlayer();
-                if (!player)
+                Unit* player = GetOriginalCaster()->ToPlayer();
+                if(player == NULL)
                     return;
 
                 if (GetHitUnit() && player->HasAura(EARTH_AND_MOON_TALENT)) // Wild Mushrooms should apply Earth and moon debuff
                     player->CastSpell(GetHitUnit(),EARTH_AND_MOON_DEBUFF,true);
-
-                if (!_summoned)
-                {
-                    if (GetCaster() && ( player->HasAura(FUNGAL_GROWTH_RANK1) || player->HasAura(FUNGAL_GROWTH_RANK2)) )
-                    {
-                        TempSummon* summon = player->SummonCreature(43484, GetCaster()->GetPositionX(),GetCaster()->GetPositionY(),GetCaster()->GetPositionZ(),0.0f,TEMPSUMMON_MANUAL_DESPAWN,0);
-
-                        if (!summon)
-                            return;
-
-                        _summoned = true;
-                        summon->DespawnOrUnsummon(20000);
-                        summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-                        summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, player->GetGUID());
-                        summon->setFaction(player->getFaction());
-                        summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, GetSpellInfo()->Id);
-
-                        summon->CastSpell(summon,FUNGAL_VISUAL,true);
-                        Aura * aur = summon->GetAura(FUNGAL_VISUAL);
-                        if (aur)
-                            aur->SetDuration(20000); // Mistake in DB ?? ( 30s before )
-
-                        if (player && player->getClass() == CLASS_DRUID)
-                        {
-                            if(player->HasAura(FUNGAL_GROWTH_RANK1))
-                            {
-                                summon->CastSpell(summon, TRIGGERING_AURA_R1, true, 0, 0, player->GetGUID());
-                            }
-                            else if(player->HasAura(FUNGAL_GROWTH_RANK2))
-                            {
-                                summon->CastSpell(summon, TRIGGERING_AURA_R2, true, 0, 0, player->GetGUID());
-                            }
-                        }
-                    }
-                }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_dru_mush_detonate_SpellScript::HandleHit);
+                OnEffect += SpellEffectFn(spell_dru_mush_detonate_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
-
-            bool _summoned;
         };
 
         SpellScript* GetSpellScript() const
@@ -561,15 +507,120 @@ class spell_dru_solar_beam : public SpellScriptLoader
         }
 };
 
+class wild_mushroom_and_treant_npc : public CreatureScript
+{
+public:
+   wild_mushroom_and_treant_npc() : CreatureScript("wild_mushroom_and_treant_npc") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new wild_mushroom_and_treant_npcAI (creature);
+    }
+
+    struct wild_mushroom_and_treant_npcAI : public ScriptedAI
+    {
+        wild_mushroom_and_treant_npcAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            if(IsMushroom())
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        enum spells
+        {
+            FUNGAL_GROWTH_RANK1     = 78788,
+            FUNGAL_GROWTH_RANK2     = 78789,
+
+            TRIGGERING_AURA_R1      = 81289,
+            TRIGGERING_AURA_R2      = 81282,
+
+            FUNGAL_VISUAL           = 94339,
+            FUNGAL_COOLDOWN         = 81283
+        };
+
+        uint32 Stealth_timer;
+
+        bool IsMushroom(void)
+        {
+            return (me->GetEntry() == 47649) ? true : false ;
+        }
+
+        void Reset()
+        {
+            Stealth_timer = 6000;
+        }
+
+        void JustDied(Unit * victim)
+        {
+            if(IsMushroom() && victim != me) // if mushroom is killed by someone else, do nothing
+                return;
+
+            Player * pPlayer = NULL;
+
+            if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                pPlayer = me->ToTempSummon()->GetSummoner()->ToPlayer();
+
+            if(pPlayer == NULL)
+                return;
+
+            if(pPlayer->getClass() != CLASS_DRUID || pPlayer->HasSpellCooldown(FUNGAL_COOLDOWN)) // Only druids with no cooldown
+                return;
+
+            if (!pPlayer->HasAura(FUNGAL_GROWTH_RANK1) && !pPlayer->HasAura(FUNGAL_GROWTH_RANK2) ) // No talent no deal
+                return;
+
+            TempSummon* summon = pPlayer->SummonCreature(43484, me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_MANUAL_DESPAWN,0);
+
+            if (!summon)
+                return;
+
+            summon->SetLevel(pPlayer->getLevel());
+            summon->ForcedDespawn(20000);
+            summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, pPlayer->GetGUID());
+            summon->setFaction(pPlayer->getFaction());
+            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, 78777);
+
+            summon->CastSpell(summon,FUNGAL_VISUAL,true);
+            Aura * aur = summon->GetAura(FUNGAL_VISUAL);
+            if (aur)
+                aur->SetDuration(20000); // Mistake in DB ?? ( 30s before )
+
+            if(pPlayer->HasAura(FUNGAL_GROWTH_RANK1))
+                summon->CastSpell(summon, TRIGGERING_AURA_R1, true);
+            else
+                summon->CastSpell(summon, TRIGGERING_AURA_R2, true);
+
+            summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PACIFIED); // Dont attack
+        }
+
+        void UpdateAI (const uint32 diff)
+        {
+            if(Stealth_timer <= diff)
+            {
+                if(IsMushroom())
+                    me->CastSpell(me,92661,true); // Turn "Invisible" - > actually it is SPELL_AURA_MOD_STEALTH
+                Stealth_timer = 60000;
+            }
+            else Stealth_timer -= diff;
+
+            if(!IsMushroom())
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_blood_in_water();
     new spell_druid_pulverize();
     new spell_druid_insect_swarm();
-    new spell_dru_mush_detonate();
+    new spell_dru_mush_detonate(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (78777, 'spell_dru_mush_detonate');
 
     new spell_dru_tranquility(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (44203, 'spell_dru_tranquility');
     new spell_dru_solar_beam(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (78675, 'spell_dru_solar_beam');
     new spell_dru_efflo_periodic(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (81262, 'spell_dru_efflo_periodic');
+    new wild_mushroom_and_treant_npc();
+    //UPDATE `creature_template` SET `ScriptName`='wild_mushroom_and_treant_npc' WHERE  `entry`=1964 LIMIT 1;
+    //UPDATE `creature_template` SET `ScriptName`='wild_mushroom_and_treant_npc' WHERE  `entry`=47649 LIMIT 1;
 }
