@@ -511,6 +511,56 @@ class spell_dru_tranquility : public SpellScriptLoader
         }
 };
 
+class spell_dru_solar_beam : public SpellScriptLoader
+{
+    public:
+        spell_dru_solar_beam() : SpellScriptLoader("spell_dru_solar_beam") { }
+
+        class spell_dru_solar_beam_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dru_solar_beam_AuraScript)
+
+            Position pos;
+            bool done;
+
+            bool Load()
+            {
+                done = false;
+                return true;
+            }
+
+            void HandleEffectPeriodic(AuraEffect const * aurEff)
+            {
+                Unit* caster = aurEff->GetCaster();
+                Unit *target = GetTarget();
+
+                if (!caster || !target)
+                    return;
+
+                if(done == false) // Remember position of target (only once at begining)
+                {
+                    target->GetPosition(&pos);
+                    done = true;
+                }
+
+                CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_BASE_POINT0, aurEff->GetAmount());
+                caster->CastCustomSpell(81261, values, pos, true, NULL, aurEff, caster->GetGUID());
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_solar_beam_AuraScript::HandleEffectPeriodic, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dru_solar_beam_AuraScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_t10_restoration_4p_bonus();
@@ -520,5 +570,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_mush_detonate();
 
     new spell_dru_tranquility(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (44203, 'spell_dru_tranquility');
+    new spell_dru_solar_beam(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (78675, 'spell_dru_solar_beam');
     new spell_dru_efflo_periodic(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (81262, 'spell_dru_efflo_periodic');
 }
