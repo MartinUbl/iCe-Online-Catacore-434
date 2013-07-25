@@ -483,6 +483,41 @@ public:
     }
 };
 
+// 73510 - Mind spike
+class spell_priest_mind_spike : public SpellScriptLoader
+{
+    public:
+        spell_priest_mind_spike() : SpellScriptLoader("spell_priest_mind_spike") { }
+
+        class spell_priest_mind_spike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_priest_mind_spike_SpellScript);
+
+            void HandleHit()
+            {
+                Unit * target = GetHitUnit();
+                Unit * caster = GetCaster();
+
+                if(!target || !caster)
+                    return;
+
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE,caster->GetGUID(),target->GetAura(14914,caster->GetGUID())); // Holy fire is excluded
+                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH,caster->GetGUID());
+
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_priest_mind_spike_SpellScript::HandleHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_priest_mind_spike_SpellScript();
+        }
+};
+
 
 void AddSC_priest_spell_scripts()
 {
@@ -495,4 +530,5 @@ void AddSC_priest_spell_scripts()
     new mob_shadowy_apparition;
     new spell_pri_spirit_of_redemption();
     new spell_priest_inner_sanctum();
+    new spell_priest_mind_spike();
 }
