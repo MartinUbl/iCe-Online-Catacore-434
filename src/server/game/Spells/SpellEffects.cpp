@@ -9405,6 +9405,14 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (unitTarget->HasAura(87856)) // player is inside Al'akir squall line vehicle
         return;
 
+    if (Creature* creatureTarget = unitTarget->ToCreature()) // If Creature is WorldBoss or DungeonBoss
+    {
+        CreatureInfo const *cinfo = sObjectMgr->GetCreatureTemplate(creatureTarget->GetEntry());
+        if(cinfo)
+            if (creatureTarget->isWorldBoss() ||  (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS) )
+                return;
+    }
+
     // Instantly interrupt non melee spells being casted
     if (unitTarget->IsNonMeleeSpellCasted(true))
         unitTarget->InterruptNonMeleeSpells(true);
