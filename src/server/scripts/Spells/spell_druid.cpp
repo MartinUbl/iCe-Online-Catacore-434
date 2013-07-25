@@ -381,6 +381,56 @@ class spell_dru_mush_detonate : public SpellScriptLoader
         }
 };
 
+class spell_dru_efflo_periodic : public SpellScriptLoader
+{
+    public:
+        spell_dru_efflo_periodic() : SpellScriptLoader("spell_dru_efflo_periodic") { }
+
+        class spell_dru_efflo_periodic_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dru_efflo_periodic_AuraScript)
+
+            Position pos;
+            bool done;
+
+            bool Load()
+            {
+                done = false;
+                return true;
+            }
+
+            void HandleEffectPeriodic(AuraEffect const * aurEff)
+            {
+                Unit* caster = aurEff->GetCaster();
+                Unit *target = GetTarget();
+
+                if (!caster || !target)
+                    return;
+
+                if(done == false) // Remember position of target (only once at begining)
+                {
+                    target->GetPosition(&pos);
+                    done = true;
+                }
+
+                CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_BASE_POINT0, aurEff->GetAmount());
+                caster->CastCustomSpell(81269, values, pos, true, NULL, aurEff, caster->GetGUID());
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_efflo_periodic_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dru_efflo_periodic_AuraScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_t10_restoration_4p_bonus();
@@ -388,4 +438,6 @@ void AddSC_druid_spell_scripts()
     new spell_druid_pulverize();
     new spell_druid_insect_swarm();
     new spell_dru_mush_detonate();
+
+    new spell_dru_efflo_periodic(); // INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (81262, 'spell_dru_efflo_periodic');
 }
