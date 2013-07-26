@@ -399,7 +399,7 @@ public:
 
         void HandleHeal(SpellEffIndex /*effIndex*/)
         {
-            Unit *caster = GetCaster()->ToPlayer();
+            Unit *caster = GetOriginalCaster()->ToPlayer();
             if(!caster)
                 return;
 
