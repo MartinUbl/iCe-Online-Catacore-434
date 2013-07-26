@@ -4226,6 +4226,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 81288:
             spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
         break;
+        case 74410: // Arena - Dampening
+        case 74411: // Battleground - Dampening
+            spellInfo->EffectBasePoints[0] = -10; // - 10 % healing done
+        break;
         case 98552: // Summon Spark of Rhyoloth
         case 98136: // Summon Fragment of Rhyolith
             spellInfo->DurationIndex = 21; // unlimited - despawned by AI
