@@ -2779,8 +2779,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                                     counter++;
                                 }
                             }
-                            if(counter > 0 && !pPlayer->HasSpellCooldown(81283))
-                                pPlayer->AddSpellCooldown(81283,0,60000); // Add 1 minute cooldown for Fungal Growth
                             Mushrooms->clear();
                         }
                     }

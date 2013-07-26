@@ -562,7 +562,7 @@ public:
             if(pPlayer == NULL)
                 return;
 
-            if(pPlayer->getClass() != CLASS_DRUID || pPlayer->HasSpellCooldown(FUNGAL_COOLDOWN)) // Only druids with no cooldown
+            if(pPlayer->getClass() != CLASS_DRUID) // Only druids
                 return;
 
             if (!pPlayer->HasAura(FUNGAL_GROWTH_RANK1) && !pPlayer->HasAura(FUNGAL_GROWTH_RANK2) ) // No talent no deal
