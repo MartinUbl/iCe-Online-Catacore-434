@@ -3061,6 +3061,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_DRUID:
         {
+            // Solar beam should not be affected be DR
+            if (spellproto->Id == 81261)
+                return DIMINISHING_NONE;
             // Pounce
             if (spellproto->SpellFamilyFlags[0] & 0x20000)
                 return DIMINISHING_CONTROL_STUN;
