@@ -227,35 +227,24 @@ public:
             Unit* pCaster = GetCaster();
             if (pCaster->GetTypeId() != TYPEID_PLAYER)
                 return;
-
-            std::vector<uint32> possibleSpells;
-            switch (pCaster->getClass())
+            float agi=pCaster->ToPlayer()->GetTotalStatValue(STAT_AGILITY);
+            float str=pCaster->ToPlayer()->GetTotalStatValue(STAT_STRENGTH);
+            float inte=pCaster->ToPlayer()->GetTotalStatValue(STAT_INTELLECT);
+            uint32 spellId=0;
+            if(agi>=str&&agi>=inte)
             {
-                case CLASS_WARLOCK:
-                case CLASS_MAGE:
-                case CLASS_PRIEST:
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
-                    break;
-                case CLASS_DEATH_KNIGHT:
-                case CLASS_WARRIOR:
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_STR);
-                    break;
-                case CLASS_ROGUE:
-                case CLASS_HUNTER:
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
-                    break;
-                case CLASS_DRUID:
-                case CLASS_PALADIN:
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_STR);
-                    break;
-                case CLASS_SHAMAN:
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_INT);
-                    possibleSpells.push_back(SPELL_FLASK_OF_ENHANCEMENT_AGI);
-                    break;
+                spellId = 79639;
             }
-
-            pCaster->CastSpell(pCaster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, NULL);
+            else if(str>=agi&&str>=inte)
+            {
+                spellId = 79638;
+            }
+            else if(inte>=agi&&inte>=str)
+            {
+                spellId = 79640;
+            }
+            if(spellId)
+                pCaster->CastSpell(pCaster, spellId, true, NULL);           
         }
 
         void Register()
