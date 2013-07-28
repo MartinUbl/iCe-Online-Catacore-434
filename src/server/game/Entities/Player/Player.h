@@ -3200,6 +3200,11 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
                 continue;
 
             totalmul *= 1.0f + (float)mod->value / 100.0f;
+
+            // two modifiers both reducing it below 0 won't make it positive
+            if (mod->op == SPELLMOD_COST)
+                if (mod->value < -100.0f && totalmul > 0)
+                    totalmul = -totalmul;
         }
 
         DropModCharge(mod, spell);
