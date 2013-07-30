@@ -61,7 +61,7 @@ void ConfusedMovementGenerator<T>::Initialize(T* unit)
 
         new_z = map->GetHeight(unit->GetPhaseMask(), wanderX, wanderY, z+2.0f, true);
 
-        Position dpos = {wanderX, wanderY, new_z};
+        Position dpos = {wanderX, wanderY, new_z, 0.0f};
 
         if (unit->IsWithinLOS(wanderX, wanderY, z) && fabs(new_z - z) < 3.0f && !unit->HasEdgeOnPathTo(&dpos))
         {

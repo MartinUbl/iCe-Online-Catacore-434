@@ -176,7 +176,7 @@ bool FleeingMovementGenerator<T>::_getPoint(T* owner, float &x, float &y, float 
                 // if we are not in water, nor stepping into water, check the Z difference (to avoid falling from edges)
                 if (!is_water_now && !is_water_next)
                 {
-                    Position dst = {temp_x, temp_y, new_z};
+                    Position dst = {temp_x, temp_y, new_z, 0.0f};
                     if (fabs(new_z - z) > 2.0f || owner->HasEdgeOnPathTo(&dst))
                     {
                         if (distance > 1.0f)
