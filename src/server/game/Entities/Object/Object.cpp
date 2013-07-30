@@ -1772,6 +1772,47 @@ bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, 
     return fabs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
 }
 
+bool WorldObject::HasEdgeOnPathTo(Position *dst)
+{
+    /**
+     * Determines, whether there is some edge in the way or not
+     *
+     * The basic idea is to choose points along the path 0.33 yard distant from each other
+     * then get the height of every of them and determine, if there is more than 45 degrees
+     * height angle. If yes, then it's considered an edge.
+     */
+
+    /**
+     * pointDistance = distance of points along the path. Also used for checking the height difference
+     * startX, startY, startZ = starting coordinates
+     * deltaX, deltaY, deltaZ = difference between starting and end point (vector-like, with polarity)
+     */
+
+    static const float pointDistance = 0.33f;
+
+    float distance = GetExactDist2d(dst);
+    uint32 numpoints = distance / pointDistance; // check on every third of yard
+
+    float startX = GetPositionX();
+    float deltaX = dst->m_positionX - startX;
+    float startY = GetPositionY();
+    float deltaY = dst->m_positionY - startY;
+    float startZ = GetPositionZ();
+    float deltaZ = dst->m_positionZ - startZ;
+
+    // starting height is our Z position
+    float prevHeight = startZ;
+    float tmpHeight;
+    for (uint32 i = 1; i <= numpoints; i++)
+    {
+        tmpHeight = GetMap()->GetHeight(GetPhaseMask(), startX + ((float)i)/((float)numpoints)*deltaX, startY + ((float)i)/((float)numpoints)*deltaY, startZ + ((float)i)/((float)numpoints)*deltaZ, true);
+        if (fabs(prevHeight - tmpHeight) > pointDistance)
+            return true;
+    }
+
+    return false;
+}
+
 bool WorldObject::HasFlatPathTo(Position *dst)
 {
     /* on a path between this object and dst position, select a series

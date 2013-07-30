@@ -781,6 +781,7 @@ class WorldObject : public Object, public WorldLocation
         bool IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size = 0) const;
 
         bool HasFlatPathTo(Position *dst);
+        bool HasEdgeOnPathTo(Position *dst);
 
         virtual void CleanupsBeforeDelete(bool finalCleanup = true);  // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 

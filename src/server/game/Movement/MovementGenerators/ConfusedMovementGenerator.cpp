@@ -36,7 +36,7 @@
 template<class T>
 void ConfusedMovementGenerator<T>::Initialize(T* unit)
 {
-    float const wander_distance = 4;
+    float const wander_distance = 4.0f;
     float x = unit->GetPositionX();
     float y = unit->GetPositionY();
     float z = unit->GetPositionZ();
@@ -48,16 +48,22 @@ void ConfusedMovementGenerator<T>::Initialize(T* unit)
     bool is_water_ok, is_land_ok;
     _InitSpecific(unit, is_water_ok, is_land_ok);
 
+    float wanderX, wanderY, new_z;
+
     for (uint8 idx = 0; idx < MAX_CONF_WAYPOINTS + 1; ++idx)
     {
-        float wanderX = x + (wander_distance * (float)rand_norm() - wander_distance/2);
-        float wanderY = y + (wander_distance * (float)rand_norm() - wander_distance/2);
+        wanderX = x + (wander_distance * (float)rand_norm() - wander_distance/2);
+        wanderY = y + (wander_distance * (float)rand_norm() - wander_distance/2);
 
         // prevent invalid coordinates generation
         Trinity::NormalizeMapCoord(wanderX);
         Trinity::NormalizeMapCoord(wanderY);
 
-        if (unit->IsWithinLOS(wanderX, wanderY, z))
+        new_z = map->GetHeight(unit->GetPhaseMask(), wanderX, wanderY, z+2.0f, true);
+
+        Position dpos = {wanderX, wanderY, new_z};
+
+        if (unit->IsWithinLOS(wanderX, wanderY, z) && fabs(new_z - z) < 3.0f && !unit->HasEdgeOnPathTo(&dpos))
         {
             bool is_water = map->IsInWater(wanderX, wanderY, z);
 
@@ -75,12 +81,13 @@ void ConfusedMovementGenerator<T>::Initialize(T* unit)
             wanderY = idx > 0 ? i_waypoints[idx-1][1] : y;
         }
 
-        unit->UpdateAllowedPositionZ(wanderX, wanderY, z);
+        new_z = z+2.0f;
+        unit->UpdateAllowedPositionZ(wanderX, wanderY, new_z);
 
         //! Positions are fine - apply them to this waypoint
         i_waypoints[idx][0] = wanderX;
         i_waypoints[idx][1] = wanderY;
-        i_waypoints[idx][2] = z;
+        i_waypoints[idx][2] = new_z;
     }
 
     unit->StopMoving();
