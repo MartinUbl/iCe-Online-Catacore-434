@@ -3244,6 +3244,26 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 89435: // Wrack ( Sinestra encounter )
+                        case 92956:
+                        {
+                            // Exclude players with tank spec
+                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                            {
+                                Player * p = (*itr)->ToPlayer();
+                                if (p == NULL || ( p->GetActiveSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) )) // If not player or feral in bear form
+                                {
+                                    itr = unitList.erase(itr);
+                                    continue;
+                                }
+
+                                if (p->GetActiveSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveSpec() == SPEC_DK_BLOOD)
+                                    itr = unitList.erase(itr);
+                                else
+                                    ++itr;
+                            }
+                            break;
+                        }
                         case 58836: // Initialize Images (Mirror Image)
                         {
                             if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)

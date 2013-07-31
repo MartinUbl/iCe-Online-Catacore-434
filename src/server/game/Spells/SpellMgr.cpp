@@ -5237,6 +5237,46 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+
+/***************** SINESTRA ***************************************/
+        case 92958:// Twilight Pulse
+        case 92959:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
+        case 92851: // Twilight Slicer
+            spellInfo->EffectTriggerSpell[1] = 0;
+            break;
+        case 95822: // Twilight flames
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
+        case 87229 : // Fiery barrier summon effekt
+            spellInfo->Effect[1] = 0;
+            break;
+        case 87655: // Purple beam
+        case 35371: // White beam
+            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+        break;
+        case 90045: // Indomitable
+        case 92946:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
+        case 90028: // Unleash essence
+        case 92947:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
+        case 89284: // Twilight essence (visual)
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 88146: // Twilight essence aoe dmg
+        case 92950:
+            spellInfo->EffectRadiusIndex[0] = 26; // 4 y
+            spellInfo->EffectRadiusIndex[1] = 26; // 4 y
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
+        case 89435: // Aoe Wracks
+        case 92956:
+            spellInfo->MaxAffectedTargets = 2;
+            break;
         /*case 99476: // The Widow's Kiss (Beth'tilac)
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
             count++;
