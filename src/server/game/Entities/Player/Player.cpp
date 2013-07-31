@@ -27999,12 +27999,15 @@ float Player::GetAverageItemLevel()
 
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
-        // don't check tabard, ranged, offhand or chest
-        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_RANGED || i == EQUIPMENT_SLOT_OFFHAND || i == EQUIPMENT_SLOT_CHEST)
+        // don't check tabard or shirt
+        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_CHEST)
             continue;
 
         if (m_items[i] && m_items[i]->GetProto())
             sum += m_items[i]->GetProto()->GetItemLevelIncludingQuality();
+        // don't count empty ranged and offhand slots
+        else if (i == EQUIPMENT_SLOT_RANGED || i == EQUIPMENT_SLOT_OFFHAND)
+            continue;
 
         count++;
     }
