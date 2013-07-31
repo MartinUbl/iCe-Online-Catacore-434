@@ -288,7 +288,7 @@ public:
                     if (p && p->IsInWorld() == true)
                     {
                         if (   p->GetActiveSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveSpec() != SPEC_PALADIN_PROTECTION
-                            && p->GetActiveSpec() != SPEC_DRUID_FERAL        &&  p->GetActiveSpec() != SPEC_DK_BLOOD)
+                            && ( p->GetActiveSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveSpec() != SPEC_DK_BLOOD)
                         {
                             wrack_targets.push_back(p);
                         }
@@ -298,12 +298,13 @@ public:
 
             if(!wrack_targets.empty() && wrack_targets.size() >= 2 )
             {
-                std::list<Player*>::const_iterator j = wrack_targets.begin();
+                std::list<Player*>::iterator j = wrack_targets.begin();
                 advance(j, rand()%wrack_targets.size());
                 if (*j && (*j)->IsInWorld() == true )
                     me->SummonCreature(CREATURE_SHADOW_ORB1,(*j)->GetPositionX(),(*j)->GetPositionY() + urand(0,5),(*j)->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
 
                 wrack_targets.erase(j);
+                j = wrack_targets.begin();
 
                 advance(j, rand()%wrack_targets.size());
                 if (*j && (*j)->IsInWorld() == true )
@@ -497,8 +498,7 @@ public:
 
         if (Spawn_calen_timer <= Diff) // Spawn Stalker and Calen after 10 seconds
         {
-            Creature * stalker = me->SummonCreature(CREATURE_BARRIER_COMSMETIC_STALKER,-988.927f,-783.37f,439.0f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
-
+            me->SummonCreature(CREATURE_BARRIER_COMSMETIC_STALKER,-988.927f,-783.37f,439.0f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,0);
             me->SummonCreature(CREATURE_CALEN,-1015.624207f,-815.707947f,438.593506f, 0.0f,TEMPSUMMON_CORPSE_DESPAWN,5000);
             Spawn_calen_timer = NEVER;
         }
@@ -1676,7 +1676,7 @@ public:
                 int32 bp0 = 2000;
                 int32 bp1 = aurEff->GetBase()->GetDuration();
 
-                if(aurEff->GetTickNumber() >= 0 && aurEff->GetTickNumber() < 3 ) // Prevent from Mass dispelling
+                if(aurEff->GetTickNumber() < 3) // Prevent from Mass dispelling
                 {
                     bp1 += 1000; // Increase duration by second
                     target->CastCustomSpell(target,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
