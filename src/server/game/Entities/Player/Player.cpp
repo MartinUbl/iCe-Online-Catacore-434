@@ -20661,7 +20661,7 @@ void Player::_SaveStats(SQLTransaction& trans)
     std::ostringstream ss;
     ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
-        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience, achievPoints) VALUES ("
+        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience, itemLevel, achievPoints) VALUES ("
         << GetGUIDLow() << ", "
         << GetMaxHealth() << ", ";
     for (uint8 i = 0; i < MAX_POWERS-1; ++i)
@@ -20681,6 +20681,7 @@ void Player::_SaveStats(SQLTransaction& trans)
        << GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) << ", "
        << GetBaseSpellPowerBonus() << ", "
        << GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1+CR_RESILIENCE_PLAYER_DAMAGE_TAKEN) << ", "
+       << uint32(GetAverageItemLevel()) << ", "
        << GetAchievementMgr().GetAchievementPoints() << ")";
     trans->Append(ss.str().c_str());
 }
