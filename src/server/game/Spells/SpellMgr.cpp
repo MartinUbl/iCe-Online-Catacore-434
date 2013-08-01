@@ -3137,7 +3137,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
     if (mechanic & ((1<<MECHANIC_FEAR) |
                     (1<<MECHANIC_TURN)))    return DIMINISHING_FEAR_BLIND;
     if (mechanic & (1<<MECHANIC_CHARM))     return DIMINISHING_CHARM;
-    if (mechanic & (1<<MECHANIC_SILENCE))   return DIMINISHING_SILENCE;
+    //if (mechanic & (1<<MECHANIC_SILENCE))   return DIMINISHING_SILENCE; Removed in 4.3.4 ?
     if (mechanic & (1<<MECHANIC_DISARM))    return DIMINISHING_DISARM;
     if (mechanic & (1<<MECHANIC_FREEZE))    return DIMINISHING_FREEZE_SLEEP;
     if (mechanic & ((1<<MECHANIC_KNOCKOUT) |
@@ -3242,7 +3242,7 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
         case DIMINISHING_TRIGGER_ROOT:
         case DIMINISHING_CHARM:
         case DIMINISHING_POLYMORPH:
-        case DIMINISHING_SILENCE:
+        //case DIMINISHING_SILENCE:
         case DIMINISHING_DISARM:
         case DIMINISHING_DEATHCOIL:
         case DIMINISHING_FREEZE_SLEEP:
