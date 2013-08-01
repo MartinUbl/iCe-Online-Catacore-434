@@ -135,7 +135,6 @@ public:
             number_of_stacks=0;
             lift_timer=0;
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             spawn_timer=7000; // Prve 3 sekundy po spawne by mal byt pasivny ( som milosrdny 5 :D )
             Gravity_crush_timer=spawn_timer+28000;
             LiquidIce_timer=spawn_timer;
@@ -177,9 +176,6 @@ public:
         {
              if (damage > 500000 )
                 damage=0; // Anti IK prevention
-
-             if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                damage = damage * 1.15f; // 15 % dmg boost na heroicu 
         }
 
         void EnterEvadeMode()
@@ -343,12 +339,15 @@ public:
 
             if(Intensity_timer<=diff) // Kazdych 20 sekund sa zvysi pocet instability "castov" o 1
             {
-                    if(INSTABILITY < 10) // Obmedzenie na max 10 bleskov
-                        INSTABILITY = INSTABILITY + 1;
+                INSTABILITY++;
+                bool _25man = ( getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL );
 
-                    Intensity_timer = 20000;
-                    if(getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC) // V HC mensi nerf zvysovania bleskov
-                        Intensity_timer=25000;
+                if( _25man && INSTABILITY > 25 )
+                    INSTABILITY = 25;
+                else if ( INSTABILITY > 10 )
+                        INSTABILITY = 10;
+
+                Intensity_timer = 20000;
             }
             else Intensity_timer-=diff;
 
@@ -393,7 +392,7 @@ public:
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                 {
                                     if(unit->GetTypeId() == TYPEID_PLAYER )
-                                        unit->ToPlayer()->GetMotionMaster()->MovePoint(0,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25);
+                                        unit->KnockbackFrom(unit->GetPositionX(),unit->GetPositionY(),0.1f,25.0f);
                                 }
                     }
                 can_lift=false;
@@ -860,7 +859,7 @@ public:
                             {
                                 can_interrupt=false;
                                 check_debuff=true;
-                                Frozen_timer=4500; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
+                                Frozen_timer=3100; // po docasteni kontrolujem ci ma na sebe niekto watterlogged debuff
                                 DoCast(me,SPELL_GLACIATE);
                                 Glaciate_timer=32000;
                                 Glaciate_all_timer=3000;
@@ -890,8 +889,7 @@ public:
                      if(Tele_debug_timer<=diff && !debuged)
                      {
                         DoCast(me,87459); // Visual teleport
-                        me->SetPosition(-1056.21f,-535.33f,877.69f,5.495f,true);
-                        me->SendMovementFlagUpdate();
+                        me->NearTeleportTo(-1056.21f,-535.33f,877.69f,5.495f);
                         me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                         me->GetMotionMaster()->MoveIdle();
                         DoCast(me,87459); // Visual teleport
@@ -909,8 +907,7 @@ public:
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
-                                me->SetPosition(-1056.21f,-535.33f,877.69f,5.495f,true);
-                                me->SendMovementFlagUpdate();
+                                me->NearTeleportTo(-1056.21f,-535.33f,877.69f,5.495f);
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
                                 DoCast(me,87459); // Visual teleport
@@ -923,8 +920,7 @@ public:
                                 if(me->FindNearestCreature(ARION_ENTRY, 500, true) == NULL)
                                 {
                                     me->SetVisible(false);
-                                    me->SetPosition(-1041.3f,-546.18f,835.2f, 5.52f,true);
-                                    me->SendMovementFlagUpdate();
+                                    me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
                                     PHASE=4;
                                 }
 
@@ -1090,8 +1086,8 @@ public:
             if(aegis_used && !me->IsNonMeleeSpellCasted(false) && (me->HasAura(82631) || me->HasAura(92512) || me->HasAura(92513) || me->HasAura(92514))) //Cast rising flames hned po nahodeni stitu ( AEGIS_OF_FLAME)
             {
                 can_interrupt=true;
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->CastSpell(me,SPELL_RISING_FLAMES, false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 aegis_used=false;
             }
 
@@ -1101,8 +1097,8 @@ public:
                 {
                    can_interrupt=false;
                    Stack=counter=0;
-                   DoCast(me,SPELL_AEGIS_OF_FLAME);
                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                   DoCast(me,SPELL_AEGIS_OF_FLAME);
                    aegis_used=true;
                    Rising_flames_timer=64000;
                    me->MonsterYell("BURN!", LANG_UNIVERSAL, 0);
@@ -1132,6 +1128,8 @@ public:
                     }
                     else Ticking_timer-=diff;
             }
+            else
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 
                 if(Flame_torrent_timer<=diff )
                 {
@@ -1214,8 +1212,7 @@ public:
                      if(Tele_debug_timer<=diff && !debuged)
                      {
                         DoCast(me,87459); // Visual teleport
-                        me->SetPosition(-1057.72f,-630.95f,877.684f,0.814f,true);
-                        me->SendMovementFlagUpdate();
+                        me->NearTeleportTo(-1057.72f,-630.95f,877.684f,0.814f);
                         me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                         me->GetMotionMaster()->MoveIdle();
                         DoCast(me,87459); // Visual teleport
@@ -1232,8 +1229,8 @@ public:
                                 PHASE=3;
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-                                me->SetPosition(-1057.72f,-630.95f,877.684f,0.814f,true);
-                                me->SendMovementFlagUpdate();
+
+                                me->NearTeleportTo(-1057.72f,-630.95f,877.684f,0.814f,true);
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
                                 me->SummonCreature(TERRASTRA_ENTRY,-1053.943f,-569.11f,835.2f, 6.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
@@ -1245,8 +1242,8 @@ public:
                             {
                                 if(me->FindNearestCreature(43689, 300, true) == NULL)
                                 {
-                                    me->SetVisible(false);;
-                                    me->SetPosition(-1043.05f,-614.6f,835.167f, 0.774f,true);
+                                    me->SetVisible(false);
+                                    me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
                                     me->SendMovementFlagUpdate();
                                     PHASE=4;
                                 }
@@ -1368,7 +1365,8 @@ public:
         {
             if(flame_timer<=diff && !fired)
             {
-                me->AddAura(89350,me); // Added auru tu reduce dmg by 60 %
+                if(IsHeroic())
+                    me->AddAura(89350,me);
                 me->AddAura(SPELL_INFERNO_RUSH_AOE,me);
                 fired=true;
             }
@@ -1457,8 +1455,6 @@ public:
         {
              if(damage > me->GetHealth() || damage > 500000 )
                 damage=0;
-
-             damage = damage * 1.1f ; // 10 % dmg boost 
         }
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -1498,7 +1494,6 @@ public:
 
         if(Lightning_blast_timer<=diff && can_tele) // Hned po docasteni Disperse sa portne na random poziciu a vycasti na tanka Lightning blast
         {
-
             if(!me->IsNonMeleeSpellCasted(false))
                 {
                     float max_distance=0.0f;
@@ -1511,11 +1506,9 @@ public:
                             position=i;
                         }
                     }
-                    me->SetPosition(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation(),true);
-                    me->SendMovementFlagUpdate();
+                    me->NearTeleportTo(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation());
                     update_movement=true;
                     Update_timer=500;
-                    me->SendMovementFlagUpdate();
                     can_interrupt=true;
                     DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
                     can_tele=false;
@@ -1651,8 +1644,7 @@ public:
 
                                 if(pIgnac)
                                 {
-                                    pIgnac->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIgnac->SendMovementFlagUpdate();
+                                    pIgnac->NearTeleportTo(-1029.52f,-561.7f,831.92f,5.52f);
                                     pIgnac->InterruptNonMeleeSpells(true);
                                     pIgnac->SetSpeed(MOVE_RUN,1.5f,true);
                                     pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
@@ -1681,8 +1673,7 @@ public:
                                 me->AttackStop();
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
-                                me->SetPosition(-987.17f,-561.25f,831.91f,3.93f,true);
-                                me->SendMovementFlagUpdate();
+                                me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
                                 TeleDebug_timer=200;
                                 walk_timer=2000;
                                 me->ForcedDespawn(15000);
@@ -1693,8 +1684,7 @@ public:
 
                             if(PHASE==3 && TeleDebug_timer<=diff)
                             {
-                                me->SetPosition(-987.17f,-561.25f,831.91f,3.93f,true);
-                                me->SendMovementFlagUpdate();
+                                me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
 
                                 Creature * pIgnac = NULL;
 
@@ -1703,9 +1693,8 @@ public:
 
                                 if(pIgnac)
                                 {
-                                    pIgnac->SetPosition(-1029.52f,-561.7f,831.92f,5.52f,true);
-                                    pIgnac->SendMovementFlagUpdate();
                                     pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
+                                    pIgnac->NearTeleportTo(-1029.52f,-561.7f,831.92f,5.52f);
                                 }
 
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
@@ -1822,8 +1811,6 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            damage = damage * 1.1f; // 10 % dmg boost
-
             if(attacker==me) // Davam si sam dmg pri spelle Harden skin
                 return;
 
@@ -1984,8 +1971,7 @@ public:
                                     pFel->SetReactState(REACT_PASSIVE);
                                     pFel->InterruptNonMeleeSpells(true);
                                     pFel->CastSpell(pFel, 87459, true); // Visual teleport
-                                    pFel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
-                                    pFel->SendMovementFlagUpdate();
+                                    pFel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                 }
 
                                 me->InterruptNonMeleeSpells(true);
@@ -1997,8 +1983,7 @@ public:
                                 me->GetMotionMaster()->MovementExpired();
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
-                                me->SetPosition(-987.68f,-603.96f,831.91f,2.35f,true);
-                                me->SendMovementFlagUpdate();
+                                me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
                                 TeleDebug_timer = 300;
                                 walk_timer = 5000;
                                 walk_timer_Ignacious = walk_timer + 5200;
@@ -2011,8 +1996,7 @@ public:
                             if(PHASE==3 && TeleDebug_timer<=diff) // musel so mdat tele este raz bugovalo sa to visualne
                             {
                                 DoCast(me,87459); // Visual teleport
-                                me->SetPosition(-987.68f,-603.96f,831.91f,2.35f,true);
-                                me->SendMovementFlagUpdate();
+                                me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
                                 me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
                                 me->GetMotionMaster()->MoveIdle();
 
@@ -2024,9 +2008,8 @@ public:
 
                                 if(pFel) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
-                                    pFel->SetPosition(-1023.2f,-600.15f,831.91f,0.79f,true);
+                                    pFel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
                                     pFel->CastSpell(pFel, 87459, true); // Visual teleport
-                                    pFel->SendMovementFlagUpdate();
                                 }
 
                                 PHASE = 4;
@@ -2081,14 +2064,10 @@ public:
                                     Hp_gainer = Hp_gainer + me->GetHealth(); // + HP Terrastry
                                     me->DisappearAndDie();
                                 }
-                                if(Monstrosity != NULL)
-                                {
-                                    // Kedze nejde vsetko na 100 % ako na offi znizim zacinajuce HP Monstoristy o par %
-                                    if(getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) // Na normale uberem 2 %
-                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) << 1) );
-                                    else
-                                        Monstrosity->SetHealth(Hp_gainer - ( (Monstrosity->GetMaxHealth()/100) * 4) ); // Na HC 4 %
 
+                                if(Monstrosity)
+                                {
+                                    Monstrosity->SetHealth(Hp_gainer);
                                     Monstrosity->SetInCombatWithZone();
                                 }
                             }
@@ -2334,7 +2313,7 @@ public:
             Speed_timer = 6000;
             Glaciate_timer = 60000; // Ak uplynula minuta a orb je este akivny cast Glaciate
             buffed=false;
-            me->SetSpeed(MOVE_RUN,0.3f);
+            me->SetSpeed(MOVE_RUN,0.25f);
             DoCast(me,92269); // Uvodna animacia spawnu
             target=NULL;
         }
@@ -2369,8 +2348,8 @@ public:
             if(Speed_timer <= diff) // Priebezne zvysujem speed orbu
             {
                 speeder = speeder + 0.05f;
-                if(speeder <= 0.6) // Orb neprevysi 90 % normalnej rychlosti
-                    me->SetSpeed(MOVE_RUN, (0.3f + speeder));
+                if(speeder <= 0.5) // Orb neprevysi 90 % normalnej rychlosti
+                    me->SetSpeed(MOVE_RUN, (0.25f + speeder));
 
                 Speed_timer = 500;
             }
