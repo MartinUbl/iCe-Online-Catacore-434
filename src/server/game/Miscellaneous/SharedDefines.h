@@ -2915,7 +2915,7 @@ enum DiminishingGroup
     // Shared Class Specific
     DIMINISHING_CHEAPSHOT_POUNCE,
     DIMINISHING_DISARM,                                     // From 2.3.0
-    //DIMINISHING_SILENCE,                                    // From 2.3.0
+    DIMINISHING_SILENCE,                                    // From 2.3.0
     DIMINISHING_FREEZE_SLEEP,                               // Hunter's Freezing Trap
     DIMINISHING_BANISH,
     DIMINISHING_TAUNT,
