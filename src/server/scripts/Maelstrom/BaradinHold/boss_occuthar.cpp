@@ -148,7 +148,7 @@ public:
                 if (count%3)
                 {
                     // Focused Fire
-                    if (Unit *target = this->SelectUnit(SELECT_TARGET_RANDOM,1))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true))
                         me->CastSpell(target, SPELL_FOCUSED_FIRE_SUMMON, false);
                 }
                 else
