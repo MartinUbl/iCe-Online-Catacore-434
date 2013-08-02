@@ -392,7 +392,7 @@ public:
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                 {
                                     if(unit->GetTypeId() == TYPEID_PLAYER )
-                                        unit->KnockbackFrom(unit->GetPositionX(),unit->GetPositionY(),0.1f,25.0f);
+                                        unit->GetMotionMaster()->MoveJump(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),0.1f,25.0f);
                                 }
                     }
                 can_lift=false;
@@ -2320,6 +2320,10 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+
+            if(me->getVictim())
+                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED); // Unwanted daze
+
             // toto by melo vyresit problem s padem, uvidime
             if (me->getVictim() && me->GetDistance(me->getVictim()) <= 4.0f) // melee range
             {
@@ -2372,7 +2376,7 @@ public:
                         me->ForcedDespawn();
                 }
 
-                if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 1000, true))
+                if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 500, true))
                     pIgnacious->CastSpell(me,92212,false); // Visual Flamestrike ( 4s cast time)
 
                 Flamestrike_timer=999999;
