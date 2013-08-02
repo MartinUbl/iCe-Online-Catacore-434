@@ -357,6 +357,7 @@ public:
         void EnterEvadeMode()
         {
             me->RemoveAurasDueToSpell(SPELL_BALANCE_BAR);
+            me->RemoveAurasDueToSpell(SPELL_MOLTEN_ARMOR);
             if (pInstance)
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
@@ -930,8 +931,8 @@ public:
 
             if (bossRangeCheckTimer <= diff)
             {
-                // 7y range? TODO: Check
-                if (Creature* pBoss = GetClosestCreatureWithEntry(me, NPC_LORD_RHYOLITH, 7.0f, true))
+                // 8y range? TODO: Check
+                if (Creature* pBoss = GetClosestCreatureWithEntry(me, NPC_LORD_RHYOLITH, 8.0f, true))
                 {
                     // animation
                     me->RemoveAurasDueToSpell(SPELL_ERUPTION);
@@ -941,11 +942,11 @@ public:
                     /*if (pCrater)
                         pCrater->CastSpell(pCrater, SPELL_VOLCANIC_ERUPTION, true);*/
 
-                    // If the volcano was dormant, increase stacks of Molten Armor buff on boss by 2 to 4
+                    // If the volcano was dormant, increase stacks of Molten Armor by one
                     if (me->HasAura(SPELL_VOLCANO_SMOKE))
                     {
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModMoltenArmorStack(urand(2,4));
+                            pAI->ModMoltenArmorStack(1);
                     }
                     // Every time he steps on an active volcano, he loses 16 stacks of the buff
                     else
