@@ -403,6 +403,9 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+            if(me->getVictim() && me->getVictim()->ToPlayer() && !me->IsWithinLOSInMap(me->getVictim())) // If halfus is in texture
+                me->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
+
             if (!CycloneWinds && me->GetAura(SPELL_CYCLONE_WINDS))
                 CycloneWinds = true;
 

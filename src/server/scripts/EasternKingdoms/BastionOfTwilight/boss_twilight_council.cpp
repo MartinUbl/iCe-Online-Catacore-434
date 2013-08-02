@@ -2481,51 +2481,6 @@ public:
         }
     };
 };
-
-
-/******************** HALFUS ANTI-LOS DEBUGGER BUNNY****************************/
-class Halfus_los_checker : public CreatureScript
-{
-public:
-    Halfus_los_checker() : CreatureScript("Halfus_los_checker") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new Halfus_los_checkerAI (creature);
-    }
-
-    struct Halfus_los_checkerAI : public ScriptedAI
-    {
-        Halfus_los_checkerAI(Creature* creature) : ScriptedAI(creature) {}
-
-        uint32 Los_timer;
-
-        void Reset()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-            Los_timer=5000; // Kazdych 5 sekund checknem ci je Halfus v texture
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if(Los_timer <= diff)
-            {
-                if(Creature *pHalfus = me->FindNearestCreature(44600, 1000, true)) // Halfus
-                {
-                    if(pHalfus->isInCombat()) // Iba ak je halfus v combate
-                    {
-                        if(pHalfus->getVictim() && pHalfus->getVictim()->ToPlayer() && !pHalfus->IsWithinLOSInMap(pHalfus->getVictim())) // Ak je Halfus v texture
-                             pHalfus->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
-                    }
-                }
-                Los_timer = 5000;
-            }
-            else Los_timer-=diff;
-        }
-    };
-};
-
 void AddSC_twilight_council()
 {
     new mob_felo();
@@ -2542,5 +2497,4 @@ void AddSC_twilight_council()
     new mob_liquide_ice();
     new Frozen_orb();
     new Flamestrike_patch();
-    new Halfus_los_checker();
 }
