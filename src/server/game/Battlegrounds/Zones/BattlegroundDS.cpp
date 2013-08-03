@@ -118,7 +118,10 @@ void BattlegroundDS::Update(uint32 diff)
         else if (getWaterFallStatus() == BG_DS_WATERFALL_STATUS_WARNING) // Active collision and start knockback timer
         {
             if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+            {
                 gob->SetGoState(GO_STATE_READY);
+                gob->EnableCollision(true);
+            }
 
             setWaterFallTimer(BG_DS_WATERFALL_DURATION);
             setWaterFallStatus(BG_DS_WATERFALL_STATUS_ON);
@@ -128,7 +131,10 @@ void BattlegroundDS::Update(uint32 diff)
         {
             // turn off collision
             if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+            {
                 gob->SetGoState(GO_STATE_ACTIVE);
+                gob->EnableCollision(false);
+            }
 
             DoorOpen(BG_DS_OBJECT_WATER_2);
             setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
