@@ -49,10 +49,9 @@ enum BattlegroundRVObjectTypes
     BG_RV_OBJECT_PILAR_COLLISION_3,
     BG_RV_OBJECT_PILAR_COLLISION_4,
 
-    BG_RV_OBJECT_ELEVATOR_1,
-    BG_RV_OBJECT_ELEVATOR_2,
-    BG_RV_OBJECT_FENCE_1,
-    BG_RV_OBJECT_FENCE_2,
+    BG_RV_OBJECT_DOOR_1,
+    BG_RV_OBJECT_DOOR_2,
+
     BG_RV_OBJECT_MAX,
 };
 
@@ -67,27 +66,23 @@ enum BattlegroundRVObjects
     BG_RV_OBJECT_TYPE_FIREDOOR_1                 = 192388,
     BG_RV_OBJECT_TYPE_PULLEY_1                   = 192389,
     BG_RV_OBJECT_TYPE_PULLEY_2                   = 192390,
-    BG_RV_OBJECT_TYPE_FENCE_1                    = 192391,
-    BG_RV_OBJECT_TYPE_FENCE_2                    = 192392,
     BG_RV_OBJECT_TYPE_GEAR_1                     = 192393,
     BG_RV_OBJECT_TYPE_GEAR_2                     = 192394,
-    BG_RV_OBJECT_TYPE_ELEVATOR_1                 = 194582,
-    BG_RV_OBJECT_TYPE_ELEVATOR_2                 = 194586,
+    BG_RV_OBJECT_TYPE_PORTCULLIS                 = 203710,
 
-    BG_RV_OBJECT_TYPE_PILAR_COLLISION_1          = 194580, // axe
-    BG_RV_OBJECT_TYPE_PILAR_COLLISION_2          = 194579, // arena
-    BG_RV_OBJECT_TYPE_PILAR_COLLISION_3          = 194581, // lightning
-    BG_RV_OBJECT_TYPE_PILAR_COLLISION_4          = 194578, // ivory
+    BG_RV_OBJECT_TYPE_PILAR_COLLISION_1          = 208466, // axe
+    BG_RV_OBJECT_TYPE_PILAR_COLLISION_2          = 208465, // arena
+    BG_RV_OBJECT_TYPE_PILAR_COLLISION_3          = 208467, // lightning
+    BG_RV_OBJECT_TYPE_PILAR_COLLISION_4          = 208464, // ivory
 
-    BG_RV_OBJECT_TYPE_PILAR_1                    = 194583, // axe
-    BG_RV_OBJECT_TYPE_PILAR_2                    = 194584, // arena
-    BG_RV_OBJECT_TYPE_PILAR_3                    = 194585, // lightning
-    BG_RV_OBJECT_TYPE_PILAR_4                    = 194587, // ivory
+    BG_RV_OBJECT_TYPE_PILAR_1                    = 208468, // axe
+    BG_RV_OBJECT_TYPE_PILAR_2                    = 208469, // arena
+    BG_RV_OBJECT_TYPE_PILAR_3                    = 208470, // lightning
+    BG_RV_OBJECT_TYPE_PILAR_4                    = 208471, // ivory
 };
 
 enum BattlegroundRVData
 {
-    BG_RV_STATE_OPEN_FENCES,
     BG_RV_STATE_OPEN_PILARS,
     BG_RV_STATE_CLOSE_PILARS,
     BG_RV_STATE_OPEN_FIRE,
