@@ -296,6 +296,13 @@ void Object::DestroyForPlayer(Player *target, bool anim) const
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 {
     uint32 unkLoopCounter = 0;
+
+    bool hasTransportTime2 = false;
+    bool hasTransportTime3 = false;
+    uint32 transportTime2 = 0;
+    uint32 transportTime3 = 0;
+    uint32 goTransportTime = getMSTime(); // we don't know what belongs to this field, getMSTime is therefore wrong
+
     // Bit content
     data->WriteBit(0);
     data->WriteBit(0);
@@ -344,11 +351,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             ObjectGuid transGuid = self->m_movementInfo.t_guid;
 
             data->WriteBit(transGuid[1]);
-            data->WriteBit(0);                                                  // Has transport time 2
+            data->WriteBit(hasTransportTime2);                                                  // Has transport time 2
             data->WriteBit(transGuid[4]);
             data->WriteBit(transGuid[0]);
             data->WriteBit(transGuid[6]);
-            data->WriteBit(0);                                                  // Has transport time 3
+            data->WriteBit(hasTransportTime3);                                                  // Has transport time 3
             data->WriteBit(transGuid[7]);
             data->WriteBit(transGuid[5]);
             data->WriteBit(transGuid[3]);
@@ -376,14 +383,14 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         WorldObject const* self = static_cast<WorldObject const*>(this);
         ObjectGuid transGuid = self->m_movementInfo.t_guid;
         data->WriteBit(transGuid[5]);
-        data->WriteBit(0);                                                      // Has GO transport time 3
+        data->WriteBit(hasTransportTime3);                                                      // Has GO transport time 3
         data->WriteBit(transGuid[0]);
         data->WriteBit(transGuid[3]);
         data->WriteBit(transGuid[6]);
         data->WriteBit(transGuid[1]);
         data->WriteBit(transGuid[4]);
         data->WriteBit(transGuid[2]);
-        data->WriteBit(0);                                                      // Has GO transport time 2
+        data->WriteBit(hasTransportTime2);                                                      // Has GO transport time 2
         data->WriteBit(transGuid[7]);
     }
 
@@ -454,16 +461,16 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             data->WriteByteSeq(transGuid[7]);
             *data << uint32(self->GetTransTime());
             *data << float(self->GetTransOffsetO());
-            //if (hasTransportTime2)
-            //    *data << uint32(0);
+            if (hasTransportTime2)
+                *data << uint32(transportTime2);
 
             *data << float(self->GetTransOffsetY());
             *data << float(self->GetTransOffsetX());
             data->WriteByteSeq(transGuid[3]);
             *data << float(self->GetTransOffsetZ());
             data->WriteByteSeq(transGuid[0]);
-            //if (hasTransportTime3)
-            //    *data << uint32(0);
+            if (hasTransportTime3)
+                *data << uint32(transportTime3);
 
             *data << int8(self->GetTransSeat());
             data->WriteByteSeq(transGuid[1]);
@@ -514,8 +521,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
         data->WriteBit(transGuid[0]);
         data->WriteBit(transGuid[5]);
-        //if (hasTransportTime3)
-        //    *data << uint32(0);
+        if (hasTransportTime3)
+            *data << uint32(transportTime3);
 
         data->WriteBit(transGuid[3]);
         *data << float(self->GetTransOffsetX());
@@ -529,8 +536,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
         *data << float(self->GetTransOffsetZ());
         *data << int8(self->GetTransSeat());
         *data << float(self->GetTransOffsetO());
-        //if (hasTransportTime2)
-        //    *data << uint32(0);
+        if (hasTransportTime2)
+            *data << uint32(transportTime2);
     }
 
     if (flags & UPDATEFLAG_HAS_GO_ROTATION)
@@ -593,7 +600,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     //}
 
     if (flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME)
-        *data << uint32(getMSTime());                       // Unknown - getMSTime is wrong.
+        *data << uint32(goTransportTime);
 }
 
 void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
