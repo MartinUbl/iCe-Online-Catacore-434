@@ -33,6 +33,7 @@ enum BethtilacSpawns
 {
     NPC_BETHTILAC = 52498,
     NPC_SPIDERWEB_FILAMENT = 53082,     // "vehicle" dropped from the web after taunting or killing Cinderweb Spinner
+    NPC_FILAMENT_CASTER = 524981,
 
     // spawns in waves
     NPC_CINDERWEB_DRONE = 52581,
@@ -48,6 +49,13 @@ enum SharedSpells
 {
     SPELL_SPIDERWEB_FILAMENT = 98623,
     SPELL_CONSUME = 99304,
+};
+
+
+enum AnimKits
+{
+    ANIM_KIT_EMERGE = 1490,
+    ANIM_KIT_FLY_UP = 1467,
 };
 
 

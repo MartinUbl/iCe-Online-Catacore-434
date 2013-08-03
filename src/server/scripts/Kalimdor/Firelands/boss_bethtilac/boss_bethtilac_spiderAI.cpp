@@ -145,7 +145,7 @@ void SpiderAI::SummonFilament()
     Position pos;
     me->GetPosition(&pos);
     pos.m_positionZ = webZPosition + 1.0f;
-    summonFilament = me->SummonTrigger(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, 0);
+    summonFilament = me->SummonCreature(NPC_FILAMENT_CASTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0);
     summonFilament->StopMoving();
     summonFilament->SetReactState(REACT_PASSIVE);
     summonFilament->SetFlying(true);
@@ -189,7 +189,7 @@ void SpiderAI::MoveToGround(uint32 movementId)
           posZ = me->GetPositionZ();
 
     posZ = me->GetMap()->GetHeight(posX, posY, posZ - 10.0f);  // height of the closest ground
-    posZ += me->GetObjectSize();                               // do not dig in to the ground
+    //posZ += me->GetObjectSize();                               // do not dig in to the ground
 
     me->GetMotionMaster()->MovePoint(movementId, posX, posY, posZ);
 }

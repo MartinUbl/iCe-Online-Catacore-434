@@ -78,6 +78,8 @@ void mob_spiderling::mob_spiderlingAI::UpdateAI(const uint32 diff)
         me->DespawnOrUnsummon();
         return;
     }
+
+    UpdateTimers(diff);
 }
 
 
@@ -160,7 +162,7 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
     }
 
     // move to the middle and wait
-    DoZoneInCombat();
+    //DoZoneInCombat();
     following = false;
     followedGuid = 0;
 

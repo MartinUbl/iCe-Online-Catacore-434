@@ -66,30 +66,4 @@ private:
 };
 
 
-class npc_filament: public CreatureScript
-{
-public:
-    npc_filament(): CreatureScript("npc_spiderweb_filament") {}
-    CreatureAI *GetAI(Creature *creature) const;
-
-private:
-    // not quite a spider, but has same methods...
-    class filamentAI: public SpiderAI
-    {
-    public:
-        explicit filamentAI(Creature *creature);
-        virtual ~filamentAI();
-
-        void Reset();
-        void UpdateAI(const uint32 diff);
-        void MoveInLineOfSight(Unit *who);
-        void AttackStart(Unit *victim);
-        void EnterEvadeMode();
-        void MovementInform(uint32 type, uint32 id);
-        void PassengerBoarded(Unit *unit, int8 seat, bool apply);
-        void DoAction(const int32 event);
-    };
-};
-
-
 #endif // BOSS_BETHTILAC_SPINNER_H

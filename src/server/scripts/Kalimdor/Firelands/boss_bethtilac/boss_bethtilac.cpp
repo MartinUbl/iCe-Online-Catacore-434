@@ -40,6 +40,7 @@ enum BethtilacSpells
     SPELL_SMOLDERING_DEVASTATION = 99052,
     SPELL_EMBER_FLARE = 98934,
     SPELL_VENOM_RAIN = 99333,
+    SPELL_METEOR_BURN = 99133,
     // phase 2
     SPELL_FRENZY = 99497,
     SPELL_EMBER_FLARE_2 = 99859,
@@ -56,16 +57,15 @@ enum BethtilacEvents
     // combat check
     COMBAT_CHECK_ENABLE,
 
-    TRANSFER_TIMEOUT,     // transfer phases have limited duration - if they last longer, something went wrong
-
     // phase 1
     TRANSFER1_START,
     SD_ENABLE,            // Smoldering Devastation enabled
     SP_EMBER_FLARE,       // cast Ember Flare
     SP_VENOM_RAIN,        // cast Venom Rain (instant) if no one is in range
+    SP_METEOR_BURN,       // cast Meteor Burn
     SUMMON_FIRST_DRONE,   // first Cinderweb Drone is spawned earlier than others
     SUMMON_DRONE,
-    SUMMON_SPINNERS,
+    SUMMON_SPINNERS,      // 3 waves per 1 devastation
     SUMMON_FIRST_SPIDERLINGS,
     SUMMON_SPIDERLINGS,
 
@@ -77,6 +77,9 @@ enum BethtilacEvents
 };
 
 
+static const int MAX_DEVASTATION_COUNT = 3;
+
+
 
 boss_bethtilac::boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
     : SpiderAI(creature)
@@ -84,6 +87,7 @@ boss_bethtilac::boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
     phase = PHASE_IDLE;
     devastationEnabled = true;
     devastationCounter = 0;
+    spinnerCounter = 0;
 }
 
 
@@ -116,11 +120,19 @@ void boss_bethtilac::boss_bethtilacAI::Reset()
 
     // summon the filament
     SummonFilament();
+
+    // allow the door to be open
+    UnlockDoor();
 }
 
 
 void boss_bethtilac::boss_bethtilacAI::EnterCombat(Unit *who)
 {
+    if (phase != PHASE_IDLE)
+        return;
+
+    LockDoor();
+
     if (instance)
         instance->SetData(TYPE_BETHTILAC, IN_PROGRESS);
 
@@ -128,6 +140,8 @@ void boss_bethtilac::boss_bethtilacAI::EnterCombat(Unit *who)
 
     devastationEnabled = true;
     devastationCounter = 0;
+
+    spinnerCounter = 0;
 
     combatCheckEnabled = true;
 
@@ -149,6 +163,7 @@ bool boss_bethtilac::boss_bethtilacAI::UpdateVictim()
     if (phase != PHASE_1 || !me->isInCombat())
         return false;
 
+    // in phase 1 while there are enemies below the web
     me->AttackStop();
     return true;
 }
@@ -229,7 +244,7 @@ void boss_bethtilac::boss_bethtilacAI::UpdateAI(const uint32 diff)
         me->AttackStop();
         me->StopMoving();
         me->DeleteThreatList();
-        me->NearTeleportTo(me->GetPositionX() + 1.0f, me->GetPositionY(), webZPosition + 1.0f, me->GetOrientation());
+        me->NearTeleportTo(me->GetPositionX() + 1.0f, me->GetPositionY(), webZPosition + 5.0f, me->GetOrientation());
     }
 
     if (!IsInTransfer() && !me->IsNonMeleeSpellCasted(false))
@@ -272,7 +287,8 @@ void boss_bethtilac::boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
         case PHASE_TRANSFER_1:
         {
             DebugOutput("phase transfer 1");
-            // TODO: anim
+            // anim and movement up
+            me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
             AddTimer(TRANSFER1_START, 1000, false);
             break;
         }
@@ -336,10 +352,10 @@ void boss_bethtilac::boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases ph
             break;
         case PHASE_1:
             AddTimer(SP_EMBER_FLARE, 6000, true);
-            AddTimer(SP_VENOM_RAIN, 3000, true);
+            AddTimer(SP_VENOM_RAIN, 2500, true);
+            AddTimer(SP_METEOR_BURN, 16000, true);
             break;
         case PHASE_TRANSFER_2:
-            AddTimer(TRANSFER_TIMEOUT, 10000, false);
             break;
         case PHASE_2:
             AddTimer(SP_FRENZY, 5000, true);
@@ -372,8 +388,8 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
     {
         case TRANSFER1_START:
             MoveToFilament(MOVE_POINT_UP);
-            AddTimer(TRANSFER_TIMEOUT, 10000, false);
             break;
+
         case POWER_DECAY:
             DepletePower();
             if (phase == PHASE_1 && GetPower() == 0)
@@ -382,12 +398,6 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
 
         case COMBAT_CHECK_ENABLE:
             combatCheckEnabled = true;
-            break;
-
-        case TRANSFER_TIMEOUT:
-            //me->CastSpell(me, 265, false);      // area death (only cheaters can make this to happen)
-            if (IsInTransfer())
-                SetPhase(PHASE_IDLE);
             break;
 
         case SD_ENABLE:
@@ -404,6 +414,14 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
                 me->CastSpell((Unit*)NULL, SPELL_EMBER_FLARE, false);
             break;
 
+        case SP_METEOR_BURN:
+            if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
+            {
+                DebugOutput("casting Meteor Burn");
+                me->CastSpell(me->getVictim(), SPELL_METEOR_BURN, false);
+            }
+            break;
+
         case SUMMON_FIRST_DRONE:
             AddTimer(SUMMON_DRONE, 60000, true);
         case SUMMON_DRONE:
@@ -411,7 +429,10 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
             break;
 
         case SUMMON_SPINNERS:
-            SummonSpinners();
+            if (++spinnerCounter < 3)
+                AddTimer(SUMMON_SPINNERS, 10000, false);
+
+            SummonSpinners(spinnerCounter == 1);
             break;
 
         case SUMMON_FIRST_SPIDERLINGS:
@@ -456,6 +477,7 @@ void boss_bethtilac::boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
                 SetPhase(PHASE_1);
                 me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), webZPosition + 1.0f, me->GetOrientation(), false);
                 me->SetFlying(false);
+                DoZoneInCombat();
             }
 
             break;
@@ -482,7 +504,7 @@ void boss_bethtilac::boss_bethtilacAI::MoveInLineOfSight(Unit *who)
     if (me->isInCombat() && /*!me->getVictim() &&*/
         !IsInTransfer())
     {
-        if ( me->canAttack(who, false))
+        if (me->canAttack(who, false))
             AttackStart(who);
         else
         {
@@ -495,10 +517,13 @@ void boss_bethtilac::boss_bethtilacAI::MoveInLineOfSight(Unit *who)
 
 void boss_bethtilac::boss_bethtilacAI::AttackStart(Unit *victim)
 {
-    if (phase != PHASE_IDLE && !IsInTransfer() &&
-        me->canAttack(victim, false) && (phase != PHASE_1 || victim->GetPositionZ() >= webZPosition))
+    if (phase != PHASE_IDLE && !IsInTransfer() && me->canAttack(victim, false))
     {
-        ScriptedAI::AttackStart(victim);
+        if (phase != PHASE_1 && victim->GetPositionZ() < webZPosition - 5 ||
+            phase == PHASE_1 && victim->GetPositionZ() >= webZPosition - 5)
+        {
+            ScriptedAI::AttackStart(victim);
+        }
     }
 }
 
@@ -521,7 +546,7 @@ void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
         me->CastSpell(me, SPELL_SMOLDERING_DEVASTATION, false);    // has cast time - can't be flagged as triggered
         devastationCounter++;   // increase counter - after third one transfer to next phase
 
-        if (devastationCounter == 3)
+        if (devastationCounter == MAX_DEVASTATION_COUNT)
         {
             AddTimer(END_OF_PHASE_1, me->GetCurrentSpellCastTime(SPELL_SMOLDERING_DEVASTATION) + 200, false);
         }
@@ -530,6 +555,9 @@ void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
             // next Cinderweb Spinners in 15 seconds after start of cast
             AddTimer(SUMMON_SPINNERS, 15000, false);
         }
+
+        // enable next waves of spinners
+        spinnerCounter = 0;
     }
 }
 
@@ -542,6 +570,9 @@ void boss_bethtilac::boss_bethtilacAI::ShowWarnText(const char *text)
 
 void boss_bethtilac::boss_bethtilacAI::SummonDrone()
 {
+    if (devastationCounter >= MAX_DEVASTATION_COUNT)
+        return;
+
     DebugOutput("summoning Cinderweb Drone");
 
     me->SummonCreature(NPC_CINDERWEB_DRONE, 103.176773f, 454.915924f, 86.966888f, 3.578207f,
@@ -549,18 +580,27 @@ void boss_bethtilac::boss_bethtilacAI::SummonDrone()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::SummonSpinners()
+void boss_bethtilac::boss_bethtilacAI::SummonSpinners(bool withWarn)
 {
-    ShowWarnText("Cinderweb Spinners dangle from above!");
-    DebugOutput("summoning Cinderweb Spinners");
+    if (devastationCounter >= MAX_DEVASTATION_COUNT)
+        return;
 
-    for (uint8 i = 0; i < 6; i++)
+    if (withWarn)
+    {
+        ShowWarnText("Cinderweb Spinners dangle from above!");
+        DebugOutput("summoning Cinderweb Spinners");
+    }
+
+    for (uint8 i = 0; i < 2; i++)
         me->CastSpell(me, SPELL_SUMMON_SPINNER, true);
 }
 
 
 void boss_bethtilac::boss_bethtilacAI::SummonSpiderlings()
 {
+    if (devastationCounter >= MAX_DEVASTATION_COUNT)
+        return;
+
     ShowWarnText("Spiderlings have been roused from their nest!");
     DebugOutput("summoning Cinderweb Spiderlings");
 
@@ -571,6 +611,32 @@ void boss_bethtilac::boss_bethtilacAI::SummonSpiderlings()
         me->SummonCreature(NPC_CINDERWEB_SPIDERLING,
                            98.0f + cos(angle), 452.0f + sin(angle), 86, 0,
                            TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+    }
+}
+
+
+GameObject *boss_bethtilac::boss_bethtilacAI::FindDoor()
+{
+    return me->FindNearestGameObject(208877, 100);
+}
+
+
+void boss_bethtilac::boss_bethtilacAI::LockDoor()
+{
+    if (GameObject *goDoor = FindDoor())
+    {
+        goDoor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+        goDoor->SetGoState(GO_STATE_READY);     // close door
+    }
+}
+
+
+void boss_bethtilac::boss_bethtilacAI::UnlockDoor()
+{
+    if (GameObject *goDoor = FindDoor())
+    {
+        goDoor->SetGoState(GO_STATE_ACTIVE);    // open door
+        goDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
     }
 }
 
@@ -623,7 +689,8 @@ UPDATE
     AIName = 'NullAI',
     difficulty_entry_1 = 53579,
     difficulty_entry_2 = 53580,
-    difficulty_entry_3 = 53581
+    difficulty_entry_3 = 53581,
+    speed_run = 1
   WHERE
     entry = 52447;
 
@@ -638,11 +705,28 @@ UPDATE
     entry = 53082;
 
 
+UPDATE
+    creature_template
+  SET
+    ScriptName = 'npc_web_rip'
+  WHERE
+    entry = 53450;
+
+
 INSERT INTO
   conditions
     (SourceTypeOrReferenceId, SourceEntry, ConditionTypeOrReference, ConditionValue1, ConditionValue2, Comment)
   VALUES
     (13,                      99411,       18,                       1,               52498,           'Beth\'tilac - Leech Venom'),
     (13,                      99304,       18,                       1,               52447,           'Beth\'tilac - Consume');
+
+INSERT INTO `creature_template` (`entry`, `modelid1`, `modelid2`, `name`, `minlevel`, `maxlevel`, `faction_A`, `faction_H`, `speed_walk`, `speed_run`, `unit_flags`, `dynamicflags`, `AIName`, `InhabitType`, `flags_extra`, `ScriptName`)
+    VALUES ('524981', '17519', '11686', 'Beth\'tilac Filament Caster', '80', '80', '114', '114', '0', '0', '33587968', '8', 'NullAI', '7', '130', '');
+
+INSERT INTO
+  spell_script_names
+    (spell_id, ScriptName)
+  VALUES
+    (99133, 'spell_meteor_burn');
 
  */

@@ -65,6 +65,7 @@ private:
         bool devastationEnabled;    // Smoldering devastation is disabled for a while after cast to avoid duplicate casts
         bool combatCheckEnabled;
         int devastationCounter;
+        int spinnerCounter;         // number of the vawe of spinners
 
         // methods
         void SetPhase(BethtilacPhases newPhase);
@@ -79,9 +80,13 @@ private:
 
         void ShowWarnText(const char *text);    // show warning text in the client screen (checked by videos)
 
+        GameObject *FindDoor();
+        void LockDoor();
+        void UnlockDoor();
+
         // spawns
         void SummonDrone();
-        void SummonSpinners();
+        void SummonSpinners(bool withWarn);
         void SummonSpiderlings();
     };
 };

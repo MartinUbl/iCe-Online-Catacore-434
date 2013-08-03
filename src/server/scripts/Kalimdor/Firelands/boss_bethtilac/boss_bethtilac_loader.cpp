@@ -24,6 +24,7 @@
 #include "ScriptPCH.h"  // not needed, only to make compiler happy
 #include "boss_bethtilac.h"
 #include "boss_bethtilac_drone.h"
+#include "boss_bethtilac_environment.h"
 #include "boss_bethtilac_spiderling.h"
 #include "boss_bethtilac_spinner.h"
 
@@ -37,4 +38,7 @@ void AddSC_boss_bethtilac()
     new mob_spiderling();
     new mob_spinner();
     new npc_filament();
+    new npc_web_rip();
+
+    new spell_meteor_burn();
 }

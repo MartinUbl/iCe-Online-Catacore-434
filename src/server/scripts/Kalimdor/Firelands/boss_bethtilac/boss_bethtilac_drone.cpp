@@ -122,8 +122,8 @@ void mob_drone::mob_droneAI::DoAction(const int32 event)
                     SummonFilament();
                     MoveToFilament(MOVE_POINT_UP);
                 }
-                //else
-                //     MovementInform(POINT_MOTION_TYPE, MOVE_POINT_UP);
+                else
+                    MovementInform(POINT_MOTION_TYPE, MOVE_POINT_UP);
             }
             break;
 
@@ -166,6 +166,7 @@ void mob_drone::mob_droneAI::MovementInform(uint32 type, uint32 id)
             case MOVE_POINT_UP:
                 onTop = true;
                 UnSummonFilament();
+                me->PlayOneShotAnimKit(ANIM_KIT_FLY_UP);
                 me->SetFlying(false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->CastSpell(me->ToTempSummon()->GetSummoner(), SPELL_LEECH_VENOM, false);

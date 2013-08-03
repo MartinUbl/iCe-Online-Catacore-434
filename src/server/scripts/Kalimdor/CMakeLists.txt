@@ -153,6 +153,8 @@ set(scripts_STAT_SRCS
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_data.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_drone.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_drone.cpp
+  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_environment.h
+  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_environment.cpp
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderling.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderling.cpp
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spinner.h

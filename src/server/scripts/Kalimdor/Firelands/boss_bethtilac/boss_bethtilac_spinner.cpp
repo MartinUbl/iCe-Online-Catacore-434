@@ -99,7 +99,7 @@ void mob_spinner::mob_spinnerAI::DoAction(const int32 event)
     switch (event)
     {
         case EVENT_BURNING_ACID:
-            me->CastCustomSpell(SPELL_BURNING_ACID, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
+            me->CastCustomSpell(SPELL_BURNING_ACID, SPELLVALUE_MAX_TARGETS, 1, me, false);
             break;
         case EVENT_SUMMON_FILAMENT:
             if (!summoned)
@@ -133,6 +133,8 @@ void mob_spinner::mob_spinnerAI::MovementInform(uint32 type, uint32 id)
             {
                 hanging = false;
                 onGround = true;
+
+                UnSummonFilament();
 
                 me->SetFlying(false);
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -173,114 +175,5 @@ void mob_spinner::mob_spinnerAI::SpellHit(Unit *caster, const SpellEntry *spell)
             // summon filament for players
             AddTimer(EVENT_SUMMON_FILAMENT, 2000, false);
         }
-    }
-}
-
-
-
-enum FilamentSpells
-{
-    SPELL_FILAMENT_VISUAL = 98149
-};
-
-enum FilamentEvents
-{
-    EVENT_TRANSFER_START
-};
-
-
-CreatureAI *npc_filament::GetAI(Creature *creature) const
-{
-    return new filamentAI(creature);
-}
-
-
-npc_filament::filamentAI::filamentAI(Creature *creature)
-    : SpiderAI(creature)
-{
-}
-
-
-npc_filament::filamentAI::~filamentAI()
-{
-}
-
-
-void npc_filament::filamentAI::Reset()
-{
-    SummonFilament();
-    me->CastSpell(me, SPELL_FILAMENT_VISUAL, true);
-}
-
-
-void npc_filament::filamentAI::UpdateAI(const uint32 diff)
-{
-    if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
-    {
-        UnSummonFilament();
-        me->DespawnOrUnsummon();
-        return;
-    }
-
-    UpdateTimers(diff);
-}
-
-
-void npc_filament::filamentAI::MoveInLineOfSight(Unit *who)
-{
-}
-
-
-void npc_filament::filamentAI::AttackStart(Unit *victim)
-{
-}
-
-
-void npc_filament::filamentAI::EnterEvadeMode()
-{
-}
-
-
-void npc_filament::filamentAI::MovementInform(uint32 type, uint32 id)
-{
-    if (type == POINT_MOTION_TYPE && id == MOVE_POINT_UP)
-    {
-        if (me->IsVehicle())
-        {
-            UnSummonFilament();
-            Vehicle *veh = me->GetVehicleKit();
-            veh->RemoveAllPassengers();
-
-            me->DespawnOrUnsummon();
-        }
-    }
-}
-
-
-void npc_filament::filamentAI::PassengerBoarded(Unit *unit, int8 seat, bool apply)
-{
-    if (apply)
-    {
-        unit->addUnitState(UNIT_STAT_ONVEHICLE);        // makes the passenger unattackable
-        unit->RemoveAllAttackers();
-        unit->DeleteThreatList();
-        AddTimer(EVENT_TRANSFER_START, 2000, false);
-    }
-    else
-    {
-        unit->clearUnitState(UNIT_STAT_ONVEHICLE);
-        //unit->NearTeleportTo(unit->GetPositionX(), unit->GetPositionY(), webZPosition + 1.0f, unit->GetOrientation());
-        unit->DeleteThreatList();
-    }
-}
-
-
-void npc_filament::filamentAI::DoAction(const int32 event)
-{
-    switch (event)
-    {
-        case EVENT_TRANSFER_START:
-            MoveToFilament(MOVE_POINT_UP);  // move the passenger
-            break;
     }
 }
