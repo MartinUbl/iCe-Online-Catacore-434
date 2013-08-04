@@ -19459,13 +19459,16 @@ void Player::SendRaidInfo()
             if (itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
+                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
+                data << uint32(isHeroic);
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
-                data << uint32(now);                        // unknown, probably something with extend lock
                 data << uint32(save->GetResetTime() - now); // reset time
+                data << uint32(0);                          // completed encounters mask
                 ++counter;
             }
         }
@@ -21098,13 +21101,18 @@ void Player::StopCastingCharm()
     }
 }
 
-void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string& text, uint32 language) const
+void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix) const
 {
     *data << (uint8)msgtype;
     *data << (uint32)language;
     *data << (uint64)GetGUID();
     *data << (uint32)0;                               //language 2.1.0 ?
-    *data << (uint64)GetGUID();
+
+    if (addonPrefix)
+        *data << addonPrefix;
+    else
+        *data << (uint64)GetGUID();
+
     *data << (uint32)(text.length()+1);
     *data << text;
     *data << (uint8)GetChatTag();
