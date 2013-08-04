@@ -6760,6 +6760,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     return false;
                 }
+                case 99001: // Druid T12 Feral 2P Bonus
+                {
+                    if(procSpell->SpellIconID == 2312 || procSpell->Id == 6807 || procSpell->Id == 5221  ) // Mangle, Maul, Shred
+                    {
+                        CastCustomSpell(99002, SPELLVALUE_BASE_POINT0,damage * 0.05, pVictim, true); // Fiery Claws + 10 % dmg as fire dot, but 5% per tick ( 2 ticks )
+                        break;
+                    }
+                    else return (false);
+                }
                 // Leader of the Pack
                 case 24932:
                 {
