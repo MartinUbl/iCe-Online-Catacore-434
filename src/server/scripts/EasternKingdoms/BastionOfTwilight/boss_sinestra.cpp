@@ -453,7 +453,7 @@ public:
         PHASE = 2;
         Beam_timer = 15000;
         Delay_timer= 10000;
-        Drake_timer= 60000 + rand()%5000;
+        Drake_timer= 60000;
         Spawn_calen_timer = 16000;
         Spitecaller_timer = Spawn_calen_timer + 55000;
         Voice_losing_time = 90000 - 21000;
@@ -541,7 +541,7 @@ public:
             me->SummonCreature(CREATURE_TWILIGHT_SPITECALLER,-1042.167f,-850.95f,445.74762f,1.03f);
             Spitecaller_timer = 55000;
         }
-        else Spitecaller_timer-=Diff;
+        else Spitecaller_timer -= Diff;
 
         if(Repeat_timer <= Diff )
         {
@@ -572,12 +572,12 @@ public:
             me->MonsterYell("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", LANG_UNIVERSAL, NULL);
             me->SendPlaySound(20206, false);
 
-            Flame_breath_timer = 20000;
+            Flame_breath_timer = 25000;
             Wrack_timer = 15000;
-            CheckTimer = 10000;
-            Shadow_orb_timer = 25000;
-            Respawn_flames_timer = 10000;
-            Whelps_timer = 12000;
+            CheckTimer = 20000;
+            Shadow_orb_timer = 30000;
+            Respawn_flames_timer = 15000;
+            Whelps_timer = 20000;
             flamed = false; // Spawn Twilight Flames again
         }
 
@@ -663,7 +663,7 @@ public:
                 bool inMeleeRange = ( me->IsWithinMeleeRange(me->getVictim()) ) ? true : false;
 
                 if (inMeleeRange == false)
-                    if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
+                    if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true) )
                         if (PHASE == 1 || PHASE == 3)
                             if (!me->IsNonMeleeSpellCasted(false))
                                 me->CastSpell(target,SPELL_TWILIGHT_BLAST,false);
@@ -673,7 +673,7 @@ public:
              else CheckTimer -= Diff;
 
 
-            if (Shadow_orb_timer<=Diff)
+            if (Shadow_orb_timer <= Diff)
             {
                 SpawnShadowOrbs();
                 Shadow_orb_timer = 30000;
@@ -783,6 +783,7 @@ public:
                 Player * fix_pl = GetFixateVictim();
                 if(fix_pl)
                 {
+                    fix_pl->Say("Shadow orb on me !!!", LANG_UNIVERSAL);
                     me->TauntApply(fix_pl);
                     me->AddThreat(fix_pl,5000000.0f);
                 }
@@ -918,7 +919,6 @@ public:
             {
                 std::list<Player*>::const_iterator j = player_list.begin();
                 advance(j, rand()%player_list.size());
-
                 return (*j);
             }
             else
@@ -940,6 +940,7 @@ public:
                 Player * fix_pl = GetFixateVictim();
                 if(fix_pl)
                 {
+                    fix_pl->Say("Shadow orb on me !!!", LANG_UNIVERSAL);
                     me->TauntApply(fix_pl);
                     me->AddThreat(fix_pl,5000000.0f);
                 }
@@ -1016,7 +1017,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
             me->SetInCombatWithZone();
-            DoZoneInCombat();
+            DoZoneInCombat(me,100.0f);
             me->SetSpeed(MOVE_FLIGHT, 1.4f, true);
 
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
@@ -1035,10 +1036,18 @@ public:
             }
         }
 
-        void DamageDealt(Unit* victim, uint32& /*damage*/, DamageEffectType typeOfDamage) // Only 10 HC functionality
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage) // Only 10 HC functionality
         {
-            if (typeOfDamage == DIRECT_DAMAGE)
+            if (typeOfDamage == DIRECT_DAMAGE )
             {
+                uint32 absorbAmount = 0;
+                Unit::AuraEffectList const& auraAbsorbList = victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
+                for (Unit::AuraEffectList::const_iterator i = auraAbsorbList.begin(); i != auraAbsorbList.end(); ++i)
+                    absorbAmount += (uint32((*i)->GetAmount()));
+
+                if (absorbAmount >= damage) // Dont cast if damage was absorbed
+                    return;
+
                 uint32 stack_number = victim->GetAuraCount(SPELL_TWILIGHTT_SPIT); // save stacks of spit on target
                 me->CastSpell(victim,SPELL_TWILIGHTT_SPIT,true); // Cast spell, cause we want damage efffect of that spell
                 victim->RemoveAurasDueToSpell(SPELL_TWILIGHTT_SPIT);
@@ -1116,7 +1125,7 @@ public:
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                 me->SetReactState(REACT_AGGRESSIVE);
-                me->SetInCombatWithZone();
+                DoZoneInCombat(me,100.0f);
 
                 if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     me->GetMotionMaster()->MoveChase(player);
@@ -1186,7 +1195,7 @@ public:
                 boundig_radius += 0.225f;
                 me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,boundig_radius);
                 stacks++;
-                growing_timer = 5000;
+                growing_timer = 4500;
             }
             else growing_timer -= diff;
 
@@ -1601,7 +1610,7 @@ public:
             me->SetSpeed(MOVE_WALK, 1.1f, true);
             me->GetMotionMaster()->MovePoint(0,-1014.179f,-808.09f,439.0f);
 
-            Walk_timer = 15000; // 15 seconds till he walks to place
+            Walk_timer = 12000; // 12 seconds till he walks to place
             Dot_timer = Walk_timer + urand(8000,9000);
         }
 
