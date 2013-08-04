@@ -16406,6 +16406,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
             && procSpell && ((procSpell->Mechanic == MECHANIC_BLEED && procSpell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE)) || procSpell->Id == 89775))
             takeCharges = false;
 
+        // Repentance is not broken by Censure DoT ticks (only one explicit exception)
+        if (procSpell && procSpell->Id == 31803 && i->aura->GetSpellProto()->Id == 20066)
+            takeCharges = false;
+
         // Remove charge (aura can be removed by triggers)
         if (useCharges && takeCharges)
             i->aura->DropCharge();
