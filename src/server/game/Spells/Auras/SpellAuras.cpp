@@ -1135,6 +1135,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 target->RemoveAurasDueToSpell(91041);
                         }
                         break;
+                    case 81277: // Blood Gorged
+                        if (target && caster)
+                        {
+                            uint32 stacks = GetStackAmount();
+                            if (stacks >= 3)
+                            {
+                                // chance is approximatelly 10% at 3 stacks and raises to 100% (101) at 10 stacks
+                                if (stacks >= 10 || roll_chance_i(13*(stacks-3)+10))
+                                {
+                                    int32 bp0 = caster->GetMaxHealth()*(stacks*0.1f); // 10% health for every stack
+                                    caster->CastCustomSpell(caster, 81280, &bp0, 0, 0, true); // burst!
+                                    caster->Kill(caster);
+                                }
+                            }
+                        }
                 }
                 break;
             case SPELLFAMILY_MAGE:
