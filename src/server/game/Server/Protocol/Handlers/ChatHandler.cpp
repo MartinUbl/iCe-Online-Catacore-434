@@ -68,7 +68,151 @@ bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 {
-    uint32 type = 0;
+    uint32 opcode = recv_data.GetOpcode();
+    ChatMsg type = CHAT_MSG_SYSTEM;
+
+    if (opcode == CMSG_MESSAGECHAT_ADDON_BATTLEGROUND || opcode == CMSG_MESSAGECHAT_ADDON_GUILD || opcode == CMSG_MESSAGECHAT_ADDON_OFFICER ||
+        opcode == CMSG_MESSAGECHAT_ADDON_PARTY || opcode == CMSG_MESSAGECHAT_ADDON_RAID || opcode == CMSG_MESSAGECHAT_ADDON_WHISPER)
+    {
+        Player* sender = GetPlayer();
+
+        switch (recv_data.GetOpcode())
+        {
+            case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:
+                type = CHAT_MSG_BATTLEGROUND;
+                break;
+            case CMSG_MESSAGECHAT_ADDON_GUILD:
+                type = CHAT_MSG_GUILD;
+                break;
+            case CMSG_MESSAGECHAT_ADDON_OFFICER:
+                type = CHAT_MSG_OFFICER;
+                break;
+            case CMSG_MESSAGECHAT_ADDON_PARTY:
+                type = CHAT_MSG_PARTY;
+                break;
+            case CMSG_MESSAGECHAT_ADDON_RAID:
+                type = CHAT_MSG_RAID;
+                break;
+            case CMSG_MESSAGECHAT_ADDON_WHISPER:
+                type = CHAT_MSG_WHISPER;
+                break;
+            default:
+                // unknown
+                recv_data.hexlike();
+                return;
+        }
+
+        std::string message;
+        std::string prefix;
+        std::string targetName;
+
+        uint32 prefixLen;
+        uint32 msgLen;
+        uint32 targetLen;
+
+        switch (type)
+        {
+            case CHAT_MSG_WHISPER:
+            {
+                msgLen = recv_data.ReadBits(9);
+                prefixLen = recv_data.ReadBits(5);
+                targetLen = recv_data.ReadBits(10);
+                if (msgLen > 0)
+                    message = recv_data.ReadString(msgLen);
+                if (prefixLen > 0)
+                    prefix = recv_data.ReadString(prefixLen);
+                if (targetLen > 0)
+                    targetName = recv_data.ReadString(targetLen);
+                break;
+            }
+            case CHAT_MSG_PARTY:
+            case CHAT_MSG_RAID:
+            case CHAT_MSG_OFFICER:
+            {
+                prefixLen = recv_data.ReadBits(5);
+                msgLen = recv_data.ReadBits(9);
+                if (prefixLen > 0)
+                    prefix = recv_data.ReadString(prefixLen);
+                if (msgLen > 0)
+                    message = recv_data.ReadString(msgLen);
+                break;
+            }
+            case CHAT_MSG_GUILD:
+            case CHAT_MSG_BATTLEGROUND:
+            {
+                msgLen = recv_data.ReadBits(9);
+                prefixLen = recv_data.ReadBits(5);
+                if (msgLen > 0)
+                    message = recv_data.ReadString(msgLen);
+                if (prefixLen > 0)
+                    prefix = recv_data.ReadString(prefixLen);
+                break;
+            }
+            default:
+                break;
+        }
+
+        // Disabled addon channel?
+        if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+            return;
+
+        switch (type)
+        {
+            case CHAT_MSG_BATTLEGROUND:
+            {
+                Group* group = sender->GetGroup();
+                if (!group || !group->isBGGroup())
+                    return;
+
+                WorldPacket data;
+                ChatHandler::FillMessageData(&data, this, type, uint32(LANG_ADDON), "", 0, message.c_str(), NULL);
+                group->BroadcastPacket(&data, false);
+                break;
+            }
+            case CHAT_MSG_GUILD:
+            case CHAT_MSG_OFFICER:
+            {
+                if (sender->GetGuildId())
+                    if (Guild* guild = sObjectMgr->GetGuildById(sender->GetGuildId()))
+                        guild->BroadcastToGuild(this, type == CHAT_MSG_OFFICER, message, uint32(LANG_ADDON));
+                break;
+            }
+            case CHAT_MSG_WHISPER:
+            {
+                if (!normalizePlayerName(targetName))
+                    break;
+                Player* receiver = sObjectAccessor->FindPlayerByName(targetName.c_str());
+                if (!receiver)
+                    break;
+
+                WorldPacket data(SMSG_MESSAGECHAT, 200);
+                receiver->BuildPlayerChat(&data, CHAT_MSG_WHISPER, message, LANG_UNIVERSAL, prefix.c_str());
+                receiver->GetSession()->SendPacket(&data);
+                break;
+            }
+            // Messages sent to "RAID" while in a party will get delivered to "PARTY"
+            case CHAT_MSG_PARTY:
+            case CHAT_MSG_RAID:
+            {
+
+                Group* group = sender->GetGroup();
+                if (!group || group->isBGGroup())
+                    break;
+
+                WorldPacket data;
+                ChatHandler::FillMessageData(&data, this, type, uint32(LANG_ADDON), "", 0, message.c_str(), NULL, prefix.c_str());
+                group->BroadcastPacket(&data, true, -1, group->GetMemberGroup(sender->GetGUID()));
+                break;
+            }
+            default:
+            {
+                // unknown
+                break;
+            }
+        }
+        return;
+    }
+
     uint32 lang;
 
     uint32 textLength = 0;

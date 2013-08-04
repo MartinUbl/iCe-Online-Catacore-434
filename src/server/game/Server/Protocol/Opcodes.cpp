@@ -1363,6 +1363,12 @@ void InitOpcodeTable()
     OPCODE( SMSG_LF_GUILD_POST_UPDATED,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_LF_GUILD_RECRUIT_LIST_UPDATED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_REORDER_CHARACTERS,                      STATUS_AUTHED,   &WorldSession::HandleReorderCharacters         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_BATTLEGROUND,          STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_GUILD,                 STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_OFFICER,               STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_PARTY,                 STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_RAID,                  STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
+    OPCODE( CMSG_MESSAGECHAT_ADDON_WHISPER,               STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
 };
 
 void DestroyOpcodeTable()
