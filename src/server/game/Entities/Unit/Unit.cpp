@@ -7335,29 +7335,38 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     break;
                 }
-                // Seal of Vengeance (damage calc on apply aura)
+                // Seal of Truth
                 case 31801:
                 {
-                    if (effIndex != 0)                       // effect 1,2 used by seal unleashing code
+                    if (effIndex != 0 || pVictim == this)                       // effect 1,2 used by seal unleashing code
                         return false;
 
-                    // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    if ((procFlag & PROC_FLAG_DONE_MELEE_AUTO_ATTACK) || (procSpell && procSpell->Id == 53595))
-                        triggered_spell_id = 31803;
-                    // On target with 5 stacks of Holy Vengeance direct damage is done
-                    if (Aura * aur = pVictim->GetAura(triggered_spell_id, GetGUID()))
+                    bool singleTarget = false;
+                    if (procFlag & PROC_FLAG_DONE_MELEE_AUTO_ATTACK)
+                        singleTarget = true;
+                    else if (procSpell)
                     {
-                        if (aur->GetStackAmount() == 5)
+                        if (IsSingleTargetSpell(procSpell))
+                            singleTarget = true;
+                        else
                         {
-                            aur->RefreshDuration();
-                            CastSpell(pVictim, 42463, true);
-                            return true;
+                            switch (procSpell->Id)
+                            {
+                                case 853: // Hammer of Justice
+                                case 879: // Exorcism
+                                case 20271: // Judgement
+                                case 24275: // Hammer of Wrath
+                                case 35395: // Crusader Strike
+                                case 85256: // Templar's Verdict
+                                    singleTarget = true;
+                                    break;
+                            }
                         }
                     }
 
-                    // Only Autoattack can stack debuff
-                    if (procFlag & PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS)
-                        return false;
+                    // At melee attack or any single target ability
+                    if (singleTarget)
+                        triggered_spell_id = 31803;
                     break;
                 }
                 // Seal of Corruption
