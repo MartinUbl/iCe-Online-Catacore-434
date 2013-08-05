@@ -519,8 +519,8 @@ void boss_bethtilac::boss_bethtilacAI::AttackStart(Unit *victim)
 {
     if (phase != PHASE_IDLE && !IsInTransfer() && me->canAttack(victim, false))
     {
-        if (phase != PHASE_1 && victim->GetPositionZ() < webZPosition - 5 ||
-            phase == PHASE_1 && victim->GetPositionZ() >= webZPosition - 5)
+        if ((phase != PHASE_1 && victim->GetPositionZ() < webZPosition - 5) ||
+            (phase == PHASE_1 && victim->GetPositionZ() >= webZPosition - 5))
         {
             ScriptedAI::AttackStart(victim);
         }
