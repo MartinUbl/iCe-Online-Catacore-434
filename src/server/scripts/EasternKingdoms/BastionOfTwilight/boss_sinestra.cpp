@@ -287,8 +287,8 @@ public:
                     Player * p = unit->ToPlayer();
                     if (p && p->IsInWorld() == true)
                     {
-                        if (   p->GetActiveSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveSpec() != SPEC_PALADIN_PROTECTION
-                            && ( p->GetActiveSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveSpec() != SPEC_DK_BLOOD)
+                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
+                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
                         {
                             wrack_targets.push_back(p);
                         }
@@ -335,8 +335,8 @@ public:
                     Player * p = unit->ToPlayer();
                     if (p && p->IsInWorld() == true)
                     {
-                        if (   p->GetActiveSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveSpec() != SPEC_PALADIN_PROTECTION
-                            && p->GetActiveSpec() != SPEC_DRUID_FERAL        &&  p->GetActiveSpec() != SPEC_DK_BLOOD)
+                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
+                            && p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL        &&  p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
                         {
                             wrack_targets.push_back(p);
                         }
@@ -432,7 +432,7 @@ public:
                             if (!me->IsNonMeleeSpellCasted(false))
                                 me->CastSpell(target,SPELL_TWILIGHT_BLAST,false);
 
-                    CheckTimer = 3000;
+                    CheckTimer = 4000;
              }
              else CheckTimer -= Diff;
 
@@ -668,7 +668,7 @@ public:
                             if (!me->IsNonMeleeSpellCasted(false))
                                 me->CastSpell(target,SPELL_TWILIGHT_BLAST,false);
 
-                    CheckTimer = 3000;
+                    CheckTimer = 4000;
              }
              else CheckTimer -= Diff;
 
@@ -723,20 +723,20 @@ public:
             Pulse_timer = 5000;
             Despawn_timer = 15000;
             Slicer_timer = 5000;
-            me->SetSpeed(MOVE_RUN,0.7f);
+            me->SetSpeed(MOVE_RUN,0.65f);
             me->SetInCombatWithZone();
         }
 
         bool HasHealingSpec(Player * p )
         {
-            return ( p->GetActiveSpec() == SPEC_DRUID_RESTORATION || p->GetActiveSpec() == SPEC_PALADIN_HOLY ||  p->GetActiveSpec() == SPEC_PRIEST_DISCIPLINE ||
-                     p->GetActiveSpec() == SPEC_PRIEST_HOLY || p->GetActiveSpec() == SPEC_SHAMAN_RESTORATION );
+            return ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_RESTORATION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_HOLY ||  p->GetActiveTalentBranchSpec() == SPEC_PRIEST_DISCIPLINE ||
+                     p->GetActiveTalentBranchSpec() == SPEC_PRIEST_HOLY || p->GetActiveTalentBranchSpec() == SPEC_SHAMAN_RESTORATION );
         }
 
         bool HasTankSpec(Player * p )
         {
-            return ( p->GetActiveSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveSpec() == SPEC_DK_BLOOD 
-                || ( p->GetActiveSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
+            return ( p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD 
+                || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
         }
 
         Player * GetFixateVictim(void)
@@ -778,6 +778,9 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (me->getVictim())
+                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
             if (Fixate_timer <= diff)
             {
                 Player * fix_pl = GetFixateVictim();
@@ -796,8 +799,6 @@ public:
             {
                 if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
                     me->getVictim()->CastSpell(me,35371,true); // White beam
-
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED); // If whelp cast dazed, remove it
 
                 Beam_timer = 100;
             }
@@ -878,7 +879,7 @@ public:
             Beam_timer = 3000;
             Pulse_timer = 5000;
             Despawn_timer = 15000;
-            me->SetSpeed(MOVE_RUN,0.7f);
+            me->SetSpeed(MOVE_RUN,0.65f);
             me->SetInCombatWithZone();
         }
 
@@ -892,8 +893,8 @@ public:
 
         bool HasTankSpec(Player * p )
         {
-            return ( p->GetActiveSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveSpec() == SPEC_DK_BLOOD 
-                || ( p->GetActiveSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
+            return ( p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD 
+                || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
         }
 
         Player * GetFixateVictim(void)
@@ -935,6 +936,9 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (me->getVictim())
+                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
             if (Fixate_timer <= diff)
             {
                 Player * fix_pl = GetFixateVictim();
@@ -961,8 +965,6 @@ public:
             {
                 if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
                     me->CastSpell(me->getVictim(),35371,true); // White beam
-
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED); // If whelp cast dazed, remove it
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
@@ -1071,6 +1073,9 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if(me->getVictim())
+                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+
             DoMeleeAttackIfReady();
         }
     };
@@ -1127,9 +1132,6 @@ public:
                 me->SetReactState(REACT_AGGRESSIVE);
                 DoZoneInCombat(me,100.0f);
 
-                if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                    me->GetMotionMaster()->MoveChase(player);
-
                 landed = true;
             }
             else flight_timer -= diff;
@@ -1168,7 +1170,7 @@ public:
             stacks = 1;
             boundig_radius = 1.5;
             summoned_whelps = false;
-            delay_spawn_timer = 4000 + urand(1000,2000);
+            delay_spawn_timer = 2000 + urand(1000,2000);
             aoe_damage_timer = 2000;
             growing_timer = 5000;
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,boundig_radius);
@@ -1195,7 +1197,7 @@ public:
                 boundig_radius += 0.225f;
                 me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,boundig_radius);
                 stacks++;
-                growing_timer = 4500;
+                growing_timer = 10000;
             }
             else growing_timer -= diff;
 
@@ -1610,7 +1612,7 @@ public:
             me->SetSpeed(MOVE_WALK, 1.1f, true);
             me->GetMotionMaster()->MovePoint(0,-1014.179f,-808.09f,439.0f);
 
-            Walk_timer = 12000; // 12 seconds till he walks to place
+            Walk_timer = 10000; // 10 seconds till he walks to place
             Dot_timer = Walk_timer + urand(8000,9000);
         }
 
@@ -1674,9 +1676,9 @@ public:
 
         void OnDispel(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+            if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
             {
-                Unit* caster = GetCaster();
+                Unit* caster = aurEff->GetCaster();
                 Unit* target = GetTarget();
 
                 if(!caster || !target)

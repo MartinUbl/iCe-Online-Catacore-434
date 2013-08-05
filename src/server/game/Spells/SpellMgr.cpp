@@ -5245,6 +5245,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92958:// Twilight Pulse
         case 92959:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
             break;
         case 92851: // Twilight Slicer
             spellInfo->EffectTriggerSpell[1] = 0;
@@ -5278,7 +5279,8 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 89435: // Aoe Wracks
         case 92956:
-            spellInfo->MaxAffectedTargets = 2;
+            spellInfo->EffectRadiusIndex[0] = 22; // 200 yards
+            spellInfo->EffectRadiusIndex[1] = 22;
             break;
         /*case 99476: // The Widow's Kiss (Beth'tilac)
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;

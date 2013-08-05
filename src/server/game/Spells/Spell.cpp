@@ -3247,20 +3247,27 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         case 89435: // Wrack ( Sinestra encounter )
                         case 92956:
                         {
+                            uint32 counter = 0;
+
                             // Exclude players with tank spec
                             for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                             {
-                                Player * p = (*itr)->ToPlayer();
-                                if (p == NULL || ( p->GetActiveSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) )) // If not player or feral in bear form
+                                if ( (*itr)->GetTypeId() == TYPEID_PLAYER ) // Only players can be affected
                                 {
-                                    itr = unitList.erase(itr);
-                                    continue;
+                                    Player * p = (*itr)->ToPlayer();
+                                    if (p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD
+                                    || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) || counter == 2  ) // Max 2 jump targets
+                                    {
+                                        itr = unitList.erase(itr);
+                                    }
+                                    else
+                                    {
+                                        ++itr;
+                                        counter++; // Increment targets hit 
+                                    }
                                 }
-
-                                if (p->GetActiveSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveSpec() == SPEC_DK_BLOOD)
-                                    itr = unitList.erase(itr);
                                 else
-                                    ++itr;
+                                    itr = unitList.erase(itr);
                             }
                             break;
                         }
