@@ -5546,6 +5546,11 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         m_originalCaster->GetPosition(&pos);
     }
 
+    if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && entry == 27893) // Dancing Rune Weapon
+    {
+        m_caster->CastSpell(m_caster,81256,true); // + 20 % parry chance
+    }
+
     /*//totem must be at same Z in case swimming caster and etc.
         if (fabs(z - m_caster->GetPositionZ()) > 5)
             z = m_caster->GetPositionZ();
