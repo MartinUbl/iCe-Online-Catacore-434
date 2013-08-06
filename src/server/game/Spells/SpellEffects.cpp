@@ -817,6 +817,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         pAura->SetCharges(2);
                     }
                 }
+                else if (m_spellInfo->Id == 31117) // Unstable Affliction backfire dmg has been doubled at 4.3.4
+                {
+                    damage *= 2;
+                }
                 // Soul Swap
                 else if (m_spellInfo->Id == 86121)
                 {
