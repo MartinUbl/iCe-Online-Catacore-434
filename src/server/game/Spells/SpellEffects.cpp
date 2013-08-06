@@ -10292,10 +10292,6 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
         case 46619: // Raise Ally
             amount = 1;
             break;
-        case 49028: // Dancing Rune Weapon
-            if (AuraEffect *aurEff = m_originalCaster->GetAuraEffect(63330, 0)) // glyph of Dancing Rune Weapon
-                duration += aurEff->GetAmount();
-            break;
         case 94548: // Cardboard Assassin (Engineering enchant)
             amount = 1;
             break;
