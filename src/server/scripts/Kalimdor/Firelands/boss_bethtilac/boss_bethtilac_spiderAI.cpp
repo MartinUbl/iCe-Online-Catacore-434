@@ -145,13 +145,15 @@ void SpiderAI::SummonFilament()
     Position pos;
     me->GetPosition(&pos);
     pos.m_positionZ = webZPosition + 1.0f;
-    summonFilament = me->SummonCreature(NPC_FILAMENT_CASTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0);
-    summonFilament->StopMoving();
-    summonFilament->SetReactState(REACT_PASSIVE);
-    summonFilament->SetFlying(true);
-    summonFilament->CastSpell(me, SPELL_SPIDERWEB_FILAMENT, false);
+    if (summonFilament = me->SummonCreature(NPC_FILAMENT_CASTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0))
+    {
+        summonFilament->StopMoving();
+        summonFilament->SetReactState(REACT_PASSIVE);
+        summonFilament->SetFlying(true);
+        summonFilament->CastSpell(me, SPELL_SPIDERWEB_FILAMENT, false);
 
-    summonFilament->SendMovementFlagUpdate();
+        summonFilament->SendMovementFlagUpdate();
+    }
 }
 
 
