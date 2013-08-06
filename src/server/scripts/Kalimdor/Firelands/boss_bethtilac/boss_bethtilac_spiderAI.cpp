@@ -145,7 +145,7 @@ void SpiderAI::SummonFilament()
     Position pos;
     me->GetPosition(&pos);
     pos.m_positionZ = webZPosition + 1.0f;
-    if (summonFilament = me->SummonCreature(NPC_FILAMENT_CASTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0))
+    if ((summonFilament = me->SummonCreature(NPC_FILAMENT_CASTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0)))
     {
         summonFilament->StopMoving();
         summonFilament->SetReactState(REACT_PASSIVE);
