@@ -186,6 +186,9 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
+            if (PHASE == 3)
+                damage = damage * 1.2;
+
             if(!me->HasAura(SPELL_MANA_BARRIER)) // No barrier no deal
                 return;
 
@@ -409,7 +412,7 @@ public:
                 if (Flame_breath_timer <= Diff)
                 {
                     me->CastSpell(me,92944,false); // Aoe flame breath
-                    Flame_breath_timer = 20000;
+                    Flame_breath_timer = urand(20000,25000);
                 }
                 else Flame_breath_timer -= Diff;
 
@@ -417,7 +420,7 @@ public:
             if (Wrack_timer <= Diff)
             {
                 CastWrack();
-                Wrack_timer= 62000;
+                Wrack_timer= 65000;
             }
             else Wrack_timer -= Diff;
 
@@ -630,7 +633,7 @@ public:
                 for ( uint8 i = 0; i < 5; i++ ) // Summon 5 drakes
                 {
                     //Generate random angle,distance,height and spawn whelp on that position
-                    angle = (float)urand(0,6) + 0.28f ; 
+                    angle = (float)urand(0,6) + 0.28f ;
                     dist = (float) urand(40,60);
                     height = (float)urand(15,35);
 
@@ -645,7 +648,7 @@ public:
             if (Flame_breath_timer <= Diff)
             {
                 me->CastSpell(me,92944,false);
-                Flame_breath_timer = 20000;
+                Flame_breath_timer = urand(20000,25000);
             }
             else Flame_breath_timer -= Diff;
 
@@ -1010,12 +1013,17 @@ public:
         uint64 summonerGUID;
         uint32 summonerEntry;
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+                damage = damage *1.2;
+        }
+
         void Reset()
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, true);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
             me->SetInCombatWithZone();

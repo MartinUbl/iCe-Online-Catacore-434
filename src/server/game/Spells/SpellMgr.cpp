@@ -5245,7 +5245,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92958:// Twilight Pulse
         case 92959:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
-            spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
+            spellInfo->EffectRadiusIndex[0] = 77; // 6 yards
             break;
         case 92851: // Twilight Slicer
             spellInfo->EffectTriggerSpell[1] = 0;
@@ -5279,6 +5279,12 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 89435: // Aoe Wracks
         case 92956:
+            spellInfo->EffectImplicitTargetA[0] = 30;
+            spellInfo->EffectImplicitTargetB[0] = 30;
+
+            spellInfo->EffectImplicitTargetA[1] = 30;
+            spellInfo->EffectImplicitTargetB[1] = 30;
+
             spellInfo->EffectRadiusIndex[0] = 22; // 200 yards
             spellInfo->EffectRadiusIndex[1] = 22;
             break;
