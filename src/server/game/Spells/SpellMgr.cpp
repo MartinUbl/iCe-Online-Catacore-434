@@ -3059,8 +3059,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR_BLIND;
-            // Unstable Affliction
-            else if (spellproto->SpellIconID == 2039)
+            // Unstable Affliction + Sin and Punishment should not have DR
+            else if (spellproto->Id == 31117 || spellproto->Id == 87204 ) // Sin and Punishment -> SPELLFAMILY_WARLOCK ??? mistake in DB ?
                 return DIMINISHING_NONE;
             break;
         }
