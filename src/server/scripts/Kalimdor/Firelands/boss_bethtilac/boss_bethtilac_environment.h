@@ -48,6 +48,9 @@ private:
         void MovementInform(uint32 type, uint32 id);
         void PassengerBoarded(Unit *unit, int8 seat, bool apply);
         void DoAction(const int32 event);
+
+    private:
+        bool transporting;
     };
 };
 

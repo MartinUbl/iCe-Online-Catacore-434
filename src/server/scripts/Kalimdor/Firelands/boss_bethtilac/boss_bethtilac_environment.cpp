@@ -36,7 +36,8 @@ enum FilamentSpells
 
 enum FilamentEvents
 {
-    EVENT_TRANSFER_START
+    EVENT_TRANSFER_START,
+    EVENT_DESPAWN,
 };
 
 
@@ -49,6 +50,7 @@ CreatureAI *npc_filament::GetAI(Creature *creature) const
 npc_filament::filamentAI::filamentAI(Creature *creature)
     : SpiderAI(creature)
 {
+    transporting = false;
 }
 
 
@@ -61,6 +63,9 @@ void npc_filament::filamentAI::Reset()
 {
     SummonFilament();
     me->CastSpell(me, SPELL_FILAMENT_VISUAL, true);
+    AddTimer(EVENT_DESPAWN, 30000, false);
+
+    transporting = false;
 }
 
 
@@ -110,10 +115,15 @@ void npc_filament::filamentAI::MovementInform(uint32 type, uint32 id)
 
 void npc_filament::filamentAI::PassengerBoarded(Unit *unit, int8 seat, bool apply)
 {
+    transporting = apply;
+
     if (apply)
     {
         unit->addUnitState(UNIT_STAT_ONVEHICLE);        // makes the passenger unattackable
-        AddTimer(EVENT_TRANSFER_START, 2000, false);
+        AddTimer(EVENT_TRANSFER_START, 1500, false);
+
+        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
     else
     {
@@ -132,6 +142,10 @@ void npc_filament::filamentAI::DoAction(const int32 event)
     {
     case EVENT_TRANSFER_START:
         MoveToFilament(MOVE_POINT_UP);  // move the passenger
+        break;
+    case EVENT_DESPAWN:
+        if (!transporting)
+            me->DespawnOrUnsummon(0);
         break;
     }
 }
