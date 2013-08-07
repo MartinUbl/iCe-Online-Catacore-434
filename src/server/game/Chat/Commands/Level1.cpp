@@ -692,7 +692,9 @@ bool ChatHandler::HandleNotifyCommand(const char* args)
     std::string str = GetTrinityString(LANG_GLOBAL_NOTIFY);
     str += args;
 
-    WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+    WorldPacket data(SMSG_NOTIFICATION, (str.size()+2));
+    data.WriteBits(str.size(), 13);
+    data.FlushBits();
     data << str;
     sWorld->SendGlobalMessage(&data);
 
@@ -708,7 +710,9 @@ bool ChatHandler::HandleGMNotifyCommand(const char* args)
     std::string str = GetTrinityString(LANG_GM_NOTIFY);
     str += args;
 
-    WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+    WorldPacket data(SMSG_NOTIFICATION, (str.size()+2));
+    data.WriteBits(str.size(), 13);
+    data.FlushBits();
     data << str;
     sWorld->SendGlobalGMMessage(&data);
 
