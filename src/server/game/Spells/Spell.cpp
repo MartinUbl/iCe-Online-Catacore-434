@@ -3252,7 +3252,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             // Exclude players with tank spec
                             for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                             {
-                                if ( (*itr)->GetTypeId() == TYPEID_PLAYER ) // Only players can be affected
+                                if ( (*itr)->GetTypeId() == TYPEID_PLAYER && m_caster ) // Only players can be affected
                                 {
                                     Player * p = (*itr)->ToPlayer();
                                     if (p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD

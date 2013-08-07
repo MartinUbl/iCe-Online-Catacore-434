@@ -721,8 +721,8 @@ public:
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-            Fixate_timer = 2000;
-            Beam_timer = 3000;
+            Fixate_timer = 500;
+            Beam_timer = 1500;
             Pulse_timer = 5000;
             Despawn_timer = 15000;
             Slicer_timer = 5000;
@@ -800,9 +800,8 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
-                    me->getVictim()->CastSpell(me,35371,true); // White beam
-
+                if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
+                    me->CastSpell(me->getVictim(),35371,true); // White beam
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
@@ -878,8 +877,8 @@ public:
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-            Fixate_timer = 2500;
-            Beam_timer = 3000;
+            Fixate_timer = 1000;
+            Beam_timer = 1500;
             Pulse_timer = 5000;
             Despawn_timer = 15000;
             me->SetSpeed(MOVE_RUN,0.65f);
@@ -966,8 +965,9 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
-                    me->CastSpell(me->getVictim(),35371,true); // White beam
+                if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
+                    me->getVictim()->CastSpell(me,35371,true); // White beam
+
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
@@ -1060,7 +1060,7 @@ public:
 
                 uint32 stack_number = victim->GetAuraCount(SPELL_TWILIGHTT_SPIT); // save stacks of spit on target
                 me->CastSpell(victim,SPELL_TWILIGHTT_SPIT,true); // Cast spell, cause we want damage efffect of that spell
-                victim->RemoveAurasDueToSpell(SPELL_TWILIGHTT_SPIT);
+                victim->RemoveAura(SPELL_TWILIGHTT_SPIT); // do not use removeaurasduetospell !!!! can cycle server due to wrack mechanic
                 if(stack_number < 99 )
                     me->SetAuraStack(SPELL_TWILIGHTT_SPIT,victim,stack_number + 1 );
             }
@@ -1698,10 +1698,10 @@ public:
                 if(aurEff->GetTickNumber() < 3) // Prevent from Mass dispelling
                 {
                     bp1 += 1000; // Increase duration by second
-                    target->CastCustomSpell(target,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
+                    caster->CastCustomSpell(caster,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
                 }
                 else // Regular dispel
-                    target->CastCustomSpell(target,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
+                    caster->CastCustomSpell(caster,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
             }
         }
 
