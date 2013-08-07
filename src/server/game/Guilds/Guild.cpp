@@ -2954,20 +2954,48 @@ void Guild::HandleRemoveRank(WorldSession* session, uint8 rankId)
         SendCommandResult(session, GUILD_COMMAND_CREATE, ERR_GUILD_PERMISSIONS);
     else
     {
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
         //uint8 rankId = _GetLowestRankId();
         // Delete bank rights for rank
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_RIGHTS_FOR_RANK);
         stmt->setUInt32(0, m_id);
         stmt->setUInt8 (1, rankId);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
         // Delete rank
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_LOWEST_RANK);
         stmt->setUInt32(0, m_id);
         stmt->setUInt8 (1, rankId);
-        CharacterDatabase.Execute(stmt);
+        trans->Append(stmt);
+        //Move members to the new correct position
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_MOVE_GUILD_BANK_RIGHT);
+        stmt->setUInt32(0, m_id);
+        stmt->setUInt8 (1, rankId);
+        trans->Append(stmt);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_MOVE_GUILD_LOWEST_RANK);
+        stmt->setUInt32(0, m_id);
+        stmt->setUInt8 (1, rankId);
+        trans->Append(stmt);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_MOVE_GUILD_MEMBER);
+        stmt->setUInt32(0, m_id);
+        stmt->setUInt8 (1, rankId);
+        trans->Append(stmt);
+
+        CharacterDatabase.CommitTransaction(trans);
 
         m_ranks.erase(m_ranks.begin()+rankId);
-
+        Members::const_iterator itr;
+        for(itr = m_members.begin(); itr != m_members.end(); itr++)
+        {
+            if(itr->second->GetRankId()>rankId)
+                itr->second->ChangeRank(itr->second->GetRankId()-1);
+        }
+        Ranks::iterator itr2;
+        for(itr2 = m_ranks.begin(); itr2 != m_ranks.end(); itr2++)
+        {
+            if(itr2->GetId()>rankId)
+                itr2->SetId(itr2->GetId()-1);
+        }
         _BroadcastEvent(GE_RANK_DELETED, rankId);
     }
 }

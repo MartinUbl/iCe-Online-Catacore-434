@@ -609,6 +609,7 @@ private:
         void WritePacket(WorldPacket& data) const;
 
         uint8 GetId() const { return m_rankId; }
+        void SetId(uint8 newId){ m_rankId=newId; }
 
         std::string GetName() const { return m_name; }
         void SetName(const std::string& name);
