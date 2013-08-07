@@ -83,10 +83,10 @@ enum Creatures
 
 enum actions
 {
-    DO_REMOVE       = 0,
-    DO_CHANGE_PHASE = 1,
-    DO_CALEN_DIED   = 2,
-    DO_WIN          = 3
+    DO_REMOVE       = 70000, // Just to be sure that values are greater than 60000 -> duration of wrack
+    DO_CHANGE_PHASE = 70001,
+    DO_CALEN_DIED   = 70002,
+    DO_WIN          = 70003,
 };
 
 # define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
@@ -178,9 +178,14 @@ public:
             {
                 eggs_dead ++;
             }
-            else if ( param == DO_CALEN_DIED)
+            else if (param == DO_CALEN_DIED)
             {
                 eggs_dead = 2; // Lets continue to PHASE 3 if Calen died
+            }
+            else // Set duration for wrack
+            {
+                if(param)
+                    SpreadWrack(param);
             }
         }
 
@@ -243,6 +248,71 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
         }
+
+        void SpreadWrack(int32 restDuration)
+        {
+            std::list<Player*> spread_targets;
+            std::list<Player*> backup_targets;
+
+            std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+            {
+                if ( Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                {
+                    Player * p = unit->ToPlayer();
+                    if (p)
+                    {
+                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
+                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
+                        {
+                            if (p->HasAura(89421) || p->HasAura(92955)) // If have wrack push him to backup player list
+                                backup_targets.push_back(p);
+                            else
+                                spread_targets.push_back(p); // Players without wrack
+                        }
+                    }
+                }
+            }
+
+            uint8 valid_players = 0;
+
+            if(!spread_targets.empty())
+            {
+                for (std::list<Player*>::const_iterator itr = spread_targets.begin(); itr!= spread_targets.end(); ++itr)
+                {
+                    if(valid_players == 2)
+                        break;
+
+                    if ((*itr) && (*itr)->IsInWorld())
+                    {
+                        valid_players++;
+                        me->CastSpell((*itr),89421,true); // Wrack
+                        Aura * a = (*itr)->GetAura(89421);
+                        if(a)
+                            a->SetDuration(restDuration);
+                    }
+                }
+            }
+
+            if(!backup_targets.empty() && valid_players < 2)
+            {
+                for (std::list<Player*>::const_iterator itr = backup_targets.begin(); itr!= backup_targets.end(); ++itr)
+                {
+                    if(valid_players == 2)
+                        break;
+
+                    if ((*itr) && (*itr)->IsInWorld())
+                    {
+                        valid_players++;
+                        me->CastSpell((*itr),89421,true); // Wrack
+                        Aura * a = (*itr)->GetAura(89421);
+                        if(a)
+                            a->SetDuration(restDuration);
+                    }
+                }
+            }
+        }
+
 
         void KilledUnit(Unit * victim)
         {
@@ -339,7 +409,7 @@ public:
                     if (p && p->IsInWorld() == true)
                     {
                         if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
-                            && p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL        &&  p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
+                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) &&  p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
                         {
                             wrack_targets.push_back(p);
                         }
@@ -354,11 +424,11 @@ public:
                 if (*j && (*j)->IsInWorld() == true )
                     me->CastSpell(*j,SPELL_WRACK,true);
             }
-            else
+            /*else
             {
                 if ( Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
                     me->CastSpell(player,SPELL_WRACK,true);
-            }
+            }*/
         }
 
         void UpdateAI(const uint32 Diff)
@@ -656,7 +726,7 @@ public:
             if (Wrack_timer <= Diff)
             {
                 CastWrack();
-                Wrack_timer= 62000;
+                Wrack_timer= 65000;
             }
             else Wrack_timer -= Diff;
 
@@ -1677,37 +1747,27 @@ public:
             }
         }
 
-        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-                aurEff->GetBase()->SetDuration(aurEff->GetAmount());
-        }
-
         void OnDispel(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
+
+            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK) // Anti  "Recursion" after recasting spell in AI
+                return;
+
             if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
             {
                 Unit* caster = aurEff->GetCaster();
-                Unit* target = GetTarget();
-
-                if(!caster || !target)
+                if (!caster)
                     return;
 
-                int32 bp0 = 2000;
-                int32 bp1 = aurEff->GetBase()->GetDuration();
-
-                if(aurEff->GetTickNumber() < 3) // Prevent from Mass dispelling
+                if (Creature * pSinestra = caster->ToCreature())
                 {
-                    bp1 += 1000; // Increase duration by second
-                    caster->CastCustomSpell(caster,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
+                    pSinestra->AI()->DoAction(aurEff->GetBase()->GetDuration()); // Spreading of wrack is handling in Sinestra's AI
                 }
-                else // Regular dispel
-                    caster->CastCustomSpell(caster,89435,&bp0,&bp1,NULL,true,NULL,NULL,caster->GetGUID());
             }
         }
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_gen_wrack_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_wrack_AuraScript::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_wrack_AuraScript::OnDispel, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }

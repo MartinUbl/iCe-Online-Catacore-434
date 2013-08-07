@@ -3244,33 +3244,6 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
-                        case 89435: // Wrack ( Sinestra encounter )
-                        case 92956:
-                        {
-                            uint32 counter = 0;
-
-                            // Exclude players with tank spec
-                            for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
-                            {
-                                if ( (*itr)->GetTypeId() == TYPEID_PLAYER && m_caster ) // Only players can be affected
-                                {
-                                    Player * p = (*itr)->ToPlayer();
-                                    if (p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD
-                                    || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) || counter == 2  ) // Max 2 jump targets
-                                    {
-                                        itr = unitList.erase(itr);
-                                    }
-                                    else
-                                    {
-                                        ++itr;
-                                        counter++; // Increment targets hit 
-                                    }
-                                }
-                                else
-                                    itr = unitList.erase(itr);
-                            }
-                            break;
-                        }
                         case 58836: // Initialize Images (Mirror Image)
                         {
                             if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
