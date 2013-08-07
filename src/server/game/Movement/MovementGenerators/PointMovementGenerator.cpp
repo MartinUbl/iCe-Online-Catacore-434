@@ -64,6 +64,10 @@ bool PointMovementGenerator<T>::Update(T* unit, const uint32& /*diff*/)
 template<class T>
 void PointMovementGenerator<T>::Finalize(T* unit)
 {
+    // if we charged when falling, do not take full fall damage
+    if (unit->hasUnitState(UNIT_STAT_CHARGING) && unit->GetTypeId() == TYPEID_PLAYER)
+        unit->ToPlayer()->SetFallInformation(0, unit->GetPositionZ());
+
     unit->clearUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE|UNIT_STAT_CHARGING);
 
     if (unit->movespline->Finalized())
