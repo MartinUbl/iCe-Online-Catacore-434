@@ -2790,7 +2790,8 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
             continue;
         UnitList targetList;
         // non-area aura
-        if (GetSpellProto()->Effect[effIndex] == SPELL_EFFECT_APPLY_AURA)
+        uint32 effect = GetSpellProto()->Effect[effIndex];
+        if (effect == SPELL_EFFECT_APPLY_AURA || effect == SPELL_EFFECT_APPLY_AURA_FORCED)
         {
             targetList.push_back(GetUnitOwner());
         }

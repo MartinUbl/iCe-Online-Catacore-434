@@ -458,7 +458,7 @@ inline bool HasAreaAuraEffect(SpellEntry const *spellInfo)
 
 inline bool IsUnitOwnedAuraEffect(uint32 effect)
 {
-    return (IsAreaAuraEffect(effect) || effect == SPELL_EFFECT_APPLY_AURA);
+    return (IsAreaAuraEffect(effect) || effect == SPELL_EFFECT_APPLY_AURA || effect == SPELL_EFFECT_APPLY_AURA_FORCED);
 }
 
 inline bool IsDispel(SpellEntry const *spellInfo)

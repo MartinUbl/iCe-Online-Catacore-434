@@ -250,7 +250,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //171
     &Spell::EffectResurrect,                                //172 SPELL_EFFECT_MASS_RESURRECT
     &Spell::EffectActivateGuildBankSlot,                    //173 SPELL_EFFECT_ACTIVATE_GUILD_BANK_SLOT
-    &Spell::EffectNULL,                                     //174
+    &Spell::EffectApplyAura,                                //174 SPELL_EFFECT_APPLY_AURA_FORCED
     &Spell::EffectUnused,                                   //175 unused
     &Spell::EffectSanctuary,                                //176 SPELL_EFFECT_SANCTUARY_2
     &Spell::EffectNULL,                                     //177
@@ -3977,6 +3977,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     return;
                 }
             }
+            break;
         }
         case SPELLFAMILY_ROGUE:
         {
