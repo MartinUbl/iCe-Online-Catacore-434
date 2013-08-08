@@ -7237,14 +7237,13 @@ void AuraEffect::HandleShieldBlockValue(AuraApplication const *aurApp, uint8 mod
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
+    if (GetAuraType() == SPELL_AURA_MOD_SHIELD_BLOCKVALUE)
+        return;     // former flat bonus to shield block value, does not exist on available spells and items in Cataclysm
+
     Unit *target = aurApp->GetTarget();
 
-    BaseModType modType = FLAT_MOD;
-    if (GetAuraType() == SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT)
-        modType = PCT_MOD;
-
     if (target->GetTypeId() == TYPEID_PLAYER)
-        target->ToPlayer()->HandleBaseModValue(SHIELD_BLOCK_VALUE, modType, float(GetAmount()), apply);
+        target->ToPlayer()->UpdateShieldBlockValue();   // update the value in character info
 }
 
 /********************************/

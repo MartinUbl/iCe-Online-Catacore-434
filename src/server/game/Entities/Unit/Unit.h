@@ -430,7 +430,7 @@ enum BaseModGroup
     CRIT_PERCENTAGE,
     RANGED_CRIT_PERCENTAGE,
     OFFHAND_CRIT_PERCENTAGE,
-    SHIELD_BLOCK_VALUE,
+    //SHIELD_BLOCK_VALUE,
     BASEMOD_END
 };
 
@@ -1408,21 +1408,10 @@ class Unit : public WorldObject
             return true;
         }
 
-        virtual uint32 GetShieldBlockValue() const =0;
-        uint32 GetShieldBlockValue(uint32 soft_cap, uint32 hard_cap) const
-        {
-            uint32 value = GetShieldBlockValue();
-            if (value >= hard_cap)
-            {
-                value = (soft_cap + hard_cap) / 2;
-            }
-            else if (value > soft_cap)
-            {
-                value = soft_cap + ((value - soft_cap) / 2);
-            }
+        // returns percentage of damage blocked
+        uint32 GetShieldBlockValue() const;
+        uint32 CalculateBlockedAmount(uint32 damage);
 
-            return value;
-        }
         uint32 GetUnitMeleeSkill(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         uint32 GetDefenseSkillValue(Unit const* target = NULL) const;
         float GetWeaponProcChance() const;

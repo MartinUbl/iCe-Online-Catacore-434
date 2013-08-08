@@ -489,7 +489,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
 void Player::UpdateShieldBlockValue()
 {
-    SetUInt32Value(PLAYER_SHIELD_BLOCK, 30+GetTotalAuraModifier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT));
+    SetUInt32Value(PLAYER_SHIELD_BLOCK, GetShieldBlockValue());
 }
 
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage)

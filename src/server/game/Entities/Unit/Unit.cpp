@@ -1233,12 +1233,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 dama
                 // Spell weapon based damage CAN BE crit & blocked at same time
                 if (blocked)
                 {
-                    damageInfo->blocked = pVictim->GetShieldBlockValue();
-                    //double blocked amount if block is critical
-                    if (pVictim->isBlockCritical())
-                        damageInfo->blocked += damageInfo->blocked;
-                    if (damage < int32(damageInfo->blocked))
-                        damageInfo->blocked = uint32(damage);
+                    damageInfo->blocked = pVictim->CalculateBlockedAmount(damage);
                     damage -= damageInfo->blocked;
                 }
 
@@ -1488,10 +1483,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
                 damageInfo->TargetState = VICTIMSTATE_HIT;
                 damageInfo->HitInfo    |= HITINFO_BLOCK;
                 damageInfo->procEx     |= PROC_EX_BLOCK;
-                damageInfo->blocked_amount = damageInfo->damage * (0.3f + damageInfo->target->GetTotalAuraModifier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT)/100.0f);
-                // double blocked amount if block is critical
-                if (damageInfo->target->isBlockCritical())
-                    damageInfo->blocked_amount+=damageInfo->blocked_amount;
+                damageInfo->blocked_amount = damageInfo->target->CalculateBlockedAmount(damageInfo->damage);
 
                 damageInfo->procEx  |= PROC_EX_NORMAL_HIT;
                 damageInfo->damage      -= damageInfo->blocked_amount;
@@ -2603,6 +2595,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 
     bool canDodge = true;
     bool canParry = true;
+
+    // spells with this attribute can be fully blocked (they usually have other effects than doing damage)
     bool canBlock = spell->AttributesEx3 & SPELL_ATTR3_BLOCKABLE_SPELL;
 
     // Same spells cannot be parry/dodge
@@ -2884,6 +2878,30 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
             return MagicSpellHitResult(pVictim, spell);
     }
     return SPELL_MISS_NONE;
+}
+
+uint32 Unit::GetShieldBlockValue() const
+{
+    using namespace std;
+
+    int32 ratio = 30 + GetTotalAuraModifier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT);
+    ratio = max(0, ratio);
+    ratio = min(100, ratio);
+    return (uint32) ratio;
+}
+
+uint32 Unit::CalculateBlockedAmount(uint32 damage)
+{
+    float blockRatio = GetShieldBlockValue() / 100.0f;
+
+    //double blocked amount if block is critical
+    if (isBlockCritical())
+        blockRatio *= 2;
+
+    if (blockRatio > 1)
+        blockRatio = 1;
+
+    return uint32(blockRatio * damage);
 }
 
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
