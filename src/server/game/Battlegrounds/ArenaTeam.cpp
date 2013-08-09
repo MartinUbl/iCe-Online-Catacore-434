@@ -694,7 +694,13 @@ int32 ArenaTeam::GetMatchMakerRatingMod(uint32 own_rating, uint32 enemy_rating, 
     if (own_rating + mod < 1)
         mod = -float(own_rating) + 1;
 
-    return (int32)ceil(mod);
+    // this condition makes sure that the average MMR remains 1500
+    // (values of rating gain and loss of opponent team are equal)
+    // TODO: it is needed to compute it for only one team, the second one has the same with opposite sign (+/-)
+    if (won)
+        return (int32)ceil(mod);
+    else
+        return (int32)floor(mod);
 }
 
 int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_matchmaker_rating, bool won)
@@ -716,7 +722,10 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_matchmaker_rating,
             mod *= 0.5f;
     }
 
-    return (int32)ceil(mod);
+    if (won)
+        return (int32)ceil(mod);
+    else
+        return (int32)floor(mod);
 }
 
 void ArenaTeam::FinishGame(int32 teamRatingMod)
