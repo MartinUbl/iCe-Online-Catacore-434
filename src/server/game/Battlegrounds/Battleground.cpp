@@ -789,6 +789,12 @@ void Battleground::EndBattleground(uint32 winner)
                     winner_matchmaker_rating, loser_matchmaker_rating, winner_change, loser_change);
                 //SetArenaTeamRatingChangeForTeam(winner, winner_change);
                 //SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+
+                CharacterDatabase.PExecute("INSERT INTO arena_log_team VALUES ('%u', '%u', '%d', '%d', NOW())",
+                                            winner_arena_team->GetId(),
+                                            loser_arena_team->GetId(),
+                                            int32(winner_team_rating+winner_change),
+                                            int32(loser_team_rating+loser_change) >= 0 ? int32(loser_team_rating+loser_change) : 0);
             }
             // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
             else
