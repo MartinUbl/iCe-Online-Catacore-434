@@ -4475,6 +4475,33 @@ class npc_summon_infernal: public CreatureScript
         }
 };
 
+// NPC spawned by item Moonwell Chalice (70142)
+class npc_moonwell_chalice: public CreatureScript
+{
+    public:
+        npc_moonwell_chalice(): CreatureScript("npc_moonwell_chalice") {}
+        CreatureAI *GetAI(Creature *c) const { return new npc_moonwell_ai(c); }
+
+    private:
+        class npc_moonwell_ai: public Scripted_NoMovementAI
+        {
+        public:
+            npc_moonwell_ai(Creature *c): Scripted_NoMovementAI(c) {}
+        protected:
+            virtual void IsSummonedBy(Unit *summoner)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->addUnitState(UNIT_STAT_ROOT);
+                me->CastSpell(me, 100403, false);
+            }
+            virtual void EnterEvadeMode()
+            {
+                // do nothing, entering evade mode would interrupt the spell
+            }
+        };
+};
+
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -4528,4 +4555,5 @@ void AddSC_npcs_special()
     new npc_title_map_restorer;
     new npc_summon_doomguard;
     new npc_summon_infernal;
+    new npc_moonwell_chalice;
 }
