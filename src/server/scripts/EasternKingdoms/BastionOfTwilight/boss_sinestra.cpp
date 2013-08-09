@@ -1753,7 +1753,7 @@ public:
             if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK) // Anti  "Recursion" after recasting spell in AI
                 return;
 
-            if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
+            if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
             {
                 Unit* caster = aurEff->GetCaster();
                 if (!caster)
