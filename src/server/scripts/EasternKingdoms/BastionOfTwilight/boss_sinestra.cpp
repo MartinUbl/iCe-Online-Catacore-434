@@ -170,15 +170,17 @@ public:
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,0.001f); // Avoid aggro on wipe
 
             if(instance)
-            if(instance->GetData(DATA_SINESTRA_INTRO) == 0 )
             {
-                me->SetVisible(false);
-                Animation_timer = 11000;// Emerge animation time
-            }
-            else
-            {
-                me->SetVisible(true);
-                Animation_timer = 0;
+                if(instance->GetData(DATA_SINESTRA_INTRO) == 0 )
+                {
+                    me->SetVisible(false);
+                    Animation_timer = 11000;// Emerge animation time
+                }
+                else
+                {
+                    me->SetVisible(true);
+                    Animation_timer = 0;
+                }
             }
 
             Flame_breath_timer = Animation_timer + 21000;
