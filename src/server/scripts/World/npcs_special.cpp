@@ -1859,7 +1859,15 @@ public:
 
     struct npc_mirror_imageAI : CasterAI
     {
-        npc_mirror_imageAI(Creature *c) : CasterAI(c) { castCounter = 0; }
+        npc_mirror_imageAI(Creature *c) : CasterAI(c) 
+        {
+            if(me->GetEntry() == 53438) // Image mirror from T12 2P set bonus
+            {
+                me->SetMaxHealth(3500); // Should have only 3500 HP
+                me->SetFullHealth();
+            }
+            castCounter = 0; 
+        }
 
         Unit* owner;
         uint32 castCounter;
@@ -1874,6 +1882,11 @@ public:
 
             if (owner->GetTypeId() != TYPEID_PLAYER)
                 return;
+
+            if(me->GetEntry() == 53438) // Image mirror from T12 2P set bonus
+            {
+                me->CastSpell(me, 63623, true); // Have avoidance
+            }
 
             // Inherit Master's Threat List (not yet implemented)
             owner->CastSpell((Unit*)NULL, 58838, true);
@@ -1939,24 +1952,31 @@ public:
 
             if (!me->hasUnitState(UNIT_STAT_CASTING))
             {
-                uint32 spellToCast = 59638; // Frostbolt
-
-                // Glyph of Mirror Image
-                if (owner->HasAura(63093))
+                if(me->GetEntry() == 53438 ) // Mage T12 2P Bonus, this image is kinda different
                 {
-                    if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_ARCANE)
-                        spellToCast = 59257; // Arcane Blast (probably right id)
-                    else if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_FIRE)
-                        spellToCast = 59994; // Fireball
+                    me->CastSpell(me->getVictim(), 99062, false); // Should use Fireball wich hit's around 6-7k
                 }
+                else
+                {
+                    uint32 spellToCast = 59638; // Frostbolt
 
-                if (castCounter % 2 == 0)
-                    if (urand(0,2) > 0)
-                        spellToCast = 59637; // Fire Blast (sometimes casts instead of main spell)
+                    // Glyph of Mirror Image
+                    if (owner->HasAura(63093))
+                    {
+                        if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_ARCANE)
+                            spellToCast = 59257; // Arcane Blast (probably right id)
+                        else if (owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_FIRE)
+                            spellToCast = 59994; // Fireball
+                    }
 
-                me->CastSpell(me->getVictim(), spellToCast, false);
+                    if (castCounter % 2 == 0)
+                        if (urand(0,2) > 0)
+                            spellToCast = 59637; // Fire Blast (sometimes casts instead of main spell)
 
-                castCounter++;
+                    me->CastSpell(me->getVictim(), spellToCast, false);
+
+                    castCounter++;
+                }
             }
         }
     };

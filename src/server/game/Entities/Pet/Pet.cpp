@@ -1087,6 +1087,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 31216: // Mirror Image
+                case 53438: // Mirror Image from T12 2P set
                 {
                     SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
 

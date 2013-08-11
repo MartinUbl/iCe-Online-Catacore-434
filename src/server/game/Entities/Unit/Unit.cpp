@@ -8779,6 +8779,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                             return false;
                     }
                 }
+                if(auraSpellInfo->Id == 99061) // Mage T12 2P Bonus
+                {
+                    CastSpell(this,58836,true); // Initialize image
+
+                    if(ToPlayer() && ToPlayer()->HasSpellCooldown(99063)) // 45 seconds internal cooldown
+                        return false;
+
+                    if(this->ToPlayer())
+                        this->ToPlayer()->AddSpellCooldown(99063,0,45000); // 45 seconds internal cooldown
+
+                    break;
+                }
                 break;
             case SPELLFAMILY_WARRIOR:
                 if (auraSpellInfo->Id == 50421)             // Scent of Blood
