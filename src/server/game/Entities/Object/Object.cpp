@@ -301,7 +301,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     bool hasTransportTime3 = false;
     uint32 transportTime2 = 0;
     uint32 transportTime3 = 0;
-    uint32 goTransportTime = getMSTime(); // we don't know what belongs to this field, getMSTime is therefore wrong
 
     // Bit content
     data->WriteBit(0);
@@ -600,7 +599,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     //}
 
     if (flags & UPDATEFLAG_HAS_GO_TRANSPORT_TIME)
-        *data << uint32(goTransportTime);
+    {
+        GameObject const* go = ToGameObject();
+        if (go && go->IsTransport())
+            *data << uint32(go->GetGOValue()->Transport.PathProgress);
+        else
+            *data << uint32(getMSTime());
+    }
 }
 
 void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
@@ -611,13 +616,15 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     bool IsActivateToQuest = false;
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
-        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsDynTransport())
+        if (isType(TYPEMASK_GAMEOBJECT))
         {
-            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+            if (!ToGameObject()->IsTransport() && (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster()))
                 IsActivateToQuest = true;
 
             if (((GameObject*)this)->GetGoArtKit())
                 updateMask->SetBit(GAMEOBJECT_BYTES_1);
+
+            updateMask->SetBit(GAMEOBJECT_DYNAMIC);
         }
         else if (isType(TYPEMASK_UNIT))
         {
@@ -627,16 +634,17 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
     }
     else                                                    // case UPDATETYPE_VALUES
     {
-        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        if (isType(TYPEMASK_GAMEOBJECT))
         {
-            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+            if (!((GameObject*)this)->IsTransport() && (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster()))
                 IsActivateToQuest = true;
-
-            updateMask->SetBit(GAMEOBJECT_BYTES_1);
 
             if (ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_CHEST && ToGameObject()->GetGOInfo()->chest.groupLootRules/* &&
                 ToGameObject()->HasLootRecipient()*/)
                 updateMask->SetBit(GAMEOBJECT_FLAGS);
+
+            updateMask->SetBit(GAMEOBJECT_DYNAMIC);
+            updateMask->SetBit(GAMEOBJECT_BYTES_1);
         }
         else if (isType(TYPEMASK_UNIT))
         {
@@ -828,35 +836,41 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 // send in current format (float as float, uint32 as uint32)
                 if (index == GAMEOBJECT_DYNAMIC)
                 {
+                    uint16 dynflags_lo = 0;
+
                     if (IsActivateToQuest)
                     {
                         switch (ToGameObject()->GetGoType())
                         {
                             case GAMEOBJECT_TYPE_CHEST:
                                 if (target->isGameMaster())
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                    dynflags_lo |= GO_DYNFLAG_LO_ACTIVATE;
                                 else
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+                                    dynflags_lo |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
                                 break;
                             case GAMEOBJECT_TYPE_GENERIC:
-                                if (target->isGameMaster())
-                                    *data << uint16(0);
-                                else
-                                    *data << uint16(GO_DYNFLAG_LO_SPARKLE);
+                                if (!target->isGameMaster())
+                                    dynflags_lo |= GO_DYNFLAG_LO_SPARKLE;
                                 break;
                             case GAMEOBJECT_TYPE_GOOBER:
                                 if (target->isGameMaster())
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                    dynflags_lo |= GO_DYNFLAG_LO_ACTIVATE;
                                 else
-                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
-                                break;
-                            default:
-                                *data << uint16(0); // unknown, not happen.
+                                    dynflags_lo |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
                                 break;
                         }
                     }
-                    else
-                        *data << uint16(0);         // disable quest object
+
+                    switch (ToGameObject()->GetGoType())
+                    {
+                        case GAMEOBJECT_TYPE_TRANSPORT:
+                        case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                            if (ToGameObject()->GetGoState() != GO_STATE_READY)
+                                dynflags_lo |= GO_DYNFLAG_LO_STOPPED;
+                            break;
+                    }
+
+                    *data << dynflags_lo;
 
                     *data << uint16(-1);
                 }

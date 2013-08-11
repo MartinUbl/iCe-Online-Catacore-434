@@ -23,12 +23,64 @@
 #ifndef TRANSPORTS_H
 #define TRANSPORTS_H
 
+#include <ace/Singleton.h>
+
 #include "GameObject.h"
 #include "Vehicle.h"
+#include "Spline.h"
+#include "DBCStores.h"
+#include <G3D/Quat.h>
 
 #include <map>
 #include <set>
 #include <string>
+
+typedef Movement::Spline<double>                 TransportSpline;
+
+typedef std::map<uint32, TransportAnimationEntry const*> TransportPathContainer;
+typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationContainer;
+
+struct TransportAnimation
+{
+    TransportPathContainer Path;
+    TransportPathRotationContainer Rotations;
+    uint32 TotalTime;
+
+    TransportAnimationEntry const* GetAnimNode(uint32 time) const;
+    G3D::Quat GetAnimRotation(uint32 time) const;
+};
+
+typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;
+
+// a little parody to TrinityCore TransportMgr, we use it because of fewer things
+class TransportMovementMgr
+{
+        friend class ACE_Singleton<TransportMovementMgr, ACE_Thread_Mutex>;
+        friend void LoadDBCStores(std::string const&);
+
+    public:
+
+        TransportAnimation const* GetTransportAnimInfo(uint32 entry) const
+        {
+            TransportAnimationContainer::const_iterator itr = _transportAnimations.find(entry);
+            if (itr != _transportAnimations.end())
+                return &itr->second;
+
+            return NULL;
+        }
+
+    private:
+
+        void AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node);
+        void AddPathRotationToTransport(uint32 transportEntry, uint32 timeSeg, TransportRotationEntry const* node)
+        {
+            _transportAnimations[transportEntry].Rotations[timeSeg] = node;
+        }
+
+        TransportAnimationContainer _transportAnimations;
+};
+
+#define sTransportMgr ACE_Singleton<TransportMovementMgr, ACE_Thread_Mutex>::instance()
 
 class Transport : public GameObject, public TransportBase
 {

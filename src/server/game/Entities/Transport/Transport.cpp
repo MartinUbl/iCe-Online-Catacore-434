@@ -33,6 +33,52 @@
 #include "World.h"
 #include "GameObjectAI.h"
 
+void TransportMovementMgr::AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node)
+{
+    if (_transportAnimations.find(transportEntry) == _transportAnimations.end())
+    {
+        _transportAnimations[transportEntry].Path.clear();
+        _transportAnimations[transportEntry].Rotations.clear();
+        _transportAnimations[transportEntry].TotalTime = 0;
+    }
+
+    TransportAnimation& animNode = _transportAnimations[transportEntry];
+    if (animNode.TotalTime < timeSeg)
+        animNode.TotalTime = timeSeg;
+
+    animNode.Path[timeSeg] = node;
+}
+
+TransportAnimationEntry const* TransportAnimation::GetAnimNode(uint32 time) const
+{
+    if (Path.empty())
+        return NULL;
+
+    for (TransportPathContainer::const_reverse_iterator itr2 = Path.rbegin(); itr2 != Path.rend(); ++itr2)
+        if (time >= itr2->first)
+            return itr2->second;
+
+    return Path.begin()->second;
+}
+
+G3D::Quat TransportAnimation::GetAnimRotation(uint32 time) const
+{
+    if (Rotations.empty())
+        return G3D::Quat(0.0f, 0.0f, 0.0f, 1.0f);
+
+    TransportRotationEntry const* rot = Rotations.begin()->second;
+    for (TransportPathRotationContainer::const_reverse_iterator itr2 = Rotations.rbegin(); itr2 != Rotations.rend(); ++itr2)
+    {
+        if (time >= itr2->first)
+        {
+            rot = itr2->second;
+            break;
+        }
+    }
+
+    return G3D::Quat(rot->X, rot->Y, rot->Z, rot->W);
+}
+
 void MapManager::LoadTransports()
 {
     QueryResult result = WorldDatabase.Query("SELECT guid, entry, name, period, ScriptName FROM transports");
@@ -228,6 +274,8 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetGoAnimProgress(animprogress);
     if (dynflags)
         SetUInt32Value(GAMEOBJECT_DYNAMIC, MAKE_PAIR32(0, dynflags));
+
+    m_goValue->Transport.PathProgress = 0;
 
     SetName(goinfo->name);
 

@@ -46,6 +46,7 @@
 #include "CreatureAISelector.h"
 #include "GameObjectModel.h"
 #include "DynamicTree.h"
+#include "Transport.h"
 
 GameObject::GameObject() : WorldObject(), m_model(NULL), m_goValue(new GameObjectValue), m_AI(NULL)
 {
@@ -201,7 +202,16 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
         return false;
     }
 
-    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    HighGuid hightype = HIGHGUID_GAMEOBJECT;
+    uint32 guidEntry = goinfo->id;
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
+        m_updateFlag = (m_updateFlag | UPDATEFLAG_HAS_GO_TRANSPORT_TIME)/* & ~UPDATEFLAG_HAS_STATIONARY_POSITION*/;
+        hightype = HIGHGUID_MO_TRANSPORT;
+        guidEntry = 0;
+    }
+
+    Object::_Create(guidlow, guidEntry, hightype);
 
     m_goInfo = goinfo;
 
@@ -250,7 +260,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
             if (goinfo->transport.startOpen)
                 SetGoState(GO_STATE_ACTIVE);
+            else
+                SetGoState(GO_STATE_READY);
             SetGoAnimProgress(animprogress);
+            m_goValue->Transport.PathProgress = 0;
+            m_goValue->Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->id);
+            m_goValue->Transport.CurrentSeg = 0;
             break;
         case GAMEOBJECT_TYPE_FISHINGNODE:
             SetGoAnimProgress(0);
@@ -276,6 +291,29 @@ void GameObject::Update(uint32 diff)
 
     if (IS_MO_TRANSPORT(GetGUID()))
     {
+        // independent on loot state
+        switch (GetGoType())
+        {
+            case GAMEOBJECT_TYPE_TRANSPORT:
+            {
+                if (!m_goValue->Transport.AnimationInfo)
+                    break;
+
+                if (GetGoState() == GO_STATE_READY)
+                {
+                    m_goValue->Transport.PathProgress += diff;
+                    uint32 timer = m_goValue->Transport.PathProgress % m_goValue->Transport.AnimationInfo->TotalTime;
+                    TransportAnimationEntry const* node = m_goValue->Transport.AnimationInfo->GetAnimNode(timer);
+                    if (node && m_goValue->Transport.CurrentSeg != node->TimeSeg)
+                    {
+                        m_goValue->Transport.CurrentSeg = node->TimeSeg;
+                    }
+                }
+            }
+            default:
+                break;
+        }
+
         //((Transport*)this)->Update(p_time);
         return;
     }
@@ -586,6 +624,7 @@ void GameObject::Update(uint32 diff)
             break;
         }
     }
+
     sScriptMgr->OnGameObjectUpdate(this, diff);
 }
 
