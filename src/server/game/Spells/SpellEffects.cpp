@@ -5049,6 +5049,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         case 99131:                                         // Divine Fire - Priest T12 Healer 2P Bonus
         case 99069:                                         // Fires of Heaven - Paladin T12 Healer 2P Bonus
         case 99007:                                         // Heartfire - Druid T12 Healer 2P bonus
+        case 99189:                                         // Flametide - Shaman T12 Restoration 2P Bonus
             damage = damage * unitTarget->GetCreateMana() / 100;
             break;
         case 92601:                                         // Tyrande's favorite doll - Release mana: restore mana
