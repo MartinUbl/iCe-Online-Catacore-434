@@ -4231,6 +4231,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 81288:
             spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
         break;
+        case 99233: // Burning Rage T12 warrior dps bonus
+            spellInfo->DurationIndex = 29; // 12 s 
+        break;
         case 74410: // Arena - Dampening
         case 74411: // Battleground - Dampening
             spellInfo->EffectBasePoints[0] = -10; // - 10 % healing done
