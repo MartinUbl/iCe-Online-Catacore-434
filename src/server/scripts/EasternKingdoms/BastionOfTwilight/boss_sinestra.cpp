@@ -793,7 +793,7 @@ public:
             else Shadow_orb_timer -= Diff;
 
         }
-            if (PHASE != 0 && PHASE != 2 || (PHASE == 3 && CheckTimer <= 4000))
+            if (PHASE == 1 || (PHASE == 3 && CheckTimer <= 4000) )
                 DoMeleeAttackIfReady();
        }
     };
