@@ -106,11 +106,12 @@ public:
 
     struct boss_Elementium_MonstrosityAI : public ScriptedAI
     {
-        boss_Elementium_MonstrosityAI(Creature* creature) : ScriptedAI(creature)
+        boss_Elementium_MonstrosityAI(Creature* creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
         }
 
+        SummonList Summons;
         InstanceScript* instance;
         uint32 Gravity_crush_timer;
         uint32 LiquidIce_timer;
@@ -160,6 +161,11 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
+        void JustSummoned(Creature* summon)
+        {
+            Summons.push_back(summon->GetGUID());
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             me->MonsterYell("BEHOLD YOUR DOOM!", LANG_UNIVERSAL, 0);
@@ -180,6 +186,7 @@ public:
 
         void EnterEvadeMode()
         {
+            Summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             if (GameObject* pGoDoor1 = me->FindNearestGameObject(401930, 500.0f)) // Po wipe despawnem dvere
@@ -210,6 +217,7 @@ public:
 
         void JustDied (Unit * killed)
         {
+            Summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->MonsterYell("Impossible.... ", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20399, false);
@@ -392,7 +400,7 @@ public:
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                 {
                                     if(unit->GetTypeId() == TYPEID_PLAYER )
-                                        unit->GetMotionMaster()->MoveJump(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),0.1f,25.0f);
+                                        unit->GetMotionMaster()->MoveJump(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ()+25,5,20.0f);
                                 }
                     }
                 can_lift=false;
@@ -581,14 +589,6 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(Creature *pMonstr = me->FindNearestCreature(43735, 500, true))
-            {
-                if(!pMonstr->isInCombat() ) // Ak je Monstrosity mrtva alebo nie je v combate despawnem liquid ice plosku
-                    me->ForcedDespawn();
-            }
-            else me->ForcedDespawn();
-
-
             if(Growing_timer<=diff) // Myslim ze kazde 3 sekundy to vychadza najpresnejsie
             {
                 range=3.0f*(1.0f + 0.4f*Stacks);
@@ -889,10 +889,6 @@ public:
                      if(Tele_debug_timer<=diff && !debuged)
                      {
                         DoCast(me,87459); // Visual teleport
-                        me->NearTeleportTo(-1056.21f,-535.33f,877.69f,5.495f);
-                        me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
-                        me->GetMotionMaster()->MoveIdle();
-                        DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
                      else Tele_debug_timer-=diff;
@@ -907,8 +903,8 @@ public:
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
-                                me->NearTeleportTo(-1056.21f,-535.33f,877.69f,5.495f);
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveJump(-1056.21f,-535.33f,877.69f,20,40);
+                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MoveIdle();
                                 DoCast(me,87459); // Visual teleport
                                 me->SummonCreature(ARION_ENTRY,-1051.28f,-599.69f,835.21f, 5.7f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
@@ -920,7 +916,7 @@ public:
                                 if(me->FindNearestCreature(ARION_ENTRY, 500, true) == NULL)
                                 {
                                     me->SetVisible(false);
-                                    me->NearTeleportTo(-1041.3f,-546.18f,835.2f, 5.52f);
+                                    me->GetMotionMaster()->MoveJump(-1041.3f,-546.18f,835.2f,20,40);
                                     PHASE=4;
                                 }
 
@@ -1212,10 +1208,6 @@ public:
                      if(Tele_debug_timer<=diff && !debuged)
                      {
                         DoCast(me,87459); // Visual teleport
-                        me->NearTeleportTo(-1057.72f,-630.95f,877.684f,0.814f);
-                        me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
-                        me->GetMotionMaster()->MoveIdle();
-                        DoCast(me,87459); // Visual teleport
                         debuged=true;
                      }
                      else Tele_debug_timer-=diff;
@@ -1228,10 +1220,11 @@ public:
                                 DoCast(me,87459); // Visual teleport
                                 PHASE=3;
                                 me->SetReactState(REACT_PASSIVE);
+                                me->AttackStop();
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
 
-                                me->NearTeleportTo(-1057.72f,-630.95f,877.684f,0.814f,true);
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveJump(-1057.72f,-630.95f,877.684f,20,40);
+                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MoveIdle();
                                 me->SummonCreature(TERRASTRA_ENTRY,-1053.943f,-569.11f,835.2f, 6.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
                                 DoCast(me,87459); // Visual teleport
@@ -1243,8 +1236,7 @@ public:
                                 if(me->FindNearestCreature(43689, 300, true) == NULL)
                                 {
                                     me->SetVisible(false);
-                                    me->NearTeleportTo(-1043.05f,-614.6f,835.167f, 0.774f);
-                                    me->SendMovementFlagUpdate();
+                                    me->GetMotionMaster()->MoveJump(-1043.05f,-614.6f,835.167f,20,40);
                                     PHASE=4;
                                 }
 
@@ -1390,6 +1382,7 @@ public:
         boss_ArionAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            summonerGUID = 0;
         }
 
         InstanceScript* instance;
@@ -1405,6 +1398,7 @@ public:
         uint32 walk_timer;
         uint32 walk_timer_Feludisu;
         uint32 Update_timer;
+        uint64 summonerGUID;
         Unit* pRod_marked_player;
         bool can_chaining,ported,can_tele,Hp_dropped,can_interrupt,update_movement;
 
@@ -1449,6 +1443,12 @@ public:
             me->MonsterYell("Enough of this foolishness!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20237, false);
             DoCast(me,87459); // Visual teleport
+        }
+
+        void IsSummonedBy(Unit* pSummoner)
+        {
+            if (pSummoner && pSummoner->ToCreature())
+                summonerGUID = pSummoner->GetGUID();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -1506,7 +1506,8 @@ public:
                             position=i;
                         }
                     }
-                    me->NearTeleportTo(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation());
+                    // NearTeleport not working :(
+                    //me->NearTeleportTo(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation());
                     update_movement=true;
                     Update_timer=500;
                     can_interrupt=true;
@@ -1637,20 +1638,17 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                                Creature * pIgnac = NULL;
-
-                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
-                                    pIgnac = me->ToTempSummon()->GetSummoner()->ToCreature();
+                                Unit * pIgnac = Unit::GetUnit(*me,summonerGUID);
 
                                 if(pIgnac)
                                 {
-                                    pIgnac->NearTeleportTo(-1029.52f,-561.7f,831.92f,5.52f);
-                                    pIgnac->InterruptNonMeleeSpells(true);
+                                    pIgnac->GetMotionMaster()->MoveJump(-1029.52f,-561.7f,831.92f,20,40); // Ignac ?
+                                    pIgnac->InterruptNonMeleeSpells(false);
                                     pIgnac->SetSpeed(MOVE_RUN,1.5f,true);
                                     pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
                                 }
 
-                                me->InterruptNonMeleeSpells(true);
+                                me->InterruptNonMeleeSpells(false);
                                 DoCast(me->getVictim(),82285); // Elemental stasis
 
                                 // V tretej faze maju hracom opadnut debuffy  ( grounded /swirling winds )
@@ -1671,9 +1669,9 @@ public:
                                 me->SetReactState(REACT_PASSIVE);
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->AttackStop();
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveJump(-987.17f,-561.25f,831.91f,20,40);
+                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MoveIdle();
-                                me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
                                 TeleDebug_timer=200;
                                 walk_timer=2000;
                                 me->ForcedDespawn(15000);
@@ -1684,24 +1682,10 @@ public:
 
                             if(PHASE==3 && TeleDebug_timer<=diff)
                             {
-                                me->NearTeleportTo(-987.17f,-561.25f,831.91f,3.93f);
-
-                                Creature * pIgnac = NULL;
-
-                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
-                                    pIgnac = me->ToTempSummon()->GetSummoner()->ToCreature();
-
-                                if(pIgnac)
-                                {
-                                    pIgnac->CastSpell(pIgnac, 87459, true); // Visual teleport
-                                    pIgnac->NearTeleportTo(-1029.52f,-561.7f,831.92f,5.52f);
-                                }
-
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
-                                me->GetMotionMaster()->MoveIdle();
+                                DoCast(me,87459);
                                 PHASE=4;
                             }
-                            else TeleDebug_timer-=diff;
+                            else TeleDebug_timer -= diff;
 
                             if(PHASE==4 && walk_timer<=diff)
                             {
@@ -1749,6 +1733,7 @@ public:
         boss_TerrastraAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            summonerGUID = 0;
         }
 
         InstanceScript* instance;
@@ -1766,6 +1751,7 @@ public:
         uint32 Frozen_orb_timer;
         uint32 HS_counter; // Harden skin counter
         uint32 Hp_gainer; // HP ktore bude mat monstrosity
+        uint64 summonerGUID;
         bool Hp_dropped,has_shield,speaked,can_interrupt;
 
         void Reset()
@@ -1800,6 +1786,12 @@ public:
                 me->MonsterYell("The soil welcomes your bones!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21842, false);
             }
+        }
+
+        void IsSummonedBy(Unit* pSummoner)
+        {
+            if (pSummoner && pSummoner->ToCreature())
+                summonerGUID = pSummoner->GetGUID();
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -1961,29 +1953,25 @@ public:
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                                Creature * pFel = NULL;
+                                Unit * pFel = Unit::GetUnit(*me,summonerGUID);
 
-                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
-                                    pFel = me->ToTempSummon()->GetSummoner()->ToCreature();
-
-                                if(pFel) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
+                                if(pFel->ToCreature()) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
                                 {
-                                    pFel->SetReactState(REACT_PASSIVE);
+                                    pFel->ToCreature()->SetReactState(REACT_PASSIVE);
                                     pFel->InterruptNonMeleeSpells(true);
                                     pFel->CastSpell(pFel, 87459, true); // Visual teleport
-                                    pFel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
+                                    pFel->GetMotionMaster()->MoveJump(-1023.2f,-600.15f,831.91f,20,40);
                                 }
 
-                                me->InterruptNonMeleeSpells(true);
+                                me->InterruptNonMeleeSpells(false);
                                 DoCast(me,87459); // Visual teleport
                                 PHASE = 3;
                                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                                 me->SetReactState(REACT_PASSIVE);
                                 me->AttackStop();
-                                me->GetMotionMaster()->MovementExpired();
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
+                                me->GetMotionMaster()->MoveJump(-987.68f,-603.96f,831.91f,20,40);
+                                me->GetMotionMaster()->Clear();
                                 me->GetMotionMaster()->MoveIdle();
-                                me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
                                 TeleDebug_timer = 300;
                                 walk_timer = 5000;
                                 walk_timer_Ignacious = walk_timer + 5200;
@@ -1995,28 +1983,11 @@ public:
 
                             if(PHASE==3 && TeleDebug_timer<=diff) // musel so mdat tele este raz bugovalo sa to visualne
                             {
-                                DoCast(me,87459); // Visual teleport
-                                me->NearTeleportTo(-987.68f,-603.96f,831.91f,2.35f);
-                                me->GetMotionMaster()->Clear(); // Aby sa predchadzalo problemu ze boss aj po teleporte nahanal "aktualneho tanka"
-                                me->GetMotionMaster()->MoveIdle();
-
-
-                                Creature * pFel = NULL;
-
-                                if(me->ToTempSummon() && me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToCreature())
-                                    pFel = me->ToTempSummon()->GetSummoner()->ToCreature();
-
-                                if(pFel) // Ak som bol daleko od bossa tak sa stalo ze som ho nebol schopny zamerat preto som sa snazil ho najst kazdych 40 sekund pocas encounteru pre istotu
-                                {
-                                    pFel->NearTeleportTo(-1023.2f,-600.15f,831.91f,0.79f);
-                                    pFel->CastSpell(pFel, 87459, true); // Visual teleport
-                                }
-
                                 PHASE = 4;
                                 DoCast(me,87459); // Visual teleport
                                 walk_timer=5500;
                             }
-                            else TeleDebug_timer-=diff;
+                            else TeleDebug_timer-= diff;
 
                             if(PHASE==4 && walk_timer<=diff)
                             {
@@ -2102,7 +2073,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
-            me->ForcedDespawn(40000);
+            me->ForcedDespawn(30000);
             Buff_timer=1000;
             buffed=false;
             me->SetInCombatWithZone();
@@ -2327,7 +2298,7 @@ public:
             // toto by melo vyresit problem s padem, uvidime
             if (me->getVictim() && me->GetDistance(me->getVictim()) <= 4.0f) // melee range
             {
-                if(me->getVictim()->ToPlayer())
+                if(me->getVictim()->ToPlayer() && me->HasAura(92302))
                 {
                     if( me->getVictim()->HasAura(92307) )
                         me->getVictim()->RemoveAurasDueToSpell(92307);
@@ -2413,7 +2384,7 @@ public:
 
                 if(Creature *pFlamestrike = me->FindNearestCreature(50297, 1000, true))
                 {
-                    if(me->IsWithinMeleeRange(pFlamestrike) && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
+                    if(me->GetExactDist2d(pFlamestrike) <= 12 && !pFlamestrike->HasAura(92211)) // Ak sa orb nachadza blizko Flamestriku despawnem orb aj FLamestrike
                     {
                         me->ForcedDespawn();
                         pFlamestrike->ForcedDespawn();
