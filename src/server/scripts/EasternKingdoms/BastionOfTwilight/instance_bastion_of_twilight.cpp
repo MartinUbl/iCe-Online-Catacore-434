@@ -47,6 +47,8 @@ public:
         uint32 NetherScionEvent;
         uint32 EmeraldWhelpEvent;
         uint32 HalfusIntro;
+        uint32 SinestraIntro;
+
         void Initialize()
         {
             HalfusGUID = 0;
@@ -56,6 +58,7 @@ public:
             SinestraGUID = 0;
             GOfloorGUID = 0;
             HalfusIntro = 0;
+            SinestraIntro = 0;
             EmeraldWhelpFlag = 0;
             Proto_BehemothGUID = 0;
             TimeWardenEvent = 1;
@@ -63,7 +66,7 @@ public:
             SlateDragonEvent = 1;
             NetherScionEvent = 1;
             EmeraldWhelpEvent = 1;
-            
+
             for (int i = 0; i < 8; ++i)
                 EmeraldWhelp[i] = 0;
                        
@@ -208,6 +211,9 @@ public:
                 case DATA_SINESTRA:
                     auiEncounter[4] = data;
                     break;
+                case DATA_SINESTRA_INTRO:
+                    SinestraIntro = data;
+                    break;
             }
 
             if (auiEncounter[0] == DONE // Halfus
@@ -240,7 +246,7 @@ public:
                 return auiEncounter[type];
 
             switch (type)
-            {  
+            {
                 case DATA_HALFUS:                 return auiEncounter[0];
                 case DATA_PROTO_BEHEMOTH:         return auiEncounter[0];
                 case DATA_VALIONA:                return auiEncounter[1];
@@ -253,6 +259,7 @@ public:
                 case DATA_NETHER_SCION:           return NetherScionEvent;
                 case DATA_ORPHANED_EMERALD_WHELP: return EmeraldWhelpEvent;
                 case DATA_HALFUS_INTRO:           return HalfusIntro;
+                case DATA_SINESTRA_INTRO:         return SinestraIntro;
             }
 
             return 0;

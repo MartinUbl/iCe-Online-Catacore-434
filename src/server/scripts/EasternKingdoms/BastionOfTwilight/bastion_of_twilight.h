@@ -30,6 +30,8 @@ enum data
     DATA_ORPHANED_EMERALD_WHELP,
     DATA_PROTO_BEHEMOTH,
     DATA_HALFUS_INTRO,
+    //Sinestra intro
+    DATA_SINESTRA_INTRO,
 };
 
 enum sCreature

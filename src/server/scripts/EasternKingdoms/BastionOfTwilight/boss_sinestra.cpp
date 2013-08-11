@@ -106,6 +106,7 @@ public:
         boss_sinestraAI(Creature* creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
+            me->SetVisible(false);
 
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -144,6 +145,18 @@ public:
 
         uint32 eggs_dead;
 
+        void JustRespawned()
+        {
+            me->DealDamage(me,me->GetMaxHealth()*0.4);
+            me->ResetPlayerDamageReq();
+            me->CastSpell(me,SPELL_DRAINED,true);
+            me->SetVisible(false);
+            if(instance)
+                instance->SetData(DATA_SINESTRA_INTRO,0);
+            Reset();
+        }
+
+
         void Reset()
         {
             PHASE = 0;
@@ -155,16 +168,29 @@ public:
 
             eggs_dead = 0;
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,0.001f); // Avoid aggro on wipe
-            Animation_timer = 11000;// Emerge animation time
+
+            if(instance)
+            if(instance->GetData(DATA_SINESTRA_INTRO) == 0 )
+            {
+                me->SetVisible(false);
+                Animation_timer = 11000;// Emerge animation time
+            }
+            else
+            {
+                me->SetVisible(true);
+                Animation_timer = 0;
+            }
+
             Flame_breath_timer = Animation_timer + 21000;
             Wrack_timer = Animation_timer + 15000;
             CheckTimer = Animation_timer + 4000;
             Shadow_orb_timer = Animation_timer + 25000; //first orbs after 25 seconds
             Whelps_timer = Animation_timer + 16000;
             was_used = was_blasted = may_cast_extinction = flamed = phrase1 = phrase2 = phrase3 = false;
-            me->SetVisible(false);
             DoCast(me,SPELL_DRAINED,true);// - 40 % dmg reduction in first phase
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetUInt64Value(UNIT_FIELD_HEALTH,(uint64) (me->GetMaxHealth() * 0.6 )); // Starting with 60% of HP
+            me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full
         }
 
         void JustSummoned(Creature* summon)
@@ -216,12 +242,20 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->SetUInt64Value(UNIT_FIELD_HEALTH,(uint64) (me->GetMaxHealth() * 0.6 )); // Starting with 60% of HP
-            me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full
             me->SetVisible(true);
             me->SummonGameObject(207679,-1032.994f,-830.444f,441.0f,2.954f,0,0,0,0,0); // Fire wall
-            me->SendPlaySound(20429, false);
-            me->CastSpell(me,75764,true); // Visual emerge animation
+            //me->DealDamage(me,me->GetMaxHealth()*0.4);
+            //me->ResetPlayerDamageReq();
+
+            if(instance)
+            {
+                if(instance->GetData(DATA_SINESTRA_INTRO) == 0)
+                {
+                    me->SendPlaySound(20429, false);
+                    me->CastSpell(me,75764,true); // Visual emerge animation
+                }
+            }
+
             if (instance)
             {
                 instance->SetData(DATA_SINESTRA, IN_PROGRESS);
@@ -260,7 +294,7 @@ public:
                 if ( Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 {
                     Player * p = unit->ToPlayer();
-                    if (p)
+                    if (p && p->isAlive())
                     {
                         if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
                             && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
@@ -333,6 +367,10 @@ public:
 
         void EnterEvadeMode() //Despawn vajec + flameov
         {
+            me->SetHealth(me->GetMaxHealth()*0.6);
+            me->ResetPlayerDamageReq();
+            me->SetVisible(true);
+
             Summons.DespawnAll();
 
             GameObject * gowall = me->FindNearestGameObject(207679,200.0f); // Remove Fire wall
@@ -343,6 +381,7 @@ public:
             {
                 instance->SetData(DATA_SINESTRA, NOT_STARTED);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(DATA_SINESTRA_INTRO,1);
             }
 
             ScriptedAI::EnterEvadeMode();
@@ -647,7 +686,7 @@ public:
 
             Flame_breath_timer = 25000;
             Wrack_timer = 15000;
-            CheckTimer = 20000;
+            CheckTimer = 40000;
             Shadow_orb_timer = 30000;
             Respawn_flames_timer = 15000;
             Whelps_timer = 20000;
@@ -754,7 +793,7 @@ public:
             else Shadow_orb_timer -= Diff;
 
         }
-            if (PHASE != 0 && PHASE != 2)
+            if (PHASE != 0 && PHASE != 2 || (PHASE == 3 && CheckTimer <= 4000))
                 DoMeleeAttackIfReady();
        }
     };
@@ -822,7 +861,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster())
+                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if ( HasHealingSpec(pPlayer) == false && HasTankSpec(pPlayer) == false) // Exclude healers and tanks
                             {
@@ -979,7 +1018,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster())
+                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if (HasTankSpec(pPlayer) == false && IsOrb1Victim(pPlayer) == false ) // Exclude tanks and orb1 victim
                             {
@@ -1288,7 +1327,8 @@ public:
 
             if (delay_spawn_timer <=diff && !summoned_whelps) // After few seconds spawn whelp on puddle position
             {
-                me->SummonCreature(CREATURE_TWILIGHT_WHELP,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,1000);
+                if ( urand(0,100) > 20 ) // Little workaround for s while
+                    me->SummonCreature(CREATURE_TWILIGHT_WHELP,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,1000);
                 summoned_whelps = true;
             }
             else delay_spawn_timer-=diff;
@@ -1628,7 +1668,10 @@ public:
 
     struct mob_Twilight_spitecallerAI : public ScriptedAI
     {
-        mob_Twilight_spitecallerAI(Creature* creature) : ScriptedAI(creature) { }
+        mob_Twilight_spitecallerAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
+        }
 
         uint32 Walk_timer;
         uint32 Dot_timer;
@@ -1738,12 +1781,7 @@ public:
 
             if (target && target->ToPlayer())
             {
-                uint32 result = 2;
-
-                for(uint32 i = 0; i < aurEff->GetTickNumber() - 1; i++ )
-                    result *= 2;
-
-                    const_cast<AuraEffect*>(aurEff)->SetAmount((int32)(result * 1000));
+                    const_cast<AuraEffect*>(aurEff)->SetAmount((2000 * pow (1.5,(int)(aurEff->GetTickNumber() -1 ))));
             }
         }
 
