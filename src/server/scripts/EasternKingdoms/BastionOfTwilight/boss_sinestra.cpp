@@ -189,7 +189,7 @@ public:
             was_used = was_blasted = may_cast_extinction = flamed = phrase1 = phrase2 = phrase3 = false;
             DoCast(me,SPELL_DRAINED,true);// - 40 % dmg reduction in first phase
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetUInt64Value(UNIT_FIELD_HEALTH,(uint64) (me->GetMaxHealth() * 0.6 )); // Starting with 60% of HP
+            me->SetHealth(me->GetMaxHealth() * 0.6 ); // Starting with 60% of HP
             me->ModifyPower(POWER_MANA, me->GetMaxPower(POWER_MANA)); // Fill mana to full
         }
 
