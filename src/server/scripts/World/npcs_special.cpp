@@ -2194,6 +2194,7 @@ public:
 ######*/
 #define GLYPH_OF_SHADOWFIEND_MANA         58227
 #define GLYPH_OF_SHADOWFIEND              58228
+#define SHADOWFORM                        15473
 
 class npc_shadowfiend : public CreatureScript
 {
@@ -2209,6 +2210,9 @@ public:
             if (me->isSummon())
                 if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
                 {
+                    if(pOwner->HasAura(99154) && me->getVictim() && pOwner->HasAura(SHADOWFORM)) // Priest T12 Shadow 2P Bonus
+                        me->CastCustomSpell(99156, SPELLVALUE_BASE_POINT0,damage * 0.2, me->getVictim(), true); // Shadowflame
+
                     if (pOwner->HasAura(GLYPH_OF_SHADOWFIEND))
                         if (damage >= me->GetHealth())
                             pOwner->CastSpell(pOwner,GLYPH_OF_SHADOWFIEND_MANA,true);
