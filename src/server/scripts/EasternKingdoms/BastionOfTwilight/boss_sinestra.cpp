@@ -688,7 +688,7 @@ public:
 
             Flame_breath_timer = 25000;
             Wrack_timer = 15000;
-            CheckTimer = 40000;
+            CheckTimer = 30000;
             Shadow_orb_timer = 30000;
             Respawn_flames_timer = 15000;
             Whelps_timer = 20000;
@@ -795,6 +795,7 @@ public:
             else Shadow_orb_timer -= Diff;
 
         }
+
             if (PHASE == 1 || (PHASE == 3 && CheckTimer <= 4000) )
                 DoMeleeAttackIfReady();
        }
@@ -911,8 +912,8 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
-                    me->CastSpell(me->getVictim(),35371,true); // White beam
+                if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
+                    me->getVictim()->CastSpell(me,35371,true); // White beam
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
@@ -1076,8 +1077,8 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
-                    me->getVictim()->CastSpell(me,35371,true); // White beam
+                if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
+                    me->CastSpell(me->getVictim(),35371,true); // White beam
 
                 Beam_timer = 100;
             }
