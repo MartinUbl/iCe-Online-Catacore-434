@@ -1051,7 +1051,7 @@ struct GemPropertiesEntry
     //uint32                                                // 2
     //uint32                                                // 3
     uint32      color;                                      // 4
-    //uint32                                                // 5
+    uint32      reqItemLevel;                               // 5 required item level of socketed item
 };
 
 struct GlyphPropertiesEntry

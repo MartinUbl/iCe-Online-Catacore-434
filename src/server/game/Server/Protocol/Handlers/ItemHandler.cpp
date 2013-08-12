@@ -1584,6 +1584,10 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         // tried to put meta gem in normal socket
         if (itemProto->Socket[i].Color != SOCKET_COLOR_META && GemProps[i]->color == SOCKET_COLOR_META)
             return;
+
+        // tried to put a gem to an item with insufficient item level
+        if (itemProto->ItemLevel < GemProps[i]->reqItemLevel)
+            return;
     }
 
     uint32 GemEnchants[MAX_GEM_SOCKETS];
