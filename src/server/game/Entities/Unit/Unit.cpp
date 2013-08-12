@@ -7251,7 +7251,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             }
             if (dummySpell->Id == 99093) // Paladin T12 Retribution 2P Bonus
             {
-                if(procSpell->SpellIconID == 35395) // Crusader Strike
+                if(procSpell->Id == 35395) // Crusader Strike
                 {
                     CastCustomSpell(99002, SPELLVALUE_BASE_POINT0,damage * 0.075, pVictim, true); // Flames of the Faithful
                     break;
