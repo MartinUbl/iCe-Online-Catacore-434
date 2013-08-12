@@ -5285,10 +5285,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 22; // 200 yards
             spellInfo->EffectRadiusIndex[1] = 22;
             break;
-        /*case 99476: // The Widow's Kiss (Beth'tilac)
-            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
-            count++;
-            break;*/
+
+        case 99223: // Sticky Webbing (Beth'tilac encounter)
+            spellInfo->DurationIndex = 66;  // 2.5s
+            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            break;
         default:
             break;
         }

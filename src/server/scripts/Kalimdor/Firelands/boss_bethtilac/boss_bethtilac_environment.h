@@ -93,4 +93,22 @@ private:
 };
 
 
+// Sticky Webbing - handles applying of slow fall when falling through the hole in the middle of the web
+class npc_sticky_webbing: public CreatureScript
+{
+public:
+    npc_sticky_webbing(): CreatureScript("npc_sticky_webbing") {}
+    CreatureAI *GetAI(Creature *creature) const { return new AI(creature); }
+
+private:
+    class AI: public NullCreatureAI
+    {
+    public:
+        AI(Creature *creature);
+    private:
+        void Reset();
+    };
+};
+
+
 #endif // BOSS_BETHTILAC_EVNIRONMENT_H

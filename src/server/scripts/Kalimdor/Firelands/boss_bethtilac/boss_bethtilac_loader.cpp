@@ -39,6 +39,7 @@ void AddSC_boss_bethtilac()
     new mob_spinner();
     new npc_filament();
     new npc_web_rip();
+    new npc_sticky_webbing();
 
     new spell_meteor_burn();
 }

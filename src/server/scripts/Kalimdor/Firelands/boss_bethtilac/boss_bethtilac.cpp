@@ -712,6 +712,15 @@ UPDATE
   WHERE
     entry = 53450;
 
+UPDATE
+    creature_template
+  SET
+    InhabitType = 7,
+    AIName = 'NullCreatureAI',
+    ScriptName = 'npc_sticky_webbing'
+  WHERE
+    entry = 53490;
+
 
 INSERT INTO
   conditions

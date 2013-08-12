@@ -215,3 +215,20 @@ void spell_meteor_burn::Script::HandleHit(SpellEffIndex effIndex)
         }
     }
 }
+
+
+// creature script for Sticky Webbing
+
+static const uint32 SPELL_STICKY_WEBBING = 99219;
+
+
+npc_sticky_webbing::AI::AI(Creature *creature)
+    : NullCreatureAI(creature)
+{
+}
+
+void npc_sticky_webbing::AI::Reset()
+{
+    if (!me->HasAura(SPELL_STICKY_WEBBING))
+        me->CastSpell(me, SPELL_STICKY_WEBBING, false);    // triggers the channel of Sticky Webbing
+}
