@@ -16449,6 +16449,32 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 324 && HasAura(55448) && i->aura->GetCharges() <= 3)
             takeCharges = false;
 
+        // 4P PvP bonus for Elemental shaman's
+        if (i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 324 && HasAura(100956)) // // Improved Lightning Shield aura
+        {
+            uint8 maxCharges = 3;
+
+            if (HasAura(88756)) // Rolling Thunder (Rank 1)
+                maxCharges = 6;
+
+            if (HasAura(88764)) // Rolling Thunder (Rank 2)
+                maxCharges = 9;
+
+            Aura * lsAura = this->GetAura(324,this->GetGUID());
+
+            if(lsAura)
+            {
+                uint8 lsCharges = lsAura->GetCharges();
+
+                if(lsCharges < maxCharges)
+                {
+                    lsAura->SetCharges(lsCharges + 1);
+                }
+            }
+
+            takeCharges = false;
+        }
+
         // Sanguinary Vein - do not unapply Gouge if attempting from bleed effect
         if (pTarget && ((pTarget->HasAura(79146) && roll_chance_i(50)) || pTarget->HasAura(79147)) && i->aura->GetSpellProto() && i->aura->GetSpellProto()->Id == 1776
             && procSpell && ((procSpell->Mechanic == MECHANIC_BLEED && procSpell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE)) || procSpell->Id == 89775))
