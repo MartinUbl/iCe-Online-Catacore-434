@@ -8268,13 +8268,34 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 if (m_targets.getUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
                     (m_targets.getUnitTarget() != unitTarget || m_caster->GetAura(63334)))
                 {
+                    float dmgDecreased = 2.0f ;
+
+                    if (m_caster->HasAura(91316) ) // Contagion (Rank 1)
+                        dmgDecreased = 1.333f;
+
+                    if (m_caster->HasAura(91319) ) // Contagion (Rank 2)
+                        dmgDecreased = 1.0f;
+
                     // And spread them on target
                     // Blood Plague
                     if (m_targets.getUnitTarget()->GetAura(55078))
+                    {
                         m_caster->CastSpell(unitTarget, 55078, true);
+                        m_caster->CastSpell(unitTarget, 91939, true); // Visual effect
+
+                        if (AuraEffect* aurEff = unitTarget->GetAuraEffect(55078,0,m_caster->GetGUID()) )
+                            if ( aurEff->GetAmount() / dmgDecreased > 0)
+                                aurEff->SetAmount(aurEff->GetAmount() / dmgDecreased);
+                    }
                     // Frost Fever
                     if (m_targets.getUnitTarget()->GetAura(55095))
+                    {
                         m_caster->CastSpell(unitTarget, 55095, true);
+                        m_caster->CastSpell(unitTarget, 91939, true); // Visual effect
+                        if (AuraEffect* aurEff = unitTarget->GetAuraEffect(55095,0,m_caster->GetGUID()))
+                            if ( aurEff->GetAmount() / dmgDecreased > 0)
+                                aurEff->SetAmount(aurEff->GetAmount() / dmgDecreased);
+                    }
                 }
             }
             // Festering Strike
