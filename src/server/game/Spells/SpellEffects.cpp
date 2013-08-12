@@ -8449,7 +8449,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 // Direct heals condition handled implicitely
 
-                if (Aura* renew = unitTarget->GetAura(139))
+                if (Aura* renew = unitTarget->GetAura(139,m_caster->GetGUID()))
                     renew->RefreshDuration();
             }
 
