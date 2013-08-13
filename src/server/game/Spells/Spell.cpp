@@ -3310,7 +3310,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         // Remove targets not in LoS or in stealth
                         for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                         {
-                            if ((*itr)->HasStealthAura() || (*itr)->HasInvisibilityAura() || !(*itr)->IsWithinLOSInMap(m_caster))
+                            if ((*itr)->HasStealthAura() || (*itr)->HasInvisibilityAura() || !(*itr)->IsWithinLOSInMap(m_caster)
+                               || ((*itr)->GetCreatureType() == CREATURE_TYPE_CRITTER ) || !(*itr)->isInCombat() || (*itr)->IsFullHealth())
                                 itr = unitList.erase(itr);
                             else
                                 ++itr;
