@@ -21100,10 +21100,14 @@ void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string
     *data << (uint64)GetGUID();
     *data << (uint32)0;                               //language 2.1.0 ?
 
-    if (addonPrefix)
-        *data << addonPrefix;
-    else
-        *data << (uint64)GetGUID();
+    *data << (uint64)GetGUID();
+    if (language == LANG_ADDON)
+    {
+        if (addonPrefix)
+            *data << addonPrefix;
+        else
+            *data << "someAddon";
+    }
 
     *data << (uint32)(text.length()+1);
     *data << text;

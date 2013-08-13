@@ -131,10 +131,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             {
                 prefixLen = recv_data.ReadBits(5);
                 msgLen = recv_data.ReadBits(9);
-                if (prefixLen > 0)
-                    prefix = recv_data.ReadString(prefixLen);
                 if (msgLen > 0)
                     message = recv_data.ReadString(msgLen);
+                if (prefixLen > 0)
+                    prefix = recv_data.ReadString(prefixLen);
                 break;
             }
             case CHAT_MSG_GUILD:
@@ -165,7 +165,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     return;
 
                 WorldPacket data;
-                ChatHandler::FillMessageData(&data, this, type, uint32(LANG_ADDON), "", 0, message.c_str(), NULL);
+                ChatHandler::FillMessageData(&data, this, type, uint32(LANG_ADDON), "", 0, message.c_str(), NULL, prefix.c_str());
                 group->BroadcastPacket(&data, false);
                 break;
             }
@@ -174,7 +174,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             {
                 if (sender->GetGuildId())
                     if (Guild* guild = sObjectMgr->GetGuildById(sender->GetGuildId()))
-                        guild->BroadcastToGuild(this, type == CHAT_MSG_OFFICER, message, uint32(LANG_ADDON));
+                        guild->BroadcastToGuild(this, type == CHAT_MSG_OFFICER, message, uint32(LANG_ADDON), prefix.c_str());
                 break;
             }
             case CHAT_MSG_WHISPER:
@@ -186,7 +186,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     break;
 
                 WorldPacket data(SMSG_MESSAGECHAT, 200);
-                receiver->BuildPlayerChat(&data, CHAT_MSG_WHISPER, message, LANG_UNIVERSAL, prefix.c_str());
+                receiver->BuildPlayerChat(&data, CHAT_MSG_WHISPER, message, uint32(LANG_ADDON), prefix.c_str());
                 receiver->GetSession()->SendPacket(&data);
                 break;
             }

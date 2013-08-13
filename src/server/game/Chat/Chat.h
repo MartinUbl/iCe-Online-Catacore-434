@@ -56,9 +56,9 @@ class ChatHandler
 
         static void FillMessageData(WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker, const char* addonPrefix = NULL);
 
-        void FillMessageData(WorldPacket *data, uint8 type, uint32 language, uint64 target_guid, const char* message)
+        void FillMessageData(WorldPacket *data, uint8 type, uint32 language, uint64 target_guid, const char* message, const char* addonPrefix = NULL)
         {
-            FillMessageData(data, m_session, type, language, NULL, target_guid, message, NULL);
+            FillMessageData(data, m_session, type, language, NULL, target_guid, message, NULL, addonPrefix);
         }
 
         void FillSystemMessageData(WorldPacket *data, const char* message)
