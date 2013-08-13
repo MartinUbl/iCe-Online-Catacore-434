@@ -1135,6 +1135,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 target->RemoveAurasDueToSpell(91041);
                         }
                         break;
+                    case 92328: // Heart's Judgement ( HC version )
+                        if (target)
+                        {
+                            if (Aura* procbuff = target->GetAura(92325))
+                            {
+                                SetStackAmount(procbuff->GetStackAmount());
+                                procbuff->Remove();
+                            }
+                            else
+                                target->RemoveAurasDueToSpell(92328);
+                        }
+                        break;
                     case 81277: // Blood Gorged
                         if (target && caster)
                         {
