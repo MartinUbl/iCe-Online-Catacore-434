@@ -6972,6 +6972,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         {
             switch(dummySpell->Id)
             {
+                case 99174: //  Rogue T12 2P Bonus
+                {
+                    CastCustomSpell(99173, SPELLVALUE_BASE_POINT0,damage * 0.03, pVictim, true); // Burning Wounds
+                    break;
+                }
                 // Deadly Throw Interrupt
                 case 32748:
                 {
