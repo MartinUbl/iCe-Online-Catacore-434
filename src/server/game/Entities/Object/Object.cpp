@@ -858,6 +858,8 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                                 else
                                     dynflags_lo |= GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE;
                                 break;
+                            default:
+                                break;
                         }
                     }
 
@@ -867,6 +869,8 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                         case GAMEOBJECT_TYPE_MO_TRANSPORT:
                             if (ToGameObject()->GetGoState() != GO_STATE_READY)
                                 dynflags_lo |= GO_DYNFLAG_LO_STOPPED;
+                            break;
+                        default:
                             break;
                     }
 
