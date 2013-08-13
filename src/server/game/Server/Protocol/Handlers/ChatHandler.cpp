@@ -418,7 +418,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                             lang = LANG_UNIVERSAL;
                         break;
                     default:
-                        lang = LANG_UNIVERSAL;
                         break;
                 }
             }
