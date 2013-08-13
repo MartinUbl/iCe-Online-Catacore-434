@@ -489,9 +489,7 @@ class spell_dru_solar_beam : public SpellScriptLoader
                     done = true;
                 }
 
-                CustomSpellValues values;
-                values.AddSpellMod(SPELLVALUE_BASE_POINT0, aurEff->GetAmount());
-                caster->CastCustomSpell(81261, values, pos, true, NULL, aurEff, caster->GetGUID());
+                caster->CastSpell(pos.m_positionX,pos.m_positionY,pos.m_positionZ,81261,true);
             }
 
             void Register()
