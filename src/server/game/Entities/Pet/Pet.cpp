@@ -185,6 +185,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             m_loading = false;
             return false;
         }
+        else if(!owner->HasAura(52143))//Raise dead but not in Unholy talent specialization
+        {
+            m_loading = false;
+            return false;
+        }
     }
 
     uint32 pet_number = fields[0].GetUInt32();
