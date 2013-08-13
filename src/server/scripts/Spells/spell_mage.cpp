@@ -768,6 +768,74 @@ public:
     }
 };
 
+
+
+enum FlamestrikeSpells
+{
+    ICON_MAGE_IMPROVED_FLAMESTRIKE               = 37,
+    SPELL_MAGE_FLAMESTRIKE                       = 2120
+};
+
+//Improved Flamestrike 
+class spell_mage_blast_wave : public SpellScriptLoader
+{
+    public:
+        spell_mage_blast_wave() : SpellScriptLoader("spell_mage_blast_wave") { }
+
+        class spell_mage_blast_wave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_blast_wave_SpellScript);
+
+            uint32 _targetCount;
+            bool done;
+
+            bool Load()
+            {
+                _targetCount = 0;
+                done = false;
+                return true;
+            }
+
+            void CountTargets(std::list<Unit*>& targetList)
+            {
+                _targetCount = targetList.size();
+            }
+
+            void HandleImprovedFlamestrike(SpellEffIndex /*eff*/)
+            {
+                Unit * caster = GetCaster();
+
+                if(!caster || done)
+                    return;
+
+                if (_targetCount >= 2)
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, ICON_MAGE_IMPROVED_FLAMESTRIKE, EFFECT_0))
+                        if (roll_chance_i(aurEff->GetAmount()))
+                        {
+                            float x, y, z;
+                            WorldLocation const* loc = GetTargetDest();
+                            if (!loc)
+                                return;
+
+                            done = true;
+                            loc->GetPosition(x, y, z);
+                            caster->CastSpell(x, y, z, SPELL_MAGE_FLAMESTRIKE, true);
+                        }
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_mage_blast_wave_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
+                OnEffect += SpellEffectFn(spell_mage_blast_wave_SpellScript::HandleImprovedFlamestrike, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_blast_wave_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
@@ -780,4 +848,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_blizzard();
     new spell_mage_invocation();
     new spell_mage_reactive_barrier();
+    new spell_mage_blast_wave(); // 11113
 }
