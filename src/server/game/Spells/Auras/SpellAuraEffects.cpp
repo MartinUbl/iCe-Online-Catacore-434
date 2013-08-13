@@ -2024,6 +2024,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 88427: // Electrocute (Al'akir)
                         damage = (10000 + urand(0,4000)) * m_tickNumber;
                         break;
+                    case 93402: // Glyph of Moonfire - sunfire part
+                        if (caster && caster->HasAura(54829)) // Glyph of Moonfire - sunfire part
+                            damage *= 1.2f;
+                    break;
                     default:
                         break;
                 }
