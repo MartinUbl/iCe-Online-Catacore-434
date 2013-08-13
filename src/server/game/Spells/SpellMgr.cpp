@@ -4095,6 +4095,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             count++;
             break;
+        case 19615: // Hunnter's pet Frenzy
+            spellInfo->EffectBasePoints[0] = 4;
+            break;
         case 77223: // Enhaced Elements (bad spellfamily name and flags)
             // probably Blizzard's mistake
             spellInfo->SpellClassOptionsId = 7443;
