@@ -1603,8 +1603,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Deals damage equal to damage done to caster
                 int32 back_damage = m_damage;
                 // Pain and Suffering reduces damage
-                if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
-                    back_damage -= aurEff->GetAmount() * back_damage / 100;
+                if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 1))
+                    back_damage += aurEff->GetAmount() * back_damage / 100; // += due to - basepoint in spelleffect
                 m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
 
                 if (unitTarget->GetHealthPct() <= 25.0f)
