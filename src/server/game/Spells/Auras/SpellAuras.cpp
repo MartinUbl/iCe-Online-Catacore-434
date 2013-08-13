@@ -1195,6 +1195,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         break;
                     case 45438: // Ice Block
+                        if(caster)
+                            caster->RemoveAurasDueToSpell(87023); // Cauterize
                         // Glyph of Ice Block
                         if (caster && caster->ToPlayer() && caster->HasAura(56372))
                             caster->ToPlayer()->RemoveSpellCooldown(122, true);
