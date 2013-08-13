@@ -4105,7 +4105,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
             target->RemoveAurasWithMechanic((1 << MECHANIC_SNARE));
 
             // Disentanglement (what a wierd name) allows to clear all movement imparing things (root,..)
-            if (target->HasAura(96429))
+            if (target->HasAura(96429) || form == FORM_MOONKIN ) // Shapeshifting in or out of this form now breaks roots ( Patch 4.0.6)
                 target->RemoveMovementImpairingAuras();
 
             // and polymorphic affects
