@@ -16467,13 +16467,14 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
 
             Aura * lsAura = this->GetAura(324,this->GetGUID());
 
-            if(lsAura)
+            if(lsAura && ToPlayer() && !ToPlayer()->HasSpellCooldown(26364))
             {
                 uint8 lsCharges = lsAura->GetCharges();
 
                 if(lsCharges < maxCharges)
                 {
                     lsAura->SetCharges(lsCharges + 1);
+                    ToPlayer()->AddSpellCooldown(26364,0,3000);
                 }
             }
 
