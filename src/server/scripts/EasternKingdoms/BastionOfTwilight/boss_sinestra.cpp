@@ -1167,7 +1167,10 @@ public:
                 for (Unit::AuraEffectList::const_iterator i = auraAbsorbList.begin(); i != auraAbsorbList.end(); ++i)
                     absorbAmount += (uint32((*i)->GetAmount()));
 
-                if (absorbAmount >= damage) // Dont cast if damage was absorbed
+                if (absorbAmount >= damage) // Dont cast if damage was fully absorbed
+                    return;
+
+                if (roll_chance_f(victim->GetUnitBlockChance())) // Don't cast if damage was blocked
                     return;
 
                 uint32 stack_number = victim->GetAuraCount(SPELL_TWILIGHTT_SPIT); // save stacks of spit on target
