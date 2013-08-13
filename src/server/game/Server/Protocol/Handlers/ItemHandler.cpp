@@ -1699,7 +1699,10 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
             if (Item* guidItem = _player->GetItemByGuid(gem_guids[i]))
             {
                 if (guidItem->GetCount() > 1)
+                {
                     guidItem->SetCount(guidItem->GetCount() - 1);
+                    guidItem->SetState(ITEM_CHANGED, _player);
+                }
                 else
                     _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true);
             }
