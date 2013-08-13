@@ -1584,6 +1584,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         // Shadow Word: Death
         case 32379:
         {
+            if (unitTarget->GetHealthPct() <= 25.0f) // At or below 25 %
+            {
+                if(m_caster->HasAura(14910)) // Mind Melt (Rank 1)
+                    m_damage *= 1.15f;
+
+                if(m_caster->HasAura(33371)) // Mind Melt (Rank 2)
+                    m_damage *= 1.30f;
+            }
+
             // Deals three times as much damage to targets below 25%
             if (unitTarget->GetHealthPct() < 25.0f)
                 m_damage *= 3;
