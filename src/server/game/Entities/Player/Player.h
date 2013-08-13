@@ -41,6 +41,7 @@
 #include "ReputationMgr.h"
 #include "Battleground.h"
 #include "DBCEnums.h"
+#include "MapInstanced.h"       
 
 #include<string>
 #include<vector>
@@ -1153,6 +1154,8 @@ class Player : public Unit, public GridObject<Player>
     friend class WorldSession;
     friend void Item::AddToUpdateQueueOf(Player *player);
     friend void Item::RemoveFromUpdateQueueOf(Player *player);
+    friend class MapInstanced;
+    friend class InstanceMap;
     public:
         explicit Player (WorldSession *session);
         ~Player ();
@@ -2667,7 +2670,7 @@ class Player : public Unit, public GridObject<Player>
         InstanceSave * GetInstanceSave(uint32 mapid, bool raid);
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
         void UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload = false);
-        InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
+        InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false, bool merge=false);
         void SendRaidInfo();
         void SendSavedInstances();
         static void ConvertInstancesToGroup(Player *player, Group *group = NULL, uint64 player_guid = 0);
@@ -2842,6 +2845,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadAuras(PreparedQueryResult result, uint32 timediff);
         void _LoadGlyphAuras();
         void _LoadBoundInstances(PreparedQueryResult result);
+        void _LoadBoundInst();
         void _LoadInventory(PreparedQueryResult result, uint32 timediff);
         void _LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery);
         void _LoadMail();
