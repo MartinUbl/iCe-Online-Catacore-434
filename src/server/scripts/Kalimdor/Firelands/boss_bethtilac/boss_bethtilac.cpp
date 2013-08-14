@@ -563,7 +563,7 @@ void boss_bethtilac::boss_bethtilacAI::SummonDrone()
 
     DebugOutput("summoning Cinderweb Drone");
 
-    me->SummonCreature(NPC_CINDERWEB_DRONE, 103.176773f, 454.915924f, 86.966888f, 3.578207f,
+    me->SummonCreature(NPC_CINDERWEB_DRONE, 21.0f, 295.0f, 84.1f, 0.0f,
                        TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
 }
 

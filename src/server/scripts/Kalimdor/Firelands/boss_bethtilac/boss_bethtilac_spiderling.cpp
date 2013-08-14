@@ -88,8 +88,7 @@ void mob_spiderling::mob_spiderlingAI::DoAction(const int32 event)
     switch (event)
     {
         case MOVE_CHECK:
-            if (!following)
-                FollowTarget();
+            FollowTarget();
             break;
         default:
             break;
@@ -117,6 +116,9 @@ void mob_spiderling::mob_spiderlingAI::MoveInLineOfSight(Unit *who)
 void mob_spiderling::mob_spiderlingAI::IsSummonedBy(Unit *summoner)
 {
     FollowTarget();
+
+    // re-check after a second
+    AddTimer(MOVE_CHECK, 1000, true);
 }
 
 
@@ -145,7 +147,6 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
         {
             if (CanFollowTarget(followed))
             {
-                me->StopMoving();
                 me->GetMotionMaster()->MoveChase(followed);
                 return true;
             }
@@ -174,9 +175,6 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
 
     following = false;
     followedGuid = 0;
-
-    // re-check after a second
-    AddTimer(MOVE_CHECK, 1000, false);
 
     return false;
 }
