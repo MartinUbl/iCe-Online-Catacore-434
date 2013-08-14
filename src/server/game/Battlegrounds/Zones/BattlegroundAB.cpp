@@ -150,7 +150,13 @@ void BattlegroundAB::Update(uint32 diff)
                     RewardHonorToTeam(BG_AB_Honor[BG_AB_TICK], (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
                     m_HonorScoreTics[team] -= m_HonorTics;
                 }
-                if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
+                if (m_TeamScores[team] > BG_AB_MAX_TEAM_SCORE)
+                    m_TeamScores[team] = BG_AB_MAX_TEAM_SCORE;
+                if (team == BG_TEAM_ALLIANCE)
+                    UpdateWorldState(BG_AB_OP_RESOURCES_ALLY, m_TeamScores[team]);
+                if (team == BG_TEAM_HORDE)
+                    UpdateWorldState(BG_AB_OP_RESOURCES_HORDE, m_TeamScores[team]);
+                if (!m_IsInformedNearVictory && m_TeamScores[team] >= BG_AB_WARNING_NEAR_VICTORY_SCORE)
                 {
                     if (team == BG_TEAM_ALLIANCE)
                         SendMessageToAll(LANG_BG_AB_A_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
@@ -159,13 +165,6 @@ void BattlegroundAB::Update(uint32 diff)
                     PlaySoundToAll(BG_AB_SOUND_NEAR_VICTORY);
                     m_IsInformedNearVictory = true;
                 }
-
-                if (m_TeamScores[team] > BG_AB_MAX_TEAM_SCORE)
-                    m_TeamScores[team] = BG_AB_MAX_TEAM_SCORE;
-                if (team == BG_TEAM_ALLIANCE)
-                    UpdateWorldState(BG_AB_OP_RESOURCES_ALLY, m_TeamScores[team]);
-                if (team == BG_TEAM_HORDE)
-                    UpdateWorldState(BG_AB_OP_RESOURCES_HORDE, m_TeamScores[team]);
                 // update achievement flags
                 // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
                 uint8 otherTeam = (team + 1) % BG_TEAMS_COUNT;
