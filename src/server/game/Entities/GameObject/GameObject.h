@@ -520,17 +520,9 @@ struct GameObjectInfo
 };
 
 class OPvPCapturePoint;
-struct TransportAnimation;
 
 union GameObjectValue
 {
-    //11 GAMEOBJECT_TYPE_TRANSPORT
-    struct
-    {
-        uint32 PathProgress;
-        TransportAnimation const* AnimationInfo;
-        uint32 CurrentSeg;
-    } Transport;
     //29 GAMEOBJECT_TYPE_CAPTURE_POINT
     struct
     {
@@ -562,12 +554,10 @@ enum GOState
 {
     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
-    GO_STATE_ACTIVE_ALTERNATIVE = 2,                        // show in world as used in alt way and not reset (closed door open by cannon fire)
-    GO_STATE_UNK_24             = 24,                       // unknown, probably related to transports
-    GO_STATE_UNK_27             = 27                        // unknown, probably related to controlled transports
+    GO_STATE_ACTIVE_ALTERNATIVE = 2                         // show in world as used in alt way and not reset (closed door open by cannon fire)
 };
 
-#define MAX_GO_STATE              28
+#define MAX_GO_STATE              3
 
 // from `gameobject`
 struct GameObjectData

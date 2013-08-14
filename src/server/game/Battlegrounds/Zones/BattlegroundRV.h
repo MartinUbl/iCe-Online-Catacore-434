@@ -135,7 +135,6 @@ class BattlegroundRV : public Battleground
         uint32 getState() { return State; };
         void setState(uint32 state) { State = state; };
 
-        void TogglePillars(bool apply);
-        void UseTransportObject(GameObject* go);
+        void TogglePillarCollision(bool apply);
 };
 #endif
