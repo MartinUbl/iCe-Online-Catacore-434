@@ -154,6 +154,8 @@ void npc_filament::filamentAI::DoAction(const int32 event)
 
 // Web Rip, created by Meteor Burn spell
 
+static const uint32 SPELL_METEOR_BURN_VISUAL = 99071;
+
 CreatureAI *npc_web_rip::GetAI(Creature *creature) const
 {
     return new AI(creature);
@@ -168,7 +170,8 @@ npc_web_rip::AI::AI(Creature *creature)
 
 void npc_web_rip::AI::IsSummonedBy(Unit *summoner)
 {
-
+    me->setFaction(14);
+    me->CastSpell(me, SPELL_METEOR_BURN_VISUAL, true);
 }
 
 
