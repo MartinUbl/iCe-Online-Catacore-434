@@ -3838,6 +3838,14 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                 return;
             }
             break;
+        case 99566: // Meteor Burn (teleport)
+            {
+                Position pos;
+                unitTarget->GetPosition(&pos);
+                pos.m_positionZ -= 2;   // fall through the ground
+                m_targets.setDst(pos);
+            }
+            break;
     }
 
     // If not exist data for dest location - return

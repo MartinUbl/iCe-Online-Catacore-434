@@ -62,13 +62,14 @@ public:
     CreatureAI *GetAI(Creature *creature) const;
 
 private:
-    class AI: public ScriptedAI
+    class AI: public NullCreatureAI
     {
     public:
         explicit AI(Creature *creature);
 
     private:
         virtual void IsSummonedBy(Unit *summoner);
+        virtual void EnterEvadeMode();
     };
 };
 

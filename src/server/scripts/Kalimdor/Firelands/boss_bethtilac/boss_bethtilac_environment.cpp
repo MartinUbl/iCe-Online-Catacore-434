@@ -163,7 +163,7 @@ CreatureAI *npc_web_rip::GetAI(Creature *creature) const
 
 
 npc_web_rip::AI::AI(Creature *creature)
-    : ScriptedAI(creature)
+    : NullCreatureAI(creature)
 {
 }
 
@@ -171,7 +171,15 @@ npc_web_rip::AI::AI(Creature *creature)
 void npc_web_rip::AI::IsSummonedBy(Unit *summoner)
 {
     me->setFaction(14);
+    me->SetReactState(REACT_PASSIVE);
+    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     me->CastSpell(me, SPELL_METEOR_BURN_VISUAL, true);
+}
+
+
+void npc_web_rip::AI::EnterEvadeMode()
+{
 }
 
 

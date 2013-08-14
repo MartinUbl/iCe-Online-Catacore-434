@@ -3013,9 +3013,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                 }
                             }
                             break;
-                            case 97505: // Refreshing Stream
-                                SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ANY);
-                            break;
+                        case 97505: // Refreshing Stream
+                            SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ANY);
+                        break;
+                        case 99083: // Meteor Burn (Beth'tilac) - teleport part
+                            SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ENEMY);
+                        break;
 
                         default:
                             sLog->outDebug("Spell (ID: %u) (caster Entry: %u) does not have type CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET record in `conditions` table.", m_spellInfo->Id, m_caster->GetEntry());
