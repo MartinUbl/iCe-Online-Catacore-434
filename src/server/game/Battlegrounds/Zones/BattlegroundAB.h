@@ -133,7 +133,7 @@ enum BG_AB_Timers
 
 enum BG_AB_Score
 {
-    BG_AB_WARNING_NEAR_VICTORY_SCORE    = 1400,
+    BG_AB_WARNING_NEAR_VICTORY_SCORE    = 1440,     // 90% of maximum points
     BG_AB_MAX_TEAM_SCORE                = 1600
 };
 
