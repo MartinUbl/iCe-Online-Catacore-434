@@ -163,6 +163,15 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
 
     // move to the middle and wait
     //DoZoneInCombat();
+    Position pos;
+    if (Unit *summoner = me->ToTempSummon()->GetSummoner())
+    {
+        summoner->GetPosition(&pos);
+        pos.m_positionZ -= 20.0f;
+        pos.m_positionZ = summoner->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); // get ground height
+        me->GetMotionMaster()->MovePoint(0, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());    // go underneath Beth'tilac
+    }
+
     following = false;
     followedGuid = 0;
 
