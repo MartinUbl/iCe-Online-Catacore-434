@@ -499,22 +499,6 @@ void boss_bethtilac::boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::MoveInLineOfSight(Unit *who)
-{
-    if (me->isInCombat() && /*!me->getVictim() &&*/
-        !IsInTransfer())
-    {
-        if (me->canAttack(who, false))
-            AttackStart(who);
-        else
-        {
-            if (me->IsFriendlyTo(who) && !me->IsNonMeleeSpellCasted(false))
-                SpiderAI::MoveInLineOfSight(who);   // eat spiderlings
-        }
-    }
-}
-
-
 void boss_bethtilac::boss_bethtilacAI::AttackStart(Unit *victim)
 {
     if (phase != PHASE_IDLE && !IsInTransfer() && me->canAttack(victim, false))
