@@ -248,9 +248,13 @@ void boss_bethtilac::boss_bethtilacAI::UpdateAI(const uint32 diff)
     }
 
     if (!IsInTransfer() && !me->IsNonMeleeSpellCasted(false))
-        if (Unit const *pVictim = me->getVictim())
+        if (Unit *pVictim = me->getVictim())
+        {
             if (me->IsWithinMeleeRange(pVictim))
                 DoMeleeAttackIfReady();
+            else
+                me->GetMotionMaster()->MoveChase(pVictim);
+        }
 
 
     UpdateTimers(diff);
