@@ -5548,6 +5548,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (!target)
                         return false;
 
+                     // If player select something else during SS ( self for example ) SS can still proc
+                    if (target == this || target->IsFriendlyTo(this) || !target->IsWithinMeleeRange(this))
+                        return false;
+
                     triggered_spell_id = 26654;
                     break;
                 }
