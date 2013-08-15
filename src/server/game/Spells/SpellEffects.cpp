@@ -3489,6 +3489,12 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
             break;
         }
+        case 20511: // Intimidating Shout
+        {
+            if (!m_caster->HasAura(63327)) // Glyph of Intimidating Shout
+                return;
+            break;
+        }
         case 91565:
         {
             // Feral Aggression
