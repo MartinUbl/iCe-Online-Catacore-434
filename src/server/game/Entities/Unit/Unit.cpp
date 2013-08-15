@@ -12158,11 +12158,11 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                     break;
                     case SPELLFAMILY_SHAMAN:
                         // Lava Burst
-                        if (spellProto->SpellFamilyFlags[1] & 0x00001000)
+                        if (spellProto->Id == 51505 || spellProto->Id == 77451) // Original or "fake" Lava burst triggered from Elemental Overload
                         {
                             if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0,0, GetGUID()))
                                 if (pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
-                                    return true;     
+                                    return true;
                             break;
                         }
                     break;
