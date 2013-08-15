@@ -477,7 +477,7 @@ class spell_dru_solar_beam : public SpellScriptLoader
 
             void HandleEffectPeriodic(AuraEffect const * aurEff)
             {
-                Unit* caster = aurEff->GetCaster();
+                Unit* caster = aurEff->GetBase()->GetCaster();
                 Unit *target = GetTarget();
 
                 if (!caster || !target)
