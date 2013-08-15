@@ -6974,7 +6974,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 case 99174: //  Rogue T12 2P Bonus
                 {
-                    CastCustomSpell(99173, SPELLVALUE_BASE_POINT0,damage * 0.03, pVictim, true); // Burning Wounds
+                    if (procEx & PROC_EX_CRITICAL_HIT) // Only from melee critical strikes 
+                    {
+                        CastCustomSpell(99173, SPELLVALUE_BASE_POINT0,damage * 0.03, pVictim, true); // Burning Wounds
+                    }
                     break;
                 }
                 // Deadly Throw Interrupt
