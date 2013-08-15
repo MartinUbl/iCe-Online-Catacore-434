@@ -6646,8 +6646,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 81659:
                 case 81662:
                 {
-                    // Smite
-                    if (!(procSpell->Id == 585))
+                    // Smite and Holy Fire
+                    if (!(procSpell->Id == 585) && !(procSpell->Id == 14914))
                         return false;
 
                     // Done to someone else
@@ -6703,10 +6703,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 81749:
                 {
                     if (!pVictim || (procSpell->Id != 585 && procSpell->Id != 14914)) // Smite, Holy Fire
-                        return false;
-
-                    // Holy Fire has also periodic part, which we exclude
-                    if (procFlag & PROC_FLAG_DONE_PERIODIC)
                         return false;
 
                     int32 bp0 = damage * dummySpell->GetSpellEffect(0)->EffectBasePoints / 100;
