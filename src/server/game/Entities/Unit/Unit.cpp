@@ -16745,7 +16745,7 @@ Unit* Unit::SelectNearbyTarget(float dist) const
         return NULL;
 
     // select random
-    std::list<Unit*>::const_iterator tcIter = targets.begin();    
+    std::list<Unit*>::const_iterator tcIter = targets.begin();
     std::advance(tcIter, urand(0, targets.size()-1));
     return *tcIter;
 }
