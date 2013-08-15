@@ -98,7 +98,7 @@ const char*  SAY_KILL2        = "This is too easy!";
 #define SPELL_DUAL_WIELD                42459
 //Phase Normal spells
 #define SPELL_FLAME_CRASH_EFFECT        40836 // Firey blue ring of circle that the other flame crash summons
-#define SPELL_SUMMON_SHADOWDEMON        41117 // Summon four shadowfiends
+#define SPELL_SUMMON_SHADOWDEMON        41120 // Summon four shadowfiends
 #define SPELL_SHADOWFIEND_PASSIVE       41913 // Passive aura for shadowfiends
 #define SPELL_SHADOW_DEMON_PASSIVE      41079 // Adds the "shadowform" aura to Shadow Demons.
 #define SPELL_CONSUME_SOUL              41080 // Once the Shadow Demons reach their target, they use this to kill them
@@ -1124,10 +1124,13 @@ public:
                     Timer[EVENT_SHADOW_BLAST] = 4000;
                     break;
                 case EVENT_SHADOWDEMON:
-                    DoCast(me, SPELL_SUMMON_SHADOWDEMON);
-                    Timer[EVENT_SHADOWDEMON] = 0;
+                {
+                    for (uint32 i = 0; i < 4; i++)
+                        DoCast(me, SPELL_SUMMON_SHADOWDEMON);
+                    Timer[EVENT_SHADOWDEMON] = 30000;
                     Timer[EVENT_FLAME_BURST] += 10000;
                     break;
+                }
                 case EVENT_FLAME_BURST:
                     DoCast(me, SPELL_FLAME_BURST);
                     Timer[EVENT_FLAME_BURST] = 15000;
