@@ -826,7 +826,7 @@ class spell_mage_blast_wave : public SpellScriptLoader
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_mage_blast_wave_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
-                OnEffect += SpellEffectFn(spell_mage_blast_wave_SpellScript::HandleImprovedFlamestrike, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_mage_blast_wave_SpellScript::HandleImprovedFlamestrike, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
