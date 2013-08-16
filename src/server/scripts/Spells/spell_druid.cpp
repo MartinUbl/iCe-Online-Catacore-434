@@ -478,9 +478,13 @@ class spell_dru_solar_beam : public SpellScriptLoader
             void HandleEffectPeriodic(AuraEffect const * aurEff)
             {
                 Unit* caster = aurEff->GetBase()->GetCaster();
-                Unit *target = GetTarget();
 
-                if (!caster || !target)
+                if (!caster)
+                    return;
+
+                Unit *target = Unit::GetUnit(*caster,caster->GetUInt64Value(UNIT_FIELD_TARGET));
+
+                if (!target)
                     return;
 
                 if(done == false) // Remember position of target (only once at begining)
