@@ -8422,8 +8422,9 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         if (!(dot_schoolmask &= SPELL_SCHOOL_MASK_FIRE))
                             continue;
 
-                        int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dot_eff->GetEffIndex(), dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
-                        uint32 dot_amplitude = dot_spell->EffectAmplitude[effIndex];
+                        uint32 dotEffIndex = dot_eff->GetEffIndex();
+                        int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dotEffIndex, dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
+                        uint32 dot_amplitude = dot_spell->EffectAmplitude[dotEffIndex];
 
                         if (dot_amplitude > 0 && dot_tick > 0)
                             dot_sum += dot_tick * IN_MILLISECONDS / dot_amplitude;    // base damage per second (without haste)
