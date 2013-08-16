@@ -1861,11 +1861,6 @@ public:
     {
         npc_mirror_imageAI(Creature *c) : CasterAI(c) 
         {
-            if(me->GetEntry() == 53438) // Image mirror from T12 2P set bonus
-            {
-                me->SetMaxHealth(3500); // Should have only 3500 HP
-                me->SetFullHealth();
-            }
             castCounter = 0; 
         }
 
@@ -1894,6 +1889,7 @@ public:
             // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
             // Clone Me!
             owner->CastSpell(me, 45204, false);
+            me->SetReactState(REACT_DEFENSIVE);
         }
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
@@ -1912,35 +1908,31 @@ public:
             }
         }
 
+        bool OwnerHasDifferentVictim(Unit * owner)
+        {
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->getVictim())
+                return true;
+
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
+                return true;
+
+            return false;
+        }
+
         void UpdateAI(const uint32 diff)
         {
             // Custom updatevictim routine
             if (!owner)
                 return;
 
-            HostileReference* top = NULL;
-            std::list<HostileReference*> &thrList = owner->getThreatManager().getThreatList();
-            for (std::list<HostileReference*>::iterator itr = thrList.begin(); itr != thrList.end(); ++itr)
+            if (OwnerHasDifferentVictim(owner))
             {
-                if (!top || top->getThreat() < (*itr)->getThreat())
-                    if (me->canSeeOrDetect((*itr)->getSource()->getOwner(), false))
-                        top = (*itr);
-            }
-
-            if (top && top->getSource() && top->getSource()->getOwner() && me->getVictim() != top->getSource()->getOwner() && me->canSeeOrDetect(top->getSource()->getOwner(), false))
-            {
-                me->getThreatManager().clearReferences();
-                me->AddThreat(top->getSource()->getOwner(), top->getThreat());
-                me->Attack(owner->getVictim(), true);
-            }
-
-            if (!me->getVictim())
-            {
-                if (owner->getVictim() && me->canSeeOrDetect(owner->getVictim(), false))
+                Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
+                if (victim && me->canSeeOrDetect(victim, false) && victim->isAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
                 {
                     me->getThreatManager().clearReferences();
-                    me->AddThreat(owner->getVictim(), 1000.0f);
-                    me->Attack(owner->getVictim(), true);
+                    me->AddThreat(victim,90000.0f);
+                    me->Attack(victim, true);
                 }
                 if (!me->getVictim())
                 {
