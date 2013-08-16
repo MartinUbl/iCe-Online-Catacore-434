@@ -426,7 +426,8 @@ class boss_shannox : public CreatureScript
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        me->CastSpell(me->getVictim(), SPELL_ARCING_SLASH, false);
+                        if(me->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) == 71557) // Only if Shannox has spear equiped (in main hand)
+                            me->CastSpell(me->getVictim(), SPELL_ARCING_SLASH, false);
                         ArcingSlashTimer = 11000;
                     }
                 }
@@ -485,6 +486,7 @@ class boss_shannox : public CreatureScript
                                     me->PlayDirectSound(24585);
                                     break;
                             }
+
                             float x,y,z,ripangle;
                             pRiplimb->GetPosition(x, y, z);
                             ripangle = me->GetAngle(x, y);
@@ -1001,74 +1003,65 @@ class npc_immolation_trap : public CreatureScript
         {
             npc_immolation_trapAI(Creature* c) : ScriptedAI(c)
             {
+                pInstance = me->GetInstanceScript();
+                pBoss = NULL;
                 c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 c->setFaction(35);
                 Reset();
             }
 
-            bool armTrap;
+            bool can_trigger;
+            bool passive;
             InstanceScript* pInstance;
-            bool trapActivated;
             uint32 armtrapTimer;
-            uint32 activatingTrapTimer;
             Creature* pBoss;
 
             void Reset()
             {
-                me->RemoveAllAuras(); // because "Hurl Spear" visual in his mouth, safety.. safety
-
-                armTrap = false;
-                trapActivated = false;
-                pBoss = NULL;
-
-                pInstance = me->GetInstanceScript();
+                can_trigger = passive = false;
+                me->RemoveAllAuras(); // because "Hurl Spear" visual in his mouth
 
                 if (pInstance)
                 {
                     pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
 
                     if (pBoss)
-                        armtrapTimer = 2000 + uint32(me->GetDistance2d(pBoss) / 100) * 1000;
+                        armtrapTimer = 2000 + (me->GetDistance2d(pBoss)* 10);
                 }
                 else
                     armtrapTimer = 2000;
-
-                activatingTrapTimer = 500;
             }
 
             void MoveInLineOfSight(Unit* pWho)
             {
-                if (!pWho || pWho->GetDistance(me) > 0.3f || !armTrap || trapActivated)
+                if (!pWho || can_trigger == false || passive || pWho->GetDistance(me) > 0.3f || pWho->HasAura(SPELL_WARY))
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL || (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE))
-                    ActivateTrap(pWho);
+                {
+                    passive = true;
+                    me->CastSpell(pWho, SPELL_IMMOLATION_TRAP, true);
+
+                    if(pWho->ToCreature())
+                        pWho->CastSpell(pWho, SPELL_WARY, true);
+
+                    me->SetVisible(false);
+                }
 
                 ScriptedAI::MoveInLineOfSight(pWho);
             }
 
-            void ActivateTrap(Unit* pWho)
-            {
-                if (pWho)
-                {
-                    trapActivated = true;
-                    if (pBoss)
-                        pBoss->CastSpell(pWho, SPELL_IMMOLATION_TRAP, true);
-                }
-            }
-
             void UpdateAI(const uint32 diff)
             {
-                if (!armTrap && !trapActivated) // done
+                if(can_trigger)
+                    return;
+
+                if (armtrapTimer <= diff)
                 {
-                    if (armtrapTimer <= diff)
-                    {
-                        armTrap = true;
-                        armtrapTimer = 2000;
-                    }
-                    else
-                        armtrapTimer -= diff;
+                    can_trigger = true;
                 }
+                else
+                    armtrapTimer -= diff;
             }
 
         };
