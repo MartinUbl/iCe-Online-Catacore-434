@@ -11753,6 +11753,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 }
             }
         break;
+        case SPELLFAMILY_GENERIC:
+            // The Widow's Kiss
+            if (spellProto->Id == 99506)
+            {
+                // multiply the damage done by stack amount
+                if (Aura *aura = this->GetAura(spellProto->Id, GetGUID()))
+                    pdamage *= aura->GetStackAmount();
+            }
+        break;
     }
 
     // ..taken

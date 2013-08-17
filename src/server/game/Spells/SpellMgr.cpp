@@ -5293,6 +5293,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->DurationIndex = 66;  // 2.5s
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
             break;
+        case 99506: // The Widow's Kiss
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
+            break;
         default:
             break;
         }
