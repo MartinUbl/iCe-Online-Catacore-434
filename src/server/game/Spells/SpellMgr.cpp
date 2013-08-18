@@ -5289,12 +5289,17 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[1] = 22;
             break;
 
-        case 99223: // Sticky Webbing (Beth'tilac encounter)
+        // Beth'tilac
+        case 99223: // Sticky Webbing
             spellInfo->DurationIndex = 66;  // 2.5s
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
         case 99506: // The Widow's Kiss
-            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF; // ignore the owner of aura
+            break;
+        case 98471: // Burning Acid
+            spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
         default:
             break;

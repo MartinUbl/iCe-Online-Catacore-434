@@ -422,7 +422,7 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
             if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
             {
                 DebugOutput("casting Meteor Burn");
-                me->CastCustomSpell(SPELL_METEOR_BURN, SPELLVALUE_MAX_TARGETS, 1, me->getVictim(), false);
+                me->CastCustomSpell(SPELL_METEOR_BURN, SPELLVALUE_MAX_TARGETS, 1, me, false);
             }
             break;
 
