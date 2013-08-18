@@ -70,6 +70,9 @@ private:
     private:
         virtual void IsSummonedBy(Unit *summoner);
         virtual void EnterEvadeMode();
+        virtual void UpdateAI(const uint32 diff);
+
+        InstanceScript *instance;
     };
 };
 

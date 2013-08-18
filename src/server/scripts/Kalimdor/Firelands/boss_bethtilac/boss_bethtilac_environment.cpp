@@ -175,11 +175,20 @@ void npc_web_rip::AI::IsSummonedBy(Unit *summoner)
     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     me->CastSpell(me, SPELL_METEOR_BURN_VISUAL, true);
+
+    instance = me->GetInstanceScript();
 }
 
 
 void npc_web_rip::AI::EnterEvadeMode()
 {
+}
+
+
+void npc_web_rip::AI::UpdateAI(const uint32 diff)
+{
+    if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
+        me->DespawnOrUnsummon();
 }
 
 
