@@ -789,6 +789,20 @@ namespace Trinity
             ASSERT(i_source);
         }
 
+        inline bool CheckLoS(const Unit *target) const
+        {
+            // check line of sight
+            return ((m_spellInfo && (m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS)) ||
+                target->IsWithinLOS(i_pos->GetPositionX(), i_pos->GetPositionY(), i_pos->GetPositionZ()));
+        }
+
+        inline void AddUnitTarget(Unit *target)
+        {
+            // checks the line of sight and adds the target
+            if (CheckLoS(target))
+                i_data->push_back(target);
+        }
+
         template<class T> inline void Visit(GridRefManager<T>  &m)
         {
             for (typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
@@ -844,23 +858,23 @@ namespace Trinity
                     case PUSH_CHAIN:
                     default:
                         if (target->IsWithinDist3d(i_pos, i_radius))
-                            i_data->push_back(target);
+                            AddUnitTarget(target);
                         break;
                     case PUSH_IN_FRONT:
                         if (i_source->isInFront(target, i_radius, static_cast<float>(M_PI/2)))
-                            i_data->push_back(target);
+                            AddUnitTarget(target);
                         break;
                     case PUSH_IN_BACK:
                         if (i_source->isInBack(target, i_radius, static_cast<float>(M_PI/2)))
-                            i_data->push_back(target);
+                            AddUnitTarget(target);
                         break;
                     case PUSH_IN_LINE:
                         if (i_source->HasInLine(target, i_radius, i_source->GetObjectSize()))
-                            i_data->push_back(target);
+                            AddUnitTarget(target);
                         break;
                     case PUSH_IN_THIN_LINE: // only traj
                         if (i_pos->HasInLine(target, i_radius, 0))
-                            i_data->push_back(target);
+                            AddUnitTarget(target);
                         break;
                 }
             }
