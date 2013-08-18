@@ -186,7 +186,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     break;
 
                 WorldPacket data(SMSG_MESSAGECHAT, 200);
-                receiver->BuildPlayerChat(&data, CHAT_MSG_WHISPER, message, uint32(LANG_ADDON), prefix.c_str());
+                GetPlayer()->BuildPlayerChat(&data, CHAT_MSG_WHISPER, message, uint32(LANG_ADDON), prefix.c_str());
                 receiver->GetSession()->SendPacket(&data);
                 break;
             }
