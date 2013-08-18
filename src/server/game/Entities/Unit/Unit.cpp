@@ -6976,7 +6976,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 {
                     if (procEx & PROC_EX_CRITICAL_HIT) // Only from melee critical strikes 
                     {
-                        CastCustomSpell(99173, SPELLVALUE_BASE_POINT0,damage * 0.03, pVictim, true); // Burning Wounds
+                        int32 bp0 = int32((damage*3)/100);
+                        CastCustomSpell(pVictim,99173, &bp0, 0, 0, true); // Burning wounds
                     }
                     break;
                 }
