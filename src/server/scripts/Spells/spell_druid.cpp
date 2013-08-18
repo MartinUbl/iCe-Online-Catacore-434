@@ -482,14 +482,14 @@ class spell_dru_solar_beam : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                Unit *target = Unit::GetUnit(*caster,caster->GetUInt64Value(UNIT_FIELD_TARGET));
+                DynamicObject* dynobj = caster->GetDynObject(78675);
 
-                if (!target)
+                if (!dynobj)
                     return;
 
                 if(done == false) // Remember position of target (only once at begining)
                 {
-                    target->GetPosition(&pos);
+                    dynobj->GetPosition(&pos);
                     done = true;
                 }
 
