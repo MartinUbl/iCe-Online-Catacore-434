@@ -5540,6 +5540,42 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     return false;
                 }
+                // Scales of Life
+                case 96879: // normal
+                case 97117: // heroic
+                {
+                    uint32 heal = 0;
+
+                    if (IsFullHealth()) // Pure overheal
+                        heal = damage;
+                    else
+                    {
+                        uint32 missing_hp = GetMaxHealth() - GetHealth();
+                        if (missing_hp >= damage) // No overheal no deal
+                            heal = 0;
+                        else
+                            heal = damage - missing_hp; // Add only real amount of overheal
+                    }
+
+                    if (heal == 0)
+                        break;
+
+                    int32 bp0 = 0;
+                    int32 max_heal = (dummySpell->Id == 96879) ? 17096 : 19284; // Stored also in auraEffect value of dummySpell -> nah :P
+
+                    if (AuraEffect* pEff = GetAuraEffect(96881,EFFECT_0)) // Weight of a Feather
+                    {
+                        bp0 = ((pEff->GetAmount() + (int32)heal) > max_heal) ? (int32)max_heal : (pEff->GetAmount() + (int32)heal);
+                        pEff->SetAmount(bp0);
+                        pEff->GetBase()->RefreshDuration();
+                    }
+                    else
+                    {
+                        bp0 = int32(heal);
+                        CastCustomSpell(this, 96881, &bp0, 0, 0, true);
+                    }
+                    break;
+                }
                 // Sweeping Strikes
                 case 18765:
                 case 35429:

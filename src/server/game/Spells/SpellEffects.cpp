@@ -4211,6 +4211,15 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 m_caster->ToPlayer()->ModifySpellCooldown(17116, -10000, true);
         }
 
+        if (m_spellInfo->Id == 96880) // Tipping of the Scales ( trinket )
+        {
+            if (AuraEffect* pEff = m_caster->GetAuraEffect(96881,EFFECT_0)) //  Weight of a Feather 
+            {
+                addhealth = pEff->GetAmount();
+                pEff->GetBase()->Remove();
+            }
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
