@@ -174,7 +174,7 @@ public:
                 case DATA_HALFUS:
                     return HalfusGUID;
                     break;
-                case DATA_PROTO_BEHEMOTH:		 
+                case DATA_PROTO_BEHEMOTH:
                     return Proto_BehemothGUID;
                 case DATA_VALIONA:
                     return ValionaGUID;
