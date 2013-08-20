@@ -367,6 +367,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData *data
         case 42166: // Arcanotron
         case 42178: // Magmatron
         case 42180: // Toxitron
+        case 52571: // Majordomo Staghelm
             break;
         default:
             SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
