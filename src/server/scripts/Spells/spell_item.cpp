@@ -227,24 +227,26 @@ public:
             Unit* pCaster = GetCaster();
             if (pCaster->GetTypeId() != TYPEID_PLAYER)
                 return;
-            float agi=pCaster->ToPlayer()->GetTotalStatValue(STAT_AGILITY);
-            float str=pCaster->ToPlayer()->GetTotalStatValue(STAT_STRENGTH);
-            float inte=pCaster->ToPlayer()->GetTotalStatValue(STAT_INTELLECT);
-            uint32 spellId=0;
-            if(agi>=str&&agi>=inte)
+            float agi = pCaster->ToPlayer()->GetTotalStatValue(STAT_AGILITY);
+            float str = pCaster->ToPlayer()->GetTotalStatValue(STAT_STRENGTH);
+            float inte = pCaster->ToPlayer()->GetTotalStatValue(STAT_INTELLECT);
+
+            uint32 spellId = 0;
+
+            if (agi>=str && agi>=inte)
             {
                 spellId = 79639;
             }
-            else if(str>=agi&&str>=inte)
+            else if (str>=agi && str>=inte)
             {
                 spellId = 79638;
             }
-            else if(inte>=agi&&inte>=str)
+            else if (inte>=agi && inte>=str)
             {
                 spellId = 79640;
             }
-            if(spellId)
-                pCaster->CastSpell(pCaster, spellId, true, NULL);           
+            if (spellId)
+                pCaster->CastSpell(pCaster, spellId, true, NULL);
         }
 
         void Register()
