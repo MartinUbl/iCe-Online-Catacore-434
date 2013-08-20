@@ -1803,7 +1803,8 @@ class Player : public Unit, public GridObject<Player>
         void SetTalentBranchSpec(uint32 branchSpec, uint8 spec) { m_branchSpec[spec] = branchSpec; }
         BranchSpec GetTalentBranchSpec(uint8 spec) const { return BranchSpec(m_branchSpec[spec]); }
         BranchSpec GetActiveTalentBranchSpec() const { return GetTalentBranchSpec(GetActiveSpec()); }
-        bool isTank();
+        bool HasTankSpec();
+        bool HasHealingSpec();
 
         uint32 CalculateTalentsPoints() const;
 

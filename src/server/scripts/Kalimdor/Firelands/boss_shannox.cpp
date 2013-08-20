@@ -1131,7 +1131,7 @@ class npc_rageface : public CreatureScript
                         {
                             Player* plr = itr->getSource();
                             plrCount++;
-                            if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->isTank() && plr->isAlive()))
+                            if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->HasTankSpec() && plr->isAlive()))
                                 targets.push_back(plr->GetGUID());
                         }
                     }

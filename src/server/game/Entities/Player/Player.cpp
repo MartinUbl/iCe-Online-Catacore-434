@@ -4601,19 +4601,30 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
     return (itr != m_talents[spec]->end() && itr->second->state != PLAYERSPELL_REMOVED);
 }
 
-bool Player::isTank()
+bool Player::HasTankSpec()
 {
-    switch (getClass())
+    switch (GetActiveTalentBranchSpec())
     {
-        case CLASS_WARRIOR:
-            return HasSpell(93098);
-        case CLASS_DEATH_KNIGHT:
-            return HasSpell(93099);
-        case CLASS_PALADIN:
-            return HasSpell(84839);
-        case CLASS_DRUID:
-            return HasSpell(84840) && HasTalent(57880, GetActiveSpec())
-                && HasTalent(16931, GetActiveSpec()) && HasTalent(61336, GetActiveSpec());
+        case SPEC_WARRIOR_PROTECTION:
+        case SPEC_PALADIN_PROTECTION:
+        case SPEC_DRUID_FERAL:
+        case SPEC_DK_BLOOD:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool Player::HasHealingSpec()
+{
+    switch (GetActiveTalentBranchSpec())
+    {
+        case SPEC_DRUID_RESTORATION:
+        case SPEC_PALADIN_HOLY:
+        case SPEC_PRIEST_DISCIPLINE:
+        case SPEC_SHAMAN_RESTORATION:
+        case SPEC_PRIEST_HOLY:
+            return true;
         default:
             return false;
     }

@@ -499,7 +499,7 @@ class mob_amani_kiddnaper : public CreatureScript
                 {
                     if ((pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0)) != NULL)
                     {
-                        if ((pTarget->ToPlayer() && pTarget->ToPlayer()->isTank()) || !pTarget->isAlive())
+                        if ((pTarget->ToPlayer() && pTarget->ToPlayer()->HasTankSpec()) || !pTarget->isAlive())
                             pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
 
                         float x,y,z;

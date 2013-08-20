@@ -298,8 +298,7 @@ public:
                     Player * p = unit->ToPlayer();
                     if (p && p->isAlive())
                     {
-                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
-                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
+                        if (!p->HasTankSpec() && !p->HasAura(5487)) // Bear form
                         {
                             if (p->HasAura(89421) || p->HasAura(92955)) // If have wrack push him to backup player list
                                 backup_targets.push_back(p);
@@ -401,8 +400,7 @@ public:
                     Player * p = unit->ToPlayer();
                     if (p && p->IsInWorld() == true)
                     {
-                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
-                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) && p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
+                        if (!p->HasTankSpec() && !p->HasAura(5487)) // Bear form
                         {
                             wrack_targets.push_back(p);
                         }
@@ -449,8 +447,7 @@ public:
                     Player * p = unit->ToPlayer();
                     if (p && p->IsInWorld() == true)
                     {
-                        if (   p->GetActiveTalentBranchSpec() != SPEC_WARRIOR_PROTECTION && p->GetActiveTalentBranchSpec() != SPEC_PALADIN_PROTECTION
-                            && ( p->GetActiveTalentBranchSpec() != SPEC_DRUID_FERAL && !p->HasAura(5487) ) &&  p->GetActiveTalentBranchSpec() != SPEC_DK_BLOOD)
+                        if (!p->HasTankSpec() && !p->HasAura(5487)) // Bear form
                         {
                             wrack_targets.push_back(p);
                         }
@@ -842,18 +839,6 @@ public:
             me->SetInCombatWithZone();
         }
 
-        bool HasHealingSpec(Player * p )
-        {
-            return ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_RESTORATION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_HOLY ||  p->GetActiveTalentBranchSpec() == SPEC_PRIEST_DISCIPLINE ||
-                     p->GetActiveTalentBranchSpec() == SPEC_PRIEST_HOLY || p->GetActiveTalentBranchSpec() == SPEC_SHAMAN_RESTORATION );
-        }
-
-        bool HasTankSpec(Player * p )
-        {
-            return ( p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD 
-                || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
-        }
-
         Player * GetFixateVictim(void)
         {
             std::list<Player*> player_list;
@@ -866,7 +851,7 @@ public:
                     Player* pPlayer = itr->getSource();
                     if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
-                            if ( HasHealingSpec(pPlayer) == false && HasTankSpec(pPlayer) == false) // Exclude healers and tanks
+                            if (!pPlayer->HasTankSpec() && !pPlayer->HasHealingSpec() && !pPlayer->HasAura(5487)) // Exclude healers and tanks
                             {
                                 player_list.push_back(pPlayer);
                             }
@@ -1005,12 +990,6 @@ public:
             return false;
         }
 
-        bool HasTankSpec(Player * p )
-        {
-            return ( p->GetActiveTalentBranchSpec() == SPEC_WARRIOR_PROTECTION || p->GetActiveTalentBranchSpec() == SPEC_PALADIN_PROTECTION ||  p->GetActiveTalentBranchSpec() == SPEC_DK_BLOOD 
-                || ( p->GetActiveTalentBranchSpec() == SPEC_DRUID_FERAL && p->HasAura(5487) ) );
-        }
-
         Player * GetFixateVictim(void)
         {
             std::list<Player*> player_list;
@@ -1023,7 +1002,7 @@ public:
                     Player* pPlayer = itr->getSource();
                     if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
-                            if (HasTankSpec(pPlayer) == false && IsOrb1Victim(pPlayer) == false ) // Exclude tanks and orb1 victim
+                            if (!pPlayer->HasTankSpec() && IsOrb1Victim(pPlayer) == false &&  !pPlayer->HasAura(5487)) // Exclude tanks and orb1 victim
                             {
                                 player_list.push_back(pPlayer);
                             }
