@@ -261,6 +261,24 @@ public:
     }
 };
 
+class go_food_feast_cataclysm : public GameObjectScript
+{
+public:
+    go_food_feast_cataclysm() : GameObjectScript("go_food_feast_cataclysm") { uses = 0;}
+
+    uint32 uses;
+
+    bool OnGossipHello(Player * pPlayer, GameObject* pGo)
+    {
+        if(pPlayer && !pPlayer->isInCombat() && uses < 50)
+        {
+            pPlayer->CastSpell(pPlayer,87544,true); // Food
+            uses++;
+        }
+        return false;
+    }
+};
+
 // http://www.wowhead.com/item=10645 Gnomish Death Ray
 // 13280 Gnomish Death Ray
 enum eGnomishDeathRay
@@ -940,4 +958,5 @@ void AddSC_item_spell_scripts()
     new spell_item_shadowmourne();
     new spell_item_apparatus_of_khazgoroth();
     new spell_item_apparatus_of_khazgoroth_hc();
+    new go_food_feast_cataclysm();
 }

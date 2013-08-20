@@ -3422,6 +3422,68 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                 triggerTarget->clearUnitState(UNIT_STAT_UNATTACKABLE);
                 break;
             }
+            case 87544: // Food ( Broiled Dragon Feast, Goblin Barbecue,.....)
+            {
+                uint32 spell_id = 0;
+                Player * player = NULL;
+
+                player = caster->ToPlayer();
+
+                if(player == NULL)
+                    break;
+
+                if (player->HasTankSpec())
+                {
+                    switch(player->GetActiveTalentBranchSpec())
+                    {
+                        case SPEC_WARRIOR_PROTECTION:
+                        case SPEC_PALADIN_PROTECTION:
+                            spell_id = 87565; // Parry
+                            break;
+                        case SPEC_DRUID_FERAL:
+                            spell_id = (player->HasAura(5487)) ? 87564 : 87557; // dodge ( bear )  agi ( cat )
+                            break;
+                        case SPEC_DK_BLOOD:
+                            spell_id = 87560; // mastery
+                            break;
+                    }
+                }
+
+                if (player->HasHealingSpec())
+                    spell_id = (urand(0,1)) ? 87558 : 87559 ; // intelect, spirit
+
+
+                if (spell_id == 0)
+                {
+                    switch (player->getClass())
+                    {
+                        case CLASS_ROGUE:
+                        case CLASS_HUNTER:
+                            spell_id = (urand(0,1)) ? 87557 : 87562 ; // agi, crit
+                            break;
+                        case CLASS_WARRIOR:
+                        case CLASS_PALADIN:
+                        case CLASS_DEATH_KNIGHT:
+                            spell_id = 87556 ; // srength
+                            break;
+                        case CLASS_PRIEST:
+                        case CLASS_MAGE:
+                        case CLASS_WARLOCK:
+                        case CLASS_DRUID:
+                            spell_id = (urand(0,1)) ? 87558 : 87563 ; // intelect,haste
+                            break;
+                        case CLASS_SHAMAN:
+                        {
+                            spell_id = (player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_ENHANCEMENT) ? 87557 : 87563; // agi,haste
+                            break;
+                        }
+                    }
+                }
+
+                if(spell_id)
+                    triggerSpellId = spell_id;
+                break;
+            }
         }
     }
 
