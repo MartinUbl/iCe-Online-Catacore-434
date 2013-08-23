@@ -3446,6 +3446,8 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                         case SPEC_DK_BLOOD:
                             spell_id = 87560; // mastery
                             break;
+                        default:
+                            break;
                     }
                 }
 
@@ -3477,6 +3479,9 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                             spell_id = (player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_ENHANCEMENT) ? 87557 : 87563; // agi,haste
                             break;
                         }
+                        default:
+                            spell_id = 0;
+                            break;
                     }
                 }
 
