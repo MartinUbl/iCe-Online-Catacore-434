@@ -3393,9 +3393,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     if (m_spellInfo->Id == 85222) // Light of Dawn
                     {
                         // Exclude targets which aren't in party with caster
-                        // and limit count to 6
+                        // and limit count to 5 (the caster is healed by separate effect making 6 targets total)
 
-                        maxSize = 6;
+                        maxSize = 5;
                         if (m_caster->HasAura(54940))
                             maxSize -= 2;
 
@@ -3403,7 +3403,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
                         for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                         {
-                            if ((*itr)->GetTypeId() != TYPEID_PLAYER || !((*itr)->ToPlayer()->IsInPartyWith(m_caster) || (*itr)->ToPlayer()->IsInRaidWith(m_caster)))
+                            Player *target = (*itr)->ToPlayer();
+                            if (!target || target == m_caster || !(target->IsInPartyWith(m_caster) || target->IsInRaidWith(m_caster)))
                                 itr = unitList.erase(itr);
                             else
                                 ++itr;
