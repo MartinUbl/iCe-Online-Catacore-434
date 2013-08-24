@@ -85,7 +85,9 @@ class InstanceSave
         /* online players bound to the instance (perm/solo)
            does not include the members of the group unless they have permanent saves */
         void AddPlayer(Player *player) { m_playerList.push_back(player); }
-        bool RemovePlayer(Player *player) { m_playerList.remove(player); return UnloadIfEmpty(); }
+        void AddFlexiblePlayer(Player *player) { m_flexiblePlayerList.push_back(player); } //flexible id
+        bool RemovePlayer(Player *player) { m_playerList.remove(player); m_flexiblePlayerList.remove(player); return UnloadIfEmpty(); }
+        bool RemoveFlexiblePlayer(Player *player) {m_flexiblePlayerList.remove(player); return UnloadIfEmpty(); } //flexible id
         /* all groups bound to the instance */
         void AddGroup(Group *group) { m_groupList.push_back(group); }
         bool RemoveGroup(Group *group) { m_groupList.remove(group); return UnloadIfEmpty(); }
@@ -108,6 +110,7 @@ class InstanceSave
            the object-instSave links need to be broken at reset time
            TODO: maybe it's enough to just store the number of players/groups */
         PlayerListType m_playerList;
+        PlayerListType m_flexiblePlayerList; //special player list for flexible bound players
         GroupListType m_groupList;
         time_t m_resetTime;
         uint32 m_instanceid;
