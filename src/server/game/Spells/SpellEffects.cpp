@@ -6936,11 +6936,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 float diseaseBonus = SpellMgr::CalculateSpellEffectAmount(m_spellInfo, EFFECT_2) / 10.0f;   // damage bonus per 1 disease
                 uint32 diseaseCount = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
                 AddPctF(totalDamagePercentMod, diseaseBonus * diseaseCount);
-
-                // Glyph of Blood Strike
-                if (m_caster->GetAuraEffect(59332, EFFECT_0))
-                    if (unitTarget->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
-                       totalDamagePercentMod *= (20 + 100.0f) / 100.0f;
                 break;
             }
             // Death Strike
