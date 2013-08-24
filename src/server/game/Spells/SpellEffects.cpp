@@ -4473,6 +4473,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         else if (m_spellInfo->Id == 81269)
         {
         }
+        // Glyph of Healing Wave
+        else if (m_spellInfo->Id == 55533)
+        {
+        }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
@@ -4553,13 +4557,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     addhealth *= 1.12f;
                 else if (caster->HasAura(30867))
                     addhealth *= 1.06f;
-            }
-
-            // Healing Wave + Glyph of Healing Wave
-            if (m_spellInfo->Id == 331 && m_caster->HasAura(55440))
-            {
-                int32 bp0 = addhealth*0.2f;
-                m_caster->CastCustomSpell(m_caster, 55533, &bp0, 0, 0, true);
             }
 
             // any shaman heal should trigger Ancestral Vigor if talent Ancestral Healing is present
