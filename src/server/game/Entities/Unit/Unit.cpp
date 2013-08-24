@@ -19905,41 +19905,36 @@ void Unit::SaveDamageTakenHistory(uint32 damage)
     uint32 time = getMSTime();
     if (m_lDamageTakenHistory.empty())
     {
-        // Data structure: Hipart - damage, Lowpart - timestamp
-        uint64 data = ((uint64)damage << 32) + time;
+        DamageTakenRecord data = {time, damage};
         m_lDamageTakenHistory.push_back(data);
     }
     else
     {
         // Is last record still up-to-date
-        std::list<uint64>::iterator last = m_lDamageTakenHistory.end();
+        std::list<DamageTakenRecord>::iterator last = m_lDamageTakenHistory.end();
         --last; // Get back to the beginning of the last record
-        uint32 timestamp = *last & 0x00000000FFFFFFFF;
+        uint32 timestamp = last->timestamp;
         if (timestamp > time - 1000)
         {
-            // Add damage to the Hipart
-            *last += ((uint64)damage << 32);
+            // Add damage
+            last->damage += damage;
         }
         else
         {
             // Fresh record
-            // Hipart: damage, Lowpart: timestamp
-            uint64 data = ((uint64)damage << 32) + time;
+            DamageTakenRecord data = {time, damage};
             m_lDamageTakenHistory.push_back(data);
         }
 
         // Search existing records for outdated ones to delete
-        std::list<uint64> lDelete;
-        for(std::list<uint64>::iterator itr = m_lDamageTakenHistory.begin(); itr != m_lDamageTakenHistory.end(); ++itr)
+        for (std::list<DamageTakenRecord>::iterator itr = m_lDamageTakenHistory.begin(); itr != m_lDamageTakenHistory.end(); )
         {
-            uint32 timestamp = *itr & 0x00000000FFFFFFFF;
+            uint32 timestamp = itr->timestamp;
             if (timestamp < time - 10500)
-                lDelete.push_back(*itr);
+                itr = m_lDamageTakenHistory.erase(itr);
             else
-                break;
+                itr++;
         }
-        for(std::list<uint64>::const_iterator i = lDelete.begin(); i != lDelete.end(); ++i)
-            m_lDamageTakenHistory.remove(*i);
     }
 }
 
@@ -19953,15 +19948,15 @@ uint32 Unit::GetDamageTakenHistory(uint32 seconds)
         return 0;
     else
     {
-        for(std::list<uint64>::const_iterator itr = m_lDamageTakenHistory.begin(); itr != m_lDamageTakenHistory.end(); ++itr)
+        for(std::list<DamageTakenRecord>::const_iterator itr = m_lDamageTakenHistory.begin(); itr != m_lDamageTakenHistory.end(); ++itr)
         {
-            uint64 record = *itr;
-            // For each record within searched duration (timestamp saved in lowpart)
-            uint32 timestamp = uint32(record & 0x00000000FFFFFFFF);
+            DamageTakenRecord record = *itr;
+            // For each record within searched duration
+            uint32 timestamp = record.timestamp;
             if (timestamp > (time - duration))
             {
-                // Add damage taken form the hipart
-                damage_history += uint32((record & 0xFFFFFFFF00000000) >> 32);
+                // Add damage taken
+                damage_history += record.damage;
             }
         }
     }
