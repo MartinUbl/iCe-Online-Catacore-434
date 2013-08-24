@@ -6350,12 +6350,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 basepoints0 = GetShieldBlockValue() * triggerAmount / 100;
                 break;
             }*/
-            // Glyph of Blocking
-            if (dummySpell->Id == 58375)
-            {
-                triggered_spell_id = 58374;
-                break;
-            }
             // Glyph of Sunder Armor
             if (dummySpell->Id == 58387)
             {
@@ -6433,9 +6427,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 // Siphon Life
                 case 63108:
                 {
-                    // Glyph of Siphon Life
-                    if (HasAura(56216))
-                        triggerAmount += triggerAmount / 4;
                     triggered_spell_id = 63106;
                     target = this;
                     basepoints0 = int32(damage*triggerAmount/100);
@@ -6801,19 +6792,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // if not found Rip
                     return false;
                 }
-                // Glyph of Rake
-                case 54821:
-                {
-                    if (procSpell->SpellVisual[0] == 750 && procSpell->EffectApplyAuraName[1] == 3)
-                    {
-                        if (target->GetTypeId() == TYPEID_UNIT)
-                        {
-                            triggered_spell_id = 54820;
-                            break;
-                        }
-                    }
-                    return false;
-                }
                 case 99001: // Druid T12 Feral 2P Bonus
                 {
                     if(procSpell->SpellIconID == 2312 || procSpell->Id == 6807 || procSpell->Id == 5221  ) // Mangle, Maul, Shred
@@ -6845,15 +6823,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     basepoints0 = int32(procSpell->manaCost * 30 / 100);
                     target = this;
                     triggered_spell_id = 28742;
-                    break;
-                }
-                // Glyph of Rejuvenation
-                case 54754:
-                {
-                    if (!pVictim || !pVictim->HealthBelowPct(uint32(triggerAmount)))
-                        return false;
-                    basepoints0 = int32(triggerAmount * damage / 100);
-                    triggered_spell_id = 54755;
                     break;
                 }
                 // Healing Touch Refund (Idol of Longevity trinket)
@@ -7523,20 +7492,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                     break;
                 }
-                // Glyph of Flash of Light
-                case 54936:
-                {
-                    triggered_spell_id = 54957;
-                    basepoints0 = triggerAmount*damage/100;
-                    break;
-                }
-                // Glyph of Holy Light
-                case 54937:
-                {
-                    triggered_spell_id = 54968;
-                    basepoints0 = triggerAmount*damage/100;
-                    break;
-                }
                 case 71406: // Tiny Abomination in a Jar
                 {
                     if (!pVictim || !pVictim->isAlive())
@@ -7903,37 +7858,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     {
                         // reduce the cooldown of Elemental Mastery by 1 second
                         ToPlayer()->ModifySpellCooldown(16116, -1000, true);
-                        return true;
-                    }
-                    return false;
-                }
-                case 63280: // Glyph of Totem of Wrath
-                {
-                    if (procSpell->SpellIconID != 2019)
-                        return false;
-
-                    AuraEffect * aurEffA = NULL;
-                    AuraEffectList const& auras = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
-                    for (AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
-                    {
-                        SpellEntry const *spell = (*i)->GetSpellProto();
-                        if (spell->SpellFamilyName == uint32(SPELLFAMILY_SHAMAN) && spell->SpellFamilyFlags.HasFlag(0, 0x02000000, 0))
-                        {
-                            if ((*i)->GetCasterGUID() != GetGUID())
-                                continue;
-                            if (spell->Id == 63283)
-                                continue;
-                            aurEffA = (*i);
-                            break;
-                        }
-                    }
-                    if (aurEffA)
-                    {
-                        int32 bp0 = 0, bp1 = 0;
-                        bp0 = aurEffA->GetAmount() * triggerAmount / 100;
-                        if (AuraEffect * aurEffB = aurEffA->GetBase()->GetEffect(EFFECT_1))
-                            bp1 = aurEffB->GetAmount() * triggerAmount / 100;
-                        CastCustomSpell(this, 63283, &bp0, &bp1, NULL, true, NULL, triggeredByAura);
                         return true;
                     }
                     return false;
@@ -11654,13 +11578,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             if (spellProto->SpellIconID == 186)
             {
                 if (pVictim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
-                {
-                    // Glyph of Ice Lance
-                    if (owner->HasAura(56377) && pVictim->getLevel() > owner->getLevel())
-                        DoneTotalMod *= 2.05f;
-                    else
-                        DoneTotalMod *= 2.0f;
-                }
+                    DoneTotalMod *= 2.0f;
             }
 
             // Torment the weak
@@ -11680,12 +11598,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Mind Flay
             if (spellProto->SpellFamilyFlags[0] & 0x800000)
             {
-                // Glyph of Shadow Word: Pain
-                if (AuraEffect * aurEff = GetAuraEffect(55687, 0))
-                    // Increase Mind Flay damage if Shadow Word: Pain present on target
-                    if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0,0, GetGUID()))
-                        DoneTotalMod *= (aurEff->GetAmount() + 100.0f) / 100.f;
-
                 // Twisted Faith - Mind Flay part
                 if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, SPELLFAMILY_PRIEST, 2848, 1))
                     // Increase Mind Flay damage if Shadow Word: Pain present on target
@@ -11734,11 +11646,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 }
         break;
         case SPELLFAMILY_HUNTER:
-            // Steady Shot
-            if(spellProto->SpellFamilyFlags[1] & 0x1)
-                if (AuraEffect * aurEff = GetAuraEffect(56826, 0))  // Glyph of Steady Shot
-                    if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 0x00004000, 0, 0, GetGUID()))
-                        AddPctN(DoneTotalMod, aurEff->GetAmount());
         break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Merciless Combat
@@ -12461,12 +12368,6 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
                     modPercent += stepPercent * aura->GetStackAmount();
                 }
                 DoneTotalMod *= (modPercent+100.0f)/100.0f;
-                break;
-            }
-            case 7871: // Glyph of Lesser Healing Wave
-            {
-                if (pVictim->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0 , 0x00000400, 0, GetGUID()))
-                    DoneTotalMod *= ((*i)->GetAmount()+100.0f)/100.0f;
                 break;
             }
             default:

@@ -8286,8 +8286,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
             {
                 // Get diseases on target of spell
-                if (m_targets.getUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.getUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+                if (m_targets.getUnitTarget() != unitTarget)
                 {
                     float dmgDecreased = 2.0f ;
 

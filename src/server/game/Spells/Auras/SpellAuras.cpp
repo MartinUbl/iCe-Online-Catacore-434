@@ -1167,12 +1167,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             case SPELLFAMILY_MAGE:
                 if (!caster)
                     break;
-                if (GetSpellProto()->SpellFamilyFlags[0] & 0x00000001 && GetSpellProto()->SpellFamilyFlags[2] & 0x00000008)
-                {
-                    // Glyph of Fireball
-                    if (caster->HasAura(56368))
-                        SetDuration(0);
-                }
                 // Todo: This should be moved to similar function in spell::hit
                 else if (GetSpellProto()->SpellFamilyFlags[0] & 0x01000000)
                 {

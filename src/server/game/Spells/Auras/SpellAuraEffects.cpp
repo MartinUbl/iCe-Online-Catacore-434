@@ -852,24 +852,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 if (GetBase()->GetUnitOwner()->GetTypeId() == TYPEID_UNIT)
                     amount -= 20.0;
             }
-            // Icebound Fortitude
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellProto->SpellFamilyFlags[0] & 0x00100000)
-            {
-                if (caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    int32 value = -amount;
-
-                    // Glyph of Icebound Fortitude
-                    if (AuraEffect const * aurEff = caster->GetAuraEffect(58625, 0))
-                        value = aurEff->GetAmount();
-
-                    uint32 defval = uint32(caster->ToPlayer()->GetSkillValue(SKILL_DEFENSE) + caster->ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
-                    if (defval > 400)
-                        value += int32((defval - 400) * 0.075);
-
-                    amount = -value;
-                }
-            }
             // Hand of Salvation
             else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_PALADIN && GetSpellProto()->SpellFamilyFlags[0] & 0x00000100)
             {
