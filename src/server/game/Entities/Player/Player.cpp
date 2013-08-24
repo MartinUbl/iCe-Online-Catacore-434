@@ -19367,8 +19367,11 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
 
 void Player::_LoadBoundInst(uint32 mapId,uint32 difficulty)
 {
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        m_boundInstances[i].clear();
+    /*for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        m_boundInstances[i].clear();*/
+   
+    //remove flexible bound
+    m_boundInstances[difficulty].erase(mapId);
 
     Group *group = GetGroup();
 
