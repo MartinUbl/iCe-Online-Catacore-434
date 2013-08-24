@@ -3531,8 +3531,6 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     if ((*j)->IsAffectedOnSpell(m_spellInfo))
                         maxTargets += (*j)->GetAmount();
 
-                if (m_spellInfo->Id == 5246) //Intimidating Shout
-                    unitList.remove(m_targets.getUnitTarget());
                 Trinity::RandomResizeList(unitList, maxTargets);
             }
             else
