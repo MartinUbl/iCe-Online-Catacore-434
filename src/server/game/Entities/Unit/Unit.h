@@ -1937,9 +1937,6 @@ class Unit : public WorldObject
         uint32 SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
         uint32 SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
 
-        void SetLastManaUse(uint32 spellCastTime) { m_lastManaUse = spellCastTime; }
-        bool IsUnderLastManaUseEffect() const;
-
         void SetContestedPvP(Player *attackedPlayer = NULL);
 
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
@@ -2229,7 +2226,6 @@ class Unit : public WorldObject
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
-        uint32 m_lastManaUse;                               // msecs
         TimeTrackerSmall m_movesplineTimer;
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];

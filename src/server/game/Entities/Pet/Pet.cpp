@@ -635,13 +635,10 @@ void Creature::Regenerate(Powers power, uint32 diff)
                 // so client will display the regeneration smoothly
             if (isInCombat() || GetCharmerOrOwnerGUID())
             {
-                if (!IsUnderLastManaUseEffect())
-                {
-                    float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
-                    float Spirit = GetStat(STAT_SPIRIT);
+                float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
+                float Spirit = GetStat(STAT_SPIRIT);
 
-                    addvalue = (Spirit/5.0f + 17.0f) * ManaIncreaseRate * diff;
-                }
+                addvalue = (Spirit/5.0f + 17.0f) * ManaIncreaseRate * diff;
             }
             else
                 addvalue = maxValue * float(diff) / 3;

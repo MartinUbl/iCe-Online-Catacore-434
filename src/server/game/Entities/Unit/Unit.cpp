@@ -192,7 +192,6 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
-    m_lastManaUse = 0;
     m_LogonTimer = 0;
 
     //m_victimThreat = 0.0f;
@@ -16874,11 +16873,6 @@ float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
         default:
             return Weapon->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER ? 1.7f : 2.4f;
     }
-}
-
-bool Unit::IsUnderLastManaUseEffect() const
-{
-    return  getMSTimeDiff(m_lastManaUse,getMSTime()) < 5000;
 }
 
 void Unit::SetContestedPvP(Player *attackedPlayer)

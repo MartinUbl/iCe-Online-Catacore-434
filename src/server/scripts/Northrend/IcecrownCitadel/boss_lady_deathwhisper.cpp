@@ -181,7 +181,7 @@ class boss_lady_deathwhisper : public CreatureScript
             void Reset()
             {
                 me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
-                me->SetLastManaUse(0xFFFFFFFF); // hacky, but no other way atm to prevent mana regen
+                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);    // disable mana regeneration
                 events.Reset();
                 events.SetPhase(PHASE_ONE);
                 addWaveCounter = 0;
