@@ -2071,6 +2071,94 @@ public:
     }
 };
 
+class npc_burning_treant : public CreatureScript
+{
+public:
+    npc_burning_treant() : CreatureScript("npc_burning_treant") { }
+
+    struct npc_burning_treantAI : CasterAI
+    {
+        npc_burning_treantAI(Creature *c) : CasterAI(c) {}
+
+        Unit* owner;
+
+        void InitializeAI()
+        {
+            owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            if (owner->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            me->CastSpell(me, 63623, true); // Have avoidance
+            me->CastSpell(me, 99029, true); // Burning
+
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        // Do not reload Creature templates on evade mode enter - prevent visual lost
+        void EnterEvadeMode()
+        {
+            if (me->IsInEvadeMode() || !me->isAlive())
+                return;
+
+            Unit *owner = me->GetCharmerOrOwner();
+
+            me->CombatStop(true);
+            if (owner && !me->hasUnitState(UNIT_STAT_FOLLOW))
+            {
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+
+        bool OwnerHasDifferentVictim(Unit * owner)
+        {
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->getVictim())
+                return true;
+
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
+                return true;
+
+            return false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            // Custom updatevictim routine
+            if (!owner)
+                return;
+
+            if (OwnerHasDifferentVictim(owner))
+            {
+                Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
+                if (victim && me->canSeeOrDetect(victim, false) && victim->isAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
+                {
+                    me->getThreatManager().clearReferences();
+                    me->AddThreat(victim,90000.0f);
+                    me->Attack(victim, true);
+                }
+                if (!me->getVictim())
+                {
+                    if (me->isInCombat())
+                        me->AI()->EnterEvadeMode();
+                    return;
+                }
+            }
+
+            if (!me->hasUnitState(UNIT_STAT_CASTING))
+                me->CastSpell(me->getVictim(), 99026, false); // Fireseed
+
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_burning_treantAI(creature);
+    }
+};
+
 class npc_lightwell : public CreatureScript
 {
 public:
@@ -4572,4 +4660,5 @@ void AddSC_npcs_special()
     new npc_summon_doomguard;
     new npc_summon_infernal;
     new npc_moonwell_chalice;
+    new npc_burning_treant;
 }
