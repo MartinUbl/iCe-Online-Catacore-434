@@ -4248,6 +4248,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 99845: // Immolation (Rhyolith, Firelands)
             spellInfo->EffectRadiusIndex[0] = 12;
             break;
+        case 98649: // Meltdown ( Rhyolith) - not working as intendet
+        case 101646:
+        case 101647:
+        case 101648:
+            spellInfo->EffectTriggerSpell[1] = 0;
+            break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
             spellInfo->EffectRadiusIndex[1] = 8;
