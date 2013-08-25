@@ -4948,6 +4948,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
             count++;
             break;
+        case 63531: //  Retribution Aura Overflow ( Communion ) retribution paladin talent, missing basepoint
+            spellInfo->EffectBasePoints[1] = 3;
+            break;
         case 82415: // Dampening Wave
         case 92650: // Dampening Wave (heroic difficulty)
             // because of bug in dbc
