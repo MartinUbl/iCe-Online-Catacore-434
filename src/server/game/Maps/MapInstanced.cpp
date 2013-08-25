@@ -119,9 +119,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 {
     if (GetId() != mapId || !player)
         return NULL;
-    if(player->GetSession()->GetSecurity()==SEC_PLAYER&&!IsBattlegroundOrArena())
-        player->_LoadBoundInst(mapId,GetDifficulty()); //reset of temporary instance bounds for flexible id
- 
+
     Map* map = NULL;
     uint32 NewInstanceId = 0;                       // instanceId of the resulting map
 
@@ -154,11 +152,11 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                     pSave = groupBind->save;
             }
         }
-        //instance bound merging when same bosses killed(flexible id)
+        //instance bound merging when same bosses killed
         Group *group = player->GetGroup();
         if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
             group->GetBoundInstance(this) && group->GetLeader() &&
-            pBind->save != group->GetBoundInstance(this)->save) 
+            pBind->save != group->GetBoundInstance(this)->save)
         {
             Player *leader = group->GetLeader();
 
@@ -198,14 +196,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
-                            pBind->save->RemovePlayer(player);//remove from list of normal and flexible players
-                            pBind->save=groupBind->save;
-                            groupBind->save->AddFlexiblePlayer(player);
-                            player->m_boundInstances[pSave->GetDifficulty()][pSave->GetMapId()]=*pBind;
-                            bool hero=true;
-                            if(iGMap->GetDifficulty()==RAID_DIFFICULTY_10MAN_HEROIC||iGMap->GetDifficulty()==RAID_DIFFICULTY_25MAN_HEROIC) // if difficulty is heroic bind instantly, else after killing boss
-                                hero=false;
-                            player->BindToInstance(pSave, true,true, hero);
+                            player->BindToInstance(pSave, true);
                         }
                      }
                 }
