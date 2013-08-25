@@ -37,6 +37,8 @@ static const uint32 npcListUnsummonAtReset[] = {NPC_VOLCANO, NPC_CRATER, NPC_SPA
 
 static const Position platformCenter = {-374.337006f, -318.489990f, 100.413002f, 0.0f};
 
+# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+
 enum Spells
 {
     SPELL_BALANCE_BAR       = 98226, // power bar for power 10
@@ -165,6 +167,10 @@ public:
             leftFootGUID = 0;
             rightFootGUID = 0;
 
+            c->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+
             Creature* pFoot = me->SummonCreature(NPC_LEFT_FOOT, 0,0,0);
             if (pFoot)
             {
@@ -216,6 +222,7 @@ public:
         uint32 lavaCheckTimer;
         uint8 magmaDrinkCount;
         uint32 magmaDrinkTimer;
+        uint32 EruptionTimer;
 
         uint32 enrageTimer;
 
@@ -240,6 +247,7 @@ public:
             activateVolcanoTimer = 8000;
             summonTimer          = 15000;
             lavaCheckTimer       = 1000;
+            EruptionTimer        = 20000;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
             displayIdPhase       = 0;
@@ -364,6 +372,8 @@ public:
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
             if (foot)
             {
+                if (pInstance)
+                    pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                 foot->SetVisibility(VISIBILITY_ON);
                 foot->CombatStop();
                 foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
@@ -374,6 +384,8 @@ public:
             foot = Unit::GetUnit(*me, rightFootGUID);
             if (foot)
             {
+                if (pInstance)
+                    pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                 foot->SetVisibility(VISIBILITY_ON);
                 foot->CombatStop();
                 foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
@@ -572,11 +584,19 @@ public:
 
                 Unit* foot = Unit::GetUnit(*me, leftFootGUID);
                 if (foot)
+                {
+                    if (pInstance)
+                        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                     foot->SetVisibility(VISIBILITY_OFF);
+                }
 
                 foot = Unit::GetUnit(*me, rightFootGUID);
                 if (foot)
+                {
+                    if (pInstance)
+                        pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                     foot->SetVisibility(VISIBILITY_OFF);
+                }
                 phase = 2;
             }
 
@@ -596,13 +616,25 @@ public:
                 GetCreatureListWithEntryInGrid(volcanoList, me, NPC_VOLCANO, 200.0f);
                 for (std::list<Creature*>::iterator itr = volcanoList.begin(); itr != volcanoList.end(); )
                 {
-                    if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE))
+                    if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE)) // Only on non active volcano
                         itr++;
                     else
                         itr = volcanoList.erase(itr);
                 }
 
+                bool found = false;
+
                 if (volcanoList.size() > 0)
+                {
+                    for (std::list<Creature*>::iterator iter = volcanoList.begin(); iter != volcanoList.end(); ++iter)
+                        if ( (*iter) && me->HasInArc(M_PI,(*iter)) ) // Pick volcano in front of boss if possible
+                        {
+                            me->CastSpell((*iter), SPELL_ACTIVATE_VOLCANO, true);
+                            found = true;
+                        }
+                }
+
+                if (volcanoList.size() > 0 && found == false) // if  we didn't find any volcano in front of boss, pick random
                 {
                     uint32 randpos = urand(0,volcanoList.size()-1);
 
@@ -760,6 +792,26 @@ public:
                 }
                 else
                     summonTimer -= diff;
+
+                if (EruptionTimer <= diff)
+                {
+                    std::list<Creature*> craterList;
+                    GetCreatureListWithEntryInGrid(craterList, me, NPC_CRATER, 200.0f);
+
+                    if (craterList.size() > 0 )
+                    {
+                        uint32 randpos = urand(0,craterList.size()-1);
+
+                        std::list<Creature*>::iterator itr = craterList.begin();
+                        std::advance(itr, randpos);
+                        if (*itr)
+                            (*itr)->AI()->DoAction(0); // Erupt
+                    }
+
+                    EruptionTimer = urand(10000,30000);
+                }
+                else EruptionTimer -= diff;
+
             }
             else if (phase == 2)
             {
@@ -793,7 +845,18 @@ public:
     {
         npc_rhyolith_feetAI(Creature* c): ScriptedAI(c)
         {
-            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            c->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            instance = c->GetInstanceScript();
+        }
+
+        uint32 SynchronizeTimer;
+        InstanceScript * instance;
+
+        void Reset()
+        {
+            SynchronizeTimer = 3000;
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -809,12 +872,33 @@ public:
                 damage = 0;
         }
 
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            //
+            if (SynchronizeTimer <= diff)
+            {
+                if (me->GetEntry() == NPC_LEFT_FOOT)
+                {
+                    if (Creature * rightFoot = me->FindNearestCreature(NPC_RIGHT_FOOT,50.0f,true))
+                    {
+                        uint32 shareHealth = me->GetHealth() + rightFoot->GetHealth();
+                        shareHealth /= 2;
+                        me->SetHealth(shareHealth);
+                        rightFoot->SetHealth(shareHealth);
+                    }
+                }
+
+                SynchronizeTimer = 1000;
+            }
+            else SynchronizeTimer -= diff;
         }
     };
 
@@ -936,11 +1020,7 @@ public:
                 {
                     // animation
                     me->RemoveAurasDueToSpell(SPELL_ERUPTION);
-
-                    // if it's in range, spawn crater and despawn us
-                    /*Creature* pCrater = */pBoss->SummonCreature(NPC_CRATER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
-                    /*if (pCrater)
-                        pCrater->CastSpell(pCrater, SPELL_VOLCANIC_ERUPTION, true);*/
+                    pBoss->SummonCreature(NPC_CRATER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN,60000);
 
                     // If the volcano was dormant, increase stacks of Molten Armor by one
                     if (me->HasAura(SPELL_VOLCANO_SMOKE))
@@ -992,17 +1072,31 @@ public:
         std::vector<Creature*> lastCreatures;
         uint32 flowStep;
         float tendency;
-
-        Creature* centerStumb;
+        bool erupted;
 
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            flowTimer = 5000;
+            flowTimer = 0;
             flowStep  = 0;
             lastCreatures.clear();
-            centerStumb = NULL;
             tendency  = 0.0f;
+            erupted = false;
+        }
+
+        void DoAction(const int32 param) // Used for eruption
+        {
+            if (erupted == false)
+            {
+                flowTimer = 1;
+                erupted = true;
+
+                if(Creature* centerStumb = me->SummonCreature(NPC_LAVA_FLOW, me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f,TEMPSUMMON_MANUAL_DESPAWN, 0))
+                {
+                    centerStumb->CastSpell(centerStumb,SPELL_LAVA_TUBE,true);
+                    centerStumb->SetFloatValue(OBJECT_FIELD_SCALE_X, 5.0f);
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -1013,9 +1107,6 @@ public:
                 {
                     if (lastCreatures.empty())
                     {
-                        centerStumb = me->SummonCreature(NPC_LAVA_FLOW, 0,0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                        centerStumb->CastSpell(me, SPELL_LAVA_TUBE, true);
-                        centerStumb->SetFloatValue(OBJECT_FIELD_SCALE_X, 4.0f);
                         tendency = ((float)urand(0,100.0f*M_PI/3))/100.0f - M_PI/6;
 
                         lastCreatures.resize(urand(4,6));
@@ -1023,7 +1114,7 @@ public:
                         for (uint32 i = 0; i < lastCreatures.size(); i++)
                         {
                             me->GetNearPosition(pos, 5.0f, i*(2*M_PI/lastCreatures.size()));
-                            lastCreatures[i] = me->SummonCreature(NPC_LAVA_FLOW, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                            lastCreatures[i] = me->SummonCreature(NPC_LAVA_FLOW, pos, TEMPSUMMON_MANUAL_DESPAWN, 0);
                         }
                     }
 
@@ -1031,7 +1122,7 @@ public:
                     for (uint32 i = 0; i < lastCreatures.size(); i++)
                     {
                         lastCreatures[i]->GetNearPosition(pos, FLOW_DIST, i*(2*M_PI/lastCreatures.size())+tendency);
-                        lastCreatures[i] = me->SummonCreature(NPC_LAVA_FLOW, pos, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                        lastCreatures[i] = me->SummonCreature(NPC_LAVA_FLOW, pos, TEMPSUMMON_MANUAL_DESPAWN, 0);
                         lastCreatures[i]->GetAI()->DoAction(10000 - 160*flowStep);
                     }
                     flowStep++;
@@ -1042,8 +1133,7 @@ public:
 
                     if (flowStep >= FLOW_LENGTH)
                     {
-                        centerStumb->RemoveAurasDueToSpell(SPELL_LAVA_TUBE);
-                        centerStumb->ForcedDespawn();
+                        me->RemoveAurasDueToSpell(SPELL_LAVA_TUBE);
                         flowTimer = 0;
                     }
                     else
@@ -1088,7 +1178,9 @@ public:
             {
                 if (boomTimer <= diff)
                 {
-                    me->CastSpell(me, SPELL_MAGMA_FLOW_BOOM, true);
+                    if (!me->HasAura(SPELL_LAVA_TUBE))
+                        me->CastSpell(me, SPELL_MAGMA_FLOW_BOOM, true);
+                    me->ForcedDespawn(7000);
                     boomTimer = 0;
                 }
                 else
@@ -1132,20 +1224,25 @@ public:
         }
 
         uint32 infernalRageTimer;
+        uint32 aggressiveTimer;
 
         void Reset()
         {
-            infernalRageTimer = 5000;
-        }
-
-        void EnterCombat(Unit* with)
-        {
-            me->CastSpell(me, SPELL_SPARK_IMMOLATION, true);
-            infernalRageTimer = 5000;
+            aggressiveTimer = 4000;
+            infernalRageTimer = aggressiveTimer + 5000;
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (aggressiveTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_SPARK_IMMOLATION, true);
+                me->SetInCombatWithZone();
+                aggressiveTimer = NEVER;
+                infernalRageTimer = 5000;
+            }
+            else aggressiveTimer -= diff;
+
             if (!UpdateVictim())
                 return;
 
@@ -1156,6 +1253,8 @@ public:
             }
             else
                 infernalRageTimer -= diff;
+
+            DoMeleeAttackIfReady();
         }
     };
 
@@ -1175,43 +1274,57 @@ public:
         npc_rhyolith_fragmentAI(Creature* c): ScriptedAI(c)
         {
             Reset();
+            victimGUID = 0;
         }
 
         uint32 meltdownTimer;
+        uint32 aggressiveTimer;
+        uint64 victimGUID;
 
         void Reset()
         {
-            meltdownTimer = 30000;
+            aggressiveTimer = 4000;
+            meltdownTimer = aggressiveTimer + 30000;
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (aggressiveTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_FRAGMENT_MELTDOWN, true);
+                me->SetInCombatWithZone();
+                aggressiveTimer = NEVER;
+                meltdownTimer = 30000;
+            }
+            else aggressiveTimer -= diff;
+
             if (!UpdateVictim())
                 return;
 
             if (meltdownTimer <= diff)
             {
-                std::list<Player*> targetList;
-                Map::PlayerList const& plList = me->GetInstanceScript()->instance->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                if ( Unit * target = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true))
                 {
-                    if ((*itr).getSource()->isAlive() && (*itr).getSource()->IsWithinCombatRange(me, 100.0f))
-                        targetList.push_back((*itr).getSource());
+                    victimGUID = target->GetGUID();
+                    me->GetMotionMaster()->MoveCharge(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
                 }
-
-                if (targetList.empty())
-                    me->ForcedDespawn();
-                else
-                {
-                    std::list<Player*>::iterator itr = targetList.begin();
-                    std::advance(itr, urand(0, targetList.size()-1));
-                    me->CastSpell(*itr, SPELL_FRAGMENT_MELTDOWN, true);
-                }
-
-                meltdownTimer = 30000;
+                meltdownTimer = NEVER;
             }
             else
                 meltdownTimer -= diff;
+
+            if(victimGUID)
+            {
+                Unit * vic = Unit::GetUnit(*me,victimGUID);
+                if(vic && me->IsWithinMeleeRange(vic))
+                {
+                    me->CastSpell(me,98649,true);
+                    victimGUID = 0;
+                    me->Kill(me);
+                }
+            }
+
+            DoMeleeAttackIfReady();
         }
     };
 
