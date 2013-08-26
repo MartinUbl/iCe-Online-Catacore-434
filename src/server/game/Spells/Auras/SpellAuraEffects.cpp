@@ -5057,11 +5057,13 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp, uint8 mode
     if (!apply)
     {
         target->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING_FLY);
-        target->GetMotionMaster()->MoveFall();
+        //target->GetMotionMaster()->MoveFall(); - who the hell write this nonsens ?
     }
 
     if (target->m_movedPlayer && target->m_movedPlayer->GetTypeId() == TYPEID_PLAYER)
+    {
         target->m_movedPlayer->SetSendFlyPacket(apply);
+    }
 }
 
 void AuraEffect::HandleAuraWaterWalk(AuraApplication const *aurApp, uint8 mode, bool apply) const
