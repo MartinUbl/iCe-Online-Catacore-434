@@ -2840,6 +2840,9 @@ void SpellMgr::LoadSpellAreas()
 
 SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player)
 {
+    if (spellInfo->Id == 98619) // Ugly ugly hack ...
+        return SPELL_CAST_OK;
+
     // normal case
     if (spellInfo->AreaGroupId > 0)
     {
@@ -4171,6 +4174,22 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[1] = 25;
             count++;
             break;
+        /**************************** ALYSRAZOR  **********************************/
+
+        case 100555: // Smouldering Roots
+            spellInfo->Effect[1] = 0;
+        break;
+        case 99388: // Imprinted
+        case 99389:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+        break;
+        case 101223: // Fieroblast
+        case 101294:
+        case 101295:
+        case 101296:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+        break;
         case 99816: // Fiery Tornado
             spellInfo->EffectRadiusIndex[EFFECT_0] = 26;
             spellInfo->EffectRadiusIndex[EFFECT_1] = 26;
@@ -4179,14 +4198,31 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         case 99844: // Blazing Claw
+        case 101729:
+        case 101730:
+        case 101731:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CONE_ENEMY;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CONE_ENEMY;
+            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_CONE_ENEMY;
+
             spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
             spellInfo->EffectValueMultiplier[2] = 10;
             spellInfo->EffectBasePoints[2] = 10;
             spellInfo->EffectMiscValue[2] = 1;
             spellInfo->EffectMiscValueB[2] = 0;
-            spellInfo->EffectImplicitTargetA[2] = TARGET_DEST_UNK_110;
             break;
+        case 98885: // Brushfire
+        case 100715:
+        case 100716:
+        case 100717:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            spellInfo->excludeTargetAuraSpell = 0;
+            break;
+
+/************************ END OF ALYSRAZOR *******************************/
+
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;
