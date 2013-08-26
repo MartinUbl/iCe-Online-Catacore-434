@@ -142,7 +142,90 @@ class npc_gh: public CreatureScript
             return true;
         }
 };
+
+#define LOTTERY_WORLD_STATE 13331
+#define LOTTERY_TICKET_ITEM 190000
+
+class LotteryHelper: public WorldScript
+{
+    public:
+        LotteryHelper(): WorldScript("lottery_world_script")
+        {
+            if (sWorld->getWorldState(LOTTERY_WORLD_STATE) == 0)
+                sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
+
+            time_flush = sWorld->getWorldState(LOTTERY_WORLD_STATE);
+        }
+
+        uint32 time_flush;
+
+        void OnUpdate(void* dunno, uint32 diff)
+        {
+            if (time_flush < time(NULL))
+            {
+                sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
+                time_flush = sWorld->getWorldState(LOTTERY_WORLD_STATE);
+
+                QueryResult res = CharacterDatabase.PQuery("SELECT owner_guid FROM item_instance WHERE itemEntry = %u;", LOTTERY_TICKET_ITEM);
+                if (res)
+                {
+                    std::vector<uint64> holderMap;
+                    uint32 cnt = 0;
+                    do
+                    {
+                        holderMap.push_back((*res)[0].GetUInt64());
+                        cnt++;
+                    } while (res->NextRow());
+
+                    // Get rid of all tickets
+
+                    // online players
+                    SessionMap const& sessMap = sWorld->GetAllSessions();
+                    Player* tmp = NULL;
+                    for (SessionMap::const_iterator itr = sessMap.begin(); itr != sessMap.end(); ++itr)
+                    {
+                        tmp = itr->second->GetPlayer();
+                        if (!tmp)
+                            continue;
+
+                        if (tmp->GetItemCount(LOTTERY_TICKET_ITEM, false) > 0)
+                            tmp->DestroyItemCount(LOTTERY_TICKET_ITEM, tmp->GetItemCount(LOTTERY_TICKET_ITEM, false), true);
+                    }
+                    // offline players
+                    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE itemEntry = %u;", LOTTERY_TICKET_ITEM);
+
+                    // Choose winner
+
+                    if (holderMap.empty())
+                        return;
+
+                    uint32 winnerPos = urand(0, holderMap.size()-1);
+
+                    uint64 target_guid = holderMap[winnerPos];
+                    Player* target = sObjectMgr->GetPlayer(target_guid);
+
+                    uint64 moneyamount = (cnt*100000)*0.8f;
+                    uint64 moneyamount_notvat = (cnt*100000);
+
+                    std::stringstream ss;
+                    ss << "Congratulations! You won " << moneyamount/GOLD << " golds in goblin lottery!\n\nThat's " << moneyamount_notvat/GOLD << " golds original minus 20% vat.";
+
+                    // send mail with money to our winner
+                    MailSender sender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
+                    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                    MailDraft* md = new MailDraft("Goblin Lottery", ss.str().c_str());
+                    md->AddMoney(moneyamount);
+                    md->SendMailTo(trans, MailReceiver(target,GUID_LOPART(target_guid)),sender);
+                    delete md;
+
+                    CharacterDatabase.CommitTransaction(trans);
+                }
+            }
+        }
+};
+
 void AddSC_custom_events()
 {
     new npc_gh;
+    new LotteryHelper();
 }
