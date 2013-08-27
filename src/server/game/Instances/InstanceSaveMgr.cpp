@@ -216,7 +216,7 @@ void InstanceSave::DeleteFromDB()
 /* true if the instance save is still valid */
 bool InstanceSave::UnloadIfEmpty()
 {
-    if (m_playerList.empty() && m_groupList.empty())
+    if (m_playerList.empty() && m_groupList.empty() && m_flexiblePlayerList.empty())
     {
         if (!sInstanceSaveMgr->lock_instLists)
             sInstanceSaveMgr->RemoveInstanceSave(GetInstanceId());

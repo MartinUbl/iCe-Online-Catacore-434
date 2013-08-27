@@ -2416,7 +2416,7 @@ bool InstanceMap::CanEnter(Player *player)
     // cannot enter while an encounter is in progress on raids
     /*Group *pGroup = player->GetGroup();
     if (!player->isGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
-    if (player->GetSession()->GetSecurity() == SEC_PLAYER && IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress()) 
+    if ( player->GetSession()->GetSecurity() == SEC_PLAYER && IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress()) 
     {
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
@@ -2744,7 +2744,8 @@ void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind *bind = plr->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
-        if (!bind || !bind->perm)
+
+        if (!bind || !bind->perm ||bind->save!=save)
         {
             plr->BindToInstance(save, true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
