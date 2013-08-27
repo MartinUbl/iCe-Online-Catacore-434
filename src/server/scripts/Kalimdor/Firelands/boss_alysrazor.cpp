@@ -224,6 +224,7 @@ class boss_Alysrazor : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 //me->SetPower(POWER_MANA, 100);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
                 me->SetFlying(true);
                 sx = -41.78f;
                 sy = -275.97f;
@@ -251,6 +252,7 @@ class boss_Alysrazor : public CreatureScript
             bool MoveMiddle;
             bool FieryTornado;
             bool Check;
+            bool Dying;
 
             uint32 AchievementBF;
             uint32 AchievementIC;
@@ -272,6 +274,7 @@ class boss_Alysrazor : public CreatureScript
             uint32 IncendiaryCloudFront;
             uint32 BlazingPowerTimer;
             uint32 StageTimer;
+            uint32 FallingTimer;
 
             uint32 C;
             uint32 u;
@@ -284,6 +287,15 @@ class boss_Alysrazor : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 Summons.push_back(summon->GetGUID());
+            }
+
+            void SummonedCreatureDespawn(Creature* pSummon)
+            {
+                if (pSummon && pSummon->GetEntry() == NPC_VORACIOUS_HATCHLING)
+                {
+                        if (instance)
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, pSummon);
+                }
             }
 
             void DoUpdateGoForPlayers (GameObject * pGO)
@@ -339,6 +351,8 @@ class boss_Alysrazor : public CreatureScript
                 SpawnWorms = false;
                 FlyDownFirst = true;
                 FlyOut = false;
+                Dying = false;
+
                 if (!me->FindNearestCreature(NPC_MAJORDOMO_STAGHELM, 300.0f))
                 {
                     if (GameObject* Volcano = me->FindNearestGameObject(GAMEOBJECT_VOLCANO, 300.0f))
@@ -352,6 +366,7 @@ class boss_Alysrazor : public CreatureScript
 
             void EnterCombat(Unit* /*target*/)
             {
+                //me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 HeraldTimer = 35000;
                 SummonInitiate = true;
                 SummonInitiateTimer = 20000;
@@ -359,6 +374,25 @@ class boss_Alysrazor : public CreatureScript
                 DoPlaySoundToSet(me, SAY_AGGRO);
                 RemoveAuraFromAllPlayers(SPELL_MOLTEN_FEATHER, true, false);
                 RemoveAuraFromAllPlayers(SPELL_FEATHER_BAR, false, false);
+            }
+
+            void DamageTaken(Unit* attacker, uint32& damage)
+            {
+                if(attacker == me) // Can kill self
+                    return;
+
+                if (damage >= me->GetHealth())
+                {
+                    damage = 0;
+                    me->InterruptNonMeleeSpells(false);
+                    me->RemoveAllAuras();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                    me->GetMotionMaster()->MoveFall(0);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
+                    Dying = true;
+                    FallingTimer = 2500;
+                }
             }
 
             void KilledUnit(Unit* victim)
@@ -389,7 +423,6 @@ class boss_Alysrazor : public CreatureScript
 
             void JustDied(Unit* /*Killer*/)
             {
-                me->GetMotionMaster()->MoveFall();
                 me->MonsterYell("The light... mustn't... burn out...", LANG_UNIVERSAL, 0);
                 DoPlaySoundToSet(me, SAY_DEATH);
                 RemoveAuraFromAllPlayers(SPELL_MOLTEN_FEATHER, true, false);
@@ -439,6 +472,9 @@ class boss_Alysrazor : public CreatureScript
                 if(caster == me)
                     return;
 
+                if(caster->ToCreature() && caster->GetEntry() == NPC_BLAZING_TALON_CLAW)
+                    return;
+
                 if (caster && me->HasAura(SPELL_BURNOUT) && caster->getPowerType() == POWER_MANA)
                     me->CastSpell(caster,99433,true); // Energize mana ( Essence of the Green )
             }
@@ -457,17 +493,21 @@ class boss_Alysrazor : public CreatureScript
                         me->SetSpeed(MOVE_FLIGHT, 40.0f);
                         me->PlayOneShotAnimKit(ANIM_KIT_FLY_OUT);
                         me->SetFacingTo(2.40f);
-                        me->GetMotionMaster()->MovePoint(1, 105.9f, -407.6f, 180.0f);
+                        //me->GetMotionMaster()->MovePoint(1, 105.9f, -407.6f, 150.0f);
+                        me->GetMotionMaster()->MovePoint(1,45.0f,-348.0f,120.0f);
                         ++FlyFront;
                         break;
                     case 2: //FlyDown(Intro)
+                    {
                         FlyTimer = 10000;
-                        me->SetSpeed(MOVE_FLIGHT, 2.2f);
+                        me->SetFacingTo(2.40f);
+                        me->SetSpeed(MOVE_FLIGHT, 1.2f);
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 70*cos(i), sy + 70*sin(i), 90.0f);
-                        me->CastSpell(me, SPELL_FIRESTORM, false);
+                        me->CastSpell(me, SPELL_FIRESTORM, true);
                         ++FlyFront;
                         break;
+                     }
                     case 3://FlyDown2
                         FlyUP = false;
                         FlyTimer = !Check ? 1000 : 2500;
@@ -480,7 +520,7 @@ class boss_Alysrazor : public CreatureScript
                     case 4: //FlyCenter
                         FlyTimer = 9000;
                         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
-                        me->SetSpeed(MOVE_FLIGHT, 1.4f);
+                        me->SetSpeed(MOVE_FLIGHT, 1.0f);
                         i = 19.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 55*cos(i), sy + 55*sin(i), 70.0f);
                         me->CastSpell(me, 99844, true);
@@ -604,17 +644,7 @@ class boss_Alysrazor : public CreatureScript
                             pBroodMother->GetMotionMaster()->MovePoint(0,-59.0f,-279.0f,55.0f + 18);
                         }
                     }
-                    /*if (Creature* Satchel1 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(1.0f), sy + 150*sin(1.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
-                    {
-                        Satchel1->AI()->SetData(DATA_IMPRINTED, 1);
-                        Satchel1->GetMotionMaster()->MovePoint(3, SpawnPositions[16]);
-                    }
-                    if (Creature* Satchel2 = me->SummonCreature(NPC_EGG_SATCHEL, sx + 150*cos(4.0), sy + 150*sin(4.0f), 140.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 25000))
-                    {
-                        Satchel2->AI()->SetData(DATA_IMPRINTED, 2);
-                        Satchel2->GetMotionMaster()->MovePoint(3, SpawnPositions[17]);
-                    }*/
-                    }
+                }
                     break;
                 case NPC_PLUMP_LAVA_WORM:
                     if (FirstWormPositions)
@@ -861,6 +891,16 @@ class boss_Alysrazor : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                if(Dying && FallingTimer <= diff)
+                {
+                    me->DealDamage(me,me->GetHealth());
+                    return;
+                }
+                else FallingTimer -= diff;
+
+                if (Dying)
+                    return;
+
                 if (instance->GetData(TYPE_ALYSRAZOR) == FAIL && Phase != 4)
                 {
                     RemoveAuraFromAllPlayers(0, false, true);
@@ -1204,6 +1244,7 @@ class boss_Alysrazor : public CreatureScript
                         DoPlaySoundToSet(me, SAY_REBORN);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetInCombatWithZone();
+                        //me->SetUInt64Value(UNIT_FIELD_TARGET, me->getVictim()->GetGUID());
                         StageTimer = 23000;
                         FlyTimer = 2000;
                         FlyUP = true;
@@ -1507,6 +1548,7 @@ class npc_Molten_Egg : public CreatureScript
             {
                 CastTimer = 10000;
                 SpawnTimer = 15500;
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             }
 
             uint32 CastTimer;
@@ -1873,6 +1915,7 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetSpeed(MOVE_FLIGHT, 3.0f);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 Male = false;
             }
 
@@ -1994,6 +2037,8 @@ class npc_Voracious_Hatchling : public CreatureScript
                 me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 HathTimer = 3000;
                 Imprinted = true;
+                instance = me->GetInstanceScript();
+
             }
 
             uint32 GushingWoundTimer;
@@ -2001,13 +2046,25 @@ class npc_Voracious_Hatchling : public CreatureScript
             uint32 HathTimer;
             uint32 Threat;
             uint32 Imprinte;
+            InstanceScript * instance;
 
             bool Imprinted;
             bool Passive;
 
+
+            void Reset()
+            {
+                if(instance)
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
             void EnterCombat(Unit* /*target*/)
             {
                 me->SetInCombatWithZone();
+
+                if(instance)
+                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
                 GushingWoundTimer = 15000;
             }
 
@@ -2019,6 +2076,9 @@ class npc_Voracious_Hatchling : public CreatureScript
 
             void JustDied(Unit* /*Killer*/)
             {
+                if(instance)
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
                 Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                     if (Player* player = i->getSource())
@@ -2871,7 +2931,7 @@ class spell_Blazing_Power : public SpellScriptLoader
                 {
                     if (Aura* Blazing = GetTarget()->GetAura(SPELL_BLAZING_POWER_EFFECT))
                     {
-                        if (Blazing->GetStackAmount() >= 25)
+                        if (Blazing->GetStackAmount() >= 24)
                         {
                             if (Aura* Power = GetTarget()->GetAura(SPELL_ALYSRAS_RAZOR))
                                 Power->SetDuration(40000);
