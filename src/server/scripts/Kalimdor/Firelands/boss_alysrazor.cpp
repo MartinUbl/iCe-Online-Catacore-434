@@ -640,7 +640,7 @@ class boss_Alysrazor : public CreatureScript
                         {
                             pBroodMother->ForcedDespawn(12000);
                             pSatchel2->EnterVehicle(pBroodMother, 0, false);
-                            pSatchel2->AI()->SetData(DATA_IMPRINTED, 1);
+                            pSatchel2->AI()->SetData(DATA_IMPRINTED, 2);
                             pBroodMother->GetMotionMaster()->MovePoint(0,-59.0f,-279.0f,55.0f + 18);
                         }
                     }
