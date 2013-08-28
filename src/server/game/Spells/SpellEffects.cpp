@@ -4450,6 +4450,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         else if (m_spellInfo->Id == 55533)
         {
         }
+        // Spirit Link
+        else if (m_spellInfo->Id == 98021)
+        {
+        }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
