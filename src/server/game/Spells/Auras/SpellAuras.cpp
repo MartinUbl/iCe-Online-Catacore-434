@@ -2408,9 +2408,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Jinx, casting CotW bonus
                     int32 bp0 = 0;
                     if (caster->HasAura(85479))
-                        bp0 = -10;
+                        bp0 = 10;
                     else if (caster->HasAura(18179))
-                        bp0 = -5;
+                        bp0 = 5;
 
                     if (bp0 != 0)
                     {
