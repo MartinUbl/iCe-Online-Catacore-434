@@ -1431,6 +1431,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                 }
 
+                // Fulmination
+                if (m_spellInfo->Id == 88767)
+                {
+                    // disable damage bonus (already applied in spell script)
+                    apply_direct_bonus = false;
+                }
+
                 // Implementation of Elemental Overload mastery profficiency
                 if ((m_spellInfo->Id == 403 || m_spellInfo->Id == 51505 || m_spellInfo->Id == 421) &&
                     m_caster->ToPlayer() && m_caster->ToPlayer()->HasMastery() &&
