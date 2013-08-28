@@ -4181,6 +4181,8 @@ void SpellMgr::LoadSpellCustomAttr()
         break;
         case 99388: // Imprinted
         case 99389:
+        case 100359:
+        case 100358:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
         break;
         case 101223: // Fieroblast

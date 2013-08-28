@@ -23,12 +23,13 @@
 
 #define DATA_TORNADO_SLOT           1
 #define DATA_STAGE_THREE_TIMER      2
-#define DATA_IMPRINTED              3
 #define DATA_ACHIEVEMENTBF          4
 #define DATA_ACHIEVEMENTIC          5
 #define DATA_ACHIEVEMENTLS          6
 #define DATA_ACHIEVEMENTFT          7
 #define DATA_BOULDER                8
+
+const uint32 DATA_IMPRINTED = 999;
 
 enum Sounds
 {
@@ -208,8 +209,6 @@ enum MiscData
     ANIM_KIT_WAKE_UP            = 1456,
 };
 
-uint64 ALYSRAZOR_GUID = 0;
-
 /*********************ALYSRAZOR_BOSS_AI***********************/
 class boss_Alysrazor : public CreatureScript
 {
@@ -222,16 +221,16 @@ class boss_Alysrazor : public CreatureScript
             {
                 me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 me->SetReactState(REACT_PASSIVE);
-                //me->SetPower(POWER_MANA, 100);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                 me->SetFlying(true);
                 sx = -41.78f;
                 sy = -275.97f;
                 Phase = 4;
                 me->SetVisible(false);
                 instance = creature->GetInstanceScript();
-                ALYSRAZOR_GUID = me->GetGUID();
             }
 
             InstanceScript* instance;
@@ -253,6 +252,7 @@ class boss_Alysrazor : public CreatureScript
             bool FieryTornado;
             bool Check;
             bool Dying;
+            bool switcher;
 
             uint32 AchievementBF;
             uint32 AchievementIC;
@@ -352,6 +352,7 @@ class boss_Alysrazor : public CreatureScript
                 FlyDownFirst = true;
                 FlyOut = false;
                 Dying = false;
+                switcher = false;
 
                 if (!me->FindNearestCreature(NPC_MAJORDOMO_STAGHELM, 300.0f))
                 {
@@ -366,7 +367,6 @@ class boss_Alysrazor : public CreatureScript
 
             void EnterCombat(Unit* /*target*/)
             {
-                //me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 HeraldTimer = 35000;
                 SummonInitiate = true;
                 SummonInitiateTimer = 20000;
@@ -413,6 +413,9 @@ class boss_Alysrazor : public CreatureScript
 
             void EnterEvadeMode()
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
+
                 if(instance)
                 {
                     instance->SetData(TYPE_ALYSRAZOR,NOT_STARTED);
@@ -443,8 +446,21 @@ class boss_Alysrazor : public CreatureScript
                 }
             }
 
-            uint32 GetData(uint32 type) const
+        void DoAction(const int32 param)
+        {
+            switcher = !switcher;
+        }
+
+            uint32 GetData(uint32 type)
             {
+                if( type == DATA_IMPRINTED)
+                {
+                    if(switcher)
+                        return 1;
+                    else
+                        return 2;
+                }
+
                 switch (type)
                 {
                     case DATA_STAGE_THREE_TIMER:
@@ -504,6 +520,8 @@ class boss_Alysrazor : public CreatureScript
                         me->SetSpeed(MOVE_FLIGHT, 1.2f);
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 70*cos(i), sy + 70*sin(i), 90.0f);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
                         me->CastSpell(me, SPELL_FIRESTORM, true);
                         ++FlyFront;
                         break;
@@ -512,7 +530,9 @@ class boss_Alysrazor : public CreatureScript
                         FlyUP = false;
                         FlyTimer = !Check ? 1000 : 2500;
                         me->SetSpeed(MOVE_FLIGHT, 4.0f);
-                        me->SetFacingTo(me->GetAngle(sx, sy));
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                        //me->SetFacingTo(me->GetAngle(sx, sy));
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 55*cos(i), sy + 55*sin(i), 70.0);
                         ++FlyFront;
@@ -598,17 +618,6 @@ class boss_Alysrazor : public CreatureScript
                     if (despawncreatures)
                     {
                         Summons.DespawnAll();
-                        /*DespawnCreatures(NPC_BRUSHFIRE);
-                        DespawnCreatures(NPC_LAVA_WORM_TARGET);
-                        DespawnCreatures(NPC_MOLTEN_FEATHER);
-                        DespawnCreatures(NPC_BLAZING_TALON_CLAW);
-                        DespawnCreatures(NPC_FIERY_TORNADO);
-                        DespawnCreatures(NPC_FIERY_VORTEX);
-                        DespawnCreatures(NPC_EGG_SATCHEL);
-                        DespawnCreatures(NPC_MOLTEN_EGG);
-                        DespawnCreatures(NPC_BLAZING_TALON_INITIATE);
-                        DespawnCreatures(NPC_VORACIOUS_HATCHLING);
-                        DespawnCreatures(NPC_PLUMP_LAVA_WORM);*/
                     }
                 }
 
@@ -618,21 +627,20 @@ class boss_Alysrazor : public CreatureScript
                 {
                 case NPC_EGG_SATCHEL:
                 {
-                    Creature* pBroodMother = me->SummonCreature(NPC_BROODMOTHER_1,30.0f,-307.0f,95.0f,2.61f,TEMPSUMMON_MANUAL_DESPAWN,0);
+                    Creature* pBroodMother = me->SummonCreature(NPC_BROODMOTHER_1,25.4f,-188.5f,113.0f,2.61f,TEMPSUMMON_MANUAL_DESPAWN,0);
                     if (pBroodMother)
                     {
                         if (Creature* pSatchel1 = me->SummonCreature(NPC_MOLTEN_EGG,pBroodMother->GetPositionX(),pBroodMother->GetPositionY(),pBroodMother->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                         {
                             pBroodMother->ForcedDespawn(12000);
                             pSatchel1->EnterVehicle(pBroodMother, 0, false);
-                            pSatchel1->AI()->SetData(DATA_IMPRINTED, 1);
-                            pBroodMother->GetMotionMaster()->MovePoint(0,-47.0f,-253.0f,54.8f + 18);
+                            pBroodMother->GetMotionMaster()->MovePoint(0,-47.0f, -266.0f, 80.0f);
                         }
                     }
 
                     pBroodMother = NULL;
 
-                    pBroodMother = me->SummonCreature(NPC_BROODMOTHER_2,19.0f,-327.0f,95.0f,2.65f,TEMPSUMMON_MANUAL_DESPAWN,0);
+                    pBroodMother = me->SummonCreature(NPC_BROODMOTHER_2,-20.3f,-410.4f,113.0f,2.65f,TEMPSUMMON_MANUAL_DESPAWN,0);
 
                     if (pBroodMother)
                     {
@@ -640,8 +648,7 @@ class boss_Alysrazor : public CreatureScript
                         {
                             pBroodMother->ForcedDespawn(12000);
                             pSatchel2->EnterVehicle(pBroodMother, 0, false);
-                            pSatchel2->AI()->SetData(DATA_IMPRINTED, 2);
-                            pBroodMother->GetMotionMaster()->MovePoint(0,-59.0f,-279.0f,55.0f + 18);
+                            pBroodMother->GetMotionMaster()->MovePoint(0,-33.0f,-287.0f, 80.0f);
                         }
                     }
                 }
@@ -1388,7 +1395,10 @@ class npc_Captive_Duid : public CreatureScript
 
         struct npc_Captive_DuidAI : public ScriptedAI
         {
-            npc_Captive_DuidAI(Creature* creature) : ScriptedAI(creature){}
+            npc_Captive_DuidAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->CastSpell(me,100556,true);
+            }
 
             void JustDied(Unit* /*Killer*/)
             {
@@ -1417,7 +1427,7 @@ public:
         void Reset()
         {
             me->SetReactState(REACT_AGGRESSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
             me->SetInCombatWithZone();
             //me->CastSpell(me, SPELL_FIERY_VORTEX, false);
             me->setFaction(14);
@@ -1457,6 +1467,8 @@ class npc_Fendral : public CreatureScript
         {
             npc_FendralAI(Creature* creature) : ScriptedAI(creature) 
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                 instance = creature->GetInstanceScript();
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -1549,16 +1561,19 @@ class npc_Molten_Egg : public CreatureScript
                 CastTimer = 10000;
                 SpawnTimer = 15500;
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+                ALYSRAZOR_GUID = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             uint32 CastTimer;
             uint32 SpawnTimer;
             uint32 Imprinte;
+            uint64 ALYSRAZOR_GUID;
 
-            void SetData(uint32 Type, uint32 Data)
+            void IsSummonedBy(Unit* pSummoner)
             {
-                if (Type == DATA_IMPRINTED)
-                    Imprinte = Data;
+                ALYSRAZOR_GUID = pSummoner->GetGUID();
             }
 
             void UpdateAI(const uint32 diff)
@@ -1573,8 +1588,10 @@ class npc_Molten_Egg : public CreatureScript
                 if (SpawnTimer <= diff)
                 {
                     if( Unit * pAlys = Unit::GetUnit(*me,ALYSRAZOR_GUID))
-                    if (Creature* HATCHLING = pAlys->SummonCreature(NPC_VORACIOUS_HATCHLING, me->GetPositionX(), me->GetPositionY(), 55.3f))
-                        HATCHLING->AI()->SetData(DATA_IMPRINTED, Imprinte);
+                    {
+                        pAlys->SummonCreature(NPC_VORACIOUS_HATCHLING, me->GetPositionX(), me->GetPositionY(), 55.3f);
+                    }
+
                     me->ForcedDespawn(500);
                     SpawnTimer = 50000;
                 }
@@ -1603,17 +1620,12 @@ class npc_Blazing_Broodmother  : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetSpeed(MOVE_FLIGHT, 2.5f);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                SpawnEggTimer = 6000;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                SpawnEggTimer = 8000;
             }
 
             uint32 SpawnEggTimer;
-            uint32 Imprinte;
-
-            void SetData(uint32 Type, uint32 Data)
-            {
-                if (Type == DATA_IMPRINTED)
-                    Imprinte = Data;
-            }
 
              void UpdateAI(const uint32 diff)
             {
@@ -1625,18 +1637,10 @@ class npc_Blazing_Broodmother  : public CreatureScript
                     {
                         pEgg1->ExitVehicle();
                         pEgg1->GetMotionMaster()->MoveFall();
-                        pEgg1->AI()->SetData(DATA_IMPRINTED, Imprinte);
                         pEgg1->SetReactState(REACT_PASSIVE);
-                        me->GetMotionMaster()->MovePoint(0,-111.0f,-277.0f,95.0f);
+                        //me->GetMotionMaster()->MovePoint(0,-111.0f,-277.0f,95.0f);
+                        me->GetMotionMaster()->MoveTargetedHome();
                     }
-
-                    /*if( Unit * pAlys = Unit::GetUnit(*me,ALYSRAZOR_GUID))
-                    if (Creature* Egg = pAlys->SummonCreature(NPC_MOLTEN_EGG, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
-                    {
-                        Egg->AI()->SetData(DATA_IMPRINTED, Imprinte);
-                        Egg->SetReactState(REACT_PASSIVE);
-                    }
-                    me->GetMotionMaster()->MovePoint(3, me->GetHomePosition());*/
                 }
                 else SpawnEggTimer -=diff;
             }
@@ -1821,6 +1825,8 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
         {
             npc_Blazing_Talon_ClawshaperAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                 me->SetFlying(true);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
                 me->SetDisplayId(38317);
@@ -1862,7 +1868,6 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
                 else IgnitionTimer -= diff;
 
                 if (Creature* Alysrazor = me->FindNearestCreature(NPC_ALYSRAZOR,200.0f, true))
-                    //if (Alysrazor->AI()->GetData(DATA_STAGE_THREE_TIMER) == 5)
                     if (Alysrazor->GetPower(POWER_MANA) >= 50)
                         FlyAway = true;
 
@@ -1908,6 +1913,8 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
         {
             npc_Blazing_Talon_InitiateAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                 me->SetFlying(true);
                 me->SetDisplayId(38317);
                 FlyTimer = 6000;
@@ -1939,19 +1946,18 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
                     me->GetMotionMaster()->MovePoint(3, me->GetPositionX(), me->GetPositionY(), 55.0f);
                     me->CastSpell(me, SPELL_BLAZING_TALON_TRAN, false);
                     switch (urand(1,2))
-                        {
-                        case 1:
-                            me->SetDisplayId(38558);
-                            Male = false;
-                            break;
-                        case 2:
-                            Male = true;
-                            break;
-                        }
+                    {
+                    case 1:
+                        me->SetDisplayId(38558);
+                        Male = false;
+                        break;
+                    case 2:
+                        Male = true;
+                        break;
+                    }
                     FieroblastTimer = 10000;
                     BrushfireTimer = 3000;
                     Transform = true;
-                    //DoZoneInCombat(me);
                     me->SetInCombatWithZone();
                     if (Male)
                         switch(urand(1,3))
@@ -2003,7 +2009,7 @@ class npc_Blazing_Talon_Initiate : public CreatureScript
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        if (Unit* Target = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true))
+                        if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true,-98619)) // Dont't target fly boys
                             me->CastSpell(Target, SPELL_FIEROBLAST, false);
                         FieroblastTimer = 10000;
                         BrushfireTimer = 4000;
@@ -2029,33 +2035,33 @@ class npc_Voracious_Hatchling : public CreatureScript
         {
             npc_Voracious_HatchlingAI(Creature* creature) : ScriptedAI(creature)
             {
-                Imprinte = 0;
-                Passive = false;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                //me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true); - > cant be set due to Imprinted buff on Hatchling with this aura
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 me->PlayOneShotAnimKit(ANIM_HATH);
-                me->addUnitState(UNIT_STAT_ROOT);
                 me->AddAura(SPELL_SATIATED, me);
-                me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                HathTimer = 3000;
-                Imprinted = true;
                 instance = me->GetInstanceScript();
-
+                VICTIM_GUID = 0;
+                me->SetInCombatWithZone();
+                ALYSRAZOR_GUID = 0;
+                me->SetSpeed(MOVE_RUN,2.0f,true);
             }
 
             uint32 GushingWoundTimer;
-            uint32 PassiveTimer;
-            uint32 HathTimer;
-            uint32 Threat;
-            uint32 Imprinte;
             InstanceScript * instance;
-
-            bool Imprinted;
-            bool Passive;
-
+            uint64 VICTIM_GUID;
+            uint64 ALYSRAZOR_GUID;
 
             void Reset()
             {
                 if(instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            }
+
+            void IsSummonedBy(Unit* pSummoner)
+            {
+                ALYSRAZOR_GUID = pSummoner->GetGUID();
             }
 
             void EnterCombat(Unit* /*target*/)
@@ -2068,141 +2074,103 @@ class npc_Voracious_Hatchling : public CreatureScript
                 GushingWoundTimer = 15000;
             }
 
-            void SetData(uint32 Type, uint32 Data)
+            void SpellHit(Unit* /*pCaster*/, const SpellEntry* spell)
             {
-                if (Type == DATA_IMPRINTED)
-                    Imprinte = Data;
+                if (spell->HasSpellEffect(SPELL_EFFECT_ATTACK_ME)) // Don't try fuck up with me
+                    Fixate();
             }
 
             void JustDied(Unit* /*Killer*/)
             {
                 if(instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-
-                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                    if (Player* player = i->getSource())
-                    {
-                        if (Imprinte == 1)
-                            if (Aura* Imprinted = player->GetAura(99389))
-                                player->RemoveAura(Imprinted);
-                            if (Imprinte == 2)
-                                if (Aura* Imprinted = player->GetAura(100359))
-                                    player->RemoveAura(Imprinted);
-                    }
             }
 
-            void DeleteFromThreatList(uint64 TargetGUID)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
-                std::list<HostileReference*> const& threatlist = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                if(damage >= me->GetHealth())
                 {
-                    if ((*itr)->getUnitGuid() == TargetGUID)
-                    {
-                        (*itr)->removeReference();
-                        break;
-                    }
+                    ClearImprinted();
                 }
             }
 
-            bool CheckImprinted()
+            void ClearImprinted(void)
             {
                 Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                     if (Player* player = i->getSource())
                     {
-                        if (Imprinted)
+                        if (me->HasAura(99390))
+                            player->RemoveAura(99389);
+                        else
+                            player->RemoveAura(100359);
+                    }
+            }
+
+            void Fixate(void)
+            {
+                ClearImprinted();
+
+                if (Unit* pVictim = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true))
+                {
+                    me->getThreatManager().resetAllAggro();
+                    me->AddThreat(pVictim,9999999.9f);
+                    me->GetMotionMaster()->MoveChase(pVictim);
+
+
+                    if (Creature * alys = (Creature*)Unit::GetUnit(*me,ALYSRAZOR_GUID))
+                    {
+                        alys->AI()->DoAction(1);
+
+                        if (alys->AI()->GetData(DATA_IMPRINTED) == 1)
                         {
-                            if (player->GetAura(99389) && Imprinte == 1)
-                                return true;
-                            if (player->GetAura(100359) && Imprinte == 2)
-                                return true;
+                            me->AddAura(99389,pVictim); // Imprinted
+                            me->AddAura(99390,me);
+                        }
+                        else
+                        {
+                            me->AddAura(100359,pVictim); // Imprinted
+                            me->AddAura(SPELL_IMPRINTED_TAUNT2,me);
                         }
                     }
+                    VICTIM_GUID = pVictim->GetGUID();
+                }
+            }
+
+            bool VictimDiedOrInvalid(uint64 victimGUID)
+            {
+                if (Unit * player = Unit::GetUnit(*me,victimGUID))
+                {
+                    if(player->IsInWorld() == false)
+                        return true;
+
+                    if(player->isDead())
+                        return true;
+
+                    if (player->HasAura(98619)) // Wings of flame
+                    {
+                        player->RemoveAura(99389);
+                        player->RemoveAura(100359);
+                        return true;
+                    }
+                }
+                else return true;
+
                 return false;
             }
 
             void UpdateAI(const uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 if (!me->GetAura(SPELL_SATIATED) && !me->GetAura(SPELL_HUNGRY))
                     me->CastSpell(me, SPELL_HUNGRY, false);
 
-                if (CheckImprinted() && !Imprinted)
-                    {
-                        HathTimer = 1000;
-                        Imprinted = true;
-                    }
-
-                if (HathTimer <= diff && Imprinted)
+                if (VICTIM_GUID == 0 || VictimDiedOrInvalid(VICTIM_GUID))
                 {
-                    if (Unit* Target = SelectTarget(SELECT_TARGET_NEAREST, 0, 20.0f, true))
-                    {
-                        if (Target->GetPositionZ() > me->GetPositionZ()+10.0f)
-                            return;
-                        me->SetInCombatWithZone();
-                        me->AddThreat(Target, 5000.0f);
-                        me->clearUnitState(UNIT_STAT_ROOT);
-                        if (Imprinte == 1)
-                        {
-                            Target->AddAura(SPELL_IMPRINTED_TAUNT, me);
-                            me->CastSpell(Target, SPELL_IMPRINTED, false);
-                        }
-                        else if (Imprinte == 2)
-                                {
-                                    Target->AddAura(SPELL_IMPRINTED_TAUNT2, me);
-                                    me->CastSpell(Target, SPELL_IMPRINTED2, false);
-                                }
-                        Imprinted = false;
-                    }
-                }
-                else HathTimer -= diff;
-
-                if (!me->getVictim() && (me->GetAura(SPELL_IMPRINTED2) || me->GetAura(SPELL_IMPRINTED)))
-                {
-                    me->RemoveAura(SPELL_IMPRINTED2);
-                    me->RemoveAura(SPELL_IMPRINTED);
-                }
-
-                if (!me->getVictim())
+                    Fixate();
                     return;
-
-                if (Imprinte == 1)
-                    if (!me->getVictim()->GetAura(99389) && !Imprinted)
-                    {
-                        DeleteFromThreatList(me->getVictim()->GetGUID());
-                        me->SetInCombatWithZone();
-                    }
-
-                if (Imprinte == 2)
-                    if (!me->getVictim()->GetAura(100359) && !Imprinted)
-                    {
-                        DeleteFromThreatList(me->getVictim()->GetGUID());
-                        me->SetInCombatWithZone();
-                    }
-
-                if ((me->getVictim()->GetPositionZ() >= me->GetPositionZ()+10.0f) && !Imprinted)
-                {
-                    Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                        if (Player* player = i->getSource())
-                        {
-                            if (!Imprinted)
-                            {
-                                if (player->GetAura(99389) && Imprinte == 1)
-                                {
-                                    me->RemoveAura(SPELL_IMPRINTED_TAUNT);
-                                    player->RemoveAura(99389);
-                                }
-                                if (player->GetAura(100359) && Imprinte == 2)
-                                {
-                                    me->RemoveAura(SPELL_IMPRINTED_TAUNT2);
-                                    player->RemoveAura(100359);
-                                }
-                            }
-                        }
-                    HathTimer = 1000;
-                    Imprinted = true;
-                    me->CombatStop(true);
                 }
 
                 if (GushingWoundTimer <= diff)
@@ -2215,29 +2183,17 @@ class npc_Voracious_Hatchling : public CreatureScript
                 if (Creature* Worm = me->FindNearestCreature(NPC_PLUMP_LAVA_WORM,10.0f))
                     if (me->IsWithinDistInMap(Worm, 2))
                     {
-                        PassiveTimer = 1500;
-                        Passive = true;
                         me->RemoveAura(SPELL_HUNGRY);
                         me->RemoveAura(SPELL_TANTRUM);
                         me->RemoveAura(SPELL_SATIATED);
                         me->AddAura(SPELL_SATIATED, me);
-                        me->addUnitState(UNIT_STAT_ROOT);
-                        me->SetFacingToObject(Worm);
                         me->PlayOneShotAnimKit(ANIM_ATTACK_FEED);
                         Worm->setDeathState(JUST_DIED);
-                        if (Creature* Target = me->FindNearestCreature(NPC_LAVA_WORM_TARGET, 50.0f))
+                        if (Creature* Target = me->FindNearestCreature(NPC_LAVA_WORM_TARGET, 20.0f))
                             Target->ForcedDespawn();
                         Worm->ForcedDespawn(2000);
                     }
 
-                if (PassiveTimer <= diff && Passive)
-                {
-                    Passive = false;
-                    me->clearUnitState(UNIT_STAT_ROOT);
-                }
-                else PassiveTimer -= diff;
-
-                if (!Passive)
                     DoMeleeAttackIfReady();
             }
         };
@@ -2259,7 +2215,7 @@ class npc_Plump_Lava_worm : public CreatureScript
             npc_Plump_Lava_wormAI(Creature* creature) : ScriptedAI(creature)
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
                 Emerge = false;
                 Casting = false;
                 Rotation = false;
@@ -2347,7 +2303,7 @@ class npc_Fiery_Tornado : public CreatureScript
                 sx = me->GetPositionX();
                 sy = me->GetPositionY();
                 me->RemoveAllAuras();
-                me->SetSpeed(MOVE_RUN, 4.0f);
+                me->SetSpeed(MOVE_RUN, 5.0f);
             }
 
             float Distance;
@@ -2567,6 +2523,7 @@ class npc_Flying_Spells : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_AGGRESSIVE);
+                me->SetInCombatWithZone();
 
                 if (me->GetEntry() == NPC_INCENDIARY_CLOUD)
                 {
@@ -2596,6 +2553,8 @@ class npc_Flying_Spells : public CreatureScript
                 }
             }
         }
+
+        void UpdateAI(const uint32 diff){ }
 
         };
 
@@ -2654,11 +2613,11 @@ class npc_Volcanic_Fire : public CreatureScript
                     }
                     else Timer -= diff;
                 }
-                  else if (Aura* Fire = me->GetAura(SPELL_VOLCANIC_FIRE))
-                        {
-                            me->RemoveAura(Fire);
-                            cast = true;
-                        }
+                else if (Aura* Fire = me->GetAura(SPELL_VOLCANIC_FIRE))
+                {
+                    me->RemoveAura(Fire);
+                    cast = true;
+                }
             }
         };
 
@@ -2764,7 +2723,7 @@ class spell_cataclysm : public SpellScriptLoader
 
             void HandleExtraEffect()
             {
-                if( Unit * pAlys = Unit::GetUnit(*GetCaster(),ALYSRAZOR_GUID))
+                if( Unit * pAlys = GetCaster()->FindNearestCreature(NPC_ALYSRAZOR,500.0f,true))
                 if (Creature* Meteor = pAlys->SummonCreature(NPC_MOLTEN_METEOR, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ() + 40.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
                     Meteor->CastSpell(Meteor, SPELL_MOLTEN_METEOR, false);
             }
@@ -2798,7 +2757,7 @@ class spell_Molten_Feather : public SpellScriptLoader
                        if (!GetTarget()->GetAura(SPELL_WINGS_OF_FLAME_FLY))
                        {
                             GetTarget()->CastSpell(GetTarget(), SPELL_WINGS_OF_FLAME, false);
-                            GetTarget()->AddAura(SPELL_WINGS_OF_FLAME_FLY,GetTarget()); // triggered spell was bugged due to ( You are in wrong zone message )
+                            GetTarget()->AddAura(SPELL_WINGS_OF_FLAME_FLY,GetTarget());
                        }
                 }
             }
@@ -3077,42 +3036,57 @@ void AddSC_boss_alysrazor()
 }
 
 /*
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=52530 LIMIT 1;
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=54015 LIMIT 1;
-
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53554 LIMIT 1;
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=53554 LIMIT 1;
-
-UPDATE `creature_template` SET `modelid1`=0, `InhabitType`=4 WHERE  `entry`=53541 LIMIT 1;
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53372 LIMIT 1;
-
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53158 LIMIT 1;
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53986 LIMIT 1;
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53693 LIMIT 1;
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53521 LIMIT 1;
-
-UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14 WHERE  `entry`=53372 LIMIT 1;
-UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14 WHERE  `entry`=53541 LIMIT 1;
-
-UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE  `entry`=53541 LIMIT 1;
-UPDATE `creature_template` SET `modelid1`=0 WHERE  `entry`=53698 LIMIT 1;
-
-UPDATE `creature_template` SET `ScriptName`='npc_fiery_vortex' WHERE  `entry`=53693 LIMIT 1;
-UPDATE `creature_template` SET `Mana_mod`=0.01999245 WHERE  `entry`=52530 LIMIT 1;
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (52528, 0, 0, 0, 0, 0, 37935, 0, 0, 0, 'Egg Satchel', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 16778240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Egg_Satchel', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (52530, 54044, 54045, 54046, 0, 0, 38446, 0, 0, 0, 'Alysrazor', '', '', 0, 88, 88, 3, 14, 14, 0, 2, 3.2, 1, 3, 40000, 43000, 0, 308, 1, 2000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 108, 666, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3500000, '', 0, 4, 450, 0.0199925, 1, 0, 0, 0, 0, 0, 0, 0, 187, 1, 0, 646922239, 1, 'boss_Alysrazor', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53089, 0, 0, 0, 0, 0, 38146, 0, 0, 0, 'Molten Feather', '', 'Interact', 0, 1, 1, 0, 2028, 2028, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33280, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Molten_Feather', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53158, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Volcano Fire Bunny', '', '', 0, 85, 85, 3, 14, 14, 0, 1.14286, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 2, 33554432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Volcanic_Fire', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53372, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Brushfire', '', '', 0, 88, 88, 0, 14, 14, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Brushfire', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53375, 0, 0, 0, 0, 0, 38652, 0, 0, 0, 'Herald of the Burning End', '', '', 0, 87, 87, 3, 14, 14, 0, 1.14286, 1, 1, 0, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullAI', 0, 3, 50, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53498, 0, 0, 0, 0, 0, 20324, 11686, 0, 0, 'Molten Boulder', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 188, 1, 0, 0, 0, '', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53520, 0, 0, 0, 0, 0, 37993, 0, 0, 0, 'Plump Lava Worm', '', '', 0, 87, 87, 0, 14, 14, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554432, 0, 42, 0, 0, 0, 0, 0, 0, 0, 1, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 50, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Plump_Lava_worm', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53521, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Lava Worm Target', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53541, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Incindiary Cloud', '', '', 0, 85, 85, 3, 14, 14, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Flying_Spells', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53554, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Blazing Power', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Flying_Spells', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53680, 0, 0, 0, 0, 0, 38443, 0, 0, 0, 'Blazing Broodmother', '', '', 0, 87, 87, 0, 14, 14, 0, 1.5873, 1.44444, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 1, 33587456, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1679, 0, 0, '', 0, 3, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Blazing_Broodmother', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53681, 0, 0, 0, 0, 0, 38445, 0, 0, 0, 'Molten Egg', '', '', 0, 87, 87, 0, 16, 16, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 1, 33024, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 400, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Molten_Egg', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53693, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Fiery Vortex', '', '', 0, 88, 88, 0, 14, 14, 0, 1.14286, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_fiery_vortex', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53698, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Fiery Tornado', '', '', 0, 88, 88, 0, 14, 14, 0, 1.14286, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1096, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Fiery_Tornado', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53734, 54055, 0, 0, 0, 0, 38013, 0, 0, 0, 'Blazing Talon Clawshaper', '', '', 0, 86, 86, 3, 14, 14, 0, 1.5873, 1.44444, 1, 1, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullAI', 0, 3, 100, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Blazing_Talon_Clawshaper', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53896, 54063, 54064, 0, 0, 0, 38317, 0, 0, 0, 'Blazing Talon Initiate', '', '', 0, 86, 86, 3, 14, 14, 0, 1.5873, 1.44444, 1, 1, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullAI', 0, 5, 4, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Blazing_Talon_Initiate', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53898, 0, 0, 0, 0, 0, 38372, 0, 0, 0, 'Voracious Hatchling', '', '', 0, 87, 87, 3, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullAI', 0, 3, 168, 1, 1, 0, 0, 0, 0, 0, 0, 0, 259, 1, 0, 0, 0, 'npc_Voracious_Hatchling', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53900, 0, 0, 0, 0, 0, 38443, 0, 0, 0, 'Blazing Broodmother', '', '', 0, 87, 87, 0, 14, 14, 0, 1.5873, 1.44444, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 1, 33587456, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1697, 0, 0, '', 0, 3, 40, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Blazing_Broodmother', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (53986, 0, 0, 0, 0, 0, 0, 11686, 0, 0, 'Firestorm', '', '', 0, 85, 85, 0, 14, 14, 0, 1.14286, 1, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554432, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1048576, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, '', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (54015, 54016, 54017, 0, 0, 0, 37953, 0, 0, 0, 'Majordomo Staghelm', 'Archdruid of the Flame', '', 0, 88, 88, 3, 14, 14, 0, 1, 1, 1, 1, 30000, 33000, 0, 308, 1, 2000, 2000, 4, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullAI', 0, 4, 330, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Fendral', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (54019, 0, 0, 0, 0, 0, 38603, 38604, 38605, 38606, 'Captive Druid of the Talon', '', '', 0, 85, 85, 3, 35, 35, 0, 1.14286, 1, 1, 1, 0, 0, 0, 0, 1, 2000, 2000, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 'npc_Captive_Duid', 15595);
+REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (54563, 0, 0, 0, 0, 0, 20324, 38493, 0, 0, 'Molten Meteor', '', '', 0, 87, 87, 3, 14, 14, 0, 1, 1.14286, 1, 1, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'EventAI', 0, 3, 1.7, 1, 1, 0, 0, 0, 0, 0, 0, 0, 188, 1, 0, 0, 0, '', 15595);
 
 DELETE FROM `spell_script_names` WHERE  `spell_id`=100640 AND `ScriptName`='spell_gen_harsh_winds' LIMIT 1;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (100640, 'spell_gen_harsh_winds');
 
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=53896 LIMIT 1;
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=54063 LIMIT 1;
-UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=54064 LIMIT 1;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_Fieroblast_buff';
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_Gushing_Wound';
 
-UPDATE `creature_template` SET `exp`=3, `faction_A`=14, `faction_H`=14 WHERE  `entry`=53158 LIMIT 1;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(101294, 'spell_Fieroblast_buff'),
+(101295, 'spell_Fieroblast_buff'),
+(101296, 'spell_Fieroblast_buff'),
+(100718, 'spell_Gushing_Wound'),
+(100719, 'spell_Gushing_Wound'),
+(100720, 'spell_Gushing_Wound');
 
-UPDATE `creature_template` SET `ScriptName`='npc_Blazing_Broodmother' WHERE  `entry`=53680 LIMIT 1;
-UPDATE `creature_template` SET `ScriptName`='npc_Blazing_Broodmother' WHERE  `entry`=53900 LIMIT 1;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_Blazing_Power';
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_Molten_Feather';
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_ignition';
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`,`position_y`,`position_z` , `orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`, `curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(99461, 'spell_Blazing_Power'),
+(97128, 'spell_Molten_Feather'),
+(101223, 'spell_Fieroblast_buff'),
+(99308, 'spell_Gushing_Wound'),
+(99919, 'spell_ignition');
+
+
+REPLACE INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`,`position_y`,`position_z` , `orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`, `curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (220492,53158,720,15,1,0,0,-44.2135,-204.372,65.878,5.11381,7200,0,0,1,0,0,0,0,0),
 (220493,53158,720,15,1,0,0,-24.3542,-191.929,77.8011,4.4855,7200,0,0,1,0,0,0,0,0),
 (220494,53158,720,15,1,0,0,47.3455,-240.977,78.1981,3.33358,7200,0,0,1,0,0,0,0,0),
@@ -3133,4 +3107,52 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (220530,53158,720,15,1,0,0,-11.6198,-375.441,63.4142,1.72788,7200,0,0,1,0,0,0,0,0),
 (220531,53158,720,15,1,0,0,-53.3646,-372.29,78.901,1.29154,7200,0,0,1,0,0,0,0,0),
 (220532,53158,720,15,1,0,0,-30.8837,-386.681,77.1706,1.53589,7200,0,0,1,0,0,0,0,0);
+
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, ConditionValue1, `ConditionValue2`, `Comment`) VALUES 
+(13, 3, 99335, 31, 3, 53521, 'Spell Lava Spew ScriptTarget'),
+(13, 3, 99919, 31, 3, 52530, 'Spell Cyclone Winds ScriptTarget'),
+(13, 3, 100558, 31, 3, 54019, 'Spell Sacrifice ScriptTarget'),
+(13, 3, 100564, 31, 3, 53521, 'Spell Cosmetic Death ScriptTarget'),
+(13, 3, 100744, 31, 3, 53986, 'Spell Firestorm ScriptTarget');
+
+REPLACE INTO `achievement_criteria_data` (`criteria_id`, `type`, `ScriptName`) VALUES (17533, 11, 'achievement_do_a_barrel_rollBF'),
+(17538, 11, 'achievement_do_a_barrel_rollFT'),
+(17536, 11, 'achievement_do_a_barrel_rollIC'),
+(17535, 11, 'achievement_do_a_barrel_rollLS');
+
+UPDATE `creature_template` SET `VehicleId`=1673 WHERE  `entry`=52530 LIMIT 1;
+UPDATE `creature_template` SET `VehicleId`=1673 WHERE  `entry`=54044 LIMIT 1;
+UPDATE `creature_template` SET `VehicleId`=1673 WHERE  `entry`=54045 LIMIT 1;
+UPDATE `creature_template` SET `VehicleId`=1673 WHERE  `entry`=54046 LIMIT 1;
+
+UPDATE `creature_template` SET `difficulty_entry_1`=54052 WHERE  `entry`=53898 LIMIT 1;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88 WHERE  `entry`=54044 LIMIT 1;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86 WHERE  `entry`=54055 LIMIT 1;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86 WHERE  `entry`=54063 LIMIT 1;
+UPDATE `creature_template` SET `Mana_mod`=0.0199925 WHERE  `entry`=54044 LIMIT 1;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87 WHERE  `entry`=54052 LIMIT 1;
+
+UPDATE `creature_template` set `exp` = 3,faction_A =14,faction_H =14 where entry in(52530,54044,54055,54063,53896,53898,53734,54052);
+
+UPDATE `creature_template` SET `mechanic_immune_mask`=650854395 WHERE  `entry`=52530 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=650854395 WHERE  `entry`=54044 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=650854395 WHERE  `entry`=53898 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=650854395 WHERE  `entry`=54052 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=617297915 WHERE  `entry`=53734 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=617297915 WHERE  `entry`=54055 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=617299707 WHERE  `entry`=53896 LIMIT 1;
+UPDATE `creature_template` SET `mechanic_immune_mask`=617299707 WHERE  `entry`=54063 LIMIT 1;
+
+UPDATE `creature_template` SET `baseattacktime`=1500 WHERE  `entry`=53898 LIMIT 1;
+UPDATE `creature_template` SET `mindmg`=35000, `maxdmg`=38000 WHERE  `entry`=53898 LIMIT 1;
+
+UPDATE `creature_template` SET `Health_mod`=6.898 WHERE  `entry`=53896 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=20.694 WHERE  `entry`=54063 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=178.063 WHERE  `entry`=53898 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=222.6 WHERE  `entry`=54052 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=86.1385 WHERE  `entry`=53734 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=301.35 WHERE  `entry`=54055 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=371.05344 WHERE  `entry`=52530 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=1159.542 WHERE  `entry`=54044 LIMIT 1;
+
 */
