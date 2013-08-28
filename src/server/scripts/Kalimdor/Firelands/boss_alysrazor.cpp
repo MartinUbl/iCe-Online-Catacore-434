@@ -2052,11 +2052,13 @@ class npc_Voracious_Hatchling : public CreatureScript
             InstanceScript * instance;
             uint64 VICTIM_GUID;
             uint64 ALYSRAZOR_GUID;
+            uint32 data;
 
             void Reset()
             {
                 if(instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                data = 0;
             }
 
             void IsSummonedBy(Unit* pSummoner)
@@ -2074,9 +2076,12 @@ class npc_Voracious_Hatchling : public CreatureScript
                 GushingWoundTimer = 15000;
             }
 
-            void SpellHit(Unit* /*pCaster*/, const SpellEntry* spell)
+            void SpellHit(Unit* pCaster, const SpellEntry* spell)
             {
-                if (spell->HasSpellEffect(SPELL_EFFECT_ATTACK_ME)) // Don't try fuck up with me
+                if(pCaster == me)
+                    return;
+
+                if (spell->AppliesAuraType(SPELL_AURA_MOD_TAUNT)) // Dont try fuck up with me
                     Fixate();
             }
 
@@ -2120,9 +2125,13 @@ class npc_Voracious_Hatchling : public CreatureScript
 
                     if (Creature * alys = (Creature*)Unit::GetUnit(*me,ALYSRAZOR_GUID))
                     {
-                        alys->AI()->DoAction(1);
+                        if(data == 0)
+                        {
+                            alys->AI()->DoAction(1);
+                            data = alys->AI()->GetData(DATA_IMPRINTED);
+                        }
 
-                        if (alys->AI()->GetData(DATA_IMPRINTED) == 1)
+                        if (data == 1)
                         {
                             me->AddAura(99389,pVictim); // Imprinted
                             me->AddAura(99390,me);
@@ -3152,7 +3161,7 @@ UPDATE `creature_template` SET `Health_mod`=178.063 WHERE  `entry`=53898 LIMIT 1
 UPDATE `creature_template` SET `Health_mod`=222.6 WHERE  `entry`=54052 LIMIT 1;
 UPDATE `creature_template` SET `Health_mod`=86.1385 WHERE  `entry`=53734 LIMIT 1;
 UPDATE `creature_template` SET `Health_mod`=301.35 WHERE  `entry`=54055 LIMIT 1;
-UPDATE `creature_template` SET `Health_mod`=371.05344 WHERE  `entry`=52530 LIMIT 1;
-UPDATE `creature_template` SET `Health_mod`=1159.542 WHERE  `entry`=54044 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=383.44 WHERE  `entry`=52530 LIMIT 1;
+UPDATE `creature_template` SET `Health_mod`=1198.24 WHERE  `entry`=54044 LIMIT 1;
 
 */
