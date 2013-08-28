@@ -1156,7 +1156,7 @@ class boss_Alysrazor : public CreatureScript
 
                     if (FieryVortex && HarshTimer <= diff)
                     {
-                        if (Creature* Target = me->FindNearestCreature(NPC_FIERY_VORTEX, 200.0f))
+                        if (me->FindNearestCreature(NPC_FIERY_VORTEX, 200.0f))
                         {
                             if (FieryTornado)
                             {
@@ -2646,7 +2646,7 @@ class npc_Volcanic_Fire : public CreatureScript
 
                     if (!cast && Timer <= diff)
                     {
-                        if (Creature* Target = me->FindNearestCreature(NPC_ALYSRAZOR, 300.0f))
+                        if (me->FindNearestCreature(NPC_ALYSRAZOR, 300.0f))
                             me->CastSpell(me, SPELL_ERRUPTION, false);
                         cast = true;
                         me->AddAura(SPELL_VOLCANIC_FIRE, me);
