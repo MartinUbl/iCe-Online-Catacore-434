@@ -3417,25 +3417,33 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     // we have to do it this way, cause the dummy raid aura select targets for us, which have to be used for calculation
                     if (m_spellInfo->Id == 98020)
                     {
-                        float percentage = 0.0f;
-
+                        uint32 curHealthSum = 0, maxHealthSum = 0;
                         for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
-                            percentage += (*itr)->GetHealthPct()/(float)(unitList.size());
+                        {
+                            Unit *unit = *itr;
+                            curHealthSum += unit->GetHealth();
+                            maxHealthSum += unit->GetMaxHealth();
+                        }
+
+                        float avgHealthPct = 100.0f * float(curHealthSum) / maxHealthSum;
 
                         int32 bp = 0;
                         for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                         {
+                            Unit *target = *itr;
+                            float curHealthPct = target->GetHealthPct();
+
                             // effect 0 = damage
-                            if ((*itr)->GetHealthPct() > percentage)
+                            if (curHealthPct > avgHealthPct)
                             {
-                                bp = ((*itr)->GetHealthPct()-percentage)*(*itr)->GetMaxHealth()/100.0f;
-                                m_caster->CastCustomSpell((*itr), 98021, &bp, 0, 0, true);
+                                bp = (curHealthPct - avgHealthPct) * target->GetMaxHealth() / 100.0f;
+                                m_caster->CastCustomSpell(target, 98021, &bp, 0, 0, true);
                             }
                             // effect 1 = heal
                             else
                             {
-                                bp = (percentage-(*itr)->GetHealthPct())*(*itr)->GetMaxHealth()/100.0f;
-                                m_caster->CastCustomSpell((*itr), 98021, 0, &bp, 0, true);
+                                bp = (avgHealthPct - curHealthPct) * target->GetMaxHealth() / 100.0f;
+                                m_caster->CastCustomSpell(target, 98021, 0, &bp, 0, true);
                             }
                         }
                     }
