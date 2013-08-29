@@ -1544,7 +1544,11 @@ class npc_Fendral : public CreatureScript
 
                 if (me->GetPositionZ() >= 110.0f && instance->GetData(TYPE_ALYSRAZOR) == NOT_STARTED)
                 {
-                    instance->SetData(TYPE_ALYSRAZOR, IN_PROGRESS);
+                    Unit * alys = Unit::GetUnit(*me,instance->GetData64(TYPE_ALYSRAZOR));
+                    if(alys && alys->ToCreature())
+                    {
+                        alys->ToCreature()->SetInCombatWithZone();
+                    }
                     me->ForcedDespawn();
                 }
             }
