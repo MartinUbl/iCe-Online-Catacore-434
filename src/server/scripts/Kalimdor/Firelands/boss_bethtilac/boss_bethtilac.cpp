@@ -225,6 +225,8 @@ void boss_bethtilac::boss_bethtilacAI::JustDied(Unit *killer)
 
     if (instance)
         instance->SetData(TYPE_BETHTILAC, DONE);
+
+    UnlockDoor();
 }
 
 
