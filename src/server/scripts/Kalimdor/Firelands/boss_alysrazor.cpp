@@ -367,6 +367,9 @@ class boss_Alysrazor : public CreatureScript
 
             void EnterCombat(Unit* /*target*/)
             {
+                Phase = 4;
+                if(instance)
+                    instance->SetData(TYPE_ALYSRAZOR, IN_PROGRESS);
                 HeraldTimer = 35000;
                 SummonInitiate = true;
                 SummonInitiateTimer = 20000;
@@ -421,6 +424,18 @@ class boss_Alysrazor : public CreatureScript
                     instance->SetData(TYPE_ALYSRAZOR,NOT_STARTED);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 }
+
+                RemoveAuraFromAllPlayers(0, false, true);
+                RemoveAuraFromAllPlayers(SPELL_FEATHER_BAR, true, false);
+                RemoveAuraFromAllPlayers(SPELL_MOLTEN_FEATHER, true, false);
+                me->CombatStop(true);
+                me->SetVisible(false);
+                me->SetFullHealth();
+                me->RemoveAllAuras();
+                me->SetSpeed(MOVE_FLIGHT, 20.0f);
+                me->GetMotionMaster()->MovePoint(3, me->GetHomePosition());
+                Phase = 4;
+
                 ScriptedAI::EnterEvadeMode();
             }
 
@@ -898,6 +913,9 @@ class boss_Alysrazor : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                if(!UpdateVictim())
+                    return;
+
                 if(Dying && FallingTimer <= diff)
                 {
                     me->DealDamage(me,me->GetHealth());
@@ -907,21 +925,6 @@ class boss_Alysrazor : public CreatureScript
 
                 if (Dying)
                     return;
-
-                if (instance->GetData(TYPE_ALYSRAZOR) == FAIL && Phase != 4)
-                {
-                    RemoveAuraFromAllPlayers(0, false, true);
-                    RemoveAuraFromAllPlayers(SPELL_FEATHER_BAR, true, false);
-                    RemoveAuraFromAllPlayers(SPELL_MOLTEN_FEATHER, true, false);
-                    me->CombatStop(true);
-                    me->SetVisible(false);
-                    me->SetHealth(me->GetMaxHealth());
-                    me->RemoveAllAuras();
-                    me->SetSpeed(MOVE_FLIGHT, 20.0f);
-                    me->GetMotionMaster()->MovePoint(3, me->GetHomePosition());
-                    Phase = 4;
-                    Reset();
-                }
 
                 if (Phase == 4 && instance->GetData(TYPE_ALYSRAZOR) == IN_PROGRESS)
                 {
@@ -1336,7 +1339,11 @@ class npc_Molten_Feather : public CreatureScript
                 instance = creature->GetInstanceScript();
                 if (instance->GetData(TYPE_ALYSRAZOR) != IN_PROGRESS)
                 {
-                    instance->SetData(TYPE_ALYSRAZOR, IN_PROGRESS);
+                    Unit * alys = Unit::GetUnit(*player,instance->GetData64(TYPE_ALYSRAZOR));
+                    if(alys && alys->ToCreature())
+                    {
+                        alys->ToCreature()->SetInCombatWithZone();
+                    }
                 }
                 else 
                 {
@@ -1495,7 +1502,7 @@ class npc_Fendral : public CreatureScript
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
                 me->MonsterYell("What have we here - visitors to our kingdom in the Firelands?", LANG_UNIVERSAL, 0);
                 DoPlaySoundToSet(me, SAY_FENDRAL_01);
-                me->GetMotionMaster()->MovePoint(3, 29.02f, -329.64f, 50.4f);
+                me->GetMotionMaster()->MovePoint(3, 29.02f, -329.64f, 52.4f);
                 Timer = 10000;
                 StartIntro = true;
             }
@@ -1560,7 +1567,7 @@ class npc_Molten_Egg : public CreatureScript
             {
                 CastTimer = 10000;
                 SpawnTimer = 15500;
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
                 ALYSRAZOR_GUID = 0;
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
@@ -2081,6 +2088,9 @@ class npc_Voracious_Hatchling : public CreatureScript
                 if(pCaster == me)
                     return;
 
+                if (spell->Id == 99390 || spell->Id == SPELL_IMPRINTED_TAUNT2) // Recursion check
+                    return;
+
                 if (spell->AppliesAuraType(SPELL_AURA_MOD_TAUNT)) // Dont try fuck up with me
                     Fixate();
             }
@@ -2115,14 +2125,11 @@ class npc_Voracious_Hatchling : public CreatureScript
             void Fixate(void)
             {
                 ClearImprinted();
+                me->RemoveAura(99390);
+                me->RemoveAura(SPELL_IMPRINTED_TAUNT2);
 
                 if (Unit* pVictim = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true))
                 {
-                    me->getThreatManager().resetAllAggro();
-                    me->AddThreat(pVictim,9999999.9f);
-                    me->GetMotionMaster()->MoveChase(pVictim);
-
-
                     if (Creature * alys = (Creature*)Unit::GetUnit(*me,ALYSRAZOR_GUID))
                     {
                         if(data == 0)
@@ -2134,12 +2141,12 @@ class npc_Voracious_Hatchling : public CreatureScript
                         if (data == 1)
                         {
                             me->AddAura(99389,pVictim); // Imprinted
-                            me->AddAura(99390,me);
+                            pVictim->CastSpell(me,99390,true);
                         }
                         else
                         {
                             me->AddAura(100359,pVictim); // Imprinted
-                            me->AddAura(SPELL_IMPRINTED_TAUNT2,me);
+                            pVictim->CastSpell(me,SPELL_IMPRINTED_TAUNT2,true);
                         }
                     }
                     VICTIM_GUID = pVictim->GetGUID();
@@ -2552,14 +2559,22 @@ class npc_Flying_Spells : public CreatureScript
         {
             if (who && who->ToPlayer() && who->GetDistance(me) <= 12 && me->GetEntry() == NPC_BLAZING_POWER)
             {
-                if (Aura * a = who->GetAura(98619))
+                if (Aura * aWings = who->GetAura(98619)) // Wings of flame
                 {
-                    if (a->GetDuration() <= 28000)
+                    if (aWings->GetDuration() <= 28000)
+                        aWings->RefreshDuration();
+                }
+
+                if (Aura * aBlaze = who->GetAura(SPELL_BLAZING_POWER_EFFECT)) // Blazing power
+                {
+                    if (aBlaze->GetDuration() <= 38000)
                     {
-                        a->SetDuration(30000);
                         who->AddAura(SPELL_BLAZING_POWER_EFFECT,who);
                     }
                 }
+                else
+                    who->AddAura(SPELL_BLAZING_POWER_EFFECT,who);
+
             }
         }
 
@@ -2601,6 +2616,14 @@ class npc_Volcanic_Fire : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                if (instance == NULL)
+                    return;
+
+                if (instance->GetData(TYPE_ALYSRAZOR) != IN_PROGRESS)
+                    me->SetReactState(REACT_PASSIVE);
+                else
+                    me->SetReactState(REACT_AGGRESSIVE);
+
                 if (instance->GetData(TYPE_ALYSRAZOR) == IN_PROGRESS)
                 {
                     if (me->GetAura(SPELL_VOLCANIC_FIRE))

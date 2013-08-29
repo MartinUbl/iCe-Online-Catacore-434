@@ -31,6 +31,7 @@ public:
         uint64 riplimbGuid;
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
+        uint64 alysrazorGUID;
         std::string saveData;
 
         void Initialize()
@@ -91,6 +92,9 @@ public:
                 case 53691:
                     shannoxGuid = pCreature->GetGUID();
                     break;
+                case 52530:
+                    alysrazorGUID = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -105,6 +109,8 @@ public:
                     return ragefaceGuid;
                 case DATA_RIPLIMB_GUID:
                     return riplimbGuid;
+                case TYPE_ALYSRAZOR:
+                    return alysrazorGUID;
             }
                 return 0;
         }
