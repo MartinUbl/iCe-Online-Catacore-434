@@ -223,6 +223,7 @@ class boss_Alysrazor : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_BURN, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                 me->SetFlying(true);
@@ -503,10 +504,10 @@ class boss_Alysrazor : public CreatureScript
                 if(caster == me)
                     return;
 
-                if(caster->ToCreature() && caster->GetEntry() == NPC_BLAZING_TALON_CLAW)
+                if(caster->ToCreature())
                     return;
 
-                if (caster && me->HasAura(SPELL_BURNOUT) && caster->getPowerType() == POWER_MANA)
+                if (me->HasAura(SPELL_BURNOUT) && caster->getPowerType() == POWER_MANA)
                     me->CastSpell(caster,99433,true); // Energize mana ( Essence of the Green )
             }
 
