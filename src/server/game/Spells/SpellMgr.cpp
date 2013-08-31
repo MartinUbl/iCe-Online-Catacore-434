@@ -4179,6 +4179,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100555: // Smouldering Roots
             spellInfo->Effect[1] = 0;
         break;
+        case 99432: //Burnout
+            spellInfo->EffectTriggerSpell[1] = 0;
+        break;
         case 99388: // Imprinted
         case 99389:
         case 100359:

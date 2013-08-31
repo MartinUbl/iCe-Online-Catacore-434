@@ -224,8 +224,8 @@ class boss_Alysrazor : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_BURN, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
                 me->SetFlying(true);
                 sx = -41.78f;
                 sy = -275.97f;
@@ -254,6 +254,8 @@ class boss_Alysrazor : public CreatureScript
             bool Check;
             bool Dying;
             bool switcher;
+
+            uint8 wormsCount;
 
             uint32 AchievementBF;
             uint32 AchievementIC;
@@ -319,6 +321,23 @@ class boss_Alysrazor : public CreatureScript
                 }
             }
 
+            void DoStopCombatForPlayers()
+            {
+                Map * map = me->GetMap();
+
+                if (!map)
+                    return;
+
+                Map::PlayerList const& plrList = map->GetPlayers();
+                if (plrList.isEmpty())
+                    return;
+                for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                {
+                    if(Player* pPlayer = itr->getSource())
+                        pPlayer->CombatStop(true);
+                }
+            }
+
             void Reset()
             {
                 if(instance)
@@ -340,6 +359,7 @@ class boss_Alysrazor : public CreatureScript
                 C = 1;
                 u = 0;
                 y = 0;
+                wormsCount = 0;
                 Rounds = 0;
                 Cycle = 1;
                 Enrage = 0;
@@ -447,6 +467,7 @@ class boss_Alysrazor : public CreatureScript
                 RemoveAuraFromAllPlayers(SPELL_MOLTEN_FEATHER, true, false);
                 RemoveAuraFromAllPlayers(SPELL_FEATHER_BAR, true, true);
                 instance->SetData(TYPE_ALYSRAZOR, DONE);
+                DoStopCombatForPlayers();
             }
 
             void SetData(uint32 Type, uint32 Data)
@@ -536,8 +557,6 @@ class boss_Alysrazor : public CreatureScript
                         me->SetSpeed(MOVE_FLIGHT, 1.2f);
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 70*cos(i), sy + 70*sin(i), 90.0f);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, false);
                         me->CastSpell(me, SPELL_FIRESTORM, true);
                         ++FlyFront;
                         break;
@@ -546,8 +565,6 @@ class boss_Alysrazor : public CreatureScript
                         FlyUP = false;
                         FlyTimer = !Check ? 1000 : 2500;
                         me->SetSpeed(MOVE_FLIGHT, 4.0f);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                         //me->SetFacingTo(me->GetAngle(sx, sy));
                         i = -4.5f*(M_PI/25);
                         me->GetMotionMaster()->MovePoint(3, sx + 55*cos(i), sy + 55*sin(i), 70.0);
@@ -555,6 +572,8 @@ class boss_Alysrazor : public CreatureScript
                         break;
                     case 4: //FlyCenter
                         FlyTimer = 9000;
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
                         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
                         me->SetSpeed(MOVE_FLIGHT, 1.0f);
                         i = 19.5f*(M_PI/25);
@@ -670,19 +689,26 @@ class boss_Alysrazor : public CreatureScript
                 }
                     break;
                 case NPC_PLUMP_LAVA_WORM:
+                {
+                    if (wormsCount >= 2)
+                        break;
+
+                    wormsCount++;
+
                     if (FirstWormPositions)
                     {
-                        for(uint8 i=1; i<5 ; i++)
+                        for(uint8 i = 1; i < 5 ; i++)
                             me->SummonCreature(NPC_PLUMP_LAVA_WORM, SpawnPositions[i].GetPositionX(), SpawnPositions[i].GetPositionY(), 55.3f, 0, TEMPSUMMON_MANUAL_DESPAWN);
                         FirstWormPositions = false;
                     }
                     else
                     {
-                        for(uint8 i=5; i<9 ; i++)
+                        for(uint8 i = 5; i < 9 ; i++)
                             me->SummonCreature(NPC_PLUMP_LAVA_WORM, SpawnPositions[i].GetPositionX(), SpawnPositions[i].GetPositionY(), 55.3f, 0, TEMPSUMMON_MANUAL_DESPAWN);
                         FirstWormPositions = true;
                      }
-                    break;
+                 }
+                 break;
                 case NPC_BLAZING_TALON_INITIATE:
                     if (InitiatesFirst == 0)
                     {
@@ -860,18 +886,6 @@ class boss_Alysrazor : public CreatureScript
                                     }
                             break;
                         }
-                        case NPC_BLAZING_POWER:
-                            for (uint32 i=0; i<4 ; i++)
-                            {
-                                float u; // Distance
-                                float l; // RAD
-                                l = (urand(1,628))/100;
-                                uint32 t = urand(1,3);
-                                u = 15+(t*9);
-                                if (Creature* Ring = me->SummonCreature(NPC_BLAZING_POWER, sx + u*cos(l), sy + u*sin(l), 56.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 3200))
-                                    Ring->GetMotionMaster()->MovePoint(3, sx + u*cos(l+0.01f), sy + u*sin(l+0.01f), 56.0f); //SetOrientation
-                            }
-                            break;
                         case NPC_FIERY_TORNADO:
                             if (Creature* Target = Unit::GetCreature(*me, TargetGUID))
                                 for (uint32 i=1; i<18 ; i++)
@@ -1034,8 +1048,8 @@ class boss_Alysrazor : public CreatureScript
                         }
                         else if (Rounds == 101 && Cycle == 3)
                         {
-                            DespawnCreatures(NPC_LAVA_WORM_TARGET);
-                            DespawnCreatures(NPC_PLUMP_LAVA_WORM);
+                            //DespawnCreatures(NPC_LAVA_WORM_TARGET);
+                            //DespawnCreatures(NPC_PLUMP_LAVA_WORM);
                             me->MonsterYell("These skies are MINE!", LANG_UNIVERSAL, 0);
                             DoPlaySoundToSet(me, SAY_SPIRAL_01);
                             Phase = STAGE_TWO;
@@ -1158,6 +1172,8 @@ class boss_Alysrazor : public CreatureScript
                             me->CastSpell(me, 99604, false);                                    //Fly Anim
                             if (Creature* Target = me->SummonCreature(NPC_FIERY_VORTEX, sx, sy, 55.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 31000))
                             {
+                                wormsCount = 0;
+                                Target->CastSpell(Target, SPELL_FIERY_VORTEX, false);
                                 TargetGUID = Target->GetGUID();
                                 StageTimer = 30000; 
                                 HarshTimer = 5000;
@@ -1194,7 +1210,7 @@ class boss_Alysrazor : public CreatureScript
 
                     if (FlyUP && BlazingPowerTimer <= diff) //Rings
                     {
-                        SummonNPC(NPC_BLAZING_POWER);
+                        //SummonNPC(NPC_BLAZING_POWER);
                         BlazingPowerTimer = 4000;
                     }
                     else BlazingPowerTimer -= diff;
@@ -1410,8 +1426,8 @@ class npc_Captive_Duid : public CreatureScript
 
             void JustDied(Unit* /*Killer*/)
             {
-                if (Creature* Target = me->SummonCreature(NPC_LAVA_WORM_TARGET, 111.7f, -400.8f, 100.9f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 3000))
-                    me->CastSpell(Target, SPELL_COSMETIC_DEATH, false);
+                //if (Creature* Target = me->SummonCreature(NPC_LAVA_WORM_TARGET, 111.7f, -400.8f, 100.9f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 3000))
+                    //me->CastSpell(Target, SPELL_COSMETIC_DEATH, false);
             }
         };
 
@@ -1431,20 +1447,17 @@ public:
         npc_fiery_vortexAI(Creature* creature) : ScriptedAI(creature){}
 
         uint32 harshWindsTimer;
+        uint32 blazing_timer;
 
         void Reset()
         {
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NOT_SELECTABLE);
             me->SetInCombatWithZone();
-            //me->CastSpell(me, SPELL_FIERY_VORTEX, false);
+            //me->CastSpell(me, SPELL_FIERY_VORTEX, false); - > Why player can't see casting animation when casted here or in entercombat ? :D
             me->setFaction(14);
             harshWindsTimer = 6000;
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            me->CastSpell(me, SPELL_FIERY_VORTEX, false);
+            blazing_timer = 4000;
         }
 
         void UpdateAI(const uint32 diff)
@@ -1455,6 +1468,22 @@ public:
                 harshWindsTimer = 1000;
             }
             else harshWindsTimer -= diff;
+
+            if (blazing_timer <= diff)
+            {
+                for (uint8 i = 0; i < 4 ; i++)
+                {
+                    float u; // Distance
+                    float l; // RAD
+                    l = (urand(1,628))/100;
+                    uint32 t = urand(1,3);
+                    u = 15+(t*9);
+                    if (Creature* Ring = me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + u*cos(l), me->GetPositionY() + u*sin(l), 56.0f, 0, TEMPSUMMON_TIMED_DESPAWN, 3200))
+                        Ring->GetMotionMaster()->MovePoint(3, me->GetPositionX() + u*cos(l+0.01f), me->GetPositionY() + u*sin(l+0.01f), 56.0f); //SetOrientation
+                }
+                blazing_timer = 5000;
+            }
+            else blazing_timer -= diff;
         }
 
         };
@@ -1480,40 +1509,57 @@ class npc_Fendral : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
                 instance = creature->GetInstanceScript();
                 me->SetReactState(REACT_AGGRESSIVE);
-                me->SetFlying(false);
-                StartIntro = false;
-                FlyUp = false;
             }
-
-            InstanceScript* instance;
-
-            bool StartIntro;
-            bool FlyUp;
 
             uint32 KillTimer;
             uint32 Timer;
 
+            bool StartIntro;
+            bool FlyUp;
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (who && who->ToPlayer() && !who->ToPlayer()->isGameMaster() && who->GetDistance(me) <= 40.0f)
-            if (!StartIntro)
+            InstanceScript* instance;
+
+            void Reset()
             {
-                me->CastSpell(me, SPELL_SMOULDERING_ROOTS, true);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
-                me->MonsterYell("What have we here - visitors to our kingdom in the Firelands?", LANG_UNIVERSAL, 0);
-                DoPlaySoundToSet(me, SAY_FENDRAL_01);
-                me->GetMotionMaster()->MovePoint(3, 29.02f, -329.64f, 52.4f);
-                Timer = 10000;
-                StartIntro = true;
+                StartIntro = false;
+                FlyUp = false;
             }
-            ScriptedAI::MoveInLineOfSight(who);
-        }
+
+            void EnterEvadeMode()
+            {
+                StartIntro = false;
+                FlyUp = false;
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                ScriptedAI::EnterEvadeMode();
+            }
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                if (who && who->ToPlayer() && !who->ToPlayer()->isGameMaster() && who->GetDistance(me) <= 40.0f)
+                    if (!StartIntro)
+                    {
+                        me->SetInCombatWithZone();
+                        me->CastSpell(me, SPELL_SMOULDERING_ROOTS, true);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+
+                        me->MonsterYell("What have we here - visitors to our kingdom in the Firelands?", LANG_UNIVERSAL, 0);
+                        DoPlaySoundToSet(me, SAY_FENDRAL_01);
+                        me->GetMotionMaster()->MovePoint(3, 29.02f, -329.64f, 52.4f);
+                        Timer = 10000;
+                        StartIntro = true;
+                    }
+
+                ScriptedAI::MoveInLineOfSight(who);
+            }
 
             void UpdateAI(const uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 if (Timer <= diff && StartIntro && !FlyUp)
                 {
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                     me->MonsterYell("You mortals may remember Alysra, who spirited me to freedom in Mount Hyjal. She, too has been reborn. Born of flame!", LANG_UNIVERSAL, 0);
                     DoPlaySoundToSet(me, SAY_FENDRAL_02);
                     Timer = 18000;
@@ -1534,6 +1580,7 @@ class npc_Fendral : public CreatureScript
                 if (Timer <= diff && FlyUp)
                 {
                     me->SetSpeed(MOVE_FLIGHT, 0.8f);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                     me->MonsterYell("I wish I could watch her reduce your pitiful band to cinders, but I am needed elsewhere. Farewell!", LANG_UNIVERSAL, 0);
                     DoPlaySoundToSet(me, SAY_FENDRAL_03);
                     me->CastSpell(me, SPELL_FENDRAL_TRANSFORM, false);
@@ -2628,6 +2675,13 @@ class npc_Volcanic_Fire : public CreatureScript
                     me->SetReactState(REACT_PASSIVE);
                 else
                     me->SetReactState(REACT_AGGRESSIVE);
+
+                if (instance->GetData(TYPE_ALYSRAZOR) == DONE )
+                {
+                    me->RemoveAllAuras();
+                    me->CombatStop(true);
+                    me->SetReactState(REACT_PASSIVE);
+                }
 
                 if (instance->GetData(TYPE_ALYSRAZOR) == IN_PROGRESS)
                 {
