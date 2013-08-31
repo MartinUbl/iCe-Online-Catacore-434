@@ -9794,7 +9794,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 7099:  // Curse of Mending
         case 39647: // Curse of Mending
         case 29494: // Temptation
-        case 20233: // Improved Lay on Hands (cast on target)
         {
             target = pVictim;
             break;
