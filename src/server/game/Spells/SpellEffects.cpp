@@ -7076,6 +7076,9 @@ void Spell::EffectHealMaxHealth(SpellEffIndex effIndex)
     {
         if (m_caster->GetGUID() == unitTarget->GetGUID())
             m_caster->CastSpell(m_caster, 25771, true); // Forbearance
+
+        if (m_caster->HasAura(54939)) // Glyph of Divinity
+            m_caster->CastSpell(m_caster,54986,true);
     }
 
     // damage == 0 - heal for caster max health
