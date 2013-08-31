@@ -188,6 +188,9 @@ class boss_shannox : public CreatureScript
                 if (pInstance)
                     pInstance->SetData(TYPE_SHANNOX, DONE);
 
+                DespawnTraps();
+                summonedTraps.clear();
+
                 DoYell("The pain... Lord of fire, it hurts...", 24568);
             }
 
