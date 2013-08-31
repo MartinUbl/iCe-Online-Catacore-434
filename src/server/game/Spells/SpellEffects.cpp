@@ -4018,6 +4018,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             {
                 m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
             }
+            break;
         }
         case SPELLFAMILY_PRIEST:
         {
