@@ -4196,6 +4196,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
         break;
         case 99816: // Fiery Tornado
+        case 100733:
+        case 100734:
+        case 100735:
             spellInfo->EffectRadiusIndex[EFFECT_0] = 26;
             spellInfo->EffectRadiusIndex[EFFECT_1] = 26;
             break;
