@@ -1757,20 +1757,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         }
     }
 
-    // Lightning Bolt
-    if (m_caster && m_spellInfo->Id == 403)
-    {
-        // Telluric Currents
-        int32 bp0 = 0;
-        if (m_caster->HasAura(82988))
-            bp0 = 40*m_damage/100;
-        else if (m_caster->HasAura(82984))
-            bp0 = 20*m_damage/100;
-
-        if (bp0)
-            m_caster->CastCustomSpell(m_caster, 82987, &bp0, 0, 0, true);
-    }
-
     if (m_caster && m_spellInfo)
     {
         // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC

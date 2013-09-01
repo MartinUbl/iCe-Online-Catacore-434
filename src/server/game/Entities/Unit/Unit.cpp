@@ -7866,6 +7866,22 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     return false;
                 }
+                // Telluric Currents
+                case 82984:
+                case 82988:
+                {
+                    // proc only from Lightning Bolt
+                    if (procSpell->Id != 403)
+                        return false;
+
+                    // amount of mana restored equals 20/40 percent of damage done
+                    int32 bp0 = 0;
+                    bp0 = triggerAmount * damage / 100;
+                    if (bp0)
+                        CastCustomSpell(this, 82987, &bp0, 0, 0, true);
+
+                    return false;
+                }
                 break;
             }
             // Frozen Power
