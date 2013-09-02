@@ -4287,6 +4287,7 @@ void SpellMgr::LoadSpellCustomAttr()
         break;
         case 98552: // Summon Spark of Rhyoloth
         case 98136: // Summon Fragment of Rhyolith
+        case 100392:
             spellInfo->DurationIndex = 21; // unlimited - despawned by AI
             break;
         case 99845: // Immolation (Rhyolith, Firelands)
