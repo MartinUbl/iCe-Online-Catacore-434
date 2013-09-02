@@ -2631,8 +2631,9 @@ void Player::ResetAllPowers()
             break;
     }
 
-    // Also clear paladin's holy power to avoid overpowered combos
+    // Also clear paladin's holy power and druid's eclipse power to avoid overpowered combos
     SetPower(POWER_HOLY_POWER, 0);
+    SetPower(POWER_ECLIPSE, 0);
 }
 
 Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
