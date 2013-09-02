@@ -203,13 +203,11 @@ public:
         InstanceScript *pInstance;
         uint64 leftFootGUID, rightFootGUID;
 
-        uint32 leftDamage, rightDamage, meDamage;
+        uint32 leftDamage, rightDamage;
         uint32 lastDamage;
-        uint32 directionPower;
         float direction;
         float moveAngle;
         uint32 directionUpdateTimer;
-        uint32 movementUpdateTimer;
         uint8 directionTimes;
         bool savedLeft;
 
@@ -223,6 +221,11 @@ public:
         uint8 magmaDrinkCount;
         uint32 magmaDrinkTimer;
         uint32 EruptionTimer;
+        uint32 DPSTimer;
+        uint32 position_counter;
+        uint32 lDamage_field[4];
+        uint32 rDamage_field[4];
+        uint32 directionPower;
 
         uint32 enrageTimer;
 
@@ -233,16 +236,14 @@ public:
 
             me->SetDisplayId(DISPLAYID_NORMAL); // "dressed up"
 
+            position_counter = 0;
             leftDamage  = 0;
             rightDamage = 0;
-            meDamage    = 0;
             lastDamage  = 0;
             direction   = 0.0f;
             moveAngle   = me->GetOrientation();
-            directionPower = 50;
             directionUpdateTimer = 1000;
-            movementUpdateTimer  = 1000;
-
+            DPSTimer = 1000;
             concussiveStompTimer = 3000;
             activateVolcanoTimer = 8000;
             summonTimer          = 15000;
@@ -251,8 +252,10 @@ public:
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
             displayIdPhase       = 0;
+            directionPower = 50;
 
-            me->SetWalk(true);
+            memset (lDamage_field,0,4*sizeof(uint32));
+            memset (rDamage_field,0,4*sizeof(uint32));
 
             savedLeft      = true;
             directionTimes = 0;
@@ -301,20 +304,19 @@ public:
                 foot = Unit::GetUnit(*me, rightFootGUID);
                 if (foot)
                     me->DealDamage(foot, damage/2);
-
-                meDamage += damage;
             }
         }
 
         void EnterCombat(Unit* pWho)
         {
             me->CastSpell(me, SPELL_BALANCE_BAR, true);
+            me->SetUInt64Value(UNIT_FIELD_TARGET,0);
+
             if (pInstance)
             {
                 pInstance->SetData(TYPE_RHYOLITH, IN_PROGRESS);
                 pInstance->DoSetMaxScriptedPowerToPlayers(100);
                 pInstance->DoSetScriptedPowerToPlayers(50);
-                directionPower = 50;
             }
 
             PlayAndYell(me, ST_AGGRO);
@@ -322,7 +324,6 @@ public:
             phase = 1;
 
             directionUpdateTimer = 1000;
-            movementUpdateTimer  = 1000;
             concussiveStompTimer = 5000;
             activateVolcanoTimer = 10000;
             summonTimer          = 15000;
@@ -332,8 +333,10 @@ public:
             moveAngle            = me->GetOrientation();
             lastDamage           = 0;
             displayIdPhase       = 0;
+            directionPower       = 50;
 
-            me->SetWalk(true);
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_WALK,1.0f,true);
 
             savedLeft = true;
             directionTimes = 0;
@@ -376,6 +379,9 @@ public:
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                 foot->SetVisibility(VISIBILITY_ON);
                 foot->CombatStop();
+                foot->ToCreature()->AI()->EnterEvadeMode();
+                foot->RemoveAllAuras();
+                foot->SetFullHealth();
                 foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
                 if (Aura* armor = foot->GetAura(SPELL_OBSIDIAN_ARMOR))
                     armor->SetStackAmount(80);
@@ -388,16 +394,25 @@ public:
                     pInstance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, foot);
                 foot->SetVisibility(VISIBILITY_ON);
                 foot->CombatStop();
+                foot->ToCreature()->AI()->EnterEvadeMode();
+                foot->RemoveAllAuras();
+                foot->SetFullHealth();
                 foot->CastSpell(foot, SPELL_OBSIDIAN_ARMOR, true);
                 if (Aura* armor = foot->GetAura(SPELL_OBSIDIAN_ARMOR))
                     armor->SetStackAmount(80);
             }
+
+            if (pInstance)
+                    pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
             ScriptedAI::EnterEvadeMode();
         }
 
         void JustDied(Unit* killer)
         {
+            if (pInstance)
+                    pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
+
             if (pInstance)
                 pInstance->SetData(TYPE_RHYOLITH, DONE);
 
@@ -412,24 +427,22 @@ public:
             PlayAndYell(me, ST_DEATH);
         }
 
-        void UpdateMovement()
+        void UpdateMovement(void)
         {
-            moveAngle += direction*(M_PI/7);
-            moveAngle = MapManager::NormalizeOrientation(moveAngle);
-
             // if too far away, move to the center of platform
             if (me->GetDistance2d(platformCenter.m_positionX, platformCenter.m_positionY) > 75.0f)
                 moveAngle = me->GetAngle(&platformCenter);
 
             float x, y, z;
-            //me->GetClosePoint(x, y, z, me->GetObjectSize(), 30.0f, moveAngle);
             me->GetNearPoint2D(x, y, 30.0f, moveAngle);
             z = me->GetPositionZ();
 
             me->SetOrientation(moveAngle);
             me->GetMotionMaster()->MovementExpired(false);
-            //me->GetMotionMaster()->MovePoint(1, x, y, z);
-            me->GetMotionMaster()->MoveCharge(x, y, z, 2.25f);
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK,1.0f,true);
+            me->GetMotionMaster()->MovePoint(0, x, y, z);
+            me->SetSpeed(MOVE_WALK,1.0f,true);
         }
 
         void RefreshPowerBar(uint32 now, bool removal)
@@ -524,7 +537,6 @@ public:
                 me->GetMotionMaster()->MovementExpired(false);
 
                 directionUpdateTimer = 3000;
-                movementUpdateTimer = 500;
 
                 // change orientation to allow movement update
                 moveAngle = me->GetAngle(&platformCenter);
@@ -537,6 +549,50 @@ public:
                 magmaDrinkTimer = 1000;
                 magmaDrinkCount = 3;
             }
+        }
+
+        uint32 GetExactDamage(uint32 damage) // Return exact dmg before reduction from Obsidian Armor
+        {
+            uint32 stacks = 0;
+
+            Aura* pArmor = me->GetAura(SPELL_OBSIDIAN_ARMOR);
+            if (pArmor)
+                stacks = pArmor->GetStackAmount();
+
+            if(stacks)
+                return ((damage * 100)/(100 - stacks));
+            else
+                return damage;
+        }
+
+        inline uint32 GetTotalDamage(void)
+        {
+            return GetTotalRightDamage() + GetTotalLeftDamage();
+        }
+
+        inline uint32 GetTotalLeftDamage(void)
+        {
+            uint32 totalDamage = 0;
+
+            for (uint32 i = 0 ; i < 4; i++)
+                totalDamage  += lDamage_field[i];
+
+            return totalDamage;
+        }
+
+        inline uint32 GetTotalRightDamage(void)
+        {
+            uint32 totalDamage = 0;
+
+            for (uint32 i = 0 ; i < 4; i++)
+                totalDamage  += rDamage_field[i];
+
+            return totalDamage;
+        }
+
+        inline bool isTurningLeft(void)
+        {
+            return (GetTotalLeftDamage() > GetTotalRightDamage()) ? true : false;
         }
 
         void UpdateAI(const uint32 diff)
@@ -561,18 +617,21 @@ public:
             {
                 //reset damage count dealt by players for getting loot
                 me->ResetPlayerDamageReq();
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
 
                 // back to normal movement
+
                 me->GetMotionMaster()->MovementExpired(true);
                 me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->SetWalk(false);
+                me->SetSpeed(MOVE_RUN,1.0f,true);
 
                 displayIdPhase = 3;
                 me->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
                 me->SetDisplayId(DISPLAYID_SHATTERED);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, false);
-
-                me->SetWalk(false);
 
                 PlayAndYell(me, ST_SHATTER_ARMOR);
 
@@ -581,6 +640,7 @@ public:
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
                 me->CastSpell(me, SPELL_IMMOLATION, true);
+                me->HandleEmoteCommand(EMOTE_STATE_SIT);
 
                 Unit* foot = Unit::GetUnit(*me, leftFootGUID);
                 if (foot)
@@ -609,47 +669,6 @@ public:
             }
             else
                 concussiveStompTimer -= diff;
-
-            if (activateVolcanoTimer <= diff)
-            {
-                std::list<Creature*> volcanoList;
-                GetCreatureListWithEntryInGrid(volcanoList, me, NPC_VOLCANO, 200.0f);
-                for (std::list<Creature*>::iterator itr = volcanoList.begin(); itr != volcanoList.end(); )
-                {
-                    if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE)) // Only on non active volcano
-                        itr++;
-                    else
-                        itr = volcanoList.erase(itr);
-                }
-
-                bool found = false;
-
-                if (volcanoList.size() > 0)
-                {
-                    for (std::list<Creature*>::iterator iter = volcanoList.begin(); iter != volcanoList.end(); ++iter)
-                        if ( (*iter) && me->HasInArc(M_PI,(*iter)) ) // Pick volcano in front of boss if possible
-                        {
-                            me->CastSpell((*iter), SPELL_ACTIVATE_VOLCANO, true);
-                            found = true;
-                        }
-                }
-
-                if (volcanoList.size() > 0 && found == false) // if  we didn't find any volcano in front of boss, pick random
-                {
-                    uint32 randpos = urand(0,volcanoList.size()-1);
-
-                    std::list<Creature*>::iterator itr = volcanoList.begin();
-                    std::advance(itr, randpos);
-                    if (*itr)
-                        me->CastSpell(*itr, SPELL_ACTIVATE_VOLCANO, true);
-                }
-
-                PlayAndYell(me, ST_VOLCANO_1+urand(0,4));
-
-                activateVolcanoTimer = 25000;
-            }
-            else
-                activateVolcanoTimer -= diff;
 
             if (lavaCheckTimer <= diff)
             {
@@ -688,97 +707,79 @@ public:
 
             if (phase == 1)
             {
+                if (DPSTimer <= diff)
+                {
+                    if(position_counter == 4) // Fill field from start
+                        position_counter = 0;
+
+                    // We need to get real damage before reduction from Obsidian armor
+                    lDamage_field[position_counter] = GetExactDamage(leftDamage);
+                    rDamage_field[position_counter] = GetExactDamage(rightDamage);
+
+                    leftDamage = 0; // Rest last dps for both legs
+                    rightDamage = 0;
+
+                    position_counter++;
+
+                    DPSTimer = 1000;
+                }
+                else DPSTimer -= diff;
+
                 /* Direction stuff
                  * Update direction depending on which foot was damaged more
-                 * if no foot was damaged, then converge to the middle (straight forward, energy 50/100)
                  */
                 if (directionUpdateTimer <= diff)
                 {
-                    uint32 totaldmg = leftDamage+rightDamage+meDamage;
+                    uint32 powerPoint = (Is25ManRaid()) ? 5000 : 2000; // These numbers control sensibility of stearing
+                    bool noDmgIncoming = false;
 
-                    // moving left
-                    if (direction > 0.0f)
+                    if (isTurningLeft())
                     {
-                        // would turn more left, but total damage isn't at least 90% of last damage
-                        if (leftDamage > rightDamage && totaldmg < lastDamage*0.9f)
-                            totaldmg = 0;
-                    }
-                    else // moving right
-                    {
-                        if (rightDamage > leftDamage && totaldmg < lastDamage*0.9f)
-                            totaldmg = 0;
-                    }
-
-                    if (totaldmg != 0)
-                    {
-                        if (leftDamage > rightDamage)
+                        uint32 leftDamage = GetTotalLeftDamage() - GetTotalRightDamage();
+                        if(leftDamage != 0)
                         {
-                            if (!savedLeft)
-                            {
-                                savedLeft = true;
-                                directionTimes = 0;
-                            }
-                            direction += ((((float)leftDamage)/((float)totaldmg)))/10.0f;
+                            uint32 powerDamage = (leftDamage/powerPoint >= 25) ? 25 : (leftDamage/powerPoint);
+                            float angle = powerDamage * 0.0084f; // Comes from my calculation ( Maximum 30 s to make one turn around)
+                            direction = 25.0f / powerDamage;
+                            moveAngle += angle;
+                            moveAngle = MapManager::NormalizeOrientation(moveAngle);
                         }
-                        else
-                        {
-                            if (savedLeft)
-                            {
-                                savedLeft = false;
-                                directionTimes = 0;
-                            }
-                            direction += (-(((float)rightDamage)/((float)totaldmg)))/10.0f;
-                        }
+                        else noDmgIncoming = true;
                     }
-                    else
+                    else // Is turning right
                     {
-                        direction = 2.0f*direction/5.0f;
-                        if (fabs(direction) <= 0.12f)
-                            direction = 0.0f;
+                        uint32 rightDamage = GetTotalRightDamage() - GetTotalLeftDamage();
+                        if(rightDamage != 0)
+                        {
+                            uint32 powerDamage = (rightDamage/powerPoint >= 25) ? 25 : (rightDamage/powerPoint);
+                            float angle = powerDamage * 0.0084f;
+                            direction = 25.0f / powerDamage;
+                            direction *= -1.0f;
+                            moveAngle -= angle;
+                            moveAngle = MapManager::NormalizeOrientation(moveAngle);
+                        }
+                        else noDmgIncoming = true;
                     }
 
-                    if (directionTimes < 20)
-                        directionTimes++;
-
-                    //direction *= (1.0f - ((float)directionTimes)/25.0f);
-
-                    if (direction > 1.0f)
-                        direction = 1.0f;
-                    else if (direction < -1.0f)
-                        direction = -1.0f;
-
-                    if (lastDamage == 0)
-                        lastDamage = totaldmg;
+                    if (noDmgIncoming)
+                        RefreshPowerBar(50, false);
                     else
-                        lastDamage = (lastDamage + totaldmg)/2.0f;
+                        RefreshPowerBar(50 - direction * 50, false);
 
-                    leftDamage = 0;
-                    rightDamage = 0;
-                    meDamage = 0;
+                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                        UpdateMovement();
 
-                    RefreshPowerBar(50-direction*50, false);
 
-                    directionUpdateTimer = 2000;
+                    directionUpdateTimer = 1000;
                 }
                 else
                     directionUpdateTimer -= diff;
 
-                if (movementUpdateTimer <= diff)
-                {
-                    if (!me->hasUnitState(UNIT_STAT_CASTING))
-                        UpdateMovement();
-
-                    movementUpdateTimer = 800;
-                }
-                else
-                    movementUpdateTimer -= diff;
-
                 /* Phase 1 spell stuff */
-
                 if (summonTimer <= diff)
                 {
                     // summon 1 spark OR 5 fragments, 50/50 chances
-                    if (urand(1,4) > 2)
+                    if (urand(0,100) > 50)
                     {
                         for (uint32 i = 0; i < 5; i++)
                             me->CastSpell(me, SPELL_SUMMON_FRAGMENT, true);
@@ -792,6 +793,47 @@ public:
                 }
                 else
                     summonTimer -= diff;
+
+                if (activateVolcanoTimer <= diff)
+                {
+                    std::list<Creature*> volcanoList;
+                    GetCreatureListWithEntryInGrid(volcanoList, me, NPC_VOLCANO, 200.0f);
+                    for (std::list<Creature*>::iterator itr = volcanoList.begin(); itr != volcanoList.end(); )
+                    {
+                        if ((*itr)->HasAura(SPELL_VOLCANO_SMOKE)) // Only on non active volcano
+                            itr++;
+                        else
+                            itr = volcanoList.erase(itr);
+                    }
+
+                    bool found = false;
+
+                    if (volcanoList.size() > 0)
+                    {
+                        for (std::list<Creature*>::iterator iter = volcanoList.begin(); iter != volcanoList.end(); ++iter)
+                            if ( (*iter) && me->HasInArc(M_PI,(*iter)) ) // Pick volcano in front of boss if possible
+                            {
+                                me->CastSpell((*iter), SPELL_ACTIVATE_VOLCANO, true);
+                                found = true;
+                            }
+                    }
+
+                    if (volcanoList.size() > 0 && found == false) // if  we didn't find any volcano in front of boss, pick random
+                    {
+                        uint32 randpos = urand(0,volcanoList.size()-1);
+
+                        std::list<Creature*>::iterator itr = volcanoList.begin();
+                        std::advance(itr, randpos);
+                        if (*itr)
+                            me->CastSpell(*itr, SPELL_ACTIVATE_VOLCANO, true);
+                    }
+
+                    PlayAndYell(me, ST_VOLCANO_1+urand(0,4));
+
+                    activateVolcanoTimer = 25000;
+                }
+                else
+                    activateVolcanoTimer -= diff;
 
                 if (EruptionTimer <= diff)
                 {
@@ -874,8 +916,16 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,15.0f);
+
             if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            me->SetUInt64Value(UNIT_FIELD_TARGET,0);
+        }
+
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
         }
 
         void UpdateAI(const uint32 diff)
@@ -1031,6 +1081,7 @@ public:
                     // Every time he steps on an active volcano, he loses 16 stacks of the buff
                     else
                     {
+                        pBoss->MonsterTextEmote("Lord Rhyolith's armor is weakened by the active volcano.", 0, true);
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
                             pAI->ModObsidianArmorStack(-16);
 
