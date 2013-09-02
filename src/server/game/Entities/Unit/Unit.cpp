@@ -9201,6 +9201,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 99134:// Priest T12 Healer 2P Bonus
+        {
+            // Proc only from (Flash Heal, Heal, Greater Heal, and Prayer of Mending)
+            if (procSpell->Id != 2050 && procSpell->Id != 2060 && procSpell->Id != 2061 && procSpell->Id != 33076)
+                return false;
+            break;
+        }
         // Vigilance
         case 50720:
             if (triggeredByAura)
