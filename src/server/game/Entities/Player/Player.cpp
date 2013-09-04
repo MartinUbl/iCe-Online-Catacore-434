@@ -7212,7 +7212,7 @@ void Player::RewardCurrency(Unit *pVictim)
     if (!Cur)
         return;
 
-    ModifyCurrency(Cur->type, Cur->amount);
+    ModifyCurrency(Cur->type, Cur->amount, CURRENCY_SOURCE_OTHER);
 }
 
 //Calculates how many reputation points player gains in victim's enemy factions
