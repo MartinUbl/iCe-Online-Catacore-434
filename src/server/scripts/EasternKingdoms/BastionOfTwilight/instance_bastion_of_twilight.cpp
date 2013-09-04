@@ -49,6 +49,8 @@ public:
         uint32 HalfusIntro;
         uint32 SinestraIntro;
 
+        bool ChogallKilledOnHC;
+
         void Initialize()
         {
             HalfusGUID = 0;
@@ -116,6 +118,8 @@ public:
 
             for(uint8 i=0; i < MAX_ENCOUNTER; ++i)
                 auiEncounter[i] = NOT_STARTED;
+
+            ChogallKilledOnHC=false;
         }
 
 
@@ -207,6 +211,8 @@ public:
                     break;
                 case DATA_CHOGALL:
                     auiEncounter[3] = data;
+                    if(this->instance->IsHeroic())
+                        ChogallKilledOnHC=true;
                     break;
                 case DATA_SINESTRA:
                     auiEncounter[4] = data;
@@ -221,7 +227,7 @@ public:
                 && auiEncounter[2] == DONE // Council
                 && auiEncounter[3] == DONE) // Chogall
             {
-                if (this->instance->IsHeroic())
+                if (this->instance->IsHeroic()&&ChogallKilledOnHC)
                 {
                     if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
                         go->Delete();
@@ -273,6 +279,7 @@ public:
             saveStream << auiEncounter[0];
             for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                 saveStream << " " << auiEncounter[i];
+            saveStream << " " << ChogallKilledOnHC;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -291,6 +298,8 @@ public:
             std::istringstream loadStream(in);
             for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
                 loadStream >> auiEncounter[i];
+
+            loadStream >> ChogallKilledOnHC;//load data, if Chogall was killed on hc
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (auiEncounter[i] == IN_PROGRESS)
