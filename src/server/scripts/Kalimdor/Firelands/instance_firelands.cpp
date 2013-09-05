@@ -114,8 +114,8 @@ public:
             {
                 balerocDoorGUID = go->GetGUID();
 
-               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
-                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
+               if (m_auiEncounter[0] == DONE // TYPE_BETHTILAC
+                && m_auiEncounter[1] == DONE // TYPE_RHYOLITH
                 && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
                 && m_auiEncounter[3] == DONE)// TYPE_SHANNOX
                 {
@@ -180,8 +180,8 @@ public:
             if (DataId < MAX_ENCOUNTER)
                 m_auiEncounter[DataId] = Value;
 
-               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
-                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
+               if (m_auiEncounter[0] == DONE // TYPE_BETHTILAC
+                && m_auiEncounter[1] == DONE // TYPE_RHYOLITH
                 && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
                 && m_auiEncounter[3] == DONE ) // TYPE_SHANNOX
                 {
