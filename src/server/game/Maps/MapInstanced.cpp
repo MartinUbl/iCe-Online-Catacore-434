@@ -158,7 +158,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         }
         //instance bound merging when same bosses killed(flexible id)
         Group *group = player->GetGroup();
-        if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
+        if (!player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
             group->GetBoundInstance(this) && group->GetLeader() &&
             pBind->save != group->GetBoundInstance(this)->save) 
         {
@@ -212,14 +212,12 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             map = _FindMap(NewInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
-            {
                 if(IsRaid())
                 {
                     map = CreateInstance(NewInstanceId, pSave, RAID_DIFFICULTY_10MAN_HEROIC);
                 }
                 else
                     map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
-            }
             if(IsRaid()&&!map->ToInstanceMap()->GetInstanceScript()->CorrectDiff(player))
             {
                 if(GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
