@@ -632,6 +632,7 @@ public:
                 me->SetDisplayId(DISPLAYID_SHATTERED);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, false);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
 
                 PlayAndYell(me, ST_SHATTER_ARMOR);
 
@@ -640,7 +641,7 @@ public:
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
                 me->CastSpell(me, SPELL_IMMOLATION, true);
-                me->HandleEmoteCommand(EMOTE_STATE_SIT);
+                //me->HandleEmoteCommand(EMOTE_STATE_SIT);
 
                 Unit* foot = Unit::GetUnit(*me, leftFootGUID);
                 if (foot)
@@ -916,7 +917,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,15.0f);
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,18.0f);
 
             if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -1082,14 +1083,14 @@ public:
                     if (me->HasAura(SPELL_VOLCANO_SMOKE))
                     {
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModMoltenArmorStack(1);
+                            pAI->ModMoltenArmorStack(urand(2,4));
                     }
-                    // Every time he steps on an active volcano, he loses 16 stacks of the buff
+                    // Every time he steps on an active volcano, he loses 8 stacks of the buff ( 16 was nerfed on 4.3.4)
                     else
                     {
                         pBoss->MonsterTextEmote("Lord Rhyolith's armor is weakened by the active volcano.", 0, true);
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModObsidianArmorStack(-16);
+                            pAI->ModObsidianArmorStack(-8);
 
                         PlayAndYell(pBoss, ST_ARMOR_WEAKEN_1+urand(0,4));
                     }
