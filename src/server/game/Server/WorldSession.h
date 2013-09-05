@@ -496,6 +496,7 @@ class WorldSession
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
         void HandleGroupSetRoles(WorldPacket & recvPacket);
+        void HandleClearRaidMarker(WorldPacket &recv_data);
         void HandleOptOutOfLootOpcode(WorldPacket &recv_data);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll(WorldPacket &recv_data);

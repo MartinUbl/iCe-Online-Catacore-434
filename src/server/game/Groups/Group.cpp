@@ -482,6 +482,7 @@ Player* Group::GetLeader()
 
 void Group::ChangeLeader(const uint64 &guid)
 {
+    RemoveAllMarkers(guid);
     member_citerator slot = _getMemberCSlot(guid);
 
     if (slot == m_memberSlots.end())
@@ -497,6 +498,9 @@ void Group::ChangeLeader(const uint64 &guid)
 
 void Group::Disband(bool hideDestroy /* = false */)
 {
+    if (this)
+        this->RemoveAllMarkers(this->GetLeaderGUID());
+
     sScriptMgr->OnGroupDisband(this);
 
     Player *player;
@@ -505,7 +509,6 @@ void Group::Disband(bool hideDestroy /* = false */)
         player = sObjectMgr->GetPlayer(citr->guid);
         if (!player)
             continue;
-
         //we cannot call _removeMember because it would invalidate member iterator
         //if we are removing player from battleground raid
         if (isBGGroup() || isBFGroup())
@@ -2322,3 +2325,151 @@ void Group::ResetMaxEnchantingLevel()
             m_maxEnchantingLevel = pMember->GetSkillValue(SKILL_ENCHANTING);
     }
 }
+
+void Group::BuildMarkerVisualPacket(WorldPacket *data, uint64 source, RaidMarkers pos)
+{
+    if (!data)
+        return;
+
+   ObjectGuid guid = source;
+
+    data->clear();
+    data->SetOpcode(SMSG_PLAY_SPELL_VISUAL_KIT);
+    *data << uint32(0);
+    *data << uint32(RAID_MARKER_KIT(pos));
+    *data << uint32(2);
+    data->WriteBit(guid[4]);
+    data->WriteBit(guid[7]);
+    data->WriteBit(guid[5]);
+    data->WriteBit(guid[3]);
+    data->WriteBit(guid[1]);
+    data->WriteBit(guid[2]);
+    data->WriteBit(guid[0]);
+    data->WriteBit(guid[6]);
+    data->FlushBits();
+    data->WriteByteSeq(guid[0]);
+    data->WriteByteSeq(guid[4]);
+    data->WriteByteSeq(guid[1]);
+    data->WriteByteSeq(guid[6]);
+    data->WriteByteSeq(guid[7]);
+    data->WriteByteSeq(guid[2]);
+    data->WriteByteSeq(guid[3]);
+    data->WriteByteSeq(guid[5]);
+}
+
+
+void Group::RefreshMarkerBySpellId(Player *pl,uint32 spellId)
+{
+    if(!pl || !pl->IsInWorld())
+        return;
+
+    Player * rl = pl->GetGroup()->GetLeader();
+
+    if (rl == NULL || !rl->IsInWorld())
+        return;
+
+    Player::GUIDTimestampMap* Markers = rl->GetSummonMapFor(RAID_MARKER_TRIGGER);
+    if (Markers && !Markers->empty())
+    {
+        Creature* pTemp = NULL;
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();++itr)
+        {
+            pTemp = Creature::GetCreature(*rl, (*itr).first);
+            if (pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId)
+            {
+                RaidMarkers pos;
+                pos = (RaidMarkers)(pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) - 84996);
+                WorldPacket visual;
+                BuildMarkerVisualPacket(&visual, pTemp->GetGUID(), pos);
+                pl->GetSession()->SendPacket(&visual);
+                break;
+            }
+        }
+    }
+}
+
+void Group::RefreshAllMarkersTo(Player *pl)
+{
+    if(!pl || !pl->IsInWorld())
+        return;
+
+    Player * rl = pl->GetGroup()->GetLeader();
+
+    if (rl == NULL || !rl->IsInWorld())
+        return;
+
+    if (rl->GetMapId() != pl->GetMapId() || rl->GetExactDist2d(pl) > 80.0f)
+        return;
+
+    Player::GUIDTimestampMap* Markers = rl->GetSummonMapFor(RAID_MARKER_TRIGGER);
+    if (Markers && !Markers->empty())
+    {
+        Creature* pTemp = NULL;
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();++itr)
+        {
+            pTemp = Creature::GetCreature(*rl, (*itr).first);
+            if (pTemp)
+            {
+                RaidMarkers pos;
+                pos = (RaidMarkers)(pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) - 84996);
+                WorldPacket visual;
+                BuildMarkerVisualPacket(&visual, pTemp->GetGUID(), pos);
+                pl->GetSession()->SendPacket(&visual);
+            }
+        }
+    }
+}
+
+void Group::RemoveAllMarkers(uint64 leaderGUID)
+{
+    Player * p = sObjectMgr->GetPlayer(leaderGUID);
+
+    if (!p || p->IsInWorld() == false)
+        return;
+
+    Player::GUIDTimestampMap* Markers = p->GetSummonMapFor(RAID_MARKER_TRIGGER);
+    if (Markers && !Markers->empty())
+    {
+        Creature* pTemp = NULL;
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
+        {
+            pTemp = Creature::GetCreature(*p, (*itr).first);
+            if (pTemp)
+            {
+                itr = Markers->erase(itr);
+                pTemp->ForcedDespawn();
+            }
+            else
+                ++itr;
+        }
+        Markers->clear();
+    }
+}
+
+void Group::RemoveMarkerBySpellId(Player * player,uint32 spellId)
+{
+    if (!player || !player->IsInWorld() || !spellId)
+        return;
+
+    Player::GUIDTimestampMap* Markers = player->GetSummonMapFor(RAID_MARKER_TRIGGER);
+    if (Markers && !Markers->empty())
+    {
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
+        {
+            Creature* pTemp = Creature::GetCreature(*player, (*itr).first);
+            if (pTemp)
+            {
+                if (pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId) // Remove only correct marker
+                {
+                    itr = Markers->erase(itr);
+                    pTemp->ForcedDespawn();
+                    break;
+                }
+                else
+                    ++itr;
+            }
+        }
+    }
+}
+
+

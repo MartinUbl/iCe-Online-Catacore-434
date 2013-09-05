@@ -917,6 +917,7 @@ enum PlayerDelayedOperations
     DELAYED_SPELL_CAST_DESERTER = 0x04,
     DELAYED_BG_MOUNT_RESTORE    = 0x08,                     ///< Flag to restore mount state after teleport from BG
     DELAYED_BG_TAXI_RESTORE     = 0x10,                     ///< Flag to restore taxi state after teleport from BG
+    DELAYED_MARKER_UPDATE       = 0x20,                     ///< Player need to get update packet for raid markers after teleport or login
     DELAYED_END
 };
 
@@ -1958,6 +1959,7 @@ class Player : public Unit, public GridObject<Player>
         static void RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0 , const char* reason = NULL);
         void RemoveFromGroup(RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT) { RemoveFromGroup(GetGroup(),GetGUID(), method); }
         void SendUpdateToOutOfRangeGroupMembers();
+        void RemoveMarkerForPlayer(Player * raidLeader);
 
         void SetInGuild(uint32 GuildId);
         void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
@@ -2575,6 +2577,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateVisibilityForPlayer();
         void UpdateVisibilityOf(WorldObject* target);
         void UpdateTriggerVisibility();
+        void HandleDelayedUpdateForPlayer(Creature * target);
 
         template<class T>
             void UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& visibleNow);
@@ -2761,6 +2764,8 @@ class Player : public Unit, public GridObject<Player>
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
         void UpdateGuildAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
         void CompletedAchievement(AchievementEntry const* entry, bool ignoreGMAllowAchievementConfig = false);
+        void SendDelayedRaidMarkerUpdate(uint32 delayedTime,uint32 markerSpellId);
+        void SendDelayedMovementUpdate(uint32 delayedTime,uint64 cGUID);
 
         bool HasTitle(uint32 bitIndex);
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
@@ -3141,6 +3146,9 @@ class Player : public Unit, public GridObject<Player>
         bool m_bHasDelayedTeleport;
 
         uint32 m_DetectInvTimer;
+        uint32 m_RaidMarkerTimerField[MARKER_MAX];
+        uint32 m_UpdateMovementTimer;
+        uint64 m_UpdatecreatureGUID;
 
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;
