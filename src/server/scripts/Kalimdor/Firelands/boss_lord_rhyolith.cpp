@@ -928,6 +928,12 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
+        void JustDied(Unit* killer)
+        {
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
