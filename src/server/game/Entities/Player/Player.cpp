@@ -19615,8 +19615,8 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         if (ar->achievement && !GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement)))
             missingAchievement = ar->achievement;
 
-        if (mapEntry->IsRaid() && ar->achievement && GetGroup()->GetLeader()->GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement))) //only leader need to have achievement to access heroic raid
-            missingAchievement=0;
+        if (mapEntry->IsRaid() && ar->achievement && GetGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement))) //only leader need to have achievement to access heroic raid
+            missingAchievement = 0;
 
 
         Difficulty target_difficulty = GetDifficulty(mapEntry->IsRaid());
