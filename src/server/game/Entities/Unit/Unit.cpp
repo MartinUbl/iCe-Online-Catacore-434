@@ -6878,6 +6878,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 99174: //  Rogue T12 2P Bonus ( SPELLFAMILY_DRUID seriously blizz ??? )
+                {
+                    if (procEx & PROC_EX_CRITICAL_HIT) // Only from melee critical strikes 
+                    {
+                        int32 bp0 = int32((damage*3)/100);
+                        CastCustomSpell(pVictim,99173, &bp0, 0, 0, true); // Burning wounds
+                    }
+                    break;
+                }
                 // Tricks of the Trade
                 case 57934:
                 {
@@ -6976,15 +6985,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         {
             switch(dummySpell->Id)
             {
-                case 99174: //  Rogue T12 2P Bonus
-                {
-                    if (procEx & PROC_EX_CRITICAL_HIT) // Only from melee critical strikes 
-                    {
-                        int32 bp0 = int32((damage*3)/100);
-                        CastCustomSpell(pVictim,99173, &bp0, 0, 0, true); // Burning wounds
-                    }
-                    break;
-                }
                 // Deadly Throw Interrupt
                 case 32748:
                 {
