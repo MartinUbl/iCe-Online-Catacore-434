@@ -62,20 +62,19 @@ class MapInstanced : public Map
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
         virtual void InitVisibilityDistance();
+
+    private:
+
         InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty);
+        BattlegroundMap* CreateBattleground(uint32 InstanceId, Battleground* bg);
+
+        InstancedMaps m_InstancedMaps;
 
         Map* _FindMap(uint32 InstanceId) const
         {
             InstancedMaps::const_iterator i = m_InstancedMaps.find(InstanceId);
             return(i == m_InstancedMaps.end() ? NULL : i->second);
         }
-
-    private:
-
-        
-        BattlegroundMap* CreateBattleground(uint32 InstanceId, Battleground* bg);
-
-        InstancedMaps m_InstancedMaps;
 
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };

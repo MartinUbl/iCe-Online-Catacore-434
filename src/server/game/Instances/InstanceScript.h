@@ -25,6 +25,8 @@
 
 #include "ZoneScript.h"
 #include "World.h"
+//#include "GameObject.h"
+//#include "Map.h"
 
 #define OUT_SAVE_INST_DATA             sLog->outDebug("TSCR: Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_SAVE_INST_DATA_COMPLETE    sLog->outDebug("TSCR: Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
@@ -210,22 +212,6 @@ class InstanceScript : public ZoneScript
         virtual bool CheckAchievementCriteriaMeet(uint32 /*criteria_id*/, Player const* /*source*/, Unit const* /*target*/ = NULL, uint32 /*miscvalue1*/ = 0);
         virtual uint32* GetUiEncounter(){return NULL;}
         virtual uint32 GetMaxEncounter(){return 0;}
-        uint8 getPlayerDifficulty(Player* play)
-        {
-            if(play->GetGroup()&&play->GetGroup()->GetLeader())
-                return play->GetGroup()->GetLeader()->GetRaidDifficulty();
-            return play->GetRaidDifficulty();
-        }
-        void repairDifficulty(Player* play)
-        {
-            instance->setSpawnMode(getPlayerDifficulty(play));
-        }
-        bool CorrectDiff(Player* play)
-        {
-            if(instance->GetSpawnMode()!=getPlayerDifficulty(play))
-               return false;
-            return true;
-        }
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(const DoorData *data);
