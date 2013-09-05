@@ -10437,6 +10437,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             }
         }
 
+        summon->CastSpell(summon,65220,true); // Every pet/guardian should have avoidance
         ExecuteLogEffectSummonObject(i, summon);
     }
 }
