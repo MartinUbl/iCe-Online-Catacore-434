@@ -4187,6 +4187,50 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
         }
 
+        // Vital spark implementation
+        if(caster->GetMapId() == 720) // Firelands
+        {
+            uint32 spellId = 0;
+
+            // Torment debuff
+            if (unitTarget->HasAura(99256))
+                spellId = 99256;
+            if (unitTarget->HasAura(100230))
+                spellId = 100230;
+            if (unitTarget->HasAura(100231))
+                spellId = 100231;
+            if (unitTarget->HasAura(100232))
+                spellId = 100232;
+
+            if (spellId)
+            {
+                uint32 stacks = unitTarget->GetAuraCount(spellId);
+                if (stacks && stacks >=3)
+                {
+                    uint32 sparks = stacks / 3;
+
+                    for(uint32 i = 0; i < sparks; i++)
+                        caster->CastSpell(caster,99262,true); // Vital Spark
+                }
+            }
+        }
+
+        // Vital flame triggering implementation
+        if(caster->GetMapId() == 720) // Firelands
+        {
+            if (caster->HasAura(99262) && unitTarget->HasAura(99252) ) //Vital Spark, Blaze of Glory
+            {
+                uint32 stacks = caster->GetAuraCount(99262);
+                caster->CastSpell(caster,99263,true); // Vital flame
+                caster->RemoveAurasDueToSpell(99262); // Remove Vital Spark stacks
+                if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
+                {
+                    if(stacks)
+                        aurEff->SetAmount( int32(5 * stacks)); // bonus healing is stored here
+                }
+            }
+        }
+
         // Word of Glory (paladin holy talent)
         if (m_spellInfo->Id == 85673)
         {
@@ -4427,6 +4471,17 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             // Soulburn: Healthstone
             if (caster->HasAura(74434))
                 caster->CastSpell(caster, 79437, true);
+        }
+        else if (caster->GetMapId() == 720) // // Vital flame healing bonus implementation
+        {
+            if (caster->HasAura(99263) && unitTarget->HasAura(99252) ) //Vital flame, Blaze of Glory
+            {
+                if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
+                {
+                    addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+                    addhealth += (addhealth * aurEff->GetAmount()) / 100;
+                }
+            }
         }
         // Divine Touch
         else if (m_spellInfo->Id == 63544)

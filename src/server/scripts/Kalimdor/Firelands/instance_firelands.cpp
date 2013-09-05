@@ -32,10 +32,14 @@ public:
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
         uint64 alysrazorGUID;
+        uint64 balerocGUID;
+        uint64 balerocDoorGUID;
+
         std::string saveData;
 
         void Initialize()
         {
+            balerocDoorGUID = 0;
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
         }
 
@@ -95,9 +99,33 @@ public:
                 case 52530:
                     alysrazorGUID = pCreature->GetGUID();
                     break;
+                case 53494:
+                    balerocGUID = pCreature->GetGUID();
+                    break;
             }
         }
 
+        void OnGameObjectCreate(GameObject* go, bool add)
+        {
+            if(add == false)
+                return;
+
+            if (go->GetEntry() == 209066) // Baleroc's door
+            {
+                balerocDoorGUID = go->GetGUID();
+
+               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
+                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
+                && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
+                && m_auiEncounter[3] == DONE)// TYPE_SHANNOX
+                {
+                        go->Delete();
+                        Creature * baleroc = Unit::GetCreature(*go,GetData64(TYPE_BALEROC));
+                        if (baleroc)
+                            baleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                }
+            }
+        }
 
         uint64 GetData64(uint32 type)
         {
@@ -111,6 +139,8 @@ public:
                     return riplimbGuid;
                 case TYPE_ALYSRAZOR:
                     return alysrazorGUID;
+                case TYPE_BALEROC:
+                    return balerocGUID;
             }
                 return 0;
         }
@@ -149,6 +179,18 @@ public:
         {
             if (DataId < MAX_ENCOUNTER)
                 m_auiEncounter[DataId] = Value;
+
+               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
+                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
+                && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
+                && m_auiEncounter[3] == DONE ) // TYPE_SHANNOX
+                {
+                    if (GameObject* go = this->instance->GetGameObject(balerocDoorGUID))
+                        go->Delete();
+
+                    if (Creature* baleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC)))
+                        baleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                }
         }
 
         virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
