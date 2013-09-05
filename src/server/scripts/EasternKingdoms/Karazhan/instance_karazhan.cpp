@@ -26,7 +26,7 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "karazhan.h"
 
-#define MAX_ENCOUNTER      12+5 //+5 for Bahamut special bosses
+#define MAX_ENCOUNTER      12
 
 /*
 0  - Attumen + Midnight (optional)
@@ -41,11 +41,6 @@ EndScriptData */
 9  - Chess Event
 10 - Prince Malchezzar
 11 - Nightbane
-12 - Nut
-13 - Bahamut Lord
-14 - Hades
-15 - Zeus
-16 - Fladios
 */
 
 class instance_karazhan : public InstanceMapScript
@@ -156,12 +151,6 @@ public:
                     else if (uiData == IN_PROGRESS)
                         m_uiOzDeathCount = 0;
                     break;
-
-                case DATA_NUT:                   m_auiEncounter[12] = uiData; break;
-                case DATA_BAHAMUT_LORD:          m_auiEncounter[13] = uiData; break;
-                case DATA_HADES:                 m_auiEncounter[14] = uiData; break;
-                case DATA_ZEUS:                  m_auiEncounter[15] = uiData; break;
-                case DATA_FLADIOS:               m_auiEncounter[15] = uiData; break;
             }
 
             if (uiData == DONE)
@@ -171,9 +160,7 @@ public:
                 std::ostringstream saveStream;
                 saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                     << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " " << m_auiEncounter[6] << " "
-                    << m_auiEncounter[7] << " " << m_auiEncounter[8] << " " << m_auiEncounter[9] << " " << m_auiEncounter[10] << " "
-                    << m_auiEncounter[11] << " " << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                    << m_auiEncounter[15] << " " << m_auiEncounter[16];
+                    << m_auiEncounter[7] << " " << m_auiEncounter[8] << " " << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
 
                 strSaveData = saveStream.str();
 
@@ -259,11 +246,6 @@ public:
                 case TYPE_NIGHTBANE:            return m_auiEncounter[11];
                 case DATA_OPERA_PERFORMANCE:    return m_uiOperaEvent;
                 case DATA_OPERA_OZ_DEATHCOUNT:  return m_uiOzDeathCount;
-                case DATA_NUT:                  return m_auiEncounter[12];
-                case DATA_BAHAMUT_LORD:         return m_auiEncounter[13];
-                case DATA_HADES:                return m_auiEncounter[14];
-                case DATA_ZEUS:                 return m_auiEncounter[15];
-                case DATA_FLADIOS:              return m_auiEncounter[16];
             }
 
             return 0;
@@ -306,7 +288,7 @@ public:
 
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                 >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15] >> m_auiEncounter[16];
+                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;

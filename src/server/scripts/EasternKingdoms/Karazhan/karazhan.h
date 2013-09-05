@@ -52,12 +52,7 @@ enum eEnums
     DATA_IMAGE_OF_MEDIVH            = 26,
     DATA_MASTERS_TERRACE_DOOR_1     = 27,
     DATA_MASTERS_TERRACE_DOOR_2     = 28,
-    DATA_GO_SIDE_ENTRANCE_DOOR      = 29,
-    DATA_NUT                        = 120677,
-    DATA_BAHAMUT_LORD               = 120675,
-    DATA_HADES                      = 120676,
-    DATA_ZEUS                       = 120821,
-    DATA_FLADIOS                    = 123901
+    DATA_GO_SIDE_ENTRANCE_DOOR      = 29
 };
 
 enum OperaEvents
