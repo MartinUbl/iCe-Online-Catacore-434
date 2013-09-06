@@ -4472,17 +4472,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             if (caster->HasAura(74434))
                 caster->CastSpell(caster, 79437, true);
         }
-        else if (caster->GetMapId() == 720) // // Vital flame healing bonus implementation
-        {
-            if (caster->HasAura(99263) && unitTarget->HasAura(99252) ) //Vital flame, Blaze of Glory
-            {
-                if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
-                {
-                    addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
-                    addhealth += (addhealth * aurEff->GetAmount()) / 100;
-                }
-            }
-        }
         // Divine Touch
         else if (m_spellInfo->Id == 63544)
         {
@@ -4505,6 +4494,17 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+
+        if (caster->GetMapId() == 720) // // Vital flame healing bonus implementation
+        {
+            if (caster->HasAura(99263) && unitTarget->HasAura(99252) ) //Vital flame, Blaze of Glory
+            {
+                if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
+                {
+                    addhealth += (addhealth * aurEff->GetAmount()) / 100;
+                }
+            }
+        }
 
         /**** Mastery System for healing spells**************/
 
