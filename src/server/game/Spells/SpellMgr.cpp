@@ -5136,7 +5136,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 92480:
         case 92481:
         case 92482:
-            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->EffectRadiusIndex[0] = 84;  // 8 yardov
             break;
         case 86838: // Impending dooooom
@@ -5182,6 +5181,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 93016:
             spellInfo->EffectRadiusIndex[0] = 15; // 3yd
             spellInfo->EffectRadiusIndex[1] = 13; // 10yd
+            break;
+        case 99353: // Decimating Strike ( Baleroc )
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         case 99842: // Magma Rupture
         case 101205: // + difficulty entries

@@ -36,6 +36,11 @@ enum AdditionNPCs
     DATA_RIPLIMB_GUID = 9
 };
 
+enum AdditionalGoGUIDS
+{
+    DATA_BALEROC_FRONT_DOOR = 10,
+};
+
 enum CreatureIds
 {
     NPC_BLAZING_MONSTROSITY_LEFT    = 53786,

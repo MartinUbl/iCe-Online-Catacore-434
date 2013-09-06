@@ -101,6 +101,8 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             instance = me->GetInstanceScript();
+            wallCheck = false;
+
             SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE); // Set blades to both hands
             me->SummonGameObject(208906,126.92f,-63.55f,55.27f,2.5823f,0,0,0,0,0); // Fire wall
         }
@@ -112,6 +114,7 @@ public:
         uint32 castShardTimer;
         uint32 summonShardTimer;
         bool meleePhase;
+        bool wallCheck;
 
         InstanceScript * instance;
         SummonList Summons;
@@ -199,16 +202,19 @@ public:
             {
                 case DO_EQUIP_INFERNO_BLADE:
                     SetEquipmentSlots(false, INFERNO_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
                     meleePhase = false;
                 break;
 
                 case DO_EQUIP_DECIMATION_BLADE:
                     SetEquipmentSlots(false, DECIMATION_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
                     meleePhase = false;
                 break;
 
                 case DO_EQUIP_NORMAL_BLADE:
                     SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE);
+                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
                     meleePhase = true;
                 break;
 
@@ -298,6 +304,29 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
+            if (wallCheck == false)
+            {
+                //Creature * pBethtilac = instance->instance->GetCreature(instance->GetData64(TYPE_BETHTILAC));
+                Creature * pShannox = instance->instance->GetCreature(instance->GetData64(TYPE_SHANNOX));
+                Creature * pRhyolith = instance->instance->GetCreature(instance->GetData64(TYPE_RHYOLITH));
+                Creature * pAlysrazor = instance->instance->GetCreature(instance->GetData64(TYPE_ALYSRAZOR));
+
+
+                if (/*pBethtilac &&*/ pShannox && pRhyolith && pAlysrazor)
+                {
+                    if (/*pBethtilac->isDead() &&*/ pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
+                    {
+                        if (GameObject * door1 = instance->instance->GetGameObject(instance->GetData64(DATA_BALEROC_FRONT_DOOR)))
+                        {
+                            door1->Delete();
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                        }
+                    }
+                }
+
+                wallCheck = true;
+            }
+
             if (!UpdateVictim())
                 return;
 
@@ -354,7 +383,6 @@ public:
             if (infernoBladeTimer <= diff)
             {
                 PlayAndYell(onInfernoBlade.sound,onInfernoBlade.text);
-                SetEquipmentSlots(false, INFERNO_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
                 me->CastSpell(me,INFERNO_BLADE,false);
                 decimationBladeTimer = 45000;
                 infernoBladeTimer = NEVER;
@@ -365,7 +393,6 @@ public:
             if (decimationBladeTimer <= diff)
             {
                 PlayAndYell(onDecimationBlade.sound,onDecimationBlade.text);
-                SetEquipmentSlots(false, DECIMATION_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
                 me->CastSpell(me,DECIMATION_BLADE,false);
                 infernoBladeTimer = 45000;
                 decimationBladeTimer = NEVER;

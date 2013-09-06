@@ -31,6 +31,8 @@ public:
         uint64 riplimbGuid;
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
+        uint64 bethtilacGUID;
+        uint64 rhyolithGUID;
         uint64 alysrazorGUID;
         uint64 balerocGUID;
         uint64 balerocDoorGUID;
@@ -39,22 +41,28 @@ public:
 
         void Initialize()
         {
-            balerocDoorGUID = 0;
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+            riplimbGuid =       0;
+            ragefaceGuid =      0;
+            shannoxGuid =       0;
+            alysrazorGUID =     0;
+            bethtilacGUID =     0;
+            rhyolithGUID=       0;
+            balerocGUID =       0;
+            balerocDoorGUID =   0;
+            memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
         }
 
-        const char* Save()
+        std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
+
             std::ostringstream saveStream;
             saveStream << m_auiEncounter[0];
             for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                 saveStream << " " << m_auiEncounter[i];
 
-            saveData = saveStream.str();
-            SaveToDB();
             OUT_SAVE_INST_DATA_COMPLETE;
-            return saveData.c_str();
+            return saveStream.str();
         }
 
         void Load(const char* chrIn)
@@ -99,6 +107,12 @@ public:
                 case 52530:
                     alysrazorGUID = pCreature->GetGUID();
                     break;
+                case 52558:
+                    rhyolithGUID = pCreature->GetGUID();
+                    break;
+                case 52498:
+                    bethtilacGUID = pCreature->GetGUID();
+                    break;
                 case 53494:
                     balerocGUID = pCreature->GetGUID();
                     break;
@@ -110,20 +124,9 @@ public:
             if(add == false)
                 return;
 
-            if (go->GetEntry() == 209066) // Baleroc's door
+            if (go->GetEntry() == 209066 && go->GetPositionX() < 0.0f ) // Baleroc's front door
             {
                 balerocDoorGUID = go->GetGUID();
-
-               if (m_auiEncounter[0] == DONE // TYPE_BETHTILAC
-                && m_auiEncounter[1] == DONE // TYPE_RHYOLITH
-                && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
-                && m_auiEncounter[3] == DONE)// TYPE_SHANNOX
-                {
-                        go->Delete();
-                        Creature * baleroc = Unit::GetCreature(*go,GetData64(TYPE_BALEROC));
-                        if (baleroc)
-                            baleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-                }
             }
         }
 
@@ -137,10 +140,16 @@ public:
                     return ragefaceGuid;
                 case DATA_RIPLIMB_GUID:
                     return riplimbGuid;
+                case TYPE_RHYOLITH:
+                    return rhyolithGUID;
+                case TYPE_BETHTILAC:
+                    return bethtilacGUID;
                 case TYPE_ALYSRAZOR:
                     return alysrazorGUID;
                 case TYPE_BALEROC:
                     return balerocGUID;
+                case DATA_BALEROC_FRONT_DOOR:
+                    return balerocDoorGUID;
             }
                 return 0;
         }
@@ -167,7 +176,7 @@ public:
                 m_auiEncounter[TYPE_ALYSRAZOR] = FAIL;
         };
 
-        virtual uint32 GetData(uint32 DataId)
+        uint32 GetData(uint32 DataId)
         {
             if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
@@ -175,13 +184,13 @@ public:
             return 0;
         }
 
-        virtual void SetData(uint32 DataId, uint32 Value)
+        void SetData(uint32 type, uint32 data)
         {
-            if (DataId < MAX_ENCOUNTER)
-                m_auiEncounter[DataId] = Value;
+            if (type < MAX_ENCOUNTER)
+                m_auiEncounter[type] = data;
 
-               if (m_auiEncounter[0] == DONE // TYPE_BETHTILAC
-                && m_auiEncounter[1] == DONE // TYPE_RHYOLITH
+               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
+                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
                 && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
                 && m_auiEncounter[3] == DONE ) // TYPE_SHANNOX
                 {
@@ -191,6 +200,17 @@ public:
                     if (Creature* baleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC)))
                         baleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                 }
+
+            if (data == DONE)
+            {
+                std::ostringstream saveStream;
+                saveStream << m_auiEncounter[0];
+                for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
+                    saveStream << " " << m_auiEncounter[i];
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
         }
 
         virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
