@@ -52,19 +52,6 @@ enum RollVote
     NOT_VALID         = 5
 };
 
-enum RaidMarkers
-{
-    MARKER_CYAN     = 0,
-    MARKER_GREEN    = 1,
-    MARKER_PURPLE   = 2,
-    MARKER_RED      = 3,
-    MARKER_YELLOW   = 4,
-    MARKER_MAX      = 5
-};
-
-#define MARKER_KIT_START 19455
-#define RAID_MARKER_KIT(a) ((a-MARKER_CYAN)+MARKER_KIT_START)
-
 enum GroupMemberOnlineStatus
 {
     MEMBER_STATUS_OFFLINE   = 0x0000,
@@ -466,13 +453,6 @@ class Group
 
         uint32 GetAverageBattlegroundRating();
         uint8 GetAverageLevel();
-
-        // raid markers
-        void BuildMarkerVisualPacket(WorldPacket *data, uint64 source, RaidMarkers pos);
-        void RefreshMarkerBySpellId(Player *pl,uint32 spellId);
-        void RefreshAllMarkersTo(Player *pl);
-        void RemoveAllMarkers(uint64 leaderGUID);
-        void RemoveMarkerBySpellId(Player * player,uint32 spellId);
 
     protected:
         bool _addMember(const uint64 &guid, const char* name);

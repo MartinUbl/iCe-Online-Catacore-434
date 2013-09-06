@@ -1369,7 +1369,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_MESSAGECHAT_ADDON_PARTY,                 STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_ADDON_RAID,                  STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_ADDON_WHISPER,               STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
-    OPCODE( CMSG_CLEAR_RAID_MARKER,                       STATUS_LOGGEDIN, &WorldSession::HandleClearRaidMarker           );
 };
 
 void DestroyOpcodeTable()

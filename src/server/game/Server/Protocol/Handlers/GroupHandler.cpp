@@ -378,10 +378,7 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket &recv_data)
 
         // everything's fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
         if (!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
-        {
-            group->RefreshAllMarkersTo(GetPlayer());
             return;
-        }
 
         group->BroadcastGroupUpdate();
     }
@@ -438,15 +435,12 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
     if (grp->IsMember(guid))
     {
         Player::RemoveFromGroup(grp, guid, GROUP_REMOVEMETHOD_KICK, GetPlayer()->GetGUID(), reason.c_str());
-        if (Player* plr = Player::GetPlayer(*GetPlayer(),guid))
-            plr->RemoveMarkerForPlayer(grp->GetLeader());
         return;
     }
 
     if (Player* plr = grp->GetInvited(guid))
     {
         plr->UninviteFromGroup();
-        plr->RemoveMarkerForPlayer(grp->GetLeader());
         return;
     }
 
@@ -483,16 +477,12 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
     if (uint64 guid = grp->GetMemberGUID(membername))
     {
         Player::RemoveFromGroup(grp, guid, GROUP_REMOVEMETHOD_KICK, GetPlayer()->GetGUID());
-
-        if (Player* plr = Player::GetPlayer(*GetPlayer(),guid))
-            plr->RemoveMarkerForPlayer(grp->GetLeader());
         return;
     }
 
     if (Player* plr = grp->GetInvited(membername))
     {
         plr->UninviteFromGroup();
-        plr->RemoveMarkerForPlayer(grp->GetLeader());
         return;
     }
 
@@ -1198,17 +1188,6 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket & recv_data)
     }
 
     GetPlayer()->SetPassOnGroupLoot(passOnLoot);
-}
-
-void WorldSession::HandleClearRaidMarker(WorldPacket &recv_data)
-{
-    if (!GetPlayer()->GetGroup() || GetPlayer()->GetGroup()->GetLeaderGUID() != GetPlayer()->GetGUID())
-    {
-        recv_data.rfinish();
-        return;
-    }
-
-    GetPlayer()->GetGroup()->RemoveAllMarkers(GetPlayer()->GetGUID());
 }
 
 void WorldSession::HandleGroupSetRoles(WorldPacket &recv_data)
