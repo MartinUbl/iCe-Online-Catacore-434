@@ -4246,6 +4246,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 
 /********************* END OF MAORDOMO STAGHELM ****************************/
+
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;
@@ -4487,10 +4488,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 93137:                             // Sleet Storm (4 heroic entries)
         case 77679: case 92968: case 92969:     // Scorching Blast
         case 92970:                             // (4 heroic entries)
-        case 88917: case 88916: case 88915: // Caustic Slime
-        case 82935:                         // (4 heroic entries)
+        case 88917: case 88916: case 88915:     // Caustic Slime
+        case 82935:                             // (4 heroic entries)
         case 86014: case 92863: case 92864: case 92865: // Twilight Meteorite (Valiona)
         case 86825: case 92879: case 92880: case 92881: // Blackout (Valiona)
+        case 98474: case 100212: case 100213: case 100214: // Flame Scythe (Majordomo Staghelm)
+        case 100431:                            // Flaming Cleave ( Fireland's trash )
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;
