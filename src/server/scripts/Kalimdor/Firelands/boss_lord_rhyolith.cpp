@@ -355,6 +355,7 @@ public:
             else
                 enrageTimer = 360000;
 
+            me->RemoveAurasDueToSpell(SPELL_MOLTEN_ARMOR);
             me->CastSpell(me, SPELL_OBSIDIAN_ARMOR, true);
             if (Aura* armor = me->GetAura(SPELL_OBSIDIAN_ARMOR))
                 armor->SetStackAmount(80);
@@ -790,7 +791,7 @@ public:
 
                     ModMoltenArmorStack(-1);
 
-                    summonTimer = urand(20000, 25000);
+                    summonTimer = urand(22000, 25000);
                 }
                 else
                     summonTimer -= diff;
@@ -1083,14 +1084,14 @@ public:
                     if (me->HasAura(SPELL_VOLCANO_SMOKE))
                     {
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModMoltenArmorStack(urand(2,4));
+                            pAI->ModMoltenArmorStack(urand(2,3));
                     }
                     // Every time he steps on an active volcano, he loses 8 stacks of the buff ( 16 was nerfed on 4.3.4)
                     else
                     {
                         pBoss->MonsterTextEmote("Lord Rhyolith's armor is weakened by the active volcano.", 0, true);
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModObsidianArmorStack(-8);
+                            pAI->ModObsidianArmorStack(-10);
 
                         PlayAndYell(pBoss, ST_ARMOR_WEAKEN_1+urand(0,4));
                     }
