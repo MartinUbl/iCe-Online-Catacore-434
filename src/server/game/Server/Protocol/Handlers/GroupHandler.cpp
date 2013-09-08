@@ -1037,9 +1037,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_PHASE)   // 4.0.6 unk
     {
-        *data << (uint32) 0;
-        *data << (uint32) 0;
-        // string
+        /**data << uint32(player->activePhaseData.phaseIDs.empty() ? 8 : 0);
+        *data << uint32(player->activePhaseData.phaseIDs.size());
+        for (std::vector<uint32>::iterator itr = player->activePhaseData.phaseIDs.begin(); itr != player->activePhaseData.phaseIDs.end(); ++itr)
+            *data << uint16(*itr);*/
+        *data << uint32(8);
+        *data << uint32(0);
     }
 }
 
@@ -1154,9 +1157,12 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
     }
 
     // GROUP_UPDATE_FLAG_PHASE
-    data << uint32(8); // either 0 or 8, same unk found in SMSG_PHASESHIFT
-    data << uint32(0); // count
-    // for (count) *data << uint16(phaseId)
+    /*data << uint32(player->activePhaseData.phaseIDs.empty() ? 8 : 0);
+    data << uint32(player->activePhaseData.phaseIDs.size()) * 2;
+    for (std::vector<uint32>::iterator itr = player->activePhaseData.phaseIDs.begin(); itr != player->activePhaseData.phaseIDs.end(); ++itr)
+        data << uint16(*itr);*/
+    data << uint32(8);
+    data << uint32(0);
 
     SendPacket(&data);
 }

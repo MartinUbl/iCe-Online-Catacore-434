@@ -848,6 +848,14 @@ bool ChatHandler::HandleReloadPageTextsCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadPhaseDefinitionsCommand(const char*)
+{
+    sLog->outString("Re-Loading Phase Definition Data...");
+    sObjectMgr->LoadPhaseDefinitions();
+    SendGlobalGMSysMessage("DB table `phase_definitions` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadItemEnchantementsCommand(const char*)
 {
     sLog->outString("Re-Loading Item Random Enchantments Table...");

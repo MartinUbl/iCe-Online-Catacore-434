@@ -225,7 +225,6 @@ class ChatHandler
         bool HandleDebugSendQuestPartyMsgCommand(const char* args);
         bool HandleDebugSendQuestInvalidMsgCommand(const char* args);
         bool HandleDebugSendSellErrorCommand(const char* args);
-        bool HandleDebugSendSetPhaseShiftCommand(const char * args);
         bool HandleDebugSendSpellFailCommand(const char* args);
 
         bool HandleEventActiveListCommand(const char* args);
@@ -466,6 +465,7 @@ class ChatHandler
         bool HandleReloadNpcTrainerCommand(const char* args);
         bool HandleReloadNpcVendorCommand(const char* args);
         bool HandleReloadPageTextsCommand(const char* args);
+        bool HandleReloadPhaseDefinitionsCommand(const char* args);
         bool HandleReloadPointsOfInterestCommand(const char* args);
         bool HandleReloadSpellClickSpellsCommand(const char* args);
         bool HandleReloadQuestAreaTriggersCommand(const char* args);

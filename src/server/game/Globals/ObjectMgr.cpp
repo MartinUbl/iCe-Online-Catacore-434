@@ -5433,6 +5433,66 @@ void ObjectMgr::LoadGossipScripts()
     // checks are done in LoadGossipMenuItems
 }
 
+void ObjectMgr::LoadPhaseDefinitions()
+{
+    for (PhaseDefMap::iterator itr = PhasesByZone.begin(); itr != PhasesByZone.end(); ++itr)
+        (*itr).second.clear();
+    for (PhaseDefMap::iterator itr = PhasesByMap.begin(); itr != PhasesByMap.end(); ++itr)
+        (*itr).second.clear();
+    PhasesByZone.clear();
+    PhasesByMap.clear();
+
+    QueryResult res = WorldDatabase.Query("SELECT zoneOrMapId, entry, phaseMask, phaseId, terrainSwapMap, worldMapAreaId, flags FROM phase_definitions");
+
+    if (!res)
+    {
+        sLog->outString(">> Loaded 0 phase definitions. Table is empty.");
+        sLog->outString();
+        return;
+    }
+
+    uint32 count = 0;
+    Field* fld = NULL;
+    PhaseDefinition* target = NULL;
+
+    int32 key;
+
+    do
+    {
+        fld = res->Fetch();
+        if (!fld)
+            continue;
+
+        count++;
+
+        key = fld[0].GetInt32();
+        if (key > 0)
+        {
+            PhasesByZone[key].resize(PhasesByZone[key].size()+1);
+            target = &PhasesByZone[key][PhasesByZone[key].size()-1];
+        }
+        else
+        {
+            key = -key;
+            PhasesByMap[key].resize(PhasesByMap[key].size()+1);
+            target = &PhasesByMap[key][PhasesByMap[key].size()-1];
+        }
+
+        memset(target, 0, sizeof(PhaseDefinition));
+
+        target->entry = fld[1].GetUInt8();
+        target->phaseMask = fld[2].GetUInt32();
+        target->phaseId = fld[3].GetUInt32();
+        target->terrainSwapMap = fld[4].GetUInt32();
+        target->worldMapAreaId = fld[5].GetUInt32();
+        target->flags = fld[6].GetUInt8();
+
+    } while (res->NextRow());
+
+    sLog->outString(">> Loaded %u phase definitions.", count);
+    sLog->outString();
+}
+
 void ObjectMgr::LoadPageTexts()
 {
     sPageTextStore.Free();                                  // for reload case

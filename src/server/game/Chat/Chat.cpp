@@ -206,7 +206,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "qpartymsg",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSendQuestPartyMsgCommand>,   "", NULL },
         { "qinvalidmsg",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSendQuestInvalidMsgCommand>, "", NULL },
         { "sellerror",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSendSellErrorCommand>,       "", NULL },
-        { "setphaseshift",  SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSendSetPhaseShiftCommand>,   "", NULL },
         { "spellfail",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDebugSendSpellFailCommand>,       "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
@@ -553,6 +552,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "npc_trainer",                 SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadNpcTrainerCommand>,              "", NULL },
         { "npc_vendor",                  SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadNpcVendorCommand>,               "", NULL },
         { "page_text",                   SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadPageTextsCommand>,               "", NULL },
+        { "phase_definitions",           SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadPhaseDefinitionsCommand>,        "", NULL },
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadLootTemplatesPickpocketingCommand>,"",NULL},
         { "points_of_interest",          SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadPointsOfInterestCommand>,        "",NULL},
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, true,  OldHandler<&ChatHandler::HandleReloadLootTemplatesProspectingCommand>,"", NULL },

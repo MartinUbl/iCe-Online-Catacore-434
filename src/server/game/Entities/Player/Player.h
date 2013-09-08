@@ -1492,6 +1492,15 @@ class Player : public Unit, public GridObject<Player>
 
         bool AddItem(uint32 itemId, uint32 count);
 
+        struct phaseData_t
+        {
+            std::vector<uint32> worldMapAreas;
+            std::vector<uint32> phaseIDs;
+            std::vector<uint32> terrainSwapMaps;
+        } activePhaseData;
+
+        void UpdateActivePhaseData();
+
         /*********************************************************/
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/

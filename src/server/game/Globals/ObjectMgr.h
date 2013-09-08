@@ -563,6 +563,19 @@ struct GuildRewardsEntry
     uint32 standing;
 };
 
+struct PhaseDefinition
+{
+    uint32 entry;
+    uint32 phaseMask;
+    uint32 phaseId;
+    uint32 terrainSwapMap;
+    uint32 worldMapAreaId;
+    uint8  flags;
+};
+
+typedef std::vector<PhaseDefinition> PhaseDefVector;
+typedef std::map<uint32, PhaseDefVector> PhaseDefMap;
+
 struct QuestPOIPoint
 {
     int32 x;
@@ -1041,6 +1054,7 @@ class ObjectMgr
         void LoadVehicleAccessories();
         void LoadVehicleScaling();
         void LoadGrandSkillupData();
+        void LoadPhaseDefinitions();
 
         void LoadGossipText();
 
@@ -1276,6 +1290,24 @@ class ObjectMgr
         bool AddGameTele(GameTele& data);
         bool DeleteGameTele(const std::string& name);
 
+        PhaseDefVector const* GetPhasesByZone(uint32 zoneId)
+        {
+            PhaseDefMap::const_iterator itr = PhasesByZone.find(zoneId);
+            if (itr == PhasesByZone.end())
+                return NULL;
+
+            return &itr->second;
+        }
+
+        PhaseDefVector const* GetPhasesByMap(uint32 mapId)
+        {
+            PhaseDefMap::const_iterator itr = PhasesByMap.find(mapId);
+            if (itr == PhasesByMap.end())
+                return NULL;
+
+            return &itr->second;
+        }
+
         uint32 GetNpcGossip(uint32 entry) const
         {
             CacheNpcTextIdMap::const_iterator iter = m_mCacheNpcTextIdMap.find(entry);
@@ -1504,6 +1536,9 @@ class ObjectMgr
         typedef std::map<uint32, StringVector> HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
+
+        PhaseDefMap PhasesByZone;
+        PhaseDefMap PhasesByMap;
 
         typedef UNORDERED_MAP<uint32, ItemSetNameEntry> ItemSetNameMap;
         ItemSetNameMap mItemSetNameMap;

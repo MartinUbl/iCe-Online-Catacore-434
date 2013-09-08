@@ -1428,6 +1428,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Disables");
     sDisableMgr->LoadDisables();                             // must be before loading quests and items
 
+    sLog->outString("Loading Phase Definitions...");
+    sObjectMgr->LoadPhaseDefinitions();
+
     sLog->outString("Loading Items...");                     // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr->LoadItemPrototypes();
 

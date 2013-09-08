@@ -26402,6 +26402,73 @@ uint32 Player::GetPhaseMaskForSpawn() const
     return PHASEMASK_NORMAL;
 }
 
+void Player::UpdateActivePhaseData()
+{
+    uint32 phaseMask = GetPhaseMask();
+    uint32 zone = GetZoneId();
+    uint32 map = GetMapId();
+
+    bool phasePresent = activePhaseData.phaseIDs.size() > 0;
+
+    // Get rid of old data
+    activePhaseData.phaseIDs.clear();
+    activePhaseData.terrainSwapMaps.clear();
+    activePhaseData.worldMapAreas.clear();
+
+    PhaseDefVector const* zonePhases = sObjectMgr->GetPhasesByZone(zone);
+    PhaseDefVector const* mapPhases = sObjectMgr->GetPhasesByMap(map);
+
+    PhaseDefinition const* temp;
+
+    // At first process zone phases
+    if (zonePhases && zonePhases->size() > 0)
+    {
+        for (uint32 i = 0; i < zonePhases->size(); i++)
+        {
+            temp = &(*zonePhases)[i];
+
+            if ((phaseMask & temp->phaseMask) == 0)
+                continue;
+
+            if (temp->phaseId != 0)
+                activePhaseData.phaseIDs.push_back(temp->phaseId);
+
+            if (temp->terrainSwapMap != 0)
+                activePhaseData.terrainSwapMaps.push_back(temp->terrainSwapMap);
+
+            if (temp->worldMapAreaId != 0)
+                activePhaseData.worldMapAreas.push_back(temp->worldMapAreaId);
+        }
+    }
+
+    // and then map phases
+    if (mapPhases && mapPhases->size() > 0)
+    {
+        for (uint32 i = 0; i < mapPhases->size(); i++)
+        {
+            temp = &(*mapPhases)[i];
+
+            if ((phaseMask & temp->phaseMask) == 0)
+                continue;
+
+            if (temp->phaseId != 0)
+                activePhaseData.phaseIDs.push_back(temp->phaseId);
+
+            if (temp->terrainSwapMap != 0)
+                activePhaseData.terrainSwapMaps.push_back(temp->terrainSwapMap);
+
+            if (temp->worldMapAreaId != 0)
+                activePhaseData.worldMapAreas.push_back(temp->worldMapAreaId);
+        }
+    }
+
+    // If we went from some phase to normal or if we got from phase to phase, or from normal to phase
+    if (phasePresent || activePhaseData.phaseIDs.size() > 0)
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PHASE);
+
+    GetSession()->SendSetPhaseShift();
+}
+
 uint8 Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limit_count) const
 {
     ItemPrototype const* pProto = pItem->GetProto();

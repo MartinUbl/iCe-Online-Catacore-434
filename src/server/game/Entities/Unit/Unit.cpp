@@ -18538,6 +18538,10 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
 
     WorldObject::SetPhaseMask(newPhaseMask,update);
 
+    // update terrain swap and map data override
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->UpdateActivePhaseData();
+
     if (!IsInWorld())
         return;
 

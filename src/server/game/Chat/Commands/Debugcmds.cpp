@@ -849,16 +849,6 @@ bool ChatHandler::HandleDebugSendLargePacketCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendSetPhaseShiftCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint32 PhaseShift = atoi(args);
-    m_session->SendSetPhaseShift(PhaseShift);
-    return true;
-}
-
 bool ChatHandler::HandleDebugGetItemValueCommand(const char* args)
 {
     if (!*args)
