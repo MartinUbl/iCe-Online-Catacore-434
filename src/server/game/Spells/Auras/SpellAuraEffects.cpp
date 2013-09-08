@@ -4044,10 +4044,6 @@ void AuraEffect::HandlePhase(AuraApplication const *aurApp, uint8 mode, bool app
     // phase auras normally not expected at BG but anyway better check
     if (Player* pPlayer = target->ToPlayer())
     {
-        // stop handling the effect if it was removed by linked event
-        if (aurApp->GetRemoveMode())
-            return;
-
         if (!newPhase)
             newPhase = PHASEMASK_NORMAL;
 
