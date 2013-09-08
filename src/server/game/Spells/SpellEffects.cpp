@@ -4207,10 +4207,18 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 uint32 stacks = unitTarget->GetAuraCount(spellId);
                 if (stacks && stacks >=3)
                 {
-                    uint32 sparks = stacks / 3;
+                    uint32 sparks= 0;
 
-                    for(uint32 i = 0; i < sparks; i++)
-                        caster->CastSpell(caster,99262,true); // Vital Spark
+                    if (spellId == 99256 || spellId == 100231) // On 10 man
+                        sparks = stacks / 3;
+                    else
+                        sparks = stacks / 5;                   // On 25 man
+
+                    if (!caster->HasAura(99263)) // Cant gain spark if caster has Vital flame active on him
+                    {
+                        for(uint32 i = 0; i < sparks; i++)
+                            caster->CastSpell(caster,99262,true); // Vital Spark
+                    }
                 }
             }
         }

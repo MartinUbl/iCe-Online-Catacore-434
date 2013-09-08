@@ -101,20 +101,18 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             instance = me->GetInstanceScript();
-            wallCheck = false;
 
             SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE); // Set blades to both hands
             me->SummonGameObject(208906,126.92f,-63.55f,55.27f,2.5823f,0,0,0,0,0); // Fire wall
         }
 
         uint32 blazeOfGloryTimer;
-        uint32 decimationBladeTimer;
-        uint32 infernoBladeTimer;
+        uint32 bladeTimer;
         uint32 berserkTimer;
         uint32 castShardTimer;
         uint32 summonShardTimer;
+        uint32 wallCheckTimer;
         bool meleePhase;
-        bool wallCheck;
 
         InstanceScript * instance;
         SummonList Summons;
@@ -127,11 +125,11 @@ public:
                 instance->SetData(TYPE_BALEROC, NOT_STARTED);
             }
 
+            wallCheckTimer          = 30000;
             castShardTimer          = 4000;
             summonShardTimer        = NEVER;
             blazeOfGloryTimer       = 8000;
-            decimationBladeTimer    = 28000;
-            infernoBladeTimer       = NEVER;
+            bladeTimer              = 28000;
             berserkTimer            = 6 * MINUTE;
             meleePhase = true;
         }
@@ -202,19 +200,19 @@ public:
             {
                 case DO_EQUIP_INFERNO_BLADE:
                     SetEquipmentSlots(false, INFERNO_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
+                    me->SetSheath(SHEATH_STATE_MELEE);
                     meleePhase = false;
                 break;
 
                 case DO_EQUIP_DECIMATION_BLADE:
                     SetEquipmentSlots(false, DECIMATION_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
+                    me->SetSheath(SHEATH_STATE_MELEE);
                     meleePhase = false;
                 break;
 
                 case DO_EQUIP_NORMAL_BLADE:
                     SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE);
-                    me->SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE);
+                    me->SetSheath(SHEATH_STATE_MELEE);
                     meleePhase = true;
                 break;
 
@@ -304,7 +302,7 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
-            if (wallCheck == false)
+            if (wallCheckTimer <= diff)
             {
                 //Creature * pBethtilac = instance->instance->GetCreature(instance->GetData64(TYPE_BETHTILAC));
                 Creature * pShannox = instance->instance->GetCreature(instance->GetData64(TYPE_SHANNOX));
@@ -316,16 +314,17 @@ public:
                 {
                     if (/*pBethtilac->isDead() &&*/ pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
                     {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                         if (GameObject * door1 = instance->instance->GetGameObject(instance->GetData64(DATA_BALEROC_FRONT_DOOR)))
                         {
                             door1->Delete();
-                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
                         }
                     }
                 }
 
-                wallCheck = true;
+                wallCheckTimer = 30000;
             }
+            else wallCheckTimer -= diff;
 
             if (!UpdateVictim())
                 return;
@@ -380,25 +379,23 @@ public:
             }
             else summonShardTimer -= diff;
 
-            if (infernoBladeTimer <= diff)
+            if (bladeTimer <= diff)
             {
-                PlayAndYell(onInfernoBlade.sound,onInfernoBlade.text);
-                me->CastSpell(me,INFERNO_BLADE,false);
-                decimationBladeTimer = 45000;
-                infernoBladeTimer = NEVER;
-                return;
-            }
-            else infernoBladeTimer -= diff;
+                if (urand(0,1))
+                {
+                    PlayAndYell(onInfernoBlade.sound,onInfernoBlade.text);
+                    me->CastSpell(me,INFERNO_BLADE,false);
+                }
+                else
+                {
+                    PlayAndYell(onDecimationBlade.sound,onDecimationBlade.text);
+                    me->CastSpell(me,DECIMATION_BLADE,false);
+                }
 
-            if (decimationBladeTimer <= diff)
-            {
-                PlayAndYell(onDecimationBlade.sound,onDecimationBlade.text);
-                me->CastSpell(me,DECIMATION_BLADE,false);
-                infernoBladeTimer = 45000;
-                decimationBladeTimer = NEVER;
+                bladeTimer = 30000;
                 return;
             }
-            else decimationBladeTimer -= diff;
+            else bladeTimer -= diff;
 
 /**********************************AUTO ATTACK STUFF***********************************************/
 
@@ -508,8 +505,8 @@ public:
         void Reset()
         {
             canWave = false;
-            waveTimer = 8000;
-            checkTimer = 7000;
+            waveTimer = 6000;
+            checkTimer = 5000;
             beamTimer = 4000;
             me->CastSpell(me,TORMENT_VISUAL_BEAM,true);
             me->SetInCombatWithZone();
@@ -636,6 +633,17 @@ public:
                 return;
 
             target->CastSpell(target,TORMENTED_DEBUFF,true); // If torment fades from player, cast tormented debuff on him
+            Aura * aTorm = target->GetAura(TORMENTED_DEBUFF);
+            if (aTorm)
+            {
+                if (InstanceScript * pInstance = target->GetInstanceScript())
+                {
+                    if (!pInstance->instance->IsHeroic()) // Normal
+                        aTorm->SetDuration(40000);
+                    else                                  // Heroic
+                        aTorm->SetDuration(60000);
+                }
+            }
 
         }
 
@@ -751,7 +759,7 @@ class spell_gen_torment : public SpellScriptLoader
                 {
                     uint32 stacks = target->GetAuraCount(spellId);
                     if(stacks)
-                        SetHitDamage(GetHitDamage() * stacks);
+                        SetHitDamage( (500 + GetHitDamage()) * stacks); // pre nerfed value
                 }
             }
 
@@ -778,7 +786,7 @@ public:
 
         void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK)
+            if(GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                 return;
 
             Unit * caster= aurEff->GetCaster();
