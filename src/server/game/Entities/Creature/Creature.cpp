@@ -53,6 +53,7 @@
 #include "SpellAuraEffects.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
+#include "Map.h"
 // apply implementation of the singletons
 
 
@@ -189,7 +190,9 @@ void Creature::AddToWorld()
     if (!IsInWorld())
     {
         if (m_zoneScript)
+        {      
             m_zoneScript->OnCreatureCreate(this, true);
+        }
         sObjectAccessor->AddObject(this);
         Unit::AddToWorld();
         SearchFormation();
@@ -273,13 +276,15 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData *data
     // get difficulty 1 mode entry
     uint32 actualEntry = Entry;
     CreatureInfo const *cinfo = normalInfo;
+    Map* map=GetMap();
+    uint8 playDiff=map->GetSpawnMode();
     // TODO correctly implement spawnmodes for non-bg maps
     for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
     {
         if (normalInfo->DifficultyEntry[diff])
         {
             // we already have valid Map pointer for current creature!
-            if (GetMap()->GetSpawnMode() > diff)
+            if (playDiff>diff)//GetMap()->GetSpawnMode() > diff)
             {
                 cinfo = sObjectMgr->GetCreatureTemplate(normalInfo->DifficultyEntry[diff]);
                 if (!cinfo)

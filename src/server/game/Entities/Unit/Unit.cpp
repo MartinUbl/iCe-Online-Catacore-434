@@ -61,6 +61,7 @@
 #include "MoveSpline.h"
 #include "UpdateFieldFlags.h"
 #include "InstanceScript.h"
+#include "MapInstanced.h"
 
 #include <math.h>
 
@@ -17408,7 +17409,10 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
 
             InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
             if(map && map->GetInstanceScript() && creature->GetCreatureInfo()->rank == 3)
-                map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
+            {
+                InstanceScript* script=map->GetInstanceScript();
+                script->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
+            }
         }
         
         if (creature->ToTempSummon())

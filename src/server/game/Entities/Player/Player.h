@@ -41,6 +41,7 @@
 #include "ReputationMgr.h"
 #include "Battleground.h"
 #include "DBCEnums.h"
+#include "MapInstanced.h"       
 
 #include<string>
 #include<vector>
@@ -1153,6 +1154,8 @@ class Player : public Unit, public GridObject<Player>
     friend class WorldSession;
     friend void Item::AddToUpdateQueueOf(Player *player);
     friend void Item::RemoveFromUpdateQueueOf(Player *player);
+    friend class MapInstanced;
+    friend class InstanceMap;
     public:
         explicit Player (WorldSession *session);
         ~Player ();
