@@ -136,7 +136,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
     else
     {
         InstancePlayerBind *pBind;
-        if(IsRaid())
+        if(IsRaid()&&ToInstanceMap()->GetInstanceScript())
             pBind= player->GetBoundInstance(GetId(), RAID_DIFFICULTY_10MAN_HEROIC);
         else
             pBind= player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
@@ -213,14 +213,14 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             // it is possible that the save exists but the map doesn't
             if (!map)
             {
-                if(IsRaid())
+                if(IsRaid()&&ToInstanceMap()->GetInstanceScript())
                 {
                     map = CreateInstance(NewInstanceId, pSave, RAID_DIFFICULTY_10MAN_HEROIC);
                 }
                 else
                     map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
             }
-            if(IsRaid()&&!map->ToInstanceMap()->GetInstanceScript()->CorrectDiff(player))
+            if (IsRaid() && map->ToInstanceMap()->GetInstanceScript() && !map->ToInstanceMap()->GetInstanceScript()->CorrectDiff(player))
             {
                 if(GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
                     map->ToInstanceMap()->GetInstanceScript()->repairDifficulty(player);
@@ -233,7 +233,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             NewInstanceId = sMapMgr->GenerateInstanceId();
 
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
-            if(IsRaid())
+            if(IsRaid()&&ToInstanceMap()->GetInstanceScript())
             {
                 map = CreateInstance(NewInstanceId, NULL, RAID_DIFFICULTY_10MAN_HEROIC);
                 if(GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
