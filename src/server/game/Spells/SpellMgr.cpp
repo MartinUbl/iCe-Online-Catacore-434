@@ -4231,6 +4231,21 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /************************ END OF ALYSRAZOR *******************************/
 
+
+/************************ MAORDOMO STAGHELM *******************************/
+
+        case 98583: // Burning orb
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 98584: // Burning orb damage
+        case 100209:
+        case 100210:
+        case 100211:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;// should be single target not chain spell
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+
+/********************* END OF MAORDOMO STAGHELM ****************************/
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;
