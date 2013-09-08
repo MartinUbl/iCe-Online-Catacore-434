@@ -3217,6 +3217,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
+                        case 96966: // Blaze of Life ( normal trinket )
+                        case 97136: // Blaze of Life ( heroic trinket )
                             maxSize = 1;
                             power = POWER_HEALTH;
                             break;
