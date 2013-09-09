@@ -2239,7 +2239,7 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
     // some instances only have one difficulty
     GetDownscaledMapDifficultyData(aMap->GetId(),difficulty);
     if(aMap->IsRaid()&&aMap->ToInstanceMap()->GetInstanceScript())
-        difficulty=Difficulty(2);//10 man heroic
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
@@ -2273,7 +2273,10 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
     Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
-    if(permanent)
+    Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+    if(!map)
+        map=sMapMgr->CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());
+    if(map&&map->IsRaid())
         diff=RAID_DIFFICULTY_10MAN_HEROIC;
     else
         diff=save->GetDifficulty();
