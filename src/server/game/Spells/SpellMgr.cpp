@@ -4232,7 +4232,7 @@ void SpellMgr::LoadSpellCustomAttr()
 /************************ END OF ALYSRAZOR *******************************/
 
 
-/************************ MAORDOMO STAGHELM *******************************/
+/************************ MAJORDOMO STAGHELM *******************************/
 
         case 98583: // Burning orb
             spellInfo->EffectTriggerSpell[0] = 0;
@@ -4243,6 +4243,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100211:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;// should be single target not chain spell
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 98450:// Searing Seeds
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
             break;
 
 /********************* END OF MAORDOMO STAGHELM ****************************/

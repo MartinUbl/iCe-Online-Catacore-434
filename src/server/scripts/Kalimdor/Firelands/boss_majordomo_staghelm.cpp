@@ -75,20 +75,20 @@ struct Yells
 
 static const Yells RandomKill[4]= // TODO -> Find sound id's
 {
-    {0, "Burn."},
-    {0, "Soon, ALL of Azeroth will burn!"},
-    {0, "So much power!"},
-    {0, "You stood in the fire!"},
+    {24477, "Burn."},
+    {24479, "Soon, ALL of Azeroth will burn!"},
+    {24480, "So much power!"},
+    {24481, "You stood in the fire!"},
 };
 
+uint32 energyField[10] = {18,12,10,8,7,6,5,4,3,2}; // Very wierd calculation of time, so i do it manually for sure
+
 #define MINUTE 60000
-#define DEFAULT_REGENERATION  6
 #define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
 
 #define MIDDLE_X  430.0f
 #define MIDDLE_Y -63.0f
 #define MIDDLE_Z  79.0f
-
 
 class boss_majordomo_staghelm : public CreatureScript
 {
@@ -115,18 +115,17 @@ public:
         uint32 Human_timer;
         uint32 Berserk_timer;
         uint32 Phase_check_timer;
-        uint8 ENERGY_PER_SEC;
+        uint32 energyCounter;
         bool FromCatToScorpion;
 
         SummonList Summons;
 
         void Reset()
         {
+            energyCounter = 0;
             TransformToDruid();
             morphs = 0;
             PHASE = PHASE_DRUID;
-            ENERGY_PER_SEC = DEFAULT_REGENERATION;
-
             Phase_check_timer = 2000;
             Morph_timer = 2000;
             Energy_timer = 1000;
@@ -144,12 +143,14 @@ public:
         {
             Summons.DespawnAll();
             me->MonsterYell("My studies... had only just begun...", LANG_UNIVERSAL, 0);
+            me->PlayDistanceSound(24464);
         }
 
         void EnterCombat(Unit* who)
         {
             morphs++;
-            me->MonsterYell("Beg for mercy now, and I may yet allow you to live. Well, what is your answer?", LANG_UNIVERSAL, 0);
+            me->MonsterYell("Very well. Witness the raw power of my new lord!", LANG_UNIVERSAL, 0);
+            me->PlayDistanceSound(24464);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
         }
 
@@ -185,6 +186,7 @@ public:
             me->CastSpell(me,SPELL_FURY,false);
             PHASE = PHASE_CAT;
             me->MonsterYell("Behold the rage of the Firelands!", LANG_UNIVERSAL, 0);
+            me->PlayDistanceSound(24485);
         }
 
         void TransformToScorpion()
@@ -203,6 +205,7 @@ public:
 
             PHASE = PHASE_SCORPION;
             me->MonsterYell("The master's power takes on many forms...", LANG_UNIVERSAL, 0);
+            me->PlayDistanceSound(24483);
         }
 
         void TransformToDruid()
@@ -238,7 +241,7 @@ public:
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
 
-                if(unit && unit->ToPlayer() && IsRangedClass(unit->ToPlayer()) )
+                if(unit && unit->isAlive() && unit->ToPlayer() && IsRangedClass(unit->ToPlayer()) )
                     ranged_targets.push_back(unit->ToPlayer());
             }
 
@@ -257,7 +260,7 @@ public:
         {
             uint32 counter = 0;
             uint32 time_gap = (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL) ? (55/23) : (55/9); // (55 seconds / number of players ) --> tanks are excluded
-
+            time_gap *= 1000; // Need miliseconds
 
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
@@ -277,11 +280,10 @@ public:
             }
         }
 
-
         void SpawnBurningOrb(void)
         {
             float angle = (float)urand(0,(2*M_PI)*10);
-            angle /= 10;
+            angle /= 10.0f;
             float length= urand(25,45);
             me->SummonCreature(BURNING_ORB,MIDDLE_X + cos(angle)*length,MIDDLE_Y + sin(angle)* length,MIDDLE_Z,angle,TEMPSUMMON_CORPSE_DESPAWN,0);
         }
@@ -308,7 +310,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !me->getVictim())
                 return;
 
             if(Phase_check_timer <= diff)
@@ -323,11 +325,13 @@ public:
                     {
                         me->CastSpell(me,SPELL_SEARING_SEEDS,false); // cast searing seeds
                         me->MonsterYell("Blaze of Glory!", LANG_UNIVERSAL, 0);
+                        me->PlayDistanceSound(24472);
                     }
                     else                  // if we are transforming from scorpion to cat
                     {
                         me->CastSpell(me,SPELL_BURNING_ORBS,false); // cast Burning orbs
                         me->MonsterYell("Nothing but ash!", LANG_UNIVERSAL, 0);
+                        me->PlayDistanceSound(24478);
                     }
 
                     Human_timer = 4050;
@@ -370,11 +374,13 @@ public:
 
             if(Energy_timer <= diff) // Manualy filling energy bar
             {
-                ENERGY_PER_SEC =  DEFAULT_REGENERATION + me->GetAuraCount(SPELL_ADRENALINE);
+                uint32 adrenalineStacks = me->GetAuraCount(SPELL_ADRENALINE);
 
                 if(me->getPowerType() == POWER_ENERGY)
-                    me->SetPower(POWER_ENERGY,me->GetPower(POWER_ENERGY) + ENERGY_PER_SEC);
-
+                {
+                        adrenalineStacks = (adrenalineStacks > 9) ? 9 : adrenalineStacks; // Out of bounds protection
+                        me->SetPower(POWER_ENERGY,me->GetPower(POWER_ENERGY) + (100 / energyField[adrenalineStacks]));
+                }
                 Energy_timer = 1000;
             }
             else Energy_timer -= diff;
@@ -511,7 +517,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetInCombatWithZone();
             me->CastSpell(me,SPELL_BURNING_ORB_VISUAL,true);
-            me->DespawnOrUnsummon(70000);
+            me->ForcedDespawn(70000);
         }
 
         void UpdateAI (const uint32 diff)
@@ -636,6 +642,16 @@ class spell_gen_flame_scythe : public SpellScriptLoader
 
             void CountHitTargets(std::list<Unit*>& unitList)
             {
+                for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                {
+                    if ((*itr)->isGuardian() || (*itr)->isPet())
+                    {
+                        itr = unitList.erase(itr);
+                    }
+                    else
+                        ++itr;
+                }
+
                 targetCount = unitList.size();
             }
 
@@ -724,12 +740,9 @@ void AddSC_boss_majordomo_staghelm()
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
     VALUES (98450, 'spell_gen_searing_seed');
 
-    DELETE FROM `spell_script_names` WHERE  spell_id=98620 OR  spell_id=100215 OR  spell_id=100216 OR  spell_id=100217;
+    DELETE FROM `spell_script_names` WHERE  spell_id=98450;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
-    VALUES (98620, 'spell_searing_seed_explosion'),
-    (100215, 'spell_searing_seed_explosion'),
-    (100216, 'spell_searing_seed_explosion'),
-    (100217, 'spell_searing_seed_explosion');
+    VALUES (98450, 'spell_searing_seed_explosion');
 
     DELETE FROM `spell_script_names` WHERE  spell_id=98474 OR  spell_id=100212 OR  spell_id=100213 OR  spell_id=100214;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
