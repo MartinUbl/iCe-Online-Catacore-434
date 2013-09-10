@@ -2273,9 +2273,9 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
     Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
-    Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+    const Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
     if(!map)
-        map=sMapMgr->CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());
+        map=sMapMgr->CreateBaseMap(save->GetMapId());//CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());
     if(map&&map->IsRaid())
         diff=RAID_DIFFICULTY_10MAN_HEROIC;
     else
