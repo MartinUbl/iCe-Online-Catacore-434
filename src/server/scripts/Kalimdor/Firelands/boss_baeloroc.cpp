@@ -102,6 +102,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             instance = me->GetInstanceScript();
 
+            if(GameObject * go_bridge = me->FindNearestGameObject(5010734,500.0f))
+                go_bridge->SetPhaseMask(2,true); // Mask the bridge
+
             SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE); // Set blades to both hands
             me->SummonGameObject(208906,126.92f,-63.55f,55.27f,2.5823f,0,0,0,0,0); // Fire wall
         }
@@ -125,7 +128,7 @@ public:
                 instance->SetData(TYPE_BALEROC, NOT_STARTED);
             }
 
-            wallCheckTimer          = 30000;
+            wallCheckTimer          = 3000;
             castShardTimer          = 4000;
             summonShardTimer        = NEVER;
             blazeOfGloryTimer       = 8000;
@@ -145,8 +148,27 @@ public:
            PlayAndYell(onKill[_rand].sound,onKill[_rand].text);
        }
 
+       void PlayCinematicToPlayers(void)
+       {
+            if (!instance)
+                return;
+
+            Map::PlayerList const& plList = instance->instance->GetPlayers();
+
+            if (plList.isEmpty())
+                return;
+
+            for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if ( Player * p = itr->getSource())
+                    p->SendCinematicStart (197);
+            }
+       }
+
         void JustDied(Unit* /*killer*/)
         {
+            PlayAndYell(onDeath.sound,onDeath.text);
+
             if (GameObject * door1 = me->FindNearestGameObject(208906,200.0f))
                 door1->Delete();
 
@@ -159,11 +181,13 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE,me);
             }
 
-            PlayAndYell(onDeath.sound,onDeath.text);
+            me->SummonCreature(54101,100.0f,-33.0f,61.0f,4.34f,TEMPSUMMON_CORPSE_DESPAWN, 0); // Staghelm intro
+            PlayCinematicToPlayers();
         }
 
         void EnterCombat(Unit * /*who*/)
         {
+            SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
             me->SetInCombatWithZone();
             RemoveBlazeOfGloryFromPlayers(); // For sure
@@ -207,12 +231,16 @@ public:
                 case DO_EQUIP_DECIMATION_BLADE:
                     SetEquipmentSlots(false, DECIMATION_BLADE_ENTRY,EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
                     me->SetSheath(SHEATH_STATE_MELEE);
+                    me->setAttackTimer(BASE_ATTACK, 4500);
+                    me->setAttackTimer(OFF_ATTACK, 4500);
                     meleePhase = false;
                 break;
 
                 case DO_EQUIP_NORMAL_BLADE:
                     SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE);
                     me->SetSheath(SHEATH_STATE_MELEE);
+                    me->setAttackTimer(BASE_ATTACK, 2000);
+                    me->setAttackTimer(OFF_ATTACK, 2000);
                     meleePhase = true;
                 break;
 
@@ -408,10 +436,13 @@ public:
 
                 if (me->isAttackReady())
                 {
-                    if(me->HasAura(99352) || me->HasAura(99352) ) // Decimation Blade
+                    if(me->HasAura(99352) || me->HasAura(99405) ) // Decimation Blade
                     {
                         if (me->IsWithinCombatRange(me->getVictim(), GetSpellMaxRange(99353, false)))
                         {
+                            me->setAttackTimer(BASE_ATTACK, 4500);
+                            me->setAttackTimer(OFF_ATTACK, 4500);
+
                             bool avoided = false; // Decimation blade can be only dodged or parried
 
                             if (roll_chance_f(me->getVictim()->GetUnitDodgeChance()))
@@ -429,7 +460,7 @@ public:
                                 bp0 = 0;
 
                             me->CastCustomSpell(me->getVictim(),99353,&bp0,0,0,true); // Decimation Strike
-                            me->resetAttackTimer();
+                            //me->resetAttackTimer();
                         }
                         return;
                     }
@@ -438,6 +469,9 @@ public:
                     {
                         if (me->IsWithinCombatRange(me->getVictim(), GetSpellMaxRange(99351, false)))
                         {
+                            me->setAttackTimer(BASE_ATTACK, 1800);
+                            me->setAttackTimer(OFF_ATTACK, 1800);
+
                             bool avoided = false; // Inferno blade can be dodged,parried or blocked
 
                             if (roll_chance_f(me->getVictim()->GetUnitDodgeChance()))
@@ -454,7 +488,7 @@ public:
                             else
                                 me->CastSpell(me->getVictim(),99351,true); // Inferno strike
 
-                            me->resetAttackTimer();
+                            //me->resetAttackTimer();
                         }
                     }
                 }
@@ -539,6 +573,12 @@ public:
             Player* minrangeplayer = NULL;
             for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
             {
+                if (!itr->getSource())
+                    continue;
+
+               if ( !itr->getSource()->isAlive())
+                    continue;
+
                 if (me->GetDistance2d(itr->getSource()) < min_range)
                 {
                     min_range = me->GetExactDist2d(itr->getSource());
@@ -561,7 +601,13 @@ public:
 
             for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
             {
-                if (me->GetDistance2d(itr->getSource()) <= 15.0f) // 15 yards
+                if (!itr->getSource())
+                    continue;
+
+                if ( !itr->getSource()->isAlive())
+                    continue;
+
+                if (me->GetDistance2d(itr->getSource()) <= 14.0f) // 15 yards ( - 1 yard )
                     return true;
             }
 
@@ -600,7 +646,7 @@ public:
 
                 Player * shardTaregt = SelectClosestPlayer();
 
-                if (shardTaregt && !shardTaregt->HasAura(TORMENT_BEAM))
+                if (shardTaregt && shardTaregt->IsInWorld() &&  !shardTaregt->HasAura(TORMENT_BEAM))
                     me->CastSpell(shardTaregt,TORMENT_BEAM,false);
 
                 beamTimer = 1000;
@@ -815,42 +861,76 @@ public:
     }
 };
 
-class go_firelands_bridge_opener : public GameObjectScript
+class npc_majordomo_intro_npc : public CreatureScript
 {
 public:
-    go_firelands_bridge_opener() : GameObjectScript("go_firelands_bridge_opener") { }
+   npc_majordomo_intro_npc() : CreatureScript("npc_majordomo_intro_npc") { }
 
-    bool OnGossipHello(Player * pPlayer, GameObject* pGo)
+    CreatureAI* GetAI(Creature* creature) const
     {
-        InstanceScript *pInstance = pGo->GetInstanceScript();
-
-        if (pInstance)
-        {
-            if(GameObject * go_bridge = pPlayer->FindNearestGameObject(5010734,200.0f))
-            {
-                if(go_bridge->HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DESTROYED))
-                    go_bridge->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-
-                if(go_bridge->HasFlag(GAMEOBJECT_FLAGS,GO_FLAG_DAMAGED))
-                    go_bridge->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-
-                    go_bridge->SetGoAnimProgress(0);
-
-                pPlayer->SendCinematicStart (197);
-            }
-            return true;
-        }
-        return false;
+        return new npc_majordomo_intro_npcAI (creature);
     }
 
-};
+    struct npc_majordomo_intro_npcAI : public ScriptedAI
+    {
+        npc_majordomo_intro_npcAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            //me->SetVisible(false);
+        }
 
+        uint32 talkTimer;
+        uint32 talks;
+
+        void Reset()
+        {
+            if(GameObject * go_bridge = me->FindNearestGameObject(5010734,500.0f))
+                go_bridge->SetPhaseMask(1,true); // Unmask the bridge
+
+            talkTimer = 5000;
+            me->SetReactState(REACT_PASSIVE);
+            talks = 0;
+        }
+
+        void UpdateAI (const uint32 diff)
+        {
+            if(talkTimer <= diff)
+            {
+                switch (talks)
+                {
+                    case 0 :
+                        me->MonsterYell("Well well... I admire your tenacity. Baleroc stood guard over this keep for a thousand mortal lifetimes.",LANG_UNIVERSAL,0);
+                        me->PlayDistanceSound(24473);
+                        talkTimer = 12000;
+                        break;
+                    case 1:
+                        me->MonsterYell("But NONE may enter the Firelord's abode!",LANG_UNIVERSAL,0);
+                        me->PlayDistanceSound(24474);
+                        talkTimer = 6500;
+                        break;
+                    case 2:
+                        me->MonsterYell("Beg for mercy now, and I may yet allow you to live. Well, \"heroes\", what is your answer?",LANG_UNIVERSAL,0);
+                        me->PlayDistanceSound(24475);
+                        talkTimer = 100000;
+                        break;
+                }
+
+                talks++;
+
+                if (talks == 3)
+                    me->ForcedDespawn(10000);
+
+            }
+            else talkTimer -= diff;
+        }
+    };
+};
 
 void AddSC_boss_baeloroc()
 {
     new boss_baleroc();
     new npc_shard_of_torment();
-    new go_firelands_bridge_opener();
+    new npc_majordomo_intro_npc();
 
     new spell_gen_tormented(); // 99255
     new spell_gen_baleroc_blades(); // 99352,99405,99350
@@ -894,4 +974,6 @@ void AddSC_boss_baeloroc()
      VALUES (99263, 'spell_gen_vital_flame');
 
      UPDATE `gameobject_template` SET `ScriptName`='go_firelands_bridge_opener' WHERE  `entry`=209277 LIMIT 1;
+
+     UPDATE `creature_template` SET `ScriptName`='npc_majordomo_intro_npc' WHERE  `entry`=54101 LIMIT 1;
 */
