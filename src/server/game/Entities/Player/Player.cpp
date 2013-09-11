@@ -19474,7 +19474,7 @@ void Player::SendRaidInfo()
             //if(itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
-                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                //bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
                 uint32* uiEnc;
                 uint32 encData=0;
                 Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
