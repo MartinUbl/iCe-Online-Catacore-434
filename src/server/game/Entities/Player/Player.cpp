@@ -19471,19 +19471,36 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
-            if (itr->second.perm)
+            //if(itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
                 bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                uint32* uiEnc;
+                uint32 encData=0;
+                Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+                if(!map)
+                    map=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
+                uiEnc=map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
+                int coun=map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+                for(int i=0;i<coun;i++)
+                {
+                    if(uiEnc[i]==3)
+                    {
+                        encData=encData<<1;
+                        encData+=1;
+                    }
+                    else
+                        encData=encData<<1;
+                }
 
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(isHeroic);
+                data << uint32(0);                          //(isHeroic); if there wasnt 0, heroic difficulty show nothing
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << uint32(0);                          // completed encounters mask
+                data << encData;                          // completed encounters mask
                 ++counter;
             }
         }

@@ -31,6 +31,7 @@ public:
         instance_bastion_of_twilight_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 HalfusGUID;
         uint64 ValionaGUID;
@@ -309,6 +310,18 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32 GetCorrMaxEncounter(){return MAX_ENCOUNTER-1;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=uiEnc[1];//valiona and theralion
+            currEnc[1]=uiEnc[4];//sinestra
+            currEnc[2]=uiEnc[0];//halfus
+            currEnc[3]=uiEnc[3];//chogall
+            currEnc[4]=uiEnc[2];//council
+
+            return currEnc;
+        }
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const
