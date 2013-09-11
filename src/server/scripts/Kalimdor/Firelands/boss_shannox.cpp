@@ -54,8 +54,6 @@ enum Spells
     SPELL_SEPARATION_ANXIETY        = 99835,
 };
 
-# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
-
 class boss_shannox : public CreatureScript
 {
     public:
@@ -153,7 +151,6 @@ class boss_shannox : public CreatureScript
                         break;
                     case NPC_HURL_SPEAR_WEAPON: // Hurl Spear weapon
                     {
-                        SetEquipmentSlots(false, 0, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                         pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                         pSummon->setFaction(35);
                         summonedTraps.push_back(pSummon->GetGUID());
@@ -271,7 +268,6 @@ class boss_shannox : public CreatureScript
                 if (action == 1)
                 {
                     me->CastSpell(me, SPELL_FRENZY, false);
-                    SetEquipmentSlots(false, 71557, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                     DoYell("Riplimb! No... no! Oh, you terrible little beasts! HOW COULD YOU?!", 24574);
                 }
                 // Rageface death
@@ -343,6 +339,8 @@ class boss_shannox : public CreatureScript
                 {
                     if (pSummonSpear)
                         pSummonSpear->SetVisibility(VISIBILITY_ON);
+
+                    SetEquipmentSlots(false, 0, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
 
                     if (pRiplimb)
                         pRiplimb->AI()->DoAction(1);
@@ -776,10 +774,7 @@ class npc_riplimb : public CreatureScript
             void JustDied(Unit* pKiller)
             {
                 if (pBoss)
-                {
-                    pBoss->MonsterTextEmote("Shannox become enraged at seeing one of his companions fall",0,true);
                     pBoss->AI()->DoAction(1);
-                }
             }
         };
 
@@ -834,9 +829,6 @@ class npc_crystal_trap : public CreatureScript
             void MoveInLineOfSight(Unit* pWho)
             {
                 if (!pWho || pWho->GetDistance(me) > 0.3f || !armTrap || trapActivated || pWho->HasAura(SPELL_WARY) || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
-                    return;
-
-                if ( pWho->isPet() || pWho->isGuardian())
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
@@ -924,8 +916,7 @@ class npc_crystal_trap : public CreatureScript
                     {
                         armTrap = true;
                         armtrapTimer = 2000;
-                    }
-                    else armtrapTimer -= diff;
+                    } else armtrapTimer -= diff;
                 }
             }
         };
@@ -1093,7 +1084,6 @@ class npc_rageface : public CreatureScript
         {
             npc_ragefaceAI(Creature* c) : ScriptedAI(c)
             {
-                pInstance = me->GetInstanceScript();
                 c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
                 c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
@@ -1104,8 +1094,6 @@ class npc_rageface : public CreatureScript
             InstanceScript* pInstance;
             Creature* pBoss;
             uint32 changeTargetTimer;
-            uint32 faceRageTimer;
-            uint32 jumpTimer;
             bool shannoxHP;
 
             void Reset()
@@ -1113,27 +1101,11 @@ class npc_rageface : public CreatureScript
                 me->RemoveAllAuras();
                 me->SetReactState(REACT_PASSIVE);
                 shannoxHP = true;
-                faceRageTimer = NEVER;
-                jumpTimer = 30000;
-                changeTargetTimer = urand(5000,8000);
+                changeTargetTimer = urand(5000, 8000);
+                pInstance = me->GetInstanceScript();
                 pBoss = NULL;
                 if (pInstance)
                     pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
-            }
-
-            void DamageTaken(Unit* attacker, uint32& damage)
-            {
-                if (!me->hasUnitState(UNIT_STAT_CASTING)) // Must casting face rage
-                    return;
-
-                uint32 distractDamage = (Is25ManRaid()) ? 45000 : 30000;
-
-                if ( damage >= distractDamage)
-                {
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAurasDueToSpell(100129); // Crit buff on rageface
-                    changeTargetTimer = 100;
-                }
             }
 
             void EnterCombat(Unit* target)
@@ -1142,80 +1114,47 @@ class npc_rageface : public CreatureScript
                     pBoss->SetReactState(REACT_AGGRESSIVE);
             }
 
-            void ChangeTarget (bool ragefacing)
-            {
-                Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
-                std::list<uint64> targets;
-                targets.clear();
-                uint32 plrCount;
-                plrCount = 0;
-
-                if (!plrList.isEmpty())
-                {
-                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                    {
-                        Player* plr = itr->getSource();
-                        plrCount++;
-
-                        if (plr->GetDistance2d(me) > 60.0f) // Max range of jump spell
-                            continue;
-
-                        if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->HasTankSpec() && plr->isAlive()))
-                            targets.push_back(plr->GetGUID());
-                    }
-                }
-
-                if (!targets.empty() && targets.size() > 0)
-                {
-                    std::list<uint64>::iterator itr = targets.begin();
-                    uint32 randPos = urand(0, targets.size() - 1);
-                    std::advance(itr, randPos);
-
-                    if (Unit* pTarget = Unit::GetUnit((*me), (*itr)))
-                    {
-                        me->getThreatManager().resetAllAggro();
-                        me->AddThreat(pTarget, 50000.0f);
-                        me->GetMotionMaster()->Clear(false);
-                        me->GetMotionMaster()->MoveChase(pTarget);
-                        me->AI()->AttackStart(pTarget);
-
-                        if (ragefacing) // Time for rageface
-                            me->CastSpell(pTarget, SPELL_FACE_RAGE, false); // Jump to target
-                    }
-                }
-            }
-
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
 
-                if (me->HasAura(100129) && !me->getVictim()->hasUnitState(UNIT_STAT_STUNNED))
-                    me->RemoveAurasDueToSpell(100129);
-
-
-                if (jumpTimer <= diff)
-                {
-                    ChangeTarget(true); // Jump on target which will be faceraged
-                    faceRageTimer = 1500;
-                    changeTargetTimer = 30000;
-                    jumpTimer = 30000;
-                }
-                else jumpTimer -= diff;
-
-                if (faceRageTimer <= diff)
-                {
-                    me->StopMoving();
-                    me->CastSpell(me->getVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
-                    changeTargetTimer = 30000;
-                    faceRageTimer = NEVER;
-                }
-                else faceRageTimer -= diff;
-
                 if (changeTargetTimer <= diff)
                 {
-                    ChangeTarget(false);
-                    changeTargetTimer = urand(8000, 10000);
+                    // little hack
+                    Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+                    std::list<uint64> targets;
+                    targets.clear();
+                    uint32 plrCount;
+                    plrCount = 0;
+
+                    if (!plrList.isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                        {
+                            Player* plr = itr->getSource();
+                            plrCount++;
+                            if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->HasTankSpec() && plr->isAlive()))
+                                targets.push_back(plr->GetGUID());
+                        }
+                    }
+
+                    if (!targets.empty() && targets.size() > 0)
+                    {
+                        std::list<uint64>::iterator itr = targets.begin();
+                        uint32 randPos = urand(0, targets.size() - 1);
+                        std::advance(itr, randPos);
+
+                        if (Unit* pTarget = Unit::GetUnit((*me), (*itr)))
+                        {
+                            me->GetMotionMaster()->Clear(false);
+                            me->GetMotionMaster()->MoveChase(pTarget);
+                            me->AI()->AttackStart(pTarget);
+                            me->CastSpell(pTarget, SPELL_FACE_RAGE, false);
+                            me->AddThreat(pTarget, 50000.0f);
+                        }
+                    }
+                    changeTargetTimer = urand(5000, 8000);
                 }
                 else changeTargetTimer -= diff;
 
@@ -1234,10 +1173,7 @@ class npc_rageface : public CreatureScript
             void JustDied(Unit* pKiller)
             {
                 if (Creature* pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX)))
-                {
-                    pBoss->MonsterTextEmote("Shannox become enraged at seeing one of his companions fall",0,true);
                     pBoss->AI()->DoAction(2);
-                }
             }
         };
 
@@ -1247,44 +1183,6 @@ class npc_rageface : public CreatureScript
         }
 };
 
-class spell_gen_face_rage : public SpellScriptLoader
-{
-    public:
-        spell_gen_face_rage() : SpellScriptLoader("spell_gen_face_rage") { }
-
-        class spell_gen_face_rage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_face_rage_SpellScript);
-
-            void HandleHit(SpellEffIndex /*effIndex*/)
-            {
-                Unit * unit = GetHitUnit();
-                Aura * rf = unit->GetAura(99947);
-                if(!unit || !rf)
-                    return;
-
-                uint32 ticks = 60 - (rf->GetDuration() / 500); // hits every 500 ms, 30 s full duration -> 30000/500 = 60
-                ticks -= 1; // Dont't count bonus fo initial tick
-                if (ticks)
-                {
-                    uint32 addition = ticks * 5000;
-                    SetHitDamage(GetHitDamage() + addition);
-                }
-            }
-
-            void Register()
-            {
-                OnEffect += SpellEffectFn(spell_gen_face_rage_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_gen_face_rage_SpellScript();
-        }
-};
-
-
 void AddSC_boss_shannox()
 {
     new boss_shannox();
@@ -1293,7 +1191,6 @@ void AddSC_boss_shannox()
     new npc_immolation_trap();
     new npc_riplimb();
     new npc_rageface();
-    new spell_gen_face_rage();
 }
 
 /*
@@ -1310,6 +1207,4 @@ INSERT INTO creature_template
 VALUES
   (537240, 0, 0, 0, 0, 0, 11686, 0, 0, 0, "Immolation Trap trigger", "NULL", "NULL", 0, 1, 1, 3, 35, 35, 0, 1, "1,14286", "0,3", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "", 15595);
 
-DELETE FROM `spell_script_names` WHERE  `spell_id`=99948 AND `ScriptName`='spell_gen_face_rage' LIMIT 1;
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (99948, 'spell_gen_face_rage');
 */
