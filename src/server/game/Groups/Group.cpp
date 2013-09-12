@@ -2238,8 +2238,8 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
 
     // some instances only have one difficulty
     GetDownscaledMapDifficultyData(aMap->GetId(),difficulty);
-    if(aMap->IsRaid()&&aMap->ToInstanceMap()->GetInstanceScript())
-        difficulty=Difficulty(2);//10 man heroic
+    if(aMap->IsRaid())
+        difficulty=Difficulty(2);
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
