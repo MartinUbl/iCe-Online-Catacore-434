@@ -62,10 +62,8 @@ public:
             bridgeDoorGUID=     0;
             bridgeGUID =        0;
 
-
-            unlockTimer =       10000;
-            spawnBridgeTimer=   500;
-
+            unlockTimer =           10000;
+            spawnBridgeTimer =      500;
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
         }
 
@@ -204,30 +202,10 @@ public:
             }
         }
 
-        /*bool CheckWipe()
-        {
-            Map::PlayerList const &players = instance->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-            {
-                Player* player = itr->getSource();
-                if (player->isGameMaster())
-                    continue;
-
-                if (player->isAlive())
-                    return false;
-            }
-
-            return true;
-        }*/
-
         void Update(uint32 diff)
         {
             if (!instance->HavePlayers())
                 return;
-
-            /*if (CheckWipe() && m_auiEncounter[TYPE_ALYSRAZOR] == IN_PROGRESS)
-                m_auiEncounter[TYPE_ALYSRAZOR] = FAIL;*/
-
 
             if (unlockTimer < diff)
             {
@@ -263,7 +241,7 @@ public:
 
                 if (pStaghelm && pBaleroc && pBaleroc->isDead() && bridgeGUID == 0)
                 {
-                    GameObject * bridge = pStaghelm->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // Bridge
+                    GameObject * bridge = pStaghelm->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // TODO  !!!- When Ragnaros will be released, will Staghelm summon bridge if he is dead ? :D
                     if(bridge)
                         bridgeGUID = bridge->GetGUID();
                 }
@@ -274,7 +252,7 @@ public:
                         door2->Delete();
                 }
 
-                spawnBridgeTimer = 10000;
+                spawnBridgeTimer = 23000;
             }
             else spawnBridgeTimer -= diff;
         }
@@ -289,6 +267,12 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
+            if (type == DATA_BRIDGE_SPAWN)
+            {
+                spawnBridgeTimer = data;
+                return;
+            }
+
             if (type < MAX_ENCOUNTER)
                 m_auiEncounter[type] = data;
 

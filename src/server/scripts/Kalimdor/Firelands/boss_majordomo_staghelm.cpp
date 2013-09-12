@@ -381,10 +381,27 @@ public:
             if (me->GetPositionX() < 352.0f)
                 ScriptedAI::EnterEvadeMode();
 
+            if (!me->IsWithinLOSInMap(me->getVictim()) && IsInHumanForm() == false)
+                me->Kill(me->getVictim());
+
             if(Phase_check_timer <= diff)
             {
                 if(morphs == 3)
                 {
+                    bool clustered = RaidIsClusteredTogether();
+
+                    if(clustered == true  && me->HasAura(SPELL_SCORPION_FORM))
+                    {
+                        Phase_check_timer = 2000;
+                        return;
+                    }
+
+                    if (clustered == false && me->HasAura(SPELL_CAT_FORM))
+                    {
+                        Phase_check_timer = 2000;
+                        return;
+                    }
+
                     FromCatToScorpion = me->HasAura(SPELL_CAT_FORM);
                     TransformToDruid();
                     me->CastSpell(me,SPELL_FIERY_CYCLONE,true);
@@ -507,15 +524,29 @@ public:
     {
         spirit_of_flame_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
+            instance = me->GetInstanceScript();
         }
+
+        InstanceScript * instance;
 
         void Reset()
         {
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetInCombatWithZone();
 
-            if ( Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
-                me->GetMotionMaster()->MoveChase(player);
+            if ( Creature* pMajor = me->FindNearestCreature(52571,100.0f,true) )
+            {
+                if (pMajor->getVictim())
+
+                me->AddThreat(pMajor->getVictim(),50.0f);
+                me->GetMotionMaster()->MoveChase(pMajor->getVictim());
+            }
+        }
+
+        void EnterCombat(Unit* /*target*/)
+        {
+            if(instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void UpdateAI (const uint32 diff)
@@ -620,6 +651,7 @@ public:
     {
         druid_of_the_flameAI(Creature* creature) : ScriptedAI(creature) 
         {
+            instance = me->GetInstanceScript();
             int32 x = me->GetPositionX();
             int32 y = me->GetPositionY();
 
@@ -637,6 +669,7 @@ public:
         uint32 kneelTimer;
         uint32 sunfireTimer;
         bool isKitty;
+        InstanceScript * instance;
 
         void Reset()
         {
@@ -658,9 +691,36 @@ public:
             }
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*target*/)
         {
             me->SetInCombatWithZone();
+
+            if(instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
+        void JustReachedHome()
+        {
+            if (isKitty)
+            {
+                me->CastSpell(me,REACTIVE_FLAMES,true);
+                me->CastSpell(me,FIRE_CAT_TRANSFORM,true);
+            }
+
+            std::list<Creature*> druids;
+            GetCreatureListWithEntryInGrid(druids, me, 53619, 250.0f);
+
+            if (druids.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = druids.begin(); iter != druids.end(); ++iter)
+            {
+                if ((*iter)->isDead())
+                {
+                    (*iter)->Respawn();
+                    (*iter)->GetMotionMaster()->MoveTargetedHome();
+                }
+            }
         }
 
         void UpdateAI (const uint32 diff)
@@ -712,7 +772,7 @@ public:
                 if (sunfireTimer <= diff)
                 {
                     me->CastSpell(me,SUNFIRE,false);
-                    sunfireTimer = 2200;
+                    sunfireTimer = 3000;
                 }
                 else sunfireTimer -= diff;
             }
@@ -1003,4 +1063,12 @@ void AddSC_boss_majordomo_staghelm()
     (100208, 'spell_gen_leaping_flames');
 
     UPDATE `creature_template` SET `ScriptName`='druid_of_the_flame' WHERE  `entry`=53619 LIMIT 1;
+
+    UPDATE `creature_template` SET `mechanic_immune_mask`=646920191 WHERE  `entry`=53803 LIMIT 1;
+    UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=53859 LIMIT 1;
+    UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=52593 LIMIT 1;
+
+    UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=53619 LIMIT 1;
+    UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=53803 LIMIT 1;
+    select * from creature_template where entry in (53619,53803);
 */

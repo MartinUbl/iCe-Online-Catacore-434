@@ -36,10 +36,11 @@ enum AdditionNPCs
     DATA_RIPLIMB_GUID = 9
 };
 
-enum AdditionalGoGUIDS
+enum AdditionalEvents
 {
     DATA_BALEROC_FRONT_DOOR = 10,
-    DATA_BRIDGE_DOOR        = 11
+    DATA_BRIDGE_DOOR        = 11,
+    DATA_BRIDGE_SPAWN       = 12
 };
 
 enum CreatureIds
