@@ -1283,6 +1283,7 @@ void AuraEffect::CalculateSpellMod()
                 default:
                     break;
             }
+            break;
         case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
             switch(GetId())
             {
