@@ -3208,7 +3208,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
             if (mod->op == SPELLMOD_CASTING_TIME  && basevalue >= T(10000) && mod->value <= -100)
                 continue;
 
-            totalmul *= 1.0f + (float)mod->value / 100.0f;
+            // total multiplier bonuses are additive
+            totalmul += (float)mod->value / 100.0f;
 
             // two modifiers both reducing it below 0 won't make it positive
             if (mod->op == SPELLMOD_COST)
