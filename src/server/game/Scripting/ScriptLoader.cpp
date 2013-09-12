@@ -294,7 +294,6 @@ void AddSC_boss_cthun();                     //Temple of ahn'qiraj
 void AddSC_boss_fankriss();
 void AddSC_boss_huhuran();
 void AddSC_bug_trio();
-void AddSC_boss_sartura();
 void AddSC_boss_skeram();
 void AddSC_boss_twinemperors();
 void AddSC_mob_anubisath_sentinel();
@@ -929,7 +928,6 @@ void AddKalimdorScripts()
     AddSC_boss_fankriss();
     AddSC_boss_huhuran();
     AddSC_bug_trio();
-    AddSC_boss_sartura();
     AddSC_boss_skeram();
     AddSC_boss_twinemperors();
     AddSC_mob_anubisath_sentinel();
