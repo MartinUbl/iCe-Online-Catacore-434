@@ -19366,8 +19366,6 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
-
-
 InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
 {
     // some instances only have one difficulty
@@ -19414,16 +19412,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 {
     if (save)
     {
-        uint8 diff ;
-        Map* mapP=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-        if(!mapP)
-            mapP=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-        if(mapP->IsRaid())
-            diff=2;
-        else
-            diff=save->GetDifficulty();
-
-        InstancePlayerBind& bind = m_boundInstances[diff][save->GetMapId()];
+        InstancePlayerBind& bind = m_boundInstances[save->GetDifficulty()][save->GetMapId()];
         if (bind.save)
         {
             // update the save when the group kills a boss

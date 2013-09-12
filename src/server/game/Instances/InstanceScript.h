@@ -25,6 +25,8 @@
 
 #include "ZoneScript.h"
 #include "World.h"
+//#include "GameObject.h"
+//#include "Map.h"
 
 #define OUT_SAVE_INST_DATA             sLog->outDebug("TSCR: Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_SAVE_INST_DATA_COMPLETE    sLog->outDebug("TSCR: Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
@@ -228,6 +230,7 @@ class InstanceScript : public ZoneScript
                return false;
             return true;
         }
+
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(const DoorData *data);
