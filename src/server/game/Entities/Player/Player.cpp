@@ -19467,7 +19467,7 @@ void Player::SendRaidInfo()
                 uint32* uiEnc;
                 uint32 encData=0;
                 Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-                if (!map || !map->ToInstanceMap() || map->ToInstanceMap()->GetInstanceScript())
+                if(!map)
                     map=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
                 uiEnc=map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
                 int coun=map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
