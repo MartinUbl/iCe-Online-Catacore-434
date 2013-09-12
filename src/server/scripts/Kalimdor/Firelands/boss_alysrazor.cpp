@@ -2672,9 +2672,9 @@ class npc_Volcanic_Fire : public CreatureScript
                     return;
 
                 if (instance->GetData(TYPE_ALYSRAZOR) != IN_PROGRESS)
-                    me->SetReactState(REACT_PASSIVE);
+                    me->setFaction(35);
                 else
-                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->setFaction(14);
 
                 if (instance->GetData(TYPE_ALYSRAZOR) == DONE )
                 {
