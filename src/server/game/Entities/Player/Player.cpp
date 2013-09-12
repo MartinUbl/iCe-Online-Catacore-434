@@ -19480,10 +19480,16 @@ void Player::SendRaidInfo()
                 //bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
 
                 Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-                if (!map || !map->ToInstanceMap() || map->ToInstanceMap()->GetInstanceScript())
+                if (!map || !map->ToInstanceMap() || !map->ToInstanceMap()->GetInstanceScript())
                     map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-                uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
-                coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+
+                if (map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())
+                {
+                    uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
+                    coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+                }
+                else
+                    uiEnc = NULL;
 
                 encData = 0;
                 if (uiEnc)
