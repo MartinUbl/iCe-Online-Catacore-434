@@ -350,7 +350,7 @@ public:
             {
                 if (eventTimer <= diff)
                 {
-                    if (Creature * druid = me->FindNearestCreature(53619,250.0f,true))
+                    if (me->FindNearestCreature(53619,250.0f,true))
                     {
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
