@@ -4235,6 +4235,7 @@ void SpellMgr::LoadSpellCustomAttr()
 /************************ MAJORDOMO STAGHELM *******************************/
 
         case 98583: // Burning orb
+        case 99629: // Reckless Leap
             spellInfo->EffectTriggerSpell[0] = 0;
             break;
         case 98584: // Burning orb damage

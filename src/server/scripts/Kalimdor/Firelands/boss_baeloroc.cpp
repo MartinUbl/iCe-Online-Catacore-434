@@ -102,11 +102,11 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             instance = me->GetInstanceScript();
 
-            if(GameObject * go_bridge = me->FindNearestGameObject(5010734,500.0f))
-                go_bridge->SetPhaseMask(2,true); // Mask the bridge
-
             SetEquipmentSlots(false, NORMAL_BLADE_ENTRY, NORMAL_BLADE_ENTRY, EQUIP_NO_CHANGE); // Set blades to both hands
-            me->SummonGameObject(208906,126.92f,-63.55f,55.27f,2.5823f,0,0,0,0,0); // Fire wall
+            GameObject * bridgeDoor= me->SummonGameObject(208906,126.92f,-63.55f,55.27f,2.5823f,0,0,0,0,0); // Fire wall
+
+            if (bridgeDoor)
+                instance->SetData64(DATA_BRIDGE_DOOR,bridgeDoor->GetGUID());
         }
 
         uint32 blazeOfGloryTimer;
@@ -114,7 +114,6 @@ public:
         uint32 berserkTimer;
         uint32 castShardTimer;
         uint32 summonShardTimer;
-        uint32 wallCheckTimer;
         bool meleePhase;
 
         InstanceScript * instance;
@@ -128,7 +127,6 @@ public:
                 instance->SetData(TYPE_BALEROC, NOT_STARTED);
             }
 
-            wallCheckTimer          = 3000;
             castShardTimer          = 4000;
             summonShardTimer        = NEVER;
             blazeOfGloryTimer       = 8000;
@@ -148,23 +146,6 @@ public:
            PlayAndYell(onKill[_rand].sound,onKill[_rand].text);
        }
 
-       void PlayCinematicToPlayers(void)
-       {
-            if (!instance)
-                return;
-
-            Map::PlayerList const& plList = instance->instance->GetPlayers();
-
-            if (plList.isEmpty())
-                return;
-
-            for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-            {
-                if ( Player * p = itr->getSource())
-                    p->SendCinematicStart (197);
-            }
-       }
-
         void JustDied(Unit* /*killer*/)
         {
             PlayAndYell(onDeath.sound,onDeath.text);
@@ -181,8 +162,9 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE,me);
             }
 
+
+            me->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // Bridge
             me->SummonCreature(54101,100.0f,-33.0f,61.0f,4.34f,TEMPSUMMON_CORPSE_DESPAWN, 0); // Staghelm intro
-            PlayCinematicToPlayers();
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -330,30 +312,6 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
-            if (wallCheckTimer <= diff)
-            {
-                //Creature * pBethtilac = instance->instance->GetCreature(instance->GetData64(TYPE_BETHTILAC));
-                Creature * pShannox = instance->instance->GetCreature(instance->GetData64(TYPE_SHANNOX));
-                Creature * pRhyolith = instance->instance->GetCreature(instance->GetData64(TYPE_RHYOLITH));
-                Creature * pAlysrazor = instance->instance->GetCreature(instance->GetData64(TYPE_ALYSRAZOR));
-
-
-                if (/*pBethtilac &&*/ pShannox && pRhyolith && pAlysrazor)
-                {
-                    if (/*pBethtilac->isDead() &&*/ pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
-                    {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-                        if (GameObject * door1 = instance->instance->GetGameObject(instance->GetData64(DATA_BALEROC_FRONT_DOOR)))
-                        {
-                            door1->Delete();
-                        }
-                    }
-                }
-
-                wallCheckTimer = 30000;
-            }
-            else wallCheckTimer -= diff;
-
             if (!UpdateVictim())
                 return;
 
@@ -876,20 +834,36 @@ public:
         npc_majordomo_intro_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            instance = me->GetInstanceScript();
             //me->SetVisible(false);
         }
 
         uint32 talkTimer;
         uint32 talks;
+        InstanceScript * instance;
 
         void Reset()
         {
-            if(GameObject * go_bridge = me->FindNearestGameObject(5010734,500.0f))
-                go_bridge->SetPhaseMask(1,true); // Unmask the bridge
-
             talkTimer = 5000;
             me->SetReactState(REACT_PASSIVE);
             talks = 0;
+        }
+
+        void PlayCinematicToPlayers(void)
+        {
+            if (!instance)
+                return;
+
+            Map::PlayerList const& plList = instance->instance->GetPlayers();
+
+            if (plList.isEmpty())
+                return;
+
+            for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if ( Player * p = itr->getSource())
+                    p->SendCinematicStart (197);
+            }
         }
 
         void UpdateAI (const uint32 diff)
@@ -909,16 +883,22 @@ public:
                         talkTimer = 6500;
                         break;
                     case 2:
+                        PlayCinematicToPlayers();
                         me->MonsterYell("Beg for mercy now, and I may yet allow you to live. Well, \"heroes\", what is your answer?",LANG_UNIVERSAL,0);
                         me->PlayDistanceSound(24475);
-                        talkTimer = 100000;
+                        talkTimer = 10000;
+                        break;
+                    case 3:
+                        PlayCinematicToPlayers();
+                        me->SetVisible(false);
+                        talkTimer = 10000;
                         break;
                 }
 
                 talks++;
 
-                if (talks == 3)
-                    me->ForcedDespawn(10000);
+                if (talks == 4)
+                    me->ForcedDespawn(1000);
 
             }
             else talkTimer -= diff;

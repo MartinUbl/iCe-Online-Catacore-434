@@ -27,6 +27,10 @@ public:
     {
         instance_firelands_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();}
 
+
+        uint32 unlockTimer;
+        uint32 spawnBridgeTimer;
+
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 currEnc[MAX_ENCOUNTER];
         uint64 riplimbGuid;
@@ -36,7 +40,11 @@ public:
         uint64 rhyolithGUID;
         uint64 alysrazorGUID;
         uint64 balerocGUID;
+        uint64 staghelmGUID;
+
         uint64 balerocDoorGUID;
+        uint64 bridgeDoorGUID;
+        uint64 bridgeGUID;
 
         std::string saveData;
 
@@ -47,9 +55,17 @@ public:
             shannoxGuid =       0;
             alysrazorGUID =     0;
             bethtilacGUID =     0;
-            rhyolithGUID=       0;
+            rhyolithGUID =      0;
             balerocGUID =       0;
+            staghelmGUID =      0;
             balerocDoorGUID =   0;
+            bridgeDoorGUID=     0;
+            bridgeGUID =        0;
+
+
+            unlockTimer =       10000;
+            spawnBridgeTimer=   500;
+
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
         }
 
@@ -117,6 +133,9 @@ public:
                 case 53494:
                     balerocGUID = pCreature->GetGUID();
                     break;
+                case 52571:
+                    staghelmGUID = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -125,9 +144,22 @@ public:
             if(add == false)
                 return;
 
-            if (go->GetEntry() == 209066 && go->GetPositionX() < 0.0f ) // Baleroc's front door
+            switch (go->GetEntry())
             {
-                balerocDoorGUID = go->GetGUID();
+                case 209066:
+                    if (go->GetEntry() == 209066 && go->GetPositionX() < 0.0f ) // Baleroc's front door
+                        balerocDoorGUID = go->GetGUID();
+                    break;
+                case 5010734:
+                    bridgeGUID = go->GetGUID();
+                    break;
+
+                case 208906:
+                    bridgeDoorGUID = go->GetGUID();
+                    break;
+
+                default:
+                    break;
             }
         }
 
@@ -149,13 +181,30 @@ public:
                     return alysrazorGUID;
                 case TYPE_BALEROC:
                     return balerocGUID;
+                case TYPE_STAGHELM:
+                    return staghelmGUID;
                 case DATA_BALEROC_FRONT_DOOR:
                     return balerocDoorGUID;
+                case DATA_BRIDGE_DOOR:
+                    return bridgeDoorGUID;
             }
                 return 0;
         }
 
-        bool CheckWipe()
+        void SetData64(uint32 identifier, uint64 data)
+        {
+            switch(identifier)
+            {
+                case DATA_BRIDGE_DOOR:
+                    bridgeDoorGUID = data;
+                break;
+
+                default:
+                    break;
+            }
+        }
+
+        /*bool CheckWipe()
         {
             Map::PlayerList const &players = instance->GetPlayers();
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -169,13 +218,66 @@ public:
             }
 
             return true;
-        }
+        }*/
 
         void Update(uint32 diff)
         {
-            if (CheckWipe() && m_auiEncounter[TYPE_ALYSRAZOR] == IN_PROGRESS)
-                m_auiEncounter[TYPE_ALYSRAZOR] = FAIL;
-        };
+            if (!instance->HavePlayers())
+                return;
+
+            /*if (CheckWipe() && m_auiEncounter[TYPE_ALYSRAZOR] == IN_PROGRESS)
+                m_auiEncounter[TYPE_ALYSRAZOR] = FAIL;*/
+
+
+            if (unlockTimer < diff)
+            {
+                //Creature * pBethtilac = instance->instance->GetCreature(instance->GetData64(TYPE_BETHTILAC));
+                Creature * pShannox = this->instance->GetCreature(this->GetData64(TYPE_SHANNOX));
+                Creature * pRhyolith = this->instance->GetCreature(this->GetData64(TYPE_RHYOLITH));
+                Creature * pAlysrazor = this->instance->GetCreature(this->GetData64(TYPE_ALYSRAZOR));
+                Creature * pBaleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC));
+
+
+                if (/*pBethtilac &&*/ pShannox && pRhyolith && pAlysrazor && pBaleroc)
+                {
+                    if (/*pBethtilac->isDead() &&*/ pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
+                    {
+                        if (pBaleroc->isAlive())
+                            pBaleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+
+                        if (GameObject * door1 = this->instance->GetGameObject(this->GetData64(DATA_BALEROC_FRONT_DOOR)))
+                        {
+                            door1->Delete();
+                        }
+                    }
+                }
+
+                unlockTimer = 60000; // Check it every minute
+            }
+            else unlockTimer -= diff;
+
+            if (spawnBridgeTimer <= diff)
+            {
+                Creature * pBaleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC));
+                Creature * pStaghelm = this->instance->GetCreature(this->GetData64(TYPE_STAGHELM));
+
+                if (pStaghelm && pBaleroc && pBaleroc->isDead() && bridgeGUID == 0)
+                {
+                    GameObject * bridge = pStaghelm->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // Bridge
+                    if(bridge)
+                        bridgeGUID = bridge->GetGUID();
+                }
+
+                if (GameObject * door2 = this->instance->GetGameObject(this->GetData64(DATA_BRIDGE_DOOR))) // Unlock  bridge door
+                {
+                    if(pBaleroc && pBaleroc->isDead())
+                        door2->Delete();
+                }
+
+                spawnBridgeTimer = 10000;
+            }
+            else spawnBridgeTimer -= diff;
+        }
 
         uint32 GetData(uint32 DataId)
         {
@@ -189,18 +291,6 @@ public:
         {
             if (type < MAX_ENCOUNTER)
                 m_auiEncounter[type] = data;
-
-               if (/*m_auiEncounter[0] == DONE // TYPE_BETHTILAC
-                && */m_auiEncounter[1] == DONE // TYPE_RHYOLITH
-                && m_auiEncounter[2] == DONE // TYPE_ALYSRAZOR
-                && m_auiEncounter[3] == DONE ) // TYPE_SHANNOX
-                {
-                    if (GameObject* go = this->instance->GetGameObject(balerocDoorGUID))
-                        go->Delete();
-
-                    if (Creature* baleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC)))
-                        baleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-                }
 
             if (data == DONE)
             {

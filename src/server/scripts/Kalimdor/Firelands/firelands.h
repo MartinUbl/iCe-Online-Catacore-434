@@ -39,6 +39,7 @@ enum AdditionNPCs
 enum AdditionalGoGUIDS
 {
     DATA_BALEROC_FRONT_DOOR = 10,
+    DATA_BRIDGE_DOOR        = 11
 };
 
 enum CreatureIds

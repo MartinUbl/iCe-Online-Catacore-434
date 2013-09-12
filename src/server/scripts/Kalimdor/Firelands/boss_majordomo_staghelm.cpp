@@ -115,6 +115,7 @@ public:
         uint32 Human_timer;
         uint32 Berserk_timer;
         uint32 Phase_check_timer;
+        uint32 eventTimer;
         uint32 energyCounter;
         bool FromCatToScorpion;
 
@@ -122,10 +123,17 @@ public:
 
         void Reset()
         {
+            if(instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(TYPE_STAGHELM, NOT_STARTED);
+            }
+
             energyCounter = 0;
             TransformToDruid();
             morphs = 0;
             PHASE = PHASE_DRUID;
+            eventTimer = 1000;
             Phase_check_timer = 2000;
             Morph_timer = 2000;
             Energy_timer = 1000;
@@ -141,6 +149,12 @@ public:
 
         void JustDied(Unit * /*victim*/)
         {
+            if(instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(TYPE_STAGHELM, DONE);
+            }
+
             Summons.DespawnAll();
             me->MonsterYell("My studies... had only just begun...", LANG_UNIVERSAL, 0);
             me->PlayDistanceSound(24464);
@@ -148,17 +162,39 @@ public:
 
         void EnterCombat(Unit* who)
         {
+             me->SetWalk(false);
+
+            if(instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                instance->SetData(TYPE_STAGHELM, IN_PROGRESS);
+            }
+
             morphs++;
-            me->MonsterYell("Very well. Witness the raw power of my new lord!", LANG_UNIVERSAL, 0);
-            me->PlayDistanceSound(24464);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,10.0f);
+            me->SetInCombatWithZone();
+
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH,5.0f);
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,10.0f);
         }
 
         void EnterEvadeMode()
         {
+            me->SetHomePosition(516.0f,-62.0f,85.0f,M_PI);
+
+            if(instance)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->SetData(TYPE_STAGHELM, NOT_STARTED);
+            }
+
             Summons.DespawnAll();
             TransformToDruid();
             ScriptedAI::EnterEvadeMode();
+            me->RemoveAllAuras();
+
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH,5.0f);
+            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,20.0f);
         }
 
         void JustSummoned(Creature* summon)
@@ -311,7 +347,39 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim() || !me->getVictim())
+            {
+                if (eventTimer <= diff)
+                {
+                    if (Creature * druid = me->FindNearestCreature(53619,250.0f,true))
+                    {
+                        me->SetReactState(REACT_PASSIVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                    }
+                    else
+                    {
+                        if (!me->isMoving())
+                        {
+                            me->MonsterYell("Very well. Witness the raw power of my new lord!", LANG_UNIVERSAL, 0);
+                            me->PlayDistanceSound(24464);
+
+                            me->SetWalk(true);
+                            me->GetMotionMaster()->MovePoint(0,516.0f,-62.0f,85.0f);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                        }
+                        eventTimer = NEVER;
+                        return;
+                    }
+
+                    eventTimer = 1000;
+                }
+                else eventTimer -= diff;
+
                 return;
+            }
+
+            if (me->GetPositionX() < 352.0f)
+                ScriptedAI::EnterEvadeMode();
 
             if(Phase_check_timer <= diff)
             {
@@ -376,7 +444,7 @@ public:
             {
                 uint32 adrenalineStacks = me->GetAuraCount(SPELL_ADRENALINE);
 
-                if(me->getPowerType() == POWER_ENERGY)
+                if(me->getPowerType() == POWER_ENERGY && !IsInHumanForm())
                 {
                         adrenalineStacks = (adrenalineStacks > 9) ? 9 : adrenalineStacks; // Out of bounds protection
                         me->SetPower(POWER_ENERGY,me->GetPower(POWER_ENERGY) + (100 / energyField[adrenalineStacks]));
@@ -384,41 +452,6 @@ public:
                 Energy_timer = 1000;
             }
             else Energy_timer -= diff;
-
-
-            /*if(Morph_timer <= diff)
-            {
-                if(morphs == 3)
-                {
-                    FromCatToScorpion = me->HasAura(SPELL_CAT_FORM);
-                    TransformToDruid();
-                    me->CastSpell(me,SPELL_FIERY_CYCLONE,true);
-
-                    if(FromCatToScorpion) // if we are transforming from cat to scorpion
-                    {
-                        me->CastSpell(me,SPELL_SEARING_SEEDS,false); // cast seering seeds
-                        me->MonsterYell("Blaze of Glory!", LANG_UNIVERSAL, 0);
-                    }
-                    else                  // if we are transforming from scorpion to cat
-                    {
-                        me->CastSpell(me,SPELL_BURNING_ORBS,false); // cast Burning orbs
-                        me->MonsterYell("Nothing but ash!", LANG_UNIVERSAL, 0);
-                    }
-
-                    Human_timer = 4050;
-                    Morph_timer = 4000;
-                    morphs = 0;
-                    return;
-                }
-
-                if(me->HasAura(SPELL_SCORPION_FORM))
-                    TransformToCat(); 
-                else
-                    TransformToScorpion();
-
-                Morph_timer = MINUTE/2;
-            }
-            else Morph_timer -= diff;*/
 
             if(Berserk_timer <= diff) // Berser after 10 minutes
             {
@@ -532,6 +565,199 @@ public:
             else Beam_timer -= diff;
         }
     };
+};
+
+class staghelm_flame_orb : public CreatureScript
+{
+public:
+   staghelm_flame_orb() : CreatureScript("staghelm_flame_orb") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new staghelm_flame_orbAI (creature);
+    }
+
+    struct staghelm_flame_orbAI : public ScriptedAI
+    {
+        staghelm_flame_orbAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me,SPELL_BURNING_ORB_VISUAL,true);
+        }
+
+        void UpdateAI (const uint32 diff)
+        {
+        }
+    };
+};
+
+enum DruidsSpells
+{
+    RECKLESS_LEAP           = 99629,
+    RECKLESS_LEAP_STUN      = 99646,
+    REACTIVE_FLAMES         = 99649,
+    KNEEEL_TO_THE_FLAME     = 99705,
+    SUNFIRE                 = 99626,
+    FIRE_CAT_TRANSFORM      = 99574
+};
+
+class druid_of_the_flame : public CreatureScript
+{
+public:
+   druid_of_the_flame() : CreatureScript("druid_of_the_flame") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new druid_of_the_flameAI (creature);
+    }
+
+    struct druid_of_the_flameAI : public ScriptedAI
+    {
+        druid_of_the_flameAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            int32 x = me->GetPositionX();
+            int32 y = me->GetPositionY();
+
+            isKitty = (x == 516 && y == -62) ? false : true;
+
+            if (isKitty)
+            {
+                me->CastSpell(me,REACTIVE_FLAMES,true);
+                me->CastSpell(me,FIRE_CAT_TRANSFORM,true);
+            }
+        }
+
+        uint32 jumpTimer;
+        uint32 StunTimer;
+        uint32 kneelTimer;
+        uint32 sunfireTimer;
+        bool isKitty;
+
+        void Reset()
+        {
+            if (isKitty == false)
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
+            sunfireTimer = 2000;
+            kneelTimer = 1000;
+            jumpTimer = 2000;
+            StunTimer = NEVER;
+        }
+
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
+            if (isKitty)
+            {
+                me->CastSpell(me,REACTIVE_FLAMES,true);
+                me->CastSpell(me,FIRE_CAT_TRANSFORM,true);
+            }
+        }
+
+        void EnterCombat(Unit * /*who*/)
+        {
+            me->SetInCombatWithZone();
+        }
+
+        void UpdateAI (const uint32 diff)
+        {
+            if (!UpdateVictim())
+            {
+                if (isKitty == false)
+                {
+                    if(kneelTimer <= diff)
+                    {
+                        if (!me->isMoving())
+                        {
+                            me->MonsterYell("Kneel before the burning flame !",LANG_UNIVERSAL,0);
+                            me->CastSpell(me,KNEEEL_TO_THE_FLAME,false);
+                        }
+                        kneelTimer = 6000;
+                    }
+                    else kneelTimer -= diff;
+                }
+                return;
+            }
+
+            if (isKitty)
+            {
+                if(jumpTimer <= diff)
+                {
+                    if (Unit* player = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true) )
+                    {
+                        me->getThreatManager().resetAllAggro();
+                        me->AddThreat(player,50000.0f);
+                        me->CastSpell(player,RECKLESS_LEAP,false);
+                    }
+
+                    StunTimer = 5000;
+                    jumpTimer = 15000;
+                }
+                else jumpTimer -= diff;
+
+                if(StunTimer <= diff)
+                {
+                    me->CastSpell(me->getVictim(),RECKLESS_LEAP_STUN,true);
+                    StunTimer = NEVER;
+                }
+                else StunTimer -= diff;
+
+            }
+            else if (isKitty == false) // Druid in human form
+            {
+                if (sunfireTimer <= diff)
+                {
+                    me->CastSpell(me,SUNFIRE,false);
+                    sunfireTimer = 2200;
+                }
+                else sunfireTimer -= diff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class IsKneeling
+{
+    public:
+        bool operator()(Unit* unit) const
+        {
+            if (unit && unit->getStandState() == UNIT_STAND_STATE_KNEEL)
+                return true;
+            else
+                return false;
+        }
+};
+
+class spell_gen_kneel_to_the_flame : public SpellScriptLoader
+{
+    public:
+        spell_gen_kneel_to_the_flame() : SpellScriptLoader("spell_gen_kneel_to_the_flame") { }
+
+        class spell_gen_kneel_to_the_flame_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_kneel_to_the_flame_SpellScript);
+
+            void RemoveKneelingTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(IsKneeling());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_kneel_to_the_flame_SpellScript::RemoveKneelingTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC); // 15
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_kneel_to_the_flame_SpellScript();
+        }
 };
 
 
@@ -725,24 +951,42 @@ void AddSC_boss_majordomo_staghelm()
     new boss_majordomo_staghelm();//        52571
     new spirit_of_flame_npc(); //           52593
     new burning_orb_npc(); //               53216
+    new druid_of_the_flame();
+    new staghelm_flame_orb();
 
     // SPELLS
     new spell_gen_searing_seed(); //        98450
     new spell_searing_seed_explosion(); //  98620,100215,100216,100217
     new spell_gen_flame_scythe(); //        98474,100212,100213,100214
     new spell_gen_leaping_flames(); //      98535,100206,100207,100208
+    new spell_gen_kneel_to_the_flame();//   99705,100101
 }
 
 /*
-    // TODO -> ADD CREATURE QUERIES !!!!
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (53619, 53803, 0, 0, 0, 0, 38441, 38442, 0, 0, 'Druid of the Flame', '', '', 0, 85, 85, 3, 14, 14, 0, 1.14286, 1.6, 1, 0, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50000, 100000, '', 0, 3, 43.9, 1, 1, 0, 0, 0, 0, 0, 0, 0, 125, 1, 53619, 646920191, 0, 'druid_of_the_flame', 15595, 0);
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (53803, 0, 0, 0, 0, 0, 38441, 38442, 0, 0, 'Druid of the Flame (1)', '', '', 0, 85, 85, 3, 14, 14, 0, 1.14286, 1.6, 1, 0, 30000, 33000, 0, 308, 1, 2000, 2000, 1, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50000, 100000, '', 0, 3, 154, 1, 1, 0, 0, 0, 0, 0, 0, 0, 125, 1, 53619, 0, 0, '', 15595, 0);
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (52571, 53856, 53857, 53858, 0, 0, 37953, 0, 0, 0, 'Majordomo Staghelm', 'Archdruid of the Flame', '', 0, 88, 88, 3, 14, 14, 0, 2, 1.71429, 1, 3, 60000, 70000, 0, 308, 1, 1250, 2000, 4, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 7, 108, 52571, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 380, 1, 1, 0, 0, 0, 0, 0, 0, 0, 169, 1, 0, 646922239, 1, 'boss_majordomo_staghelm', 15595, 52571);
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (53856, 0, 0, 0, 0, 0, 37953, 0, 0, 0, 'Majordomo Staghelm (1)', 'Archdruid of the Flame', '', 0, 88, 88, 3, 14, 14, 0, 2, 1.71429, 1, 3, 70000, 80000, 0, 308, 1, 1250, 2000, 4, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 108, 53856, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000000, 3500000, '', 0, 3, 1330, 1, 1, 0, 0, 0, 0, 0, 0, 0, 169, 1, 0, 646922239, 1, '', 15595, 53856);
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (52593, 53859, 53860, 53861, 0, 0, 38747, 0, 0, 0, 'Spirit of the Flame', '', '', 0, 88, 88, 3, 14, 14, 0, 2, 1.14286, 1, 2, 45000, 55000, 0, 308, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 2.46, 1, 1, 0, 0, 0, 0, 0, 0, 0, 191, 1, 0, 646922239, 0, 'spirit_of_flame_npc', 15595, 0);
+    REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`, `lootid`) VALUES (53859, 0, 0, 0, 0, 0, 38747, 0, 0, 0, 'Spirit of the Flame (1)', '', '', 0, 88, 88, 3, 14, 14, 0, 2, 1.14286, 1, 2, 55000, 65000, 0, 308, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 8.61, 1, 1, 0, 0, 0, 0, 0, 0, 0, 191, 1, 0, 646922239, 0, '', 15595, 0);
 
-    DELETE FROM `spell_script_names` WHERE  spell_id=98450;
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=98620 OR  spell_id=100215 OR  spell_id=100216 OR  spell_id=100217;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
-    VALUES (98450, 'spell_gen_searing_seed');
+    VALUES (98620, 'spell_gen_searing_seed'),
+    (100215, 'spell_gen_searing_seed'),
+    (100216, 'spell_gen_searing_seed'),
+    (100217, 'spell_gen_searing_seed');
 
     DELETE FROM `spell_script_names` WHERE  spell_id=98450;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
     VALUES (98450, 'spell_searing_seed_explosion');
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=99705 OR  spell_id=100101;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (99705, 'spell_gen_kneel_to_the_flame'),
+    (100101, 'spell_gen_kneel_to_the_flame');
+
 
     DELETE FROM `spell_script_names` WHERE  spell_id=98474 OR  spell_id=100212 OR  spell_id=100213 OR  spell_id=100214;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
@@ -757,4 +1001,6 @@ void AddSC_boss_majordomo_staghelm()
     (100206, 'spell_gen_leaping_flames'),
     (100207, 'spell_gen_leaping_flames'),
     (100208, 'spell_gen_leaping_flames');
+
+    UPDATE `creature_template` SET `ScriptName`='druid_of_the_flame' WHERE  `entry`=53619 LIMIT 1;
 */
