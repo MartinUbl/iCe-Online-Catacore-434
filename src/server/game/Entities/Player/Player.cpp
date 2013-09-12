@@ -19465,21 +19465,25 @@ void Player::SendRaidInfo()
                 InstanceSave *save = itr->second.save;
                 //bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
                 uint32* uiEnc;
-                uint32 encData=0;
-                Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-                if(!map)
-                    map=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-                uiEnc=map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
-                int coun=map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
-                for(int i=0;i<coun;i++)
+                uint32 encData = 0;
+                int coun = 0;
+                Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+                if (!map)
+                    map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
+                if (map && map->ToInstanceMap()->GetInstanceScript())
                 {
-                    if(uiEnc[i]==3)
+                    uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
+                    coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+                    for (int i=0;i<coun;i++)
                     {
-                        encData=encData<<1;
-                        encData+=1;
+                        if (uiEnc[i] == DONE)
+                        {
+                            encData = encData << 1;
+                            encData += 1;
+                        }
+                        else
+                            encData = encData << 1;
                     }
-                    else
-                        encData=encData<<1;
                 }
 
                 data << uint32(save->GetMapId());           // map id
