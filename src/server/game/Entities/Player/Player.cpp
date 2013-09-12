@@ -19459,6 +19459,9 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 void Player::SendRaidInfo()
 {
     uint32 counter = 0;
+    uint32* uiEnc;
+    uint32 encData;
+    uint32 coun;
 
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4, true);
 
@@ -19475,22 +19478,26 @@ void Player::SendRaidInfo()
             {
                 InstanceSave *save = itr->second.save;
                 //bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
-                uint32* uiEnc;
-                uint32 encData=0;
-                Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+
+                Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
                 if (!map || !map->ToInstanceMap() || map->ToInstanceMap()->GetInstanceScript())
-                    map=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-                uiEnc=map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
-                int coun=map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
-                for(int i=0;i<coun;i++)
+                    map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
+                uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
+                coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+
+                encData = 0;
+                if (uiEnc)
                 {
-                    if(uiEnc[i]==3)
+                    for (uint32 i = 0; i < coun; i++)
                     {
-                        encData=encData<<1;
-                        encData+=1;
+                        if (uiEnc[i] == 3)
+                        {
+                            encData = encData << 1;
+                            encData += 1;
+                        }
+                        else
+                            encData = encData << 1;
                     }
-                    else
-                        encData=encData<<1;
                 }
 
                 data << uint32(save->GetMapId());           // map id
