@@ -236,7 +236,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             if(IsRaid()&&ToInstanceMap()->GetInstanceScript())
             {
                 map = CreateInstance(NewInstanceId, NULL, RAID_DIFFICULTY_10MAN_HEROIC);
-                if (map && GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
+                if(GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
                      map->ToInstanceMap()->GetInstanceScript()->repairDifficulty(player);
             }
             else
