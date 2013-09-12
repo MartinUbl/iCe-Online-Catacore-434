@@ -442,7 +442,7 @@ public:
                                 avoided = true;
 
                             if(avoided)
-                                me->CastCustomSpell(me->getVictim(),99353,0,0,0,true);
+                                me->CastCustomSpell(me->getVictim(),99351,0,0,0,true);
                             else
                                 me->CastSpell(me->getVictim(),99351,true); // Inferno strike
 
@@ -844,6 +844,9 @@ public:
 
         void Reset()
         {
+            if (instance)
+                instance->SetData(DATA_BRIDGE_SPAWN,23000);
+
             talkTimer = 5000;
             me->SetReactState(REACT_PASSIVE);
             talks = 0;
@@ -889,7 +892,6 @@ public:
                         talkTimer = 10000;
                         break;
                     case 3:
-                        PlayCinematicToPlayers();
                         me->SetVisible(false);
                         talkTimer = 10000;
                         break;
