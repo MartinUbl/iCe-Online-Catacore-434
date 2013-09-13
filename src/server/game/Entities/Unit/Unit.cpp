@@ -7281,6 +7281,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 else return (false);
             }
+            if (dummySpell->Id == 99074) // Paladin T12 Protection 2P Bonus
+            {
+                if(procSpell->Id == 53600) // Shield of the Righteous
+                {
+                    CastCustomSpell(99075, SPELLVALUE_BASE_POINT0,damage * 0.1, pVictim, true); // Righteous Flames
+                    break;
+                }
+                else return (false);
+            }
             // Judgements of the Wise
             if (dummySpell->Id == 31878)
             {
