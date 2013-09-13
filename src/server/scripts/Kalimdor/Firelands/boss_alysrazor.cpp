@@ -2128,6 +2128,7 @@ class npc_Voracious_Hatchling : public CreatureScript
             void EnterCombat(Unit* /*target*/)
             {
                 me->SetInCombatWithZone();
+                me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,10.0f);
 
                 if(instance)
                      instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
