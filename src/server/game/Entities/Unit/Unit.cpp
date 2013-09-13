@@ -6315,6 +6315,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 triggered_spell_id = 22858;
                 break;
             }
+            if (dummySpell->Id == 99239) // Warior T12 Protection 2P Bonus
+            {
+                if(procSpell->Id == 23922) // Shield Slam
+                {
+                    CastCustomSpell(99240, SPELLVALUE_BASE_POINT0,damage * 0.1, pVictim, true); // Combust
+                    break;
+                }
+                else return (false);
+            }
             // Second Wind
             if (dummySpell->SpellIconID == 1697)
             {
