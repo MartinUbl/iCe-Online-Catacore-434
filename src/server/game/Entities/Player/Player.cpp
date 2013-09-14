@@ -19474,15 +19474,19 @@ void Player::SendRaidInfo()
                 {
                     uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
                     coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
-                    for (int i=0;i<coun;i++)
+
+                    if (uiEnc && coun > 0)
                     {
-                        if (uiEnc[i] == DONE)
+                        for (int i=0;i<coun;i++)
                         {
-                            encData = encData << 1;
-                            encData += 1;
+                            if (uiEnc[i] == DONE)
+                            {
+                                encData = encData << 1;
+                                encData += 1;
+                            }
+                            else
+                                encData = encData << 1;
                         }
-                        else
-                            encData = encData << 1;
                     }
                 }
 
