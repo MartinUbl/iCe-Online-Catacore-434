@@ -25,6 +25,9 @@
 #include "boss_bethtilac_spiderAI.h"
 
 
+namespace Bethtilac
+{
+
 
 // Spiderweb Filament dropped from the web above after killing Cinterweb Spinner
 class filamentAI: public SpiderAI
@@ -307,3 +310,6 @@ void StickyWebbingAI::Reset()
     if (!me->HasAura(SPELL_STICKY_WEBBING))
         me->CastSpell(me, SPELL_STICKY_WEBBING, false);    // triggers the channel of Sticky Webbing
 }
+
+
+}   // end of namespace

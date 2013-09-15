@@ -32,6 +32,9 @@
 #include "boss_bethtilac_spiderAI.h"
 
 
+namespace Bethtilac
+{
+
 
 // Beth'tilac AI class declaration
 
@@ -717,3 +720,6 @@ void boss_bethtilacAI::UnlockDoor()
         goDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
     }
 }
+
+
+}   // end of namespace

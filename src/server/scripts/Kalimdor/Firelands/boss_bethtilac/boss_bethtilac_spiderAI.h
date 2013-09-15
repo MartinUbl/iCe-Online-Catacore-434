@@ -24,6 +24,10 @@
 #define BOSS_BETHTILAC_SPIDERAI_H
 
 
+namespace Bethtilac
+{
+
+
 class SpiderAI: public ScriptedAI
 {
 private:
@@ -80,6 +84,9 @@ private:
 protected:
     InstanceScript *instance;
 };
+
+
+}   // end of namespace
 
 
 #endif // BOSS_BETHTILAC_SPIDERAI_H

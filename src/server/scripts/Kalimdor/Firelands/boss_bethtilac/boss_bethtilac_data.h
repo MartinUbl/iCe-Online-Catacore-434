@@ -24,6 +24,10 @@
 #define BOSS_BETHTILAC_DATA_H
 
 
+namespace Bethtilac
+{
+
+
 // Encounter data
 
 static const float webZPosition = 111.7f;
@@ -57,6 +61,9 @@ enum AnimKits
     ANIM_KIT_EMERGE = 1490,
     ANIM_KIT_FLY_UP = 1467,
 };
+
+
+}   // end of namespace
 
 
 #endif // BOSS_BETHTILAC_DATA_H

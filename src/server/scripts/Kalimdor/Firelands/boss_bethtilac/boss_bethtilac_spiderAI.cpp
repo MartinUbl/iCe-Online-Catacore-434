@@ -25,7 +25,11 @@
 #include "boss_bethtilac_data.h"
 
 #include <list>
-using namespace std;
+
+
+namespace Bethtilac
+{
+
 
 enum CommonEvents
 {
@@ -284,3 +288,6 @@ void SpiderAI::DoAction(const int32 event)
             break;
     }
 }
+
+
+}   // end of namespace

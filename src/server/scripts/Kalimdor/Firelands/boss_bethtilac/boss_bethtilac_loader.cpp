@@ -24,22 +24,26 @@
 #include "ScriptPCH.h"  // not needed, only to make compiler happy
 
 
-// forward declarations of script loaders
-void load_boss_Bethtilac();
-void load_npc_CinderwebDrone();
-void load_mob_Spiderling();
-void load_mob_Spinner();
-void load_beth_environment();
+namespace Bethtilac
+{
+    // forward declarations of script loaders
+    void load_boss_Bethtilac();
+    void load_npc_CinderwebDrone();
+    void load_mob_Spiderling();
+    void load_mob_Spinner();
+    void load_beth_environment();
+}
 
 
 // load scripts
 
 void AddSC_boss_bethtilac()
 {
+    using namespace Bethtilac;
+
     load_boss_Bethtilac();
     load_npc_CinderwebDrone();
     load_mob_Spiderling();
     load_mob_Spinner();
     load_beth_environment();
 }
-

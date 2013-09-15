@@ -27,6 +27,10 @@
 #include "boss_bethtilac_spiderAI.h"
 
 
+namespace Bethtilac
+{
+
+
 class mob_droneAI: public SpiderAI
 {
 public:
@@ -248,3 +252,6 @@ void mob_droneAI::IsSummonedBy(Unit *summoner)
     onGround = true;
     onTop = false;
 }
+
+
+}   // end of namespace

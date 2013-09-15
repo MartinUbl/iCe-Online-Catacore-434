@@ -27,6 +27,10 @@
 #include "boss_bethtilac_spiderAI.h"
 
 
+namespace Bethtilac
+{
+
+
 class mob_spinnerAI: public SpiderAI
 {
 public:
@@ -217,3 +221,6 @@ void mob_spinnerAI::SpellHit(Unit *caster, const SpellEntry *spell)
         }
     }
 }
+
+
+}   // end of namespace

@@ -27,6 +27,10 @@
 #include "boss_bethtilac_spiderAI.h"
 
 
+namespace Bethtilac
+{
+
+
 class mob_spiderlingAI: public SpiderAI
 {
 public:
@@ -223,3 +227,6 @@ bool mob_spiderlingAI::CanFollowTarget(Unit *target) const
 {
     return target->isAlive() && target->GetPositionZ() < webZPosition - 20.0f;
 }
+
+
+}   // end of namespace
