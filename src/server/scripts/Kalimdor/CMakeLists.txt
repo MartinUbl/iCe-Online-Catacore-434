@@ -148,16 +148,11 @@ set(scripts_STAT_SRCS
   Kalimdor/Firelands/boss_baeloroc.cpp
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderAI.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderAI.cpp
-  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac.cpp
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_data.h
-  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_drone.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_drone.cpp
-  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_environment.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_environment.cpp
-  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderling.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spiderling.cpp
-  Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spinner.h
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_spinner.cpp
   Kalimdor/Firelands/boss_bethtilac/boss_bethtilac_loader.cpp
   Kalimdor/Firelands/boss_lord_rhyolith.cpp

@@ -28,11 +28,99 @@
 #include "../firelands.h"
 #include "Spell.h"
 
-#include "boss_bethtilac.h"
 #include "boss_bethtilac_data.h"
+#include "boss_bethtilac_spiderAI.h"
 
 
+
+// Beth'tilac AI class declaration
+
+
+enum BethtilacPhases    // needed to be here because it is used as function parameter
+{
+    PHASE_IDLE,
+    PHASE_TRANSFER_1,
+    PHASE_1,
+    PHASE_TRANSFER_2,
+    PHASE_2
+};
+
+class boss_bethtilacAI: public SpiderAI
+{
+public:
+    explicit boss_bethtilacAI(Creature *creature);
+    virtual ~boss_bethtilacAI();
+
+private:
+    // virtual method overrides
+    void Reset();
+    void EnterCombat(Unit *who);
+    bool UpdateVictim();
+    void DamageTaken(Unit *attacker, uint32 &damage);
+    void EnterEvadeMode();
+    void KilledUnit(Unit *victim);
+    void JustDied(Unit *killer);
+    void UpdateAI(const uint32 diff);
+    void DoAction(const int32 event);
+    void MovementInform(uint32 type, uint32 id);
+    //void SummonedCreatureDespawn(Creature *creature);
+    void AttackStart(Unit *victim);
+
+    // attributes
+    BethtilacPhases phase, oldPhase;
+    bool devastationEnabled;    // Smoldering devastation is disabled for a while after cast to avoid duplicate casts
+    bool combatCheckEnabled;
+    int devastationCounter;
+    int spinnerCounter;         // number of the vawe of spinners
+
+    // methods
+    void SetPhase(BethtilacPhases newPhase);
+    void EnterPhase(BethtilacPhases newPhase);
+    void ScheduleEventsForPhase(BethtilacPhases phase);
+
+    bool IsInTransfer();
+    void ResetPower();
+    void DepletePower();
+
+    void DoSmolderingDevastation();
+
+    void ShowWarnText(const char *text);    // show warning text in the client screen (checked by videos)
+
+    GameObject *FindDoor();
+    void LockDoor();
+    void UnlockDoor();
+
+    // spawns
+    void SummonDrone();
+    void SummonSpinners(bool withWarn);
+    void SummonSpiderlings();
+};
+
+
+
+// Beth'tilac script loader
+class boss_bethtilac: public CreatureScript
+{
+public:
+    boss_bethtilac() : CreatureScript("boss_bethtilac") {}
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new boss_bethtilacAI(creature);
+    }
+};
+
+void load_boss_Bethtilac()
+{
+    new boss_bethtilac();
+};
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
 // Beth'tilac implementation
+
 
 enum BethtilacSpells
 {
@@ -81,7 +169,7 @@ static const int MAX_DEVASTATION_COUNT = 3;
 
 
 
-boss_bethtilac::boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
+boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
     : SpiderAI(creature)
 {
     phase = PHASE_IDLE;
@@ -91,14 +179,14 @@ boss_bethtilac::boss_bethtilacAI::boss_bethtilacAI(Creature *creature)
 }
 
 
-boss_bethtilac::boss_bethtilacAI::~boss_bethtilacAI()
+boss_bethtilacAI::~boss_bethtilacAI()
 {
     //if (summonCombatChecker)
     //    summonCombatChecker->UnSummon();
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::Reset()
+void boss_bethtilacAI::Reset()
 {
     if (instance)
         instance->SetData(TYPE_BETHTILAC, NOT_STARTED);
@@ -126,7 +214,7 @@ void boss_bethtilac::boss_bethtilacAI::Reset()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::EnterCombat(Unit *who)
+void boss_bethtilacAI::EnterCombat(Unit *who)
 {
     if (phase != PHASE_IDLE)
         return;
@@ -149,7 +237,7 @@ void boss_bethtilac::boss_bethtilacAI::EnterCombat(Unit *who)
 }
 
 
-bool boss_bethtilac::boss_bethtilacAI::UpdateVictim()
+bool boss_bethtilacAI::UpdateVictim()
 {
     if (phase == PHASE_IDLE)
         return false;
@@ -169,7 +257,7 @@ bool boss_bethtilac::boss_bethtilacAI::UpdateVictim()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::DamageTaken(Unit *attacker, uint32 &damage)
+void boss_bethtilacAI::DamageTaken(Unit *attacker, uint32 &damage)
 {
     if (phase == PHASE_IDLE)
     {
@@ -178,7 +266,7 @@ void boss_bethtilac::boss_bethtilacAI::DamageTaken(Unit *attacker, uint32 &damag
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::EnterEvadeMode()
+void boss_bethtilacAI::EnterEvadeMode()
 {
     if (!combatCheckEnabled)
         return;
@@ -213,12 +301,12 @@ void boss_bethtilac::boss_bethtilacAI::EnterEvadeMode()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::KilledUnit(Unit *victim)
+void boss_bethtilacAI::KilledUnit(Unit *victim)
 {
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::JustDied(Unit *killer)
+void boss_bethtilacAI::JustDied(Unit *killer)
 {
     SpiderAI::JustDied(killer);
     me->RemoveAllAuras();
@@ -230,7 +318,7 @@ void boss_bethtilac::boss_bethtilacAI::JustDied(Unit *killer)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::UpdateAI(const uint32 diff)
+void boss_bethtilacAI::UpdateAI(const uint32 diff)
 {
     if (!UpdateVictim())
     {
@@ -267,14 +355,14 @@ void boss_bethtilac::boss_bethtilacAI::UpdateAI(const uint32 diff)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::SetPhase(BethtilacPhases newPhase)
+void boss_bethtilacAI::SetPhase(BethtilacPhases newPhase)
 {
     oldPhase = phase;
     phase = newPhase;
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
+void boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
 {
     if (newPhase != PHASE_1)
         ClearTimers();
@@ -343,7 +431,7 @@ void boss_bethtilac::boss_bethtilacAI::EnterPhase(BethtilacPhases newPhase)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases phase)
+void boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases phase)
 {
     if (phase != PHASE_IDLE && phase != PHASE_1)
         AddTimer(POWER_DECAY, 1000, true);
@@ -374,7 +462,7 @@ void boss_bethtilac::boss_bethtilacAI::ScheduleEventsForPhase(BethtilacPhases ph
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::ResetPower()
+void boss_bethtilacAI::ResetPower()
 {
     SetMaxPower(8200);
     SetPower(8200);
@@ -382,13 +470,13 @@ void boss_bethtilac::boss_bethtilacAI::ResetPower()
 }
 
 
-bool boss_bethtilac::boss_bethtilacAI::IsInTransfer()
+bool boss_bethtilacAI::IsInTransfer()
 {
     return phase == PHASE_TRANSFER_1 || phase == PHASE_TRANSFER_2;
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
+void boss_bethtilacAI::DoAction(const int32 event)
 {
     switch (event)
     {
@@ -470,7 +558,7 @@ void boss_bethtilac::boss_bethtilacAI::DoAction(const int32 event)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
+void boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
 {
     ScriptedAI::MovementInform(type, id);
 
@@ -505,7 +593,7 @@ void boss_bethtilac::boss_bethtilacAI::MovementInform(uint32 type, uint32 id)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::AttackStart(Unit *victim)
+void boss_bethtilacAI::AttackStart(Unit *victim)
 {
     if (phase != PHASE_IDLE && !IsInTransfer() && me->canAttack(victim, false))
     {
@@ -518,13 +606,13 @@ void boss_bethtilac::boss_bethtilacAI::AttackStart(Unit *victim)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::DepletePower()
+void boss_bethtilacAI::DepletePower()
 {
     ModifyPower(-100);
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
+void boss_bethtilacAI::DoSmolderingDevastation()
 {
     if (devastationEnabled)
     {
@@ -552,13 +640,13 @@ void boss_bethtilac::boss_bethtilacAI::DoSmolderingDevastation()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::ShowWarnText(const char *text)
+void boss_bethtilacAI::ShowWarnText(const char *text)
 {
     me->MonsterTextEmote(text, 0, true);
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::SummonDrone()
+void boss_bethtilacAI::SummonDrone()
 {
     if (devastationCounter >= MAX_DEVASTATION_COUNT)
         return;
@@ -570,7 +658,7 @@ void boss_bethtilac::boss_bethtilacAI::SummonDrone()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::SummonSpinners(bool withWarn)
+void boss_bethtilacAI::SummonSpinners(bool withWarn)
 {
     if (devastationCounter >= MAX_DEVASTATION_COUNT)
         return;
@@ -586,7 +674,7 @@ void boss_bethtilac::boss_bethtilacAI::SummonSpinners(bool withWarn)
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::SummonSpiderlings()
+void boss_bethtilacAI::SummonSpiderlings()
 {
     if (devastationCounter >= MAX_DEVASTATION_COUNT)
         return;
@@ -605,13 +693,13 @@ void boss_bethtilac::boss_bethtilacAI::SummonSpiderlings()
 }
 
 
-GameObject *boss_bethtilac::boss_bethtilacAI::FindDoor()
+GameObject *boss_bethtilacAI::FindDoor()
 {
     return me->FindNearestGameObject(208877, 100);
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::LockDoor()
+void boss_bethtilacAI::LockDoor()
 {
     if (GameObject *goDoor = FindDoor())
     {
@@ -621,7 +709,7 @@ void boss_bethtilac::boss_bethtilacAI::LockDoor()
 }
 
 
-void boss_bethtilac::boss_bethtilacAI::UnlockDoor()
+void boss_bethtilacAI::UnlockDoor()
 {
     if (GameObject *goDoor = FindDoor())
     {
@@ -629,103 +717,3 @@ void boss_bethtilac::boss_bethtilacAI::UnlockDoor()
         goDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
     }
 }
-
-
-
-// vehicle id = 1652
-
-/*
-// required SQL queries
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'boss_bethtilac',
-    AIName = 'NullAI',
-    VehicleId = 1652
-  WHERE
-    entry = 52498;
-
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'mob_cinderweb_drone',
-    AIName = 'NullAI',
-    VehicleId = 1652,
-    difficulty_entry_1 = 53582,
-    difficulty_entry_2 = 53583,
-    difficulty_entry_3 = 53584
-  WHERE
-    entry = 52581;
-
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'mob_cinderweb_spinner',
-    AIName = 'NullAI',
-    difficulty_entry_1 = 53599,
-    difficulty_entry_2 = 53600,
-    difficulty_entry_3 = 53601
-  WHERE
-    entry = 52524;
-
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'mob_cinderweb_spiderling',
-    AIName = 'NullAI',
-    difficulty_entry_1 = 53579,
-    difficulty_entry_2 = 53580,
-    difficulty_entry_3 = 53581,
-    speed_run = 1
-  WHERE
-    entry = 52447;
-
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'npc_spiderweb_filament',
-    AIName = 'NullAI',
-    VehicleId = 341
-  WHERE
-    entry = 53082;
-
-
-UPDATE
-    creature_template
-  SET
-    ScriptName = 'npc_web_rip'
-  WHERE
-    entry = 53450;
-
-UPDATE
-    creature_template
-  SET
-    InhabitType = 7,
-    AIName = 'NullCreatureAI',
-    ScriptName = 'npc_sticky_webbing'
-  WHERE
-    entry = 53490;
-
-
-INSERT INTO
-  conditions
-    (SourceTypeOrReferenceId, SourceEntry, ConditionTypeOrReference, ConditionValue1, ConditionValue2, Comment)
-  VALUES
-    (13,                      99411,       18,                       1,               52498,           'Beth\'tilac - Leech Venom'),
-    (13,                      99304,       18,                       1,               52447,           'Beth\'tilac - Consume');
-
-INSERT INTO `creature_template` (`entry`, `modelid1`, `modelid2`, `name`, `minlevel`, `maxlevel`, `faction_A`, `faction_H`, `speed_walk`, `speed_run`, `unit_flags`, `dynamicflags`, `AIName`, `InhabitType`, `flags_extra`, `ScriptName`)
-    VALUES ('524981', '17519', '11686', 'Beth\'tilac Filament Caster', '80', '80', '114', '114', '0', '0', '33587968', '8', 'NullAI', '7', '130', '');
-
-INSERT INTO
-  spell_script_names
-    (spell_id, ScriptName)
-  VALUES
-    (99133, 'spell_meteor_burn');
-
- */

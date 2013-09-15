@@ -24,9 +24,56 @@
 #include "ScriptPCH.h"
 #include "../firelands.h"
 #include "boss_bethtilac_data.h"
+#include "boss_bethtilac_spiderAI.h"
 
-#include "boss_bethtilac_drone.h"
 
+class mob_droneAI: public SpiderAI
+{
+public:
+    explicit mob_droneAI(Creature *creature);
+    virtual ~mob_droneAI();
+
+private:
+    // virtual method overrides
+    void Reset();
+    void EnterCombat(Unit *who);
+    void EnterEvadeMode();
+    void UpdateAI(const uint32 diff);
+    void DoAction(const int32 event);
+    void MovementInform(uint32 type, uint32 id);
+    void AttackStart(Unit *victim);
+    void IsSummonedBy(Unit *summoner);
+
+    // attributes
+    bool onGround;
+    bool onTop;
+};
+
+
+class mob_drone: public CreatureScript
+{
+public:
+    mob_drone(): CreatureScript("mob_cinderweb_drone") {}
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        if (creature->isSummon())
+            return new mob_droneAI(creature);
+
+        return NULL;
+    }
+};
+
+void load_npc_CinderwebDrone()
+{
+    new mob_drone();
+};
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// implementation of Cinderweb Drone
 
 enum DroneSpells
 {
@@ -45,17 +92,7 @@ enum DroneEvents
 
 
 
-CreatureAI *mob_drone::GetAI(Creature *creature) const
-{
-    if (creature->isSummon())
-        return new mob_droneAI(creature);
-
-    return NULL;
-}
-
-
-
-mob_drone::mob_droneAI::mob_droneAI(Creature *creature)
+mob_droneAI::mob_droneAI(Creature *creature)
     : SpiderAI(creature)
     , onGround(true)
     , onTop(false)
@@ -63,30 +100,30 @@ mob_drone::mob_droneAI::mob_droneAI(Creature *creature)
 }
 
 
-mob_drone::mob_droneAI::~mob_droneAI()
+mob_droneAI::~mob_droneAI()
 {
 }
 
 
-void mob_drone::mob_droneAI::Reset()
+void mob_droneAI::Reset()
 {
     SpiderAI::Reset();
 }
 
 
-void mob_drone::mob_droneAI::EnterCombat(Unit *who)
+void mob_droneAI::EnterCombat(Unit *who)
 {
     SpiderAI::EnterCombat(who);
 }
 
 
-void mob_drone::mob_droneAI::EnterEvadeMode()
+void mob_droneAI::EnterEvadeMode()
 {
     // do nothing
 }
 
 
-void mob_drone::mob_droneAI::UpdateAI(const uint32 diff)
+void mob_droneAI::UpdateAI(const uint32 diff)
 {
     if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
     {
@@ -105,7 +142,7 @@ void mob_drone::mob_droneAI::UpdateAI(const uint32 diff)
 }
 
 
-void mob_drone::mob_droneAI::DoAction(const int32 event)
+void mob_droneAI::DoAction(const int32 event)
 {
     switch (event)
     {
@@ -157,7 +194,7 @@ void mob_drone::mob_droneAI::DoAction(const int32 event)
 }
 
 
-void mob_drone::mob_droneAI::MovementInform(uint32 type, uint32 id)
+void mob_droneAI::MovementInform(uint32 type, uint32 id)
 {
     if (type == POINT_MOTION_TYPE)
     {
@@ -184,14 +221,14 @@ void mob_drone::mob_droneAI::MovementInform(uint32 type, uint32 id)
 }
 
 
-void mob_drone::mob_droneAI::AttackStart(Unit *victim)
+void mob_droneAI::AttackStart(Unit *victim)
 {
     if (victim->GetPositionZ() < webZPosition - 10.0f)      // don't attack players above the web
         SpiderAI::AttackStart(victim);
 }
 
 
-void mob_drone::mob_droneAI::IsSummonedBy(Unit *summoner)
+void mob_droneAI::IsSummonedBy(Unit *summoner)
 {
     SetMaxPower(85);
     SetPower(85);

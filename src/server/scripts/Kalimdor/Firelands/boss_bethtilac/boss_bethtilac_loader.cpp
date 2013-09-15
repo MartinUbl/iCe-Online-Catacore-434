@@ -22,24 +22,24 @@
 
 
 #include "ScriptPCH.h"  // not needed, only to make compiler happy
-#include "boss_bethtilac.h"
-#include "boss_bethtilac_drone.h"
-#include "boss_bethtilac_environment.h"
-#include "boss_bethtilac_spiderling.h"
-#include "boss_bethtilac_spinner.h"
+
+
+// forward declarations of script loaders
+void load_boss_Bethtilac();
+void load_npc_CinderwebDrone();
+void load_mob_Spiderling();
+void load_mob_Spinner();
+void load_beth_environment();
 
 
 // load scripts
 
 void AddSC_boss_bethtilac()
 {
-    new boss_bethtilac();
-    new mob_drone();
-    new mob_spiderling();
-    new mob_spinner();
-    new npc_filament();
-    new npc_web_rip();
-    new npc_sticky_webbing();
-
-    new spell_meteor_burn();
+    load_boss_Bethtilac();
+    load_npc_CinderwebDrone();
+    load_mob_Spiderling();
+    load_mob_Spinner();
+    load_beth_environment();
 }
+

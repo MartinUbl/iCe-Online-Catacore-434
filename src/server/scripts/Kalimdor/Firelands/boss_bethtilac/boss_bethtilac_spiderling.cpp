@@ -24,8 +24,57 @@
 #include "ScriptPCH.h"
 #include "../firelands.h"
 #include "boss_bethtilac_data.h"
+#include "boss_bethtilac_spiderAI.h"
 
-#include "boss_bethtilac_spiderling.h"
+
+class mob_spiderlingAI: public SpiderAI
+{
+public:
+    explicit mob_spiderlingAI(Creature *creature);
+    virtual ~mob_spiderlingAI();
+
+private:
+    // virtual method overrides
+    void UpdateAI(const uint32 diff);
+    void DoAction(const int32 event);
+    void MovementInform(uint32 type, uint32 id);
+    void MoveInLineOfSight(Unit *who);
+    void IsSummonedBy(Unit *summoner);
+    void EnterEvadeMode();
+
+    // attributes
+    uint64 followedGuid;
+    bool following;
+
+    // methods
+    bool CanFollowTarget(Unit *target) const;
+    Unit *ChooseTarget();
+    bool FollowTarget();
+};
+
+
+class mob_spiderling: public CreatureScript
+{
+public:
+    mob_spiderling(): CreatureScript("mob_cinderweb_spiderling") {}
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        if (creature->isSummon())
+            return new mob_spiderlingAI(creature);
+
+        return NULL;
+    }
+};
+
+void load_mob_Spiderling()
+{
+    new mob_spiderling();
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// implementation of Cinderweb Spiderling
 
 
 static const uint32 MOVE_CHASE = 1;
@@ -35,24 +84,13 @@ enum SpiderlingEvents
     MOVE_CHECK = 0
 };
 
-
 enum SpiderlingSpells
 {
     SPELL_SEEPING_VENOM = 99130
 };
 
 
-
-CreatureAI *mob_spiderling::GetAI(Creature *creature) const
-{
-    if (creature->isSummon())
-        return new mob_spiderlingAI(creature);
-
-    return NULL;
-}
-
-
-mob_spiderling::mob_spiderlingAI::mob_spiderlingAI(Creature *creature)
+mob_spiderlingAI::mob_spiderlingAI(Creature *creature)
     : SpiderAI(creature)
     , followedGuid(0)
     , following(false)
@@ -60,18 +98,19 @@ mob_spiderling::mob_spiderlingAI::mob_spiderlingAI(Creature *creature)
 }
 
 
-mob_spiderling::mob_spiderlingAI::~mob_spiderlingAI()
+mob_spiderlingAI::~mob_spiderlingAI()
 {
 }
 
 
-void mob_spiderling::mob_spiderlingAI::EnterEvadeMode()
+
+void mob_spiderlingAI::EnterEvadeMode()
 {
     // do nothing, don't evade
 }
 
 
-void mob_spiderling::mob_spiderlingAI::UpdateAI(const uint32 diff)
+void mob_spiderlingAI::UpdateAI(const uint32 diff)
 {
     if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
     {
@@ -83,7 +122,7 @@ void mob_spiderling::mob_spiderlingAI::UpdateAI(const uint32 diff)
 }
 
 
-void mob_spiderling::mob_spiderlingAI::DoAction(const int32 event)
+void mob_spiderlingAI::DoAction(const int32 event)
 {
     switch (event)
     {
@@ -96,14 +135,14 @@ void mob_spiderling::mob_spiderlingAI::DoAction(const int32 event)
 }
 
 
-void mob_spiderling::mob_spiderlingAI::MovementInform(uint32 type, uint32 id)
+void mob_spiderlingAI::MovementInform(uint32 type, uint32 id)
 {
     me->StopMoving();
     FollowTarget();
 }
 
 
-void mob_spiderling::mob_spiderlingAI::MoveInLineOfSight(Unit *who)
+void mob_spiderlingAI::MoveInLineOfSight(Unit *who)
 {
     if (!me->HasSpellCooldown(SPELL_SEEPING_VENOM))
     {
@@ -113,7 +152,7 @@ void mob_spiderling::mob_spiderlingAI::MoveInLineOfSight(Unit *who)
 }
 
 
-void mob_spiderling::mob_spiderlingAI::IsSummonedBy(Unit *summoner)
+void mob_spiderlingAI::IsSummonedBy(Unit *summoner)
 {
     FollowTarget();
 
@@ -122,7 +161,7 @@ void mob_spiderling::mob_spiderlingAI::IsSummonedBy(Unit *summoner)
 }
 
 
-Unit *mob_spiderling::mob_spiderlingAI::ChooseTarget()
+Unit *mob_spiderlingAI::ChooseTarget()
 {
     // find Drone or Beth'tilac to follow to be eaten
     if (Creature *drone = me->FindNearestCreature(NPC_CINDERWEB_DRONE, 100.0f, true))
@@ -139,7 +178,7 @@ Unit *mob_spiderling::mob_spiderlingAI::ChooseTarget()
 }
 
 
-bool mob_spiderling::mob_spiderlingAI::FollowTarget()
+bool mob_spiderlingAI::FollowTarget()
 {
     if (following)
     {
@@ -180,7 +219,7 @@ bool mob_spiderling::mob_spiderlingAI::FollowTarget()
 }
 
 
-bool mob_spiderling::mob_spiderlingAI::CanFollowTarget(Unit *target) const
+bool mob_spiderlingAI::CanFollowTarget(Unit *target) const
 {
     return target->isAlive() && target->GetPositionZ() < webZPosition - 20.0f;
 }
