@@ -30,7 +30,6 @@ public:
         instance_blackwing_descent_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
-        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 MaloriakGUID;
         uint64 AtramedesGUID;
@@ -208,18 +207,6 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
-        virtual uint32* GetCorrUiEncounter()
-        {
-            uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[4];//omnotron
-            currEnc[1]=uiEnc[6];//nefarian
-            currEnc[2]=uiEnc[1];//maloriak
-            currEnc[3]=uiEnc[5];//magmaw
-            currEnc[4]=uiEnc[3];//chimareon
-            currEnc[5]=uiEnc[2];//atramedes
-            return currEnc;
-        }
-        virtual uint32 GetCorrMaxEncounter(){return MAX_ENCOUNTER-1;}
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const
