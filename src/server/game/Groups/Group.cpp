@@ -2110,6 +2110,20 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         player->SetRaidDifficulty(difficulty);
         player->SendRaidDifficulty(true);
     }
+
+    Player *leader = GetLeader();//Reset npc in map for calling AddToWorld() again because of Flexible Raid locks
+    Player::BoundInstancesMap bounds=leader->m_boundInstances[2];
+    for(Player::BoundInstancesMap::iterator itr=bounds.begin();itr!=bounds.end();itr++)
+    {
+        InstancePlayerBind pBind=itr->second;
+        Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());
+        if (!map)     //sometimes (almost always) it doesnt exist yet
+            map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
+        if(map)
+        {
+            map->UnloadAll();
+        }
+    }
 }
 
 uint32 Group::GetAverageBattlegroundRating()
@@ -2224,7 +2238,8 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
 
     // some instances only have one difficulty
     GetDownscaledMapDifficultyData(aMap->GetId(),difficulty);
-
+    if(aMap->IsRaid()&&aMap->ToInstanceMap()->GetInstanceScript())
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
@@ -2257,8 +2272,15 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
 {
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
-
-    InstanceGroupBind& bind = m_boundInstances[save->GetDifficulty()][save->GetMapId()];
+    Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
+    const Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+    if(!map)
+        map=sMapMgr->CreateBaseMap(save->GetMapId());//CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());
+    if(map&&map->IsRaid())
+        diff=RAID_DIFFICULTY_10MAN_HEROIC;
+    else
+        diff=save->GetDifficulty();
+    InstanceGroupBind& bind = m_boundInstances[diff][save->GetMapId()];
     if (!load && (!bind.save || permanent != bind.perm || save != bind.save))
         CharacterDatabase.PExecute("REPLACE INTO group_instance (guid, instance, permanent) VALUES (%u, %u, %u)", GUID_LOPART(GetGUID()), save->GetInstanceId(), permanent);
 

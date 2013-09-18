@@ -190,7 +190,28 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     CellPair cell_pair(x, y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids const& cell_guids = sObjectMgr->GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
+    uint8 spawMod=0;
+    if(i_map->IsRaid())
+    {
+        uint32 mapId=i_map->GetId();//757=Baradin Hold
+        spawMod=2;  
+        MapDifficulty const* mapDiff = GetMapDifficultyData(i_map->GetId(),Difficulty(spawMod));
+        if(!mapDiff||mapId==757)//mapid checks for instances which was started but not finished on 10M HC by blizzard
+        {
+            for(int i=0;i<4;i++)
+            {
+                mapDiff = GetMapDifficultyData(i_map->GetId(),Difficulty(i));
+                if(mapDiff)
+                {
+                    spawMod=i;
+                    break;
+                }
+            }
+        }
+    }
+    else
+        spawMod=i_map->GetSpawnMode();
+    CellObjectGuids const& cell_guids  = sObjectMgr->GetCellObjectGuids(i_map->GetId(), spawMod, cell_id);
 
     LoadHelper(cell_guids.creatures, cell_pair, m, i_creatures, i_map);
 }
