@@ -19474,7 +19474,7 @@ void Player::SendRaidInfo()
             //if(itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
-                //bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                bool isHeroic;
                 uint32* uiEnc;
                 uint32 encData = 0;
                 int coun = 0;
@@ -19485,8 +19485,9 @@ void Player::SendRaidInfo()
                 {
                     uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
                     coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
+                    isHeroic = 0;
 
-                    if (uiEnc && coun > 0)
+                    if (uiEnc && coun > 0 && coun < 25)
                     {
                         for (int i=0;i<coun;i++)
                         {
@@ -19500,10 +19501,12 @@ void Player::SendRaidInfo()
                         }
                     }
                 }
+                else 
+                   isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
 
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(0);                          //(isHeroic); if there wasnt 0, heroic difficulty show nothing
+                data << isHeroic;                           //if there wasnt 0, heroic difficulty shown nothing
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
