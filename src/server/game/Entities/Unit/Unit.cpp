@@ -9709,8 +9709,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             case 92322: // Theralion's Mirror (Heroic)
             case 92114: // Unheeded Warning
             case 92319: // Bell of Enraging Resonance
-            case 96967: // Eye of Blazing Power
-            case 97137: // Eye of Blazing Power (Heroic)
             case 96947: // Spidersilk Spindle
             case 97130: // Spidersilk Spindle (Heroic)
             case 96910: // The Hungerer
@@ -9725,6 +9723,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     return false;
 
                 ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 60000);
+                break;
+            //45 second cooldown
+            case 96967: // Eye of Blazing Power
+            case 97137: // Eye of Blazing Power (Heroic)       
+                if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
+                    return false;
+
+                ToPlayer()->AddSpellCooldown(auraSpellInfo->Id, 0, 45000);
                 break;
             // 30 second cooldown
             case 92180: // Leaden Despair
