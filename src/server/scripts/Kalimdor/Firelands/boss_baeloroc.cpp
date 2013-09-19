@@ -418,6 +418,10 @@ public:
                                 bp0 = 0;
 
                             me->CastCustomSpell(me->getVictim(),99353,&bp0,0,0,true); // Decimation Strike
+
+                            if (avoided)
+                                me->getVictim()->RemoveAurasDueToSpell(99353);
+
                             //me->resetAttackTimer();
                         }
                         return;
