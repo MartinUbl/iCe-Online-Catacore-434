@@ -2300,6 +2300,11 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
 
 void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
 {
+    const Map* map=sMapMgr->CreateBaseMap(mapid);
+    if(map && map->IsRaid())
+    {
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
+    }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())
     {
