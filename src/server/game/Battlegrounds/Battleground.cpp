@@ -500,6 +500,8 @@ inline void Battleground::_ProcessJoin(uint32 diff)
 
                     plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
                     plr->ResetAllPowers();
+                    plr->CastSpell(plr,74410,true); // Arena Dampening
+
                     // remove auras with duration lower than 30s
                     Unit::AuraApplicationMap & auraMap = plr->GetAppliedAuras();
                     for (Unit::AuraApplicationMap::iterator iter = auraMap.begin(); iter != auraMap.end();)
@@ -528,6 +530,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                 {
                     plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
                     plr->ResetAllPowers();
+                    plr->CastSpell(plr,74411,true); // Battleground Dampening
 
                     // reapply faction override in rated battlegrounds + wargames if necessarry
                     if (isRated() || isWargame())

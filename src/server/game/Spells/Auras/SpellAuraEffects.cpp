@@ -635,13 +635,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
 
                         amount += (int32)DoneActualBenefit;
-                        
-                        // Arena - Dampening
-                        if (AuraEffect const* pAurEff = caster->GetAuraEffect(74410, 0))
-                            amount *= int32((100.0f + pAurEff->GetAmount()) / 100.0f);
-                        // Battleground - Dampening
-                        else if (AuraEffect const* pAurEff = caster->GetAuraEffect(74411, 0))
-                            amount *= int32((100.0f + pAurEff->GetAmount()) / 100.0f);
 
                         return amount;
                     }

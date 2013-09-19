@@ -23166,6 +23166,8 @@ void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
     // Remove faction override spells
     RemoveAurasDueToSpell(SPELL_FACTION_HORDE);
     RemoveAurasDueToSpell(SPELL_FACTION_ALLIANCE);
+    RemoveAurasDueToSpell(74411); // Battleground dampening
+    RemoveAurasDueToSpell(74410); // Arena dampening
 
     if (Battleground *bg = GetBattleground())
     {
