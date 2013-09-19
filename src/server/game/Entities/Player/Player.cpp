@@ -19402,6 +19402,11 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 
 void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
+    const Map* map=sMapMgr->CreateBaseMap(itr->second.save->GetMapId());
+    if(map && map->IsRaid())
+    {
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
+    }
     if (itr != m_boundInstances[difficulty].end())
     {
         if (!unload) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'", GetGUIDLow(), itr->second.save->GetInstanceId());
