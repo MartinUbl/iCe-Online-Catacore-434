@@ -19471,7 +19471,7 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
-            //if(itr->second.perm)
+            if(itr->second.perm)
             {
                 InstanceSave *save = itr->second.save;
                 bool isHeroic;
