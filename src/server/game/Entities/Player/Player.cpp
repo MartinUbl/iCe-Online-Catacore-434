@@ -19396,6 +19396,11 @@ InstanceSave * Player::GetInstanceSave(uint32 mapid, bool raid)
 
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
+    const Map* map=sMapMgr->CreateBaseMap(mapid);
+    if(map && map->IsRaid())
+    {
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
+    }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     UnbindInstance(itr, difficulty, unload);
 }
