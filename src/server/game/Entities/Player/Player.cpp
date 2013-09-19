@@ -4533,6 +4533,40 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
+    // Some spells need to be cleared after talent reset
+    switch (getClass())
+    {
+        case CLASS_MAGE:
+            RemoveAura(57529); // Arcane Potency r.1
+            RemoveAura(57531); // Arcane Potency r.2
+        break;
+
+        case CLASS_DRUID:
+            RemoveAura(48517); // Eclipse (Solar)
+            RemoveAura(48518); // Eclipse (Lunar)
+        break;
+
+        default:
+            break;
+    }
+
+    if (Group * group = this->GetGroup())
+    {
+        for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player *pl = itr->getSource();
+
+            if (pl && pl->IsInWorld())
+            {
+                if (pl->GetAura(54646,GetGUID())) // Focus Magic
+                {
+                    pl->RemoveAura(54646);
+                    break;
+                }
+            }
+        }
+    }
+
     m_branchSpec[m_activeSpec] = 0;
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
