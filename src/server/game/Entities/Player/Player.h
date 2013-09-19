@@ -913,11 +913,12 @@ enum PlayerLoginQueryIndex
 
 enum PlayerDelayedOperations
 {
-    DELAYED_SAVE_PLAYER         = 0x01,
-    DELAYED_RESURRECT_PLAYER    = 0x02,
-    DELAYED_SPELL_CAST_DESERTER = 0x04,
-    DELAYED_BG_MOUNT_RESTORE    = 0x08,                     ///< Flag to restore mount state after teleport from BG
-    DELAYED_BG_TAXI_RESTORE     = 0x10,                     ///< Flag to restore taxi state after teleport from BG
+    DELAYED_SAVE_PLAYER             = 0x01,
+    DELAYED_RESURRECT_PLAYER        = 0x02,
+    DELAYED_SPELL_CAST_DESERTER     = 0x04,
+    DELAYED_BG_MOUNT_RESTORE        = 0x08,                     ///< Flag to restore mount state after teleport from BG
+    DELAYED_BG_TAXI_RESTORE         = 0x10,                     ///< Flag to restore taxi state after teleport from BG
+    DELAYED_GROUP_MARKER_UPDATE     = 0x20,                     ///< Group need to get update packet for raid markers after teleport or login
     DELAYED_END
 };
 
@@ -1970,6 +1971,7 @@ class Player : public Unit, public GridObject<Player>
         static void RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0 , const char* reason = NULL);
         void RemoveFromGroup(RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT) { RemoveFromGroup(GetGroup(),GetGUID(), method); }
         void SendUpdateToOutOfRangeGroupMembers();
+        void RemoveMarkerForPlayer(Player * raidLeader);
 
         void SetInGuild(uint32 GuildId);
         void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
@@ -2587,6 +2589,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateVisibilityForPlayer();
         void UpdateVisibilityOf(WorldObject* target);
         void UpdateTriggerVisibility();
+        void HandleDelayedUpdateForPlayer(Creature * target);
 
         template<class T>
             void UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& visibleNow);

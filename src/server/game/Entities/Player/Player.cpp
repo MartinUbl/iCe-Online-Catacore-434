@@ -2268,6 +2268,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //else
         //    return false;
     }
+
+    if (this->GetGroup())
+        ScheduleDelayedOperation(DELAYED_GROUP_MARKER_UPDATE);
+
     return true;
 }
 
@@ -2308,6 +2312,12 @@ void Player::ProcessDelayedOperations()
 
     if (m_DelayedOperations & DELAYED_SPELL_CAST_DESERTER)
         CastSpell(this, 26013, true);               // Deserter
+
+    if (m_DelayedOperations & DELAYED_GROUP_MARKER_UPDATE)
+    {
+        if (this->GetGroup())
+            this->GetGroup()->RefreshAllMarkersTo(this);
+    }
 
     if (m_DelayedOperations & DELAYED_BG_MOUNT_RESTORE)
     {
@@ -3340,6 +3350,31 @@ void Player::RemoveMail(uint32 id)
             //do not delete item, because Player::removeMail() is called when returning mail to sender.
             m_mail.erase(itr);
             return;
+        }
+    }
+}
+
+void Player::RemoveMarkerForPlayer(Player * raidLeader)
+{
+    if (!raidLeader || !raidLeader->IsInWorld() || !this)
+        return;
+
+    if (this->GetMapId() != raidLeader->GetMapId() || GetExactDist2d(raidLeader) > 80.0f)
+        return;
+
+    Player::GUIDTimestampMap* Markers = raidLeader->GetSummonMapFor(RAID_MARKER_TRIGGER);
+    if (Markers && !Markers->empty())
+    {
+        Creature* pTemp = NULL;
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
+        {
+            pTemp = Creature::GetCreature(*raidLeader, (*itr).first);
+            if (pTemp)
+            {
+                pTemp->DestroyForPlayer(this);
+            }
+            else
+                ++itr;
         }
     }
 }
@@ -21826,6 +21861,7 @@ void Player::HandleStealthedUnitsDetection()
                 // target aura duration for caster show only if target exist at caster client
                 // send data at target visibility change (adding to client)
                 SendInitialVisiblePackets(*i);
+
             }
         }
         else
@@ -23624,6 +23660,7 @@ void Player::UpdateTriggerVisibility()
 
     UpdateData udata(GetMapId());
     WorldPacket packet;
+
     for (ClientGUIDs::iterator itr=m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
     {
         if (IS_CREATURE_GUID(*itr))
@@ -23639,9 +23676,51 @@ void Player::UpdateTriggerVisibility()
     GetSession()->SendPacket(&packet);
 }
 
+void Player::HandleDelayedUpdateForPlayer(Creature * creature)
+{
+    switch (creature->GetEntry())
+    {
+        case RAID_MARKER_TRIGGER:
+        {
+            if(creature->ToTempSummon())
+            {
+                if (Player* pCaster = Player::GetPlayer(*creature,creature->ToTempSummon()->GetSummonerGUID()))
+                {
+                    if (pCaster->IsInWorld() == true)
+                    {
+                        if (this->IsInRaidWith(pCaster) || this->IsInPartyWith(pCaster)) // Markers should be visible only for party/raid members
+                        {
+                            if (this->GetGroup() && this->GetExactDist2d(creature->GetPositionX(),creature->GetPositionY()) > 80.0f)
+                            {
+                                creature->AI()->SetGUID(GetGUID());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        break;
+        case 52498: // Beth'tilac
+        case 52577: // Lord Rhyolit's feet
+        case 53087:
+        {
+            //this->SendDelayedMovementUpdate(500,creature->GetGUID()); // 500 ms
+        }
+        break;
+
+        default:
+            break;
+    }
+
+}
+
 void Player::SendInitialVisiblePackets(Unit* target)
 {
+    if (target->ToCreature())
+        HandleDelayedUpdateForPlayer(target->ToCreature());
+
     SendAurasForTarget(target);
+
     if (target->isAlive())
     {
         if (target->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && target->getVictim())
@@ -23928,7 +24007,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
-{    
+{
     // update zone
     uint32 newzone, newarea;
     GetZoneAndAreaId(newzone,newarea);
@@ -23943,6 +24022,10 @@ void Player::SendInitialPacketsAfterAddToMap()
     CastSpell(this, 836, true);                             // LOGINEFFECT
 
     SendAurasForTarget(this);
+
+    if (this->GetGroup())
+            this->GetGroup()->RefreshAllMarkersTo(this);
+
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 

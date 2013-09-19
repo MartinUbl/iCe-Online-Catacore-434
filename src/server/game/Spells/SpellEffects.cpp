@@ -9163,6 +9163,25 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
             go_id = 4510103;
         }
     }
+    else if (m_spellInfo->Id >= 84996 && m_spellInfo->Id <= 85000) // raid markers
+    {
+        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetGroup())
+        {
+            if(m_caster->ToPlayer()->GetGroup()->GetLeaderGUID() == m_caster->GetGUID())
+            {
+                m_caster->ToPlayer()->GetGroup()->RemoveMarkerBySpellId(m_caster->ToPlayer(),m_spellInfo->Id);
+                Creature* trigger = m_caster->SummonCreature(RAID_MARKER_TRIGGER, x, y, z, o, TEMPSUMMON_TIMED_DESPAWN, 300000); // 5 minutes
+                if (trigger)
+                {
+                    trigger->setFaction(35);
+                    m_caster->ToPlayer()->AddSummonToMap(RAID_MARKER_TRIGGER, trigger->GetGUID(),time(NULL));
+                    trigger->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+                    m_caster->ToPlayer()->GetGroup()->RefreshMarkerBySpellIdToGroup(m_spellInfo->Id);
+                    return;
+                }
+            }
+        }
+    }
 
     uint64 guid = m_caster->m_ObjectSlot[slot];
     if (guid != 0)

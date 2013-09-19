@@ -4691,6 +4691,58 @@ class npc_moonwell_chalice: public CreatureScript
         };
 };
 
+class npc_raid_marker : public CreatureScript
+{
+public:
+    npc_raid_marker() : CreatureScript("npc_raid_marker") { }
+
+    CreatureAI* GetAI(Creature *_Creature) const
+    {
+        return new npc_raid_markerAI(_Creature);
+    }
+
+    struct npc_raid_markerAI : public PassiveAI
+    {
+        npc_raid_markerAI(Creature *c) : PassiveAI(c)
+        {
+            playerGUID = 0;
+            spellId = 0;
+        }
+
+        uint64 playerGUID;
+        uint32 spellId;
+
+        void SetGUID(const uint64 &guid, int32 /*id*/)
+        {
+            playerGUID = guid;
+        }
+
+        void UpdateMarkerForPlayer(void)
+        {
+            if (playerGUID == 0)
+                return;
+
+            Player * p = Player::GetPlayer(*me,playerGUID);
+
+            if (p == NULL || p->IsInWorld() == false || p->GetGroup() == false)
+                return;
+
+            spellId = me->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+
+            if (spellId)
+            {
+                p->GetGroup()->RefreshMarkerBySpellIdToPlayer(p,spellId);
+                playerGUID = 0;
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            UpdateMarkerForPlayer();
+        }
+    };
+};
+
 
 void AddSC_npcs_special()
 {
@@ -4748,4 +4800,5 @@ void AddSC_npcs_special()
     new npc_moonwell_chalice;
     new npc_burning_treant;
     new npc_fiery_imp;
+    new npc_raid_marker;
 }

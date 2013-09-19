@@ -41,7 +41,8 @@
 #include "Timer.h"
 #include <list>
 
-#define WORLD_TRIGGER   12999
+#define WORLD_TRIGGER       12999
+#define RAID_MARKER_TRIGGER 606060
 
 enum SpellInterruptFlags
 {
