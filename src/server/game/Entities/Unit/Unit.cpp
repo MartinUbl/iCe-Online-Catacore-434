@@ -3047,20 +3047,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
             crit -= 25.0f;
     }
 
-    // If origin is spell
-    if (spell)
-    {
-        const Unit::AuraEffectList& pAuraList = GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
-        if (!pAuraList.empty())
-        {
-            for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
-            {
-                if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spell->SpellFamilyFlags)
-                    crit += (*itr)->GetBaseAmount();
-            }
-        }
-    }
-    else // If not spell (pure melee / ranged attack)
+    if (!spell)// If not spell (pure melee / ranged attack)
     {
         if (pVictim)
         {
@@ -12064,15 +12051,10 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
             // Calculate increased critical strike chance for specific spells by relevant auras
             if (spellProto)
             {
-                const Unit::AuraEffectList& pAuraList = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
-                if (!pAuraList.empty())
-                {
-                    for (Unit::AuraEffectList::const_iterator itr = pAuraList.begin(); itr != pAuraList.end(); ++itr)
-                    {
-                        if ((*itr)->GetSpellProto()->EffectSpellClassMask[(*itr)->GetEffIndex()] & spellProto->SpellFamilyFlags)
-                            crit_chance += (*itr)->GetAmount();
-                    }
-                }
+                AuraEffectList const& critAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_CRITICAL_CHANCE_SPECIFIC);
+                for (AuraEffectList::const_iterator i = critAuras.begin(); i != critAuras.end(); ++i)
+                    if ((*i)->GetCasterGUID() == GetGUID() && (*i)->IsAffectedOnSpell(spellProto))
+                        crit_chance += (*i)->GetAmount();
             }
             // taken
             if (pVictim)
