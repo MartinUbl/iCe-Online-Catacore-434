@@ -1357,9 +1357,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     // Cleanse Spirit - heal after dispel with Cleansing Waters talent
     if (m_spellInfo->Id == 51886 && m_healing)
     {
-        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER
-            && !m_caster->ToPlayer()->HasSpellCooldown(m_healing))
+        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->ToPlayer()->HasSpellCooldown(m_healing))
+        {
             m_caster->CastSpell(unitTarget, m_healing, true);
+            m_caster->ToPlayer()->AddSpellCooldown(m_healing,0,6000);
+        }
 
         m_healing = 0;
     }
