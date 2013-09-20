@@ -72,6 +72,35 @@ bool InstanceScript::IsEncounterInProgress() const
     return false;
 }
 
+void InstanceScript::SetResurectionData(uint32 value, bool reset)
+{
+    if (reset)
+        ressurrectionCounter = value; // value should be always 0
+    else
+        ressurrectionCounter += value;
+}
+
+uint32 InstanceScript::GetResurrectionData() const
+{
+    return ressurrectionCounter;
+}
+
+bool InstanceScript::CanUseCombatRessurrection() const
+{
+    if (this->instance && this->instance->IsRaid())
+    {
+        if ( this->instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || this->instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+        {
+            return (GetResurrectionData() <= 2) ? true : false;
+        }
+        else // 10 man difficulty
+        {
+            return (GetResurrectionData() == 0) ? true : false;
+        }
+    }
+    return true;
+}
+
 void InstanceScript::LoadMinionData(const MinionData *data)
 {
     while (data->entry)

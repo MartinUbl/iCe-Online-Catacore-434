@@ -60,6 +60,7 @@
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 #include "BattlefieldMgr.h"
+#include "InstanceScript.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
 
@@ -5803,6 +5804,19 @@ SpellCastResult Spell::CheckCast(bool strict)
 {
     if(m_spellInfo->Id == 98619) // Wings of Flame ( Hacky way probably )
         return SPELL_CAST_OK;
+
+    // Combat ressurections per encounter are limited since Cataclysm
+    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
+    {
+        if (pInstance->instance->IsRaid())
+        {
+            if (m_spellInfo->HasSpellEffect(SPELL_EFFECT_RESURRECT) || m_spellInfo->HasSpellEffect(SPELL_EFFECT_SELF_RESURRECT))
+            {
+                if (pInstance->CanUseCombatRessurrection() == false)
+                    return SPELL_FAILED_IN_COMBAT_RES_LIMIT_REACHED;
+            }
+        }
+    }
 
     // Arena spectators are not able to cast spells while in arena
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena() && m_caster->ToPlayer()->GetSpectatorInstanceId() > 0)

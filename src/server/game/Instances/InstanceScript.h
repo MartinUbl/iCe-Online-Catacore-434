@@ -135,7 +135,7 @@ class InstanceScript : public ZoneScript
 {
     public:
 
-        explicit InstanceScript(Map *map) : instance(map) {}
+        explicit InstanceScript(Map *map) : instance(map) { ressurrectionCounter = 0;}
         virtual ~InstanceScript() {}
 
         Map *instance;
@@ -144,7 +144,7 @@ class InstanceScript : public ZoneScript
         virtual void Initialize() {}
 
         //On load
-        virtual void Load(const char * data) { LoadBossState(data); }
+        virtual void Load(const char * data) { LoadBossState(data);}
 
         //When save is needed, this function generates the data
         virtual std::string GetSaveData() { return GetBossSaveData(); }
@@ -156,6 +156,14 @@ class InstanceScript : public ZoneScript
         //Used by the map's CanEnter function.
         //This is to prevent players from entering during boss encounters.
         virtual bool IsEncounterInProgress() const;
+
+        // Players can use combat ressurection only once in 10 man and max 3 times in 25 man
+        virtual bool CanUseCombatRessurrection() const;
+
+        // Setters and Getters for ressurrection counting
+        virtual uint32 GetResurrectionData() const;
+
+        virtual void SetResurectionData(uint32 val, bool reset = false);
 
         //Called when a player successfully enters the instance.
         virtual void OnPlayerEnter(Player *) {}
@@ -239,6 +247,7 @@ class InstanceScript : public ZoneScript
 
         std::string LoadBossState(const char * data);
         std::string GetBossSaveData();
+        uint32 ressurrectionCounter;
     private:
         std::vector<BossInfo> bosses;
         DoorInfoMap doors;

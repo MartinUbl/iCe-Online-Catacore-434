@@ -13433,7 +13433,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             {
                 InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
                 if (map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
+                {
+                    map->GetInstanceScript()->SetResurectionData(0,true);
                     map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, this);
+                }
 
                 crea->AI()->EnterCombat(enemy);
                 RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);//always remove Out of Combat Non Attackable flag if we enter combat and AI is enabled
@@ -14686,7 +14689,10 @@ Unit* Creature::SelectVictim()
     Creature* crea = ToCreature();
     InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
     if (crea && crea->IsAIEnabled && map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
+    {
+        map->GetInstanceScript()->SetResurectionData(0,true);
         map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, this);
+    }
 
     return NULL;
 }
@@ -17414,8 +17420,8 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
             InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
             if(map && map->GetInstanceScript() && creature->GetCreatureInfo()->rank == 3)
             {
-                InstanceScript* script=map->GetInstanceScript();
-                script->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
+                map->GetInstanceScript()->SetResurectionData(0,true);
+                map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
             }
         }
         
