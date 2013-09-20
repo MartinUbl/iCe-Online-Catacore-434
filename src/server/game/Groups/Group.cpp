@@ -2517,6 +2517,8 @@ void Group::RemoveMarkerBySpellId(Player * rL,uint32 spellId)
                 else
                     ++itr;
             }
+            else
+                ++itr;
         }
     }
 }
