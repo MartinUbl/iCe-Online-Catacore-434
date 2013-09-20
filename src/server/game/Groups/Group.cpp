@@ -2399,7 +2399,7 @@ void Group::RefreshMarkerBySpellIdToPlayer(Player * p,uint32 spellId)
         for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();++itr)
         {
             pTemp = Creature::GetCreature(*rl, (*itr).first);
-            if (pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId)
+            if (pTemp && pTemp->IsInWorld() && pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId)
             {
                 RaidMarkers pos;
                 pos = (RaidMarkers)(pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) - 84996);
@@ -2426,7 +2426,7 @@ void Group::RefreshMarkerBySpellIdToGroup(uint32 spellId)
         for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();++itr)
         {
             pTemp = Creature::GetCreature(*rl, (*itr).first);
-            if (pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId)
+            if (pTemp && pTemp->IsInWorld() && pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId)
             {
                 RaidMarkers pos;
                 pos = (RaidMarkers)(pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) - 84996);
@@ -2457,7 +2457,7 @@ void Group::RefreshAllMarkersTo(Player *pl)
         for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();++itr)
         {
             pTemp = Creature::GetCreature(*rl, (*itr).first);
-            if (pTemp)
+            if (pTemp && pTemp->IsInWorld())
             {
                 RaidMarkers pos;
                 pos = (RaidMarkers)(pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) - 84996);
@@ -2483,7 +2483,7 @@ void Group::RemoveAllMarkers(uint64 leaderGUID)
         for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
         {
             pTemp = Creature::GetCreature(*p, (*itr).first);
-            if (pTemp)
+            if (pTemp && pTemp->IsInWorld())
             {
                 itr = Markers->erase(itr);
                 pTemp->ForcedDespawn();
@@ -2506,7 +2506,7 @@ void Group::RemoveMarkerBySpellId(Player * rL,uint32 spellId)
         for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
         {
             Creature* pTemp = Creature::GetCreature(*rL, (*itr).first);
-            if (pTemp)
+            if (pTemp && pTemp->IsInWorld())
             {
                 if (pTemp->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellId) // Remove only correct marker
                 {
