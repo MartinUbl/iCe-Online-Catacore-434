@@ -1269,9 +1269,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             break;
 
                         // Jinx, casting Jinx: Curse of the Elements
-                        if (caster->HasAura(85479))
+                        if (caster->HasAura(85479)) // Jinx (Rank 2)
                             caster->CastSpell(caster, 86105, true);
-                        else if (caster->HasAura(18179))
+                        else if (caster->HasAura(18179)) // Jinx (Rank 1)
                             caster->CastSpell(caster, 85547, true);
                         break;
                 }
@@ -2410,9 +2410,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     // Jinx, casting CotW bonus
                     int32 bp0 = 0;
-                    if (caster->HasAura(85479))
+                    if (caster->HasAura(85479)) // Jinx (Rank 2)
                         bp0 = 10;
-                    else if (caster->HasAura(18179))
+                    else if (caster->HasAura(18179)) // Jinx (Rank 1)
                         bp0 = 5;
 
                     if (bp0 != 0)
