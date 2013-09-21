@@ -7806,7 +7806,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     {
                         // If the target dies within duration of this 6sec debuff, gain 3 soul shards
                         if (caster && aurApp->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
-                            caster->SetPower(POWER_SOUL_SHARDS,3);
+                            caster->CastSpell(caster,95810,true);
                     }
                     break;
                 case SPELLFAMILY_DRUID:
