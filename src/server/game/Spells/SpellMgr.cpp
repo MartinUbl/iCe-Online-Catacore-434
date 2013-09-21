@@ -4940,6 +4940,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->procCharges = 1;
             count++;
             break;
+        case 85547:// Jinx: Curse of the Elements
+        case 86105:
+            spellInfo->excludeTargetAuraSpell = 1490; // Dont affect targets with original CoE
+            spellInfo->DurationIndex = 5; // 30 s same as original CoE
+            spellInfo->MaxAffectedTargets = 15;
+           break;
         case 23126: // World Enlarger
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_SPELL_ATTACK;
             count++;
