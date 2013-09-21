@@ -2823,7 +2823,10 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     break;
                 case 79268: // Soul Harvest
                     if (caster->GetTypeId() == TYPEID_PLAYER)
-                        caster->CastSpell(caster, 101977, true); // Soul Harvest (Energize +1 shard per 3s tick)
+                    {
+                        if (m_tickNumber == 2 || m_tickNumber == 5 || m_tickNumber == 8 ) // Only every third tick
+                            caster->CastSpell(caster, 101977, true); // Energize warlock with one soul shard
+                    }
                     break;
             }
             break;
