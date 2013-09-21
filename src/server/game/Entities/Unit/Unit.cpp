@@ -11553,7 +11553,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 {
                     Aura const * aura = itr->second->GetBase();
                     SpellEntry const *m_spell = aura->GetSpellProto();
-                    if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK || !(m_spell->SpellFamilyFlags[1] & 0x0004071B || m_spell->SpellFamilyFlags[0] & 0x8044C402))
+                    //  Unstable affliction, Corruption, Bane of agony, Bane of doom
+                    if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK || !(m_spell->Id == 30108  || m_spell->Id == 172 || m_spell->Id == 980 || m_spell->Id == 603))
                         continue;
                     modPercent += stepPercent * aura->GetStackAmount();
                     if (modPercent >= maxPercent)
