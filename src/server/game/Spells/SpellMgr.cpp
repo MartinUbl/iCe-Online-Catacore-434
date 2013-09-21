@@ -4113,14 +4113,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
             break;
-        case 79268: // Soul Harvest
-            /* Because of bug in DBC, we need set periodic manually
-             * also percent modifier (blizzard was drunk?) */
-            spellInfo->EffectAmplitude[0] = 3000;
-            spellInfo->EffectAmplitude[1] = 3000;
-            spellInfo->EffectValueMultiplier[1] = 15;
-            spellInfo->EffectBasePoints[1] = 15;
-            break;
         case 95673: // Ozumat Heroic Kill Credit
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
