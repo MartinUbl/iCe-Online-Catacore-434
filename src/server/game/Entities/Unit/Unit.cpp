@@ -9260,7 +9260,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Shadow Infusion
         case 49572:
             // Should proc only from Death Coil (dmg and heal)
-            if (procSpell->Id != 47632 && procSpell->Id != 47632)
+            if (procSpell->Id != 47632 && procSpell->Id != 47633)
                 return false;
             break;
         // Incite
