@@ -1753,8 +1753,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 switch (GetId())
                 {
                     case 689:    // Drain Life
-                    case 89420:
-                        caster->CastSpell(caster, 89653, true);
+                    case 89420: // Drain Life (Soulburn)
+                        {
+                            caster->CastSpell(caster, 89653, true);
+                            caster->RemoveAura(74434); // Soulburn buff
+                        }
                         break;
                     case 603:    // Bane of Doom
                         {

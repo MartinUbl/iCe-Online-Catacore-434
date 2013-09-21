@@ -815,6 +815,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         //m_caster->CastSpell(m_caster, 79440, true);
                         Aura* pAura = m_caster->AddAura(79440, m_caster);
                         pAura->SetCharges(2);
+                        m_caster->RemoveAura(74434);
                     }
                 }
                 else if (m_spellInfo->Id == 31117) // Unstable Affliction backfire dmg has been doubled at 4.3.4
@@ -4478,7 +4479,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
             // Soulburn: Healthstone
             if (caster->HasAura(74434))
+            {
                 caster->CastSpell(caster, 79437, true);
+                caster->RemoveAura(74434);
+            }
         }
         // Divine Touch
         else if (m_spellInfo->Id == 63544)

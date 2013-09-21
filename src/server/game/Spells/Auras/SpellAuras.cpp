@@ -1247,7 +1247,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             {
                                 // Soulburn: Demonic Circle
                                 if (target->HasAura(74434))
+                                {
                                     target->CastSpell(target, 79438, true);
+                                    caster->RemoveAura(74434);
+                                }
 
                                 target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation(), target->GetMap()->IsBattlegroundOrArena() ? TELE_TO_NOT_LEAVE_COMBAT : 0);
                                 target->ToPlayer()->RemoveMovementImpairingAuras();
