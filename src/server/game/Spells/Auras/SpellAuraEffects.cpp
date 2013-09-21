@@ -2749,7 +2749,11 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     target->RemoveAura(64821);
                 }
                 break;
-
+            case 98971: // Death Knight T12 DPS 2P Bonus
+            {
+                caster->CastSpell(caster,99055,true);
+                break;
+            }
             case 76691: // Vengeance (multi-class talent bonus)
             {
                 AuraEffect* pFrst = GetBase()->GetEffect(EFFECT_0);
