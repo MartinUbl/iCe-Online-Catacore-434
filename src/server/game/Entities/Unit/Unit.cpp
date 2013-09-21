@@ -11669,6 +11669,14 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 if (stacks)
                     DoneTotalMod *= (10.0f + float(stacks)) / 10.0f;
             }
+
+            if (spellProto->Id == 96172) // Hand of Light
+            {
+                if (AuraEffect * aurEff = GetAuraEffect(84963,0)) // Inquisition
+                {
+                    DoneTotalMod *= ((aurEff)->GetAmount() + 100.0f) / 100.0f;
+                }
+            }
         break;
         case SPELLFAMILY_WARLOCK:
             //Fire and Brimstone
