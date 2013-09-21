@@ -217,14 +217,45 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_seed_of_corruption_SpellScript);
 
+            bool soulShardGained;
+
+            bool Load()
+            {
+                soulShardGained = false;
+                return true;
+            }
+
             void FilterTargets(std::list<Unit*>& unitList)
             {
                 unitList.remove(GetTargetUnit());
             }
 
+            void HandleExtraEffect(SpellEffIndex effIndex)
+            {
+                Unit * caster = GetCaster();
+                Unit * unit = GetHitUnit();
+
+                if (GetSpellInfo() && caster && unit)
+                {
+                    if (GetSpellInfo()->Id == 27285 && caster->HasAura(74434)) // Soulburn: Seed of Corruption
+                    {
+                        caster->CastSpell(unit,172,true); // Corruption
+                        caster->RemoveAura(74434); // Remove Soulburn buff
+
+                        if (soulShardGained == false)
+                        {
+                            caster->CastSpell(caster,87388,true); // Gain 1 soul shard
+                            soulShardGained = true;
+                        }
+                    }
+                }
+                else return;
+            }
+
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_warl_seed_of_corruption_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
+                OnEffect += SpellEffectFn(spell_warl_seed_of_corruption_SpellScript::HandleExtraEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
