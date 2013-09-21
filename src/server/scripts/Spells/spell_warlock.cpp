@@ -34,7 +34,7 @@ enum WarlockSpells
     WARLOCK_DEMONIC_EMPOWERMENT_IMP         = 54444,
     //WARLOCK_IMPROVED_HEALTHSTONE_R1         = 18692,
     //WARLOCK_IMPROVED_HEALTHSTONE_R2         = 18693,
-    WARLOCK_FELHUNTER_SHADOWBITE_R1         = 54049,
+    WARLOCK_FELHUNTER_SHADOWBITE            = 54049,
 };
 
 // 47193 Demonic Empowerment
@@ -245,50 +245,38 @@ public:
         PrepareSpellScript(spell_warl_shadow_bite_SpellScript)
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
-            if (!sSpellStore.LookupEntry(WARLOCK_FELHUNTER_SHADOWBITE_R1))
+            if (!sSpellStore.LookupEntry(WARLOCK_FELHUNTER_SHADOWBITE))
                 return false;
             return true;
         }
 
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            //Unit *caster = GetCaster();
-            // Get DoTs on target by owner (15% increase by dot)
-            // need to get this here from SpellEffects.cpp ?
-            //damage *= float(100.f + 15.f * caster->getVictim()->GetDoTsByCaster(caster->GetOwnerGUID())) / 100.f;
-        }
-
-        // Improved Felhunter parts commented--deprecated. removed in cataclysm
-        // For Improved Felhunter
-        void HandleAfterHitEffect()
+        void HandleDamage(SpellEffIndex /*effIndex*/)
         {
             Unit *caster = GetCaster();
-            if(!caster) { return; };
 
-            // break if our caster is not a pet
-            if(!(caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature()->isPet())) { return; };
+            if (!caster)
+                return;
 
-            // break if pet has no owner and/or owner is not a player
             Unit *owner = caster->GetOwner();
-            if(!(owner && (owner->GetTypeId() == TYPEID_PLAYER))) { return; };
-            
 
-            /*int32 amount;
-            // rank 1 - 4%
-            if(owner->HasAura(WARLOCK_IMPROVED_FELHUNTER_R1)) { amount = 5; };*/
+            if (!owner)
+                return;
 
-            /*// rank 2 - 8%
-            if(owner->HasAura(WARLOCK_IMPROVED_FELHUNTER_R2)) { amount = 9; };*/
-            
-            // Finally return the Mana to our Caster
-            /*if(AuraEffect * aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 214, 0))
-                caster->CastCustomSpell(caster,WARLOCK_IMPROVED_FELHUNTER_EFFECT,&amount,NULL,NULL,true,NULL,aurEff,caster->GetGUID());*/
+            int32 damage = GetHitDamage();
+
+            if (AuraEffect * aurEff = owner->GetAuraEffect(18694,2))        // Dark Arts (Rank 1)
+                damage *= ((aurEff)->GetAmount() + 100.0f) / 100.0f;
+            else if (AuraEffect * aurEff = owner->GetAuraEffect(85283,2))   // Dark Arts (Rank 2)
+                damage *= ((aurEff)->GetAmount() + 100.0f) / 100.0f;
+            else if (AuraEffect * aurEff = owner->GetAuraEffect(85284,2))   // Dark Arts (Rank 3)
+                damage *= ((aurEff)->GetAmount() + 100.0f) / 100.0f;
+
+            SetHitDamage(damage);
         }
 
         void Register()
         {
-            //OnEffect += SpellEffectFn(spell_warl_shadow_bite_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            AfterHit += SpellHitFn(spell_warl_shadow_bite_SpellScript::HandleAfterHitEffect);
+            OnEffect += SpellEffectFn(spell_warl_shadow_bite_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
