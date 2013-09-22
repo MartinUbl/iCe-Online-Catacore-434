@@ -4373,6 +4373,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 97492: // Lightning Totem
             spellInfo->EffectBasePoints[0] = 1;
             break;
+        case 31224: // Cloak of shadows
+            spellInfo->EffectBasePoints[0] = -100;
+            spellInfo->EffectValueMultiplier[0] = -100;
+            break;
         // Sweeping Strikes
         case 12328:
             // this allows keeping spell even when changing stances
