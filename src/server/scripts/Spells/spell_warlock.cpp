@@ -235,20 +235,22 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
                 Unit * caster = GetCaster();
                 Unit * unit = GetHitUnit();
 
-                if (GetSpellInfo() && caster && unit)
-                {
-                    if (GetSpellInfo()->Id == 27285 && caster->HasAura(74434)) // Soulburn: Seed of Corruption
-                    {
-                        caster->CastSpell(unit,172,true); // Corruption
-                        caster->RemoveAura(74434); // Remove Soulburn buff
+                if (!GetSpellInfo() || !caster || !unit || !caster->HasAura(74434))
+                    return;
 
-                        if (soulShardGained == false)
-                        {
-                            caster->CastSpell(caster,87388,true); // Gain 1 soul shard
-                            soulShardGained = true;
-                        }
+                caster->RemoveAura(74434);
+
+                if (GetSpellInfo()->Id == 27285 || GetSpellInfo()->Id == 32865) // Soulburn: Seed of Corruption
+                {
+                    caster->CastSpell(unit,172,true); // Corruption
+
+                    if (soulShardGained == false)
+                    {
+                        caster->CastSpell(caster,87388,true); // Gain 1 soul shard
+                        soulShardGained = true;
                     }
                 }
+
                 else return;
             }
 
