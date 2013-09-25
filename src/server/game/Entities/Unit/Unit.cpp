@@ -13444,12 +13444,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 if (map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
                 {
                     map->GetInstanceScript()->SetResurectionData(0,true);
-                    map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, this);
                 }
 
                 crea->AI()->EnterCombat(enemy);
                 RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);//always remove Out of Combat Non Attackable flag if we enter combat and AI is enabled
 
+                if (map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
+                    map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, this);
             }
             if (crea->GetFormation())
                 crea->GetFormation()->MemberAttackStart(crea, enemy);
