@@ -32,6 +32,7 @@ public:
         uint32 spawnBridgeTimer;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
         uint64 riplimbGuid;
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
@@ -289,6 +290,19 @@ public:
 
         virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
         virtual uint32 GetMaxEncounter(){ return MAX_ENCOUNTER; }
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=uiEnc[TYPE_ALYSRAZOR];//alysrazor
+            currEnc[1]=uiEnc[TYPE_SHANNOX];//shannox
+            currEnc[2]=uiEnc[TYPE_RHYOLITH];//rhyolit
+            currEnc[3]=uiEnc[TYPE_RAGNAROS];//ragnaros
+            currEnc[4]=uiEnc[TYPE_BALEROC];//baleroc
+            currEnc[5]=uiEnc[TYPE_BETHTILAC];//bethilac
+            currEnc[6]=uiEnc[TYPE_STAGHELM];//majordomo
+
+            return currEnc;
+        }
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* pMap) const

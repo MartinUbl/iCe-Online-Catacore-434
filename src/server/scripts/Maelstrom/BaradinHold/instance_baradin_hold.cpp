@@ -35,6 +35,7 @@ public:
         instance_baradin_hold_InstanceMapScript(InstanceMap *map) : InstanceScript(map) { }
 
         uint32 uiEncounter[ENCOUNTERS];
+        uint32 currEnc[ENCOUNTERS];
 
         uint64 uiArgaloth;
         uint64 uiOccuthar;
@@ -136,6 +137,13 @@ public:
         }
         virtual uint32* GetUiEncounter(){return uiEncounter;}
         virtual uint32 GetMaxEncounter(){return ENCOUNTERS;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=uiEnc[1];
+            currEnc[1]=uiEnc[0];
+            return currEnc;
+        }
     };
 };
 
