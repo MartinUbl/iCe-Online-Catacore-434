@@ -459,6 +459,23 @@ bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
 
 void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
 {
+    if (!unit)
+        return;
+
+    if (Creature * cr = unit->ToCreature()) // Some creature have rank 3 in DB and we dont want to send encounter frame for players
+    {
+        switch (cr->GetEntry())
+        {
+            case 52593: // Spirit of Flame ( Majordomo encounter)
+            case 53619: // Druid of the Flame ( Majordomo thrash )
+            case 53803:
+                return;
+
+            default:
+                break;
+        }
+    }
+
     // size of this packet is at most 15 (usually less)
     WorldPacket data(SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT, 15);
     data << uint32(type);
@@ -468,8 +485,6 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
     case ENCOUNTER_FRAME_ENGAGE:
     case ENCOUNTER_FRAME_DISENGAGE:
     case ENCOUNTER_FRAME_UPDATE_PRIORITY:
-        if (!unit)
-            return;
         data.append(unit->GetPackGUID());
         data << uint8(param1);
         break;
