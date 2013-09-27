@@ -158,19 +158,19 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         }
         //instance bound merging when same bosses killed(flexible id)
         Group *group = player->GetGroup();
-        if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
-            group->GetBoundInstance(this) && group->GetLeader() &&
-            pBind->save != group->GetBoundInstance(this)->save) 
+        if (!player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && pBind->perm &&
+            group->GetBoundInstance(this) &&
+            pBind->save != group->GetBoundInstance(this)->save) // && group->GetLeader() 
         {
-            Player *leader = group->GetLeader();
+            //Player *leader = group->GetLeader();
 
             NewInstanceId = pSave->GetInstanceId();
             map = _FindMap(pBind->save->GetInstanceId()); 
-            Map* mapG = _FindMap(leader->GetMap()->GetInstanceId());
+            Map* mapG = _FindMap(group->GetBoundInstance(this)->save->GetInstanceId());
             if (!map)     //sometimes (almost always) it doesnt exist even when id is already loaded
                 map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
             if (!mapG)
-                mapG = CreateInstance(leader->GetMap()->GetInstanceId(), group->GetBoundInstance(this)->save, group->GetBoundInstance(this)->save->GetDifficulty());
+                mapG = CreateInstance(group->GetBoundInstance(this)->save->GetInstanceId(), group->GetBoundInstance(this)->save, group->GetBoundInstance(this)->save->GetDifficulty());
 
             InstanceMap* iMap = map ? map->ToInstanceMap() : NULL;
             InstanceMap* iGMap = mapG ? mapG->ToInstanceMap() : NULL;
@@ -185,7 +185,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                     bool canMerge=true;
                     for (uint32 i = 0; i < count; i++)
                     {
-                        if (bossP[i]==DONE&& bossG[i]!=DONE)
+                        if (bossP[i]==DONE && bossG[i]!=DONE)
                         {
                             canMerge=false;
                             break;
@@ -198,6 +198,8 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                         if (groupBind)
                         {
                             pSave = groupBind->save;
+                            pBind->save = groupBind->save;
+                            pBind->perm = groupBind->perm;
                             player->m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC][pSave->GetMapId()]=*pBind;
                         }
                      }
