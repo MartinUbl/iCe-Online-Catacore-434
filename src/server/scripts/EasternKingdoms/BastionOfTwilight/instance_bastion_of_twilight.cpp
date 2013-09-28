@@ -137,7 +137,7 @@ public:
                     && auiEncounter[2] == DONE // Council
                     && auiEncounter[3] == DONE) // Chogall
                     {
-                        if (this->instance->IsHeroic())
+                        if (this->instance->IsHeroic() && ChogallKilledOnHC)
                             go->Delete();
                     }
             }
@@ -228,7 +228,7 @@ public:
                 && auiEncounter[2] == DONE // Council
                 && auiEncounter[3] == DONE) // Chogall
             {
-                if (this->instance->IsHeroic()&&ChogallKilledOnHC)
+                if (this->instance->IsHeroic() && ChogallKilledOnHC)
                 {
                     if (GameObject* go = this->instance->GetGameObject(GOfloorGUID))
                         go->Delete();
