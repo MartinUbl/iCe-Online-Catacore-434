@@ -1818,6 +1818,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
 
+                switch(GetId())
+                {
+                    //remove Blood frenzy on bleed effect drop
+                    case 94009://Rend
+                    case 12721://Deep Wounds
+                        if(target && !target->HasAura(94009) && !target->HasAura(12721))
+                        {
+                            target->RemoveAurasDueToSpell(30069);
+                            target->RemoveAurasDueToSpell(30070);
+                        }
+                }
+
                 break;
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
