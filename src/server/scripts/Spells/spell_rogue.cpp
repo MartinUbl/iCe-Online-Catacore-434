@@ -288,6 +288,9 @@ public:
             // item combat enchantments
             for (uint8 e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
             {
+                if (e_slot == REFORGING_ENCHANTMENT_SLOT || e_slot == TRANSMOGRIFY_ENCHANTMENT_SLOT)
+                    continue;
+
                 uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
                 SpellItemEnchantmentEntry const * pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
 
