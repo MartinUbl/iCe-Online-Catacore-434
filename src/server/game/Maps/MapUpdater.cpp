@@ -122,6 +122,10 @@ int MapUpdater::schedule_update(Map& map, ACE_UINT32 diff)
     {
         ACE_DEBUG((LM_ERROR, ACE_TEXT("(%t) \n"), ACE_TEXT("Failed to schedule Map Update")));
 
+        using namespace std;
+        cout << "failed to schedule map update" << endl
+             << "pending requests: " << pending_requests << endl;
+
         --pending_requests;
         return -1;
     }
