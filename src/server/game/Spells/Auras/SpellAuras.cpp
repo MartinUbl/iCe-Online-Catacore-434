@@ -2034,6 +2034,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 {
                     target->RemoveAurasDueToSpell(86669);
                 }
+                // Divine Protection
+                else if (GetId() == 498)
+                {
+                    // Paladin T12 Protection 4P bonus
+                    if (caster && caster->HasAura(99091) && removeMode == AURA_REMOVE_BY_EXPIRE)
+                        caster->CastSpell(caster, 99090, true);
+                }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Reaping
