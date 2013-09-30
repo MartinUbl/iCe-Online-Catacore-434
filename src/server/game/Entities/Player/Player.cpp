@@ -19468,7 +19468,8 @@ InstanceSave * Player::GetInstanceSave(uint32 mapid, bool raid)
 
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
-    const Map* map=sMapMgr->CreateBaseMap(mapid);
+    const MapEntry* map = sMapStore.LookupEntry(mapid);
+    //const Map* map=sMapMgr->CreateBaseMap(mapid);
     if(map && map->IsRaid())
     {
         difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
@@ -19479,7 +19480,8 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 
 void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
-    const Map* map=sMapMgr->CreateBaseMap(itr->second.save->GetMapId());
+    const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
+    //const Map* map=sMapMgr->CreateBaseMap(itr->second.save->GetMapId());
     if(map && map->IsRaid())
     {
         difficulty=RAID_DIFFICULTY_10MAN_HEROIC;

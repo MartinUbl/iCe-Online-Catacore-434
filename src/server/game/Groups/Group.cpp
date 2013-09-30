@@ -2276,9 +2276,10 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
     Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
-    const Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+    /*const Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
     if(!map)
-        map=sMapMgr->CreateBaseMap(save->GetMapId());//CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());
+        map=sMapMgr->CreateBaseMap(save->GetMapId());//CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());*/
+    const MapEntry* map = sMapStore.LookupEntry(save->GetMapId());
     if(map&&map->IsRaid())
         diff=RAID_DIFFICULTY_10MAN_HEROIC;
     else
@@ -2303,7 +2304,8 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
 
 void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
 {
-    const Map* map=sMapMgr->CreateBaseMap(mapid);
+    //const Map* map=sMapMgr->CreateBaseMap(mapid);
+    const MapEntry* map = sMapStore.LookupEntry(mapid);
     if(map && map->IsRaid())
     {
         difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
