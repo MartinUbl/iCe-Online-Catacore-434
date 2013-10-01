@@ -227,6 +227,16 @@ bool InstanceSave::UnloadIfEmpty()
         return true;
 }
 
+uint32 InstanceSave::GetLeaderGuid()
+{
+    if(m_playerList.empty())
+        return -1;
+    if(!(*m_playerList.begin())->GetGroup() || !(*m_playerList.begin())->GetGroup()->GetLeader())
+        return (*m_playerList.begin())->GetGUID();
+
+    return (*m_playerList.begin())->GetGroup()->GetLeader()->GetGUID();
+}
+
 void InstanceSaveManager::_DelHelper(const char *fields, const char *table, const char *queryTail,...)
 {
     Tokens fieldTokens(fields, ',');
