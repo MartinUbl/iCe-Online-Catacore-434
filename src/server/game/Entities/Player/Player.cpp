@@ -19498,12 +19498,10 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 {
     if (save)
     {
-        uint8 diff ;
-        Map* mapP=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-        if(!mapP)
-            mapP=sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-        if(mapP->IsRaid())
-            diff=2;
+        Difficulty diff ;
+        const MapEntry* mapP = sMapStore.LookupEntry(save->GetMapId());
+        if(mapP&&mapP->IsRaid())
+            diff=RAID_DIFFICULTY_10MAN_HEROIC;
         else
             diff=save->GetDifficulty();
 
