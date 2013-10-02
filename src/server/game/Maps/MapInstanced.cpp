@@ -281,11 +281,6 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     map->CreateInstanceData(load_data);
 
     m_InstancedMaps[InstanceId] = map;
-
-    if(save)
-        sLog->outChar("MapSaveCreation insId %d mapId %d leader %d",InstanceId,GetId(),save->GetLeaderGuid());
-    else
-        sLog->outChar("MapSaveCreation insId %d mapId %d",InstanceId,GetId());
     return map;
 }
 

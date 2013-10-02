@@ -101,8 +101,6 @@ class InstanceSave
         /* currently it is possible to omit this information from this structure
            but that would depend on a lot of things that can easily change in future */
         Difficulty GetDifficulty() const { return m_difficulty; }
-        uint32 GetLeaderGuid();
-
 
         typedef std::list<Player*> PlayerListType;
         typedef std::list<Group*> GroupListType;
