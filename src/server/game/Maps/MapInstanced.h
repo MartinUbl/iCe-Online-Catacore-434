@@ -70,6 +70,13 @@ class MapInstanced : public Map
             return(i == m_InstancedMaps.end() ? NULL : i->second);
         }
 
+        void _RemoveMapByInstId(uint32 InstanceId) 
+        {
+            InstancedMaps::iterator i = m_InstancedMaps.find(InstanceId);
+            if(i!=m_InstancedMaps.end())
+                DestroyInstance(i);
+        }
+
     private:
 
         

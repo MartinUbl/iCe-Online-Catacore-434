@@ -19560,9 +19560,14 @@ void Player::SendRaidInfo()
                 uint32* uiEnc;
                 uint32 encData = 0;
                 int coun = 0;
+                bool created=false;
                 Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
                 if (!map)
+                {
                     map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
+                    if(map)
+                        created=true;
+                }
                 if (map && map->ToInstanceMap()->GetInstanceScript())
                 {
                     uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
@@ -19581,6 +19586,12 @@ void Player::SendRaidInfo()
                             else
                                 encData = encData << 1;
                         }
+                    }
+                    if(!map->HavePlayers() && created)
+                    {
+                        Map* mapR=sMapMgr->_findMap(save->GetMapId());
+                        if(mapR)
+                            ((MapInstanced*)mapR)->_RemoveMapByInstId(save->GetInstanceId());
                     }
                 }
                 else 

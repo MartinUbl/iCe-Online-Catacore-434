@@ -2119,12 +2119,24 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
     for(Player::BoundInstancesMap::iterator itr=bounds.begin();itr!=bounds.end();itr++)
     {
         InstancePlayerBind pBind=itr->second;
+        bool created=false;
         Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());
         if (!map)     //sometimes (almost always) it doesnt exist yet
+        {
             map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
+            if(map)
+                created=true;
+        }
         if(map && !map->HavePlayers())
         {
             map->UnloadAll();
+        }
+
+        if(!map->HavePlayers() && created)
+        {
+            Map* mapR=sMapMgr->_findMap(pBind.save->GetMapId());
+            if(mapR)
+                ((MapInstanced*)mapR)->_RemoveMapByInstId(pBind.save->GetInstanceId());
         }
     }
 }
