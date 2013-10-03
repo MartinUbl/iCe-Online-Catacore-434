@@ -19568,7 +19568,7 @@ void Player::SendRaidInfo()
                     if(map)
                         created=true;
                 }
-                if (map && map->ToInstanceMap()->GetInstanceScript())
+                if (map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())
                 {
                     uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
                     coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
