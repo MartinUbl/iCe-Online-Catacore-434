@@ -2115,7 +2115,7 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
     }
 
     Player *leader = GetLeader();//Reset npc in map for calling AddToWorld() again because of Flexible Raid locks
-    Player::BoundInstancesMap bounds=leader->m_boundInstances[2];
+    Player::BoundInstancesMap bounds=leader->m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC];
     for(Player::BoundInstancesMap::iterator itr=bounds.begin();itr!=bounds.end();itr++)
     {
         InstancePlayerBind pBind=itr->second;
