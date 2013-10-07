@@ -331,12 +331,11 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
                                                             // horde flag in base (but not respawned yet)
         m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
-                                                            // Drop Horde Flag from Player
+                                                            // Drop Horde Flag and Debuffs from Player
         Source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG);
-        if (m_FlagDebuffState == 1)
-          Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-        if (m_FlagDebuffState == 2)
-          Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+        Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+        Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+
         if (GetTeamScore(ALLIANCE) < BG_WS_MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE);
@@ -349,12 +348,11 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player *Source)
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
                                                             // alliance flag in base (but not respawned yet)
         m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
-                                                            // Drop Alliance Flag from Player
+                                                            // Drop Alliance Flag and Debuffs from Player
         Source->RemoveAurasDueToSpell(BG_WS_SPELL_SILVERWING_FLAG);
-        if (m_FlagDebuffState == 1)
-          Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-        if (m_FlagDebuffState == 2)
-          Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+        Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+        Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+
         if (GetTeamScore(HORDE) < BG_WS_MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
@@ -442,10 +440,9 @@ void BattlegroundWS::EventPlayerDroppedFlag(Player *Source)
         {
             SetHordeFlagPicker(0);
             Source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG);
-            if (m_FlagDebuffState == 1)
-              Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-            if (m_FlagDebuffState == 2)
-              Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+            Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+            Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+
             m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_GROUND;
             Source->CastSpell(Source, BG_WS_SPELL_WARSONG_FLAG_DROPPED, true);
             set = true;
@@ -459,10 +456,8 @@ void BattlegroundWS::EventPlayerDroppedFlag(Player *Source)
         {
             SetAllianceFlagPicker(0);
             Source->RemoveAurasDueToSpell(BG_WS_SPELL_SILVERWING_FLAG);
-            if (m_FlagDebuffState == 1)
-              Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-            if (m_FlagDebuffState == 2)
-              Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
+            Source->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+            Source->RemoveAurasDueToSpell(WS_SPELL_BRUTAL_ASSAULT);
             m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_GROUND;
             Source->CastSpell(Source, BG_WS_SPELL_SILVERWING_FLAG_DROPPED, true);
             set = true;
@@ -559,10 +554,14 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             Source->CastSpell(Source, BG_WS_SPELL_SILVERWING_FLAG, true);
             m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(HORDE, BG_WS_FLAG_STATE_ON_PLAYER);
-            if (m_FlagDebuffState == 1)
-              Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
-            if (m_FlagDebuffState == 2)
+            if (m_FlagDebuffState > 1 && m_FlagDebuffState < 4 )
+            {
+                for (uint8 i = 0; i < m_FlagDebuffState; i++)
+                    Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
+            }
+            if (m_FlagDebuffState >= 4)
               Source->CastSpell(Source,WS_SPELL_BRUTAL_ASSAULT,true);
+
             UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
         }
         //called in HandleGameObjectUseOpcode:
@@ -572,7 +571,7 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     //Horde flag on ground(not in base) (returned or picked up again)
     if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
     {
-        if (Source->GetBGTeam() == HORDE)
+        if (Source->GetBGTeam() == HORDE) // Flag was returned to base by enemy team
         {
             message_id = LANG_BG_WS_RETURNED_HF;
             type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -583,7 +582,7 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);
             m_BothFlagsKept = false;
         }
-        else
+        else // Flag was picked up again 
         {
             message_id = LANG_BG_WS_PICKEDUP_HF;
             type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
@@ -593,9 +592,12 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
             Source->CastSpell(Source, BG_WS_SPELL_WARSONG_FLAG, true);
             m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(ALLIANCE, BG_WS_FLAG_STATE_ON_PLAYER);
-            if (m_FlagDebuffState == 1)
-              Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
-            if (m_FlagDebuffState == 2)
+            if (m_FlagDebuffState > 1 && m_FlagDebuffState < 4 )
+            {
+                for (uint8 i = 0; i < m_FlagDebuffState; i++)
+                    Source->CastSpell(Source,WS_SPELL_FOCUSED_ASSAULT,true);
+            }
+            if (m_FlagDebuffState >= 4)
               Source->CastSpell(Source,WS_SPELL_BRUTAL_ASSAULT,true);
             UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 1);
         }

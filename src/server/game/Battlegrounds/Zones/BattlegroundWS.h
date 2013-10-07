@@ -234,7 +234,7 @@ class BattlegroundWS : public Battleground
         uint32 m_HonorEndKills;
         int32 m_FlagSpellForceTimer;
         bool m_BothFlagsKept;
-        uint8 m_FlagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
+        uint8 m_FlagDebuffState;                            // 0,1,2,3 - focused assault 4 - brutal assault
         uint8 m_minutesElapsed;
 };
 #endif
