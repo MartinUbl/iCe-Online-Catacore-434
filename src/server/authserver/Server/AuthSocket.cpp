@@ -38,6 +38,9 @@
 
 #define ChunkSize 2048
 
+// security constant used for avoiding auth server flooding
+#define MAX_AUTH_LOGON_CHALLENGES_IN_A_ROW 3
+
 enum eAuthCmd
 {
     AUTH_LOGON_CHALLENGE        = 0x00,
@@ -231,11 +234,24 @@ void AuthSocket::OnClose(void)
 /// Read the packet from the client
 void AuthSocket::OnRead()
 {
+    uint32 challengesInARow = 0;
+
     uint8 _cmd;
     while (1)
     {
         if (!socket().recv_soft((char *)&_cmd, 1))
             return;
+
+        if (_cmd == AUTH_LOGON_CHALLENGE)
+        {
+            ++challengesInARow;
+            if (challengesInARow == MAX_AUTH_LOGON_CHALLENGES_IN_A_ROW)
+            {
+                sLog->outChar("IP:(%s) Got %u AUTH_LOGON_CHALLENGE in a row, possible ongoing DoS", socket().get_remote_address().c_str(), challengesInARow);
+                socket().shutdown();
+                return;
+            }
+        }
 
         size_t i;
 
