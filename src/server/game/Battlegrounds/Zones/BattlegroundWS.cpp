@@ -149,30 +149,62 @@ void BattlegroundWS::Update(uint32 diff)
                 m_BothFlagsKept = false;
             }
         }
+
         if (m_BothFlagsKept)
         {
           m_FlagSpellForceTimer += diff;
-          if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= 600000)  //10 minutes
+
+          switch (m_FlagDebuffState)
           {
-            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
-              plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
-            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
-              plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
-            m_FlagDebuffState = 1;
-          }
-          else if (m_FlagDebuffState == 1 && m_FlagSpellForceTimer >= 900000) //15 minutes
-          {
-            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+            case 0:
             {
-              plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-              plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
+                if (m_FlagSpellForceTimer >= 180000) // After 3 minutes of both teams having the flag
+                {
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 60000; // Every minute afterwards
+                }
+                break;
             }
-            if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+            case 1:
+            case 2:
+            case 3:
             {
-              plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
-              plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
+                if (m_FlagSpellForceTimer >= 60000)
+                {
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+                    if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                      plr->CastSpell(plr,WS_SPELL_FOCUSED_ASSAULT,true);
+
+                    m_FlagDebuffState++;
+                    m_FlagSpellForceTimer = 60000;
+                }
+                break;
             }
-            m_FlagDebuffState = 2;
+            case 4: // After 7 minutes, Brutal Assault will be applied in place of Focused Assault
+            {
+                if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+                {
+                      plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                      plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
+                }
+                if (Player * plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+                {
+                      plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
+                      plr->CastSpell(plr,WS_SPELL_BRUTAL_ASSAULT,true);
+                }
+
+                m_FlagDebuffState++;
+                break;
+            }
+
+            default:
+                break;
           }
         }
         else
