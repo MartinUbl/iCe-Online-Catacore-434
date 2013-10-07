@@ -85,6 +85,9 @@ class AuthSocket: public RealmSocket::Session
 
         bool _authed;
 
+        time_t _authChallengeTime;
+        uint32 _authChallengeCount;
+
         std::string _login;
 
         // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
