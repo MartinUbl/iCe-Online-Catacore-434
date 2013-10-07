@@ -19555,7 +19555,7 @@ void Player::SendRaidInfo()
         {
             if(itr->second.perm)
             {
-                InstanceSave *save = itr->second.save;
+                InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
                 bool isHeroic;
                 uint32* uiEnc;
                 uint32 encData = 0;

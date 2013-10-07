@@ -193,14 +193,21 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                     }
                      if(canMerge)
                      {
-                        InstanceGroupBind *groupBind = NULL;
-                        groupBind = group->GetBoundInstance(this);
+                        InstanceGroupBind *groupBind = group->GetBoundInstance(this);
                         if (groupBind)
                         {
-                            pSave = groupBind->save;
+
+                            /*
                             pBind->save = groupBind->save;
                             pBind->perm = groupBind->perm;
                             player->m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC][pSave->GetMapId()]=*pBind;
+                            */
+                            InstanceSave *saveP=sInstanceSaveMgr->GetInstanceSave(groupBind->save->GetInstanceId());
+                            if(saveP)
+                            {
+                                player->BindToInstance(saveP,true,true);
+                                pSave = saveP;
+                            }
                         }
                      }
                 }
