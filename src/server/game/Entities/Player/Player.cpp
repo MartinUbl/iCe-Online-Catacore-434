@@ -19564,7 +19564,7 @@ void Player::SendRaidInfo()
                 Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
                 if (!map)
                 {
-                    map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
+                    map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId(),2);
                     if(map)
                         created=true;
                 }
