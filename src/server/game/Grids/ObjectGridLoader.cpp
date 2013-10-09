@@ -193,8 +193,8 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     uint8 spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
     if(i_map->IsRaid())
     {
-        uint32 mapId=i_map->GetId();//757=Baradin Hold, 469=Blackwing Lair, 531=Ahn'Qiraj Temple, 409=Molten Core
-        if(mapId == 469 || mapId == 531 || mapId == 409)//special control for 40 mans, because they have spawn mode as 10man N
+        uint32 mapId=i_map->GetId();//757=Baradin Hold, 469=Blackwing Lair, 531=Ahn'Qiraj Temple, 409=Molten Core, 509=Ruins of Ahn'Qiraj
+        if(mapId == 469 || mapId == 531 || mapId == 409 || mapId == 509)//special control for 40 mans, because they have spawn mode as 10man N
         {
             spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
         }
