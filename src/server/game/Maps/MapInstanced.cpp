@@ -115,13 +115,8 @@ void MapInstanced::UnloadAll()
 - create the instance if it's not created already
 - the player is not actually added to the instance (only in InstanceMap::Add)
 */
-Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 whereN)
+Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 {
-    int addit=0;
-    if(whereN==1)
-        addit=10;
-    if(whereN==2)
-        addit=20;
     if (GetId() != mapId || !player)
         return NULL;
  
@@ -173,9 +168,9 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 wh
             map = _FindMap(pBind->save->GetInstanceId()); 
             Map* mapG = _FindMap(group->GetBoundInstance(this)->save->GetInstanceId());
             if (!map)     //sometimes (almost always) it doesnt exist even when id is already loaded
-                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty(),0+addit);
+                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
             if (!mapG)
-                mapG = CreateInstance(group->GetBoundInstance(this)->save->GetInstanceId(), group->GetBoundInstance(this)->save, group->GetBoundInstance(this)->save->GetDifficulty(),1+addit);
+                mapG = CreateInstance(group->GetBoundInstance(this)->save->GetInstanceId(), group->GetBoundInstance(this)->save, group->GetBoundInstance(this)->save->GetDifficulty());
 
             InstanceMap* iMap = map ? map->ToInstanceMap() : NULL;
             InstanceMap* iGMap = mapG ? mapG->ToInstanceMap() : NULL;
@@ -229,10 +224,10 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 wh
             {
                 if(IsRaid())
                 {
-                    map = CreateInstance(NewInstanceId, pSave, RAID_DIFFICULTY_10MAN_HEROIC,2+addit);
+                    map = CreateInstance(NewInstanceId, pSave, RAID_DIFFICULTY_10MAN_HEROIC);
                 }
                 else
-                    map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty(),3+addit);
+                    map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
             }
             if (IsRaid() && map->ToInstanceMap()->GetInstanceScript() && !map->ToInstanceMap()->GetInstanceScript()->CorrectDiff(player))
             {
@@ -249,12 +244,12 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 wh
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             if(IsRaid())
             {
-                map = CreateInstance(NewInstanceId, NULL, RAID_DIFFICULTY_10MAN_HEROIC,4+addit);
+                map = CreateInstance(NewInstanceId, NULL, RAID_DIFFICULTY_10MAN_HEROIC);
                 if(map->ToInstanceMap()->GetInstanceScript() && GetMapDifficultyData(map->GetId(),Difficulty(map->ToInstanceMap()->GetInstanceScript()->getPlayerDifficulty(player))))
                      map->ToInstanceMap()->GetInstanceScript()->repairDifficulty(player);
             }
             else
-                map = CreateInstance(NewInstanceId, NULL, diff,5+addit);
+                map = CreateInstance(NewInstanceId, NULL, diff);
 
         }
     }
@@ -262,7 +257,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 wh
     return map;
 }
 
-InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty,uint32 whereN)
+InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty)
 {
     // load/create a map
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, NULL);
@@ -295,9 +290,9 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     m_InstancedMaps[InstanceId] = map;
 
     if(save)
-        sLog->outChar("MapSaveCreation insId %d mapId %d leader %d path %d",InstanceId,GetId(),save->GetLeaderGuid(),whereN);
+        sLog->outChar("MapSaveCreation insId %d mapId %d leader %d",InstanceId,GetId(),save->GetLeaderGuid());
     else
-        sLog->outChar("MapSaveCreation insId %d mapId %d path %d",InstanceId,GetId(),whereN);
+        sLog->outChar("MapSaveCreation insId %d mapId %d",InstanceId,GetId());
     return map;
 }
 

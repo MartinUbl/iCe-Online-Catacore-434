@@ -2123,7 +2123,7 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());
         if (!map)     //sometimes (almost always) it doesnt exist yet
         {
-            map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId(),1);
+            map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
             if(map)
                 created=true;
         }

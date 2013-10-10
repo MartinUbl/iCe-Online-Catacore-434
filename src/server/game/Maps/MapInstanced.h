@@ -43,7 +43,7 @@ class MapInstanced : public Map
         void UnloadAll();
         bool CanEnter(Player* player);
 
-        Map* CreateInstance(const uint32 mapId, Player * player, uint32 whereN=0);
+        Map* CreateInstance(const uint32 mapId, Player * player);
         Map* FindMap(uint32 InstanceId) const { return _FindMap(InstanceId); }
         bool DestroyInstance(InstancedMaps::iterator &itr);
 
@@ -62,7 +62,7 @@ class MapInstanced : public Map
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
         virtual void InitVisibilityDistance();
-        InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty, uint32 whereN=-1);
+        InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave *save, Difficulty difficulty);
 
         Map* _FindMap(uint32 InstanceId) const
         {
