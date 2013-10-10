@@ -19553,7 +19553,7 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
-            if(itr->second.perm)
+            //if(itr->second.perm)
             {
                 InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
                 bool isHeroic;
@@ -19591,7 +19591,13 @@ void Player::SendRaidInfo()
                     {
                         Map* mapR=sMapMgr->_findMap(save->GetMapId());
                         if(mapR)
+                        {
                             ((MapInstanced*)mapR)->_RemoveMapByInstId(save->GetInstanceId());
+                            if(save)
+                                sLog->outChar("MapDeletion insId %d mapId %d leader %d path %d",save->GetInstanceId(),save->GetMapId(),save->GetLeaderGuid(),1);
+                            else
+                                sLog->outChar("MapDeletion insId %d mapId %d path %d",save->GetInstanceId(),save->GetMapId(),2);
+                        }
                     }
                 }
                 else 
