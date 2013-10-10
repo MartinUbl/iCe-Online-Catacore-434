@@ -97,10 +97,11 @@ public:
             ACE_Based::Thread::Sleep(1000);
             uint32 curtime = getMSTime();
             // normal work
-            if (w_loops != World::m_worldLoopCounter)
+            uint32 worldLoopCounter = World::m_worldLoopCounter.value();
+            if (w_loops != worldLoopCounter)
             {
                 w_lastchange = curtime;
-                w_loops = World::m_worldLoopCounter;
+                w_loops = worldLoopCounter;
             }
             // possible freeze
             else if (getMSTimeDiff(w_lastchange,curtime) > _delaytime)
