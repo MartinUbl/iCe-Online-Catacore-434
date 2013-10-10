@@ -19554,6 +19554,7 @@ void Player::SendRaidInfo()
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             if(itr->second.perm)
+            //if(itr->second.perm)
             {
                 InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
                 bool isHeroic;
@@ -19565,8 +19566,7 @@ void Player::SendRaidInfo()
                 if (!map)
                 {
                     map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-                    if(map)
-                        created=true;
+                    created=true;
                 }
                 if (map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())
                 {
@@ -19587,7 +19587,7 @@ void Player::SendRaidInfo()
                                 encData = encData << 1;
                         }
                     }
-                    if(!map->HavePlayers() && created)
+                    if(created)//!map->HavePlayers() && 
                     {
                         Map* mapR=sMapMgr->_findMap(save->GetMapId());
                         if(mapR)

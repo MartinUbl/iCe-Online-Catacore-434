@@ -2124,15 +2124,14 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         if (!map)     //sometimes (almost always) it doesnt exist yet
         {
             map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
-            if(map)
-                created=true;
+            created=true;
         }
-        if(map && !map->HavePlayers())
+        if(map && !map->HavePlayers()) 
         {
             map->UnloadAll();
         }
 
-        if(!map->HavePlayers() && created)
+        if(created)//!map->HavePlayers() && 
         {
             Map* mapR=sMapMgr->_findMap(pBind.save->GetMapId());
             if(mapR)
