@@ -190,31 +190,11 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     CellPair cell_pair(x, y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    uint8 spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
-    if(i_map->IsRaid())
+    uint8 spawMod;
+    uint32 mapId=i_map->GetId();//757=Baradin Hold, 469=Blackwing Lair, 531=Ahn'Qiraj Temple, 409=Molten Core, 509=Ruins of Ahn'Qiraj
+    if(mapId == 469 || mapId == 531 || mapId == 409 || mapId == 509)//special control for 40/20 mans, because they have spawn mode as 10man N
     {
-        uint32 mapId=i_map->GetId();//757=Baradin Hold, 469=Blackwing Lair, 531=Ahn'Qiraj Temple, 409=Molten Core, 509=Ruins of Ahn'Qiraj
-        if(mapId == 469 || mapId == 531 || mapId == 409 || mapId == 509)//special control for 40 mans, because they have spawn mode as 10man N
-        {
-            spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
-        }
-        else
-        {
-            spawMod=RAID_DIFFICULTY_10MAN_HEROIC;  
-            MapDifficulty const* mapDiff = GetMapDifficultyData(i_map->GetId(),Difficulty(spawMod));
-            if(!mapDiff||mapId==757)//mapid checks for instances which was started but not finished on 10M HC by blizzard
-            {
-                for(int i=0;i<4;i++)
-                {
-                    mapDiff = GetMapDifficultyData(i_map->GetId(),Difficulty(i));
-                    if(mapDiff)
-                    {
-                        spawMod=i;
-                        break;
-                    }
-                }
-            }
-        }
+        spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
     }
     else
         spawMod=i_map->GetSpawnMode();
