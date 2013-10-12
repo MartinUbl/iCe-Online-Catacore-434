@@ -940,9 +940,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (!pOwner)
                         break;
 
-                    int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                    if (bonuspct != 0)
-                        damage *= 1.0f+((float)bonuspct/100.0f);
+                    damage = pOwner->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, damage, DamageEffectType::SPELL_DIRECT_DAMAGE);
 
                     // Burning Embers talent
                     int32 bp0 = 0;
