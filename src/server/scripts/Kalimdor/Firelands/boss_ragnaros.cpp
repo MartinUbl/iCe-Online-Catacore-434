@@ -2097,7 +2097,7 @@ public:
 
         void EnterCombat(Unit * who)
         {
-            Creature * erupter;
+            Creature * erupter = NULL;
 
             std::list<Creature*> erupters;
             me->GetCreatureListWithEntryInGrid(erupters, MOLTEN_ERUPTER, 100.0f);
@@ -2108,7 +2108,8 @@ public:
                         erupter = (*itr);
             }
 
-            erupter->SetInCombatWithZone();
+            if (erupter)
+                erupter->SetInCombatWithZone();
             me->SetInCombatWithZone();
         }
 
