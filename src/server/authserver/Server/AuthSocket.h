@@ -85,8 +85,8 @@ class AuthSocket: public RealmSocket::Session
 
         bool _authed;
 
-        time_t _authChallengeTime;
-        uint32 _authChallengeCount;
+        time_t _authPacketTime;
+        uint32 _authPacketCount;
 
         std::string _login;
 

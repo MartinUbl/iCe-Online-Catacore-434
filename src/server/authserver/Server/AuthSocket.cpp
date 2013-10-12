@@ -41,9 +41,9 @@
 // security constant used for avoiding auth server flooding
 #define MAX_AUTH_LOGON_CHALLENGES_IN_A_ROW 3
 
-// second flooding exploit constants - flooding in multiple "segments"
-#define AUTH_CHALLENGE_TIME_TEST_PERIOD 10
-#define AUTH_CHALLENGE_PERIOD_LIMIT 10
+// second flooding exploit constants - flooding in multiple "segments" - allow 30 auth packets per 10 seconds (never sent by normal client)
+#define AUTH_PACKET_TIME_TEST_PERIOD 30
+#define AUTH_PACKET_PERIOD_LIMIT 10
 
 enum eAuthCmd
 {
@@ -218,8 +218,8 @@ AuthSocket::AuthSocket(RealmSocket& socket) : socket_(socket)
     _authed = false;
     _accountSecurityLevel = SEC_PLAYER;
 
-    _authChallengeTime = 0;
-    _authChallengeCount = 0;
+    _authPacketTime = 0;
+    _authPacketCount = 0;
 }
 
 /// Close patch file descriptor before leaving
@@ -258,23 +258,23 @@ void AuthSocket::OnRead()
                 socket().shutdown();
                 return;
             }
+        }
 
-            if (_authChallengeTime == 0 || _authChallengeTime + AUTH_CHALLENGE_TIME_TEST_PERIOD < time(NULL))
-            {
-                _authChallengeTime = time(NULL);
-                _authChallengeCount = 1;
-            }
-            else
-            {
-                _authChallengeCount++;
-                _authChallengeTime = time(NULL);
+        if (_authPacketTime == 0 || _authPacketTime + AUTH_PACKET_TIME_TEST_PERIOD < time(NULL))
+        {
+            _authPacketTime = time(NULL);
+            _authPacketCount = 1;
+        }
+        else
+        {
+            _authPacketCount++;
+            _authPacketTime = time(NULL);
 
-                if (_authChallengeCount > AUTH_CHALLENGE_PERIOD_LIMIT)
-                {
-                    sLog->outChar("IP:(%s) Got %u AUTH_LOGON_CHALLENGE in a row, possible ongoing DoS (second type auth flooding exploit)", socket().get_remote_address().c_str(), challengesInARow);
-                    socket().shutdown();
-                    return;
-                }
+            if (_authPacketCount > AUTH_PACKET_PERIOD_LIMIT)
+            {
+                sLog->outChar("IP:(%s) Got %u auth packets in a row, possible ongoing DoS (second type auth flooding exploit)", socket().get_remote_address().c_str(), challengesInARow);
+                socket().shutdown();
+                return;
             }
         }
 
