@@ -2456,60 +2456,6 @@ class spell_gen_blazing_heat_heal : public SpellScriptLoader
         }
 };
 
-
-class spell_gen_lava : public SpellScriptLoader
-{
-    public:
-        spell_gen_lava() : SpellScriptLoader("spell_gen_lava") { }
-
-        class spell_gen_lava_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_lava_SpellScript);
-
-            inline bool IsBetween(Unit * caster,Unit * player, float range, float size)
-            {
-                float angle = caster->GetOrientation();
-
-                if (player->GetPositionX() > std::max(caster->GetPositionX(), caster->GetPositionX() + cos(angle) * range)
-                    || player->GetPositionX() < std::min(caster->GetPositionX(), caster->GetPositionX() + cos(angle) * range)
-                    || player->GetPositionY() > std::max(caster->GetPositionY(), caster->GetPositionY() + sin(angle) * range)
-                    || player->GetPositionY() < std::min(caster->GetPositionY(), caster->GetPositionY() + sin(angle) * range))
-                    {
-                        return false;
-                    }
-
-                angle = caster->GetAngle(player) - caster->GetAngle(caster->GetPositionX() + cos(angle) * range,caster->GetPositionY() + sin(angle) * range);
-                return fabs(sin(angle)) * caster->GetExactDist2d(player->GetPositionX(), player->GetPositionY()) < 2.5f;
-            }
-
-            void RemoveInvalidTargets(std::list<Unit*>& unitList)
-            {
-                Unit * caster  = GetCaster();
-
-                if (!caster)
-                    return;
-
-                for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
-                {
-                    if ( IsBetween(caster,(*itr),40.0f,5.0f))
-                        itr = unitList.erase(itr);
-                    else
-                        ++itr;
-                }
-            }
-
-            void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_lava_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_PATH);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_gen_lava_SpellScript();
-        }
-};
-
 void AddSC_boss_ragnaros_fl()
 {
     // RAGNAROS NPCS
@@ -2532,7 +2478,6 @@ void AddSC_boss_ragnaros_fl()
 
     //TRASH SPELL_SCRIPTS
     new spell_gen_raise_lava();//           99503
-    //new spell_gen_lava(); //                99510
 
     // RAGNAROS SPELL_SCRIPTS
     new spell_gen_molten_inferno();//       98518,100252,100253,100254
