@@ -3958,6 +3958,12 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     if (unitTarget->ToPlayer()->isRessurectRequested())       // already have one active request
                         return;
 
+                    if (InstanceScript * pInstance = unitTarget->GetInstanceScript())
+                    {
+                        if (pInstance->instance->IsRaid() &&  pInstance->IsEncounterInProgress())
+                            pInstance->SetResurectionData(1); // Increase resurrection counter by one
+                    }
+
                     ExecuteLogEffectResurrect(effIndex, unitTarget);
 
                     unitTarget->ToPlayer()->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), unitTarget->GetMaxHealth()*0.3f, unitTarget->GetMaxPower(POWER_MANA)*0.3f);
