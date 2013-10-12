@@ -4259,6 +4259,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             break;
+        case 100455:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            break;
         case 101088: // Lavalogged
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;

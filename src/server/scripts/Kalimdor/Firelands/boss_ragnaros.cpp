@@ -623,8 +623,9 @@ public:
 
         bool CanCast(void) // We can't allow casting when we don't have our victim  in UNIT_FIELD_TARGET, due to spells animation ( Sulfuras smash,Splitting blow )
         {
-            if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
-                return true;
+            if (me->IsInWorld() && me->getVictim() && me->getVictim()->IsInWorld() )
+                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
+                    return true;
 
             return false;
         }
@@ -668,7 +669,8 @@ public:
 
             if (AllowTurning_timer <= diff) // Put again  our victim to  UNIT_FIELD_TARGET
             {
-                me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
+                if (me->getVictim() && me->getVictim()->IsInWorld())
+                    me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
                 AllowTurning_timer = NEVER;
             }
             else AllowTurning_timer -= diff;
@@ -810,7 +812,7 @@ public:
 
                 Creature * sulfur = me->SummonCreature(SPLITTING_SULFURAS,me->GetPositionX() + cos(angle)*50.0f,me->GetPositionY() + sin(angle)* 50.0f,55.34f,angle,TEMPSUMMON_MANUAL_DESPAWN,0);
 
-                if(sulfur)
+                if(sulfur && sulfur->IsInWorld())
                 {
                     me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                 }
@@ -1020,7 +1022,7 @@ public:
                         angle = 3.73f; // RIGHT
 
                     Creature * sulfur = me->SummonCreature(SPLITTING_SULFURAS,me->GetPositionX() + cos(angle)*50.0f,me->GetPositionY() + sin(angle)* 50.0f,55.34f,angle,TEMPSUMMON_MANUAL_DESPAWN,0);
-                    if (sulfur)
+                    if (sulfur && sulfur->IsInWorld())
                     {
                         me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                     }

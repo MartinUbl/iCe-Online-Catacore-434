@@ -251,7 +251,6 @@ public:
                     if(pBaleroc && pBaleroc->isDead())
                         door2->Delete();
                 }
-
                 spawnBridgeTimer = 23000;
             }
             else spawnBridgeTimer -= diff;
