@@ -282,15 +282,18 @@ public:
             instance = creature->GetInstanceScript();
             Creature * lava_ring = me->SummonCreature(LAVA_RING_NPC,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ() + 14.0f,me->GetOrientation());
             if(lava_ring)
+            {
                 LAVA_RING_GUID = lava_ring->GetGUID();
-            lava_ring->CastSpell(lava_ring,LAVA_FIRE_RING,true);
-            lava_ring->SetFloatValue(OBJECT_FIELD_SCALE_X, 12.0f);
-            lava_ring->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-
-            // TODO : Move this to DB
+                lava_ring->CastSpell(lava_ring,LAVA_FIRE_RING,true);
+                lava_ring->SetFloatValue(OBJECT_FIELD_SCALE_X, 12.0f);
+                lava_ring->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+                // TODO : Move this to DB
+                lava_ring->SetPhaseMask(PHASEMASK_NORMAL,false);
+            }
+            
             me->SetRespawnDelay(7*DAY);
             me->SetPhaseMask(PHASEMASK_NORMAL,false);
-            lava_ring->SetPhaseMask(PHASEMASK_NORMAL,false);
+            
 
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,50.0f);
 
