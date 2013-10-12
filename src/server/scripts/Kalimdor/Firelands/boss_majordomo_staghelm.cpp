@@ -107,7 +107,7 @@ public:
         boss_majordomo_staghelmAI(Creature* creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
-            me->SummonGameObject(FIREWALL_MAJORDOMO,576.04f,-61.8f,90.34f,5.6f,0,0,0,0,0);
+            //me->SummonGameObject(FIREWALL_MAJORDOMO,576.04f,-61.8f,90.34f,5.6f,0,0,0,0,0); Temporary disabled
         }
 
         InstanceScript* instance;
