@@ -277,7 +277,8 @@ public:
             phase = 1;
 
             if (pInstance)
-                pInstance->SetData(TYPE_RHYOLITH, NOT_STARTED);
+                if(pInstance->GetData(TYPE_RHYOLITH)!=DONE)
+                    pInstance->SetData(TYPE_RHYOLITH, NOT_STARTED);
         }
 
         void FootDamaged(uint64 guid, uint32 damage)

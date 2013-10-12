@@ -108,7 +108,8 @@ class boss_shannox : public CreatureScript
 
                 if (pInstance)
                 {
-                    pInstance->SetData(TYPE_SHANNOX, NOT_STARTED);
+                    if(pInstance->GetData(TYPE_SHANNOX)!=DONE)
+                        pInstance->SetData(TYPE_SHANNOX, NOT_STARTED);
                     pRiplimb = me->GetCreature((*me), pInstance->GetData64(DATA_RIPLIMB_GUID));
                     pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID));
                 }
