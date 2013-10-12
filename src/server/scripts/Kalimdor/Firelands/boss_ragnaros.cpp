@@ -379,6 +379,7 @@ public:
                 me->PlayOneShotAnimKit(ANIM_KIT_EXCLAIM);
                 me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
                 me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,20.0f);
+                return;
             }
             ScriptedAI::MoveInLineOfSight(who);
         }
@@ -1303,6 +1304,7 @@ public:
     {
         Magma_trap_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
+            erupted = can_erupt = false;
         }
 
         uint32 Eruption_timer;
@@ -1311,18 +1313,26 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if(can_erupt && who->ToPlayer() && erupted == false)
-                if(me->GetExactDist2d(who->GetPositionX(),who->GetPositionY()) <= 10.0f )
-                {
-                    erupted = true;
-                    me->CastSpell(who,MAGMA_TRAP_ERUPTION,false);
-                    if (!who->HasAura(19263)) //Deterrence
-                        who->KnockbackFrom(who->GetPositionX(),who->GetPositionY(),0.1f,55.1f);
+            if (erupted == true)
+                return;
 
-                    if(IsHeroic())
-                        DoCastAOE(MAGMA_TRAP_VULNERABILITY,true);
-                    me->ForcedDespawn(300);
-                }
+            if (can_erupt == false)
+                return;
+
+            if (who->ToPlayer() == NULL)
+                return;
+
+            if (me->GetExactDist2d(who->GetPositionX(),who->GetPositionY()) <= 10.0f )
+            {
+                erupted = true;
+                me->CastSpell(who,MAGMA_TRAP_ERUPTION,true);
+                if (!who->HasAura(19263)) //Deterrence
+                    who->KnockbackFrom(who->GetPositionX(),who->GetPositionY(),0.1f,55.1f);
+
+                if(IsHeroic())
+                    DoCastAOE(MAGMA_TRAP_VULNERABILITY,true);
+                me->ForcedDespawn(300);
+            }
 
             ScriptedAI::MoveInLineOfSight(who);
         }
@@ -1331,7 +1341,6 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetUInt64Value(UNIT_FIELD_TARGET,0); // Stop turning
-            erupted = can_erupt = false;
             Eruption_timer = 5200;
         }
 
