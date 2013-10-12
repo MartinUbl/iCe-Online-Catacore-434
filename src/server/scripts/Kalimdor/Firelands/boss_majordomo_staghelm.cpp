@@ -90,6 +90,8 @@ uint32 energyField[10] = {18,12,10,8,7,6,5,4,3,2}; // Very wierd calculation of 
 #define MIDDLE_Y -63.0f
 #define MIDDLE_Z  79.0f
 
+#define FIREWALL_MAJORDOMO  208873
+
 class boss_majordomo_staghelm : public CreatureScript
 {
 public:
@@ -105,6 +107,7 @@ public:
         boss_majordomo_staghelmAI(Creature* creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
+            me->SummonGameObject(FIREWALL_MAJORDOMO,576.04f,-61.8f,90.34f,5.6f,0,0,0,0,0);
         }
 
         InstanceScript* instance;
@@ -158,6 +161,11 @@ public:
             Summons.DespawnAll();
             me->MonsterYell("My studies... had only just begun...", LANG_UNIVERSAL, 0);
             me->PlayDistanceSound(24464);
+
+            GameObject * wall = me->FindNearestGameObject(FIREWALL_MAJORDOMO,500.0f);
+
+            if (wall)
+                wall->Delete();
         }
 
         void EnterCombat(Unit* who)

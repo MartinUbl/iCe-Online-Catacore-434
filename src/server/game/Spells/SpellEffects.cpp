@@ -517,6 +517,27 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 99400: // Burning blast ( Ragnaros encounter)
+                    case 101241:
+                    case 101242:
+                    case 101243:
+                    {
+                        if(Aura* pAura = m_caster->GetAura(99399)) // Burning wound
+                        {
+                            uint8 stacks = pAura->GetCharges();
+                            damage *= stacks; // multiply damage by number Burning wound stacks
+                            apply_direct_bonus = false;
+                        }
+                        break;
+                    }
+                    case 98175: // Magma trap ( Ragnaros encounter )
+                    case 100106:
+                    case 100107:
+                    case 100108:
+                    {
+                        damage = (damage * 180 ) / 100;
+                        break;
+                    }
                     // Paladin: Guardian of Ancient Kings: Ancient Fury
                     case 86704:
                     {

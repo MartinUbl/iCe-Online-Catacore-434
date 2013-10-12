@@ -4216,10 +4216,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100715:
         case 100716:
         case 100717:
+        /*case 99510: // Lava ( Ragnaros trash)
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->excludeTargetAuraSpell = 0;
-            break;
+            break;*/
 
 /************************ END OF ALYSRAZOR *******************************/
 
@@ -4242,6 +4243,71 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 
 /********************* END OF MAORDOMO STAGHELM ****************************/
+
+/*************************  RAGNAROS FIRELANDS *****************************/
+
+        case 99399: // Burning Wound ( Missing trigerring spell )
+        case 101238:
+        case 101239:
+        case 101240:
+            spellInfo->EffectTriggerSpell[1] = 99400; // Burning blast
+            spellInfo->EffectBasePoints[0] = 6000;
+            spellInfo->EffectValueMultiplier[0] = 6000;
+            break;
+        case 98928: // Lava wave leap back effect is handling incorrect -> fixed in AI
+            spellInfo->Effect[2] = SPELL_EFFECT_NONE;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            break;
+        case 101088: // Lavalogged
+            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
+            break;
+        case 99849: // Fixate debuff
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 99296: // Missing triggering spell
+            spellInfo->EffectTriggerSpell[0] = 99303;
+            break;
+        case 98518: // Molten Inferno
+            spellInfo->EffectRadiusIndex[0] = 22;
+            break;
+        case 99126: // Blazing Heat
+            spellInfo->DurationIndex = 1; // 10 seconds ( pre nerfed value )
+            break;
+        case 99414: // Burning speed - speed handling in G-core is incorrect ( SPELL_AURA_MOD_INCREASE_SPEED )
+        case 100306:// after application ignore speed_walk,speed_run from DB and start from 1.0
+        case 100307:
+        case 100308:
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+            break;
+        case 98710: // Sulfuras smash
+        case 100890:
+        case 100891:
+        case 100892:
+        spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19;// SPELL_ATTR5_DONT_TURN_DURING_CAST
+            break;
+        case 98951: // Splitting blow
+        case 100883:
+        case 100884:
+        case 100885:
+        spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19;// SPELL_ATTR5_DONT_TURN_DURING_CAST
+            break;
+        case 99172: // Engulfing flames
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 98982: // Submerge - disable lava bolts from triggering
+        case 100295:
+        case 100296:
+        case 100297:
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 100158: // Molten Power
+        case 100302:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+
+/*************************  END OF RAGNAROS FIRELANDS *****************************/
 
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
@@ -4464,6 +4530,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 26029: // dark glare
         case 37433: // spout
         case 43140: case 43215: // flame breath
+        case 99510: // Lava
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_CONE_LINE;
             count++;
             break;
