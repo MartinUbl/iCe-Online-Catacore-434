@@ -404,6 +404,8 @@ public:
 
         void EnterEvadeMode()
         {
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
+
             Summons.DespawnAll();
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -480,24 +482,28 @@ public:
             Summons.push_back(summon->GetGUID());
         }
 
-        uint32 CastSpellOnRandomPlayers(uint32 spellId, uint32 size, bool triggered = true, bool ignoreTanks = false) // Return number of successfuly selected targets
+        void CastSpellOnRandomPlayers(uint32 spellId, uint32 size, bool triggered = true, bool ignoreTanks = false)
         {
-            uint32 counter = 0;
             std::list<Player*> target_list;
             target_list.clear(); // For sure
             Map * map = me->GetMap();
 
             if (!map)
-                return 0;
+                return;
 
             Map::PlayerList const& plrList = map->GetPlayers();
             if (plrList.isEmpty())
-                return 0;
+                return;
+
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    target_list.push_back(pPlayer);
+                    if (ignoreTanks == true)
+                    {
+                        if (!pPlayer->HasTankSpec() && !pPlayer->HasAura(5487)) // Or bear form
+                            target_list.push_back(pPlayer);
+                    }
                 }
             }
 
@@ -513,11 +519,8 @@ public:
                 {
                     me->CastSpell((*j),spellId,triggered);
                     target_list.erase(j);
-                    counter++;
                 }
             }
-
-            return counter;
         }
 
 
@@ -730,16 +733,7 @@ public:
                         if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                             max = 6;
 
-                        uint32 rest = CastSpellOnRandomPlayers(WRATH_OF_RAGNAROS,max,true,false);
-
-                        if (rest)
-                        {
-                            for (uint8 i = 0; i < rest; i++)
-                            {
-                                if ( Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
-                                    me->CastSpell(player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),WRATH_OF_RAGNAROS,true);
-                            }
-                        }
+                        CastSpellOnRandomPlayers(WRATH_OF_RAGNAROS,max,true,true);
 
                         Wrath_timer = 22000;
                     }
@@ -768,10 +762,8 @@ public:
 
                     if (player)
                     {
-                        Creature * trap = me->SummonCreature(MAGMA_TRAP_NPC,player->GetPositionX(),player->GetPositionY(),55.34f,0.0f,TEMPSUMMON_DEAD_DESPAWN,0);
-
-                        if (trap)
-                            me->CastSpell(trap,MAGMA_TRAP_MARK_MISSILE,true);
+                        //Creature * trap = me->SummonCreature(MAGMA_TRAP_NPC,player->GetPositionX(),player->GetPositionY(),55.34f,0.0f,TEMPSUMMON_DEAD_DESPAWN,0);
+                        me->CastSpell(player,MAGMA_TRAP_MARK_MISSILE,true);
                     }
 
                     Magma_trap_timer = 25000;
@@ -846,16 +838,8 @@ public:
                     if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                         max += 6;
 
-                    uint32 rest = CastSpellOnRandomPlayers(LAVA_BOLT,max,true,true);
+                    CastSpellOnRandomPlayers(LAVA_BOLT,max,true);
 
-                    if (rest)
-                    {
-                        for (uint8 i = 0; i < rest; i++)
-                        {
-                            if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
-                                me->CastSpell(player->GetPositionX(),player->GetPositionY(),player->GetPositionZ(),LAVA_BOLT,true);
-                        }
-                    }
                     Lava_Bolt_timer = 4000;
                 }
                 else Lava_Bolt_timer -= diff;
@@ -1304,20 +1288,22 @@ public:
     {
         Magma_trap_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
-            erupted = can_erupt = false;
+            erupted /*= can_erupt*/ = false;
         }
 
-        uint32 Eruption_timer;
+        //uint32 Eruption_timer;
         bool erupted;
-        bool can_erupt;
+        //bool can_erupt;
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (erupted == true)
+            //ScriptedAI::MoveInLineOfSight(who);
+
+            if (erupted == true) // If trap already boomed
                 return;
 
-            if (can_erupt == false)
-                return;
+            /*if (can_erupt == false) // If trap can't erupt yet
+                return;*/
 
             if (who->ToPlayer() == NULL)
                 return;
@@ -1326,33 +1312,34 @@ public:
             {
                 erupted = true;
                 me->CastSpell(who,MAGMA_TRAP_ERUPTION,true);
+                me->RemoveAurasDueToSpell(MAGMA_TRAP_BURNING);
+
                 if (!who->HasAura(19263)) //Deterrence
                     who->KnockbackFrom(who->GetPositionX(),who->GetPositionY(),0.1f,55.1f);
 
                 if(IsHeroic())
                     DoCastAOE(MAGMA_TRAP_VULNERABILITY,true);
-                me->ForcedDespawn(300);
+                me->ForcedDespawn(2000);
             }
-
-            ScriptedAI::MoveInLineOfSight(who);
         }
 
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetUInt64Value(UNIT_FIELD_TARGET,0); // Stop turning
-            Eruption_timer = 5200;
+            me->CastSpell(me,MAGMA_TRAP_BURNING,true);
+            //Eruption_timer = 5200;
         }
 
         void UpdateAI ( const uint32 diff)
         {
-            if (Eruption_timer <= diff)
+            /*if (Eruption_timer <= diff)
             {
                 me->CastSpell(me,MAGMA_TRAP_BURNING,true);
                 can_erupt = true;
                 Eruption_timer = NEVER;
             }
-            else Eruption_timer -= diff;
+            else Eruption_timer -= diff;*/
         }
     };
 };

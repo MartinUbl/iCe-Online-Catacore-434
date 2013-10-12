@@ -41,6 +41,7 @@ public:
         uint64 alysrazorGUID;
         uint64 balerocGUID;
         uint64 staghelmGUID;
+        uint64 ragnarosGUID;
 
         uint64 balerocDoorGUID;
         uint64 bridgeDoorGUID;
@@ -58,6 +59,7 @@ public:
             rhyolithGUID =      0;
             balerocGUID =       0;
             staghelmGUID =      0;
+            ragnarosGUID =      0;
             balerocDoorGUID =   0;
             bridgeDoorGUID=     0;
             bridgeGUID =        0;
@@ -134,6 +136,9 @@ public:
                 case 52571:
                     staghelmGUID = pCreature->GetGUID();
                     break;
+                case 52409:
+                    ragnarosGUID = pCreature->GetGUID();
+                    break;
             }
         }
 
@@ -181,6 +186,8 @@ public:
                     return balerocGUID;
                 case TYPE_STAGHELM:
                     return staghelmGUID;
+                case TYPE_RAGNAROS:
+                    return ragnarosGUID;
                 case DATA_BALEROC_FRONT_DOOR:
                     return balerocDoorGUID;
                 case DATA_BRIDGE_DOOR:
@@ -238,12 +245,20 @@ public:
             {
                 Creature * pBaleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC));
                 Creature * pStaghelm = this->instance->GetCreature(this->GetData64(TYPE_STAGHELM));
+                Creature * pRagnaros = this->instance->GetCreature(this->GetData64(TYPE_RAGNAROS));
+                GameObject * bridge = NULL;
 
-                if (pStaghelm && pBaleroc && pBaleroc->isDead() && bridgeGUID == 0)
+                if (pStaghelm && pBaleroc && pRagnaros && pBaleroc->isDead() && bridgeGUID == 0)
                 {
-                    GameObject * bridge = pStaghelm->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // TODO  !!!- When Ragnaros will be released, will Staghelm summon bridge if he is dead ? :D
+                    bridge = pStaghelm->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0);
                     if(bridge)
                         bridgeGUID = bridge->GetGUID();
+                    else // In case Staghelm is dead, bridge has to be summoned by ragnaros
+                    {
+                        bridge = pRagnaros->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0);
+                        if (bridge)
+                            bridgeGUID = bridge->GetGUID();
+                    }
                 }
 
                 if (GameObject * door2 = this->instance->GetGameObject(this->GetData64(DATA_BRIDGE_DOOR))) // Unlock  bridge door
