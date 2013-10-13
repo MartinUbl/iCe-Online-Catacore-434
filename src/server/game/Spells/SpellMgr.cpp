@@ -4255,14 +4255,21 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectValueMultiplier[0] = 6000;
             break;
         case 98928: // Lava wave leap back effect is handling incorrect -> fixed in AI
+        case 100292:
+        case 100293:
+        case 100294:
             spellInfo->Effect[2] = SPELL_EFFECT_NONE;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             break;
         case 100455:
+        case 101229:
+        case 101230:
+        case 101231:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
             break;
         case 101088: // Lavalogged
+        case 101102:
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_SRC;
             break;
@@ -4270,12 +4277,21 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
         case 99296: // Missing triggering spell
+        case 100282:
+        case 100283:
+        case 100284:
             spellInfo->EffectTriggerSpell[0] = 99303;
             break;
         case 98518: // Molten Inferno
+        case 100252:
+        case 100253:
+        case 100254:
             spellInfo->EffectRadiusIndex[0] = 22;
             break;
         case 99126: // Blazing Heat
+        case 100984:
+        case 100985:
+        case 100986:
             spellInfo->DurationIndex = 1; // 10 seconds ( pre nerfed value )
             break;
         case 99414: // Burning speed - speed handling in G-core is incorrect ( SPELL_AURA_MOD_INCREASE_SPEED )
