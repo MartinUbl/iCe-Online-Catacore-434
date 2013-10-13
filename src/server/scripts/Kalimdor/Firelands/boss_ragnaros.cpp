@@ -1450,7 +1450,13 @@ public:
 
         void UpdateAI ( const uint32 diff)
         {
-            me->SetSpeed(MOVE_RUN, 0.142857 + (speed_coef * me->GetAuraCount(BURNING_SPEED)),true); // Base speed + spell_coef * stacks
+
+            uint32 stacks = 0;
+            Aura * a = me->GetAura(BURNING_SPEED);
+            if (a)
+                stacks = a->GetStackAmount();
+
+            me->SetSpeed(MOVE_RUN, 0.142857 + (speed_coef * stacks),true); // Base speed + spell_coef * stacks
 
             if (me->HealthBelowPct(HPpercentage) && HPpercentage > 40)
             {
