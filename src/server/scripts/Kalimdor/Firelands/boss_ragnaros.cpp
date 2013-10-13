@@ -966,25 +966,35 @@ public:
                         }
                     }
 
-                    std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-                    for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+                    Map * map = me->GetMap();
+
+                    if (!map)
+                        return;
+
+                    Map::PlayerList const& plrList = map->GetPlayers();
+                    if (plrList.isEmpty())
+                        return;
+
+                    for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                     {
-                        Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                        if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() && unit->IsInWorld() )
+                        if(Player* pPlayer = itr->getSource())
                         {
-                            if (playerCounter == 20) // Max 20 seed on 25 man
-                                break;
+                            if ( pPlayer && pPlayer->isAlive() && pPlayer->IsInWorld() )
+                            {
+                                if (playerCounter == 20) // Max 20 seed on 25 man
+                                    break;
 
-                            seedCounter = (seedCounter == 6) ? 0 : seedCounter;
+                                seedCounter = (seedCounter == 6) ? 0 : seedCounter;
 
-                            Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
+                                Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
 
-                            if (pSeed && pSeed->IsInWorld())
-                                pSeed->CastSpell(unit,MOLTEN_SEED_INITIAL_DMG,true); // Cast initial Molten seed dmg + visual missile
+                                if (pSeed && pSeed->IsInWorld())
+                                    pSeed->CastSpell(pPlayer,MOLTEN_SEED_INITIAL_DMG,true); // Cast initial Molten seed dmg + visual missile
 
-                            me->SummonCreature(MOLTEN_ELEMENTAL,unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),0.0f);
-                            playerCounter++;
-                            seedCounter++;
+                                me->SummonCreature(MOLTEN_ELEMENTAL,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ(),0.0f);
+                                playerCounter++;
+                                seedCounter++;
+                            }
                         }
                     }
 
@@ -1453,6 +1463,13 @@ public:
 
             uint32 stacks = 0;
             Aura * a = me->GetAura(BURNING_SPEED);
+            if (!a)
+                a = me->GetAura(100306);
+            if (!a)
+                a = me->GetAura(100307);
+            if (!a)
+                a = me->GetAura(100308);
+
             if (a)
                 stacks = a->GetStackAmount();
 
@@ -1467,6 +1484,10 @@ public:
             if (Transform_timer <= diff)
             {
                 me->RemoveAurasDueToSpell(FLAME_PILLAR_TRANSFORM);
+                me->RemoveAurasDueToSpell(100133);
+                me->RemoveAurasDueToSpell(100134);
+                me->RemoveAurasDueToSpell(100134);
+
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
 
                 for (uint8 i = 0; i < 10; i++) // At start Sons of flames starting with 10 stacks of burning speed
