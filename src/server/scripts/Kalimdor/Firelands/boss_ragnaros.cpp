@@ -499,7 +499,7 @@ public:
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    if (ignoreTanks == true)
+                    if (ignoreTanks == true && pPlayer->isAlive())
                     {
                         if (!pPlayer->HasTankSpec() && !pPlayer->HasAura(5487)) // Or bear form
                             target_list.push_back(pPlayer);
@@ -1363,6 +1363,8 @@ public:
 
         void Reset()
         {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             Summon_sons_timer = 9000;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
@@ -1428,7 +1430,7 @@ public:
 
         void Reset()
         {
-            speed_coef = 0.25142832f;
+            speed_coef = 0.10857132f;
             x = y = z = 0.0f;
             Creature * hammer = me->FindNearestCreature(SPLITTING_SULFURAS,500.0f,true);
             Transform_timer = 18000; // Default time in case we couldn't find ragnaros
@@ -2458,6 +2460,33 @@ class spell_gen_blazing_heat_heal : public SpellScriptLoader
         }
 };
 
+
+class go_firelands_portal : public GameObjectScript
+{
+public:
+    go_firelands_portal() : GameObjectScript("go_firelands_portal") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        if (pPlayer == NULL || !pPlayer->IsInWorld())
+            return false;
+
+        InstanceScript * instance = pPlayer->GetInstanceScript();
+
+        if (instance == NULL)
+            return false;
+
+        Creature * pStaghelm = instance->instance->GetCreature(instance->GetData64(TYPE_STAGHELM));
+
+        if (pStaghelm && pStaghelm->isDead())
+        {
+            pPlayer->NearTeleportTo(360.63f,-63.93f,77.52f,0.06f);
+        }
+
+        return true;
+    }
+};
+
 void AddSC_boss_ragnaros_fl()
 {
     // RAGNAROS NPCS
@@ -2488,6 +2517,9 @@ void AddSC_boss_ragnaros_fl()
     new spell_gen_blazing_heat_heal();//    99145
     new spell_gen_molten_power(); //        100158,100302
     new spell_gen_lava_wave(); //           101088,101102
+
+    // GO SCRIPTS
+    new go_firelands_portal();
 }
 /*
     DELETE FROM `spell_script_names` WHERE  spell_id=98518 OR  spell_id=100252 OR  spell_id=100253 OR  spell_id=100254;
