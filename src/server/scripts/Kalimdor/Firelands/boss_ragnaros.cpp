@@ -1460,7 +1460,7 @@ public:
 
             if (Transform_timer <= diff)
             {
-                me->RemoveAura(FLAME_PILLAR_TRANSFORM);
+                me->RemoveAurasDueToSpell(FLAME_PILLAR_TRANSFORM);
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
 
                 for (uint8 i = 0; i < 10; i++) // At start Sons of flames starting with 10 stacks of burning speed
