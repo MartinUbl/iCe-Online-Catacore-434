@@ -19553,9 +19553,10 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
+            InstanceSave *save=itr->second.save;
             //if(itr->second.perm)
             {
-                InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
+                /*InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
                 bool isHeroic;
                 uint32* uiEnc;
                 uint32 encData = 0;
@@ -19594,8 +19595,8 @@ void Player::SendRaidInfo()
                     }
                 }
                 else 
-                   isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
-
+                   isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;*/
+                bool isHeroic=save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
                 data << isHeroic;                           //if there wasnt 0, heroic difficulty shown nothing
@@ -19603,7 +19604,7 @@ void Player::SendRaidInfo()
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << encData;                          // completed encounters mask
+                data << uint8(0);//encData;                          // completed encounters mask
                 ++counter;
             }
         }
