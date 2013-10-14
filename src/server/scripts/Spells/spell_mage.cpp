@@ -59,7 +59,7 @@ class spell_mage_cold_snap : public SpellScriptLoader
                 {
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
 
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
+                    if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
                         (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) &&
                         spellInfo->Id != SPELL_MAGE_COLD_SNAP && GetSpellRecoveryTime(spellInfo) > 0)
                     {
