@@ -2503,9 +2503,9 @@ public:
         if (instance == NULL)
             return false;
 
-        Creature * pStaghelm = instance->instance->GetCreature(instance->GetData64(TYPE_STAGHELM));
+        Creature * pBaleroc = instance->instance->GetCreature(instance->GetData64(TYPE_BALEROC));
 
-        if (pStaghelm && pStaghelm->isDead())
+        if (pBaleroc && pBaleroc->isDead())
         {
             pPlayer->NearTeleportTo(360.63f,-63.93f,77.52f,0.06f);
         }
