@@ -358,7 +358,11 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
 
-            me->RemoveAurasDueToSpell(BURROW_SULFURAS);
+            me->RemoveAura(BURROW_SULFURAS);
+            me->RemoveAura(100295);
+            me->RemoveAura(100296);
+            me->RemoveAura(100297);
+
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
 
@@ -379,6 +383,13 @@ public:
                 me->PlayOneShotAnimKit(ANIM_KIT_EXCLAIM);
                 me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
                 me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,20.0f);
+
+                Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
+                if(unit) // Visual bug when sometime player cant see lava ring
+                {
+                    unit->SetVisible(false);
+                    unit->SetVisible(true);
+                }
                 return;
             }
             ScriptedAI::MoveInLineOfSight(who);
@@ -405,7 +416,7 @@ public:
         void EnterEvadeMode()
         {
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
-
+            me->RemoveAllAuras();
             Summons.DespawnAll();
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -559,7 +570,10 @@ public:
 
         void ShiftToPhase2(void)
         {
-            me->RemoveAurasDueToSpell(BURROW_SULFURAS);
+            me->RemoveAura(BURROW_SULFURAS);
+            me->RemoveAura(100295);
+            me->RemoveAura(100296);
+            me->RemoveAura(100297);
             me->SetReactState(REACT_AGGRESSIVE);
 
             CheckTimer = 3000;
@@ -579,7 +593,10 @@ public:
 
         void ShiftToPhase3(void)
         {
-            me->RemoveAurasDueToSpell(BURROW_SULFURAS);
+            me->RemoveAura(BURROW_SULFURAS);
+            me->RemoveAura(100295);
+            me->RemoveAura(100296);
+            me->RemoveAura(100297);
             me->SetReactState(REACT_AGGRESSIVE);
 
             CheckTimer = 3000;
@@ -686,6 +703,19 @@ public:
             }
             else Enrage_timer -= diff;
 
+            if (BurningWoundTimer <= diff)
+            {
+                if (!me->IsNonMeleeSpellCasted(false))
+                {
+                    if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3)
+                        if (CanCast() && me->IsWithinMeleeRange(me->getVictim()))
+                            me->CastSpell(me->getVictim(),BURNING_WOUND_DOT,true);
+
+                    BurningWoundTimer = urand(4000,8000);
+                }
+            }
+            else BurningWoundTimer -= diff;
+
             if (me->HealthBelowPct(10) && me->GetHealth() != 1 ) // On normal difficulty Ragnaros should die at 10 % of his health
             {
                 me->DealDamage(me, me->GetHealth() - 1, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -709,19 +739,6 @@ public:
                     }
                 }
                  else CheckTimer -= diff;
-
-                 if (BurningWoundTimer <= diff)
-                 {
-                    if (!me->IsNonMeleeSpellCasted(false))
-                    {
-                        if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3)
-                            if (CanCast() && me->IsWithinMeleeRange(me->getVictim()))
-                                me->CastSpell(me->getVictim(),BURNING_WOUND_DOT,true);
-
-                        BurningWoundTimer = urand(4000,8000);
-                    }
-                 }
-                 else BurningWoundTimer -= diff;
 
                  if (Wrath_timer <= diff) // Cast Wrath of Ragnaros  on random player position
                 {
@@ -950,7 +967,7 @@ public:
                 if (Molten_seeds_timer <= diff) // Spawn molten seeds under every player
                 {
                     uint8 playerCounter = 0;
-                    uint8 seedCounter   = 0;
+                    /*uint8 seedCounter   = 0;
                     uint64 seedsGUID[6];
 
                     memset(&seedsGUID, 0, sizeof(seedsGUID));
@@ -964,7 +981,7 @@ public:
                             seed->ForcedDespawn(5000);
                             seedsGUID[j] = seed->GetGUID();
                         }
-                    }
+                    }*/
 
                     Map * map = me->GetMap();
 
@@ -979,21 +996,21 @@ public:
                     {
                         if(Player* pPlayer = itr->getSource())
                         {
-                            if ( pPlayer && pPlayer->isAlive() && pPlayer->IsInWorld() )
+                            if ( pPlayer && pPlayer->isAlive() && pPlayer->IsInWorld() && pPlayer->GetDistance(me) < 200.0f)
                             {
                                 if (playerCounter == 20) // Max 20 seed on 25 man
                                     break;
 
-                                seedCounter = (seedCounter == 6) ? 0 : seedCounter;
+                                //seedCounter = (seedCounter == 6) ? 0 : seedCounter;
 
-                                Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
+                                //Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
 
-                                if (pSeed && pSeed->IsInWorld())
-                                    pSeed->CastSpell(pPlayer,MOLTEN_SEED_INITIAL_DMG,true); // Cast initial Molten seed dmg + visual missile
+                                //if (pSeed && pSeed->IsInWorld())
+                                    me->CastSpell(pPlayer,MOLTEN_SEED_INITIAL_DMG,true); // Cast initial Molten seed dmg + visual missile
 
                                 me->SummonCreature(MOLTEN_ELEMENTAL,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ(),0.0f);
                                 playerCounter++;
-                                seedCounter++;
+                                //seedCounter++;
                             }
                         }
                     }
@@ -1478,15 +1495,18 @@ public:
             if (me->HealthBelowPct(HPpercentage) && HPpercentage > 40)
             {
                 me->RemoveAuraFromStack(BURNING_SPEED);
+                me->RemoveAuraFromStack(100306);
+                me->RemoveAuraFromStack(100307);
+                me->RemoveAuraFromStack(100308);
                 HPpercentage -= 5;
             }
 
             if (Transform_timer <= diff)
             {
-                me->RemoveAurasDueToSpell(FLAME_PILLAR_TRANSFORM);
-                me->RemoveAurasDueToSpell(100133);
-                me->RemoveAurasDueToSpell(100134);
-                me->RemoveAurasDueToSpell(100134);
+                me->RemoveAura(FLAME_PILLAR_TRANSFORM);
+                me->RemoveAura(100133);
+                me->RemoveAura(100134);
+                me->RemoveAura(100134);
 
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
 
@@ -1599,6 +1619,8 @@ public:
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
         }
 
         uint32 Demorph_timer;
@@ -1609,12 +1631,11 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetDisplayId(11686); // Invis model
-            Morph_timer = 2000;
-            Demorph_timer = 12000;
+            Morph_timer = 100;
+            Demorph_timer = 10000;
             Reset_aggro_timer = Demorph_timer + 5000;
             me->SetInCombatWithZone();
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->SetFloatValue(OBJECT_FIELD_SCALE_X,0.9f);
         }
 
         void UpdateAI ( const uint32 diff)
@@ -1629,6 +1650,7 @@ public:
             if (Demorph_timer <= diff)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
+                me->SetFloatValue(OBJECT_FIELD_SCALE_X,2.0f);
                 me->CastSpell(me,MOLTEN_INFERNO,true);
                 me->CastSpell(me,MOLTEN_POWER,true);
                 me->SetDisplayId(me->GetNativeDisplayId());// Back to Elemental Form
@@ -1771,6 +1793,9 @@ public:
     {
         Living_meteor_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         }
 
         Player * SelectRandomPlayer() // Need to filter Ragnaros tanks
@@ -1794,20 +1819,16 @@ public:
 
         uint32 Chasin_timer;
         uint32 Combustible_timer;
-        uint32 Check_timer;
         uint32 ClearRoot_timer;
 
         void Reset()
         {
-            ClearRoot_timer = Combustible_timer = Check_timer = NEVER; // Not now
+            ClearRoot_timer = Combustible_timer = NEVER; // Not now
             Chasin_timer = 1500;
-            me->SetInCombatWithZone();
             me->SetReactState(REACT_AGGRESSIVE);
+            me->SetInCombatWithZone();
             me->CastSpell(me,METEOR_DMG_REDUCTION,true);
             me->CastSpell(me,COMBUSTIBLE,true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
         }
 
@@ -1817,12 +1838,31 @@ public:
             {
                 if (me->HasAura(COMBUSTIBLE) || me->HasAura(100282) ||me->HasAura(100283) ||me->HasAura(100284) ) // Combustible spell difficulties variants
                 {
-                    me->RemoveAurasDueToSpell(COMBUSTIBLE); // Hope that will clear all spell difficulty variants of spelll -> have to test !!!
+                    me->RemoveAura(COMBUSTIBLE); // Hope that will clear all spell difficulty variants of spelll -> have to test !!!
+                    me->RemoveAura(100282);
+                    me->RemoveAura(100283);
+                    me->RemoveAura(100284);
+
                     me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE); // few  seconds after knockback, meteor should stay on place
+
+                    if (Unit *victim = me->getVictim())
+                    {
+                        uint32 dist = (uint32) me->GetDistance(victim);
+
+                        if (dist <= 10 )
+                            me->JumpTo(8.0f, 5.0f,false);
+                        else if (dist <= 20)
+                            me->JumpTo(15.0f, 8.0f,false);
+                        else if (dist <= 30)
+                            me->JumpTo(20.0f, 10.0f,false);
+                        else
+                            me->JumpTo(20.0f, 10.0f,false);
+                    }
+                    me->InterruptNonMeleeSpells(false);
                     //me->GetMotionMaster()->MoveJump(me->GetPositionX()+cos(me->GetOrientation() + M_PI)*8,me->GetPositionY()+sin(me->GetOrientation() + M_PI)*8,me->GetPositionZ(),15.0f,10.0f);
-                    me->JumpTo(15.0f, 10.0f,false); // Leap back - spell effect 144 on Combustion effect didn't work properly
+                    //me->JumpTo(15.0f, 8.0f,false); // Leap back - spell effect 144 on Combustion effect didn't work properly
                     Combustible_timer = 5000; // Trigger Combustible effect again in 5 s
-                    Check_timer = 4000;
+                    Chasin_timer = 4000;
                 }
             }
         }
@@ -1838,9 +1878,8 @@ public:
             {
                 me->getThreatManager().resetAllAggro();
                 me->AddThreat(p,99999999.0f);
-                me->CastSpell(SelectRandomPlayer(),FIXATE,false);
+                me->CastSpell(p,FIXATE,false);
                 me->clearUnitState(UNIT_STAT_CASTING);
-                me->GetMotionMaster()->MovePoint(0,p->GetPositionX(),p->GetPositionY(),p->GetPositionZ());
             }
         }
 
@@ -1850,8 +1889,9 @@ public:
             {
                 me->CastSpell(me,MATEOR_EXPLOSION,true);
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+                me->InterruptNonMeleeSpells(false);
                 ClearRoot_timer = 2000;
-                Check_timer = 2600;
+                Chasin_timer = 1500;
             }
         }
 
@@ -1860,27 +1900,18 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (Chasin_timer <= diff)
+            if (Unit * vic = me->getVictim())
             {
-                StartChasing();
-                Check_timer = 2000;
+                if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE))
+                    me->GetMotionMaster()->MovePoint(0,vic->GetPositionX(),vic->GetPositionY(),vic->GetPositionZ());
+            }
+
+            if (Chasin_timer <= diff) // Few seconds after spawn Metoer should be passive
+            {
+                StartChasing(); 
                 Chasin_timer = NEVER;
             }
             else Chasin_timer -= diff;
-
-            if (Check_timer <= diff)
-            {
-                Aura* aur = me->getVictim()->GetAura(FIXATE,me->GetGUID());
-                if (aur == NULL)  // If my victim doesn't have fixate debuff from me
-                {
-                    StartChasing(); // Select new target,place debuff and chase him
-                }
-                else
-                    me->GetMotionMaster()->MovePoint(0,me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ());
-
-                Check_timer = 2000;
-            }
-            else Check_timer -= diff;
 
             if (Combustible_timer <= diff)
             {
@@ -1892,7 +1923,6 @@ public:
             if (ClearRoot_timer <= diff)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                Check_timer = 1000;
                 ClearRoot_timer = NEVER;
             }
             else ClearRoot_timer -= diff;
@@ -2291,6 +2321,11 @@ public:
 
             damage = GetHitDamage() / ( pow((double)(distance + 1),0.5) ); // Approx. is correct ( Thanks to Gregory :P )
 
+            /*damage = damage - 2000;
+
+            if (damage <= 0) // Should not happen
+                damage = 8000;*/
+
             SetHitDamage((int32)damage);
         }
 
@@ -2496,19 +2531,23 @@ public:
     bool OnGossipHello(Player *pPlayer, GameObject *pGO)
     {
         if (pPlayer == NULL || !pPlayer->IsInWorld())
-            return false;
+            return true;
 
         InstanceScript * instance = pPlayer->GetInstanceScript();
 
         if (instance == NULL)
-            return false;
+            return true;
 
         Creature * pBaleroc = instance->instance->GetCreature(instance->GetData64(TYPE_BALEROC));
 
-        if (pBaleroc && pBaleroc->isDead())
+        if (pBaleroc == NULL)
         {
             pPlayer->NearTeleportTo(360.63f,-63.93f,77.52f,0.06f);
+            return true;
         }
+
+        if (pBaleroc && pBaleroc->isDead())
+            pPlayer->NearTeleportTo(360.63f,-63.93f,77.52f,0.06f);
 
         return true;
     }
