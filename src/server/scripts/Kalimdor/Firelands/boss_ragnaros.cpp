@@ -1759,7 +1759,7 @@ public:
                 {
                     me->CastSpell(player,BLAZING_HEAT_SIGNALIZER,false);
                 }
-                Blazing_heat_timer = 45000;
+                Blazing_heat_timer = 20000;
             }
             else Blazing_heat_timer -= diff;
 
@@ -2340,7 +2340,7 @@ public:
             float damage = 0.0f;
             float distance = caster->GetExactDist2d(hit_unit->GetPositionX(),hit_unit->GetPositionY());
 
-            damage = GetHitDamage() / ( pow((double)(distance + 1),0.68) ); // Approx. is correct ( Thanks to Gregory :P )
+            damage = GetHitDamage() / ( pow((double)(distance + 1),0.72) ); // Approx. is correct ( Thanks to Gregory :P )
 
             SetHitDamage((int32)damage);
         }
