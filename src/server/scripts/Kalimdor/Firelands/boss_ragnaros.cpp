@@ -510,7 +510,7 @@ public:
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    if (ignoreTanks == true && pPlayer->isAlive())
+                    if (ignoreTanks == true && pPlayer->isAlive() && !pPlayer->isGameMaster())
                     {
                         if (!pPlayer->HasTankSpec() && !pPlayer->HasAura(5487)) // Or bear form
                             target_list.push_back(pPlayer);
@@ -680,6 +680,20 @@ public:
             //Return since we have no target
             if (!UpdateVictim())
                 return;
+
+            if (me->IsInWorld() && me->getVictim() && me->getVictim()->IsInWorld())
+            {
+                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
+                {
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+                }
+                else
+                {
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                }
+            }
 
             if (Magma_timer <= diff)
             {
@@ -996,7 +1010,7 @@ public:
                     {
                         if(Player* pPlayer = itr->getSource())
                         {
-                            if ( pPlayer && pPlayer->isAlive() && pPlayer->IsInWorld() && pPlayer->GetDistance(me) < 200.0f)
+                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 200.0f)
                             {
                                 if (playerCounter == 20) // Max 20 seed on 25 man
                                     break;
@@ -1469,15 +1483,15 @@ public:
             HPpercentage = 95;
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE| UNIT_FLAG_DISABLE_MOVE);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            //me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->CastSpell(me,FLAME_PILLAR_TRANSFORM,true);
         }
 
         void UpdateAI ( const uint32 diff)
         {
-
             uint32 stacks = 0;
             Aura * a = me->GetAura(BURNING_SPEED);
             if (!a)
@@ -1532,7 +1546,8 @@ public:
                     y = hammer->GetPositionY();
                     z = hammer->GetPositionZ();
 
-                    me->GetMotionMaster()->MovePoint(0,x,y,z);
+                    if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
+                        me->GetMotionMaster()->MovePoint(0,x,y,z);
                 }
                 GetPosition_timer = NEVER;
             }
@@ -1553,7 +1568,8 @@ public:
             {
                 if( x != 0.0f )
                 {
-                    me->GetMotionMaster()->MovePoint(0,x,y,z);
+                    if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
+                        me->GetMotionMaster()->MovePoint(0,x,y,z);
                 }
 
                 Path_correction_timer = 1000;
@@ -1666,6 +1682,11 @@ public:
             if (Reset_aggro_timer <= diff) // Reset aggro every 5 seconds
             {
                 me->getThreatManager().resetAllAggro();
+                if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                {
+                    me->AddThreat(player,10.0f);
+                    me->GetMotionMaster()->MoveChase(player);
+                }
                 Reset_aggro_timer = 5000;
             }
             else Reset_aggro_timer -= diff;
@@ -1738,7 +1759,7 @@ public:
                 {
                     me->CastSpell(player,BLAZING_HEAT_SIGNALIZER,false);
                 }
-                Blazing_heat_timer = 20000;
+                Blazing_heat_timer = 45000;
             }
             else Blazing_heat_timer -= diff;
 
@@ -2319,12 +2340,7 @@ public:
             float damage = 0.0f;
             float distance = caster->GetExactDist2d(hit_unit->GetPositionX(),hit_unit->GetPositionY());
 
-            damage = GetHitDamage() / ( pow((double)(distance + 1),0.5) ); // Approx. is correct ( Thanks to Gregory :P )
-
-            /*damage = damage - 2000;
-
-            if (damage <= 0) // Should not happen
-                damage = 8000;*/
+            damage = GetHitDamage() / ( pow((double)(distance + 1),0.68) ); // Approx. is correct ( Thanks to Gregory :P )
 
             SetHitDamage((int32)damage);
         }
