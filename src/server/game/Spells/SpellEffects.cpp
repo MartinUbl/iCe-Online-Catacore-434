@@ -535,7 +535,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     case 100107:
                     case 100108:
                     {
-                        damage = (damage * 180 ) / 100;
+                        damage = (damage * 170 ) / 100;
                         break;
                     }
                     // Paladin: Guardian of Ancient Kings: Ancient Fury
@@ -1074,6 +1074,25 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DRUID:
             {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    //Druid T12 Feral 4P Bonus
+                    if (m_spellInfo->Id == 1079 || m_spellInfo->Id == 22568 || m_spellInfo->Id == 22570 || m_spellInfo->Id == 52610 )
+                    {
+                        int cp = (int)m_caster->ToPlayer()->GetComboPoints();
+
+                        if (cp)
+                        {
+                            if (roll_chance_i(cp * 20)) // 20 % chance per combo point
+                            {
+                                if (Aura * berserk = m_caster->GetAura(50334)) // Berserk
+                                {
+                                    berserk->SetDuration(berserk->GetDuration() + 2000);
+                                }
+                            }
+                        }
+                    }
+                }
                 // Ferocious Bite
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                 {
