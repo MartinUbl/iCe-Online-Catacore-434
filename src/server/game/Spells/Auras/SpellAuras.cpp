@@ -2073,6 +2073,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             break;
                         target->CastSpell(target, GetEffect(0)->GetAmount(), true, NULL, GetEffect(0));
                         break;
+                    case 49028: // Dancing Rune Weapon
+                    {
+                        if (caster && caster->HasAura(98966) && removeMode == AURA_REMOVE_BY_EXPIRE) // Death Knight T12 Blood 4P Bonus
+                            caster->CastSpell(caster,101162,true);
+                        break;
+                    }
                 }
                 break;
             case SPELLFAMILY_SHAMAN:
