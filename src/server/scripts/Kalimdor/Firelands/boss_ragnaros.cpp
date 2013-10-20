@@ -259,7 +259,7 @@ static const Yells HeroicDeath[7]= // TODO -> FIND REST OF SOUND ID'S
     {11469, "Indeed."},
 };
 
-uint32 engulfing_lengths[4] = {48,60,70,85}; // Distances for Engulfing flames
+uint32 engulfing_lengths[4] = {48,60,72,87}; // Distances for Engulfing flames
 
 # define MINUTE 60000
 # define NEVER  (4294967295) // used as "delayed" timer (10 minutes)
@@ -376,7 +376,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who->ToPlayer() && speech == false)
+            if (who->ToPlayer() && !who->ToPlayer()->isGameMaster() && speech == false)
             {
                 speech = true;
                 PlayAndYell(intro.sound,intro.text);
@@ -2053,8 +2053,8 @@ public:
 
         void EnterCombat(Unit * /*who*/)
         {
-            me->SummonGameObject(FIREWALL_TRASH,690.82f,-60.1f,86.32f,2.69f,0,0,0,0,0); // Wall to Majordomo
-            me->SummonGameObject(FIREWALL_TRASH,791.59f,-59.40f,86.32f,5.742f,0,0,0,0,0); // Wall to Ragnaros
+            //me->SummonGameObject(FIREWALL_TRASH,690.82f,-60.1f,86.32f,2.69f,0,0,0,0,0); // Wall to Majordomo
+            //me->SummonGameObject(FIREWALL_TRASH,791.59f,-59.40f,86.32f,5.742f,0,0,0,0,0); // Wall to Ragnaros
             me->SetInCombatWithZone();
         }
 
@@ -2340,7 +2340,7 @@ public:
             float damage = 0.0f;
             float distance = caster->GetExactDist2d(hit_unit->GetPositionX(),hit_unit->GetPositionY());
 
-            damage = GetHitDamage() / ( pow((double)(distance + 1),0.72) ); // Approx. is correct ( Thanks to Gregory :P )
+            damage = GetHitDamage() / ( pow((double)(distance + 1),0.7) ); // Approx. is correct ( Thanks to Gregory :P )
 
             SetHitDamage((int32)damage);
         }
