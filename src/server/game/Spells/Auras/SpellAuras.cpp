@@ -1823,13 +1823,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     //remove Blood frenzy on bleed effect drop
                     case 94009://Rend
                     case 12721://Deep Wounds
+                    {
                         if(target && !target->HasAura(94009) && !target->HasAura(12721))
                         {
                             target->RemoveAurasDueToSpell(30069);
                             target->RemoveAurasDueToSpell(30070);
                         }
+                        break;
+                    }
+                    case 2565: // Shield block
+                    {
+                        // Warrior T12 Protection 4P bonus
+                        if (caster && caster->HasAura(99242) && removeMode == AURA_REMOVE_BY_EXPIRE)
+                            caster->CastSpell(caster, 99243, true);
+                        break;
+                    }
                 }
-
                 break;
             case SPELLFAMILY_WARLOCK:
                 if (!caster)
