@@ -8776,52 +8776,28 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
         return;
     }
 
-    /* reset stats, auras, ... */
-    ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pTarget->getClass());
-    if (cEntry)
-    {
-        uint8 powertype = cEntry->powerType;
+    /* which spells to preserve through spell reset */
+    uint32 preserve_spells_table[] = {
+        15007,  // Ressurection Sickness
+        26013,  // Deserter
+    };
+    std::vector<uint32> preserve_spells;
 
-        /* which spells to preserve through spell reset */
-        uint32 preserve_spells_table[] = {
-            15007,  // Ressurection Sickness
-            26013,  // Deserter
-        };
-        std::vector<uint32> preserve_spells;
+    for (uint32 i = 0; i < sizeof(preserve_spells_table)/sizeof(uint32); i++)
+        if (pTarget->HasAura(preserve_spells_table[i]))
+            preserve_spells.push_back(preserve_spells_table[i]);
 
-        for (uint32 i = 0; i < sizeof(preserve_spells_table)/sizeof(uint32); i++)
-            if (pTarget->HasAura(preserve_spells_table[i]))
-                preserve_spells.push_back(preserve_spells_table[i]);
+    pTarget->SetShapeshiftForm(FORM_NONE);
+    pTarget->RemoveAllAuras();
 
-        pTarget->SetShapeshiftForm(FORM_NONE);
+    if (!pTarget->isAlive()) {
+        pTarget->ResurrectPlayer(0.1f);
+        pTarget->SpawnCorpseBones();
+    }
 
-        pTarget->RemoveAllAuras();
-
-        if (!pTarget->isAlive()) {
-            pTarget->ResurrectPlayer(0.1f);
-            pTarget->SpawnCorpseBones();
-        }
-
-        pTarget->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
-        pTarget->SetFloatValue(UNIT_FIELD_COMBATREACH, DEFAULT_COMBAT_REACH);
-        pTarget->setFactionForRace(pTarget->getRace());
-        pTarget->SetUInt32Value(UNIT_FIELD_BYTES_0, ((pTarget->getRace()) | (pTarget->getClass() << 8) | (pTarget->getGender() << 16) | (powertype << 24)));
-        pTarget->InitDisplayIds();
-        pTarget->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
-        pTarget->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-        pTarget->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));  //-1 == default
-
-        pTarget->InitRunes();
-        pTarget->InitStatsForLevel(true);
-        pTarget->UpdateAllStats();
-        pTarget->InitTaxiNodesForLevel();
-        pTarget->InitGlyphsForLevel();
-        pTarget->InitTalentForLevel();
-
-        while (!preserve_spells.empty()) {
-            pTarget->CastSpell(pTarget, preserve_spells.back(), true);
-            preserve_spells.pop_back();
-        }
+    while (!preserve_spells.empty()) {
+        pTarget->CastSpell(pTarget, preserve_spells.back(), true);
+        preserve_spells.pop_back();
     }
 
     /* disabled, causes server crash, probably due to unavailability of m_mapId
