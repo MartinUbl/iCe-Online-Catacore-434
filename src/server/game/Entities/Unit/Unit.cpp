@@ -425,6 +425,20 @@ bool Unit::IsWithinMeleeRange(const Unit *obj, float dist) const
     float distsq = dx*dx + dy*dy + dz*dz;
 
     float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
+
+    // Hunters can attack bosses with ranged attacks despite their huge melee reach
+    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_HUNTER)
+    {
+        Creature const *boss = obj->ToCreature();
+        if (boss)
+        {
+            CreatureInfo const *cinfo = sObjectMgr->GetCreatureTemplate(boss->GetEntry());
+            if(cinfo)
+                if (boss->isWorldBoss() || (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS) )
+                    sizefactor = GetMeleeReach() + NOMINAL_MELEE_RANGE;
+        }
+    }
+
     float maxdist = dist + sizefactor;
 
     return distsq < maxdist * maxdist;
