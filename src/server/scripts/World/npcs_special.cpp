@@ -3011,13 +3011,13 @@ public:
             if(pGuide || pDoneBy == me->ToUnit())
                 return;
 
-            if(pGuide = pDoneBy->ToPlayer())
+            if((pGuide = (pDoneBy->ToPlayer())))
             {
                 me->CastSpell(me, 83508, true);
                 me->GetMotionMaster()->MoveFollow(pGuide,30,M_PI,MOTION_SLOT_ACTIVE);
                 HandleLooming(true);
                 char whisp[128];
-                sprintf(whisp, "following you (GUID %d)", me->GetGUID());
+                sprintf(whisp, "following you (GUID %ld)", me->GetGUID());
                 me->MonsterWhisper(whisp, pGuide->GetGUID());
             }
             else return;
