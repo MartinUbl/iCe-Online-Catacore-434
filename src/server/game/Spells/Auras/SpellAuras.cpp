@@ -1147,6 +1147,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 target->RemoveAurasDueToSpell(92328);
                         }
                         break;
+                    case 94656: // Deathwing Attack Looming (red sky) aura
+                        if (!GetCaster()) // event is over
+                            Remove();
+                        break;
                     case 81277: // Blood Gorged
                         if (target && caster)
                         {

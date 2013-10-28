@@ -2904,6 +2904,13 @@ public:
 
 class npc_outdoor_deathwing_flight : public CreatureScript
 {
+// hacky and messy script for Deathwing and Stood in the Fire achievement.
+// known bugs: visual problems with movement update.
+// handling the event:
+// 1 .npc add 44744
+// 2 .damage 5
+// 3 have fun
+// 4 .die
 public:
     npc_outdoor_deathwing_flight() : CreatureScript("npc_outdoor_deathwing_flight") { }
 
@@ -2921,7 +2928,6 @@ public:
         uint32 m_zoneId;
         uint32 m_uiZoneCheck_Timer;
         Player* pGuide;
-        bool m_bIsMoving;
 
         void Reset()
         {
@@ -2938,19 +2944,16 @@ public:
             me->setActive(true);
 
             //me->ApplySpellImmune(0, IMMUNITY_ID, 94644, true); // removes triggering aura as well?
-            me->CastSpell(me, 83508, true);
-
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // TEMPORARY remove when solved movement update properly.
 
             me->SetFlying(true);
             me->SetSpeed(MOVE_FLIGHT, 7.0f, true);
-
-            HandleLooming(true);
+            me->GetMotionMaster()->MovePoint(1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+1);
 
             pGuide = NULL;
-            m_bIsMoving = false;
 
-            m_uiZoneCheck_Timer = 5000;
+            m_uiZoneCheck_Timer = 1000;
         }
 
         void JustDied(Unit* /*pKiller*/)
@@ -2959,6 +2962,12 @@ public:
             me->SetVisibility(VISIBILITY_OFF);
             me->setActive(false);
             me->DeleteFromDB();
+            if(pGuide)
+            {
+                char whisp[128];
+                sprintf(whisp, "event ended properly");
+                me->MonsterWhisper(whisp, pGuide->GetGUID());
+            }
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* spellInfo)
@@ -2979,6 +2988,13 @@ public:
                 data << uint64(pTarget->GetGUID());
                 data << uint32(spellInfo->Id);
                 pPlayer->SendMessageToSet(&data, true);
+
+                if(pGuide)
+                {
+                    char whisp[128];
+                    sprintf(whisp, "player %s stood in the fire", pPlayer->GetName());
+                    me->MonsterWhisper(whisp, pGuide->GetGUID());
+                }
             }
             me->AddAura(94644, pTarget);
         }
@@ -2995,62 +3011,46 @@ public:
             if(pGuide || pDoneBy == me->ToUnit())
                 return;
 
-            if((pGuide = pDoneBy->ToPlayer()) != NULL)
-                m_bIsMoving = FlyMove();
-            else return;
-        }
-
-        bool FlyMove()
-        {
-            if(!pGuide)
-                return false;
-
-            Position pos;
-            pGuide->GetPosition(&pos);
-            float dist = me->GetDistance(pos);
-
-            if(dist < 5.0f)
-                return false;
-
-            HandleLooming(true);
-            me->GetMotionMaster()->MovePoint(2, pos);
-
-            for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+            if(pGuide = pDoneBy->ToPlayer())
             {
-                if(me->GetPlayer(*me, *i))
-                    me->MonsterMoveWithSpeed(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), uint32(dist/6.8f));
+                me->CastSpell(me, 83508, true);
+                me->GetMotionMaster()->MoveFollow(pGuide,30,M_PI,MOTION_SLOT_ACTIVE);
+                HandleLooming(true);
+                char whisp[128];
+                sprintf(whisp, "following you (GUID %d)", me->GetGUID());
+                me->MonsterWhisper(whisp, pGuide->GetGUID());
             }
-            return true;
-        }
-
-        void MovementInform(uint32 /*type*/, uint32 data)
-        {
-            if(data != 2)
-                return;
-
-            m_bIsMoving = FlyMove();
+            else return;
         }
 
         void UpdateAI(const uint32 diff)
         {
             if(m_uiZoneCheck_Timer < diff)
             {
-                if(pMap)
+                uint32 newZoneId = me->GetZoneId();
+                if(newZoneId != m_zoneId)
                 {
-                    uint32 newZoneId = pMap->GetZoneId(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-                    if(newZoneId != m_zoneId)
+                    m_zoneId = newZoneId;
+                    HandleLooming(false);
+                    if(pGuide)
                     {
-                        m_zoneId = newZoneId;
-                        HandleLooming(false);
-                        HandleLooming(true);
+                        char whisp[128];
+                        sprintf(whisp, "entered zone id: %d", me->GetZoneId());
+                        me->MonsterWhisper(whisp, pGuide->GetGUID());
                     }
                 }
-                if(!m_bIsMoving)
-                    m_bIsMoving = FlyMove();
-
-                m_uiZoneCheck_Timer = 2000;
+                HandleLooming(true);
+                m_uiZoneCheck_Timer = 3000;
             }
-            else m_uiZoneCheck_Timer -= diff;
+            else if(pGuide) m_uiZoneCheck_Timer -= diff;
+
+            //// heart beat is sent but has no effect :(
+            //WorldPacket hbt;
+            //me->BuildHeartBeatMsg(&hbt);
+            //if(!m_lPlayerGUID.empty())
+            //    for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+            //        if(Player* pPlayer = me->GetPlayer(*me, *i))
+            //            pPlayer->SendDirectMessage(&hbt);
         }
 
         void HandleLooming(bool apply)
@@ -3060,39 +3060,36 @@ public:
                 if(!pMap)
                     return;
 
+                me->setFaction(16);
                 Map::PlayerList const &lPlayers = pMap->GetPlayers();
                 for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
                     if(Player* pPlayer = itr->getSource())
-                    {
-                        if(pPlayer->GetMap()->GetZoneId(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()) == m_zoneId)
+                        if(pPlayer->GetZoneId() == m_zoneId)
                         {
                             if(!pPlayer->HasAura(94656))
                             {
                                 m_lPlayerGUID.push_back(pPlayer->GetGUID());
                                 pPlayer->CastCustomSpell(pPlayer, 94656, NULL, NULL, NULL, true, 0, 0, me->GetGUID());
                             }
-
-                            me->setFaction(16);
+                            if(pPlayer != pGuide)
+                                me->DestroyForPlayer(pPlayer); // TEMPORARY found no better solution for movement update
                             me->SendUpdateToPlayer(pPlayer); // create/update deathwing for client
-                            me->setFaction(35);
                             pPlayer->SendAurasForTarget((Unit*)me);
                         }
-                    }
-                }
+                me->setFaction(35);
             }
             else
             {
                 std::list<uint64> lEraseGUID;
-                for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
-                {
-                    if(Player* pPlayer = me->GetPlayer(*me, *i))
-                    {
-                        pPlayer->RemoveAurasDueToSpell(94656);
-                        me->DestroyForPlayer(pPlayer); // destroy deathwing for client
-                        lEraseGUID.push_back(*i);
-                    }
-                }
+                lEraseGUID.clear();
+                if(!m_lPlayerGUID.empty())
+                    for(std::list<uint64>::const_iterator i = m_lPlayerGUID.begin(); i != m_lPlayerGUID.end(); ++i)
+                        if(Player* pPlayer = me->GetPlayer(*me, *i))
+                        {
+                            pPlayer->RemoveAurasDueToSpell(94656);
+                            me->DestroyForPlayer(pPlayer); // destroy deathwing for client
+                            lEraseGUID.push_back(*i);
+                        }
                 for(std::list<uint64>::const_iterator i = lEraseGUID.begin(); i != lEraseGUID.end(); ++i)
                     m_lPlayerGUID.remove(*i);
             }
