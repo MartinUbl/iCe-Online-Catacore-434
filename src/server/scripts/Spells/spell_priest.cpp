@@ -373,7 +373,7 @@ class mob_cauterizing_flame: public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
                 if (TempSummon * temp = me->ToTempSummon())
                 {
-                    if (me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToPlayer())
+                    if (temp->GetSummoner() && temp->GetSummoner()->ToPlayer())
                     {
                         Player * p = me->ToTempSummon()->GetSummoner()->ToPlayer();
                         if (p->IsInWorld())
@@ -383,7 +383,6 @@ class mob_cauterizing_flame: public CreatureScript
                 }
                 me->SetUInt32Value(UNIT_CREATED_BY_SPELL, 99136);
                 me->CastSpell(me,102129,true); // Visual
-                //me->CastSpell(me,99153,true); // Periodic heal
             }
         };
 
