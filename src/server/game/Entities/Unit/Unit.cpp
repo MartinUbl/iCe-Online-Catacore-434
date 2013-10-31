@@ -8081,6 +8081,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                 triggered_spell_id = 65142;
             }
+            if (dummySpell->Id == 98996) // Death Knight T12 DPS 4P Bonus
+            {
+                if(procSpell->Id == 49020 || procSpell->Id == 55090) // Obliterate, Scourge strike
+                {
+                    CastCustomSpell(99000, SPELLVALUE_BASE_POINT0,damage * 0.07, pVictim, true); // Flaming torrent ( 7 % dmg as fire dmg)
+                }
+                else return (false);
+            }
             // Runic Empowerment
             else if (dummySpell->Id == 81229)
             {
