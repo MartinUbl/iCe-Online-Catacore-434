@@ -4455,6 +4455,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             if (!caster->HasAura(54824))
                 unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
+            // T12 Restoration 4P Bonus
+            if (caster->HasAura(99015))
+                caster->CastCustomSpell(caster, 99017, &addhealth, 0, 0, true); // Firebloom
+
             // Efflorescence
             int32 bp0 = 0;
             if (caster->HasAura(34151))

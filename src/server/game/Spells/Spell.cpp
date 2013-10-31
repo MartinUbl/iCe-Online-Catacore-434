@@ -3339,6 +3339,13 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         power = POWER_HEALTH;
                         break;
                     }
+                    // Firebloom
+                    else if (m_spellInfo->Id == 99017)
+                    {
+                        maxSize = 1;
+                        power = POWER_HEALTH;
+                        break;
+                    }
                     else
                         break;
 
