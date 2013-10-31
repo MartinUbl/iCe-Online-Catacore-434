@@ -7308,6 +7308,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 else return (false);
             }
+            if (dummySpell->Id == 99070) // Paladin T12 Holy 4P Bonus
+            {
+                if(procSpell->Id == 82326 || procSpell->Id == 19750 || procSpell->Id == 635 ) // Divine Light, Flash of Light, and Holy Light 
+                {
+                    CastCustomSpell(54968, SPELLVALUE_BASE_POINT0,damage * 0.10, this, true); // Divine Flame
+                    break;
+                }
+                else return (false);
+            }
             // Judgements of the Wise
             if (dummySpell->Id == 31878)
             {
