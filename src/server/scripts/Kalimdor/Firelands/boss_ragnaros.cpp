@@ -435,19 +435,10 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             if(instance)
+            {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-
-            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator l = PlList.begin(); l != PlList.end(); ++l)
-                if (Player* player = l->getSource())
-                {
-                    if (player->IsInWorld() && !player->isGameMaster())
-                    {
-                        //player->CastSpell(player,102237,true);
-                        if (instance)
-                            instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 102237);
-                    }
-                }
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 102237);
+            }
 
             Summons.DespawnAll();
             DoAfterDied();
