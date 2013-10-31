@@ -264,6 +264,10 @@ uint32 engulfing_lengths[4] = {48,60,72,87}; // Distances for Engulfing flames
 # define MINUTE 60000
 # define NEVER  (4294967295) // used as "delayed" timer (10 minutes)
 
+# define MIDDLE_X 1033.54f
+# define MIDDLE_Y  -55.08f
+# define MIDDLE_Z   55.92f
+
 
 class boss_ragnaros_firelands : public CreatureScript
 {
@@ -290,10 +294,9 @@ public:
                 // TODO : Move this to DB
                 lava_ring->SetPhaseMask(PHASEMASK_NORMAL,false);
             }
-            
+
             me->SetRespawnDelay(7*DAY);
             me->SetPhaseMask(PHASEMASK_NORMAL,false);
-            
 
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,50.0f);
 
@@ -328,6 +331,7 @@ public:
         uint32 Text_timer;
         uint32 Kill_timer;
         bool speech;
+        bool burried;
 
         SummonList Summons;
 
@@ -349,6 +353,7 @@ public:
             AllowTurning_timer      = NEVER;
             PHASE = PHASE1;
             reemerge = 0;
+            burried  = false;
 
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -432,6 +437,18 @@ public:
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
+            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator l = PlList.begin(); l != PlList.end(); ++l)
+                if (Player* player = l->getSource())
+                {
+                    if (player->IsInWorld() && !player->isGameMaster())
+                    {
+                        //player->CastSpell(player,102237,true);
+                        if (instance)
+                            instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 102237);
+                    }
+                }
+
             Summons.DespawnAll();
             DoAfterDied();
         }
@@ -448,6 +465,7 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
             Summons.DespawnAll();
+            me->InterruptNonMeleeSpells(false);
             DoAfterDied();
             PlayAndYell(24519,"Too soon! ... You have come too soon..."); // Only on normal difficulty
             me->RemoveAllAuras();
@@ -510,10 +528,14 @@ public:
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    if (ignoreTanks == true && pPlayer->isAlive() && !pPlayer->isGameMaster())
+                    if (pPlayer->isAlive() && !pPlayer->isGameMaster())
                     {
-                        if (!pPlayer->HasTankSpec() && !pPlayer->HasAura(5487)) // Or bear form
-                            target_list.push_back(pPlayer);
+                        if (ignoreTanks == true)
+                        {
+                            if (!pPlayer->HasTankSpec() && !pPlayer->HasAura(5487)) // Or bear form
+                                target_list.push_back(pPlayer);
+                        }
+                        else target_list.push_back(pPlayer);
                     }
                 }
             }
@@ -730,9 +752,10 @@ public:
             }
             else BurningWoundTimer -= diff;
 
-            if (me->HealthBelowPct(10) && me->GetHealth() != 1 ) // On normal difficulty Ragnaros should die at 10 % of his health
+            if (me->HealthBelowPct(10) && burried == false ) // On normal difficulty Ragnaros should die at 10 % of his health
             {
-                me->DealDamage(me, me->GetHealth() - 1, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                burried = true;
+                //me->DealDamage(me, me->GetHealth() - 1, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 JustDiedInNormal();
             }
 
@@ -794,7 +817,11 @@ public:
                     if (player)
                     {
                         //Creature * trap = me->SummonCreature(MAGMA_TRAP_NPC,player->GetPositionX(),player->GetPositionY(),55.34f,0.0f,TEMPSUMMON_DEAD_DESPAWN,0);
-                        me->CastSpell(player,MAGMA_TRAP_MARK_MISSILE,true);
+                        float x,y,z;
+                        player->GetPosition(x,y,z);
+                        player->UpdateGroundPositionZ(x,y,z);
+                        //me->CastSpell(player,MAGMA_TRAP_MARK_MISSILE,true);
+                        me->CastSpell(x,y,z,MAGMA_TRAP_MARK_MISSILE,true);
                     }
 
                     Magma_trap_timer = 25000;
@@ -1194,7 +1221,7 @@ public:
                 if (Kill_timer <= diff)
                 {
                     me->SetVisible(false);
-                    me->DisappearAndDie();
+                    me->Kill(me);
                     Kill_timer = NEVER;
                 }
                 else Kill_timer -= diff;
@@ -1741,6 +1768,43 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
+        void CastBlazingHeat(void)
+        {
+            std::list<Player*> heat_targets;
+
+            std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+            {
+                if ( Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+                {
+                    Player * p = unit->ToPlayer();
+                    if (p && p->IsInWorld() == true)
+                    {
+                        if (!p->HasTankSpec() && !p->HasAura(5487)) // Bear form
+                        {
+                            if (!p->HasAura(BLAZING_HEAT_SIGNALIZER) && !p->HasAura(100981) && !p->HasAura(100982) && !p->HasAura(100983))
+                                heat_targets.push_back(p);
+                        }
+                    }
+                }
+            }
+
+            if(!heat_targets.empty())
+            {
+                std::list<Player*>::iterator j = heat_targets.begin();
+                advance(j, rand()%heat_targets.size());
+                if (*j && (*j)->IsInWorld() == true )
+                    me->CastSpell(*j,BLAZING_HEAT_SIGNALIZER,false);
+            }
+            else
+            {
+                 Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true);
+                 if (player)
+                    me->CastSpell(player,BLAZING_HEAT_SIGNALIZER,false);
+            }
+
+        }
+
         void UpdateAI ( const uint32 diff)
         {
             if (!UpdateVictim())
@@ -1748,17 +1812,7 @@ public:
 
             if (Blazing_heat_timer <= diff)
             {
-                Unit * player;
-
-                player = SelectTarget(SELECT_TARGET_RANDOM, 1, 500.0f, true); // Not on victim
-
-                if(player == NULL)
-                    player = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true);
-
-                if (player)
-                {
-                    me->CastSpell(player,BLAZING_HEAT_SIGNALIZER,false);
-                }
+                CastBlazingHeat();
                 Blazing_heat_timer = 20000;
             }
             else Blazing_heat_timer -= diff;
@@ -1827,10 +1881,10 @@ public:
             if (rag == NULL)
                 return NULL;
 
-             p = rag->AI()->SelectTarget(SELECT_TARGET_RANDOM, 2, 500.0f, true); // Ignore rag's tank + offtank
+             p = rag->AI()->SelectTarget(SELECT_TARGET_NEAREST, 2, 500.0f, true); // Ignore rag's tank + offtank
 
             if (p == NULL)
-                p = rag->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true);
+                p = rag->AI()->SelectTarget(SELECT_TARGET_NEAREST, 0, 500.0f, true);
 
             if (p == NULL)
                 return NULL;
@@ -1870,14 +1924,18 @@ public:
                     {
                         uint32 dist = (uint32) me->GetDistance(victim);
 
-                        if (dist <= 10 )
+                        Position pos;
+                        pos.m_positionX = MIDDLE_X;
+                        pos.m_positionY = MIDDLE_Y;
+
+                        bool canJump = (pos.GetExactDist2d(MIDDLE_X,MIDDLE_Y) >= 58.0f ) ? false : true;
+
+                        if (dist <= 10 && canJump)
                             me->JumpTo(8.0f, 5.0f,false);
-                        else if (dist <= 20)
+                        else if (dist <= 20 && canJump)
                             me->JumpTo(15.0f, 8.0f,false);
-                        else if (dist <= 30)
-                            me->JumpTo(20.0f, 10.0f,false);
-                        else
-                            me->JumpTo(20.0f, 10.0f,false);
+                        else if (canJump)
+                            me->JumpTo(15.0f, 8.0f,false);
                     }
                     me->InterruptNonMeleeSpells(false);
                     //me->GetMotionMaster()->MoveJump(me->GetPositionX()+cos(me->GetOrientation() + M_PI)*8,me->GetPositionY()+sin(me->GetOrientation() + M_PI)*8,me->GetPositionZ(),15.0f,10.0f);
