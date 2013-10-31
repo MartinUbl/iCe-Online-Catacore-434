@@ -2138,9 +2138,27 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             // Special cases
 
-            // Devouring Plague - do not give healing bonus to leeched value (twice)
+
             if (GetSpellProto()->Id == 2944)
+            {
+                // Devouring Plague - do not give healing bonus to leeched value (twice)
                 preventHealingBonus = true;
+
+                // T12 4P shadow priest set bonus
+                if (caster->HasAura(99157))
+                {
+                    // While you have Shadow Word: Pain, Devouring Plague, and Vampiric Touch active on the same target you gain Dark Flames
+                    if (target->GetAura(589,caster->GetGUID()) && target->GetAura(34914,caster->GetGUID()))
+                    {
+                        if (!caster->HasAura(99158))
+                            caster->CastSpell(caster,99158,true); // Dark flames
+                    }
+                    else if (caster->HasAura(99158))
+                        caster->RemoveAura(99158); // Dark flames
+                }
+                else if (caster->HasAura(99158))
+                    caster->RemoveAura(99158); // Dark flames
+            }
 
             if (!preventHealingBonus)
                 heal = uint32(caster->SpellHealingBonus(caster, GetSpellProto(), GetEffIndex(), heal, DOT, GetBase()->GetStackAmount()));

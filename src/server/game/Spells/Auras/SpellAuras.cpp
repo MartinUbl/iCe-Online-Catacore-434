@@ -1305,6 +1305,39 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
+                case 2944:
+                    if (caster->HasAura(99157)) // T12 4P shadow priest set bonus
+                    {
+                        // While you have Shadow Word: Pain, Devouring Plague, and Vampiric Touch active on the same target you gain Dark Flames
+                        if (target->GetAura(589,caster->GetGUID()) && target->GetAura(34914,caster->GetGUID()))
+                        {
+                            if (!caster->HasAura(99158))
+                                caster->CastSpell(caster,99158,true); // Dark flames
+                        }
+                    }
+                    break;
+                case 589:
+                    if (caster->HasAura(99157)) // T12 4P shadow priest set bonus
+                    {
+                        // While you have Shadow Word: Pain, Devouring Plague, and Vampiric Touch active on the same target you gain Dark Flames
+                        if (target->GetAura(2944,caster->GetGUID()) && target->GetAura(34914,caster->GetGUID()))
+                        {
+                            if (!caster->HasAura(99158))
+                                caster->CastSpell(caster,99158,true); // Dark flames
+                        }
+                    }
+                    break;
+                case 34914:
+                    if (caster->HasAura(99157)) // T12 4P shadow priest set bonus
+                    {
+                        // While you have Shadow Word: Pain, Devouring Plague, and Vampiric Touch active on the same target you gain Dark Flames
+                        if (target->GetAura(589,caster->GetGUID()) && target->GetAura(2944,caster->GetGUID()))
+                        {
+                            if (!caster->HasAura(99158))
+                                caster->CastSpell(caster,99158,true); // Dark flames
+                        }
+                    }
+                    break;
                 // Fade
                 case 586:
                     {
@@ -1978,6 +2011,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 81208:
                     case 81209:
                         caster->RemoveAura(89912, caster->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
+                        break;
+                    // T12 4P shadow priest set bonus ( remove Dark flames on aura removal )
+                    case 2944:
+                    case 589:
+                    case 34914:
+                        caster->RemoveAura(99158); // Dark flames
                         break;
                     default: break;
                 }
