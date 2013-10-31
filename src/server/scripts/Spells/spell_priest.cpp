@@ -361,6 +361,38 @@ class mob_shadowy_apparition: public CreatureScript
         }
 };
 
+class mob_cauterizing_flame: public CreatureScript
+{
+    public:
+        mob_cauterizing_flame(): CreatureScript("mob_cauterizing_flame") {};
+
+        struct mob_cauterizing_flameAI: public ScriptedAI
+        {
+            mob_cauterizing_flameAI(Creature* c): ScriptedAI(c)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
+                if (TempSummon * temp = me->ToTempSummon())
+                {
+                    if (me->ToTempSummon()->GetSummoner() && me->ToTempSummon()->GetSummoner()->ToPlayer())
+                    {
+                        Player * p = me->ToTempSummon()->GetSummoner()->ToPlayer();
+                        if (p->IsInWorld())
+                            me->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, p->GetGUID());
+                        me->CastSpell(me, 99153, true, 0, 0, p->GetGUID());
+                    }
+                }
+                me->SetUInt32Value(UNIT_CREATED_BY_SPELL, 99136);
+                me->CastSpell(me,102129,true); // Visual
+                //me->CastSpell(me,99153,true); // Periodic heal
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new mob_cauterizing_flameAI(c);
+        }
+};
+
 class spell_pri_spirit_of_redemption : public SpellScriptLoader
 {
 public:
@@ -528,6 +560,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_reflective_shield_trigger();
     new spell_pri_cure_disease();
     new mob_shadowy_apparition;
+    new mob_cauterizing_flame();
     new spell_pri_spirit_of_redemption();
     new spell_priest_inner_sanctum();
     new spell_priest_mind_spike();
