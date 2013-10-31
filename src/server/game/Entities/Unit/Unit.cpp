@@ -434,7 +434,7 @@ bool Unit::IsWithinMeleeRange(const Unit *obj, float dist) const
         {
             CreatureInfo const *cinfo = sObjectMgr->GetCreatureTemplate(boss->GetEntry());
             if(cinfo)
-                if (boss->isWorldBoss() || (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS) )
+                if (boss->isWorldBoss() || (cinfo->rank == 3 ) )
                     sizefactor = GetMeleeReach() + NOMINAL_MELEE_RANGE;
         }
     }
