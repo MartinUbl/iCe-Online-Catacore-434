@@ -4247,7 +4247,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             if (unitTarget->HasAura(100232))
                 spellId = 100232;
 
-            if (spellId)
+            if (spellId && m_spellInfo->Id != 52752 && m_spellInfo->Id != 379) // Ancestral Awakening and Earth shield
             {
                 uint32 stacks = unitTarget->GetAuraCount(spellId);
                 if (stacks && stacks >=3)
@@ -4273,13 +4273,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             if (caster->HasAura(99262) && unitTarget->HasAura(99252) ) //Vital Spark, Blaze of Glory
             {
-                uint32 stacks = caster->GetAuraCount(99262);
-                caster->CastSpell(caster,99263,true); // Vital flame
-                caster->RemoveAurasDueToSpell(99262); // Remove Vital Spark stacks
-                if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
+                if (m_spellInfo->Id != 52752 && m_spellInfo->Id != 379)
                 {
-                    if(stacks)
-                        aurEff->SetAmount( int32(5 * stacks)); // bonus healing is stored here
+                    uint32 stacks = caster->GetAuraCount(99262);
+                    caster->CastSpell(caster,99263,true); // Vital flame
+                    caster->RemoveAurasDueToSpell(99262); // Remove Vital Spark stacks
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(99263,EFFECT_0))
+                    {
+                        if(stacks)
+                            aurEff->SetAmount( int32(5 * stacks)); // bonus healing is stored here
+                    }
                 }
             }
         }
