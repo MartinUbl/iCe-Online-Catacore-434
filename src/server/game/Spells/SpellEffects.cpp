@@ -4510,7 +4510,8 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             {
                 addhealth = int32(addhealth * 1.25f);
                 // consume aura
-                unitTarget->RemoveAura(aurEff->GetBase());
+                if (!caster->HasAura(99195)) // Shaman T12 Restoration 4P Bonus
+                    unitTarget->RemoveAura(aurEff->GetBase());
             }
         }
         // Death Pact - return pct of max health to caster
