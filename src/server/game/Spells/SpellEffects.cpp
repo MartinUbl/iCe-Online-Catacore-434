@@ -9568,11 +9568,11 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (unitTarget->HasAura(87856)) // player is inside Al'akir squall line vehicle
         return;
 
-    if (Creature* creatureTarget = unitTarget->ToCreature()) // If Creature is WorldBoss or DungeonBoss
+    if (Creature* creatureTarget = unitTarget->ToCreature()) // If Creature is WorldBoss or regular boss
     {
         CreatureInfo const *cinfo = sObjectMgr->GetCreatureTemplate(creatureTarget->GetEntry());
         if(cinfo)
-            if (creatureTarget->isWorldBoss() ||  (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS) )
+            if (creatureTarget->isWorldBoss() ||  (cinfo->rank == 3) )
                 return;
     }
 
