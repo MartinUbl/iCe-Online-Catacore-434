@@ -9468,7 +9468,10 @@ void Spell::EffectSelfResurrect(SpellEffIndex effIndex)
     if (InstanceScript * pInstance = plr->GetInstanceScript())
     {
         if (pInstance->instance->IsRaid() &&  pInstance->IsEncounterInProgress())
-            pInstance->SetResurectionData(1); // Increase resurrection counter by one
+        {
+            if (m_spellInfo->Id != 21169) // Reincarantion
+                pInstance->SetResurectionData(1); // Increase resurrection counter by one
+        }
     }
 }
 
