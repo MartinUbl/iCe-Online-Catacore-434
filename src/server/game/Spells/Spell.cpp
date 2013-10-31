@@ -3227,11 +3227,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
                         case 96966: // Blaze of Life ( normal trinket )
                         case 97136: // Blaze of Life ( heroic trinket )
+                        case 99152: // Cauterizing Flame
+                        case 54968: // Divine Flame 
                             maxSize = 1;
-                            power = POWER_HEALTH;
-                            break;
-                        case 54968: // Glyph of Holy Light
-                            maxSize = m_spellInfo->MaxAffectedTargets;
                             power = POWER_HEALTH;
                             break;
                         case 57669: // Replenishment
