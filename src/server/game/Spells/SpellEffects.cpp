@@ -1098,17 +1098,30 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 energy = 0;
+                    // energy after using FB
+                    int32 energy = m_caster->GetPower(POWER_ENERGY);
 
                     // Glyph of Ferocious Bite
-                    if (!m_caster->HasAura(67598))
-                        energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+                    if (m_caster->HasAura(67598))
+                    {
+                        //Healed for 1% of maximum health for each 10 energy spent
+                        int32 bp = (m_caster->GetPower(POWER_ENERGY) + 25) / 10;
+                        //Maximum of 50 energy can be spent (25 for FB + 25 for 100% dmg increase)
+                        bp = (bp > 5) ? 5 : bp;
+
+                        if(bp)
+                            m_caster->CastCustomSpell(m_caster, 101024, &bp, 0, 0, true);
+                    }
 
                     damage += int32(m_caster->ToPlayer()->GetComboPoints() * ap * 0.109f);
 
-                    // Convert extra energy up to 35 to damage by up to 100% (it means 100%+energy/35*100%)
-                    if (energy > 0)
-                        damage *= (1.0f+float(energy)/35.0f);
+                    //If druid has 25 additional energy stored
+                    if (energy - 25 >= 0)
+                    {
+                        m_caster->ModifyPower(POWER_ENERGY, -25);
+                        // increase damage by up to 100%
+                        damage *= 2;
+                    }
 
                     // Done with calculation
                     apply_direct_bonus = false;
