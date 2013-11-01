@@ -1891,12 +1891,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             // Reseting cooldown originally done by spell 77762 (Lava Burst!), but it's simplier this way
                             if ( caster->ToPlayer() && ((caster->HasAura(77755) && roll_chance_i(10)) ||
                                 (caster->HasAura(77756) && roll_chance_i(20))) )
-                                {
-                                    caster->ToPlayer()->RemoveSpellCooldown(51505, true);
-
-                                    if (caster->HasAura(99206) && target) // Shaman T12 Elemental 4P Bonus ( Instant Lava Burst)
-                                        caster->CastSpell(target,51505,true); // Will this trigger cooldown ?
-                                }
+                                caster->ToPlayer()->RemoveSpellCooldown(51505, true);
                             break;
                         }
                     case 33745: // Lacerate
