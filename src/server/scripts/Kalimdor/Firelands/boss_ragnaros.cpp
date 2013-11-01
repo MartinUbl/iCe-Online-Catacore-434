@@ -883,11 +883,11 @@ public:
 
                 if (Lava_Bolt_timer <= diff)
                 {
-                    uint8 max = 4;
+                    int32 max = 4;
                     if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                         max += 6;
 
-                    CastSpellOnRandomPlayers(LAVA_BOLT,max,true);
+                    me->CastCustomSpell(LAVA_BOLT, SPELLVALUE_MAX_TARGETS,max, me, true);
 
                     Lava_Bolt_timer = 4000;
                 }
@@ -2555,7 +2555,7 @@ class IsNotSonOrLavaScion
         bool operator()(WorldObject* object) const
         {
             if (object->ToCreature())
-                if(object->ToCreature()->GetEntry() == LAVA_SCION || object->ToCreature()->GetEntry() == SON_OF_FLAME_NPC )
+                if(object->ToCreature()->GetEntry() == SON_OF_FLAME_NPC)
                     return false;
             return true;
         }
