@@ -4288,6 +4288,13 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100254:
             spellInfo->EffectRadiusIndex[0] = 22;
             break;
+        case 98495: // Molten Seed
+        case 98498:
+        case 100579:
+        case 100580:
+        case 100581:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
         case 99126: // Blazing Heat
         case 100984:
         case 100985:

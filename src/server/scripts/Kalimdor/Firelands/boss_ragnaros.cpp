@@ -64,7 +64,7 @@ enum Spells
     ENGULFING_FLAME_VISUAL  = 99216,
     ENGULFING_FLAME_DMG     = 99225,
     MOLTEN_SEED             = 100888,
-    MOLTEN_SEED_INITIAL_DMG = 98498,
+    MOLTEN_SEED_MISSILE     = 98495,
     MOLTEN_INFERNO          = 98518,
     MOLTEN_POWER            = 100157,
     BLAZING_HEAT_DMG_HEAL   = 99128,
@@ -807,12 +807,11 @@ public:
 
                     if (player)
                     {
-                        //Creature * trap = me->SummonCreature(MAGMA_TRAP_NPC,player->GetPositionX(),player->GetPositionY(),55.34f,0.0f,TEMPSUMMON_DEAD_DESPAWN,0);
-                        float x,y,z;
-                        player->GetPosition(x,y,z);
-                        player->UpdateGroundPositionZ(x,y,z);
+                        //float x,y,z;
+                        //player->GetPosition(x,y,z);
+                        //player->UpdateGroundPositionZ(x,y,z);
                         //me->CastSpell(player,MAGMA_TRAP_MARK_MISSILE,true);
-                        me->CastSpell(x,y,z,MAGMA_TRAP_MARK_MISSILE,true);
+                        me->CastSpell(player,MAGMA_TRAP_MARK_MISSILE,true);
                     }
 
                     Magma_trap_timer = 25000;
@@ -999,7 +998,7 @@ public:
                 if (Molten_seeds_timer <= diff) // Spawn molten seeds under every player
                 {
                     uint8 playerCounter = 0;
-                    /*uint8 seedCounter   = 0;
+                    uint8 seedCounter   = 0;
                     uint64 seedsGUID[6];
 
                     memset(&seedsGUID, 0, sizeof(seedsGUID));
@@ -1010,10 +1009,10 @@ public:
                         if (seed)
                         {
                             seed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-                            seed->ForcedDespawn(5000);
+                            seed->ForcedDespawn(15000);
                             seedsGUID[j] = seed->GetGUID();
                         }
-                    }*/
+                    }
 
                     Map * map = me->GetMap();
 
@@ -1028,21 +1027,23 @@ public:
                     {
                         if(Player* pPlayer = itr->getSource())
                         {
-                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 200.0f)
+                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 250.0f)
                             {
                                 if (playerCounter == 20) // Max 20 seed on 25 man
                                     break;
 
-                                //seedCounter = (seedCounter == 6) ? 0 : seedCounter;
+                                seedCounter = (seedCounter == 6) ? 0 : seedCounter;
 
-                                //Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
+                                Creature * pSeed = (Creature*) Unit::GetUnit(*me,seedsGUID[seedCounter]);
 
-                                //if (pSeed && pSeed->IsInWorld())
-                                    me->CastSpell(pPlayer,MOLTEN_SEED_INITIAL_DMG,true); // Cast initial Molten seed dmg + visual missile
+                                if ( pSeed && pSeed->IsInWorld())
+                                {
+                                    pSeed->CastSpell(pPlayer,MOLTEN_SEED_MISSILE,true); // Cast initial Molten seed dmg + visual missile
+                                }
 
                                 me->SummonCreature(MOLTEN_ELEMENTAL,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ(),0.0f);
                                 playerCounter++;
-                                //seedCounter++;
+                                seedCounter++;
                             }
                         }
                     }
@@ -1347,22 +1348,15 @@ public:
     {
         Magma_trap_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
-            erupted /*= can_erupt*/ = false;
+            erupted = false;
         }
 
-        //uint32 Eruption_timer;
         bool erupted;
-        //bool can_erupt;
 
         void MoveInLineOfSight(Unit* who)
         {
-            //ScriptedAI::MoveInLineOfSight(who);
-
             if (erupted == true) // If trap already boomed
                 return;
-
-            /*if (can_erupt == false) // If trap can't erupt yet
-                return;*/
 
             if (who->ToPlayer() == NULL)
                 return;
@@ -1387,18 +1381,11 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetUInt64Value(UNIT_FIELD_TARGET,0); // Stop turning
             me->CastSpell(me,MAGMA_TRAP_BURNING,true);
-            //Eruption_timer = 5200;
+            //me->GetMotionMaster()->MoveFall(0);
         }
 
         void UpdateAI ( const uint32 diff)
         {
-            /*if (Eruption_timer <= diff)
-            {
-                me->CastSpell(me,MAGMA_TRAP_BURNING,true);
-                can_erupt = true;
-                Eruption_timer = NEVER;
-            }
-            else Eruption_timer -= diff;*/
         }
     };
 };
@@ -1665,8 +1652,8 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetDisplayId(11686); // Invis model
-            Morph_timer = 100;
-            Demorph_timer = 10000;
+            Morph_timer = 1750;
+            Demorph_timer = Morph_timer + 10000;
             Reset_aggro_timer = Demorph_timer + 5000;
             me->SetInCombatWithZone();
             me->SetFloatValue(OBJECT_FIELD_SCALE_X,0.9f);
@@ -1836,11 +1823,18 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
             me->ForcedDespawn(40000);
+            Blazing_heat_timer = 300;
             me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
         }
 
         void UpdateAI ( const uint32 diff)
         {
+            if (Blazing_heat_timer <= diff)
+            {
+                me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
+                Blazing_heat_timer = NEVER;
+            }
+            else Blazing_heat_timer -= diff;
         }
     };
 };
@@ -2389,7 +2383,7 @@ public:
             float damage = 0.0f;
             float distance = caster->GetExactDist2d(hit_unit->GetPositionX(),hit_unit->GetPositionY());
 
-            damage = GetHitDamage() / ( pow((double)(distance + 1),0.7) ); // Approx. is correct ( Thanks to Gregory :P )
+            damage = GetHitDamage() / ( pow((double)(distance + 1),0.65) ); // Approx. is correct ( Thanks to Gregory :P )
 
             SetHitDamage((int32)damage);
         }
