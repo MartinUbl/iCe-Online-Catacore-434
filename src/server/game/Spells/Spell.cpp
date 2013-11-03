@@ -5822,7 +5822,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             if (m_spellInfo->HasSpellEffect(SPELL_EFFECT_RESURRECT) || m_spellInfo->HasSpellEffect(SPELL_EFFECT_SELF_RESURRECT))
             {
-                if (pInstance->CanUseCombatRessurrection() == false)
+                if (pInstance->CanUseCombatRessurrection() == false && m_spellInfo->Id != 21169 )
                     return SPELL_FAILED_IN_COMBAT_RES_LIMIT_REACHED;
             }
         }
