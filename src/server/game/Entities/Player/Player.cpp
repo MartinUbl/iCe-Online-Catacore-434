@@ -7781,6 +7781,14 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // zone changed, so area changed as well, update it
     UpdateArea(newArea);
 
+    // Phased map event special case - apply some spells after entering that map
+    if (GetMapId() == 752)
+    {
+        CastSpell(this, 84594, true);
+        CastSpell(this, 34311, true);
+        CastSpell(this, 39811, true);
+    }
+
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if (!zone)
         return;
