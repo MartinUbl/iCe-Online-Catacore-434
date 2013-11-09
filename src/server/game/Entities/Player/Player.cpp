@@ -26442,6 +26442,10 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
     if((v_map == 0 || v_map == 1 || v_map == 646) && canAzerothFly)
         return true;
 
+    // special event zone
+    if (v_map == 752)
+        return true;
+
     return false;
 }
 
