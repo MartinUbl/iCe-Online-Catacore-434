@@ -7788,6 +7788,12 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         CastSpell(this, 34311, true);
         CastSpell(this, 39811, true);
     }
+    else
+    {
+        RemoveAurasDueToSpell(84594);
+        RemoveAurasDueToSpell(34311);
+        RemoveAurasDueToSpell(39811);
+    }
 
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if (!zone)
