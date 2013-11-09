@@ -183,6 +183,10 @@ if( WIN32 )
   )
 endif()
 
+if( WIN32 )
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+endif()
+
 if( UNIX )
   install(TARGETS worldserver DESTINATION bin)
   install(FILES worldserver.conf.dist DESTINATION etc)

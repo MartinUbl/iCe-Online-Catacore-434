@@ -252,6 +252,10 @@ include_directories(
   ${OPENSSL_INCLUDE_DIR}
 )
 
+if( WIN32 )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zm500")
+endif()
+
 add_library(game STATIC ${game_STAT_SRCS})
 
 # Generate precompiled header

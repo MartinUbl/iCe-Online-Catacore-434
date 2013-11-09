@@ -146,6 +146,10 @@ include_directories(
   ${OPENSSL_INCLUDE_DIR}
 )
 
+if( WIN32 )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zm500")
+endif()
+
 add_library(scripts STATIC ${scripts_STAT_SRCS})
 
 # Generate precompiled header
