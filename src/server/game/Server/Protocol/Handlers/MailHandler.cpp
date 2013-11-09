@@ -609,7 +609,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data)
         CharacterDatabase.CommitTransaction(trans);
 
         // Items sent via mail should lose any transmogrified look
-        if (it->GetEnchantmentId(TRANSMOGRIFY_ENCHANTMENT_SLOT) != 0)
+        if (it && it->GetEnchantmentId(TRANSMOGRIFY_ENCHANTMENT_SLOT) != 0)
             it->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
 
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
