@@ -41,7 +41,8 @@
 #include "ReputationMgr.h"
 #include "Battleground.h"
 #include "DBCEnums.h"
-#include "MapInstanced.h"       
+#include "MapInstanced.h"
+#include "AntiHack.h"
 
 #include<string>
 #include<vector>
@@ -2803,6 +2804,11 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetSpectatorJoinTime() const { return m_spectatorJoinTime; };
         void ViolateSpectatorWaitTime();
 
+        AntiHackServant* GetAntiHackServant()
+        {
+            return &m_antiHackServant;
+        }
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
@@ -2811,6 +2817,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 m_spectatorInstanceId;
         uint32 m_spectatorJoinTime;
+
+        AntiHackServant m_antiHackServant;
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];

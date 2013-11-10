@@ -449,6 +449,22 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
                 plMover->RepopAtGraveyard();
             }
         }
+
+        switch (opcode)
+        {
+            case MSG_MOVE_START_FORWARD:
+            case MSG_MOVE_START_STRAFE_LEFT:
+            case MSG_MOVE_START_STRAFE_RIGHT:
+            case MSG_MOVE_START_BACKWARD:
+                plMover->GetAntiHackServant()->CheckSpeedFrames(SpeedCheckEvent::SPEED_CHECK_MOVE_START);
+                break;
+            case MSG_MOVE_HEARTBEAT:
+                plMover->GetAntiHackServant()->CheckSpeedFrames(SpeedCheckEvent::SPEED_CHECK_MOVE_UPDATE);
+                break;
+            case MSG_MOVE_STOP:
+                plMover->GetAntiHackServant()->CheckSpeedFrames(SpeedCheckEvent::SPEED_CHECK_MOVE_STOP);
+                break;
+        }
     }
 }
 
