@@ -183,33 +183,40 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 if (count && bossP && bossG)
                 {
                     bool canMerge=true;
+                    bool anyKillledP=false;
+                    bool anyKilledG=false;
+                    std::ostringstream ssP;
+                    std::ostringstream ssG;
+                    std::ostringstream ssPrint;
                     for (uint32 i = 0; i < count; i++)
                     {
-                        if (bossP[i]==DONE && bossG[i]!=DONE)
+                        ssP << bossP[i] << ' ';
+                        ssG << bossG[i] << ' ';
+                        if (bossP[i] == DONE && bossG[i] != DONE)
                         {
                             canMerge=false;
                             break;
                         }
+                        if(bossP[i] == DONE)//check if player or group has killed any boss (if not it is possible that Raid lock is going to bug away)
+                            anyKillledP=true;
+                        if(bossG[i] == DONE)
+                            anyKilledG=true;
                     }
-                     if(canMerge)
-                     {
-                        InstanceGroupBind *groupBind = group->GetBoundInstance(this);
-                        if (groupBind)
-                        {
-
-                            /*
-                            pBind->save = groupBind->save;
-                            pBind->perm = groupBind->perm;
-                            player->m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC][pSave->GetMapId()]=*pBind;
-                            */
-                            InstanceSave *saveP=sInstanceSaveMgr->GetInstanceSave(groupBind->save->GetInstanceId());
-                            if(saveP)
-                            {
-                                player->BindToInstance(saveP,true,true);
-                                pSave = saveP;
-                            }
-                        }
-                     }
+                    if(canMerge && anyKillledP && anyKilledG)
+                    {
+                       InstanceGroupBind *groupBind = group->GetBoundInstance(this);
+                       if (groupBind)
+                       {
+                           InstanceSave *saveP = sInstanceSaveMgr->GetInstanceSave(groupBind->save->GetInstanceId());
+                           if(saveP)
+                           {
+                               ssPrint << "Merging save player: "<< player->GetGUIDLow() <<" instance id: " << pSave->GetInstanceId() <<" instance data " << ssP.str().c_str() <<" INTO group: "<< group->GetLowGUID() <<" instance id: "<< groupBind->save->GetInstanceId() <<" instance data " << ssG.str().c_str();//log for instance merging
+                               sLog->outChar(ssPrint.str().c_str());
+                               player->BindToInstance(saveP,true,true);
+                               pSave = saveP;
+                           }
+                       }
+                    }
                 }
             }
         }
