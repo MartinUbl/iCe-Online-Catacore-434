@@ -2905,21 +2905,21 @@ enum DiminishingGroup
     DIMINISHING_CONTROL_ROOT,                               // Immobilizing effects from casted spells
     DIMINISHING_TRIGGER_ROOT,                               // Immobilizing effects from triggered spells like Frostbite
     DIMINISHING_CHARM,
-    DIMINISHING_POLYMORPH,              // Also: Gouge, Sap, Repentance, Hungering Cold
-    DIMINISHING_KNOCKOUT,               // Sap, Knockout mechanics
-    DIMINISHING_FEAR_BLIND,             // Intimidating Shout, Howl of Terror, Blind
+    DIMINISHING_DISORIENT,                                  // Also: Gouge, Sap, Repentance, Hungering Cold
+    DIMINISHING_KNOCKOUT,                                   // Sap, Knockout mechanics
+    DIMINISHING_FEAR_BLIND,                                 // Intimidating Shout, Howl of Terror, Blind
     // Warlock Specific
     DIMINISHING_DEATHCOIL,                                  // Death Coil Diminish only with another Death Coil
     // Druid Specific
     DIMINISHING_CYCLONE,                                    // From 2.3.0
     // Shared Class Specific
-    DIMINISHING_CHEAPSHOT_POUNCE,
     DIMINISHING_DISARM,                                     // From 2.3.0
     DIMINISHING_SILENCE,                                    // From 2.3.0
     DIMINISHING_FREEZE_SLEEP,                               // Hunter's Freezing Trap
     DIMINISHING_BANISH,
     DIMINISHING_TAUNT,
-    DIMINISHING_LIMITONLY               // Don't Diminish, but limit duration to 10s
+    DIMINISHING_DISORIENT_SPECIAL,                          // Dragon's Breath and Scatter Shot
+    DIMINISHING_LIMITONLY                                   // Don't Diminish, but limit duration to 10s
 };
 
 enum SummonCategory

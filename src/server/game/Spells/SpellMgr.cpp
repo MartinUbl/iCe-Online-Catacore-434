@@ -3014,11 +3014,11 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             break;
         case SPELLFAMILY_MAGE:
         {
-            // Frostbite
-            if (spellproto->SpellFamilyFlags[1] & 0x80000000)
-                return DIMINISHING_TRIGGER_ROOT;
-            //Shattered Barrier: only flag SpellFamilyFlags[0] = 0x00080000 shared
-            //by most frost spells, using id instead
+            // Improved Cone of Cold
+            if (spellproto->SpellFamilyFlags[1] & 0x80000000 && spellproto->SpellIconID == 35)
+                return DIMINISHING_CONTROL_ROOT;
+            // Shattered Barrier: only flag SpellFamilyFlags[0] = 0x00080000 shared
+            // by most frost spells, using id instead
             if (spellproto->Id == 55080)
                 return DIMINISHING_TRIGGER_ROOT;
             // Frost Nova / Freeze (Water Elemental)
@@ -3026,25 +3026,28 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROL_ROOT;
             // Ring of Frost
             if (spellproto->Id == 82691)
-                return DIMINISHING_POLYMORPH;
+                return DIMINISHING_DISORIENT;
+            // Dragon's Breath
+            if (spellproto->SpellFamilyFlags[0] & 0x00800000)
+                return DIMINISHING_DISORIENT_SPECIAL;
             break;
         }
         case SPELLFAMILY_ROGUE:
         {
             // Sap 0x80 Gouge 0x8
             if (spellproto->SpellFamilyFlags[0] & 0x88)
-                return DIMINISHING_POLYMORPH;
+                return DIMINISHING_DISORIENT;
             // Blind
-            else if (spellproto->SpellFamilyFlags[0] & 0x1000000)
+            if (spellproto->SpellFamilyFlags[0] & 0x1000000)
                 return DIMINISHING_FEAR_BLIND;
             // Cheap Shot
-            else if (spellproto->SpellFamilyFlags[0] & 0x400)
+            if (spellproto->SpellFamilyFlags[0] & 0x400)
                 return DIMINISHING_CONTROL_STUN;
             // Kidney Shot
-            else if (spellproto->SpellFamilyFlags[0] & 0x200000)
+            if (spellproto->SpellFamilyFlags[0] & 0x200000)
                 return DIMINISHING_CONTROL_STUN;
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
-            else if (spellproto->SpellIconID == 163)
+            if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -3054,16 +3057,16 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if (spellproto->SpellFamilyFlags[0] & 0x80000)
                 return DIMINISHING_DEATHCOIL;
             // Curses/etc
-            else if (spellproto->SpellFamilyFlags[0] & 0x80000000)
+            if (spellproto->SpellFamilyFlags[0] & 0x80000000)
                 return DIMINISHING_LIMITONLY;
             // Howl of Terror
-            else if (spellproto->SpellFamilyFlags[1] & 0x8)
+            if (spellproto->SpellFamilyFlags[1] & 0x8)
                 return DIMINISHING_FEAR_BLIND;
             // Seduction
-            else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
+            if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR_BLIND;
             // Unstable Affliction + Sin and Punishment should not have DR
-            else if (spellproto->Id == 31117 || spellproto->Id == 87204 ) // Sin and Punishment -> SPELLFAMILY_WARLOCK ??? mistake in DB ?
+            if (spellproto->Id == 31117 || spellproto->Id == 87204 ) // Sin and Punishment -> SPELLFAMILY_WARLOCK ??? mistake in DB ?
                 return DIMINISHING_NONE;
             break;
         }
@@ -3076,14 +3079,24 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if (spellproto->SpellFamilyFlags[0] & 0x20000)
                 return DIMINISHING_CONTROL_STUN;
             // Cyclone
-            else if (spellproto->SpellFamilyFlags[1] & 0x20)
+            if (spellproto->SpellFamilyFlags[1] & 0x20)
                 return DIMINISHING_CYCLONE;
             // Entangling Roots: to force natures grasp proc to be control root
-            else if (spellproto->SpellFamilyFlags[0] & 0x00000200)
+            if (spellproto->SpellFamilyFlags[0] & 0x00000200)
                 return DIMINISHING_CONTROL_ROOT;
             // Faerie Fire
-            else if (spellproto->SpellFamilyFlags[0] & 0x400)
+            if (spellproto->SpellFamilyFlags[0] & 0x400)
                 return DIMINISHING_LIMITONLY;
+            // Hibernate
+            if (spellproto->Id == 2637)
+                return DIMINISHING_DISORIENT;
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Earthgrab
+            if (spellproto->SpellFamilyFlags[2] & 0x00004000)
+                return DIMINISHING_CONTROL_ROOT;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -3092,10 +3105,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if (spellproto->SpellFamilyFlags[0] & 0x2)
                 return DIMINISHING_LIMITONLY;
             // Intimidating Shout
-            else if (spellproto->SpellFamilyFlags[0] & 0x40000)
+            if (spellproto->SpellFamilyFlags[0] & 0x40000)
                 return DIMINISHING_FEAR_BLIND;
             // Intercept + charge stun
-            else if ((spellproto->SpellFamilyFlags[0] & 0x01000000 || spellproto->Id == 96273) || spellproto->Id == 20253)
+            if ((spellproto->SpellFamilyFlags[0] & 0x01000000 || spellproto->Id == 96273) || spellproto->Id == 20253)
                 return DIMINISHING_NONE;
             break;
         }
@@ -3103,18 +3116,24 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         {
             // Repentance
             if (spellproto->SpellFamilyFlags[0] & 0x4)
-                return DIMINISHING_POLYMORPH;
+                return DIMINISHING_DISORIENT;
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Hungering Cold (no flags)
-            if (spellproto->SpellIconID == 2797)
-                return DIMINISHING_POLYMORPH;
+            // Hungering Cold
+            if ((spellproto->SpellFamilyFlags[1] & 0x00009000) && spellproto->SpellIconID == 2797)
+                return DIMINISHING_DISORIENT;
             // Mark of Blood
-            else if ((spellproto->SpellFamilyFlags[0] & 0x10000000)
-                && spellproto->SpellIconID == 2285)
+            if ((spellproto->SpellFamilyFlags[0] & 0x10000000) && spellproto->SpellIconID == 2285)
                 return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Shackle Undead
+            if ((spellproto->SpellFamilyFlags[1] & 0x04001000) && spellproto->SpellIconID == 27)
+                return DIMINISHING_DISORIENT;
             break;
         }
         case SPELLFAMILY_HUNTER:
@@ -3124,7 +3143,16 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot
             if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
-                return DIMINISHING_NONE;
+                return DIMINISHING_DISORIENT_SPECIAL;
+            // Freezing Trap
+            if ((spellproto->SpellFamilyFlags[0] & 0x00000008) && spellproto->SpellIconID == 180)
+                return DIMINISHING_DISORIENT;
+            // Wyvern Sting
+            if ((spellproto->SpellFamilyFlags[1] & 0x00001000) && spellproto->SpellIconID == 1721)
+                return DIMINISHING_DISORIENT;
+            // Bad Manner (Monkey)
+            if (spellproto->SpellFamilyFlags[1] & 0x10000000)
+                return DIMINISHING_CONTROL_STUN;
             break;
         }
         default:
@@ -3137,8 +3165,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
     if (mechanic & ((1<<MECHANIC_STUN) |
                     (1<<MECHANIC_SHACKLE))) return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
     if (mechanic & ((1<<MECHANIC_SLEEP) |
-                    (1<<MECHANIC_FREEZE))) return DIMINISHING_FREEZE_SLEEP;
-    if (mechanic & (1<<MECHANIC_POLYMORPH)) return DIMINISHING_POLYMORPH;
+                    (1<<MECHANIC_FREEZE)))  return DIMINISHING_FREEZE_SLEEP;
+    if (mechanic & (1<<MECHANIC_POLYMORPH)) return DIMINISHING_DISORIENT;
     if (mechanic & (1<<MECHANIC_ROOT))      return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
     if (mechanic & ((1<<MECHANIC_FEAR) |
                     (1<<MECHANIC_TURN)))    return DIMINISHING_FEAR_BLIND;
@@ -3210,12 +3238,12 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
         case DIMINISHING_TRIGGER_ROOT:
         case DIMINISHING_FEAR_BLIND:
         case DIMINISHING_CHARM:
-        case DIMINISHING_POLYMORPH:
+        case DIMINISHING_DISORIENT:
         case DIMINISHING_KNOCKOUT:
         case DIMINISHING_CYCLONE:
         case DIMINISHING_BANISH:
+        case DIMINISHING_DISORIENT_SPECIAL:
         case DIMINISHING_LIMITONLY:
-        case DIMINISHING_CHEAPSHOT_POUNCE:
             return true;
         default:
             return false;
@@ -3240,19 +3268,19 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
         case DIMINISHING_TAUNT:
         case DIMINISHING_CONTROL_STUN:
         case DIMINISHING_TRIGGER_STUN:
-        case DIMINISHING_CHEAPSHOT_POUNCE:
         case DIMINISHING_CYCLONE:
             return DRTYPE_ALL;
         case DIMINISHING_FEAR_BLIND:
         case DIMINISHING_CONTROL_ROOT:
         case DIMINISHING_TRIGGER_ROOT:
         case DIMINISHING_CHARM:
-        case DIMINISHING_POLYMORPH:
+        case DIMINISHING_DISORIENT:
         case DIMINISHING_SILENCE:
         case DIMINISHING_DISARM:
         case DIMINISHING_DEATHCOIL:
         case DIMINISHING_FREEZE_SLEEP:
         case DIMINISHING_BANISH:
+        case DIMINISHING_DISORIENT_SPECIAL:
         case DIMINISHING_KNOCKOUT:
             return DRTYPE_PLAYER;
         default:
