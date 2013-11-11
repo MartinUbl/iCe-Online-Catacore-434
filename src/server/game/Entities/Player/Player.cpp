@@ -388,7 +388,7 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this), m_antiHackServant(this)
+Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achievementMgr(this), m_reputationMgr(this)
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
