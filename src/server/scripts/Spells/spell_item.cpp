@@ -757,74 +757,110 @@ public:
 
 enum eShadowmourneVisuals
 {
-    SPELL_SHADOWMOURNE_VISUAL_LOW       = 72521,
-    SPELL_SHADOWMOURNE_VISUAL_HIGH      = 72523,
-    SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF  = 73422,
+    SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE = 71904,
+    SPELL_SHADOWMOURNE_SOUL_FRAGMENT     = 71905,
+    SPELL_SHADOWMOURNE_VISUAL_LOW        = 72521,
+    SPELL_SHADOWMOURNE_VISUAL_HIGH       = 72523,
+    SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF   = 73422,
 };
 
+// 71903 - Item - Shadowmourne Legendary
 class spell_item_shadowmourne : public SpellScriptLoader
 {
-public:
-    spell_item_shadowmourne() : SpellScriptLoader("spell_item_shadowmourne") { }
-
-    class spell_item_shadowmourne_AuraScript : public AuraScript
-    {
     public:
-        PrepareAuraScript(spell_item_shadowmourne_AuraScript)
-        spell_item_shadowmourne_AuraScript() : AuraScript() { }
+        spell_item_shadowmourne() : SpellScriptLoader("spell_item_shadowmourne") { }
 
-        bool Validate(SpellEntry const* /*spellEntry*/)
+        class spell_item_shadowmourne_AuraScript : public AuraScript
         {
-            if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_VISUAL_LOW))
-                return false;
-            if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_VISUAL_HIGH))
-                return false;
-            if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF))
-                return false;
-            return true;
-        }
+        public:
+            PrepareAuraScript(spell_item_shadowmourne_AuraScript);
 
-        void OnStackChange(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-
-            switch (GetStackAmount())
+            bool Validate(SpellEntry const*)
             {
-                case 1:
-                    target->CastSpell(target, SPELL_SHADOWMOURNE_VISUAL_LOW, true);
-                    break;
-                case 6:
-                    target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_LOW);
-                    target->CastSpell(target, SPELL_SHADOWMOURNE_VISUAL_HIGH, true);
-                    break;
-                case 10:
-                    target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_HIGH);
-                    target->CastSpell(target, SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF, true);
-                    break;
+                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE))
+                    return false;
+                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_SOUL_FRAGMENT))
+                    return false;
+                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF))
+                    return false;
+                return true;
             }
-        }
 
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void HandleDummy(AuraEffect const *, AuraEffectHandleModes)
+            {
+                GetCaster()->CastSpell(GetCaster(), SPELL_SHADOWMOURNE_SOUL_FRAGMENT, true, NULL);
+
+                if (Aura* soulFragments = GetCaster()->GetAura(SPELL_SHADOWMOURNE_SOUL_FRAGMENT))
+                {
+                    if (soulFragments->GetStackAmount() >= 10)
+                    {
+                        GetCaster()->CastSpell(GetCaster(), SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE, true, NULL);
+                        soulFragments->Remove();
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_AuraScript::HandleDummy, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuracript() const
         {
-            Unit* target = GetTarget();
-
-            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_STACK)
-                return;
-            target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_LOW);
-            target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_HIGH);
+            return new spell_item_shadowmourne_AuraScript();
         }
+};
 
-        void Register()
+// 71905 - Soul Fragment
+class spell_item_shadowmourne_soul_fragment : public SpellScriptLoader
+{
+    public:
+        spell_item_shadowmourne_soul_fragment() : SpellScriptLoader("spell_item_shadowmourne_soul_fragment") { }
+
+        class spell_item_shadowmourne_soul_fragment_AuraScript : public AuraScript
         {
-            OnEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_AuraScript::OnStackChange, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(spell_item_shadowmourne_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
+            PrepareAuraScript(spell_item_shadowmourne_soul_fragment_AuraScript);
 
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_item_shadowmourne_AuraScript();
-    }
+            bool Validate(SpellEntry const*)
+            {
+                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_VISUAL_LOW) || !sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_VISUAL_HIGH) || !sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF))
+                    return false;
+                return true;
+            }
+
+            void OnStackChange(AuraEffect const*, AuraEffectHandleModes)
+            {
+                Unit* target = GetTarget();
+
+                switch (GetStackAmount())
+                {
+                    case 1:
+                        target->CastSpell(target, SPELL_SHADOWMOURNE_VISUAL_LOW, true);
+                        break;
+                    case 6:
+                        target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_LOW);
+                        target->CastSpell(target, SPELL_SHADOWMOURNE_VISUAL_HIGH, true);
+                        break;
+                    case 10:
+                        target->RemoveAurasDueToSpell(SPELL_SHADOWMOURNE_VISUAL_HIGH);
+                        target->CastSpell(target, SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_soul_fragment_AuraScript::OnStackChange, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_item_shadowmourne_soul_fragment_AuraScript();
+        }
 };
 
 class spell_item_apparatus_of_khazgoroth : public SpellScriptLoader
@@ -956,6 +992,7 @@ void AddSC_item_spell_scripts()
     new spell_item_six_demon_bag();
     new spell_item_underbelly_elixir();
     new spell_item_shadowmourne();
+    new spell_item_shadowmourne_soul_fragment();
     new spell_item_apparatus_of_khazgoroth();
     new spell_item_apparatus_of_khazgoroth_hc();
     new go_food_feast_cataclysm();

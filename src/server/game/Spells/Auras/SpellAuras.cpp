@@ -1797,6 +1797,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         target->RemoveAurasDueToSpell(96932); // remove the vehicle kit form player
                         break;
+                    case 71905: // Soul Fragment Visual Effects
+                        if(removeMode == AURA_REMOVE_BY_STACK) return;
+
+                        target->RemoveAurasDueToSpell(72521);
+                        target->RemoveAurasDueToSpell(72523);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
