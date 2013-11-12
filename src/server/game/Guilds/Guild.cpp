@@ -1324,9 +1324,11 @@ void Guild::SwitchRank(uint32 oldID, uint32 newID)
     if (oldID > GUILD_RANKS_MIN_COUNT || newID > GUILD_RANKS_MIN_COUNT)
         return;
     
-    RankInfo old = m_ranks[oldID];
+    RankInfo old = m_ranks[oldID];//swap rank position
     m_ranks[oldID] = m_ranks[newID];
     m_ranks[newID] = old;
+    m_ranks[oldID].SetId(oldID);//we need to swap their ids too
+    m_ranks[newID].SetId(newID);
    
     CharacterDatabase.PExecute("UPDATE guild_rank SET rid = 11 WHERE rid = '%u' AND guildid='%u'", oldID, m_id);
     CharacterDatabase.PExecute("UPDATE guild_rank SET rid = '%u' WHERE rid = '%u' AND guildid='%u'", oldID, newID, m_id);
@@ -2939,7 +2941,10 @@ void Guild::HandleSwitchRank(WorldSession* session, uint8 rankId, bool up)
         dst->SetRankPos(srcPos);
         src->SetRankPos(up ? (srcPos - 1) : (srcPos + 1));
     }*/
-
+    if(up)
+        SwitchRank(rankId,rankId-1);
+    else
+        SwitchRank(rankId,rankId+1);
     SendGuildRankInfo(session);
 }
 
