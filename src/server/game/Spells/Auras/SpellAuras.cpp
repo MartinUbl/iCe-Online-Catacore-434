@@ -1803,6 +1803,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         target->RemoveAurasDueToSpell(72521);
                         target->RemoveAurasDueToSpell(72523);
                         break;
+
+                    // Fandral's Flamescythe On Use Buff removes aura of Flame Cat and also removes Cat form aura
+                    // Otherwise player has Cat Form buff but doesn't have Cat Form visual effect 
+                    case 99245: 
+                        target->RemoveAurasDueToSpell(768);
+                        break;
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -2150,6 +2156,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastSpell(caster,99011,true);
                     }
                 }
+ 
+                // Cat Form + Fandral's Flamescythe on use buff -> Removes both at the same time
+                // Otherwise player has Druid of the flames buff, but doesn't have cat form nor Flame Cat form 
+                if (GetId() == 768)
+                {
+                    target->RemoveAurasDueToSpell(99245);
+                }
+
                 break;
             }
         }

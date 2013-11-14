@@ -961,6 +961,59 @@ public:
     }
 };
 
+enum eFandralsFlamescythe
+{
+    SPELL_DRUID_OF_FLAMES = 99244,
+    SPELL_DRUID_OF_FLAMES2 = 99245,
+    SPELL_DRUID_OF_THE_FLAME_FORM = 98829,
+    SPELL_DRUID_FIRELANDS_COSMETIC_TRANSFORM_CONTROLLER = 99246
+};
+
+class spell_item_fandrals_flamescythe : public SpellScriptLoader
+{
+public:
+    spell_item_fandrals_flamescythe() : SpellScriptLoader("spell_item_fandrals_flamescythe") { }
+
+    class spell_item_fandrals_flamescythe_AuraScript : public AuraScript
+    {
+    public:
+        PrepareAuraScript(spell_item_fandrals_flamescythe_AuraScript)
+            spell_item_fandrals_flamescythe_AuraScript() : AuraScript() { }
+
+        bool Validate(SpellEntry const* /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(SPELL_DRUID_OF_FLAMES))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_DRUID_OF_FLAMES2))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_DRUID_OF_THE_FLAME_FORM))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_DRUID_FIRELANDS_COSMETIC_TRANSFORM_CONTROLLER))
+                return false;
+            return true;
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+            if (target && target->HasAura(768))
+                target->CastSpell(target, SPELL_DRUID_OF_FLAMES, true, NULL);
+            else if (!(target && target->HasAura(768)))
+                target->RemoveAura(99245);
+        }
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_item_fandrals_flamescythe_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_item_fandrals_flamescythe_AuraScript();
+    }
+};
+
+
+
 enum eGenericData
 {
     SPELL_ARCANITE_DRAGONLING           = 19804,
@@ -996,4 +1049,5 @@ void AddSC_item_spell_scripts()
     new spell_item_apparatus_of_khazgoroth();
     new spell_item_apparatus_of_khazgoroth_hc();
     new go_food_feast_cataclysm();
+    new spell_item_fandrals_flamescythe();
 }

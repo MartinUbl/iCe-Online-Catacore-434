@@ -3730,6 +3730,9 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             switch(GetMiscValue())
             {
                 case FORM_CAT:
+                    // Fandral's Flamescythe effect
+                    if (target->isInCombat() && (target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1)))
+                        target->SetDisplayId(38150);
                     // Savage Roar
                     if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0 , 0x10000000, 0))
                         target->CastSpell(target, 62071, true);

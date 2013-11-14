@@ -13515,6 +13515,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     
     if(GetTypeId() == TYPEID_PLAYER)
     {
+        // Add Visaual effect of Flame Druid Aura when entering combat with Fandral's Flamescythe
+        if ((ToPlayer()->HasAura(768)) && ((ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || ToPlayer()->HasItemOrGemWithIdEquipped(71466, 1))))
+            ToPlayer()->CastSpell(ToPlayer(), 99244, true);
+
         // Interrupt mount spell cast while entering to combat
         Spell* currSpell = ToPlayer()->GetCurrentSpell(CURRENT_GENERIC_SPELL);
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; i++)
@@ -13560,7 +13564,12 @@ void Unit::ClearInCombat()
             SetUInt32Value(UNIT_DYNAMIC_FLAGS, ((Creature*)this)->GetCreatureInfo()->dynamicflags);
     }
     else
+    {
+        // Remove Visaual effect of Flame Druid Aura when leaving combat
+        if (ToPlayer()->HasAura(99244))
+            ToPlayer()->CastSpell(ToPlayer(), 768, true);
         this->ToPlayer()->UpdatePotionCooldown();
+    }
 
     if (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
     {
