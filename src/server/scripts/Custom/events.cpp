@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2012 iCe Online <http://www.ice-wow.eu/>
+ * Copyright (C) 2006-2013 iCe Online <http://www.ice-wow.eu/>
  *
  * This program is not free software. iCe GM Team owns all of its content
  * Who won't obey that rule, i will kick his balls and twist his nipples.
@@ -9,7 +9,7 @@
 #include "ScriptPCH.h"
 #include "Guild.h"
 
-/* Guild House System, completed scripted by HyN3Q with cooperation Gregory. Ty ! */
+/* Guild House System, fucked up by HyN3Q, fixed and maintained by Gregory */
 
 class npc_gh: public CreatureScript
 {
@@ -51,19 +51,19 @@ class npc_gh: public CreatureScript
 
             QueryResult res = ScriptDatabase.PQuery("SELECT rank, password, phase, map, x, y, z FROM gh_system WHERE guildid = %u", pPlayer->GetGuildId());
 
-            uint16 phase;
-            int8 rank;
+            uint32 phase;
+            int32 rank;
             std::string password;
-            uint16 map;
+            uint32 map;
             float x, y, z;
 
-            if (res != 0) // Process
+            if (res != NULL) // Process
             {
                 Field* field = res->Fetch();
-                rank = field[0].GetInt8();
+                rank = field[0].GetInt32();
                 password = field[1].GetString();
-                phase = field[2].GetUInt16();
-                map = field[3].GetUInt16();
+                phase = field[2].GetUInt32();
+                map = field[3].GetUInt32();
                 x = field[4].GetFloat();
                 y = field[5].GetFloat();
                 z = field[6].GetFloat();
@@ -80,6 +80,7 @@ class npc_gh: public CreatureScript
                             {
                                 pPlayer->SetPhaseMask(phase, true);
                                 pPlayer->TeleportTo(map,x,y,z,0.0f); // Teleport To Dest where is GH
+                                pPlayer->SetPhaseMask(phase, true);
                             }
                             else // if not access.. bye
                                 pPlayer->GetSession()->SendNotification("Your rank is too low.");
