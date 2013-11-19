@@ -135,7 +135,8 @@ namespace VMAP
     {
         if (!isLineOfSightCalcEnabled())
             return true;
-
+        if(mapId==754)//Throne of the Four Winds Al'akir LoS hack (temporary, need to fix it in normal way!!!)
+            return true;
         InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(mapId);
         if (instanceTree != iInstanceMapTrees.end())
         {
