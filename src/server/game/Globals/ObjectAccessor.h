@@ -146,7 +146,7 @@ class ObjectAccessor
         {
             ASSERT(map);
             if (T * obj = GetObjectInWorld(guid, (T*)NULL))
-                if (obj->GetMap() == map)
+                if (obj->IsInWorld() && obj->GetMap() == map)
                     return obj;
             return NULL;
         }
