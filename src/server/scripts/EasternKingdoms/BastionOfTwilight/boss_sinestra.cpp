@@ -269,7 +269,7 @@ public:
         {
             Summons.DespawnAll();
 
-            me->MonsterYell("Deathwing! I have fallen.... The brood... is lost.", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("Deathwing! I have fallen.... The brood... is lost.", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20200, false);
             me->ForcedDespawn(15000);
             me->SummonGameObject(208045,-964.64f,-752.1f,438.6f,4.18f,0,0,0,0,0);// Summon Cache for loot
@@ -356,12 +356,12 @@ public:
 
             if(urand(0,1))
             {
-                me->MonsterYell("My brood will feed on your bones!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("My brood will feed on your bones!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20201, false);
             }
             else 
             {
-                me->MonsterYell("Powerless...", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("Powerless...", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20202, false);
             }
         }
@@ -628,7 +628,7 @@ public:
 
         if (Voice_losing_time <= Diff)
         {
-            me->MonsterYell("You mistake this for weakness? Fool!", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("You mistake this for weakness? Fool!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20203, false);
 
             Creature* pStalker = me->FindNearestCreature(CREATURE_BARRIER_COMSMETIC_STALKER, 200, true);
@@ -680,7 +680,7 @@ public:
                 pStalker->ForcedDespawn();
 
             me->InterruptNonMeleeSpells(false);
-            me->MonsterYell("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", LANG_UNIVERSAL, NULL);
+            me->MonsterYell("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", LANG_UNIVERSAL, 0);
             me->SendPlaySound(20206, false);
 
             Flame_breath_timer = 25000;
@@ -712,21 +712,21 @@ public:
 
             if (me->HealthBelowPct(78) && !phrase1)
             {
-                me->MonsterYell("The energy infuse within my clutch is mine to reclaim!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("The energy infuse within my clutch is mine to reclaim!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20208, false);
                 phrase1=true;
             }
 
             if (me->HealthBelowPct(32) && !phrase2)
             {
-                me->MonsterYell("SUFFER!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("SUFFER!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20209, false);
                 phrase2=true;
             }
 
             if (me->HealthBelowPct(8) && !phrase3)
             {
-                me->MonsterYell("FEEL MY HATRED!", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("FEEL MY HATRED!", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(20210, false);
                 phrase3=true;
             }
@@ -1473,7 +1473,7 @@ public:
 
             if (Voice_timer <= diff)
             {
-                me->MonsterYell("The fires dim, champions... Take this, the last of my power. Succeed where I have failed... Avenge me. Avenge the world...", LANG_UNIVERSAL, NULL);
+                me->MonsterYell("The fires dim, champions... Take this, the last of my power. Succeed where I have failed... Avenge me. Avenge the world...", LANG_UNIVERSAL, 0);
                 me->SendPlaySound(21591, false);
                 Voice_timer = NEVER;
             }
