@@ -1497,17 +1497,13 @@ public:
             if(!me->IsNonMeleeSpellCasted(false))
                 {
                     float max_distance=0.0f;
-                    int position=1;
                     for(int i=1;i<=4;i++) // Na port si veberem najvzdialenejsie miesto od mojej aktualnej pozicie
                     {
                         if(me->GetDistance(Tele_pos[i].GetPositionX(),Tele_pos[i].GetPositionY(),Tele_pos[i].GetPositionZ()) > max_distance)
                         {
                             max_distance=me->GetDistance(Tele_pos[i].GetPositionX(),Tele_pos[i].GetPositionY(),Tele_pos[i].GetPositionZ());
-                            position=i;
                         }
                     }
-                    // NearTeleport not working :(
-                    //me->NearTeleportTo(Tele_pos[position].GetPositionX(),Tele_pos[position].GetPositionY(),Tele_pos[position].GetPositionZ(),Tele_pos[position].GetOrientation());
                     update_movement=true;
                     Update_timer=500;
                     can_interrupt=true;
