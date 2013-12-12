@@ -831,24 +831,18 @@ public:
             if (PHASE == PREPARING_FOR_INTERMISSION1) // Burry to lava
             {
                 float angle = 0.0f;
-                uint32 side = 0;
 
                 switch (urand(0,2))
                 {
                     case 0:
-                        side = LEFT;
                         angle = 2.54f;
-                    break;
-
+                        break;
                     case 1:
-                        side = MIDDLE;
                         angle = 3.135f;
-                    break;
-
+                        break;
                     case 2:
-                        side = RIGHT;
                         angle = 3.73f;
-                    break;
+                        break;
                 }
 
                 Creature * sulfur = me->SummonCreature(SPLITTING_SULFURAS,me->GetPositionX() + cos(angle)*50.0f,me->GetPositionY() + sin(angle)* 50.0f,55.34f,angle,TEMPSUMMON_MANUAL_DESPAWN,0);
