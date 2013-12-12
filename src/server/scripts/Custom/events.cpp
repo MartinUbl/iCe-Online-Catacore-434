@@ -57,7 +57,7 @@ class npc_gh: public CreatureScript
             uint32 map;
             float x, y, z;
 
-            if (res != NULL) // Process
+            if (res) // Process
             {
                 Field* field = res->Fetch();
                 rank = field[0].GetInt32();
