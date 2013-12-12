@@ -37,7 +37,6 @@ if( UNIX )
     #message("[DEBUG] MYSQL ADD_INCLUDE_PATH : ${MYSQL_ADD_INCLUDE_PATH}")
     # set LIBRARY_DIR
     exec_program(${MYSQL_CONFIG}
-      ARGS --libs_r
       OUTPUT_VARIABLE MY_TMP
     )
     set(MYSQL_ADD_LIBRARIES "")
@@ -58,7 +57,7 @@ if( UNIX )
 
   else( MYSQL_CONFIG )
     set(MYSQL_ADD_LIBRARIES "")
-    list(APPEND MYSQL_ADD_LIBRARIES "mysqlclient_r")
+    list(APPEND MYSQL_ADD_LIBRARIES "mysqlclient")
   endif( MYSQL_CONFIG )
 endif( UNIX )
 
