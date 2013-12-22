@@ -1882,8 +1882,10 @@ void BattlegroundMgr::SetupWargame(Group* first, Group* second, BattlegroundType
 
     BattlegroundQueue& bgQueue = sBattlegroundMgr->m_BattlegroundQueues[bgQueueTypeId][BATTLEGROUND_WARGAME];
 
-    GroupQueueInfo* ginfo1 = bgQueue.AddGroup(initiator, first, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
-    GroupQueueInfo* ginfo2 = bgQueue.AddGroup(receiver, second, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
+    /*GroupQueueInfo* ginfo1 = bgQueue.AddGroup(initiator, first, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);
+    GroupQueueInfo* ginfo2 = bgQueue.AddGroup(receiver, second, bgTypeId, bracketEntry, arenaType, false, true, 0, 0, 0);*/
+
+    WargameQueueInfo* wginfo = bgQueue.AddWargameGroups(first, second, bgTypeId, arenaType);
 
     uint32 queueSlot;
     Player *member;
@@ -1900,10 +1902,10 @@ void BattlegroundMgr::SetupWargame(Group* first, Group* second, BattlegroundType
         queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId, true);
 
         // add joined time data
-        member->AddBattlegroundQueueJoinTime(bgTypeId, ginfo1->JoinTime);
+        member->AddBattlegroundQueueJoinTime(bgTypeId, wginfo->JoinTime);
 
         // send status packet (in queue)
-        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, ginfo1->JoinTime, ginfo1->ArenaType);
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, wginfo->JoinTime, wginfo->ArenaType);
         member->GetSession()->SendPacket(&data);
     }
     for (GroupReference *itr = second->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1918,10 +1920,10 @@ void BattlegroundMgr::SetupWargame(Group* first, Group* second, BattlegroundType
         queueSlot = member->AddBattlegroundQueueId(bgQueueTypeId, true);
 
         // add joined time data
-        member->AddBattlegroundQueueJoinTime(bgTypeId, ginfo2->JoinTime);
+        member->AddBattlegroundQueueJoinTime(bgTypeId, wginfo->JoinTime);
 
         // send status packet (in queue)
-        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, ginfo2->JoinTime, ginfo2->ArenaType);
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, 0, wginfo->JoinTime, wginfo->ArenaType);
         member->GetSession()->SendPacket(&data);
     }
 

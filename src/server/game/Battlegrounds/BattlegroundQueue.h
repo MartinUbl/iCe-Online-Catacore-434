@@ -57,6 +57,11 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  OpponentsMatchmakerRating;                      // for rated arena matches
 };
 
+struct WargameQueueInfo: public GroupQueueInfo
+{
+    Group* queuedGroups[2];
+};
+
 struct WargameRequest
 {
     Group* groups[2];
@@ -85,10 +90,11 @@ class BattlegroundQueue
         bool CheckPremadeMatch(BattlegroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
         bool CheckNormalMatch(Battleground* bg_template, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattlegroundBracketId bracket_id, uint32 minPlayersPerTeam);
-        GroupQueueInfo * AddGroup(Player* leader, Group* group, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 ArenaTeamId = 0, bool isWargame = false);
+        GroupQueueInfo * AddGroup(Player* leader, Group* group, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 ArenaTeamId = 0);
+        WargameQueueInfo* AddWargameGroups(Group* first, Group* second, BattlegroundTypeId bgTypeId, uint8 arenaType);
         void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
         bool IsPlayerInvited(const uint64& pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
-        bool GetPlayerGroupInfoData(const uint64& guid, GroupQueueInfo* ginfo);
+        bool GetPlayerGroupInfoData(const uint64& guid, GroupQueueInfo** ginfo);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id) const;
 
@@ -97,6 +103,7 @@ class BattlegroundQueue
 
         //we need constant add to begin and constant remove / add from the end, therefore deque suits our problem well
         typedef std::list<GroupQueueInfo*> GroupsQueueType;
+        typedef std::list<WargameQueueInfo*> WargameQueueType;
 
         /*
         This two dimensional array is used to store All queued groups
@@ -108,7 +115,7 @@ class BattlegroundQueue
              BG_QUEUE_NORMAL_HORDE      is used for normal (or small) horde groups or non-rated arena matches
         */
         GroupsQueueType m_QueuedGroups[MAX_BATTLEGROUND_BRACKETS][BG_QUEUE_GROUP_TYPES_COUNT];
-        GroupsQueueType m_wargameGroups;
+        WargameQueueType m_wargameGroups;
 
         // class to select and invite groups to bg
         class SelectionPool
@@ -131,7 +138,7 @@ class BattlegroundQueue
 
     private:
 
-        bool InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * bg, uint32 side);
+        bool InviteGroupToBG(GroupQueueInfo * ginfo, Battleground * bg, uint32 side, bool isWargame = false);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
