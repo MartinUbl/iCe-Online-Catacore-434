@@ -27147,6 +27147,10 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
     if (GetPetGUID())
         return;
 
+    // arena spectators can't have pets
+    if (GetSpectatorInstanceId() > 0)
+        return;
+
     Pet* NewPet = new Pet(this);
     if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, PET_SLOT_ACTUAL_PET_SLOT))
         delete NewPet;
