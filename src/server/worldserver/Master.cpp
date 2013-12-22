@@ -41,6 +41,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "RARunnable.h"
+#include "APIRunnable.h"
 #include "TCSoap.h"
 #include "Timer.h"
 #include "Util.h"
@@ -208,6 +209,7 @@ int Master::Run()
     }
 
     ACE_Based::Thread rar_thread(new RARunnable);
+    ACE_Based::Thread api_thread(new APIRunnable);
 
     ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef _WIN32

@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+file(GLOB_RECURSE sources_API API/*.cpp API/*.h)
 file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
@@ -27,6 +28,7 @@ endif()
 
 set(worldserver_SRCS
   ${worldserver_SRCS}
+  ${sources_API}
   ${sources_CommandLine}
   ${sources_RemoteAccess}
   ${sources_TCSoap}
@@ -135,6 +137,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server
   ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/API
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
   ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
   ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap

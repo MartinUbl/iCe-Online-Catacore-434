@@ -1940,7 +1940,7 @@ Network.OutUBuff = 65536
 Network.TcpNodelay = 1
 
 ###############################################################################
-# CONSOLE AND REMOTE ACCESS
+# CONSOLE, REMOTE ACCESS AND API SETTINGS
 #
 #    Console.Enable
 #        Enable console
@@ -1964,6 +1964,17 @@ Network.TcpNodelay = 1
 #    Ra.Secure
 #        Kick client on wrong pass
 #
+#    API.Enable
+#        Enable API thread
+#        Default: 0 - off
+#                 1 - on
+#
+#    API.IP
+#        Default API access IP (default 127.0.0.1)
+#
+#    API.Port
+#        Default API access port (default 3444)
+#
 #    SOAP.Enable
 #        Enable soap service
 #        Default: 0 - off
@@ -1985,6 +1996,9 @@ Ra.IP = 0.0.0.0
 Ra.Port = 3443
 Ra.MinLevel = 3
 Ra.Secure = 1
+API.Enable = 1
+API.IP = 127.0.0.1
+API.Port = 3444
 SOAP.Enabled = 0
 SOAP.IP = 127.0.0.1
 SOAP.Port = 7878
