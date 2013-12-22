@@ -6199,12 +6199,10 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
 
     switch (GetSpellProto()->Id)
     {
-        // Bear Form - increase armor by 120% on level >= 40
+        // Bear Form - increase armor by 120%
         case 5487:
         {
             float f_amount = 100 + amount;
-            if (target->getLevel() >= 40)
-                f_amount = 100 + 120;
             // Thick Hide increases armor percentage by an additional 26/52/78%
             if (target->HasAura(16931))
                 f_amount *= 1.78f;
