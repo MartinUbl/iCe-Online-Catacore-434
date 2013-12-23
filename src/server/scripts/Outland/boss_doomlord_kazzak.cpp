@@ -144,7 +144,7 @@ public:
             if (MarkOfKazzak_Timer <= diff)
             {
                 Unit* victim = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                if (victim->GetPower(POWER_MANA))
+                if (victim && victim->GetPower(POWER_MANA))
                 {
                     DoCast(victim, SPELL_MARKOFKAZZAK);
                     MarkOfKazzak_Timer = 20000;
