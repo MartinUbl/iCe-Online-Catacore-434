@@ -1014,6 +1014,22 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     amount = -50;
             }
             break;
+        case SPELL_AURA_MOD_BASE_RESISTANCE_PCT:
+            if (GetId() == 5487)    // Bear Form
+            {
+                Unit *owner = GetBase()->GetUnitOwner();
+                if (!owner)
+                    break;
+                float f_amount = 100 + amount;
+                // Thick Hide increases armor percentage by an additional 26/52/78%
+                if (owner->HasAura(16931))
+                    f_amount *= 1.78f;
+                else if (owner->HasAura(16930))
+                    f_amount *= 1.52f;
+                else if (owner->HasAura(16929))
+                    f_amount *= 1.26f;
+                amount = f_amount - 100.0f;
+            }
         default:
             break;
     }
@@ -6196,30 +6212,6 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
     Unit *target = aurApp->GetTarget();
 
     int32 amount = GetAmount();
-
-    switch (GetSpellProto()->Id)
-    {
-        // Bear Form - increase armor by 120%
-        case 5487:
-        {
-            float f_amount = 100 + amount;
-            // Thick Hide increases armor percentage by an additional 26/52/78%
-            if (target->HasAura(16931))
-                f_amount *= 1.78f;
-            else if (target->HasAura(16930))
-                f_amount *= 1.52f;
-            else if (target->HasAura(16929))
-                f_amount *= 1.26f;
-            amount = f_amount - 100.0f;
-            // total armor is 1 * 2.2 * 1.78    =  391.6%
-            // bonus armor is 1 * 2.2 * 1.78 -1 = +291.6%
-            // (no bonus 100% - 100% = 0%)
-            // --> amount == bonus percent
-            break;
-        }
-        default:
-            break;
-    }
 
     // only players have base stats
     if (target->GetTypeId() != TYPEID_PLAYER)
