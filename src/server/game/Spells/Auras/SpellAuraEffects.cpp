@@ -1020,15 +1020,13 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 Unit *owner = GetBase()->GetUnitOwner();
                 if (!owner)
                     break;
-                float f_amount = 100 + amount;
                 // Thick Hide increases armor percentage by an additional 26/52/78%
                 if (owner->HasAura(16931))
-                    f_amount *= 1.78f;
+                    amount += 78;
                 else if (owner->HasAura(16930))
-                    f_amount *= 1.52f;
+                    amount += 52;
                 else if (owner->HasAura(16929))
-                    f_amount *= 1.26f;
-                amount = f_amount - 100.0f;
+                    amount += 26;
             }
         default:
             break;
