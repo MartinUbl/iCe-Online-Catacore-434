@@ -364,11 +364,6 @@ bool ChatHandler::HandleSpectatorJoinCommand(const char* args)
         PSendSysMessage("You are dead!");
         return true;
     }
-    if (pl->isInFlight())
-    {
-        PSendSysMessage("You are flying!");
-        return true;
-    }
 
     pl->SetSpectatorData(instanceId, time(NULL)+sWorld->getIntConfig(CONFIG_ARENA_SPECTATOR_WAITTIME));
     PSendSysMessage("You have joined spectator mode for instance %u. Please, wait %u seconds, do not enter combat, battleground, flight, nor die.", instanceId, sWorld->getIntConfig(CONFIG_ARENA_SPECTATOR_WAITTIME));
