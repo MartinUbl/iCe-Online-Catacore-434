@@ -2147,7 +2147,11 @@ void Battleground::AddSpectator(Player* pl)
         pl->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         pl->UnsummonPetTemporaryIfAny();
 
-        pl->TeleportTo(GetMapId(), m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0], 0, false);
+        Position pos;
+        if (!GetUnderMapReturnPosition(pl, pos))
+            pos.Relocate(m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0]);
+
+        pl->TeleportTo(GetMapId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0, false);
     }
 }
 
@@ -2155,12 +2159,6 @@ void Battleground::RemoveSpectator(Player* pl)
 {
     if (m_Players.find(pl->GetGUID()) == m_Players.end())
     {
-        pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
-        pl->SetBGTeam(0);
-        pl->clearUnitState(UNIT_STAT_UNATTACKABLE);
-        pl->clearUnitState(UNIT_STAT_ISOLATED);
-        pl->clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
-        pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         RemovePlayerAtLeave(pl->GetGUID(), true, true);
         pl->ResummonPetTemporaryUnSummonedIfAny();
 
