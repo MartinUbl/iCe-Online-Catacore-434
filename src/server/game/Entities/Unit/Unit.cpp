@@ -10336,16 +10336,19 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
     if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
     {
+        uint32 cmpSpectId = unit->ToPlayer()->GetSpectatorInstanceId();
+        uint32 thisSpectId = ToPlayer()->GetSpectatorInstanceId();
+
         // arena player friendly to spectator
-        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() == 0)
+        if (cmpSpectId > 0 && thisSpectId == 0)
             return false;
 
         // spectators are friendly too
-        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+        if (cmpSpectId > 0 && thisSpectId > 0)
             return false;
 
         // spectators are friendly for arena players too
-        if (unit->ToPlayer()->GetSpectatorInstanceId() == 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+        if (cmpSpectId == 0 && thisSpectId > 0)
             return false;
     }
 
@@ -10470,16 +10473,19 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
     if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
     {
+        uint32 cmpSpectId = unit->ToPlayer()->GetSpectatorInstanceId();
+        uint32 thisSpectId = ToPlayer()->GetSpectatorInstanceId();
+
         // arena player friendly to spectator
-        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() == 0)
+        if (cmpSpectId > 0 && thisSpectId == 0)
             return true;
 
         // spectators are friendly too
-        if (unit->ToPlayer()->GetSpectatorInstanceId() > 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+        if (cmpSpectId > 0 && thisSpectId > 0)
             return true;
 
         // spectators are friendly for arena players too
-        if (unit->ToPlayer()->GetSpectatorInstanceId() == 0 && ToPlayer()->GetSpectatorInstanceId() > 0)
+        if (cmpSpectId == 0 && thisSpectId > 0)
             return true;
     }
 
