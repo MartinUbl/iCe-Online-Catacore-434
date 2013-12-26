@@ -470,6 +470,13 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg,
         if (!player)
             continue;
 
+        // for arenas which didn't start yet, do not send opponents data
+        if (isArena && bg->GetStatus() <= STATUS_WAIT_JOIN)
+        {
+            if (bg->GetPlayerTeam(player->GetGUID()) != bg->GetPlayerTeam(receiver->GetGUID()))
+                continue;
+        }
+
         data->WriteBit(0); // Unk 1
         data->WriteBit(0); // Unk 2
         data->WriteBit(guid[2]);
