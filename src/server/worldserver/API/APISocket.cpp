@@ -175,6 +175,16 @@ int APISocket::handle(std::string &cmd, std::vector<std::string> &args)
                 sprintf(resp, "%u", sWorld->GetMaxPlayerCount());
                 response += resp;
             }
+            else if (args[0] == "alliance")
+            {
+                sprintf(resp, "%u", sWorld->GetPlayerCountAlliance());
+                response += resp;
+            }
+            else if (args[0] == "horde")
+            {
+                sprintf(resp, "%u", sWorld->GetPlayerCountHorde());
+                response += resp;
+            }
             else
             {
                 response += "params?";
