@@ -73,7 +73,7 @@ class BattlegroundBE : public Battleground
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d);
         void HandleKillPlayer(Player* player, Player *killer);
-        bool HandlePlayerUnderMap(Player * plr);
+        bool GetUnderMapReturnPosition(Player* /*plr*/, Position& pos);
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player *Source, uint32 type, int32 value, bool doAddHonor = true);

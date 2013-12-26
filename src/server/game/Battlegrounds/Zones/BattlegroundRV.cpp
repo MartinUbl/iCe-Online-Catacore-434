@@ -171,9 +171,9 @@ void BattlegroundRV::HandleKillPlayer(Player *player, Player *killer)
     CheckArenaWinConditions();
 }
 
-bool BattlegroundRV::HandlePlayerUnderMap(Player *player)
+bool BattlegroundRV::GetUnderMapReturnPosition(Player* plr, Position& pos)
 {
-    player->TeleportTo(GetMapId(), 763.5f, -284, 28.276f, 2.422f, false);
+    pos.Relocate(763.5f, -284, 28.276f, 2.422f);
     return true;
 }
 

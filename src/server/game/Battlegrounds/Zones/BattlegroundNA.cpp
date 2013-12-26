@@ -115,9 +115,9 @@ void BattlegroundNA::HandleKillPlayer(Player *player, Player *killer)
     CheckArenaWinConditions();
 }
 
-bool BattlegroundNA::HandlePlayerUnderMap(Player *player)
+bool BattlegroundNA::GetUnderMapReturnPosition(Player* plr, Position& pos)
 {
-    player->TeleportTo(GetMapId(),4055.504395f,2919.660645f,13.611241f,player->GetOrientation(),false);
+    pos.Relocate(4055.504395f, 2919.660645f, 13.611241f, plr->GetOrientation());
     return true;
 }
 

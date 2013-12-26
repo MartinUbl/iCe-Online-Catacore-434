@@ -604,7 +604,8 @@ class Battleground
         //to be removed
         const char* GetTrinityString(int32 entry);
 
-        virtual bool HandlePlayerUnderMap(Player * /*plr*/) { return false; }
+        virtual bool HandlePlayerUnderMap(Player *plr);
+        virtual bool GetUnderMapReturnPosition(Player* /*plr*/, Position& pos) { return false; }
 
         void AddSpectator(Player* pl);
         void RemoveSpectator(Player* pl);  // chat command / player class use

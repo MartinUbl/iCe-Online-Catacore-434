@@ -2013,6 +2013,17 @@ int32 Battleground::GetObjectType(const uint64& guid)
     return -1;
 }
 
+bool Battleground::HandlePlayerUnderMap(Player *plr)
+{
+    Position pos;
+    if (GetUnderMapReturnPosition(plr, pos))
+    {
+        plr->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), false);
+        return true;
+    }
+    return false;
+}
+
 void Battleground::HandleKillUnit(Creature* /*creature*/, Player* /*killer*/)
 {
 }
