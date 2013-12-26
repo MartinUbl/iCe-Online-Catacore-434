@@ -1080,6 +1080,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     LoginDatabase.PExecute("UPDATE account SET online = '%u' WHERE id = '%u'", realmID, GetAccountId());
     pCurrChar->SetInGameTime(getMSTime());
 
+    if (Player::TeamForRace(pCurrChar->getRace()) == ALLIANCE)
+        sWorld->IncreasePlayerCountAlliance();
+
     // announce group about member online (must be after add to player list to receive announce to self)
     if (Group *group = pCurrChar->GetGroup())
     {

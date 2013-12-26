@@ -574,6 +574,9 @@ class World
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
         /// Get number of players
         inline uint32 GetPlayerCount() const { return m_PlayerCount; }
+        inline uint32 GetPlayerCountAlliance() const { return m_PlayerCountAlliance; }
+        inline uint32 GetPlayerCountHorde() const { return m_PlayerCount - m_PlayerCountAlliance; }
+
         inline uint32 GetMaxPlayerCount() const { return m_MaxPlayerCount; }
         /// Increase/Decrease number of players
         inline void IncreasePlayerCount()
@@ -582,6 +585,9 @@ class World
             m_MaxPlayerCount = std::max(m_MaxPlayerCount, m_PlayerCount);
         }
         inline void DecreasePlayerCount() { m_PlayerCount--; }
+
+        inline void IncreasePlayerCountAlliance() { m_PlayerCountAlliance++; }
+        inline void DecreasePlayerCountAlliance() { m_PlayerCountAlliance--; }
 
         Player* FindPlayerInZone(uint32 zone);
 
@@ -827,6 +833,7 @@ class World
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
         uint32 m_PlayerCount;
+        uint32 m_PlayerCountAlliance; // horde count is counted as total-alliance
         uint32 m_MaxPlayerCount;
 
         std::string m_newCharString;

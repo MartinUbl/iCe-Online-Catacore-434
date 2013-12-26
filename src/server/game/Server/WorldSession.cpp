@@ -530,6 +530,9 @@ void WorldSession::LogoutPlayer(bool Save)
         // Call script hook before deletion
         sScriptMgr->OnPlayerLogout(GetPlayer());
 
+        if (Player::TeamForRace(GetPlayer()->getRace()) == ALLIANCE)
+            sWorld->DecreasePlayerCountAlliance();
+
         ///- Remove the player from the world
         // the player may not be in the world when logging out
         // e.g if he got disconnected during a transfer to another map
