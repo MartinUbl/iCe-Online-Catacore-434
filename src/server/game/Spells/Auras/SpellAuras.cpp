@@ -1772,8 +1772,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 43681: // Inactive (Report AFK)
                         if (removeMode == AURA_REMOVE_BY_EXPIRE)
                         {
-                            caster->CastSpell(caster, 26013, true); // we must cast deserter here..
-                            caster->ToPlayer()->LeaveBattleground(true, false); // Leave Battleground
+                            if (caster)
+                            {
+                                caster->CastSpell(caster, 26013, true); // we must cast deserter here..
+                                caster->ToPlayer()->LeaveBattleground(true, false); // Leave Battleground
+                            }
                             if (Aura* deserter = target->GetAura(26013)) // deserter
                             {
                                 deserter->SetMaxDuration(deserter->GetMaxDuration()*2); // 15*2 = 30 min duration
@@ -1787,13 +1790,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 97028: // Gaze of Occu'thar
                         if (removeMode == AURA_REMOVE_BY_EXPIRE)
                         {
-                            caster->CastSpell(caster, 96968, true); // AoE
-                            if (caster->isAlive())
-                                caster->setDeathState(JUST_DIED); // must not despawn due to delayed AoE damage/animation
+                            if (caster)
+                            {
+                                caster->CastSpell(caster, 96968, true); // AoE
+                                if (caster->isAlive())
+                                    caster->setDeathState(JUST_DIED); // must not despawn due to delayed AoE damage/animation
+                            }
                         }
                         else 
                         {
-                            caster->ToCreature()->DisappearAndDie();
+                            if (caster)
+                                caster->ToCreature()->DisappearAndDie();
                         }
                         target->RemoveAurasDueToSpell(96932); // remove the vehicle kit form player
                         break;
