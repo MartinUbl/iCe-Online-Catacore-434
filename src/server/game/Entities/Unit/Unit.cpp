@@ -6953,6 +6953,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     CastCustomSpell(70691, SPELLVALUE_BASE_POINT0, damage, pVictim, true);
                     return true;
                 }
+                // PvP balance 4p bonus(Sudden Eclipse)
+                case 46832:
+                {
+                    Player *caster = ToPlayer();
+                    if (!caster || caster->IsInEclipse())
+                        break;
+                    if (caster->HasSpellCooldown(95746))
+                        break;
+                    caster->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(95746), 0);
+                    int32 change = caster->IsEclipseDriverLeft() ? -13 : 20;
+                    caster->ModifyPower(POWER_ECLIPSE, change);
+                    return true;
+                }
             }
             // Eclipse
             if (dummySpell->SpellIconID == 2856 && GetTypeId() == TYPEID_PLAYER)
