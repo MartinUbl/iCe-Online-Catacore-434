@@ -2054,6 +2054,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
 
+        bool IsInEclipse();
         bool IsEclipseDriverLeft() { return m_eclipseDriverLeft; };
         void TurnEclipseDriver(bool left);
         void ClearEclipseState();

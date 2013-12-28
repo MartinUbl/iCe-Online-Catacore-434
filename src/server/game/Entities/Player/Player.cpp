@@ -26358,6 +26358,11 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         SendEquipError(msg, NULL, NULL, item->itemid);
 }
 
+bool Player::IsInEclipse()
+{
+    return HasAura(48517) || HasAura(48518);
+}
+
 void Player::TurnEclipseDriver(bool left)
 {
     m_eclipseDriverLeft = left;
