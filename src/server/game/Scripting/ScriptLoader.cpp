@@ -56,6 +56,7 @@ void AddSC_areatrigger_scripts();
 void AddSC_boss_emeriss();
 void AddSC_boss_taerar();
 void AddSC_boss_ysondre();
+void AddSC_darkmoon_island();
 void AddSC_generic_creature();
 void AddSC_go_scripts();
 void AddSC_guards();
@@ -681,6 +682,7 @@ void AddWorldScripts()
     AddSC_boss_emeriss();
     AddSC_boss_taerar();
     AddSC_boss_ysondre();
+    AddSC_darkmoon_island();
     AddSC_generic_creature();
     AddSC_go_scripts();
     AddSC_guards();

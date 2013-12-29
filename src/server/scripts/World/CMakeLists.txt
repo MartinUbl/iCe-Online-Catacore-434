@@ -8,6 +8,7 @@ set(scripts_STAT_SRCS
   World/boss_ysondre.cpp
   World/chat_log.cpp
   World/cs_bf.cpp
+  World/darkmoon_island.cpp
   World/go_scripts.cpp
   World/guards.cpp
   World/guards_swog.cpp
