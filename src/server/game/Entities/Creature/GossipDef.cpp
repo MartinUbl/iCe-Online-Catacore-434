@@ -502,7 +502,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     data << uint32(pQuest->GetCharTitleId());
 
     data << uint32(0); // unknown 4.0.1
-    data << uint32(0); // unknown 4.0.1
+    data << float(0.0f); // unknown 4.0.1
     data << uint32(pQuest->GetBonusTalents());
 
     data << uint32(0); // unknown 4.0.1
@@ -526,6 +526,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     // Reward currency count
     for(int i = 0; i < 4; i++)
         data << uint32(pQuest->RewCurrencyCount[i]);
+
+    data << uint32(0);
+    data << uint32(0);
 
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; ++i)
@@ -789,14 +792,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
             data << uint32(0);
     }
 
-    data << uint32(0); // unknow 4.0.1
-    data << uint32(0); // unknow 4.0.1
     data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(pQuest->XPValue(pSession->GetPlayer())*sWorld->getRate(RATE_XP_QUEST));
-
-    // rewarded honor points. Multiply with 10 to satisfy client
-    data << float(0);                                       // new 3.3.0, honor multiplier?
+    data << uint32(pQuest->GetCharTitleId());
     data << uint32(0); // unknow 4.0.1
+
+    data << float(0.0f);
+    data << uint32(pQuest->GetBonusTalents());
     data << uint32(0); // unknow 4.0.1
     data << uint32(0); // unknow 4.0.1
 
