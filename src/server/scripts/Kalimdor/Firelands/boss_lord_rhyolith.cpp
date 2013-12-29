@@ -260,6 +260,9 @@ public:
             savedLeft      = true;
             directionTimes = 0;
 
+            if (!pInstance || !pInstance->instance)
+                return;
+
             uint32 mode = pInstance->instance->GetDifficulty();
             if (mode == RAID_DIFFICULTY_10MAN_HEROIC || mode == RAID_DIFFICULTY_25MAN_HEROIC)
                 enrageTimer = 300000;
