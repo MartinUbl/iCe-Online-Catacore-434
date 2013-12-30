@@ -26469,6 +26469,10 @@ bool Player::IsKnowHowFlyIn(uint32 mapid, uint32 zone) const
     if (v_map == 752)
         return true;
 
+    // Darkmoon Faire Island map - needed by some events
+    if (v_map == 974)
+        return true;
+
     return false;
 }
 
