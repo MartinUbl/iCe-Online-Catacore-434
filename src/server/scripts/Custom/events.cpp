@@ -93,8 +93,7 @@ class npc_gh: public CreatureScript
                     {
                         pPlayer->CLOSE_GOSSIP_MENU();
                         Guild* pGuild = sObjectMgr->GetGuildById(pPlayer->GetGuildId());
-                        uint8 rank_size = pGuild->_GetRanksSize();
-                        int8 cislo = atoi(code);
+                        int32 cislo = atoi(code);
                         // Process
                         if (pPlayer->HasEnoughMoney(500*GOLD)) // Check, if player has 500 gold
                         {
@@ -104,7 +103,7 @@ class npc_gh: public CreatureScript
                                 pPlayer->ModifyMoney(-500*GOLD);
                                 ChatHandler(pPlayer).PSendSysMessage("Modified 500g money.");
                             }
-                            else if (cislo > 0 && cislo <= rank_size)
+                            else if (cislo > 0)
                             {
                                 ScriptDatabase.PExecute("UPDATE gh_system SET rank = %i WHERE guildid = %u", cislo-1, pPlayer->GetGuildId());
                                 pPlayer->ModifyMoney(-500*GOLD);
