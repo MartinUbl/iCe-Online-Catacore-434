@@ -247,6 +247,7 @@ TaxiPathNodesByPath sTaxiPathNodesByPath;
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
 DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
+DBCStorage <UnitPowerBarEntry> sUnitPowerBarStore(UnitPowerBarEntryfmt);
 DBCStorage <VehicleEntry> sVehicleStore(VehicleEntryfmt);
 DBCStorage <VehicleSeatEntry> sVehicleSeatStore(VehicleSeatEntryfmt);
 DBCStorage <WMOAreaTableEntry> sWMOAreaTableStore(WMOAreaTableEntryfmt);
@@ -749,6 +750,7 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     LoadDBC(availableDbcLocales,bad_dbc_files,sTotemCategoryStore,       dbcPath,"TotemCategory.dbc");
+    LoadDBC(availableDbcLocales,bad_dbc_files,sUnitPowerBarStore,        dbcPath,"UnitPowerBar.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sVehicleStore,             dbcPath,"Vehicle.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sVehicleSeatStore,         dbcPath,"VehicleSeat.dbc");
     LoadDBC(availableDbcLocales,bad_dbc_files,sWMOAreaTableStore,        dbcPath,"WMOAreaTable.dbc");
