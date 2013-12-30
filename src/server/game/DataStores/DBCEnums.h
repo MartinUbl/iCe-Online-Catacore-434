@@ -412,12 +412,9 @@ enum AbilityLearnType
     ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL  = 2
 };
 
-enum DB2Types
-{
-    DB2TYPE_ITEM_SPARSE             = 2442913102, // hash of item-sparse.db2
-    DB2TYPE_ITEM                    = 1344507586, // hash of item.db2
-    ITEM_TEMPLATE_UPDATE_REGISTER   = 1091717232, // what is this for?
-};
+#define DB2TYPE_ITEM_SPARSE           2442913102 // hash of item-sparse.db2
+#define DB2TYPE_ITEM                  1344507586 // hash of item.db2
+#define ITEM_TEMPLATE_UPDATE_REGISTER 1091717232 // what is this for?
 
 enum ItemEnchantmentType
 {
