@@ -2594,7 +2594,24 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     float range = GetSpellMaxRange(m_spellInfo, IsPositiveSpell(m_spellInfo->Id));
                     if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
 
-                    if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i)))
+                    // Ring Toss - Darkmoon Faire
+                    // explicit randomization since missile handling is little bit fucked up
+                    // and also the spell target is set to be "nearby_entry", which is, obviously, wrong for us and our implementation
+                    if (m_spellInfo->Id == 101699)
+                    {
+                        if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i)))
+                        {
+                            float x, y, z;
+                            target->GetPosition(x, y, z);
+                            float radius = (((float)urand(10,100)) / 100.0f)*3.0f;
+                            float angle = ((float)urand(0, 2*M_PI*100.0f))/100.0f;
+                            x += radius * cos(angle);
+                            y += radius * sin(angle);
+                            m_targets.setDst(x, y, z, 0.0f);
+                        }
+                    }
+                    // Standard case
+                    else if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i)))
                         m_targets.setDst(*target);
                     break;
                 }
@@ -4860,6 +4877,9 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_UNKNOWN_19;                   // same as in SMSG_SPELL_START
     }
 
+    if (m_targets.HasTraj())
+        castFlags |= CAST_FLAG_ADJUST_MISSILE;
+
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
 
     if (m_CastItem)
@@ -4917,7 +4937,7 @@ void Spell::SendSpellGo()
         data << m_targets.GetElevation();
         data << uint32(m_delayMoment);
         */
-        data << uint32(0);
+        data << uint32(m_targets.m_elevation);
         data << uint32(0);
     }
 
