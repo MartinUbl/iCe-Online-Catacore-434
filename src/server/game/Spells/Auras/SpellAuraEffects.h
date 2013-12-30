@@ -284,6 +284,7 @@ class AuraEffect
         void HandleArenaPreparation(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleNoReagentUseAura(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleAuraRetainComboPoints(AuraApplication const * aurApp, uint8 mode, bool apply) const;
+        void HandleAuraEnableAltPower(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         //  others
         void HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, bool apply) const;
         void HandleChannelDeathItem(AuraApplication const * aurApp, uint8 mode, bool apply) const;

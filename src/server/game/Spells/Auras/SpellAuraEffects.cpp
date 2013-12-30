@@ -405,7 +405,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //343
     &AuraEffect::HandleNULL,                                      //344
     &AuraEffect::HandleNULL,                                      //345
-    &AuraEffect::HandleNULL,                                      //346
+    &AuraEffect::HandleAuraEnableAltPower,                        //346 SPELL_AURA_ENABLE_ALT_POWER
     &AuraEffect::HandleNULL,                                      //347
     &AuraEffect::HandleNULL,                                      //348
     &AuraEffect::HandleNULL,                                      //349
@@ -3978,6 +3978,31 @@ void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mod
             }
         }
     }
+}
+
+void AuraEffect::HandleAuraEnableAltPower(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    // we do not handle these effects on remove
+    if (!apply)
+        return;
+
+    // we only handle these effects on player
+    if (!aurApp->GetTarget() || aurApp->GetTarget()->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    UnitPowerBarEntry const* bar = sUnitPowerBarStore.LookupEntry(GetMiscValue());
+    if (!bar)
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+
+    uint32 maxPower = std::max(bar->maxAmount, bar->maxAmountNegative);
+
+    target->SetMaxPower(POWER_SCRIPTED, maxPower);
+    target->SetPower(POWER_SCRIPTED, bar->startAmount);
 }
 
 void AuraEffect::HandleModStealth(AuraApplication const *aurApp, uint8 mode, bool apply) const
