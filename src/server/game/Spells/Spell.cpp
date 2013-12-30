@@ -5575,9 +5575,8 @@ void Spell::TakeRunePower(bool didhit)
                 plr->SetLastUsedRune(i);
                 runeCost[rune]--;
 
-                // Blood of the North (permanent convert)
                 // keep Death Rune type if missed
-                if (didhit && !((i == RUNE_BLOOD || i == RUNE_UNHOLY) && (plr->HasAura(54637) || plr->HasAura(98056))))
+                if (didhit && !plr->HasPermanentDeathRuneInSlot(i))
                     plr->RestoreBaseRune(i);
 
                 if (runeCost[RUNE_DEATH] == 0)

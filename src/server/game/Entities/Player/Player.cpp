@@ -26109,11 +26109,13 @@ void Player::RemoveRunesByAuraEffect(AuraEffect const * aura)
 void Player::RestoreBaseRune(uint8 index)
 {
     AuraEffect const * aura = m_runes->runes[index].ConvertAura;
-    // Don't drop passive talents providing rune convertion
-    if (!aura || aura->GetAuraType() != SPELL_AURA_CONVERT_RUNE)
+    if (!aura)
         return;
     ConvertRune(index, GetBaseRune(index));
     SetRuneConvertAura(index, NULL);
+    if (aura->GetBase()->IsPassive())
+        return;
+
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
         if (aura == m_runes->runes[i].ConvertAura)
@@ -26219,6 +26221,20 @@ void Player::SendConvertedRunes()
             GetSession()->SendPacket(&data);
         }
     }
+}
+
+bool Player::HasPermanentDeathRuneInSlot(uint8 index) const
+{
+    const RuneInfo &rune = m_runes->runes[index];
+    if (rune.CurrentRune != RUNE_DEATH)
+        return false;
+
+    const AuraEffect *convertAura = rune.ConvertAura;
+    if (!convertAura)
+        return false;
+
+    const uint32 id = convertAura->GetSpellProto()->Id;
+    return id == 54637 || id == 98056;  // currently only Blood of the North converts rune to Death type pernamently
 }
 
 void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast, uint16 lootMode)

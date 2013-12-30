@@ -2772,6 +2772,7 @@ class Player : public Unit, public GridObject<Player>
         void AddRunePower(uint8 index);
         void InitRunes();
         void SendConvertedRunes();
+        bool HasPermanentDeathRuneInSlot(uint8 index) const;
 
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
