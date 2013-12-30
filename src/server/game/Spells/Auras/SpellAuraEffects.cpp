@@ -5133,25 +5133,60 @@ void AuraEffect::HandleAuraFeatherFall(AuraApplication const *aurApp, uint8 mode
             return;
     }
 
-    WorldPacket data;
+    ObjectGuid targetGuid = target->GetGUID();
+
     if (apply)
     {
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
         target->AddUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
+
+        WorldPacket data(SMSG_MOVE_FEATHER_FALL, 8 + 4);
+
+        data.WriteBit(targetGuid[3]);
+        data.WriteBit(targetGuid[1]);
+        data.WriteBit(targetGuid[7]);
+        data.WriteBit(targetGuid[0]);
+        data.WriteBit(targetGuid[4]);
+        data.WriteBit(targetGuid[2]);
+        data.WriteBit(targetGuid[5]);
+        data.WriteBit(targetGuid[6]);
+        data.WriteByteSeq(targetGuid[5]);
+        data.WriteByteSeq(targetGuid[7]);
+        data.WriteByteSeq(targetGuid[2]);
+        data << uint32(0);
+        data.WriteByteSeq(targetGuid[0]);
+        data.WriteByteSeq(targetGuid[3]);
+        data.WriteByteSeq(targetGuid[4]);
+        data.WriteByteSeq(targetGuid[1]);
+        data.WriteByteSeq(targetGuid[6]);
+
+        target->SendMessageToSet(&data, true);
     }
     else
     {
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
-        target->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
-    }
-    data.append(target->GetPackGUID());
-    data << uint32(0);
-    target->SendMessageToSet(&data, true);
+         target->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
 
-    WorldPacket data2(SMSG_MOVE_FEATHER_FALL, 64);
-    data.append(target->GetPackGUID());
-    target->BuildMovementPacket(&data);
-    target->SendMessageToSet(&data, false);
+         WorldPacket data(SMSG_MOVE_NORMAL_FALL, 8 + 4);
+
+        data << uint32(0);
+        data.WriteBit(targetGuid[3]);
+        data.WriteBit(targetGuid[0]);
+        data.WriteBit(targetGuid[1]);
+        data.WriteBit(targetGuid[5]);
+        data.WriteBit(targetGuid[7]);
+        data.WriteBit(targetGuid[4]);
+        data.WriteBit(targetGuid[6]);
+        data.WriteBit(targetGuid[2]);
+        data.WriteByteSeq(targetGuid[2]);
+        data.WriteByteSeq(targetGuid[7]);
+        data.WriteByteSeq(targetGuid[1]);
+        data.WriteByteSeq(targetGuid[4]);
+        data.WriteByteSeq(targetGuid[5]);
+        data.WriteByteSeq(targetGuid[0]);
+        data.WriteByteSeq(targetGuid[3]);
+        data.WriteByteSeq(targetGuid[6]);
+
+        target->SendMessageToSet(&data, true);
+    }
 
     // start fall from current height
     if (!apply && target->GetTypeId() == TYPEID_PLAYER)
