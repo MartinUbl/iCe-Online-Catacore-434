@@ -2159,6 +2159,13 @@ void Battleground::RemoveSpectator(Player* pl)
 {
     if (m_Players.find(pl->GetGUID()) == m_Players.end())
     {
+        pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
+        pl->SetBGTeam(0);
+        pl->clearUnitState(UNIT_STAT_UNATTACKABLE);
+        pl->clearUnitState(UNIT_STAT_ISOLATED);
+        pl->clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
+        pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+
         RemovePlayerAtLeave(pl->GetGUID(), true, true);
         pl->ResummonPetTemporaryUnSummonedIfAny();
 

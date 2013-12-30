@@ -883,15 +883,9 @@ void BattlegroundMgr::RemoveArenaSpectator(Player* pl)
 
     uint32 instanceID = pl->GetSpectatorInstanceId();
 
-    if (instanceID > 0)
-    {
-        pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
-        pl->SetBGTeam(0);
-        pl->clearUnitState(UNIT_STAT_UNATTACKABLE);
-        pl->clearUnitState(UNIT_STAT_ISOLATED);
-        pl->clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
-        pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-    }
+    // attempt to remove from nowhere?
+    if (instanceID == 0)
+        return;
 
     for (uint32 i = 0; i < sizeof(spectableArenaTypes)/sizeof(BattlegroundTypeId); i++)
     {
