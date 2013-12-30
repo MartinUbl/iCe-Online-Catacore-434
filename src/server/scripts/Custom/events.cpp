@@ -92,7 +92,6 @@ class npc_gh: public CreatureScript
                     case GOSSIP_ACTION_INFO_DEF+3: // Define for Modify Rank Access
                     {
                         pPlayer->CLOSE_GOSSIP_MENU();
-                        Guild* pGuild = sObjectMgr->GetGuildById(pPlayer->GetGuildId());
                         int32 cislo = atoi(code);
                         // Process
                         if (pPlayer->HasEnoughMoney(500*GOLD)) // Check, if player has 500 gold
