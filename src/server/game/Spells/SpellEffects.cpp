@@ -9627,6 +9627,13 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
         else
             return;
     }
+    // Magic Wings - Darkmoon Faire Island spell
+    else if (m_spellInfo->Id == 102116)
+    {
+        m_caster->GetNearPoint2D(x, y, 5.0f, m_caster->GetOrientation() - M_PI);
+        speedxy *= 1.2f;
+        speedz *= 1.25f;
+    }
     else //if (m_spellInfo->Effect[i] == SPELL_EFFECT_KNOCK_BACK)
     {
         m_caster->GetPosition(x, y);
