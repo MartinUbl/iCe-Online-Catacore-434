@@ -26024,6 +26024,8 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell)
 
     float cdTime = float(spellInfo->StartRecoveryTime);
 
+    ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, cdTime, spell);
+
     if (!(spellInfo->Attributes & (SPELL_ATTR0_ABILITY|SPELL_ATTR0_PASSIVE)))
         cdTime *= GetFloatValue(UNIT_MOD_CAST_SPEED);
     else if (IsRangedWeaponSpell(spellInfo) && !spell->IsAutoRepeat())
@@ -26031,9 +26033,6 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell)
 
     if (cdTime > 1500.0f)
         cdTime = 1500.0f;
-
-    ApplySpellMod(spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, cdTime, spell);
-
     if (cdTime < 1000.0f && cdTime > 0)
         cdTime = 1000.0f;
 
