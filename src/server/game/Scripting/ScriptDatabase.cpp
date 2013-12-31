@@ -70,4 +70,38 @@ void ScriptDatabaseMgr::LoadDatabase()
     // Finished loading
 
     sLog->outString();
+
+    //////////////////////////////////////////////////////////////////////
+
+    m_personalCreatures.clear();
+
+    sLog->outString("Loading personal creatures...");
+    res = ScriptDatabase.PQuery("SELECT * FROM creature_personal;");
+    if (res)
+    {
+        Field* pField = NULL;
+        uint32 count = 0;
+        for (uint64 i = 0; i < res->GetRowCount(); i++)
+        {
+            pField = res->Fetch();
+
+            CreaturePersonal* pTemp = new CreaturePersonal;
+            pTemp->Group = pField[1].GetUInt32();
+
+            m_personalCreatures[pField[0].GetUInt32()] = pTemp;
+            ++count;
+
+            res->NextRow();
+        }
+        sLog->outString("Loaded %u personal creature definition(s)",count);
+    }
+    else
+        sLog->outString("Loaded 0 personal creature definition(s), table is empty or doesn't exist!");
+
+    sLog->outString();
 }
+
+ bool ScriptDatabaseMgr::IsPersonalCreature(uint32 entry)
+ {
+     return (m_personalCreatures.find(entry) != m_personalCreatures.end());
+ }

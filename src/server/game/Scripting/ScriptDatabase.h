@@ -34,6 +34,12 @@ struct GameObjectTeleportCond
     uint32 map;
 };
 
+struct CreaturePersonal
+{
+    //uint32 Id;
+    uint32 Group;
+};
+
 class ScriptDatabaseMgr
 {
 public:
@@ -55,12 +61,16 @@ public:
         return NULL;
     }
 
+    bool IsPersonalCreature(uint32 entry);
+
 private:
     //Typedefs HERE !
     typedef UNORDERED_MAP<uint32, GameObjectTeleportCond*> GOTeleCondMap;
+    typedef UNORDERED_MAP<uint32, CreaturePersonal*> CreaturePersonalMap;
 
     //Storages HERE !
     GOTeleCondMap m_GOTeleCond;
+    CreaturePersonalMap m_personalCreatures;
 };
 
 #define sScriptDatabase ACE_Singleton<ScriptDatabaseMgr, ACE_Null_Mutex>::instance()

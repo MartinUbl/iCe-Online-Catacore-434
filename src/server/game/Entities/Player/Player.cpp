@@ -23478,6 +23478,10 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         if (u->GetGUID() == guid)
             return true;
 
+    // personal units are visible only to their personal players
+    if (u->IsPersonalUnit() && GetGUID() != u->GetPersonalPlayer())
+        return false;
+
     // different visible distance checks
     if (isInFlight())                                           // what see player in flight
     {

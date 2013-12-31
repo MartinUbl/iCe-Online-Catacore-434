@@ -62,6 +62,7 @@
 #include "UpdateFieldFlags.h"
 #include "InstanceScript.h"
 #include "MapInstanced.h"
+#include "ScriptDatabase.h"
 
 #include <math.h>
 
@@ -194,6 +195,8 @@ m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE), m_HostileRefManager(this)
 
     m_CombatTimer = 0;
     m_LogonTimer = 0;
+
+    m_personalPlayer = 0;
 
     //m_victimThreat = 0.0f;
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -19217,6 +19220,27 @@ bool Unit::CheckPlayerCondition(Player* pPlayer)
             default:
                 return true;
     }
+}
+
+bool Unit::IsPersonalUnit() const
+{
+    if (GetTypeId() != TYPEID_UNIT)
+        return false;
+
+    return sScriptDatabase->IsPersonalCreature(GetEntry());
+}
+
+void Unit::SetPersonalPlayer(uint64 guid)
+{
+    if (!IsPersonalUnit())
+        return;
+
+    m_personalPlayer = guid;
+}
+
+uint64 Unit::GetPersonalPlayer() const
+{
+    return m_personalPlayer;
 }
 
 void Unit::EnterVehicle(Vehicle *vehicle, int8 seatId, bool byAura)

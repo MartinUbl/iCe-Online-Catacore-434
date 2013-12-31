@@ -2126,6 +2126,10 @@ class Unit : public WorldObject
         void SetStunned(bool apply);
         void SetWaterWalk(bool apply);
 
+        bool IsPersonalUnit() const;
+        uint64 GetPersonalPlayer() const;
+        void SetPersonalPlayer(uint64 guid);
+
     protected:
         explicit Unit ();
 
@@ -2202,6 +2206,8 @@ class Unit : public WorldObject
 
         // Map of damage taken from different casters
         std::map<uint64, uint64> m_damageTakenMap;
+
+        uint64 m_personalPlayer;
 
     private:
         bool IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry const * procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const *& spellProcEvent);

@@ -373,6 +373,9 @@ class npc_jessica_darkmoon: public CreatureScript
             // Info
             if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
             {
+                Creature* cr = pCreature->SummonCreature(37988, 0, 0, 0, 0);
+                cr->SetPersonalPlayer(pPlayer->GetGUID());
+
                 pPlayer->PlayerTalkClass->ClearMenus();
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, JESSICA_GOSSIP_2_UNDERSTAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
                 pPlayer->SEND_GOSSIP_MENU(JESSICA_TEXT_ID_2, pCreature->GetGUID());
