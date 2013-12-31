@@ -2151,6 +2151,12 @@ void Battleground::AddSpectator(Player* pl)
         if (!GetUnderMapReturnPosition(pl, pos))
             pos.Relocate(m_TeamStartLocX[0], m_TeamStartLocY[0], m_TeamStartLocZ[0], m_TeamStartLocO[0]);
 
+        m_Spectators.insert(pl->GetGUID());
+
+        WorldPacket data;
+        sBattlegroundMgr->BuildPvpLogDataPacket(&data, this, pl);
+        pl->GetSession()->SendPacket(&data);
+
         pl->TeleportTo(GetMapId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0, false);
     }
 }
