@@ -9107,6 +9107,27 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         default: return;
     }
 
+    // Hunter traps should have their own slots depending on type (frost / fire / nature)
+    switch (m_spellInfo->Id)
+    {
+        case 13795: // Immolation trap
+        case 82944: // Immolation trap (Trap launcher)
+        case 13813: // Explosive trap
+        case 82938: // Explosive trap (Trap launcher)
+            slot = 0;
+            break;
+        case 1499:  // Freezing trap
+        case 60202: // Freezing trap (Trap launcher)
+        case 13809: // Ice Trap
+        case 82940: // Ice trap (Trap launcher)
+            slot = 1;
+            break;
+        case 34600: // Snake Trap
+        case 82949: // Snake Trap (Trap launcher)
+            slot = 2;
+            break;
+    }
+
     float x, y, z;
     // If dest location if present
     if (m_targets.HasDst())
