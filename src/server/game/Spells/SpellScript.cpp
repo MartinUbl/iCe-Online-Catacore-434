@@ -246,6 +246,11 @@ void SpellScript::_FinishScriptCall()
     m_currentScriptState = SPELL_SCRIPT_STATE_NONE;
 }
 
+bool SpellScript::IsTriggered() const
+{
+    return m_spell ? m_spell->IsTriggered() : false;
+}
+
 Unit * SpellScript::GetCaster()
 {
      return m_spell->GetCaster();

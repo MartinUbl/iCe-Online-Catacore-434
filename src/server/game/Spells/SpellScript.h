@@ -194,6 +194,7 @@ class SpellScript : public _SpellScript
         bool IsInHitPhase() { return (m_currentScriptState >= HOOK_SPELL_HIT_START && m_currentScriptState < HOOK_SPELL_HIT_END); }
         bool IsInEffectHook() { return (m_currentScriptState == SPELL_SCRIPT_HOOK_EFFECT); }
         bool IsInAfterHitPhase() const { return (m_currentScriptState == SPELL_SCRIPT_HOOK_AFTER_HIT); }
+        bool IsTriggered() const;
     private:
         Spell * m_spell;
         uint8 m_hitPreventEffectMask;
