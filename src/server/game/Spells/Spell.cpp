@@ -4929,9 +4929,6 @@ void Spell::SendSpellGo()
 
     m_targets.write(data);
 
-    if (m_spellInfo->Id == 101872)
-        sLog->outString("unit: %u, guid: %u", m_targets.getTargetMask() & TARGET_FLAG_UNIT, m_targets.getUnitTargetGUID());
-
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
         data << uint32(m_caster->GetPower((Powers)m_spellInfo->powerType));
 
