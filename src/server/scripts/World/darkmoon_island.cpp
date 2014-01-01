@@ -272,6 +272,59 @@ class spell_cannon_prep: public SpellScriptLoader
         }
 };
 
+#define FOZLEBUB_TEXT_ID_1 120007
+#define FOZLEBUB_GOSSIP_TELEPORT "Teleport me to the cannon |cFF0000FF(30 silver)|r"
+#define FOZLEBUB_GOSSIP_CANCEL "I don't need a teleport"
+
+#define FOZLEBUB_TELEPORT_COST 30*SILVER
+#define SPELL_CANNONBALL_TELEPORT_BACK 109244
+
+class npc_teleporter_fozlebub: public CreatureScript
+{
+    public:
+        npc_teleporter_fozlebub(): CreatureScript("npc_teleporter_fozlebub")
+        {
+        }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pCreature->isQuestGiver())
+                pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FOZLEBUB_GOSSIP_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FOZLEBUB_GOSSIP_CANCEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+
+            pPlayer->SEND_GOSSIP_MENU(FOZLEBUB_TEXT_ID_1, pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+
+            // Teleport
+            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+            {
+                if (pPlayer->HasEnoughMoney(FOZLEBUB_TELEPORT_COST))
+                {
+                    pPlayer->ModifyMoney(-FOZLEBUB_TELEPORT_COST);
+                    pCreature->CastSpell(pPlayer, SPELL_CANNONBALL_TELEPORT_BACK, true);
+                }
+                else
+                    pPlayer->GetSession()->SendNotification("You don't have enough money!");
+                return true;
+            }
+            // Cancel
+            else if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
+            {
+                // menu already closed
+                return true;
+            }
+
+            return false;
+        }
+};
+
 /*
 
 SQL
@@ -280,6 +333,8 @@ UPDATE creature_template SET ScriptName = 'npc_maxima_darkmoon', AIName = '' WHE
 UPDATE creature_template SET ScriptName = 'npc_cannonball_bunny', AIName = '' WHERE entry = 33068;
 DELETE FROM spell_script_names WHERE spell_id = 102112;
 INSERT INTO spell_script_names VALUES (102112, 'spell_cannon_prep');
+UPDATE creature_template SET ScriptName = 'npc_teleporter_fozlebub', AIName = '' WHERE entry = 57850;
+INSERT INTO spell_target_position VALUES (109244, 974, -4017.340820, 6284.694336, 12.8, 1.2);
 
 */
 
@@ -835,6 +890,7 @@ void AddSC_darkmoon_island()
     new npc_maxima_darkmoon();
     new npc_cannonball_bunny();
     new spell_cannon_prep();
+    new npc_teleporter_fozlebub();
 
     new npc_jessica_darkmoon();
     new spell_ring_toss_enable();
