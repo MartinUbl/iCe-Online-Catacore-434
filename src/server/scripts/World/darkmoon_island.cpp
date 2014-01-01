@@ -25,7 +25,7 @@ const char* maximaQuotes[MAXIMA_QUOTES_TOTAL] = {
 
 #define MAXIMA_TEXT_ID_1 120001
 #define MAXIMA_GOSSIP_1_INFO "How do I use the cannon?"
-#define MAXIMA_GOSSIP_1_LAUNCH "Launch me! (Darkmoon Game Token)"
+#define MAXIMA_GOSSIP_1_LAUNCH "Launch me! |cFF0000FF(Darkmoon Game Token)|r"
 #define MAXIMA_TEXT_ID_2 120002
 #define MAXIMA_GOSSIP_2_UNDERSTAND "I understand"
 
@@ -295,7 +295,7 @@ const char* jessicaQuotes[JESSICA_QUOTES_TOTAL] = {
 
 #define JESSICA_TEXT_ID_1 120003
 #define JESSICA_GOSSIP_1_INFO "How do I play the Ring Toss?"
-#define JESSICA_GOSSIP_1_LAUNCH "Ready to play! (Darkmoon Game Token)"
+#define JESSICA_GOSSIP_1_LAUNCH "Ready to play! |cFF0000FF(Darkmoon Game Token)|r"
 #define JESSICA_TEXT_ID_2 120004
 #define JESSICA_GOSSIP_2_UNDERSTAND "I understand"
 
@@ -567,7 +567,7 @@ const char* rinlingQuotes[RINLING_QUOTES_TOTAL] = {
 
 #define RINLING_TEXT_ID_1 120005
 #define RINLING_GOSSIP_1_INFO "How does the Shooting Gallery work?"
-#define RINLING_GOSSIP_1_START "Let's shoot! (Darkmoon Game Token)"
+#define RINLING_GOSSIP_1_START "Let's shoot! |cFF0000FF(Darkmoon Game Token)|r"
 #define RINLING_TEXT_ID_2 120006
 #define RINLING_GOSSIP_2_UNDERSTAND "I understand"
 
