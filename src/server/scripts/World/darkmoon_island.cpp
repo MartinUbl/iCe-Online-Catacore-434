@@ -57,26 +57,28 @@ class npc_maxima_darkmoon: public CreatureScript
                 Reset();
             }
 
-            uint32 nextQuoteTime;
+            uint32 nextQuoteTimer;
             uint8 nextQuote;
 
             void Reset()
             {
-                nextQuoteTime = getMSTime() + urand(1, 60)*1000;
+                nextQuoteTimer = urand(1, 60)*1000;
                 nextQuote = 0;
             }
 
             void UpdateAI(const uint32 diff)
             {
-                if (getMSTime() > nextQuoteTime)
+                if (nextQuoteTimer <= diff)
                 {
-                    nextQuoteTime = getMSTime() + 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
+                    nextQuoteTimer = 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
                     me->MonsterSay(maximaQuotes[nextQuote], LANG_UNIVERSAL, 0);
 
                     nextQuote++;
                     if (nextQuote >= MAXIMA_QUOTES_TOTAL)
                         nextQuote = 0;
                 }
+                else
+                    nextQuoteTimer -= diff;
             }
         };
 
@@ -152,18 +154,18 @@ class npc_cannonball_bunny: public CreatureScript
                 Reset();
             }
 
-            uint32 nextCheckTime;
+            uint32 nextCheckTimer;
 
             void Reset()
             {
-                nextCheckTime = getMSTime() + 1000;
+                nextCheckTimer = 1000;
             }
 
             void UpdateAI(const uint32 diff)
             {
-                if (getMSTime() > nextCheckTime)
+                if (nextCheckTimer <= diff)
                 {
-                    nextCheckTime = getMSTime() + 1000;
+                    nextCheckTimer = 1000;
 
                     Map::PlayerList const& plList = me->GetMap()->GetPlayers();
                     Player* tmp;
@@ -204,6 +206,8 @@ class npc_cannonball_bunny: public CreatureScript
                         }
                     }
                 }
+                else
+                    nextCheckTimer -= diff;
             }
         };
 
@@ -326,26 +330,28 @@ class npc_jessica_darkmoon: public CreatureScript
                 Reset();
             }
 
-            uint32 nextQuoteTime;
+            uint32 nextQuoteTimer;
             uint8 nextQuote;
 
             void Reset()
             {
-                nextQuoteTime = getMSTime() + urand(1, 60)*1000;
+                nextQuoteTimer = urand(1, 60)*1000;
                 nextQuote = 0;
             }
 
             void UpdateAI(const uint32 diff)
             {
-                if (getMSTime() > nextQuoteTime)
+                if (nextQuoteTimer <= diff)
                 {
-                    nextQuoteTime = getMSTime() + 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
+                    nextQuoteTimer = 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
                     me->MonsterSay(jessicaQuotes[nextQuote], LANG_UNIVERSAL, 0);
 
                     nextQuote++;
                     if (nextQuote >= JESSICA_QUOTES_TOTAL)
                         nextQuote = 0;
                 }
+                else
+                    nextQuoteTimer -= diff;
             }
         };
 
