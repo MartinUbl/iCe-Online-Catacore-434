@@ -84,7 +84,7 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
         sLog->outString("Performing opcode jump!");
         for (uint32 i = 0; i < jump; i++)
         {
-            if (strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+            if (strcmp(LookupOpcodeName(testopcode), "<undefined>") == 0)
             {
                 PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
                 SendTestPacket(testopcode, m_session->GetPlayer());
@@ -135,7 +135,7 @@ bool ChatHandler::HandleOpcodeTestCommand(const char* args)
     }
 
     PSendSysMessage("Opcode: 0x%.4X - %s",testopcode,LookupOpcodeName(testopcode));
-    if (strcmp(LookupOpcodeName(testopcode), "UNKNOWN") == 0)
+    if (strcmp(LookupOpcodeName(testopcode), "<undefined>") == 0)
         SendTestPacket(testopcode, m_session->GetPlayer());
 
     testopcode++;
