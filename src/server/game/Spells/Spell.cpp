@@ -3192,6 +3192,28 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             }
                             break;
                         }
+                        case 101872: // Shoot - Darkmoon faire minigame spell
+                        {
+                            // choose the target, that is closest to the orientation of player
+                            std::list<Unit*>::iterator itr = unitList.begin();
+                            Unit* best = *itr;
+                            itr++;
+                            float casterOr = GetCaster()->GetOrientation();
+                            for (; itr != unitList.end(); ++itr)
+                            {
+                                if (fabs(GetCaster()->GetAngle((*itr)->GetPositionX(), (*itr)->GetPositionY())-casterOr) < fabs(GetCaster()->GetAngle(best->GetPositionX(), best->GetPositionY())-casterOr))
+                                    best = *itr;
+                            }
+                            unitList.clear();
+
+                            // add best target only if it's in 30deg cone in front (15deg to every side)
+                            if (fabs(GetCaster()->GetAngle(best->GetPositionX(), best->GetPositionY())-casterOr) < M_PI / 12.0f)
+                            {
+                                unitList.push_back(best);
+                                m_targets.setUnitTarget(best);
+                            }
+                            break;
+                        }
                         case 77679: // Scorching Blast + difficulty entries
                         case 92968:
                         case 92969:
@@ -4906,6 +4928,9 @@ void Spell::SendSpellGo()
     WriteSpellGoTargets(&data);
 
     m_targets.write(data);
+
+    if (m_spellInfo->Id == 101872)
+        sLog->outString("unit: %u, guid: %u", m_targets.getTargetMask() & TARGET_FLAG_UNIT, m_targets.getUnitTargetGUID());
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
         data << uint32(m_caster->GetPower((Powers)m_spellInfo->powerType));

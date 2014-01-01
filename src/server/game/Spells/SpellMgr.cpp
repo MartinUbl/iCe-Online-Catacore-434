@@ -4406,6 +4406,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->CastingTimeIndex = 16;
             count++;
             break;
+        case 101010: // [DND] Target Indicator - Quick Shot (Darkmoon faire island spell)
+            spellInfo->DurationIndex = 27; // lenghten duration to 3 seconds from 1.25s, we need it to last longer
+            break;
         case 81281: // Fungal growth
         case 81288:
             spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
