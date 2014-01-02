@@ -10,6 +10,7 @@ enum DarkmoonQuests
     QUEST_HUMANOID_CANNONBALL   = 29436,
     QUEST_TARGET_TURTLE         = 29455,
     QUEST_HE_SHOOTS_HE_SCORES   = 29438,
+    QUEST_ITS_HAMMER_TIME       = 29463,
 };
 
 #define ITEM_DARKMOON_GAME_TOKEN 71083
@@ -918,6 +919,382 @@ INSERT INTO spell_script_names VALUES (101872, 'spell_heshoots_shoot_hit'), (101
 
 */
 
+/*
+ * Quest: It's Hammer Time
+ */
+
+#define MOLA_QUOTE_1 "Hammer swingin' fun! Who wants to swing a hammer?"
+#define MOLA_QUOTE_2 "Hammer time!"
+#define MOLA_QUOTE_3 "Swing a hammer, win a prize!"
+#define MOLA_QUOTE_4 "Whack some gnolls! Step right up and whack some gnolls!"
+
+#define MOLA_QUOTES_TOTAL 4
+const char* molaQuotes[MOLA_QUOTES_TOTAL] = {
+    MOLA_QUOTE_1, MOLA_QUOTE_2, MOLA_QUOTE_3, MOLA_QUOTE_4
+};
+
+#define MOLA_TEXT_ID_TITLE 120008
+#define MOLA_GOSSIP_INFO_TEXT  "How do I play Whack-a-Gnoll?"
+#define MOLA_GOSSIP_WHACK_TEXT "Ready to whack! |cFF0000FF(Darkmoon Game Token)|r"
+
+#define MOLA_TEXT_ID_INFO 120009
+#define MOLA_GOSSIP_UNDERSTAND_TEXT "I understand"
+
+#define GNOLL_POSITION_COUNT 9
+
+const Position gnollPositions[GNOLL_POSITION_COUNT] = {
+    {-3983.67f, 6300.26f, 13.2001f, 3.8f},
+    {-3988.96f, 6296.32f, 13.2001f, 3.8f},
+    {-3994.49f, 6292.84f, 13.2001f, 3.8f},
+    {-3979.42f, 6295.16f, 13.2001f, 3.8f},
+    {-3985.05f, 6291.41f, 13.2001f, 3.8f},
+    {-3990.7f,  6287.61f, 13.2001f, 3.8f},
+    {-3975.94f, 6289.36f, 13.2001f, 3.8f},
+    {-3981.64f, 6285.74f, 13.2001f, 3.8f},
+    {-3986.78f, 6282.54f, 13.2001f, 3.8f},
+};
+
+enum GnollPuppetEntries
+{
+    PUPPET_GNOLL_NORMAL = 54444,
+    PUPPET_GNOLL_BONUS  = 54549,
+    PUPPET_BABY         = 54466
+};
+
+enum WhackSpells
+{
+    SPELL_WHACKAGNOLL_ENABLE        = 110230,
+    SPELL_WHACKAGNOLL_SPELLBAR      = 101612,
+    SPELL_WHACKAGNOLL_KILL_CREDIT   = 101835,
+    SPELL_WHACKAGNOLL_STUN          = 101679,
+    SPELL_WHACKAGNOLL_WHACK_DUMMY   = 101604,
+    SPELL_WHACKAGNOLL_WHACK_HIT     = 102022,
+    SPELL_WHACKAGNOLL_SPAWN_VISUAL  = 102136,
+};
+
+struct BarrelData
+{
+    uint64 creatureGuid;
+    uint32 despawnTimer;
+    uint32 nextSpawnTimer;
+};
+
+class npc_darkmoon_mola: public CreatureScript
+{
+    public:
+        npc_darkmoon_mola(): CreatureScript("npc_darkmoon_mola")
+        {
+        }
+
+        struct npc_darkmoon_molaAI: public ScriptedAI
+        {
+            npc_darkmoon_molaAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            BarrelData barrels[GNOLL_POSITION_COUNT];
+            uint32 nextQuoteTimer;
+            uint8 nextQuote;
+
+            void Reset()
+            {
+                memset(&barrels, 0, sizeof(barrels));
+                for (uint32 i = 0; i < GNOLL_POSITION_COUNT; i++)
+                    barrels[i].nextSpawnTimer = urand(0,6000);
+
+                nextQuoteTimer = urand(1, 60)*1000;
+                nextQuote = 0;
+            }
+
+            uint32 RollCreatureEntry()
+            {
+                // 40% normal gnoll, 40% baby, 20% bonus gnoll
+                uint32 rand = urand(1,100);
+                if (rand <= 40)
+                    return PUPPET_GNOLL_NORMAL;
+                if (rand <= 80)
+                    return PUPPET_BABY;
+                return PUPPET_GNOLL_BONUS;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                Creature* tmp;
+
+                for (uint32 i = 0; i < GNOLL_POSITION_COUNT; i++)
+                {
+                    if (barrels[i].despawnTimer != 0)
+                    {
+                        if (barrels[i].despawnTimer <= diff)
+                        {
+                            tmp = Creature::GetCreature(*me, barrels[i].creatureGuid);
+                            if (tmp)
+                            {
+                                tmp->Kill(tmp);
+                                tmp->ForcedDespawn(1000);
+                            }
+
+                            barrels[i].creatureGuid = 0;
+                            barrels[i].despawnTimer = 0;
+                        }
+                        else
+                            barrels[i].despawnTimer -= diff;
+                    }
+
+                    if (barrels[i].nextSpawnTimer <= diff)
+                    {
+                        tmp = me->SummonCreature(RollCreatureEntry(), gnollPositions[i], TEMPSUMMON_MANUAL_DESPAWN, 0, 0);
+                        tmp->SetPhaseMask(2, true);
+                        tmp->CastSpell(tmp, SPELL_WHACKAGNOLL_SPAWN_VISUAL, true);
+                        tmp->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                        barrels[i].creatureGuid = tmp->GetGUID();
+                        barrels[i].despawnTimer = urand(2000,5000);
+                        barrels[i].nextSpawnTimer = urand(5000,9000);
+                    }
+                    else
+                        barrels[i].nextSpawnTimer -= diff;
+                }
+
+                if (nextQuoteTimer <= diff)
+                {
+                    nextQuoteTimer = 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
+                    me->MonsterSay(molaQuotes[nextQuote], LANG_UNIVERSAL, 0);
+
+                    nextQuote++;
+                    if (nextQuote >= MOLA_QUOTES_TOTAL)
+                        nextQuote = 0;
+                }
+                else
+                    nextQuoteTimer -= diff;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_darkmoon_molaAI(c);
+        }
+
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pCreature->isQuestGiver())
+                pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MOLA_GOSSIP_INFO_TEXT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MOLA_GOSSIP_WHACK_TEXT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+
+            pPlayer->SEND_GOSSIP_MENU(MOLA_TEXT_ID_TITLE, pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+
+            // Info
+            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+            {
+                pPlayer->PlayerTalkClass->ClearMenus();
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MOLA_GOSSIP_UNDERSTAND_TEXT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                pPlayer->SEND_GOSSIP_MENU(MOLA_TEXT_ID_INFO, pCreature->GetGUID());
+                return true;
+            }
+            // Whack
+            else if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
+            {
+                if (pPlayer->GetItemCount(ITEM_DARKMOON_GAME_TOKEN, false) > 0)
+                {
+                    pPlayer->DestroyItemCount(ITEM_DARKMOON_GAME_TOKEN, 1, true);
+
+                    pPlayer->CastSpell(pPlayer, SPELL_WHACKAGNOLL_ENABLE, true);
+                    pPlayer->CastSpell(pPlayer, SPELL_WHACKAGNOLL_SPELLBAR, true);
+
+                    int16 progress = pPlayer->GetReqKillOrCastCurrentCount(QUEST_ITS_HAMMER_TIME, 54505);
+                    if (progress > 0)
+                        pPlayer->SetPower(POWER_SCRIPTED, progress);
+                }
+                else
+                {
+                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                }
+                return true;
+            }
+            // "I understand"
+            else if (uiAction == GOSSIP_ACTION_INFO_DEF+3)
+            {
+                pPlayer->PlayerTalkClass->ClearMenus();
+                return OnGossipHello(pPlayer, pCreature);
+            }
+
+            return false;
+        }
+};
+
+class spell_whackagnoll_whack_dummy: public SpellScriptLoader
+{
+    public:
+        spell_whackagnoll_whack_dummy(): SpellScriptLoader("spell_whackagnoll_whack_dummy") { }
+
+        class spell_whackagnoll_whack_dummy_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_whackagnoll_whack_dummy_SpellScript);
+
+            void HitHandler()
+            {
+                if (!GetCaster())
+                    return;
+
+                GetCaster()->CastSpell(GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ(), SPELL_WHACKAGNOLL_WHACK_HIT, true);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_whackagnoll_whack_dummy_SpellScript::HitHandler);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_whackagnoll_whack_dummy_SpellScript();
+        }
+};
+
+class spell_whackagnoll_whack_hit: public SpellScriptLoader
+{
+    public:
+        spell_whackagnoll_whack_hit(): SpellScriptLoader("spell_whackagnoll_whack_hit") { }
+
+        class spell_whackagnoll_whack_hit_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_whackagnoll_whack_hit_SpellScript);
+
+            void AfterHitHandler()
+            {
+                if (!GetCaster())
+                    return;
+
+                Unit* target = GetHitUnit();
+
+                if (!target || target->isDead())
+                    return;
+
+                if (target->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                Player* pl = GetCaster()->ToPlayer();
+                if (!pl)
+                    return;
+
+                switch (target->GetEntry())
+                {
+                    case PUPPET_GNOLL_NORMAL:
+                    {
+                        pl->CastSpell(pl, SPELL_WHACKAGNOLL_KILL_CREDIT, true);
+                        target->Kill(target);
+                        break;
+                    }
+                    case PUPPET_GNOLL_BONUS:
+                    {
+                        for (uint32 i = 0; i < 3; i++)
+                            pl->CastSpell(pl, SPELL_WHACKAGNOLL_KILL_CREDIT, true);
+                        target->Kill(target);
+                        break;
+                    }
+                    case PUPPET_BABY:
+                    {
+                        pl->CastSpell(pl, SPELL_WHACKAGNOLL_STUN, true);
+                        target->Kill(target);
+                        break;
+                    }
+                }
+
+                if (pl->GetReqKillOrCastCurrentCount(QUEST_ITS_HAMMER_TIME, 54505) >= 30)
+                {
+                    pl->RemoveAurasDueToSpell(SPELL_WHACKAGNOLL_ENABLE);
+                    pl->RemoveAurasDueToSpell(SPELL_WHACKAGNOLL_SPELLBAR);
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_whackagnoll_whack_hit_SpellScript::AfterHitHandler);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_whackagnoll_whack_hit_SpellScript();
+        }
+};
+
+class spell_whackagnoll_enable: public SpellScriptLoader
+{
+    public:
+        spell_whackagnoll_enable(): SpellScriptLoader("spell_whackagnoll_enable")
+        {
+        }
+
+        class spell_whackagnoll_enable_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_whackagnoll_enable_AuraScript);
+
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                return sSpellStore.LookupEntry(SPELL_WHACKAGNOLL_ENABLE);
+            }
+
+            bool Load()
+            {
+                return true;
+            }
+
+            void EffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*modes*/)
+            {
+                if (!GetUnitOwner() || GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Unit* owner = GetUnitOwner();
+                owner->SetPhaseMask(owner->GetPhaseMask() | 2, true);
+            }
+
+            void EffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*modes*/)
+            {
+                if (!GetUnitOwner() || GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Unit* owner = GetUnitOwner();
+                if (owner->GetPhaseMask() & 2)
+                    owner->SetPhaseMask(owner->GetPhaseMask() - 2, true);
+            }
+
+            void Register()
+            {
+                OnEffectApply +=  AuraEffectApplyFn(spell_whackagnoll_enable_AuraScript::EffectApply, EFFECT_0, SPELL_AURA_369, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectApplyFn(spell_whackagnoll_enable_AuraScript::EffectRemove, EFFECT_0, SPELL_AURA_369, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript *GetAuraScript() const
+        {
+            return new spell_whackagnoll_enable_AuraScript();
+        }
+};
+
+/*
+
+SQL
+
+UPDATE creature_template SET ScriptName = 'npc_darkmoon_mola', AIName = '' WHERE entry=54601;
+UPDATE creature_template SET ScriptName = '', AIName = '' WHERE entry=58570;
+DELETE FROM spell_script_names WHERE spell_id IN (101604, 102022, 110230);
+INSERT INTO spell_script_names VALUES (101604, 'spell_whackagnoll_whack_dummy'), (102022, 'spell_whackagnoll_whack_hit'), (110230, 'spell_whackagnoll_enable');
+REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54444, 0, 0, '', 'Whack - implicit targets gnoll');
+REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54549, 0, 0, '', 'Whack - implicit targets hogger');
+REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54466, 0, 0, '', 'Whack - implicit targets baby');
+
+*/
+
 void AddSC_darkmoon_island()
 {
     new npc_maxima_darkmoon();
@@ -933,4 +1310,9 @@ void AddSC_darkmoon_island()
     new npc_rinling_darkmoon();
     new spell_heshoots_shoot_hit();
     new spell_heshoots_indicator();
+
+    new npc_darkmoon_mola();
+    new spell_whackagnoll_whack_dummy();
+    new spell_whackagnoll_whack_hit();
+    new spell_whackagnoll_enable();
 }
