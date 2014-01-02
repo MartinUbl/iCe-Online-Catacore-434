@@ -16146,6 +16146,9 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     else if (pQuest->GetRewSpell() > 0)
         CastSpell(this, pQuest->GetRewSpell(), true);
 
+    if (pQuest->GetRewSkillLineId() > 0 && pQuest->GetRewSkillPoints() > 0)
+        UpdateSkill(pQuest->GetRewSkillLineId(), pQuest->GetRewSkillPoints());
+
     if (pQuest->GetZoneOrSort() > 0)
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_IN_ZONE, pQuest->GetZoneOrSort());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT);
