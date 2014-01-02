@@ -1012,6 +1012,14 @@ enum BranchSpec
     SPEC_PET_CUNNING          = 411,
 };
 
+/*Player difficulty and merge progress in raids for Flexible raid locks rules*/
+enum RaidPlayerStatus
+{
+    ONLY_NORMAL = 0,//all bosses killed only on normal difficulty (can enter any difficulty and ID)
+    KILLED_HC,//killed 1 or more bosses on HC difficulty (cannot merge into other HC)
+    KILLED_HC_N_MERGED,//killed some bosses on HC and then killed on normal difficulty or merged into other normal (cannot enter other than normal difficulty of that raid anymore)
+};
+
 class PlayerTaxi
 {
 public:
@@ -2811,6 +2819,19 @@ class Player : public Unit, public GridObject<Player>
             return &m_antiHackServant;
         }
 
+        uint32 getRaidDiffProgr(uint32 id/*mapId*/)
+        {
+            return RaidDiffProgress[id];
+        }
+
+        void setRaidDiffProgr(uint32 id/*mapId*/, uint32 progr)
+        {
+            RaidDiffProgress[id]=progr;
+        }
+
+        bool merged;//sets if player is merged into another raid ID
+        uint32 oldID;//Instance ID before merge
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
@@ -3184,6 +3205,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+
+        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*progress*/> RaidDiffProgress;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

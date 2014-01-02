@@ -2495,7 +2495,11 @@ bool InstanceMap::Add(Player *player)
             }*/
 
             // check for existing instance binds
-            InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind *playerBind;
+            if(IsRaid())
+                playerBind = player->GetBoundInstance(GetId(), RAID_DIFFICULTY_10MAN_HEROIC);
+            else
+                playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently

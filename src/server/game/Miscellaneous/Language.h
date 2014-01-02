@@ -93,7 +93,9 @@ enum TrinityStrings
     LANG_IMPROPER_VALUE                 = 62,
     LANG_BANAKY_PRAVIDLA                = 63,
     LANG_BANAKY_PRAVIDLA_2              = 64,
-    // Room for more level 0              65-99 not used
+    LANG_CANNOT_ENTER_HC                = 65,
+
+    // Room for more level 0              66-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,

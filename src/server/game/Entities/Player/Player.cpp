@@ -660,6 +660,9 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
 
     m_ConditionErrorMsgId = 0;
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
+
+    merged=false;
+    oldID=0;
 }
 
 Player::~Player ()
@@ -19416,6 +19419,9 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
             // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
             // and in that case it is not used
 
+            uint32 diffProgress = fields[5].GetUInt32();//difficulty progress for Flexible raid locks rules
+            setRaidDiffProgr(mapId, diffProgress);
+
             MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
             if (!mapEntry || !mapEntry->IsDungeon())
             {
@@ -19548,6 +19554,9 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
         if (!load)
             sLog->outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
         sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
+
+        if(mapP->IsRaid())
+             CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", getRaidDiffProgr(save->GetMapId()), GetGUIDLow(), save->GetInstanceId());
         return &bind;
     }
     else
@@ -19766,10 +19775,14 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         if (mapEntry->IsRaid() && ar->achievement &&  GetGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement))) //only leader need to have achievement to access heroic raid
             missingAchievement = 0;
 
-
         Difficulty target_difficulty = GetDifficulty(mapEntry->IsRaid());
+
+        bool cantEnterDiff=false;
+        if(getRaidDiffProgr(mapEntry->MapID) == KILLED_HC_N_MERGED && (target_difficulty == RAID_DIFFICULTY_10MAN_HEROIC || target_difficulty == RAID_DIFFICULTY_25MAN_HEROIC))//player cannot enter HC diff of that raid (Flexible raid locks rules)
+            cantEnterDiff=true;
+
         MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(target_map, target_difficulty);
-        if (LevelMin || LevelMax || missingItem || missingQuest || missingAchievement)
+        if (LevelMin || LevelMax || missingItem || missingQuest || missingAchievement || cantEnterDiff)
         {
             if (report)
             {
@@ -19781,6 +19794,10 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                     GetSession()->SendAreaTriggerMessage(GetSession()->GetTrinityString(LANG_LEVEL_MINREQUIRED_AND_ITEM), LevelMin, sObjectMgr->GetItemPrototype(missingItem)->Name1);
                 else if (LevelMin)
                     GetSession()->SendAreaTriggerMessage(GetSession()->GetTrinityString(LANG_LEVEL_MINREQUIRED), LevelMin);
+                else if (cantEnterDiff)
+                {
+                    GetSession()->SendAreaTriggerMessage(GetSession()->GetTrinityString(LANG_CANNOT_ENTER_HC));
+                }
             }
             return false;
         }
