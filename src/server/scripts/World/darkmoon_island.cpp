@@ -5,6 +5,13 @@
  *
  **/
 
+enum DarkmoonQuests
+{
+    QUEST_HUMANOID_CANNONBALL   = 29436,
+    QUEST_TARGET_TURTLE         = 29455,
+    QUEST_HE_SHOOTS_HE_SCORES   = 29438,
+};
+
 #define ITEM_DARKMOON_GAME_TOKEN 71083
 
 const Position cannonPosition = {-4021.4734f, 6300.0625f, 18.63f, 3.31187f};
@@ -585,9 +592,23 @@ class spell_ring_toss_hit: public SpellScriptLoader
                 PreventHitEffect(EFFECT_0);
             }
 
+            void AfterHitHandler()
+            {
+                if (GetCaster())
+                {
+                    Player* pl = GetCaster()->ToPlayer();
+                    if (pl)
+                    {
+                        if (pl->GetReqKillOrCastCurrentCount(QUEST_TARGET_TURTLE, 54495) >= 3)
+                            pl->RemoveAurasDueToSpell(SPELL_RINGTOSS_ENABLE);
+                    }
+                }
+            }
+
             void Register()
             {
                 BeforeHit += SpellHitFn(spell_ring_toss_hit_SpellScript::HitHandler);
+                AfterHit += SpellHitFn(spell_ring_toss_hit_SpellScript::AfterHitHandler);
             }
         };
 
@@ -759,6 +780,10 @@ class npc_rinling_darkmoon: public CreatureScript
                     pPlayer->DestroyItemCount(ITEM_DARKMOON_GAME_TOKEN, 1, true);
 
                     pPlayer->CastSpell(pPlayer, SPELL_HESHOOTS_CRACKSHOT_ENABLE, true);
+
+                    int16 progress = pPlayer->GetReqKillOrCastCurrentCount(QUEST_HE_SHOOTS_HE_SCORES, 54231);
+                    if (progress > 0)
+                        pPlayer->SetPower(POWER_SCRIPTED, progress);
                 }
                 else
                 {
@@ -799,13 +824,21 @@ class spell_heshoots_shoot_hit: public SpellScriptLoader
                 if (Aura* shootAura = target->GetAura(SPELL_HESHOOTS_TARGET_INDICATOR))
                 {
                     target->CastSpell(GetCaster(), SPELL_HESHOOTS_KILL_CREDIT, true);
+
+                    Player* pl = GetCaster()->ToPlayer();
+
                     if (shootAura->GetMaxDuration() - shootAura->GetDuration() < 1000)
                     {
                         target->CastSpell(GetCaster(), SPELL_HESHOOTS_KILL_CREDIT_BONUS, true);
-                        Player* pl = GetCaster()->ToPlayer();
                         AchievementEntry const* achiev = sAchievementStore.LookupEntry(ACHIEVEMENT_QUICK_SHOT);
                         if (pl)
                             pl->CompletedAchievement(achiev);
+                    }
+
+                    if (pl)
+                    {
+                        if (pl->GetReqKillOrCastCurrentCount(QUEST_HE_SHOOTS_HE_SCORES, 54231) >= 25)
+                            pl->RemoveAurasDueToSpell(SPELL_HESHOOTS_CRACKSHOT_ENABLE);
                     }
                 }
             }
