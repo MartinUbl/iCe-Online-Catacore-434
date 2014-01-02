@@ -2825,7 +2825,7 @@ void InstanceMap::doDifficultyStaff(Player* player, uint32 mapId, uint32 instanc
             CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(),  instanceId);
         }
     }
-    if(player->GetDifficulty(true) != KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC)) //killed boss on HC so cannot enter HC with other group
+    if(player->getRaidDiffProgr(mapId) != KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC)) //killed boss on HC so cannot enter HC with other group
     {
         player->setRaidDiffProgr(mapId , KILLED_HC);
         CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), instanceId);
