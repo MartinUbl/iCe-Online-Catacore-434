@@ -4781,7 +4781,33 @@ void ObjectMgr::LoadQuests()
             if (!quest)
                 continue;
 
-            if (!quest->HasFlag(QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT))
+            bool hasObjective = false;
+
+            for (uint32 i = 0; i < 6; i++)
+            {
+                if (i < 4)
+                {
+                    if (quest->ReqCreatureOrGOCount[i] != 0)
+                    {
+                        hasObjective = true;
+                        break;
+                    }
+
+                    if (quest->ReqCurrencyCount[i] != 0)
+                    {
+                        hasObjective = true;
+                        break;
+                    }
+                }
+
+                if (quest->ReqItemCount[i] != 0)
+                {
+                    hasObjective = true;
+                    break;
+                }
+            }
+
+            if (!hasObjective && !quest->HasFlag(QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT))
             {
                 sLog->outErrorDb("Spell (id: %u) have SPELL_EFFECT_QUEST_COMPLETE for quest %u , but quest not have flag QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT. Quest flags must be fixed, quest modified to enable objective.",spellInfo->Id,quest_id);
 
