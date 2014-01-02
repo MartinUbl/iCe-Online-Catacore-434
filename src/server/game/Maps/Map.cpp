@@ -2807,6 +2807,36 @@ void InstanceMap::SetResetSchedule(bool on)
     }
 }
 
+void InstanceMap::doDifficultyStaff(Player* player, uint32 mapId, uint32 instanceId)
+{
+    if(player->merged == true)
+    {
+        player->merged=false;
+
+        /*!!!!ZRUSIT KED SA BUDE RATAT KAZDEMU ID SAMOSTATNE!!!!!!!!!!*/
+        CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' where guid = '%u' AND instance = '%u'", instanceId, player->GetGUIDLow(), player->oldID);//player merged and killed boss => update instance in database to new
+        player->oldID=0;
+        /**************************************************************/
+
+        /*Player just merged from HC to normal, so he can no longer access HC version*/
+        if(player->getRaidDiffProgr(mapId) == KILLED_HC)// && (group->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_NORMAL || group->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_NORMAL))
+        {
+            player->setRaidDiffProgr(mapId,KILLED_HC_N_MERGED);
+            CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(),  instanceId);
+        }
+    }
+    if(player->GetDifficulty(true) != KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC)) //killed boss on HC so cannot enter HC with other group
+    {
+        player->setRaidDiffProgr(mapId , KILLED_HC);
+        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), instanceId);
+    }
+    if(player->getRaidDiffProgr(mapId) == KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_NORMAL || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_NORMAL)) //killed on HC and the on N so cannot enter any HC anymore
+    {
+        player->setRaidDiffProgr(mapId , KILLED_HC_N_MERGED);
+        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), instanceId);
+    }
+}
+
 MapDifficulty const* Map::GetMapDifficulty() const
 {
     return GetMapDifficultyData(GetId(),GetDifficulty());

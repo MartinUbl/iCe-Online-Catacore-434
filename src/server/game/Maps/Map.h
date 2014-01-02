@@ -633,6 +633,8 @@ class InstanceMap : public Map
         uint32 GetMaxResetDelay() const;
 
         virtual void InitVisibilityDistance();
+
+        void doDifficultyStaff(Player* player, uint32 mapId, uint32 instanceId);
     private:
         uint32 m_checkCombatTimer;
         bool m_resetAfterUnload;

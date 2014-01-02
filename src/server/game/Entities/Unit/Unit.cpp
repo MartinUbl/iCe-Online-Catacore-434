@@ -17540,32 +17540,14 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 if(map->IsRaid())
                 {
                     uint32 mapId=map->GetId();
-                    if(player->merged)
-                    {
-                        player->merged=false;
-
-                        /*!!!!ZRUSIT KED SA BUDE RATAT KAZDEMU ID SAMOSTATNE!!!!!!!!!!*/
-                        CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' where guid = '%u' AND instance = '%u'", map->GetInstanceId(), player->GetGUIDLow(), player->oldID);//player merged and killed boss => update instance in database to new
-                        player->oldID=0;
-                        /**************************************************************/
-
-                        /*Player just merged from HC to normal, so he can no longer access HC version*/
-                        if(player->getRaidDiffProgr(mapId) == KILLED_HC)// && (group->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_NORMAL || group->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_NORMAL))
+                    Map::PlayerList const &PlayerList = map->GetInstanceScript()->instance->GetPlayers();//do it for all players
+                    if (!PlayerList.isEmpty())
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            player->setRaidDiffProgr(mapId,KILLED_HC_N_MERGED);
-                            CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(),  map->GetInstanceId());
+                            Player* pPlayer = i->getSource();
+                            if(pPlayer)
+                                map->doDifficultyStaff(pPlayer, mapId, map->GetInstanceId());
                         }
-                    }
-                    if(player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC) //killed boss on HC so cannot enter HC with other group
-                    {
-                        player->setRaidDiffProgr(mapId , KILLED_HC);
-                        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), map->GetInstanceId());
-                    }
-                    if(player->getRaidDiffProgr(mapId) == KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_NORMAL || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_NORMAL)) //killed on HC and the on N so cannot enter any HC anymore
-                    {
-                        player->setRaidDiffProgr(mapId , KILLED_HC_N_MERGED);
-                        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), map->GetInstanceId());
-                    }
                 }
             }
 
