@@ -2406,6 +2406,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             else if (cur == TARGET_DST_CASTER)
             {
                 m_targets.setDst(*m_caster);
+
+                // This is countermeasure for spells with non-traditional spell targetting specified in primary target
+                // This implicitly selects the caster as primary target
+                if (EffectTargetType[m_spellInfo->Effect[i]] == SPELL_REQUIRE_UNIT && m_spellInfo->EffectImplicitTargetB[i] == TARGET_NONE)
+                    AddUnitTarget(m_caster, i);
                 break;
             }
 
