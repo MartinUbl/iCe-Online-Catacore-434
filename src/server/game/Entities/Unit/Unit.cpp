@@ -14062,7 +14062,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
         switch (mtype)
         {
             case MOVE_WALK:
-                data.Initialize(SMSG_SPLINE_SET_WALK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_WALK_SPEED, 8+4+2+4+4+4+4+4+4+4);
                 data.WriteBit(guid[0]);
                 data.WriteBit(guid[6]);
                 data.WriteBit(guid[7]);
@@ -14083,7 +14083,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[5]);
                 break;
             case MOVE_RUN:
-                data.Initialize(SMSG_SPLINE_SET_RUN_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[4]);
                 data.WriteBit(guid[0]);
                 data.WriteBit(guid[5]);
@@ -14104,7 +14104,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[1]);
                 break;
             case MOVE_RUN_BACK:
-                data.Initialize(SMSG_SPLINE_SET_RUN_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_BACK_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[1]);
                 data.WriteBit(guid[2]);
                 data.WriteBit(guid[6]);
@@ -14125,7 +14125,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[7]);
                 break;
             case MOVE_SWIM:
-                data.Initialize(SMSG_SPLINE_SET_SWIM_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[4]);
                 data.WriteBit(guid[2]);
                 data.WriteBit(guid[5]);
@@ -14146,7 +14146,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[3]);
                 break;
             case MOVE_SWIM_BACK:
-                data.Initialize(SMSG_SPLINE_SET_SWIM_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_BACK_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[0]);
                 data.WriteBit(guid[1]);
                 data.WriteBit(guid[3]);
@@ -14167,7 +14167,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[2]);
                 break;
             case MOVE_TURN_RATE:
-                data.Initialize(SMSG_SPLINE_SET_TURN_RATE, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_TURN_RATE, 1 + 8 + 4);
                 data.WriteBit(guid[2]);
                 data.WriteBit(guid[4]);
                 data.WriteBit(guid[6]);
@@ -14188,7 +14188,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[0]);
                 break;
              case MOVE_FLIGHT:
-                data.Initialize(SMSG_SPLINE_SET_FLIGHT_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[7]);
                 data.WriteBit(guid[4]);
                 data.WriteBit(guid[0]);
@@ -14209,7 +14209,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data << float(GetSpeed(mtype));
                 break;
             case MOVE_FLIGHT_BACK:
-                data.Initialize(SMSG_SPLINE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
                 data.WriteBit(guid[2]);
                 data.WriteBit(guid[1]);
                 data.WriteBit(guid[6]);
@@ -14230,7 +14230,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.WriteByteSeq(guid[4]);
                 break;
             case MOVE_PITCH_RATE:
-                data.Initialize(SMSG_SPLINE_SET_PITCH_RATE, 1 + 8 + 4);
+                data.Initialize(SMSG_SPLINE_MOVE_SET_PITCH_RATE, 1 + 8 + 4);
                 data.WriteBit(guid[3]);
                 data.WriteBit(guid[5]);
                 data.WriteBit(guid[6]);
