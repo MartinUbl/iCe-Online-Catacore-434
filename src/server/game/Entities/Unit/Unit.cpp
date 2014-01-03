@@ -15570,42 +15570,16 @@ uint32 Unit::GetPowerIndex(Powers power) const
     if (isPet() && ToPet()->getPetType() == HUNTER_PET)
         classId = CLASS_HUNTER;
 
-    uint32 powerIndex = GetPowerIndexByClass(power, classId);
-    if (powerIndex != MAX_POWERS)
-        return powerIndex;
-
     if (GetTypeId() != TYPEID_PLAYER)
         if (power == getPowerType())
             return 0;
 
+    uint32 powerIndex = sObjectMgr->GetPowerIndexByClass(power, classId);
+    if (powerIndex != MAX_POWERS)
+        return powerIndex;
+
     return MAX_POWERS;
 }
-
-uint32 Unit::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
-{
-    ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(classId);
-
-    ASSERT(classEntry && "Class not found");
-
-    uint32 index = 0;
-    for (uint32 i = 0; i <= sChrPowerTypesStore.GetNumRows(); ++i)
-    {
-        ChrPowerTypesEntry const* powerEntry = sChrPowerTypesStore.LookupEntry(i);
-        if (!powerEntry)
-            continue;
-
-        if (powerEntry->classId != classId)
-            continue;
-
-        if (powerEntry->power == powerId)
-            return index;
-
-        ++index;
-    }
-
-    // return invalid value - this class doesn't use this power
-    return MAX_POWERS;
-};
 
 void Unit::SetMaxPower(Powers power, uint32 val)
 {

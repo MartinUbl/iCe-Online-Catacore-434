@@ -1348,6 +1348,9 @@ void World::SetInitialWorldSettings()
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
 
+    sLog->outString("Caching data stores into parsed structures...");
+    sObjectMgr->CacheDBCData();
+
     sLog->outString("Loading GameObject models...");
     LoadGameObjectModelList();
 

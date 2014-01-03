@@ -755,6 +755,11 @@ class ObjectMgr
         void SetAddonDebug(bool state) { m_addonDebug = state; }
         bool GetAddonDebug() { return m_addonDebug; }
 
+        void CacheDBCData();
+        void CacheClassPowerIndex();
+
+        uint32 GetPowerIndexByClass(uint32 powerId, uint32 classId) const;
+
         static CreatureInfo const *GetCreatureTemplate(uint32 id);
         CreatureModelInfo const *GetCreatureModelInfo(uint32 modelid);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
@@ -1507,6 +1512,8 @@ class ObjectMgr
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
         void LoadQuestRelationsHelper(QuestRelations& map, std::string table, bool starter, bool go);
         void PlayerCreateInfoAddItemHelper(uint32 race_, uint32 class_, uint32 itemId, int32 count);
+
+        uint32 m_classPowerIndex[MAX_CLASSES][MAX_POWERS];
 
         MailLevelRewardMap m_mailLevelRewardMap;
 

@@ -502,6 +502,59 @@ void ObjectMgr::RemoveArenaTeam(uint32 Id)
     mArenaTeamMap.erase(Id);
 }
 
+void ObjectMgr::CacheDBCData()
+{
+    sLog->outString("Caching DBC data...");
+
+    CacheClassPowerIndex();
+
+    sLog->outString();
+}
+
+void ObjectMgr::CacheClassPowerIndex()
+{
+    //m_classPowerIndex[MAX_CLASSES][MAX_POWERS]
+    uint32 classId, powerId, index;
+    bool written;
+    for (classId = 0; classId < MAX_CLASSES; classId++)
+    {
+        for (powerId = 0; powerId < MAX_POWERS; powerId++)
+        {
+            index = 0;
+            written = false;
+            for (uint32 i = 0; i <= sChrPowerTypesStore.GetNumRows(); ++i)
+            {
+                ChrPowerTypesEntry const* powerEntry = sChrPowerTypesStore.LookupEntry(i);
+                if (!powerEntry)
+                    continue;
+
+                if (powerEntry->classId != classId)
+                    continue;
+
+                if (powerEntry->power == powerId)
+                {
+                    written = true;
+                    m_classPowerIndex[classId][powerId] = index;
+                    break;
+                }
+
+                ++index;
+            }
+
+            if (!written)
+                m_classPowerIndex[classId][powerId] = MAX_POWERS;
+        }
+    }
+}
+
+uint32 ObjectMgr::GetPowerIndexByClass(uint32 powerId, uint32 classId) const
+{
+    if (powerId >= MAX_POWERS || classId >= MAX_CLASSES)
+        return MAX_POWERS;
+
+    return m_classPowerIndex[classId][powerId];
+}
+
 CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 {
     return sCreatureStorage.LookupEntry<CreatureInfo>(id);
