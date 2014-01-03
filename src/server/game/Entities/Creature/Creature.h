@@ -685,6 +685,10 @@ class Creature : public Unit, public GridObject<Creature>
         void GetTransportHomePosition(float &x, float &y, float &z, float &ori) { m_transportHomePosition.GetPosition(x, y, z, ori); }
         Position GetTransportHomePosition() { return m_transportHomePosition; }
 
+        void SetRelocatedFlag();
+        bool HasRelocatedFlag() const;
+        bool IsInWater() const;
+
         void FarTeleportTo(Map* map, float X, float Y, float Z, float O);
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData *data = NULL);
@@ -692,6 +696,9 @@ class Creature : public Unit, public GridObject<Creature>
 
         // vendor items
         VendorItemCounts m_vendorItemCounts;
+
+        bool m_relocated;
+        bool m_cachedInWater;
 
         void _RealtimeSetCreatureInfo();
 

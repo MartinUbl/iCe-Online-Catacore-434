@@ -171,6 +171,9 @@ m_path_id(0), m_formation(NULL)
 
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
+
+    m_cachedInWater = false;
+    m_relocated = true; // will trigger caching of IsInWater result in next update
 }
 
 Creature::~Creature()
@@ -474,6 +477,14 @@ void Creature::Update(uint32 diff)
     {
         TriggerJustRespawned = false;
         AI()->JustRespawned();
+    }
+
+    // cache several things only if we were relocated
+    if (HasRelocatedFlag())
+    {
+        m_relocated = false;
+
+        m_cachedInWater = Unit::IsInWater(); // overloaded function, call parent for not-cached result
     }
 
     if (IsInWater())
@@ -1494,6 +1505,24 @@ float Creature::GetAttackDistance(Unit const* pl) const
 
     return (RetDistance*aggroRate);
 }
+
+bool Creature::IsInWater() const
+{
+    if (HasRelocatedFlag())
+        return Unit::IsInWater();
+
+    return m_cachedInWater;
+}
+
+void Creature::SetRelocatedFlag()
+{
+    m_relocated = true;
+}
+
+bool Creature::HasRelocatedFlag() const
+{
+    return m_relocated;
+};
 
 void Creature::setDeathState(DeathState s)
 {

@@ -813,6 +813,7 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     else
     {
         creature->Relocate(x, y, z, ang);
+        creature->SetRelocatedFlag();
         creature->UpdateObjectVisibility(false);
     }
 
@@ -852,6 +853,7 @@ void Map::MoveAllCreaturesInMoveList()
             c->Relocate(cm.x, cm.y, cm.z, cm.ang);
             //CreatureRelocationNotify(c,new_cell,new_cell.cellPair());
             c->UpdateObjectVisibility(false);
+            c->SetRelocatedFlag();
         }
         else
         {
