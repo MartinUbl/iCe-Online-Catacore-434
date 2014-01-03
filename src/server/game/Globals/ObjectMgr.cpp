@@ -7743,7 +7743,7 @@ void ObjectMgr::LoadQuestPOI()
         uint32 unk3               = fields[6].GetUInt32();
         uint32 unk4               = fields[7].GetUInt32();
 
-        if (POIs.size() >= questId || POIs[questId].size() >= id)
+        if (questId >= POIs.size() || id >= POIs[questId].size())
         {
             sLog->outErrorDb("Table `quest_poi` has invalid record for quest %u, point id %u", questId, id);
             continue;
