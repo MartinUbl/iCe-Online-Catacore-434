@@ -1009,11 +1009,11 @@ class npc_darkmoon_mola: public CreatureScript
 
             uint32 RollCreatureEntry()
             {
-                // 40% normal gnoll, 40% baby, 20% bonus gnoll
+                // 60% normal gnoll, 30% baby, 10% bonus gnoll
                 uint32 rand = urand(1,100);
-                if (rand <= 40)
+                if (rand <= 60)
                     return PUPPET_GNOLL_NORMAL;
-                if (rand <= 80)
+                if (rand <= 90)
                     return PUPPET_BABY;
                 return PUPPET_GNOLL_BONUS;
             }
@@ -1049,8 +1049,8 @@ class npc_darkmoon_mola: public CreatureScript
                         tmp->CastSpell(tmp, SPELL_WHACKAGNOLL_SPAWN_VISUAL, true);
                         tmp->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                         barrels[i].creatureGuid = tmp->GetGUID();
-                        barrels[i].despawnTimer = urand(2000,5000);
-                        barrels[i].nextSpawnTimer = urand(5000,9000);
+                        barrels[i].despawnTimer = urand(3500,5000);
+                        barrels[i].nextSpawnTimer = urand(5000,8000);
                     }
                     else
                         barrels[i].nextSpawnTimer -= diff;
