@@ -399,6 +399,7 @@ public:
             {
                 // save instance progress to database
                 SaveToDB();
+                GetCorrUiEncounter();
                 DespawnAllSummons();
             }
             else if (uiData == NOT_STARTED)
@@ -615,6 +616,13 @@ public:
         }
         virtual uint32* GetUiEncounter(){return m_auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),uiEnc,MAX_ENCOUNTER);
+
+            return NULL;
+        }
     };
 };
 

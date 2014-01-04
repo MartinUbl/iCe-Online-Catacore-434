@@ -656,3 +656,196 @@ uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
 
     return ret;
 }
+
+/*This is gona be HUUUUUUUUUUUGE. Sorry, everybody is saving boss data as he wants"-.-
+  Loads Raid boss data into data structure when server starts, so no map must be created later
+*/
+void InstanceSaveManager::loadRaidEncounter()
+{
+    uint32 count = 0;
+    QueryResult result = CharacterDatabase.Query("SELECT id, data, map FROM instance");
+    uint32 instanceId;
+    std::string data;
+    uint32 mapId;
+    int bossNum=0;
+    char DummyRead;
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outErrorDb(">> Loaded 0 raid encounter boss data.");
+        return;
+    }
+
+    Field* fields = NULL;
+    do
+    {
+        fields = result->Fetch();
+        instanceId = fields[0].GetUInt32();
+        data = fields[1].GetString();
+        mapId = fields[2].GetUInt32();
+
+        switch(mapId)
+        {
+            case 671://The Bastion of Twilight
+            {
+                bossNum=5;
+                uint32 dataEnc[5];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                        case 0:
+                            loadStream >> dataEnc[2];//halfus
+                            break;
+                        case 1:
+                            loadStream >> dataEnc[0];//valiona and theralion
+                            break;
+                        case 2:
+                            loadStream >> dataEnc[4];//council
+                            break;
+                        case 3:                            
+                            loadStream >> dataEnc[3];//chogall
+                            break;
+                        case 4:
+                            loadStream >> dataEnc[1];//sinestra
+                            break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 669://Blackwing Descent
+            {
+                bossNum=6;
+                uint32 dataEnc[6];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum+1; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> DummyRead;
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[2];//Maloriak
+                        break;
+                    case 2:
+                        loadStream >> dataEnc[5];//Atramedes
+                        break;
+                    case 3:                            
+                        loadStream >> dataEnc[4];//Chimareon
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[0];//Omnotron
+                        break;
+                    case 5:
+                        loadStream >> dataEnc[3];//Magmaw
+                        break;
+                    case 6:
+                        loadStream >> dataEnc[1];//Nefarian
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 757://Baradin Hold
+            {
+                bossNum=2;
+                uint32 dataEnc[2];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                loadStream >> DummyRead >>DummyRead;
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[1];//Argaloth
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[0];//Occuthar
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 754://Throne of the Four Winds
+            {
+                bossNum=2;
+                uint32 dataEnc[2];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[1];//Argaloth
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[0];//Occuthar
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 720://Firelands
+            {
+                bossNum=7;
+                uint32 dataEnc[7];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[5];//Bethilac
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[2];//Rhyolit
+                        break;
+                    case 2:
+                        loadStream >> dataEnc[0];//Alysrazor
+                        break;
+                    case 3:                            
+                        loadStream >> dataEnc[1];//Shannox
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[4];//Baleroc
+                        break;
+                    case 5:
+                        loadStream >> dataEnc[6];//Staghelm
+                        break;
+                    case 6:
+                        loadStream >> dataEnc[3];//Ragnaros
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+
+            default://raids for which Raid info does not work
+            {
+                bossNum=1;
+                uint32 dataEnc[1];
+                dataEnc[0]=0;
+                setBossNumber(mapId,bossNum);
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }               
+        
+        }
+        ++count;
+    } while (result->NextRow());
+    sLog->outString();
+    sLog->outString(">> Loaded %u raid encounter boss data.", count);
+}

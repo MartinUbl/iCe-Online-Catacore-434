@@ -31,7 +31,7 @@ public:
         instance_bastion_of_twilight_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
-        uint32 currEnc[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER-1];
 
         uint64 HalfusGUID;
         uint64 ValionaGUID;
@@ -242,6 +242,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -310,7 +311,6 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
-        virtual uint32 GetCorrMaxEncounter(){return MAX_ENCOUNTER-1;}
         virtual uint32* GetCorrUiEncounter()
         {
             uint32* uiEnc=GetUiEncounter();
@@ -319,8 +319,9 @@ public:
             currEnc[2]=uiEnc[0];//halfus
             currEnc[3]=uiEnc[3];//chogall
             currEnc[4]=uiEnc[2];//council
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
 
-            return currEnc;
+            return NULL;
         }
     };
 

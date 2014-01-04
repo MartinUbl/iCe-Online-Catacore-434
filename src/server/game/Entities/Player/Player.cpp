@@ -19581,59 +19581,39 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
+            uint32 encData = 0;
             InstanceSave *save=itr->second.save;
-            //if(itr->second.perm)
+            if(save)
             {
-                /*InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(itr->second.save->GetInstanceId());
-                bool isHeroic;
-                uint32* uiEnc;
-                uint32 encData = 0;
+                uint32 instanceId=save->GetInstanceId();
+                std::map<uint32,uint32> uiEnc;
                 int coun = 0;
-                bool created=false;
-                Map* map = sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
-                if (!map)
-                {
-                    map = sMapMgr->CreateMap(save->GetMapId(),this,save->GetInstanceId());
-                    created=true;
-                }
-                if (map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())
-                {
-                    uiEnc = map->ToInstanceMap()->GetInstanceScript()->GetCorrUiEncounter();
-                    coun = map->ToInstanceMap()->GetInstanceScript()->GetCorrMaxEncounter();
-                    isHeroic = 0;
 
-                    if (uiEnc && coun > 0 && coun < 25)
+                uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
+                coun = sInstanceSaveMgr->getBossNumber(save->GetMapId());
+
+                if (!uiEnc.empty() && coun && coun > 0)
+                {
+                    for (int i=0;i<coun;i++)
                     {
-                        for (int i=0;i<coun;i++)
+                        if (uiEnc[i] == DONE)
                         {
-                            if (uiEnc[i] == DONE)
-                            {
-                                encData = encData << 1;
-                                encData += 1;
-                            }
-                            else
-                                encData = encData << 1;
+                            encData = encData << 1;
+                            encData += 1;
                         }
-                    }
-                    if(created)//!map->HavePlayers() && 
-                    {
-                        Map* mapR=sMapMgr->_findMap(save->GetMapId());
-                        if(mapR)
-                            ((MapInstanced*)mapR)->_RemoveMapByInstId(save->GetInstanceId());
+                        else
+                            encData = encData << 1;
                     }
                 }
-                else 
-                   isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;*/
-                bool isHeroic=save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
-                data << isHeroic;                           //if there wasnt 0, heroic difficulty shown nothing
+                data << 0;                           //if there wasnt 0, heroic difficulty shown nothing  //isHeroic;
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << uint8(0);//encData;                          // completed encounters mask
-                ++counter;
+                data << encData;                          // completed encounters mask   //uint8(0);
+                ++counter;  
             }
         }
     }

@@ -175,6 +175,24 @@ class InstanceSaveManager
         uint32 GetNumInstanceSaves() { return m_instanceSaveById.size(); }
         uint32 GetNumBoundPlayersTotal();
         uint32 GetNumBoundGroupsTotal();
+        void setInstanceSaveData(uint32 instanceId, uint32* data, uint32 bossNumber)
+        {
+            for(uint32 i=0; i<bossNumber; i++)
+                InstanceSaveData[instanceId][i]=data[i];
+        }
+        std::map<uint32,uint32> getInstanceSaveData(uint32 instanceId)
+        {
+            return InstanceSaveData[instanceId];
+        }
+        void loadRaidEncounter();
+        void setBossNumber(uint32 mapId, uint32 number)
+        {
+            bossNumber[mapId]=number;
+        }
+        uint32 getBossNumber(uint32 mapId)
+        {
+            return bossNumber[mapId];
+        }
 
     protected:
         static uint16 ResetTimeDelay[];
@@ -192,6 +210,8 @@ class InstanceSaveManager
         // fast lookup for reset times (always use existed functions for access/set)
         ResetTimeByMapDifficultyMap m_resetTimeByMapDifficulty;
         ResetTimeQueue m_resetTimeQueue;
+        UNORDERED_MAP<uint32 /*instanceId*/,std::map<uint32/*boss poss*/,uint32/*boss data*/>> InstanceSaveData;
+        UNORDERED_MAP<uint32 /*mapId*/,uint32 /*number of bosses*/> bossNumber;
 };
 
 #define sInstanceSaveMgr ACE_Singleton<InstanceSaveManager, ACE_Thread_Mutex>::instance()

@@ -297,6 +297,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << m_auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -314,8 +315,9 @@ public:
             currEnc[4]=uiEnc[TYPE_BALEROC];//baleroc
             currEnc[5]=uiEnc[TYPE_BETHTILAC];//bethilac
             currEnc[6]=uiEnc[TYPE_STAGHELM];//majordomo
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
 
-            return currEnc;
+            return NULL;
         }
     };
 

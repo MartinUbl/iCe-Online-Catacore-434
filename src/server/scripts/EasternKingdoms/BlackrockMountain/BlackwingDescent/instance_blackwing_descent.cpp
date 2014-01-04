@@ -160,6 +160,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -217,9 +218,9 @@ public:
             currEnc[3]=uiEnc[5];//magmaw
             currEnc[4]=uiEnc[3];//chimareon
             currEnc[5]=uiEnc[2];//atramedes
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
             return currEnc;
         }
-        virtual uint32 GetCorrMaxEncounter(){return MAX_ENCOUNTER-1;}
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

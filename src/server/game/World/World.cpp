@@ -1528,6 +1528,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Dungeon boss data...");
     sLFGMgr->LoadDungeonEncounters();
 
+    sLog->outString("Loading Raid boss data...");
+    sInstanceSaveMgr->loadRaidEncounter();
+
     sLog->outString("Loading Creature encounter data...");
     sObjectMgr->LoadCreatureEncounterData();
 

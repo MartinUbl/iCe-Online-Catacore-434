@@ -89,6 +89,7 @@ public:
 
             if (data == DONE)
             {
+                GetCorrUiEncounter();
                 SaveToDB();
             }
         }
@@ -140,9 +141,10 @@ public:
         virtual uint32* GetCorrUiEncounter()
         {
             uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[1];
-            currEnc[1]=uiEnc[0];
-            return currEnc;
+            currEnc[0]=uiEnc[1];//Argaloth
+            currEnc[1]=uiEnc[0];//Occuthar
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,ENCOUNTERS);
+            return NULL;
         }
     };
 };
