@@ -970,6 +970,7 @@ enum WhackSpells
     SPELL_WHACKAGNOLL_WHACK_DUMMY   = 101604,
     SPELL_WHACKAGNOLL_WHACK_HIT     = 102022,
     SPELL_WHACKAGNOLL_SPAWN_VISUAL  = 102136,
+    SPELL_WHACKAGNOLL_STAY_OUT      = 109977,
 };
 
 struct BarrelData
@@ -1281,17 +1282,75 @@ class spell_whackagnoll_enable: public SpellScriptLoader
         }
 };
 
+class npc_darkmoon_whack_controller: public CreatureScript
+{
+    public:
+        npc_darkmoon_whack_controller(): CreatureScript("npc_darkmoon_whack_controller")
+        {
+        }
+
+        struct npc_darkmoon_whack_controllerAI: public ScriptedAI
+        {
+            npc_darkmoon_whack_controllerAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint32 nextCheckTimer;
+
+            void Reset()
+            {
+                nextCheckTimer = 1000;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (nextCheckTimer <= diff)
+                {
+                    Map::PlayerList const& plList = me->GetMap()->GetPlayers();
+                    Player* tmp;
+                    for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                    {
+                        tmp = itr->getSource();
+                        if (!tmp)
+                            continue;
+
+                        // is further - dont care
+                        if (!tmp->IsWithinDist2d(me->GetPositionX(), me->GetPositionY(), 15.0f))
+                            continue;
+
+                        // has enable aura - dont care
+                        if (tmp->HasAura(SPELL_WHACKAGNOLL_ENABLE))
+                            continue;
+
+                        tmp->CastSpell(tmp, SPELL_WHACKAGNOLL_STAY_OUT, true);
+                    }
+
+                    nextCheckTimer = 1000;
+                }
+                else
+                    nextCheckTimer -= diff;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_darkmoon_whack_controllerAI(c);
+        }
+};
+
 /*
 
 SQL
 
 UPDATE creature_template SET ScriptName = 'npc_darkmoon_mola', AIName = '' WHERE entry=54601;
-UPDATE creature_template SET ScriptName = '', AIName = '' WHERE entry=58570;
+UPDATE creature_template SET ScriptName = 'npc_darkmoon_whack_controller', AIName = '' WHERE entry=58570;
 DELETE FROM spell_script_names WHERE spell_id IN (101604, 102022, 110230);
 INSERT INTO spell_script_names VALUES (101604, 'spell_whackagnoll_whack_dummy'), (102022, 'spell_whackagnoll_whack_hit'), (110230, 'spell_whackagnoll_enable');
 REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54444, 0, 0, '', 'Whack - implicit targets gnoll');
 REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54549, 0, 0, '', 'Whack - implicit targets hogger');
 REPLACE INTO conditions VALUES (13, 0, 102022, 0, 18, 1, 54466, 0, 0, '', 'Whack - implicit targets baby');
+INSERT INTO spell_target_position VALUES (109977, 974, -4008.035156, 6270.989258, 11.879892, 0.702977);
 
 */
 
@@ -1315,4 +1374,5 @@ void AddSC_darkmoon_island()
     new spell_whackagnoll_whack_dummy();
     new spell_whackagnoll_whack_hit();
     new spell_whackagnoll_enable();
+    new npc_darkmoon_whack_controller();
 }
