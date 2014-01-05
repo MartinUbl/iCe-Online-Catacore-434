@@ -1644,7 +1644,7 @@ class spell_tonk_enable: public SpellScriptLoader
                 if (!GetUnitOwner() || GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                Unit* owner = GetUnitOwner();
+                //Unit* owner = GetUnitOwner();
                 //owner->SetPhaseMask(owner->GetPhaseMask() | 2, true);
             }
 
