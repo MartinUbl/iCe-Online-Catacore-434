@@ -3599,6 +3599,13 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         maxTargets += (*j)->GetAmount();
 
                 Trinity::RandomResizeList(unitList, maxTargets);
+
+                // if the target list can contain only 1 target and is selected from many (i.e. TARGET_UNIT_CONE_ENTRY), then we probably search for only one target)
+                // may be wrong for several spells
+                if (maxTargets == 1 && unitList.size() == 1)
+                {
+                    m_targets.setUnitTarget(*(unitList.begin()));
+                }
             }
             else
             {
