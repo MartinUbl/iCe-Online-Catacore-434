@@ -210,7 +210,7 @@ class InstanceSaveManager
         // fast lookup for reset times (always use existed functions for access/set)
         ResetTimeByMapDifficultyMap m_resetTimeByMapDifficulty;
         ResetTimeQueue m_resetTimeQueue;
-        UNORDERED_MAP<uint32 /*instanceId*/,std::map<uint32/*boss poss*/,uint32/*boss data*/>> InstanceSaveData;
+        UNORDERED_MAP<uint32 /*instanceId*/,std::map<uint32/*boss poss*/,uint32/*boss data*/> > InstanceSaveData;
         UNORDERED_MAP<uint32 /*mapId*/,uint32 /*number of bosses*/> bossNumber;
 };
 
