@@ -11,6 +11,7 @@ enum DarkmoonQuests
     QUEST_TARGET_TURTLE         = 29455,
     QUEST_HE_SHOOTS_HE_SCORES   = 29438,
     QUEST_ITS_HAMMER_TIME       = 29463,
+    QUEST_TONK_COMMANDER        = 29434,
 };
 
 #define ITEM_DARKMOON_GAME_TOKEN 71083
@@ -1354,6 +1355,510 @@ INSERT INTO spell_target_position VALUES (109977, 974, -4008.035156, 6270.989258
 
 */
 
+/*
+ * Quest: Tonk Commander
+ */
+
+enum TonkSpells
+{
+    SPELL_TONK_ENABLE       = 102178,
+    SPELL_TONK_SHOOT        = 102292,
+    SPELL_TONK_NITRO_BOOST  = 102297,
+    SPELL_TONK_KILL_CREDIT  = 110162,
+
+    SPELL_ENEMY_TONK_MARKED         = 102341,
+    SPELL_ENEMY_TONK_CANNON_BLAST   = 102227,
+};
+
+enum TonkNPCs
+{
+    NPC_PLAYER_TONK         = 54588,
+    NPC_ENEMY_TONK          = 54642,
+    NPC_ENEMY_MINIZEP       = 54643,
+    NPC_TONK_TARGET         = 33081,
+};
+
+#define TONK_TARGET_POSITION_COUNT 33
+
+const Position tonkTargetPositions[TONK_TARGET_POSITION_COUNT] = {
+    {-4145.988770f, 6290.719727f, 13.116899f, 0.499545f},
+    {-4137.421387f, 6289.625977f, 13.116899f, 1.210661f},
+    {-4133.106934f, 6296.116699f, 13.116899f, 2.729411f},
+    {-4139.067383f, 6300.952148f, 13.116899f, 0.894536f},
+    {-4139.654297f, 6305.813477f, 13.116899f, 0.671786f},
+    {-4143.446777f, 6308.530762f, 13.116899f, 2.021786f},
+    {-4148.482910f, 6308.563965f, 13.116899f, 0.614411f},
+    {-4147.683105f, 6300.739258f, 13.116899f, 0.972161f},
+    {-4145.276855f, 6304.266602f, 13.116899f, 0.972161f},
+    {-4142.250000f, 6312.737793f, 13.116899f, 0.297161f},
+    {-4137.417480f, 6316.265137f, 13.116899f, 6.023472f},
+    {-4133.054688f, 6318.007813f, 13.116899f, 5.348472f},
+    {-4127.991211f, 6313.178223f, 13.116899f, 2.551661f},
+    {-4125.186035f, 6313.233398f, 13.116899f, 3.395411f},
+    {-4122.878418f, 6307.192383f, 13.116899f, 3.395411f},
+    {-4126.788574f, 6306.019043f, 13.116899f, 2.274911f},
+    {-4124.875977f, 6300.727051f, 13.116899f, 3.176036f},
+    {-4123.939941f, 6299.044434f, 13.116899f, 2.328911f},
+    {-4126.655762f, 6294.246094f, 13.116899f, 2.328911f},
+    {-4129.494141f, 6294.895020f, 13.116899f, 1.205036f},
+    {-4131.038086f, 6292.043457f, 13.116899f, 2.575286f},
+    {-4135.638184f, 6288.404785f, 13.116899f, 1.750661f},
+    {-4137.863770f, 6292.131836f, 13.116899f, 1.075661f},
+    {-4137.863770f, 6297.746094f, 13.116899f, 1.755162f},
+    {-4135.811523f, 6302.905762f, 13.116517f, 1.755162f},
+    {-4133.516113f, 6307.136719f, 13.116517f, 1.755162f},
+    {-4143.302246f, 6310.689941f, 13.116517f, 0.573911f},
+    {-4148.054688f, 6297.366211f, 13.116712f, 5.652222f},
+    {-4139.401855f, 6294.312500f, 13.116712f, 0.047411f},
+    {-4119.912109f, 6299.708496f, 13.116712f, 4.221162f},
+    {-4120.738281f, 6306.735352f, 13.116712f, 3.097287f},
+    {-4125.261719f, 6317.238281f, 13.116712f, 3.154662f},
+    {-4135.285645f, 6321.727539f, 13.116712f, 4.992911f}
+};
+
+const Position playerSpawnPosition  = {-4130.196777f, 6320.329102f, 13.116393f, 4.368710f};
+const Position playerKickPosition   = {-4125.278809f, 6332.548828f, 12.219045f, 4.313733f};
+const Position circleCenterPosition = {-4135.632813f, 6302.201172f, 13.116685f, 1.336366f};
+const float circleBattleRadius      = 15.0f;
+
+#define FINLAY_QUOTE_1 "Hey, hey! Command a tonk in glorious battle!"
+#define FINLAY_QUOTE_2 "Step right up and try a tonk!"
+#define FINLAY_QUOTE_3 "Tonks! We got tonks here!"
+#define FINLAY_QUOTE_4 "We're under attack! Step up and do your part!"
+
+#define FINLAY_QUOTES_TOTAL 4
+const char* finlayQuotes[FINLAY_QUOTES_TOTAL] = {
+    FINLAY_QUOTE_1, FINLAY_QUOTE_2, FINLAY_QUOTE_3, FINLAY_QUOTE_4
+};
+
+#define FINLAY_TEXT_ID_1 120010
+#define FINLAY_GOSSIP_1_INFO "How do I play the Tonk Challenge?"
+#define FINLAY_GOSSIP_1_LAUNCH "Ready to play! |cFF0000FF(Darkmoon Game Token)|r"
+#define FINLAY_TEXT_ID_2 120011
+#define FINLAY_GOSSIP_2_UNDERSTAND "I understand"
+
+struct TargetSpawn
+{
+    uint64 guid;
+    uint8 pos;
+    uint32 nextSpawnTime;
+    uint32 nextCheckTime;
+};
+
+#define TONK_TARGETS_MAX 8
+
+class npc_finlay_darkmoon: public CreatureScript
+{
+    public:
+        npc_finlay_darkmoon(): CreatureScript("npc_finlay_darkmoon")
+        {
+        }
+
+        struct npc_finlay_darkmoonAI: public ScriptedAI
+        {
+            npc_finlay_darkmoonAI(Creature* c): ScriptedAI(c)
+            {
+                spawnedTonks = false;
+                Reset();
+            }
+
+            uint32 nextQuoteTimer;
+            uint8 nextQuote;
+            TargetSpawn targetSpawns[TONK_TARGETS_MAX];
+            bool spawnedTonks;
+
+            void Reset()
+            {
+                nextQuoteTimer = urand(1, 60)*1000;
+                nextQuote = 0;
+
+                memset(&targetSpawns, 0, sizeof(targetSpawns));
+
+                if (!spawnedTonks)
+                {
+                    uint8 point;
+                    for (uint32 i = 0; i < 3; i++)
+                    {
+                        point = urand(0, TONK_TARGET_POSITION_COUNT);
+                        me->SummonCreature(NPC_ENEMY_TONK, tonkTargetPositions[point], TEMPSUMMON_MANUAL_DESPAWN);
+                    }
+                    spawnedTonks = true;
+                }
+            }
+
+            bool IsSpawnAtPos(uint8 pos)
+            {
+                for (uint32 i = 0; i < TONK_TARGETS_MAX; i++)
+                {
+                    if (pos == targetSpawns[i].pos)
+                        return true;
+                }
+                return false;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (nextQuoteTimer <= diff)
+                {
+                    nextQuoteTimer = 30000 + urand(0, 15)*10000; // 30 - 180s (step by 10s, not so big importance)
+                    me->MonsterSay(finlayQuotes[nextQuote], LANG_UNIVERSAL, 0);
+
+                    nextQuote++;
+                    if (nextQuote >= FINLAY_QUOTES_TOTAL)
+                        nextQuote = 0;
+                }
+                else
+                    nextQuoteTimer -= diff;
+
+                for (uint32 i = 0; i < TONK_TARGETS_MAX; i++)
+                {
+                    if (targetSpawns[i].nextCheckTime <= diff)
+                    {
+                        Creature* cr = Creature::GetCreature(*me, targetSpawns[i].guid);
+                        if (!cr || cr->isDead())
+                        {
+                            targetSpawns[i].nextSpawnTime = 2000;
+                            targetSpawns[i].nextCheckTime = 5000;
+                        }
+                        else
+                        {
+                            targetSpawns[i].nextCheckTime = 2000;
+                        }
+                    }
+                    else
+                        targetSpawns[i].nextCheckTime -= diff;
+
+                    if (targetSpawns[i].nextSpawnTime <= diff)
+                    {
+                        targetSpawns[i].nextSpawnTime = urand(20000, 40000);
+                        if (Creature* cr = Creature::GetCreature(*me, targetSpawns[i].guid))
+                        {
+                            cr->ForcedDespawn(1000);
+                        }
+
+                        uint8 chosen = 0;
+                        do
+                        {
+                            chosen = urand(0, TONK_TARGET_POSITION_COUNT);
+                        } while (IsSpawnAtPos(chosen));
+
+                        targetSpawns[i].pos = chosen;
+
+                        Creature* cr = me->SummonCreature(NPC_TONK_TARGET, tonkTargetPositions[chosen], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000);
+                        if (cr)
+                            targetSpawns[i].guid = cr->GetGUID();
+                    }
+                    else
+                        targetSpawns[i].nextSpawnTime -= diff;
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_finlay_darkmoonAI(c);
+        }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pCreature->isQuestGiver())
+                pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FINLAY_GOSSIP_1_INFO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FINLAY_GOSSIP_1_LAUNCH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+
+            pPlayer->SEND_GOSSIP_MENU(FINLAY_TEXT_ID_1, pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+
+            // Info
+            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+            {
+                pPlayer->PlayerTalkClass->ClearMenus();
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FINLAY_GOSSIP_2_UNDERSTAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                pPlayer->SEND_GOSSIP_MENU(FINLAY_TEXT_ID_2, pCreature->GetGUID());
+                return true;
+            }
+            // Play
+            else if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
+            {
+                //if (pPlayer->GetItemCount(ITEM_DARKMOON_GAME_TOKEN, false) > 0)
+                {
+                    //pPlayer->DestroyItemCount(ITEM_DARKMOON_GAME_TOKEN, 1, true);
+
+                    Creature* summon = pPlayer->SummonCreature(NPC_PLAYER_TONK, playerSpawnPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    if (summon)
+                    {
+                        pPlayer->EnterVehicle(summon);
+                        pPlayer->CastSpell(pPlayer, SPELL_TONK_ENABLE, true);
+
+                        int16 progress = pPlayer->GetReqKillOrCastCurrentCount(QUEST_TONK_COMMANDER, 33081);
+                        if (progress > 0)
+                            pPlayer->SetPower(POWER_SCRIPTED, progress);
+                    }
+                }
+                //else
+                {
+                    //pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                }
+                return true;
+            }
+            // "I understand"
+            else if (uiAction == GOSSIP_ACTION_INFO_DEF+3)
+            {
+                pPlayer->PlayerTalkClass->ClearMenus();
+                return OnGossipHello(pPlayer, pCreature);
+            }
+
+            return false;
+        }
+};
+
+class spell_tonk_enable: public SpellScriptLoader
+{
+    public:
+        spell_tonk_enable(): SpellScriptLoader("spell_tonk_enable")
+        {
+        }
+
+        class spell_tonk_enable_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_tonk_enable_AuraScript);
+
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                return sSpellStore.LookupEntry(SPELL_TONK_ENABLE);
+            }
+
+            bool Load()
+            {
+                return true;
+            }
+
+            void EffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*modes*/)
+            {
+                if (!GetUnitOwner() || GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Unit* owner = GetUnitOwner();
+                //owner->SetPhaseMask(owner->GetPhaseMask() | 2, true);
+            }
+
+            void EffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*modes*/)
+            {
+                if (!GetUnitOwner() || GetUnitOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Unit* owner = GetUnitOwner();
+                //if (owner->GetPhaseMask() & 2)
+                //    owner->SetPhaseMask(owner->GetPhaseMask() - 2, true);
+                if (Creature* vb = owner->ToPlayer()->GetVehicleCreatureBase())
+                {
+                    vb->Kill(vb);
+                    vb->ForcedDespawn();
+                }
+
+                owner->NearTeleportTo(playerKickPosition.GetPositionX(), playerKickPosition.GetPositionY(), playerKickPosition.GetPositionZ(), playerKickPosition.GetOrientation(), false);
+            }
+
+            void Register()
+            {
+                OnEffectApply +=  AuraEffectApplyFn(spell_tonk_enable_AuraScript::EffectApply, EFFECT_0, SPELL_AURA_369, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectApplyFn(spell_tonk_enable_AuraScript::EffectRemove, EFFECT_0, SPELL_AURA_369, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript *GetAuraScript() const
+        {
+            return new spell_tonk_enable_AuraScript();
+        }
+};
+
+class npc_darkmoon_tonk_target: public CreatureScript
+{
+    public:
+        npc_darkmoon_tonk_target(): CreatureScript("npc_darkmoon_tonk_target")
+        {
+        }
+
+        struct npc_darkmoon_tonk_targetAI: public ScriptedAI
+        {
+            npc_darkmoon_tonk_targetAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            void SpellHit(Unit* source, const SpellEntry* spell)
+            {
+                if (spell->Id == SPELL_TONK_SHOOT)
+                {
+                    Vehicle* veh = source->GetVehicleKit();
+                    if (veh)
+                    {
+                        for (uint32 i = 0; i < MAX_VEHICLE_SEATS; i++)
+                        {
+                            if (Unit* passenger = veh->GetPassenger(i))
+                                passenger->CastSpell(passenger, SPELL_TONK_KILL_CREDIT, true);
+                        }
+                    }
+                    me->CastSpell(me, 100626, true);
+                    me->ForcedDespawn(600);
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_darkmoon_tonk_targetAI(c);
+        }
+};
+
+class vehicle_darkmoon_steam_tonk: public VehicleScript
+{
+    public:
+        vehicle_darkmoon_steam_tonk(): VehicleScript("vehicle_darkmoon_steam_tonk")
+        {
+        }
+
+        void OnRemovePassenger(Vehicle* veh, Unit* passenger)
+        {
+            if (passenger)
+            {
+                passenger->GetMotionMaster()->MovementExpired();
+                passenger->RemoveAurasDueToSpell(SPELL_TONK_ENABLE);
+            }
+
+            if (Unit* base = veh->GetBase())
+                if (base->ToCreature())
+                    base->ToCreature()->ForcedDespawn(0);
+        }
+};
+
+class npc_darkmoon_enemy_tonk: public CreatureScript
+{
+    public:
+        npc_darkmoon_enemy_tonk(): CreatureScript("npc_darkmoon_enemy_tonk")
+        {
+        }
+
+        struct npc_darkmoon_enemy_tonkAI: public ScriptedAI
+        {
+            npc_darkmoon_enemy_tonkAI(Creature* c): ScriptedAI(c)
+            {
+                Reset();
+            }
+
+            uint64 target;
+            bool changePath;
+            uint32 pathCheckTimer;
+            uint32 targetCheckTimer;
+
+            void Reset()
+            {
+                target = 0;
+                changePath = true;
+                pathCheckTimer = 0;
+                targetCheckTimer = 1000;
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (id == 0)
+                    changePath = true;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (pathCheckTimer != 0)
+                {
+                    if (pathCheckTimer <= diff)
+                    {
+                        target = 0;
+                        changePath = true;
+                        pathCheckTimer = 0;
+                    }
+                    else
+                        pathCheckTimer -= diff;
+                }
+
+                if (changePath)
+                {
+                    uint8 point = urand(0, TONK_TARGET_POSITION_COUNT);
+                    me->GetMotionMaster()->MovePoint(0, tonkTargetPositions[point]);
+                    changePath = false;
+                }
+
+                if (targetCheckTimer <= diff)
+                {
+                    if (target == 0)
+                    {
+                        std::list<Creature*> crList;
+                        GetCreatureListWithEntryInGrid(crList, me, NPC_PLAYER_TONK, 4.5f);
+                        for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); ++itr)
+                        {
+                            if ((*itr)->isInFront(me, 7.0f, M_PI/1.5f) && !(*itr)->HasAura(SPELL_ENEMY_TONK_MARKED))
+                            {
+                                target = (*itr)->GetGUID();
+                                me->StopMoving();
+                                me->GetMotionMaster()->MovementExpired(true);
+                                me->GetMotionMaster()->MoveIdle();
+                                changePath = false;
+                                me->SetFacingToObject(*itr);
+                                me->AddAura(SPELL_ENEMY_TONK_MARKED, (*itr));
+                                me->CastSpell((*itr), SPELL_ENEMY_TONK_CANNON_BLAST, false);
+                                pathCheckTimer = 3000; // 2s spellcast + 1s delay
+                                break;
+                            }
+                        }
+
+                        if (target == 0)
+                            targetCheckTimer = 1000;
+                        else
+                            targetCheckTimer = 2500;
+                    }
+                    else
+                    {
+                        Unit* targetUnit = Unit::GetUnit(*me, target);
+                        if (targetUnit && targetUnit->IsWithinDist(me, 7.0f, true) && targetUnit->isInFront(me, 7.0f, M_PI/1.5f))
+                        {
+                            targetUnit->CastSpell(targetUnit, 100626, true);
+                            me->DealDamage(targetUnit, (targetUnit->GetMaxHealth() / 2) + 1);
+                        }
+                        targetCheckTimer = 2000;
+                    }
+                }
+                else
+                    targetCheckTimer -= diff;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* c) const
+        {
+            return new npc_darkmoon_enemy_tonkAI(c);
+        }
+};
+
+/*
+
+SQL
+
+UPDATE creature_template SET ScriptName='npc_finlay_darkmoon', AIName='' WHERE entry=54605;
+UPDATE creature_template SET ScriptName='npc_darkmoon_tonk_target', AIName='' WHERE entry=33081;
+UPDATE creature_template SET ScriptName='npc_darkmoon_enemy_tonk', AIName='' WHERE entry=54642;
+UPDATE creature_template SET VehicleId=1734,spell1=102292,spell2=102297,ScriptName='vehicle_darkmoon_steam_tonk' WHERE entry=54588;
+REPLACE INTO conditions VALUES (13, 0, 102292, 0, 18, 1, 33081, 0, 0, '', 'Cannon shoot - implicit targets disc');
+-- TODO: find out, whether the tonk and minizep is targettable by player tonk attack
+-- REPLACE INTO conditions VALUES (13, 0, 102292, 0, 18, 1, 54642, 0, 0, '', 'Cannon shoot - implicit targets tonk');
+-- REPLACE INTO conditions VALUES (13, 0, 102292, 0, 18, 1, 54643, 0, 0, '', 'Cannon shoot - implicit targets minizep');
+DELETE FROM spell_script_names WHERE spell_id IN (102178);
+INSERT INTO spell_script_names VALUES (102178, 'spell_tonk_enable');
+
+*/
+
 void AddSC_darkmoon_island()
 {
     new npc_maxima_darkmoon();
@@ -1375,4 +1880,10 @@ void AddSC_darkmoon_island()
     new spell_whackagnoll_whack_hit();
     new spell_whackagnoll_enable();
     new npc_darkmoon_whack_controller();
+
+    new npc_finlay_darkmoon();
+    new spell_tonk_enable();
+    new npc_darkmoon_tonk_target();
+    new vehicle_darkmoon_steam_tonk();
+    new npc_darkmoon_enemy_tonk();
 }
