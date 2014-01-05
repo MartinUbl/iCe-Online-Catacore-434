@@ -1586,9 +1586,9 @@ class npc_finlay_darkmoon: public CreatureScript
             // Play
             else if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
             {
-                //if (pPlayer->GetItemCount(ITEM_DARKMOON_GAME_TOKEN, false) > 0)
+                if (pPlayer->GetItemCount(ITEM_DARKMOON_GAME_TOKEN, false) > 0)
                 {
-                    //pPlayer->DestroyItemCount(ITEM_DARKMOON_GAME_TOKEN, 1, true);
+                    pPlayer->DestroyItemCount(ITEM_DARKMOON_GAME_TOKEN, 1, true);
 
                     Creature* summon = pPlayer->SummonCreature(NPC_PLAYER_TONK, playerSpawnPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
                     if (summon)
@@ -1601,9 +1601,9 @@ class npc_finlay_darkmoon: public CreatureScript
                             pPlayer->SetPower(POWER_SCRIPTED, progress);
                     }
                 }
-                //else
+                else
                 {
-                    //pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
