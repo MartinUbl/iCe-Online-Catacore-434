@@ -19387,6 +19387,9 @@ void Unit::ExitVehicle()
     init.SetTransportExit();
     init.Launch();
 
+    if (vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
+        sScriptMgr->OnRemovePassenger(vehicle, this);
+
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
         if (((Minion*)vehicle->GetBase())->GetOwner() == this)
             vehicle->Dismiss();

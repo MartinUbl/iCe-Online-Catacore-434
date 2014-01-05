@@ -440,9 +440,6 @@ void Vehicle::RemovePassenger(Unit *unit)
     // only for flyable vehicles
     if (unit->HasUnitMovementFlag(MOVEMENTFLAG_FLYING))
         me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
-
-    if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr->OnRemovePassenger(this, unit);
 }
 
 void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
