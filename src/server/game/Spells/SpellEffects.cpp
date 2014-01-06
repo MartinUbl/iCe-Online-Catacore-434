@@ -9607,8 +9607,8 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
                 return;
     }
 
-    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
-    if (unitTarget->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED))
+    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT
+    if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
         return;
 
     // Instantly interrupt non melee spells being casted
