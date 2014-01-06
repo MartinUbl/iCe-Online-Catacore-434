@@ -1137,17 +1137,31 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     SetHealth(health);
     ResetPlayerDamageReq();
 
-    // mana
-    uint32 mana = stats->GenerateMana(cinfo);
-
-    SetCreateMana(mana);
-    SetMaxPower(POWER_MANA, mana);                          //MAX Mana
-    SetPower(POWER_MANA, mana);
+    switch(cinfo->unit_class)
+    {
+        case 1: // CLASS_WARRIOR
+        case 4: // CLASS_ROGUE
+        {
+            // We don't want mana as energy in these cases, temporary solution ...
+            break;
+        }
+        case 2: // CLASS_PALADIN
+        case 8: // CLASS_MAGE
+        {
+            // mana
+            uint32 mana = stats->GenerateMana(cinfo);
+            SetCreateMana(mana);
+            SetMaxPower(POWER_MANA, mana);                          //MAX Mana
+            SetPower(POWER_MANA, mana);
+            SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, (float)mana);
+            break;
+        }
+        default:
+            break;
+    }
 
     // TODO: set UNIT_FIELD_POWER*, for some creature class case (energy, etc)
-
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)health);
-    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, (float)mana);
 
     //damage
     float damagemod = 1.0f;//_GetDamageMod(rank);
