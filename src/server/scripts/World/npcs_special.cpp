@@ -3573,6 +3573,9 @@ public:
 
         void CheckIfMoveInRing(Unit *who)
         {
+            if (who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE) || who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE))
+                return;
+
             if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
                 me->CastSpell(who, 82691, true);
         }
