@@ -1365,6 +1365,7 @@ enum TonkSpells
     SPELL_TONK_SHOOT        = 102292,
     SPELL_TONK_NITRO_BOOST  = 102297,
     SPELL_TONK_KILL_CREDIT  = 110162,
+    SPELL_TONK_STAY_OUT     = 109976,
 
     SPELL_ENEMY_TONK_MARKED         = 102341,
     SPELL_ENEMY_TONK_CANNON_BLAST   = 102227,
@@ -1419,7 +1420,7 @@ const Position tonkTargetPositions[TONK_TARGET_POSITION_COUNT] = {
 const Position playerSpawnPosition  = {-4130.196777f, 6320.329102f, 13.116393f, 4.368710f};
 const Position playerKickPosition   = {-4125.278809f, 6332.548828f, 12.219045f, 4.313733f};
 const Position circleCenterPosition = {-4135.632813f, 6302.201172f, 13.116685f, 1.336366f};
-const float circleBattleRadius      = 15.0f;
+const float circleBattleRadius      = 17.0f;
 
 #define FINLAY_QUOTE_1 "Hey, hey! Command a tonk in glorious battle!"
 #define FINLAY_QUOTE_2 "Step right up and try a tonk!"
@@ -1463,6 +1464,7 @@ class npc_finlay_darkmoon: public CreatureScript
             }
 
             uint32 nextQuoteTimer;
+            uint32 nextCheckTimer;
             uint8 nextQuote;
             TargetSpawn targetSpawns[TONK_TARGETS_MAX];
             bool spawnedTonks;
@@ -1470,6 +1472,7 @@ class npc_finlay_darkmoon: public CreatureScript
             void Reset()
             {
                 nextQuoteTimer = urand(1, 60)*1000;
+                nextCheckTimer = 1000;
                 nextQuote = 0;
 
                 memset(&targetSpawns, 0, sizeof(targetSpawns));
@@ -1509,6 +1512,32 @@ class npc_finlay_darkmoon: public CreatureScript
                 }
                 else
                     nextQuoteTimer -= diff;
+
+                if (nextCheckTimer <= diff)
+                {
+                    Map::PlayerList const& plList = me->GetMap()->GetPlayers();
+                    Player* tmp;
+                    for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                    {
+                        tmp = itr->getSource();
+                        if (!tmp)
+                            continue;
+
+                        // is further - dont care
+                        if (!tmp->IsWithinDist2d(&circleCenterPosition, circleBattleRadius))
+                            continue;
+
+                        // has enable aura - dont care
+                        if (tmp->HasAura(SPELL_TONK_ENABLE))
+                            continue;
+
+                        tmp->CastSpell(tmp, SPELL_TONK_STAY_OUT, true);
+                    }
+
+                    nextCheckTimer = 500;
+                }
+                else
+                    nextCheckTimer -= diff;
 
                 for (uint32 i = 0; i < TONK_TARGETS_MAX; i++)
                 {
@@ -1856,6 +1885,7 @@ REPLACE INTO conditions VALUES (13, 0, 102292, 0, 18, 1, 33081, 0, 0, '', 'Canno
 -- REPLACE INTO conditions VALUES (13, 0, 102292, 0, 18, 1, 54643, 0, 0, '', 'Cannon shoot - implicit targets minizep');
 DELETE FROM spell_script_names WHERE spell_id IN (102178);
 INSERT INTO spell_script_names VALUES (102178, 'spell_tonk_enable');
+REPLACE INTO spell_target_position VALUES (109976, 974, -4125.278809, 6332.548828, 12.219045, 4.313733);
 
 */
 
