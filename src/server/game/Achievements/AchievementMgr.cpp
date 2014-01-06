@@ -1683,9 +1683,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (IsCompletedAchievement(*itr))
                     CompletedAchievement(*itr);
         }
-
-        if (const uint32 dungeonId = sLFGMgr->GetDungeonIdForAchievement(achievement->ID))
-            sLFGMgr->RewardDungeonDoneFor(dungeonId, GetPlayer());
     }
 }
 

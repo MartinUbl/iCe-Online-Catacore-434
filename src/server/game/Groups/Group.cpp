@@ -1364,6 +1364,24 @@ void Group::OnGroupSlain(Unit* pVictim)
                                     break;
                                 }
             }
+
+            // if DungeonFinder group
+            if (isLFGGroup())
+            {
+                // and nothing is wrong with DB data
+                if (de->mapId != 0)
+                {
+                    // get the dungeon id that the group are going
+                    uint32 dungId = sLFGMgr->GetDungeon(GetGUID(), true);
+                    if (dungId > 0)
+                    {
+                        // and reward them
+                        for (Group::MemberSlotList::const_iterator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+                            if (Player* player = sObjectMgr->GetPlayer(itr->guid))
+                                sLFGMgr->RewardDungeonDoneFor(dungId, player);
+                    }
+                }
+            }
         }
     }
 
