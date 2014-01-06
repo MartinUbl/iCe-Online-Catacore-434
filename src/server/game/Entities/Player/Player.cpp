@@ -21108,8 +21108,12 @@ void Player::UpdatePvPOnTimer(time_t diff)
 
     /* each minute */
     if (m_pvpOnTimer >= 60000) {
-        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP);
-        SetPvP(true);
+        if (!pvpInfo.inNoPvPArea)
+        {
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP);
+            SetPvP(true);
+        }
+        m_pvpOnTimer = 0;
     } else
         m_pvpOnTimer += diff;
 }
