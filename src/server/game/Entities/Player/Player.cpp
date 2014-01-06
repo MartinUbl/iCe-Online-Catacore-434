@@ -7804,6 +7804,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     if (!zone)
         return;
 
+    AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
+
     if (sWorld->getBoolConfig(CONFIG_WEATHER) && !HasAuraType(SPELL_AURA_FORCE_WEATHER))
     {
         Weather *wth = sWeatherMgr->FindWeather(zone->ID);
@@ -7853,15 +7855,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (GetMapId() == 661 /* Lost Isles Phase 2 */
         || GetMapId() == 746 /* Plantaz */
-        || GetAreaId() == 5303 /* Temple of Earth (Deepholm) */
-        || GetAreaId() == 3539 /* Stair of Destiny (Hellfire peninsula) */
-        || GetZoneId() == 3703 /* Shattrath City */
-        || GetZoneId() == 4395 /* Dalaran */
-        || GetAreaId() == 4658 /* Argent Tournament */
         || GetMapId() == 759) /* Uldum Phase Event Map Phantomia */
         ForcedSanctuary = true;
 
-    if ((zone && zone->IsSanctuary()) || ForcedSanctuary == true)        // in sanctuary
+    if ((zone && zone->IsSanctuary()) || (area && area->IsSanctuary()) || ForcedSanctuary == true)        // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;
