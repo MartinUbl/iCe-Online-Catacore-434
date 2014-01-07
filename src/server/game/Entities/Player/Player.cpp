@@ -7843,25 +7843,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // If the map is not battleground map, remove faction force auras used for rated battlegrounds and BG wargames
     if (Map* pMap = GetMap())
     {
-        if (!pMap->IsBattleground())
+        if (!pMap->IsBattleground() && HasAuraType(SPELL_AURA_MOD_FACTION))
         {
-            if (HasAuraType(SPELL_AURA_MOD_FACTION))
-            {
-                RemoveAurasDueToSpell(SPELL_FACTION_HORDE);
-                RemoveAurasDueToSpell(SPELL_FACTION_ALLIANCE);
-            }
-
-            if (GetSpectatorInstanceId() > 0)
-            {
-                SetSpectatorData(0, 0);
-                SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
-                SetBGTeam(0);
-                clearUnitState(UNIT_STAT_UNATTACKABLE);
-                clearUnitState(UNIT_STAT_ISOLATED);
-                clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-                ResummonPetTemporaryUnSummonedIfAny();
-            }
+            RemoveAurasDueToSpell(SPELL_FACTION_HORDE);
+            RemoveAurasDueToSpell(SPELL_FACTION_ALLIANCE);
         }
     }
 

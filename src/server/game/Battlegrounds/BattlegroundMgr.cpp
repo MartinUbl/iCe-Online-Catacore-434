@@ -895,6 +895,7 @@ void BattlegroundMgr::RemoveArenaSpectator(Player* pl)
             if (itr->second)
             {
                 itr->second->RemoveSpectator(pl);
+                pl->SetSpectatorData(0, 0);
                 return;
             }
         }
