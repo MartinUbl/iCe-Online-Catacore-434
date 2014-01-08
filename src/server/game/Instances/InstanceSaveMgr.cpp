@@ -668,7 +668,8 @@ void InstanceSaveManager::loadRaidEncounter()
     std::string data;
     uint32 mapId;
     int bossNum=0;
-    char DummyRead;
+    char DummyReadCh;
+    char DummyReadInt;
 
     if (!result)
     {
@@ -728,7 +729,7 @@ void InstanceSaveManager::loadRaidEncounter()
                     switch(i)
                     {
                     case 0:
-                        loadStream >> DummyRead;
+                        loadStream >> DummyReadInt;
                         break;
                     case 1:
                         loadStream >> dataEnc[2];//Maloriak
@@ -759,7 +760,7 @@ void InstanceSaveManager::loadRaidEncounter()
                 uint32 dataEnc[2];
                 setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
-                loadStream >> DummyRead >>DummyRead;
+                loadStream >> DummyReadCh >>DummyReadCh;
                 for (uint8 i = 0; i < bossNum; i++)
                 {
                     switch(i)
