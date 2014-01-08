@@ -99,7 +99,9 @@ enum ConditionSourceType
     CONDITION_SOURCE_TYPE_QUEST_ACCEPT                   = 19,//DONE
     CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK                = 20,//DONE
     CONDITION_SOURCE_TYPE_VEHICLE_SPELL                  = 21,//DONE
-    CONDITION_SOURCE_TYPE_MAX                            = 22//MAX
+    //CONDITION_SOURCE_TYPE_SMART_EVENT                  = 22,//NYI
+    CONDITION_SOURCE_TYPE_NPC_VENDOR                     = 23,//DONE
+    CONDITION_SOURCE_TYPE_MAX                            = 24//MAX
 };
 
 struct Condition
@@ -139,6 +141,7 @@ typedef std::list<Condition*> ConditionList;
 typedef std::map<uint32, ConditionList > ConditionTypeMap;
 typedef std::map<ConditionSourceType, ConditionTypeMap > ConditionMap;
 typedef std::map<uint32, ConditionTypeMap > VehicleSpellConditionMap;
+typedef std::map<uint32, ConditionTypeMap > NpcVendorConditionMap;
 
 typedef std::map<uint32, ConditionList > ConditionReferenceMap;//only used for references
 
@@ -157,12 +160,14 @@ class ConditionMgr
         bool IsPlayerMeetToConditions(Player* player, ConditionList conditions, Unit* invoker = NULL);
         ConditionList GetConditionsForNotGroupedEntry(ConditionSourceType sType, uint32 uEntry);
         ConditionList GetConditionsForVehicleSpell(uint32 creatureID, uint32 spellID);
+        ConditionList GetConditionsForNpcVendorEvent(uint32 creatureID, uint32 itemID);
 
     protected:
 
         ConditionMap                m_ConditionMap;
         ConditionReferenceMap       m_ConditionReferenceMap;
         VehicleSpellConditionMap    m_VehicleSpellConditions;
+        NpcVendorConditionMap       m_NpcVendorConditions;
 
     private:
 

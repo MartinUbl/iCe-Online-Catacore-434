@@ -348,6 +348,21 @@ ConditionList ConditionMgr::GetConditionsForVehicleSpell(uint32 creatureID, uint
     return cond;
 }
 
+ConditionList ConditionMgr::GetConditionsForNpcVendorEvent(uint32 creatureID, uint32 itemID)
+{
+    ConditionList cond;
+    NpcVendorConditionMap::const_iterator itr = m_NpcVendorConditions.find(creatureID);
+    if (itr != m_NpcVendorConditions.end())
+    {
+        ConditionTypeMap::const_iterator i = (*itr).second.find(itemID);
+        if (i != (*itr).second.end())
+        {
+            cond = (*i).second;
+        }
+    }
+    return cond;
+}
+
 void ConditionMgr::LoadConditions(bool isReload)
 {
     Clean();
@@ -381,21 +396,13 @@ void ConditionMgr::LoadConditions(bool isReload)
 
     if (!result)
     {
-        
-
-        
-
         sLog->outString();
         sLog->outErrorDb(">> Loaded `conditions`, table is empty!");
         return;
     }
 
-    
-
     do
     {
-        
-
         Field *fields = result->Fetch();
 
         Condition* cond = new Condition();
@@ -539,6 +546,13 @@ void ConditionMgr::LoadConditions(bool isReload)
                     bIsDone = true;
                     ++count;
                     continue;   // do not add to m_AllocatedMemory to avoid double deleting
+                }
+                case CONDITION_SOURCE_TYPE_NPC_VENDOR:
+                {
+                    m_NpcVendorConditions[cond->mSourceGroup][cond->mSourceEntry].push_back(cond);
+                    bIsDone = true;
+                    ++count;
+                    continue;
                 }
                 default:
                     break;
@@ -1017,6 +1031,16 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                 }
                 break;
             }
+        case CONDITION_SOURCE_TYPE_NPC_VENDOR:
+            {
+                if (!sObjectMgr->GetCreatureTemplate(cond->mSourceGroup))
+                    return false;
+
+                ItemPrototype const* itemTemplate = sObjectMgr->GetItemPrototype(cond->mSourceEntry);
+                if (!itemTemplate)
+                    return false;
+                break;
+            }
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
         case CONDITION_SOURCE_TYPE_NONE:
@@ -1426,6 +1450,19 @@ void ConditionMgr::Clean()
     }
 
     m_VehicleSpellConditions.clear();
+
+    for (NpcVendorConditionMap::iterator itr = m_NpcVendorConditions.begin(); itr != m_NpcVendorConditions.end(); ++itr)
+    {
+        for (ConditionTypeMap::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
+        {
+            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
+                delete *i;
+            it->second.clear();
+        }
+        itr->second.clear();
+    }
+
+    m_NpcVendorConditions.clear();
 
     // this is a BIG hack, feel free to fix it if you can figure out the ConditionMgr ;)
     for (std::list<Condition*>::const_iterator itr = m_AllocatedMemory.begin(); itr != m_AllocatedMemory.end(); ++itr)

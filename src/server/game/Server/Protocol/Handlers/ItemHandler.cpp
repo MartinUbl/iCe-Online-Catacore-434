@@ -1067,6 +1067,10 @@ void WorldSession::SendListInventory(uint64 vendorguid)
                 // Items sold out are not displayed in list
                 if (leftInStock == 0)
                     continue;
+
+                ConditionList conditions = sConditionMgr->GetConditionsForNpcVendorEvent(pCreature->GetEntry(), vendorItem->item);
+                if (!sConditionMgr->IsPlayerMeetToConditions(_player, conditions, pCreature))
+                    continue;
             }
 
             int32 price = vendorItem->IsGoldRequired(itemTemplate) ? uint32(floor(itemTemplate->BuyPrice * discountMod)) : 0;
