@@ -718,6 +718,11 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
         {
             return (sAchievementStore.LookupEntry(e.action.achievement.achievementId) != NULL);
         }
+        case SMART_ACTION_LEARN_SPELL:
+        case SMART_ACTION_UNLEARN_SPELL:
+        {
+            return (sSpellStore.LookupEntry(e.action.spell.spellID) != NULL);
+        }
         case SMART_ACTION_FOLLOW:
         case SMART_ACTION_SET_ORIENTATION:
         case SMART_ACTION_STORE_TARGET_LIST:

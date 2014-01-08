@@ -465,6 +465,8 @@ enum SMART_ACTION
 
     // iCe custom SAI events
     SMART_ACTION_COMPLETE_ACHIEVEMENT               = 200,    // achievement ID
+    SMART_ACTION_LEARN_SPELL                        = 201,    // spellID
+    SMART_ACTION_UNLEARN_SPELL                      = 202,    // spellID
 
     SMART_ACTION_END                                = 94,
 };
@@ -853,6 +855,11 @@ struct SmartAction
         {
             uint32 achievementId;
         } achievement;
+
+        struct
+        {
+            uint32 spellID;
+        } spell;
 
         struct
         {

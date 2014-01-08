@@ -1721,6 +1721,26 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
+        case SMART_ACTION_LEARN_SPELL:
+        case SMART_ACTION_UNLEARN_SPELL:
+        {
+            ObjectList* targets = GetTargets(e, unit);
+            if (!targets)
+                return;
+            for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
+            {
+                if (IsPlayer((*itr)))
+                {
+                    if (e.GetActionType() == SMART_ACTION_LEARN_SPELL)
+                        (*itr)->ToPlayer()->learnSpell(e.action.spell.spellID, false);
+                    else
+                        (*itr)->ToPlayer()->removeSpell(e.action.spell.spellID, false, false);
+                }
+            }
+
+            delete targets;
+            break;
+        }
         default:
             sLog->outErrorDb("SmartScript::ProcessAction: Unhandled Action type %u", e.GetActionType());
             break;
