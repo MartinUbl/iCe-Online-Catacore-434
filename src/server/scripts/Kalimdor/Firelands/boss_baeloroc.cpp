@@ -35,9 +35,14 @@ enum Spells
     SUMMON_SHARD_DUMMY          = 99259,
     SUMMON_SHARD                = 99260,
 
+    // BRIDGE !!!
+    BRIDGE_FORMING_ANIM         = 101035, // are you serious blizz, really spell ? (damn)
+
     // HEROIC SPELLS
-    COUNTDOWN                   = 99516,
-    COUNTDOWN_TRIGGERED         = 99517,
+    COUNTDOWN_TIMER             = 99516,
+    COUNTDOWN_SELECTER          = 99517,
+    COUNTDOWN_LINK              = 99519,
+    COUNTDOWN_DAMAGE            = 99518
 
 };
 
@@ -114,6 +119,7 @@ public:
         uint32 berserkTimer;
         uint32 castShardTimer;
         uint32 summonShardTimer;
+        uint32 countDownTimer;
         bool meleePhase;
 
         InstanceScript * instance;
@@ -130,6 +136,7 @@ public:
             castShardTimer          = 4000;
             summonShardTimer        = NEVER;
             blazeOfGloryTimer       = 8000;
+            countDownTimer          = 27000;
             bladeTimer              = 28000;
             berserkTimer            = 6 * MINUTE;
             meleePhase = true;
@@ -148,6 +155,9 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            if (instance)
+                instance->SetData(DATA_BRIDGE_SPAWN,37000);
+
             PlayAndYell(onDeath.sound,onDeath.text);
 
             if (GameObject * door1 = me->FindNearestGameObject(208906,200.0f))
@@ -162,8 +172,7 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE,me);
             }
 
-
-            me->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // Bridge
+            //me->SummonGameObject(5010734,247.0f,-64.0f,62.0f,3.15f,0,0,0,0,0); // Bridge
             me->SummonCreature(54101,100.0f,-33.0f,61.0f,4.34f,TEMPSUMMON_CORPSE_DESPAWN, 0); // Staghelm intro
         }
 
@@ -310,6 +319,62 @@ public:
             }
         }
 
+        void SelectCountDownVictims(void)
+        {
+            Map * map = me->GetMap();
+
+            if (!map)
+                return;
+
+            Map::PlayerList const& plrList = map->GetPlayers();
+            if (plrList.isEmpty())
+                return;
+
+            std::list<Player*> countdownTargets;
+            countdownTargets.clear();
+
+            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+            {
+                if(Player* pl = itr->getSource())
+                {
+                    if ( pl && pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster() && pl->GetDistance(me) < 250.0f)
+                    {
+                        if (!pl->HasTankSpec() && !pl->HasAura(5487)) // Bear form
+                        {
+                            countdownTargets.push_back(pl);
+                        }
+                    }
+                }
+            }
+
+            if(countdownTargets.size() >= 2 )
+            {
+                Player * pl1 = NULL, *pl2 = NULL;
+
+                std::list<Player*>::iterator j = countdownTargets.begin();
+                advance(j, rand()%countdownTargets.size());
+                if (*j)
+                    pl1 = *j;
+
+                countdownTargets.erase(j);
+                j = countdownTargets.begin();
+
+                advance(j, rand()%countdownTargets.size());
+                if (*j)
+                    pl2 = *j;
+
+                if (pl1 && pl2 && pl1->IsInWorld() && pl2->IsInWorld())
+                {
+                    pl1->CastSpell(pl1,COUNTDOWN_TIMER,false);
+                    pl2->CastSpell(pl2,COUNTDOWN_TIMER,false);
+
+                    pl1->CastSpell(pl2,COUNTDOWN_LINK,false); // Visual link between players
+                }
+
+            }
+
+        }
+
        void UpdateAI(const uint32 diff)
        {
             if (!UpdateVictim())
@@ -317,6 +382,14 @@ public:
 
             if (!me->IsWithinLOS(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()))
                 me->Kill(me->getVictim(),true);
+
+            if (countDownTimer <= diff)
+            {
+                if (IsHeroic())
+                    SelectCountDownVictims();
+                countDownTimer = 48000;
+            }
+            else countDownTimer -= diff;
 
             if (blazeOfGloryTimer <= diff)
             {
@@ -823,6 +896,76 @@ public:
     }
 };
 
+// HEROIC SPELLS
+class spell_gen_countdown_Selector : public SpellScriptLoader
+{
+    public:
+        spell_gen_countdown_Selector() : SpellScriptLoader("spell_gen_countdown_Selector") { }
+
+        class spell_gen_countdown_Selector_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_countdown_Selector_SpellScript);
+
+            void HandleScript()
+            {
+                Unit * hitUnit = GetHitUnit();
+                Unit * caster = GetCaster();
+
+                if (!hitUnit || !caster)
+                    return;
+
+                Aura *a = hitUnit->GetAura(99516);
+                if (a)
+                    a->Remove(AURA_REMOVE_BY_DEFAULT);
+                a = caster->GetAura(99516);
+                if (a)
+                    a->Remove(AURA_REMOVE_BY_DEFAULT);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_gen_countdown_Selector_SpellScript::HandleScript);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_countdown_Selector_SpellScript();
+        }
+};
+
+class spell_gen_tormented_Selector : public SpellScriptLoader
+{
+    public:
+        spell_gen_tormented_Selector() : SpellScriptLoader("spell_gen_tormented_Selector") { }
+
+        class spell_gen_tormented_Selector_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_tormented_Selector_SpellScript);
+
+            void HandleScript()
+            {
+                Unit * hitUnit = GetHitUnit();
+
+                if (!hitUnit)
+                    return;
+
+                Aura * aur = hitUnit->AddAura(TORMENTED_DEBUFF,hitUnit);
+
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_gen_tormented_Selector_SpellScript::HandleScript);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_tormented_Selector_SpellScript();
+        }
+};
+
 class npc_majordomo_intro_npc : public CreatureScript
 {
 public:
@@ -848,9 +991,6 @@ public:
 
         void Reset()
         {
-            if (instance)
-                instance->SetData(DATA_BRIDGE_SPAWN,23000);
-
             talkTimer = 5000;
             me->SetReactState(REACT_PASSIVE);
             talks = 0;
@@ -891,6 +1031,8 @@ public:
                         break;
                     case 2:
                         PlayCinematicToPlayers();
+                        if (Creature * dummy = me->SummonCreature(540100,247.0f,-64.0f,62.0f,0.01f,TEMPSUMMON_TIMED_DESPAWN,20000))
+                            dummy->CastSpell(dummy,BRIDGE_FORMING_ANIM,true);
                         me->MonsterYell("Beg for mercy now, and I may yet allow you to live. Well, \"heroes\", what is your answer?",LANG_UNIVERSAL,0);
                         me->PlayDistanceSound(24475);
                         talkTimer = 10000;
@@ -922,7 +1064,22 @@ void AddSC_boss_baeloroc()
     new spell_gen_baleroc_blades(); // 99352,99405,99350
     new spell_gen_torment(); // 99256,100230,100231,100232
     new spell_gen_vital_flame(); // 99263
+    // Heroic
+    new spell_gen_countdown_Selector(); // 99517
+    new spell_gen_tormented_Selector(); // 99489
 }
+
+/* HEROIC SQLs
+
+    delete from spell_script_names where spell_id = 99517;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+     VALUES (99517, 'spell_gen_countdown_Selector');
+
+    delete from spell_script_names where spell_id = 99489;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+     VALUES (99489, 'spell_gen_tormented_Selector');
+
+*/
 
 /*
     UPDATE `creature_equip_template` SET `equipentry1`=0, `equipentry2`=0 WHERE  `entry`=53494 LIMIT 1;
