@@ -1539,7 +1539,7 @@ void ObjectMgr::LoadCreatures()
         data.is_dead        = fields[14].GetBool();
         data.movementType   = fields[15].GetUInt8();
         data.spawnMask      = fields[16].GetUInt8();
-        data.phaseMask      = fields[17].GetUInt16();
+        data.phaseMask      = fields[17].GetUInt32();
         int16 gameEvent     = fields[18].GetInt16();
         uint32 PoolId       = fields[19].GetUInt32();
         data.npcflag        = fields[20].GetUInt32();
@@ -1944,7 +1944,7 @@ void ObjectMgr::LoadGameobjects()
 
         data.spawnMask      = fields[14].GetUInt8();
 
-        data.phaseMask      = fields[15].GetUInt16();
+        data.phaseMask      = fields[15].GetUInt32();
         int16 gameEvent     = fields[16].GetInt16();
         uint32 PoolId        = fields[17].GetUInt32();
 
