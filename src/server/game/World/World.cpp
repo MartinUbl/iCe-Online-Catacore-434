@@ -115,6 +115,7 @@ World::World()
     m_MaxPlayerCount = 0;
     m_NextDailyQuestReset = 0;
     m_NextWeeklyQuestReset = 0;
+    m_NextMonthlyQuestReset = 0;
     m_scheduledScripts = 0;
 
     debugOpcode = 0;
@@ -1845,6 +1846,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Calculate next weekly quest reset time..." );
     InitWeeklyQuestResetTime();
 
+    sLog->outString("Calculate next monthly quest reset time..." );
+    InitMonthlyQuestResetTime();
+
     sLog->outString("Calculate random battleground reset time..." );
     InitRandomBGResetTime();
 
@@ -2020,6 +2024,11 @@ void World::Update(uint32 diff)
         ResetCurrencyWeekCount();
 
         sObjectMgr->ResetGuildChallenges();
+    }
+
+    if (m_gameTime > m_NextMonthlyQuestReset)
+    {
+        ResetMonthlyQuests();
     }
 
     if (m_gameTime > m_NextRandomBGReset)
@@ -2746,6 +2755,13 @@ void World::InitWeeklyQuestResetTime()
     m_NextWeeklyQuestReset = wstime < curtime ? curtime : time_t(wstime);
 }
 
+void World::InitMonthlyQuestResetTime()
+{
+    time_t wstime = uint64(sWorld->getWorldState(WS_MONTHLY_QUEST_RESET_TIME));
+    time_t curtime = time(NULL);
+    m_NextMonthlyQuestReset = wstime < curtime ? curtime : time_t(wstime);
+}
+
 void World::InitDailyQuestResetTime()
 {
     time_t mostRecentQuestTime;
@@ -2848,6 +2864,18 @@ void World::ResetWeeklyQuests()
 
     // change available weeklies
     sPoolMgr->ChangeWeeklyQuests();
+}
+
+void World::ResetMonthlyQuests()
+{
+    CharacterDatabase.Execute("DELETE FROM character_queststatus_monthly");
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetMonthlyQuestStatus();
+
+    m_NextMonthlyQuestReset = time_t(m_NextMonthlyQuestReset + MONTH);
+    sWorld->setWorldState(WS_MONTHLY_QUEST_RESET_TIME, uint64(m_NextMonthlyQuestReset));
 }
 
 void World::ResetCurrencyWeekCount()

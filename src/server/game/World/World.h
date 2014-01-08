@@ -467,8 +467,9 @@ enum RealmZone
 
 enum WorldStates
 {
-    WS_WEEKLY_QUEST_RESET_TIME = 20002,                      // Next weekly reset time
-    WS_BG_DAILY_RESET_TIME     = 20003                       // Next daily BG reset time
+    WS_WEEKLY_QUEST_RESET_TIME  = 20002,                      // Next weekly reset time
+    WS_BG_DAILY_RESET_TIME      = 20003,                      // Next daily BG reset time
+    WS_MONTHLY_QUEST_RESET_TIME = 20005                       // Next monthly reset time
 };
 
 // DB scripting commands
@@ -648,6 +649,7 @@ class World
         /// Next daily quests and random bg reset time
         time_t GetNextDailyQuestsResetTime() const { return m_NextDailyQuestReset; }
         time_t GetNextWeeklyQuestsResetTime() const { return m_NextWeeklyQuestReset; }
+        time_t GetNextMonthlyQuestsResetTime() const { return m_NextMonthlyQuestReset; }
         time_t GetNextRandomBGResetTime() const { return m_NextRandomBGReset; }
 
         /// Get the maximum skill level a player can reach
@@ -800,9 +802,11 @@ class World
 
         void InitDailyQuestResetTime();
         void InitWeeklyQuestResetTime();
+        void InitMonthlyQuestResetTime();
         void InitRandomBGResetTime();
         void ResetDailyQuests();
         void ResetWeeklyQuests();
+        void ResetMonthlyQuests();
         void ResetCurrencyWeekCount();
         void ResetRandomBG();
     private:
@@ -874,6 +878,7 @@ class World
         // next daily quests and random bg reset time
         time_t m_NextDailyQuestReset;
         time_t m_NextWeeklyQuestReset;
+        time_t m_NextMonthlyQuestReset;
         time_t m_NextRandomBGReset;
 
         //Player Queue
