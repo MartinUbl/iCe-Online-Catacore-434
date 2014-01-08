@@ -1787,6 +1787,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     case 43648: // Electrical Storm
                         target->SetStunned(false);
                         break;
+                    case 99516: // Countdown - Baleroc HC
+                    {
+                        caster->RemoveAura(99519); // Visual link
+
+                        if (removeMode != AURA_REMOVE_BY_DEFAULT)
+                            caster->CastSpell(caster, 99518, true); // AoE damage
+                        break;
+                    }
                     case 97028: // Gaze of Occu'thar
                         if (removeMode == AURA_REMOVE_BY_EXPIRE)
                         {
