@@ -21,19 +21,24 @@
 
 enum NPCs
 {
-    NPC_LORD_RHYOLITH = 52558,
-    NPC_LEFT_FOOT     = 52577,
-    NPC_RIGHT_FOOT    = 53087,
+    NPC_LORD_RHYOLITH   = 52558,
+    NPC_LEFT_FOOT       = 52577,
+    NPC_RIGHT_FOOT      = 53087,
 
-    NPC_VOLCANO       = 52582,
-    NPC_CRATER        = 52866,
-    NPC_LAVA_FLOW     = 950000, // custom NPC
+    NPC_VOLCANO         = 52582,
+    NPC_CRATER          = 52866,
+    NPC_LAVA_FLOW       = 950000, // custom NPC
 
-    NPC_SPARK         = 53211,
-    NPC_FRAGMENT      = 52620,
+    NPC_SPARK           = 53211,
+    NPC_FRAGMENT        = 52620,
+
+    // Heroic
+    NPC_LIQUID_OBSIDIAN = 52619,
+    NPC_UNLEASHED_FLAME = 54347
+
 };
 
-static const uint32 npcListUnsummonAtReset[] = {NPC_VOLCANO, NPC_CRATER, NPC_SPARK, NPC_FRAGMENT, NPC_LAVA_FLOW};
+static const uint32 npcListUnsummonAtReset[] = {NPC_VOLCANO, NPC_CRATER, NPC_SPARK, NPC_FRAGMENT, NPC_LAVA_FLOW,NPC_LIQUID_OBSIDIAN,NPC_UNLEASHED_FLAME};
 
 static const Position platformCenter = {-374.337006f, -318.489990f, 100.413002f, 0.0f};
 
@@ -72,9 +77,13 @@ enum Spells
     SPELL_MAGMA_FLOW_BOOM   = 97230,
 
     // boss spawns abilities
-    SPELL_SPARK_IMMOLATION  = 98597,
-    SPELL_SPARK_INFERNAL_RAGE = 98596,
-    SPELL_FRAGMENT_MELTDOWN = 98646,
+    SPELL_SPARK_IMMOLATION      = 98597,
+    SPELL_SPARK_INFERNAL_RAGE   = 98596,
+    SPELL_FRAGMENT_MELTDOWN     = 98646,
+
+    // heroic spells
+    SPELL_FUSE                  = 99875
+
 };
 
 enum DisplayIDs
@@ -196,7 +205,6 @@ public:
                 if (Aura* armor = pFoot->GetAura(SPELL_OBSIDIAN_ARMOR))
                     armor->SetStackAmount(80);
             }
-
             Reset();
         }
 
@@ -228,13 +236,16 @@ public:
         uint32 directionPower;
 
         uint32 enrageTimer;
+        bool beam;
 
         void Reset()
         {
+            beam = false;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, true);
 
             me->SetDisplayId(DISPLAYID_NORMAL); // "dressed up"
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE); // Rhyolith can't be attack directly in phase 1
 
             position_counter = 0;
             leftDamage  = 0;
@@ -244,9 +255,9 @@ public:
             moveAngle   = me->GetOrientation();
             directionUpdateTimer = 1000;
             DPSTimer = 1000;
-            concussiveStompTimer = 3000;
-            activateVolcanoTimer = 8000;
-            summonTimer          = 15000;
+            concussiveStompTimer = 15000;
+            activateVolcanoTimer = 25000;
+            summonTimer          = 22000;
             lavaCheckTimer       = 1000;
             EruptionTimer        = 20000;
             magmaDrinkCount      = 0;
@@ -328,9 +339,9 @@ public:
             phase = 1;
 
             directionUpdateTimer = 1000;
-            concussiveStompTimer = 5000;
-            activateVolcanoTimer = 10000;
-            summonTimer          = 15000;
+            concussiveStompTimer = 15000;
+            activateVolcanoTimer = 25000;
+            summonTimer          = 22000;
             lavaCheckTimer       = 1000;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
@@ -481,21 +492,22 @@ public:
 
         void ModMoltenArmorStack(int32 amount)
         {
-            Aura* pArmor = me->GetAura(SPELL_MOLTEN_ARMOR);
-            if (!pArmor)
+            if (amount >= 0) // Add armor
             {
-                if (amount <= 0)
-                    return;
-
-                me->AddAura(SPELL_MOLTEN_ARMOR, me);
-                amount -= 1; // 1 stack is applied on aura apply by default
-
-                pArmor = me->GetAura(SPELL_MOLTEN_ARMOR);
-                if (!pArmor)
-                    return;
+                for ( int32 i = 0 ; i < amount; i++)
+                {
+                    if (Aura * a = me->GetAura(SPELL_MOLTEN_ARMOR))
+                        a->SetStackAmount(a->GetStackAmount() + 1);
+                    else
+                        me->AddAura(SPELL_MOLTEN_ARMOR,me);
+                }
             }
-
-            pArmor->ModStackAmount(amount);
+            else    // Reduce armor
+            {
+                amount *= -1;
+                for ( int32 i = 0 ; i < amount; i++)
+                    me->RemoveAuraFromStack(SPELL_MOLTEN_ARMOR);
+            }
         }
 
         void ModObsidianArmorStack(int32 amount)
@@ -530,9 +542,12 @@ public:
             {
                 ModMoltenArmorStack(-1);
 
-                uint32 cnt = urand(2,3);
-                for (uint32 i = 0; i < cnt; i++)
-                    me->CastSpell(me, SPELL_VOLCANIC_BIRTH, true);
+                if ( phase == 1) // Only in first phase
+                {
+                    uint32 cnt = urand(2,3);
+                    for (uint32 i = 0; i < cnt; i++)
+                        me->CastSpell(me, SPELL_VOLCANIC_BIRTH, true);
+                }
             }
             else if (spell->Id == SPELL_DRINK_MAGMA)
             {
@@ -664,14 +679,20 @@ public:
                     foot->SetVisibility(VISIBILITY_OFF);
                 }
                 phase = 2;
+                me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             }
 
             /* both phases */
             if (concussiveStompTimer <= diff)
             {
+                me->StopMoving(); // Dont move during casting
+                directionUpdateTimer = 3100; // 3s cast time
                 me->CastSpell(me, SPELL_CONCUSSIVE_STOMP, false);
                 PlayAndYell(me, ST_STOMP_1+urand(0,1));
-                concussiveStompTimer = 30000;
+                if ( phase == 1)
+                    concussiveStompTimer = 30500;
+                else
+                    concussiveStompTimer = 13000; // In second phase stomp every 13 seconds, but dont spawn volcanos
             }
             else
                 concussiveStompTimer -= diff;
@@ -795,7 +816,7 @@ public:
 
                     ModMoltenArmorStack(-1);
 
-                    summonTimer = urand(22000, 25000);
+                    summonTimer = urand(22000, 24000);
                 }
                 else
                     summonTimer -= diff;
@@ -820,11 +841,13 @@ public:
                             if ( (*iter) && me->HasInArc(M_PI,(*iter)) ) // Pick volcano in front of boss if possible
                             {
                                 me->CastSpell((*iter), SPELL_ACTIVATE_VOLCANO, true);
+                                volcanoList.erase(iter); // This volcano is not interesting anymore
                                 found = true;
+                                break;
                             }
                     }
 
-                    if (volcanoList.size() > 0 && found == false) // if  we didn't find any volcano in front of boss, pick random
+                    if (volcanoList.size() > 0 && found == false) // If we did not found volcano in front of boss, pick random
                     {
                         uint32 randpos = urand(0,volcanoList.size()-1);
 
@@ -863,7 +886,39 @@ public:
             }
             else if (phase == 2)
             {
-                /* TODO: HC version spell */
+                if (beam == false)
+                {
+                    beam = true;
+
+                    // Despawn all summons
+                    std::list<Creature*> crList;
+                    for (uint32 i = 0; i < sizeof(npcListUnsummonAtReset)/sizeof(uint32); i++)
+                    {
+                        GetCreatureListWithEntryInGrid(crList, me, npcListUnsummonAtReset[i], 200.0f);
+                        for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); ++itr)
+                            (*itr)->ForcedDespawn();
+                    }
+
+                    // The Eruption debuff is now cleared when transitioning into phase 2 of the fight.
+                    if (pInstance)
+                        pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ERUPTION_DAMAGE);
+
+                    if (IsHeroic())
+                    {
+                        //me->CastSpell(me->getVictim(),101324,true); // Summon spell
+
+                        Unit * pl1 = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
+                        Unit * pl2 = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
+                        Unit * pl3 = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
+
+                        if (!pl1 || !pl2 || !pl3)
+                            return;
+
+                        me->SummonCreature(NPC_UNLEASHED_FLAME,pl1->GetPositionX()+5,pl1->GetPositionY()+10,pl1->GetPositionZ(),0.0f);
+                        me->SummonCreature(NPC_UNLEASHED_FLAME,pl2->GetPositionX()+10,pl2->GetPositionY()+5,pl2->GetPositionZ(),0.0f);
+                        me->SummonCreature(NPC_UNLEASHED_FLAME,pl3->GetPositionX()-5,pl3->GetPositionY()-10,pl3->GetPositionZ(),0.0f);
+                    }
+                }
 
                 DoMeleeAttackIfReady();
             }
@@ -919,6 +974,22 @@ public:
             if (damage > me->GetHealth())
                 damage = 0;
         }
+
+         void SpellHit(Unit* pSrc, const SpellEntry* spell)
+         {
+            if (spell->Id == SPELL_FUSE)
+            {
+                me->CastSpell(me,SPELL_OBSIDIAN_ARMOR,true);
+
+                if (me->GetEntry() == NPC_LEFT_FOOT)
+                {
+                    if (Creature * rightFoot = me->FindNearestCreature(NPC_RIGHT_FOOT,100.0f,true))
+                        rightFoot->CastSpell(rightFoot,SPELL_OBSIDIAN_ARMOR,true);
+                }
+                else if (Creature * leftFoot = me->FindNearestCreature(NPC_LEFT_FOOT,100.0f,true))
+                        leftFoot->CastSpell(leftFoot,SPELL_OBSIDIAN_ARMOR,true);
+            }
+         }
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -1048,7 +1119,7 @@ public:
                     Map::PlayerList const& plList = pInstance->instance->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                     {
-                        if ((*itr).getSource()->isAlive())
+                        if ((*itr).getSource()->isAlive() && (*itr).getSource()->isGameMaster() == false) 
                             targetList.push_back((*itr).getSource());
                     }
 
@@ -1093,6 +1164,19 @@ public:
                     // Every time he steps on an active volcano, he loses 8 stacks of the buff ( 16 was nerfed on 4.3.4)
                     else
                     {
+                        if (IsHeroic())
+                        {
+                            float angle,dist;
+
+                            for ( uint8 i = 0; i < 5; i++ ) // Summon 5 Liquid Obsidians from the edge of platform
+                            {
+                                angle = (float)urand(0,6) + 0.28f ; 
+                                dist = ((float)urand(300,340))/10.0f;
+
+                                pBoss->SummonCreature(NPC_LIQUID_OBSIDIAN, -374.337006f + cos(angle) * dist, -318.489990f + sin(angle) * dist, 100.413002f ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                            }
+                        }
+
                         pBoss->MonsterTextEmote("Lord Rhyolith's armor is weakened by the active volcano.", 0, true);
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
                             pAI->ModObsidianArmorStack(-10);
@@ -1397,6 +1481,156 @@ public:
     }
 };
 
+class npc_Liquid_Obsidian : public CreatureScript
+{
+public:
+   npc_Liquid_Obsidian() : CreatureScript("npc_Liquid_Obsidian") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_Liquid_ObsidianAI (creature);
+    }
+
+    struct npc_Liquid_ObsidianAI : public ScriptedAI
+    {
+        npc_Liquid_ObsidianAI(Creature* creature) : ScriptedAI(creature)
+        {
+            summonerGUID = 0;
+        }
+
+        uint32 Path_correction_timer;
+        uint64 summonerGUID;
+        bool arrived;
+
+        void Reset()
+        {
+            arrived = false;
+            Path_correction_timer = 500;
+            me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            me->SetSpeed(MOVE_RUN,0.42f,true);
+        }
+
+        void IsSummonedBy(Unit* pSummoner)
+        {
+            if (pSummoner && pSummoner->ToCreature())
+                summonerGUID = pSummoner->GetGUID();
+        }
+
+        void UpdateAI ( const uint32 diff)
+        {
+            if (Path_correction_timer <= diff && arrived == false)
+            {
+                if(Unit * pLord = Unit::GetUnit(*me,summonerGUID))
+                {
+                    if (me->GetDistance2d(pLord) <= 7.0f)
+                    {
+                        me->StopMoving();
+                        arrived = true;
+
+                        Creature * lFoot = me->FindNearestCreature(NPC_LEFT_FOOT,100.0f,true);
+                        Creature * rFoot = me->FindNearestCreature(NPC_RIGHT_FOOT,100.0f,true);
+
+                        if (urand(0,1) && lFoot)
+                            me->CastSpell(lFoot,SPELL_FUSE,true);
+                        else if (rFoot)
+                            me->CastSpell(rFoot,SPELL_FUSE,true);
+
+                        /*if (pLord->ToCreature())
+                            pLord->ToCreature()->AI()->DoAction(0);*/
+
+                        if (pLord->GetDisplayId() != 38594) // Phase 2
+                            pLord->CastSpell(pLord,SPELL_OBSIDIAN_ARMOR,false);
+                    }
+                    else
+                        me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
+                }
+
+                Path_correction_timer = 500;
+            }
+            else Path_correction_timer -= diff;
+
+        }
+    };
+};
+
+class npc_Unleashed_flame : public CreatureScript
+{
+public:
+   npc_Unleashed_flame() : CreatureScript("npc_Unleashed_flame") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_Unleashed_flameAI (creature);
+    }
+
+    struct npc_Unleashed_flameAI : public ScriptedAI
+    {
+        npc_Unleashed_flameAI(Creature* creature) : ScriptedAI(creature)
+        {
+            summonerGUID = 0;
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        uint32 motionTimer;
+        uint64 summonerGUID;
+
+        void Reset()
+        {
+            me->setFaction(14);
+            motionTimer = 200;
+            me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
+
+            me->SetSpeed(MOVE_RUN,0.9f,true);
+
+            me->CastSpell(me,101313,true); // Laser visual on ground + aoe damage trigerring
+        }
+
+        void IsSummonedBy(Unit* pSummoner)
+        {
+            if (pSummoner && pSummoner->ToCreature())
+                summonerGUID = pSummoner->GetGUID();
+
+            if(Unit * pLord = Unit::GetUnit(*me,summonerGUID))
+                me->CastSpell(pLord,86956,true); // Visual beam to Rhyolith
+        }
+
+        void UpdateAI ( const uint32 diff)
+        {
+            if (motionTimer <= diff)
+            {
+                    /*if (urand(0,100) >= 50 ) //  55% chance to go at random position on platform
+                    {
+                        float angle =(float)urand(0,6) + 0.28f;
+                        float dist = 34.0f;
+                        Position pos;
+                        me->GetNearPosition(pos, 34.0f,angle);
+                        me->GetMotionMaster()->MovePoint(0,pos);
+                    }
+                    else // go to random player position
+                    {*/
+                        if(Creature * pLord = Creature::GetCreature(*me,summonerGUID))
+                        {
+                            Unit * target = pLord->AI()->SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
+                            if (target)
+                                me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
+
+                        }
+                    //}
+                motionTimer = 3000;
+            }
+            else motionTimer -= diff;
+
+        }
+    };
+};
+
 void AddSC_boss_lord_rhyolith()
 {
     new boss_rhyolith();
@@ -1406,7 +1640,18 @@ void AddSC_boss_lord_rhyolith()
     new npc_rhyolith_lava_flow();
     new npc_rhyolith_spark();
     new npc_rhyolith_fragment();
+    // Heroic
+    new npc_Liquid_Obsidian();
+    new npc_Unleashed_flame();
 }
+
+/* HEROIC SQLs
+
+UPDATE `creature_template` SET `ScriptName`='npc_Liquid_Obsidian' WHERE  `entry`=52619 LIMIT 1;
+UPDATE `creature_template` SET `ScriptName`='npc_Unleashed_flame' WHERE  `entry`=54347 LIMIT 1;
+UPDATE `creature_template` SET `modelid2`=0 WHERE  `entry`=54347 LIMIT 1;
+
+*/
 
 /*
 SQL:
@@ -1428,4 +1673,6 @@ UPDATE instance_template SET script='instance_firelands' WHERE map=720;
 REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (950000, 0, 0, 0, 0, 0, 17188, 0, 0, 0, 'Lava Flow', '', '', 0, 88, 88, 0, 14, 14, 0, 0.428571, 1.2, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 33554560, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 1060, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 76, 1, 0, 0, 0, 'npc_rhyolith_lava_flow', 15595);
 
 INSERT INTO conditions VALUES (13, 0, 98493, 0, 18, 1, 52582, 0, 0, '', 'Lord Rhyolith - Heated Volcano');
+
+
 */
