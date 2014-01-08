@@ -714,6 +714,10 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
             if (!IsMinMaxValid(e, e.action.timeEvent.repeatMin, e.action.timeEvent.repeatMax)) return false;
             break;
         }
+        case SMART_ACTION_COMPLETE_ACHIEVEMENT:
+        {
+            return (sAchievementStore.LookupEntry(e.action.achievement.achievementId) != NULL);
+        }
         case SMART_ACTION_FOLLOW:
         case SMART_ACTION_SET_ORIENTATION:
         case SMART_ACTION_STORE_TARGET_LIST:

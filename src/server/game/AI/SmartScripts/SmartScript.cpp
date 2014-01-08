@@ -1702,6 +1702,25 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             delete targets;
             break;
         }
+        case SMART_ACTION_COMPLETE_ACHIEVEMENT:
+        {
+            ObjectList* targets = GetTargets(e, unit);
+            if (!targets)
+                return;
+            AchievementEntry const* achiev = sAchievementStore.LookupEntry(e.action.achievement.achievementId);
+            if (!achiev) // should not happen
+                return;
+            for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
+            {
+                if (IsPlayer((*itr)))
+                {
+                    (*itr)->ToPlayer()->CompletedAchievement(achiev);
+                }
+            }
+
+            delete targets;
+            break;
+        }
         default:
             sLog->outErrorDb("SmartScript::ProcessAction: Unhandled Action type %u", e.GetActionType());
             break;

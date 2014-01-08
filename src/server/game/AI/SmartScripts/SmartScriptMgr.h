@@ -463,6 +463,9 @@ enum SMART_ACTION
 
     SMART_ACTION_SEND_GO_CUSTOM_ANIM                = 93,     // anim id
 
+    // iCe custom SAI events
+    SMART_ACTION_COMPLETE_ACHIEVEMENT               = 200,    // achievement ID
+
     SMART_ACTION_END                                = 94,
 };
 
@@ -845,6 +848,12 @@ struct SmartAction
         {
             uint32 anim;
         } sendGoCustomAnim;
+
+        struct
+        {
+            uint32 achievementId;
+        } achievement;
+
         struct
         {
             uint32 param1;
