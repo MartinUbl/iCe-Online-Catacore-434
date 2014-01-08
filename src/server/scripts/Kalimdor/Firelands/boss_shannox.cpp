@@ -54,6 +54,8 @@ enum Spells
     SPELL_SEPARATION_ANXIETY        = 99835,
 };
 
+# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+
 class boss_shannox : public CreatureScript
 {
     public:
@@ -82,6 +84,7 @@ class boss_shannox : public CreatureScript
             uint32 separationCheckTimer;
             uint32 aggroTime;
             uint32 riplimbRespawnTimer;
+            uint32 enrageTimer;
             bool aggroBool;
 
             void Reset()
@@ -98,6 +101,7 @@ class boss_shannox : public CreatureScript
                 ImmolationTrapTimer = 10000;
                 HurlSpearTimer = 20000;
                 riplimbRespawnTimer = 30000;
+                enrageTimer = 600 * IN_MILLISECONDS; // 10 minutes enrage timer
 
                 pSummonSpear = NULL;
 
@@ -152,6 +156,7 @@ class boss_shannox : public CreatureScript
                         break;
                     case NPC_HURL_SPEAR_WEAPON: // Hurl Spear weapon
                     {
+                        SetEquipmentSlots(false, 0, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                         pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                         pSummon->setFaction(35);
                         summonedTraps.push_back(pSummon->GetGUID());
@@ -237,10 +242,16 @@ class boss_shannox : public CreatureScript
                     pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID));
 
                     if (pRiplimb && !pRiplimb->isAlive())
+                    {
                         pRiplimb->Respawn();
+                        pRiplimb->RemoveAllAuras();
+                    }
 
                     if (pRageface && !pRiplimb->isAlive())
+                    {
                         pRageface->Respawn();
+                        pRiplimb->RemoveAllAuras();
+                    }
                 }
 
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -252,12 +263,14 @@ class boss_shannox : public CreatureScript
                 {
                     pRiplimb->setDeathState(DEAD);
                     pRiplimb->Respawn(true);
+                    pRiplimb->RemoveAllAuras();
                 }
 
                 if (pRageface && !pRageface->isAlive())
                 {
                     pRageface->setDeathState(DEAD);
                     pRageface->Respawn(true);
+                    pRiplimb->RemoveAllAuras();
                 }
 
                 ScriptedAI::EnterEvadeMode();
@@ -268,8 +281,16 @@ class boss_shannox : public CreatureScript
                 // Riblimb death
                 if (action == 1)
                 {
+                    SetEquipmentSlots(false, 71557, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
                     me->CastSpell(me, SPELL_FRENZY, false);
-                    DoYell("Riplimb! No... no! Oh, you terrible little beasts! HOW COULD YOU?!", 24574);
+
+                    if (IsHeroic())
+                    {
+                        me->MonsterTextEmote("Riplimb collapses into a smouldering heap...",0,true);
+                        riplimbRespawnTimer = 30000;
+                    }
+                    else
+                        DoYell("Riplimb! No... no! Oh, you terrible little beasts! HOW COULD YOU?!", 24574);
                 }
                 // Rageface death
                 if (action == 2)
@@ -340,8 +361,6 @@ class boss_shannox : public CreatureScript
                 {
                     if (pSummonSpear)
                         pSummonSpear->SetVisibility(VISIBILITY_ON);
-
-                    SetEquipmentSlots(false, 0, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
 
                     if (pRiplimb)
                         pRiplimb->AI()->DoAction(1);
@@ -425,6 +444,13 @@ class boss_shannox : public CreatureScript
                     else
                         aggroTime -= diff;
                 }
+
+                if (enrageTimer <= diff)
+                {
+                    me->CastSpell(me,SPELL_BERSERK,true);
+                    enrageTimer = 999999999;
+                }
+                else enrageTimer -= diff;
 
                 if (ArcingSlashTimer <= diff)
                 {
@@ -577,19 +603,31 @@ class boss_shannox : public CreatureScript
                 else
                     separationCheckTimer -= diff;
 
-                if (IsHeroic() && pRiplimb && !pRiplimb->isAlive())
+                if (IsHeroic() && pRiplimb && pRiplimb->isDead())
                 {
                     if (riplimbRespawnTimer <= diff)
                     {
                         pRiplimb->Respawn(true);
-                        pRiplimb->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), true);
-                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        pRiplimb->RemoveAllAuras();
+                        me->RemoveAuraFromStack(SPELL_FRENZY);
+
+                        pRiplimb->SetReactState(REACT_AGGRESSIVE);
+                        pRiplimb->SetInCombatWithZone();
+
+                        pRiplimb->CastSpell(pRiplimb,SPELL_FEEDING_FRENZY,true); // Feeding Frenzy
+                        me->MonsterTextEmote("Riplimb reanimates and surges into battle to protect his master!",0,true);
+
+                        //pRiplimb->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), true);    WHAT,WHY ???
+
+                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1,250.0f,true);
+                        if (pTarget == NULL)
+                            pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0,250.0f,true);
+
+                        if (pTarget)
                         {
-                            pRiplimb->SetReactState(REACT_AGGRESSIVE);
                             pRiplimb->AI()->AttackStart(pTarget);
                             pRiplimb->GetMotionMaster()->Clear(false);
                             pRiplimb->GetMotionMaster()->MoveChase(pTarget);
-                            me->RemoveAurasDueToSpell(SPELL_FRENZY);
                         }
                         riplimbRespawnTimer = 30000;
                     }
@@ -649,10 +687,15 @@ class npc_riplimb : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
 
                 pInstance = me->GetInstanceScript();
+                if (pInstance)
+                    pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
             }
 
             void EnterCombat(Unit* target)
             {
+                if (IsHeroic())
+                    me->CastSpell(me,SPELL_FEEDING_FRENZY,true); // Feeding Frenzy
+
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
 
                 if (pInstance)
@@ -732,7 +775,7 @@ class npc_riplimb : public CreatureScript
                 {
                     if (spearDelayTimer <= diff)
                     {
-                        if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 50000.0f)) != NULL)
+                        if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 5000.0f)) != NULL)
                         {
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
                             me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
@@ -762,8 +805,6 @@ class npc_riplimb : public CreatureScript
                 }
 
                 DoMeleeAttackIfReady();
-                if (IsHeroic())
-                    DoSpellAttackIfReady(SPELL_FEEDING_FRENZY);
             }
 
             void DoAction(const int32 action)
@@ -772,10 +813,20 @@ class npc_riplimb : public CreatureScript
                     spearDropped = true;
             }
 
+            void DamageTaken(Unit* attacker, uint32& damage)
+            {
+                if ( damage >= me->GetHealth() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                    damage = 0;
+            }
+
             void JustDied(Unit* pKiller)
             {
                 if (pBoss)
+                {
+                    if (IsHeroic() == false)
+                        pBoss->MonsterTextEmote("Shannox become enraged at seeing one of his companions fall",0,true);
                     pBoss->AI()->DoAction(1);
+                }
             }
         };
 
@@ -830,6 +881,9 @@ class npc_crystal_trap : public CreatureScript
             void MoveInLineOfSight(Unit* pWho)
             {
                 if (!pWho || pWho->GetDistance(me) > 0.3f || !armTrap || trapActivated || pWho->HasAura(SPELL_WARY) || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
+                    return;
+
+                if ( pWho->isPet() || pWho->isGuardian())
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
@@ -892,9 +946,6 @@ class npc_crystal_trap : public CreatureScript
                         {
                             if (GetPrisoner()->GetEntry() == NPC_RIPLIMB || GetPrisoner()->GetEntry() == NPC_RAGEFACE)
                                 GetPrisoner()->CastSpell(GetPrisoner(), SPELL_WARY, true);
-
-                            if (GetPrisoner()->HasAura(SPELL_FEEDING_FRENZY))
-                                GetPrisoner()->RemoveAurasDueToSpell(SPELL_FEEDING_FRENZY);
 
                             GetPrisoner()->RemoveAurasDueToSpell(SPELL_CRYSTAL_PRISON_EFFECT);
                             me->ForcedDespawn();
@@ -1085,6 +1136,7 @@ class npc_rageface : public CreatureScript
         {
             npc_ragefaceAI(Creature* c) : ScriptedAI(c)
             {
+                pInstance = me->GetInstanceScript();
                 c->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 c->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
                 c->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
@@ -1096,66 +1148,168 @@ class npc_rageface : public CreatureScript
             Creature* pBoss;
             uint32 changeTargetTimer;
             bool shannoxHP;
+            bool jumping;
+
+            Position jumpPos;
+
+            uint32 jumpTimer;
+            uint32 debuffTimer;
 
             void Reset()
             {
+                debuffTimer = 28000;
+
+                jumpTimer = 30000;
+                changeTargetTimer = urand(5000,8000);
+
                 me->RemoveAllAuras();
                 me->SetReactState(REACT_PASSIVE);
                 shannoxHP = true;
-                changeTargetTimer = urand(5000, 8000);
-                pInstance = me->GetInstanceScript();
                 pBoss = NULL;
                 if (pInstance)
                     pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
             }
 
+            void DamageTaken(Unit* attacker, uint32& damage)
+            {
+                if (!me->IsNonMeleeSpellCasted(false)) // Must casting face rage
+                    return;
+
+                uint32 distractDamage = (Is25ManRaid()) ? 45000 : 30000;
+
+                if ( damage >= distractDamage)
+                {
+                    me->InterruptNonMeleeSpells(false);
+                    me->RemoveAura(100129); // Crit buff on rageface
+                    me->RemoveAura(101212);
+                    me->RemoveAura(101213);
+                    me->RemoveAura(101214);
+                    changeTargetTimer = 100;
+                }
+            }
+
             void EnterCombat(Unit* target)
             {
+                if (IsHeroic())
+                    me->CastSpell(me,SPELL_FEEDING_FRENZY,true); // Feeding Frenzy
+
                 if (pBoss)
                     pBoss->SetReactState(REACT_AGGRESSIVE);
             }
+
+            void EnterEvadeMode()
+            {
+                jumping = false;
+                me->RemoveAllAuras();
+                ScriptedAI::EnterEvadeMode();
+            }
+
+            void ChangeTarget (bool ragefacing)
+            {
+                Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
+                std::list<Player*> targets;
+                targets.clear();
+                uint32 plrCount = 0;
+
+                if (!plrList.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    {
+                        Player* plr = itr->getSource();
+                        plrCount++;
+
+                        /*if (plr->GetDistance2d(me) >= 60.0f) // Max range of jump spell
+                            continue;*/
+
+                        if (plr && plr->isAlive() && plr->isGameMaster() == false)
+                        {
+                            if (!plr->HasTankSpec() && !plr->HasAura(5487))
+                                targets.push_back(plr);
+                        }
+                    }
+
+                    if (!targets.empty())
+                    {
+                        std::list<Player*>::iterator itr = targets.begin();
+                        uint32 randPos = urand(0, targets.size() - 1);
+                        std::advance(itr, randPos);
+                        if ((*itr) && (*itr)->IsInWorld())
+                        {
+                            me->getThreatManager().resetAllAggro();
+                            me->AddThreat((*itr), 50000.0f);
+                            me->GetMotionMaster()->Clear(false);
+                            me->GetMotionMaster()->MoveChase((*itr));
+                            me->AI()->AttackStart((*itr));
+                            if (ragefacing) // Time for rageface
+                            {
+                                jumping = true;
+                                //me->CastSpell((*itr), SPELL_FACE_RAGE, false); // Jump to target
+                                (*itr)->GetPosition(&jumpPos);
+                                me->GetMotionMaster()->MoveJump((*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ(),50,20,0);
+                            }
+                        }
+                    }
+                }
+            }
+
+        void SpellHit(Unit* pSrc, const SpellEntry* spell)
+        {
+            if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
+            {
+                debuffTimer = 15000;
+                jumpTimer += 10000; // 10 second trap
+                changeTargetTimer += 10000;
+            }
+        }
 
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
 
+                if (jumping)
+                {
+                    uint32 x = me->GetPositionX();
+                    uint32 y = me->GetPositionY();
+
+                    uint32 mx = jumpPos.m_positionX;
+                    uint32 my = jumpPos.m_positionY;
+
+                    if (mx == x && my == y)
+                    {
+                        me->StopMoving();
+                        me->CastSpell(me->getVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
+                        jumping = false;
+                        changeTargetTimer = 31000;
+                    }
+                    return;
+                }
+
+                if (debuffTimer <= diff)
+                {
+                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                    {
+                        me->RemoveAura(100129); // Crit buff on rageface
+                        me->RemoveAura(101212);
+                        me->RemoveAura(101213);
+                        me->RemoveAura(101214);
+                    }
+                    debuffTimer = 2000;
+                }
+                else debuffTimer -= diff;
+
+                if (jumpTimer <= diff)
+                {
+                    ChangeTarget(true); // Jump on target which will be faceraged
+                    changeTargetTimer = 33000;
+                    jumpTimer = 30000;
+                }
+                else jumpTimer -= diff;
+
                 if (changeTargetTimer <= diff)
                 {
-                    // little hack
-                    Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
-                    std::list<uint64> targets;
-                    targets.clear();
-                    uint32 plrCount;
-                    plrCount = 0;
-
-                    if (!plrList.isEmpty())
-                    {
-                        for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                        {
-                            Player* plr = itr->getSource();
-                            plrCount++;
-                            if ((me->getVictim() && plr != me->getVictim() && plrCount > 1) || (!plr->HasTankSpec() && plr->isAlive()))
-                                targets.push_back(plr->GetGUID());
-                        }
-                    }
-
-                    if (!targets.empty() && targets.size() > 0)
-                    {
-                        std::list<uint64>::iterator itr = targets.begin();
-                        uint32 randPos = urand(0, targets.size() - 1);
-                        std::advance(itr, randPos);
-
-                        if (Unit* pTarget = Unit::GetUnit((*me), (*itr)))
-                        {
-                            me->GetMotionMaster()->Clear(false);
-                            me->GetMotionMaster()->MoveChase(pTarget);
-                            me->AI()->AttackStart(pTarget);
-                            me->CastSpell(pTarget, SPELL_FACE_RAGE, false);
-                            me->AddThreat(pTarget, 50000.0f);
-                        }
-                    }
-                    changeTargetTimer = urand(5000, 8000);
+                    ChangeTarget(false);
+                    changeTargetTimer = urand(8000, 10000);
                 }
                 else changeTargetTimer -= diff;
 
@@ -1166,21 +1320,63 @@ class npc_rageface : public CreatureScript
                 }
 
                 DoMeleeAttackIfReady();
-
-                if (IsHeroic())
-                    DoSpellAttackIfReady(SPELL_FEEDING_FRENZY);
             }
 
             void JustDied(Unit* pKiller)
             {
                 if (Creature* pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX)))
+                {
+                    pBoss->MonsterTextEmote("Shannox become enraged at seeing one of his companions fall",0,true);
                     pBoss->AI()->DoAction(2);
+                }
             }
         };
 
         CreatureAI* GetAI(Creature* c) const
         {
             return new npc_ragefaceAI(c);
+        }
+};
+
+class spell_gen_face_rage : public SpellScriptLoader
+{
+    public:
+        spell_gen_face_rage() : SpellScriptLoader("spell_gen_face_rage") { }
+
+        class spell_gen_face_rage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_face_rage_SpellScript);
+
+            void HandleHit(SpellEffIndex /*effIndex*/)
+            {
+                Unit * unit = GetHitUnit();
+                Aura * rf = unit->GetAura(99947);
+                if(!unit || !rf)
+                    return;
+
+                uint32 ticks = 60 - (rf->GetDuration() / 500); // hits every 500 ms, 30 s full duration -> 30000/500 = 60
+
+                if (ticks != 0)
+                    ticks -= 1; // Don't count bonus fo initial tick
+
+                if (ticks)
+                {
+                    uint32 addition = ticks * 8000;
+                    SetHitDamage(GetHitDamage() + addition);
+                }
+                else
+                    SetHitDamage(8000);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_gen_face_rage_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_face_rage_SpellScript();
         }
 };
 
@@ -1192,7 +1388,14 @@ void AddSC_boss_shannox()
     new npc_immolation_trap();
     new npc_riplimb();
     new npc_rageface();
+    new spell_gen_face_rage();
 }
+
+/*
+    Heroic SQLs
+    DELETE FROM `spell_script_names` WHERE  `spell_id`=99948 AND `ScriptName`='spell_gen_face_rage' LIMIT 1;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (99948, 'spell_gen_face_rage');
+*/
 
 /*
 SQL:
