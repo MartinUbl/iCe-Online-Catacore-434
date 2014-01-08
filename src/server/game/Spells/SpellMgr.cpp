@@ -4274,14 +4274,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /*************************  RAGNAROS FIRELANDS *****************************/
 
-        case 99399: // Burning Wound ( Missing trigerring spell )
-        case 101238:
-        case 101239:
-        case 101240:
-            spellInfo->EffectTriggerSpell[1] = 99400; // Burning blast
-            spellInfo->EffectBasePoints[0] = 6000;
-            spellInfo->EffectValueMultiplier[0] = 6000;
-            break;
         case 98928: // Lava wave leap back effect is handling incorrect -> fixed in AI
         case 100292:
         case 100293:
@@ -4289,6 +4281,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[2] = SPELL_EFFECT_NONE;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            if ( i == 100292)
+                spellInfo->excludeTargetAuraSpell = 100292;
+            else if ( i == 100293)
+                spellInfo->excludeTargetAuraSpell = 100293;
+            else if ( i == 100294)
+                spellInfo->excludeTargetAuraSpell = 100294;
             break;
         case 100455:
         case 101229:
@@ -4315,13 +4313,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100253:
         case 100254:
             spellInfo->EffectRadiusIndex[0] = 22;
-            break;
-        case 98495: // Molten Seed
-        case 98498:
-        case 100579:
-        case 100580:
-        case 100581:
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         case 99126: // Blazing Heat
         case 100984:
@@ -4359,6 +4350,35 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100158: // Molten Power
         case 100302:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 98870: // Scorched ground
+        case 100122:
+        case 100123:
+        case 100124:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_PLAYERS_ONLY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ALLY_DST;
+            break;
+        case 100342: // Draw Out Firelord
+        case 100344:
+        case 100345:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            if (i == 100345)
+                spellInfo->EffectImplicitTargetA[0] = TARGET_NONE;
+            break;
+        case 100250: // Combustion - bad targeting, handled in AI
+        case 100249:
+            spellInfo->Effect[0] = 0;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+        break;
+        case 100756: // Cloudburst summon effect
+            spellInfo->Effect[0] = 0;
+            break;
+        case 100647: // Entrapping Roots
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 100876: // Summon dreadflame
+            spellInfo->DurationIndex = 21; // unlimited
             break;
 
 /*************************  END OF RAGNAROS FIRELANDS *****************************/
@@ -4420,7 +4440,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 74411: // Battleground - Dampening
             spellInfo->EffectBasePoints[0] = -10; // - 10 % healing done
         break;
-        case 98552: // Summon Spark of Rhyoloth
+        case 98552: // Summon Spark of Rhyolith
         case 98136: // Summon Fragment of Rhyolith
         case 100392:
             spellInfo->DurationIndex = 21; // unlimited - despawned by AI
@@ -4433,6 +4453,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 101647:
         case 101648:
             spellInfo->EffectTriggerSpell[1] = 0;
+            break;
+        case 99875: // Fuse
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
+            break;
+        case 86956: // Focused laser
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
         case 1680: // Whirlwind  (Fury)
             spellInfo->EffectRadiusIndex[0] = 8;
@@ -5326,6 +5354,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 15; // 3yd
             spellInfo->EffectRadiusIndex[1] = 13; // 10yd
             break;
+        case 99517: // Countdown
+        case 99489:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
+            spellInfo->EffectRadiusIndex[0] = 7; // 2 yd
+            break;
         case 99353: // Decimating Strike ( Baleroc )
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
@@ -5338,6 +5371,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100002: // Hurl Spear
         case 99840: // Magma Rupture (Shannox' spell)
             spellInfo->EffectRadiusIndex[1] = 11; // 45yd
+            break;
+        case 99945: // Handled in AI
+            spellInfo->EffectTriggerSpell[0] = 0;
             break;
         case 51466: // Elemental Oath (Rank 1)
         case 51470: // Elemental Oath (Rank 2)
@@ -5427,9 +5463,10 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 82772: // Frozen (council)
-        case 92503: // + difficulty entries
+        case 92503:
         case 92504:
         case 92505:
+        case 98229: // Concentration ( Majordomo Staghelm HC)
             spellInfo->procFlags = 0;
             break;
         case 93495:// Wake
