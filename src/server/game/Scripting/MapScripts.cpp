@@ -985,6 +985,11 @@ void Map::ScriptsProcess()
                 if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
                     pSource->learnSpell(step.script->LearnSpell.SpellID, false);
                 break;
+            case SCRIPT_COMMAND_UNLEARN_SPELL:
+                // Source or Target must be Player.
+                if (Player *pSource = _GetScriptPlayerSourceOrTarget(source, target, step.script))
+                    pSource->removeSpell(step.script->UnlearnSpell.SpellID, false, false);
+                break;
             case SCRIPT_COMMAND_SUMMON_TO_PLAYER:
             {
                 if (WorldObject* pSummoner = _GetScriptWorldObject(source, true, step.script))

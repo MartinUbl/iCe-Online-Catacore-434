@@ -359,6 +359,11 @@ struct ScriptInfo
             uint32 type;      // datalong2
             uint32 value;    // dataint
         } ModRep;
+
+        struct                  // SCRIPT_COMMAND_UNLEARN_SPELL (42)
+        {
+            uint32 SpellID;     // datalong
+        } UnlearnSpell;
     };
 
     std::string GetDebugInfo() const;
