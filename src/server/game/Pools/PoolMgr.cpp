@@ -866,7 +866,7 @@ void PoolMgr::LoadQuestPools()
             continue;
         }
 
-        if (!pQuest->IsDailyOrWeeklyOrMonthly())
+        if (!pQuest->IsDailyOrWeekly())
         {
             sLog->outErrorDb("`pool_quest` has an quest (%u) which is not daily or weekly in pool id (%u), use ExclusiveGroup instead, skipped.", entry, pool_id);
             continue;

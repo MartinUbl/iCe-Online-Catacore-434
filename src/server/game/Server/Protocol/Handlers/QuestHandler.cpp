@@ -409,7 +409,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
             if (const Quest *pQuest = sObjectMgr->GetQuestTemplate(quest))
             {
-                if (pQuest->HasInternalFlag(QUEST_INTERNAL_FLAGS_TIMED))
+                if (pQuest->HasFlag(QUEST_TRINITY_FLAGS_TIMED))
                     _player->RemoveTimedQuest(quest);
             }
 

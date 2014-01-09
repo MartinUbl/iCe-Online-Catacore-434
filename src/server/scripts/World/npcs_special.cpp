@@ -4283,7 +4283,7 @@ class npc_areatrigger_completer: public CreatureScript
                 if (!qInfo) // If quest exist
                     return;
 
-                if (qInfo->HasFlag(QUEST_FLAGS_EXPLORATION) && qInfo->HasInternalFlag(QUEST_INTERNAL_FLAGS_EXPLORATION_OR_EVENT)) // if Quest Has QuestFlag & QUEST_FLAGS_EXPLORATION and SpecialFlag & QUEST_INTERNAL_FLAGS_EXPLORATION_OR_EVENT
+                if (qInfo->HasFlag(QUEST_FLAGS_EXPLORATION) && qInfo->HasFlag(QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT)) // if Quest Has QuestFlag = QUEST_FLAGS_EXPLORATION and SpecialFlag = QUEST_TRINITY_FLAGS_EXPLORATION_OR_EVENT
                 {
                     if (qInfo && pl->GetQuestStatus(quest) == QUEST_STATUS_INCOMPLETE) // If Quest Status = QUEST_STATUS_INCOMPLETE
                         pl->CompleteQuest(quest); // Complete Quest
