@@ -317,6 +317,7 @@ public:
             currEnc[5]=uiEnc[TYPE_BETHTILAC];//bethilac
             currEnc[6]=uiEnc[TYPE_STAGHELM];//majordomo
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
 
             return NULL;
         }

@@ -320,6 +320,7 @@ public:
             currEnc[3]=uiEnc[3];//chogall
             currEnc[4]=uiEnc[2];//council
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-1);
 
             return NULL;
         }

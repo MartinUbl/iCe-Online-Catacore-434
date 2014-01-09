@@ -620,6 +620,7 @@ public:
         {
             uint32* uiEnc=GetUiEncounter();
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),uiEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
 
             return NULL;
         }

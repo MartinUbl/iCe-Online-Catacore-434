@@ -144,6 +144,7 @@ public:
             currEnc[0]=uiEnc[1];//Argaloth
             currEnc[1]=uiEnc[0];//Occuthar
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,ENCOUNTERS);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),ENCOUNTERS);
             return NULL;
         }
     };

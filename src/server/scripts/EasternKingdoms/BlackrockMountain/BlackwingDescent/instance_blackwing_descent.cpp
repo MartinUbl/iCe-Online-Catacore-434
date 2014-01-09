@@ -219,6 +219,7 @@ public:
             currEnc[4]=uiEnc[3];//chimareon
             currEnc[5]=uiEnc[2];//atramedes
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-1);
             return currEnc;
         }
     };
