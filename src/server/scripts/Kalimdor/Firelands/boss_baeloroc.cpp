@@ -950,8 +950,7 @@ class spell_gen_tormented_Selector : public SpellScriptLoader
                 if (!hitUnit)
                     return;
 
-                Aura * aur = hitUnit->AddAura(TORMENTED_DEBUFF,hitUnit);
-
+                hitUnit->AddAura(TORMENTED_DEBUFF,hitUnit);
             }
 
             void Register()
