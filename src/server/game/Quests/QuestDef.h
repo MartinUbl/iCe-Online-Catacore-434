@@ -279,7 +279,7 @@ class Quest
         uint32 GetRequiredSpell() const { return RequiredSpell; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
-        bool   IsRepeatable() const { return QuestInternalFlags & QUEST_INTERNAL_FLAGS_REPEATABLE; }
+        bool   IsRepeatable() const { return QuestFlags & QUEST_INTERNAL_FLAGS_REPEATABLE; }
         bool   IsAutoComplete() const { return QuestMethod ? false : true; }
         uint32 GetFlags() const { return QuestFlags; }
         bool   IsDaily() const { return QuestFlags & QUEST_FLAGS_DAILY; }
@@ -290,7 +290,7 @@ class Quest
         bool   IsAutoAccept() const { return QuestFlags & QUEST_FLAGS_AUTO_ACCEPT; }
         bool   IsRaidQuest() const { return Type == QUEST_TYPE_RAID || Type == QUEST_TYPE_RAID_10 || Type == QUEST_TYPE_RAID_25 || Type == QUEST_TYPE_PVP; }
         bool   IsAllowedInRaid() const;
-        bool   IsDFQuest() const { return QuestInternalFlags & QUEST_INTERNAL_FLAGS_DF_QUEST; }
+        bool   IsDFQuest() const { return QuestFlags & QUEST_INTERNAL_FLAGS_DF_QUEST; }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
