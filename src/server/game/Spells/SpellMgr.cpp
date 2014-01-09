@@ -5538,6 +5538,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 98471: // Burning Acid
             spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
+
+        //Deatbringer Saurfang
+        case 7202: // Blood link
+            spellInfo->EffectApplyAuraName[0]=SPELL_EFFECT_DUMMY;
+            break;
         default:
             break;
         }

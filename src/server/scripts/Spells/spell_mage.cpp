@@ -83,55 +83,6 @@ class spell_mage_cold_snap : public SpellScriptLoader
         }
 };
 
-class spell_mage_polymorph_cast_visual : public SpellScriptLoader
-{
-    public:
-        spell_mage_polymorph_cast_visual() : SpellScriptLoader("spell_mage_polymorph_visual") { }
-
-        class spell_mage_polymorph_cast_visual_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_polymorph_cast_visual_SpellScript)
-            static const uint32 spell_list[6];
-
-            bool Validate(SpellEntry const * /*spellEntry*/)
-            {
-                // check if spell ids exist in dbc
-                for (int i = 0; i < 6; i++)
-                    if (!sSpellStore.LookupEntry(spell_list[i]))
-                        return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit *unitTarget = GetHitUnit())
-                    if (unitTarget->GetTypeId() == TYPEID_UNIT)
-                        unitTarget->CastSpell(unitTarget, spell_list[urand(0, 5)], true);
-            }
-
-            void Register()
-            {
-                // add dummy effect spell handler to Polymorph visual
-                OnEffect += SpellEffectFn(spell_mage_polymorph_cast_visual_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_polymorph_cast_visual_SpellScript();
-        }
-};
-
-const uint32 spell_mage_polymorph_cast_visual::spell_mage_polymorph_cast_visual_SpellScript::spell_list[6] =
-{
-    SPELL_MAGE_SQUIRREL_FORM,
-    SPELL_MAGE_GIRAFFE_FORM,
-    SPELL_MAGE_SERPENT_FORM,
-    SPELL_MAGE_DRAGONHAWK_FORM,
-    SPELL_MAGE_WORGEN_FORM,
-    SPELL_MAGE_SHEEP_FORM
-};
-
 // Frost Warding
 class spell_mage_frost_warding_trigger : public SpellScriptLoader
 {
@@ -842,7 +793,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_frost_warding_trigger();
     new spell_mage_incanters_absorbtion_absorb();
     new spell_mage_incanters_absorbtion_manashield();
-    new spell_mage_polymorph_cast_visual;
     new spell_mage_cauterize();
     new spell_mage_impact();
     new spell_mage_blizzard();

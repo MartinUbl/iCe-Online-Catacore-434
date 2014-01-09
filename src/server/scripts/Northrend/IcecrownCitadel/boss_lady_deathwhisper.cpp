@@ -787,47 +787,6 @@ class spell_deathwhisper_mana_barrier : public SpellScriptLoader
         }
 };
 
-class spell_cultist_dark_martyrdom : public SpellScriptLoader
-{
-    public:
-        spell_cultist_dark_martyrdom() : SpellScriptLoader("spell_cultist_dark_martyrdom") { }
-
-        class spell_cultist_dark_martyrdom_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_cultist_dark_martyrdom_SpellScript)
-            bool Validate(SpellEntry const* /*spellEntry*/)
-            {
-                if (uint32 scriptId = sObjectMgr->GetScriptId("boss_lady_deathwhisper"))
-                    if (CreatureInfo const* creInfo = ObjectMgr::GetCreatureTemplate(NPC_LADY_DEATHWHISPER))
-                        if (creInfo->ScriptID == scriptId)
-                            return true;
-
-                return false;
-            }
-
-            void HandleEffect(SpellEffIndex /*effIndex*/)
-            {
-                if (GetCaster()->isSummon())
-                    if (Unit* owner = GetCaster()->ToTempSummon()->GetSummoner())
-                        if (owner->GetEntry() == NPC_LADY_DEATHWHISPER)
-                            CAST_AI(boss_lady_deathwhisper::boss_lady_deathwhisperAI, owner->ToCreature()->AI())->AddToReanimationQueue(GetCaster());
-
-                GetCaster()->Kill(GetCaster());
-                GetCaster()->SetDisplayId(uint32(GetCaster()->GetEntry() == NPC_CULT_FANATIC ? 38009 : 38010));
-            }
-
-            void Register()
-            {
-                OnEffect += SpellEffectFn(spell_cultist_dark_martyrdom_SpellScript::HandleEffect, EFFECT_2, SPELL_EFFECT_FORCE_DESELECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_cultist_dark_martyrdom_SpellScript();
-        }
-};
-
 void AddSC_boss_lady_deathwhisper()
 {
     new boss_lady_deathwhisper();
@@ -835,5 +794,4 @@ void AddSC_boss_lady_deathwhisper()
     new npc_cult_adherent();
     new npc_vengeful_shade();
     new spell_deathwhisper_mana_barrier();
-    new spell_cultist_dark_martyrdom();
 }

@@ -319,7 +319,7 @@ public:
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_item_gnomish_death_ray_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnEffect += SpellEffectFn(spell_item_gnomish_death_ray_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
         }
     };
 
@@ -764,53 +764,6 @@ enum eShadowmourneVisuals
     SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF   = 73422,
 };
 
-// 71903 - Item - Shadowmourne Legendary
-class spell_item_shadowmourne : public SpellScriptLoader
-{
-    public:
-        spell_item_shadowmourne() : SpellScriptLoader("spell_item_shadowmourne") { }
-
-        class spell_item_shadowmourne_AuraScript : public AuraScript
-        {
-        public:
-            PrepareAuraScript(spell_item_shadowmourne_AuraScript);
-
-            bool Validate(SpellEntry const*)
-            {
-                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE))
-                    return false;
-                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_SOUL_FRAGMENT))
-                    return false;
-                if (!sSpellStore.LookupEntry(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(AuraEffect const *, AuraEffectHandleModes)
-            {
-                GetCaster()->CastSpell(GetCaster(), SPELL_SHADOWMOURNE_SOUL_FRAGMENT, true, NULL);
-
-                if (Aura* soulFragments = GetCaster()->GetAura(SPELL_SHADOWMOURNE_SOUL_FRAGMENT))
-                {
-                    if (soulFragments->GetStackAmount() >= 10)
-                    {
-                        GetCaster()->CastSpell(GetCaster(), SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE, true, NULL);
-                        soulFragments->Remove();
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_AuraScript::HandleDummy, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuracript() const
-        {
-            return new spell_item_shadowmourne_AuraScript();
-        }
-};
 
 // 71905 - Soul Fragment
 class spell_item_shadowmourne_soul_fragment : public SpellScriptLoader
@@ -1024,14 +977,8 @@ enum eGenericData
 
 void AddSC_item_spell_scripts()
 {
-    // 23074 Arcanite Dragonling
-    new spell_item_trigger_spell("spell_item_arcanite_dragonling", SPELL_ARCANITE_DRAGONLING);
     // 23133 Gnomish Battle Chicken
     new spell_item_trigger_spell("spell_item_gnomish_battle_chicken", SPELL_BATTLE_CHICKEN);
-    // 23076 Mechanical Dragonling
-    new spell_item_trigger_spell("spell_item_mechanical_dragonling", SPELL_MECHANICAL_DRAGONLING);
-    // 23075 Mithril Mechanical Dragonling
-    new spell_item_trigger_spell("spell_item_mithril_mechanical_dragonling", SPELL_MITHRIL_MECHANICAL_DRAGONLING);
 
     new spell_item_deviate_fish();
     new spell_item_flask_of_the_north();
@@ -1044,7 +991,6 @@ void AddSC_item_spell_scripts()
     new spell_item_savory_deviate_delight();
     new spell_item_six_demon_bag();
     new spell_item_underbelly_elixir();
-    new spell_item_shadowmourne();
     new spell_item_shadowmourne_soul_fragment();
     new spell_item_apparatus_of_khazgoroth();
     new spell_item_apparatus_of_khazgoroth_hc();

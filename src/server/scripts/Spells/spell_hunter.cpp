@@ -108,53 +108,6 @@ public:
     }
 };
 
-class spell_hun_masters_call : public SpellScriptLoader
-{
-public:
-    spell_hun_masters_call() : SpellScriptLoader("spell_hun_masters_call") { }
-
-    class spell_hun_masters_call_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_masters_call_SpellScript)
-        bool Validate(SpellEntry const * spellEntry)
-        {
-            if (!sSpellStore.LookupEntry(HUNTER_SPELL_MASTERS_CALL_TRIGGERED))
-                return false;
-            if (!sSpellStore.LookupEntry(SpellMgr::CalculateSpellEffectAmount(spellEntry, EFFECT_0)))
-                return false;
-            if (!sSpellStore.LookupEntry(SpellMgr::CalculateSpellEffectAmount(spellEntry, EFFECT_1)))
-                return false;
-            return true;
-        }
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit * target = GetHitUnit())
-            {
-                target->CastSpell(target, GetEffectValue(), true);
-                target->CastSpell(target, HUNTER_SPELL_MASTERS_CALL_TRIGGERED, true);
-                // there is a possibility that this effect should access effect 0 (dummy) target, but i dubt that
-                // it's more likely that on on retail it's possible to call target selector based on dbc values
-                // anyways, we're using GetTargetUnit() here and it's ok
-                if (Unit * ally = GetTargetUnit())
-                {
-                    target->CastSpell(ally, GetEffectValue(), true);
-                    target->CastSpell(ally, SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(), EFFECT_0), true);
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_hun_masters_call_SpellScript();
-    }
-};
 
 class spell_hun_readiness : public SpellScriptLoader
 {
@@ -224,7 +177,7 @@ public:
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_hun_scatter_shot_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnEffect += SpellEffectFn(spell_hun_scatter_shot_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
         }
     };
 
@@ -397,7 +350,6 @@ void AddSC_hunter_spell_scripts()
 {
     new spell_hun_invigoration();
     new spell_hun_last_stand_pet();
-    new spell_hun_masters_call();
     new spell_hun_readiness();
     new spell_hun_scatter_shot();
     new spell_hun_sniper_training();

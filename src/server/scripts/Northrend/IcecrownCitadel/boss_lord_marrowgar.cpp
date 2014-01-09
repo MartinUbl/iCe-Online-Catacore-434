@@ -437,7 +437,7 @@ class spell_marrowgar_coldflame : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_marrowgar_coldflame_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffect += SpellEffectFn(spell_marrowgar_coldflame_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_PERSISTENT_AREA_AURA);
             }
         };
 
@@ -478,7 +478,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_marrowgar_bone_spike_graveyard_SpellScript::HandleSpikes, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+                OnEffect += SpellEffectFn(spell_marrowgar_bone_spike_graveyard_SpellScript::HandleSpikes, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -510,7 +510,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_marrowgar_bone_storm_SpellScript::RecalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffect += SpellEffectFn(spell_marrowgar_bone_storm_SpellScript::RecalculateDamage, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };
 

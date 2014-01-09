@@ -107,35 +107,6 @@ public:
     }
 };
 
-// 47422 Everlasting Affliction
-class spell_warl_everlasting_affliction : public SpellScriptLoader
-{
-public:
-    spell_warl_everlasting_affliction() : SpellScriptLoader("spell_warl_everlasting_affliction") { }
-
-    class spell_warl_everlasting_affliction_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_warl_everlasting_affliction_SpellScript)
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* unitTarget = GetHitUnit())
-                // Refresh corruption on target
-                if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, GetCaster()->GetGUID()))
-                    aur->GetBase()->RefreshDuration();
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_warl_everlasting_affliction_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warl_everlasting_affliction_SpellScript();
-    }
-};
-
 // 6201 Create Healthstone
 class spell_warl_create_healthstone : public SpellScriptLoader
 {
@@ -207,7 +178,7 @@ public:
 };*/
 
 
-//27285 Seed of Corruption
+/*//27285 Seed of Corruption
 class spell_warl_seed_of_corruption : public SpellScriptLoader
 {
     public:
@@ -265,7 +236,7 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         {
             return new spell_warl_seed_of_corruption_SpellScript();
         }
-};
+};*/
 
 // 54049 Shadow Bite
 class spell_warl_shadow_bite : public SpellScriptLoader
@@ -361,9 +332,8 @@ class npc_hand_of_guldan: public CreatureScript
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_demonic_empowerment();
-    new spell_warl_everlasting_affliction();
     new spell_warl_create_healthstone();
-    new spell_warl_seed_of_corruption();
+    //new spell_warl_seed_of_corruption();
     new spell_warl_shadow_bite();
     new npc_hand_of_guldan();
 }

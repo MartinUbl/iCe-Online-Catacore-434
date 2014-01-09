@@ -59,24 +59,6 @@ public:
     }
 };
 
-// http://www.wowhead.com/quest=55 Morbent Fel
-// 8913 Sacred Cleansing
-enum eQuest55Data
-{
-    NPC_MORBENT             = 1200,
-    NPC_WEAKENED_MORBENT    = 24782,
-};
-
-class spell_q55_sacred_cleansing : public SpellScriptLoader
-{
-public:
-    spell_q55_sacred_cleansing() : SpellScriptLoader("spell_q55_sacred_cleansing") { }
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_generic_quest_update_entry_SpellScript(SPELL_EFFECT_DUMMY, EFFECT_1, NPC_MORBENT, NPC_WEAKENED_MORBENT, true);
-    }
-};
 
 // http://www.wowhead.com/quest=5206 Marauders of Darrowshire
 // 17271 Test Fetid Skull
@@ -627,51 +609,9 @@ enum eQuest12937Data
     NPC_FALLEN_EARTHEN_DEFENDER         = 30035,
 };
 
-class spell_q12937_relief_for_the_fallen : public SpellScriptLoader
-{
-public:
-    spell_q12937_relief_for_the_fallen() : SpellScriptLoader("spell_q12937_relief_for_the_fallen") { }
-
-    class spell_q12937_relief_for_the_fallen_SpellScript : public SpellScript
-    {
-    public:
-        PrepareSpellScript(spell_q12937_relief_for_the_fallen_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
-        {
-            if (!sSpellStore.LookupEntry(SPELL_TRIGGER_AID_OF_THE_EARTHEN))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Unit* pCaster = GetCaster();
-            if (Player* pPlayer = pCaster->ToPlayer())
-            {
-                if(Creature* pTarget = GetHitCreature())
-                {
-                    pPlayer->CastSpell(pPlayer, SPELL_TRIGGER_AID_OF_THE_EARTHEN, true, NULL);
-                    pPlayer->KilledMonsterCredit(NPC_FALLEN_EARTHEN_DEFENDER, 0);
-                    pTarget->ForcedDespawn();
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_q12937_relief_for_the_fallen_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_q12937_relief_for_the_fallen_SpellScript();
-    }
-};
 
 void AddSC_quest_spell_scripts()
 {
-    new spell_q55_sacred_cleansing();
     new spell_q5206_test_fetid_skull();
     new spell_q6124_6129_apply_salve();
     new spell_q10255_administer_antidote();
@@ -684,5 +624,4 @@ void AddSC_quest_spell_scripts()
     new spell_q12459_seeds_of_natures_wrath();
     new spell_q12634_despawn_fruit_tosser();
     new spell_q12683_take_sputum_sample();
-    new spell_q12937_relief_for_the_fallen();
 }
