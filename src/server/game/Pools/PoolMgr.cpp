@@ -982,9 +982,6 @@ void PoolMgr::ChangeDailyQuests()
             if (pQuest->IsWeekly())
                 continue;
 
-            if (pQuest->IsMonthly())
-                continue;
-
             UpdatePool<Quest>(itr->GetPoolId(), 1);    // anything non-zero means don't load from db
         }
     }
@@ -999,9 +996,6 @@ void PoolMgr::ChangeWeeklyQuests()
         if (Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->GetFirstEqualChancedObjectId()))
         {
             if (pQuest->IsDaily())
-                continue;
-
-            if (pQuest->IsMonthly())
                 continue;
 
             UpdatePool<Quest>(itr->GetPoolId(), 1);

@@ -909,8 +909,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY            = 35,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY_WEEKCAP    = 36,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES        = 37,
-    PLAYER_LOGIN_QUERY_LOADMONTHLYQUESTSTATUS   = 38,
-    MAX_PLAYER_LOGIN_QUERY                      = 39
+    MAX_PLAYER_LOGIN_QUERY                      = 38
 };
 
 enum PlayerDelayedOperations
@@ -1563,7 +1562,6 @@ class Player : public Unit, public GridObject<Player>
         bool SatisfyQuestPrevChain(Quest const* qInfo, bool msg);
         bool SatisfyQuestDay(Quest const* qInfo, bool msg);
         bool SatisfyQuestWeek(Quest const* qInfo, bool msg);
-        bool SatisfyQuestMonth(Quest const* qInfo, bool msg);
         bool GiveQuestSourceItem(Quest const *pQuest);
         bool TakeQuestSourceItem(uint32 quest_id, bool msg);
         bool GetQuestRewardStatus(uint32 quest_id) const;
@@ -1572,10 +1570,8 @@ class Player : public Unit, public GridObject<Player>
 
         void SetDailyQuestStatus(uint32 quest_id);
         void SetWeeklyQuestStatus(uint32 quest_id);
-        void SetMonthlyQuestStatus(uint32 quest_id);
         void ResetDailyQuestStatus();
         void ResetWeeklyQuestStatus();
-        void ResetMonthlyQuestStatus();
 
         uint16 FindQuestSlot(uint32 quest_id) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
@@ -2881,7 +2877,6 @@ class Player : public Unit, public GridObject<Player>
         typedef std::set<uint32> QuestSet;
         QuestSet m_timedquests;
         QuestSet m_weeklyquests;
-        QuestSet m_monthlyquests;
 
         uint64 m_divider;
         uint32 m_ingametime;
@@ -2901,7 +2896,6 @@ class Player : public Unit, public GridObject<Player>
         void _LoadQuestStatus(PreparedQueryResult result);
         void _LoadDailyQuestStatus(PreparedQueryResult result);
         void _LoadWeeklyQuestStatus(PreparedQueryResult result);
-        void _LoadMonthlyQuestStatus(PreparedQueryResult result);
         void _LoadRandomBGStatus(PreparedQueryResult result);
         void _LoadGroup(PreparedQueryResult result);
         void _LoadSkills(PreparedQueryResult result);
@@ -2933,7 +2927,6 @@ class Player : public Unit, public GridObject<Player>
         void _SaveQuestStatus(SQLTransaction& trans);
         void _SaveDailyQuestStatus(SQLTransaction& trans);
         void _SaveWeeklyQuestStatus(SQLTransaction& trans);
-        void _SaveMonthlyQuestStatus(SQLTransaction& trans);
         void _SaveSkills(SQLTransaction& trans);
         void _SaveSpells(SQLTransaction& trans);
         void _SaveEquipmentSets(SQLTransaction& trans);
@@ -3075,7 +3068,6 @@ class Player : public Unit, public GridObject<Player>
 
         bool   m_DailyQuestChanged;
         bool   m_WeeklyQuestChanged;
-        bool   m_MonthlyQuestChanged;
         time_t m_lastDailyQuestTime;
 
         uint32 m_pvpOnTimer;

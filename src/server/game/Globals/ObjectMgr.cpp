@@ -4230,18 +4230,6 @@ void ObjectMgr::LoadQuests()
         if (qinfo->GetQuestMethod() >= 3)
             sLog->outErrorDb("Quest %u has `Method` = %u, expected values are 0, 1 or 2.", qinfo->GetQuestId(), qinfo->GetQuestMethod());
 
-        if (qinfo->QuestFlags & QUEST_FLAGS_DAILY && qinfo->QuestInternalFlags & QUEST_INTERNAL_FLAGS_MONTHLY)
-        {
-            sLog->outErrorDb("Monthly Quest %u is marked as daily quest in `QuestFlags`, removed daily flag.", qinfo->GetQuestId());
-            qinfo->QuestFlags &= ~QUEST_FLAGS_DAILY;
-        }
-
-        if (qinfo->QuestFlags & QUEST_FLAGS_WEEKLY && qinfo->QuestInternalFlags & QUEST_INTERNAL_FLAGS_MONTHLY)
-        {
-            sLog->outErrorDb("Monthly Quest %u is marked as weekly quest in `QuestFlags`, removed weekly flag.", qinfo->GetQuestId());
-            qinfo->QuestFlags &= ~QUEST_FLAGS_WEEKLY;
-        }
-
         if (qinfo->QuestFlags & QUEST_FLAGS_DAILY && qinfo->QuestFlags & QUEST_FLAGS_WEEKLY)
         {
             sLog->outErrorDb("Weekly Quest %u is marked as daily quest in `QuestFlags`, removed daily flag.",qinfo->GetQuestId());
