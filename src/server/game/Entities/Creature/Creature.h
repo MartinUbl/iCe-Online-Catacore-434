@@ -237,7 +237,7 @@ struct CreatureData
     explicit CreatureData() : dbData(true) {}
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    uint32 phaseMask;
+    uint16 phaseMask;
     uint32 displayid;
     int32 equipmentId;
     float posX;
