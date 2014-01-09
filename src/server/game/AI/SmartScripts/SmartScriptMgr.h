@@ -468,7 +468,7 @@ enum SMART_ACTION
     SMART_ACTION_LEARN_SPELL                        = 201,    // spellID
     SMART_ACTION_UNLEARN_SPELL                      = 202,    // spellID
 
-    SMART_ACTION_END                                = 203,
+    SMART_ACTION_END                                = 94,
 };
 
 struct SmartAction
