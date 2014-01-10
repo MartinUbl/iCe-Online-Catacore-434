@@ -5077,8 +5077,18 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 13;
             count++;
             break;
-        case 87904: // Feedback (Al'akir)
+        case 87904:  // Al'akir:
+        case 101458: // Feedback
+        case 101459: // 4 difficulty entries
+        case 101460:
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            count++;
+            break;
+        case 87770: // Al'akir:
+        case 93261: // Wind Burst
+        case 93262: // 4 difficulty entries
+        case 93263:
+            spellInfo->PreventionType = SPELL_PREVENTION_TYPE_NONE; // remove SPELL_PREVENTION_TYPE_SILENCE
             count++;
             break;
         case 88835: // Conclave of Wind kill credit
