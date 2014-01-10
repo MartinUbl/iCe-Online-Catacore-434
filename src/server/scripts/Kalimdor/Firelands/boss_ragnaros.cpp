@@ -1639,7 +1639,6 @@ public:
         }
 
         uint32 Demorph_timer;
-        uint32 Reset_aggro_timer;
         uint32 Morph_timer;
 
         void Reset()
@@ -1648,7 +1647,6 @@ public:
             me->SetDisplayId(11686); // Invis model
             Morph_timer = 1750;
             Demorph_timer = Morph_timer + 10000;
-            Reset_aggro_timer = Demorph_timer + 5000;
             me->SetInCombatWithZone();
             me->SetFloatValue(OBJECT_FIELD_SCALE_X,0.9f);
         }
@@ -1672,23 +1670,12 @@ public:
 
                 if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
                 {
+                    me->AddThreat(player,5000000.0f);
                     me->GetMotionMaster()->MoveChase(player);
                 }
                 Demorph_timer = NEVER;
             }
             else Demorph_timer -= diff;
-
-            if (Reset_aggro_timer <= diff) // Reset aggro every 5 seconds
-            {
-                me->getThreatManager().resetAllAggro();
-                if (Unit* player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                {
-                    me->AddThreat(player,10.0f);
-                    me->GetMotionMaster()->MoveChase(player);
-                }
-                Reset_aggro_timer = 5000;
-            }
-            else Reset_aggro_timer -= diff;
 
             if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE)) // Dont attack if we havent morphed yet
                 DoMeleeAttackIfReady();
