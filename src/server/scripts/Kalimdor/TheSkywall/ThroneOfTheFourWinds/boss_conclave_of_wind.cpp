@@ -692,7 +692,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                 }
             } else windblast_update_timer -= diff;
 
-            if(!me->isAttackReady()) // not to interrupt current spell
+            if(!me->isAttackReady()) // not to interrupt current spell attack
                 return;
 
             if(m_ability_phase == 1)
@@ -744,7 +744,17 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                 DoHurricane();
             }
 
-            DoSpellAttackIfReady(86182); // standard spell attack Slicing Gale
+            // DoSpellAttackIfReady(86182); // changed to random target:
+            if (!me->hasUnitState(UNIT_STAT_CASTING) && me->isAttackReady())
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f))
+                {
+                    me->Attack(target, false);
+                    me->CastSpell(target, 86182, false); // standard spell attack Slicing Gale
+                    me->resetAttackTimer();
+                }
+            }
+
         }
 
         void DoAction(const int32 param)
