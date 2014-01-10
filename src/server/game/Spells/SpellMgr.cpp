@@ -4339,6 +4339,9 @@ void SpellMgr::LoadSpellCustomAttr()
         spellInfo->AttributesEx5 &= ~SPELL_ATTR5_UNK19;// SPELL_ATTR5_DONT_TURN_DURING_CAST
             break;
         case 99172: // Engulfing flames
+        case 100175:
+        case 100176:
+        case 100177:
             spellInfo->EffectTriggerSpell[0] = 0;
             break;
         case 98982: // Submerge - disable lava bolts from triggering
