@@ -1363,7 +1363,12 @@ void GameObject::Use(Unit* user)
                     // most people reaction delay, therefore it indicates fishing bot usage
                     if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN))
                     {
-                        sLog->outChar("character:(%s) guid:(%u) is probably using fishing bot, or is faster than most people", player->GetName(), player->GetGUIDLow());
+                        sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) type:(%s))",
+                        player->GetSession() ? player->GetSession()->GetRemoteAddress().c_str() : "none",
+                        player->GetSession()->GetAccountId(),
+                        player->GetName(),
+                        "cheat",
+                        "fishing bot");
                     }
 
                     WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
