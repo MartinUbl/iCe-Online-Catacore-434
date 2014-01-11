@@ -1345,6 +1345,7 @@ void Group::OnGroupSlain(Unit* pVictim)
     // check for guild challenge condition
     if (sObjectMgr->IsFinalBoss(pVictim->GetEntry(), GetDifficulty(isRaidGroup())))
     {
+        sLog->outChar("DEBUG: last boss (entry %u) was slain", pVictim->GetEntry());
         CreatureEncounterData* ced = sObjectMgr->GetCreatureEncounter(pVictim->GetEntry(), GetDifficulty(isRaidGroup()));
         // ced exists if IsFinalBoss returned true
         DungeonEncounterEntry const* de = sDungeonEncountersStore.LookupEntry(ced->encounterId);
@@ -1368,6 +1369,7 @@ void Group::OnGroupSlain(Unit* pVictim)
             // if DungeonFinder group
             if (isLFGGroup())
             {
+                sLog->outChar("DEBUG: LFG group has slain the last boss (entry: %u) of dungeon ID: %u, de->mapId: %u", pVictim->GetEntry(), sLFGMgr->GetDungeon(GetGUID(), true), de->mapId);
                 // and nothing is wrong with DB data
                 if (de->mapId != 0)
                 {

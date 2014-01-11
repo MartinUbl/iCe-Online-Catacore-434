@@ -1890,7 +1890,7 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     Group* group = player->GetGroup();
     if (!group || !group->isLFGGroup())
     {
-        sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] is not in a group or not a LFGGroup. Ignoring", player->GetGUID());
+        sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] is not in a group or not a LFGGroup. Ignoring", player->GetGUID());
         return;
     }
 
@@ -1899,13 +1899,13 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     uint32 gDungeonId = GetDungeon(gguid);
     if (gDungeonId != dungeonId)
     {
-        sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] Finished dungeon %u but group queued for %u. Ignoring", guid, dungeonId, gDungeonId);    
+        sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] Finished dungeon %u but group queued for %u. Ignoring", guid, dungeonId, gDungeonId);    
         return;
     }
 
     if (GetState(guid) == LFG_STATE_FINISHED_DUNGEON)
     {
-        sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] Already rewarded player. Ignoring", guid);
+        sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] Already rewarded player. Ignoring", guid);
         return;
     }
 
@@ -1921,7 +1921,7 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(rDungeonId);
     if (!dungeon || dungeon->type != LFG_TYPE_RANDOM)
     {
-        sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] dungeon %u is not random", guid, rDungeonId);
+        sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] dungeon %u is not random", guid, rDungeonId);
         return;
     }
 
@@ -1936,7 +1936,10 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     uint8 index = 0;
     Quest const* qReward = sObjectMgr->GetQuestTemplate(reward->reward[index].questId);
     if (!qReward)
+    {
+        sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] quest %u does not exist", guid, reward->reward[index].questId);
         return;
+    }
 
     // if we can take the quest, means that we haven't done this kind of "run", IE: First Heroic Random of Day.
     if (player->CanRewardQuest(qReward,false))
@@ -1952,7 +1955,7 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     }
 
     // Give rewards
-    sLog->outDebug("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] done dungeon %u,%s previously done.", player->GetGUID(), GetDungeon(gguid), index > 0 ? " " : " not");
+    sLog->outChar("LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] done dungeon %u,%s previously done.", player->GetGUID(), GetDungeon(gguid), index > 0 ? " " : " not");
     player->GetSession()->SendLfgPlayerReward(dungeon->Entry(), GetDungeon(gguid, false), index, reward, qReward);
 }
 
