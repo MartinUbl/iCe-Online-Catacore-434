@@ -1400,7 +1400,6 @@ void SpellMgr::LoadSpellProcEvents()
         return;
     }
 
-    uint32 customProc = 0;
     do
     {
         Field *fields = result->Fetch();
@@ -1429,23 +1428,11 @@ void SpellMgr::LoadSpellProcEvents()
 
         mSpellProcEventMap[entry] = spe;
 
-        if (spell->procFlags == 0)
-        {
-            if (spe.procFlags == 0)
-            {
-                sLog->outErrorDb("Spell %u listed in `spell_proc_event` probally not triggered spell", entry);
-                continue;
-            }
-            customProc++;
-        }
         ++count;
     } while (result->NextRow());
 
     sLog->outString();
-    if (customProc)
-        sLog->outString(">> Loaded %u extra spell proc event conditions + %u custom",  count, customProc);
-    else
-        sLog->outString(">> Loaded %u extra spell proc event conditions", count);
+    sLog->outString(">> Loaded %u extra spell proc event conditions", count);
 }
 
 void SpellMgr::LoadSpellBonusess()
