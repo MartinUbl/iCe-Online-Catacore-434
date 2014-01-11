@@ -306,12 +306,21 @@ void GameObject::Update(uint32 diff)
                     // fishing code (bobber ready)
                     if (time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME)
                     {
+                        // This should prevent fishing bots usage - send custom anim before the bobber is set to "active" state (therefore "lootable")
+                        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN))
+                        {
+                            SendCustomAnim(GetGoAnimProgress());
+                            SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
+
+                            // delay the real "splash" by one update tick to confuse fishing bot
+                            break;
+                        }
+
                         // splash bobber (bobber ready now)
                         Unit* caster = GetOwner();
                         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                         {
                             SetGoState(GO_STATE_ACTIVE);
-                            SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
 
                             UpdateData udata(GetMapId());
                             WorldPacket packet;
@@ -319,12 +328,10 @@ void GameObject::Update(uint32 diff)
                             udata.BuildPacket(&packet);
                             caster->ToPlayer()->GetSession()->SendPacket(&packet);
 
-                            // Improvize the animation since CustomAnim doesn't work
+                            // Add some additional splash - this should help players to recognize the real catch
                             Creature* pVisual = SummonTrigger(GetPositionX(),GetPositionY(),GetPositionZ(),0.0f,2000);
                             if (pVisual)
                                 pVisual->CastSpell(pVisual, 69657, true);
-
-                            SendCustomAnim(GetGoAnimProgress());
                         }
 
                         m_lootState = GO_READY;                 // can be successfully open with some chance
@@ -1350,6 +1357,14 @@ void GameObject::Use(Unit* user)
                 default:
                 {
                     SetLootState(GO_JUST_DEACTIVATED);
+
+                    // if has "nodespawn" flag and is not yet lootable (loot state "go_ready") but already splashed visually
+                    // the real delay between splash and lootable flag setting is approx. 100ms, which is much smaller than
+                    // most people reaction delay, therefore it indicates fishing bot usage
+                    if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN))
+                    {
+                        sLog->outChar("character:(%s) guid:(%u) is probably using fishing bot, or is faster than most people", player->GetName(), player->GetGUIDLow());
+                    }
 
                     WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
                     player->GetSession()->SendPacket(&data);
