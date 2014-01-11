@@ -7005,16 +7005,6 @@ inline void CheckGOLockId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)
         goInfo->id,goInfo->type,N,goInfo->door.lockId,goInfo->door.lockId);
 }
 
-inline void CheckGOLinkedTrapId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)
-{
-    if (GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(dataN))
-    {
-        if (trapInfo->type != GAMEOBJECT_TYPE_TRAP)
-            sLog->outErrorDb("Gameobject (Entry: %u GoType: %u) have data%d=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%u) type.",
-            goInfo->id,goInfo->type,N,dataN,dataN,GAMEOBJECT_TYPE_TRAP);
-    }
-}
-
 inline void CheckGOSpellId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)
 {
     if (sSpellStore.LookupEntry(dataN))
@@ -7099,9 +7089,6 @@ void ObjectMgr::LoadGameobjectInfo()
                     CheckGOLockId(goInfo,goInfo->chest.lockId,0);
 
                 CheckGOConsumable(goInfo,goInfo->chest.consumable,3);
-
-                if (goInfo->chest.linkedTrapId)              // linked trap
-                    CheckGOLinkedTrapId(goInfo,goInfo->chest.linkedTrapId,7);
                 break;
             }
             case GAMEOBJECT_TYPE_TRAP:                      //6
@@ -7121,9 +7108,6 @@ void ObjectMgr::LoadGameobjectInfo()
                         sLog->outErrorDb("Gameobject (Entry: %u GoType: %u) have data0=%u but SpellFocus (Id: %u) not exist.",
                             id,goInfo->type,goInfo->spellFocus.focusId,goInfo->spellFocus.focusId);
                 }
-
-                if (goInfo->spellFocus.linkedTrapId)        // linked trap
-                    CheckGOLinkedTrapId(goInfo,goInfo->spellFocus.linkedTrapId,2);
                 break;
             }
             case GAMEOBJECT_TYPE_GOOBER:                    //10
@@ -7140,8 +7124,6 @@ void ObjectMgr::LoadGameobjectInfo()
                             id,goInfo->type,goInfo->goober.pageId,goInfo->goober.pageId);
                 }
                 CheckGONoDamageImmuneId(goInfo,goInfo->goober.noDamageImmune,11);
-                if (goInfo->goober.linkedTrapId)            // linked trap
-                    CheckGOLinkedTrapId(goInfo,goInfo->goober.linkedTrapId,12);
                 break;
             }
             case GAMEOBJECT_TYPE_AREADAMAGE:                //12
