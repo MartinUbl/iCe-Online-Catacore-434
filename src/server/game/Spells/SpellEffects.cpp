@@ -9655,6 +9655,13 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
         speedxy *= 1.2f;
         speedz *= 1.25f;
     }
+    // Ultrasafe Personnel Launcher
+    else if (m_spellInfo->Id == 77393)
+    {
+        // adjust knockback position to always "knock back" from the same absolute angle
+        float dstAngle = m_caster->GetAngle(-5692.6215f, -923.6963f);
+        m_caster->GetNearPoint2D(x, y, 5.0f, dstAngle);
+    }
     else //if (m_spellInfo->Effect[i] == SPELL_EFFECT_KNOCK_BACK)
     {
         m_caster->GetPosition(x, y);

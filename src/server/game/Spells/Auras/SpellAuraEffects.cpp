@@ -5213,6 +5213,18 @@ void AuraEffect::HandleAuraFeatherFall(AuraApplication const *aurApp, uint8 mode
         target->SendMessageToSet(&data, true);
     }
 
+    // special case of spells, which have to knockback player in order to get him falling in the direction he was falling till this moment
+    // it's weird, but Blizzard also does that
+
+    // Gnomish VLD Parachute
+    if (apply && m_spellProto->Id == 77404)
+    {
+        float x, y;
+        float dstAngle = target->GetAngle(-5692.6215f, -923.6963f);
+        target->GetNearPoint2D(x, y, 5.0f, dstAngle);
+        target->KnockbackFrom(x, y, -0.5f, 0.0f);
+    }
+
     // start fall from current height
     if (!apply && target->GetTypeId() == TYPEID_PLAYER)
         target->ToPlayer()->SetFallInformation(0, target->GetPositionZ());
