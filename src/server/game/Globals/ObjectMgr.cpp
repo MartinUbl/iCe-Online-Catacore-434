@@ -2808,7 +2808,6 @@ void ObjectMgr::LoadItemSetNames()
             pProto = GetItemPrototype(entry);
             if (pProto)
             {
-                sLog->outErrorDb("Item set part (Entry: %u) does not have entry in `item_set_names`, adding data from `item_template`.", entry);
                 ItemSetNameEntry &data = mItemSetNameMap[entry];
                 data.name = pProto->Name1;
                 data.InventoryType = pProto->InventoryType;
