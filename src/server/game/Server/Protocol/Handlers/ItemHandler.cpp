@@ -505,7 +505,7 @@ void WorldSession::HandleRequestHotFixOpcode(WorldPacket & recv_data)
                 SendItemSparseDb2Reply(entry);
                 break;
             default:
-                sLog->outError("CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
+                sLog->outDebug("CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
                 recv_data.rfinish();
                 break;
         }

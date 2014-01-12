@@ -46,7 +46,7 @@ void WorldSession::HandleDismissCritter(WorldPacket &recv_data)
 
     if (!pet)
     {
-        sLog->outError("Vanitypet %u does not exist", uint32(GUID_LOPART(guid)));
+        sLog->outDetail("Vanitypet %u does not exist", uint32(GUID_LOPART(guid)));
         return;
     }
 
