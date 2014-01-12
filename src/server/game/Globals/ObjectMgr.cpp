@@ -4283,29 +4283,6 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(),qinfo->ZoneOrSort);
                 // no changes, quest not dependent from this value but can have problems at client (note some may be 0, we must allow this so no check)
             }
-
-            //check SkillOrClass value (class case).
-            if (ClassByQuestSort(-int32(qinfo->ZoneOrSort)))
-            {
-                // SkillOrClass should not have class case when class case already set in ZoneOrSort.
-                if (qinfo->SkillOrClassMask < 0)
-                {
-                    sLog->outErrorDb("Quest %u has `ZoneOrSort` = %i (class sort case) and `SkillOrClassMask` = %i (class case), redundant.",
-                        qinfo->GetQuestId(), qinfo->ZoneOrSort, qinfo->SkillOrClassMask);
-                }
-            }
-
-            //check for proper SkillOrClass value (skill case)
-            if (int32 skill_id =  SkillByQuestSort(-int32(qinfo->ZoneOrSort)))
-            {
-                // skill is positive value in SkillOrClass
-                if (qinfo->SkillOrClassMask != skill_id)
-                {
-                    sLog->outErrorDb("Quest %u has `ZoneOrSort` = %i (skill sort case) but `SkillOrClassMask` does not have a corresponding value (%i).",
-                        qinfo->GetQuestId(), qinfo->ZoneOrSort, skill_id);
-                    //override, and force proper value here?
-                }
-            }
         }
 
         // SkillOrClassMask (class case)
