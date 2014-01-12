@@ -1585,12 +1585,6 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-        {
-            if (!mapEntry || !mapEntry->IsDungeon())
-                sLog->outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`flags_extra` including CREATURE_FLAG_EXTRA_INSTANCE_BIND but creature are not in instance.", guid, data.id);
-        }
-
         if (data.spawndist < 0.0f)
         {
             sLog->outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawndist`< 0, set to 0.", guid, data.id);
