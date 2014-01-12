@@ -150,16 +150,21 @@ class LotteryHelper: public WorldScript
     public:
         LotteryHelper(): WorldScript("lottery_world_script")
         {
-            if (sWorld->getWorldState(LOTTERY_WORLD_STATE) == 0)
-                sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
-
-            time_flush = sWorld->getWorldState(LOTTERY_WORLD_STATE);
+            time_flush = 0;
         }
 
-        uint32 time_flush;
+        time_t time_flush;
 
         void OnUpdate(void* dunno, uint32 diff)
         {
+            if (time_flush == 0)
+            {
+                if (sWorld->getWorldState(LOTTERY_WORLD_STATE) == 0)
+                    sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
+
+                time_flush = sWorld->getWorldState(LOTTERY_WORLD_STATE);
+            }
+
             if (time_flush < time(NULL))
             {
                 sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
