@@ -2905,21 +2905,18 @@ void World::LoadWorldStates()
 
     if (!result)
     {
-        
-        
         sLog->outString();
         sLog->outString(">> Loaded 0 world states.");
         return;
     }
 
-    
     uint32 counter = 0;
 
     do
     {
         Field *fields = result->Fetch();
         m_worldstates[fields[0].GetUInt32()] = fields[1].GetUInt64();
-        
+
         ++counter;
     } while (result->NextRow());
 
