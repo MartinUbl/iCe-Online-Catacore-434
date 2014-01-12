@@ -2665,8 +2665,10 @@ void ObjectMgr::LoadItemPrototypes()
         else
         {
             // lot DB cases
-            if (proto->RequiredDisenchantSkill >= 0)
+            if (proto->RequiredDisenchantSkill > 0)
                 sLog->outErrorDb("Item (Entry: %u) marked as disenchantable by RequiredDisenchantSkill, but not have disenchanting loot id.",i);
+            else if (proto->RequiredDisenchantSkill == 0)
+                const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
         }
 
         if (proto->FoodType >= MAX_PET_DIET)
