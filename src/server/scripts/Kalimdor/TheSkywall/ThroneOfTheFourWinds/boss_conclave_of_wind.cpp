@@ -957,18 +957,14 @@ public:
         {
             if(TempSummon* summon = me->ToTempSummon())
                 summon->SetTempSummonType(TEMPSUMMON_DEAD_DESPAWN);
-
-            if(InstanceScript* pInstance = me->GetInstanceScript())
-                anshal_guid = pInstance->GetData64(NPC_ANSHAL);
-            else anshal_guid = 0;
         }
 
         uint32 spores_timer;
-        uint64 anshal_guid;
 
         void Reset()
         {
             spores_timer = 5000;
+            me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
         }
 
         void UpdateAI(const uint32 diff)
@@ -977,7 +973,7 @@ public:
             {
                 // Toxic Spores aura
                 me->CastSpell(me, 86281, true);
-                spores_timer = 15000;
+                spores_timer = 20000;
             } else spores_timer -= diff;
 
             if(!UpdateVictim())
@@ -985,15 +981,8 @@ public:
 
             if(me->GetDistance2d(me->getVictim()) > 50.0f)
             {
-                if(anshal_guid)
-                {
-                    if(Creature* pAnshal = me->GetCreature(*me, anshal_guid))
-                    {
-                        AttackStart(pAnshal);
-                        return;
-                    }
-                }
-                EnterEvadeMode();
+                me->getThreatManager().resetAllAggro();
+                me->GetMotionMaster()->MoveTargetedHome();
                 return;
             }
 
