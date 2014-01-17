@@ -19604,12 +19604,12 @@ void Player::SendRaidInfo()
                 }
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
-                data << 0;                           //if there wasnt 0, heroic difficulty shown nothing  //isHeroic;
+                data << 0;                                  //if there wasnt 0, heroic difficulty shown nothing  //isHeroic;
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << encData;                          // completed encounters mask   //uint8(0);
+                data << encData;                            // completed encounters mask   //uint8(0);
                 ++counter;  
             }
         }

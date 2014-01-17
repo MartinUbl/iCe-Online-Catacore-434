@@ -39,6 +39,7 @@ public:
         instance_grim_batol_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 General_UmbrissGUID;
         uint64 Forgemaster_ThorngusGUID;
@@ -135,6 +136,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -183,6 +185,17 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=auiEncounter[DATA_GENERAL_UMBRISS];//0
+            currEnc[1]=auiEncounter[DATA_FORGEMASTER_THRONGUS];//1
+            currEnc[2]=auiEncounter[DATA_EDURAX];//3
+            currEnc[3]=auiEncounter[DATA_DRAHGA_SHADOWBURNER];//2
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+            return currEnc;
+        }
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

@@ -2144,6 +2144,8 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
             map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
             created=true;
         }
+        if(map && !map->IsRaid())
+            break;
         if(map && !map->HavePlayers()) 
         {
             map->UnloadAll();

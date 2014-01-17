@@ -26,10 +26,12 @@ enum data
     DATA_ISISET,
     DATA_AMMUNAE,
     DATA_SETESH,
-    DATA_RAJH
+    DATA_RAJH,
+    DATA_PTAH,
+    GUID_PTAH=39428,
 };
 
-#define MAX_ENCOUNTER 6
+#define MAX_ENCOUNTER 7
 
 class instance_halls_of_origination : public InstanceMapScript
 {
@@ -41,6 +43,7 @@ public:
         instance_halls_of_origination_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 Temple_Guardian_AnhuurGUID;
         uint64 AnraphetGUID;
@@ -138,6 +141,9 @@ public:
                 case DATA_RAJH:
                     auiEncounter[type] = data;
                     break;
+                case GUID_PTAH:
+                    auiEncounter[DATA_PTAH] = data;
+                    break;
             }
 
             if (auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR] == DONE) // Temple
@@ -162,6 +168,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -171,6 +178,8 @@ public:
        {
             if (type < MAX_ENCOUNTER)
                 return auiEncounter[type];
+            else if(type==GUID_PTAH)
+                return auiEncounter[6];
             else
                 return 0;
        }
@@ -210,6 +219,20 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=auiEncounter[DATA_TEMPLE_GUARDIAN_ANHUUR];//0
+            currEnc[1]=auiEncounter[DATA_SETESH];//4
+            currEnc[2]=auiEncounter[DATA_RAJH];//5
+            currEnc[3]=auiEncounter[DATA_ISISET];//2
+            currEnc[4]=auiEncounter[DATA_PTAH];//6
+            currEnc[5]=auiEncounter[DATA_ANRAPHET];//1
+            currEnc[6]=auiEncounter[DATA_AMMUNAE];//3
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+            return currEnc;
+        }
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

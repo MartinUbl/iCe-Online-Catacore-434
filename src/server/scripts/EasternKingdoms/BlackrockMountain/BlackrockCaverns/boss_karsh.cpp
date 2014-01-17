@@ -65,6 +65,7 @@ class boss_karsh: public CreatureScript
             {
                 ModifySpellRadius(75083, 32, 0); // mob Conflagration - Burning Heat
                 Reset();
+                pInstance = me->GetInstanceScript();
             }
 
             void Reset()
@@ -75,6 +76,7 @@ class boss_karsh: public CreatureScript
                 Zaznamenal = true;
             }
 
+            InstanceScript* pInstance;
             uint32 HeatedArmorApplyTimer;
             uint32 HeatWaveTimer;
             uint32 CleaveTimer;
@@ -94,6 +96,7 @@ class boss_karsh: public CreatureScript
             void JustDied(Unit* pKiller)
             {
                 me->MonsterYell("We number in the millions! Your efforts are wasted...",LANG_UNIVERSAL,0);
+                pInstance->SetData(TYPE_KARSH, DONE);
             }
 
             bool IsInRangeOfPillar()

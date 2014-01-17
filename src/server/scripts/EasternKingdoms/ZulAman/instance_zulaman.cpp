@@ -81,6 +81,7 @@ class instance_zulaman : public InstanceMapScript
             uint16 ChestLooted;
 
             uint32 m_auiEncounter[MAX_ENCOUNTER];
+            uint32 currEnc[MAX_ENCOUNTER];
             uint32 RandVendor[RAND_VENDOR];
 
             void Initialize()
@@ -180,6 +181,8 @@ class instance_zulaman : public InstanceMapScript
             {
                 std::ostringstream ss;
                 ss << "S " << BossKilled << " " << ChestLooted << " " << QuestMinute;
+                for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                    ss << " " << m_auiEncounter[i];
                 char* data = new char[ss.str().length()+1];
                 strcpy(data, ss.str().c_str());
                 //sLog->outError("TSCR: Zul'aman saved, %s.", data);
@@ -201,6 +204,11 @@ class instance_zulaman : public InstanceMapScript
                     ChestLooted = data2;
                     QuestMinute = data3;
                 } else sLog->outError("TSCR: Zul'aman: corrupted save data.");
+                for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
+                    ss >> m_auiEncounter[i];
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    if (m_auiEncounter[i] == IN_PROGRESS)
+                        m_auiEncounter[i] = NOT_STARTED;
             }
 
             void SetData(uint32 type, uint32 data)
@@ -273,6 +281,7 @@ class instance_zulaman : public InstanceMapScript
                         DoUpdateWorldState(3104, 0);
                     }
                     CheckInstanceStatus();
+                    GetCorrUiEncounter();
                     SaveToDB();
                 }
             }
@@ -322,6 +331,19 @@ class instance_zulaman : public InstanceMapScript
             }
             virtual uint32* GetUiEncounter(){return m_auiEncounter;}
             virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+            virtual uint32* GetCorrUiEncounter()
+            {
+                uint32* uiEnc=GetUiEncounter();
+                currEnc[0]=m_auiEncounter[DATA_ZULJINEVENT-1];//5
+                currEnc[1]=m_auiEncounter[DATA_HEXLORDEVENT-1];//4
+                currEnc[2]=m_auiEncounter[DATA_HALAZZIEVENT-1];//3
+                currEnc[3]=m_auiEncounter[DATA_JANALAIEVENT-1];//2
+                currEnc[4]=m_auiEncounter[DATA_NALORAKKEVENT-1];//0
+                currEnc[5]=m_auiEncounter[DATA_AKILZONEVENT-1];//1
+                sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+                sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+                return currEnc;
+            }
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* pMap) const

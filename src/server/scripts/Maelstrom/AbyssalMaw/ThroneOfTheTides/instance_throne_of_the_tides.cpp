@@ -39,6 +39,7 @@ public:
         instance_throne_of_the_tides_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 Commander_UlthokGUID;
         uint64 Lady_NazjarGUID;
@@ -134,6 +135,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -182,6 +184,18 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=auiEncounter[DATA_OZUMAT];//3
+            currEnc[1]=auiEncounter[DATA_ERUNAK_STONESPEAKER];//2
+            currEnc[2]=auiEncounter[DATA_LADY_NAZJAR];//0
+            currEnc[3]=auiEncounter[DATA_COMANNDER_ULTHOK];//1
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+            return currEnc;
+        }
+
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

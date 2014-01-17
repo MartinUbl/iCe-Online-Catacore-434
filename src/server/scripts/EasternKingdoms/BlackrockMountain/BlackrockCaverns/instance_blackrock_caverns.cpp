@@ -41,6 +41,7 @@ public:
         }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
         std::string str_data;
         uint64 m_auiCorla_ZealotGUID[3];
         uint64 m_uiCorlaGUID;
@@ -115,6 +116,7 @@ public:
 
                 str_data = saveStream.str();
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -148,6 +150,18 @@ public:
         }
         virtual uint32* GetUiEncounter(){return m_auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=m_auiEncounter[TYPE_ROMOGG];//0
+            currEnc[1]=m_auiEncounter[TYPE_KARSH];//2
+            currEnc[2]=m_auiEncounter[TYPE_CORLA];//1
+            currEnc[3]=m_auiEncounter[TYPE_BEAUTY];//3
+            currEnc[4]=m_auiEncounter[TYPE_OBSIDIUS];//4
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+            return currEnc;
+        }
     };
 };
 
@@ -155,4 +169,3 @@ void AddSC_instance_blackrock_caverns()
 {
     new instance_blackrock_caverns();
 }
-

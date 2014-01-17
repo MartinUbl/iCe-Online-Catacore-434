@@ -43,6 +43,7 @@ public:
         instance_the_stonecore_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+        uint32 currEnc[MAX_ENCOUNTER];
 
         uint64 CorborusGUID;
         uint64 Corborus2GUID;
@@ -220,6 +221,7 @@ public:
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << auiEncounter[i];
 
+                GetCorrUiEncounter();
                 SaveToDB();
                 OUT_SAVE_INST_DATA_COMPLETE;
             }
@@ -268,6 +270,18 @@ public:
         }
         virtual uint32* GetUiEncounter(){return auiEncounter;}
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
+        virtual uint32* GetCorrUiEncounter()
+        {
+            uint32* uiEnc=GetUiEncounter();
+            currEnc[0]=auiEncounter[DATA_SLABHIDE];//1
+            currEnc[1]=auiEncounter[DATA_OZRUK];//2
+            currEnc[2]=auiEncounter[DATA_HIGH_PRIESTESS_AZIL];//3
+            currEnc[3]=auiEncounter[DATA_CORBORUS];//0
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-4);
+            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-4);
+            return currEnc;
+        }
+
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

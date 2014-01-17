@@ -51,8 +51,10 @@ class boss_obsidius: public CreatureScript
             {
                 ModifySpellRadius(SPELL_THUNDER_CLAP, 13, -1);
                 Reset();
+                pInstance = me->GetInstanceScript();
             }
 
+            InstanceScript* pInstance;
             uint32 StoneBlowTimer;
             uint32 TwilightCorruptionTimer;
             uint32 ThunderClapTimer;
@@ -95,6 +97,7 @@ class boss_obsidius: public CreatureScript
                     for (std::list<Creature*>::const_iterator itr = ShadowsList.begin(); itr != ShadowsList.end(); ++itr)
                         (*itr)->Kill((*itr));
                 }
+                pInstance->SetData(TYPE_OBSIDIUS, DONE);
             }
 
             void UpdateAI(const uint32 diff)

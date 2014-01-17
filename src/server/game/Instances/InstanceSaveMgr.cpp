@@ -669,7 +669,7 @@ void InstanceSaveManager::loadRaidEncounter()
     uint32 mapId;
     int bossNum=0;
     char DummyReadCh;
-    char DummyReadInt;
+    uint32 DummyReadInt;
 
     if (!result)
     {
@@ -787,10 +787,10 @@ void InstanceSaveManager::loadRaidEncounter()
                     switch(i)
                     {
                     case 0:
-                        loadStream >> dataEnc[1];//Argaloth
+                        loadStream >> dataEnc[0];//Conclave
                         break;
                     case 1:
-                        loadStream >> dataEnc[0];//Occuthar
+                        loadStream >> dataEnc[1];//Alakir
                         break;
                     }
                 }
@@ -833,8 +833,303 @@ void InstanceSaveManager::loadRaidEncounter()
                 setInstanceSaveData(instanceId,dataEnc,bossNum);
                 break;
             }
+            case 33://Shadowfang keep
+            {
+                bossNum=5;
+                uint32 dataEnc[5];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[4];//Ashbury
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[3];//Silverlaine
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[2];//Springvale
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[0];//Valden
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[1];//Godfrey
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 645://Blackrock caverns
+            {
+                bossNum=5;
+                uint32 dataEnc[5];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[0];//Romogg
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[2];//Corla
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[1];//Karsh
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[3];//Beauty
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[4];//Obsidius
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 670://Grim batol
+            {
+                bossNum=4;
+                uint32 dataEnc[4];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[0];//Umbriss
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[1];//Throngus
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[3];//Dragha
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[2];//Edurax
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 644://Halls of Origination
+            {
+                bossNum=7;
+                uint32 dataEnc[7];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[0];//Anhuur
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[5];//Anarphet
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[3];//Isiset
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[6];//Ammunae
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[1];//Setesh
+                        break;
+                    case 5:
+                        loadStream >> dataEnc[2];//Rajh
+                        break;
+                    case 6:
+                        loadStream >> dataEnc[4];//Ptah
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 755://Lost city of Tolvir
+            {
+                bossNum=4;
+                uint32 dataEnc[4];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[3];//Husam
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[2];//Barim
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[1];//Lockmaw
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[0];//Siamat
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 657://Vortex pinnacle
+            {
+                bossNum=3;
+                uint32 dataEnc[3];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[0];//Ertan
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[2];//Altarius
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[1];//Asaad
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 725://The Stonecore
+            {
+                bossNum=4;
+                uint32 dataEnc[4];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[3];//Corborus
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[0];//Slabhide
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[1];//Ozruk
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[2];//Azil
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 643://Throne of the Tides
+            {
+                bossNum=4;
+                uint32 dataEnc[4];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[2];//Nazjar
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[3];//Ulthok
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[1];//Stonespeaker
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[0];//Ozumat
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 36://Deadmines
+            {
+                bossNum=6;
+                uint32 dataEnc[6];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[2];//Glubtok
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[1];//Gearbreaker
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[3];//Reaper 5000
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[4];//Ripsnarl
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[5];//Cookie
+                        break;
+                    case 5:
+                        loadStream >> dataEnc[0];//Vancleef
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
+            case 568://Zulaman
+            {
+                bossNum=6;
+                uint32 dataEnc[6];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                loadStream >> DummyReadCh >> DummyReadInt >> DummyReadInt >> DummyReadInt;
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                        loadStream >> dataEnc[4];//Nalorakk
+                        break;
+                    case 1:
+                        loadStream >> dataEnc[5];//Akilzon
+                        break;
+                    case 2:                            
+                        loadStream >> dataEnc[3];//Janalai
+                        break;
+                    case 3:
+                        loadStream >> dataEnc[2];//Halazzi
+                        break;
+                    case 4:
+                        loadStream >> dataEnc[1];//Hexlord
+                        break;
+                    case 5:
+                        loadStream >> dataEnc[0];//Zuljin
+                        break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+            }
 
-            default://raids for which Raid info does not work
+            default://raids for which Raid info does not work yet
             {
                 bossNum=1;
                 uint32 dataEnc[1];
@@ -842,6 +1137,38 @@ void InstanceSaveManager::loadRaidEncounter()
                 setBossNumber(mapId,bossNum);
                 setInstanceSaveData(instanceId,dataEnc,bossNum);
                 break;
+                /*
+                case mapid://
+                {
+                bossNum=5;
+                uint32 dataEnc[5];
+                setBossNumber(mapId,bossNum);
+                std::istringstream loadStream(data);
+                for (uint8 i = 0; i < bossNum; i++)
+                {
+                    switch(i)
+                    {
+                    case 0:
+                    loadStream >> dataEnc[4];//
+                    break;
+                    case 1:
+                    loadStream >> dataEnc[3];//
+                    break;
+                    case 2:                            
+                    loadStream >> dataEnc[2];//
+                    break;
+                    case 3:
+                    loadStream >> dataEnc[0];//
+                    break;
+                    case 4:
+                    loadStream >> dataEnc[1];//
+                    break;
+                    }
+                }
+                setInstanceSaveData(instanceId,dataEnc,bossNum);
+                break;
+                }
+                */
             }               
         
         }

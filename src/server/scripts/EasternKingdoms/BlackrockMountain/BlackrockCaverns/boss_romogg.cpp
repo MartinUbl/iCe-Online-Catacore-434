@@ -103,6 +103,7 @@ public:
         void JustDied(Unit* pKiller)
         {
             me->MonsterYell("Rom'ogg...sorry...",LANG_UNIVERSAL,0);
+            pInstance->SetData(TYPE_ROMOGG, DONE);
         }
 
         void UpdateAI(const uint32 diff)

@@ -165,6 +165,7 @@ public:
                 }
             }
             ClearPlayers(achiev);
+            pInstance->SetData(TYPE_CORLA, DONE);
         }
 
         void UpdateAI(const uint32 diff)

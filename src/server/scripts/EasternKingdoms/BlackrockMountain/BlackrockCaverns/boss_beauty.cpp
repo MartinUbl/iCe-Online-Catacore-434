@@ -146,6 +146,12 @@ class boss_beauty: public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
+
+            void JustDied(Unit* pKiller)
+            {
+                pInstance->SetData(TYPE_BEAUTY, DONE);               
+            }
+
         };
 
         CreatureAI* GetAI(Creature* c) const
