@@ -2164,7 +2164,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             case SPELLFAMILY_DRUID:
             {
-                if (GetId() == 101162) //Barksin
+                if (GetId() == 22812) //Barksin
                 {
                     if (caster && caster->HasAura(99009) && removeMode == AURA_REMOVE_BY_EXPIRE) // T12 4P druid item set
                     {
