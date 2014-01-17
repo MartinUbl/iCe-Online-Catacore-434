@@ -13102,11 +13102,12 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                 // Improved Lava Lash - damage increase by X% for every stack of Searing Flames
                 if (spellProto->Id == 60103)
                 {
-                    float bonusApp = 0.0f;
+                    float bonusApp = (HasAura(99209)) ? 0.05f : 0.0f; // Shaman T12 Enhancement 2P Bonus
+
                     if (HasAura(77701))
-                        bonusApp = 0.2f;
+                        bonusApp += 0.2f;
                     else if (HasAura(77700))
-                        bonusApp = 0.1f;
+                        bonusApp += 0.1f;
 
                     if (Aura* pAura = pVictim->GetAura(77661, GetGUID()))
                     {
