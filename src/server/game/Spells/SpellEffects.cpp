@@ -4087,6 +4087,13 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            if (m_spellInfo->Id == 17364 && m_caster->HasAura(99213)) // Stormstrike (Shaman T12 Enhancement 4P Bonus)
+                m_caster->CastSpell(unitTarget,99212,true);
+            break;
+        }
+
     }
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
@@ -6891,15 +6898,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             if (AuraEffect * aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
                 m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
 
-            //Stormstrike
-            if (m_spellInfo->Id == 17364)
-            {
-                if (m_caster->HasAura(99213)) //  Shaman T12 Enhancement 4P Bonus
-                {
-                    // if wont work change 99213 to DUMMY AURA
-                    m_caster->CastSpell(unitTarget,99212,true); // Stormfire
-                }
-            }
             // Lava Lash
             if (m_spellInfo->Id == 60103)
             {
