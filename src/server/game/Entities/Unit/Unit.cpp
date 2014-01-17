@@ -6898,34 +6898,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     break;
                 }
-                // Tricks of the Trade
-                case 57934:
-                {
-                    if (HasAura(99175)) // Rogue T12 4P Bonus
-                    {
-                        switch (urand(0,2)) // Get one of random buffs 
-                        {
-                            case 0:
-                                CastSpell(this, 99187, true); // Crit
-                                break;
-                            case 1:
-                                CastSpell(this, 99186, true); // Haste
-                                break;
-                            case 2:
-                                CastSpell(this, 99188, true); // Mastery
-                                break;
-                        }
-                    }
-
-                    if (Unit* unitTarget = GetMisdirectionTarget())
-                    {
-                        RemoveAura(dummySpell->Id, GetGUID(), 0, AURA_REMOVE_BY_DEFAULT);
-                        CastSpell(this, 59628, true);
-                        CastSpell(unitTarget, 57933, true);
-                        return true;
-                    }
-                    return false;
-                }
                 // Item - Druid T10 Balance 4P Bonus
                 case 70723:
                 {

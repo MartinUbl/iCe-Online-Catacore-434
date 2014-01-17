@@ -7897,7 +7897,24 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                             break;
                         case 57934: // Tricks of the Trade
                             if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
+                            {
                                 caster->SetReducedThreatPercent(0, 0);
+                                if (caster->HasAura(99175)) // Rogue T12 4P Bonus
+                                {
+                                    switch (urand(0,2)) // Get one of random buffs 
+                                    {
+                                        case 0:
+                                            caster->CastSpell(caster, 99187, true); // Crit
+                                            break;
+                                        case 1:
+                                            caster->CastSpell(caster, 99186, true); // Haste
+                                            break;
+                                        case 2:
+                                            caster->CastSpell(caster, 99188, true); // Mastery
+                                            break;
+                                    }
+                                }
+                            }
                             break;
                     }
                     break;
