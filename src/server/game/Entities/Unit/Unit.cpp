@@ -9293,6 +9293,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 99204: // Shaman T12 Elemental 2P Bonus
+        {
+            if (procSpell->Id != 403) // Lightning Bolt
+                return false;
+        }
         // Vigilance
         case 50720:
             if (triggeredByAura)
