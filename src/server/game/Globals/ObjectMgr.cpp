@@ -972,7 +972,6 @@ void ObjectMgr::CheckCreatureTemplate(CreatureInfo const* cInfo)
     {
         sLog->outErrorDb("Creature (Entry: %u) has invalid unit_class (%u) in creature_template. Set to 1 (UNIT_CLASS_WARRIOR).", cInfo->Entry, cInfo->unit_class);
         const_cast<CreatureInfo*>(cInfo)->unit_class = UNIT_CLASS_WARRIOR;
-        WorldDatabase.PQuery("UPDATE creature_template SET unit_class=1 WHERE entry='%d' AND unit_class=0", cInfo->Entry);
     }
 
     if (cInfo->dmgschool >= MAX_SPELL_SCHOOL)
