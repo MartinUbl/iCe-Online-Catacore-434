@@ -170,14 +170,16 @@ class LotteryHelper: public WorldScript
                 sWorld->setWorldState(LOTTERY_WORLD_STATE, (uint64)time(NULL)+WEEK);
                 time_flush = sWorld->getWorldState(LOTTERY_WORLD_STATE);
 
-                QueryResult res = CharacterDatabase.PQuery("SELECT owner_guid FROM item_instance WHERE itemEntry = %u;", LOTTERY_TICKET_ITEM);
+                QueryResult res = CharacterDatabase.PQuery("SELECT owner_guid, count FROM item_instance WHERE itemEntry = %u;", LOTTERY_TICKET_ITEM);
                 if (res)
                 {
                     std::vector<uint64> holderMap;
                     uint32 cnt = 0;
                     do
                     {
-                        holderMap.push_back((*res)[0].GetUInt64());
+                        // the more tickets you have, the greater chance you have
+                        for (uint32 i = 0; i < (*res)[1].GetUInt32(); i++)
+                            holderMap.push_back((*res)[0].GetUInt64());
                         cnt++;
                     } while (res->NextRow());
 
