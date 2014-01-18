@@ -145,10 +145,10 @@ public:
                 {
                     if (uiPhase == 1)
                         for (uint8 i = 0; i < DUNGEON_MODE(3, 5); ++i)
-                            me->SummonCreature(CREATURE_SNAKE, SpawnLoc[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN,20*IN_MILLISECONDS);
+                            me->SummonCreature(CREATURE_SNAKE, SpawnLoc[i], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,120*IN_MILLISECONDS);
                     if (uiPhase == 2)
                         for (uint8 i = 0; i < DUNGEON_MODE(3, 5); ++i)
-                            me->SummonCreature(CREATURE_CONSTRICTORS, SpawnLoc[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN,20*IN_MILLISECONDS);
+                            me->SummonCreature(CREATURE_CONSTRICTORS, SpawnLoc[i], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,120*IN_MILLISECONDS);
                     uiSpawnTimer = 5*IN_MILLISECONDS;
                 } else uiSpawnTimer -= diff;
             }
