@@ -300,7 +300,9 @@ public:
             Unit *caster = GetCaster();
             if(!target || !caster)
                 return;
-            
+
+            caster->RemoveAura(95774); // Fulmination marker
+
             AuraEffect *fulminationAura = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2010, 0);
             if (!fulminationAura)
                 return;

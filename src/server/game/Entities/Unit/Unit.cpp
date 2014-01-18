@@ -10034,7 +10034,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 if(lsCharges < 9)
                 {
                     lightningShield->SetCharges(lsCharges + 1);
+                    lsCharges++;
                 }
+
+                if (lsCharges == 9)
+                    this->CastSpell(this,95774,true); // Fulmination marker
             }
             break;
         }
