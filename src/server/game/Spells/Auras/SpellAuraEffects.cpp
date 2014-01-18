@@ -822,6 +822,27 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             }
         case SPELL_AURA_PERIODIC_HEAL:
             break;
+        case SPELL_AURA_MOD_RATING:
+        {
+            // These spells need to set amount manually because real amount should be so high to get 25 % of some rating
+            // 128 haste rating for 1% chance
+            // 179 critical strike rating for 1% chance
+            // 179 mastery rating for 1% chance
+            // source -> http://wowpedia.org/Combat_rating_system
+            switch(GetSpellProto()->Id)
+            {
+                case 99186: // Haste
+                    amount = 128 * 25;
+                    break;
+                case 99187: // Critical
+                    amount = 179 * 25;
+                    break;
+                case 99188: // Mastery
+                    amount = 179 * 25;
+                    break;
+            }
+            break;
+        }
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
             if (!caster)
                 break;
