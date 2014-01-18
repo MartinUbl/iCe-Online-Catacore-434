@@ -1235,7 +1235,7 @@ class npc_rageface : public CreatureScript
                         std::advance(itr, randPos);
                         if ((*itr) && (*itr)->IsInWorld())
                         {
-                            me->getThreatManager().resetAllAggro();
+                            me->TauntApply(*itr);
                             me->AddThreat((*itr), 50000.0f);
                             me->GetMotionMaster()->Clear(false);
                             me->GetMotionMaster()->MoveChase((*itr));
