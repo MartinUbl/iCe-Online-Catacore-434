@@ -2137,25 +2137,12 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
     for(Player::BoundInstancesMap::iterator itr=bounds.begin();itr!=bounds.end();itr++)
     {
         InstancePlayerBind pBind=itr->second;
-        bool created=false;
-        Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());
-        if (!map)     //sometimes (almost always) it doesnt exist yet
+        Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());//find map instance
+        if(map && map->IsRaid() && !map->HavePlayers())//map is empty so we can unload it
         {
-            map= sMapMgr->CreateMap(pBind.save->GetMapId(),leader,pBind.save->GetInstanceId());
-            created=true;
-        }
-        if(map && !map->IsRaid())
-            break;
-        if(map && !map->HavePlayers()) 
-        {
-            map->UnloadAll();
-        }
-
-        if(created)//!map->HavePlayers() && 
-        {
-            Map* mapR=sMapMgr->_findMap(pBind.save->GetMapId());
+            Map* mapR=sMapMgr->_findMap(pBind.save->GetMapId());//find main map 
             if(mapR)
-                ((MapInstanced*)mapR)->_RemoveMapByInstId(pBind.save->GetInstanceId());
+                ((MapInstanced*)mapR)->_RemoveMapByInstId(pBind.save->GetInstanceId());//destroy instance of map
         }
     }
 }
