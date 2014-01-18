@@ -1928,7 +1928,8 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 (caster->HasAura(77756) && roll_chance_i(20))) )
                             {
                                 caster->ToPlayer()->RemoveSpellCooldown(51505, true);
-                                caster->CastSpell(caster,99207,true); // next Lava Burst will be instant
+                                if (caster->HasAura(99206))
+                                    caster->CastSpell(caster,99207,true); // next Lava Burst will be instant
                             }
                             break;
                         }
