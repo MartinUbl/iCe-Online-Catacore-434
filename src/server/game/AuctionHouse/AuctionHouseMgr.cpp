@@ -631,7 +631,11 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
             continue;
 
         if (inventoryType != 0xffffffff && proto->InventoryType != inventoryType)
-            continue;
+        {
+            // let's join chests with robes, as it should be
+            if (inventoryType != INVTYPE_CHEST || proto->InventoryType != INVTYPE_ROBE)
+                continue;
+        }
 
         if (quality != 0xffffffff && proto->Quality != quality)
             continue;
