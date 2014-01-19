@@ -635,6 +635,7 @@ class InstanceMap : public Map
         virtual void InitVisibilityDistance();
 
         void doDifficultyStaff(Player* player, uint32 mapId, uint32 instanceId);
+        void copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 instanceId, uint32 unitGuidDB);
     private:
         uint32 m_checkCombatTimer;
         bool m_resetAfterUnload;

@@ -2696,6 +2696,7 @@ class Player : public Unit, public GridObject<Player>
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
         void UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload = false);
         InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
+        InstancePlayerBind* BindToInstanceRaid(uint32 instanceId,uint32 mapId);
         void SendRaidInfo();
         void SendSavedInstances();
         static void ConvertInstancesToGroup(Player *player, Group *group = NULL, uint64 player_guid = 0);
@@ -2834,8 +2835,15 @@ class Player : public Unit, public GridObject<Player>
             RaidDiffProgress[id]=progr;
         }
 
-        bool merged;//sets if player is merged into another raid ID
-        uint32 oldID;//Instance ID before merge
+        uint32 getRaidId(uint32 mapId/*mapId*/)
+        {
+            return raidId[mapId];
+        }
+
+        void setRaidId(uint32 mapId/*mapId*/, uint32 instanceId)
+        {
+            raidId[mapId]=instanceId;
+        }
 
     protected:
         uint32 m_AreaID;
@@ -2896,6 +2904,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadAuras(PreparedQueryResult result, uint32 timediff);
         void _LoadGlyphAuras();
         void _LoadBoundInstances(PreparedQueryResult result);
+        void _LoadBoundInstance(uint32 mapId);
         void _LoadInventory(PreparedQueryResult result, uint32 timediff);
         void _LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery);
         void _LoadMail();
@@ -3213,7 +3222,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
 
-        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*progress*/> RaidDiffProgress;
+        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*progress*/> RaidDiffProgress;//players difficulty progress in raid
+        UNORDERED_MAP<uint32 /*mapId*/, uint32 /*oldId*/> raidId;//players deafult IDs for his raids
 };
 
 void AddItemsSetItem(Player*player,Item *item);

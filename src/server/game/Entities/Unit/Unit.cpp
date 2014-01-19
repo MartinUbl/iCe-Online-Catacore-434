@@ -17550,7 +17550,10 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                         {
                             Player* pPlayer = i->getSource();
                             if(pPlayer)
+                            {
                                 map->doDifficultyStaff(pPlayer, mapId, map->GetInstanceId());
+                                map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());                              
+                            }
                         }
                 }
             }
