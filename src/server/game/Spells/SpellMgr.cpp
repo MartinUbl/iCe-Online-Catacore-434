@@ -1126,6 +1126,13 @@ bool IsPositiveSpell(uint32 spellId)
     return !(sSpellMgr->GetSpellCustomAttr(spellId) & SPELL_ATTR0_CU_NEGATIVE);
 }
 
+bool IsPositiveSpell(uint32 spellId, uint8 effMask)
+{
+    if (!sSpellStore.LookupEntry(spellId)) // non-existing spells
+        return false;
+    return !(sSpellMgr->GetSpellCustomAttr(spellId) & (SPELL_ATTR0_CU_NEGATIVE_EFF0*effMask));
+}
+
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 {
     if (!sSpellStore.LookupEntry(spellId))
