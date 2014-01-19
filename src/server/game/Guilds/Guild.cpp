@@ -2886,6 +2886,10 @@ void Guild::HandleSetMemberRank(WorldSession *session, uint64 targetGuid, uint64
     Member *member = GetMember(targetGuid);
     GuildRankRights rights = GR_RIGHT_PROMOTE;
     GuildCommandType type = GUILD_COMMAND_PROMOTE;
+    if(!member)
+    {
+        return;
+    }
 
     if (rank > member->GetRankId())
     {
