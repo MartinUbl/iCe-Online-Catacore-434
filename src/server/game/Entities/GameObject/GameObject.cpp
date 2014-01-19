@@ -332,6 +332,8 @@ void GameObject::Update(uint32 diff)
                             Creature* pVisual = SummonTrigger(GetPositionX(),GetPositionY(),GetPositionZ(),0.0f,2000);
                             if (pVisual)
                                 pVisual->CastSpell(pVisual, 69657, true);
+
+                            SendCustomAnim(GetGoAnimProgress());
                         }
 
                         m_lootState = GO_READY;                 // can be successfully open with some chance
