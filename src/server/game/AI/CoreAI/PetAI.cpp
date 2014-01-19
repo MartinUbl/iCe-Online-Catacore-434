@@ -106,6 +106,19 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         targetHasCC = _CheckTargetCC(me->getVictim());
 
+        // if in assist state and owner is player
+        if (me->HasReactState(REACT_ASSIST) && owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            // and if doesn't have target, or the current target is not equal to player's last attack target (if any)
+            if (!me->getVictim() || owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID())
+            {
+                Unit* plTarget = Unit::GetUnit(*me, owner->ToPlayer()->GetLastDirectAttackTargetGUID());
+                // target needs to be valid and alive
+                if (plTarget && owner->GetUInt64Value(UNIT_FIELD_TARGET) == plTarget->GetGUID() && plTarget->IsInWorld() && plTarget->isAlive())
+                    AttackStart(plTarget);
+            }
+        }
+
         DoMeleeAttackIfReady();
     }
     else if (owner && me->GetCharmInfo()) //no victim
@@ -114,6 +127,20 @@ void PetAI::UpdateAI(const uint32 diff)
 
         if (me->HasReactState(REACT_PASSIVE))
             _stopAttack();
+        else if (me->HasReactState(REACT_ASSIST) && owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            // and if doesn't have target, or the current target is not equal to player's last attack target (if any)
+            if (!me->getVictim() || owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID())
+            {
+                Unit* plTarget = Unit::GetUnit(*me, owner->ToPlayer()->GetLastDirectAttackTargetGUID());
+                if (plTarget && owner->GetUInt64Value(UNIT_FIELD_TARGET) == plTarget->GetGUID() && plTarget->IsInWorld() && plTarget->isAlive())
+                    AttackStart(plTarget);
+                else if (nextTarget)
+                    AttackStart(nextTarget);
+            }
+            else if (nextTarget)
+                AttackStart(nextTarget);
+        }
         else if (nextTarget)
             AttackStart(nextTarget);
         else

@@ -4183,10 +4183,17 @@ void Spell::cast(bool skipCheck)
         // Powers have to be taken before SendSpellGo
         TakePower();
         TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
-        // Also add spellcast history to player class
-        // TODO: add hit outcome (crit/miss/parry/..) to specialValue
+
         if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Also add spellcast history to player class
+            // TODO: add hit outcome (crit/miss/parry/..) to specialValue
             m_caster->ToPlayer()->AddNonTriggeredSpellcastHistory(GetSpellInfo(), 0);
+
+            // Whenever we cast non-triggered negative direct-damaging spell, save the last target
+            if (m_targets.getUnitTarget() && !IsPositiveSpell(GetSpellInfo()->Id))
+                m_caster->ToPlayer()->SetLastDirectAttackTarget(m_targets.getUnitTarget());
+        }
     }
     else if (Item* targetItem = m_targets.getItemTarget())
     {

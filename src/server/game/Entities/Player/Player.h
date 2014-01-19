@@ -2805,6 +2805,9 @@ class Player : public Unit, public GridObject<Player>
         // Only for use in current Update tick! Pointer can (and probably will) expire with next spellcast
         uint64 GetHistorySpell(uint8 slot);
 
+        void SetLastDirectAttackTarget(Unit* target);
+        uint64 GetLastDirectAttackTargetGUID();
+
         void SetSpectatorData(uint32 instanceId, uint32 joinTime)
         {
             m_spectatorInstanceId = instanceId;
@@ -2845,6 +2848,8 @@ class Player : public Unit, public GridObject<Player>
 
         //32bits for entry, 32bits for special cases
         uint64 m_nonTriggeredSpellcastHistory[4];
+
+        uint64 m_lastDirectAttackTarget;
 
         std::list<SavedCastedAura*> m_myCastedAuras;
 

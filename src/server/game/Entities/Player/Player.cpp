@@ -651,6 +651,8 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     for (uint8 i = 0; i < 4; i++)
         m_nonTriggeredSpellcastHistory[i] = 0;
 
+    m_lastDirectAttackTarget = 0;
+
     m_ChampioningFaction = 0;
 
     for (uint8 i = 0; i < MAX_POWERS; ++i)
@@ -1386,6 +1388,13 @@ void Player::Update(uint32 p_time)
 // check every second    
     if (now > m_Last_tick + 1)
         UpdateSoulboundTradeItems();
+
+    if (uint64 lastDirectAttackTarget = GetLastDirectAttackTargetGUID())
+    {
+        Unit* lastTarget = Unit::GetUnit(*this, lastDirectAttackTarget);
+        if (!lastTarget || !lastTarget->IsInWorld() || lastTarget->isDead() || lastDirectAttackTarget != GetUInt64Value(UNIT_FIELD_TARGET))
+            SetLastDirectAttackTarget(NULL);
+    }
 
     if (!m_timedquests.empty())
     {
@@ -28312,6 +28321,19 @@ uint64 Player::GetHistorySpell(uint8 slot)
         return 0;
 
     return m_nonTriggeredSpellcastHistory[slot];
+}
+
+void Player::SetLastDirectAttackTarget(Unit* target)
+{
+    if (target && target->IsInWorld())
+        m_lastDirectAttackTarget = target->GetGUID();
+    else
+        m_lastDirectAttackTarget = 0;
+}
+
+uint64 Player::GetLastDirectAttackTargetGUID()
+{
+    return m_lastDirectAttackTarget;
 }
 
 float Player::GetAverageItemLevel()

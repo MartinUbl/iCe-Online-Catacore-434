@@ -2247,8 +2247,13 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
         DealMeleeDamage(&damageInfo,true);
 
         if (GetTypeId() == TYPEID_PLAYER)
+        {
+            if (damageInfo.target)
+                ToPlayer()->SetLastDirectAttackTarget(damageInfo.target);
+
             sLog->outStaticDebug("AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                 GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+        }
         else
             sLog->outStaticDebug("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                 GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
@@ -3220,6 +3225,10 @@ void Unit::_UpdateAutoRepeatSpell()
 
         // all went good, reset attack
         resetAttackTimer(RANGED_ATTACK);
+
+        // and save last direct attack target (autorepeat routine spell is counted also as direct attack)
+        if (ToPlayer() && m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTarget())
+            ToPlayer()->SetLastDirectAttackTarget(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTarget());
     }
 }
 
