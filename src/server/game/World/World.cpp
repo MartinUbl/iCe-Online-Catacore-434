@@ -2135,6 +2135,7 @@ void World::Update(uint32 diff)
         CharacterDatabase.KeepAlive();
         LoginDatabase.KeepAlive();
         WorldDatabase.KeepAlive();
+        ScriptDatabase.KeepAlive();
     }
 
     // update the instance reset times
