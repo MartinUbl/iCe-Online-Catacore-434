@@ -187,7 +187,6 @@ public:
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
             currEnc[0]=auiEncounter[DATA_SIAMAT];//3
             currEnc[1]=auiEncounter[DATA_LOCKMAW];//2
             currEnc[2]=auiEncounter[DATA_HIGH_PROPHET_BARIM];//1

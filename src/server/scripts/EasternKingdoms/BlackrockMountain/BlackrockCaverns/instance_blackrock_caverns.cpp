@@ -152,7 +152,6 @@ public:
         virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
             currEnc[0]=m_auiEncounter[TYPE_ROMOGG];//0
             currEnc[1]=m_auiEncounter[TYPE_KARSH];//2
             currEnc[2]=m_auiEncounter[TYPE_CORLA];//1

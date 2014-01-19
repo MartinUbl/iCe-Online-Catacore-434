@@ -333,7 +333,6 @@ class instance_zulaman : public InstanceMapScript
             virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
             virtual uint32* GetCorrUiEncounter()
             {
-                uint32* uiEnc=GetUiEncounter();
                 currEnc[0]=m_auiEncounter[DATA_ZULJINEVENT-1];//5
                 currEnc[1]=m_auiEncounter[DATA_HEXLORDEVENT-1];//4
                 currEnc[2]=m_auiEncounter[DATA_HALAZZIEVENT-1];//3
