@@ -332,24 +332,55 @@ public:
             me->SummonCreature(BURNING_ORB,MIDDLE_X + cos(angle)*length,MIDDLE_Y + sin(angle)* length,MIDDLE_Z,angle,TEMPSUMMON_CORPSE_DESPAWN,0);
         }
 
-        bool RaidIsClusteredTogether(void) // If >= 7/18 (10 man / 25 man) people are clustered together, switch to Scorpion form 
+        // If >= 7/18 (10 man / 25 man) people are clustered together, switch to Scorpion form 
+        // This algorithm has time complexity O(n^2)
+        // TODO : Maybe find better algorithm
+        bool RaidIsClusteredTogether(void) 
         {
             uint32 clustered_people = 0;
+            uint32 counter = 0;
+            uint32 maximum = (Is25ManRaid()) ? 18 : 7;
 
-            std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
-            for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
+            Map * map = me->GetMap();
+            if (!map)
+                return false;
+
+            Map::PlayerList const& plrList = map->GetPlayers();
+            if (plrList.isEmpty())
+                return false;
+
+            std::list<Player*> players;
+            // Copy players to secons list
+            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                if(Player* pl = itr->getSource())
+                    if (pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster())
+                        players.push_back(itr->getSource());
+
+            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
             {
-                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive())
-                    if (me->getVictim() && me->getVictim()->IsInWorld() && me->getVictim()->GetExactDist2d(unit->GetPositionX(),unit->GetPositionY()) <= 15.0f) // 15 yards from tank
-                        clustered_people++;
+                if(Player* p = itr->getSource())
+                {
+                    counter = 0;
+
+                    if (p->IsInWorld() && p->isAlive() && !p->isGameMaster())
+                    {
+                        // Measure distance for player to every player
+                        for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
+                        {
+                            if ((*j) && (*j)->IsInWorld())
+                            {
+                                if ((*j) == p) // Exclude self
+                                    continue;
+                                if (p->GetExactDist2d(*j) <= 15.0f)
+                                    counter++;
+                            }
+                        }
+                        if (counter >= maximum) // Stop looking
+                            return true;
+                    }
+                }
             }
-
-            if( getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL )
-                return (clustered_people >= 18) ? true : false;
-
-            return (clustered_people >= 7) ? true : false;
-
+            return false;
         }
 
         void UpdateAI(const uint32 diff)
