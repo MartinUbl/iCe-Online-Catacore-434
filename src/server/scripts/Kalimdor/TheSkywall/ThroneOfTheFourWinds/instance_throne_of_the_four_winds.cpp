@@ -612,6 +612,7 @@ public:
                 if (m_auiEncounter[i] != DONE)
                     m_auiEncounter[i] = NOT_STARTED;
 
+            GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
         virtual uint32* GetUiEncounter(){return m_auiEncounter;}

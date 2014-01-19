@@ -1259,6 +1259,7 @@ class ObjectMgr
             return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)];
         }
         void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
+        void SaveCreatureRespawnTimeWithoutDB(uint32 loguid, uint32 instance, time_t t);
         void RemoveCreatureRespawnTime(uint32 loguid, uint32 instance);
         time_t GetGORespawnTime(uint32 loguid, uint32 instance)
         {
