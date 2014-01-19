@@ -110,7 +110,7 @@ void PetAI::UpdateAI(const uint32 diff)
         if (me->HasReactState(REACT_ASSIST) && owner->GetTypeId() == TYPEID_PLAYER)
         {
             // and if doesn't have target, or the current target is not equal to player's last attack target (if any)
-            if (!me->getVictim() || owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID())
+            if (!me->getVictim() || (owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID()))
             {
                 Unit* plTarget = Unit::GetUnit(*me, owner->ToPlayer()->GetLastDirectAttackTargetGUID());
                 // target needs to be valid and alive
@@ -130,7 +130,7 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (me->HasReactState(REACT_ASSIST) && owner->GetTypeId() == TYPEID_PLAYER)
         {
             // and if doesn't have target, or the current target is not equal to player's last attack target (if any)
-            if (!me->getVictim() || owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID())
+            if (!me->getVictim() || (owner->ToPlayer()->GetLastDirectAttackTargetGUID() > 0 && owner->ToPlayer()->GetLastDirectAttackTargetGUID() != me->getVictim()->GetGUID()))
             {
                 Unit* plTarget = Unit::GetUnit(*me, owner->ToPlayer()->GetLastDirectAttackTargetGUID());
                 if (plTarget && owner->GetUInt64Value(UNIT_FIELD_TARGET) == plTarget->GetGUID() && plTarget->IsInWorld() && plTarget->isAlive())
