@@ -6744,7 +6744,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                     int32 bp0 = damage * dummySpell->GetSpellEffect(0)->EffectBasePoints / 100;
 
-                    CastCustomSpell(this, 94472, &bp0, NULL, NULL, true, 0, triggeredByAura, GetGUID());
+                    CastCustomSpell(pVictim, 94472, &bp0, NULL, NULL, true, 0, triggeredByAura, GetGUID());
                     // Fails when cast on dummy target
                     return false;
                 }
