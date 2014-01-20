@@ -340,8 +340,8 @@ public:
             for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive())
-                    if( me->getVictim()->GetExactDist2d(unit->GetPositionX(),unit->GetPositionY()) <= 15.0f) // 15 yards from tank
+                if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive())
+                    if (me->getVictim() && me->getVictim()->IsInWorld() && me->getVictim()->GetExactDist2d(unit->GetPositionX(),unit->GetPositionY()) <= 15.0f) // 15 yards from tank
                         clustered_people++;
             }
 
