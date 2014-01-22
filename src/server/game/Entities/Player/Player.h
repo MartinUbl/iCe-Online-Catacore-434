@@ -2844,6 +2844,8 @@ class Player : public Unit, public GridObject<Player>
             raidId[mapId]=instanceId;
         }
 
+        bool showInstanceBindQuery;
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;

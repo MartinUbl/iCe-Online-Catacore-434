@@ -2226,3 +2226,25 @@ void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
             player->SendCinematicStart(raceEntry->CinematicSequence);
     }
 }
+
+void WorldSession::HandleInstanceLockResponse(WorldPacket &recv_data)
+{
+    sLog->outDebug("CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
+    Player* player=GetPlayer();
+    Map* map=player->GetMap();
+    uint8 respond;
+    recv_data>>respond;
+    if(respond == 0)//Leave instance button
+    {
+        player->RepopAtGraveyard();
+    }
+    else//Accept
+    {
+        //if heroic, bind immediatelly
+        if(map && (map->GetSpawnMode() == RAID_DIFFICULTY_10MAN_HEROIC || map->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC) && map->ToInstanceMap())
+        {
+            map->ToInstanceMap()->copyDeadUnitsFromLeader(player, player->GetMapId(), map->GetInstanceId(),0);
+            map->ToInstanceMap()->removePlayerSaveTimer(player->GetGUIDLow());//remove automatic save timer (because just saved)
+        }
+    }
+}
