@@ -672,7 +672,8 @@ void boss_bethtilacAI::SummonSpinners(bool withWarn)
         DebugOutput("summoning Cinderweb Spinners");
     }
 
-    for (uint8 i = 0; i < 2; i++)
+    int spinners = RAID_MODE(2, 5, 2, 5);
+    for (int i = 0; i < spinners; i++)
         me->CastSpell(me, SPELL_SUMMON_SPINNER, true);
 }
 
