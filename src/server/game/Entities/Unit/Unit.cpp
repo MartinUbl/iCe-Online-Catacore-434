@@ -17552,7 +17552,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                             if(pPlayer)
                             {
                                 map->doDifficultyStaff(pPlayer, mapId, map->GetInstanceId());
-                                map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());                              
+                                map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());//kill units in all IDs of group members                              
                             }
                         }
                 }
