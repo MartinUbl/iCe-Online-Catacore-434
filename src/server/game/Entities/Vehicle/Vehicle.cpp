@@ -401,7 +401,8 @@ void Vehicle::RemovePassenger(Unit *unit)
         if (seat->second.passenger == unit)
             break;
 
-    ASSERT(seat != m_Seats.end());
+    if (seat == m_Seats.end())
+        return;
 
     sLog->outDebug("Unit %s exit vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
 
