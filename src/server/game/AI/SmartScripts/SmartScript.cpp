@@ -1431,13 +1431,28 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!targets)
                 return;
 
-            for (ObjectList::iterator itr = targets->begin(); itr != targets->end(); ++itr)
+            if (e.action.enterVehicle.seat <= MAX_VEHICLE_SEATS)
             {
-                if (IsUnit(*itr) && (*itr)->ToUnit()->GetVehicleKit())
+                for (ObjectList::iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 {
-                    me->EnterVehicle((*itr)->ToUnit(), e.action.enterVehicle.seat);
-                    delete targets;
-                    return;
+                    if (IsUnit(*itr) && (*itr)->ToUnit()->GetVehicleKit())
+                    {
+                        me->EnterVehicle((*itr)->ToUnit(), e.action.enterVehicle.seat);
+                        delete targets;
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                // 100 is the "ID" for leave vehicle
+                if (e.action.enterVehicle.seat == 100)
+                {
+                    for (ObjectList::iterator itr = targets->begin(); itr != targets->end(); ++itr)
+                    {
+                        if (IsUnit(*itr) || IsPlayer(*itr))
+                            (*itr)->ToUnit()->ExitVehicle();
+                    }
                 }
             }
 
