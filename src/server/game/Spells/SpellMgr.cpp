@@ -5483,6 +5483,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
+        case 77758: // Thrash
+        case 779:   // Swipe
+            spellInfo->EffectBonusCoefficient[0] = 0;   // no spell power bonus
+            count++;
+            break;
 
 /***************** SINESTRA ***************************************/
         case 92958:// Twilight Pulse
