@@ -2851,19 +2851,19 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 //   Parry
 // For spells
 //   Resist
-SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect, uint8 effMask)
+SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect)
 {
     // Return evade for units in evade mode
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode() && this != pVictim)
         return SPELL_MISS_EVADE;
 
     // Check for immune
-    if (pVictim->IsImmunedToSpell(spell, effMask))
+    if (pVictim->IsImmunedToSpell(spell))
         return SPELL_MISS_IMMUNE;
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-    if (IsPositiveSpell(spell->Id, effMask)
+    if (IsPositiveSpell(spell->Id)
         &&(!IsHostileTo(pVictim)))  //prevent from affecting enemy by "positive" spell
         return SPELL_MISS_NONE;
     // Check for immune
@@ -12827,7 +12827,7 @@ bool Unit::IsImmunedToDamage(SpellEntry const* spellInfo)
     return false;
 }
 
-bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint8 effMask)
+bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
         return false;
@@ -12865,7 +12865,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint8 effMask)
     {
         // State/effect immunities applied by aura expect full spell immunity
         // Ignore effects with mechanic, they are supposed to be checked separately
-        if ((1 << i) & effMask && !spellInfo->EffectMechanic[i])
+        if (!spellInfo->EffectMechanic[i])
             if (IsImmunedToSpellEffect(spellInfo, i))
                 return true;
     }
@@ -12875,7 +12875,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, uint8 effMask)
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
             if ((itr->type & GetSpellSchoolMask(spellInfo))
-                && !(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id, effMask))
+                && !(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
                 && !CanSpellPierceImmuneAura(spellInfo, sSpellStore.LookupEntry(itr->spellId)))
                 return true;
     }

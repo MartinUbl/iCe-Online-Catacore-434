@@ -1391,7 +1391,7 @@ class Unit : public WorldObject
         float MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, uint32 spellId) const;
         SpellMissInfo MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell);
         SpellMissInfo MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell);
-        SpellMissInfo SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool canReflect = false, uint8 effMask = 0x7);
+        SpellMissInfo SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool canReflect = false);
 
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
@@ -1947,7 +1947,7 @@ class Unit : public WorldObject
 
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(const SpellEntry * spellProto, DispelType type, bool apply);
-        virtual bool IsImmunedToSpell(SpellEntry const* spellInfo, uint8 effMask = 0x7);
+        virtual bool IsImmunedToSpell(SpellEntry const* spellInfo);
                                                             // redefined in Creature
         bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask);
         bool IsImmunedToDamage(SpellEntry const* spellInfo);
