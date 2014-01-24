@@ -21619,6 +21619,15 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
     if (mod->op == SPELLMOD_DURATION && GetSpellDuration(spellInfo) == -1)
         return false;
 
+    // hack-fix for Might of the Frozen Wastes to increase damage only for 2h weapons
+    uint32 auraId = mod->ownerAura->GetId();
+    if (auraId == 81330 || auraId == 81332 || auraId == 81333)
+    {
+        auto *item = GetWeaponForAttack(BASE_ATTACK);
+        if (!item || item->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+            return false;
+    }
+
     return sSpellMgr->IsAffectedByMod(spellInfo, mod);
 }
 
