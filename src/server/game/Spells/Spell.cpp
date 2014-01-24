@@ -5602,15 +5602,22 @@ void Spell::TakeRunePower(bool didhit)
 
     int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
 
+    bool anyRuneUsed = false;
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
     {
         runeCost[i] = src->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
+        if (runeCost[i] > 0)
+            anyRuneUsed = true;
+        runeCost[i] = std::max(runeCost[i], 0);
     }
 
     runeCost[RUNE_DEATH] = 0;                               // calculated later
     plr->ClearLastUsedRuneList();
+
+    if (!anyRuneUsed)
+        return;     // if no runes are to be used no runic power is generated => no further processing is needed
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
