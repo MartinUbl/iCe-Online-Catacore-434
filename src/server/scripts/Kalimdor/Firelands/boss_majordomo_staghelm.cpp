@@ -337,7 +337,6 @@ public:
         // TODO : Maybe find better algorithm
         bool RaidIsClusteredTogether(void) 
         {
-            uint32 clustered_people = 0;
             uint32 counter = 0;
             uint32 maximum = (Is25ManRaid()) ? 18 : 7;
 
