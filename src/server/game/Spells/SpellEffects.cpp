@@ -5718,6 +5718,20 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
             m_caster->ToPlayer()->DespawnOldestSummon(entry);
     }
 
+    // Shadowfiend should be summoned as pet
+    if (entry == 19668 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Pet* pet = m_caster->ToPlayer()->SummonPet(entry,pos.m_positionX,pos.m_positionY,pos.m_positionZ,pos.m_orientation,SUMMON_PET,15000,PET_SLOT_OTHER_PET);
+        if (!pet)
+            return;
+
+        pet->SetReactState(REACT_AGGRESSIVE);
+        pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+        pet->SetCreatorGUID(m_originalCaster->GetGUID());
+        ExecuteLogEffectSummonObject(effIndex, pet);
+        return;
+    }
+
     TempSummon *summon = NULL;
 
     switch (properties->Category)

@@ -2345,8 +2345,8 @@ public:
                 me->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
 
             if (uiEntry != NPC_CATACLYSM_TARGET_DUMMY)
-            {            
-			    if (uiEntry != NPC_ADVANCED_TARGET_DUMMY && uiEntry != NPC_TARGET_DUMMY)
+            {
+                if (uiEntry != NPC_ADVANCED_TARGET_DUMMY && uiEntry != NPC_TARGET_DUMMY)
                 {
                     if (uiResetTimer <= uiDiff)
                     {
@@ -2403,6 +2403,22 @@ public:
                         if (damage >= me->GetHealth())
                             pOwner->CastSpell(pOwner,GLYPH_OF_SHADOWFIEND_MANA,true);
                 }
+        }
+
+        void SummonedCreatureDespawn(Creature*) 
+        {
+            if (me->isSummon())
+                if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
+                    if (pOwner->IsInWorld() && pOwner->ToPlayer() && me->ToPet())
+                        pOwner->ToPlayer()->ToPlayer()->RemovePet(me->ToPet(),PET_SLOT_OTHER_PET,false);
+        }
+
+        void JustDied(Unit *)
+        {
+            if (me->isSummon())
+                if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
+                    if (pOwner->IsInWorld() && pOwner->ToPlayer() && me->ToPet())
+                        pOwner->ToPlayer()->ToPlayer()->RemovePet(me->ToPet(),PET_SLOT_OTHER_PET,false);
         }
 
         void UpdateAI(const uint32 /*diff*/)
