@@ -8124,6 +8124,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (procSpell->Id != 45462 && procSpell->Id != 45477 && procSpell->Id != 45524 && procSpell->Id != 77575)
                     return false;
 
+                basepoints0 = triggeredByAura->GetAmount();
                 triggered_spell_id = 65142;
             }
             if (dummySpell->Id == 98996) // Death Knight T12 DPS 4P Bonus
