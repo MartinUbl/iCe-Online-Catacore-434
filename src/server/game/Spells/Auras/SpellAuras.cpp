@@ -2033,10 +2033,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->RemoveAurasDueToSpell(87154);
                             break;
                         }
-                    // T11 4p bonus remove (not in Chakra state)
+                    // T11 4p bonus remove (not in Chakra state) or if equip is changed and there is no longer 4P set bonus
                     case 81206:
                     case 81208:
                     case 81209:
+                    case 89911: // must have set bonus
                         caster->RemoveAura(89912, caster->GetGUID(), 0, AURA_REMOVE_BY_EXPIRE);
                         break;
                     // T12 4P shadow priest set bonus ( remove Dark flames on aura removal )
