@@ -4545,40 +4545,6 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    // Some spells need to be cleared after talent reset
-    switch (getClass())
-    {
-        case CLASS_MAGE:
-            RemoveAura(57529); // Arcane Potency r.1
-            RemoveAura(57531); // Arcane Potency r.2
-        break;
-
-        case CLASS_DRUID:
-            RemoveAura(48517); // Eclipse (Solar)
-            RemoveAura(48518); // Eclipse (Lunar)
-        break;
-
-        default:
-            break;
-    }
-
-    if (Group * group = this->GetGroup())
-    {
-        for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-        {
-            Player *pl = itr->getSource();
-
-            if (pl && pl->IsInWorld())
-            {
-                if (pl->GetAura(54646,GetGUID())) // Focus Magic
-                {
-                    pl->RemoveAura(54646);
-                    break;
-                }
-            }
-        }
-    }
-
     m_branchSpec[m_activeSpec] = 0;
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -6881,6 +6847,70 @@ int16 Player::GetSkillTempBonusValue(uint32 skill) const
     return GetUInt16Value(PLAYER_SKILL_MODIFIER_0 + field, offset);
 }
 
+
+void Player::RemoveSpecializationAuras(void)
+{
+    // Some auras need to be cleared after talent reset
+    switch (getClass())
+    {
+        case CLASS_MAGE:
+        {
+            RemoveAura(57529); // Arcane Potency r.1
+            RemoveAura(57531); // Arcane Potency r.2
+
+            if (Group * group = this->GetGroup())
+            {
+                for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player *pl = itr->getSource();
+
+                    if (pl && pl->IsInWorld())
+                    {
+                        if (pl->GetAura(54646,GetGUID())) // Focus Magic
+                        {
+                            pl->RemoveAura(54646);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+        case CLASS_DRUID:
+        {
+            RemoveAura(48517); // Eclipse (Solar)
+            RemoveAura(48518); // Eclipse (Lunar)
+            SetPower(POWER_ECLIPSE,0);
+            //hardly set eclipse power to zero
+            uint32 powerIndex = sObjectMgr->GetPowerIndexByClass(POWER_ECLIPSE, getClass());
+            if (powerIndex != MAX_POWERS)
+                SetUInt32Value(UNIT_FIELD_POWER1 + powerIndex, 0);
+        }
+        break;
+        case CLASS_HUNTER:
+        {
+            if (Pet * pet = GetPet())
+            {
+                if (pet->isHunterPet())
+                {
+                    pet->RemoveAura(19579); // Spirit Bond (Rank 1)
+                    pet->RemoveAura(24529); // Spirit Bond (Rank 2)
+                    pet->RemoveAura(75447); // Ferocious Inspiration
+                }
+            }
+        }
+        break;
+        case CLASS_DEATH_KNIGHT:
+        {
+            RemoveAura(53137); // Abomination's Might (Rank 1)
+            RemoveAura(53138); // Abomination's Might (Rank 2)
+        }
+        break;
+
+        default:
+            break;
+    }
+}
 void Player::SendActionButtons(uint32 state) const
 {
     sLog->outDetail("Sending Action Buttons for '%u' spec '%u'", GetGUIDLow(), m_activeSpec);
@@ -27877,6 +27907,8 @@ void Player::ActivateSpec(uint8 spec)
         if (uint32 oldglyph = m_Glyphs[m_activeSpec][slot])
             if (GlyphPropertiesEntry const *old_gp = sGlyphPropertiesStore.LookupEntry(oldglyph))
                 RemoveAurasDueToSpell(old_gp->SpellId);
+
+    RemoveSpecializationAuras(); // Remove some auras characteristic only for one specialization
 
     SetActiveSpec(spec);
     uint32 spentTalents = 0;
