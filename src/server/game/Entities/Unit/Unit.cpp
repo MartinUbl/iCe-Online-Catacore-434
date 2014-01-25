@@ -10086,6 +10086,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Proc only from healing part of Death Coil. Check is essential as all Death Coil spells have 0x2000 mask in SpellFamilyFlags
             if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags[0] == 0x80002000))
                 return false;
+
+            if (!pVictim || !pVictim->isAlive())
+                return false;
+
+            // Glyph of Death's Embrace no longer refunds Runic Power when self-healing via Lichborne.
+            if ((HasAura(49039) || HasAura(50397)) && pVictim->ToPlayer())
+                return false;
             break;
         }
         // Savage Defense
