@@ -7153,6 +7153,34 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 triggered_spell_id = 24406;
                 break;
             }
+            // Crouching Tiger, Hidden Chimera 
+            if (dummySpell->SpellIconID == 4752 && GetTypeId() == TYPEID_PLAYER)
+            {
+                if (ToPlayer()->HasSpellCooldown(82898) || ToPlayer()->HasSpellCooldown(82899))
+                    return false;
+
+                // Whenever you are hit by a melee attack, the cooldown of your Disengage is instantly reduced by 2/4 seconds
+                if ((procFlag & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK) || (procFlag & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS))
+                {
+                    if (dummySpell->Id == 82898) // Rank 1
+                        ToPlayer()->ModifySpellCooldown(781,-2000,true);
+                    else                         // Rank 2
+                        ToPlayer()->ModifySpellCooldown(781,-4000,true);
+
+                    ToPlayer()->AddSpellCooldown(82898,0,2000);
+                }
+                // Whenever you are hit by a ranged attack or spell, the cooldown of your Deterrence is instantly reduced by 4/8 seconds
+                else
+                {
+                    if (dummySpell->Id == 82898) // Rank 1
+                        ToPlayer()->ModifySpellCooldown(19263,-4000,true);
+                    else                         // Rank 2
+                        ToPlayer()->ModifySpellCooldown(19263,-8000,true);
+
+                    ToPlayer()->AddSpellCooldown(82899,0,2000);
+                }
+                break;
+            }
             // Lock and Load
             if (dummySpell->SpellIconID == 3579)
             {
