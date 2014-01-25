@@ -17442,6 +17442,17 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
         }
     }
 
+    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->isHonorOrXPTarget(pVictim))
+    {
+        if (HasAura(49588)) // Unholy Command (Rank 1)
+        {
+            if (roll_chance_f(50.0f))
+                ToPlayer()->RemoveSpellCooldown(49560,true);
+        }
+        else if(HasAura(49589)) // Unholy Command (Rank 2)
+            ToPlayer()->RemoveSpellCooldown(49560,true);
+    }
+
     sLog->outStaticDebug("SET JUST_DIED");
     pVictim->setDeathState(JUST_DIED);
 
