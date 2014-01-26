@@ -3779,110 +3779,6 @@ public:
     }
 };
 
-/*######
-## npc_flame_orb
-######*/
-
-enum eFlameOrb
-{
-    SPELL_FLAME_ORB_DAMAGE_VISUAL   = 86719,
-    SPELL_FLAME_ORB_DAMAGE          = 82739,
-    SPELL_FLAME_ORB_FIRE_POWER_EXPLODE = 83619,
-    FLAME_ORB_DISTANCE              = 120
-};
-
-class npc_flame_orb : public CreatureScript
-{
-public:
-    npc_flame_orb() : CreatureScript("npc_flame_orb") {}
-
-    struct npc_flame_orbAI : public ScriptedAI
-    {
-        npc_flame_orbAI(Creature *c) : ScriptedAI(c) 
-        {
-            x = me->GetPositionX();
-            y = me->GetPositionY();
-            if(Unit* owner = me->GetOwner())
-            {
-                z = owner->GetPositionZ()+2;
-                angle = owner->GetAngle(me);
-            }
-            o = me->GetOrientation();
-            me->NearTeleportTo(x, y, z, o, true);
-            newx = me->GetPositionX() + FLAME_ORB_DISTANCE/2 * cos(angle);
-            newy = me->GetPositionY() + FLAME_ORB_DISTANCE/2 * sin(angle);
-            CombatCheck = false;
-        }
-        
-        float x,y,z,o,newx,newy,angle;
-        bool CombatCheck;
-        uint32 uiDespawnTimer;
-        uint32 uiDespawnCheckTimer;
-        uint32 uiDamageTimer;
-
-        void EnterCombat(Unit* /*target*/)
-        {
-            me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f); // Normal speed
-            uiDespawnTimer = 15*IN_MILLISECONDS;
-            CombatCheck = true;
-        }
-        
-        void Reset()
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
-            me->SetReactState(REACT_PASSIVE);
-            if (CombatCheck == true)
-                uiDespawnTimer = 15*IN_MILLISECONDS;
-            else
-                uiDespawnTimer = 4*IN_MILLISECONDS;
-            uiDamageTimer = 1*IN_MILLISECONDS;
-            me->GetMotionMaster()->MovePoint(0, newx, newy, z);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!me->isInCombat() && CombatCheck == false)
-            {
-                me->SetSpeed(MOVE_RUN, 2, true);
-                me->SetSpeed(MOVE_FLIGHT, 2, true);
-            }
-
-            if (uiDespawnTimer <= diff)
-            {
-                if (Unit* owner = me->GetOwner())
-                    if (AuraEffect* aureff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE,SPELLFAMILY_MAGE,31,EFFECT_0))
-                        if (const SpellEntry* spellinfo = aureff->GetSpellProto())
-                            if (roll_chance_i(spellinfo->GetProcChance()))
-                                owner->CastSpell(me, SPELL_FLAME_ORB_FIRE_POWER_EXPLODE, true);
-                me->SetVisibility(VISIBILITY_OFF);
-                me->DisappearAndDie();
-            }
-            else
-                uiDespawnTimer -= diff;
-
-            if (uiDamageTimer <= diff)
-            {
-                if (Unit* target = me->SelectNearestTarget(20))
-                {
-                    me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
-                    if(Unit* owner = me->GetOwner())
-                        owner->CastSpell(target, SPELL_FLAME_ORB_DAMAGE, true);
-                }
-
-                uiDamageTimer = 1*IN_MILLISECONDS;
-            }
-            else
-                uiDamageTimer -= diff;
-        }
-    };
-
-    CreatureAI *GetAI(Creature *creature) const
-    {
-        return new npc_flame_orbAI(creature);
-    }
-};
-
 class npc_jailer: public CreatureScript
 {
    public:
@@ -4801,7 +4697,6 @@ void AddSC_npcs_special()
     new npc_ring_of_frost;
     new npc_reforger;
     new npc_unmuter;
-    new npc_flame_orb;
     new npc_power_word_barrier;
     new npc_jailer;
     new boss_event_jarmila;
