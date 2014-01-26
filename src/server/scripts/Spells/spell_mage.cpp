@@ -810,50 +810,78 @@ public:
         {
             x = me->GetPositionX();
             y = me->GetPositionY();
-            if(Unit* owner = me->GetOwner())
+            if (Unit* owner = me->GetOwner())
             {
-                z = owner->GetPositionZ()+2;
+                z = owner->GetPositionZ() + 3.0f;
                 angle = owner->GetAngle(me);
             }
             o = me->GetOrientation();
             me->NearTeleportTo(x, y, z, o, true);
-            newx = me->GetPositionX() + FLAME_ORB_DISTANCE/2 * cos(angle);
-            newy = me->GetPositionY() + FLAME_ORB_DISTANCE/2 * sin(angle);
+            newx = me->GetPositionX() + 5.0f * cos(angle);
+            newy = me->GetPositionY() + 5.0f * sin(angle);
+            z = me->GetMap()->GetHeight(newx, newy, z+3.0f) + 3.0f;
             CombatCheck = false;
+            SlowedDown = true;
+            MoveCheck = false;
         }
 
         float x,y,z,o,newx,newy,angle;
         bool CombatCheck;
+        bool SlowedDown;
+        bool MoveCheck;
         uint32 uiDespawnTimer;
         uint32 uiDespawnCheckTimer;
         uint32 uiDamageTimer;
 
-        void EnterCombat(Unit* /*target*/)
+        void EnterCombat(Unit* target)
         {
             me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f); // Normal speed
             uiDespawnTimer = 15*IN_MILLISECONDS;
             CombatCheck = true;
         }
 
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == 8)
+            {
+                newx = me->GetPositionX() + 5.0f * cos(angle);
+                newy = me->GetPositionY() + 5.0f * sin(angle);
+                z = me->GetMap()->GetHeight(newx, newy, z+3.0f) + 3.0f;
+                MoveCheck = true;
+            }
+        }
+
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
+            me->SetFlying(true);
             me->SetReactState(REACT_PASSIVE);
+
             if (CombatCheck == true)
                 uiDespawnTimer = 15*IN_MILLISECONDS;
             else
                 uiDespawnTimer = 4*IN_MILLISECONDS;
+
             uiDamageTimer = 1*IN_MILLISECONDS;
-            me->GetMotionMaster()->MovePoint(0, newx, newy, z);
+            me->GetMotionMaster()->MoveCharge(newx, newy, z, 5.5f);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat() && CombatCheck == false)
+            if (MoveCheck)
             {
-                me->SetSpeed(MOVE_RUN, 2, true);
-                me->SetSpeed(MOVE_FLIGHT, 2, true);
+                MoveCheck = false;
+                if (SlowedDown)
+                    me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f);
+                else
+                    me->GetMotionMaster()->MoveCharge(newx, newy, z, 5.5f);
+            }
+
+            if (!me->isInCombat() && SlowedDown)
+            {
+                SlowedDown = false;
+                me->SetSpeed(MOVE_RUN, 2.0f, true);
+                me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
             }
 
             if (uiDespawnTimer <= diff)
@@ -873,8 +901,15 @@ public:
             {
                 if (Unit* target = me->SelectNearestTarget(20))
                 {
+                    if (!SlowedDown)
+                    {
+                        me->GetMotionMaster()->MovementExpired();
+                        me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f);
+                        SlowedDown = true;
+                    }
+
                     me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
-                    if(Unit* owner = me->GetOwner())
+                    if (Unit* owner = me->GetOwner())
                         owner->CastSpell(target, SPELL_FLAME_ORB_DAMAGE, true);
                 }
 
