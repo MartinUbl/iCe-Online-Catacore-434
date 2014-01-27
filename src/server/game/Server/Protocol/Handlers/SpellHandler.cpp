@@ -349,6 +349,8 @@ const uint32 ModABSpellMap[][3] = {
     {88625,            81206,         2}, // Chakra: Sanctuary
     {88625,            81208,         2}, // Chakra: Sanctuary
     {2061,             88688,         0}, // Flash Light (talent Surge of Light)
+    {82731,            84726,         1}, // Frostfire Orb rank 1
+    {82731,            84727,         1}, // Frostfire Orb rank 1
 };
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)

@@ -4175,6 +4175,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
             count++;
             break;
+        case 84726: // Frostfire Orb (rank 1)
+        case 84727: // Frostfire Orb (rank 2)
+            // we need to send amount in order to override spell in action bar
+            spellInfo->AttributesEx8 |= SPELL_ATTR8_AURA_SEND_AMOUNT;
+            count++;
+            break;
         case 16213: // Purification (passive)
             // 4.0.6a Blizzard hotfix, note in client not present, also DBC data wrong!
             spellInfo->EffectBasePoints[0] = 25;

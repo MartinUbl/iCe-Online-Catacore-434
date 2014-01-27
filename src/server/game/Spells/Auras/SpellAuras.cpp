@@ -840,6 +840,8 @@ bool Aura::IsModActionButton() const
         case 81206: // Chakra: Sanctuary
         case 81208: // Chakra: Serenity
         case 88688: // Surge of Light
+        case 84726: // Frostfire Orb rank 1
+        case 84727: // Frostfire Orb rank 2
             return true;
         case 687:   // Demon Armor - condition for talent Nether Ward
         case 28176: // Fel Armor
@@ -881,6 +883,8 @@ uint8 Aura::GetModActionButtonEffectMask() const
             break;
         case 74434: // Soulburn
         case 82926: // Fire! (Master Marksman proc)
+        case 84726: // Frostfire Orb rank 1
+        case 84727: // Frostfire Orb rank 2
             effMask |= 1 << 1;
             break;
         case 82946: // Trap Launcher (second?)
@@ -923,6 +927,8 @@ uint32 Aura::GetActionButtonSpellForEffect(uint8 effIndex) const
         case 84728: // Frostfire Orb Override
         case 86211: // Soul Swap (marker)
         case 88688: // Surge of Light
+        case 84726: // Frostfire Orb rank 1
+        case 84727: // Frostfire Orb rank 2
             return GetSpellProto()->EffectBasePoints[effIndex];
         case 77616: // Dark Simulacrum
             return (m_effects[effIndex] != NULL) ? m_effects[effIndex]->GetBaseAmount() : 0;
@@ -987,7 +993,8 @@ bool Aura::CanBeSaved() const
 
 bool Aura::CanBeSentToClient() const
 {
-    return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_WALK_AND_CAST);
+    return !IsPassive() || HasAreaAuraEffect(GetSpellProto()) || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_WALK_AND_CAST)
+        || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON) || HasEffectType(SPELL_AURA_MOD_ACTION_BUTTON_2);
 }
 
 void Aura::UnregisterSingleTarget()

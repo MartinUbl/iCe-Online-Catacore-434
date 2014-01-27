@@ -793,10 +793,17 @@ class spell_mage_blast_wave : public SpellScriptLoader
 
 enum eFlameOrb
 {
-    SPELL_FLAME_ORB_DAMAGE_VISUAL   = 86719,
-    SPELL_FLAME_ORB_DAMAGE          = 82739,
+    ENTRY_FLAME_ORB                    = 44214,
+    ENTRY_FROSTFIRE_ORB                = 45322,
+
+    SPELL_FLAME_ORB_DAMAGE_VISUAL      = 86719,
+    SPELL_FLAME_ORB_DAMAGE             = 82739,
     SPELL_FLAME_ORB_FIRE_POWER_EXPLODE = 83619,
-    FLAME_ORB_DISTANCE              = 120
+    FLAME_ORB_DISTANCE                 = 120,
+
+    SPELL_FROSTFIRE_ORB_VISUAL         = 84716,
+    SPELL_FROSTFIRE_ORB_DAMAGE         = 95969,
+    SPELL_FROSTFIRE_ORB_DAMAGE_CHILL   = 84721,
 };
 
 class npc_flame_orb : public CreatureScript
@@ -810,10 +817,12 @@ public:
         {
             x = me->GetPositionX();
             y = me->GetPositionY();
+            isChilling = false;
             if (Unit* owner = me->GetOwner())
             {
                 z = owner->GetPositionZ() + 3.0f;
                 angle = owner->GetAngle(me);
+                isChilling = owner->HasAura(84727);
             }
             o = me->GetOrientation();
             me->NearTeleportTo(x, y, z, o, true);
@@ -823,7 +832,12 @@ public:
             CombatCheck = false;
             SlowedDown = true;
             MoveCheck = false;
+
+            isFrostfire = (c->GetEntry() == ENTRY_FROSTFIRE_ORB);
         }
+
+        bool isFrostfire;
+        bool isChilling;
 
         float x,y,z,o,newx,newy,angle;
         bool CombatCheck;
@@ -856,6 +870,9 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlying(true);
             me->SetReactState(REACT_PASSIVE);
+
+            if (isFrostfire)
+                me->CastSpell(me, SPELL_FROSTFIRE_ORB_VISUAL, true);
 
             if (CombatCheck == true)
                 uiDespawnTimer = 15*IN_MILLISECONDS;
@@ -910,7 +927,7 @@ public:
 
                     me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
                     if (Unit* owner = me->GetOwner())
-                        owner->CastSpell(target, SPELL_FLAME_ORB_DAMAGE, true);
+                        owner->CastSpell(target, isFrostfire ? (isChilling ? SPELL_FROSTFIRE_ORB_DAMAGE_CHILL : SPELL_FROSTFIRE_ORB_DAMAGE) : SPELL_FLAME_ORB_DAMAGE, true);
                 }
 
                 uiDamageTimer = 1*IN_MILLISECONDS;
