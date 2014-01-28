@@ -5936,6 +5936,17 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
+    // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms
+    if (m_spellInfo->Id == 88751)
+    {
+        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player::GUIDTimestampMap* summonMap = m_caster->ToPlayer()->GetSummonMapFor(47649);
+            if (!summonMap || summonMap->empty())
+                return SPELL_FAILED_NO_VALID_TARGETS;
+        }
+    }
+
     // Dispel Magic - can be cast on friend target only when caster has aura Absolution
     // also check if target has anything to dispel
     if (m_spellInfo->Id == 527)
