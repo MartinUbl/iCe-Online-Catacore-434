@@ -3677,17 +3677,27 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
                 {
                     Unit * unit_to_add = NULL;
+                    Unit * target_unit = NULL;
                     for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
                     {
                         if ((*itr)->GetTypeId() == TYPEID_UNIT
                             && (*itr)->GetOwnerGUID() == m_caster->GetGUID()
                             && (*itr)->ToCreature()->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD)
                         {
+                            // Prefer targeted minion
+                            if (m_caster->getVictim() && m_caster->getVictim()->IsInWorld() && m_caster->getVictim() == (*itr))
+                                target_unit = (*itr);
+
                             unit_to_add = (*itr);
                             break;
                         }
                     }
-                    if (unit_to_add)
+                    if (target_unit)
+                    {
+                        unitList.clear();
+                        unitList.push_back(target_unit);
+                    }
+                    else if (unit_to_add)
                     {
                         unitList.clear();
                         unitList.push_back(unit_to_add);
