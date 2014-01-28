@@ -3378,15 +3378,11 @@ void Player::RemoveMarkerForPlayer(Player * raidLeader)
     if (Markers && !Markers->empty())
     {
         Creature* pTemp = NULL;
-        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end();)
+        for (Player::GUIDTimestampMap::iterator itr = Markers->begin(); itr != Markers->end(); ++itr)
         {
             pTemp = Creature::GetCreature(*raidLeader, (*itr).first);
             if (pTemp)
-            {
                 pTemp->DestroyForPlayer(this);
-            }
-            else
-                ++itr;
         }
     }
 }
