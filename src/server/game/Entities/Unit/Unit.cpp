@@ -15821,8 +15821,9 @@ void CharmInfo::InitPetActionBar()
         SetActionBar(ACTION_BAR_INDEX_PET_SPELL_START + i,0,ACT_PASSIVE);
 
     // last 3 SpellOrActions are reactions
-    for (uint32 i = 0; i < ACTION_BAR_INDEX_END - ACTION_BAR_INDEX_PET_SPELL_END; ++i)
-        SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i,COMMAND_ATTACK - i,ACT_REACTION);
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + 0, REACT_PASSIVE, ACT_REACTION);
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + 1, REACT_DEFENSIVE, ACT_REACTION);
+    SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + 2, REACT_ASSIST, ACT_REACTION);
 }
 
 void CharmInfo::InitEmptyActionBar(bool withAttack)
@@ -15997,6 +15998,10 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
         ActiveStates type  = ActiveStates(atol(*iter));
         ++iter;
         uint32 action = uint32(atol(*iter));
+
+        // "fix" the react states - this is necessary due to client automation
+        if (type == ACT_REACTION && action == REACT_AGGRESSIVE)
+            action = REACT_ASSIST;
 
         PetActionBar[index].SetActionAndType(action, type);
 
