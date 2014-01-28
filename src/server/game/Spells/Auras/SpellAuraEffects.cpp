@@ -4094,7 +4094,7 @@ void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp, uint8 m
     }
     // die at aura end
     else
-        target->setDeathState(JUST_DIED);
+        target->Kill(target,true);
 }
 
 void AuraEffect::HandleAuraGhost(AuraApplication const *aurApp, uint8 mode, bool apply) const
