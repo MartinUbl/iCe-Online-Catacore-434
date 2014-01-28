@@ -1580,9 +1580,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                     {
                         // Doesn't work as intended, leave alone and modify manually
                         //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
-                        if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus
-                            bp0 = bp0 -3;
-
                         m_caster->ModifyPower(POWER_ECLIPSE, bp0);
                     }
 
@@ -1609,8 +1606,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                     {
                         // Doesn't work as intended, leave alone and modify manually
                         //m_caster->CastCustomSpell(m_caster, 81069, &bp0, 0, 0, true);
-                        if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus
-                            bp0 = bp0 + 5;
                         m_caster->ModifyPower(POWER_ECLIPSE, bp0);
                     }
 
