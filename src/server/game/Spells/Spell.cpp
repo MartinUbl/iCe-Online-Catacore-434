@@ -1520,6 +1520,23 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         m_caster->ToPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
     }
 
+    // Camouflage should have duration 6 seconds if hunter used it in combat
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_HUNTER)
+    {
+        if (Aura * hunterCamouflage = m_caster->GetAura(51755))
+        {
+            if (m_caster->isInCombat())
+            {
+                hunterCamouflage->SetDuration(6000);
+                if (Pet * pet = m_caster->ToPlayer()->GetPet())
+                {
+                    if (Aura * petCamouflage = pet->GetAura(51755))
+                        petCamouflage->SetDuration(6000);
+                }
+            }
+        }
+    }
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID && ((Player*)m_caster)->GetTalentBranchSpec(((Player*)m_caster)->GetActiveSpec()) == 752)
     {
         bool EclipseLeft = m_caster->ToPlayer()->IsEclipseDriverLeft();
@@ -3926,6 +3943,23 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
                     case 82941: // Ice Trap (trap launcher)
                     case 34600: // Snake Trap
                     case 82948: // Snake Trap (trap launcher)
+                    // Hunter aspects
+                    case 5118:
+                    case 13159:
+                    case 13165:
+                    case 20043:
+                    case 3045: // Rapid Fire
+                    case 35079: // Misdirection
+                    case 53271: // Master's Call
+                    case 53480: // Roar of Sacrifice
+                    // Call pet spells
+                    case 883:
+                    case 83242:
+                    case 83243:
+                    case 83244:
+                    case 83245:
+                    // Dissmiss pet
+                    case 2641:
                         removeException = 51755;
                         break;
                 }
@@ -5933,6 +5967,12 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_spellInfo->Id == 51690)
     {
         if (!SearchNearbyTarget(10.0f, SPELL_TARGETS_ENEMY, EFFECT_1))
+            return SPELL_FAILED_NO_VALID_TARGETS;
+    }
+
+    if (m_spellInfo->Id == 30980 || m_spellInfo->Id == 6770) // Sap
+    {
+        if (Target && Target->HasAura(51755)) // Camouflage
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
