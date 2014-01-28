@@ -8424,12 +8424,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (m_caster->HasAura(91319) ) // Contagion (Rank 2)
                         dmgDecreased = 1.0f;
 
+                    m_caster->CastSpell(unitTarget, 91939, true); // Visual effect
+
                     // And spread them on target
                     // Blood Plague
                     if (m_targets.getUnitTarget()->GetAura(55078))
                     {
                         m_caster->CastSpell(unitTarget, 55078, true);
-                        m_caster->CastSpell(unitTarget, 91939, true); // Visual effect
 
                         if (AuraEffect* aurEff = unitTarget->GetAuraEffect(55078,0,m_caster->GetGUID()) )
                             if ( aurEff->GetAmount() / dmgDecreased > 0)
@@ -8439,8 +8440,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (m_targets.getUnitTarget()->GetAura(55095))
                     {
                         m_caster->CastSpell(unitTarget, 55095, true);
-                        m_caster->CastSpell(unitTarget, 91939, true); // Visual effect
                         if (AuraEffect* aurEff = unitTarget->GetAuraEffect(55095,0,m_caster->GetGUID()))
+                            if ( aurEff->GetAmount() / dmgDecreased > 0)
+                                aurEff->SetAmount(aurEff->GetAmount() / dmgDecreased);
+                    }
+                    // Ebon Plague
+                    if (m_targets.getUnitTarget()->GetAura(65142))
+                    {
+                        m_caster->CastSpell(unitTarget, 65142, true);
+                        if (AuraEffect* aurEff = unitTarget->GetAuraEffect(65142,0,m_caster->GetGUID()))
                             if ( aurEff->GetAmount() / dmgDecreased > 0)
                                 aurEff->SetAmount(aurEff->GetAmount() / dmgDecreased);
                     }
