@@ -3515,17 +3515,19 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 return;
             break;
         }
-        case 91565:
+        case 91565: // Feral Aggression
         {
-            // Feral Aggression
-            // more CastSpell is faster than finding an aura and modifying stack count
-            if (m_caster->HasAura(16859))
+            if (m_caster->ToPlayer() && m_caster->ToPlayer()->GetShapeshiftForm() != FORM_CAT) // Should affect only Faerie Fire used in cat form
             {
-                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
-                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+                // more CastSpell is faster than finding an aura and modifying stack count
+                if (m_caster->HasAura(16859))
+                {
+                    m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+                    m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
+                }
+                else if (m_caster->HasAura(16858))
+                    m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
             }
-            else if (m_caster->HasAura(16858))
-                m_caster->CastSpell(unitTarget, 91565, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
             break;
         }
         // Hammer of the Righteous
