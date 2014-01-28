@@ -33,44 +33,7 @@ enum HunterSpells
     HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED    = 54114,
     HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF       = 55711,
     HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED    = 54045,
-    HUNTER_SPELL_INVIGORATION_TRIGGERED          = 53398,
     HUNTER_SPELL_MASTERS_CALL_TRIGGERED          = 62305
-};
-
-// 53412 Invigoration
-class spell_hun_invigoration : public SpellScriptLoader
-{
-public:
-    spell_hun_invigoration() : SpellScriptLoader("spell_hun_invigoration") { }
-
-    class spell_hun_invigoration_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_invigoration_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
-        {
-            if (!sSpellStore.LookupEntry(HUNTER_SPELL_INVIGORATION_TRIGGERED))
-                return false;
-            return true;
-        }
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* unitTarget = GetHitUnit())
-                if (AuraEffect* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0))
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        unitTarget->CastSpell(unitTarget, HUNTER_SPELL_INVIGORATION_TRIGGERED, true);
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_hun_invigoration_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_hun_invigoration_SpellScript();
-    }
 };
 
 class spell_hun_last_stand_pet : public SpellScriptLoader
@@ -348,7 +311,6 @@ public:
 
 void AddSC_hunter_spell_scripts()
 {
-    new spell_hun_invigoration();
     new spell_hun_last_stand_pet();
     new spell_hun_readiness();
     new spell_hun_scatter_shot();
