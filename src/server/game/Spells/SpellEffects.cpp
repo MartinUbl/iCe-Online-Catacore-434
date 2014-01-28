@@ -4087,6 +4087,16 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget,99212,true);
             break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            if (m_spellInfo->Id == 53490) // Bullheaded ( hunter's pet ability )
+            {
+                m_caster->RemoveMovementImpairingAuras();
+                m_caster->RemoveAurasByType(SPELL_AURA_MOD_STUN);
+                m_caster->CastSpell(m_caster,63896,true);
+            }
+            break;
+        }
 
     }
     ASSERT(unitTarget == m_spellAura->GetOwner());
