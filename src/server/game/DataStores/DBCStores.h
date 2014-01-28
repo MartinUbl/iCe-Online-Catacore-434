@@ -232,9 +232,13 @@ extern DBCStorage <UnitPowerBarEntry>            sUnitPowerBarStore;
 extern DBCStorage <VehicleEntry>                 sVehicleStore;
 extern DBCStorage <VehicleSeatEntry>             sVehicleSeatStore;
 extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
-//extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
+extern DBCStorage <WorldMapAreaEntry>            sWorldMapAreaStore;
 extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
 extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
+
+typedef UNORDERED_MAP<uint8, std::list<uint32> > TaxiNodesByType;
+typedef UNORDERED_MAP<uint32, TaxiNodesByType> TaxiNodesByZoneAndType;
+extern TaxiNodesByZoneAndType sTaxiNodesByZoneAndType;
 
 void LoadDBCStores(const std::string& dataPath);
 

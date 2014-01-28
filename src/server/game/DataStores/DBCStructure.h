@@ -2608,8 +2608,8 @@ struct WorldMapAreaEntry
     // int32   dungeonMap_id;                               // 9 pointer to DungeonMap.dbc (owerride x1,x2,y1,y2 coordinates)
     // uint32  someMapID;                                   // 10
     //uint32   unk1;                                        // 11 4.0.0, flags?
-    //uint32   minlevel;                                    // 12 minimal level of zone
-    //uint32   maxlevel;                                    // 13 maximal level of zone
+    uint32   minlevel;                                      // 12 minimal level of zone
+    uint32   maxlevel;                                      // 13 maximal level of zone
 };
 
 #define MAX_WORLD_MAP_OVERLAY_AREA_IDX 4

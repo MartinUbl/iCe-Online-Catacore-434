@@ -515,4 +515,16 @@ enum CurrencyFlags
 // Faction used for Guild reputation counting
 #define FACTION_GUILD 1168
 
+enum TaxiNodeTypes
+{
+    TAXI_NODE_TYPE_SPECIAL    = 0, // quest nodes, script nodes and others, that doesn't appear in player menu
+    TAXI_NODE_TYPE_ALLIANCE   = 1, // alliance-only
+    TAXI_NODE_TYPE_HORDE      = 2, // horde-only
+    TAXI_NODE_TYPE_NEUTRAL    = 3, // both factions
+    //TAXI_NODE_TYPE_UNK      = 4, // not found in DBC
+    TAXI_NODE_TYPE_ALLIANCE_2 = 5, // alliance-only, second
+    TAXI_NODE_TYPE_HORDE_2    = 6, // horde-only, second
+    TAXI_NODE_TYPE_NEUTRAL_2  = 7, // both factions, second
+};
+
 #endif

@@ -144,9 +144,9 @@ PlayerTaxi::PlayerTaxi()
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
 {
     // class specific initial known nodes
-    switch(chrClass)
+    switch (chrClass)
     {
-    case CLASS_DEATH_KNIGHT:
+        case CLASS_DEATH_KNIGHT:
         {
             for (uint8 i = 0; i < TaxiMaskSize; ++i)
                 m_taximask[i] |= sOldContinentsNodesMask[i];
@@ -154,31 +154,58 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
         }
     }
 
-    // race specific initial known nodes: capital and taxi hub masks
-    switch(race)
-    {
-    case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-    case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-    case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-    case RACE_NIGHTELF: SetTaximaskNode(26);
-                        SetTaximaskNode(27); break;     // Night Elf
-    case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
-    case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-    case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-    case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-    case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-    case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-    // new continent starting masks (It will be accessible only at new map)
+    uint32 team = Player::TeamForRace(race);
 
-    switch (Player::TeamForRace(race))
+    // Go through zones containing some taxi nodes
+    for (TaxiNodesByZoneAndType::iterator itr = sTaxiNodesByZoneAndType.begin(); itr != sTaxiNodesByZoneAndType.end(); ++itr)
     {
-    case ALLIANCE: SetTaximaskNode(100); break;
-    case HORDE:    SetTaximaskNode(99);  break;
+        WorldMapAreaEntry const* ae = sWorldMapAreaStore.LookupEntry((*itr).first);
+        if (!ae)
+            continue;
+
+        // determine, if level is suitable for us - if level equals 0 in both fields, then it's suitable for all,
+        // or is a dungeon, raid, BG, .. and those zones usually does not contain flight paths (only capital cities do)
+        if ((ae->minlevel == 0 && ae->maxlevel == 0) || (ae->minlevel <= level))
+        {
+            for (TaxiNodesByType::iterator iter = (*itr).second.begin(); iter != (*itr).second.end(); ++iter)
+            {
+                switch ((*iter).first)
+                {
+                    case TAXI_NODE_TYPE_NEUTRAL:
+                    case TAXI_NODE_TYPE_NEUTRAL_2:
+                    {
+                        for (std::list<uint32>::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); ++iter2)
+                            SetTaximaskNode(*iter2);
+                        break;
+                    }
+                    case TAXI_NODE_TYPE_ALLIANCE:
+                    case TAXI_NODE_TYPE_ALLIANCE_2:
+                    {
+                        if (team == ALLIANCE)
+                        {
+                            for (std::list<uint32>::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); ++iter2)
+                                SetTaximaskNode(*iter2);
+                        }
+                        break;
+                    }
+                    case TAXI_NODE_TYPE_HORDE:
+                    case TAXI_NODE_TYPE_HORDE_2:
+                    {
+                        if (team == HORDE)
+                        {
+                            for (std::list<uint32>::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); ++iter2)
+                                SetTaximaskNode(*iter2);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
+
     // level dependent taxi hubs
     if (level >= 68)
-        SetTaximaskNode(213);                               //Shattered Sun Staging Area
+        SetTaximaskNode(213);                               // Shattered Sun Staging Area
 }
 
 void PlayerTaxi::LoadTaxiMask(const char* data)

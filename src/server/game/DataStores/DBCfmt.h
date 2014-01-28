@@ -203,7 +203,7 @@ const char UnitPowerBarEntryfmt[]="nxiiixxxxxxxxxxxxxxxxsxxxxx";
 const char VehicleEntryfmt[]="niffffiiiiiiiifffffffffffffffssssfifiixx";
 const char VehicleSeatEntryfmt[]="niiffffffffffiiiiiifffffffiiifffiiiiiiiffiiiiixxxxxxxxxxxxxxxxxxxx";
 const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxx";
-const char WorldMapAreaEntryfmt[]="xinxffffixxxxx";
+const char WorldMapAreaEntryfmt[]="xinxffffixxxii";
 const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxx";
 const char WorldSafeLocsEntryfmt[]="nifffx";
 
