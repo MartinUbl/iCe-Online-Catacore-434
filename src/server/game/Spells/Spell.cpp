@@ -5969,7 +5969,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // Cobra shot and Chimera shot can't be cast while hunter has detterance
-    if (m_spellInfo->Id == 77767 || m_spellInfo->Id == 53209 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if ((m_spellInfo->Id == 77767 || m_spellInfo->Id == 53209) && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         if (m_caster->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
             return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
