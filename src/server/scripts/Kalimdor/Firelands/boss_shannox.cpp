@@ -889,6 +889,12 @@ class npc_crystal_trap : public CreatureScript
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
                     return;
 
+                if (pWho->ToCreature() && pWho->ToCreature()->GetEntry() == NPC_RAGEFACE)
+                {
+                    if (!pWho->IsNonMeleeSpellCasted(false) || pWho->ToCreature()->AI()->GetData(0) == 1) // If casting or jumping (1), dont allow go into trap
+                        return;
+                }
+
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL ||
                     (!pWho->HasAura(SPELL_SPEAR_VISUAL) && (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE)))
                     ActivateTrap(pWho);
@@ -1170,6 +1176,11 @@ class npc_rageface : public CreatureScript
                     pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
             }
 
+            uint32 GetData(uint32 type)
+            {
+                return ((jumping) ? 1 : 0); // // Is jumping ?
+            }
+
             void DamageTaken(Unit* attacker, uint32& damage)
             {
                 if (!me->IsNonMeleeSpellCasted(false)) // Must casting face rage
@@ -1209,22 +1220,18 @@ class npc_rageface : public CreatureScript
                 Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
                 std::list<Player*> targets;
                 targets.clear();
-                uint32 plrCount = 0;
 
                 if (!plrList.isEmpty())
                 {
                     for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                     {
                         Player* plr = itr->getSource();
-                        plrCount++;
 
-                        /*if (plr->GetDistance2d(me) >= 60.0f) // Max range of jump spell
-                            continue;*/
-
-                        if (plr && plr->isAlive() && plr->isGameMaster() == false)
+                        if (plr && plr->isAlive() && plr->isGameMaster() == false && plr->GetExactDist2d(me) < 55.0f)
                         {
-                            if (!plr->HasTankSpec() && !plr->HasAura(5487))
-                                targets.push_back(plr);
+                            if (!plr->HasTankSpec() && !plr->HasAura(5487)) // Not on tanks
+                                if (!plr->HasAura(SPELL_CRYSTAL_PRISON_EFFECT)) // Not on players in crystal
+                                    targets.push_back(plr);
                         }
                     }
 
@@ -1235,17 +1242,14 @@ class npc_rageface : public CreatureScript
                         std::advance(itr, randPos);
                         if ((*itr) && (*itr)->IsInWorld())
                         {
-                            me->TauntApply(*itr);
-                            me->AddThreat((*itr), 50000.0f);
-                            me->GetMotionMaster()->Clear(false);
-                            me->GetMotionMaster()->MoveChase((*itr));
-                            me->AI()->AttackStart((*itr));
+                            DoResetThreat();
+                            me->AddThreat(*itr,500000.0f);
                             if (ragefacing) // Time for rageface
                             {
                                 jumping = true;
-                                //me->CastSpell((*itr), SPELL_FACE_RAGE, false); // Jump to target
-                                (*itr)->GetPosition(&jumpPos);
-                                me->GetMotionMaster()->MoveJump((*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ(),50,20,0);
+                                me->CastSpell((*itr), SPELL_FACE_RAGE, false); // Jump to target
+                                //(*itr)->GetPosition(&jumpPos);
+                                //me->GetMotionMaster()->MoveJump((*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ(),50,20,0);
                             }
                         }
                     }
@@ -1269,7 +1273,7 @@ class npc_rageface : public CreatureScript
 
                 if (jumping)
                 {
-                    uint32 x = me->GetPositionX();
+                    /*uint32 x = me->GetPositionX();
                     uint32 y = me->GetPositionY();
 
                     uint32 mx = jumpPos.m_positionX;
@@ -1277,17 +1281,23 @@ class npc_rageface : public CreatureScript
 
                     if (mx == x && my == y)
                     {
-                        me->StopMoving();
-                        me->CastSpell(me->getVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
-                        jumping = false;
-                        changeTargetTimer = 31000;
-                    }
+                        me->StopMoving();*/
+                        if (Unit * victim = me->getVictim())
+                        {
+                            if (victim->IsInWorld() && me->IsWithinMeleeRange(victim))
+                            {
+                                me->StopMoving();
+                                me->CastSpell(victim,99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
+                                jumping = false;
+                                changeTargetTimer = 31000;
+                            }
+                        }
                     return;
                 }
 
                 if (debuffTimer <= diff)
                 {
-                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                    if (me->IsNonMeleeSpellCasted(false))
                     {
                         me->RemoveAura(100129); // Crit buff on rageface
                         me->RemoveAura(101212);
