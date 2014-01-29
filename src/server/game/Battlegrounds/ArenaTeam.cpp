@@ -827,7 +827,7 @@ int32 ArenaTeam::LostAgainst(uint32 selfMatchmakerRating, uint32 opponentMatchma
     // called when the team has lost
     // own team rating versus opponents matchmaker rating
     int32 matchmakerRatingMod = GetMatchMakerRatingMod(selfMatchmakerRating, opponentMatchmakerRating, false);
-    int32 teamRatingMod = GetRatingMod(GetTeamRating(), selfMatchmakerRating, false);
+    int32 teamRatingMod = GetRatingMod(GetTeamRating(), opponentMatchmakerRating, false);
 
     // modify the team stats accordingly
     FinishGame(teamRatingMod);
