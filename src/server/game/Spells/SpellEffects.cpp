@@ -5733,6 +5733,13 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         pet->SetCreatorGUID(m_originalCaster->GetGUID());
         ExecuteLogEffectSummonObject(effIndex, pet);
+
+        if (Unit * victim = m_caster->getVictim())
+        {
+            if (victim->IsInWorld() && m_caster->IsHostileTo(victim))
+                pet->GetMotionMaster()->MoveChase(victim);
+        }
+
         return;
     }
 
