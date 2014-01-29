@@ -1623,7 +1623,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
         {
             if (pHunter->IsInWorld())
             {
-                if (AuraEffect* aurEff = pHunter->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0))
+                if (pHunter->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0))
                     pHunter->CastSpell(pHunter, 53398, true); // Focus gain
             }
         }
