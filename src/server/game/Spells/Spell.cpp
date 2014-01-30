@@ -7312,7 +7312,7 @@ uint32 Spell::GetCCDelay(SpellEntry const* _spell)
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Death Grip
-            if (_spell->Id == 49560)
+            if (_spell->Id == 49576)
                 return ccDelay;
             break;
         case SPELLFAMILY_ROGUE:
