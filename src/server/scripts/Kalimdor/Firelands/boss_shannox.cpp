@@ -1256,6 +1256,16 @@ class npc_rageface : public CreatureScript
                 }
             }
 
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            me->InterruptNonMeleeSpells(false);
+            if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true))
+                me->GetMotionMaster()->MoveChase(player);
+        }
+
         void SpellHit(Unit* pSrc, const SpellEntry* spell)
         {
             if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
