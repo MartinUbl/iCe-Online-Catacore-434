@@ -6078,7 +6078,8 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const *aurApp, uint8 
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FREEZE, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_TURN, apply);
             break;
-        case 56651: // Master's Call
+        case 54216: // Master's Call
+        case 62305:
             mechanic = (1 << MECHANIC_ROOT) | (1 << MECHANIC_SNARE) | (1 << MECHANIC_TURN);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);

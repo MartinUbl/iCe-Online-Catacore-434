@@ -2532,6 +2532,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     Unit* pPet = Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
                     if (unitTarget && pPet)
                     {
+                        pPet->RemoveMovementImpairingAuras();
+                        unitTarget->RemoveMovementImpairingAuras();
                         pPet->CastSpell(unitTarget, 54216, true);
                         pPet->CastSpell(pPet, 62305, true);
                     }

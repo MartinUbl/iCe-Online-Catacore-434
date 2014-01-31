@@ -5998,6 +5998,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
+    if (m_spellInfo->Id == 53271 && m_caster->GetTypeId() == TYPEID_PLAYER) // Master's Call
+    {
+        Unit* pPet = Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
+
+        // Can't be cast if pet is dead and also check if pet is able to cast
+        if (!pPet || pPet->isDead() || pPet->isFeared() || pPet->isFrozen() || pPet->hasUnitState(UNIT_STAT_STUNNED) || pPet->hasUnitState(UNIT_STAT_CONFUSED))
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+    }
+
     // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms
     if (m_spellInfo->Id == 88751)
     {
