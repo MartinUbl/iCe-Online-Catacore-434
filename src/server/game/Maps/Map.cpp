@@ -2480,31 +2480,21 @@ bool InstanceMap::Add(Player *player)
 
             // Not sure where put this
             // It lets player know, that if he kills boss, he will be bound to this instance
-            if(player->showInstanceBindQuery == true)//show only, if needed
+            /*uint32 count = GetInstanceScript()->GetBossNumber();
+            if (count)
             {
-                player->showInstanceBindQuery=false;
-                uint32 count = sInstanceSaveMgr->getBossNumber(GetId());
                 uint32 bossescompleted = 0;
-                if (count)
-                {
-                    std::map<uint32,uint32> uiEnc = sInstanceSaveMgr->getInstanceSaveData(GetInstanceId());
-                    for (uint32 i = 0; i < count; i++)
-                        if (uiEnc[i] == DONE)
-                            bossescompleted |= 1 << (count-1-i);
-                }
-                WorldPacket data(SMSG_INSTANCE_LOCK_WARNING_QUERY, 4+4+1+1, true);
-                uint8 diff=1;
-                if(GetSpawnMode()== RAID_DIFFICULTY_10MAN_HEROIC || GetSpawnMode()== RAID_DIFFICULTY_25MAN_HEROIC) 
-                {
-                    diff=0;
-                    setPlayerSaveTimer(player->GetGUIDLow(), 60000);//set timer for autobind
-                }
-                data << uint32(60000);               // time
-                data << bossescompleted; // completed boss mask
+                for (uint32 i = 0; i < count; i++)
+                    if (GetInstanceScript()->GetBossState(i) == DONE)
+                        bossescompleted |= 1 << i;
+
+                WorldPacket data(SMSG_ENTERED_INSTANCE_IN_PROGRESS, 4+4+1+1, true);
+                data << uint32(0);               // unk
+                data << uint32(bossescompleted); // completed boss mask
                 data << uint8(0);                // unk
-                data << diff;                // some kind of switch, 1-with timer and leave 0-only accept
+                data << uint8(1);                // some kind of switch, 1 probably means new save
                 player->SendMessageToSet(&data,true);
-            }
+            }*/
 
             // check for existing instance binds
             InstancePlayerBind *playerBind;
@@ -2649,33 +2639,12 @@ void InstanceMap::Update(const uint32& t_diff)
     else
         m_checkCombatTimer -= t_diff;
 
-    // Here we will if the player needs to be autosaved to the instance
-    Map::PlayerList const& plList = GetPlayers();
-    if (!plList.isEmpty())
-    {
-        for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-        {
-            Player* player=itr->getSource();
-            if(savePlayerTimers[player->GetGUIDLow()])//player has timer
-            {
-                if(savePlayerTimers[player->GetGUIDLow()] <= t_diff)//timer is ending
-                {
-                    removePlayerSaveTimer(player->GetGUIDLow());
-                    copyDeadUnitsFromLeader(player, GetId(), GetInstanceId(),0);
-                }
-                else//timer has some time
-                    savePlayerTimers[player->GetGUIDLow()] -= t_diff;
-            }
-        }
-    }
-
     if (i_data)
         i_data->Update(t_diff);
 }
 
 void InstanceMap::Remove(Player *player, bool remove)
 {
-    removePlayerSaveTimer(player->GetGUIDLow());//remove running timer for player
     sLog->outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to another map", player->GetName(), GetInstanceId(), GetMapName());
     //if last player set unload timer
     if (!m_unloadTimer && m_mapRefManager.getSize() == 1)
@@ -2854,13 +2823,13 @@ void InstanceMap::doDifficultyStaff(Player* player, uint32 mapId, uint32 instanc
     }
 }
 
-void InstanceMap::copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 instanceId, uint32 unitGuidDB/*=0*/)
+void InstanceMap::copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 instanceId, uint32 unitGuidDB)
 {
     uint32 playId=player->getRaidId(mapId);
     if(playId!=instanceId)
     {
         CharacterDatabase.PExecute("REPLACE INTO creature_respawn(guid,respawnTime,instance) SELECT guid,respawnTime,'%d' FROM creature_respawn WHERE instance = '%d'", playId, instanceId);
-        QueryResult result = CharacterDatabase.PQuery("SELECT guid, respawnTime FROM creature_respawn WHERE instance = '%d'", instanceId);
+        QueryResult result = CharacterDatabase.PQuery("SELECT guid, respawnTime FROM creature_respawn WHERE instance = '%d'", instanceId, instanceId);
         if (result)
         {
             do
@@ -2870,6 +2839,7 @@ void InstanceMap::copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 i
                 uint32 guid = fields[0].GetUInt32();
                 uint32 time = fields[1].GetUInt32();
                 sObjectMgr->SaveCreatureRespawnTimeWithoutDB(guid,playId,time);
+                time=sObjectMgr->GetCreatureRespawnTime(guid,playId);
             }
             while (result->NextRow());
         }
@@ -2884,7 +2854,9 @@ void InstanceMap::copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 i
                 map->ToInstanceMap()->GetInstanceScript()->Load(data.c_str());
                 if(!map->HavePlayers())
                 {
-                    map->UnloadAll();
+                    Map* mapR=sMapMgr->_findMap(mapId);
+                        if(mapR)
+                            ((MapInstanced*)mapR)->_RemoveMapByInstId(playId);
                 }
             }
         }

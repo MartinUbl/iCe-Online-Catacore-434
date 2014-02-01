@@ -897,7 +897,6 @@ class WorldSession
         void HandleEnterPlayerVehicle(WorldPacket &data);
         void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
         void HandleOpeningCinematic(WorldPacket& recvData);
-        void HandleInstanceLockResponse(WorldPacket &recv_data);
 
         // Compact Unit Frames (4.x)
         void HandleSaveCUFProfiles(WorldPacket& recvPacket);

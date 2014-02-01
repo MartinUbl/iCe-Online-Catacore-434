@@ -689,8 +689,6 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
 
     m_ConditionErrorMsgId = 0;
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
-
-    showInstanceBindQuery=false;
 }
 
 Player::~Player ()

@@ -365,7 +365,7 @@ void InitOpcodeTable()
     OPCODE( SMSG_AI_REACTION,                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_SET_SELECTION,                           STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode        );
     OPCODE( CMSG_EQUIPMENT_SET_DELETE,                    STATUS_LOGGEDIN, &WorldSession::HandleEquipmentSetDelete        );
-    OPCODE( CMSG_INSTANCE_LOCK_WARNING_RESPONSE,          STATUS_LOGGEDIN, &WorldSession::HandleInstanceLockResponse      );
+    OPCODE( CMSG_INSTANCE_LOCK_WARNING_RESPONSE,          STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_UNUSED2,                                 STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_ATTACKSWING,                             STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode         );
     OPCODE( CMSG_ATTACKSTOP,                              STATUS_LOGGEDIN, &WorldSession::HandleAttackStopOpcode          );
@@ -1368,7 +1368,6 @@ void InitOpcodeTable()
     OPCODE( CMSG_MESSAGECHAT_ADDON_RAID,                  STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_MESSAGECHAT_ADDON_WHISPER,               STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         );
     OPCODE( CMSG_CLEAR_RAID_MARKER,                       STATUS_LOGGEDIN, &WorldSession::HandleClearRaidMarker           );
-    OPCODE( SMSG_WORLD_SERVER_INFO,                       STATUS_LOGGEDIN, &WorldSession::Handle_ServerSide               );
 };
 
 void DestroyOpcodeTable()

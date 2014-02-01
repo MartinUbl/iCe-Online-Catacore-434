@@ -635,26 +635,13 @@ class InstanceMap : public Map
         virtual void InitVisibilityDistance();
 
         void doDifficultyStaff(Player* player, uint32 mapId, uint32 instanceId);
-        void copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 instanceId, uint32 unitGuidDB=0);
-        void setPlayerSaveTimer(uint32 playGuid, uint32 time)
-        {
-            savePlayerTimers[playGuid]=time;
-        }
-        uint32 getPlayerSaveTimer(uint32 playGuid)
-        {
-            return savePlayerTimers[playGuid];
-        }
-        void removePlayerSaveTimer(uint32 playGuid)
-        {
-            savePlayerTimers.erase(playGuid);
-        }
+        void copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 instanceId, uint32 unitGuidDB);
     private:
         uint32 m_checkCombatTimer;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
         InstanceScript* i_data;
         uint32 i_script_id;
-        UNORDERED_MAP< uint32 /*player guid*/, uint32 /*save timer*/ > savePlayerTimers;
 };
 
 class BattlegroundMap : public Map

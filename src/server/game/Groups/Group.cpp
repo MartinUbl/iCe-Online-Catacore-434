@@ -41,7 +41,6 @@
 #include "Guild.h"
 #include "UpdateFieldFlags.h"
 #include "ObjectAccessor.h"
-#include "InstanceScript.h"
 
 Group::Group() : m_leaderGuid(0), m_groupType(GROUPTYPE_NORMAL), m_bgGroup(NULL),
 m_bfGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_looterGuid(0), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
@@ -2295,6 +2294,9 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
     if (!save || isBGGroup() || isBFGroup())
         return NULL;
     Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
+    /*const Map* map=sMapMgr->FindMap(save->GetMapId(),save->GetInstanceId());
+    if(!map)
+        map=sMapMgr->CreateBaseMap(save->GetMapId());//CreateMap(save->GetMapId(),GetLeader(),save->GetInstanceId());*/
     const MapEntry* map = sMapStore.LookupEntry(save->GetMapId());
     if(map&&map->IsRaid())
         diff=RAID_DIFFICULTY_10MAN_HEROIC;
@@ -2316,59 +2318,6 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
     if (!load)
         sLog->outDebug("Group::BindToInstance: %d is now bound to map %d, instance %d, difficulty %d", GUID_LOPART(GetGUID()), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
     return &bind;
-}
-
-InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
-{
-    InstanceGroupBind* newBind=NULL;
-    uint32 leadGuid;
-    uint32 leadId=0;
-    std::string data;
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_HEROIC, 0, true, false))
-    {
-        newBind=BindToInstance(save, true, false);
-        leadGuid=GetLeaderGUID();
-        if(leadGuid)
-        {
-            if(GetLeader())
-                leadId=GetLeader()->GetBoundInstance(mapId, RAID_DIFFICULTY_10MAN_HEROIC)->save->GetInstanceId();
-            else
-            {
-                 QueryResult result = CharacterDatabase.PQuery("SELECT instance,data FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%d' AND map='%d'", leadGuid,mapId);
-                 if(result)
-                 {
-                     Field* fields = result->Fetch();
-                     leadId = fields[0].GetUInt32();
-                     data = fields[1].GetString();
-                 }
-            }
-            /*Copy all killed mobs from the leader, if he has ID*/
-            if(leadId)
-            {
-                CharacterDatabase.PExecute("REPLACE INTO creature_respawn(guid,respawnTime,instance) SELECT guid,respawnTime,'%d' FROM creature_respawn WHERE instance = '%d'", instanceId, leadId);
-                CharacterDatabase.PExecute("REPLACE INTO instance(id,map,resettime,difficulty,data) SELECT '%d',map,resettime,difficulty,data FROM instance WHERE id = '%d'", instanceId, leadId);
-                QueryResult result = CharacterDatabase.PQuery("SELECT guid, respawnTime FROM creature_respawn WHERE instance = '%d'", leadId);
-                if (result)
-                {
-                    do
-                    {
-                        Field* fields = result->Fetch();
-
-                        uint32 guid = fields[0].GetUInt32();
-                        uint32 time = fields[1].GetUInt32();
-                        sObjectMgr->SaveCreatureRespawnTimeWithoutDB(guid,instanceId,time);
-                    }
-                    while (result->NextRow());
-                }
-                Map* map=sMapMgr->FindMap(mapId,instanceId);
-                if(!data.empty() && map && map->ToInstanceMap() && map->ToInstanceMap()->GetInstanceScript())//set data to new group map
-                {
-                    map->ToInstanceMap()->GetInstanceScript()->Load(data.c_str());
-                }
-            }
-        }
-    }
-    return newBind;
 }
 
 void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
