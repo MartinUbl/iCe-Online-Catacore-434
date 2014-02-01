@@ -6003,7 +6003,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         Unit* pPet = Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
 
         // Can't be cast if pet is dead and also check if pet is able to cast
-        if (!pPet || pPet->isDead() || pPet->isFeared() || pPet->isFrozen() || pPet->hasUnitState(UNIT_STAT_STUNNED) || pPet->hasUnitState(UNIT_STAT_CONFUSED))
+        if (!pPet || pPet->isDead() || pPet->isFeared() || pPet->hasUnitState(UNIT_STAT_STUNNED) || pPet->hasUnitState(UNIT_STAT_CONFUSED))
             return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
     }
 
