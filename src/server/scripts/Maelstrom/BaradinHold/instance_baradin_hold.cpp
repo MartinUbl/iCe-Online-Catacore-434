@@ -134,7 +134,6 @@ public:
             }
             else OUT_LOAD_INST_DATA_FAIL;
 
-            GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
         virtual uint32* GetUiEncounter(){return uiEncounter;}

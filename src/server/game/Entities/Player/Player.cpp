@@ -689,6 +689,9 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
 
     m_ConditionErrorMsgId = 0;
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
+
+    merged=false;
+    oldID=0;
 }
 
 Player::~Player ()
@@ -19514,71 +19517,11 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
             // since non permanent binds are always solo bind, they can always be reset
             if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, Difficulty(difficulty), resetTime, !perm, true))
                BindToInstance(save, perm, true);
-
-            setRaidId(mapId, instanceId);//Set deafult instance ID of player for his raids
         }
         while (result->NextRow());
     }
 }
 
-/*Reload one exact bind of player from Database*/
-void Player::_LoadBoundInstance(uint32 mapId)
-{
-    m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC].erase(mapId);
-
-    Group *group = GetGroup();
-
-    QueryResult result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime, diffProgress FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%d' AND map='%d'", GetGUIDLow(),mapId);
-    if (result)
-    {
-        Field* fields = result->Fetch();
-
-        bool perm = fields[1].GetBool();
-        uint32 mapId = fields[2].GetUInt32();
-        uint32 instanceId = fields[0].GetUInt32();
-        uint8 difficulty = fields[3].GetUInt8();
-
-        time_t resetTime = (time_t)fields[4].GetUInt64();
-        // the resettime for normal instances is only saved when the InstanceSave is unloaded
-        // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
-        // and in that case it is not used
-
-        uint32 diffProgress = fields[5].GetUInt32();//difficulty progress for Flexible raid locks rules
-        setRaidDiffProgr(mapId, diffProgress);
-
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || !mapEntry->IsDungeon())
-        {
-            sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed or not dungeon map %d", GetName(), GetGUIDLow(), mapId);
-            CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
-        }
-
-        if (difficulty >= MAX_DIFFICULTY)
-        {
-            sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed difficulty %d instance for map %u", GetName(), GetGUIDLow(), difficulty, mapId);
-            CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
-        }
-
-        MapDifficulty const* mapDiff = GetMapDifficultyData(mapId,Difficulty(difficulty));
-        if (!mapDiff)
-        {
-            sLog->outError("_LoadBoundInstances: player %s(%d) has bind to not existed difficulty %d instance for map %u", GetName(), GetGUIDLow(), difficulty, mapId);
-            CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
-        }
-
-        if (!perm && group)
-        {
-            sLog->outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetGUID()), mapId, instanceId, difficulty);
-            CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
-        }
-
-        // since non permanent binds are always solo bind, they can always be reset
-        if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, Difficulty(difficulty), resetTime, !perm, true))
-            BindToInstance(save, perm, true);
-
-        setRaidId(mapId, instanceId);//Correct deafult raid ID if it has somehow corrupted
-    }
-}
 
 
 InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
@@ -19680,16 +19623,6 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
     }
     else
         return NULL;
-}
-
-InstancePlayerBind* Player::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
-{
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_HEROIC, 0, true, false))
-    {
-        setRaidId(mapId,instanceId);
-        return BindToInstance(save, true, false);
-    }
-    return NULL;
 }
 
 void Player::SendRaidInfo()

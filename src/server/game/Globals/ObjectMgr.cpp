@@ -7843,16 +7843,6 @@ void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t
     CharacterDatabase.Execute(stmt);
 }
 
-void ObjectMgr::SaveCreatureRespawnTimeWithoutDB(uint32 loguid, uint32 instance, time_t t)
-{
-    // This function can be called from various map threads concurrently
-    {
-        m_CreatureRespawnTimesMtx.acquire();
-        mCreatureRespawnTimes[MAKE_PAIR64(loguid, instance)] = t;
-        m_CreatureRespawnTimesMtx.release();
-    }
-}
-
 void ObjectMgr::RemoveCreatureRespawnTime(uint32 loguid, uint32 instance)
 {
     // This function can be called from various map threads concurrently

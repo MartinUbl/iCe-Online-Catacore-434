@@ -104,7 +104,6 @@ public:
                     m_auiEncounter[i] = NOT_STARTED;
             }
 
-            GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
