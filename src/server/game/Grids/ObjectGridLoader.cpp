@@ -190,15 +190,15 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     CellPair cell_pair(x, y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    uint8 spawMod=i_map->GetSpawnMode();;
+    uint8 spawMod;
     uint32 mapId=i_map->GetId();//757=Baradin Hold, 469=Blackwing Lair, 531=Ahn'Qiraj Temple, 409=Molten Core, 509=Ruins of Ahn'Qiraj
-    /*if(mapId == 469 || mapId == 531 || mapId == 409 || mapId == 509)//special control for 40/20 mans, because they have spawn mode as 10man N
+    if(mapId == 469 || mapId == 531 || mapId == 409 || mapId == 509)//special control for 40/20 mans, because they have spawn mode as 10man N
     {
         spawMod=RAID_DIFFICULTY_10MAN_NORMAL;
     }
-    else*
-        spawMod=i_map->GetSpawnMode();*/
-    CellObjectGuids const& cell_guids  = sObjectMgr->GetCellObjectGuids(mapId, spawMod, cell_id);
+    else
+        spawMod=i_map->GetSpawnMode();
+    CellObjectGuids const& cell_guids  = sObjectMgr->GetCellObjectGuids(i_map->GetId(), spawMod, cell_id);
 
     LoadHelper(cell_guids.creatures, cell_pair, m, i_creatures, i_map);
 }

@@ -2134,12 +2134,12 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
     }
 
     Player *leader = GetLeader();//Reset npc in map for calling AddToWorld() again because of Flexible Raid locks
-    Player::BoundInstancesMap bounds=leader->m_boundInstances[FLEXIBLE_RAID_DIFFICULTY];
+    Player::BoundInstancesMap bounds=leader->m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC];
     for(Player::BoundInstancesMap::iterator itr=bounds.begin();itr!=bounds.end();itr++)
     {
         InstancePlayerBind pBind=itr->second;
         Map* map=sMapMgr->FindMap(pBind.save->GetMapId(),pBind.save->GetInstanceId());//find map instance
-        if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(map->GetId()) && !map->HavePlayers())//map is empty so we can unload it
+        if(map && map->IsRaid() && !map->HavePlayers())//map is empty so we can unload it
         {
             Map* mapR=sMapMgr->_findMap(pBind.save->GetMapId());//find main map 
             if(mapR)
@@ -2260,8 +2260,8 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
 
     // some instances only have one difficulty
     GetDownscaledMapDifficultyData(aMap->GetId(),difficulty);
-    if(aMap->IsRaid() && aMap->ToInstanceMap()->GetInstanceScript() && sInstanceSaveMgr->getBossNumber(aMap->GetId()))
-        difficulty= FLEXIBLE_RAID_DIFFICULTY;
+    if(aMap->IsRaid()&&aMap->ToInstanceMap()->GetInstanceScript())
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
@@ -2296,8 +2296,8 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
         return NULL;
     Difficulty diff=RAID_DIFFICULTY_10MAN_NORMAL;
     const MapEntry* map = sMapStore.LookupEntry(save->GetMapId());
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(save->GetMapId()))
-        diff= FLEXIBLE_RAID_DIFFICULTY;
+    if(map&&map->IsRaid())
+        diff=RAID_DIFFICULTY_10MAN_HEROIC;
     else
         diff=save->GetDifficulty();
     InstanceGroupBind& bind = m_boundInstances[diff][save->GetMapId()];
@@ -2324,14 +2324,14 @@ InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
     uint32 leadGuid;
     uint32 leadId=0;
     std::string data;
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, FLEXIBLE_RAID_DIFFICULTY, 0, true, false))
+    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_HEROIC, 0, true, false))
     {
         newBind=BindToInstance(save, true, false);
         leadGuid=GetLeaderGUID();
         if(leadGuid)
         {
             if(GetLeader())
-                leadId=GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY)->save->GetInstanceId();
+                leadId=GetLeader()->GetBoundInstance(mapId, RAID_DIFFICULTY_10MAN_HEROIC)->save->GetInstanceId();
             else
             {
                  QueryResult result = CharacterDatabase.PQuery("SELECT instance,data FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%d' AND map='%d'", leadGuid,mapId);
@@ -2373,10 +2373,11 @@ InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
 
 void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
 {
+    //const Map* map=sMapMgr->CreateBaseMap(mapid);
     const MapEntry* map = sMapStore.LookupEntry(mapid);
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(mapid))
+    if(map && map->IsRaid())
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())

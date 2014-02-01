@@ -19526,7 +19526,7 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
 /*Reload one exact bind of player from Database*/
 void Player::_LoadBoundInstance(uint32 mapId)
 {
-    m_boundInstances[FLEXIBLE_RAID_DIFFICULTY].erase(mapId);
+    m_boundInstances[RAID_DIFFICULTY_10MAN_HEROIC].erase(mapId);
 
     Group *group = GetGroup();
 
@@ -19612,9 +19612,10 @@ InstanceSave * Player::GetInstanceSave(uint32 mapid, bool raid)
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
     const MapEntry* map = sMapStore.LookupEntry(mapid);
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(mapid))
+    //const Map* map=sMapMgr->CreateBaseMap(mapid);
+    if(map && map->IsRaid())
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     }
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     UnbindInstance(itr, difficulty, unload);
@@ -19623,9 +19624,10 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
     const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(itr->second.save->GetMapId()))
+    //const Map* map=sMapMgr->CreateBaseMap(itr->second.save->GetMapId());
+    if(map && map->IsRaid())
     {
-        difficulty=FLEXIBLE_RAID_DIFFICULTY;
+        difficulty=RAID_DIFFICULTY_10MAN_HEROIC;
     }
     if (itr != m_boundInstances[difficulty].end())
     {
@@ -19641,8 +19643,8 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
     {
         Difficulty diff ;
         const MapEntry* mapP = sMapStore.LookupEntry(save->GetMapId());
-        if(mapP && mapP->IsRaid() && sInstanceSaveMgr->getBossNumber(save->GetMapId()))
-            diff=FLEXIBLE_RAID_DIFFICULTY;
+        if(mapP&&mapP->IsRaid())
+            diff=RAID_DIFFICULTY_10MAN_HEROIC;
         else
             diff=save->GetDifficulty();
 
@@ -19684,7 +19686,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 
 InstancePlayerBind* Player::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
 {
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, FLEXIBLE_RAID_DIFFICULTY, 0, true, false))
+    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_HEROIC, 0, true, false))
     {
         setRaidId(mapId,instanceId);
         return BindToInstance(save, true, false);
