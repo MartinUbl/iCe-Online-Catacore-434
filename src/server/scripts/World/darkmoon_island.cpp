@@ -134,7 +134,8 @@ class npc_maxima_darkmoon: public CreatureScript
                 }
                 else
                 {
-                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    if (pPlayer->GetSession())
+                        pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
@@ -319,7 +320,7 @@ class npc_teleporter_fozlebub: public CreatureScript
                     pPlayer->ModifyMoney(-FOZLEBUB_TELEPORT_COST);
                     pCreature->CastSpell(pPlayer, SPELL_CANNONBALL_TELEPORT_BACK, true);
                 }
-                else
+                else if (pPlayer->GetSession())
                     pPlayer->GetSession()->SendNotification("You don't have enough money!");
                 return true;
             }
@@ -459,7 +460,8 @@ class npc_jessica_darkmoon: public CreatureScript
                 }
                 else
                 {
-                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    if (pPlayer->GetSession())
+                        pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
@@ -789,7 +791,8 @@ class npc_rinling_darkmoon: public CreatureScript
                 }
                 else
                 {
-                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    if (pPlayer->GetSession())
+                        pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
@@ -1118,7 +1121,8 @@ class npc_darkmoon_mola: public CreatureScript
                 }
                 else
                 {
-                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    if (pPlayer->GetSession())
+                        pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
@@ -1632,7 +1636,8 @@ class npc_finlay_darkmoon: public CreatureScript
                 }
                 else
                 {
-                    pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
+                    if (pPlayer->GetSession())
+                        pPlayer->GetSession()->SendNotification("You don't have enough Darkmoon Game Tokens!");
                 }
                 return true;
             }
