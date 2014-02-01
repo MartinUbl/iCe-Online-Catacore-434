@@ -8470,9 +8470,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     {
                         int32 bp0 = (m_caster->HasAura(51099)) ? 15 : 30;
                         m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true);
-                        if (AuraEffect* aurEff = unitTarget->GetAuraEffect(65142,0,m_caster->GetGUID()))
-                            if ( aurEff->GetAmount() / dmgDecreased > 0)
-                                aurEff->SetAmount(aurEff->GetAmount() / dmgDecreased);
                     }
                 }
             }
