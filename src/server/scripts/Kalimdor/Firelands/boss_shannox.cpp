@@ -1206,6 +1206,8 @@ class npc_rageface : public CreatureScript
 
                 if (pBoss)
                     pBoss->SetReactState(REACT_AGGRESSIVE);
+
+                me->SetInCombatWithZone();
             }
 
             void EnterEvadeMode()
@@ -1243,38 +1245,49 @@ class npc_rageface : public CreatureScript
                         if ((*itr) && (*itr)->IsInWorld())
                         {
                             DoResetThreat();
+                            me->SetInCombatWithZone();
                             me->AddThreat(*itr,500000.0f);
                             if (ragefacing) // Time for rageface
                             {
                                 jumping = true;
                                 me->CastSpell((*itr), SPELL_FACE_RAGE, false); // Jump to target
-                                //(*itr)->GetPosition(&jumpPos);
-                                //me->GetMotionMaster()->MoveJump((*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ(),50,20,0);
+                                debuffTimer = 3000;
                             }
                         }
                     }
                 }
             }
 
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            me->InterruptNonMeleeSpells(false);
-            if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true))
-                me->GetMotionMaster()->MoveChase(player);
-        }
-
-        void SpellHit(Unit* pSrc, const SpellEntry* spell)
-        {
-            if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
+            void UnstuckRageFace(void)
             {
-                debuffTimer = 15000;
-                jumpTimer += 10000; // 10 second trap
-                changeTargetTimer += 10000;
+                jumping = false;
+                DoResetThreat();
+                me->SetInCombatWithZone();
+                me->InterruptNonMeleeSpells(false);
+                if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true))
+                {
+                    me->AddThreat(player,20.0f);
+                    me->GetMotionMaster()->MoveChase(player);
+                }
             }
-        }
+
+            void KilledUnit(Unit* victim)
+            {
+                if (victim->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                UnstuckRageFace();
+            }
+
+            void SpellHit(Unit* pSrc, const SpellEntry* spell)
+            {
+                if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
+                {
+                    debuffTimer = 15000;
+                    jumpTimer += 10000; // 10 second trap
+                    changeTargetTimer += 10000;
+                }
+            }
 
             void UpdateAI(const uint32 diff)
             {
@@ -1283,36 +1296,35 @@ class npc_rageface : public CreatureScript
 
                 if (jumping)
                 {
-                    /*uint32 x = me->GetPositionX();
-                    uint32 y = me->GetPositionY();
-
-                    uint32 mx = jumpPos.m_positionX;
-                    uint32 my = jumpPos.m_positionY;
-
-                    if (mx == x && my == y)
+                    if (Unit * victim = me->getVictim())
                     {
-                        me->StopMoving();*/
-                        if (Unit * victim = me->getVictim())
+                        if (victim->IsInWorld() && me->IsWithinMeleeRange(victim))
                         {
-                            if (victim->IsInWorld() && me->IsWithinMeleeRange(victim))
-                            {
-                                me->StopMoving();
-                                me->CastSpell(victim,99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
-                                jumping = false;
-                                changeTargetTimer = 31000;
-                            }
+                            me->StopMoving();
+                            me->CastSpell(victim,99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
+                            jumping = false;
+                            changeTargetTimer = 31000;
                         }
+                    }
                     return;
                 }
 
                 if (debuffTimer <= diff)
                 {
+                    // I will use this timer also for rageface stuck 
+                    if (Unit * victim = me->getVictim())
+                    {
+                        if (victim->IsInWorld() && victim->isDead())
+                            UnstuckRageFace();
+                    }
+
                     if (me->IsNonMeleeSpellCasted(false))
                     {
                         me->RemoveAura(100129); // Crit buff on rageface
                         me->RemoveAura(101212);
                         me->RemoveAura(101213);
                         me->RemoveAura(101214);
+                        jumping = false;
                     }
                     debuffTimer = 2000;
                 }
@@ -1320,16 +1332,22 @@ class npc_rageface : public CreatureScript
 
                 if (jumpTimer <= diff)
                 {
-                    ChangeTarget(true); // Jump on target which will be faceraged
-                    changeTargetTimer = 33000;
-                    jumpTimer = 30000;
+                    if (me->IsNonMeleeSpellCasted(false))
+                    {
+                        ChangeTarget(true); // Jump on target which will be faceraged
+                        changeTargetTimer = 33000;
+                        jumpTimer = 30000;
+                    }
                 }
                 else jumpTimer -= diff;
 
                 if (changeTargetTimer <= diff)
                 {
-                    ChangeTarget(false);
-                    changeTargetTimer = urand(8000, 10000);
+                    if (me->IsNonMeleeSpellCasted(false))
+                    {
+                        ChangeTarget(false);
+                        changeTargetTimer = urand(8000, 10000);
+                    }
                 }
                 else changeTargetTimer -= diff;
 
@@ -1352,10 +1370,10 @@ class npc_rageface : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* c) const
-        {
-            return new npc_ragefaceAI(c);
-        }
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new npc_ragefaceAI(c);
+    }
 };
 
 class spell_gen_face_rage : public SpellScriptLoader
