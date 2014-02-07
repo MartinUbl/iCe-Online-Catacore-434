@@ -452,8 +452,6 @@ public:
                 } else SlaugtherSquare_Timer -= diff;
             }
         }
-        virtual uint32* GetUiEncounter(){return Encounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

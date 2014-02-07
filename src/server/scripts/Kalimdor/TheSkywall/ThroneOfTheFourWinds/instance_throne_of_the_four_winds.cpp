@@ -146,6 +146,7 @@ public:
             m_power = 10;
 
             m_summons.clear();
+            GetCorrUiEncounter();
         }
 
 
@@ -615,13 +616,9 @@ public:
             GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
-            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),uiEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
+            sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(), m_auiEncounter, MAX_ENCOUNTER);
 
             return NULL;
         }

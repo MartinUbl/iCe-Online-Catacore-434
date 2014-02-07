@@ -121,6 +121,7 @@ public:
                 auiEncounter[i] = NOT_STARTED;
 
             ChogallKilledOnHC=false;
+            GetCorrUiEncounter();
         }
 
 
@@ -310,18 +311,14 @@ public:
             GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[1];//valiona and theralion
-            currEnc[1]=uiEnc[4];//sinestra
-            currEnc[2]=uiEnc[0];//halfus
-            currEnc[3]=uiEnc[3];//chogall
-            currEnc[4]=uiEnc[2];//council
+            currEnc[0]=auiEncounter[1];//valiona and theralion
+            currEnc[1]=auiEncounter[4];//sinestra
+            currEnc[2]=auiEncounter[0];//halfus
+            currEnc[3]=auiEncounter[3];//chogall
+            currEnc[4]=auiEncounter[2];//council
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-1);
 
             return NULL;
         }

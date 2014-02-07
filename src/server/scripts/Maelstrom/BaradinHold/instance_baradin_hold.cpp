@@ -46,6 +46,7 @@ public:
             uiOccuthar = 0;
             for(uint8 i=0; i < ENCOUNTERS; ++i)
                 uiEncounter[i] = NOT_STARTED;
+            GetCorrUiEncounter();
             
         }
 
@@ -137,15 +138,11 @@ public:
             GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return uiEncounter;}
-        virtual uint32 GetMaxEncounter(){return ENCOUNTERS;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[1];//Argaloth
-            currEnc[1]=uiEnc[0];//Occuthar
+            currEnc[0]=uiEncounter[1];//Argaloth
+            currEnc[1]=uiEncounter[0];//Occuthar
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,ENCOUNTERS);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),ENCOUNTERS);
             return NULL;
         }
     };

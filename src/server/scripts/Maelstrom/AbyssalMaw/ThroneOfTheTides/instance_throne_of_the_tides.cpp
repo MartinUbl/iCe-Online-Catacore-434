@@ -54,6 +54,7 @@ public:
             Lady_NazjarGUID = 0;
             Erunak_StonespeakerGUID = 0;
             OzumatGUID = 0;
+            GetCorrUiEncounter();
         }
 
         void OnCreatureCreate(Creature* pCreature, bool add)
@@ -182,8 +183,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_OZUMAT];//3
@@ -191,7 +190,6 @@ public:
             currEnc[2]=auiEncounter[DATA_LADY_NAZJAR];//0
             currEnc[3]=auiEncounter[DATA_COMANNDER_ULTHOK];//1
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
 

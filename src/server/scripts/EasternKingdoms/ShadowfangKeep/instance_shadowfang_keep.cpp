@@ -56,6 +56,7 @@ public:
             Commander_SpringvaleGUID = 0;
             Lord_ValdenGUID = 0;
             Lord_GodfreyGUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -196,8 +197,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_LORD_VALDEN];//3
@@ -206,7 +205,6 @@ public:
             currEnc[3]=auiEncounter[DATA_BARON_SILVERLAINE];//1
             currEnc[4]=auiEncounter[DATA_BARON_ASHBURY];//0
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
 

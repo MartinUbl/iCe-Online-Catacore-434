@@ -198,8 +198,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
     InstanceScript* GetInstanceScript(InstanceMap *map) const

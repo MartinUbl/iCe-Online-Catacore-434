@@ -51,6 +51,7 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             memset(&m_auiCorla_ZealotGUID, 0, sizeof(m_auiCorla_ZealotGUID));
             m_uiCorlaGUID = 0;
+            GetCorrUiEncounter();
         }
 
         void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
@@ -148,8 +149,6 @@ public:
                     m_auiEncounter[i] = NOT_STARTED;
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=m_auiEncounter[TYPE_ROMOGG];//0
@@ -158,7 +157,6 @@ public:
             currEnc[3]=m_auiEncounter[TYPE_BEAUTY];//3
             currEnc[4]=m_auiEncounter[TYPE_OBSIDIUS];//4
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
     };

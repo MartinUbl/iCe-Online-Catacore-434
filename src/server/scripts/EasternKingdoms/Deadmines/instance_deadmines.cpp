@@ -60,6 +60,7 @@ public:
             Admiral_RipsnarlGUID = 0;
             Captain_CookieGUID = 0;
             Vanesa_VancleefGUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -211,8 +212,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_VANESSA_VANCLEEF];//5
@@ -222,7 +221,6 @@ public:
             currEnc[4]=auiEncounter[DATA_ADMIRAL_RIPSNARL];//3
             currEnc[5]=auiEncounter[DATA_CAPTAIN_COOKIE];//4
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
 

@@ -54,6 +54,7 @@ public:
             Forgemaster_ThorngusGUID = 0;
             Drahga_ShadowburnerGUID = 0;
             EduraxGUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -183,8 +184,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_GENERAL_UMBRISS];//0
@@ -192,7 +191,6 @@ public:
             currEnc[2]=auiEncounter[DATA_EDURAX];//3
             currEnc[3]=auiEncounter[DATA_DRAHGA_SHADOWBURNER];//2
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
     };

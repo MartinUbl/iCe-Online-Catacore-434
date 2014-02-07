@@ -312,9 +312,6 @@ public:
                     m_auiEncounter[i] = NOT_STARTED;
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
-        virtual uint32 GetCorrMaxEncounter(){return MAX_ENCOUNTER-5;}
     };
 
 };

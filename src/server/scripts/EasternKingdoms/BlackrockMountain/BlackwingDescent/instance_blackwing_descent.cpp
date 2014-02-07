@@ -51,6 +51,7 @@ public:
             OmnotronDefenceMatrixGUID = 0;
             Nefarian1GUID = 0;
             Nefarian2GUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -208,19 +209,15 @@ public:
             GetCorrUiEncounter();
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[4];//omnotron
-            currEnc[1]=uiEnc[6];//nefarian
-            currEnc[2]=uiEnc[1];//maloriak
-            currEnc[3]=uiEnc[5];//magmaw
-            currEnc[4]=uiEnc[3];//chimareon
-            currEnc[5]=uiEnc[2];//atramedes
+            currEnc[0]=auiEncounter[4];//omnotron
+            currEnc[1]=auiEncounter[6];//nefarian
+            currEnc[2]=auiEncounter[1];//maloriak
+            currEnc[3]=auiEncounter[5];//magmaw
+            currEnc[4]=auiEncounter[3];//chimareon
+            currEnc[5]=auiEncounter[2];//atramedes
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-1);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-1);
             return currEnc;
         }
     };

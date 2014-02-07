@@ -243,8 +243,6 @@ public:
             }
             return false;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

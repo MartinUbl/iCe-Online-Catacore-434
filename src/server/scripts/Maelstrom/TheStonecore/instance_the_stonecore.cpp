@@ -66,6 +66,7 @@ public:
             Millhouse1_GUID = 0;
             Millhouse2_GUID = 0;
             wallGUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -268,8 +269,6 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_SLABHIDE];//1
@@ -277,7 +276,6 @@ public:
             currEnc[2]=auiEncounter[DATA_HIGH_PRIESTESS_AZIL];//3
             currEnc[3]=auiEncounter[DATA_CORBORUS];//0
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER-4);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER-4);
             return currEnc;
         }
 

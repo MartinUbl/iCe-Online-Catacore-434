@@ -17585,13 +17585,13 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
             InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
             if(map && map->GetInstanceScript() && creature->GetCreatureInfo()->rank == 3)
             {
+                uint32 mapId=map->GetId();
                 map->GetInstanceScript()->SetResurectionData(0,true);
                 map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
 
                 /*Flexible raid locks rules- boss killed on normal or HC*/
-                if(map->IsRaid())
+                if(map->IsRaid() && sInstanceSaveMgr->getBossNumber(mapId))
                 {
-                    uint32 mapId=map->GetId();
                     Map::PlayerList const &PlayerList = map->GetInstanceScript()->instance->GetPlayers();//do it for all players
                     if (!PlayerList.isEmpty())
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)

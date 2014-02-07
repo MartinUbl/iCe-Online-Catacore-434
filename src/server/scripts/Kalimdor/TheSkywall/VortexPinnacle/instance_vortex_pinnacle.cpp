@@ -51,6 +51,7 @@ public:
             Grand_Vizier_ErrtanGUID = 0;
             AltariusGUID = 0;
             AsaadGUID = 0;
+            GetCorrUiEncounter();
         }
 
 
@@ -169,15 +170,12 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-        virtual uint32* GetUiEncounter(){return auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         virtual uint32* GetCorrUiEncounter()
         {
             currEnc[0]=auiEncounter[DATA_GRAND_VIZIER_ERTAN];//0
             currEnc[1]=auiEncounter[DATA_ASAAD];//2
             currEnc[2]=auiEncounter[DATA_ALTARIUS];//1
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
             return currEnc;
         }
     };

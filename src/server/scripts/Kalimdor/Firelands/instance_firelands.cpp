@@ -69,6 +69,7 @@ public:
             unlockTimer =           10000;
             spawnBridgeTimer =      500;
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
+            GetCorrUiEncounter();
         }
 
         std::string GetSaveData()
@@ -305,20 +306,16 @@ public:
             }
         }
 
-        virtual uint32* GetUiEncounter(){ return m_auiEncounter; }
-        virtual uint32 GetMaxEncounter(){ return MAX_ENCOUNTER; }
         virtual uint32* GetCorrUiEncounter()
         {
-            uint32* uiEnc=GetUiEncounter();
-            currEnc[0]=uiEnc[TYPE_ALYSRAZOR];//alysrazor
-            currEnc[1]=uiEnc[TYPE_SHANNOX];//shannox
-            currEnc[2]=uiEnc[TYPE_RHYOLITH];//rhyolit
-            currEnc[3]=uiEnc[TYPE_RAGNAROS];//ragnaros
-            currEnc[4]=uiEnc[TYPE_BALEROC];//baleroc
-            currEnc[5]=uiEnc[TYPE_BETHTILAC];//bethilac
-            currEnc[6]=uiEnc[TYPE_STAGHELM];//majordomo
+            currEnc[0]=m_auiEncounter[TYPE_ALYSRAZOR];//alysrazor
+            currEnc[1]=m_auiEncounter[TYPE_SHANNOX];//shannox
+            currEnc[2]=m_auiEncounter[TYPE_RHYOLITH];//rhyolit
+            currEnc[3]=m_auiEncounter[TYPE_RAGNAROS];//ragnaros
+            currEnc[4]=m_auiEncounter[TYPE_BALEROC];//baleroc
+            currEnc[5]=m_auiEncounter[TYPE_BETHTILAC];//bethilac
+            currEnc[6]=m_auiEncounter[TYPE_STAGHELM];//majordomo
             sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-            sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
 
             return NULL;
         }

@@ -201,8 +201,6 @@ public:
 
             } else OUT_LOAD_INST_DATA_FAIL;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

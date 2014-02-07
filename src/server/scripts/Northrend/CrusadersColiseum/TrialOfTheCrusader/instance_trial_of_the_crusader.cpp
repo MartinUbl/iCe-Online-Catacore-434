@@ -123,8 +123,6 @@ public:
                 m_player->SendUpdateWorldState(UPDATE_STATE_UI_COUNT, GetData(TYPE_COUNTER));
             }
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTERS;}
         bool IsRaidWiped()
         {
             Map::PlayerList const &players = instance->GetPlayers();

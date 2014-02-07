@@ -670,6 +670,23 @@ void InstanceSaveManager::loadRaidEncounter()
     int bossNum=0;
     char DummyReadCh;
     uint32 DummyReadInt;
+    /*Set boss numbers for all needed maps*/
+    setBossNumber(671, 5); //BoT
+    setBossNumber(669, 6); //BwD
+    setBossNumber(757, 2); //BH
+    setBossNumber(754, 2); //ToFW
+    setBossNumber(720, 7); //Firelands
+
+    setBossNumber(33, 5); //SfK
+    setBossNumber(645, 5); //BrC
+    setBossNumber(670, 4); //GB
+    setBossNumber(644, 7); //HoO
+    setBossNumber(755, 4); //Tolvir
+    setBossNumber(657, 3);//VP
+    setBossNumber(725, 4);//SC
+    setBossNumber(643, 4);//TotT
+    setBossNumber(36, 6);//DM
+    setBossNumber(568, 6);//ZA
 
     if (!result)
     {
@@ -691,8 +708,7 @@ void InstanceSaveManager::loadRaidEncounter()
             case 671://The Bastion of Twilight
             {
                 bossNum=5;
-                uint32 dataEnc[5];
-                setBossNumber(mapId,bossNum);
+                uint32 dataEnc[5];               
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -722,7 +738,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=6;
                 uint32 dataEnc[6];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum+1; i++)
                 {
@@ -758,7 +773,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=2;
                 uint32 dataEnc[2];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 loadStream >> DummyReadCh >>DummyReadCh;
                 for (uint8 i = 0; i < bossNum; i++)
@@ -780,7 +794,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=2;
                 uint32 dataEnc[2];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -801,7 +814,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=7;
                 uint32 dataEnc[7];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -837,7 +849,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=5;
                 uint32 dataEnc[5];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -867,7 +878,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=5;
                 uint32 dataEnc[5];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -897,7 +907,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=4;
                 uint32 dataEnc[4];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -924,7 +933,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=7;
                 uint32 dataEnc[7];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -960,7 +968,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=4;
                 uint32 dataEnc[4];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -987,7 +994,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=3;
                 uint32 dataEnc[3];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -1011,7 +1017,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=4;
                 uint32 dataEnc[4];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -1038,7 +1043,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=4;
                 uint32 dataEnc[4];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -1065,7 +1069,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=6;
                 uint32 dataEnc[6];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
@@ -1098,7 +1101,6 @@ void InstanceSaveManager::loadRaidEncounter()
             {
                 bossNum=6;
                 uint32 dataEnc[6];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 loadStream >> DummyReadCh >> DummyReadInt >> DummyReadInt >> DummyReadInt;
                 for (uint8 i = 0; i < bossNum; i++)

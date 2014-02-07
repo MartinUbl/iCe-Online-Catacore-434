@@ -88,8 +88,6 @@ class instance_ramparts : public InstanceMapScript
                         break;
                 }
             }
-            virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-            virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* pMap) const

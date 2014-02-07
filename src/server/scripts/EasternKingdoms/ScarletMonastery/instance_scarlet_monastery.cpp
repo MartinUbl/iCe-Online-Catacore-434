@@ -151,8 +151,6 @@ public:
                 return m_auiEncounter[1];
             return 0;
         }
-        virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-        virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
     };
 
 };

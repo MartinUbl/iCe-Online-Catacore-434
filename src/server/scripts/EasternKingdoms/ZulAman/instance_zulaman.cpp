@@ -107,6 +107,7 @@ class instance_zulaman : public InstanceMapScript
 
                 for (uint8 i = 0; i < RAND_VENDOR; ++i)
                     RandVendor[i] = NOT_STARTED;
+                GetCorrUiEncounter();
             }
 
 
@@ -329,8 +330,6 @@ class instance_zulaman : public InstanceMapScript
                     QuestTimer -= diff;
                 }
             }
-            virtual uint32* GetUiEncounter(){return m_auiEncounter;}
-            virtual uint32 GetMaxEncounter(){return MAX_ENCOUNTER;}
             virtual uint32* GetCorrUiEncounter()
             {
                 currEnc[0]=m_auiEncounter[DATA_ZULJINEVENT-1];//5
@@ -340,7 +339,6 @@ class instance_zulaman : public InstanceMapScript
                 currEnc[4]=m_auiEncounter[DATA_NALORAKKEVENT-1];//0
                 currEnc[5]=m_auiEncounter[DATA_AKILZONEVENT-1];//1
                 sInstanceSaveMgr->setInstanceSaveData(instance->GetInstanceId(),currEnc,MAX_ENCOUNTER);
-                sInstanceSaveMgr->setBossNumber(instance->GetId(),MAX_ENCOUNTER);
                 return currEnc;
             }
         };
