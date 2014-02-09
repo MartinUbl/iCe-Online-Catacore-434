@@ -1826,7 +1826,8 @@ void Spell::DoTriggersOnSpellHit(Unit *unit)
                 // Disallow applying on self (i.e. when logging in)
                 if (   i->first->Id == 81325 || i->first->Id == 81326  // Brittle Bones
                     || i->first->Id == 50434 || i->first->Id == 50435  // Chilblains
-                    || i->first->Id == 81130 || i->first->Id == 96265) // Scarlet Fever
+                    || i->first->Id == 81130 || i->first->Id == 96265 // Scarlet Fever
+                    || i->first->Id == 30069 || i->first->Id == 30070) // Blood Frenzy 
                 {
                     if (unit == m_caster)
                         continue;
