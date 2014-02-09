@@ -1418,16 +1418,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         // Used in spell scripts
         m_final_damage = damageInfo.damage;
 
-        //Invigoration (hunter) talent
-        if (m_spellInfo->Id == 16827 || m_spellInfo->Id == 17253 || m_spellInfo->Id == 49966)
-        {
-            if (procEx & PROC_EX_CRITICAL_HIT)
-                if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0)) // Has Invigoration talent
-                {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(m_caster, 53398, &bp0, NULL, NULL, true); // Focus gain
-                }
-        }
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
         {

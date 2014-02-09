@@ -9304,6 +9304,49 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 403) // Lightning Bolt
                 return false;
         }
+        case 53256: // Cobra Strikes
+        case 53259:
+        case 53260:
+        {
+            this->CastSpell(this,53257,true); // Generate second stack of Cobra strikes buff
+            break;
+        }
+        case 20784: // Tamed Pet Passive ( Aura on hunter's pets, trigger Frenzy when they hit with their basic attacks )
+        {
+            // Exclude bad proc flags
+            if ((procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) || (procFlags & PROC_FLAG_DONE_PERIODIC) )
+                return false;
+
+            if (Unit * pet = triggeredByAura->GetCaster()) // Hunter's Pet
+            {
+                if (Unit* pHunter = Unit::GetUnit(*pet, pet->GetOwnerGUID()))
+                {
+                    int32 amount = 0;
+                    if (pHunter->HasAura(19621)) // Frenzy (Rank 1)
+                        amount = 2;
+                    else if (pHunter->HasAura(19622)) // Frenzy (Rank 2)
+                        amount = 4;
+                    else if (pHunter->HasAura(19623)) // Frenzy (Rank 3)
+                        amount = 6;
+
+                    if (amount)
+                        pet->CastCustomSpell(pet, 19615, &amount, 0, 0, true);
+
+                    if (procEx & PROC_EX_CRITICAL_HIT) // Invigoration talent proc only from critical basic attacks
+                    {
+                        if (pHunter->HasAura(53257))
+                            pHunter->RemoveAuraFromStack(53257); // Drop 1 charge of Cobra strike when pet critical strike with his ability
+
+                        if (AuraEffect * aurEff = pHunter->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0)) // Has Invigoration talent
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            pHunter->CastCustomSpell(pHunter, 53398, &bp0, NULL, NULL, true); // Focus gain
+                        }
+                    }
+                }
+            }
+            return false;
+        }
         // Vigilance
         case 50720:
             if (triggeredByAura)
