@@ -9294,8 +9294,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         }
         case 99134:// Priest T12 Healer 2P Bonus
         {
-            // Proc only from (Flash Heal, Heal, Greater Heal, and Prayer of Mending)
-            if (procSpell->Id != 2050 && procSpell->Id != 2060 && procSpell->Id != 2061 && procSpell->Id != 33076)
+            // Proc only from Flash Heal, Heal, Greater Heal, Prayer of Mending proc handled in Spell::EffectApplyAura
+            if (procSpell->Id != 2050 && procSpell->Id != 2060 && procSpell->Id != 2061)
                 return false;
             break;
         }
@@ -17264,8 +17264,9 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     // Prayer of Mending
     // if (spell == 33110)
     {
-        if (triggeredByAura && triggeredByAura->GetCaster())
+        if (triggeredByAura && triggeredByAura->GetCaster() && this && spellProto)
         {
+            heal = triggeredByAura->GetCaster()->SpellHealingBonus(this, spellProto, effIdx, heal, HEAL);
             // Glyph of Prayer of Mending, first jump
             if (triggeredByAura->GetCaster()->HasAura(55685) && jumps == 4)
                 heal *= 1.6f;

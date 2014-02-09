@@ -4589,6 +4589,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         else if (m_spellInfo->Id == 56160)
         {
         }
+        // Glyph of Prayer of Mending
+        else if (m_spellInfo->Id == 33110)
+        {
+        }
         // Efflorescence
         else if (m_spellInfo->Id == 81269)
         {
