@@ -8612,7 +8612,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 {
                     int8 charges = aura->GetCharges();
 
-					// 3% healing bonus for each stack
+                    // 3% healing bonus for each stack
                     int32 basepoints0_a = charges * 3;
                     m_caster->CastCustomSpell(m_caster, 81700, &basepoints0_a, NULL, NULL, true);
 

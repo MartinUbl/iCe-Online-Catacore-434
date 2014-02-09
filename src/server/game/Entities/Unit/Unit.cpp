@@ -8626,7 +8626,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     return true;
                 }
             }
-			// Glyph of Divinity
+            // Glyph of Divinity
             else if (dummySpell->Id == 54939)
             {
                 *handled = true;
