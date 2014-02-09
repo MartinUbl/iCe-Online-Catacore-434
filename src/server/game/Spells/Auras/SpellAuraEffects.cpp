@@ -2310,6 +2310,22 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 }
 
                 damage = uint32(damage * TakenTotalMod);
+
+                // Improved Mend Pet
+                if (GetSpellProto()->Id == 136)
+                {
+                    int chance = 0;
+
+                    if (caster->HasAura(19572)) // Improved Mend Pet r.1
+                        chance = 25;
+                    else if (caster->HasAura(19573)) // Improved Mend Pet r.2
+                        chance = 50;
+
+                    if (roll_chance_i(chance))
+                    {
+                        caster->CastSpell(caster,24406,true); // Dispel one Curse, Disease, Magic or Poison effect 
+                    }
+                }
             }
             else
             {

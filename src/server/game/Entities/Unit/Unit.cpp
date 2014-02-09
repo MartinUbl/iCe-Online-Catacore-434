@@ -7143,16 +7143,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 target = this;
                 break;
             }
-            // Improved Mend Pet
-            if (dummySpell->SpellIconID == 267)
-            {
-                int32 chance = SpellMgr::CalculateSpellEffectAmount(triggeredByAura->GetSpellProto(), triggeredByAura->GetEffIndex());
-                if (!roll_chance_i(chance))
-                    return false;
-
-                triggered_spell_id = 24406;
-                break;
-            }
             // Crouching Tiger, Hidden Chimera 
             if (dummySpell->SpellIconID == 4752 && GetTypeId() == TYPEID_PLAYER)
             {
