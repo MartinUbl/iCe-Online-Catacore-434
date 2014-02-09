@@ -4083,6 +4083,13 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                 else if (m_caster->HasAura(89489)) // rank #2
                     m_caster->CastSpell(m_caster, 96267, true);
             }
+            if(m_spellInfo->Id == 41635 && m_caster)
+            {
+                if (m_spellAura->GetCharges() == 5 && m_caster->HasAura(99134)) //Priest T12 Healer 2P Bonus ( hackfix for PoM triggering )
+                {
+                    m_caster->CastSpell(m_caster,99132,true); // Divine Fire
+                }
+            }
             // Implementation of Priests discipline mastery proficiency
             if (m_spellAura->HasEffectType(SPELL_AURA_SCHOOL_ABSORB) && m_spellInfo->Id != 47753) // exclude Divine Aegis (handled elsewhere)
             {
