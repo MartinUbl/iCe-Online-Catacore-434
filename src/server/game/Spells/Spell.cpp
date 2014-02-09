@@ -5666,8 +5666,9 @@ void Spell::TakeRunePower(bool didhit)
     runeCost[RUNE_DEATH] = 0;                               // calculated later
     plr->ClearLastUsedRuneList();
 
-    if (!anyRuneUsed)
-        return;     // if no runes are to be used no runic power is generated => no further processing is needed
+    if (!anyRuneUsed) // if no runes are to be used no runic power is generated => no further processing is needed
+        if (GetSpellInfo() && GetSpellInfo()->Id != 57330) //  // Horn of Winter is exception
+            return;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
