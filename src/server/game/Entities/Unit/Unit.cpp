@@ -16477,6 +16477,19 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                     if (triggeredByAura->GetCasterGUID() == pTarget->GetGUID())
                         takeCharges = true;
                     break;
+                case SPELL_AURA_SPELL_MAGNET:
+                    if (procSpell && procAura && procAura->Id == 8178)
+                    {
+                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                        {
+                            if (procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_DST
+                            || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST)
+                            {
+                                return; // Exclude AoE spells from triggering Grounding totem
+                            }
+                        }
+                    }
+                    break;
                 case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
                     sLog->outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s spell crit chance aura of spell %u)", spellInfo->Id,(isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
                     if (procSpell && HandleSpellCritChanceAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
@@ -20088,10 +20101,23 @@ bool Unit::HandleAuraProcHack(Unit *pVictim, Aura * aura, SpellEntry const* proc
             // Grounding Totem glyphed spell, dunno why spellfamily warrior
             if (dummySpell->Id == 89523 && ((procExtra & PROC_EX_REFLECT) != 0))
             {
-                // reflect one spell, then die
-                if (Unit* caster = aura->GetUnitOwner())
-                    if (caster->isTotem())
-                        caster->Kill(caster);
+                bool isAoE = false; // Don't allow AoE spells to consume grounding totem
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_DST
+                    || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST)
+                    {
+                        isAoE = true;
+                        break;
+                    }
+                }
+                if (isAoE == false)
+                {
+                    // reflect one spell, then die
+                    if (Unit* caster = aura->GetUnitOwner())
+                        if (caster->isTotem())
+                            caster->Kill(caster);
+                }
             }
         default:
             break;
