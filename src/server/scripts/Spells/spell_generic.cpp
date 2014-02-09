@@ -722,6 +722,86 @@ class aoe_heal_diminisher : public SpellScriptLoader
         }
 };
 
+//Stay of Execution ( trinket )
+class spell_gen_stay_of_execution : public SpellScriptLoader
+{
+    public: spell_gen_stay_of_execution() : SpellScriptLoader("spell_gen_stay_of_execution") { }
+
+        class spell_gen_stay_of_execution_AuraScript : public AuraScript 
+        {
+            PrepareAuraScript(spell_gen_stay_of_execution_AuraScript);
+
+            enum boundaries
+            {
+                MAX_ABSORB_NORMAL = 56981,
+                MAX_ABSORB_HEROIC = 64281,
+            };
+
+            int32 absorbedDamage;
+
+            bool Load()
+            {
+                absorbedDamage = 0;
+                return true;
+            }
+
+            void Absorb(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            {
+                Unit * owner = aurEff->GetCaster();
+
+                if(!owner)
+                    return;
+
+                // Absorbs 20% of incoming damage
+                uint32 shouldAbsorb = ((dmgInfo.GetDamage() * 20) / 100);
+
+                // If shield was broken by damge exceeding max absorb dmg
+                if (shouldAbsorb >= absorbAmount)
+                {
+                    if (const SpellEntry * spell = GetSpellProto())
+                    {
+                        int32 bp0 = 9; // 9 % of absorbed damage
+
+                        if (spell->Id == 96988) // Normal
+                            bp0 = (MAX_ABSORB_NORMAL * 9) / 100;
+                        else                    // Heroic
+                            bp0 = (MAX_ABSORB_HEROIC * 9) / 100;
+
+                        if (bp0 != 9)
+                            owner->CastCustomSpell(owner,96993,&bp0,0,0,true);
+                    }
+                }
+                // Damage will not break shield
+                absorbAmount = shouldAbsorb;
+                absorbedDamage += absorbAmount; 
+            }
+
+            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE) // If shield expired -> deal 9% of absorbed damage
+                {
+                    if (Unit * owner = aurEff->GetCaster())
+                    {
+                        int32 bp0 = 9; // 9 % of absorbed damage
+                        bp0 = (absorbedDamage * 9) / 100;
+                        if (bp0)
+                            owner->CastCustomSpell(owner,96993,&bp0,0,0,true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectAbsorb += AuraEffectAbsorbFn(spell_gen_stay_of_execution_AuraScript::Absorb, EFFECT_0);
+                OnEffectRemove += AuraEffectRemoveFn(spell_gen_stay_of_execution_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript *GetAuraScript() const
+        {
+            return new spell_gen_stay_of_execution_AuraScript();
+        }
+};
 
 
 void AddSC_generic_spell_scripts()
@@ -742,4 +822,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_gunship_portal();
     new spell_gen_blades();
     new aoe_heal_diminisher();
+    new spell_gen_stay_of_execution();
 }
