@@ -6892,9 +6892,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_TELEPORT_UNITS:
             {
                 // Mage teleports should not be able to cast in battleground
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->getClass() == CLASS_MAGE)
-                    if (m_caster->ToPlayer()->InBattleground())
-                        return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->getClass() == CLASS_MAGE )
+                    if (m_caster->ToPlayer()->GetBattleground())
+                            return SPELL_FAILED_NOT_IN_BATTLEGROUND;
                 break;
             }
             case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
