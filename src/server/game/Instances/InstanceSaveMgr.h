@@ -191,6 +191,8 @@ class InstanceSaveManager
         }
         uint32 getBossNumber(uint32 mapId)
         {
+            if(mapId == 671)
+                return NULL;
             return bossNumber[mapId];
         }
 
