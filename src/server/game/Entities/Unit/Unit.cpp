@@ -9303,6 +9303,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         {
             if (procSpell->Id != 403) // Lightning Bolt
                 return false;
+            break;
         }
         case 53256: // Cobra Strikes
         case 53259:
