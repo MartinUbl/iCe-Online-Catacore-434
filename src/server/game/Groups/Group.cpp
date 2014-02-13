@@ -2330,7 +2330,7 @@ InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
         leadGuid=GetLeaderGUID();
         if(leadGuid)
         {
-            if(GetLeader())
+            if(GetLeader() && GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY))
                 leadId=GetLeader()->GetBoundInstance(mapId, FLEXIBLE_RAID_DIFFICULTY)->save->GetInstanceId();
             else
             {
