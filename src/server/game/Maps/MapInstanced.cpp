@@ -187,7 +187,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 pSave = groupBind->save;
         }
         //instance bound merging when same bosses killed(flexible id)
-        if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && groupBind)
+        if (player->GetSession()->GetSecurity()==SEC_PLAYER && group && pBind && groupBind && raid)
         {
             std::map<uint32,uint32> bossP = sInstanceSaveMgr->getInstanceSaveData(pSave->GetInstanceId());
             std::map<uint32,uint32> bossG = sInstanceSaveMgr->getInstanceSaveData(groupBind->save->GetInstanceId());
