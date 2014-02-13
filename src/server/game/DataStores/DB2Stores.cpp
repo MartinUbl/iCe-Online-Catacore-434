@@ -133,19 +133,55 @@ void LoadDB2Stores(const std::string& dataPath)
     sLog->outString("Loading custom DB2 entries...");
 
     // initialize
+
+    // head
     ItemExtendedCostEntry* a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 78;
     a->RequiredArenaSlot = 1;
-    a->RequiredPersonalArenaRating = 1650;
+    a->RequiredPersonalArenaRating = 2250;
+    a->RequiredCurrency[0] = 390;
+    a->RequiredCurrencyCount[0] = 165000;
+    // insert
+    sItemExtendedCostStore.SetEntry(a->ID, a);
+
+    // shoulders
+    a = new ItemExtendedCostEntry;
+    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a->ID = 79;
+    a->RequiredArenaSlot = 2;
+    a->RequiredPersonalArenaRating = 2000;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
     // insert
     sItemExtendedCostStore.SetEntry(a->ID, a);
 
+    // chest
     a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
-    a->ID = 79;
+    a->ID = 80;
+    a->RequiredArenaSlot = 1;
+    a->RequiredPersonalArenaRating = 2050;
+    a->RequiredCurrency[0] = 390;
+    a->RequiredCurrencyCount[0] = 220000;
+    // insert
+    sItemExtendedCostStore.SetEntry(a->ID, a);
+
+    // legs
+    a = new ItemExtendedCostEntry;
+    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a->ID = 81;
+    a->RequiredArenaSlot = 1;
+    a->RequiredPersonalArenaRating = 1850;
+    a->RequiredCurrency[0] = 390;
+    a->RequiredCurrencyCount[0] = 220000;
+    // insert
+    sItemExtendedCostStore.SetEntry(a->ID, a);
+
+    // hands
+    a = new ItemExtendedCostEntry;
+    memset(a, 0, sizeof(ItemExtendedCostEntry));
+    a->ID = 82;
     a->RequiredArenaSlot = 1;
     a->RequiredPersonalArenaRating = 1650;
     a->RequiredCurrency[0] = 390;

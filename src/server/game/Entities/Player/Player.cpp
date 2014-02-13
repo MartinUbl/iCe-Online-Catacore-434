@@ -22717,8 +22717,18 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             }
         }
 
+        // custom PvP items extended cost check - we check only the 3v3 rating, the 2v2 rating
+        // is checked by next condition due to setting in ItemExtendedCostEntry
+        uint32 additional3v3Rating = 0;
+        if (iece->ID >= 78 && iece->ID <= 82)
+        {
+            static const uint32 pvpitemratings[] = {1850, 2000, 1700, 1600, 1500};
+            additional3v3Rating = pvpitemratings[iece->ID-78];
+        }
+
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
+        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating
+            && (additional3v3Rating == 0 || GetMaxPersonalArenaRatingRequirement(2) < additional3v3Rating))
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
