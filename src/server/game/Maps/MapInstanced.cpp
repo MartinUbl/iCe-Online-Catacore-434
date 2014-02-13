@@ -174,7 +174,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             }
         }
         else
-            pBind= player->GetBoundInstance(GetId(), player->GetDifficulty(raid));
+            pBind= player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
 
         InstanceSave *pSave = pBind ? pBind->save : NULL;
 
@@ -248,7 +248,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             // the instance will be created for the first time
             NewInstanceId = sMapMgr->GenerateInstanceId();
 
-            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(raid) : player->GetDifficulty(raid);
+            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             if(raid)
             {
                 map = CreateInstance(NewInstanceId, NULL, FLEXIBLE_RAID_DIFFICULTY);
