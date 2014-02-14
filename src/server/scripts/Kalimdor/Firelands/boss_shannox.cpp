@@ -27,6 +27,7 @@ enum NPCs
     NPC_RAGEFACE                    = 53695,
     NPC_RIPLIMB                     = 53694,
     NPC_HURL_SPEAR_WEAPON           = 53752,
+    NPC_SHANNOX                     = 53691
 };
 
 enum Spells
@@ -1152,21 +1153,20 @@ class npc_rageface : public CreatureScript
 
             InstanceScript* pInstance;
             Creature* pBoss;
-            uint32 changeTargetTimer;
-            bool shannoxHP;
-            bool jumping;
 
-            Position jumpPos;
+            bool shannoxHP;
 
             uint32 jumpTimer;
             uint32 debuffTimer;
+            uint32 faceRageTimer;
+            uint32 changeTargetTimer;
 
             void Reset()
             {
-                debuffTimer = 28000;
-
                 jumpTimer = 30000;
+                debuffTimer = jumpTimer + 3000;
                 changeTargetTimer = urand(5000,8000);
+                faceRageTimer = NEVER;
 
                 me->RemoveAllAuras();
                 me->SetReactState(REACT_PASSIVE);
@@ -1174,11 +1174,6 @@ class npc_rageface : public CreatureScript
                 pBoss = NULL;
                 if (pInstance)
                     pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX));
-            }
-
-            uint32 GetData(uint32 type)
-            {
-                return ((jumping) ? 1 : 0); // // Is jumping ?
             }
 
             void DamageTaken(Unit* attacker, uint32& damage)
@@ -1195,7 +1190,7 @@ class npc_rageface : public CreatureScript
                     me->RemoveAura(101212);
                     me->RemoveAura(101213);
                     me->RemoveAura(101214);
-                    changeTargetTimer = 100;
+                    changeTargetTimer = 1000;
                 }
             }
 
@@ -1210,100 +1205,54 @@ class npc_rageface : public CreatureScript
 
             void EnterEvadeMode()
             {
-                jumping = false;
                 me->RemoveAllAuras();
                 ScriptedAI::EnterEvadeMode();
             }
 
-            void ChangeTarget (bool ragefacing)
+            void KilledUnit(Unit* victim)
             {
-                Map::PlayerList const& plrList = me->GetMap()->GetPlayers();
-                std::list<Player*> targets;
-                targets.clear();
+                if (victim->GetTypeId() != TYPEID_PLAYER)
+                    return;
 
-                if (!plrList.isEmpty())
+                me->InterruptNonMeleeSpells(false);
+                SelectNewVictim(false);
+            }
+
+            void SpellHit(Unit* pSrc, const SpellEntry* spell)
+            {
+                if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
                 {
-                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
-                    {
-                        Player* plr = itr->getSource();
+                    debuffTimer = 13000;
+                    jumpTimer += 10000; // 10 second trap
+                    changeTargetTimer += 10000;
+                }
+            }
 
-                        if (plr && plr->isAlive() && plr->isGameMaster() == false && plr->GetExactDist2d(me) < 55.0f)
-                        {
-                            if (!plr->HasTankSpec() && !plr->HasAura(5487)) // Not on tanks
-                                if (!plr->HasAura(SPELL_CRYSTAL_PRISON_EFFECT)) // Not on players in crystal
-                                    targets.push_back(plr);
-                        }
-                    }
-
-                    if (!targets.empty())
+            void SelectNewVictim(bool jump)
+            {
+                if (Creature * pShannox = me->FindNearestCreature(NPC_SHANNOX,200.0f,true))
+                {
+                    if(Unit * player = pShannox->AI()->SelectTarget(SELECT_TARGET_RANDOM,1,100.0f,true))
                     {
-                        std::list<Player*>::iterator itr = targets.begin();
-                        uint32 randPos = urand(0, targets.size() - 1);
-                        std::advance(itr, randPos);
-                        if ((*itr) && (*itr)->IsInWorld())
+                        DoResetThreat();
+                        me->SetInCombatWithZone();
+                        me->AddThreat(player, 50000.0f);
+                        me->GetMotionMaster()->Clear(false);
+                        me->GetMotionMaster()->MoveChase(player);
+                        me->AI()->AttackStart(player);
+                        if(jump)
                         {
-                            DoResetThreat();
-                            me->AddThreat(*itr,500000.0f);
-                            if (ragefacing) // Time for rageface
-                            {
-                                jumping = true;
-                                me->CastSpell((*itr), SPELL_FACE_RAGE, false); // Jump to target
-                                //(*itr)->GetPosition(&jumpPos);
-                                //me->GetMotionMaster()->MoveJump((*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ(),50,20,0);
-                            }
+                            me->CastSpell(player, SPELL_FACE_RAGE, false); // Jump to target
+                            faceRageTimer = urand(1000,2000);
                         }
                     }
                 }
             }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            me->InterruptNonMeleeSpells(false);
-            if (Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true))
-                me->GetMotionMaster()->MoveChase(player);
-        }
-
-        void SpellHit(Unit* pSrc, const SpellEntry* spell)
-        {
-            if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
-            {
-                debuffTimer = 15000;
-                jumpTimer += 10000; // 10 second trap
-                changeTargetTimer += 10000;
-            }
-        }
 
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
-
-                if (jumping)
-                {
-                    /*uint32 x = me->GetPositionX();
-                    uint32 y = me->GetPositionY();
-
-                    uint32 mx = jumpPos.m_positionX;
-                    uint32 my = jumpPos.m_positionY;
-
-                    if (mx == x && my == y)
-                    {
-                        me->StopMoving();*/
-                        if (Unit * victim = me->getVictim())
-                        {
-                            if (victim->IsInWorld() && me->IsWithinMeleeRange(victim))
-                            {
-                                me->StopMoving();
-                                me->CastSpell(victim,99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
-                                jumping = false;
-                                changeTargetTimer = 31000;
-                            }
-                        }
-                    return;
-                }
 
                 if (debuffTimer <= diff)
                 {
@@ -1318,17 +1267,24 @@ class npc_rageface : public CreatureScript
                 }
                 else debuffTimer -= diff;
 
+                if (faceRageTimer <= diff)
+                {
+                    me->CastSpell(me->getVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
+                    faceRageTimer = NEVER;
+                }
+                else faceRageTimer -= diff;
+
                 if (jumpTimer <= diff)
                 {
-                    ChangeTarget(true); // Jump on target which will be faceraged
-                    changeTargetTimer = 33000;
+                    SelectNewVictim(true);
                     jumpTimer = 30000;
+                    changeTargetTimer += urand(8000,10000);
                 }
                 else jumpTimer -= diff;
 
                 if (changeTargetTimer <= diff)
                 {
-                    ChangeTarget(false);
+                    SelectNewVictim(false);
                     changeTargetTimer = urand(8000, 10000);
                 }
                 else changeTargetTimer -= diff;
