@@ -171,6 +171,9 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 map = CreateInstance(NewInstanceId, NULL, FLEXIBLE_RAID_DIFFICULTY);
                 pBind= player->BindToInstanceRaid(NewInstanceId, mapId);
                 player->showInstanceBindQuery=true;
+                std::ostringstream ssPrint;
+                ssPrint << "Creating save for player: "<< player->GetGUIDLow() << " map id: " << mapId  << " instance id: " << NewInstanceId;//log
+                sLog->outChar(ssPrint.str().c_str());
             }
         }
         else
@@ -211,7 +214,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 
                 if(canMerge)
                 {
-                    ssPrint << "Merging save player: "<< player->GetGUIDLow() <<" instance id: " << pSave->GetInstanceId() <<" instance data " << ssP.str().c_str() <<" INTO group: "<< group->GetLowGUID() <<" instance id: "<< groupBind->save->GetInstanceId() <<" instance data " << ssG.str().c_str();//log for instance merging
+                    ssPrint << "Merging save player: "<< player->GetGUIDLow() << " map id: " << mapId  << " instance id: " << pSave->GetInstanceId() <<" instance data " << ssP.str().c_str() <<" INTO group: "<< group->GetLowGUID() <<" instance id: "<< groupBind->save->GetInstanceId() <<" instance data " << ssG.str().c_str();//log for instance merging
                     sLog->outChar(ssPrint.str().c_str());
                     player->BindToInstance(groupBind->save,true,true);
                     pSave = groupBind->save;                             
