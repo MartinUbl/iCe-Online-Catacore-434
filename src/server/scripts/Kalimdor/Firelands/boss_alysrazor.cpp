@@ -952,19 +952,20 @@ class boss_Alysrazor : public CreatureScript
                                 return;
                             }
                             if (IncendiaryCloudFront == 4)
+                            {
                                 if (O != 100.0f)
                                 {
-                                    if (Creature* Power = me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10*cos(O), me->GetPositionY() + 10*sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
-                                    {
+                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10 * cos(O), me->GetPositionY() + 10 * sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
                                         RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
-                                        IncendiaryCloudFront = 1;
-                                    }
+                                    IncendiaryCloudFront = 1;
                                 }
-                                else if (Creature* Power = me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
-                                    {
+                                else
+                                {
+                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
                                         RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
-                                        IncendiaryCloudFront = 1;
-                                    }
+                                    IncendiaryCloudFront = 1;
+                                }
+                            }
                             break;
                         }
                         case NPC_FIERY_TORNADO:
@@ -1755,7 +1756,7 @@ class npc_Molten_Egg : public CreatureScript
                     if (me->GetDistance2d(-47.0f, -266.0f) < 1.0f)
                     if( Unit * pAlys = Unit::GetUnit(*me,ALYSRAZOR_GUID))
                     {
-                        me->MonsterTextEmote("The Molten Eggs begin to hatch!",0,true);
+                        pAlys->MonsterTextEmote("The Molten Eggs begin to hatch!", 0, true);
                     }
                     CastTimer = 50000;
                 }
