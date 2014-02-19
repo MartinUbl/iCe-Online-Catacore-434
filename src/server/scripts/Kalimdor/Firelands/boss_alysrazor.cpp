@@ -955,14 +955,14 @@ class boss_Alysrazor : public CreatureScript
                             {
                                 if (O != 100.0f)
                                 {
-                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10 * cos(O), me->GetPositionY() + 10 * sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
-                                        RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
+                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX() + 10 * cos(O), me->GetPositionY() + 10 * sin(O), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200);
+                                    RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
                                     IncendiaryCloudFront = 1;
                                 }
                                 else
                                 {
-                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200))
-                                        RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
+                                    me->SummonCreature(NPC_BLAZING_POWER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + Z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 3200);
+                                    RemoveAuraFromAllPlayers(SPELL_BLAZING_PREVENTION, true, false);
                                     IncendiaryCloudFront = 1;
                                 }
                             }
