@@ -1467,7 +1467,9 @@ void AuraEffect::HandleEffect(AuraApplication const *aurApp, uint8 mode, bool ap
 void AuraEffect::HandleEffect(Unit *target, uint8 mode, bool apply)
 {
     AuraApplication const *aurApp = GetBase()->GetApplicationOfTarget(target->GetGUID());
-    ASSERT(aurApp);
+    if (!aurApp)
+        return;
+
     HandleEffect(aurApp, mode, apply);
 }
 
