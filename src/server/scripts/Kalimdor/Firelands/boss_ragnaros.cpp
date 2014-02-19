@@ -1895,7 +1895,6 @@ public:
                         {
                             std::list<DREADSPOSITIONS>::iterator j = flameList.begin();
                             advance(j, rand()%flameList.size());
-                            uint32 _rand = urand(0,flameList.size() -1);
 
                             Creature * quad = me->SummonCreature(QUAD_STALKER,(*j).wx,(*j).wy,56.0f,0.0f);
                             if (quad)
@@ -1955,7 +1954,6 @@ public:
                         }
                     }
                     uint8 max = (Is25ManRaid()) ? 10 : 6; // Todo is 6 correct number
-                    uint8 clones = (counter < max) ? counter : 10;
 
                     for ( uint8 i = 0; i < max ;i ++)
                     {
