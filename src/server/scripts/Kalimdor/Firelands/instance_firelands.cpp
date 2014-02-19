@@ -30,6 +30,7 @@ public:
 
         uint32 unlockTimer;
         uint32 spawnBridgeTimer;
+        uint32 unAuraTimer;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 currEnc[MAX_ENCOUNTER];
@@ -66,8 +67,9 @@ public:
             bridgeDoorGUID=     0;
             bridgeGUID =        0;
 
-            unlockTimer =           10000;
-            spawnBridgeTimer =      500;
+            unlockTimer         = 10000;
+            spawnBridgeTimer    = 500;
+            unAuraTimer         = 30000;
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
             GetCorrUiEncounter();
         }
@@ -272,6 +274,42 @@ public:
                 spawnBridgeTimer = 23000;
             }
             else spawnBridgeTimer -= diff;
+
+            if (unAuraTimer <= diff)
+            {
+                if (GetData(TYPE_SHANNOX) != IN_PROGRESS)
+                    DoRemoveAurasDueToSpellOnPlayers(99837); // Crystal Prison Trap Effect
+
+                if (GetData(TYPE_RHYOLITH) != IN_PROGRESS)
+                    DoRemoveAurasDueToSpellOnPlayers(98226); // Balance Bar
+
+                if (GetData(TYPE_ALYSRAZOR) != IN_PROGRESS)
+                    DoRemoveAurasDueToSpellOnPlayers(97128); // Molten Feather Bar
+
+                if (GetData(TYPE_BALEROC) != IN_PROGRESS)
+                    DoRemoveAurasDueToSpellOnPlayers(99252); // Blaze of Glory
+
+                if (GetData(TYPE_STAGHELM) != IN_PROGRESS && this->instance->IsHeroic())
+                {
+                    DoRemoveAurasDueToSpellOnPlayers(98229); // Concentration bar
+                    // 4 kinds of concetration buffs
+                    DoRemoveAurasDueToSpellOnPlayers(98254); // uncommon
+                    DoRemoveAurasDueToSpellOnPlayers(98253); // rare
+                    DoRemoveAurasDueToSpellOnPlayers(98252); // epic
+                    DoRemoveAurasDueToSpellOnPlayers(98245); // legendary
+                }
+
+                if (GetData(TYPE_RAGNAROS) != IN_PROGRESS && this->instance->IsHeroic())
+                {
+                    //Deluge
+                    DoRemoveAurasDueToSpellOnPlayers(100713);
+                    DoRemoveAurasDueToSpellOnPlayers(101015);
+                    //Superheated
+                    DoRemoveAurasDueToSpellOnPlayers(100594);
+                    DoRemoveAurasDueToSpellOnPlayers(100915);
+                }
+            }
+            else unAuraTimer -= diff;
         }
 
         uint32 GetData(uint32 DataId)
