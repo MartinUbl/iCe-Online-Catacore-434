@@ -50,6 +50,14 @@ enum Spells
     SPELL_SUMMON_BURNING_ORB    = 98565, // summon one orb at random location
     SPELL_BURNING_ORB_VISUAL    = 98583, // need to turn off triggering spell on effect 0
     SPELL_BURNING_ORB_DAMAGE    = 98584, // "beam"
+
+    // Heroic spells
+    SPELL_UNCOMMON_CONCENTRATION        = 98254, // 25 %
+    SPELL_RARE_CONCENTRATION            = 98253, // 50 %
+    SPELL_EPIC_CONCENTRATION            = 98252, // 75 %
+    SPELL_LEGENDARY_CONCENTRATION       = 98245, // 100 %
+
+    SPELL_CONCENTRATION_BAR             = 98229
 };
 
 enum MajordomoPhase
@@ -119,8 +127,10 @@ public:
         uint32 Berserk_timer;
         uint32 Phase_check_timer;
         uint32 eventTimer;
+        uint32 powerTimer;
         uint32 energyCounter;
         bool FromCatToScorpion;
+        bool barUsed;
 
         SummonList Summons;
 
@@ -138,10 +148,12 @@ public:
             PHASE = PHASE_DRUID;
             eventTimer = 1000;
             Phase_check_timer = 2000;
+            powerTimer = 2500;
             Morph_timer = 2000;
             Energy_timer = 1000;
             Berserk_timer = 10 * MINUTE;
             Human_timer = NEVER;
+            barUsed = false;
         }
 
         void KilledUnit(Unit * /*victim*/)
@@ -152,10 +164,21 @@ public:
 
         void JustDied(Unit * /*victim*/)
         {
+            me->RemoveAurasDueToSpell(SPELL_CONCENTRATION_BAR);
+
             if(instance)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(TYPE_STAGHELM, DONE);
+
+                if (IsHeroic())
+                {
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CONCENTRATION_BAR);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UNCOMMON_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_RARE_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_EPIC_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LEGENDARY_CONCENTRATION);
+                }
             }
 
             Summons.DespawnAll();
@@ -186,14 +209,38 @@ public:
             me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,10.0f);
         }
 
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
+        {
+            if (victim && victim->ToPlayer() && IsHeroic())
+            {
+                victim->RemoveAura(SPELL_UNCOMMON_CONCENTRATION);
+                victim->RemoveAura(SPELL_RARE_CONCENTRATION);
+                victim->RemoveAura(SPELL_EPIC_CONCENTRATION);
+                victim->RemoveAura(SPELL_LEGENDARY_CONCENTRATION);
+                victim->SetPower(POWER_SCRIPTED,0);
+                victim->RemoveAura(SPELL_CONCENTRATION_BAR);  // client don't want visualy reset power bar :)
+                victim->AddAura(SPELL_CONCENTRATION_BAR,victim);
+            }
+        }
+
         void EnterEvadeMode()
         {
+            me->RemoveAurasDueToSpell(SPELL_CONCENTRATION_BAR);
             me->SetHomePosition(516.0f,-62.0f,85.0f,M_PI);
 
             if(instance)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(TYPE_STAGHELM, NOT_STARTED);
+
+                if (IsHeroic())
+                {
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CONCENTRATION_BAR);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_UNCOMMON_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_RARE_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_EPIC_CONCENTRATION);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LEGENDARY_CONCENTRATION);
+                }
             }
 
             Summons.DespawnAll();
@@ -218,6 +265,18 @@ public:
 
         void TransformToCat()
         {
+            if (barUsed == false && IsHeroic())
+            {
+                me->CastSpell(me, SPELL_CONCENTRATION_BAR, true);
+
+                if (instance)
+                {
+                    instance->DoSetMaxScriptedPowerToPlayers(100);
+                    instance->DoSetScriptedPowerToPlayers(0);
+                }
+
+                barUsed = true;
+            }
             morphs++;
             me->RemoveAura(SPELL_ADRENALINE);
             me->RemoveAura(SPELL_SCORPION_FORM);
@@ -235,6 +294,19 @@ public:
 
         void TransformToScorpion()
         {
+            if (barUsed == false && IsHeroic())
+            {
+                me->CastSpell(me, SPELL_CONCENTRATION_BAR, true);
+
+                if (instance)
+                {
+                    instance->DoSetMaxScriptedPowerToPlayers(100);
+                    instance->DoSetScriptedPowerToPlayers(0);
+                }
+
+                barUsed = true;
+            }
+
             morphs++;
             me->RemoveAura(SPELL_ADRENALINE);
             me->RemoveAura(SPELL_CAT_FORM);
@@ -422,6 +494,75 @@ public:
             if (!me->IsWithinLOSInMap(me->getVictim()) && IsInHumanForm() == false)
                 me->Kill(me->getVictim());
 
+            if (powerTimer <= diff && IsHeroic())
+            {
+                if (!instance)
+                    return;
+
+                Map::PlayerList const& plList = instance->instance->GetPlayers();
+
+                if (plList.isEmpty())
+                    return;
+
+                for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+                {
+                    if ( Player * p = itr->getSource())
+                    {
+                        if (p->isAlive() && !p->isGameMaster() && p->IsInWorld())
+                        {
+                            uint32 power = p->GetPower(POWER_SCRIPTED);
+
+                            if (power + 5 > 100)
+                                continue;
+
+                            power +=5;
+                            p->SetPower(POWER_SCRIPTED,power);
+
+                            switch (power)
+                            {
+                                case 25:
+                                {
+                                    if (!p->HasAura(SPELL_UNCOMMON_CONCENTRATION))
+                                        p->CastSpell(p,SPELL_UNCOMMON_CONCENTRATION,true);
+                                    break;
+                                }
+                                case 50:
+                                {
+                                    if (!p->HasAura(SPELL_RARE_CONCENTRATION))
+                                    {
+                                        p->CastSpell(p,SPELL_RARE_CONCENTRATION,true);
+                                        p->RemoveAurasDueToSpell(SPELL_UNCOMMON_CONCENTRATION);
+                                    }
+                                    break;
+                                }
+                                case 75:
+                                {
+                                    if (!p->HasAura(SPELL_EPIC_CONCENTRATION))
+                                    {
+                                        p->CastSpell(p,SPELL_EPIC_CONCENTRATION,true);
+                                        p->RemoveAurasDueToSpell(SPELL_RARE_CONCENTRATION);
+                                    }
+                                    break;
+                                }
+                                case 100:
+                                {
+                                    if (!p->HasAura(SPELL_LEGENDARY_CONCENTRATION))
+                                    {
+                                        p->CastSpell(p,SPELL_LEGENDARY_CONCENTRATION,true);
+                                        p->RemoveAurasDueToSpell(SPELL_EPIC_CONCENTRATION);
+                                    }
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                powerTimer = 1000;
+            }
+            else powerTimer -= diff;
+
             if(Phase_check_timer <= diff)
             {
                 if(morphs == 3)
@@ -575,9 +716,24 @@ public:
             if ( Creature* pMajor = me->FindNearestCreature(52571,100.0f,true) )
             {
                 if (pMajor->getVictim())
+                {
+                    me->AddThreat(pMajor->getVictim(),50.0f);
+                    me->GetMotionMaster()->MoveChase(pMajor->getVictim());
+                }
+            }
+        }
 
-                me->AddThreat(pMajor->getVictim(),50.0f);
-                me->GetMotionMaster()->MoveChase(pMajor->getVictim());
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
+        {
+            if (victim && victim->ToPlayer() && IsHeroic())
+            {
+                victim->RemoveAura(SPELL_UNCOMMON_CONCENTRATION);
+                victim->RemoveAura(SPELL_RARE_CONCENTRATION);
+                victim->RemoveAura(SPELL_EPIC_CONCENTRATION);
+                victim->RemoveAura(SPELL_LEGENDARY_CONCENTRATION);
+                victim->SetPower(POWER_SCRIPTED,0);
+                victim->RemoveAura(SPELL_CONCENTRATION_BAR); // client don't want visualy reset power bar :)
+                victim->AddAura(SPELL_CONCENTRATION_BAR,victim);
             }
         }
 
@@ -620,6 +776,20 @@ public:
             me->SetInCombatWithZone();
             me->CastSpell(me,SPELL_BURNING_ORB_VISUAL,true);
             me->ForcedDespawn(70000);
+        }
+
+        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType typeOfDamage)
+        {
+            if (victim && victim->ToPlayer() && IsHeroic())
+            {
+                victim->RemoveAura(SPELL_UNCOMMON_CONCENTRATION);
+                victim->RemoveAura(SPELL_RARE_CONCENTRATION);
+                victim->RemoveAura(SPELL_EPIC_CONCENTRATION);
+                victim->RemoveAura(SPELL_LEGENDARY_CONCENTRATION);
+                victim->SetPower(POWER_SCRIPTED,0);
+                victim->RemoveAura(SPELL_CONCENTRATION_BAR); // client don't want visualy reset power bar :)
+                victim->AddAura(SPELL_CONCENTRATION_BAR,victim);
+            }
         }
 
         void UpdateAI (const uint32 diff)
