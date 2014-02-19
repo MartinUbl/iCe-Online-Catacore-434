@@ -1158,6 +1158,23 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (!GetCaster()) // event is over
                             Remove();
                         break;
+                    case 100567: // Breadth of Frost ( Ragnaros encounter)
+                        //Damage reduction buff
+                        target->RemoveAura(100904);
+                        //Combustible
+                        target->RemoveAura(99296);
+                        target->RemoveAura(100282);
+                        target->RemoveAura(100283);
+                        target->RemoveAura(100284);
+                        break;
+                    case 101361:
+                        if (target->HasAura(100713)) // deluge
+                        {
+                            if (caster->ToCreature())
+                                caster->ToCreature()->AI()->SetData(3,0); // Despawn
+                            target->CastSpell(target,100757,true);
+                        }
+                        break;
                     case 81277: // Blood Gorged
                         if (target && caster)
                         {
@@ -1820,6 +1837,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                         target->RemoveAurasDueToSpell(96932); // remove the vehicle kit form player
                         break;
+                    case 100567: // Breadth of Frost ( Ragnaros encounter)
+                        //Damage reduction buff
+                        target->AddAura(100904,target);
+                        //Combustible
+                        target->CastSpell(target,99296,true);
+                    break;
                     case 71905: // Soul Fragment Visual Effects
                         if(removeMode == AURA_REMOVE_BY_STACK) return;
 

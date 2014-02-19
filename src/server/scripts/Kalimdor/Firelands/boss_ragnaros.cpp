@@ -24,9 +24,8 @@
 enum Spells
 {
     LAVA_FIRE_RING          = 99870,
-    BURNING_WOUND           = 99401, // In DB seems that it should proc form melee attacks, but that's incorrect
+    BURNING_WOUND           = 99401, // In DB seems that it should proc from melee attacks, but that's incorrect
     BURNING_WOUND_DOT       = 99399, // If player have this dot, melee attacks should damage player by Burning blast
-    RAGNAROS_LEG_WALK       = 96214,
     SUBMERGE_STATE_AURA     = 96725,
     BERSERK                 = 47008,
     BURROW_SULFURAS         = 98982,
@@ -51,6 +50,7 @@ enum Spells
 
     // PHASE 2
     SULFURUS_HAMMER_DMG     = 100456, // 45 second dmg aura
+    SCORCHED_GROUND_DMG     = 100118, // correct aoe
     SPLITTING_BLOW          = 98951,
     INVOKE_SONS             = 99050, // visual lava spilled at son of flame birth location ( single target)
     BURNING_SPEED           = 99414,
@@ -79,9 +79,36 @@ enum Spells
     MATEOR_EXPLOSION        = 99287,
     DUMMY_AOE               = 99269, // Original for meteor explosion
 
-    //HC ABILITIES
-    EMPOWER_SULFURAS        = 100604,
-
+    //HEROIC ABILITIES
+    LEGS_HEAL                   = 100346, // 40% heal
+    WORLD_IN_FLAMES             = 100171, // trigerrs 99171 every 3 seconds
+    WORLD_IN_FLAMES_TRIGGERED   = 99171,
+    MAGMA_GEYSER                = 100858, 
+    SUMMON_GEYSER               = 100820, // summon at caster position
+    EMPOWER_SULFURAS            = 100604,
+    EMPOWER_SULFURAS_MISSILE    = 100606,
+    SUPERHEATED                 = 100593,
+    SUPERHEATED_DEBUFF          = 100594,
+    DREADFLAME_MISSILE          = 100675,
+    DREADFLAME_AOE              = 101361,
+    DREADFLAME_CONTROL_AURA     = 100696, // trigger 100823
+    // Cenarius spells
+    CENARIUS_FROST_FREEZE       = 100345,
+    SUMMON_BREADTH_OF_FROST     = 100476,
+    BREADTH_OF_FROST_MISSILE    = 100479,
+    BREADTH_OF_FROST_TRIGGERED  = 100478,
+    //Arch Druid Hamuul Runetotem spells
+    ROOT_BEAM                   = 100344,
+    ENTRAPPING_ROOTS_SUMMON     = 100644,
+    ENTRAPPING_ROOOTS_MISSILE   = 100646,
+    ENTRAPPING_ROOTS_TRIGGERED  = 100647,
+    // Malfurion Stormrage spells
+    LIGHTNING_BEAM              = 100342,
+    SUMMON_CLOUDBURST_MISSILE   = 100714,
+    CLOUDBURST_VISUAL           = 100758,
+    DELUGE                      = 100713,
+    DELUGE_VISUAL_BLOB          = 100757,
+    DELUGE_CANCEL               = 100771, // not needed
 };
 
 enum Npcs
@@ -99,6 +126,19 @@ enum Npcs
     BLAZING_HEAT            = 53473,
     LIVING_METEOR           = 53500,
     MOLTEN_SEED_CASTER      = 53186,
+
+    // Heroic
+    HAMUUL_RUNETOTEM        = 53874,
+    CENARIUS                = 53872,
+    MALFURION_STORMRAGE     = 53873,
+    CLOUDBURST              = 54147,
+    BREADTH_OF_FROST        = 53953,
+    ENTRAPPING_ROOTS        = 54074,
+    // dreadflame npcs
+    QUAD_STALKER            = 52850,
+    DREADFLAME              = 54127,
+    DREADFLAME_SPAWN        = 54203,
+    MAGMA_GEYSER_NPC        = 54184,
 
     // Trash
     MOLTEN_ERUPTER          = 53617,
@@ -118,8 +158,9 @@ enum GameObjects
 enum AnimationKits
 {
     ANIM_KIT_HAMMER_PICKUP  = 1465,
-    ANIM_KIT_WALK_SPECIAL   = 1486,
-    ANIM_KIT_EXCLAIM        = 1479
+    ANIM_KIT_ON_LEGS        = 1486,
+    ANIM_KIT_EXCLAIM        = 1479,
+    ANIM_KIT_EXCLAIM_SHORT  = 1468
 };
 
 enum Actions
@@ -146,7 +187,15 @@ enum Phases
     INTERMISSION2                 ,
     PHASE3                        ,
     PHASE_NORMAL_DEATH            ,
+    PHASE_HEROIC_INTERMISSION     ,
     PHASE4                        , // Only on Heroic
+};
+
+enum itemEntries
+{
+    MACE_1      = 93215,
+    MACE_2      = 93216,
+    MACE_3      = 93217
 };
 
 const Position Left_pos[8] =           // Spawn positions for sons of flames if hammer is burried LEFT
@@ -232,11 +281,11 @@ static const Yells Phase3[3]= // DONE
     {24522, "Your judgement has come!"},
 };
 
-static const Yells Phase4[5]= // TODO -> FIND REST OF SOUND ID'S
+static const Yells Phase4[5]= // DONE
 {
     {24528, "Too soon..."},
-    {11468, "No, fiend. Your time is NOW."},
-    {11469, "Heroes! He is bound. Finish him!"},
+    {25159, "No, fiend. Your time is NOW."},
+    {25169, "Heroes! He is bound. Finish him!"},
     {25427, "Arrggh, outsiders - this is not your realm!"},
     {24526, "When I finish this, your pathetic mortal world will burn with my vengeance!"},
 };
@@ -248,18 +297,18 @@ static const Yells RandomKill[3]= // DONE
     {24529, "This is my realm!"},
 };
 
-static const Yells HeroicDeath[7]= // TODO -> FIND REST OF SOUND ID'S
+static const Yells HeroicDeath[7]= // DONE
 {
     {24518, "No, noooo- This was to be my hour of triumph..."},
-    {11468, "It is finished then!"},
-    {11469, "Perhaps..."},
-    {11467, "Heroes, the world owns you a great debt."},
-    {11468, "Ragnaros has perished. But the primal powers he represents can never be vanquished. Another will rise to power, someday."},
-    {11469, "Yes, Cenarius. We must maintain a constant vigil over this realm. For let us celebrate this day, and the great victory we have earned here."},
-    {11469, "Indeed."},
+    {25170, "It is finished then!"},
+    {25160, "Perhaps..."},
+    {25171, "Heroes, the world owns you a great debt."},
+    {25158, "Ragnaros has perished. But the primal powers he represents can never be vanquished. Another will rise to power, someday."},
+    {25168, "Yes, Cenarius. We must maintain a constant vigil over this realm. For let us celebrate this day, and the great victory we have earned here."},
+    {25161, "Indeed."},
 };
 
-uint32 engulfing_lengths[4] = {48,60,72,87}; // Distances for Engulfing flames
+float engulfing_lengths[4] = {45.0f,58.9f,73.7f,89.5f}; // Distances for Engulfing flames
 
 # define MINUTE 60000
 # define NEVER  (4294967295) // used as "delayed" timer (10 minutes)
@@ -267,6 +316,26 @@ uint32 engulfing_lengths[4] = {48,60,72,87}; // Distances for Engulfing flames
 # define MIDDLE_X 1033.54f
 # define MIDDLE_Y  -55.08f
 # define MIDDLE_Z   55.92f
+#define  MIDDLE_RADIUS   55.0f
+
+typedef struct flamematrix
+{
+    bool valid; // if it's on platform
+    bool free; // if there is no dreadflame active on this position
+    float x,y,z; // world coordiantes
+}FLAME_MATRIX;
+
+#define MIN_X   981.0f
+#define MAX_X   1112.0f
+#define MIN_Y   17.0f
+#define MAX_Y   -132.0f
+#define STEP    6.0f
+
+typedef struct dreadsPos
+{
+    int32 wx,wy; // x,y coordinate in world
+    uint32 x,y; // x,y coordinate in matrix
+}DREADSPOSITIONS;
 
 
 class boss_ragnaros_firelands : public CreatureScript
@@ -284,7 +353,7 @@ public:
         boss_ragnaros_firelandsAI(Creature* creature) : ScriptedAI(creature),Summons(creature)
         {
             instance = creature->GetInstanceScript();
-            Creature * lava_ring = me->SummonCreature(LAVA_RING_NPC,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ() + 14.0f,me->GetOrientation());
+            Creature * lava_ring = me->SummonCreature(LAVA_RING_NPC,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ() + 13.0f,me->GetOrientation()); // + 14
             if(lava_ring)
             {
                 LAVA_RING_GUID = lava_ring->GetGUID();
@@ -305,7 +374,6 @@ public:
                 door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
             speech = false;
-
             SetEquipmentSlots(false, 69804, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER); // Need to bet set, Ragnaros should "levitate" in lava, not standing on feets, lot of animations will not work without this
         }
@@ -330,18 +398,77 @@ public:
         uint32 AllowTurning_timer;
         uint32 Text_timer;
         uint32 Kill_timer;
+        // Intermission 4 timers
+        uint32 HeroicIntermissionTimer;
+        uint32 IntermissionStep;
+        //Heroic timers
+        uint32 breadthTimer;
+        uint32 dreadFlameTimer;
+        uint32 entrappingRootsTimer;
+        uint32 cloudBurstTimer;
+        uint32 empowerSulfurasTimer;
+        uint32 spreadFlamesTimer;
+        uint32 geyserTimer;
         bool speech;
         bool burried;
 
         SummonList Summons;
 
+        FLAME_MATRIX flames[22][25];
+        std::list<DREADSPOSITIONS> lastDreads;
+        uint32 dreadFlameAct;
+
+        void SetMatrix(void)
+        {
+            float xaddition = 0.0f;
+            float yaddition = 0.0f;
+
+            for (uint8 i = 0; i < 22; i++)
+            {
+                yaddition = 0.0f;
+
+                for (uint8 j = 0; j < 25; j++)
+                {
+                    flames[i][j].free = true;
+                    flames[i][j].x = MAX_X  - xaddition;
+                    flames[i][j].y = MIN_Y - yaddition;
+
+                    float z = me->GetBaseMap()->GetHeight(me->GetPhaseMask(),flames[i][j].x,flames[i][j].y,60.0f,true);
+                    if ( z > 50.0f && z < 58.0f )
+                    {
+                        flames[i][j].valid = true;
+                        flames[i][j].z = z + 2.0f;
+                    }
+                    else
+                        flames[i][j].valid = false;
+
+                    yaddition += STEP;
+                }
+                xaddition += STEP;
+            }
+        }
+
+        FLAME_MATRIX GetCoord(uint32 x, uint32 y)
+        {
+            return flames[x][y];
+        }
+
+        void SetCoord(uint32 x, uint32 y,bool on)
+        {
+            flames[x][y].free = on;
+        }
+
         void Reset()
         {
+            lastDreads.clear();
+            SetMatrix();
+
             me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
 
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
+            dreadFlameAct           = 40000; // Every 40 seconds, decrement by 5 s each time till 15 sec minimum
             Magma_timer             = 1000;
             CheckTimer              = 3000;
             BurningWoundTimer       = urand(5000,8000);
@@ -351,6 +478,10 @@ public:
             Sulfurus_timer          = 32000;
             Enrage_timer            = 15 * MINUTE;
             AllowTurning_timer      = NEVER;
+            HeroicIntermissionTimer = NEVER;
+            geyserTimer             = NEVER;
+            spreadFlamesTimer       = NEVER;
+            IntermissionStep        = 0;
             PHASE = PHASE1;
             reemerge = 0;
             burried  = false;
@@ -362,6 +493,9 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, 81261, true); // Solar Beam
             me->ApplySpellImmune(0, IMMUNITY_ID, 88625, true); // Chastise
             me->ApplySpellImmune(0, IMMUNITY_ID, 77606, true); // Dark Simulacrum 
+            // Entrapping roots stun is allowed
+            me->ApplySpellImmune(0, IMMUNITY_ID, 100653, false);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 101237, false);
 
             me->RemoveAura(BURROW_SULFURAS);
             me->RemoveAura(100295);
@@ -369,7 +503,7 @@ public:
             me->RemoveAura(100297);
 
             me->SetReactState(REACT_AGGRESSIVE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
 
             if (instance)
                 instance->SetData(TYPE_RAGNAROS, NOT_STARTED);
@@ -420,6 +554,46 @@ public:
 
         void EnterEvadeMode()
         {
+            if (IsHeroic())
+            {
+                if (GameObject * goPlatform = me->FindNearestGameObject(RAGNAROS_PLATFORM,500.0f))
+                {
+                    goPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                    goPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+                }
+
+                me->SetPosition(me->GetHomePosition(),true);
+                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+
+                if (instance)
+                {
+                    // Superheated
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SUPERHEATED_DEBUFF);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(100915);
+                    // Deluge
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(101015);
+                }
+                // Dont forget about cloudburst, cause it's summoned by creature
+                if (Creature * pCloud = me->FindNearestCreature(CLOUDBURST,500.0f,true))
+                    pCloud->ForcedDespawn();
+
+                // Despawn druids
+                Creature * pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true);
+                Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true);
+                Creature * pHamuul = me->FindNearestCreature(HAMUUL_RUNETOTEM,500.0f,true);
+
+                if (pCenarius && pMalfurion && pHamuul)
+                {
+                    pCenarius->ForcedDespawn();
+                    pMalfurion->ForcedDespawn();
+                    pHamuul->ForcedDespawn();
+                }
+
+            }
+
+            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
             me->RemoveAllAuras();
             Summons.DespawnAll();
@@ -438,6 +612,40 @@ public:
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 102237);
+
+                if (IsHeroic())
+                {
+                    // Superheated
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SUPERHEATED_DEBUFF);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(100915);
+                    // Deluge
+                    instance->DoRemoveAurasDueToSpellOnPlayers(DELUGE);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(101015);
+                }
+            }
+
+            if (IsHeroic() && instance)
+            {
+                QueryResult chars = CharacterDatabase.PQuery("select * from character_achievement as cha where cha.achievement = 5985;");
+                if (chars && chars->GetRowCount() == 0)
+                {
+                    if (Unit * player = me->AI()->SelectTarget(SELECT_TARGET_RANDOM,0,200.0f,true))
+                    {
+                        if(Group * group = player->ToPlayer()->GetGroup())
+                        {
+                            if (group->IsGuildGroup(player->ToPlayer()->GetGuildId()))
+                                instance->DoCompleteAchievement(5985); // Realm First! Ragnaros
+                                //instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
+                        }
+                    }
+                }
+
+                PlayAndYell(HeroicDeath[0].sound,HeroicDeath[0].text);
+                if (Creature * pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
+                {
+                    // Just start final conversation, Cenarius will handle all three conversations, it's waste of time and resources to create script for all of them
+                    pCenarius->AI()->DoAction(0);
+                }
             }
 
             Summons.DespawnAll();
@@ -446,8 +654,11 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (PHASE == PHASE_NORMAL_DEATH) // For sure
+            if (PHASE == PHASE_NORMAL_DEATH || PHASE == PHASE_HEROIC_INTERMISSION) // For sure
                 damage = 0;
+
+            if (damage == 123456) // TODO remove it, only for testing
+                HideInHeroic();
         }
 
         void JustDiedInNormal() // In normal mode Ragnaors can't be killed only defeated, he will hide in lava and spawn cache of firelord
@@ -465,10 +676,43 @@ public:
             me->CastSpell(me,SUBMERGE_STATE_AURA,true); // Hide in lava
             if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
                 me->SummonGameObject(CACHE_OF_FIRELORD_10N,1016.36f,-57.73f,55.34f,3.16f,0,0,0,0,0);
-            else
+            else if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                 me->SummonGameObject(CACHE_OF_FIRELORD_25N,1016.36f,-57.73f,55.34f,3.16f,0,0,0,0,0);
             PHASE = PHASE_NORMAL_DEATH;
             Kill_timer = 5000;
+        }
+
+        void HideInHeroic() // In heroic Ragnaros will hide in lava but powerfull druids draw out him
+        {
+            if(instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            me->InterruptNonMeleeSpells(false);
+            PlayAndYell(24528, "Too soon..."); // Only on normal difficulty
+            me->RemoveAllAuras();
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me,SUBMERGE_STATE_AURA,true); // Hide in lava
+
+            Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
+            if(unit)
+                unit->SetVisible(false);
+
+            PHASE = PHASE_HEROIC_INTERMISSION;
+            HeroicIntermissionTimer = 8000;
+
+            // Summon druids
+            me->SummonCreature(CENARIUS,987.32f,-56.22f,55.8f,0.067f);
+            me->SummonCreature(HAMUUL_RUNETOTEM,982.25f,-39.0f,55.8f,0.067f);
+            me->SummonCreature(MALFURION_STORMRAGE,984.56f,-73.42f,55.8f,0.3f);
+
+            // Set timers for phase 4
+            breadthTimer = 33000 - 25000;
+            cloudBurstTimer = 50000 - 25000;
+            entrappingRootsTimer = 56500 - 25000;
+            empowerSulfurasTimer = 83000 - 25000;
+            dreadFlameTimer = 48000 - 25000;
+            // - 25000 due to intermission time
         }
 
         void DoAfterDied() // Do necessary things after encounter is done
@@ -499,7 +743,28 @@ public:
             if(summon->GetGUID() == LAVA_RING_GUID)
                 return;
 
+            switch(summon->GetEntry())
+            {
+                case CENARIUS:
+                case MALFURION_STORMRAGE:
+                case HAMUUL_RUNETOTEM:
+                    return;
+            }
+
             Summons.push_back(summon->GetGUID());
+
+            if (summon->GetEntry() == DREADFLAME_SPAWN)
+            {
+                for(std::list<DREADSPOSITIONS>::const_iterator itr = lastDreads.begin(); itr != lastDreads.end(); ++itr)
+                {
+                    if ((*itr).wx == (int32)summon->GetPositionX() && (*itr).wy == (int32)summon->GetPositionY())
+                    {
+                        summon->AI()->SetData(0,(*itr).x);
+                        summon->AI()->SetData(1,(*itr).y);
+                        break;
+                    }
+                }
+            }
         }
 
         void CastSpellOnRandomPlayers(uint32 spellId, uint32 size, bool triggered = true, bool ignoreTanks = false)
@@ -643,7 +908,6 @@ public:
         void SpawnEngulfingFlames(uint32 length, float start_angle, float end_angle)
         {
             float act_angle = start_angle;
-
             float lenght_of_arc = 2.0f*(end_angle - start_angle) * length;
 
             uint32 total_flames= (uint32) (lenght_of_arc / 25); // every 25 yards approx.
@@ -655,7 +919,17 @@ public:
             }
         }
 
-        bool CanCast(void) // We can't allow casting when we don't have our victim  in UNIT_FIELD_TARGET, due to spells animation ( Sulfuras smash,Splitting blow )
+        Position GetRandomPositionInRadius(float radius)// From middle of Ragnaros platform
+        {
+            float angle = urand(0,2*M_PI);
+            Position pos;
+            pos.m_positionX = MIDDLE_X + cos(angle)*radius;
+            pos.m_positionY = MIDDLE_Y + sin(angle)*radius;
+            pos.m_positionZ = me->GetBaseMap()->GetHeight(me->GetPhaseMask(),MIDDLE_X,MIDDLE_Y,MIDDLE_Z,true) + 1.0f;
+            return pos;
+        }
+
+        inline bool CanCast(void) // We can't allow casting when we don't have our victim  in UNIT_FIELD_TARGET, due to spells animation ( Sulfuras smash,Splitting blow )
         {
             if (me->IsInWorld() && me->getVictim() && me->getVictim()->IsInWorld() )
                 if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
@@ -688,6 +962,128 @@ public:
             }
         }
 
+        void SpawnSonsOfFlameHeroic(uint32 side) // Should spawn on random locations on HC
+        {
+            float angle;
+            float distance;
+            uint32 randNum;
+
+            switch (side)
+            {
+                case LEFT:
+                {
+                    randNum = urand(2,3);
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(160,220);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                    randNum = 8 - randNum;
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(280,500);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                }
+                break;
+                case MIDDLE:
+                {
+                    randNum = urand(4,5);
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(160,285);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                    randNum = 8 - randNum;
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(335,500);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                }
+                break;
+                case RIGHT:
+                {
+                    randNum = urand(5,6);
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(160,345);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                    randNum = 8 - randNum;
+                    for(uint32 i = 0; i < randNum; i++ )
+                    {
+                        distance = urand(45,53);
+                        angle = urand(395,500);
+                        angle /= 100.0f;
+                        me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+                }
+                break;
+            }
+        }
+
+        // If >= 4/10 (10 man / 25 man) people or more are clustered together, form Magma Geyser at location
+        // This algorithm has time complexity O(n^2)
+        // TODO : Maybe find better algorithm
+        bool RaidIsClusteredTogether(void) 
+        {
+            uint32 clustered_people = 0;
+            uint32 counter = 0;
+            uint32 maximum = (Is25ManRaid()) ? 10 : 4;
+
+            Map * map = me->GetMap();
+            if (!map)
+                return false;
+
+            Map::PlayerList const& plrList = map->GetPlayers();
+            if (plrList.isEmpty())
+                return false;
+
+            std::list<Player*> players;
+            // Copy players to secons list
+            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                if(Player* pl = itr->getSource())
+                    if (pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster())
+                        players.push_back(itr->getSource());
+
+            for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+            {
+                if(Player* p = itr->getSource())
+                {
+                    counter = 0;
+
+                    if (p->IsInWorld() && p->isAlive() && !p->isGameMaster())
+                    {
+                        // Measure distance for player to every player
+                        for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
+                        {
+                            if ((*j) && (*j)->IsInWorld())
+                            {
+                                if ((*j) == p) // Exclude self
+                                    continue;
+                                if (p->GetExactDist2d(*j) <= 8.0f)
+                                    counter++;
+                            }
+                        }
+                        if (counter >= maximum) // Stop looking
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
@@ -710,7 +1106,8 @@ public:
 
             if (Magma_timer <= diff)
             {
-                me->CastSpell(me,MAGMA,true);
+                if (PHASE != PHASE4 && IntermissionStep < 4)
+                    me->CastSpell(me,MAGMA,true);
                 Magma_timer = 1000;
             }
             else Magma_timer -= diff;
@@ -734,7 +1131,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3)
+                    if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3 || PHASE == PHASE4)
                         if (CanCast() && me->IsWithinMeleeRange(me->getVictim()))
                             me->CastSpell(me->getVictim(),BURNING_WOUND_DOT,true);
 
@@ -746,8 +1143,11 @@ public:
             if (me->HealthBelowPct(10) && burried == false ) // On normal difficulty Ragnaros should die at 10 % of his health
             {
                 burried = true;
-                //me->DealDamage(me, me->GetHealth() - 1, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                JustDiedInNormal();
+
+                if (IsHeroic() == false)
+                    JustDiedInNormal();
+                else
+                    HideInHeroic();
             }
 
 /************************************************************ PHASE 1 *********************************************************************/
@@ -775,7 +1175,7 @@ public:
                         PlayAndYell(24532,"By fire be purged!");
 
                         uint8 max = 2;
-                        if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                        if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                             max = 6;
 
                         CastSpellOnRandomPlayers(WRATH_OF_RAGNAROS,max,true,true);
@@ -803,7 +1203,7 @@ public:
                     player = SelectTarget(SELECT_TARGET_RANDOM, 2, 200.0f, true); // Not under tanks ? :P
 
                     if (player == NULL)
-                        player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true); // If we didn't found target, tanks are allowed
+                        player = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true); // If we didn't find target, tanks are allowed
 
                     if (player)
                     {
@@ -852,12 +1252,24 @@ public:
                     me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                 }
 
-                if (fabs(angle - 2.54f) < FLT_EPSILON )
-                    SpawnSonsOfFlame(LEFT);
-                else if( fabs(angle - 3.135f) < FLT_EPSILON )
-                    SpawnSonsOfFlame(MIDDLE);
+                if (IsHeroic() == false)
+                {
+                    if (fabs(angle - 2.54f) < FLT_EPSILON )
+                        SpawnSonsOfFlame(LEFT);
+                    else if( fabs(angle - 3.135f) < FLT_EPSILON )
+                        SpawnSonsOfFlame(MIDDLE);
+                    else
+                        SpawnSonsOfFlame(RIGHT);
+                }
                 else
-                    SpawnSonsOfFlame(RIGHT);
+                {
+                    if (fabs(angle - 2.54f) < FLT_EPSILON )
+                        SpawnSonsOfFlameHeroic(LEFT);
+                    else if( fabs(angle - 3.135f) < FLT_EPSILON )
+                        SpawnSonsOfFlameHeroic(MIDDLE);
+                    else
+                        SpawnSonsOfFlameHeroic(RIGHT);
+                }
 
                 me->CastSpell(me->getVictim(),SPLITTING_BLOW,false); // Burry animation
                 me->SetFacingTo(angle);
@@ -877,7 +1289,7 @@ public:
                 if (Lava_Bolt_timer <= diff)
                 {
                     int32 max = 4;
-                    if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                    if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                         max += 6;
 
                     me->CastCustomSpell(LAVA_BOLT, SPELLVALUE_MAX_TARGETS,max, me, true);
@@ -963,24 +1375,31 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false) && CanCast())
                     {
-                        me->CastSpell(me,EMGULFING_FLAMES,false); // Visual casting of Engulfing flames
-                        BurningWoundTimer += 3200;
-                        uint32 rand = urand(0,2); // Spawn on 3 random locations
-
-                        switch(rand)
+                        if (IsHeroic() == false) // In normal version cast Engulfing flames
                         {
-                            case 0 :
-                                SpawnEngulfingFlames(engulfing_lengths[rand],1.6f,4.5f);
-                            break;
+                            me->CastSpell(me,EMGULFING_FLAMES,false); // Visual casting of Engulfing flames
+                            BurningWoundTimer += 3200;
+                            uint32 randNum = urand(0,2); // Spawn on 3 random locations
 
-                            case 1 :
-                                SpawnEngulfingFlames(engulfing_lengths[rand],1.6f,4.5f);
-                            break;
+                            switch(randNum)
+                            {
+                                case 0 :
+                                    SpawnEngulfingFlames(engulfing_lengths[randNum],1.6f,5.2f);
+                                break;
 
-                            default:
-                                SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.2f);
-                                SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.2f);
-                            break;
+                                case 1 :
+                                    SpawnEngulfingFlames(engulfing_lengths[randNum],1.6f,4.6f);
+                                break;
+
+                                default:
+                                    SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.33f);
+                                    SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.33f);
+                                break;
+                            }
+                        }
+                        else // in heroic is replaced by World in Flames handled via spellscript
+                        {
+                            me->CastSpell(me,WORLD_IN_FLAMES,false);
                         }
 
                         Engulfing_flames_timer = 42000;
@@ -1032,10 +1451,15 @@ public:
 
                                 if ( pSeed && pSeed->IsInWorld())
                                 {
-                                    pSeed->CastSpell(pPlayer,MOLTEN_SEED_MISSILE,true); // Cast initial Molten seed dmg + visual missile
+                                    Creature * pElemental = me->SummonCreature(MOLTEN_ELEMENTAL,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ(),0.0f);
+                                    if (pElemental)
+                                    {
+                                        pSeed->CastSpell(pPlayer,MOLTEN_SEED_MISSILE,true); // Cast initial Molten seed dmg + visual missile
+                                        int32 travelTime = (pSeed->GetExactDist2d(pElemental) / 33.3f) * 1000;
+                                        pElemental->AI()->DoAction(travelTime);
+                                    }
                                 }
 
-                                me->SummonCreature(MOLTEN_ELEMENTAL,pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ(),0.0f);
                                 playerCounter++;
                                 seedCounter++;
                             }
@@ -1066,18 +1490,31 @@ public:
                         me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                     }
 
-                    if (fabs(angle - 2.54f) < FLT_EPSILON )
-                        SpawnSonsOfFlame(LEFT);
-                    else if (fabs(angle - 3.135f) < FLT_EPSILON )
-                        SpawnSonsOfFlame(MIDDLE);
+                    if (IsHeroic() == false)
+                    {
+                        if (fabs(angle - 2.54f) < FLT_EPSILON )
+                            SpawnSonsOfFlame(LEFT);
+                        else if (fabs(angle - 3.135f) < FLT_EPSILON )
+                            SpawnSonsOfFlame(MIDDLE);
+                        else
+                            SpawnSonsOfFlame(RIGHT);
+                    }
                     else
-                        SpawnSonsOfFlame(RIGHT);
+                    {
+                        if (fabs(angle - 2.54f) < FLT_EPSILON )
+                            SpawnSonsOfFlameHeroic(LEFT);
+                        else if( fabs(angle - 3.135f) < FLT_EPSILON )
+                            SpawnSonsOfFlameHeroic(MIDDLE);
+                        else
+                            SpawnSonsOfFlameHeroic(RIGHT);
+                    }
 
                     AllowTurning_timer = 8000 + 45000+ 6000; // Casting time + 45 seconds
 
                     me->CastSpell(me->getVictim(),SPLITTING_BLOW,false); // Burry anim
                     me->SetFacingTo(angle);
                     Burry_timer = 11900;
+                    Lava_Bolt_timer = 15000;
                  }
             }
 
@@ -1086,6 +1523,18 @@ public:
             if(PHASE == INTERMISSION2)
             {
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+
+                if (Lava_Bolt_timer <= diff)
+                {
+                    int32 max = 4;
+                    if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        max += 6;
+
+                    me->CastCustomSpell(LAVA_BOLT, SPELLVALUE_MAX_TARGETS,max, me, true);
+
+                    Lava_Bolt_timer = 4000;
+                }
+                else Lava_Bolt_timer -= diff;
 
                 if (Burry_timer <= diff )
                 {
@@ -1177,23 +1626,31 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false) && CanCast())
                     {
-                        me->CastSpell(me,EMGULFING_FLAMES,false);
-                        uint32 rand = urand(0,2); // Spawn on one of 3 random locations
-
-                        switch(rand)
+                        if (IsHeroic() == false) // In normal version cast Engulfing flames
                         {
-                            case 0 :
-                                SpawnEngulfingFlames(engulfing_lengths[rand],1.6f,4.5f);
-                            break;
+                            me->CastSpell(me,EMGULFING_FLAMES,false); // Visual casting of Engulfing flames
+                            BurningWoundTimer += 3200;
+                            uint32 randNum = urand(0,2); // Spawn on 3 random locations
 
-                            case 1 :
-                                SpawnEngulfingFlames(engulfing_lengths[rand],1.6f,4.5f);
-                            break;
+                            switch(randNum)
+                            {
+                                case 0 :
+                                    SpawnEngulfingFlames(engulfing_lengths[randNum],1.6f,5.2f);
+                                break;
 
-                            default:
-                                SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.2f);
-                                SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.2f);
-                            break;
+                                case 1 :
+                                    SpawnEngulfingFlames(engulfing_lengths[randNum],1.6f,4.6f);
+                                break;
+
+                                default:
+                                    SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.33f);
+                                    SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.33f);
+                                break;
+                            }
+                        }
+                        else // in heroic is replaced by World in Flames handled via spellscript
+                        {
+                            me->CastSpell(me,WORLD_IN_FLAMES,false);
                         }
 
                         Engulfing_flames_timer = 42000;
@@ -1213,7 +1670,319 @@ public:
                 else Kill_timer -= diff;
             }
 
-            if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3) // Ragnaros can attack only during emerged phases
+            if (PHASE == PHASE_HEROIC_INTERMISSION)
+            {
+                if (HeroicIntermissionTimer <= diff)
+                {
+                    switch (IntermissionStep)
+                    {
+                        case 0:                   // Root beam
+                            if (Creature *pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
+                            {
+                                DoPlaySoundToSet(pCenarius,25159);
+                                pCenarius->MonsterYell("No, fiend. Your time is NOW.", LANG_UNIVERSAL, 0);
+                            }
+
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                            if (Creature *pRunetotem = me->FindNearestCreature(HAMUUL_RUNETOTEM,500.0f,true))
+                                pRunetotem->CastSpell(me,ROOT_BEAM,false);
+                            HeroicIntermissionTimer = 2000; 
+                            break;
+                        case 1:                   // Lightning beam 
+                            if (Creature *pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                                pMalfurion->CastSpell(me,LIGHTNING_BEAM,false);
+                            HeroicIntermissionTimer = 1000;
+                            break;
+                        case 2:                   // Frost freeze
+                        {
+                            if (Creature *pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
+                                pCenarius->CastSpell(pCenarius,CENARIUS_FROST_FREEZE,false);
+                            me->AddAura(CENARIUS_FROST_FREEZE,me); // Workaround ..., from unknown reason npc can't cast this spell on rag
+                            std::list<Creature*> meteorList;
+                            GetCreatureListWithEntryInGrid(meteorList, me, LIVING_METEOR, 200.0f);
+                            for (std::list<Creature*>::iterator iter = meteorList.begin(); iter != meteorList.end(); ++iter)
+                            {
+                                (*iter)->AddAura(100907,(*iter));
+                                (*iter)->StopMoving();
+                            }
+                            HeroicIntermissionTimer = 3000;
+                            break;
+                        }
+                        case 3:                   // Remove submerge state and heal to 50 %
+                            me->RemoveAura(SUBMERGE_STATE_AURA);
+                            me->CastSpell(me,LEGS_HEAL,true);
+                            HeroicIntermissionTimer = 1000;
+                            break;
+                        case 4:                   // Make platform walkable
+                            if (GameObject * goPlatform = me->FindNearestGameObject(RAGNAROS_PLATFORM,500.0f))
+                                goPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+                            HeroicIntermissionTimer = 2000;
+                            break;
+                        case 5:                   // Exclaim animation + text
+                            me->RemoveAllAuras(); // Beams
+                            if (Creature *pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
+                                pCenarius->InterruptNonMeleeSpells(false);
+                            me->SetFloatValue(UNIT_FIELD_COMBATREACH,15.0f);
+                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,15.0f);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+                            if(instance)
+                                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                            PlayAndYell(25427, "Arrggh, outsiders - this is not your realm!");
+                            me->PlayOneShotAnimKit(ANIM_KIT_EXCLAIM);
+                            HeroicIntermissionTimer = 5000;
+                            break;
+                        case 6:
+                            if (Creature *pMalfur = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                            {
+                                DoPlaySoundToSet(pMalfur,25169);
+                                pMalfur->MonsterYell("Heroes! He is bound. Finish him!", LANG_UNIVERSAL, 0);
+                            }
+                            HeroicIntermissionTimer = 5000;
+                            break;
+                        case 7:                     // Break free from stone magma
+                            me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                            if (GameObject * goPlatform = me->FindNearestGameObject(RAGNAROS_PLATFORM,500.0f))
+                            {
+                                goPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
+                                goPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                            }
+                            PlayAndYell(24526, "When I finish this, your pathetic mortal world will burn with my vengeance!");
+                            me->PlayOneShotAnimKit(ANIM_KIT_ON_LEGS);
+                            HeroicIntermissionTimer = 4000;
+                            break;
+                        case 8:                     // Move at correct z position
+                        {
+                            HeroicIntermissionTimer = 1500;
+                            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+                            // Move him bit higher at correct position
+                            me->GetMotionMaster()->MovePoint(0,me->GetPositionX(),me->GetPositionY(),58.0f);
+                            break;
+                        }
+                        case 9:                     // Melee phase
+                            HeroicIntermissionTimer = NEVER;
+                            PHASE = PHASE4;
+                            geyserTimer = breadthTimer + 10000;
+                            spreadFlamesTimer = dreadFlameTimer + 7000;
+                            if (me->getVictim())
+                                me->GetMotionMaster()->MoveChase(me->getVictim());
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->CastSpell(me,SUPERHEATED,true);
+                            break;
+                    }
+
+                    IntermissionStep++;
+                }
+                else HeroicIntermissionTimer -= diff;
+
+            }
+
+            if (PHASE == PHASE4) // Last phase on heroic mode
+            {
+                if (breadthTimer <= diff)
+                {
+                    Position pos = GetRandomPositionInRadius(45.0f);
+                    float x = pos.m_positionX, y = pos.m_positionY, z = pos.m_positionZ;
+
+                    Creature * boF = me->SummonCreature(BREADTH_OF_FROST,x,y,z,0.0f,TEMPSUMMON_TIMED_DESPAWN,120000);
+                    if (boF)
+                    {
+                        if (Creature * cen = me->FindNearestCreature(CENARIUS,500.0f,true))
+                            cen->CastSpell(boF,BREADTH_OF_FROST_MISSILE,false);
+                    }
+                    breadthTimer = 50000;
+                }
+                else breadthTimer -= diff;
+
+                if (cloudBurstTimer <= diff)
+                {
+                    Position pos = GetRandomPositionInRadius(40.0f);
+                    float x = pos.m_positionX, y = pos.m_positionY, z = pos.m_positionZ;
+
+                    if (Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                    {
+                        Creature * pCloud = pMalfurion->SummonCreature(CLOUDBURST,x,y,z,0.0f);
+                        if (pCloud)
+                            pMalfurion->CastSpell(pCloud,SUMMON_CLOUDBURST_MISSILE,false);
+                    }
+                    cloudBurstTimer = NEVER;
+                }
+                else cloudBurstTimer -= diff;
+
+
+                if (entrappingRootsTimer <= diff)
+                {
+                    Position pos = GetRandomPositionInRadius(35.0f);
+                    float x = pos.m_positionX, y = pos.m_positionY, z = pos.m_positionZ;
+
+                    Creature * pRoot = me->SummonCreature(ENTRAPPING_ROOTS,x,y,z,0.0f,TEMPSUMMON_TIMED_DESPAWN,90000);
+
+                    if (pRoot)
+                    {
+                        if (Creature * runTotem = me->FindNearestCreature(CENARIUS,500.0f,true))
+                            runTotem->CastSpell(pRoot,ENTRAPPING_ROOOTS_MISSILE,false);
+                    }
+
+                    entrappingRootsTimer = 56000;
+                }
+                else entrappingRootsTimer -= diff;
+
+                if (empowerSulfurasTimer <= diff)
+                {
+                    if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
+                    {
+                        me->StopMoving();
+                        me->CastSpell(me,EMPOWER_SULFURAS,false);
+                        if(me->getVictim())
+                            me->GetMotionMaster()->MoveChase(me->getVictim());
+                        // Visual missiles during casting of Empower Sulfuras
+                        for (uint8  j = 0; j < 6 ; j++)
+                        {
+                            Creature * seed = me->SummonCreature(MOLTEN_SEED_CASTER,Seeds_pos[j].GetPositionX(),Seeds_pos[j].GetPositionY(),Seeds_pos[j].GetPositionZ(),0.0f);
+                            if (seed)
+                            {
+                                seed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+                                seed->ForcedDespawn(15000);
+                                seed->CastSpell(me,EMPOWER_SULFURAS_MISSILE,false);
+                            }
+                        }
+
+                        empowerSulfurasTimer = 50000;
+                    }
+                }
+                else empowerSulfurasTimer -= diff;
+
+                if (geyserTimer <= diff)
+                {
+                    if (Creature *boF = me->FindNearestCreature(BREADTH_OF_FROST,200.0f,true))
+                    {
+                        if (RaidIsClusteredTogether())
+                        {
+                            me->SummonCreature(MAGMA_GEYSER_NPC,boF->GetPositionX(),boF->GetPositionY(),boF->GetPositionZ(),0.0f);
+                            geyserTimer = 15000;
+                            return;
+                        }
+                    }
+                    geyserTimer = 4000;
+                }
+                else geyserTimer-= diff;
+
+                if (dreadFlameTimer <= diff)
+                {
+                    uint8 max = Is25ManRaid() ? 6 : 2;
+                    lastDreads.clear();
+
+                    std::list<DREADSPOSITIONS> flameList;
+                    flameList.clear();
+
+                    // Fill vector with free spots for Dreadflames
+                    for (uint32 i = 0; i < 22; i++)
+                    for (uint32 j = 0; j < 25; j++)
+                    {
+                        if (flames[i][j].free && flames[i][j].valid)
+                        {
+                            DREADSPOSITIONS temp;
+                            temp.wx = flames[i][j].x;
+                            temp.wy = flames[i][j].y;
+                            temp.x = i;
+                            temp.y = j;
+                            flameList.push_back(temp);
+                        }
+                    }
+
+                    // If we have enoguh space
+                    if (flameList.size() >= max)
+                    {
+                        for (uint32 i = 0; i < max; i++)
+                        {
+                            std::list<DREADSPOSITIONS>::iterator j = flameList.begin();
+                            advance(j, rand()%flameList.size());
+                            uint32 _rand = urand(0,flameList.size() -1);
+
+                            Creature * quad = me->SummonCreature(QUAD_STALKER,(*j).wx,(*j).wy,56.0f,0.0f);
+                            if (quad)
+                            {
+                                // Save both coordinated dor dreadlfame
+                                DREADSPOSITIONS d; 
+                                d.wx = (uint32)quad->GetPositionX();
+                                d.wy = (uint32)quad->GetPositionY();
+                                d.x = (*j).x;
+                                d.y = (*j).y;
+                                lastDreads.push_back(d);
+
+                                quad->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+                                quad->ForcedDespawn(10000);
+                                me->CastSpell(quad,DREADFLAME_MISSILE,true);
+                                flames[(*j).x][(*j).y].free = false; // todo remove this
+                                flameList.erase(j);
+                            }
+                        }
+                    }
+
+                    dreadFlameAct = dreadFlameAct - 5000;
+
+                    if (dreadFlameAct < 15000)
+                        dreadFlameAct = 15000;
+                    dreadFlameTimer = dreadFlameAct;
+                }
+                else dreadFlameTimer -= diff;
+
+                if (spreadFlamesTimer <= diff)
+                {
+                    std::list<DREADSPOSITIONS> flameList;
+                    flameList.clear();
+                    uint32 counter = 0;
+
+                    // Fill vector with free spots for new dreadflames
+                    for (uint32 i = 1; i < 21; i++)
+                    for (uint32 j = 1; j < 24; j++)
+                    {
+                        if (flames[i][j].free == false)
+                            counter++;
+
+                        if (flames[i][j].free && flames[i][j].valid )
+                        {
+                            // If this free spot has at least one burning neighbour, add this free spot to list
+                            if (flames[i+1][j-1].free ==false || flames[i+1][j].free == false || flames[i+1][j+1].free == false
+                            || flames[i][j-1].free ==false || flames[i][j+1].free == false
+                            || flames[i-1][j-1].free ==false || flames[i-1][j].free == false || flames[i-1][j+1].free == false)
+                            {
+                                DREADSPOSITIONS temp;
+                                temp.wx = flames[i][j].x;
+                                temp.wy = flames[i][j].y;
+                                temp.x = i;
+                                temp.y = j;
+                                flameList.push_back(temp);
+                            }
+                        }
+                    }
+                    uint8 max = (Is25ManRaid()) ? 10 : 6; // Todo is 6 correct number
+                    uint8 clones = (counter < max) ? counter : 10;
+
+                    for ( uint8 i = 0; i < max ;i ++)
+                    {
+                        if (!flameList.empty())
+                        {
+                            std::list<DREADSPOSITIONS>::iterator j = flameList.begin();
+                            advance(j, rand()%flameList.size()); // Pick random
+
+                            Creature * dread = me->SummonCreature(DREADFLAME_SPAWN,(*j).wx,(*j).wy,56.0f,0.0f);
+                            if (dread)
+                            {
+                                dread->AI()->SetData(0,(*j).x);
+                                dread->AI()->SetData(1,(*j).y);
+
+                                SetCoord((*j).x,(*j).y,false); // No longer free
+                                flameList.erase(j);
+                            }
+                        }
+                    }
+
+                    spreadFlamesTimer = urand(3000,4000);
+                }
+                else spreadFlamesTimer -= diff;
+            }
+
+            if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3 || PHASE == PHASE4) // Ragnaros can attack only during emerged phases
                 if (CanCast())
                     DoMeleeAttackIfReady();
         }
@@ -1243,8 +2012,7 @@ public:
         void Reset()
         {
             Lava_timer = 4000;
-            me->SetReactState(REACT_PASSIVE);
-            me->SetUInt64Value(UNIT_FIELD_TARGET,0);
+            me->SetReactState(REACT_AGGRESSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->CastSpell(me,SS_LAVA_POOLS,true); // Lava pools visual
         }
@@ -1274,7 +2042,7 @@ public:
                 Creature * lava_wave;
 
                 me->RemoveAurasDueToSpell(SS_LAVA_POOLS); // visual lava pools
-                me->CastSpell(me,SULFURUSH_DMG,false);
+                me->CastSpell(me,SULFURUSH_DMG,false); // Impact damage
 
                 //me->CastSpell(me->getVictim(),SUMMON_WAVE_N,true); // NORTH
                 lava_wave = me->SummonCreature(LAVA_WAVE_NPC,me->GetPositionX() + cos(angle)*distance,me->GetPositionY() + sin(angle)* distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN,10000);
@@ -1290,9 +2058,10 @@ public:
                 lava_wave = me->SummonCreature(LAVA_WAVE_NPC,me->GetPositionX() + cos(angle)*distance,me->GetPositionY() + sin(angle)* distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN,10000);
                 Move(lava_wave,angle);
 
-                me->CastSpell(me,SULFURUS_HAMMER_DMG,true);
+                me->CastSpell(me,SCORCHED_GROUND_DMG,true);
+
                 me->RemoveAurasDueToSpell(SS_LAVA_POOLS);
-                me->ForcedDespawn(5000);
+                me->ForcedDespawn(11000);
 
                 Lava_timer = NEVER;
             }
@@ -1412,7 +2181,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-                damage = 0;
+            damage = 0;
         }
 
         void UpdateAI (const uint32 diff)
@@ -1601,15 +2370,19 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
-            me->ForcedDespawn(12000);
             me->AddAura(ENGULFING_FLAME_VISUAL,me);
-            Flame_timer = 3500;
+            Flame_timer = 3000;
         }
 
         void UpdateAI ( const uint32 diff)
         {
             if (Flame_timer <= diff)
             {
+                if (IsHeroic())
+                    me->ForcedDespawn(3000);
+                else
+                    me->ForcedDespawn(9000);
+
                 me->CastSpell(me,ENGULFING_FLAME_DMG,true);
                 Flame_timer = NEVER;
             }
@@ -1639,26 +2412,32 @@ public:
         }
 
         uint32 Demorph_timer;
-        uint32 Morph_timer;
+        uint32 morphTimer;
 
         void Reset()
         {
+            morphTimer = NEVER;
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetDisplayId(11686); // Invis model
-            Morph_timer = 1750;
-            Demorph_timer = Morph_timer + 10000;
+            Demorph_timer = NEVER;
             me->SetInCombatWithZone();
             me->SetFloatValue(OBJECT_FIELD_SCALE_X,0.9f);
         }
 
+        void DoAction(const int32 action)
+        {
+            morphTimer = (uint32)action;
+        }
+
         void UpdateAI ( const uint32 diff)
         {
-            if (Morph_timer <= diff)
+            if (morphTimer <= diff)
             {
                 me->CastSpell(me,MOLTEN_SEED,true); // Molten seed efekt ( 10 s duration)
-                Morph_timer = NEVER;
+                morphTimer = NEVER;
+                Demorph_timer = 10000;
             }
-            else Morph_timer -= diff;
+            else morphTimer -= diff;
 
             if (Demorph_timer <= diff)
             {
@@ -1793,9 +2572,7 @@ public:
 
     struct Blazing_heat_npcAI : public ScriptedAI
     {
-        Blazing_heat_npcAI(Creature* creature) : ScriptedAI(creature) 
-        {
-        }
+        Blazing_heat_npcAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 Blazing_heat_timer;
 
@@ -1837,6 +2614,8 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 100567, false);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 100907, false);
         }
 
         Player * SelectRandomPlayer() // Need to filter Ragnaros tanks
@@ -1875,16 +2654,28 @@ public:
 
         void SpellHit(Unit* caster, SpellEntry const* spell)
         {
-            if (caster == me && spell->Effect[0] == SPELL_EFFECT_KNOCK_BACK_DEST) // Combustion
+            if (spell->Id == 100907 || spell->Id == 100567) // Freeze through transmission or walking over BoF
+                me->StopMoving();
+
+            if (caster == me && spell->SpellIconID == 5520 && spell->SpellFamilyName == SPELLFAMILY_GENERIC  ) // Combustion
             {
+                me->RemoveAura(100249);
+                me->RemoveAura(100250);
+
                 if (me->HasAura(COMBUSTIBLE) || me->HasAura(100282) ||me->HasAura(100283) ||me->HasAura(100284) ) // Combustible spell difficulties variants
                 {
-                    me->RemoveAura(COMBUSTIBLE); // Hope that will clear all spell difficulty variants of spelll -> have to test !!!
+                    me->RemoveAura(COMBUSTIBLE);
                     me->RemoveAura(100282);
                     me->RemoveAura(100283);
                     me->RemoveAura(100284);
 
                     me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE); // few  seconds after knockback, meteor should stay on place
+
+                    if (IsHeroic()) // In Heroic Difficulty Combustion inflicts 2000 Fire damage every second on the triggering player. This effect stacks.
+                    {
+                        if (Unit * vict = me->getVictim())
+                            vict->CastSpell(vict,100249,true);
+                    }
 
                     if (Unit *victim = me->getVictim())
                     {
@@ -1928,7 +2719,7 @@ public:
             }
         }
 
-        void DoAction(const int32 action) // This will be called if dummy aoe spell hits a player ( in melee range ) - spellscript
+        void DoAction(const int32 action) // This will be called if dummy aoe spell hits a player ( in melee range ) via spellscript
         {
             if (action == EXPLODE)
             {
@@ -1947,7 +2738,7 @@ public:
 
             if (Unit * vic = me->getVictim())
             {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE))
+                if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE) && !me->HasAura(100907) && !me->HasAura(100567)) // Freeze through transmission
                     me->GetMotionMaster()->MovePoint(0,vic->GetPositionX(),vic->GetPositionY(),vic->GetPositionZ());
             }
 
@@ -2562,6 +3353,213 @@ class spell_gen_blazing_heat_heal : public SpellScriptLoader
         }
 };
 
+class spell_gen_world_in_flames : public SpellScriptLoader
+{
+    public:
+        spell_gen_world_in_flames() : SpellScriptLoader("spell_gen_world_in_flames") { }
+
+        class spell_gen_world_in_flames_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_world_in_flames_AuraScript);
+
+            uint32 lastNumber;
+
+            bool Load()
+            {
+                lastNumber = 0;
+                return true;
+            }
+
+            void HandleFlames(AuraEffect const* aurEff)
+            {
+                PreventDefaultAction();
+                Unit* caster = GetCaster();
+
+                if (!caster || !caster->ToCreature())
+                    return;
+
+                    uint32 randNum = urand(1,3); // Spawn on 3 random locations
+
+                    if (randNum == lastNumber) // Dont spawn flames at same position
+                    {
+                        if (randNum == 1)
+                            randNum = urand(2,3);
+                        else
+                        if (randNum == 2)
+                            randNum = (urand(0,1)) ? 1 : 3;
+                        else // 3
+                            randNum = urand(1,2);
+                    }
+
+                    if (boss_ragnaros_firelands::boss_ragnaros_firelandsAI* pAI = (boss_ragnaros_firelands::boss_ragnaros_firelandsAI*)(caster->ToCreature()->GetAI()))
+                    {
+                        switch(randNum)
+                        {
+                            case 1 :
+                                pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1],1.6f,5.2f);
+                            break;
+
+                            case 2 :
+                                pAI->SpawnEngulfingFlames(engulfing_lengths[randNum - 1],1.6f,4.6f);
+                            break;
+
+                            case 3:
+                                pAI->SpawnEngulfingFlames(engulfing_lengths[2],2.12f,4.33f);
+                                pAI->SpawnEngulfingFlames(engulfing_lengths[3],2.12f,4.33f);
+                            break;
+                        }
+                    }
+                    lastNumber = randNum;
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_world_in_flames_AuraScript::HandleFlames, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gen_world_in_flames_AuraScript();
+        }
+};
+
+class spell_gen_frost_freeze : public SpellScriptLoader
+{
+    public:
+        spell_gen_frost_freeze() : SpellScriptLoader("spell_gen_frost_freeze") { }
+
+        class spell_gen_frost_freeze_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_frost_freeze_SpellScript);
+
+            void RemoveInvalidTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(IsNotLivingMeteor());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_frost_freeze_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_frost_freeze_SpellScript();
+        }
+};
+
+class spell_gen_breadthOfFrostFreeze : public SpellScriptLoader
+{
+    public:
+        spell_gen_breadthOfFrostFreeze() : SpellScriptLoader("spell_gen_breadthOfFrostFreeze") { }
+
+        class spell_gen_breadthOfFrostFreeze_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_breadthOfFrostFreeze_SpellScript);
+
+            void RemoveInvalidTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(IsNotLivingMeteor());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_breadthOfFrostFreeze_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_breadthOfFrostFreeze_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_breadthOfFrostFreeze_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_AREA_ENTRY_SRC);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_breadthOfFrostFreeze_SpellScript();
+        }
+};
+
+class spell_gen_breadthOfFrostBarrier : public SpellScriptLoader
+{
+    public:
+        spell_gen_breadthOfFrostBarrier() : SpellScriptLoader("spell_gen_breadthOfFrostBarrier") { }
+
+        class spell_gen_breadthOfFrostBarrier_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_breadthOfFrostBarrier_SpellScript);
+
+            void RefreshBarrier(std::list<Unit*>& unitList)
+            {
+                for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                {
+                    if ((*itr)->IsInWorld())
+                    {
+                        if (Aura * a = (*itr)->GetAura(100503)) // If already has active buff, only refresh it
+                        {
+                            a->RefreshDuration();
+                            itr = unitList.erase(itr);
+                        }
+                        else ++itr;
+                    }
+                    else
+                        ++itr;
+                }
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_breadthOfFrostBarrier_SpellScript::RefreshBarrier, EFFECT_0, TARGET_UNIT_AREA_ALLY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_breadthOfFrostBarrier_SpellScript::RefreshBarrier, EFFECT_1, TARGET_UNIT_AREA_ALLY_SRC);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_breadthOfFrostBarrier_SpellScript();
+        }
+};
+
+class HasDeluge
+{
+    public:
+        bool operator()(WorldObject* object) const
+        {
+            if (Player * pl = object->ToPlayer())
+                if(pl->HasAura(DELUGE) || pl->HasAura(101015) || pl->HasAura(100503)) // deluge + breadth of frost
+                {
+                    pl->RemoveAura(SUPERHEATED_DEBUFF);
+                    pl->RemoveAura(100915); // diff variant
+                    return true;
+                }
+            return false;
+        }
+};
+
+class spell_gen_superheated : public SpellScriptLoader
+{
+    public:
+        spell_gen_superheated() : SpellScriptLoader("spell_gen_superheated") { }
+
+        class spell_gen_superheated_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_superheated_SpellScript);
+
+            void RemoveInvalidTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(HasDeluge());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_superheated_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_superheated_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_superheated_SpellScript();
+        }
+};
 
 class go_firelands_portal : public GameObjectScript
 {
@@ -2591,6 +3589,391 @@ public:
 
         return true;
     }
+};
+
+class npc_cloudburst : public CreatureScript
+{
+public:
+   npc_cloudburst() : CreatureScript("npc_cloudburst") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cloudburstAI (creature);
+    }
+
+    struct npc_cloudburstAI : public ScriptedAI
+    {
+        npc_cloudburstAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript * instance;
+        uint32 transformTimer;
+
+        void EnterEvadeMode() { }
+        void EnterCombat(Unit* /*enemy*/) {}
+        void DamageTaken(Unit* /*who*/, uint32 &damage) { damage = 0; }
+        void Reset()
+        {
+            transformTimer = 500;
+        }
+
+        void UpdateAI (const uint32 diff)
+        {
+            if (transformTimer <= diff)
+            {
+                me->CastSpell(me,CLOUDBURST_VISUAL,true);
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                transformTimer = NEVER;
+            }
+            else transformTimer -= diff;
+        }
+
+        uint8 GetDelugeCounter(void)
+        {
+            if (!instance)
+                me->ForcedDespawn();
+
+            Map::PlayerList const& plList = instance->instance->GetPlayers();
+            uint8 counter = 0;
+
+            if (plList.isEmpty())
+                return 0;
+
+            for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if ( Player * p = itr->getSource())
+                {
+                    if (p->IsInWorld() && p->HasAura(DELUGE))
+                        counter++;
+                }
+            }
+            return counter;
+        }
+
+        void SpellHit(Unit* caster, const SpellEntry* spell)
+        {
+            if (spell->Id == 110469) // Borrowed harmless spell
+            {
+                //me->MonsterYell("BUFF",0,0); said three times, than u cant do that yet phrase, WHY ????
+                uint8 max = (Is25ManRaid()) ? 3 : 1;
+
+                if (GetDelugeCounter() < max)
+                {
+                    caster->CastSpell(caster,DELUGE,true);
+                    return;
+                }
+
+                caster->CastSpell(caster,DELUGE,true);
+                me->ForcedDespawn();
+            }
+        }
+
+    };
+};
+
+class npc_breadthOfFrost : public CreatureScript
+{
+public:
+   npc_breadthOfFrost() : CreatureScript("npc_breadthOfFrost") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_breadthOfFrostAI (creature);
+    }
+
+    struct npc_breadthOfFrostAI : public ScriptedAI
+    {
+        npc_breadthOfFrostAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        bool morphed;
+
+        void SpellHit(Unit* pSrc, const SpellEntry* spell)
+        {
+            if (spell->Id == BREADTH_OF_FROST_MISSILE)
+            {
+                me->CastSpell(me,BREADTH_OF_FROST_TRIGGERED,true);
+                morphed = true;
+            }
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (morphed && who && who->ToCreature() && me->GetExactDist2d(who) <= 6.0f)
+            {
+                if (who->ToCreature()->GetEntry() == LIVING_METEOR)
+                {
+                    who->AddAura(100567,who); // Root stun
+                    who->StopMoving();
+                    me->ForcedDespawn();
+                }
+            }
+        }
+
+        void Reset(){ morphed = false;}
+        void EnterEvadeMode() { }
+        void EnterCombat(Unit* /*enemy*/) {}
+        void DamageTaken(Unit* /*who*/, uint32 &damage) { damage = 0; }
+
+    };
+};
+
+class npc_entrappingRoots : public CreatureScript
+{
+public:
+   npc_entrappingRoots() : CreatureScript("npc_entrappingRoots") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_entrappingRootsAI (creature);
+    }
+
+    struct npc_entrappingRootsAI : public ScriptedAI
+    {
+        npc_entrappingRootsAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        bool transformed;
+
+        void Reset() { transformed = false;}
+
+        void SpellHit(Unit* pSrc, const SpellEntry* spell)
+        {
+            if (spell->Id == ENTRAPPING_ROOOTS_MISSILE)
+            {
+                me->CastSpell(me,ENTRAPPING_ROOTS_TRIGGERED,true);
+                transformed = true;
+            }
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (transformed && who && who->ToCreature() && me->GetExactDist2d(who) <= 16.0f)
+            {
+                if (who->ToCreature()->GetEntry() == RAGNAROS)
+                {
+                    who->AddAura(100653,who); // Root stun
+                    me->ForcedDespawn();
+                }
+            }
+        }
+
+        void EnterEvadeMode() { }
+        void EnterCombat(Unit* /*enemy*/) {}
+        void DamageTaken(Unit* /*who*/, uint32 &damage) { damage = 0; }
+
+    };
+};
+
+typedef struct coord
+{
+    uint32 x;
+    uint32 y;
+}COORDINATE;
+
+class npc_dreadFlame : public CreatureScript
+{
+public:
+   npc_dreadFlame() : CreatureScript("npc_dreadFlame") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dreadFlameAI (creature);
+    }
+
+    struct npc_dreadFlameAI : public ScriptedAI
+    {
+        npc_dreadFlameAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+            summonerGUID = 0;
+        }
+        uint32 mx,my;
+        uint64 summonerGUID;
+
+        void Reset()
+        {
+            me->CastSpell(me,DREADFLAME_AOE,true);
+            me->CastSpell(me,DREADFLAME_CONTROL_AURA,true);
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == 0)
+                mx = data;
+            else if (type == 1)
+                my = data;
+            else
+            {
+                if (Unit * rag = Unit::GetUnit(*me,summonerGUID))
+                    if (rag->ToCreature())
+                        if (boss_ragnaros_firelands::boss_ragnaros_firelandsAI* pAI = (boss_ragnaros_firelands::boss_ragnaros_firelandsAI*)(rag->ToCreature()->GetAI()))
+                        {
+                            pAI->SetCoord(mx,my,true); // Free again
+                            me->ForcedDespawn();
+                        }
+            }
+        }
+
+        void EnterEvadeMode() { }
+        void EnterCombat(Unit* /*enemy*/) {}
+        void DamageTaken(Unit* /*who*/, uint32 &damage) { damage = 0; }
+
+        void IsSummonedBy(Unit* pSummoner)
+        {
+            if (pSummoner && pSummoner->ToCreature())
+                summonerGUID = pSummoner->GetGUID();
+        }
+
+       void UpdateAI(const uint32 diff)
+       {
+       }
+
+    };
+};
+
+class magma_geyser_npc : public CreatureScript
+{
+public:
+   magma_geyser_npc() : CreatureScript("magma_geyser_npc") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new magma_geyser_npcAI (creature);
+    }
+
+    struct magma_geyser_npcAI : public ScriptedAI
+    {
+        magma_geyser_npcAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->ForcedDespawn(12000);
+        }
+
+        uint32 geyserTimer;
+
+        void Reset()
+        {
+            geyserTimer = 500;
+            me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
+        }
+
+        void UpdateAI ( const uint32 diff)
+        {
+            if (geyserTimer <= diff)
+            {
+                me->CastSpell(me,MAGMA_GEYSER,true);
+                geyserTimer = NEVER;
+            }
+            else geyserTimer -= diff;
+        }
+    };
+};
+
+class npc_firelands_cenarius : public CreatureScript
+{
+public:
+   npc_firelands_cenarius() : CreatureScript("npc_firelands_cenarius") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_firelands_cenariusAI (creature);
+    }
+
+    struct npc_firelands_cenariusAI : public ScriptedAI
+    {
+        npc_firelands_cenariusAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        uint32 talkTimer;
+        uint32 talks;
+        bool canStart;
+
+        void DoAction(const int32 param) // Start post intro
+        {
+            talkTimer = 15000;
+            canStart = true;
+        }
+
+        void Reset()
+        {
+            talks = 0;
+            canStart = false;
+        }
+
+        void UpdateAI ( const uint32 diff)
+        {
+            if (canStart == false)
+                return;
+
+            if(talkTimer <= diff)
+            {
+                switch (talks)
+                {
+                    case 0 :
+                        if (Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                        {
+                            pMalfurion->MonsterYell(HeroicDeath[1].text,LANG_UNIVERSAL,0);
+                            DoPlaySoundToSet(pMalfurion,HeroicDeath[1].sound);
+                        }
+                        talkTimer = 3000;
+                        break;
+                    case 1:
+                        me->MonsterYell(HeroicDeath[2].text,LANG_UNIVERSAL,0);
+                        DoPlaySoundToSet(me,HeroicDeath[2].sound);
+                        talkTimer = 2000;
+                        break;
+                    case 2:
+                        if (Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                        {
+                            pMalfurion->MonsterYell(HeroicDeath[3].text,LANG_UNIVERSAL,0);
+                            DoPlaySoundToSet(pMalfurion,HeroicDeath[3].sound);
+                        }
+                        talkTimer = 6000;
+                        break;
+                    case 3:
+                        me->MonsterYell(HeroicDeath[4].text,LANG_UNIVERSAL,0);
+                        DoPlaySoundToSet(me,HeroicDeath[4].sound);
+                        talkTimer = 10500;
+                        break;
+                    case 4:
+                        if (Creature * pHamuul = me->FindNearestCreature(HAMUUL_RUNETOTEM,500.0f,true))
+                        {
+                            pHamuul->MonsterYell(HeroicDeath[5].text,LANG_UNIVERSAL,0);
+                            DoPlaySoundToSet(pHamuul,HeroicDeath[5].sound);
+                        }
+                        talkTimer = 13500;
+                        break;
+                    case 5:
+                        me->MonsterYell(HeroicDeath[6].text,LANG_UNIVERSAL,0);
+                        DoPlaySoundToSet(me,HeroicDeath[6].sound);
+                        talkTimer = NEVER;
+                        canStart = false;
+                        if (Creature * pHamuul = me->FindNearestCreature(HAMUUL_RUNETOTEM,500.0f,true))
+                            pHamuul->ForcedDespawn(5000);
+                        if (Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
+                            pMalfurion->ForcedDespawn(5000);
+                        me->ForcedDespawn(5000);
+                        break;
+                }
+
+                talks++;
+            }
+            else talkTimer -= diff;
+        }
+    };
 };
 
 void AddSC_boss_ragnaros_fl()
@@ -2624,9 +4007,57 @@ void AddSC_boss_ragnaros_fl()
     new spell_gen_molten_power(); //        100158,100302
     new spell_gen_lava_wave(); //           101088,101102
 
+    //HEROIC RAGNAROS NPCS
+    new npc_cloudburst();
+    new npc_breadthOfFrost();
+    new npc_entrappingRoots();
+    new npc_dreadFlame();
+    new magma_geyser_npc();
+    new npc_firelands_cenarius();
+
+    // HEROIC RAGNAROS SPELL_SCRIPTS
+    new spell_gen_world_in_flames(); // 100171 100190
+    new spell_gen_frost_freeze(); // 100907
+    new spell_gen_breadthOfFrostFreeze(); // 100567
+    new spell_gen_breadthOfFrostBarrier(); // 100503
+    new spell_gen_superheated(); // 100594,100915
+
     // GO SCRIPTS
     new go_firelands_portal();
 }
+
+/*  HEROIC SQLs
+
+    DOPLNIT REPLACE INTO pre NPC :
+    select * from creature_template where entry in (53874,53872,53873,54147)
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=100171 OR  spell_id=100190;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (100171, 'spell_gen_world_in_flames'),
+    (100190, 'spell_gen_world_in_flames');
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=100907;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (100907, 'spell_gen_frost_freeze');
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=100567;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (100567, 'spell_gen_breadthOfFrostFreeze');
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=100503;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (100503, 'spell_gen_breadthOfFrostBarrier');
+
+    DELETE FROM `spell_script_names` WHERE  spell_id=100594 OR  spell_id=100915;
+    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+    VALUES (100594, 'spell_gen_superheated'),
+    (100915, 'spell_gen_superheated');
+
+    REPLACE INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `cast_flags`, `user_type`) VALUES (54147, 110469, 0, 1, 1);
+
+
+
+*/
 /*
     DELETE FROM `spell_script_names` WHERE  spell_id=98518 OR  spell_id=100252 OR  spell_id=100253 OR  spell_id=100254;
     INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)

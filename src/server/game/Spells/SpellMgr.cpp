@@ -4357,13 +4357,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100342: // Draw Out Firelord
         case 100344:
         case 100345:
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+        case 100606: // Empower Sulfuras Visual Missile
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             if (i == 100345)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_NONE;
             break;
         case 100250: // Combustion - bad targeting, handled in AI
         case 100249:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
             spellInfo->Effect[0] = 0;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
         break;

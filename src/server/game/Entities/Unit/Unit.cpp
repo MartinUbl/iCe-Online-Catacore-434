@@ -8848,6 +8848,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                             CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
                         return true;
                     }
+                    case 99399: // Burning Wound ( Ragnaros encounter )
+                    case 101238:
+                    case 101239:
+                    case 101240:
+                    {
+                        if (pVictim && pVictim->isAlive())
+                            CastSpell(pVictim, 99400, true, castItem, triggeredByAura); // Burning blast
+                        return true;
+                    }
                     // Eye for an Eye
                     case 9799:
                     case 25988:

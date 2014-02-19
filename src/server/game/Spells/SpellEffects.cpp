@@ -524,10 +524,21 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     {
                         if(Aura* pAura = m_caster->GetAura(99399)) // Burning wound
                         {
-                            uint8 stacks = pAura->GetCharges();
+                            uint8 stacks = pAura->GetStackAmount();
                             damage *= stacks; // multiply damage by number Burning wound stacks
                             apply_direct_bonus = false;
                         }
+                        break;
+                    }
+                    case 100271: // Combustion ( Ragnaros encounter)
+                    case 100272:
+                    {
+                        Aura * a = m_caster->GetAura(100249);
+                        if(!a)
+                            a = m_caster->GetAura(100250);
+                        if (a)
+                            damage = 2000 * a->GetStackAmount();
+                        apply_direct_bonus = false;
                         break;
                     }
                     case 98175: // Magma trap ( Ragnaros encounter )
