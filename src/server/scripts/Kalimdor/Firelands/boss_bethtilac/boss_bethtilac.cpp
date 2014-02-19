@@ -48,6 +48,18 @@ enum BethtilacPhases    // needed to be here because it is used as function para
     PHASE_2
 };
 
+#define MIDDLE_X 60.5f
+#define MIDDLE_Y 387.0f
+#define MIDDLE_Z 74.05f
+
+
+const Position spawnPoints[3] = // Spiderling spawn points on 25 man difficulty
+{
+    {56.0f,426.0f,74.05f,4.3f}, // LEFT
+    {105.0f,368.0f,76.5f,3.5f}, // MIDDLE
+    {37.0f,327.0f,76.5f,1.4f}   // RIGHT
+};
+
 class boss_bethtilacAI: public SpiderAI
 {
 public:
@@ -75,6 +87,7 @@ private:
     bool combatCheckEnabled;
     int devastationCounter;
     int spinnerCounter;         // number of the vawe of spinners
+    uint32 broodlingTimer;
 
     // methods
     void SetPhase(BethtilacPhases newPhase);
@@ -112,13 +125,6 @@ public:
     }
 };
 
-void load_boss_Bethtilac()
-{
-    new boss_bethtilac();
-};
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -139,6 +145,10 @@ enum BethtilacSpells
 
     // summons
     SPELL_SUMMON_SPINNER = 98872,
+
+    //Engorged Broodling ability
+    SPELL_VOLATILE_BURST = 99990,
+    SPELL_VOLATILE_POISON = 101136,
 };
 
 enum BethtilacEvents
@@ -235,6 +245,7 @@ void boss_bethtilacAI::EnterCombat(Unit *who)
     spinnerCounter = 0;
 
     combatCheckEnabled = true;
+    broodlingTimer = 20000;
 
     EnterPhase(PHASE_TRANSFER_1);
 }
@@ -350,8 +361,23 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
         }
 
 
-    UpdateTimers(diff);
+    if (phase == PHASE_1 && IsHeroic())
+    {
+        if (broodlingTimer <= diff)
+        {
+            for (uint8 i = 0; i < 3; i++)
+            {
+                Creature * broodling = me->SummonCreature(53745,spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
+                    TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000); // Engorged Broodling
+                if (broodling)
+                    broodling->SetSpeed(MOVE_RUN, 1.5f, true); // Guessing
+            }
+            broodlingTimer = urand(7000, 12000);
+        }
+        else broodlingTimer -= diff;
+    }
 
+    UpdateTimers(diff);
 
     if (phase != oldPhase)
         EnterPhase(phase);
@@ -686,14 +712,49 @@ void boss_bethtilacAI::SummonSpiderlings()
     ShowWarnText("Spiderlings have been roused from their nest!");
     DebugOutput("summoning Cinderweb Spiderlings");
 
-    // WRONG! TOTO: more spiderlings, and at correct location
-    for (int i = 0; i < 6; i++)
+
+    if (Is25ManRaid()) // In 25 man, group of 3-4 spiderlings are spawned at three specific locations
     {
-        float angle = 2 * 3.14f / 6 * i;
-        me->SummonCreature(NPC_CINDERWEB_SPIDERLING,
-                           98.0f + cos(angle), 452.0f + sin(angle), 86, 0,
-                           TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+        for (uint8 i = 0; i < 3; i++)
+        {
+            uint8 spidersNum = urand(3, 4);
+
+            for (uint8 j = 0; j < spidersNum; j++)
+            {
+                float x, y, z,o;
+                // spawn them at 4 yards distance 
+                x = MIDDLE_X + cos(me->GetAngle(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY())) * (me->GetDistance2d(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY()) + (4*j));
+                y = MIDDLE_Y + sin(me->GetAngle(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY())) * (me->GetDistance2d(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY()) + (4*j));
+                z = me->GetMap()->GetHeight2(x, y, 80.0f);
+                o = spawnPoints[i].GetOrientation();
+
+                Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+
+                if (spiderLing)
+                    spiderLing->SetSpeed(MOVE_RUN, 0.6f, true);
+            }
+        }
     }
+    else // 10 man
+    {
+        uint8 randPos = urand(0, 2);
+
+        for (uint8 j = 0; j < 10; j++) // Spawn 10 broodlings on one random position
+        {
+            float x, y, z, o;
+            // spawn them at 2 yards distance 
+            x = MIDDLE_X + cos(me->GetAngle(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY())) * (me->GetDistance2d(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY()) + (2 * j));
+            y = MIDDLE_Y + sin(me->GetAngle(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY())) * (me->GetDistance2d(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY()) + (2 * j));
+            z = me->GetMap()->GetHeight2(x, y, 80.0f);
+            o = spawnPoints[randPos].GetOrientation();
+
+            Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+
+            if (spiderLing)
+                spiderLing->SetSpeed(MOVE_RUN, 0.6f, true);
+        }
+    }
+
 }
 
 
@@ -722,5 +783,133 @@ void boss_bethtilacAI::UnlockDoor()
     }
 }
 
+
+
+class boss_bethilac_engorged_broodling : public CreatureScript
+{
+public:
+    boss_bethilac_engorged_broodling() : CreatureScript("boss_bethilac_engorged_broodling") {};
+
+    struct boss_bethilac_engorged_broodlingAI : public ScriptedAI
+    {
+        boss_bethilac_engorged_broodlingAI(Creature* c) : ScriptedAI(c)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        Player* SelectPlayerOnGround()
+        {
+            if (!instance)
+                return NULL;
+
+            Map::PlayerList const& plList = instance->instance->GetPlayers();
+
+            if (plList.isEmpty())
+                return NULL;
+
+            std::list<Player*> groundPlayers;
+            groundPlayers.clear();
+
+            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+            {
+                if (Player * pl = itr->getSource())
+                {
+                    if (pl->GetPositionZ() < (MIDDLE_Z + 10.0f))
+                        groundPlayers.push_back(pl);
+                }
+            }
+
+            if (groundPlayers.empty())
+                return NULL;
+
+            std::list<Player*>::iterator j = groundPlayers.begin();
+            advance(j, rand() % groundPlayers.size()); // Pick random target
+
+            if ((*j) && (*j)->IsInWorld())
+            {
+                return (*j);
+            }
+            return NULL;
+        }
+
+        InstanceScript * instance;
+        uint32 checkTimer;
+
+        void Reset()
+        {
+            checkTimer = 2000;
+            me->SetInCombatWithZone();
+            if (Player * pl = SelectPlayerOnGround())
+            {
+                me->AddThreat(pl, 500000.0f);
+                me->GetMotionMaster()->MoveChase(pl);
+            }
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinMeleeRange(who))
+            {
+                me->CastSpell(me, SPELL_VOLATILE_BURST, true); // This will also kill broodling
+            }
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Creature* pDummy = me->SummonTrigger(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, 20000,0);
+            if (pDummy)
+            {
+                pDummy->setFaction(14);
+                pDummy->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                pDummy->CastSpell(pDummy, SPELL_VOLATILE_POISON, true);
+                pDummy->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (checkTimer <= diff)
+            {
+                if (me->IsWithinMeleeRange(me->getVictim()))
+                {
+                    me->CastSpell(me, SPELL_VOLATILE_BURST, true); // This will also kill broodling
+                    return;
+                }
+
+                if (me->GetPositionZ() >= MIDDLE_Z + 10.0f) // Don't chase victims at web
+                {
+                    if (Player * pl = SelectPlayerOnGround()) // If so select new target
+                    {
+                        DoResetThreat();
+                        me->SetInCombatWithZone();
+                        me->AddThreat(pl, 500000.0f);
+                        me->GetMotionMaster()->Clear(false);
+                        me->GetMotionMaster()->MoveChase(pl);
+                    }
+                }
+                checkTimer = 100;
+            }
+            else checkTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new boss_bethilac_engorged_broodlingAI(c);
+    }
+};
+
+
+void load_boss_Bethtilac()
+{
+    new boss_bethtilac();
+    new boss_bethilac_engorged_broodling();
+};
 
 }   // end of namespace

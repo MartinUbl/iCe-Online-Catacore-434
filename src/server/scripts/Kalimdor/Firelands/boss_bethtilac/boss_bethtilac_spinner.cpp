@@ -84,13 +84,15 @@ static const int MOVE_POINT_DOWN2 = MOVE_POINT_DOWN + 10;
 
 enum SpinnerSpells
 {
-    SPELL_BURNING_ACID = 98471,
+    SPELL_BURNING_ACID      = 98471,
+    SPELL_FIERY_WEB_SPIN    = 97202 // Heroic only
 };
 
 enum SpinnerEvents
 {
     EVENT_BURNING_ACID,
     EVENT_SUMMON_FILAMENT,
+    EVENT_FIERY_WEB_SPIN
 };
 
 
@@ -143,13 +145,22 @@ void mob_spinnerAI::DoAction(const int32 event)
     switch (event)
     {
         case EVENT_BURNING_ACID:
-            me->CastCustomSpell(SPELL_BURNING_ACID, SPELLVALUE_MAX_TARGETS, 1, me, false);
+        {
+            if (!me->IsNonMeleeSpellCasted(false))
+                me->CastCustomSpell(SPELL_BURNING_ACID, SPELLVALUE_MAX_TARGETS, 1, me, false);
             break;
+        }
+        case EVENT_FIERY_WEB_SPIN:
+        {
+            if (!me->IsNonMeleeSpellCasted(false) && IsHeroic())
+                me->CastCustomSpell(SPELL_FIERY_WEB_SPIN, SPELLVALUE_MAX_TARGETS, 1, me, false);
+            break;
+        }
         case EVENT_SUMMON_FILAMENT:
             if (!summoned)
             {
                 summoned = true;
-                me->SummonCreature(NPC_SPIDERWEB_FILAMENT, me->GetPositionX(), me->GetPositionY(), webZPosition - 5.0f, 0);
+                me->SummonCreature(NPC_SPIDERWEB_FILAMENT, me->GetPositionX(), me->GetPositionY(), webZPosition - 5.0f, 0,TEMPSUMMON_TIMED_DESPAWN,20000);
             }
             break;
     }
@@ -167,6 +178,7 @@ void mob_spinnerAI::MovementInform(uint32 type, uint32 id)
             {
                 hanging = true;
                 AddTimer(EVENT_BURNING_ACID, 2000, true);
+                AddTimer(EVENT_FIERY_WEB_SPIN, urand(5000, 12000), true);
             }
             break;
         }

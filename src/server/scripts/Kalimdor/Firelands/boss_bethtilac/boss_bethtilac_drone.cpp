@@ -47,10 +47,12 @@ private:
     void MovementInform(uint32 type, uint32 id);
     void AttackStart(Unit *victim);
     void IsSummonedBy(Unit *summoner);
+    Player *SelectPlayerOnGround(void);
 
     // attributes
     bool onGround;
     bool onTop;
+    uint32 fixateTimer;
 };
 
 
@@ -83,7 +85,8 @@ enum DroneSpells
 {
     SPELL_LEECH_VENOM = 99411,
     SPELL_BOILING_SPATTER = 99463,
-    SPELL_DRONE_BURNING_ACID = 99934
+    SPELL_DRONE_BURNING_ACID = 99934,
+    SPELL_FIXATE = 99559,
 };
 
 enum DroneEvents
@@ -112,6 +115,7 @@ mob_droneAI::~mob_droneAI()
 void mob_droneAI::Reset()
 {
     SpiderAI::Reset();
+    fixateTimer = 7000;
 }
 
 
@@ -124,6 +128,41 @@ void mob_droneAI::EnterCombat(Unit *who)
 void mob_droneAI::EnterEvadeMode()
 {
     // do nothing
+}
+
+Player* mob_droneAI::SelectPlayerOnGround()
+{
+    if (!instance)
+        return NULL;
+
+    Map::PlayerList const& plList = instance->instance->GetPlayers();
+
+    if (plList.isEmpty())
+        return NULL;
+
+    std::list<Player*> groundPlayers;
+    groundPlayers.clear();
+
+    for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
+    {
+        if (Player * pl = itr->getSource())
+        {
+            if (pl->GetPositionZ() < (85.0f))
+                groundPlayers.push_back(pl);
+        }
+    }
+
+    if (groundPlayers.empty())
+        return NULL;
+
+    std::list<Player*>::iterator j = groundPlayers.begin();
+    advance(j, rand() % groundPlayers.size()); // Pick random target
+
+    if ((*j) && (*j)->IsInWorld())
+    {
+        return (*j);
+    }
+    return NULL;
 }
 
 
@@ -140,7 +179,20 @@ void mob_droneAI::UpdateAI(const uint32 diff)
         return;
 
     if (UpdateVictim())
+    {
+        if (IsHeroic() && fixateTimer <= diff)
+        {
+            if (Player * pl = SelectPlayerOnGround())
+            {
+                pl->CastSpell(me, SPELL_FIXATE, true);
+            }
+            fixateTimer = urand(25000, 35000);
+        }
+        else fixateTimer -= diff;
+
         DoMeleeAttackIfReady();
+    }
+
 
     UpdateTimers(diff);
 }
