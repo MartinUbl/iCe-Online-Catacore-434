@@ -5557,6 +5557,7 @@ void Player::RepopAtGraveyard()
             TeleportTo(719, 5157, -1378, 1356, 0);
             return;
         case 764: // Celestius zone
+        case 751: // event zone II.
             return;
     }
 
@@ -7916,6 +7917,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (GetMapId() == 661 /* Lost Isles Phase 2 */
         || GetMapId() == 746 /* Plantaz */
+        || GetMapId() == 751 /* event zone II. */
         || GetMapId() == 759) /* Uldum Phase Event Map Phantomia */
         ForcedSanctuary = true;
 
