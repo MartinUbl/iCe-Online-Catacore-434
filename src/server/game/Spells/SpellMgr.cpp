@@ -4215,9 +4215,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[EFFECT_0] = 26;
             spellInfo->EffectRadiusIndex[EFFECT_1] = 26;
             break;
-        case 100744: //Firestorm
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-            break;
         case 99844: // Blazing Claw
         case 101729:
         case 101730:
