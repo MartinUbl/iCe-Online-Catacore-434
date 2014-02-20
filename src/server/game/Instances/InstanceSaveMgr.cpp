@@ -1133,7 +1133,7 @@ void InstanceSaveManager::loadRaidEncounter()
 
             default://raids for which Raid info does not work yet
             {
-                bossNum=1;
+                bossNum=0;
                 uint32 dataEnc[1];
                 dataEnc[0]=0;
                 setBossNumber(mapId,bossNum);
@@ -1142,9 +1142,8 @@ void InstanceSaveManager::loadRaidEncounter()
                 /*
                 case mapid://
                 {
-                bossNum=5;
+                bossNum=0;
                 uint32 dataEnc[5];
-                setBossNumber(mapId,bossNum);
                 std::istringstream loadStream(data);
                 for (uint8 i = 0; i < bossNum; i++)
                 {
