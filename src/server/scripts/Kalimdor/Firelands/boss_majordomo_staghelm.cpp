@@ -1045,13 +1045,13 @@ class spell_searing_seed_explosion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_searing_seed_explosion_AuraScript);
 
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* owner = GetOwner()->ToPlayer();
                 if (!owner)
                     return;
 
-                if ( mode != AURA_REMOVE_BY_DEFAULT)
+                if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
                     owner->CastSpell(owner, SPELL_SEARING_SEED_DMG, true);
             }
 
