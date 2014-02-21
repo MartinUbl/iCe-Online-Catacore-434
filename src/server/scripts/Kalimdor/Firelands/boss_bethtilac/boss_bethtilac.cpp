@@ -312,6 +312,8 @@ void boss_bethtilacAI::EnterEvadeMode()
 
     if (instance)
         instance->SetData(TYPE_BETHTILAC, FAIL);
+
+    UnlockDoor();
 }
 
 
@@ -682,7 +684,7 @@ void boss_bethtilacAI::SummonDrone()
 
     DebugOutput("summoning Cinderweb Drone");
 
-    me->SummonCreature(NPC_CINDERWEB_DRONE, 21.0f, 295.0f, 84.1f, 0.0f,
+    me->SummonCreature(NPC_CINDERWEB_DRONE, 46.0f, 458.0f, 76.5f, 4.6f,
                        TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
 }
 
@@ -751,7 +753,7 @@ void boss_bethtilacAI::SummonSpiderlings()
             Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
 
             if (spiderLing)
-                spiderLing->SetSpeed(MOVE_RUN, 0.6f, true);
+                spiderLing->SetSpeed(MOVE_RUN, 0.5f, true);
         }
     }
 

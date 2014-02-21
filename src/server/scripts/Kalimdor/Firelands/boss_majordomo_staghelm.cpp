@@ -156,10 +156,13 @@ public:
             barUsed = false;
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit * victim)
         {
-            uint8 rand_ = urand(0,3);
-            PlayAndYell(RandomKill[rand_].sound,RandomKill[rand_].text);
+            if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                uint8 rand_ = urand(0, 3);
+                PlayAndYell(RandomKill[rand_].sound, RandomKill[rand_].text);
+            }
         }
 
         void JustDied(Unit * /*victim*/)
@@ -383,12 +386,17 @@ public:
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
 
-                if(unit && unit->ToPlayer()) // Seering seeds cannot be applied at current tank ( handled in spellscript)
+                if(unit && unit->ToPlayer())
                 {
                     Aura * seed_aura = unit->GetAura(SPELL_SEARING_SEEDS);
 
                     if(seed_aura)
                     {
+                        if (unit == me->getVictim()) // Don't apply seed on main tank
+                        {
+                            seed_aura->Remove(AURA_REMOVE_BY_DEFAULT);
+                            continue;
+                        }
                         seed_aura->SetDuration(10000 + (counter * time_gap));
                         counter++;
                     }
@@ -1028,48 +1036,6 @@ class spell_gen_kneel_to_the_flame : public SpellScriptLoader
         }
 };
 
-
-class IsTankingMajordomo // Seering seeds cannot be applied at current tank
-{
-    public:
-        bool operator()(WorldObject* object) const
-        {
-            if (object && object->ToPlayer())
-                if (Creature* majordomo = GetClosestCreatureWithEntry(object, MAJORDOMO_STAGHELM, 500.0f,true))
-                    if(majordomo->getVictim() == object )
-                        return true;
-            return false;
-        }
-};
-
-class spell_gen_searing_seed : public SpellScriptLoader
-{
-    public:
-        spell_gen_searing_seed() : SpellScriptLoader("spell_gen_searing_seed") { }
-
-        class spell_gen_searing_seed_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_searing_seed_SpellScript);
-
-            void RemoveInvalidTargets(std::list<Unit*>& unitList)
-            {
-                unitList.remove_if(IsTankingMajordomo());
-            }
-
-            void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_gen_searing_seed_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
-            }
-
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_gen_searing_seed_SpellScript();
-        }
-};
-
-
 class spell_searing_seed_explosion : public SpellScriptLoader
 {
     public:
@@ -1079,13 +1045,14 @@ class spell_searing_seed_explosion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_searing_seed_explosion_AuraScript);
 
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
             {
                 Unit* owner = GetOwner()->ToPlayer();
                 if (!owner)
                     return;
 
-                owner->CastSpell(owner, SPELL_SEARING_SEED_DMG, true);
+                if ( mode != AURA_REMOVE_BY_DEFAULT)
+                    owner->CastSpell(owner, SPELL_SEARING_SEED_DMG, true);
             }
 
             void Register()
@@ -1223,7 +1190,6 @@ void AddSC_boss_majordomo_staghelm()
     new staghelm_flame_orb();
 
     // SPELLS
-    new spell_gen_searing_seed(); //        98450
     new spell_searing_seed_explosion(); //  98620,100215,100216,100217
     new spell_gen_flame_scythe(); //        98474,100212,100213,100214
     new spell_gen_leaping_flames(); //      98535,100206,100207,100208

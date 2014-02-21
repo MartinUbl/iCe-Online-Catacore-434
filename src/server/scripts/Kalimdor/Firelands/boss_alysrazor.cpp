@@ -654,6 +654,7 @@ class boss_Alysrazor : public CreatureScript
                         ++FlyFront;
                         break;
                 }
+                me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
             }
 
             void RemoveAuraFromAllPlayers(uint32 spellentry, bool remove, bool despawncreatures)
@@ -1394,10 +1395,10 @@ class boss_Alysrazor : public CreatureScript
                         // Summon molten feathers
                         uint8 max = Is25ManRaid() ? 22 : 9;
 
-                        float z = me->GetMap()->GetHeight2(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ());
                         for(uint8 l= 0; l < max ; l++)
                         {
                             float iCycleSLot = (M_PI/max)*l; // summon feather in cycle - only for visual effect
+                            float z = me->GetMap()->GetHeight2(me->GetPositionX() + 2 * cos(iCycleSLot), me->GetPositionY() + 2 * sin(iCycleSLot), me->GetPositionZ()) + 2.0f;
                             me->SummonCreature(53089, me->GetPositionX() + 2*cos(iCycleSLot), me->GetPositionY() + 2*sin(iCycleSLot), z, urand(0,6), TEMPSUMMON_TIMED_DESPAWN, 35000);
                         }
 
@@ -2319,7 +2320,7 @@ class npc_Voracious_Hatchling : public CreatureScript
                 me->RemoveAura(99390);
                 me->RemoveAura(SPELL_IMPRINTED_TAUNT2);
 
-                if (Unit* pVictim = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true))
+                if (Unit* pVictim = SelectTarget(SELECT_TARGET_NEAREST, 0, 100.0f, true,-98619)) // Ignore players with wings
                 {
                     if (Creature * alys = (Creature*)Unit::GetUnit(*me,ALYSRAZOR_GUID))
                     {
@@ -2495,8 +2496,11 @@ class npc_Plump_Lava_worm : public CreatureScript
                 }
                 else CastTimer -= diff;
 
-                if (Creature* Target = me->FindNearestCreature(NPC_LAVA_WORM_TARGET,50.0f))
+                if (Creature* Target = me->FindNearestCreature(NPC_LAVA_WORM_TARGET, 50.0f))
+                {
+                    me->SetUInt64Value(UNIT_FIELD_TARGET,Target->GetGUID());
                     me->SetFacingToObject(Target);
+                }
 
                 if (RotationTimer <= diff && Casting)
                 {
