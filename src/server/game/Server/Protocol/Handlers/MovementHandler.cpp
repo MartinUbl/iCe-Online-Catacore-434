@@ -53,13 +53,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // get the teleport destination
     WorldLocation &loc = GetPlayer()->GetTeleportDest();
-    WorldLocation oldLoc;
-    //we need to remember old position for stuck option
-    oldLoc.m_mapId=0;
-    oldLoc.m_positionX=GetPlayer()->GetPositionX()-10;
-    oldLoc.m_positionY=GetPlayer()->GetPositionY()-10;
-    oldLoc.m_positionZ=GetPlayer()->GetPositionZ()+20;
-    oldLoc.m_orientation=-GetPlayer()->GetOrientation();
     // possible errors in the coordinate validity check
     if (!MapManager::IsValidMapCoord(loc))
     {
@@ -93,7 +86,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (!newMap || !newMap->CanEnter(GetPlayer()))
     {
         sLog->outError("Map %d could not be created for player %d, porting player back to previous location", loc.GetMapId(), GetPlayer()->GetGUIDLow());
-        GetPlayer()->TeleportTo(oldLoc, 0, true); //lets port player back
+        AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(loc.GetMapId());
+        if (at)
+            GetPlayer()->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, GetPlayer()->GetOrientation());//lets port player back
         return;
     }
     else
