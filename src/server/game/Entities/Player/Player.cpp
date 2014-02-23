@@ -19686,7 +19686,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 
 InstancePlayerBind* Player::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
 {
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_NORMAL, 0, true, false))
+    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, FLEXIBLE_RAID_DIFFICULTY, 0, true, false))
     {
         setRaidId(mapId,instanceId);
         return BindToInstance(save, true, false);
@@ -19713,17 +19713,12 @@ void Player::SendRaidInfo()
             InstanceSave *save=itr->second.save;
             if(save)
             {
-                uint32 mapId=save->GetMapId();
-                int coun = sInstanceSaveMgr->getBossNumber(mapId);
-
-                if(coun)//always send correct info for player (his not group save data) if map is Flex raid diff enabled
-                    save=sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId));
-
                 uint32 instanceId=save->GetInstanceId();
                 std::map<uint32,uint32> uiEnc;
+                int coun = 0;
 
                 uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
-                
+                coun = sInstanceSaveMgr->getBossNumber(save->GetMapId());
 
                 if (!uiEnc.empty() && coun && coun > 0)
                 {
@@ -19738,7 +19733,7 @@ void Player::SendRaidInfo()
                             encData = encData << 1;
                     }
                 }
-                data << uint32(mapId);                      // map id
+                data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
                 data << 0;                                  //if there wasnt 0, heroic difficulty shown nothing  //isHeroic;
                 data << uint64(save->GetInstanceId());      // instance id

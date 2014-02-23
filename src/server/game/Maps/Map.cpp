@@ -2859,11 +2859,6 @@ void InstanceMap::copyDeadUnitsFromLeader(Player* player, uint32 mapId, uint32 i
     uint32 playId=player->getRaidId(mapId);
     if(playId!=instanceId)
     {
-        /*Send saved to instance warning*/
-        WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
-        data << uint32(0);
-        player->GetSession()->SendPacket(&data);
-
         CharacterDatabase.PExecute("REPLACE INTO creature_respawn(guid,respawnTime,instance) SELECT guid,respawnTime,'%d' FROM creature_respawn WHERE instance = '%d'", playId, instanceId);
         QueryResult result = CharacterDatabase.PQuery("SELECT guid, respawnTime FROM creature_respawn WHERE instance = '%d'", instanceId);
         if (result)

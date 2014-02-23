@@ -2324,8 +2324,7 @@ InstanceGroupBind* Group::BindToInstanceRaid(uint32 instanceId, uint32 mapId)
     uint32 leadGuid;
     uint32 leadId=0;
     std::string data;
-    
-    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, RAID_DIFFICULTY_10MAN_NORMAL, 0, true, false))
+    if (InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapId, instanceId, FLEXIBLE_RAID_DIFFICULTY, 0, true, false))
     {
         newBind=BindToInstance(save, true, false);
         leadGuid=GetLeaderGUID();
