@@ -19614,7 +19614,7 @@ InstanceSave * Player::GetInstanceSave(uint32 mapid, bool raid)
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
     const MapEntry* map = sMapStore.LookupEntry(mapid);
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(mapid))
+    if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapid))
     {
         difficulty=FLEXIBLE_RAID_DIFFICULTY;
     }
@@ -19625,7 +19625,7 @@ void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
     const MapEntry* map = sMapStore.LookupEntry(itr->second.save->GetMapId());
-    if(map && map->IsRaid() && sInstanceSaveMgr->getBossNumber(itr->second.save->GetMapId()))
+    if(map && map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(itr->second.save->GetMapId()))
     {
         difficulty=FLEXIBLE_RAID_DIFFICULTY;
     }
@@ -19643,7 +19643,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
     {
         Difficulty diff ;
         const MapEntry* mapP = sMapStore.LookupEntry(save->GetMapId());
-        if(mapP && mapP->IsRaid() && sInstanceSaveMgr->getBossNumber(save->GetMapId()))
+        if(mapP && mapP->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(save->GetMapId()))
             diff=FLEXIBLE_RAID_DIFFICULTY;
         else
             diff=save->GetDifficulty();
@@ -19714,17 +19714,17 @@ void Player::SendRaidInfo()
             if(save)
             {
                 uint32 mapId=save->GetMapId();
-                int coun = sInstanceSaveMgr->getBossNumber(mapId);
 
-                if(coun)//always send correct info for player (his not group save data) if map is Flex raid diff enabled
-                    save=sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId));
+                if(sInstanceSaveMgr->isFlexibleEnabled(mapId))//always send correct info for player (his not group save data) if map is Flex raid diff enabled
+                    if(sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId)))
+                        save=sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId));
 
                 uint32 instanceId=save->GetInstanceId();
                 std::map<uint32,uint32> uiEnc;
 
                 uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
+                int coun = sInstanceSaveMgr->getBossNumber(mapId);
                 
-
                 if (!uiEnc.empty() && coun && coun > 0)
                 {
                     for (int i=0;i<coun;i++)

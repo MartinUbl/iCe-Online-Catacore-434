@@ -139,7 +139,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         InstanceGroupBind *groupBind = NULL;
         InstancePlayerBind *pBind;
         bool raid=false;
-        if(sInstanceSaveMgr->getBossNumber(mapId) && IsRaid()) //merge only if killed bosses are set
+        if(sInstanceSaveMgr->isFlexibleEnabled(mapId) && IsRaid()) //merge only if killed bosses are set
             raid=true;
         if(group)
             groupBind = group->GetBoundInstance(this);

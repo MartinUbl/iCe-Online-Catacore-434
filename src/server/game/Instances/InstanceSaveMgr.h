@@ -193,6 +193,20 @@ class InstanceSaveManager
         {
             return bossNumber[mapId];
         }
+        bool isFlexibleEnabled(uint32 mapId/*mapId*/)
+        {
+            switch(mapId)
+            {
+            case 671://The Bastion of Twilight
+            case 669://Blackwing Descent
+            case 757://Baradin Hold
+            case 754://Throne of the Four Winds
+            case 720://Firelands
+                return true;
+            default:
+                return false;
+            }
+        }
 
     protected:
         static uint16 ResetTimeDelay[];

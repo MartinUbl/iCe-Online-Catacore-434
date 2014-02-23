@@ -17600,7 +17600,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
 
                 /*Flexible raid locks rules- boss killed on normal or HC*/
-                if(map->IsRaid() && sInstanceSaveMgr->getBossNumber(mapId))
+                if(map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapId))
                 {
                     Map::PlayerList const &PlayerList = map->GetInstanceScript()->instance->GetPlayers();//do it for all players
                     if (!PlayerList.isEmpty())

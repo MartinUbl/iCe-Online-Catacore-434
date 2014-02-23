@@ -2508,7 +2508,7 @@ bool InstanceMap::Add(Player *player)
 
             // check for existing instance binds
             InstancePlayerBind *playerBind;
-            if(IsRaid() && sInstanceSaveMgr->getBossNumber(GetId()))
+            if(IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(GetId()))
                 playerBind = player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
             else
                 playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
