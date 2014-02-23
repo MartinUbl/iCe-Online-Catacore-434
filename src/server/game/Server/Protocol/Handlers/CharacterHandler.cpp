@@ -2236,9 +2236,7 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket &recv_data)
     recv_data>>respond;
     if(respond == 0)//Leave instance button
     {
-        AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(player->GetMap()->GetId());
-        if (at)
-            GetPlayer()->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, GetPlayer()->GetOrientation());//teleport player outside
+        player->RepopAtGraveyard();
     }
     else//Accept
     {
