@@ -156,14 +156,17 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
                 }
 
             }
-            player->_LoadBoundInstance(mapId);//load player alone bound, not bound of the last leader
             pBind= player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
             if(pBind)
             {
                 if(groupBind && pBind->save->GetInstanceId() != groupBind->save->GetInstanceId())//Player enters another instance ID then before => need to show binding query, when teleported
                     player->showInstanceBindQuery=true;
             }
-            else
+
+            player->_LoadBoundInstance(mapId);//load player alone bound, not bound of the last leader(its not up because of prevent disappearing ID from server somehow)
+            pBind= player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
+
+            if(!pBind)
             {
                 NewInstanceId = sMapMgr->GenerateInstanceId();
                 /*Player enters raid for the first time, so we need create his unique ID, which will be updated with leaders*/
