@@ -19943,7 +19943,7 @@ bool Player::CheckInstanceLoginValid()
     }
 
     //Instance already full
-    if(GetMap()->GetPlayersCountExceptGMs() >= GetMap()->ToInstanceMap()->GetMaxPlayers())
+    if(GetMap()->GetPlayersCountExceptGMs() >= (GetMap()->ToInstanceMap()->GetMaxPlayers()+1))
     {
         return false;
     }
