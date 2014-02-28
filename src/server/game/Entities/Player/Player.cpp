@@ -19713,16 +19713,18 @@ void Player::SendRaidInfo()
             InstanceSave *save=itr->second.save;
             if(save)
             {
-                uint32 mapId=save->GetMapId();
+                Difficulty diff = save->GetDifficulty();
+                uint32 mapId = save->GetMapId();
 
-                if(sInstanceSaveMgr->isFlexibleEnabled(mapId))//always send correct info for player (his not group save data) if map is Flex raid diff enabled
-                    if(sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId)))
+                if(sInstanceSaveMgr->isFlexibleEnabled(mapId))
+                {
+                    if(sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId))) // always send correct info for player (his not group save data) if map is Flex raid diff enabled
                         save=sInstanceSaveMgr->GetInstanceSave(getRaidId(mapId));
+                    diff = GetDifficulty(true); // Send raid info for currently select difficulty of raid
+                }
 
-                uint32 instanceId=save->GetInstanceId();
-                std::map<uint32,uint32> uiEnc;
-
-                uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
+                uint32 instanceId = save->GetInstanceId();
+                std::map<uint32,uint32> uiEnc = sInstanceSaveMgr->getInstanceSaveData(instanceId);
                 int coun = sInstanceSaveMgr->getBossNumber(mapId);
                 
                 if (!uiEnc.empty() && coun && coun > 0)
@@ -19739,9 +19741,9 @@ void Player::SendRaidInfo()
                     }
                 }
                 data << uint32(mapId);                      // map id
-                data << uint32(save->GetDifficulty());      // difficulty
+                data << uint32(diff);                       // difficulty
                 data << 0;                                  //if there wasnt 0, heroic difficulty shown nothing  //isHeroic;
-                data << uint64(save->GetInstanceId());      // instance id
+                data << uint64(instanceId);                 // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
