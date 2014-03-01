@@ -34,6 +34,7 @@ public:
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 currEnc[MAX_ENCOUNTER];
+        uint32 heroicKills;
         uint64 riplimbGuid;
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
@@ -43,6 +44,7 @@ public:
         uint64 balerocGUID;
         uint64 staghelmGUID;
         uint64 ragnarosGUID;
+        uint64 lavaRingGUID;
         uint64 bridgeStalkerGUID;
 
         uint64 balerocDoorGUID;
@@ -62,6 +64,7 @@ public:
             balerocGUID =       0;
             staghelmGUID =      0;
             ragnarosGUID =      0;
+            lavaRingGUID =      0;
             bridgeStalkerGUID = 0;
             balerocDoorGUID =   0;
             bridgeDoorGUID=     0;
@@ -71,6 +74,7 @@ public:
             spawnBridgeTimer    = 500;
             unAuraTimer         = 30000;
             memset(m_auiEncounter, 0, sizeof(uint32) * MAX_ENCOUNTER);
+            heroicKills = 0;
             GetCorrUiEncounter();
         }
 
@@ -82,6 +86,8 @@ public:
             saveStream << m_auiEncounter[0];
             for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                 saveStream << " " << m_auiEncounter[i];
+
+            saveStream << " " << heroicKills;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -100,6 +106,8 @@ public:
             std::istringstream loadStream(chrIn);
             for (uint8 i = 0; i < MAX_ENCOUNTER; i++)
                 loadStream >> m_auiEncounter[i];
+
+            loadStream >> heroicKills;
 
             for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
@@ -144,6 +152,17 @@ public:
                     break;
                 case 52409:
                     ragnarosGUID = pCreature->GetGUID();
+                    if (instance->IsHeroic() && heroicKills != MAX_ENCOUNTER - 1)
+                    {
+                        pCreature->SetVisible(false);
+                        pCreature->setFaction(35);
+
+                        if (Creature * pLavaRing = this->instance->GetCreature(this->GetData64(DATA_LAVA_RING_GUID)))
+                            pLavaRing->SetVisible(false);
+                    }
+                    break;
+                case 540100: // Lava ring around Ragnaros
+                    lavaRingGUID = pCreature->GetGUID();
                     break;
                 case 52977:
                     bridgeStalkerGUID = pCreature->GetGUID();
@@ -197,6 +216,8 @@ public:
                     return staghelmGUID;
                 case TYPE_RAGNAROS:
                     return ragnarosGUID;
+                case DATA_LAVA_RING_GUID:
+                    return lavaRingGUID;
                 case DATA_BRIDGE_SPAWN:
                     return bridgeStalkerGUID;
                 case DATA_BALEROC_FRONT_DOOR:
@@ -317,6 +338,9 @@ public:
             if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
 
+            if (DataId == DATA_HEROIC_KILLS)
+                return heroicKills;
+
             return 0;
         }
 
@@ -332,11 +356,31 @@ public:
                 m_auiEncounter[type] = data;
 
             if (data == DONE)
+                if (this->instance->IsHeroic())
+                    heroicKills++;
+
+            if (type == TYPE_STAGHELM && data  == DONE)
+            {
+                Creature * pRagnaros = this->instance->GetCreature(this->GetData64(TYPE_RAGNAROS));
+
+                if (pRagnaros && instance->IsHeroic() && heroicKills == MAX_ENCOUNTER - 1)
+                {
+                    pRagnaros->SetVisible(true);
+                    pRagnaros->setFaction(35);
+
+                    if (Creature * pLavaRing = this->instance->GetCreature(this->GetData64(DATA_LAVA_RING_GUID)))
+                        pLavaRing->SetVisible(true);
+                }
+            }
+
+            if (data == DONE)
             {
                 std::ostringstream saveStream;
                 saveStream << m_auiEncounter[0];
                 for (uint8 i = 1; i < MAX_ENCOUNTER; i++)
                     saveStream << " " << m_auiEncounter[i];
+
+                saveStream << heroicKills;
 
                 GetCorrUiEncounter();
                 SaveToDB();

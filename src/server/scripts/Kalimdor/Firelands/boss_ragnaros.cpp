@@ -509,26 +509,50 @@ public:
                 instance->SetData(TYPE_RAGNAROS, NOT_STARTED);
 
             Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
-            if(unit)
+
+            if (unit)
+            {
+                if (IsHeroic() && me->getFaction() == 35)
+                    unit->SetVisible(false);
+                else
+                    unit->SetVisible(true);
+            }
+            else
                 unit->SetVisible(true);
+        }
+
+        void ReceiveEmote(Player* pPlayer, uint32 text_emote) // This is only for testing purpose ( for GMs only )
+        {
+            if (pPlayer && pPlayer->isGameMaster() && text_emote == TEXTEMOTE_LAUGH)
+            {
+                me->setFaction(14);
+                me->SetVisible(true);
+
+                Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
+                if (unit)
+                    unit->SetVisible(true);
+            }
+
+            if (pPlayer && pPlayer->isGameMaster() && text_emote == TEXTEMOTE_KNEEL)
+            {
+                me->setFaction(35);
+                me->SetVisible(false);
+
+                Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
+                if (unit)
+                    unit->SetVisible(false);
+            }
         }
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who->ToPlayer() && !who->ToPlayer()->isGameMaster() && speech == false)
+            if (who->ToPlayer() && !who->ToPlayer()->isGameMaster() && speech == false && me->getFaction() == 14)
             {
                 speech = true;
                 PlayAndYell(intro.sound,intro.text);
                 me->PlayOneShotAnimKit(ANIM_KIT_EXCLAIM);
                 me->SetFloatValue(UNIT_FIELD_COMBATREACH,20.0f);
                 me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,20.0f);
-
-                Unit* unit = Unit::GetUnit(*me, LAVA_RING_GUID);
-                if(unit) // Visual bug when sometime player cant see lava ring
-                {
-                    unit->SetVisible(false);
-                    unit->SetVisible(true);
-                }
                 return;
             }
             ScriptedAI::MoveInLineOfSight(who);

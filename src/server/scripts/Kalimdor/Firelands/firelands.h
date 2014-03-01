@@ -40,7 +40,9 @@ enum AdditionalEvents
 {
     DATA_BALEROC_FRONT_DOOR = 10,
     DATA_BRIDGE_DOOR        = 11,
-    DATA_BRIDGE_SPAWN       = 12
+    DATA_BRIDGE_SPAWN       = 12,
+    DATA_HEROIC_KILLS       = 13,
+    DATA_LAVA_RING_GUID     = 14
 };
 
 enum CreatureIds
