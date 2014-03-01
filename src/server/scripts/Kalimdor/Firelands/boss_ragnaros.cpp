@@ -58,6 +58,7 @@ enum Spells
     LAVA_BOLT               = 98981,
     SUPERNOVA               = 99112,
     EMGULFING_FLAMES        = 99172,
+    ENGULFING_FLAMES_HC     = 99236,
 
     // PHASE 3
 
@@ -136,7 +137,6 @@ enum Npcs
     ENTRAPPING_ROOTS        = 54074,
     // dreadflame npcs
     QUAD_STALKER            = 52850,
-    DREADFLAME              = 54127,
     DREADFLAME_SPAWN        = 54203,
     MAGMA_GEYSER_NPC        = 54184,
 
@@ -409,6 +409,7 @@ public:
         uint32 empowerSulfurasTimer;
         uint32 spreadFlamesTimer;
         uint32 geyserTimer;
+        uint32 chaseTimer;
         bool speech;
         bool burried;
 
@@ -481,6 +482,7 @@ public:
             HeroicIntermissionTimer = NEVER;
             geyserTimer             = NEVER;
             spreadFlamesTimer       = NEVER;
+            chaseTimer              = NEVER;
             IntermissionStep        = 0;
             PHASE = PHASE1;
             reemerge = 0;
@@ -879,9 +881,9 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
 
             CheckTimer = 3000;
-            Sulfurus_timer = 10000;
-            Molten_seeds_timer = 20000;
-            Engulfing_flames_timer = 38000;
+            Sulfurus_timer = (IsHeroic()) ? 7000 : 15000;
+            Molten_seeds_timer = (IsHeroic()) ? 17500 : 22000;
+            Engulfing_flames_timer = (IsHeroic()) ? 42000 : 40000;
 
             PHASE = PHASE2; // Enter phase 2
             Text_timer = urand( 10000, 15000);
@@ -902,8 +904,8 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
 
             CheckTimer = 3000;
-            Sulfurus_timer = 10000;
-            Engulfing_flames_timer = 38000;
+            Sulfurus_timer = (IsHeroic()) ? 13000 : 15000;
+            Engulfing_flames_timer = (IsHeroic()) ? 27000 : 31000;
             Meteor_timer = 45000;
 
             PHASE = PHASE3; // Enter phase 3
@@ -1778,7 +1780,8 @@ public:
                             HeroicIntermissionTimer = 1500;
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                             // Move him bit higher at correct position
-                            me->GetMotionMaster()->MovePoint(0,me->GetPositionX(),me->GetPositionY(),58.0f);
+                            float z = me->GetMap()->GetHeight2(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                            me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), z + 2.0f);
                             break;
                         }
                         case 9:                     // Melee phase
@@ -1799,8 +1802,21 @@ public:
 
             }
 
-            if (PHASE == PHASE4) // Last phase on heroic mode
+            if (PHASE == PHASE4) // Last phase on heroic mode100
             {
+                if (chaseTimer <= diff)
+                {
+                    if (!me->HasAura(100628)) // From unknowm reason channeling is interrupted, so for sure manually add aura after cast time if this happen
+                        me->AddAura(100628, me);
+
+                    if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
+                    {
+                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        chaseTimer = NEVER;
+                    }
+                }
+                else chaseTimer -= diff;
+
                 if (breadthTimer <= diff)
                 {
                     Position pos = GetRandomPositionInRadius(45.0f);
@@ -1855,6 +1871,7 @@ public:
                     {
                         me->StopMoving();
                         me->CastSpell(me,EMPOWER_SULFURAS,false);
+                        chaseTimer = 5100;
                         if(me->getVictim())
                             me->GetMotionMaster()->MoveChase(me->getVictim());
                         // Visual missiles during casting of Empower Sulfuras
@@ -2133,9 +2150,11 @@ public:
         Magma_trap_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
             erupted = false;
+            instance = me->GetInstanceScript();
         }
 
         bool erupted;
+        InstanceScript * instance;
 
         void MoveInLineOfSight(Unit* who)
         {
@@ -2151,17 +2170,16 @@ public:
                 me->CastSpell(who,MAGMA_TRAP_ERUPTION,true);
                 me->RemoveAurasDueToSpell(MAGMA_TRAP_BURNING);
 
-                if (!who->HasAura(19263)) //Deterrence
+                if (!who->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
                     who->KnockbackFrom(who->GetPositionX(),who->GetPositionY(),0.1f,55.1f);
 
-                if(IsHeroic())
-                    DoCastAOE(MAGMA_TRAP_VULNERABILITY,true);
                 me->ForcedDespawn(2000);
             }
         }
 
         void Reset()
         {
+            me->SetInCombatWithZone();
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetUInt64Value(UNIT_FIELD_TARGET,0); // Stop turning
             me->CastSpell(me,MAGMA_TRAP_BURNING,true);
@@ -2170,6 +2188,8 @@ public:
 
         void UpdateAI ( const uint32 diff)
         {
+            if (instance && instance->GetData(TYPE_RAGNAROS) != IN_PROGRESS)
+                me->ForcedDespawn();
         }
     };
 };
@@ -2293,7 +2313,16 @@ public:
             if (a)
                 stacks = a->GetStackAmount();
 
-            me->SetSpeed(MOVE_RUN, 0.142857 + (speed_coef * stacks),true); // Base speed + spell_coef * stacks
+            /* WORKING BUT AS FAR AS I KNOW SONS SHOULD BE IMMUNE ALMOST FOR EVERY SLOW EFFECT, SO DONT COUNT WITH IT
+            int32 speedReduction = me->GetTotalAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+            speedReduction = (speedReduction < -50) ? -50 : speedReduction; // Maximum 50 % movement speed reduction
+            speedReduction *= -1;
+            */
+
+            float speed = 0.142857 + (speed_coef * stacks); // Base speed + spell_coef * stacks
+            //if (speedReduction)
+                //speed = (speed * speedReduction) / 100;
+            me->SetSpeed(MOVE_RUN, speed, true);
 
             if (me->HealthBelowPct(HPpercentage) && HPpercentage > 40)
             {
@@ -2680,6 +2709,8 @@ public:
 
             if (caster == me && spell->SpellIconID == 5520 && spell->SpellFamilyName == SPELLFAMILY_GENERIC  ) // Combustion
             {
+                me->RemoveAura(99303);
+                me->RemoveAura(100249);
                 me->RemoveAura(100249);
                 me->RemoveAura(100250);
 
@@ -3384,10 +3415,12 @@ class spell_gen_world_in_flames : public SpellScriptLoader
             PrepareAuraScript(spell_gen_world_in_flames_AuraScript);
 
             uint32 lastNumber;
+            uint32 flameCounter;
 
             bool Load()
             {
                 lastNumber = 0;
+                flameCounter = 0;
                 return true;
             }
 
@@ -3397,6 +3430,9 @@ class spell_gen_world_in_flames : public SpellScriptLoader
                 Unit* caster = GetCaster();
 
                 if (!caster || !caster->ToCreature())
+                    return;
+
+                if (flameCounter > 2) // Maximum 3 times
                     return;
 
                     uint32 randNum = urand(1,3); // Spawn on 3 random locations
@@ -3414,6 +3450,9 @@ class spell_gen_world_in_flames : public SpellScriptLoader
 
                     if (boss_ragnaros_firelands::boss_ragnaros_firelandsAI* pAI = (boss_ragnaros_firelands::boss_ragnaros_firelandsAI*)(caster->ToCreature()->GetAI()))
                     {
+                        if (!caster->IsNonMeleeSpellCasted(false) && pAI->CanCast())
+                            caster->CastSpell(caster, ENGULFING_FLAMES_HC, false); // Only for visual casting
+
                         switch(randNum)
                         {
                             case 1 :
@@ -3431,6 +3470,7 @@ class spell_gen_world_in_flames : public SpellScriptLoader
                         }
                     }
                     lastNumber = randNum;
+                    flameCounter++;
             }
 
             void Register()
@@ -3667,7 +3707,7 @@ public:
             {
                 if ( Player * p = itr->getSource())
                 {
-                    if (p->IsInWorld() && p->HasAura(DELUGE))
+                    if (p->IsInWorld() && (p->HasAura(DELUGE) || p->HasAura(101015)))
                         counter++;
                 }
             }
