@@ -4230,16 +4230,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[2] = 1;
             spellInfo->EffectMiscValueB[2] = 0;
             break;
-        case 98885: // Brushfire
-        case 100715:
-        case 100716:
-        case 100717:
-        /*case 99510: // Lava ( Ragnaros trash)
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
-            spellInfo->excludeTargetAuraSpell = 0;
-            break;*/
-
 /************************ END OF ALYSRAZOR *******************************/
 
 
@@ -4334,6 +4324,14 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100177:
             spellInfo->EffectTriggerSpell[0] = 0;
             break;
+        case 100182: // Englufing flames (HC), visual only
+        case 100183:
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            break;
+        case 100171: // World in flames  (HC)
+        case 100190:
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
+            break;
         case 98982: // Submerge - disable lava bolts from triggering
         case 100295:
         case 100296:
@@ -4359,6 +4357,8 @@ void SpellMgr::LoadSpellCustomAttr()
             if (i == 100345)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_NONE;
             break;
+        case 99303:
+        case 100248:
         case 100250: // Combustion - bad targeting, handled in AI
         case 100249:
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
@@ -5541,6 +5541,9 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF; // ignore the owner of aura
             break;
         case 98471: // Burning Acid
+        case 100826:
+        case 100827:
+        case 100828:
             spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
 
