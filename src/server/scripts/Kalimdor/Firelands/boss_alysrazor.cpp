@@ -2394,7 +2394,14 @@ class npc_Voracious_Hatchling : public CreatureScript
                 }
                 else clearImprintedTimer -= diff;
 
-                if (!me->GetAura(SPELL_SATIATED) && !me->GetAura(SPELL_HUNGRY))
+                bool hasSatiated = false;
+
+                hasSatiated = me->HasAura(SPELL_SATIATED);
+                hasSatiated = me->HasAura(SPELL_SATIATED);
+                hasSatiated = me->HasAura(SPELL_SATIATED);
+                hasSatiated = me->HasAura(SPELL_SATIATED);
+
+                if (!hasSatiated && !me->GetAura(SPELL_HUNGRY))
                     me->CastSpell(me, SPELL_HUNGRY, false);
 
                 if (VICTIM_GUID == 0 || VictimDiedOrInvalid(VICTIM_GUID))
@@ -2416,6 +2423,10 @@ class npc_Voracious_Hatchling : public CreatureScript
                         me->RemoveAura(SPELL_HUNGRY);
                         me->RemoveAura(SPELL_TANTRUM);
                         me->RemoveAura(SPELL_SATIATED);
+                        me->RemoveAura(100850);
+                        me->RemoveAura(100851);
+                        me->RemoveAura(100852);
+
                         me->AddAura(SPELL_SATIATED, me);
                         me->PlayOneShotAnimKit(ANIM_ATTACK_FEED);
                         Worm->setDeathState(JUST_DIED);
@@ -2928,8 +2939,19 @@ public:
         void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
             if (GetTarget()->GetHealthPct() < 50.0f) //remove when below 50%HP
-                if (Aura* Gushing = GetTarget()->GetAura(SPELL_GUSHING_WOUND_Y10))
+            {
+                Aura* Gushing = GetTarget()->GetAura(SPELL_GUSHING_WOUND_Y10);
+                if(!Gushing)
+                    Gushing = GetTarget()->GetAura(100718);
+                if (!Gushing)
+                    Gushing = GetTarget()->GetAura(100719);
+                if (!Gushing)
+                    Gushing = GetTarget()->GetAura(100720);
+
+                if (Gushing)
                     GetTarget()->RemoveAura(Gushing);
+            }
+
         }
 
         void Register()
