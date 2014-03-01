@@ -9606,11 +9606,11 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         return;
 
     float angle = target->GetRelativeAngle(m_caster);
+
     Position pos;
     target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     target->GetFirstCollisionPosition(pos, target->GetObjectSize(), angle);
-
-    m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
+    m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
 
     // Warriors Charge - Stun the target - must be implemented this way since charge doesn't have "Trigger spell" effect
     if (m_spellInfo->Id == 100)
