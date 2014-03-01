@@ -38,11 +38,13 @@ enum BethtilacSpawns
     NPC_BETHTILAC = 52498,
     NPC_SPIDERWEB_FILAMENT = 53082,     // "vehicle" dropped from the web after taunting or killing Cinderweb Spinner
     NPC_FILAMENT_CASTER = 524981,
+    NPC_WEB_RIP = 53450,
 
     // spawns in waves
     NPC_CINDERWEB_DRONE = 52581,
     NPC_CINDERWEB_SPINNER = 52524,
     NPC_CINDERWEB_SPIDERLING = 52447,
+    NPC_ENGORGED_BROODLING = 53745,
 };
 
 // movement IDs

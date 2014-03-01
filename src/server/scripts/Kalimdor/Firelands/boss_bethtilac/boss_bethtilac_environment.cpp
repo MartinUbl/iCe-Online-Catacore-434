@@ -206,6 +206,7 @@ void filamentAI::PassengerBoarded(Unit *unit, int8 seat, bool apply)
 
     if (apply)
     {
+        me->ForcedDespawn(10000); // Don't despawn if player is in middle of transporting
         unit->addUnitState(UNIT_STAT_ONVEHICLE);        // makes the passenger unattackable
         AddTimer(EVENT_TRANSFER_START, 1500, false);
 
@@ -230,7 +231,7 @@ void filamentAI::DoAction(const int32 event)
         break;
     case EVENT_DESPAWN:
         if (!transporting)
-            me->DespawnOrUnsummon(0);
+            me->ForcedDespawn(500);
         break;
     }
 }
@@ -256,6 +257,7 @@ void WebRipAI::IsSummonedBy(Unit *summoner)
 void WebRipAI::EnterEvadeMode()
 {
 }
+
 void WebRipAI::UpdateAI(const uint32 diff)
 {
     if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)

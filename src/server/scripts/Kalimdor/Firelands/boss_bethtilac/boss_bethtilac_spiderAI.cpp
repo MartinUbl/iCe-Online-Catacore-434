@@ -212,7 +212,7 @@ void SpiderAI::MoveToFilament(uint32 movementId)
               posY = summonFilament->GetPositionY(),
               posZ = summonFilament->GetPositionZ();
 
-        me->GetMotionMaster()->MovePoint(movementId, posX, posY, posZ);
+        me->GetMotionMaster()->MovePoint(movementId, posX, posY, posZ + 1.0f);
     }
 }
 

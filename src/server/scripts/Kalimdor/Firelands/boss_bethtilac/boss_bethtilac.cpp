@@ -369,8 +369,8 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
         {
             for (uint8 i = 0; i < 3; i++)
             {
-                Creature * broodling = me->SummonCreature(53745,spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
-                    TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000); // Engorged Broodling
+                Creature * broodling = me->SummonCreature(NPC_ENGORGED_BROODLING, spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
+                    TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
                 if (broodling)
                     broodling->SetSpeed(MOVE_RUN, 1.5f, true); // Guessing
             }
@@ -653,6 +653,13 @@ void boss_bethtilacAI::DoSmolderingDevastation()
         AddTimer(SD_ENABLE, 10000, false);   // re-enable it after 10 seconds
 
         me->CastSpell(me, SPELL_SMOLDERING_DEVASTATION, false);    // has cast time - can't be flagged as triggered
+
+        std::list<Creature*> webRips;
+        GetCreatureListWithEntryInGrid(webRips, me, NPC_WEB_RIP, 200.0f);
+
+        for (std::list<Creature*>::iterator iter = webRips.begin(); iter != webRips.end(); ++iter)
+            (*iter)->ForcedDespawn(8000);
+
         devastationCounter++;   // increase counter - after third one transfer to next phase
 
         if (devastationCounter == MAX_DEVASTATION_COUNT)

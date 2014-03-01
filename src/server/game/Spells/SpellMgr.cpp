@@ -5529,7 +5529,10 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 
         // Beth'tilac
-        case 99223: // Sticky Webbing
+        case 99219: // Sticky Webbing
+            spellInfo->EffectAmplitude[0] = 500; // Lowered, cause players sometimes fall on the ground
+            break;
+        case 99223: // Sticky Webbing ( triggered)
             spellInfo->DurationIndex = 66;  // 2.5s
             spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
             spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
