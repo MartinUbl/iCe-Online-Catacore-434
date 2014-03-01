@@ -724,7 +724,7 @@ public:
 
             if (aTorm)
             {
-                if (InstanceScript * pInstance = target->GetInstanceScript())
+                if (target->GetInstanceScript() != NULL)
                 {
                     if (aTorm->GetId() == TORMENTED_DEBUFF || aTorm->GetId() == 99403) // 10 man
                         aTorm->SetDuration(40000);
