@@ -227,16 +227,16 @@ public:
 
             if (unlockTimer < diff)
             {
-                //Creature * pBethtilac = instance->instance->GetCreature(instance->GetData64(TYPE_BETHTILAC));
+                Creature * pBethtilac = this->instance->GetCreature(this->GetData64(TYPE_BETHTILAC));
                 Creature * pShannox = this->instance->GetCreature(this->GetData64(TYPE_SHANNOX));
                 Creature * pRhyolith = this->instance->GetCreature(this->GetData64(TYPE_RHYOLITH));
                 Creature * pAlysrazor = this->instance->GetCreature(this->GetData64(TYPE_ALYSRAZOR));
                 Creature * pBaleroc = this->instance->GetCreature(this->GetData64(TYPE_BALEROC));
 
 
-                if (/*pBethtilac &&*/ pShannox && pRhyolith && pAlysrazor && pBaleroc)
+                if (pBethtilac && pShannox && pRhyolith && pAlysrazor && pBaleroc)
                 {
-                    if (/*pBethtilac->isDead() &&*/ pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
+                    if (pBethtilac->isDead() && pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
                     {
                         if (pBaleroc->isAlive())
                             pBaleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
