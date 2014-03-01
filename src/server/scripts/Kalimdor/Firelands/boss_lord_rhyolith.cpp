@@ -371,6 +371,10 @@ public:
                 enrageTimer = 360000;
 
             me->RemoveAurasDueToSpell(SPELL_MOLTEN_ARMOR);
+            me->RemoveAurasDueToSpell(101157);
+            me->RemoveAurasDueToSpell(101158);
+            me->RemoveAurasDueToSpell(101159);
+
             me->CastSpell(me, SPELL_OBSIDIAN_ARMOR, true);
             if (Aura* armor = me->GetAura(SPELL_OBSIDIAN_ARMOR))
                 armor->SetStackAmount(80);
@@ -385,6 +389,10 @@ public:
         {
             me->RemoveAurasDueToSpell(SPELL_BALANCE_BAR);
             me->RemoveAurasDueToSpell(SPELL_MOLTEN_ARMOR);
+            me->RemoveAurasDueToSpell(101157);
+            me->RemoveAurasDueToSpell(101158);
+            me->RemoveAurasDueToSpell(101159);
+
             if (pInstance)
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
@@ -496,7 +504,14 @@ public:
             {
                 for ( int32 i = 0 ; i < amount; i++)
                 {
-                    if (Aura * a = me->GetAura(SPELL_MOLTEN_ARMOR))
+                    Aura * a = me->GetAura(SPELL_MOLTEN_ARMOR);
+                    if (!a)
+                        me->GetAura(101157);
+                    if (!a)
+                        me->GetAura(101158);
+                    if (!a)
+                        me->GetAura(101159);
+                    if (a)
                         a->SetStackAmount(a->GetStackAmount() + 1);
                     else
                         me->AddAura(SPELL_MOLTEN_ARMOR,me);
@@ -505,8 +520,20 @@ public:
             else    // Reduce armor
             {
                 amount *= -1;
-                for ( int32 i = 0 ; i < amount; i++)
-                    me->RemoveAuraFromStack(SPELL_MOLTEN_ARMOR);
+                for (int32 i = 0; i < amount; i++)
+                {
+                    if (me->HasAura(SPELL_MOLTEN_ARMOR))
+                        me->RemoveAuraFromStack(SPELL_MOLTEN_ARMOR);
+                    else
+                    if (me->HasAura(101157))
+                        me->RemoveAuraFromStack(101157);
+                    else
+                    if (me->HasAura(101158))
+                        me->RemoveAuraFromStack(101158);
+                    else
+                    if (me->HasAura(101159))
+                        me->RemoveAuraFromStack(101159);
+                }
             }
         }
 
