@@ -715,13 +715,20 @@ public:
 
             target->CastSpell(target,TORMENTED_DEBUFF,true); // If torment fades from player, cast tormented debuff on him
             Aura * aTorm = target->GetAura(TORMENTED_DEBUFF);
+            if (!aTorm)
+                aTorm = target->GetAura(99402);
+            if (!aTorm)
+                aTorm = target->GetAura(99403);
+            if (!aTorm)
+                aTorm = target->GetAura(99404);
+
             if (aTorm)
             {
                 if (InstanceScript * pInstance = target->GetInstanceScript())
                 {
-                    if (!pInstance->instance->IsHeroic()) // Normal
+                    if (aTorm->GetId() == TORMENTED_DEBUFF || aTorm->GetId() == 99403) // 10 man
                         aTorm->SetDuration(40000);
-                    else                                  // Heroic
+                    else                                  // 25 man
                         aTorm->SetDuration(60000);
                 }
             }
