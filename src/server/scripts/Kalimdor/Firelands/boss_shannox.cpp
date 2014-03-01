@@ -611,7 +611,7 @@ class boss_shannox : public CreatureScript
                         pRiplimb->Respawn(true);
                         pRiplimb->RemoveAllAuras();
                         me->RemoveAuraFromStack(SPELL_FRENZY);
-
+                        me->RemoveAuraFromStack(101204);
                         pRiplimb->SetReactState(REACT_AGGRESSIVE);
                         pRiplimb->SetInCombatWithZone();
 
@@ -881,7 +881,9 @@ class npc_crystal_trap : public CreatureScript
 
             void MoveInLineOfSight(Unit* pWho)
             {
-                if (!pWho || pWho->GetDistance(me) > 0.3f || !armTrap || trapActivated || pWho->HasAura(SPELL_WARY) || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
+                if (!pWho || pWho->GetDistance(me) > 0.3f || !armTrap || trapActivated ||
+                    pWho->HasAura(SPELL_WARY) || pWho->HasAura(101215) || pWho->HasAura(101216) || pWho->HasAura(101217) 
+                    || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
                     return;
 
                 if ( pWho->isPet() || pWho->isGuardian())
@@ -1096,7 +1098,8 @@ class npc_immolation_trap : public CreatureScript
 
             void MoveInLineOfSight(Unit* pWho)
             {
-                if (!pWho || can_trigger == false || passive || pWho->GetDistance(me) > 0.3f || pWho->HasAura(SPELL_WARY))
+                if (!pWho || can_trigger == false || passive || pWho->GetDistance(me) > 0.3f 
+                    || pWho->HasAura(SPELL_WARY) || pWho->HasAura(101215) || pWho->HasAura(101216) || pWho->HasAura(101217))
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL || (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE))
