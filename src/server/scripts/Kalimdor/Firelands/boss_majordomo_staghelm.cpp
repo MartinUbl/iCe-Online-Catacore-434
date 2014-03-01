@@ -378,7 +378,7 @@ public:
         void SetDurationForSeeds()
         {
             uint32 counter = 0;
-            uint32 time_gap = (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL) ? (55/23) : (55/9); // (55 seconds / number of players ) --> tanks are excluded
+            uint32 time_gap = (Is25ManRaid()) ? (55/23) : (55/9); // (55 seconds / number of players ) --> tanks are excluded
             time_gap *= 1000; // Need miliseconds
 
             std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
@@ -633,7 +633,7 @@ public:
                     SetDurationForSeeds();
                 else
                 {
-                    uint8 max = (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL) ? 5 : 2;
+                    uint8 max = (Is25ManRaid()) ? 5 : 2;
 
                     for(uint8 i = 0; i < max ; i++)
                         //me->CastSpell(me,SPELL_SUMMON_BURNING_ORB,true)
