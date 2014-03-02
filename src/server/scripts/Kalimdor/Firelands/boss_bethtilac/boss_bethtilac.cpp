@@ -878,6 +878,9 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+            if (instance && instance->GetData(TYPE_BETHTILAC) != IN_PROGRESS)
+                me->ForcedDespawn();
+
             if (!UpdateVictim())
                 return;
 

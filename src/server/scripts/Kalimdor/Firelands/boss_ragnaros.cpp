@@ -853,7 +853,7 @@ public:
 
         void DoSulfurasSmash() // Cast Sulfuras smash
         {
-            if (!me->IsNonMeleeSpellCasted(false))
+            if (!me->IsNonMeleeSpellCasted(false) && !me->HasAura(WORLD_IN_FLAMES) && !me->HasAura(100190))
             {
                 Unit * player = SelectTarget(SELECT_TARGET_RANDOM,0,200.0f,true);
 
@@ -1076,7 +1076,7 @@ public:
                 return false;
 
             std::list<Player*> players;
-            // Copy players to secons list
+            // Copy players to second list
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 if(Player* pl = itr->getSource())
                     if (pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster())
