@@ -4357,8 +4357,6 @@ void SpellMgr::LoadSpellCustomAttr()
             if (i == 100345)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_NONE;
             break;
-        case 99303:
-        case 100248:
         case 100250: // Combustion - bad targeting, handled in AI
         case 100249:
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;

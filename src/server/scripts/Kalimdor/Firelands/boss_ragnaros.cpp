@@ -2709,8 +2709,6 @@ public:
 
             if (caster == me && spell->SpellIconID == 5520 && spell->SpellFamilyName == SPELLFAMILY_GENERIC  ) // Combustion
             {
-                me->RemoveAura(99303);
-                me->RemoveAura(100249);
                 me->RemoveAura(100249);
                 me->RemoveAura(100250);
 
