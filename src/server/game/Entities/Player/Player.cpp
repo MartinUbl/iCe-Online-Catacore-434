@@ -22742,12 +22742,14 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
 
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating
-            || (additional3v3Rating != 0 && GetMaxPersonalArenaRatingRequirement(2) < additional3v3Rating))
+        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
         {
-            // probably not the proper equip err
-            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
-            return false;
+            if (additional3v3Rating == 0 || GetArenaPersonalRating(ArenaTeam::GetSlotByType(ARENA_TEAM_3v3)) < additional3v3Rating)
+            {
+                // probably not the proper equip err
+                SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+                return false;
+            }
         }
     }
 
