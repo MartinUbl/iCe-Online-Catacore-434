@@ -4600,10 +4600,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         else if (m_spellInfo->Id == 56160)
         {
         }
-        // Glyph of Prayer of Mending
-        else if (m_spellInfo->Id == 33110)
-        {
-        }
         // Efflorescence
         else if (m_spellInfo->Id == 81269)
         {
@@ -4758,6 +4754,14 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             // Remove talent proc Surge of Light (instant cast)
             m_caster->RemoveAurasDueToSpell(88688);
+        }
+        else if (m_spellInfo->Id == 33110) // Glyph of Prayer of Mending
+        {
+            if (Aura * mending = unitTarget->GetAura(41635,caster->GetGUID()))
+            {
+                if (mending->GetCharges() == 5 && caster->HasAura(55685))
+                    addhealth = addhealth * 1.6f;
+            }
         }
         // Healing Stream Totem
         else if (m_spellInfo->Id == 52042)
