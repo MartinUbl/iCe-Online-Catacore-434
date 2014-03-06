@@ -482,11 +482,10 @@ class boss_Alysrazor : public CreatureScript
             {
                 DespawnCreatures(53784); // Viusal metoers NPCs
                 std::list<GameObject*> objects; // LoS Meteors
-                me->GetGameObjectListWithEntryInGrid(objects, 208966, 200.0f);
+                me->GetGameObjectListWithEntryInGrid(objects, 208966, 500.0f);
                 if (!objects.empty())
                     for (std::list<GameObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
-                        if ((*iter)->IsInWorld())
-                            (*iter)->RemoveFromWorld();
+                        (*iter)->Delete();
             }
 
             void JustDied(Unit* /*Killer*/)
@@ -2245,6 +2244,7 @@ class npc_Voracious_Hatchling : public CreatureScript
             }
 
             uint32 GushingWoundTimer;
+            uint32 losTimer;
             uint32 clearImprintedTimer;
             InstanceScript * instance;
             uint64 VICTIM_GUID;
@@ -2273,6 +2273,7 @@ class npc_Voracious_Hatchling : public CreatureScript
 
                 GushingWoundTimer = 15000;
                 clearImprintedTimer = 2000;
+                losTimer = 5000;
             }
 
             void SpellHit(Unit* pCaster, const SpellEntry* spell)
@@ -2371,6 +2372,18 @@ class npc_Voracious_Hatchling : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+
+
+                if (losTimer <= diff) // Player can hide in LoS in meteor (GO) and hatchling can attack cause he is not in LoS
+                {
+                    if (Unit * vic = me->getVictim())
+                    {
+                        if (vic->IsInWorld() && !me->IsWithinLOSInMap(vic))
+                            me->GetMotionMaster()->MovePoint(0, vic->GetPositionX(), vic->GetPositionY(), vic->GetPositionZ());
+                    }
+                    losTimer = 2000;
+                }
+                else losTimer -= diff;
 
                 if (clearImprintedTimer <= diff)
                 {
