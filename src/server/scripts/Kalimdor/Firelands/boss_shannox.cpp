@@ -198,6 +198,18 @@ class boss_shannox : public CreatureScript
                 DespawnTraps();
                 summonedTraps.clear();
 
+                if (Creature  * pRiplimb = me->GetCreature((*me), pInstance->GetData64(DATA_RIPLIMB_GUID)))
+                {
+                    if (pRiplimb->isAlive())
+                        pRiplimb->Kill(pRiplimb);
+                }
+
+                if (Creature  * pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID)))
+                {
+                    if (pRageface->isAlive())
+                        pRageface->Kill(pRageface);
+                }
+
                 DoYell("The pain... Lord of fire, it hurts...", 24568);
             }
 
@@ -469,7 +481,7 @@ class boss_shannox : public CreatureScript
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 1000, true);
+                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true);
 
                         if (pTarget)
                             me->CastSpell(pTarget, SPELL_CRYSTAL_PRISON_TRAP_SUMMON, false);
@@ -484,7 +496,7 @@ class boss_shannox : public CreatureScript
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 1000, true);
+                        Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true);
 
                         if (pTarget)
                             me->CastSpell(pTarget, SPELL_IMMOLATION_TRAP_SUMMON, false);
@@ -541,18 +553,24 @@ class boss_shannox : public CreatureScript
                         }
                         else
                         {
-                            switch (urand(1,2))
+                            if (IsHeroic() == false) // Shannox no longer casts Magma Rapture on heroic mode cause Riplimb will reanimate if killed in 30 s
                             {
-                                case 1:
-                                    DoYell("Now you BURN!!", 24576);
-                                    break;
-                                case 2:
-                                    DoYell("Twist in flames, interlopers!", 24577);
-                                    break;
+                                switch (urand(1, 2))
+                                {
+                                    case 1:
+                                        DoYell("Now you BURN!!", 24576);
+                                        break;
+                                    case 2:
+                                        DoYell("Twist in flames, interlopers!", 24577);
+                                        break;
+                                }
+                                me->CastSpell(me, SPELL_MAGMA_RUPTURE, false);
                             }
-                            me->CastSpell(me, SPELL_MAGMA_RUPTURE, false);
 
-                            HurlSpearTimer = 15000;
+                            if (IsHeroic())
+                                HurlSpearTimer = 42000;
+                            else
+                                HurlSpearTimer = 15000;
                         }
                     }
                 }
@@ -816,12 +834,18 @@ class npc_riplimb : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
+                if (attacker == me) // Riplimb can kill self, if Shannonx dies in heroic
+                    return;
+
                 if ( damage >= me->GetHealth() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     damage = 0;
             }
 
             void JustDied(Unit* pKiller)
             {
+                if (pKiller == me)
+                    return;
+
                 if (pBoss)
                 {
                     if (IsHeroic() == false)
@@ -1160,14 +1184,14 @@ class npc_rageface : public CreatureScript
             bool shannoxHP;
 
             uint32 jumpTimer;
-            uint32 debuffTimer;
+            //uint32 debuffTimer;
             uint32 faceRageTimer;
             uint32 changeTargetTimer;
 
             void Reset()
             {
                 jumpTimer = 30000;
-                debuffTimer = jumpTimer + 3000;
+                //debuffTimer = jumpTimer + 3000;
                 changeTargetTimer = urand(5000,8000);
                 faceRageTimer = NEVER;
 
@@ -1184,11 +1208,15 @@ class npc_rageface : public CreatureScript
                 if (!me->IsNonMeleeSpellCasted(false)) // Must casting face rage
                     return;
 
+                if (attacker == me) // Can kill self -> when Shannox dies
+                    return;
+
                 uint32 distractDamage = (Is25ManRaid()) ? 45000 : 30000;
 
                 if ( damage >= distractDamage)
                 {
                     me->InterruptNonMeleeSpells(false);
+                    me->clearUnitState(UNIT_STAT_CASTING);
                     me->RemoveAura(100129); // Crit buff on rageface
                     me->RemoveAura(101212);
                     me->RemoveAura(101213);
@@ -1225,7 +1253,7 @@ class npc_rageface : public CreatureScript
             {
                 if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
                 {
-                    debuffTimer = 13000;
+                    //debuffTimer = 13000;
                     jumpTimer += 10000; // 10 second trap
                     changeTargetTimer += 10000;
                 }
@@ -1235,7 +1263,7 @@ class npc_rageface : public CreatureScript
             {
                 if (Creature * pShannox = me->FindNearestCreature(NPC_SHANNOX,200.0f,true))
                 {
-                    if(Unit * player = pShannox->AI()->SelectTarget(SELECT_TARGET_RANDOM,1,100.0f,true))
+                    if(Unit * player = pShannox->AI()->SelectTarget(SELECT_TARGET_RANDOM,1,60.0f,true))
                     {
                         DoResetThreat();
                         me->SetInCombatWithZone();
@@ -1257,7 +1285,7 @@ class npc_rageface : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (debuffTimer <= diff)
+                /*if (debuffTimer <= diff)
                 {
                     if (me->IsNonMeleeSpellCasted(false))
                     {
@@ -1268,7 +1296,7 @@ class npc_rageface : public CreatureScript
                     }
                     debuffTimer = 2000;
                 }
-                else debuffTimer -= diff;
+                else debuffTimer -= diff;*/
 
                 if (faceRageTimer <= diff)
                 {
@@ -1303,6 +1331,9 @@ class npc_rageface : public CreatureScript
 
             void JustDied(Unit* pKiller)
             {
+                if (pKiller == me)
+                    return;
+
                 if (Creature* pBoss = Unit::GetCreature((*me), pInstance->GetData64(TYPE_SHANNOX)))
                 {
                     pBoss->MonsterTextEmote("Shannox become enraged at seeing one of his companions fall",0,true);

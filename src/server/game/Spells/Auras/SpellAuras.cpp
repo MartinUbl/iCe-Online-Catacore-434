@@ -1820,6 +1820,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastSpell(caster, 99518, true); // AoE damage
                         break;
                     }
+                    case 99947: // Rageface in Firelands
+                    {
+                        caster->RemoveAura(100129); // Crit buff
+                        caster->RemoveAura(101212);
+                        caster->RemoveAura(101213);
+                        caster->RemoveAura(101214);
+                        break;
+                    }
                     case 97028: // Gaze of Occu'thar
                         if (removeMode == AURA_REMOVE_BY_EXPIRE)
                         {
