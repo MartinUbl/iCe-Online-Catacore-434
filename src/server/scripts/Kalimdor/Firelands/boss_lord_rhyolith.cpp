@@ -448,6 +448,15 @@ public:
             if (foot)
                 foot->Kill(foot);
 
+
+            std::list<Creature*> crList;
+            for (uint32 i = 0; i < sizeof(npcListUnsummonAtReset) / sizeof(uint32); i++)
+            {
+                GetCreatureListWithEntryInGrid(crList, me, npcListUnsummonAtReset[i], 200.0f);
+                for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); ++itr)
+                    (*itr)->ForcedDespawn();
+            }
+
             PlayAndYell(me, ST_DEATH);
         }
 
@@ -1083,7 +1092,6 @@ public:
 
         uint32 bossRangeCheckTimer;
         uint32 eruptTimer;
-        uint32 deactivateTimer;
         bool destroyed;
         InstanceScript *pInstance;
 
@@ -1096,7 +1104,6 @@ public:
 
             bossRangeCheckTimer = 1000;
             eruptTimer = 0;
-            deactivateTimer = 0;
             destroyed = false;
         }
 
@@ -1108,7 +1115,6 @@ public:
                 me->SetDisplayId(DISPLAYID_VOLCANO_ACTIVE);
                 me->CastSpell(me, SPELL_ERUPTION, true);
                 eruptTimer = 2000;
-                deactivateTimer = 21000;
             }
         }
 
@@ -1122,20 +1128,6 @@ public:
         {
             if (destroyed)
                 return;
-
-            if (deactivateTimer)
-            {
-                if (deactivateTimer <= diff)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_ERUPTION);
-                    me->SetDisplayId(DISPLAYID_VOLCANO_STILL);
-                    me->CastSpell(me, SPELL_VOLCANO_SMOKE, true);
-                    eruptTimer = 0;
-                    deactivateTimer = 0;
-                }
-                else
-                    deactivateTimer -= diff;
-            }
 
             if (eruptTimer && pInstance)
             {
@@ -1200,7 +1192,7 @@ public:
                                 angle = (float)urand(0,6) + 0.28f ; 
                                 dist = ((float)urand(300,340))/10.0f;
 
-                                pBoss->SummonCreature(NPC_LIQUID_OBSIDIAN, -374.337006f + cos(angle) * dist, -318.489990f + sin(angle) * dist, 100.413002f ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                                pBoss->SummonCreature(NPC_LIQUID_OBSIDIAN, -374.337006f + cos(angle) * dist, -318.489990f + sin(angle) * dist, 102.0f ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                             }
                         }
 
@@ -1614,7 +1606,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
 
-            me->SetSpeed(MOVE_RUN,0.9f,true);
+            me->SetSpeed(MOVE_RUN,0.8f,true);
 
             me->CastSpell(me,101313,true); // Laser visual on ground + aoe damage trigerring
         }
@@ -1632,7 +1624,7 @@ public:
         {
             if (motionTimer <= diff)
             {
-                    /*if (urand(0,100) >= 50 ) //  55% chance to go at random position on platform
+                    if (urand(0,100) >= 50 ) //  55% chance to go at random position on platform
                     {
                         float angle =(float)urand(0,6) + 0.28f;
                         float dist = 34.0f;
@@ -1641,7 +1633,7 @@ public:
                         me->GetMotionMaster()->MovePoint(0,pos);
                     }
                     else // go to random player position
-                    {*/
+                    {
                         if(Creature * pLord = Creature::GetCreature(*me,summonerGUID))
                         {
                             Unit * target = pLord->AI()->SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
@@ -1649,7 +1641,7 @@ public:
                                 me->GetMotionMaster()->MovePoint(0,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
 
                         }
-                    //}
+                    }
                 motionTimer = 3000;
             }
             else motionTimer -= diff;
