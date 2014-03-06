@@ -1101,7 +1101,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
         }
 
-        if (caster->GetTypeId() == TYPEID_PLAYER)
+        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
         {
             uint32 spellId = GetSpellProto()->Id;
 
