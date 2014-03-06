@@ -191,13 +191,6 @@ enum Phases
     PHASE4                        , // Only on Heroic
 };
 
-enum itemEntries
-{
-    MACE_1      = 93215,
-    MACE_2      = 93216,
-    MACE_3      = 93217
-};
-
 const Position Left_pos[8] =           // Spawn positions for sons of flames if hammer is burried LEFT
 {
     {1074.53f,-13.48f,55.35f, 3.3f},
@@ -459,6 +452,11 @@ public:
             flames[x][y].free = on;
         }
 
+        void JustReachedHome()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+        }
+
         void Reset()
         {
             lastDreads.clear();
@@ -580,6 +578,8 @@ public:
 
         void EnterEvadeMode()
         {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
             if (IsHeroic())
             {
                 if (GameObject * goPlatform = me->FindNearestGameObject(RAGNAROS_PLATFORM,500.0f))
@@ -652,25 +652,41 @@ public:
 
             if (IsHeroic() && instance)
             {
-                QueryResult chars = CharacterDatabase.PQuery("select * from character_achievement as cha where cha.achievement = 5985;");
-                if (chars && chars->GetRowCount() == 0)
-                {
-                    if (Unit * player = me->AI()->SelectTarget(SELECT_TARGET_RANDOM,0,200.0f,true))
-                    {
-                        if(Group * group = player->ToPlayer()->GetGroup())
-                        {
-                            if (group->IsGuildGroup(player->ToPlayer()->GetGuildId()))
-                                instance->DoCompleteAchievement(5985); // Realm First! Ragnaros
-                                //instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
-                        }
-                    }
-                }
-
-                PlayAndYell(HeroicDeath[0].sound,HeroicDeath[0].text);
-                if (Creature * pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
+                PlayAndYell(HeroicDeath[0].sound, HeroicDeath[0].text);
+                if (Creature * pCenarius = me->FindNearestCreature(CENARIUS, 500.0f, true))
                 {
                     // Just start final conversation, Cenarius will handle all three conversations, it's waste of time and resources to create script for all of them
                     pCenarius->AI()->DoAction(0);
+                }
+
+                AchievementEntry const* achievement = sAchievementStore.LookupEntry(5985);
+
+                if (!sAchievementMgr->IsRealmCompleted(achievement)) // If (Realm First! Ragnaros achievement) is not already completed
+                {
+                    Map * map = me->GetMap();
+                    if (!map)
+                        return;
+
+                    Map::PlayerList const& plrList = map->GetPlayers();
+                    if (plrList.isEmpty())
+                        return;
+
+                    Player * player = plrList.getFirst()->getSource();
+
+                    if (player == NULL)
+                        return;
+
+                    if (!player->GetGroup() || !player->GetGroup()->IsGuildGroup(player->GetGuildId())) // Not in guild group
+                        return;
+
+                    for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
+                    {
+                        if (Player* pl = itr->getSource())
+                        {
+                            pl->CompletedAchievement(achievement); // Manually complete achievement for every player
+                        }
+                    }
+                    sAchievementMgr->SetRealmCompleted(achievement); // Lock Achievement manually
                 }
             }
 
@@ -683,7 +699,7 @@ public:
             if (PHASE == PHASE_NORMAL_DEATH || PHASE == PHASE_HEROIC_INTERMISSION) // For sure
                 damage = 0;
 
-            if (damage == 123456) // TODO remove it, only for testing
+            if (IsHeroic() && damage == 123456 && attacker->GetMaxHealth() > 500000) // TODO : remove this once is no longer needed
                 HideInHeroic();
         }
 
@@ -1002,7 +1018,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(160,220);
+                        angle = urand(160,200);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1010,7 +1026,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(280,500);
+                        angle = urand(300,500);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1022,7 +1038,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(160,285);
+                        angle = urand(160,270);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1030,7 +1046,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(335,500);
+                        angle = urand(350,500);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1042,7 +1058,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(160,345);
+                        angle = urand(160,320);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1050,7 +1066,7 @@ public:
                     for(uint32 i = 0; i < randNum; i++ )
                     {
                         distance = urand(45,53);
-                        angle = urand(395,500);
+                        angle = urand(430,500);
                         angle /= 100.0f;
                         me->SummonCreature(SON_OF_FLAME_NPC,me->GetPositionX()+cos(angle)*distance,me->GetPositionY()+sin(angle)*distance,55.4f,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     }
@@ -1062,7 +1078,7 @@ public:
         // If >= 4/10 (10 man / 25 man) people or more are clustered together, form Magma Geyser at location
         // This algorithm has time complexity O(n^2)
         // TODO : Maybe find better algorithm
-        bool RaidIsClusteredTogether(void) 
+        bool RaidIsClusteredTogether(void)
         {
             uint32 counter = 0;
             uint32 maximum = (Is25ManRaid()) ? 10 : 4;
@@ -1097,7 +1113,7 @@ public:
                             {
                                 if ((*j) == p) // Exclude self
                                     continue;
-                                if (p->GetExactDist2d(*j) <= 8.0f)
+                                if (p->GetDistance2d(*j) <= 8.0f)
                                     counter++;
                             }
                         }
@@ -1629,7 +1645,6 @@ public:
                 }
                 else Meteor_timer -= diff;
 
-
                 //Sulfurus Smash
                 if (Sulfurus_timer <= diff)
                 {
@@ -1809,6 +1824,8 @@ public:
                     if (!me->HasAura(100628)) // From unknowm reason channeling is interrupted, so for sure manually add aura after cast time if this happen
                         me->AddAura(100628, me);
 
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
                     if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
                     {
                         me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -1870,6 +1887,7 @@ public:
                     if (!me->HasAuraType(SPELL_AURA_MOD_STUN))
                     {
                         me->StopMoving();
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->CastSpell(me,EMPOWER_SULFURAS,false);
                         chaseTimer = 5100;
                         if(me->getVictim())
@@ -3666,10 +3684,14 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             instance = me->GetInstanceScript();
+            maxBubbles = (Is25ManRaid()) ? 3 : 1;
+            bubbles = 0;
         }
 
         InstanceScript * instance;
         uint32 transformTimer;
+        uint32 maxBubbles;
+        uint32 bubbles;
 
         void EnterEvadeMode() { }
         void EnterCombat(Unit* /*enemy*/) {}
@@ -3690,7 +3712,7 @@ public:
             else transformTimer -= diff;
         }
 
-        uint8 GetDelugeCounter(void)
+        /*uint8 GetDelugeCounter(void)
         {
             if (!instance)
                 me->ForcedDespawn();
@@ -3710,23 +3732,24 @@ public:
                 }
             }
             return counter;
-        }
+        }*/
 
         void SpellHit(Unit* caster, const SpellEntry* spell)
         {
             if (spell->Id == 110469) // Borrowed harmless spell
             {
-                //me->MonsterYell("BUFF",0,0); said three times, than u cant do that yet phrase, WHY ????
-                uint8 max = (Is25ManRaid()) ? 3 : 1;
+                //uint8 max = (Is25ManRaid()) ? 3 : 1;
 
-                if (GetDelugeCounter() < max)
+                if (bubbles < maxBubbles)
                 {
+                    bubbles++;
                     caster->CastSpell(caster,DELUGE,true);
-                    return;
+                    me->ForcedDespawn();
+                    //return;
                 }
 
-                caster->CastSpell(caster,DELUGE,true);
-                me->ForcedDespawn();
+                //caster->CastSpell(caster,DELUGE,true);
+                //me->ForcedDespawn();
             }
         }
 
