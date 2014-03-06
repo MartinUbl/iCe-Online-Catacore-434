@@ -175,6 +175,17 @@ void mob_droneAI::UpdateAI(const uint32 diff)
         return;
     }
 
+    if (me->HasAura(SPELL_FIXATE))
+    {
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+    }
+    else
+    {
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+    }
+
     if (me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
         return;
 
