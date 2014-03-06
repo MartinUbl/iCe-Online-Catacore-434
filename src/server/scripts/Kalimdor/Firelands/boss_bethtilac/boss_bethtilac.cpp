@@ -367,14 +367,26 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
     {
         if (broodlingTimer <= diff)
         {
-            for (uint8 i = 0; i < 3; i++)
+            if (Is25ManRaid())
             {
-                Creature * broodling = me->SummonCreature(NPC_ENGORGED_BROODLING, spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
+                for (uint8 i = 0; i < 3; i++)
+                {
+                    Creature * broodling = me->SummonCreature(NPC_ENGORGED_BROODLING, spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
+                        TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    if (broodling)
+                        broodling->SetSpeed(MOVE_RUN, 1.6f, true); // Guessing
+                }
+            }
+            else
+            {
+                uint32 randNum = urand(0,2);
+                Creature * broodling = me->SummonCreature(NPC_ENGORGED_BROODLING, spawnPoints[randNum].GetPositionX(), spawnPoints[randNum].GetPositionY(), spawnPoints[randNum].GetPositionZ(), spawnPoints[randNum].GetOrientation(),
                     TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
                 if (broodling)
                     broodling->SetSpeed(MOVE_RUN, 1.6f, true); // Guessing
             }
-            broodlingTimer = urand(7000, 12000);
+
+            broodlingTimer = urand(8000, 12000);
         }
         else broodlingTimer -= diff;
     }
