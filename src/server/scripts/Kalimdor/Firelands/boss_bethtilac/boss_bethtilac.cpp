@@ -902,7 +902,7 @@ public:
 
             if (checkTimer <= diff)
             {
-                if (Player * p = GetPlayerInMeleeRange())
+                if (GetPlayerInMeleeRange())
                 {
                     me->CastSpell(me, SPELL_VOLATILE_BURST, true); // This will also kill broodling
                     return;
