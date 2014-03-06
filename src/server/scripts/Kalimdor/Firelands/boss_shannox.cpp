@@ -817,7 +817,7 @@ class npc_riplimb : public CreatureScript
                 else
                     limbRipTimer -= diff;
 
-                if (pBoss && pBoss->HealthBelowPct(30) && !shannoxHP)
+                if (pBoss && pBoss->HealthBelowPct(30) && !shannoxHP && !IsHeroic())
                 {
                     me->CastSpell(me, SPELL_FRENZIED_DEVOTION, true);
                     shannoxHP = true;
@@ -1247,6 +1247,7 @@ class npc_rageface : public CreatureScript
             {
                 if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
                 {
+                    me->RemoveAura(100656);
                     //debuffTimer = 13000;
                     jumpTimer += 10000; // 10 second trap
                     changeTargetTimer += 10000;
@@ -1314,7 +1315,7 @@ class npc_rageface : public CreatureScript
                 }
                 else changeTargetTimer -= diff;
 
-                if (!shannoxHP && pBoss && pBoss->HealthBelowPct(30))
+                if (!shannoxHP && pBoss && pBoss->HealthBelowPct(30) && !IsHeroic())
                 {
                     me->CastSpell(me, SPELL_FRENZIED_DEVOTION, true);
                     shannoxHP = true;
