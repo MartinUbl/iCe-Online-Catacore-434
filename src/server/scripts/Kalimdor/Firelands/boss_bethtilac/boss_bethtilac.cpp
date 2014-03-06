@@ -372,7 +372,7 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
                 Creature * broodling = me->SummonCreature(NPC_ENGORGED_BROODLING, spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY(), spawnPoints[i].GetPositionZ(), spawnPoints[i].GetOrientation(),
                     TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
                 if (broodling)
-                    broodling->SetSpeed(MOVE_RUN, 1.5f, true); // Guessing
+                    broodling->SetSpeed(MOVE_RUN, 1.6f, true); // Guessing
             }
             broodlingTimer = urand(7000, 12000);
         }
@@ -857,23 +857,39 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinMeleeRange(who))
+            /*if (who && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinMeleeRange(who))
             {
                 me->CastSpell(me, SPELL_VOLATILE_BURST, true); // This will also kill broodling
-            }
+            }*/
             ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        Player * GetPlayerInMeleeRange()
+        {
+            using namespace Trinity;
+            using namespace std;
+            typedef AnyPlayerInObjectRangeCheck Check;
+
+            float radius = 10.0f;
+
+            list<Player*> players;
+            Check checker(me, radius);
+            PlayerListSearcher<Check> searcher(me, players, checker);
+            me->VisitNearbyWorldObject(radius, searcher);
+            for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
+            {
+                Player *player = *it;
+                if (player->IsInWorld() && player->isAlive() && !player->isGameMaster() && player->GetExactDist2d(me) < 6.0f)
+                    return player;
+            }
+
+            return NULL;
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            Creature* pDummy = me->SummonTrigger(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, 20000,0);
-            if (pDummy)
-            {
-                pDummy->setFaction(14);
-                pDummy->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-                pDummy->CastSpell(pDummy, SPELL_VOLATILE_POISON, true);
-                pDummy->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-            }
+            //Need to summon custom NPC for volatile poison after death
+            me->SummonCreature(537450,me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN,20000);
         }
 
         void UpdateAI(const uint32 diff)
@@ -886,7 +902,7 @@ public:
 
             if (checkTimer <= diff)
             {
-                if (me->IsWithinMeleeRange(me->getVictim()))
+                if (Player * p = GetPlayerInMeleeRange())
                 {
                     me->CastSpell(me, SPELL_VOLATILE_BURST, true); // This will also kill broodling
                     return;
@@ -907,7 +923,7 @@ public:
             }
             else checkTimer -= diff;
 
-            DoMeleeAttackIfReady();
+            //DoMeleeAttackIfReady();
         }
     };
 
@@ -918,10 +934,49 @@ public:
 };
 
 
+class boss_bethilac_volatile_poison : public CreatureScript
+{
+public:
+    boss_bethilac_volatile_poison() : CreatureScript("boss_bethilac_volatile_poison") {};
+
+    struct boss_bethilac_volatile_poisonAI : public ScriptedAI
+    {
+        boss_bethilac_volatile_poisonAI(Creature* c) : ScriptedAI(c)
+        {
+            me->setFaction(14);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            delayTimer = 200;
+        }
+
+        uint32 delayTimer;
+
+        void Reset() { }
+        void EnterEvadeMode() { }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (delayTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_VOLATILE_POISON, true);
+                delayTimer = 60000;
+            }
+            else delayTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* c) const
+    {
+        return new boss_bethilac_volatile_poisonAI(c);
+    }
+};
+
+
 void load_boss_Bethtilac()
 {
     new boss_bethtilac();
     new boss_bethilac_engorged_broodling();
+    new boss_bethilac_volatile_poison();
 };
 
 }   // end of namespace
