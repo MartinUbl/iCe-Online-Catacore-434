@@ -1100,6 +1100,76 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->AddAura(*itr, target);
                 }
         }
+
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            uint32 spellId = GetSpellProto()->Id;
+
+            uint32 critSpells[6] = { 22959, 17794, 17797, 17798, 17799, 17800 };
+            uint32 spellDamageSpells[4] = { 60433, 79956, 93068, 65142 };
+            uint32 allDamageSpells[6] = { 81325, 81326, 58683, 58684, 30069, 30070 };
+            uint32 armorPeneSpells[3] = { 91565, 8647, 58567 };
+
+            switch (spellId)
+            {
+                case 22959: // Critical Mass
+                case 17794: // Warlock Shadow and flame
+                case 17797:
+                case 17798:
+                case 17799:
+                case 17800:
+                {
+                    for (uint32 i = 0; i < 5; i++)
+                    {
+                        if (spellId != critSpells[i])
+                            target->RemoveAura(critSpells[i]);
+                    }
+                    break;
+                }
+                case 60433: // Earth and moon
+                case 79956: // Curse of elements
+                case 93068: // Master Poisoner
+                case 65142: // Ebon Plague
+                {
+                    for (uint32 i = 0; i < 3; i++)
+                    {
+                        if (spellId != spellDamageSpells[i])
+                            target->RemoveAura(spellDamageSpells[i]);
+                    }
+                    break;
+                }
+                case 81325: // Brittle bones
+                case 81326:
+                case 58683: // Savage Combat
+                case 58684:
+                case 30069: // Blood Frenzy
+                case 30070:
+                {
+                    for (uint32 i = 0; i < 5; i++)
+                    {
+                        if (spellId != allDamageSpells[i])
+                            target->RemoveAura(allDamageSpells[i]);
+                    }
+                    break;
+                }
+                case 91565: // Faerie Fire
+                case 8647: // Expose armor
+                case 58567: // Sunder Armor
+                {
+                    for (uint32 i = 0; i < 2; i++)
+                    {
+                        if (spellId != armorPeneSpells[i])
+                            target->RemoveAura(armorPeneSpells[i]);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+
+        }
+
+
         switch (GetSpellProto()->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
