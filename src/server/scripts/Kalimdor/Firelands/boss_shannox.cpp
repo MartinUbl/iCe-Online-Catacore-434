@@ -732,7 +732,7 @@ class npc_riplimb : public CreatureScript
                 switch (id)
                 {
                     case 1:
-                        if (pSpear)
+                        if (pSpear && pSpear->IsInWorld() && pSpear->ToCreature())
                             pSpear->ToCreature()->ForcedDespawn();
                         me->CastSpell(me, SPELL_SPEAR_VISUAL, true);
                         me->SetSpeed(MOVE_RUN, 1.7f);
@@ -794,7 +794,7 @@ class npc_riplimb : public CreatureScript
                 {
                     if (spearDelayTimer <= diff)
                     {
-                        if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 5000.0f)) != NULL)
+                        if ((pSpear = GetClosestCreatureWithEntry(me, NPC_HURL_SPEAR_WEAPON, 200.0f)) != NULL)
                         {
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
                             me->GetMotionMaster()->MovePoint(1, pSpear->GetPositionX(), pSpear->GetPositionY(), pSpear->GetPositionZ());
@@ -915,12 +915,6 @@ class npc_crystal_trap : public CreatureScript
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
                     return;
-
-                if (pWho->ToCreature() && pWho->ToCreature()->GetEntry() == NPC_RAGEFACE)
-                {
-                    if (!pWho->IsNonMeleeSpellCasted(false) || pWho->ToCreature()->AI()->GetData(0) == 1) // If casting or jumping (1), dont allow go into trap
-                        return;
-                }
 
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL ||
                     (!pWho->HasAura(SPELL_SPEAR_VISUAL) && (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE)))
