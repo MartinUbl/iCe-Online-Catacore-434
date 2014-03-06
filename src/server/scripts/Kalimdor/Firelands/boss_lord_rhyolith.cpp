@@ -1627,7 +1627,6 @@ public:
                     if (urand(0,100) >= 50 ) //  55% chance to go at random position on platform
                     {
                         float angle =(float)urand(0,6) + 0.28f;
-                        float dist = 34.0f;
                         Position pos;
                         me->GetNearPosition(pos, 34.0f,angle);
                         me->GetMotionMaster()->MovePoint(0,pos);
