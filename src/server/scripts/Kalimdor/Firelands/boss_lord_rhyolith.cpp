@@ -1530,7 +1530,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-            me->SetSpeed(MOVE_RUN,0.42f,true);
+            me->SetSpeed(MOVE_RUN,0.4f,true);
         }
 
         void IsSummonedBy(Unit* pSummoner)
@@ -1541,6 +1541,22 @@ public:
 
         void UpdateAI ( const uint32 diff)
         {
+            if (me->HasAuraType(SPELL_AURA_MOD_STUN))
+            {
+                me->StopMoving();
+                return;
+            }
+
+            // WE MUST CLACULATE ACTUAL MOVEMENT SPEED MANULLY !
+            int32 speedReduction = me->GetTotalAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+            speedReduction = (speedReduction < -50) ? -50 : speedReduction; // Maximum 50 % movement speed reduction
+            speedReduction *= -1;
+
+            float speed = 0.4f; // Base speed
+            if (speedReduction)
+                speed = (speed * speedReduction) / 100;
+            me->SetSpeed(MOVE_RUN, speed, true);
+
             if (Path_correction_timer <= diff && arrived == false)
             {
                 if(Unit * pLord = Unit::GetUnit(*me,summonerGUID))
@@ -1558,14 +1574,11 @@ public:
                         else if (rFoot)
                             me->CastSpell(rFoot,SPELL_FUSE,true);
 
-                        /*if (pLord->ToCreature())
-                            pLord->ToCreature()->AI()->DoAction(0);*/
-
                         if (pLord->GetDisplayId() != 38594) // Phase 2
                             pLord->CastSpell(pLord,SPELL_OBSIDIAN_ARMOR,false);
                     }
                     else
-                        me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
+                            me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
                 }
 
                 Path_correction_timer = 500;
