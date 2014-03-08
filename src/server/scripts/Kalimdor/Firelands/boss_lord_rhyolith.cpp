@@ -1191,7 +1191,7 @@ public:
                             for ( uint8 i = 0; i < 5; i++ ) // Summon 5 Liquid Obsidians from the edge of platform
                             {
                                 // Spawn Obsidian from behind boss back
-                                float angle = me->GetOrientation();
+                                angle = me->GetOrientation();
                                 angle += M_PI;
                                 float subs = (float)(urand(0, 314)) / 100.0f;
                                 angle += M_PI / 2 - subs;
