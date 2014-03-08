@@ -351,7 +351,7 @@ public:
             directionPower       = 50;
 
             me->SetWalk(false);
-            me->SetSpeed(MOVE_WALK,1.0f,true);
+            me->SetSpeed(MOVE_WALK,1.2f,true);
 
             savedLeft = true;
             directionTimes = 0;
@@ -473,9 +473,9 @@ public:
             me->SetOrientation(moveAngle);
             me->GetMotionMaster()->MovementExpired(false);
             me->SetWalk(true);
-            me->SetSpeed(MOVE_WALK,1.0f,true);
+            me->SetSpeed(MOVE_WALK,1.2f,true);
             me->GetMotionMaster()->MovePoint(0, x, y, z);
-            me->SetSpeed(MOVE_WALK,1.0f,true);
+            me->SetSpeed(MOVE_WALK,1.2f,true);
         }
 
         void RefreshPowerBar(uint32 now, bool removal)
@@ -1167,8 +1167,9 @@ public:
 
             if (bossRangeCheckTimer <= diff)
             {
-                // 8y range? TODO: Check
-                if (Creature* pBoss = GetClosestCreatureWithEntry(me, NPC_LORD_RHYOLITH, 8.0f, true))
+                Creature* pBoss = GetClosestCreatureWithEntry(me, NPC_LORD_RHYOLITH, 200.0f, true);
+
+                if (pBoss && me->GetExactDist2d(pBoss) <= 17.0f)
                 {
                     // animation
                     me->RemoveAurasDueToSpell(SPELL_ERUPTION);
@@ -1189,7 +1190,13 @@ public:
 
                             for ( uint8 i = 0; i < 5; i++ ) // Summon 5 Liquid Obsidians from the edge of platform
                             {
-                                angle = (float)urand(0,6) + 0.28f ; 
+                                // Spawn Obsidian from behind boss back
+                                float angle = me->GetOrientation();
+                                angle += M_PI;
+                                float subs = (float)(urand(0, 314)) / 100.0f;
+                                angle += M_PI / 2 - subs;
+                                angle = MapManager::NormalizeOrientation(angle);
+
                                 dist = ((float)urand(300,340))/10.0f;
 
                                 pBoss->SummonCreature(NPC_LIQUID_OBSIDIAN, -374.337006f + cos(angle) * dist, -318.489990f + sin(angle) * dist, 102.0f ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
@@ -1530,7 +1537,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-            me->SetSpeed(MOVE_RUN,0.4f,true);
+            me->SetSpeed(MOVE_RUN,0.3f,true);
         }
 
         void IsSummonedBy(Unit* pSummoner)
@@ -1552,7 +1559,7 @@ public:
             speedReduction = (speedReduction < -50) ? -50 : speedReduction; // Maximum 50 % movement speed reduction
             speedReduction *= -1;
 
-            float speed = 0.4f; // Base speed
+            float speed = 0.3f; // Base speed
             if (speedReduction)
                 speed = (speed * speedReduction) / 100;
             me->SetSpeed(MOVE_RUN, speed, true);
@@ -1561,7 +1568,7 @@ public:
             {
                 if(Unit * pLord = Unit::GetUnit(*me,summonerGUID))
                 {
-                    if (me->GetDistance2d(pLord) <= 7.0f)
+                    if (me->GetExactDist2d(pLord) <= 16.5f)
                     {
                         me->StopMoving();
                         arrived = true;
