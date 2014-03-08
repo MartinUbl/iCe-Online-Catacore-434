@@ -1247,7 +1247,6 @@ class npc_rageface : public CreatureScript
             {
                 if (spell->Id == SPELL_CRYSTAL_PRISON_EFFECT) // If Rageface was caught in trap
                 {
-                    me->RemoveAura(100656);
                     //debuffTimer = 13000;
                     jumpTimer += 10000; // 10 second trap
                     changeTargetTimer += 10000;
