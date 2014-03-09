@@ -60,6 +60,7 @@ enum Spells
 
     // phase two
     SPELL_IMMOLATION        = 99846,
+    SPELL_SIT_DOWN          = 84119,
 
     SPELL_SUPERHEATED       = 101304, // enrage spell
 
@@ -230,6 +231,9 @@ public:
         uint32 magmaDrinkTimer;
         uint32 EruptionTimer;
         uint32 DPSTimer;
+        uint32 sitTimer;
+        bool   canAttackIn2Phase;
+        uint32 sitAnimTimer;
         uint32 position_counter;
         uint32 lDamage_field[4];
         uint32 rDamage_field[4];
@@ -241,11 +245,16 @@ public:
         void Reset()
         {
             beam = false;
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, true);
 
             me->SetDisplayId(DISPLAYID_NORMAL); // "dressed up"
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE); // Rhyolith can't be attack directly in phase 1
+
+            me->InterruptNonMeleeSpells(false);
+            me->RemoveAura(SPELL_SIT_DOWN);
+            me->SetRooted(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            canAttackIn2Phase = false;
 
             position_counter = 0;
             leftDamage  = 0;
@@ -260,6 +269,8 @@ public:
             summonTimer          = 22000;
             lavaCheckTimer       = 1000;
             EruptionTimer        = 20000;
+            sitTimer             = NEVER;
+            sitAnimTimer         = NEVER;
             magmaDrinkCount      = 0;
             magmaDrinkTimer      = 0;
             displayIdPhase       = 0;
@@ -269,6 +280,7 @@ public:
             memset (rDamage_field,0,4*sizeof(uint32));
 
             savedLeft      = true;
+            canAttackIn2Phase = false;
             directionTimes = 0;
 
             if (!pInstance || !pInstance->instance)
@@ -673,22 +685,19 @@ public:
             {
                 //reset damage count dealt by players for getting loot
                 me->ResetPlayerDamageReq();
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
+                //me->SetReactState(REACT_AGGRESSIVE);
+                //me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
 
                 // back to normal movement
 
-                me->GetMotionMaster()->MovementExpired(true);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                //me->GetMotionMaster()->MovementExpired(true);
+                //me->GetMotionMaster()->MoveChase(me->getVictim());
                 me->SetWalk(false);
                 me->SetSpeed(MOVE_RUN,1.0f,true);
 
                 displayIdPhase = 3;
                 me->RemoveAurasDueToSpell(SPELL_OBSIDIAN_ARMOR);
                 me->SetDisplayId(DISPLAYID_SHATTERED);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, false);
-                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
 
                 PlayAndYell(me, ST_SHATTER_ARMOR);
 
@@ -697,7 +706,15 @@ public:
                     pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
 
                 me->CastSpell(me, SPELL_IMMOLATION, true);
-                //me->HandleEmoteCommand(EMOTE_STATE_SIT);
+
+                // In transition Rhyolith will sit down for a while
+                me->AddAura(SPELL_SIT_DOWN, me); // Sit animation
+                me->StopMoving();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->SetRooted(true);
+                canAttackIn2Phase = false;
+                sitTimer = 2000;
+                sitAnimTimer = 6000;
 
                 Unit* foot = Unit::GetUnit(*me, leftFootGUID);
                 if (foot)
@@ -715,6 +732,7 @@ public:
                     foot->SetVisibility(VISIBILITY_OFF);
                 }
                 phase = 2;
+                concussiveStompTimer = 13000;
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
             }
 
@@ -770,6 +788,8 @@ public:
 
             if (phase == 1)
             {
+                me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+
                 if (DPSTimer <= diff)
                 {
                     if(position_counter == 4) // Fill field from start
@@ -922,6 +942,32 @@ public:
             }
             else if (phase == 2)
             {
+                if (canAttackIn2Phase == false)
+                {
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                }
+
+                if (sitTimer <= diff)
+                {
+                    me->RemoveAura(SPELL_SIT_DOWN);
+                    sitTimer = NEVER;
+                }
+                else sitTimer -= diff;
+
+                if (sitAnimTimer <= diff)
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->SetRooted(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, me->getVictim()->GetGUID());
+                    me->GetMotionMaster()->MovementExpired(true);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    canAttackIn2Phase = true;
+                    sitAnimTimer = NEVER;
+                }
+                else sitAnimTimer -= diff;
+
                 if (beam == false)
                 {
                     beam = true;
@@ -956,7 +1002,8 @@ public:
                     }
                 }
 
-                DoMeleeAttackIfReady();
+                if (canAttackIn2Phase)
+                    DoMeleeAttackIfReady();
             }
 
             if (enrageTimer <= diff)
@@ -1190,15 +1237,8 @@ public:
 
                             for ( uint8 i = 0; i < 5; i++ ) // Summon 5 Liquid Obsidians from the edge of platform
                             {
-                                // Spawn Obsidian from behind boss back
-                                angle = me->GetOrientation();
-                                angle += M_PI;
-                                float subs = (float)(urand(0, 314)) / 100.0f;
-                                angle += M_PI / 2 - subs;
-                                angle = MapManager::NormalizeOrientation(angle);
-
-                                dist = ((float)urand(300,340))/10.0f;
-
+                                angle = (float)(urand(0, 628)) / 100.0f;
+                                dist = 58.0f;
                                 pBoss->SummonCreature(NPC_LIQUID_OBSIDIAN, -374.337006f + cos(angle) * dist, -318.489990f + sin(angle) * dist, 102.0f ,0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                             }
                         }
@@ -1403,6 +1443,7 @@ public:
         {
             aggressiveTimer = 4000;
             infernalRageTimer = aggressiveTimer + 5000;
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
         }
 
         void UpdateAI(const uint32 diff)
@@ -1568,7 +1609,7 @@ public:
             {
                 if(Unit * pLord = Unit::GetUnit(*me,summonerGUID))
                 {
-                    if (me->GetExactDist2d(pLord) <= 16.5f)
+                    if (me->GetExactDist2d(pLord) <= 8.0f)
                     {
                         me->StopMoving();
                         arrived = true;
@@ -1585,7 +1626,7 @@ public:
                             pLord->CastSpell(pLord,SPELL_OBSIDIAN_ARMOR,false);
                     }
                     else
-                            me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
+                        me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
                 }
 
                 Path_correction_timer = 500;
