@@ -159,7 +159,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
             pBind= player->GetBoundInstance(GetId(), FLEXIBLE_RAID_DIFFICULTY);
             if(pBind)
             {
-                if(groupBind && pBind->save->GetInstanceId() != groupBind->save->GetInstanceId())//Player enters another instance ID then before => need to show binding query, when teleported
+                if(groupBind && (pBind->save->GetInstanceId() != groupBind->save->GetInstanceId() || pBind->save->GetDifficulty() != groupBind->save->GetDifficulty()))//Player enters another instance ID then before or another raid difficulty => need to show binding query, when teleported
                     player->showInstanceBindQuery=true;
             }
 

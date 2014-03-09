@@ -2662,6 +2662,10 @@ void InstanceMap::Update(const uint32& t_diff)
                 {
                     removePlayerSaveTimer(player->GetGUIDLow());
                     copyDeadUnitsFromLeader(player, GetId(), GetInstanceId(),0);
+                    uint32 mapId=GetId();
+                    uint32 instanceId=player->getRaidId(mapId);
+                    if(player->getRaidDiffProgr(mapId) < KILLED_HC)
+                        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", KILLED_HC, player->GetGUIDLow(), instanceId);
                 }
                 else//timer has some time
                     savePlayerTimers[player->GetGUIDLow()] -= t_diff;
@@ -2842,15 +2846,18 @@ void InstanceMap::SetResetSchedule(bool on)
 
 void InstanceMap::doDifficultyStaff(Player* player, uint32 mapId, uint32 instanceId)
 {
+    uint32 insId=player->getRaidId(mapId);
+    if(!insId)
+        insId=instanceId;
     if(player->getRaidDiffProgr(mapId) != KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC)) //killed boss on HC so cannot enter HC with other group
     {
         player->setRaidDiffProgr(mapId , KILLED_HC);
-        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), instanceId);
+        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), insId);
     }
     if(player->getRaidDiffProgr(mapId) == KILLED_HC && (player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_NORMAL || player->GetDifficulty(true) == RAID_DIFFICULTY_25MAN_NORMAL)) //killed on HC and the on N so cannot enter any HC anymore
     {
         player->setRaidDiffProgr(mapId , KILLED_HC_N_MERGED);
-        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), instanceId);
+        CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", player->getRaidDiffProgr(mapId), player->GetGUIDLow(), insId);
     }
 }
 

@@ -19683,8 +19683,9 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
             sLog->outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
         sScriptMgr->OnPlayerBindToInstance(this, save->GetDifficulty(), save->GetMapId(), permanent);
 
-        if(mapP->IsRaid())
-             CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", getRaidDiffProgr(save->GetMapId()), GetGUIDLow(), save->GetInstanceId());
+        uint32 instanceId=getRaidId(save->GetMapId());
+        if(mapP->IsRaid() && instanceId)
+             CharacterDatabase.PExecute("UPDATE character_instance SET diffProgress = '%u' where guid = '%u' AND instance = '%u'", getRaidDiffProgr(save->GetMapId()), GetGUIDLow(), instanceId);
         return &bind;
     }
     else
