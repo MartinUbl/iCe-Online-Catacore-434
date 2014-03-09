@@ -17578,6 +17578,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
         // Call creature just died function
         if (creature->IsAIEnabled)
         {
+            std::ostringstream ssPrint;
             creature->AI()->JustDied(this);
 
             InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
@@ -17590,17 +17591,28 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 /*Flexible raid locks rules- boss killed on normal or HC*/
                 if(map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapId))
                 {
+                    /*Kill log*/
+                    ssPrint << "Players: ";
                     Map::PlayerList const &PlayerList = map->GetInstanceScript()->instance->GetPlayers();//do it for all players
+                    uint32 playNumber=map->GetPlayersCountExceptGMs();
                     if (!PlayerList.isEmpty())
+                    {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
                             Player* pPlayer = i->getSource();
-                            if(pPlayer)
+                            if(pPlayer && pPlayer->GetSession()->GetSecurity() == SEC_PLAYER)
                             {
                                 map->doDifficultyStaff(pPlayer, mapId, map->GetInstanceId());
-                                map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());//kill units in all IDs of group members                              
+                                map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());//kill units in all IDs of group members   
+                               
+                                ssPrint << pPlayer->GetName() << "(" << pPlayer->GetGUIDLow() << "), ";
                             }
                         }
+                    }
+                    ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players: " << playNumber;
+                    if(playNumber < map->GetMaxPlayers())
+                        ssPrint << " POSIBBLE BUGGING!";
+                    sLog->outChar(ssPrint.str().c_str());
                 }
             }
 
