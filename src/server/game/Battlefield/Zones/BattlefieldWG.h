@@ -478,23 +478,120 @@ enum eWGTeamControl
     BATTLEFIELD_WG_TEAM_NEUTRAL,
 };
 
+// workshop texts: X under attack by ALI, X under attack by HORDE, X taken by ALI, X taken by HORDE
+// tower texts: X has been damaged, X has been destroyed
+static const char* wgTexts[] = {
+    // The Sunken Ring (NE)
+    "The Sunken Ring siege workshop is under attack by Alliance",
+    "The Sunken Ring siege workshop is under attack by Horde",
+    "The Sunken Ring siege workshop has been captured by Alliance",
+    "The Sunken Ring siege workshop has been captured by Horde",
+    // Broken Temple (NW)
+    "Broken Temple siege workshop is under attack by Alliance",
+    "Broken Temple siege workshop is under attack by Horde",
+    "Broken Temple siege workshop has been captured by Alliance",
+    "Broken Temple siege workshop has been captured by Horde",
+    // Eastspark (SE)
+    "Eastspark siege workshop is under attack by Alliance",
+    "Eastspark siege workshop is under attack by Horde",
+    "Eastspark siege workshop has been captured by Alliance",
+    "Eastspark siege workshop has been captured by Horde",
+    // Westspark (SW)
+    "Westspark siege workshop is under attack by Alliance",
+    "Westspark siege workshop is under attack by Horde",
+    "Westspark siege workshop has been captured by Alliance",
+    "Westspark siege workshop has been captured by Horde",
+
+    // The north-eastern keep tower (NE)
+    "The north-eastern has been damaged!",
+    "The north-eastern has been destroyed!",
+    // The north-western keep tower (NW)
+    "The north-western has been damaged!",
+    "The north-western has been destroyed!",
+    // The south-eastern keep tower (SE)
+    "The south-eastern has been damaged!",
+    "The south-eastern has been destroyed!",
+    // The south-western keep tower (SW)
+    "The south-western has been damaged!",
+    "The south-western has been destroyed!",
+
+    // The southern tower (S)
+    "The southern tower has been damaged!",
+    "The southern tower has been destroyed!",
+    // The eastern tower (E)
+    "The eastern tower has been damaged!",
+    "The eastern tower has been destroyed!",
+    // The western tower (W)
+    "The western tower has been damaged!",
+    "The western tower has been destroyed!",
+
+    // WG fortress capture
+    "The Wintergrasp fortress has been captured by Alliance!",
+    "The Wintergrasp fortress has been captured by Horde!",
+    // WG fortress defend
+    "Alliance has successfully defended the Wintergrasp fortress!",
+    "Horde has successfully defended the Wintergrasp fortress!",
+
+    "The battle for Wintergrasp is about to begin!",
+    "The battle for Wintergrasp has begun!",
+
+    "You have reached Rank 1: Corporal",
+    "You have reached Rank 2: First Lieutenant",
+};
+
+enum WGTextOffsets
+{
+    WG_TEXT_OFFSET_WORKSHOP_ATTACK_ALLIANCE     = 0,
+    WG_TEXT_OFFSET_WORKSHOP_ATTACK_HORDE        = 1,
+    WG_TEXT_OFFSET_WORKSHOP_CAPTURED_ALLIANCE   = 2,
+    WG_TEXT_OFFSET_WORKSHOP_CAPTURED_HORDE      = 3,
+
+    WG_TEXT_OFFSET_TOWER_DAMAGED                = 0,
+    WG_TEXT_OFFSET_TOWER_DESTROYED              = 1,
+
+    WG_TEXT_OFFSET_END_ALLIANCE                 = 0,
+    WG_TEXT_OFFSET_END_HORDE                    = 1,
+};
+
 // TODO: Handle this with creature_text ?
 enum eWGText
 {
+    BF_WG_TEXT_WORKSHOP_NE      = 0,
+    BF_WG_TEXT_WORKSHOP_NW      = 4,
+    BF_WG_TEXT_WORKSHOP_SE      = 8,
+    BF_WG_TEXT_WORKSHOP_SW      = 12,
+
+    BF_WG_TEXT_KEEPTOWER_NE     = 16,
+    BF_WG_TEXT_KEEPTOWER_NW     = 18,
+    BF_WG_TEXT_KEEPTOWER_SE     = 20,
+    BF_WG_TEXT_KEEPTOWER_SW     = 22,
+
+    BF_WG_TEXT_TOWER_S          = 24,
+    BF_WG_TEXT_TOWER_E          = 26,
+    BF_WG_TEXT_TOWER_W          = 28,
+
+    BF_WG_TEXT_WIN_KEEP         = 30,
+    BF_WG_TEXT_DEFEND_KEEP      = 32,
+
+    BF_WG_TEXT_WILL_START       = 34,
+    BF_WG_TEXT_START            = 35,
+    BF_WG_TEXT_FIRSTRANK        = 36,
+    BF_WG_TEXT_SECONDRANK       = 37
+
 // *INDENT-OFF*
-    BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE         = 12055,
+    /*BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE         = 12055,
     BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW         = 12052,
     BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE         = 12053,
     BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW         = 12054,
     BATTLEFIELD_WG_TEXT_WORKSHOP_ATTACK          = 12051,
     BATTLEFIELD_WG_TEXT_WORKSHOP_TAKEN           = 12050,
     BATTLEFIELD_WG_TEXT_ALLIANCE                 = 12057,
-    BATTLEFIELD_WG_TEXT_HORDE                    = 12056,
-    BATTLEFIELD_WG_TEXT_WILL_START               = 12058,
+    BATTLEFIELD_WG_TEXT_HORDE                    = 12056,*/
+    /*BATTLEFIELD_WG_TEXT_WILL_START               = 12058,
     BATTLEFIELD_WG_TEXT_START                    = 12067,
     BATTLEFIELD_WG_TEXT_FIRSTRANK                = 12059,
-    BATTLEFIELD_WG_TEXT_SECONDRANK               = 12060,
-    BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NE        = 12062,
+    BATTLEFIELD_WG_TEXT_SECONDRANK               = 12060,*/
+    /*BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NE        = 12062,
     BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NW        = 12064,
     BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SE        = 12061,
     BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SW        = 12063,
@@ -504,7 +601,7 @@ enum eWGText
     BATTLEFIELD_WG_TEXT_TOWER_NAME_E             = 12070,
     BATTLEFIELD_WG_TEXT_TOWER_NAME_W             = 12071,
     BATTLEFIELD_WG_TEXT_DEFEND_KEEP              = 12068,
-    BATTLEFIELD_WG_TEXT_WIN_KEEP                 = 12072,
+    BATTLEFIELD_WG_TEXT_WIN_KEEP                 = 12072,*/
 // *INDENT-ON*
 };
 
@@ -570,10 +667,10 @@ const BfWGBuildingSpawnData WGGameObjectBuillding[WG_MAX_OBJ] = {
     { 190376, 3756, 5163.72f, 2799.84f, 409.227f, 1.57952f, BATTLEFIELD_WG_OBJECTTYPE_WALL, 0 },
 
     // Tower of keep (Not spawned in db)
-    { 190221, 3711, 5281.15f, 3044.59f, 407.843f, 3.11539f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NW },
-    { 190373, 3713, 5163.76f, 2932.23f, 409.19f, 3.12412f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SW },
-    { 190377, 3714, 5166.4f, 2748.37f, 409.188f, -1.5708f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_SE },
-    { 190378, 3712, 5281.19f, 2632.48f, 409.099f, -1.58825f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BATTLEFIELD_WG_TEXT_KEEPTOWER_NAME_NE },
+    { 190221, 3711, 5281.15f, 3044.59f, 407.843f, 3.11539f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BF_WG_TEXT_KEEPTOWER_NW },
+    { 190373, 3713, 5163.76f, 2932.23f, 409.19f, 3.12412f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BF_WG_TEXT_KEEPTOWER_SW },
+    { 190377, 3714, 5166.4f, 2748.37f, 409.188f, -1.5708f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BF_WG_TEXT_KEEPTOWER_SE },
+    { 190378, 3712, 5281.19f, 2632.48f, 409.099f, -1.58825f, BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER, BF_WG_TEXT_KEEPTOWER_NE },
 
     // Wall (with passage) (Not spawned in db)
     { 191797, 3765, 5343.29f, 2908.86f, 409.576f, 0.008724f, BATTLEFIELD_WG_OBJECTTYPE_WALL, 0 },
@@ -581,9 +678,9 @@ const BfWGBuildingSpawnData WGGameObjectBuillding[WG_MAX_OBJ] = {
     { 191805, 3768, 5279.13f, 2840.8f, 409.783f, 1.57952f, BATTLEFIELD_WG_OBJECTTYPE_WALL, 0 },
 
     // South tower (Not spawned in db)
-    { 190356, 3704, 4557.17f, 3623.94f, 395.883f, 1.67552f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BATTLEFIELD_WG_TEXT_TOWER_NAME_W },
-    { 190357, 3705, 4398.17f, 2822.5f, 405.627f, -3.12412f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BATTLEFIELD_WG_TEXT_TOWER_NAME_S },
-    { 190358, 3706, 4459.1f, 1944.33f, 434.991f, -2.00276f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BATTLEFIELD_WG_TEXT_TOWER_NAME_E },
+    { 190356, 3704, 4557.17f, 3623.94f, 395.883f, 1.67552f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BF_WG_TEXT_TOWER_W },
+    { 190357, 3705, 4398.17f, 2822.5f, 405.627f, -3.12412f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BF_WG_TEXT_TOWER_S },
+    { 190358, 3706, 4459.1f, 1944.33f, 434.991f, -2.00276f, BATTLEFIELD_WG_OBJECTTYPE_TOWER, BF_WG_TEXT_TOWER_E },
 
     // Door of forteress (Not spawned in db)
     { 190375, 3763, 5162.99f, 2841.23f, 410.162f, -3.13286f, BATTLEFIELD_WG_OBJECTTYPE_DOOR, 0 },
@@ -1112,7 +1209,7 @@ const BfWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
         192031,
         3701,
         BATTLEFIELD_WG_WORKSHOP_NE,
-        BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NE,
+        BF_WG_TEXT_WORKSHOP_NE,
         { 4949.344238f, 2432.585693f, 320.176971f, 1.386214f, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_NE, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_NE },
         1,
         {
@@ -1145,7 +1242,7 @@ const BfWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
         192030,
         3700,
         BATTLEFIELD_WG_WORKSHOP_NW,
-        BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_NW,
+        BF_WG_TEXT_WORKSHOP_NW,
         { 4948.524414f, 3342.337891f, 376.875366f, 4.400566f, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_NW, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_NW },
         1,
         {
@@ -1178,7 +1275,7 @@ const BfWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
         192033,
         3703,
         BATTLEFIELD_WG_WORKSHOP_SE,
-        BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SE,
+        BF_WG_TEXT_WORKSHOP_SE,
         { 4398.076660f, 2356.503662f, 376.190491f, 0.525406f, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_SE, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_SE },
         9,
         {
@@ -1211,7 +1308,7 @@ const BfWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
         192032,
         3702,
         BATTLEFIELD_WG_WORKSHOP_SW,
-        BATTLEFIELD_WG_TEXT_WORKSHOP_NAME_SW,
+        BF_WG_TEXT_WORKSHOP_SW,
         { 4390.776367f, 3304.094482f, 372.429077f, 6.097023f, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_SW, BATTLEFIELD_WG_GAMEOBJECT_FACTORY_BANNER_SW },
         9,
         {
@@ -1392,7 +1489,7 @@ struct BfWGGameObjectBuilding
 
         // Send warning message
         if (m_NameId)                                       // tower damage + name
-            m_WG->SendWarningToAllInZone(m_NameId);
+            m_WG->SendWarningToAllInZone(wgTexts[m_NameId + WG_TEXT_OFFSET_TOWER_DAMAGED]);
 
         for (GuidSet::const_iterator itr = m_CreatureTopList[m_WG->GetAttackerTeam()].begin(); itr != m_CreatureTopList[m_WG->GetAttackerTeam()].end(); ++itr)
             if (Unit* unit = sObjectAccessor->FindUnit(*itr))
@@ -1419,7 +1516,7 @@ struct BfWGGameObjectBuilding
 
         // Warn players
         if (m_NameId)
-            m_WG->SendWarningToAllInZone(m_NameId);
+            m_WG->SendWarningToAllInZone(wgTexts[m_NameId + WG_TEXT_OFFSET_TOWER_DESTROYED]);
 
         switch (m_Type)
         {
@@ -1821,88 +1918,88 @@ struct BfWGWorkShopData
         switch (team)
         {
             case BATTLEFIELD_WG_TEAM_NEUTRAL:
-                {
-                    // Send warning message to all player for inform a faction attack a workshop
-                    // alliance / horde attacking workshop
-                    m_WG->SendWarningToAllInZone(m_TeamControl ? m_NameId : m_NameId + 1);
-                    break;
-                }
+            {
+                // Send warning message to all player for inform a faction attack a workshop
+                // alliance / horde attacking workshop
+                m_WG->SendWarningToAllInZone((m_TeamControl == BATTLEFIELD_WG_TEAM_ALLIANCE) ? wgTexts[m_NameId + WG_TEXT_OFFSET_WORKSHOP_ATTACK_HORDE] : wgTexts[m_NameId + WG_TEXT_OFFSET_WORKSHOP_ATTACK_ALLIANCE]);
+                break;
+            }
             case BATTLEFIELD_WG_TEAM_ALLIANCE:
-                {
-                    // Show Alliance creature
-                    for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
-                            if (Creature* creature = unit->ToCreature())
-                                m_WG->ShowNpc(creature, creature->GetEntry() != 30499);
+            {
+                // Show Alliance creature
+                for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
+                    if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                        if (Creature* creature = unit->ToCreature())
+                            m_WG->ShowNpc(creature, creature->GetEntry() != 30499);
 
-                    // Hide Horde creature
-                    for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
-                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
-                            if (Creature* creature = unit->ToCreature())
-                                m_WG->HideNpc(creature);
+                // Hide Horde creature
+                for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
+                    if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                        if (Creature* creature = unit->ToCreature())
+                            m_WG->HideNpc(creature);
 
-                    // Show Alliance gameobject
-                    for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_ALLIANCE].begin(); itr != m_GameObjectOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        (*itr)->SetRespawnTime(RESPAWN_IMMEDIATELY);
+                // Show Alliance gameobject
+                for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_ALLIANCE].begin(); itr != m_GameObjectOnPoint[TEAM_ALLIANCE].end(); ++itr)
+                    (*itr)->SetRespawnTime(RESPAWN_IMMEDIATELY);
 
-                    // Hide Horde gameobject
-                    for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_HORDE].begin(); itr != m_GameObjectOnPoint[TEAM_HORDE].end(); ++itr)
-                        (*itr)->SetRespawnTime(RESPAWN_ONE_DAY);
+                // Hide Horde gameobject
+                for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_HORDE].begin(); itr != m_GameObjectOnPoint[TEAM_HORDE].end(); ++itr)
+                    (*itr)->SetRespawnTime(RESPAWN_ONE_DAY);
 
-                    // Updating worldstate
-                    m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT;
-                    m_WG->SendUpdateWorldState(m_WorldState, m_State);
+                // Updating worldstate
+                m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT;
+                m_WG->SendUpdateWorldState(m_WorldState, m_State);
 
-                    // Warning message
-                    if (!init)                              // workshop taken - alliance
-                        m_WG->SendWarningToAllInZone(m_NameId);
+                // Warning message
+                if (!init)                              // workshop taken - alliance
+                    m_WG->SendWarningToAllInZone(wgTexts[m_NameId + WG_TEXT_OFFSET_WORKSHOP_CAPTURED_ALLIANCE]);
 
-                    // Found associate graveyard and update it
-                    if (m_Type < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)
-                        if (m_WG && m_WG->GetGraveYardById(m_Type))
-                            m_WG->GetGraveYardById(m_Type)->ChangeControl(TEAM_ALLIANCE);
+                // Found associate graveyard and update it
+                if (m_Type < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)
+                    if (m_WG && m_WG->GetGraveYardById(m_Type))
+                        m_WG->GetGraveYardById(m_Type)->ChangeControl(TEAM_ALLIANCE);
 
-                    m_TeamControl = team;
-                    break;
-                }
+                m_TeamControl = team;
+                break;
+            }
             case BATTLEFIELD_WG_TEAM_HORDE:
-                {
-                    // Show Horde creature
-                    for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
-                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
-                            if (Creature* creature = unit->ToCreature())
-                                m_WG->ShowNpc(creature, creature->GetEntry() != 30400);
+            {
+                // Show Horde creature
+                for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
+                    if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                        if (Creature* creature = unit->ToCreature())
+                            m_WG->ShowNpc(creature, creature->GetEntry() != 30400);
 
-                    // Hide Alliance creature
-                    for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
-                            if (Creature* creature = unit->ToCreature())
-                                m_WG->HideNpc(creature);
+                // Hide Alliance creature
+                for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
+                    if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                        if (Creature* creature = unit->ToCreature())
+                            m_WG->HideNpc(creature);
 
-                    // Hide Alliance gameobject
-                    for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_ALLIANCE].begin(); itr != m_GameObjectOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        (*itr)->SetRespawnTime(RESPAWN_ONE_DAY);
+                // Hide Alliance gameobject
+                for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_ALLIANCE].begin(); itr != m_GameObjectOnPoint[TEAM_ALLIANCE].end(); ++itr)
+                    (*itr)->SetRespawnTime(RESPAWN_ONE_DAY);
 
-                    // Show Horde gameobject
-                    for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_HORDE].begin(); itr != m_GameObjectOnPoint[TEAM_HORDE].end(); ++itr)
-                        (*itr)->SetRespawnTime(RESPAWN_IMMEDIATELY);
+                // Show Horde gameobject
+                for (GameObjectSet::const_iterator itr = m_GameObjectOnPoint[TEAM_HORDE].begin(); itr != m_GameObjectOnPoint[TEAM_HORDE].end(); ++itr)
+                    (*itr)->SetRespawnTime(RESPAWN_IMMEDIATELY);
 
-                    // Update worlstate
-                    m_State = BATTLEFIELD_WG_OBJECTSTATE_HORDE_INTACT;
-                    m_WG->SendUpdateWorldState(m_WorldState, m_State);
+                // Update worlstate
+                m_State = BATTLEFIELD_WG_OBJECTSTATE_HORDE_INTACT;
+                m_WG->SendUpdateWorldState(m_WorldState, m_State);
 
-                    // Warning message
-                    if (!init)                              // workshop taken - horde
-                        m_WG->SendWarningToAllInZone(m_NameId + 1);
+                // Warning message
+                if (!init)                              // workshop taken - horde
+                    m_WG->SendWarningToAllInZone(wgTexts[m_NameId + WG_TEXT_OFFSET_WORKSHOP_CAPTURED_HORDE]);
 
-                    // Update graveyard control
-                    if (m_Type < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)
-                        if (m_WG && m_WG->GetGraveYardById(m_Type))
-                            m_WG->GetGraveYardById(m_Type)->ChangeControl(TEAM_HORDE);
+                // Update graveyard control
+                if (m_Type < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)
+                    if (m_WG && m_WG->GetGraveYardById(m_Type))
+                        m_WG->GetGraveYardById(m_Type)->ChangeControl(TEAM_HORDE);
 
-                    m_TeamControl = team;
-                    break;
-                }
+                m_TeamControl = team;
+                break;
+            }
         }
         if (!init)
             m_WG->UpdateCounterVehicle(false);

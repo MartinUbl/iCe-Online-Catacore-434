@@ -528,7 +528,7 @@ void Battlefield::BroadcastPacketWar(WorldPacket & data) const
                 player->GetSession()->SendPacket(&data);
 }
 
-WorldPacket Battlefield::BuildWarningAnnPacket(std::string msg)
+WorldPacket Battlefield::BuildWarningAnnPacket(char* msg)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
 
@@ -539,8 +539,10 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string msg)
     data << uint32(1);
     data << uint8(0);
     data << uint64(0);
-    data << uint32(strlen(msg.c_str()) + 1);
-    data << msg.c_str();
+    data << uint32(strlen(msg) + 1);
+    data << msg;
+    data << uint8(0);
+    data << float(0.0f);
     data << uint8(0);
 
     return data;
@@ -548,53 +550,45 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string msg)
 
 void Battlefield::SendWarningToAllInZone(uint32 entry, ...)
 {
-    /*if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
-        if (Creature* stalker = unit->ToCreature())
-            stalker->MonsterYellToZone(entry, LANG_UNIVERSAL, 0);*/
-
     const char *format = sObjectMgr->GetTrinityStringForDBCLocale(entry);
     va_list ap;
     char str[1024];
     va_start(ap, entry);
-    vsnprintf(str,1024,format, ap);
+    vsnprintf(str, 1024, format, ap);
     va_end(ap);
-    std::string msg = str;
 
-    WorldPacket data = BuildWarningAnnPacket(msg);
+    WorldPacket data = BuildWarningAnnPacket(str);
     BroadcastPacketWar(data);
 }
 
-/*void Battlefield::SendWarningToAllInWar(int32 entry,...)
+void Battlefield::SendWarningToAllInZone(const char* str)
 {
-    const char *format = sObjectMgr->GetTrinityStringForDBCLocale(entry);
-    va_list ap;
-    char str [1024];
-    va_start(ap, entry);
-    vsnprintf(str,1024,format, ap);
-    va_end(ap);
-    std::string msg = (std::string)str;
-
-    WorldPacket data = BuildWarningAnnPacket(msg);
+    WorldPacket data = BuildWarningAnnPacket((char*)str);
     BroadcastPacketWar(data);
-}*/
+}
+
 void Battlefield::SendWarningToPlayer(Player *player, uint32 entry, ...)
 {
     if (!player || !player->IsInWorld())
         return;
 
-    /*if (Unit* unit = sObjectAccessor->FindUnit(StalkerGuid))
-        if (Creature* stalker = unit->ToCreature())
-            stalker->MonsterYellToZone(entry, LANG_UNIVERSAL, player->GetGUID());*/
-
     const char *format = sObjectMgr->GetTrinityStringForDBCLocale(entry);
     va_list ap;
     char str[1024];
     va_start(ap, entry);
-    vsnprintf(str,1024,format, ap);
+    vsnprintf(str, 1024, format, ap);
     va_end(ap);
-    std::string msg = str;
 
-    WorldPacket data = BuildWarningAnnPacket(msg);
+    WorldPacket data = BuildWarningAnnPacket(str);
+    player->GetSession()->SendPacket(&data);
+}
+
+void Battlefield::SendWarningToPlayer(Player *player, const char* str)
+{
+    if (!player || !player->IsInWorld())
+        return;
+
+    WorldPacket data = BuildWarningAnnPacket((char*)str);
     player->GetSession()->SendPacket(&data);
 }
 

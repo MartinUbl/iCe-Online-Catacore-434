@@ -291,10 +291,11 @@ class Battlefield:public ZoneScript
     /// Called when a player enter in battlefield zone
     virtual void OnPlayerEnterZone(Player * /*player */ ) {};
 
-    WorldPacket BuildWarningAnnPacket(std::string msg);
+    WorldPacket BuildWarningAnnPacket(char* msg);
     void SendWarningToAllInZone(uint32 entry, ...);
-    //void SendWarningToAllInWar(int32 entry, ...); -- UNUSED
+    void SendWarningToAllInZone(const char* str);
     void SendWarningToPlayer(Player* player, uint32 entry, ...);
+    void SendWarningToPlayer(Player* player, const char* str);
 
     void PlayerAcceptInviteToQueue(Player* player);
     void PlayerAcceptInviteToWar(Player* player);

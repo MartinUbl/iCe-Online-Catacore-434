@@ -229,7 +229,11 @@ bool BattlefieldWG::Update(uint32 diff)
     else
         m_saveTimer -= diff;
 
+    std::list<uint64> toRemove;
+
+    toRemove.clear();
     for (GuidSet::const_iterator itr = m_PlayersIsSpellImu.begin(); itr != m_PlayersIsSpellImu.end(); ++itr)
+    {
         if (Player* player = ObjectAccessor::FindPlayer(*itr))
         {
             if (player->HasAura(SPELL_SPIRITUAL_IMMUNITY))
@@ -240,11 +244,18 @@ bool BattlefieldWG::Update(uint32 diff)
                     if (player->GetDistance2d(graveyard->x, graveyard->y) > 10.0f)
                     {
                         player->RemoveAurasDueToSpell(SPELL_SPIRITUAL_IMMUNITY);
-                        m_PlayersIsSpellImu.erase(player->GetGUID());
+                        toRemove.push_back(player->GetGUID());
                     }
                 }
             }
         }
+    }
+
+    for (std::list<uint64>::const_iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+    {
+        if (m_PlayersIsSpellImu.find(*itr) != m_PlayersIsSpellImu.end())
+            m_PlayersIsSpellImu.erase(*itr);
+    }
 
     if (m_BattlefieldActive)
     {
@@ -344,7 +355,7 @@ void BattlefieldWG::OnBattleStart()
     // Initialize vehicle counter
     UpdateCounterVehicle(true);
     // Send start warning to all players
-    SendWarningToAllInZone(BATTLEFIELD_WG_TEXT_START);
+    SendWarningToAllInZone(wgTexts[BF_WG_TEXT_START]);
 
     // Spawn titan relic
     m_relic = SpawnGameObject(BATTLEFIELD_WG_GAMEOBJECT_TITAN_RELIC, 5440.0f, 2840.8f, 430.43f, 0);
@@ -558,11 +569,11 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
 
     if (!endbytimer)
     {                                                       // win alli/horde
-        SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? BATTLEFIELD_WG_TEXT_WIN_KEEP : BATTLEFIELD_WG_TEXT_WIN_KEEP + 1);
+        SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? wgTexts[BF_WG_TEXT_WIN_KEEP + WG_TEXT_OFFSET_END_ALLIANCE] : wgTexts[BF_WG_TEXT_WIN_KEEP + WG_TEXT_OFFSET_END_HORDE]);
     }
     else
     {                                                       // defend alli/horde
-        SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? BATTLEFIELD_WG_TEXT_DEFEND_KEEP : BATTLEFIELD_WG_TEXT_DEFEND_KEEP + 1);
+        SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? wgTexts[BF_WG_TEXT_DEFEND_KEEP + WG_TEXT_OFFSET_END_ALLIANCE] : wgTexts[BF_WG_TEXT_DEFEND_KEEP + WG_TEXT_OFFSET_END_HORDE]);
     }
 }
 
@@ -621,7 +632,7 @@ void BattlefieldWG::RewardMarkOfHonor(Player* player, uint32 count)
 void BattlefieldWG::OnStartGrouping()
 {
     // Warn
-    SendWarningToAllInZone(BATTLEFIELD_WG_TEXT_WILL_START);
+    SendWarningToAllInZone(wgTexts[BF_WG_TEXT_WILL_START]);
 }
 
 void BattlefieldWG::OnCreatureCreate(Creature *creature, bool add)
@@ -799,7 +810,7 @@ void BattlefieldWG::PromotePlayer(Player* killer)
         {
             killer->RemoveAura(SPELL_RECRUIT);
             killer->CastSpell(killer, SPELL_CORPORAL, true);
-            SendWarningToPlayer(killer, BATTLEFIELD_WG_TEXT_FIRSTRANK);
+            SendWarningToPlayer(killer, wgTexts[BF_WG_TEXT_FIRSTRANK]);
         }
         else
             killer->CastSpell(killer, SPELL_RECRUIT, true);
@@ -810,7 +821,7 @@ void BattlefieldWG::PromotePlayer(Player* killer)
         {
             killer->RemoveAura(SPELL_CORPORAL);
             killer->CastSpell(killer, SPELL_LIEUTENANT, true);
-            SendWarningToPlayer(killer, BATTLEFIELD_WG_TEXT_SECONDRANK);
+            SendWarningToPlayer(killer, wgTexts[BF_WG_TEXT_SECONDRANK]);
         }
         else
             killer->CastSpell(killer, SPELL_CORPORAL, true);
