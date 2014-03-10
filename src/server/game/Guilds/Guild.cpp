@@ -4732,7 +4732,7 @@ void Guild::SaveXP()
         stmt->setUInt32(2, m_id);
         CharacterDatabase.Execute(stmt);
 
-        CharacterDatabase.PExecute("REPLACE INTO guild_advancement VALUES (%u,"UI64FMTD")",m_id,m_todayXP);
+        CharacterDatabase.PExecute("REPLACE INTO guild_advancement VALUES (%u," UI64FMTD ")",m_id,m_todayXP);
     }
 }
 

@@ -591,7 +591,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 
         if (my_trade->GetMoney() > 0)
         {
-            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) account:(%u))",
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(" UI64FMTD ") %s:(name:(%s) account:(%u))",
                          _player->GetSession()->GetRemoteAddress().c_str(),
                          _player->GetSession()->GetAccountId(),
                          _player->GetName(),
@@ -603,7 +603,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         }
         else if (his_trade->GetMoney() > 0)
         {
-            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:("UI64FMTD") %s:(name:(%s) account:(%u))",
+            sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) amount:(" UI64FMTD ") %s:(name:(%s) account:(%u))",
                          trader->GetSession()->GetRemoteAddress().c_str(),
                          trader->GetSession()->GetAccountId(),
                          trader->GetName(),

@@ -2070,7 +2070,7 @@ void World::Update(uint32 diff)
         if (m_timers[WUPDATE_CLEANDB].Passed())
         {
             m_timers[WUPDATE_CLEANDB].Reset();
-            LoginDatabase.PExecute("DELETE FROM logs WHERE (time + %u) < "UI64FMTD";",
+            LoginDatabase.PExecute("DELETE FROM logs WHERE (time + %u) < " UI64FMTD ";",
                 sWorld->getIntConfig(CONFIG_LOGDB_CLEARTIME), uint64(time(0)));
         }
     }
@@ -2930,9 +2930,9 @@ void World::setWorldState(uint32 index, uint64 value)
 {
     WorldStatesMap::const_iterator it = m_worldstates.find(index);
     if (it != m_worldstates.end())
-        CharacterDatabase.PExecute("UPDATE worldstates SET value="UI64FMTD" where entry=%u", value, index);
+        CharacterDatabase.PExecute("UPDATE worldstates SET value=" UI64FMTD " where entry=%u", value, index);
     else
-        CharacterDatabase.PExecute("INSERT INTO worldstates (entry, value) VALUES (%u,"UI64FMTD")", index, value);
+        CharacterDatabase.PExecute("INSERT INTO worldstates (entry, value) VALUES (%u," UI64FMTD ")", index, value);
     m_worldstates[index] = value;
 }
 
