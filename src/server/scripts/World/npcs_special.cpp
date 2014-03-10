@@ -3033,7 +3033,7 @@ public:
                 me->GetMotionMaster()->MoveFollow(pGuide,30,M_PI,MOTION_SLOT_ACTIVE);
                 HandleLooming(true);
                 char whisp[128];
-                sprintf(whisp, "following you (GUID %llu)", me->GetGUID());
+                sprintf(whisp, "following you (GUID " UI64FMTD ")", me->GetGUID());
                 me->MonsterWhisper(whisp, pGuide->GetGUID());
             }
             else return;
