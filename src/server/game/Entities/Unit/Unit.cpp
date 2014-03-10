@@ -17610,7 +17610,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                         }
                     }
                     ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players: " << playNumber;
-                    if(playNumber < map->GetMaxPlayers())
+                    if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
                         ssPrint << " POSIBBLE BUGGING!";
                     sLog->outChar(ssPrint.str().c_str());
                 }
