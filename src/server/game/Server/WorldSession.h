@@ -153,8 +153,8 @@ enum BFLeaveReason
     BF_LEAVE_REASON_LOW_LEVEL = 0x00000010
 };
 
-#define DB2_REPLY_SPARSE 2442913102
-#define DB2_REPLY_ITEM   1344507586
+#define DB2_REPLY_SPARSE 0x919BE54E
+#define DB2_REPLY_ITEM   0x50238EC2
 
 /// Player session in the World
 class WorldSession

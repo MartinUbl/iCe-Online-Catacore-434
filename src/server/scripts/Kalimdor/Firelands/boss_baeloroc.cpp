@@ -80,7 +80,7 @@ enum actions
 };
 
 # define MINUTE (60000)
-# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value )
+# define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value )
 
 
 enum ItemEntries // Thanks Gregory for help with sniffing :)

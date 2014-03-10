@@ -89,7 +89,7 @@ enum actions
     DO_WIN          = 70003,
 };
 
-# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+# define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 class boss_sinestra : public CreatureScript
 {

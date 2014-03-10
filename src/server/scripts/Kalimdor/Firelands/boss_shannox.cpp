@@ -55,7 +55,7 @@ enum Spells
     SPELL_SEPARATION_ANXIETY        = 99835,
 };
 
-# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+# define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 class boss_shannox : public CreatureScript
 {

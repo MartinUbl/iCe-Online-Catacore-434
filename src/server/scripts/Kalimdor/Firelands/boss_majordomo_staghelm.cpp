@@ -92,7 +92,7 @@ static const Yells RandomKill[4]= // TODO -> Find sound id's
 uint32 energyField[10] = {18,12,10,8,7,6,5,4,3,2}; // Very wierd calculation of time, so i do it manually for sure
 
 #define MINUTE 60000
-#define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+#define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 #define MIDDLE_X  430.0f
 #define MIDDLE_Y -63.0f

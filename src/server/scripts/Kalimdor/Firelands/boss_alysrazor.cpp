@@ -31,7 +31,7 @@
 
 const uint32 DATA_IMPRINTED = 999;
 
-# define NEVER  (4294967295) // used as "delayed" timer
+# define NEVER  (0xffffffff) // used as "delayed" timer
 
 enum Sounds
 {

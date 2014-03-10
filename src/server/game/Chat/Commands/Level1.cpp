@@ -386,7 +386,7 @@ bool ChatHandler::HandleBanankyCommandModify(const char* args)
             if (HasLowerSecurity(target, 0))
                 return false;
 
-            target->GetSession()->SendNotification(ss.str().c_str());
+            target->GetSession()->SendNotification("%s", ss.str().c_str());
         }
         else
         {

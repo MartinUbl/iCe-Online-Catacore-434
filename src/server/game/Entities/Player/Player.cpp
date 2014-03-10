@@ -1646,7 +1646,7 @@ void Player::Update(uint32 p_time)
     // process joining as arena spectator
     if (m_spectatorInstanceId && m_spectatorJoinTime)
     {
-        if (m_spectatorJoinTime <= time(NULL))
+        if (m_spectatorJoinTime <= (uint32) time(NULL))
         {
             if (!sBattlegroundMgr->AddArenaSpectator(this, m_spectatorInstanceId))
                 m_spectatorInstanceId = 0;
@@ -19914,7 +19914,7 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
                     GetSession()->SendAreaTriggerMessage(GetSession()->GetTrinityString(LANG_LEVEL_MINREQUIRED), LevelMin);
                 else if (cantEnterDiff)
                 {
-                    GetSession()->SendAreaTriggerMessage(GetSession()->GetTrinityString(LANG_CANNOT_ENTER_HC));
+                    GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetTrinityString(LANG_CANNOT_ENTER_HC));
                 }
             }
             return false;

@@ -42,7 +42,7 @@ static const uint32 npcListUnsummonAtReset[] = {NPC_VOLCANO, NPC_CRATER, NPC_SPA
 
 static const Position platformCenter = {-374.337006f, -318.489990f, 100.413002f, 0.0f};
 
-# define NEVER  (4294967295) // used as "delayed" timer ( max uint32 value)
+# define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 enum Spells
 {

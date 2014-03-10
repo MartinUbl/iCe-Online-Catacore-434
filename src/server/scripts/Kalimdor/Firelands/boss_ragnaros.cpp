@@ -304,7 +304,7 @@ static const Yells HeroicDeath[7]= // DONE
 float engulfing_lengths[4] = {45.0f,58.9f,73.7f,89.5f}; // Distances for Engulfing flames
 
 # define MINUTE 60000
-# define NEVER  (4294967295) // used as "delayed" timer (10 minutes)
+# define NEVER  (0xffffffff) // used as "delayed" timer (10 minutes)
 
 # define MIDDLE_X 1033.54f
 # define MIDDLE_Y  -55.08f

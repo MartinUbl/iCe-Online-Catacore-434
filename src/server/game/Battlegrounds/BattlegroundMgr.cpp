@@ -199,7 +199,7 @@ void BattlegroundMgr::Update(uint32 diff)
     {
         if (m_ratedBgWeekCheckTimer < diff)
         {
-            if (m_ratedBgNextWeek <= time(NULL))
+            if (m_ratedBgNextWeek <= (uint32) time(NULL))
                 UpdateRatedBattlegroundWeek();
 
             m_ratedBgWeekCheckTimer = 600000; // 10 minutes
@@ -1985,7 +1985,7 @@ void BattlegroundMgr::UpdateRatedBattlegroundWeek()
     {
         m_ratedBgNextWeek += 7*DAY;
     }
-    while (time(NULL) > m_ratedBgNextWeek);
+    while ((uint32) time(NULL) > m_ratedBgNextWeek);
 
     CharacterDatabase.PExecute("UPDATE rated_battleground SET week = %u, next_week = %u", m_ratedBgWeek, m_ratedBgNextWeek);
 

@@ -143,7 +143,7 @@ bool ChatHandler::HandlePetResetCommand(const char* /*args*/)
             break;
         fd = qr->Fetch();
     }
-    sLog->outChar(ss.str().c_str());
+    sLog->outChar("%s", ss.str().c_str());
     PSendSysMessage("%u pets found",uint32(PetEntrys.size()));
     // Pokud jsme nenasli zadneho peta, vratime se, protoze by proces zfailoval (begin == end)
     if(PetEntrys.size() < 1)
@@ -237,7 +237,7 @@ bool ChatHandler::HandleSaveCommand(const char* /*args*/)
     /* disallow player-induced save sooner than PlayerSaveInterval/2,
      * ie. PlayerSaveInterval (config) = 900sec,
      * allow manual save each 450sec + reset the timer */
-    uint32 PlayerSaveInterval = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
+    int32 PlayerSaveInterval = (int32) sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
     if (PlayerSaveInterval > 0) {
 
         time_t now = time(NULL);

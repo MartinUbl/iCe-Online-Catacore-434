@@ -218,12 +218,12 @@ bool Battlefield::Update(uint32 diff)
         {
             for (int team = 0; team < 2; team++)
                 for (PlayerTimerMap::iterator itr = m_InvitedPlayers[team].begin(); itr != m_InvitedPlayers[team].end(); itr++)
-                    if ((*itr).second <= time(NULL))
+                    if ((*itr).second <= (uint32) time(NULL))
                         KickPlayerFromBf((*itr).first);
             InvitePlayerInZoneToWar();
             for (int team = 0; team < 2; team++)
                 for (PlayerTimerMap::iterator itr = m_PlayersWillBeKick[team].begin(); itr != m_PlayersWillBeKick[team].end(); itr++)
-                    if ((*itr).second <= time(NULL))
+                    if ((*itr).second <= (uint32) time(NULL))
                         KickPlayerFromBf((*itr).first);
 
             m_uiKickDontAcceptTimer = 1000;
