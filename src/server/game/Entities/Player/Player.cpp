@@ -19839,7 +19839,10 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
 
     // if the player's not online we don't know what binds it has
     if (!player || !group || has_binds)
-        CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
+        if(group)
+            CharacterDatabase.PExecute("INSERT INTO group_instance SELECT '%d', instance, permanent FROM character_instance WHERE guid = '%u'", group->GetLowGUID(), GUID_LOPART(player_guid));
+        else //shouldn't happen but just if...
+            CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
     // the following should not get executed when changing leaders
     if (!player || has_solo)
         CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", GUID_LOPART(player_guid));
