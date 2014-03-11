@@ -17703,26 +17703,14 @@ float Player::GetFloatValueFromArray(Tokens const& data, uint16 index)
 
 Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * session)
 {
-    ////                                                     0     1        2     3     4        5      6    7      8     9           10              11
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account,name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
-    // 12          13          14          15   16           17        18        19         20         21          22           23                 24
-    //"position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
-    // 25                 26       27       28       29       30         31           32             33        34    35      36                 37         38
-    //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask,"
-    // 39           40                41                 42                    43          44          45              46           47               48              49
-    //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
-    // 50      51      52      53      54      55      56      57      58      59      60       61           62         63          64             65              66
-    //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
-    // 67           68          69              70
-    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADFROM);
-    
+
     if (!result)
     {
         sLog->outError("Player (GUID: %u) not found in table `characters`, can't load. ",guid);
         return NULL;
     }
-    
+
     Field* fields = result->Fetch();
 
     uint8 pClass = fields[4].GetUInt8();
@@ -17751,13 +17739,21 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     //"position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
     // 25                 26       27       28       29       30         31           32             33        34    35      36                 37         38
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask,"
+    // 39           40         41              42           43               44              45
+    //"totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
+    // 46      47      48      49      50      51      52      53      54      55      56       57           58         59          60             61              62
+    //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
+    // 63           64          65              66
+    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
+
+    // OLD VALUES in case of some error
     // 39           40                41                 42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
     // 50      51      52      53      54      55      56      57      58      59      60       61           62         63          64             65              66
     //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
     // 67           68          69              70
-    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
-    
+    //"knownTitles, actionBars, currentPetSlot, charSlot
+
     Field* fields = result->Fetch();
 
     //uint32 dbAccountId = fields[1].GetUInt32();
@@ -17797,8 +17793,8 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
     SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
 
-    _LoadIntoDataField(fields[64].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
-    _LoadIntoDataField(fields[67].GetCString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
+    _LoadIntoDataField(fields[60].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
+    _LoadIntoDataField(fields[63].GetCString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
@@ -17819,18 +17815,18 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
     SetUInt32Value(PLAYER_BYTES, fields[9].GetUInt32());
     SetUInt32Value(PLAYER_BYTES_2, fields[10].GetUInt32());
-    SetUInt32Value(PLAYER_BYTES_3, (fields[49].GetUInt16() & 0xFFFE) | fields[5].GetUInt8());
+    SetUInt32Value(PLAYER_BYTES_3, (fields[45].GetUInt16() & 0xFFFE) | fields[5].GetUInt8());
     SetUInt32Value(PLAYER_FLAGS, fields[11].GetUInt32());
-    SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[48].GetUInt32());
+    SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[44].GetUInt32());
 
-    //SetUInt64Value(PLAYER_FIELD_KNOWN_CURRENCIES, fields[47].GetUInt64());
+    //SetUInt64Value(PLAYER_FIELD_KNOWN_CURRENCIES, fields[43].GetUInt64());
 
-    //SetUInt32Value(PLAYER_AMMO_ID, fields[63].GetUInt32());
+    //SetUInt32Value(PLAYER_AMMO_ID, fields[62].GetUInt32());
 
     // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
-    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[68].GetUInt8());
+    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[64].GetUInt8());
 
-    m_currentPetSlot = (PetSlot)fields[69].GetUInt32();
+    m_currentPetSlot = (PetSlot)fields[65].GetUInt32();
     _LoadPetSlots(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADPETSLOT));
 
     InitDisplayIds();
@@ -17862,7 +17858,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     uint32 transGUID = uint32(fields[30].GetUInt64());   // field type is uint64 but lowguid is saved
     Relocate(fields[12].GetFloat(), fields[13].GetFloat(), fields[14].GetFloat(), fields[16].GetFloat());
     uint32 mapId = fields[15].GetUInt32();
-    uint32 instanceId = fields[61].GetUInt32();
+    uint32 instanceId = fields[57].GetUInt32();
 
     uint32 dungeonDiff = fields[38].GetUInt8() & 0x0F;
     if (dungeonDiff >= MAX_DUNGEON_DIFFICULTY)
@@ -17882,10 +17878,6 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     _LoadArenaTeamInfo(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADARENAINFO));
     _LoadArenaStatsInfo(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADARENASTATS));
 
-    uint32 arena_currency = fields[39].GetUInt32();
-    if (arena_currency > sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS))
-        arena_currency = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS);
-
     // check arena teams integrity
     for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
     {
@@ -17902,9 +17894,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             SetArenaTeamInfoField(arena_slot, ArenaTeamInfoType(j), 0);
     }
 
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, fields[43].GetUInt32());
-    SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[44].GetUInt16());
-    SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[45].GetUInt16());
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, fields[39].GetUInt32());
+    SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[40].GetUInt16());
+    SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[41].GetUInt16());
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
@@ -17933,8 +17925,8 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
             m_bgData.bgTypeID = currentBg->GetTypeID(true);
 
             //join player to battleground group
-			currentBg->EventPlayerLoggedIn(this);
-			currentBg->AddOrSetPlayerToCorrectBgGroup(this, m_bgData.bgTeam);
+            currentBg->EventPlayerLoggedIn(this);
+            currentBg->AddOrSetPlayerToCorrectBgGroup(this, m_bgData.bgTeam);
 
             SetInviteForBattlegroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
         }
@@ -18223,8 +18215,8 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    m_specsCount = fields[62].GetUInt8();
-    m_activeSpec = fields[63].GetUInt8();
+    m_specsCount = fields[58].GetUInt8();
+    m_activeSpec = fields[59].GetUInt8();
 
     // sanity check
     if (m_specsCount > MAX_TALENT_SPECS || m_activeSpec > MAX_TALENT_SPEC || m_specsCount < MIN_TALENT_SPECS)
@@ -18274,7 +18266,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
 
     // check PLAYER_CHOSEN_TITLE compatibility with PLAYER__FIELD_KNOWN_TITLES
     // note: PLAYER__FIELD_KNOWN_TITLES updated at quest status loaded
-    uint32 curTitle = fields[46].GetUInt32();
+    uint32 curTitle = fields[42].GetUInt32();
     if (curTitle && !HasTitle(curTitle))
         curTitle = 0;
 
@@ -18300,11 +18292,11 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     CheckArmorSpecialization();
 
     // restore remembered power/health values (but not more max values)
-    uint32 savedHealth = fields[50].GetUInt32();
+    uint32 savedHealth = fields[46].GetUInt32();
     SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
     for (uint8 i = 0; i < MAX_POWERS-1; ++i)
     {
-        uint32 savedPower = fields[51+i].GetUInt32();
+        uint32 savedPower = fields[47+i].GetUInt32();
         SetPower(Powers(i),savedPower > GetMaxPower(Powers(i)) ? GetMaxPower(Powers(i)) : savedPower);
     }
 
