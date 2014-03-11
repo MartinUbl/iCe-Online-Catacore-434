@@ -65,7 +65,7 @@ bool CharacterDatabaseConnection::Open()
         "resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask,"
         "totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
         "health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId," 
-        "knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = ?", true);
+        "knownTitles, actionBars, currentPetSlot, charSlot, leaveGuildId, leaveGuildTime FROM characters WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_GROUP, "SELECT guid FROM group_member WHERE memberGuid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_BOUNDINSTANCES, "SELECT id, permanent, map, difficulty, resettime, diffProgress FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = ?", true);
     PrepareStatement(CHAR_LOAD_PLAYER_AURAS, "SELECT caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, "

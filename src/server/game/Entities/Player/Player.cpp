@@ -474,6 +474,7 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     m_social = NULL;
     m_guildId = 0;
     m_lastGuildId = 0;
+    m_guildLeaveTime = 0;
 
     m_lastBattlegroundTypeId = 0;
 
@@ -1929,6 +1930,17 @@ bool Player::ToggleDND()
     if(Guild *pGuild = sObjectMgr->GetGuildById(GetGuildId()))
         pGuild->OnPlayerStatusChange(this, GUILD_MEMBER_FLAG_DND, state);
     return state;
+}
+
+void Player::SetLeaveGuildData(uint32 guildId)
+{
+    m_lastGuildId = guildId;
+    m_guildLeaveTime = time(NULL);
+}
+
+void Player::SetOfflineLeaveGuildData(uint64 guid, uint32 guildId)
+{
+    CharacterDatabase.PExecute("UPDATE characters SET leaveGuildId = %u, leaveGuildTime = %u WHERE guid = %u;", guildId, (uint32)(time(NULL)), GUID_LOPART(guid));
 }
 
 uint8 Player::GetChatTag() const
@@ -17743,8 +17755,8 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     //"totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
     // 46      47      48      49      50      51      52      53      54      55      56       57           58         59          60             61              62
     //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
-    // 63           64          65              66
-    //"knownTitles, actionBars, currentPetSlot, charSlot FROM characters WHERE guid = '%u'", guid);
+    // 63           64          65              66        67            68
+    //"knownTitles, actionBars, currentPetSlot, charSlot, leaveGuildId, leaveGuildTime FROM characters WHERE guid = '%u'", guid);
 
     // OLD VALUES in case of some error
     // 39           40                41                 42                    43          44          45              46           47               48              49
@@ -17804,6 +17816,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder, PreparedQueryResu
     SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
     SetUInt32Value(PLAYER_GUILDDELETE_DATE, 0);
     SetUInt32Value(PLAYER_GUILDLEVEL, 1);
+
+    m_lastGuildId = fields[67].GetUInt32();
+    m_guildLeaveTime = fields[68].GetUInt32();
 
     // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
     m_achievementMgr.LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACHIEVEMENTS), holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADCRITERIAPROGRESS));
@@ -20360,7 +20375,10 @@ void Player::SaveToDB()
     ss << "',";
     ss << "actionBars = " << uint32(GetByteValue(PLAYER_FIELD_BYTES, 2)) << ", ";
 
-    ss << "currentPetSlot = " << m_currentPetSlot;
+    ss << "currentPetSlot = " << m_currentPetSlot << ", ";
+
+    ss << "leaveGuildId = " << m_lastGuildId << ", "
+       << "leaveGuildTime = " << m_guildLeaveTime;
 
     ss << " WHERE guid = " << GetGUIDLow() << ";";
 

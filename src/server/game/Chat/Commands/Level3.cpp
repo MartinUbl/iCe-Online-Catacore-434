@@ -4006,6 +4006,12 @@ bool ChatHandler::HandleGuildUninviteCommand(const char *args)
         return false;
 
     targetGuild->DeleteMember(target_guid, false, true);
+
+    if (target)
+        target->SetLeaveGuildData(glId);
+    else
+        Player::SetOfflineLeaveGuildData(target_guid, glId);
+
     return true;
 }
 

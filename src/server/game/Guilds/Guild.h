@@ -243,6 +243,8 @@ enum GuildChallengeRewards
 #define GUILD_CHALLENGE_WEEK_RAID_COUNT     1
 #define GUILD_CHALLENGE_WEEK_BG_COUNT       3
 
+#define GUILD_REPUTATION_KICK_TIME_LIMIT    2592000 // 30 days
+
 enum PetitionTurns
 {
     PETITION_TURN_OK                    = 0,

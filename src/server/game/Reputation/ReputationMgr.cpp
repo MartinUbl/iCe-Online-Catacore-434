@@ -44,6 +44,19 @@ ReputationRank ReputationMgr::ReputationToRank(int32 standing)
     return MIN_REPUTATION_RANK;
 }
 
+uint32 ReputationMgr::ReputationAmountRankRange(ReputationRank start, ReputationRank end)
+{
+    uint32 rep = 0;
+
+    if (start >= end)
+        return 0;
+
+    for (int i = start; i < end; i++)
+        rep += PointsInRank[i];
+
+    return rep;
+}
+
 int32 ReputationMgr::GetReputation(uint32 faction_id) const
 {
     FactionEntry const *factionEntry = sFactionStore.LookupEntry(faction_id);

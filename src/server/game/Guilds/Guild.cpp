@@ -1948,10 +1948,18 @@ void Guild::Disband()
 
     _BroadcastEvent(GE_DISBANDED, 0);
     // Remove all members
+    uint64 guid;
     while (!m_members.empty())
     {
         Members::const_iterator itr = m_members.begin();
-        DeleteMember(itr->second->GetGUID(), true);
+        guid = itr->second->GetGUID();
+        DeleteMember(guid, true);
+
+        Player* target = sObjectMgr->GetPlayer(guid);
+        if (target)
+            target->SetLeaveGuildData(GetId());
+        else
+            Player::SetOfflineLeaveGuildData(guid, GetId());
     }
 
     PreparedStatement* stmt = NULL;
@@ -2797,6 +2805,8 @@ void Guild::HandleLeaveMember(WorldSession* session)
         _BroadcastEvent(GE_LEFT, player->GetGUID(), player->GetName());
 
         SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_COMMAND_SUCCESS, m_name);
+
+        player->SetLeaveGuildData(GetId());
     }
 }
 
@@ -2823,7 +2833,12 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
             DeleteMember(guid, false, true);
             _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
             _BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName());
-            player->SetLastGuildId(m_id);
+
+            Player* target = sObjectMgr->GetPlayer(guid);
+            if (target)
+                target->SetLeaveGuildData(GetId());
+            else
+                Player::SetOfflineLeaveGuildData(guid, GetId());
         }
     }
 }
@@ -3811,9 +3826,15 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
         pMember->AddFlag(GUILD_MEMBER_FLAG_ONLINE);
         pMember->SetStats(player);
 
-        // If player wasn't in this guild before relog, reset guild reputation to zero
-        if (player->GetLastGuildId() != m_id)
-            player->SetReputation(FACTION_GUILD,0);
+        // If player wasn't in this guild before, or his leave time is greater than one month, reduce reputation
+        if (player->m_lastGuildId != m_id || player->m_guildLeaveTime < (time(NULL) - GUILD_REPUTATION_KICK_TIME_LIMIT))
+        {
+            ReputationRank currRank = player->GetReputationRank(FACTION_GUILD);
+            if (currRank > REP_NEUTRAL)
+                player->SetReputation(FACTION_GUILD, ReputationMgr::ReputationAmountRankRange(REP_NEUTRAL, (ReputationRank)(currRank - 1)));
+            else
+                player->SetReputation(FACTION_GUILD, 0);
+        }
 
         // Learn our perks to him
         for(int i = 0; i < m_level-1; ++i)

@@ -1988,8 +1988,6 @@ class Player : public Unit, public GridObject<Player>
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() { return m_guildId; }
         Guild *GetGuild();
-        uint32 GetLastGuildId() { return m_lastGuildId; }
-        void SetLastGuildId(uint32 guildid) { m_lastGuildId = guildid; }
         static uint32 GetGuildIdFromDB(uint64 guid);
         static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
@@ -2541,6 +2539,13 @@ class Player : public Unit, public GridObject<Player>
         float m_homebindX;
         float m_homebindY;
         float m_homebindZ;
+
+        // in case of guild leave (preserve guild reputation)
+        uint32 m_lastGuildId;
+        time_t m_guildLeaveTime;
+
+        void SetLeaveGuildData(uint32 guildId);
+        static void SetOfflineLeaveGuildData(uint64 guid, uint32 guildId);
 
         WorldLocation GetStartPosition() const;
 
@@ -3127,7 +3132,6 @@ class Player : public Unit, public GridObject<Player>
         // Social
         PlayerSocial *m_social;
         uint32 m_guildId;
-        uint32 m_lastGuildId;
 
         // Groups
         GroupReference m_group;

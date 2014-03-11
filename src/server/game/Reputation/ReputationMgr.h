@@ -80,6 +80,7 @@ class ReputationMgr
         static const int32 Reputation_Bottom = -42000;
 
         static ReputationRank ReputationToRank(int32 standing);
+        static uint32 ReputationAmountRankRange(ReputationRank start, ReputationRank end);
     public:                                                 // accessors
         uint8 GetVisibleFactionCount() const { return m_visibleFactionCount; }
         uint8 GetHonoredFactionCount() const { return m_honoredFactionCount; }
