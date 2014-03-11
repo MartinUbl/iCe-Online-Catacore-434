@@ -17591,10 +17591,17 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                 /*Flexible raid locks rules- boss killed on normal or HC*/
                 if(map->IsRaid() && sInstanceSaveMgr->isFlexibleEnabled(mapId))
                 {
-                    /*Kill log*/
-                    ssPrint << "Players: ";
                     Map::PlayerList const &PlayerList = map->GetInstanceScript()->instance->GetPlayers();//do it for all players
                     uint32 playNumber=map->GetPlayersCountExceptGMs();
+                    bool log=true;
+
+                    if(creature->GetEntry() == 45993/*Theralion*/ || (player && player->GetSession()->GetSecurity() > SEC_PLAYER && !playNumber)) //GM just killed boss alone
+                        log=false;
+
+                    /*Kill log*/
+                    if(log)
+                        ssPrint << "Players: ";
+
                     if (!PlayerList.isEmpty())
                     {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
@@ -17604,15 +17611,20 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                             {
                                 map->doDifficultyStaff(pPlayer, mapId, map->GetInstanceId());
                                 map->copyDeadUnitsFromLeader(pPlayer, mapId, map->GetInstanceId(),creature->GetDBTableGUIDLow());//kill units in all IDs of group members   
-                               
-                                ssPrint << pPlayer->GetName() << "(" << pPlayer->GetGUIDLow() << "), ";
+                                if(log)
+                                    ssPrint << pPlayer->GetName() << "(" << pPlayer->GetGUIDLow() << "), ";
                             }
                         }
+                        if(log)
+                        {
+                            ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players in raid: " << playNumber;
+                            if(player && player->GetGroup())
+                                ssPrint << " in group: " << player->GetGroup()->GetMembersCount();
+                            if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
+                                ssPrint << " POSIBBLE BUGGING!";
+                            sLog->outChar("%s", ssPrint.str().c_str());
+                        }
                     }
-                    ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players: " << playNumber;
-                    if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
-                        ssPrint << " POSIBBLE BUGGING!";
-                    sLog->outChar("%s", ssPrint.str().c_str());
                 }
             }
 
