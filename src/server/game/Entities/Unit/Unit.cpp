@@ -17595,11 +17595,10 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                     uint32 playNumber=map->GetPlayersCountExceptGMs();
                     bool log=true;
 
+                    /*Kill log*/
                     if(creature->GetEntry() == 45993/*Theralion*/ || (player && player->GetSession()->GetSecurity() > SEC_PLAYER && !playNumber)) //GM just killed boss alone
                         log=false;
-
-                    /*Kill log*/
-                    if(log)
+                    else
                         ssPrint << "Players: ";
 
                     if (!PlayerList.isEmpty())
@@ -17615,15 +17614,15 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                                     ssPrint << pPlayer->GetName() << "(" << pPlayer->GetGUIDLow() << "), ";
                             }
                         }
-                        if(log)
-                        {
-                            ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players in raid: " << playNumber;
-                            if(player && player->GetGroup())
-                                ssPrint << " in group: " << player->GetGroup()->GetMembersCount();
-                            if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
-                                ssPrint << " POSIBBLE BUGGING!";
-                            sLog->outChar("%s", ssPrint.str().c_str());
-                        }
+                    }
+                    if(log)
+                    {
+                        ssPrint << "just killed Boss: " << creature->GetName() << "(" << creature->GetEntry() << ") on " << map->GetDifficulty() << " difficulty. Number of players in raid: " << playNumber;
+                        if(player && player->GetGroup())
+                            ssPrint << " in group: " << player->GetGroup()->GetMembersCount();
+                        if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
+                            ssPrint << " POSIBBLE BUGGING!";
+                        sLog->outChar("%s", ssPrint.str().c_str());
                     }
                 }
             }
