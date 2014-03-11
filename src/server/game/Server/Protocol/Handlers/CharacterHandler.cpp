@@ -1004,18 +1004,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                         pCurrChar->learnSpell(perk->SpellId, true);
             }
 
-            // propagate profession spells to guild info
-            uint32 val = 0;
-            if (pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1))
-            {
-                val = pCurrChar->GetSkillValue(pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1));
-                pGuild->SetMemberProfessionData((uint64)pCurrChar->GetGUID(), pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1), val, 0);
-            }
-            if (pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1))
-            {
-                val = pCurrChar->GetSkillValue(pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1));
-                pGuild->SetMemberProfessionData((uint64)pCurrChar->GetGUID(), pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1), val, 0);
-            }
+            pGuild->UpdateMemberStats(pCurrChar);
         }
         else
         {

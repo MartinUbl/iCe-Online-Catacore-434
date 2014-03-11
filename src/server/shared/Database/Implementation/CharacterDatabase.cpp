@@ -239,7 +239,9 @@ bool CharacterDatabaseConnection::Open()
     //   19                 20                21                 22
         "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7,"
     //   23      24       25       26      27         28
-        "c.name, c.level, c.class, c.zone, c.account, c.logout_time "
+        "c.name, c.level, c.class, c.zone, c.account, c.logout_time, "
+    //   29                 30        31           32        33           34            35
+        "achievementPoints, skillId1, skillValue1, skillId2, skillValue2, activityWeek, activityTotal "
         "FROM guild_member gm LEFT JOIN characters c ON c.guid = gm.guid ORDER BY guildid ASC");
     PrepareStatement(CHAR_LOAD_GUILD_BANK_RIGHTS, 
     //          0        1      2    3        4

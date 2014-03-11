@@ -1262,15 +1262,38 @@ void Guild::Member::SetStats(Player* player)
     m_zoneId    = player->GetZoneId();
     m_accountId = player->GetSession()->GetAccountId();
     m_achievementPoints = player->GetAchievementMgr().GetAchievementPoints();
+
+    // propagate profession spells to guild info
+    uint32 val = 0;
+    if (player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1))
+    {
+        val = player->GetSkillValue(player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1));
+        SetProfessionData(player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1), val, 0);
+    }
+    if (player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1))
+    {
+        val = player->GetSkillValue(player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1));
+        SetProfessionData(player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + 1), val, 0);
+    }
 }
 
-void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId)
+void Guild::UpdateMemberStats(Player* player)
+{
+    if (!player)
+        return;
+
+    if (Member* member = GetMember(player->GetGUID()))
+        member->SetStats(player);
+}
+
+void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 achievementPoints)
 {
     m_name      = name;
     m_level     = level;
     m_class     = _class;
     m_zoneId    = zoneId;
     m_accountId = accountId;
+    m_achievementPoints = achievementPoints;
 }
 
 void Guild::Member::SetPublicNote(const std::string& publicNote)
@@ -1350,6 +1373,18 @@ void Guild::Member::SaveToDB(SQLTransaction& trans) const
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
 }
 
+void Guild::UpdateMemberInDB(uint64 guid)
+{
+    if (Member* pMember = GetMember(guid))
+    {
+        CharacterDatabase.PExecute("UPDATE guild_member SET achievementPoints = %u, skillId1 = %u, skillValue1 = %u, skillId2 = %u, skillValue2 = %u, activityWeek = %u, activityTotal = %u"
+                                   " WHERE guildid = %u AND guid = %u;",
+                                   pMember->GetAchievementPoints(), pMember->professions[0].skillId, pMember->professions[0].skillValue, pMember->professions[1].skillId, pMember->professions[1].skillValue,
+                                   pMember->m_activityWeek, pMember->m_activityTotal,
+                                   m_id, GUID_LOPART(guid));
+    }
+}
+
 // Loads member's data from database.
 // If member has broken fields (level, class) returns false. 
 // In this case member has to be removed from guild.
@@ -1365,7 +1400,9 @@ bool Guild::Member::LoadFromDB(Field* fields)
     //   19                 20                21                 22
         "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7,"
     //   23      24       25       26      27         28
-        "c.name, c.level, c.class, c.zone, c.account, c.logout_time "
+        "c.name, c.level, c.class, c.zone, c.account, c.logout_time, "
+    //   29                 30        31           32        33           34            35
+        "achievementPoints, skillId1, skillValue1, skillId2, skillValue2, activityWeek, activityTotal "
     */
 
     m_publicNote    = fields[3].GetString();
@@ -1382,8 +1419,19 @@ bool Guild::Member::LoadFromDB(Field* fields)
              fields[24].GetUInt8(),
              fields[25].GetUInt8(),
              fields[26].GetUInt16(),
-             fields[27].GetUInt32());
-    m_logoutTime    = fields[28].GetUInt64();
+             fields[27].GetUInt32(),
+             fields[29].GetUInt32());
+    m_logoutTime = fields[28].GetUInt64();
+
+    professions[0].skillId = fields[30].GetUInt32();
+    professions[0].skillValue = fields[31].GetUInt32();
+    professions[0].title = 0;
+    professions[1].skillId = fields[32].GetUInt32();
+    professions[1].skillValue = fields[33].GetUInt32();
+    professions[1].title = 0;
+
+    m_activityWeek = fields[34].GetUInt32();
+    m_activityTotal = fields[35].GetUInt32();
 
     if (!CheckStats())
         return false;
@@ -2066,7 +2114,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         memberData << uint8(member->GetClass());
         memberData << uint32(0);      // total guild reputation of member
         memberData.WriteByteSeq(guid[0]);
-        memberData << uint64(0);  // week activity
+        memberData << uint64(member->m_activityWeek); // week activity
         memberData << uint32(member->GetRankId());
         memberData << uint32(member->GetAchievementPoints());
 
@@ -2076,7 +2124,7 @@ void Guild::HandleRoster(WorldSession *session /*= NULL*/)
         memberData.WriteByteSeq(guid[2]);
         memberData << uint8(member->GetFlags());
         memberData << uint32(member->GetZoneId());
-        memberData << uint64(0);    // total activity
+        memberData << uint64(member->m_activityTotal); // total activity
         memberData.WriteByteSeq(guid[7]);
         memberData << uint32(0);    // remaining reputation the member can gain
 
@@ -3882,6 +3930,8 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
         player->SetGuildIdInvited(0);
     }
 
+    UpdateMemberInDB(guid);
+
     _UpdateAccountsNumber();
 
     // Call scripts if member was succesfully added (and stored to database)
@@ -3969,27 +4019,30 @@ bool Guild::ChangeMemberRank(const uint64& guid, uint8 newRank)
 void Guild::SetMemberProfessionData(const uint64& guid, uint32 skillId, uint32 skillValue, uint32 title)
 {
     if (Member* pMember = GetMember(guid))
-    {
-        for (uint32 i = 0; i < 2; i++)
-        {
-            if (pMember->professions[i].skillId == skillId)
-            {
-                pMember->professions[i].skillValue = skillValue;
-                pMember->professions[i].title = title;
-                return;
-            }
-        }
+        pMember->SetProfessionData(skillId, skillValue, title);
+}
 
-        // this means that profession hasn't been found
-        for (uint32 i = 0; i < 2; i++)
+void Guild::Member::SetProfessionData(uint32 skillId, uint32 skillValue, uint32 title)
+{
+    for (uint32 i = 0; i < 2; i++)
+    {
+        if (professions[i].skillId == skillId)
         {
-            if (pMember->professions[i].skillId == 0)
-            {
-                pMember->professions[i].skillId = skillId;
-                pMember->professions[i].skillValue = skillValue;
-                pMember->professions[i].title = title;
-                return;
-            }
+            professions[i].skillValue = skillValue;
+            professions[i].title = title;
+            return;
+        }
+    }
+
+    // this means that profession hasn't been found
+    for (uint32 i = 0; i < 2; i++)
+    {
+        if (professions[i].skillId == 0)
+        {
+            professions[i].skillId = skillId;
+            professions[i].skillValue = skillValue;
+            professions[i].title = title;
+            return;
         }
     }
 }
@@ -3997,14 +4050,19 @@ void Guild::SetMemberProfessionData(const uint64& guid, uint32 skillId, uint32 s
 void Guild::RemoveMemberProfession(const uint64& guid, uint32 skillId)
 {
     if (Member* pMember = GetMember(guid))
+        pMember->RemoveProfession(skillId);
+}
+
+void Guild::Member::RemoveProfession(uint32 skillId)
+{
+    for (uint32 i = 0; i < 2; i++)
     {
-        for (uint32 i = 0; i < 2; i++)
-            if (pMember->professions[i].skillId == skillId)
-            {
-                pMember->professions[i].skillId = 0;
-                pMember->professions[i].skillValue = 0;
-                pMember->professions[i].title = 0;
-            }
+        if (professions[i].skillId == skillId)
+        {
+            professions[i].skillId = 0;
+            professions[i].skillValue = 0;
+            professions[i].title = 0;
+        }
     }
 }
 

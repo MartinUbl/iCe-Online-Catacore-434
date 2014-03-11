@@ -20455,6 +20455,16 @@ void Player::SaveToDB()
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+
+    if (GetGuildId() > 0)
+    {
+        Guild* pGuild = GetGuild();
+        if (pGuild)
+        {
+            pGuild->UpdateMemberStats(this);
+            pGuild->UpdateMemberInDB(GetGUID());
+        }
+    }
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state

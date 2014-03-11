@@ -423,10 +423,14 @@ private:
                 professions[i].skillValue = 0;
                 professions[i].title = 0;
             }
+
+            m_activityWeek = 0;
+            m_activityTotal = 0;
+            m_achievementPoints = 0;
         }
 
         void SetStats(Player* player);
-        void SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId);
+        void SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId, uint32 achievementPoints = 0);
         bool CheckStats() const;
 
         void SetPublicNote(const std::string& publicNote);
@@ -434,6 +438,8 @@ private:
         void SetZoneID(uint32 id) { m_zoneId = id; }
         void SetAchievementPoints(uint32 val) { m_achievementPoints = val; }
         void SetLevel(uint8 var) { m_level = var; }
+        void SetProfessionData(uint32 skillId, uint32 skillValue, uint32 title);
+        void RemoveProfession(uint32 skillId);
 
         void AddFlag(uint8 var) { m_flags |= var; }
         void RemFlag(uint8 var) { m_flags &= ~var; }
@@ -490,6 +496,8 @@ private:
         RemainingValue m_bankRemaining[GUILD_BANK_MAX_TABS + 1];
         uint32 m_achievementPoints;
         Profession professions[2];
+        uint32 m_activityWeek;
+        uint32 m_activityTotal;
     };
 
     // Base class for event entries
@@ -874,6 +882,8 @@ public:
     RankInfo & GetRankInfo(uint32 rankId) {return m_ranks[rankId]; }
     bool IsMember(uint64 guid) const;
     uint32 GetMembersCount() { return m_members.size(); };
+    void UpdateMemberInDB(uint64 guid);
+    void UpdateMemberStats(Player* player);
 
     // Bank
     void SwapItems(Player* player, uint8 tabId, uint8 slotId, uint8 destTabId, uint8 destSlotId, uint32 splitedAmount);
