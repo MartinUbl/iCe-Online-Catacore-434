@@ -22770,7 +22770,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot) < iece->RequiredPersonalArenaRating)
         {
-            if (additional3v3Rating == 0 || GetArenaPersonalRating(ArenaTeam::GetSlotByType(ARENA_TEAM_3v3)) < additional3v3Rating)
+            if (additional3v3Rating == 0 || (GetArenaPersonalRating(ArenaTeam::GetSlotByType(ARENA_TEAM_3v3)) < additional3v3Rating && GetArenaPersonalRating(ArenaTeam::GetSlotByType(ARENA_TEAM_2v2)) < iece->RequiredPersonalArenaRating))
             {
                 // probably not the proper equip err
                 SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
