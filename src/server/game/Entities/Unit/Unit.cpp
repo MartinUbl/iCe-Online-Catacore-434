@@ -17621,7 +17621,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
                         if(player && player->GetGroup())
                             ssPrint << " in group: " << player->GetGroup()->GetMembersCount();
                         if(playNumber < map->GetMaxPlayers() || playNumber > map->GetMaxPlayers())
-                            ssPrint << " POSIBBLE BUGGING!";
+                            ssPrint << " POSSIBLE BUGGING!";
                         sLog->outChar("%s", ssPrint.str().c_str());
                     }
                 }
