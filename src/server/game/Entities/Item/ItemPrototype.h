@@ -765,10 +765,10 @@ struct ItemPrototype
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_PROTO_FLAG_CONJURED); }
     bool IsRangedWeapon() const
     {
-        return Class == ITEM_CLASS_WEAPON ||
-               SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+        return Class == ITEM_CLASS_WEAPON &&
+               (SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
                SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
-               SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
+               SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW);
     }
 };
 
