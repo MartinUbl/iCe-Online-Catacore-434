@@ -2988,6 +2988,15 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                         cell.Visit(p, world_object_checker, *GetBase()->GetOwner()->GetMap(), *caster, radius);
                     }
 
+                    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end();)
+                    {
+                        if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) || (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE)
+                            || (*itr)->HasAura(SPELL_AURA_MOD_STEALTH) || (*itr)->HasAura(SPELL_AURA_MOD_INVISIBILITY))
+                            itr = targets.erase(itr);
+                        else
+                            itr++;
+                    }
+
                     if (targets.empty())
                         return;
 
