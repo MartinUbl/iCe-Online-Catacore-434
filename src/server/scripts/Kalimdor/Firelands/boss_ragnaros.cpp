@@ -1145,6 +1145,16 @@ public:
                 }
             }
 
+            if (PHASE == INTERMISSION1 || PHASE == INTERMISSION2 || PHASE == PREPARING_FOR_INTERMISSION1)
+            {
+                Creature * sulfur = me->FindNearestCreature(SPLITTING_SULFURAS,80.0f,true);
+
+                if (sulfur && sulfur->IsInWorld())
+                {
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, sulfur->GetGUID());
+                }
+            }
+
             if (Magma_timer <= diff)
             {
                 if (PHASE != PHASE4 && IntermissionStep < 4)
@@ -1286,22 +1296,22 @@ public:
                         break;
                 }
 
-                Creature * sulfur = me->SummonCreature(SPLITTING_SULFURAS,me->GetPositionX() + cos(angle)*50.0f,me->GetPositionY() + sin(angle)* 50.0f,55.34f,angle,TEMPSUMMON_MANUAL_DESPAWN,0);
+                Creature * sulfur = me->SummonCreature(SPLITTING_SULFURAS,me->GetPositionX() + cos(angle)*50.0f,me->GetPositionY() + sin(angle)* 50.0f,56.34f,angle,TEMPSUMMON_MANUAL_DESPAWN,0);
 
                 if(sulfur && sulfur->IsInWorld())
                 {
                     me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                 }
 
-                if (IsHeroic() == false)
-                {
+                //if (IsHeroic() == false)
+                //{
                     if (fabs(angle - 2.54f) < FLT_EPSILON )
                         SpawnSonsOfFlame(LEFT);
                     else if( fabs(angle - 3.135f) < FLT_EPSILON )
                         SpawnSonsOfFlame(MIDDLE);
                     else
                         SpawnSonsOfFlame(RIGHT);
-                }
+                /*}
                 else
                 {
                     if (fabs(angle - 2.54f) < FLT_EPSILON )
@@ -1310,7 +1320,7 @@ public:
                         SpawnSonsOfFlameHeroic(MIDDLE);
                     else
                         SpawnSonsOfFlameHeroic(RIGHT);
-                }
+                }*/
 
                 me->CastSpell(me->getVictim(),SPLITTING_BLOW,false); // Burry animation
                 me->SetFacingTo(angle);
@@ -1443,7 +1453,7 @@ public:
                             me->CastSpell(me,WORLD_IN_FLAMES,false);
                         }
 
-                        Engulfing_flames_timer = 42000;
+                        Engulfing_flames_timer = (IsHeroic()) ? 60000 : 42000;
                     }
                 }
                 else Engulfing_flames_timer -= diff;
@@ -1531,15 +1541,15 @@ public:
                         me->SetUInt64Value(UNIT_FIELD_TARGET,sulfur->GetGUID());
                     }
 
-                    if (IsHeroic() == false)
-                    {
+                    //if (IsHeroic() == false)
+                    //{
                         if (fabs(angle - 2.54f) < FLT_EPSILON )
                             SpawnSonsOfFlame(LEFT);
                         else if (fabs(angle - 3.135f) < FLT_EPSILON )
                             SpawnSonsOfFlame(MIDDLE);
                         else
                             SpawnSonsOfFlame(RIGHT);
-                    }
+                    /*}
                     else
                     {
                         if (fabs(angle - 2.54f) < FLT_EPSILON )
@@ -1548,7 +1558,7 @@ public:
                             SpawnSonsOfFlameHeroic(MIDDLE);
                         else
                             SpawnSonsOfFlameHeroic(RIGHT);
-                    }
+                    }*/
 
                     AllowTurning_timer = 8000 + 45000+ 6000; // Casting time + 45 seconds
 
@@ -1693,7 +1703,7 @@ public:
                             me->CastSpell(me,WORLD_IN_FLAMES,false);
                         }
 
-                        Engulfing_flames_timer = 42000;
+                        Engulfing_flames_timer = (IsHeroic()) ? 60000 : 42000;
                     }
                 }
                 else Engulfing_flames_timer -= diff;
