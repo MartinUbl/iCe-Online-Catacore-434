@@ -353,8 +353,9 @@ class Item : public Object
         uint32 GetPaidExtendedCost() { return m_paidExtendedCost; }
 
         void UpdatePlayedTime(Player *owner);
-        uint32 GetPlayedTime();
-        bool IsRefundExpired();
+        uint32 GetPlayedTime() const;           // played time the item exists
+        uint32 GetPlayedTimeOfCreation() const;
+        bool IsRefundExpired() const;
 
         // Soulbound trade system
         void SetSoulboundTradeable(AllowedLooterSet* allowedLooters, Player* currentOwner, bool apply);
@@ -386,6 +387,7 @@ class Item : public Object
         ItemUpdateState uState;
         int16 uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
+        uint32 m_playedTime;                                // played time the item does exist
         time_t m_lastPlayedTimeUpdate;
         uint32 m_refundRecipient;
         uint32 m_paidMoney;

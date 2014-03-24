@@ -12870,7 +12870,6 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
         if (allowedLooters && pItem->GetProto()->GetMaxStackSize() == 1 && pItem->IsSoulBound())
         {
             pItem->SetSoulboundTradeable(allowedLooters, this, true);
-            pItem->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, GetTotalPlayedTime());
             m_itemSoulboundTradeable.push_back(pItem);
 
             // save data
@@ -18673,6 +18672,8 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timediff)
                 continue;
             }
 
+            item->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, GetTotalPlayedTime() - item->GetPlayedTime());
+
             // not allow have in alive state item limited to another map/zone
             if (isAlive() && item->IsLimitedToAnotherMapOrZone(GetMapId(), zone))
             {
@@ -18697,7 +18698,7 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timediff)
 
             if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
             {
-                if (item->GetPlayedTime() > (2*HOUR))
+                if (item->IsRefundExpired())
                 {
                     sLog->outDebug("Item::LoadFromDB, Item GUID: %u: refund time expired, deleting refund data and removing refundable flag.", item->GetGUIDLow());
                     trans->PAppend("DELETE FROM item_refund_instance WHERE item_guid = '%u'", item->GetGUIDLow());
@@ -28247,7 +28248,7 @@ void Player::SendRefundInfo(Item *item)
     data.WriteBit(guid[1]);
     data.FlushBits();
     data.WriteByteSeq(guid[7]);
-    data << uint32(GetTotalPlayedTime() - item->GetPlayedTime());
+    data << uint32(item->GetPlayedTimeOfCreation());
     for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)                             // item cost data
     {
         data << uint32(iece->RequiredItemCount[i]);
