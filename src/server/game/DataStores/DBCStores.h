@@ -52,6 +52,10 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 float GetGtSpellScalingValue(int8 class_, uint8 level);
 
+void removeBuggedTransmogs(void);
+bool CanTransmogrifyItemWithItemSpec(ItemPrototype const* proto1, ItemPrototype const* proto2);
+
+
 enum ContentLevels
 {
     CONTENT_1_60 = 0,

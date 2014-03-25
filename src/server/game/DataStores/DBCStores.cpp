@@ -1093,6 +1093,102 @@ float GetGtSpellScalingValue(int8 class_, uint8 level)
         return -1.0f;
 }
 
+void removeBuggedTransmogs(void)
+{
+    QueryResult result1 = CharacterDatabase.PQuery("SELECT guid, id FROM item_enchantments WHERE slot=9");
+    if (result1)
+    {
+        do
+        {
+            Field* fields = result1->Fetch();
+
+            uint32 guid = fields[0].GetUInt32();
+            uint32 itemEntry2 = fields[1].GetUInt32();
+
+            QueryResult result2 = CharacterDatabase.PQuery("SELECT owner_guid, itemEntry FROM item_instance WHERE guid = '%d'", guid);
+            if (result2)
+            {
+                Field* fields2 = result2->Fetch();
+
+                uint32 owner_guid = fields2[0].GetUInt32();
+                uint32 itemEntry1 = fields2[1].GetUInt32();
+
+                ItemPrototype const *proto1 = sObjectMgr->GetItemPrototype(itemEntry1);
+                ItemPrototype const *proto2 = sObjectMgr->GetItemPrototype(itemEntry2);
+                if(proto1 && proto2)
+                {
+                    if(!CanTransmogrifyItemWithItemSpec(proto1,proto2))
+                    {
+                        CharacterDatabase.PExecute("DELETE FROM item_enchantments WHERE slot=9 AND guid='%d'",guid);
+                        
+                        std::ostringstream ssPrint;
+                        ssPrint << "TB:";
+                        char* pocet = "1000";
+                        char* duvod = "Bugovanie transmogu/Transmog bugging";
+                        int pocet2=-1;
+
+                        std::string chname="";
+                        sObjectMgr->GetPlayerNameByGUID(owner_guid,chname);
+                        ssPrint << chname.c_str() << " " << itemEntry1 << " to " << itemEntry2;
+                        sLog->outCharWithouTimestamp("%s", ssPrint.str().c_str());
+                        result2 =  ScriptDatabase.PQuery("SELECT count FROM ice_bananky WHERE guid = '%d'", owner_guid);
+                        if(result2)
+                        {
+                            fields2 = result2->Fetch();
+                            pocet2 = fields2[0].GetUInt32();
+
+                            if(pocet2 < 1000)
+                            {
+                                pocet2=-1;
+                            }
+                        }
+                        if(pocet2 == -1)
+                        {
+                            ScriptDatabase.PExecute("INSERT INTO ice_bananky VALUES (%u,'%s','%s','%s',0)", owner_guid, chname.c_str(), pocet, duvod); // Save to DB
+                            CharacterDatabase.PExecute("UPDATE characters SET position_x='-10936.1',position_y='-400.671',position_z='23.1415',map='746' where guid = %u", owner_guid); // Save to DB if offline
+                        }
+                        
+                    }
+                }
+            }
+        }
+        while (result1->NextRow());
+    }
+}
+
+bool CanTransmogrifyItemWithItemSpec(ItemPrototype const* proto1, ItemPrototype const* proto2)
+{
+    if (proto1->ItemId == proto2->ItemId)
+        return false;
+
+    // special case exceptions: for bows, crossbows, guns <- -> gun, bow and crossbow can be transmogrified on gun, bow and crossbow.
+    if (proto1->Class == ITEM_CLASS_WEAPON && proto2->Class == ITEM_CLASS_WEAPON
+        && (proto1->SubClass == ITEM_SUBCLASS_WEAPON_GUN || proto1->SubClass == ITEM_SUBCLASS_WEAPON_BOW
+        || proto1->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW)
+        && (proto2->SubClass == ITEM_SUBCLASS_WEAPON_BOW || proto2->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW
+        || proto2->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
+        return true;
+
+    if (proto1->InventoryType == INVTYPE_BAG ||
+        proto1->InventoryType == INVTYPE_RELIC ||
+        proto1->InventoryType == INVTYPE_BODY ||
+        proto1->InventoryType == INVTYPE_FINGER ||
+        proto1->InventoryType == INVTYPE_TRINKET ||
+        proto1->InventoryType == INVTYPE_AMMO ||
+        proto1->InventoryType == INVTYPE_QUIVER)
+        return false;
+
+    if (proto1->SubClass != proto2->SubClass && (proto1->Class != ITEM_CLASS_WEAPON || !proto2->IsRangedWeapon() || !proto1->IsRangedWeapon()))
+        return false;
+
+    if (proto1->InventoryType != proto2->InventoryType &&
+        (proto1->Class != ITEM_CLASS_WEAPON || (proto2->InventoryType != INVTYPE_WEAPONMAINHAND && proto2->InventoryType != INVTYPE_WEAPONOFFHAND)) &&
+        (proto1->Class != ITEM_CLASS_ARMOR || (proto1->InventoryType != INVTYPE_CHEST && proto2->InventoryType != INVTYPE_ROBE && proto1->InventoryType != INVTYPE_ROBE && proto2->InventoryType != INVTYPE_CHEST)))
+        return false;
+
+    return true;
+}
+
 // script support functions
  DBCStorage <SoundEntriesEntry>  const* GetSoundEntriesStore()   { return &sSoundEntriesStore;   }
  DBCStorage <SpellEntry>         const* GetSpellStore()          { return &sSpellStore;          }

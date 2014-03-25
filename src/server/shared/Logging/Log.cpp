@@ -959,6 +959,32 @@ void Log::outChar(const char * str, ...)
     }
 }
 
+void Log::outCharWithouTimestamp(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB && m_dbChar)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_CHAR, nnew_str);
+        va_end(ap2);
+    }
+
+    if (charLogfile)
+    {
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(charLogfile, str, ap);
+        fprintf(charLogfile, "\n" );
+        va_end(ap);
+        fflush(charLogfile);
+    }
+}
+
 void Log::outCharDump(const char * str, uint32 account_id, uint32 guid, const char * name)
 {
     FILE *file = NULL;

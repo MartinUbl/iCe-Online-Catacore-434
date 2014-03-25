@@ -110,6 +110,7 @@ class Log
         void outDebugInLine( const char * str, ... )            ATTR_PRINTF(2,3);
         void outErrorDb( const char * str, ... )                ATTR_PRINTF(2,3);
         void outChar( const char * str, ... )                   ATTR_PRINTF(2,3);
+        void outCharWithouTimestamp( const char * str, ... )    ATTR_PRINTF(2,3);
         void outCommand( uint32 account, const char * str, ...) ATTR_PRINTF(3,4);
         void outRemote( const char * str, ... )                 ATTR_PRINTF(2,3);
         void outChat( const char * str, ... )                   ATTR_PRINTF(2,3);
