@@ -1438,11 +1438,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Items...");                     // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr->LoadItemPrototypes();
 
-
-    // Remove bugged transmogs
-    sLog->outString("Removing bugged transmogs...");
-    removeBuggedTransmogs();
-
     sLog->outString("Loading Item set names...");            // must be after LoadItemPrototypes
     sObjectMgr->LoadItemSetNames();
 
