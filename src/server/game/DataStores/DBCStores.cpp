@@ -1123,8 +1123,8 @@ void removeBuggedTransmogs(void)
                         
                         std::ostringstream ssPrint;
                         ssPrint << "TB:";
-                        std::string pocet = "1000";
-                        std::string duvod = "Bugovanie transmogu/Transmog bugging";
+                        char* pocet = "1000";
+                        char* duvod = "Bugovanie transmogu/Transmog bugging";
                         int pocet2=-1;
 
                         std::string chname="";
@@ -1144,7 +1144,7 @@ void removeBuggedTransmogs(void)
                         }
                         if(pocet2 == -1)
                         {
-                            ScriptDatabase.PExecute("INSERT INTO ice_bananky VALUES (%u,'%s','%s','%s',0)", owner_guid, chname.c_str(), pocet.c_str(), duvod.c_str()); // Save to DB
+                            ScriptDatabase.PExecute("INSERT INTO ice_bananky VALUES (%u,'%s','%s','%s',0)", owner_guid, chname.c_str(), pocet, duvod); // Save to DB
                             CharacterDatabase.PExecute("UPDATE characters SET position_x='-10936.1',position_y='-400.671',position_z='23.1415',map='746' where guid = %u", owner_guid); // Save to DB if offline
                         }
                         
