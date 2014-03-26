@@ -5548,9 +5548,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 7202: // Blood link
             spellInfo->EffectApplyAuraName[0]=SPELL_EFFECT_DUMMY;
             break;
+
+        case 88314: // Twisting Winds
+            spellInfo->EffectRadiusIndex[0] = 15; // 3 yd
+            spellInfo->EffectRadiusIndex[1] = 15; // 3 yd
+            break;
         default:
             break;
         }
+
 
         switch(spellInfo->SpellFamilyName)
         {
