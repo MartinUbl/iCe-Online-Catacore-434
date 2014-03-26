@@ -1429,10 +1429,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Item Random Enchantments Table...");
     LoadRandomEnchantmentsTable();
 
-    /*remove transmog babanky*/
-    ScriptDatabase.PExecute("UPDATE ice_bananky SET count=0 WHERE duvod='Bugovanie transmogu/Transmog bugging'"); // Save to DB
-
-
     sLog->outString("Loading Disables");
     sDisableMgr->LoadDisables();                             // must be before loading quests and items
 
