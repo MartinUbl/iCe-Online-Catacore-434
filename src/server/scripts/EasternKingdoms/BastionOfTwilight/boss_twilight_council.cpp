@@ -49,7 +49,7 @@ enum Creatures
     FELUDIUS_ENTRY         = 43687,
     ARION_ENTRY            = 43688,
     TERRASTRA_ENTRY        = 43689,
-    CREATURE_FIRE_PATCH    = 48711,
+    CREATURE_INFERNO_RUSH  = 47501,
     CREATURE_WATER_BOMB    = 44201,
     CREATURE_GRAVITY_WELL  = 44824,
     CREATURE_ERUPTION_NPC  = 44845,
@@ -1163,15 +1163,15 @@ public:
                                     float jednotkova_dlzka=0.0f;
 
                                     // Jeden flame pod seba
-                                    me->SummonCreature(CREATURE_FIRE_PATCH,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(), 0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                                    me->SummonCreature(CREATURE_INFERNO_RUSH, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                                     // Jeden pod hraca :D
-                                    me->SummonCreature(CREATURE_FIRE_PATCH,Rush_target->GetPositionX(),Rush_target->GetPositionY(),Rush_target->GetPositionZ(), 0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                                    me->SummonCreature(CREATURE_INFERNO_RUSH, Rush_target->GetPositionX(), Rush_target->GetPositionY(), Rush_target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                                     // Ostatne po urcitym uhlom ku hracovi
                                     for(int i = 0;i < int(dlzka/5);i++)
                                     {
                                         jednotkova_dlzka=jednotkova_dlzka+5.0f; // polomer kruznice
                                         // Zatial spawn na podlazie miestnosi pretoze NPC sa prepadavju pod texturu ( zle vmapy) alebo whatever...
-                                        me->SummonCreature(CREATURE_FIRE_PATCH,me->GetPositionX()+cos(uhol)*jednotkova_dlzka,me->GetPositionY()+sin(uhol)*jednotkova_dlzka,831.92f, 0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
+                                        me->SummonCreature(CREATURE_INFERNO_RUSH, me->GetPositionX() + cos(uhol)*jednotkova_dlzka, me->GetPositionY() + sin(uhol)*jednotkova_dlzka, 831.92f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                                     }
 
                                     me->addUnitState(UNIT_STAT_CASTING); // nechceme aby zacal castit ked bude bezat znova za tankom
