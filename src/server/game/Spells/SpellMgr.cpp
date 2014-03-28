@@ -5550,8 +5550,8 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
 
         case 88314: // Twisting Winds
-            spellInfo->EffectRadiusIndex[0] = 15; // 3 yd
-            spellInfo->EffectRadiusIndex[1] = 15; // 3 yd
+            spellInfo->EffectRadiusIndex[0] = 16; // 3 yd
+            spellInfo->EffectRadiusIndex[1] = 16; // 3 yd
             break;
         default:
             break;
