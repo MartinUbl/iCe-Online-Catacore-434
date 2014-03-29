@@ -907,7 +907,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                     // Glyph of Soul Swap also makes this spell to have cooldown
                     if (m_caster->HasAura(56226))
+                    {
+                        m_caster->CastSpell(m_caster, 94229, true); // Soul Swap Cooldown Marker
                         m_caster->ToPlayer()->AddSpellCooldown(86121, 0, 30000);
+                    }
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
