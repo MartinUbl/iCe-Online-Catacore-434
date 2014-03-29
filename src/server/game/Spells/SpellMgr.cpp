@@ -3046,7 +3046,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Curses/etc
             if (spellproto->SpellFamilyFlags[0] & 0x80000000)
                 return DIMINISHING_LIMITONLY;
-            // Curse of Tongues
+            // Curse of Exhaustion
             if (spellproto->Id == 18223)
                 return DIMINISHING_LIMITONLY;
             // Howl of Terror
