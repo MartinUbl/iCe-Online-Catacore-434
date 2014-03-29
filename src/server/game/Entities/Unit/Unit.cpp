@@ -2743,6 +2743,12 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (!pVictim->isAlive() && pVictim->GetTypeId() != TYPEID_PLAYER)
         return SPELL_MISS_NONE;
 
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_ROGUE)
+    {
+        if (pVictim->HasAura(31224)) // Temporary hackfix for Cloak of Shadows -> should have 100% chance to resist no matter what
+            return SPELL_MISS_RESIST;
+    }
+
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
     int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
