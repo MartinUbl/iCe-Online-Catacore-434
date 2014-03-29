@@ -23461,6 +23461,10 @@ void Player::LeaveBattleground(bool teleportToEntryPoint, bool CastDeserter)
     RemoveAurasDueToSpell(74411); // Battleground dampening
     RemoveAurasDueToSpell(74410); // Arena dampening
 
+    // Dismount player before teleport from BG -> prevent stacking of multiple mounted auras
+    if (IsMounted())
+        RemoveAurasByType(SPELL_AURA_MOUNTED);
+
     if (Battleground *bg = GetBattleground())
     {
         // leaving rated bg -> count it as a loose to prevent exploit
