@@ -7153,6 +7153,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 target = this;
                 break;
             }
+            if (dummySpell->Id == 83340 || dummySpell->Id == 83356) // Sic 'Em! (Rank 1/2)
+            {
+                //Proc only from critical Arcane Shot, Aimed Shot or Explosive Shot 
+                if ((procSpell->Id == 3044 || procSpell->Id == 19434 || procSpell->Id == 53301) && (procEx & PROC_EX_CRITICAL_HIT))
+                    break;
+                else
+                    return false;
+            }
             // Crouching Tiger, Hidden Chimera 
             if (dummySpell->SpellIconID == 4752 && GetTypeId() == TYPEID_PLAYER)
             {
