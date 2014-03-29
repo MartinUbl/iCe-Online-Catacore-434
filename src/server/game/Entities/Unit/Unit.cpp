@@ -9347,6 +9347,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             this->CastSpell(this,53257,true); // Generate second stack of Cobra strikes buff
             break;
         }
+        case 85043: // Grand Crusader
+        case 75806:
+        {
+            // Proc only from  Crusader Strike or Hammer of the Righteous
+            if (procSpell->Id != 35395 && procSpell->Id != 53595)
+                return false;
+            break;
+        }
         case 20784: // Tamed Pet Passive ( Aura on hunter's pets, trigger Frenzy when they hit with their basic attacks )
         {
             // Exclude bad proc flags
