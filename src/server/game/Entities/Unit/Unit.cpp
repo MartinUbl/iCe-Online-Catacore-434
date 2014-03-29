@@ -9326,6 +9326,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 88687: // Surge of Light
+        case 88690:
+        {
+            //Proc only from Smite, Heal, Flash Heal, Binding Heal or Greater Heal 
+            if (procSpell->Id != 2050 && procSpell->Id != 2060 && procSpell->Id != 2061 && procSpell->Id != 32546 && procSpell->Id != 585)
+                return false;
+            break;
+        }
         case 99204: // Shaman T12 Elemental 2P Bonus
         {
             if (procSpell->Id != 403) // Lightning Bolt
