@@ -6701,6 +6701,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // Smite and Holy Fire
                     if (!(procSpell->Id == 585) && !(procSpell->Id == 14914))
                         return false;
+                    
+                    // Proc only from  direct dmg of Holy Fire
+                    if (procSpell->Id == 14914 && (procFlag & PROC_FLAG_DONE_PERIODIC))
+                        return false;
 
                     // Done to someone else
                     if (!target || target == this)
