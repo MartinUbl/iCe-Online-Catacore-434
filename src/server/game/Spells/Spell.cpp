@@ -6021,37 +6021,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (!m_caster->HasAura(33167))
                 return SPELL_FAILED_TARGET_FRIENDLY;
         }
-
-        // check if target has anything to dispel
-        if (Target)
-        {
-            bool hasMagic = false;
-
-            Unit::AuraMap const &auras = Target->GetOwnedAuras();
-            for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-            {
-                Aura *aura = itr->second;
-                if (aura->IsPassive())
-                    continue;
-
-                const SpellEntry *spellInfo = aura->GetSpellProto();
-                if (spellInfo->Dispel == DISPEL_MAGIC)
-                {
-                    AuraApplication *aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
-                    if (!aurApp)
-                        continue;
-                    bool positive = aurApp->IsPositive();
-                    if (enemy == positive)  // only positive from enemies and negative from friends
-                    {
-                        hasMagic = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!hasMagic)
-                return SPELL_FAILED_NOTHING_TO_DISPEL;
-        }
     }
 
     // Archaeology project check - reagents / keystones
