@@ -272,6 +272,54 @@ public:
     }
 };
 
+class spell_sha_chain_lightning : public SpellScriptLoader
+{
+public:
+    spell_sha_chain_lightning() : SpellScriptLoader("spell_sha_chain_lightning") { }
+
+    class spell_sha_chain_lightning_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_chain_lightning_SpellScript);
+
+        bool hitOne;
+
+        bool Load()
+        {
+            hitOne = false;
+        }
+
+        void HandleHit(SpellEffIndex effIndex)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || caster->ToPlayer() == NULL)
+                return;
+
+            if (hitOne == false) // Reduce colldown only for first target hit
+            {
+                // talent Feedback - modify cooldown of Elemental Mastery
+                if (caster->HasAura(86185))
+                    caster->ToPlayer()->ModifySpellCooldown(16166, -3000, true);
+                else if (caster->HasAura(86184))
+                    caster->ToPlayer()->ModifySpellCooldown(16166, -2000, true);
+                else if (caster->HasAura(86183))
+                    caster->ToPlayer()->ModifySpellCooldown(16166, -1000, true);
+
+                hitOne = true;
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_sha_chain_lightning_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_chain_lightning_SpellScript();
+    }
+};
+
 // 88766 Fulmination handled in 8042 Earth Shock
 class spell_sha_fulmination : public SpellScriptLoader
 {
@@ -429,6 +477,7 @@ public:
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_astral_shift();
+    new spell_sha_chain_lightning();
     new spell_sha_earthbind_totem();
     new spell_sha_unleash_elements();
     new spell_sha_totemic_wrath();

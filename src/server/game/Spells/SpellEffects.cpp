@@ -1482,8 +1482,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         m_caster->CastCustomSpell(m_caster, 77800, &manamod, &effmod, &effmod, true);
                 }
 
-                // Lightning Bolt and Chain Lightning
-                if (m_spellInfo->Id == 403 || m_spellInfo->Id == 421)
+                // Lightning Bolt -> Chain Lightning handled in SpellScript, cause should not count every single jump of spell
+                if (m_spellInfo->Id == 403)
                 {
                     // talent Feedback - modify cooldown of Elemental Mastery
                     if (m_caster->HasAura(86185))
