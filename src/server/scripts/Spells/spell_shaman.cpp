@@ -286,6 +286,7 @@ public:
         bool Load()
         {
             hitOne = false;
+            return true;
         }
 
         void HandleHit(SpellEffIndex effIndex)
