@@ -5553,6 +5553,18 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 16; // 3 yd
             spellInfo->EffectRadiusIndex[1] = 16; // 3 yd
             break;
+        case 89133: // Solar Fire (Normal)
+        case 89878: // Solar Fire (Heroic)
+            spellInfo->EffectRadiusIndex[0] = 7; // 2 yd
+            break;
+        case 74108: // Solar Winds (Normal)
+        case 89130: // Solar Winds (Heroic)
+            spellInfo->Effect[1] = 0; // Disable second effect
+            break;
+        case 93564: // Pistol Barrage (Normal)
+        case 93784: // Pistol Barrage (Heroic)
+            spellInfo->Effect[1] = 0; // Disable second effect
+            break;
         default:
             break;
         }
