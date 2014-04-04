@@ -4038,10 +4038,11 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     if (unitTarget->ToPlayer()->isRessurectRequested())       // already have one active request
                         return;
 
-                    if (InstanceScript * pInstance = unitTarget->GetInstanceScript())
+                    // Increase ressurection data after using soulstone
+                    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
                     {
-                        if (pInstance->instance->IsRaid() &&  pInstance->IsEncounterInProgress())
-                            pInstance->SetResurectionData(1); // Increase resurrection counter by one
+                        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+                            pInstance->AddRessurectionData();
                     }
 
                     ExecuteLogEffectResurrect(effIndex, unitTarget);
@@ -9428,14 +9429,6 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
             break;
     }
 
-    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
-    {
-        if (pInstance->instance->IsRaid() &&  pInstance->IsEncounterInProgress())
-        {
-            pInstance->SetResurectionData(1); // Increase resurrection counter by one
-        }
-    }
-
     Player* pTarget = unitTarget->ToPlayer();
 
     if (pTarget->isRessurectRequested())       // already have one active request
@@ -9582,12 +9575,6 @@ void Spell::EffectSelfResurrect(SpellEffIndex effIndex)
     plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY));
 
     plr->SpawnCorpseBones();
-
-    if (InstanceScript * pInstance = plr->GetInstanceScript())
-    {
-        if (pInstance->instance->IsRaid() &&  pInstance->IsEncounterInProgress())
-            pInstance->SetResurectionData(1); // Increase resurrection counter by one
-    }
 }
 
 void Spell::EffectSkinning(SpellEffIndex /*effIndex*/)

@@ -72,17 +72,9 @@ bool InstanceScript::IsEncounterInProgress() const
     return false;
 }
 
-void InstanceScript::SetResurectionData(uint32 value, bool reset)
-{
-    if (reset)
-        ressurrectionCounter = value; // value should be always 0
-    else
-        ressurrectionCounter += value;
-}
-
 uint32 InstanceScript::GetResurrectionData() const
 {
-    return ressurrectionCounter;
+    return ressCounter;
 }
 
 bool InstanceScript::CanUseCombatRessurrection() const

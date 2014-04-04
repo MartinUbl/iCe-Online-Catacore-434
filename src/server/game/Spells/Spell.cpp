@@ -5402,6 +5402,17 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint8(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);
 	data << uint32(target->GetResurrectionSpellId());
     target->GetSession()->SendPacket(&data);
+
+    // Only for players
+    if (m_caster->GetTypeId() == TYPEID_UNIT)
+        return;
+
+    // Increase ressurection data after battle res
+    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
+    {
+        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
+            pInstance->AddRessurectionData();
+    }
 }
 
 void Spell::TakeCastItem()
@@ -5928,9 +5939,10 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (pInstance->instance->IsRaid())
         {
-            if (m_spellInfo->HasSpellEffect(SPELL_EFFECT_RESURRECT) || m_spellInfo->HasSpellEffect(SPELL_EFFECT_SELF_RESURRECT))
+            if (m_spellInfo->HasSpellEffect(SPELL_EFFECT_RESURRECT)
+                || m_spellInfo->HasSpellEffect(SPELL_EFFECT_SELF_RESURRECT) || m_spellInfo->Id == 20707) // or Soulstone
             {
-                if (pInstance->CanUseCombatRessurrection() == false && m_spellInfo->Id != 21169 )
+                if (!pInstance->CanUseCombatRessurrection())
                     return SPELL_FAILED_IN_COMBAT_RES_LIMIT_REACHED;
             }
         }

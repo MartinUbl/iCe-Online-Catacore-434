@@ -13630,7 +13630,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
                 if (map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
                 {
-                    map->GetInstanceScript()->SetResurectionData(0,true);
+                    map->GetInstanceScript()->ResetRessurectionData();
                     map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, this);
                 }
 
@@ -14895,7 +14895,7 @@ Unit* Creature::SelectVictim()
     InstanceMap* map = GetMap() ? GetMap()->ToInstanceMap() : NULL;
     if (crea && crea->IsAIEnabled && map && map->GetInstanceScript() && crea->GetCreatureInfo()->rank == 3)
     {
-        map->GetInstanceScript()->SetResurectionData(0,true);
+        map->GetInstanceScript()->ResetRessurectionData();
         map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, this);
     }
 
@@ -17619,7 +17619,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
             if(map && map->GetInstanceScript() && creature->GetCreatureInfo()->rank == 3)
             {
                 uint32 mapId=map->GetId();
-                map->GetInstanceScript()->SetResurectionData(0,true);
+                map->GetInstanceScript()->ResetRessurectionData();
                 map->GetInstanceScript()->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, creature);
 
                 /*Flexible raid locks rules- boss killed on normal or HC*/
