@@ -749,7 +749,6 @@ public:
             me->SummonCreature(MALFURION_STORMRAGE,984.56f,-73.42f,55.8f,0.3f);
 
             // Set timers for phase 4
-            breadthTimer = 33000 - 25000;
             cloudBurstTimer = 50000 - 25000;
             entrappingRootsTimer = 56500 - 25000;
             empowerSulfurasTimer = 83000 - 25000;
@@ -1772,8 +1771,6 @@ public:
                             me->RemoveAllAuras(); // Beams
                             if (Creature *pCenarius = me->FindNearestCreature(CENARIUS,500.0f,true))
                                 pCenarius->InterruptNonMeleeSpells(false);
-                            me->SetFloatValue(UNIT_FIELD_COMBATREACH,15.0f);
-                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,15.0f);
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
                             if(instance)
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -1804,6 +1801,8 @@ public:
                         {
                             HeroicIntermissionTimer = 1500;
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 18.0f);
+                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 18.0f);
                             // Move him bit higher at correct position
                             float z = me->GetMap()->GetHeight2(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                             me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), z + 2.0f);
@@ -1812,6 +1811,7 @@ public:
                         case 9:                     // Melee phase
                             HeroicIntermissionTimer = NEVER;
                             PHASE = PHASE4;
+                            breadthTimer = 4000;
                             geyserTimer = breadthTimer + 10000;
                             spreadFlamesTimer = dreadFlameTimer + 7000;
                             if (me->getVictim())
@@ -1827,7 +1827,7 @@ public:
 
             }
 
-            if (PHASE == PHASE4) // Last phase on heroic mode100
+            if (PHASE == PHASE4) // Last phase on heroic mode
             {
                 if (chaseTimer <= diff)
                 {
@@ -1853,7 +1853,7 @@ public:
                     if (boF)
                     {
                         if (Creature * cen = me->FindNearestCreature(CENARIUS,500.0f,true))
-                            cen->CastSpell(boF,BREADTH_OF_FROST_MISSILE,false);
+                            cen->CastSpell(boF,BREADTH_OF_FROST_MISSILE,false); // 3.5 s cast time
                     }
                     breadthTimer = 50000;
                 }
