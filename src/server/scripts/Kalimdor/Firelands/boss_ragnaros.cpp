@@ -1112,7 +1112,7 @@ public:
                             {
                                 if ((*j) == p) // Exclude self
                                     continue;
-                                if (p->GetDistance2d(*j) <= 8.0f)
+                                if (p->GetExactDist2d(*j) <= 7.5f)
                                     counter++;
                             }
                         }
