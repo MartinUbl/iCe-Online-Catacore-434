@@ -3126,7 +3126,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             else if (m_spellInfo->Id == 1535)
             {
                 // "ignites your flame shock on all nearby enemies"
-                if (unitTarget && unitTarget->HasAura(8050))
+                if (unitTarget && unitTarget->GetAura(8050,m_caster->GetGUID()) )
                     m_caster->CastSpell(unitTarget, 8349, true);
             }
             break;
