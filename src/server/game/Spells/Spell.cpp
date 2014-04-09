@@ -5410,6 +5410,9 @@ void Spell::SendResurrectRequest(Player* target)
     // Increase ressurection data after battle res
     if (InstanceScript * pInstance = m_caster->GetInstanceScript())
     {
+        if (target->GetResurrectionSpellId() == 21169) // Except Reincarnation
+            return;
+
         if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
             pInstance->AddRessurectionData();
     }
