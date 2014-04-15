@@ -5595,6 +5595,41 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     break;
                 }
+                case 96890: // Electrical Charge
+                {
+                    if (!triggeredByAura)
+                        break;
+
+                    int8 stackamount = triggeredByAura->GetBase()->GetStackAmount();
+
+                    uint8 chance = stackamount * 10;
+
+                    // little change to linear chance
+                    if (stackamount < 3)
+                        chance -= 8;
+                    else
+                        chance += 8;
+
+                    if (roll_chance_i(chance))
+                    {
+                        Unit* target = getVictim();
+                        if (!target || target->IsFriendlyTo(this))
+                        {
+                            Unit::AttackerSet const& atts = getAttackers();
+                            Unit::AttackerSet::iterator itr = atts.begin();
+                            if (itr != atts.end())
+                                target = (*itr);
+                        }
+                        if (target)
+                        {
+                            // as comments on wowhead say, the real damage is 2-4 times higher than tooltip value
+                            int32 bp0 = (urand(20, 35) * urand(985, 1266) / 10.0f) * stackamount;
+                            CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
+                            RemoveAurasDueToSpell(96890);
+                        }
+                    }
+                    break;
+                }
                 // Sweeping Strikes
                 case 18765:
                 case 35429:
