@@ -1832,7 +1832,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
                         break;
                     case 589:   // Shadow Word: Pain
-                        {
+                    {
                         // Shadowy Apparition
                         if ((caster->HasAura(78204) && (!caster->isMoving() ? roll_chance_i(12) : roll_chance_i(60)))
                             || (caster->HasAura(78203) && (!caster->isMoving() ? roll_chance_i(8) : roll_chance_i(40)))
@@ -1842,17 +1842,19 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
 
                         // no break;
-                        }
+                    }
                     case 15407: // Mind Flay
                     {
                         // Shadow Orbs proc chance (shared with SW:P)
                         if (caster->HasAura(95740))
                         {
-                            int chance = 10;
-                            if (caster->HasAura(33191)) // Harnessed Shadows r1
-                                chance = 14;
+                            // chance is slightly increased (+3%), because our pseudorandom number generator is dumb whore
+                            int chance = 13;
                             if (caster->HasAura(78228)) // Harnessed Shadows r2
-                                chance = 18;
+                                chance = 21;
+                            else if (caster->HasAura(33191)) // Harnessed Shadows r1
+                                chance = 17;
+
                             if (roll_chance_i(chance))
                             {
                                 caster->CastSpell(caster, 77487, true);
