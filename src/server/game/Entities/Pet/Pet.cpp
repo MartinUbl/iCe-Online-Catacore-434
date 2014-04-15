@@ -192,6 +192,16 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         }
     }
 
+    // exception for Summon Water Elemental (mage) being summoned due to summon spell id not being saved
+    if (pet_type == SUMMON_PET && summon_spell_id == 0 && petentry == 510)
+    {
+        if (!owner->HasSpell(31687))
+        {
+            m_loading = false;
+            return false;
+        }
+    }
+
     uint32 pet_number = fields[0].GetUInt32();
 
     if (current && owner->IsPetNeedBeTemporaryUnsummoned())
