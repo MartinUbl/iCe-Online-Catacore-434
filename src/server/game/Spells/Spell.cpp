@@ -5999,7 +5999,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
-    if (m_spellInfo->Id == 30980 || m_spellInfo->Id == 6770) // Sap
+    // Redirect - player needs to have some combo points on some target
+    if (m_spellInfo->Id == 73981 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_caster->ToPlayer()->GetComboPoints() == 0 || m_caster->ToPlayer()->GetComboTarget() == NULL)
+            return SPELL_FAILED_NO_VALID_TARGETS;
+    }
+
+    // Sap
+    if (m_spellInfo->Id == 30980 || m_spellInfo->Id == 6770)
     {
         if (Target && Target->HasAura(51755)) // Camouflage
             return SPELL_FAILED_NO_VALID_TARGETS;
