@@ -1854,7 +1854,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             if (caster->HasAura(78228)) // Harnessed Shadows r2
                                 chance = 18;
                             if (roll_chance_i(chance))
+                            {
                                 caster->CastSpell(caster, 77487, true);
+                                // add marker if 3 stacks applied
+                                if (Aura* pAura = caster->GetAura(77487))
+                                    if (pAura->GetStackAmount() >= 3)
+                                        caster->CastSpell(caster, 93683, true);
+                            }
                         }
 
                         // Case other than Mind Flay --> break;
@@ -7881,6 +7887,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 // Whirlwind target count >= 4
                 if (GetBase()->GetEffect(EFFECT_0) && GetBase()->GetEffect(EFFECT_0)->GetAmount() == 1680)
                     caster->ToPlayer()->ModifySpellCooldown(1680, -6000, true);
+            }
+
+            // Shadow Orbs - remove marker
+            if (m_spellProto->Id == 77487 && caster)
+            {
+                // remove marker as well
+                caster->RemoveAurasDueToSpell(93683);
             }
 
             if (m_spellProto->Id == 85474 && caster->GetTypeId() == TYPEID_UNIT) // [DND] Hide text (unused)
