@@ -7686,6 +7686,28 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     break;
                 }
+                case 96890: // Electrical Charge
+                {
+                    uint8 chance = aurApp->GetBase()->GetStackAmount() * 10;
+                    if (roll_chance_i(chance))
+                    {
+                        Unit* target = GetCaster()->getVictim();
+                        if (!target || target->IsFriendlyTo(GetCaster()))
+                        {
+                            Unit::AttackerSet const& atts = GetCaster()->getAttackers();
+                            Unit::AttackerSet::iterator itr = atts.begin();
+                            if (itr != atts.end())
+                                target = (*itr);
+                        }
+                        if (target)
+                        {
+                            int32 bp0 = urand(985, 1266) * aurApp->GetBase()->GetStackAmount();
+                            GetCaster()->CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
+                            GetCaster()->RemoveAurasDueToSpell(96890);
+                        }
+                    }
+                    break;
+                }
                 case 37096:                                     // Blood Elf Illusion
                 {
                     if (caster)

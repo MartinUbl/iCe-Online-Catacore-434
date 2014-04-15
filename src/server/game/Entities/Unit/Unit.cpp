@@ -7405,6 +7405,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             }
             switch (dummySpell->Id)
             {
+                // Variable Pulse Lightning Capacitor (for some reason listed under SPELLFAMILY_PALADIN, u mad Blizzard?)
+                case 96887:
+                    // trigger Electrical Charge
+                    triggered_spell_id = 96890;
+                    break;
                 // Selfless Healer - handled in Word of Glory code
                 case 85804:
                 case 85803:
