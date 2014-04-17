@@ -2140,6 +2140,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         {
                             // Disable spell
                             caster->RemoveAurasDueToSpell(87154);
+                            caster->RemoveAurasDueToSpell(94709);
                             break;
                         }
                     // T11 4p bonus remove (not in Chakra state) or if equip is changed and there is no longer 4P set bonus

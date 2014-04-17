@@ -8678,6 +8678,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                 // Disable spell
                 m_caster->RemoveAurasDueToSpell(87154);
+                m_caster->RemoveAurasDueToSpell(94709);
             }
 
             // Chakra: Serenity - Refresh Renew

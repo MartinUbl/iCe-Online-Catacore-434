@@ -6765,6 +6765,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             pEvangelism->SetCharges(++charges);
                             pEvangelism->SetStackAmount(charges);
                         }
+
+                        // cast marker aura
+                        if (charges >= 5 && !HasAura(94709))
+                            CastSpell(this, 94709, true);
+
                         // Refresh duration not considering number of charges
                         pEvangelism->RefreshDuration();
                     }

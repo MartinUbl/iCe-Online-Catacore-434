@@ -1907,6 +1907,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                                 pEvangelism->SetCharges(++charges);
                                 pEvangelism->SetStackAmount(charges);
                             }
+
+                            // cast marker aura
+                            if (charges >= 5 && !caster->HasAura(94709))
+                                caster->CastSpell(caster, 94709, true);
+
                             // Refresh duration not considering number of charges
                             pEvangelism->RefreshDuration();
                         }
