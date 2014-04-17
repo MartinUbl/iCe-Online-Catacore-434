@@ -8521,11 +8521,10 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     tmp = unitTarget->GetAura(affectAuras[i], m_caster->GetGUID());
                     if (tmp)
                     {
-                        // Do not allow exceed maximum duration
-                        if (tmp->GetDuration()+m_spellInfo->EffectBasePoints[effIndex]*1000 > tmp->GetMaxDuration())
-                            tmp->RefreshDuration();
-                        else
-                            tmp->SetDuration(tmp->GetDuration()+m_spellInfo->EffectBasePoints[effIndex]*1000);
+                        int32 newduration = tmp->GetDuration() + m_spellInfo->EffectBasePoints[effIndex] * 1000;
+                        tmp->SetDuration(newduration);
+                        if (newduration > tmp->GetMaxDuration())
+                            tmp->SetMaxDuration(newduration);
                     }
                 }
             }
