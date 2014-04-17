@@ -474,16 +474,8 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
     uint32 WinHonor = 0;
     uint32 LossHonor = 0;
 
-    if (!endbytimer)
-    {
-        WinHonor = 200 + 20 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
-        LossHonor = 50 + 10 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
-    }
-    else
-    {
-        WinHonor = 200 + 20 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
-        LossHonor = 50 + 10 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 5 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
-    }
+    WinHonor = 350 + 25 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
+    LossHonor = 100 + 15 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
 
     for (GuidSet::const_iterator itr = m_PlayersInWar[GetDefenderTeam()].begin(); itr != m_PlayersInWar[GetDefenderTeam()].end(); ++itr)
     {
@@ -505,7 +497,7 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
             DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG, player);
             DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG_100, player);
             // Award achievement for succeeding in Wintergrasp in 10 minutes or less
-            if (!endbytimer && GetTimer() <= 10000)
+            if (!endbytimer && GetTimer() <= 10*MINUTE*IN_MILLISECONDS)
                 DoCompleteOrIncrementAchievement(ACHIEVEMENTS_WIN_WG_TIMER_10, player);
         }
     }
