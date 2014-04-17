@@ -137,9 +137,13 @@ void PetAI::UpdateAI(const uint32 diff)
                     AttackStart(plTarget);
                 else if (nextTarget)
                     AttackStart(nextTarget);
+                else
+                    HandleReturnMovement();
             }
             else if (nextTarget)
                 AttackStart(nextTarget);
+            else
+                HandleReturnMovement();
         }
         else if (nextTarget)
             AttackStart(nextTarget);
