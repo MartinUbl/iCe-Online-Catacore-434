@@ -1578,6 +1578,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += 0.344f * ((sp > ap) ? sp : ap);
                     break;
                 }
+                // Hammer of Wrath
+                else if (m_spellInfo->Id == 24275)
+                {
+                    apply_direct_bonus = false;
+
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
+
+                    damage += 0.39f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    damage += 0.117f * m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
+                }
                 // Seal of Righteousness
                 else if (m_spellInfo->Id == 25742)
                 {
