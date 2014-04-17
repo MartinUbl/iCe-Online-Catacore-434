@@ -751,7 +751,7 @@ public:
             // Set timers for phase 4
             cloudBurstTimer = 50000 - 25000;
             entrappingRootsTimer = 56500 - 25000;
-            empowerSulfurasTimer = 83000 - 25000;
+            empowerSulfurasTimer = entrappingRootsTimer + 15000;
             dreadFlameTimer = 48000 - 25000;
             // - 25000 due to intermission time
         }
@@ -1077,18 +1077,18 @@ public:
         // If >= 4/10 (10 man / 25 man) people or more are clustered together, form Magma Geyser at location
         // This algorithm has time complexity O(n^2)
         // TODO : Maybe find better algorithm
-        bool RaidIsClusteredTogether(void)
+        Player * RaidIsClusteredTogether(void)
         {
             uint32 counter = 0;
             uint32 maximum = (Is25ManRaid()) ? 10 : 4;
 
             Map * map = me->GetMap();
             if (!map)
-                return false;
+                return NULL;
 
             Map::PlayerList const& plrList = map->GetPlayers();
             if (plrList.isEmpty())
-                return false;
+                return NULL;
 
             std::list<Player*> players;
             // Copy players to second list
@@ -1117,11 +1117,11 @@ public:
                             }
                         }
                         if (counter >= maximum) // Stop looking
-                            return true;
+                            return p;
                     }
                 }
             }
-            return false;
+            return NULL;
         }
 
         void UpdateAI(const uint32 diff)
@@ -1139,8 +1139,11 @@ public:
                 }
                 else
                 {
-                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                    if (PHASE != PHASE4) // Not in last phase on heroic
+                    {
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                    }
                 }
             }
 
@@ -1334,8 +1337,6 @@ public:
 
             if (PHASE == INTERMISSION1)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-
                 if (Lava_Bolt_timer <= diff)
                 {
                     int32 max = 4;
@@ -1353,6 +1354,7 @@ public:
                 {
                     if (reemerge == 0 ) // Burry Ragnaros after casting splitting blow
                     {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         uint8 rand_ = urand(0,3);
                         PlayAndYell(Transition[rand_].sound,Transition[rand_].text);
                         me->CastSpell(me,BURROW_SULFURAS,true); // This spell force him to leave hammer on the ground and force him to burry in lava
@@ -1572,8 +1574,6 @@ public:
 
             if(PHASE == INTERMISSION2)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
-
                 if (Lava_Bolt_timer <= diff)
                 {
                     int32 max = 4;
@@ -1590,6 +1590,7 @@ public:
                 {
                     if (reemerge ==0 ) // First time burry to lava
                     {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         uint8 rand_ = urand(0,3);
                         PlayAndYell(Transition[rand_].sound,Transition[rand_].text);
                         me->CastSpell(me,BURROW_SULFURAS,true); // This spell force him to leave hammer on the ground and force him to burry in lava
@@ -1801,8 +1802,8 @@ public:
                         {
                             HeroicIntermissionTimer = 1500;
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 18.0f);
-                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 18.0f);
+                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 15.0f);
+                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 30.0f);
                             // Move him bit higher at correct position
                             float z = me->GetMap()->GetHeight2(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                             me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), z + 2.0f);
@@ -1831,7 +1832,7 @@ public:
             {
                 if (chaseTimer <= diff)
                 {
-                    if (!me->HasAura(100628)) // From unknowm reason channeling is interrupted, so for sure manually add aura after cast time if this happen
+                    if (!me->HasAura(100628) && !me->HasAuraType(SPELL_AURA_MOD_STUN)) // From unknowm reason channeling is interrupted, so for sure manually add aura after cast time if this happen
                         me->AddAura(100628, me);
 
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -1846,7 +1847,7 @@ public:
 
                 if (breadthTimer <= diff)
                 {
-                    Position pos = GetRandomPositionInRadius(45.0f);
+                    Position pos = GetRandomPositionInRadius(40.0f);
                     float x = pos.m_positionX, y = pos.m_positionY, z = pos.m_positionZ;
 
                     Creature * boF = me->SummonCreature(BREADTH_OF_FROST,x,y,z,0.0f,TEMPSUMMON_TIMED_DESPAWN,120000);
@@ -1861,7 +1862,7 @@ public:
 
                 if (cloudBurstTimer <= diff)
                 {
-                    Position pos = GetRandomPositionInRadius(40.0f);
+                    Position pos = GetRandomPositionInRadius(35.0f);
                     float x = pos.m_positionX, y = pos.m_positionY, z = pos.m_positionZ;
 
                     if (Creature * pMalfurion = me->FindNearestCreature(MALFURION_STORMRAGE,500.0f,true))
@@ -1885,7 +1886,7 @@ public:
                     if (pRoot)
                     {
                         if (Creature * runTotem = me->FindNearestCreature(CENARIUS,500.0f,true))
-                            runTotem->CastSpell(pRoot,ENTRAPPING_ROOOTS_MISSILE,false);
+                            runTotem->CastSpell(pRoot,ENTRAPPING_ROOOTS_MISSILE,false); // 3 s cast time
                     }
 
                     entrappingRootsTimer = 56000;
@@ -1913,22 +1914,30 @@ public:
                                 seed->CastSpell(me,EMPOWER_SULFURAS_MISSILE,false);
                             }
                         }
-
-                        empowerSulfurasTimer = 50000;
                     }
+                    empowerSulfurasTimer = 56000;
                 }
                 else empowerSulfurasTimer -= diff;
 
                 if (geyserTimer <= diff)
                 {
-                    if (Creature *boF = me->FindNearestCreature(BREADTH_OF_FROST,200.0f,true))
+                    if (Player * p = RaidIsClusteredTogether())
                     {
-                        if (RaidIsClusteredTogether())
+                        if (p->IsInWorld()) // Only safety check
                         {
-                            me->SummonCreature(MAGMA_GEYSER_NPC,boF->GetPositionX(),boF->GetPositionY(),boF->GetPositionZ(),0.0f);
-                            geyserTimer = 15000;
-                            return;
+                            // Summom geyser at player location
+                            me->SummonCreature(MAGMA_GEYSER_NPC, p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), 0.0f);
+
+                            //Destroy any nearby Breadth of Frost if nearby of impact
+                            if (Creature *boF = p->FindNearestCreature(BREADTH_OF_FROST, 50.0f, true))
+                            {
+                                // Probably this should be handled via magma geyser spell effect 3, but this is quicker and easier :P
+                                if (boF->GetDistance2d(p) <= 5.0f) 
+                                    boF->ForcedDespawn();
+                            }
                         }
+                        geyserTimer = 15000;
+                        return;
                     }
                     geyserTimer = 4000;
                 }
@@ -3956,7 +3965,6 @@ public:
         void Reset()
         {
             geyserTimer = 500;
-            me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
         }
 
         void UpdateAI ( const uint32 diff)
