@@ -89,16 +89,28 @@ public:
         };
 
         uint32 absorbPct, hpPct, absorbed;
-        bool hasSuppress;
+        uint32 suppressionAmount;
         bool Load()
         {
-            if (!GetCaster())
+            Unit* caster = GetCaster();
+
+            if (!caster)
                 return false;
 
             absorbed = 0;
             absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
             hpPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1, GetCaster());
-            hasSuppress = GetCaster()->HasAura(49611) || GetCaster()->HasAura(49610) ||GetCaster()->HasAura(49224);
+
+            suppressionAmount = 0;
+            // Magic Suppression profit from damage absorbed
+            // TODO: verify this for rank 1 and 2. For Rank 3 we have confirmed 1 RP per 180 damage absorbed
+            if (caster->HasAura(49611))
+                suppressionAmount = 180;
+            else if (caster->HasAura(49610))
+                suppressionAmount = 240;
+            else if (caster->HasAura(49224))
+                suppressionAmount = 300;
+
             return true;
         }
 
@@ -119,17 +131,13 @@ public:
 
             if (absorbed >= GetTarget()->CountPctFromMaxHealth(hpPct))
                 aurEff->GetBase()->Remove();
-        }
 
-        void Trigger(AuraEffect * aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
-        {
-            if (!hasSuppress)
+            if (suppressionAmount == 0)
                 return;
 
             Unit * target = GetTarget();
-            // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
-            // This, if I'm not mistaken, shows that we get back ~20% of the absorbed damage as runic power.
-            int32 bp = absorbAmount * 2 / 10;
+            // note that runic power has precision of 10 (so that it has to be multiplied by 10 to get absolute value)
+            int32 bp = 10 * absorbAmount / suppressionAmount;
             target->CastCustomSpell(target, DK_SPELL_RUNIC_POWER_ENERGIZE, &bp, NULL, NULL, true, NULL, aurEff);
         }
 
@@ -137,7 +145,6 @@ public:
         {
              DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_shell_self_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
              OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_self_AuraScript::Absorb, EFFECT_0);
-             AfterEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_shell_self_AuraScript::Trigger, EFFECT_0);
         }
     };
 

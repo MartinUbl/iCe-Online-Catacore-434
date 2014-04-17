@@ -4190,6 +4190,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectBasePoints[1] = 25;
             count++;
             break;
+        case 49224: // Magic Suppression (Ranks 1, 2 and 3)
+        case 49610:
+        case 49611:
+            // these spells have charges, which causes their drop after first trigger (which is wrong)
+            spellInfo->procCharges = 0;
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots
