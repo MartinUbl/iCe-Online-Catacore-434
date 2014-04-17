@@ -29,6 +29,8 @@
 class Creature;
 class Totem;
 
+#define DEFAULT_TOTEM_TARGET_SEARCH_TIMER 10000
+
 class TotemAI : public CreatureAI
 {
     public:
@@ -42,8 +44,14 @@ class TotemAI : public CreatureAI
         void UpdateAI(const uint32);
         static int Permissible(const Creature *);
 
+        bool CheckCurrentTarget(Unit* victim);
+        Unit* UpdateTarget();
+
     private:
         uint64 i_victimGuid;
+        uint32 i_targetSearchTimer;
+
+        float m_maxRange;
 };
 #endif
 
