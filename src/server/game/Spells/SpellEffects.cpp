@@ -1565,8 +1565,21 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     }
                     break;
                 }
+                // Exorcism (scales with AP / SP, chooses what's greater)
+                else if (m_spellInfo->Id == 879)
+                {
+                    apply_direct_bonus = false;
+                    uint32 sp = m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
+                    uint32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
+
+                    damage += 0.344f * ((sp > ap) ? sp : ap);
+                    break;
+                }
                 // Seal of Righteousness
-                if (m_spellInfo->Id == 25742)
+                else if (m_spellInfo->Id == 25742)
                 {
                     // damage formula is little wierd - divide weapon damage by 1.8 to be more accurent to tooltip
                     apply_direct_bonus = false;
