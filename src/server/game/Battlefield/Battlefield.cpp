@@ -363,7 +363,13 @@ void Battlefield::KickPlayerFromBf(uint64 guid)
 {
     if (Player* player = sObjectAccessor->FindPlayer(guid))
         if (player->GetZoneId() == GetZoneId())
-            player->TeleportTo(KickPosition);
+        {
+            WorldLocation loc = player->GetBattlegroundEntryPoint();
+            if (loc.m_mapId == 0 || loc.m_mapId == player->GetMapId())
+                player->TeleportTo(KickPosition);
+            else
+                player->TeleportToBGEntryPoint();
+        }
 }
 
 void Battlefield::StartBattle()
@@ -487,6 +493,15 @@ void Battlefield::PlayerAcceptInviteToWar(Player *player)
         //Remove player AFK
         if (player->isAFK())
             player->ToggleAFK();
+
+        player->SetBattlegroundEntryPoint();
+
+        player->Unmount();
+        if (player->isInFlight())
+        {
+            player->GetMotionMaster()->MovementExpired();
+            player->CleanupAfterTaxiFlight();
+        }
 
         OnPlayerJoinWar(player);                               //for scripting
     }
