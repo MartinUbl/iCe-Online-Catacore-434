@@ -4196,6 +4196,11 @@ void SpellMgr::LoadSpellCustomAttr()
             // these spells have charges, which causes their drop after first trigger (which is wrong)
             spellInfo->procCharges = 0;
             break;
+        case 55095: // Frost Fever
+            // originally MECHANIC_PACIFY, but that causes the effect to be dispelled with other pacify spells,
+            // and that's wrong
+            spellInfo->EffectMechanic[1] = MECHANIC_INFECTED;
+            break;
         /**************************** ALYSRAZOR  **********************************/
 
         case 100555: // Smouldering Roots
