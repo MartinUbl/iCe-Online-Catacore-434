@@ -755,36 +755,23 @@ void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
         }
     }
 
-    if (victim->ToCreature())
+    if (victim->IsVehicle())
     {
-        Creature* creature = victim->ToCreature();
-        switch (creature->GetEntry())
-        {
-            case 28312:
-            case 32627:
-            case 27881:
-            case 28094:
-                uint8 team;
-                if (creature->getFaction() == WintergraspFaction[TEAM_ALLIANCE])
-                    team = TEAM_ALLIANCE;
-                else if (creature->getFaction() == WintergraspFaction[TEAM_HORDE])
-                    team = TEAM_HORDE;
-                else
-                    break;
+        // entries probably just 28312, 32627, 27881 and 28094
 
-                if (m_vehicles[team].find(creature->GetGUID()) != m_vehicles[team].end())
-                {
-                    m_vehicles[team].erase(creature->GetGUID());
-                    if (team == TEAM_HORDE)
-                        m_Data32[BATTLEFIELD_WG_DATA_VEHICLE_H]--;
-                    else
-                        m_Data32[BATTLEFIELD_WG_DATA_VEHICLE_A]--;
-                    UpdateVehicleCountWG();
-                }
-                break;
-            default:
-                break;
+        for (uint8 team = 0; team < 2; team++)
+        {
+            if (m_vehicles[team].find(victim->GetGUID()) != m_vehicles[team].end())
+            {
+                m_vehicles[team].erase(victim->GetGUID());
+                if (team == TEAM_HORDE)
+                    m_Data32[BATTLEFIELD_WG_DATA_VEHICLE_H]--;
+                else
+                    m_Data32[BATTLEFIELD_WG_DATA_VEHICLE_A]--;
+            }
         }
+
+        UpdateVehicleCountWG();
     }
 
     // TODO:Recent PvP activity worldstate
