@@ -6002,7 +6002,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // Redirect - player needs to have some combo points on some target
     if (m_spellInfo->Id == 73981 && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_caster->ToPlayer()->GetComboPoints() == 0 || m_caster->ToPlayer()->GetComboTarget() == NULL)
+        if (m_caster->ToPlayer()->GetComboPoints() == 0 || m_caster->ToPlayer()->GetComboTarget() == 0)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
