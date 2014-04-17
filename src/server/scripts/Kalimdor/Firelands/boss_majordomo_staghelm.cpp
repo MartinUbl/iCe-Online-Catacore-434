@@ -672,7 +672,8 @@ public:
 
             if( PHASE == PHASE_CAT && me->GetPower(POWER_ENERGY) == 100)
             {
-                me->CastSpell(me,SPELL_SUMMON_SPIRIT,false); // Summon 1 cat copy of Majordomo ( cat)
+                //me->CastSpell(me,SPELL_SUMMON_SPIRIT,false); // Summon 1 cat copy of Majordomo ( cat)
+                me->SummonCreature(52593, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ(),me->GetOrientation(),TEMPSUMMON_CORPSE_DESPAWN, 500);
                 Player * p = SelectRandomRangedPlayer();
 
                 if(p == NULL || p->IsInWorld() == false) // We didnt find valid ranged target - > jump to random player
