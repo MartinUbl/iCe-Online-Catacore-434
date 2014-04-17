@@ -5541,8 +5541,8 @@ void Spell::TakePower()
     if (powerType == POWER_HOLY_POWER && m_caster->HasAura(90174))
         return;
 
-    // Dark Simulacrum - proc on any mana-taking spell
-    if (powerType == POWER_MANA && m_caster->HasAura(77606))
+    // Dark Simulacrum - proc on any mana-taking spell ( except any kind of form e.g. cat/bear/shadow form )
+    if (powerType == POWER_MANA && m_caster->HasAura(77606) && !GetSpellInfo()->AppliesAuraType(SPELL_AURA_MOD_SHAPESHIFT))
     {
         Aura* pAura = m_caster->GetAura(77606);
         if (pAura && pAura->GetCaster() && !pAura->GetCaster()->HasAura(77616))
