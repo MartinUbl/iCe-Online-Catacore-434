@@ -1261,6 +1261,9 @@ void Battleground::AddPlayer(Player* plr)
     /* remove temporary enchantments on BG/arena enter */
     plr->RemoveArenaEnchantments(TEMP_ENCHANTMENT_SLOT);
 
+    if (Pet* pPet = plr->GetPet())
+        pPet->RemoveArenaAuras();
+
     // add arena specific auras
     if (isArena())
     {
