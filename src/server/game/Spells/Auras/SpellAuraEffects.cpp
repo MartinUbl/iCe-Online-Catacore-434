@@ -394,7 +394,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleModActionButton,                           //332
     &AuraEffect::HandleModActionButton,                           //333 SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      //334
-    &AuraEffect::HandleNULL,                                      //335
+    &AuraEffect::HandleAuraModIncreaseSpeedSpecial,               //335 SPELL_AURA_MOD_INCREASE_SPEED_SPECIAL
     &AuraEffect::HandleNULL,                                      //336
     &AuraEffect::HandleNULL,                                      //337
     &AuraEffect::HandleNULL,                                      //338
@@ -5706,6 +5706,16 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const *aurApp, uint8 m
 /***                  MODIFY SPEED                     ***/
 /*********************************************************/
 void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+
+    target->UpdateSpeed(MOVE_RUN, true);
+}
+
+void AuraEffect::HandleAuraModIncreaseSpeedSpecial(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
         return;
