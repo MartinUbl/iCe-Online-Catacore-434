@@ -4231,7 +4231,7 @@ void Spell::cast(bool skipCheck)
             m_caster->ToPlayer()->AddNonTriggeredSpellcastHistory(GetSpellInfo(), 0);
 
             // Whenever we cast non-triggered negative direct-damaging spell, save the last target
-            if (m_targets.getUnitTarget() && !IsPositiveSpell(GetSpellInfo()->Id))
+            if (m_targets.getUnitTarget() && !IsPositiveSpell(GetSpellInfo()->Id) && (GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) == 0)
                 m_caster->ToPlayer()->SetLastDirectAttackTarget(m_targets.getUnitTarget());
         }
     }
