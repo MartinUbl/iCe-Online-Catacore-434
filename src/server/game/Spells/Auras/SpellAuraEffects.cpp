@@ -824,21 +824,18 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             break;
         case SPELL_AURA_MOD_RATING:
         {
-            // These spells need to set amount manually because real amount should be so high to get 25 % of some rating
-            // 128 haste rating for 1% chance
-            // 179 critical strike rating for 1% chance
-            // 179 mastery rating for 1% chance
-            // source -> http://wowpedia.org/Combat_rating_system
+            // These spells need to set amount manually because real amount should be so high to get 25 % bonus from current rating
+            // Rogue T12 4P bonus
             switch(GetSpellProto()->Id)
             {
                 case 99186: // Haste
-                    amount = 128 * 25;
+                    amount = (caster->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_MELEE) * 25) / 100 ;
                     break;
                 case 99187: // Critical
-                    amount = 179 * 25;
+                    amount = (caster->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_MELEE) * 25) / 100;
                     break;
                 case 99188: // Mastery
-                    amount = 179 * 25;
+                    amount = (caster->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY) * 25) / 100;
                     break;
             }
             break;
