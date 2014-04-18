@@ -130,7 +130,10 @@ public:
             absorbed += absorbAmount;
 
             if (absorbed >= GetTarget()->CountPctFromMaxHealth(hpPct))
+            {
                 aurEff->GetBase()->Remove();
+                return;
+            }
 
             if (suppressionAmount == 0)
                 return;
