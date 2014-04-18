@@ -3251,6 +3251,26 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
                         }
                         return;
                     }
+                    case 83676: // Resistance is Futile periodic ticks
+                    {
+                        if (!target || !caster)
+                            break;
+
+                        // affects only moving targets
+                        if (target->isMoving())
+                        {
+                            int8 chance = 0;
+                            if (caster->HasAura(82893))
+                                chance = 4;
+                            else if (caster->HasAura(82894))
+                                chance = 8;
+
+                            if (roll_chance_i(chance))
+                                caster->CastSpell(target, 82897, true);
+                        }
+
+                        break;
+                    }
                     // Quake
                     case 30576:
                         triggerSpellId = 30571;

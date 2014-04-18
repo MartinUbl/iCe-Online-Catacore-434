@@ -2470,6 +2470,26 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         }
                     }
                     break;
+                case 1130: // Hunter's Mark
+                case 88691: // Marked for Death
+                {
+                    if (!target || !caster)
+                        break;
+
+                    if (apply)
+                    {
+                        // talent Resistance is Futile
+                        if (caster->HasAura(82893) || caster->HasAura(82894))
+                            caster->CastSpell(target, 83676, true);
+                    }
+                    else
+                    {
+                        // Remove only if target doesn't have the second triggering aura casted by the same caster
+                        if ((GetId() == 1130 && !target->HasAura(88691, caster->GetGUID())) || (GetId() == 88691 && !target->HasAura(1130, caster->GetGUID())))
+                            target->RemoveAurasDueToSpell(83676, caster->GetGUID());
+                    }
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:

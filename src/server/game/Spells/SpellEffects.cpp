@@ -8441,11 +8441,21 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             // Kill Command (caster fix)
             if (m_spellInfo->Id == 34026)
             {
-                if(m_caster->GetPetGUID())
+                if (m_caster->GetPetGUID())
                 {
                     Pet* pPet = (Pet*)Unit::GetUnit(*m_caster,m_caster->GetPetGUID());
-                    if(pPet && pPet->getVictim())
-                        pPet->CastSpell(pPet->getVictim(),83381,true);
+                    if (pPet && pPet->getVictim())
+                    {
+                        Unit* victim = pPet->getVictim();
+                        pPet->CastSpell(victim, 83381, true);
+
+                        // Resistance is Futile refunds 100% of Kill Command focus cost
+                        if (m_caster->HasAura(82897))
+                        {
+                            m_caster->RemoveAurasDueToSpell(82897);
+                            m_caster->CastSpell(m_caster, 86316, true);
+                        }
+                    }
                 }
             }
             return;
