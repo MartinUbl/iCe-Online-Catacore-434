@@ -11846,10 +11846,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     {
         case SPELLFAMILY_MAGE:
             // Ice Lance
-            if (spellProto->SpellIconID == 186)
+            if (spellProto->Id == 30455)
             {
                 if (pVictim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                {
                     DoneTotalMod *= 2.0f;
+
+                    // Fingers of Frost increases damage by another 25%
+                    if (HasAura(44544))
+                        DoneTotalMod *= 1.25f;
+                }
             }
 
             // Torment the weak

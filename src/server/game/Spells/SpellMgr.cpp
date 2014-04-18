@@ -4502,6 +4502,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->procChance = 20;
             count++;
             break;
+        case 44544: // Fingers of Frost proc'd effect
+            spellInfo->EffectSpellClassMask[0] |= flag96(0x00020000, 0, 0); // add Ice Lance
+            count++;
+            break;
         case 81782: // Power Word : Barrier
             spellInfo->DurationIndex = 39;
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ALLY;
