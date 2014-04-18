@@ -3006,10 +3006,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROL_ROOT;
             // Shattered Barrier: only flag SpellFamilyFlags[0] = 0x00080000 shared
             // by most frost spells, using id instead
-            if (spellproto->Id == 55080)
+            if ((spellproto->Id == 55080) || (spellproto->Id == 83073))
                 return DIMINISHING_TRIGGER_ROOT;
             // Frost Nova / Freeze (Water Elemental)
-            if (spellproto->SpellIconID == 193)
+            if ((spellproto->SpellIconID == 193) && (spellproto->Id != 55080) && (spellproto->Id != 83073))
                 return DIMINISHING_CONTROL_ROOT;
             // Ring of Frost
             if (spellproto->Id == 82691)
