@@ -4503,7 +4503,7 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 44544: // Fingers of Frost proc'd effect
-            spellInfo->EffectSpellClassMask[0] |= flag96(0x00020000, 0, 0); // add Ice Lance
+            spellInfo->EffectSpellClassMask[0][0] |= 0x00020000; // add Ice Lance
             count++;
             break;
         case 81782: // Power Word : Barrier
