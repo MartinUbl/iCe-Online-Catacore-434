@@ -2517,7 +2517,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         break;
 
                     if (m_caster->HasAura(63560))
-                        m_caster->CastSpell(unitTarget, 91807, true);
+                        m_caster->CastSpell(unitTarget, 91802, true);
                     else
                         m_caster->CastSpell(unitTarget, 91809, true);
                     break;
