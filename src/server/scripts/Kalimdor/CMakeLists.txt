@@ -51,6 +51,13 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/DragonSoul/boss_ultraxion.cpp
   Kalimdor/CavernsOfTime/DragonSoul/instance_dragonsoul.cpp
   Kalimdor/CavernsOfTime/DragonSoul/boss_warlord_zonozz.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_sylvanas.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_jaina.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_tyrande.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_baine.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_murozond.cpp
+  Kalimdor/CavernsOfTime/EndTime/instance_end_time.cpp
+  Kalimdor/CavernsOfTime/EndTime/endtime.h
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_archbishop_benedictus.cpp
   Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_arcurion.cpp

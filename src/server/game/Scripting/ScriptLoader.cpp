@@ -597,6 +597,12 @@ void AddSC_boss_lord_rhyolith();
 void AddSC_boss_majordomo_staghelm();
 void AddSC_boss_ragnaros_fl();
 void AddSC_boss_shannox();
+void AddSC_instance_end_time();
+void AddSC_boss_echo_of_jaina();
+void AddSC_boss_echo_of_baine();
+void AddSC_boss_echo_of_sylvanas();
+void AddSC_boss_echo_of_tyrande();
+void AddSC_boss_murozond();
 void AddSC_instance_dragonsoul();
 void AddSC_boss_deathwing();
 void AddSC_boss_hagara_the_stormbinder();
@@ -1260,6 +1266,12 @@ void AddCataclysmScripts()
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_arcurion();
 
+    AddSC_instance_end_time();
+    AddSC_boss_echo_of_jaina();
+    AddSC_boss_echo_of_baine();
+    AddSC_boss_echo_of_sylvanas();
+    AddSC_boss_echo_of_tyrande();
+    AddSC_boss_murozond();
 #endif
 }
 
