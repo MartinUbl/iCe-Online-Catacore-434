@@ -60,7 +60,7 @@ class spell_mage_cold_snap : public SpellScriptLoader
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
 
                     if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
-                        (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) &&
+                        ((GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) || (spellInfo->Id == 92283))  && 
                         spellInfo->Id != SPELL_MAGE_COLD_SNAP && GetSpellRecoveryTime(spellInfo) > 0)
                     {
                         caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
