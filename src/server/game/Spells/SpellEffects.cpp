@@ -1181,6 +1181,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster)
                         damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.0552f;
                 }
+                // Rake
+                else if (m_spellInfo->Id == 1822)
+                {
+                    //Patch 4.2.0 (2011-06-28): Initial damage on hit now deals the same damage as each periodic tick 
+                    // (and is treated the same for all combat calculations). Periodic damage now gains 14.7% of attack power per tick
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.147f);
+                }
                 // Maul
                 else if (m_spellInfo->Id == 6807)
                 {
