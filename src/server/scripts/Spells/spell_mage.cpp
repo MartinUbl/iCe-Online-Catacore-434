@@ -820,29 +820,38 @@ public:
             isChilling = false;
             if (Unit* owner = me->GetOwner())
             {
+                Unit* target = me->SelectNearestTarget(20);
+                if (target)
+                    uiDespawnTimer = 15*IN_MILLISECONDS;
+                else
+                    uiDespawnTimer = 4*IN_MILLISECONDS;
+
                 z = owner->GetPositionZ() + 3.0f;
                 angle = owner->GetAngle(me);
                 isChilling = owner->HasAura(84727);
             }
+
             o = me->GetOrientation();
             me->NearTeleportTo(x, y, z, o, true);
             newx = me->GetPositionX() + 5.0f * cos(angle);
             newy = me->GetPositionY() + 5.0f * sin(angle);
             z = me->GetMap()->GetHeight(newx, newy, z+3.0f) + 3.0f;
-            CombatCheck = false;
             SlowedDown = true;
             MoveCheck = false;
 
             isFrostfire = (c->GetEntry() == ENTRY_FROSTFIRE_ORB);
+            if (isFrostfire)
+                me->CastSpell(me, SPELL_FROSTFIRE_ORB_VISUAL, true);
         }
 
         bool isFrostfire;
         bool isChilling;
+        bool isFrostfireCheck;
 
         float x,y,z,o,newx,newy,angle;
-        bool CombatCheck;
         bool SlowedDown;
         bool MoveCheck;
+        uint32 uiHardDespawnTimer;
         uint32 uiDespawnTimer;
         uint32 uiDespawnCheckTimer;
         uint32 uiDamageTimer;
@@ -851,7 +860,6 @@ public:
         {
             me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f); // Normal speed
             uiDespawnTimer = 15*IN_MILLISECONDS;
-            CombatCheck = true;
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -871,20 +879,20 @@ public:
             me->SetFlying(true);
             me->SetReactState(REACT_PASSIVE);
 
-            if (isFrostfire)
-                me->CastSpell(me, SPELL_FROSTFIRE_ORB_VISUAL, true);
+            isFrostfireCheck = false;
 
-            if (CombatCheck == true)
-                uiDespawnTimer = 15*IN_MILLISECONDS;
-            else
-                uiDespawnTimer = 4*IN_MILLISECONDS;
-
+            uiHardDespawnTimer = 15*IN_MILLISECONDS;
             uiDamageTimer = 1*IN_MILLISECONDS;
             me->GetMotionMaster()->MoveCharge(newx, newy, z, 5.5f);
         }
 
         void UpdateAI(const uint32 diff)
         {
+            if (isChilling && isFrostfireCheck == false) {
+                    me->CastSpell(me, SPELL_FROSTFIRE_ORB_VISUAL, true);
+                    isFrostfireCheck = true;
+                }
+
             if (MoveCheck)
             {
                 MoveCheck = false;
@@ -901,7 +909,7 @@ public:
                 me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
             }
 
-            if (uiDespawnTimer <= diff)
+            if (uiDespawnTimer <= diff || uiHardDespawnTimer <= diff)
             {
                 if (Unit* owner = me->GetOwner())
                     if (AuraEffect* aureff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE,SPELLFAMILY_MAGE,31,EFFECT_0))
@@ -916,6 +924,7 @@ public:
 
             if (uiDamageTimer <= diff)
             {
+
                 if (Unit* target = me->SelectNearestTarget(20))
                 {
                     if (!SlowedDown)
@@ -928,6 +937,31 @@ public:
                     me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
                     if (Unit* owner = me->GetOwner())
                         owner->CastSpell(target, isFrostfire ? (isChilling ? SPELL_FROSTFIRE_ORB_DAMAGE_CHILL : SPELL_FROSTFIRE_ORB_DAMAGE) : SPELL_FLAME_ORB_DAMAGE, true);
+                    
+                    if ((isChilling) && (target)) {
+                        Unit* owner = me->GetOwner();
+                            // Finger of Frost (44544) proc
+                            if (owner->HasAura(44543)) // Finger of Frost (Rank 1) 7%
+                                if (roll_chance_i(7))
+                                    owner->CastSpell(owner, 44544, false);
+                            if (owner->HasAura(44544)) // Finger of Frost (Rank 2) 14%
+                                if (roll_chance_i(14))
+                                    owner->CastSpell(owner, 44544, false);
+                            if (owner->HasAura(83074)) // Finger of Frost (Rank 3) 20 %
+                                if (roll_chance_i(20))
+                                    owner->CastSpell(owner, 44544, false);
+
+                            // Brain Freeze (57761) proc
+                            if (owner->HasAura(44546)) // Brain Freeze (Rank 1) 5%
+                                if (roll_chance_i(5))
+                                    owner->CastSpell(owner, 57761, false);
+                            if (owner->HasAura(44548)) // Brain Freeze (Rank 2) 10%
+                                if (roll_chance_i(10))
+                                    owner->CastSpell(owner, 57761, false);
+                            if (owner->HasAura(44549)) // Brain Freeze (Rank 3) 15%
+                                if (roll_chance_i(15))
+                                    owner->CastSpell(owner, 57761, false);
+                    }
                 }
 
                 uiDamageTimer = 1*IN_MILLISECONDS;
