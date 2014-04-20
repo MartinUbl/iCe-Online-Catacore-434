@@ -5117,6 +5117,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const *aurApp, uint8 mode, bo
 
     if (apply)
     {
+        target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+
         uint32 creatureEntry = GetMiscValue();
 
         // Festive Holiday Mount
