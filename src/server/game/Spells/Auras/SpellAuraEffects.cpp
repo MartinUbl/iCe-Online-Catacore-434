@@ -1688,15 +1688,6 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
                         return;
                     }
                     break;
-                case SPELLFAMILY_PALADIN:
-                    // Holy Radiance
-                    if (GetSpellProto()->Id == 82327)
-                    {
-                        // cast triggered spell
-                        if (caster && GetBase())
-                            caster->CastSpell(caster, 86452, true, 0, 0, GetBase()->GetCasterGUID());
-                    }
-                    break;
                 case SPELLFAMILY_SHAMAN:
                     // Earthquake
                     if (GetSpellProto()->Id == 61882)
@@ -3023,6 +3014,16 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(58427);
                     break;
+            }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            if (GetSpellProto()->Id == 82327 && target && target) // Holy Radiance
+            {
+                // cast triggered spell
+                if (GetBase())
+                    caster->CastSpell(target, 86452, true, 0, 0, GetBase()->GetCasterGUID());
             }
             break;
         }
