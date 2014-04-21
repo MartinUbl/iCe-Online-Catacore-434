@@ -7300,12 +7300,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (procSpell->Id != 19750 && procSpell->Id != 82326)
                     return false;
                 // and also if target has aura Beacon of Light of this caster
-                if (Aura* pBeacon = pVictim->GetAura(53563))
-                    if (pBeacon->GetCaster() == this)
-                    {
-                        target = this;
-                        break;
-                    }
+                if (pVictim->GetAura(53563, GetGUID()))
+                {
+                    target = this;
+                    break;
+                }
 
                 return false;
             }
@@ -10153,9 +10152,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 19750 && procSpell->Id != 82326)
                 return false;
             // and also if target has aura Beacon of Light of this caster
-            if (Aura* pBeacon = pVictim->GetAura(53563))
-                if (pBeacon->GetCaster() == this)
-                    break;
+            if (pVictim->GetAura(53563, GetGUID()))
+                break;
 
             return false;
         }
