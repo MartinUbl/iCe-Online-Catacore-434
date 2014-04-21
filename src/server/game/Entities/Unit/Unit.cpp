@@ -6303,9 +6303,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     ToPlayer()->RemoveSpellCooldown(122, true);
                     break;
                 }
-            }
-            break;
-        }
                 // Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
                 case 64411:
                 {
@@ -6323,6 +6320,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 64413;
                     break;
                 }
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch(dummySpell->Id)
@@ -6819,32 +6819,22 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 {
                     triggered_spell_id = 54846;
                     break;
+
                 }
-                // Glyph of Shred
+                // Glyph of Bloodletting
                 case 54815:
                 {
+                    if (procSpell->Id != 5221 && procSpell->Id != 33876) // Shred or Mangle ( cat form )
+                        return false;
+
                     // try to find spell Rip on the target
                     if (AuraEffect const *AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
                     {
-                        // Rip's max duration, note: spells which modifies Rip's duration also counted like Glyph of Rip
-                        uint32 CountMin = AurEff->GetBase()->GetMaxDuration();
+                        if (AurEff->GetBase()->GetDuration() + 2000 > GetSpellMaxDuration(AurEff->GetSpellProto()) + 6000)
+                            return false;
 
-                        // just Rip's max duration without other spells
-                        uint32 CountMax = GetSpellMaxDuration(AurEff->GetSpellProto());
-
-                        // add possible auras' and Glyph of Shred's max duration
-                        CountMax += 3 * triggerAmount * 1000;       // Glyph of Shred               -> +6 seconds
-                        CountMax += HasAura(54818) ? 4 * 1000 : 0;  // Glyph of Rip                 -> +4 seconds
-                        CountMax += HasAura(60141) ? 4 * 1000 : 0;  // Rip Duration/Lacerate Damage -> +4 seconds
-
-                        // if min < max -> that means caster didn't cast 3 shred yet
-                        // so set Rip's duration and max duration
-                        if (CountMin < CountMax)
-                        {
-                            AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + triggerAmount * 1000);
-                            AurEff->GetBase()->SetMaxDuration(CountMin + triggerAmount * 1000);
-                            return true;
-                        }
+                        AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + 2000);
+                        return true;
                     }
                     // if not found Rip
                     return false;
@@ -16609,6 +16599,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         {
                             if (procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_DST
+                            || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST
                             || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST)
                             {
                                 return; // Exclude AoE spells from triggering Grounding totem
