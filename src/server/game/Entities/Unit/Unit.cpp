@@ -524,6 +524,20 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 pVictim->CastSpell(pVictim, 83047, true); // stun #2
         }
 
+        if (Aura* roar = pVictim->GetAura(53480)) // Roar of Sacrifice
+        {
+            Unit * pet = roar->GetCaster(); // Caster should be hunter's pet
+
+            if (pet && pet->isAlive())
+            {
+                Unit* pHunter = Unit::GetUnit(*pet, pet->GetOwnerGUID());
+                int32 bp0 = (int32) ((damage * 20) / 100 ); // 20 % of damage caused is shared to pet
+
+                if (pHunter && pHunter->isAlive())
+                    pHunter->CastCustomSpell(pet, 67481, &bp0, NULL, NULL, true);
+            }
+        }
+
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
         pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto ? spellProto->Id : 0);
 
