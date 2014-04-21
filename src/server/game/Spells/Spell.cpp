@@ -6022,6 +6022,22 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
     }
 
+    if (m_spellInfo->Id == 34026) // Kill Command -> cast only if Hunter has target and target is in 5y range from pet
+    {
+        Pet* pPet = (Pet*)Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
+
+        if (pPet && pPet->isAlive())
+        {
+            if (!Target || m_caster->IsFriendlyTo(Target)) // Hunter must has enemy target
+                return SPELL_FAILED_NO_VALID_TARGETS;
+
+            if (pPet->GetDistance(Target) > 5.0f ) // Pet need to be in 5 yard range
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        }
+        else
+            return SPELL_FAILED_NO_VALID_TARGETS;
+    }
+
     // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms
     if (m_spellInfo->Id == 88751)
     {
