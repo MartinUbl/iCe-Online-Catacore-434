@@ -2031,7 +2031,7 @@ public:
                             }
                         }
                     }
-                    uint8 max = (Is25ManRaid()) ? 10 : 6; // Todo is 6 correct number
+                    uint8 max = (Is25ManRaid()) ? 10 : 3;
 
                     for ( uint8 i = 0; i < max ;i ++)
                     {
