@@ -943,24 +943,24 @@ public:
                             // Finger of Frost (44544) proc
                             if (owner->HasAura(44543)) // Finger of Frost (Rank 1) 7%
                                 if (roll_chance_i(7))
-                                    owner->CastSpell(owner, 44544, false);
+                                    owner->CastSpell(owner, 44544, true);
                             if (owner->HasAura(44544)) // Finger of Frost (Rank 2) 14%
                                 if (roll_chance_i(14))
-                                    owner->CastSpell(owner, 44544, false);
+                                    owner->CastSpell(owner, 44544, true);
                             if (owner->HasAura(83074)) // Finger of Frost (Rank 3) 20 %
                                 if (roll_chance_i(20))
-                                    owner->CastSpell(owner, 44544, false);
+                                    owner->CastSpell(owner, 44544, true);
 
                             // Brain Freeze (57761) proc
                             if (owner->HasAura(44546)) // Brain Freeze (Rank 1) 5%
                                 if (roll_chance_i(5))
-                                    owner->CastSpell(owner, 57761, false);
+                                    owner->CastSpell(owner, 57761, true);
                             if (owner->HasAura(44548)) // Brain Freeze (Rank 2) 10%
                                 if (roll_chance_i(10))
-                                    owner->CastSpell(owner, 57761, false);
+                                    owner->CastSpell(owner, 57761, true);
                             if (owner->HasAura(44549)) // Brain Freeze (Rank 3) 15%
                                 if (roll_chance_i(15))
-                                    owner->CastSpell(owner, 57761, false);
+                                    owner->CastSpell(owner, 57761, true);
                     }
                 }
 
