@@ -230,6 +230,12 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
         return;
     }
 
+    if (it->GetCount() < count)
+    {
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, 11);
+        return;
+    }
+
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(pCreature->getFaction());
 
     //we have to take deposit :
@@ -258,6 +264,16 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
 
     pl->ModifyMoney(-int32(deposit));
 
+    if (it->GetCount() == count)
+        pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
+    else
+    {
+        it->SetCount(it->GetCount() - count);
+        it->SetState(ITEM_CHANGED, pl);
+        _player->ItemRemovedQuestCheck(it->GetEntry(), count);
+        it = it->CloneItem(count, pl);
+    }
+
     uint32 auction_time = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
 
     AuctionEntry *AH = new AuctionEntry;
@@ -266,7 +282,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
         AH->auctioneer = 258134;
     else
         AH->auctioneer = GUID_LOPART(auctioneer);
-    AH->item_guidlow = GUID_LOPART(item);
+    AH->item_guidlow = it->GetGUIDLow();
     AH->itemEntry = it->GetEntry();
     AH->owner = pl->GetGUIDLow();
     AH->startbid = bid;
@@ -279,8 +295,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
 
     sAuctionMgr->AddAItem(it);
     auctionHouse->AddAuction(AH);
-
-    pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     it->DeleteFromInventoryDB(trans);
