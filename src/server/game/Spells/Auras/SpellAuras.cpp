@@ -1672,6 +1672,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             case SPELLFAMILY_HUNTER:
                 {
+                    if (GetId() == 19263 && caster) // Deterrence
+                        caster->CastSpell(caster, 114406, true); // - 30 % damage taken 
+
                     // Serpent Sting
                     if (caster && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
                     {
