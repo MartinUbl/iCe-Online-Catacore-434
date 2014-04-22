@@ -1171,6 +1171,55 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Starfire
                 else if (m_spellInfo->Id == 2912)
                 {
+                    // Glyph of Starfire
+                    if (m_caster->HasAura(54845))
+                    {
+                        Aura * moonFire = unitTarget->GetAura(8921, m_caster->GetGUID());
+                        uint64 tempGUID = unitTarget->GetGUID();
+
+                        if (moonFire)
+                        {
+                            UnitList targets;
+                            {
+                                float radius = 100.0f;
+
+                                CellPair p(Trinity::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                                Cell cell(p);
+                                cell.data.Part.reserved = ALL_DISTRICT;
+
+                                Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(m_caster, m_caster, radius);
+                                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(m_caster, targets, u_check);
+
+                                TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                                TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+
+                                cell.Visit(p, grid_object_checker, *m_caster->GetMap(), *m_caster, radius);
+                                cell.Visit(p, world_object_checker, *m_caster->GetMap(), *m_caster, radius);
+                            }
+
+                            for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
+                            {
+                                if (Aura * mf = (*itr)->GetAura(8921, m_caster->GetGUID()))
+                                {
+                                    //Only functions on the target with your most recently applied Moonfire.
+                                    if (mf->GetApplyTime() > moonFire->GetApplyTime())
+                                    {
+                                        tempGUID = (*itr)->GetGUID();
+                                        moonFire = mf;
+                                    }
+                                }
+                            }
+
+                            if (moonFire && unitTarget->GetGUID() == tempGUID)
+                            {
+                                int32 maxDur = GetSpellMaxDuration(moonFire->GetSpellProto());
+
+                                if (maxDur + 3000 < maxDur + 9000) // Dont exceed maximum of 9 seconds
+                                    moonFire->SetDuration(moonFire->GetDuration() + 3000);
+                            }
+                        }
+                    }
+
                     // Fury of Stormrage removal
                     if (m_caster && m_caster->HasAura(81093))
                         m_caster->RemoveAurasDueToSpell(81093);
