@@ -16615,7 +16615,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         {
                             if (procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENEMY_DST
-                            || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST
                             || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_SRC || procSpell->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENEMY_DST)
                             {
                                 return; // Exclude AoE spells from triggering Grounding totem
