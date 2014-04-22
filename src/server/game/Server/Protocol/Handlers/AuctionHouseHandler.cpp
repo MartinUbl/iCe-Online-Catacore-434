@@ -144,24 +144,36 @@ void WorldSession::SendAuctionRemovedNotification(uint32 auctionId, uint32 itemE
 //this void creates new auction and adds auction to some auctionhouse
 void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
 {
-    uint64 auctioneer, item;
+    uint64 auctioneer;
     uint64 bid, buyout;
-    uint32 etime, count;
-    uint32 unk = 1;
+    uint32 etime;
+    uint32 countOfItems;        // count of items used to create stack (almost always 1, more if creation of stack requires more player's stacks)
+    std::vector<uint64> itemGuids;
+    std::vector<uint32> itemStacks;
+
     recv_data >> auctioneer;                                // uint64
-    recv_data >> unk;                                       // 1
-    recv_data >> item;                                      // uint64
-    recv_data >> count;                                     // 3.2.2, number of items being auctioned
-    recv_data >> bid;                                       // uint64, 4.0.6
-    recv_data >> buyout;                                    // uint64, 4.0.6
+    recv_data >> countOfItems;                              // uint32
+    for (uint32 i = 0; i < countOfItems; i++)
+    {
+        uint64 item;
+        recv_data >> item;                                  // uint64
+        itemGuids.push_back(item);
+        uint32 stack;
+        recv_data >> stack;                                 // uint32
+        itemStacks.push_back(stack);
+    }
+    recv_data >> bid;                                       // uint64
+    recv_data >> buyout;                                    // uint64
     recv_data >> etime;                                     // uint32
 
     Player *pl = GetPlayer();
 
-    if (!item || !bid || !etime)
+    if (!bid || !etime)
         return;                                             //check for cheaters
+    if (itemGuids.empty())
+        return;
 
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(auctioneer,UNIT_NPC_FLAG_AUCTIONEER);
+    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(auctioneer, UNIT_NPC_FLAG_AUCTIONEER);
     if (!pCreature)
     {
         sLog->outDebug("WORLD: HandleAuctionSellItem - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(auctioneer)));
@@ -183,7 +195,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     sLog->outDebug("WORLD: HandleAuctionSellItem - ETIME: %u", etime);
 
     // client understand only 3 auction time
-    switch(etime)
+    switch (etime)
     {
         case 1*MIN_AUCTION_TIME:
         case 2*MIN_AUCTION_TIME:
@@ -197,49 +209,69 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item *it = pl->GetItemByGuid(item);
-    //do not allow to sell already auctioned items
-    if (sAuctionMgr->GetAItem(GUID_LOPART(item)))
+    std::vector<Item*> items;
+    items.reserve(countOfItems);
+    for (uint32 i = 0; i < countOfItems; i++)
     {
-        sLog->outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), GUID_LOPART(item));
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
-        return;
-    }
-    // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
-    if (!it)
-    {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
-        return;
+        Item *it = pl->GetItemByGuid(itemGuids[i]);
+        //do not allow to sell already auctioned items
+        if (sAuctionMgr->GetAItem(GUID_LOPART(itemGuids[i])))
+        {
+            sLog->outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), it->GetGUIDLow());
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+            return;
+        }
+        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
+        if (!it)
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
+            return;
+        }
+
+        if (!it->CanBeTraded())
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+            return;
+        }
+
+        if (it->GetProto()->Flags & ITEM_PROTO_FLAG_CONJURED || it->GetUInt32Value(ITEM_FIELD_DURATION))
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+            return;
+        }
+
+        if (it->IsBag() && !((Bag*)it)->IsEmpty())
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+            return;
+        }
+        if (it->GetCount() < itemStacks[i])
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
+            return;
+        }
+        items.push_back(it);
     }
 
-    if (!it->CanBeTraded())
+    //  check prototypes of merged items
+    ItemPrototype const *proto = items[0]->GetProto();
+    for (uint32 i = 1; i < items.size(); i++)
     {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
-        return;
+        if (items[i]->GetProto() != proto)
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+            return;
+        }
     }
 
-    if (it->GetProto()->Flags & ITEM_PROTO_FLAG_CONJURED || it->GetUInt32Value(ITEM_FIELD_DURATION))
-    {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
-        return;
-    }
-
-    if (it->IsBag() && !((Bag*)it)->IsEmpty())
-    {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
-        return;
-    }
-
-    if (it->GetCount() < count)
-    {
-        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, 11);
-        return;
-    }
+    uint32 totalCount = 0;
+    for (uint32 i = 0; i < itemStacks.size(); i++)
+        totalCount += itemStacks[i];
 
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(pCreature->getFaction());
 
     //we have to take deposit :
-    uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, it, count);
+    uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, proto, totalCount);
     if (!pl->HasEnoughMoney(deposit))
     {
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_NOT_ENOUGHT_MONEY);
@@ -249,7 +281,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     if (GetSecurity() > SEC_PLAYER && sWorld->getBoolConfig(CONFIG_GM_LOG_TRADE))
     {
         sLog->outCommand(GetAccountId(),"GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
-            GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),count);
+            GetPlayerName(),GetAccountId(),proto->Name1,proto->ItemId,totalCount);
     }
 
     sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) %s:(name:(%s) entry:(%u) count:(%u))",
@@ -258,21 +290,32 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
                  GetPlayerName(),
                  "create auction",
                    "item",
-                   it->GetProto()->Name1,
-                   it->GetEntry(),
-                   count);
+                   proto->Name1,
+                   proto->ItemId,
+                   totalCount);
 
     pl->ModifyMoney(-int32(deposit));
 
-    if (it->GetCount() == count)
-        pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
-    else
+
+    Item *it = NULL;
+    for (uint32 i = 0; i < items.size(); i++)
     {
-        it->SetCount(it->GetCount() - count);
-        it->SetState(ITEM_CHANGED, pl);
-        _player->ItemRemovedQuestCheck(it->GetEntry(), count);
-        it = it->CloneItem(count, pl);
+        Item *item = items[i];
+        if (itemStacks[i] == item->GetCount())
+        {
+            if (it == NULL)
+                it = item;
+            else
+                pl->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+        }
+        else
+            pl->DestroyItemCount(item, itemStacks[i], true);
     }
+
+    if (it == NULL)
+        it = items[0]->CloneItem(1, pl);
+    it->SetCount(totalCount);
+    //it->SetState(ITEM_CHANGED);
 
     uint32 auction_time = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
 
@@ -295,6 +338,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
 
     sAuctionMgr->AddAItem(it);
     auctionHouse->AddAuction(AH);
+
+    pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     it->DeleteFromInventoryDB(trans);

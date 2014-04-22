@@ -158,7 +158,7 @@ class AuctionHouseMgr
         void SendAuctionOutbiddedMail(AuctionEntry * auction, uint64 newPrice, Player* newBidder, SQLTransaction& trans);
         void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans, Item* item);
 
-        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem, uint32 count);
+        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, ItemPrototype const *pItem, uint32 count);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
 
     public:
