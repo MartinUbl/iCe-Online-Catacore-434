@@ -2596,7 +2596,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, spell->Id)*100.0f);
     // Roll miss
     uint32 tmp = missChance;
-    if (!cannotMiss && roll < tmp)
+    if (!cannotMiss && roll <= tmp)
         return SPELL_MISS_MISS;
 
     // Chance resist mechanic (select max value from every mechanic spell effect)
