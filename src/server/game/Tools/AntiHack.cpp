@@ -29,6 +29,8 @@ AntiHackServant::AntiHackServant(Player* source)
 
 AntiHackServant::~AntiHackServant()
 {
+    for (int32 i = 0; i < SPEEDHACK_CHECK_FRAME_COUNT; i++)
+        delete m_speedFrames[i];
 }
 
 void AntiHackServant::CheckSpeedFrames(SpeedCheckEvent ev)
