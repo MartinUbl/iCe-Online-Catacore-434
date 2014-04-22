@@ -6028,14 +6028,14 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         if (pPet && pPet->isAlive())
         {
-            if (!Target || m_caster->IsFriendlyTo(Target)) // Hunter must has enemy target
+            if (m_caster->getVictim() == NULL) // Hunter must has enemy target
                 return SPELL_FAILED_NO_VALID_TARGETS;
 
             if (pPet->GetDistance(Target) > 5.0f ) // Pet need to be in 5 yard range
                 return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
         }
         else
-            return SPELL_FAILED_NO_VALID_TARGETS;
+            return SPELL_FAILED_NO_PET;
     }
 
     // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms
