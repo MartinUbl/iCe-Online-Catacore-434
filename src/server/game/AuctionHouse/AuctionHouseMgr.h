@@ -48,6 +48,22 @@ enum AuctionError
     ERR_RESTRICTED_ACCOUNT          = 13,
 };
 
+// sorting values used by client in WorldSession::HandleAuctionListItems
+enum AuctionSortingCriterion
+{
+    SC_RARITY = 1,
+    SC_LEVEL = 0,
+    SC_TIME_LEFT = 3,
+    SC_SELLER = 7,
+    SC_CURRENT_BID = 8,
+};
+
+enum AuctionSortingDirection
+{
+    SORT_ASC = 1,
+    SORT_DESC = 0,
+};
+
 enum AuctionAction
 {
     AUCTION_SELL_ITEM = 0,
@@ -118,7 +134,7 @@ class AuctionHouseObject
     void BuildListAuctionItems(WorldPacket& data, Player* player,
         std::wstring const& searchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
         uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
-        uint32& count, uint32& totalcount);
+        uint32& count, uint32& totalcount, AuctionSortingCriterion sortingCriterion, AuctionSortingDirection sortingDirection);
 
   private:
     AuctionEntryMap AuctionsMap;

@@ -655,6 +655,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     uint8 levelmin, levelmax, usable;
     uint32 listfrom, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
     uint64 guid;
+    uint8 sortingCriterion, sortingDirection;
 
     recv_data >> guid;
     recv_data >> listfrom;                                  // start, used for page control listing by 50 elements
@@ -666,6 +667,10 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
 
     recv_data.read_skip<uint8>();                           // unk
     recv_data.read_skip<uint8>();                           // unk
+    recv_data.read_skip<uint8>();                           // unk
+
+    recv_data >> sortingCriterion;
+    recv_data >> sortingDirection;
 
     // unknown data, size varies
     recv_data.rpos(recv_data.wpos());
@@ -701,7 +706,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket & recv_data)
     auctionHouse->BuildListAuctionItems(data,_player,
         wsearchedname, listfrom, levelmin, levelmax, usable,
         auctionSlotID, auctionMainCategory, auctionSubCategory, quality,
-        count,totalcount);
+        count, totalcount, (AuctionSortingCriterion)sortingCriterion, (AuctionSortingDirection)sortingDirection);
 
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
