@@ -268,6 +268,12 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     for (uint32 i = 0; i < itemStacks.size(); i++)
         totalCount += itemStacks[i];
 
+    if (totalCount > proto->GetMaxStackSize())
+    {
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+        return;
+    }
+
     AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(pCreature->getFaction());
 
     //we have to take deposit :
@@ -306,7 +312,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             if (it == NULL)
                 it = item;
             else
-                pl->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+                pl->DestroyItem(item->GetBagSlot(), item->GetSlot(), true, false);
         }
         else
             pl->DestroyItemCount(item, itemStacks[i], true);

@@ -13518,7 +13518,7 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
         m_itemSoulboundTradeable.push_back(pLastItem);
 }
 
-void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
+void Player::DestroyItem(uint8 bag, uint8 slot, bool update, bool logAction)
 {
     Item *pItem = GetItemByPos(bag, slot);
     if (pItem)
@@ -13595,7 +13595,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         else if (Bag *pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
             pBag->RemoveItem(slot, update);
 
-        if (pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
+        if (logAction && pItem->GetProto()->Quality >= ITEM_QUALITY_EPIC)
         {
             sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) count:(%u)",
                          GetSession()->GetRemoteAddress().c_str(),
