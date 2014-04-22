@@ -933,6 +933,11 @@ public:
                         me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f);
                         SlowedDown = true;
                     }
+                    if (me->getVictim() && !me->getVictim()->CanFreeMove())
+                    {
+                        uiDamageTimer = 1 * IN_MILLISECONDS;
+                        return;
+                    }
 
                     me->CastSpell(target, SPELL_FLAME_ORB_DAMAGE_VISUAL, false);
                     if (Unit* owner = me->GetOwner())
