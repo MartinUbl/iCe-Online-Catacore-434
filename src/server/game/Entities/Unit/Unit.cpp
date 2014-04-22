@@ -2640,6 +2640,10 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         if (pVictim->HasInArc(M_PI,this) || pVictim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
         {
             int32 deflect_chance = pVictim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS)*100;
+
+            if (deflect_chance >= 10000) // If AuraEffect has 100 bp -> secure 100 % deflect chance
+                return SPELL_MISS_DEFLECT;
+
             tmp+=deflect_chance;
             if (roll < tmp)
                 return SPELL_MISS_DEFLECT;
@@ -18792,7 +18796,15 @@ float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, 
     if (attType == RANGED_ATTACK)
         HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
     else
-        HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+    {
+        int32 totalHitMod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+
+        if (totalHitMod <= -100) // AuraEffects with -100 basepoint should secure 100% miss chance
+            return 100.0f;
+
+        HitChance += totalHitMod;
+    }
+
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
