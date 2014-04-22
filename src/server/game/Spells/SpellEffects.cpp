@@ -8645,7 +8645,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             else if (m_spellInfo->Id == 99202) // Taming the Flames ( T12 4P set bonus )
             {
                 if (m_caster->ToPlayer())
-                    m_caster->ToPlayer()->ModifySpellCooldown(2894, -1000, true); // Fire Elemental Totem
+                    m_caster->ToPlayer()->ModifySpellCooldown(2894, -4000, true); // Fire Elemental Totem
             }
             break;
         }
