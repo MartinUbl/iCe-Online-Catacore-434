@@ -2078,6 +2078,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (!InBattleground() && mEntry->IsBattlegroundOrArena())
         return false;
 
+    GetAntiHackServant()->DeleteData();
+
     // client without expansion support
     if (GetSession()->Expansion() < mEntry->Expansion())
     {

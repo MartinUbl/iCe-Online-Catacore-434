@@ -59,6 +59,7 @@ class AntiHackServant
 
         // "speed hack" detection method
         void CheckSpeedFrames(SpeedCheckEvent ev);
+        void DeleteData();
 
     private:
 

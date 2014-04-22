@@ -29,8 +29,7 @@ AntiHackServant::AntiHackServant(Player* source)
 
 AntiHackServant::~AntiHackServant()
 {
-    for (int32 i = 0; i < SPEEDHACK_CHECK_FRAME_COUNT; i++)
-        delete m_speedFrames[i];
+    DeleteData();
 }
 
 void AntiHackServant::CheckSpeedFrames(SpeedCheckEvent ev)
@@ -106,5 +105,14 @@ void AntiHackServant::CheckSpeedFrames(SpeedCheckEvent ev)
     if (!m_source->GetTransport() && !m_source->GetVehicle() && deviance >= 100.0f+SPEEDHACK_CHECK_DEVIANCE)
     {
         m_source->GetSession()->SendNotification("Caution, your speed deviates by %i%% !", (int32)(deviance-100.0f));
+    }
+}
+
+void AntiHackServant::DeleteData()
+{
+    for (int32 i = 0; i < SPEEDHACK_CHECK_FRAME_COUNT; i++)
+    {
+        delete m_speedFrames[i];
+        m_speedFrames[i] = NULL;
     }
 }
