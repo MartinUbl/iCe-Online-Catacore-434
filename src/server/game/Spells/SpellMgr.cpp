@@ -4671,6 +4671,23 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeCasterAuraSpell = 95809; // Insanity
             count++;
             break;
+
+/**********************------- END TIME 5 MAN DUNGEON -------**********************/
+        // Echo of Tyrande
+        case 102181: // Eyes of the Goddess
+            spellInfo->Effect[0] = 0;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
+            break;
+        case 102414: // Dark Moonlight
+        case 102173: // Stardust
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_DST;
+            break;
+        case 102149: // Moonlance Effect - Exclude because of DR purpose
+            spellInfo->excludeTargetAuraSpell=102149;
+            break;
+/********************------- END_TIME 5 MAN DUNGEON END -------********************/
+
         // Heart of the Crusader
         case 20335:
         case 20336:
