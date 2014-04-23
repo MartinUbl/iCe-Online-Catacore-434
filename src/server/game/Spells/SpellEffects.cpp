@@ -1212,11 +1212,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                             if (moonFire && unitTarget->GetGUID() == tempGUID)
                             {
-                                int32 curDur = moonFire->GetDuration();
-                                int32 maxDur = GetSpellMaxDuration(moonFire->GetSpellProto());
-
-                                if (curDur + 3000 < maxDur + 9000) // Dont exceed maximum of 9 seconds
-                                    moonFire->SetDuration(curDur + 3000);
+                                // maximum of 3 renewals (9 seconds)
+                                AuraEffect *dotEffect = moonFire->GetEffect(0);
+                                if (dotEffect)
+                                {
+                                    int32 refreshCounter = dotEffect->GetScriptedAmount();
+                                    if (refreshCounter < 3)
+                                    {
+                                        moonFire->SetDuration(moonFire->GetDuration() + 3000);
+                                        dotEffect->SetScriptedAmount(refreshCounter + 1);
+                                    }
+                                }
                             }
                         }
                     }
