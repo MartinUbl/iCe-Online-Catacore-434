@@ -1802,17 +1802,18 @@ public:
                         {
                             HeroicIntermissionTimer = 1500;
                             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
-                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 15.0f);
-                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 30.0f);
+                            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 40.0f);
+                            me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 40.0f);
                             // Move him bit higher at correct position
                             float z = me->GetMap()->GetHeight2(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                             me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), z + 2.0f);
                             break;
                         }
                         case 9:                     // Melee phase
+                            me->SetInternalCombatReach(18.0f); // Need to be called after SetFloatValue !!!
                             HeroicIntermissionTimer = NEVER;
                             PHASE = PHASE4;
-                            breadthTimer = 4000;
+                            breadthTimer = 3000;
                             geyserTimer = breadthTimer + 10000;
                             spreadFlamesTimer = dreadFlameTimer + 7000;
                             if (me->getVictim())
@@ -2808,7 +2809,7 @@ public:
 
         void DoAction(const int32 action) // This will be called if dummy aoe spell hits a player ( in melee range ) via spellscript
         {
-            if (action == EXPLODE)
+            if (action == EXPLODE && !me->HasAura(100567)) // Not during stun caused by BoF
             {
                 me->CastSpell(me,MATEOR_EXPLOSION,true);
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
