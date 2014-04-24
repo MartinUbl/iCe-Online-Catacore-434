@@ -4686,6 +4686,21 @@ void SpellMgr::LoadSpellCustomAttr()
         case 102149: // Moonlance Effect - Exclude because of DR purpose
             spellInfo->excludeTargetAuraSpell=102149;
             break;
+        // Echo of Jaina
+        case 101337: // Frost Blades
+            spellInfo->EffectRadiusIndex[0] = 7; // 3 yd
+            count++;
+            break;
+        case 101927: // Flarecore
+            spellInfo->rangeIndex = 6; //  Range 100 yd
+            spellInfo->EffectRadiusIndex[0] = 19; // 18 yd
+            count++;
+            break;
+        case 101812: // Blink
+            spellInfo->Effect[0] = 0;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
+            break;
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
         // Heart of the Crusader
