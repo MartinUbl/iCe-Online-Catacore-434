@@ -454,6 +454,13 @@ class Creature : public Unit, public GridObject<Creature>
             SetReactState(REACT_DEFENSIVE);*/;
         }
 
+        void SetInternalCombatReach(float value) { m_floatValues[UNIT_FIELD_COMBATREACH] = value; m_ForcedCombatReached = true; }
+
+        bool HasInternalCombatReachSet() const { return m_ForcedCombatReached; }
+        
+        float GetSavedCombatReach() const { return m_BackupCombatReach; }
+        void SaveBackupCombatReach(float reach) { m_BackupCombatReach = reach; m_ForcedCombatReached = false; }
+
         ///// TODO RENAME THIS!!!!!
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
@@ -703,6 +710,9 @@ class Creature : public Unit, public GridObject<Creature>
         void _RealtimeSetCreatureInfo();
 
         static float _GetHealthMod(int32 Rank);
+
+        bool m_ForcedCombatReached;
+        float m_BackupCombatReach;
 
         uint32 m_lootMoney;
         uint64 m_lootRecipient;

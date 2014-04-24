@@ -427,8 +427,14 @@ bool Unit::IsWithinMeleeRange(const Unit *obj, float dist) const
     float dz = GetPositionZ() - obj->GetPositionZ();
     float distsq = dx*dx + dy*dy + dz*dz;
 
-    float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
+    if (GetTypeId() == TYPEID_PLAYER && obj->GetTypeId() == TYPEID_UNIT)
+    {
+        if (obj->ToCreature()->HasInternalCombatReachSet())
+        if (ToPlayer()->GetExactDist(obj) <= obj->ToCreature()->GetSavedCombatReach())
+            return true;
+    }
 
+    float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
 
     float maxdist = dist + sizefactor;
 

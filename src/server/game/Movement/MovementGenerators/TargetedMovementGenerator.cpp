@@ -52,6 +52,12 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner)
 //     else
     if (!i_offset)
     {
+        if (i_target->ToUnit())
+        {
+            if (owner->IsWithinMeleeRange(i_target->ToUnit()))
+                return;
+        }
+        else
         if (i_target->IsWithinMeleeRange(owner))
             return;
 

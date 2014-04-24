@@ -1153,6 +1153,9 @@ void Object::SetFloatValue(uint16 index, float value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
 
+    if (GetTypeId() == TYPEID_UNIT && index == UNIT_FIELD_COMBATREACH)
+        ToCreature()->SaveBackupCombatReach(value);
+
     if (m_floatValues[index] != value)
     {
         m_floatValues[index] = value;

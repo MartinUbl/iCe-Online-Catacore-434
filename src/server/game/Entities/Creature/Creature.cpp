@@ -174,6 +174,9 @@ m_path_id(0), m_formation(NULL)
 
     m_cachedInWater = false;
     m_relocated = true; // will trigger caching of IsInWater result in next update
+
+    m_ForcedCombatReached = false;
+    m_BackupCombatReach = 0.0f;
 }
 
 Creature::~Creature()
