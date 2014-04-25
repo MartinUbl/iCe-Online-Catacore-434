@@ -1305,6 +1305,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (caster && caster->ToPlayer() && caster->HasAura(56372))
                             caster->ToPlayer()->RemoveSpellCooldown(122, true);
                         break;
+                    case 92315: // Pyroblast !
+                    case 11366: // Pyroblast
+                    {
+                        if (!target || !caster)
+                            break;
+
+                        if (GetId() == 92315)
+                        if (Aura * pyroNormal = target->GetAura(11366, caster->GetGUID()))
+                            pyroNormal->Remove();
+
+                        if (GetId() == 11366)
+                        if (Aura * pyroNormal = target->GetAura(92315, caster->GetGUID()))
+                            pyroNormal->Remove();
+                        break;
+                    }
                     case 12472: // Icy Veins
                         // Glyph of Icy Veins
                         if (caster->HasAura(56374))
