@@ -9071,6 +9071,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         return false;
                     target = this;
                     basepoints0 = auraSpellInfo->EffectBasePoints[0];
+
+                    // One with Nature talent  + 1/2/3 focus
+                    if (HasAura(82682))
+                        basepoints0++;
+                    else if (HasAura(82683))
+                        basepoints0 += 2;
+                    else if (HasAura(82684))
+                        basepoints0 += 3;
+
                     trigger_spell_id = 82716;
                     break;
                 }
