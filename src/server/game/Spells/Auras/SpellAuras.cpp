@@ -1316,8 +1316,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             pyroNormal->Remove();
 
                         if (GetId() == 11366)
-                        if (Aura * pyroNormal = target->GetAura(92315, caster->GetGUID()))
-                            pyroNormal->Remove();
+                        if (Aura * pyroSpecial = target->GetAura(92315, caster->GetGUID()))
+                            pyroSpecial->Remove();
                         break;
                     }
                     case 12472: // Icy Veins
