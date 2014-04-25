@@ -4701,6 +4701,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[1] = 0;
             spellInfo->Effect[2] = 0;
             break;
+        // Echo of Baine
+        case 101615: // Throw Totem
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 101614: // Throw Totem
+            spellInfo->Effect[2] = 0;
+            break;
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
         // Heart of the Crusader
