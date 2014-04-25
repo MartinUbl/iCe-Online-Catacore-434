@@ -3128,8 +3128,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Hunter's mark
-            if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
+            // Hunter's mark or Widow Venom
+            if (((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538) || spellproto->Id == 82654)
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot
             if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
