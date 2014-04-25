@@ -1713,8 +1713,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             case SPELLFAMILY_DRUID:
                 {
+                    if (!caster)
+                        break;
+
                     // Rejuvenation
-                    if (caster && target && GetId() == 774)
+                    if (target && GetId() == 774)
                     {
                         // Gift of the Earthmother
                         int32 bp0 = 0;
@@ -1737,21 +1740,35 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                     }
                     // Shooting Stars - reset cooldown of Starsurge
-                    if (GetId() == 93400 && caster && caster->ToPlayer())
+                    if (GetId() == 93400 && caster->ToPlayer())
                         caster->ToPlayer()->RemoveSpellCooldown(78674, true);
 
-                    if (caster)
+
+                    if (target)
                     {
-                        // Talent Feral Swiftness
-                        // Dash or Stampeding Roar cat / bear
-                        if (GetId() == 1850 || GetId() == 77761 || GetId() == 77764)
+                        if (GetId() == 8921) // Moonfire
                         {
-                            if (caster->HasAura(24867) && roll_chance_i(50)) // 50% chance
-                                caster->RemoveMovementImpairingAuras();
-                            else if (caster->HasAura(24864)) // 100% chance
-                                caster->RemoveMovementImpairingAuras();
+                            if (Aura * mf = target->GetAura(94338, caster->GetGUID())) // Sunfire
+                                mf->Remove(AURA_REMOVE_BY_DEFAULT);
+                        }
+                        else
+                        if (GetId() == 94338) // Sunfire
+                        {
+                            if (Aura * sf = target->GetAura(8921, caster->GetGUID())) // Sunfire
+                                sf->Remove(AURA_REMOVE_BY_DEFAULT);
                         }
                     }
+
+                    // Talent Feral Swiftness
+                    // Dash or Stampeding Roar cat / bear
+                    if (GetId() == 1850 || GetId() == 77761 || GetId() == 77764)
+                    {
+                        if (caster->HasAura(24867) && roll_chance_i(50)) // 50% chance
+                            caster->RemoveMovementImpairingAuras();
+                        else if (caster->HasAura(24864)) // 100% chance
+                            caster->RemoveMovementImpairingAuras();
+                    }
+
                 }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
