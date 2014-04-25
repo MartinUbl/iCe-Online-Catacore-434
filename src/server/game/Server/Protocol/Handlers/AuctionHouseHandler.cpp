@@ -214,17 +214,18 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     for (uint32 i = 0; i < countOfItems; i++)
     {
         Item *it = pl->GetItemByGuid(itemGuids[i]);
+        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
+        if (!it)
+        {
+            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
+            return;
+        }
+
         //do not allow to sell already auctioned items
         if (sAuctionMgr->GetAItem(GUID_LOPART(itemGuids[i])))
         {
             sLog->outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), it->GetGUIDLow());
             SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
-            return;
-        }
-        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
-        if (!it)
-        {
-            SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_ITEM_NOT_FOUND);
             return;
         }
 
