@@ -1174,7 +1174,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Glyph of Starfire
                     if (m_caster->HasAura(54845))
                     {
+                        uint32 dotId = 8921; // Moonfire dot 
+
                         Aura * moonFire = unitTarget->GetAura(8921, m_caster->GetGUID());
+                        if (moonFire == NULL)
+                        {
+                            moonFire = unitTarget->GetAura(93402, m_caster->GetGUID()); // Or sunfire
+                            dotId = 93402;
+                        }
+
                         uint64 tempGUID = unitTarget->GetGUID();
 
                         if (moonFire)
@@ -1199,7 +1207,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                             for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
                             {
-                                if (Aura * mf = (*itr)->GetAura(8921, m_caster->GetGUID()))
+                                if (Aura * mf = (*itr)->GetAura(dotId, m_caster->GetGUID()))
                                 {
                                     //Only functions on the target with your most recently applied Moonfire.
                                     if (mf->GetApplyTime() > moonFire->GetApplyTime())
