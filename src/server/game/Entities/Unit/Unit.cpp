@@ -6845,13 +6845,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         return false;
 
                     // try to find spell Rip on the target
-                    if (AuraEffect const *AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
+                    if (AuraEffect *ripEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
                     {
-                        if (AurEff->GetBase()->GetDuration() + 2000 > GetSpellMaxDuration(AurEff->GetSpellProto()) + 6000)
+                        int32 refreshCounter = ripEff->GetScriptedAmount();
+                        if (refreshCounter < 3)
+                        {
+                            ripEff->GetBase()->SetDuration(ripEff->GetBase()->GetDuration() + 2000);
+                            ripEff->SetScriptedAmount(refreshCounter + 1);
+                            return true;
+                        }
+                        else
                             return false;
-
-                        AurEff->GetBase()->SetDuration(AurEff->GetBase()->GetDuration() + 2000);
-                        return true;
                     }
                     // if not found Rip
                     return false;
