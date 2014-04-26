@@ -1693,7 +1693,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000 && unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
                 {
                     damage += m_damage / 2;
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.035f);
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.035f);
                 }
                 //// Death Coil - disable adding bonus
                 //else if (m_spellInfo->Id == 47632)
