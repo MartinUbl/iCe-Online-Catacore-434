@@ -1748,11 +1748,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     {
                         if (GetId() == 8921) // Moonfire
                         {
-                            if (Aura * mf = target->GetAura(94338, caster->GetGUID())) // Sunfire
+                            if (Aura * mf = target->GetAura(93402, caster->GetGUID())) // Sunfire
                                 mf->Remove(AURA_REMOVE_BY_DEFAULT);
                         }
                         else
-                        if (GetId() == 94338) // Sunfire
+                        if (GetId() == 93402) // Sunfire
                         {
                             if (Aura * sf = target->GetAura(8921, caster->GetGUID())) // Sunfire
                                 sf->Remove(AURA_REMOVE_BY_DEFAULT);
