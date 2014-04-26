@@ -21795,14 +21795,21 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
         case 81330:
         case 81332:
         case 81333:
+        {
+            // Apply bonus only for only for 2h weapons
+            Item *item = GetWeaponForAttack(BASE_ATTACK);
+            if (!item || item->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+                return false;
+            break;
+        }
         // Nerves of Cold Steel
         case 49226:
         case 50137:
         case 50138:
         {
-            // Apply bonus only for only for 2h weapons
+            // Apply bonus only for only if dual wielding
             Item *item = GetWeaponForAttack(BASE_ATTACK);
-            if (!item || item->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+            if (!item || item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
                 return false;
             break;
         }
