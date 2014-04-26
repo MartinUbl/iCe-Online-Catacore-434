@@ -21786,13 +21786,26 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
     if (mod->op == SPELLMOD_DURATION && GetSpellDuration(spellInfo) == -1)
         return false;
 
-    // hack-fix for Might of the Frozen Wastes to increase damage only for 2h weapons
     uint32 auraId = mod->ownerAura->GetId();
-    if (auraId == 81330 || auraId == 81332 || auraId == 81333)
+
+    // Apply special conditions for apply spell mods
+    switch (auraId)
     {
-        Item *item = GetWeaponForAttack(BASE_ATTACK);
-        if (!item || item->GetProto()->InventoryType != INVTYPE_2HWEAPON)
-            return false;
+        // Might of the Frozen Wastes
+        case 81330:
+        case 81332:
+        case 81333:
+        // Nerves of Cold Steel
+        case 49226:
+        case 50137:
+        case 50138:
+        {
+            // Apply bonus only for only for 2h weapons
+            Item *item = GetWeaponForAttack(BASE_ATTACK);
+            if (!item || item->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+                return false;
+            break;
+        }
     }
 
     return sSpellMgr->IsAffectedByMod(spellInfo, mod);
