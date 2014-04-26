@@ -6841,10 +6841,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 // Glyph of Bloodletting
                 case 54815:
                 {
-                    if (procSpell->Id != 5221 && procSpell->Id != 33876) // Shred or Mangle ( cat form )
+                    if (procSpell->Id != 5221) // Shred
                         return false;
 
-                    // try to find spell Rip on the target
+                    // Mangle ( cat form ) -> is handled in void Spell::SpellDamageWeaponDmg , because from unknown reason mangle will never get here
+
+                    // Try to find spell Rip on the target
                     if (AuraEffect *ripEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
                     {
                         int32 refreshCounter = ripEff->GetScriptedAmount();

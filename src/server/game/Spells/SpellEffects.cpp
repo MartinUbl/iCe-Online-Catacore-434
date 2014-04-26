@@ -7085,6 +7085,19 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->AddComboPoints(unitTarget,1, this);
+
+                if (m_caster->HasAura(54815)) // Glyph of Bloodletting
+                {
+                    if (AuraEffect *ripEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, m_caster->GetGUID()))
+                    {
+                        int32 refreshCounter = ripEff->GetScriptedAmount();
+                        if (refreshCounter < 3)
+                        {
+                            ripEff->GetBase()->SetDuration(ripEff->GetBase()->GetDuration() + 2000);
+                            ripEff->SetScriptedAmount(refreshCounter + 1);
+                        }
+                    }
+                }
             }
             // Shred
             else if (m_spellInfo->Id == 5221)
