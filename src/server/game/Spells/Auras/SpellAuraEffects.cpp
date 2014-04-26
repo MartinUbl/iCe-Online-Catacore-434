@@ -3025,7 +3025,7 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
         }
         case SPELLFAMILY_PALADIN:
         {
-            if (GetSpellProto()->Id == 82327 && target && target) // Holy Radiance
+            if (GetSpellProto()->Id == 82327 && target && caster) // Holy Radiance
             {
                 // cast triggered spell
                 if (GetBase())
