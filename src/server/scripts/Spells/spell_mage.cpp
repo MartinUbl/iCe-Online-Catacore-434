@@ -933,7 +933,7 @@ public:
                         me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f);
                         SlowedDown = true;
                     }
-                    if (me->getVictim() && !me->getVictim()->CanFreeMove())
+                    if (!target->CanFreeMove())
                     {
                         uiDamageTimer = 1 * IN_MILLISECONDS;
                         return;
