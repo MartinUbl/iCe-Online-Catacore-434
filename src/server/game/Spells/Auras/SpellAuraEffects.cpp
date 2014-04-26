@@ -682,8 +682,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 break;
             // Thorns
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x100)
-                // 16.8% from sp bonus
-                DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.168f;
+            {
+                int32 sp = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.168f;
+                int32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.168f;
+
+                // Take benefit from higher value ( spell power or attack power )
+                DoneActualBenefit = std::max(sp,ap);
+            }
+
             // Retribution Aura
             else if (GetSpellProto()->Id == 7294)
             {
