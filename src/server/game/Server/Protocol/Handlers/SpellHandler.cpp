@@ -417,6 +417,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if (spellInfo->AttributesEx8 & SPELL_ATTR8_RAID_MARKER)
             IgnoreDontKnowSpell = true;
 
+        // Special aura (only one spell so far)
+        if (mover->HasAuraType(SPELL_AURA_MOD_NEXT_SPELL))
+        {
+            mover->RemoveAurasByType(SPELL_AURA_MOD_NEXT_SPELL);
+            IgnoreDontKnowSpell = true;
+        }
+
         // not have spell in spellbook or spell passive and not casted by client
         if ((!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId)) && !IgnoreDontKnowSpell)
         {

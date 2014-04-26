@@ -422,7 +422,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //360
     &AuraEffect::HandleNULL,                                      //361
     &AuraEffect::HandleNULL,                                      //362
-    &AuraEffect::HandleNULL,                                      //363
+    &AuraEffect::HandleNULL,                                      //363 SPELL_AURA_MOD_NEXT_SPELL implemented in WorldSession::HandleCastSpellOpcode
     &AuraEffect::HandleNULL,                                      //364
     &AuraEffect::HandleNULL,                                      //365
     &AuraEffect::HandleModOverrideSpellPowerByAttackPowerPercent, //366 SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT
