@@ -1895,7 +1895,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             break;
                         if (caster)
                         {
-                            uint32 base_points = (GetId() == 91296 ? 5040 : 5700); // normal / heroic
+                            int32 base_points = (GetId() == 91296 ? 5040 : 5700); // normal / heroic
                             caster->EnergizeBySpell(target, GetId(), base_points, POWER_MANA);
                         }
                         break;

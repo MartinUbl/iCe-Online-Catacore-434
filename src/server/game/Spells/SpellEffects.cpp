@@ -3327,6 +3327,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bp = int32(m_caster->GetDamageTakenHistory(5) * 20.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
+
                     bp = bp > min ? bp : min;
                     // Improved Death Strike
                     if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
@@ -5479,7 +5480,7 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
             damage = 4;
     }
 
-    uint32 gain = damage * maxPower / 100;
+    int32 gain = damage * maxPower / 100;
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);
 
     // Revitalize - add cooldown, which was not set by default

@@ -11688,18 +11688,18 @@ int32 Unit::HealBySpell(Unit * pVictim, SpellEntry const * spellInfo, uint32 add
     return gain;
 }
 
-void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
+void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, int32 Damage, Powers powertype)
 {
     WorldPacket data(SMSG_SPELLENERGIZELOG, 8+8+4+4+4+1);
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << uint32(SpellID);
     data << uint32(powertype);
-    data << uint32(Damage);
+    data << int32(Damage);
     SendMessageToSet(&data, true);
 }
 
-void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
+void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, int32 Damage, Powers powertype)
 {
     SendEnergizeSpellLog(pVictim, SpellID, Damage, powertype);
     // needs to be called after sending spell log

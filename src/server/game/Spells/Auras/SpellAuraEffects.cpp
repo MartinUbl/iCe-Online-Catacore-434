@@ -2792,7 +2792,7 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     break;
                 if(Unit* caster = GetCaster())
                 {
-                    uint32 base_points = (GetId() == 91296 ? 420 : 475); // normal / heroic
+                    int32 base_points = (GetId() == 91296 ? 420 : 475); // normal / heroic
                     caster->EnergizeBySpell(target, GetId(), base_points, POWER_MANA);
                 }
                 break;

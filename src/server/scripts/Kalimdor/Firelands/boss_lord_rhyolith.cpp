@@ -503,7 +503,7 @@ public:
 
             if (pInstance)
             {
-                uint32 delta = (uint32)((int32)now - (int32)directionPower);
+                int32 delta = (uint32)((int32)now - (int32)directionPower);
 
                 if (delta != 0)
                 {
