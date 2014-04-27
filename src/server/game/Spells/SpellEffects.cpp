@@ -3327,6 +3327,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     bp = int32(m_caster->GetDamageTakenHistory(5) * 20.0f / 100.0f);
                     // Minimum of 7% total health
                     int32 min = int32(m_caster->CountPctFromMaxHealth(7));
+                    if (m_caster->HasAura(101568) // Glyph of Dark Succor enabler aura
+                        && (m_caster->HasAura(48266) || m_caster->HasAura(48265)))
+                    {
+                        min = int32(m_caster->CountPctFromMaxHealth(20));
+                        m_caster->RemoveAura(101568); // Remove enabler
+                    }
 
                     bp = bp > min ? bp : min;
                     // Improved Death Strike
