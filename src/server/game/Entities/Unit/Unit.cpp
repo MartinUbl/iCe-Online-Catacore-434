@@ -12477,11 +12477,27 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         }
                     break;
                     case SPELLFAMILY_PALADIN:
+                    {
                         // Judgement of Command proc always crits on stunned target
                         if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN)
-                            if (spellProto->SpellFamilyFlags[0] & 0x0000000000800000LL && spellProto->SpellIconID == 561)
-                                if (pVictim->hasUnitState(UNIT_STAT_STUNNED))
-                                    return true;
+                        if (spellProto->SpellFamilyFlags[0] & 0x0000000000800000LL && spellProto->SpellIconID == 561)
+                        if (pVictim->hasUnitState(UNIT_STAT_STUNNED))
+                            return true;
+                        break;
+                    }
+                    case SPELLFAMILY_HUNTER:
+                    {
+                        if (spellProto->Id == 83381) // Kill Command 
+                        {
+                            // Improved Kill Command 
+                            if (HasAura(35029))       // Rank 1
+                                crit_chance += 5.0f;
+                            else if (HasAura(35030))  // Rank 2
+                                crit_chance += 10.0f;
+                        }
+                        break;
+                    }
+
                 }
             }
         case SPELL_DAMAGE_CLASS_RANGED:
