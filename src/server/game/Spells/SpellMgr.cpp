@@ -2014,36 +2014,38 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
     // random damage
     if (caster)
     {
-        // Pet abilities, probably hack, but who knows
-        switch (spellEntry->Id)
+        Player* pl = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (pl)
         {
-            case 17253: // Bite
-            case 16827: // Claw
-            case 49966: // Smack
+            // Pet abilities, probably hack, but who knows
+            switch (spellEntry->Id)
             {
-                uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                value += ap*0.4f*0.2f;
-                break;
-            }
-            case 53508: // Wolverine Bite
-            {
-                uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                value += ap*0.4f*0.1f;
-                break;
-            }
-            case 90361: // Spirit Mend
-            {
-                if (Player* pl = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                case 17253: // Bite
+                case 16827: // Claw
+                case 49966: // Smack
+                {
+                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    value += rap*0.4f*0.2f;
+                    break;
+                }
+                case 53508: // Wolverine Bite
+                {
+                    uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    value += rap*0.4f*0.1f;
+                    break;
+                }
+                case 90361: // Spirit Mend
                 {
                     uint32 rap = pl->GetTotalAttackPowerValue(RANGED_ATTACK);
                     if (effIndex == EFFECT_0)
                         value += rap*0.35f*0.5f;
                     else if (effIndex == EFFECT_1)
                         value += rap*0.35f*0.335f;
+                    break;
                 }
-                break;
             }
         }
+    }
 
         // bonus amount from combo points
         if  (caster->m_movedPlayer)
