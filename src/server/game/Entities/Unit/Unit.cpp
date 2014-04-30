@@ -12489,11 +12489,16 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                     {
                         if (spellProto->Id == 83381) // Kill Command 
                         {
-                            // Improved Kill Command 
-                            if (HasAura(35029))       // Rank 1
-                                crit_chance += 5.0f;
-                            else if (HasAura(35030))  // Rank 2
-                                crit_chance += 10.0f;
+                            Unit * owner = GetOwner();
+
+                            if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                // Improved Kill Command 
+                                if (owner->HasAura(35029))       // Rank 1
+                                    crit_chance += 5.0f;
+                                else if (owner->HasAura(35030))  // Rank 2
+                                    crit_chance += 10.0f;
+                            }
                         }
                         break;
                     }
