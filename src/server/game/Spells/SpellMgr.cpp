@@ -2045,10 +2045,10 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
                 }
             }
         }
-    }
+
 
         // bonus amount from combo points
-        if  (caster->m_movedPlayer)
+        if (caster->m_movedPlayer)
         {
             if (uint8 comboPoints = caster->m_movedPlayer->GetComboPoints())
             {
@@ -2056,7 +2056,7 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
                 {
                     if (comboPointScaling != 0.00f)
                         comboDamage = comboPointScaling;
-                    
+
                     value += int32(comboDamage * comboPoints);
                 }
             }
@@ -2066,19 +2066,19 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
 
         // amount multiplication based on caster's level
         if (!basePointsPerLevel && (spellEntry->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION && spellEntry->spellLevel) &&
-                spellEntry->Effect[effIndex] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
-                spellEntry->Effect[effIndex] != SPELL_EFFECT_KNOCK_BACK &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_ALWAYS &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_NOT_STACK &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_INCREASE_SPEED &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_DECREASE_SPEED &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_MELEE_SPEED_PCT &&
-                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_RANGED_SPEED_PCT)
-                //there are many more: slow speed, -healing pct
-            value = int32(value*0.25f*exp(caster->getLevel()*(70-spellEntry->spellLevel)/1000.0f));
-            //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
-    }
+            spellEntry->Effect[effIndex] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
+            spellEntry->Effect[effIndex] != SPELL_EFFECT_KNOCK_BACK &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_ALWAYS &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_NOT_STACK &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_INCREASE_SPEED &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_DECREASE_SPEED &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_MELEE_SPEED_PCT &&
+            spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_RANGED_SPEED_PCT)
+            //there are many more: slow speed, -healing pct
+            value = int32(value*0.25f*exp(caster->getLevel()*(70 - spellEntry->spellLevel) / 1000.0f));
+        //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
 
+    }
     // Skinning, step for 525 maxskill
     if (spellEntry->Id == 74522)
         value = 7;
