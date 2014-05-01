@@ -4708,6 +4708,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 101614: // Throw Totem
             spellInfo->Effect[2] = 0;
             break;
+        // Murozond
+        case 102364: // Blessing of the Bronze Dragonflight
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+            break;
+        case 101592: // Temporal Snapshot
+            spellInfo->Effect[0] = 0;
+            spellInfo->Effect[1] = 0;
+            break;
 /********************------- END_TIME 5 MAN DUNGEON END -------********************/
 
         // Heart of the Crusader
