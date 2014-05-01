@@ -193,6 +193,204 @@ public:
     }
 };
 
+enum flaskSpells
+{
+    FLASK_OF_TITANIC_STRENGTH   = 79472, // strength
+    FLASK_OF_THE_WINDS          = 79471, // agility
+    FLASK_OF_DRACONIC_MIND      = 79470, // intelect
+    FLASK_OF_STEELSKIN          = 79469, // stamina
+};
+
+enum items
+{
+    ITEM_FLASK_OF_BATTLE = 65455,
+};
+
+class spell_item_flask_of_battle : public SpellScriptLoader
+{
+public:
+    spell_item_flask_of_battle() : SpellScriptLoader("spell_item_flask_of_battle") { }
+
+    class spell_item_flask_of_battle_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_item_flask_of_battle_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 spell_id = 0;
+            Player * player = caster->ToPlayer();
+
+            if (player->HasTankSpec())
+            {
+                switch (player->GetActiveTalentBranchSpec())
+                {
+                    case SPEC_WARRIOR_PROTECTION:
+                    case SPEC_PALADIN_PROTECTION:
+                    case SPEC_DK_BLOOD:
+                        spell_id = FLASK_OF_STEELSKIN;
+                        break;
+                    case SPEC_DRUID_FERAL:
+                        spell_id = (player->HasAura(5487)) ? FLASK_OF_STEELSKIN : FLASK_OF_THE_WINDS;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (player->HasHealingSpec())
+                spell_id = FLASK_OF_DRACONIC_MIND;
+
+            if (spell_id == 0)
+            {
+                switch (player->getClass())
+                {
+                    case CLASS_ROGUE:
+                    case CLASS_HUNTER:
+                        spell_id = FLASK_OF_THE_WINDS;
+                        break;
+                    case CLASS_WARRIOR:
+                    case CLASS_PALADIN:
+                    case CLASS_DEATH_KNIGHT:
+                        spell_id = FLASK_OF_TITANIC_STRENGTH;
+                        break;
+                    case CLASS_PRIEST:
+                    case CLASS_MAGE:
+                    case CLASS_WARLOCK:
+                    case CLASS_DRUID:
+                        spell_id = FLASK_OF_DRACONIC_MIND;
+                        break;
+                    case CLASS_SHAMAN:
+                    {
+                        spell_id = (player->GetActiveTalentBranchSpec() == SPEC_SHAMAN_ENHANCEMENT) ? FLASK_OF_THE_WINDS : FLASK_OF_DRACONIC_MIND;
+                        break;
+                    }
+                    default:
+                        spell_id = 0;
+                        break;
+                    }
+            }
+
+            if (spell_id)
+            {
+                int32 bp = sSpellStore.LookupEntry(spell_id)->EffectBasePoints[0];
+                if (caster->HasAura(53042))
+                    bp += (bp * 26667) / 100000; // Mixology amount boost
+
+                caster->CastCustomSpell(caster, spell_id, &bp, NULL, NULL, true);
+
+                Aura * flaskAura = caster->AddAura(spell_id, caster);
+
+                int32 addDuration = caster->HasAura(53042) ? 3600000 : 0; // Mixology duration boost
+
+                if (caster->HasAura(83945)) // Chug-A-Lug rank 1
+                    addDuration += 1800000;
+                else if (caster->HasAura(83961)) // Chug-A-Lug rank 2
+                    addDuration += 3600000;
+
+                if (flaskAura)
+                {
+                    // Need to do as addition, cause Chug A Lug perk ( maximum should be 3 hours ), if multiplied it would be 4 hours which is wrong
+                    flaskAura->SetDuration(flaskAura->GetDuration() + addDuration);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_item_flask_of_battle_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_flask_of_battle_SpellScript();
+    }
+};
+
+class go_big_cauldron_of_battle : public GameObjectScript
+{
+public:
+    go_big_cauldron_of_battle() : GameObjectScript("go_big_cauldron_of_battle") { max_uses = 0; uses = 0; init = false; }
+
+    uint32 uses;
+    uint32 max_uses;
+
+    bool init;
+
+    bool OnGossipHello(Player * pPlayer, GameObject* pGo)
+    {
+        if (!pPlayer)
+            return true;
+
+        if (init == false)
+        {
+            max_uses = pPlayer->HasAura(83963) ? 30 : 20; // Happy Hour guild perk
+            init = true;
+        }
+
+        // Prevent multiple clicking on cauldron if player already has unique Flask in Inventory
+        if (pPlayer->HasItemCount(ITEM_FLASK_OF_BATTLE, 1))
+            return true;
+
+        if (uses < max_uses - 1)
+            uses++;
+        else
+        {
+            init = false;
+            uses = 0;
+            pGo->SetUseCount(0);
+            pGo->SetLootState(GO_JUST_DEACTIVATED);
+        }
+
+        return false;
+    }
+};
+
+class go_cauldron_of_battle : public GameObjectScript
+{
+public:
+    go_cauldron_of_battle() : GameObjectScript("go_cauldron_of_battle") { max_uses = 0; uses = 0; init = false; }
+
+    uint32 uses;
+    uint32 max_uses;
+
+    bool init;
+
+    bool OnGossipHello(Player * pPlayer, GameObject* pGo)
+    {
+        if (!pPlayer)
+            return true;
+
+        if (init == false)
+        {
+            max_uses = pPlayer->HasAura(83963) ? 10 : 7; // Happy Hour guild perk
+            init = true;
+        }
+
+        // Prevent multiple clicking on cauldron if player already has unique Flask in Inventory
+        if (pPlayer->HasItemCount(ITEM_FLASK_OF_BATTLE, 1))
+            return true;
+
+        if (uses < max_uses - 1)
+            uses++;
+        else
+        {
+            init = false;
+            uses = 0;
+            pGo->SetUseCount(0);
+            pGo->SetLootState(GO_JUST_DEACTIVATED);
+        }
+
+        return false;
+    }
+};
+
+
 // http://www.wowhead.com/item=58149 Flask of Enhancement
 // 79637 Flask of Enhancement
 enum eFlaskOfEnhancementSpells
@@ -996,4 +1194,8 @@ void AddSC_item_spell_scripts()
     new spell_item_apparatus_of_khazgoroth_hc();
     new go_food_feast_cataclysm();
     new spell_item_fandrals_flamescythe();
+
+    new spell_item_flask_of_battle();
+    new go_cauldron_of_battle();
+    new go_big_cauldron_of_battle();    
 }
