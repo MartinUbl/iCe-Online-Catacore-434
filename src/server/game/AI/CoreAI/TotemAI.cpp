@@ -138,19 +138,34 @@ Unit* TotemAI::UpdateTarget()
 
         float cachedRange = m_maxRange + 1.0f, tmpRange;
         bool foundPreferred = false, tmpPreferred;
+        uint32 cachedAura = 0, tmpAura = 0;
         for (std::list<Unit*>::iterator itr = tmpTargetList.begin(); itr != tmpTargetList.end(); ++itr)
         {
             tmpRange = (*itr)->GetDistance(me);
 
             // Searing Totem prefers targets with owners Flame Shock or Stormstrike aura
-            tmpPreferred = (*itr)->HasAura(8050, me->GetOwnerGUID()) || (*itr)->HasAura(17364, me->GetOwnerGUID());
+            if ((*itr)->HasAura(MASTER_SPELL_FLAME_SHOCK, me->GetOwnerGUID()))
+                tmpAura = MASTER_SPELL_FLAME_SHOCK;
+            else if ((*itr)->HasAura(MASTER_SPELL_STORMSTRIKE, me->GetOwnerGUID()))
+                tmpAura = MASTER_SPELL_STORMSTRIKE;
+            else
+                tmpAura = 0;
+
+            // if temp aura == 0, then target is not capable by present aura
+            tmpPreferred = (tmpAura != 0);
             if ((!foundPreferred && tmpPreferred) || (!foundPreferred && tmpRange < cachedRange) || (foundPreferred && tmpPreferred && tmpRange < cachedRange))
             {
-                if (CheckCurrentTarget(*itr))
+                // if already found some target with Stormstrike, select nearest of Stormstriked targets
+                // if not, select any other target
+                if (cachedAura != MASTER_SPELL_STORMSTRIKE || tmpAura == MASTER_SPELL_STORMSTRIKE)
                 {
-                    victim = *itr;
-                    cachedRange = tmpRange;
-                    foundPreferred = tmpPreferred;
+                    if (CheckCurrentTarget(*itr))
+                    {
+                        victim = *itr;
+                        cachedRange = tmpRange;
+                        foundPreferred = tmpPreferred;
+                        cachedAura = tmpAura;
+                    }
                 }
             }
         }

@@ -31,6 +31,9 @@ class Totem;
 
 #define DEFAULT_TOTEM_TARGET_SEARCH_TIMER 10000
 
+#define MASTER_SPELL_FLAME_SHOCK 8050
+#define MASTER_SPELL_STORMSTRIKE 17364
+
 class TotemAI : public CreatureAI
 {
     public:
