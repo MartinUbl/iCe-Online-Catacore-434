@@ -401,7 +401,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //339
     &AuraEffect::HandleNULL,                                      //340
     &AuraEffect::HandleNULL,                                      //341 SPELL_AURA_MOD_COOLDOWN_NATIVE
-    &AuraEffect::HandleNULL,                                      //342
+    &AuraEffect::HandleModMeleeRangedSpeedPct,                    //342 SPELL_AURA_MOD_MELEE_RANGED_HASTE_2
     &AuraEffect::HandleNULL,                                      //343
     &AuraEffect::HandleNULL,                                      //344
     &AuraEffect::HandleNULL,                                      //345
