@@ -791,6 +791,7 @@ class npc_rocket_jockey: public CreatureScript
             Creature* rocket = pPlayer->SummonCreature(rocketStops[index].entry, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 0);
             if (rocket && rocket->IsVehicle())
             {
+                pPlayer->AreaExploredOrEventHappens(29146);
                 pPlayer->EnterVehicle(rocket);
                 ((npc_rocket_joy_ride::npc_rocket_joy_rideAI*)rocket->AI())->StartRide(pPlayer->GetGUID());
             }
