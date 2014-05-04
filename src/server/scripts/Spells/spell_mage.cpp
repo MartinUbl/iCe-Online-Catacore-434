@@ -933,7 +933,7 @@ public:
                         me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f);
                         SlowedDown = true;
                     }
-                    if (!target->CanFreeMove())
+                    if (target->HasNegativeAuraWithAttribute(SPELL_ATTR0_BREAKABLE_BY_DAMAGE,0))
                     {
                         uiDamageTimer = 1 * IN_MILLISECONDS;
                         return;
