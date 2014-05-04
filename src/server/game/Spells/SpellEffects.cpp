@@ -1717,6 +1717,20 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
+        // Dont forget count damage reduction auras if damage was manually computed !!!
+        if (apply_direct_bonus == false)
+        {
+            float TakenTotalMod = 1.0f;
+            TakenTotalMod *= unitTarget->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, m_spellInfo->SchoolMask);
+
+            // Exception for Cheating Death ( dummy aura )
+            Aura * cheatingDeathAura = unitTarget->GetAura(45182);
+            if (cheatingDeathAura && cheatingDeathAura->GetEffect(EFFECT_0))
+                AddPctN(TakenTotalMod, cheatingDeathAura->GetEffect(EFFECT_0)->GetAmount());
+
+            damage *= TakenTotalMod;
+        }
+
         m_damage += damage;
     }
 
