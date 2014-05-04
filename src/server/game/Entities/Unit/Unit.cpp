@@ -9432,6 +9432,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                     if (procEx & PROC_EX_CRITICAL_HIT) // Invigoration talent proc only from critical basic attacks
                     {
+                        // Check if triggered only from basic attack abilities (Claw, Bite or Smack)
+                        if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
+                            return false;
+
                         if (pHunter->HasAura(53257))
                             pHunter->RemoveAuraFromStack(53257); // Drop 1 charge of Cobra strike when pet critical strike with his ability
 
