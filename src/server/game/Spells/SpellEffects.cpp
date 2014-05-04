@@ -989,11 +989,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if (bp0 > maxbp)
                             bp0 = maxbp;
                         // If we already have aura like this, only refresh if damage is lower
-                        if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
-                            unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
-                            unitTarget->GetAura(85421)->RefreshDuration();
-                        else
-                        pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                        if (Aura * beAura = unitTarget->GetAura(85421, pOwner->GetGUID()))
+                        {
+                            if (AuraEffect * beAurEff = beAura->GetEffect(EFFECT_0))
+                            {
+                                if (beAurEff->GetAmount() >= bp0)
+                                    beAura->RefreshDuration();
+                                else
+                                    pOwner->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                            }
+                        }
                     }
                 }
                 // Lash of Pain (succubus)
@@ -1880,11 +1885,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (bp0 > maxbp)
                     bp0 = maxbp;
                 // If we already have aura like this, only refresh if damage is lower
-                if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
-                    unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
-                    unitTarget->GetAura(85421)->RefreshDuration();
-                else
-                    m_caster->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                if (Aura * beAura = unitTarget->GetAura(85421, m_caster->GetGUID()))
+                {
+                    if (AuraEffect * beAurEff = beAura->GetEffect(EFFECT_0))
+                    {
+                        if (beAurEff->GetAmount() >= bp0)
+                            beAura->RefreshDuration();
+                        else
+                            m_caster->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+                    }
+                }
             }
             break;
         }
