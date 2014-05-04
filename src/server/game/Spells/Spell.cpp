@@ -2935,6 +2935,16 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ALLY;
                     break;
                 }
+                if (m_spellInfo->Id == 94472) // Atonement
+                {
+                    targetType = SPELL_TARGETS_ALLY;
+
+                    if (Unit * target = m_targets.getUnitTarget())
+                        radius = target->GetCombatReach() + 15.0f; // Increase radius by enemy combat reach
+                    else
+                        radius = GetEffectRadius(i);
+                    break;
+                }
                 radius = GetEffectRadius(i);
                 targetType = SPELL_TARGETS_ALLY;
                 break;
