@@ -4127,6 +4127,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 85421: // Burning Ember ( warlock )
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
+        case 54424: // Fel Intelligence (warlock)
+            spellInfo->EffectValueMultiplier[1] = 362.05f;
+            break;
         case 62388: //Demonic Circle: Summon (caster aura spell)
             spellInfo->EquippedItemClass = -1;
             spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
