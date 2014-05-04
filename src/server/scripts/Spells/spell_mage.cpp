@@ -818,13 +818,12 @@ public:
             x = me->GetPositionX();
             y = me->GetPositionY();
             isChilling = false;
+
+            uiDespawnTimer = 15 * IN_MILLISECONDS;
+
             if (Unit* owner = me->GetOwner())
             {
-                Unit* target = me->SelectNearestTarget(20);
-                if (target)
-                    uiDespawnTimer = 15*IN_MILLISECONDS;
-                else
-                    uiDespawnTimer = 4*IN_MILLISECONDS;
+                Unit* target = me->SelectNearestTarget(100);
 
                 z = owner->GetPositionZ() + 3.0f;
                 angle = owner->GetAngle(me);
@@ -851,15 +850,12 @@ public:
         float x,y,z,o,newx,newy,angle;
         bool SlowedDown;
         bool MoveCheck;
-        uint32 uiHardDespawnTimer;
         uint32 uiDespawnTimer;
-        uint32 uiDespawnCheckTimer;
         uint32 uiDamageTimer;
 
         void EnterCombat(Unit* target)
         {
             me->GetMotionMaster()->MoveCharge(newx, newy, z, 1.14286f); // Normal speed
-            uiDespawnTimer = 15*IN_MILLISECONDS;
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -881,7 +877,6 @@ public:
 
             isFrostfireCheck = false;
 
-            uiHardDespawnTimer = 15*IN_MILLISECONDS;
             uiDamageTimer = 1*IN_MILLISECONDS;
             me->GetMotionMaster()->MoveCharge(newx, newy, z, 5.5f);
         }
@@ -909,7 +904,7 @@ public:
                 me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
             }
 
-            if (uiDespawnTimer <= diff || uiHardDespawnTimer <= diff)
+            if (uiDespawnTimer <= diff)
             {
                 if (Unit* owner = me->GetOwner())
                     if (AuraEffect* aureff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE,SPELLFAMILY_MAGE,31,EFFECT_0))
@@ -924,8 +919,7 @@ public:
 
             if (uiDamageTimer <= diff)
             {
-
-                if (Unit* target = me->SelectNearestTarget(20))
+                if (Unit* target = me->SelectNearestTarget(100))
                 {
                     if (!SlowedDown)
                     {
