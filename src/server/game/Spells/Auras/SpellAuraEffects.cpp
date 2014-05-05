@@ -419,7 +419,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //357
     &AuraEffect::HandleNULL,                                      //358 SPELL_AURA_TRANSFORM_2
     &AuraEffect::HandleNULL,                                      //359
-    &AuraEffect::HandleNULL,                                      //360
+    &AuraEffect::HandleNoImmediateEffect,                         //360 SPELL_AURA_PROC_TRIGGER_SPELL_COPY implemented in Unit::ProcDamageAndSpellFor and Unit::HandleProcTriggerSpell
     &AuraEffect::HandleNULL,                                      //361
     &AuraEffect::HandleNULL,                                      //362
     &AuraEffect::HandleNULL,                                      //363 SPELL_AURA_MOD_NEXT_SPELL implemented in WorldSession::HandleCastSpellOpcode

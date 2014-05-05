@@ -8820,6 +8820,28 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
     return false;
 }
 
+void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* triggeredByAura, SpellEntry const *procSpell, uint32 procFlags)
+{
+    if (pVictim == NULL || !pVictim->isAlive() || !procSpell)
+        return;
+
+    // not allow proc extra attack spell at extra attack
+    if (m_extraAttacks && IsSpellHaveEffect(sSpellStore.LookupEntry(procSpell->Id), SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+        return;
+
+    if (procFlags & PROC_FLAG_DONE_PERIODIC) // If triggered by dot
+    {
+        // Cast Wrath of Tarecgosa spell ( arcane damage )
+        if (roll_chance_f(7.5f))
+            CastCustomSpell(101085, SPELLVALUE_BASE_POINT0, damage, pVictim, true);
+    }
+    else     // Direct negative spell
+    {
+        if (roll_chance_f(6.0f)) // Not sure, can't find proof of proc chance after 4.3 nerf
+            CastSpell(pVictim, procSpell->Id, true); // Cast copy of that spell
+    }
+}
+
 bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* triggeredByAura, SpellEntry const *procSpell, uint32 procFlags, uint32 procEx, uint32 cooldown)
 {
     // Get triggered aura spell info
@@ -16249,6 +16271,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_REFLECT_SPELLS] = true;
     isTriggerAura[SPELL_AURA_DAMAGE_IMMUNITY] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_COPY] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_DAMAGE] = true;
     isTriggerAura[SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK] = true;
     isTriggerAura[SPELL_AURA_SCHOOL_ABSORB] = true; // Savage Defense untested
@@ -16543,6 +16566,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                     // Don`t drop charge or add cooldown for not started trigger
                     if (HandleProcTriggerSpell(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
                         takeCharges = true;
+                    break;
+                }
+                case SPELL_AURA_PROC_TRIGGER_SPELL_COPY:
+                {
+                    sLog->outDebug("ProcDamageAndSpell: casting spell copy %u (triggered by %s aura of spell %u)", spellInfo->Id, (isVictim ? "a victim's" : "an attacker's"), triggeredByAura->GetId());
+                    HandleProcTriggerSpellCopy(pTarget, damage, triggeredByAura, procSpell, procFlag);
                     break;
                 }
                 case SPELL_AURA_PROC_TRIGGER_DAMAGE:
