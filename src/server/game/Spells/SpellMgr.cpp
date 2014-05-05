@@ -3016,6 +3016,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Ring of Frost
             if (spellproto->Id == 82691)
                 return DIMINISHING_DISORIENT;
+            // Slow
+            if (spellproto->Id == 31589)
+                return DIMINISHING_LIMITONLY;
             // Dragon's Breath
             if (spellproto->SpellFamilyFlags[0] & 0x00800000)
                 return DIMINISHING_DISORIENT_SPECIAL;
