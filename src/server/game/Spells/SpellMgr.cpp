@@ -3073,6 +3073,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Pounce
             if (spellproto->SpellFamilyFlags[0] & 0x20000)
                 return DIMINISHING_CONTROL_STUN;
+            // Pounce Bleed
+            if (spellproto->Id == 9007)
+                return DIMINISHING_NONE;
             // Cyclone
             if (spellproto->SpellFamilyFlags[1] & 0x20)
                 return DIMINISHING_CYCLONE;
