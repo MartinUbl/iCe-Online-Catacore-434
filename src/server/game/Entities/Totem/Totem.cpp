@@ -189,6 +189,8 @@ bool Totem::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) co
     switch(spellInfo->EffectApplyAuraName[index])
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
+            // Temp hack fix, allow spells with initial direct ( Moonfire, Holy Fire, ... )
+            return spellInfo->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE) ? false : true;
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_MOD_FEAR:
         case SPELL_AURA_TRANSFORM:
