@@ -3088,6 +3088,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Hibernate
             if (spellproto->Id == 2637)
                 return DIMINISHING_DISORIENT;
+            // Infected Wounds
+            if (spellproto->Id == 58179 || spellproto->Id == 58180)
+                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_SHAMAN:
