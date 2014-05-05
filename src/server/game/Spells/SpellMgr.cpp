@@ -3212,6 +3212,13 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
                 return 40 * IN_MILLISECONDS;
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Curse of Elements ( Max 2 minutes in PvP )
+            if (spellproto->Id == 1490)
+                return 120 * IN_MILLISECONDS;
+            break;
+        }
         default:
             break;
     }
