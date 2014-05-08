@@ -825,6 +825,7 @@ public:
                     uiDespawnTimer = 15*IN_MILLISECONDS;
                 else
                     uiDespawnTimer = 4*IN_MILLISECONDS;
+
                 z = owner->GetPositionZ() + 3.0f;
                 angle = owner->GetAngle(me);
                 isChilling = owner->HasAura(84727);
