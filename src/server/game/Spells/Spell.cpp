@@ -3381,6 +3381,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     if (m_spellInfo->SpellFamilyFlags[1] == 0x04000000) // Wild Growth
                     {
                         maxSize = m_caster->HasAura(62970) ? 6 : 5; // Glyph of Wild Growth
+
+                        if (m_caster->HasAura(33891)) // Tree of Life boost
+                            maxSize += 2;
+
                         power = POWER_HEALTH;
                     }
                     else if (m_spellInfo->SpellFamilyFlags[2] == 0x0100) // Starfall
