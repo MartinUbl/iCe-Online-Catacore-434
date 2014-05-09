@@ -2338,6 +2338,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             }
             else
             {
+                if (m_spellProto->Id == 8936) // Regrowth
+                {
+                    if (caster->HasAura(54743)) // Glyph of Regrowth
+                    if (target && target->GetHealthPct() <= 50 && GetBase())
+                        GetBase()->RefreshDuration();
+                }
                 // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
                 if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellIconID == 2864)
                     damage += int32(float(damage * GetTotalTicks()) * ((6 - float(2 * (GetTickNumber() - 1))) / 100));
