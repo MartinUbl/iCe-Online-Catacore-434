@@ -35,6 +35,9 @@ public:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 currEnc[MAX_ENCOUNTER];
         uint32 heroicKills;
+        // Achiev variables
+        uint32 shareThePainAchievComplete;
+        uint32 deathFromAboveAchievComplete;
         uint64 riplimbGuid;
         uint64 ragefaceGuid;
         uint64 shannoxGuid;
@@ -69,6 +72,8 @@ public:
             balerocDoorGUID =   0;
             bridgeDoorGUID=     0;
             bridgeGUID =        0;
+            shareThePainAchievComplete = 1;
+            deathFromAboveAchievComplete = 1;
 
             unlockTimer         = 10000;
             spawnBridgeTimer    = 500;
@@ -338,14 +343,27 @@ public:
             if (DataId < MAX_ENCOUNTER)
                 return m_auiEncounter[DataId];
 
-            if (DataId == DATA_HEROIC_KILLS)
-                return heroicKills;
+            switch (DataId)
+            {
+                case DATA_DEATH_FROM_ABOVE_ACHIEV:
+                    return deathFromAboveAchievComplete;
+                case DATA_HEROIC_KILLS:
+                    return heroicKills;
+                case DATA_PAIN_ACHIEV:
+                    return shareThePainAchievComplete;
+            }
 
             return 0;
         }
 
         void SetData(uint32 type, uint32 data)
         {
+            if (type == DATA_PAIN_ACHIEV)
+                shareThePainAchievComplete = data;
+
+            if (type == DATA_DEATH_FROM_ABOVE_ACHIEV)
+                deathFromAboveAchievComplete = data;
+
             if (type == DATA_BRIDGE_SPAWN)
             {
                 spawnBridgeTimer = data;

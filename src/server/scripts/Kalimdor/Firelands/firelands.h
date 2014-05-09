@@ -42,7 +42,14 @@ enum AdditionalEvents
     DATA_BRIDGE_DOOR        = 11,
     DATA_BRIDGE_SPAWN       = 12,
     DATA_HEROIC_KILLS       = 13,
-    DATA_LAVA_RING_GUID     = 14
+    DATA_LAVA_RING_GUID     = 14,
+
+};
+
+enum AchievEvents
+{
+    DATA_PAIN_ACHIEV = 15,
+    DATA_DEATH_FROM_ABOVE_ACHIEV = 16
 };
 
 enum CreatureIds

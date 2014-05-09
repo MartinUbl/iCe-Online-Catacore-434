@@ -40,6 +40,7 @@ public:
 private:
     // virtual method overrides
     void Reset();
+    void JustDied(Unit *killer);
     void EnterCombat(Unit *who);
     void EnterEvadeMode();
     void UpdateAI(const uint32 diff);
@@ -124,6 +125,11 @@ void mob_droneAI::EnterCombat(Unit *who)
     SpiderAI::EnterCombat(who);
 }
 
+void mob_droneAI::JustDied(Unit *killer)
+{
+    if (instance)
+        instance->SetData(DATA_DEATH_FROM_ABOVE_ACHIEV, 0); // Failed achiev
+}
 
 void mob_droneAI::EnterEvadeMode()
 {

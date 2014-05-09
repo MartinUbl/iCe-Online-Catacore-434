@@ -235,7 +235,10 @@ void boss_bethtilacAI::EnterCombat(Unit *who)
     LockDoor();
 
     if (instance)
+    {
+        instance->SetData(DATA_DEATH_FROM_ABOVE_ACHIEV, 1);
         instance->SetData(TYPE_BETHTILAC, IN_PROGRESS);
+    }
 
     DoZoneInCombat();
 
@@ -328,7 +331,13 @@ void boss_bethtilacAI::JustDied(Unit *killer)
     me->RemoveAllAuras();
 
     if (instance)
+    {
+        if (instance->GetData(DATA_DEATH_FROM_ABOVE_ACHIEV) == 1)
+            instance->DoCompleteAchievement(5821); // Death from Above
+
         instance->SetData(TYPE_BETHTILAC, DONE);
+    }
+
 
     UnlockDoor();
 }

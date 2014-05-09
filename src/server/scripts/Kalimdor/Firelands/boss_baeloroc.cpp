@@ -129,6 +129,7 @@ public:
         {
             if(instance)
             {
+                instance->SetData(DATA_PAIN_ACHIEV, 1);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 instance->SetData(TYPE_BALEROC, NOT_STARTED);
             }
@@ -156,7 +157,13 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             if (instance)
-                instance->SetData(DATA_BRIDGE_SPAWN,37000);
+            {
+                if (instance->GetData(DATA_PAIN_ACHIEV) == 1)
+                    instance->DoCompleteAchievement(5830); // Share the Pain
+
+                instance->SetData(DATA_BRIDGE_SPAWN, 37000);
+            }
+
 
             PlayAndYell(onDeath.sound,onDeath.text);
 
@@ -846,6 +853,11 @@ class spell_gen_torment : public SpellScriptLoader
                 if(spellId)
                 {
                     uint32 stacks = target->GetAuraCount(spellId);
+
+                    if (stacks >= 4)
+                        if (InstanceScript * pInstance = caster->GetInstanceScript())
+                            pInstance->SetData(DATA_PAIN_ACHIEV, 0); // Achiev failed
+
                     if(stacks)
                         SetHitDamage( (500 + GetHitDamage()) * stacks); // pre nerfed value
                 }
