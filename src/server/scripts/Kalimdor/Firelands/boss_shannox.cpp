@@ -55,6 +55,23 @@ enum Spells
     SPELL_SEPARATION_ANXIETY        = 99835,
 };
 
+typedef struct
+{
+    const uint32 areaId;
+    bool visited;
+}FirelandsAreaId;
+
+#define MAX_AREAS 5
+
+FirelandsAreaId areas[5] = 
+{
+    { 5764, false }, // BETHILAC_LAIR_AREA
+    { 5821, false }, // PATH_OF_CORRUPTION_AREA
+    { 5766, false }, // SHATTEREDSTONE_AREA
+    { 5765, false }, // FLAMEBREACH_AREA
+    { 5791, false }  // RIDGE_OF_ANCIENT_FLAME_AREA
+};
+
 # define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
 class boss_shannox : public CreatureScript
@@ -86,7 +103,35 @@ class boss_shannox : public CreatureScript
             uint32 aggroTime;
             uint32 riplimbRespawnTimer;
             uint32 enrageTimer;
+            uint32 areaCheckTimer;
             bool aggroBool;
+
+            void ResetVisitedAreas()
+            {
+                for (uint32 i = 0; i < MAX_AREAS; i++)
+                    areas[i].visited = false;
+            }
+
+            void UpdateVisitedAreas()
+            {
+                uint32 actualAreaId = me->GetAreaId();
+
+                for (uint32 i = 0; i < MAX_AREAS; i++)
+                if (areas[i].areaId == actualAreaId && areas[i].visited == false)
+                    {
+                        areas[i].visited = true;
+                        break;
+                    }
+            }
+
+            bool VisitedAllAreas()
+            {
+                for (uint32 i = 0; i < MAX_AREAS; i++)
+                    if (areas[i].visited == false)
+                        return false;
+
+                return true;
+            }
 
             void Reset()
             {
@@ -96,6 +141,7 @@ class boss_shannox : public CreatureScript
                 aggroTime = 500;
                 aggroBool = false;
 
+                areaCheckTimer = 1000;
                 separationCheckTimer = 1000;
                 ArcingSlashTimer = 7000;
                 CrystalTrapTimer = 8000;
@@ -193,7 +239,12 @@ class boss_shannox : public CreatureScript
             void JustDied(Unit* killer)
             {
                 if (pInstance)
+                {
                     pInstance->SetData(TYPE_SHANNOX, DONE);
+
+                    if (VisitedAllAreas())
+                        pInstance->DoCompleteAchievement(5829); // Bucket List
+                }
 
                 DespawnTraps();
                 summonedTraps.clear();
@@ -246,6 +297,7 @@ class boss_shannox : public CreatureScript
 
             void EnterCombat(Unit* pWho)
             {
+                ResetVisitedAreas();
                 DoYell("Aha! The interlopers... Kill them! EAT THEM!", 24565);
                 if (pInstance)
                 {
@@ -425,6 +477,13 @@ class boss_shannox : public CreatureScript
 
                 if (!UpdateVictim())
                     return;
+
+                if (areaCheckTimer <= diff)
+                {
+                    UpdateVisitedAreas();
+                    areaCheckTimer = 2000;
+                }
+                else areaCheckTimer -= diff;
 
                 if (!aggroBool)
                 {
