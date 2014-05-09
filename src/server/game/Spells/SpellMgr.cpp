@@ -4490,6 +4490,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
             break;
         case 86956: // Focused laser
+        case 45576: // Cosmetic Fire Beam
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
         case 1680: // Whirlwind  (Fury)

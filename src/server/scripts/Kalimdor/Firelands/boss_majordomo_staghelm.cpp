@@ -72,6 +72,7 @@ enum Creatures
     MAJORDOMO_STAGHELM      = 52571,
     SPIRIT_OF_FLAME         = 52593,
     BURNING_ORB             = 53216,
+    FANDRAL_FLAME           = 53696
 };
 
 
@@ -81,7 +82,7 @@ struct Yells
     const char * text;
 };
 
-static const Yells RandomKill[4]= // TODO -> Find sound id's
+static const Yells RandomKill[4]=
 {
     {24477, "Burn."},
     {24479, "Soon, ALL of Azeroth will burn!"},
@@ -116,6 +117,10 @@ public:
         {
             instance = creature->GetInstanceScript();
             //me->SummonGameObject(FIREWALL_MAJORDOMO,576.04f,-61.8f,90.34f,5.6f,0,0,0,0,0); Temporary disabled
+
+            // Summon 2 orbs for achievement (Only the Penitent...)
+            me->SummonCreature(FANDRAL_FLAME, 508.0f, -27.0f, 84.0f, 2.83f);
+            me->SummonCreature(FANDRAL_FLAME, 510.0f, -97.0f, 84.0f, 2.83f);
         }
 
         InstanceScript* instance;
@@ -196,6 +201,12 @@ public:
 
         void EnterCombat(Unit* who)
         {
+            std::list<Creature*> orbs;
+            GetCreatureListWithEntryInGrid(orbs, me, FANDRAL_FLAME, 200.0f);
+
+            for (std::list<Creature*>::iterator iter = orbs.begin(); iter != orbs.end(); ++iter)
+                (*iter)->ForcedDespawn();
+
              me->SetWalk(false);
 
             if(instance)
@@ -650,8 +661,8 @@ public:
 
                 if(me->getPowerType() == POWER_ENERGY && !IsInHumanForm())
                 {
-                        adrenalineStacks = (adrenalineStacks > 9) ? 9 : adrenalineStacks; // Out of bounds protection
-                        me->SetPower(POWER_ENERGY,me->GetPower(POWER_ENERGY) + (100 / energyField[adrenalineStacks]));
+                    adrenalineStacks = (adrenalineStacks > 9) ? 9 : adrenalineStacks; // Out of bounds protection
+                    me->SetPower(POWER_ENERGY,me->GetPower(POWER_ENERGY) + (100 / energyField[adrenalineStacks]));
                 }
                 Energy_timer = 1000;
             }
@@ -829,17 +840,75 @@ public:
     {
         staghelm_flame_orbAI(Creature* creature) : ScriptedAI(creature) 
         {
-            me->SetFlag(UNIT_FIELD_FLAGS,/*UNIT_FLAG_NOT_SELECTABLE|*/UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS,/*|UNIT_FLAG_NON_ATTACKABLE|*/UNIT_FLAG_DISABLE_MOVE);
+            if (me->GetPositionY() < -30.0f)
+                leftOrb = false;
+            else
+                leftOrb = true;
         }
+
+        uint32 checkTimer;
+        bool changed;
+        bool leftOrb;
 
         void Reset()
         {
+            checkTimer = NEVER;
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetReactState(REACT_PASSIVE);
             me->CastSpell(me,SPELL_BURNING_ORB_VISUAL,true);
         }
 
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+
+            if (spell->Id != 45576) // Beam
+                return;
+
+            if (me->GetAuraCount(45576) > 1) // Beam
+                return;
+
+            checkTimer = 3000;
+        }
+
         void UpdateAI (const uint32 diff)
         {
+            if (checkTimer <= diff && leftOrb)
+            {
+                Creature *rightOrb = NULL;
+                std::list<Creature*> orbs;
+                GetCreatureListWithEntryInGrid(orbs, me, FANDRAL_FLAME, 200.0f);
+
+                for (std::list<Creature*>::iterator iter = orbs.begin(); iter != orbs.end(); ++iter)
+                {
+                    if ((*iter)->GetPositionY() < -30.0f)
+                    {
+                        rightOrb = *iter;
+                    }
+                }
+
+                if (rightOrb == NULL)
+                {
+                    me->ForcedDespawn();
+                    return;
+                }
+
+                if (me->GetAuraCount(45576) >= 3 && rightOrb->GetAuraCount(45576) >= 3)
+                {
+                    me->RemoveAllAuras();
+                    rightOrb->RemoveAllAuras();
+
+                    me->ForcedDespawn(500);
+                    rightOrb->ForcedDespawn(500);
+
+                    if (InstanceScript * instance = me->GetInstanceScript())
+                        instance->DoCompleteAchievement(5799); // Only the Penitent... achievement
+                }
+                checkTimer = NEVER;
+            }
+            else checkTimer -= diff;
+
         }
     };
 };
@@ -896,6 +965,18 @@ public:
             kneelTimer = 1000;
             jumpTimer = 2000;
             StunTimer = NEVER;
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
+        {
+            if (spell->Id == KNEEEL_TO_THE_FLAME)
+            {
+                std::list<Creature*> orbs;
+                GetCreatureListWithEntryInGrid(orbs, me, FANDRAL_FLAME, 200.0f);
+
+                for (std::list<Creature*>::iterator iter = orbs.begin(); iter != orbs.end(); ++iter)
+                    (*iter)->ForcedDespawn();
+            }
         }
 
         void EnterEvadeMode()
@@ -988,7 +1069,8 @@ public:
             {
                 if (sunfireTimer <= diff)
                 {
-                    me->CastSpell(me,SUNFIRE,false);
+                    if (!me->IsNonMeleeSpellCasted(false))
+                        me->CastSpell(me,SUNFIRE,false);
                     sunfireTimer = 3000;
                 }
                 else sunfireTimer -= diff;
@@ -1004,7 +1086,7 @@ class IsKneeling
     public:
         bool operator()(Unit* unit) const
         {
-            if (unit && unit->getStandState() == UNIT_STAND_STATE_KNEEL)
+            if (unit && (unit->getStandState() == UNIT_STAND_STATE_KNEEL || unit->GetEntry() == FANDRAL_FLAME))
                 return true;
             else
                 return false;
@@ -1188,7 +1270,7 @@ void AddSC_boss_majordomo_staghelm()
     new spirit_of_flame_npc(); //           52593
     new burning_orb_npc(); //               53216
     new druid_of_the_flame();
-    new staghelm_flame_orb();
+    new staghelm_flame_orb(); //            53696
 
     // SPELLS
     new spell_searing_seed_explosion(); //  98620,100215,100216,100217
@@ -1246,4 +1328,6 @@ void AddSC_boss_majordomo_staghelm()
     UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=53619 LIMIT 1;
     UPDATE `creature_template` SET `rank`=3 WHERE  `entry`=53803 LIMIT 1;
     select * from creature_template where entry in (53619,53803);
+
+    INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `cast_flags`, `user_type`) VALUES (53696, 45576, 0, 1, 0);
 */

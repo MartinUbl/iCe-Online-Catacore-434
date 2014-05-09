@@ -27424,6 +27424,15 @@ bool Player::canSeeSpellClickOn(Creature const *c) const
     if (!c->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_SPELLCLICK))
         return false;
 
+    // TODO - Find correct solution, this is temporary hack
+    switch (c->GetEntry())
+    {
+        case 53696: // Flame Orb ( Firelands )
+            return true;
+        default:
+            break;
+    }
+
     SpellClickInfoMapBounds clickPair = sObjectMgr->GetSpellClickInfoMapBounds(c->GetEntry());
     if (clickPair.first == clickPair.second)
         return true;
