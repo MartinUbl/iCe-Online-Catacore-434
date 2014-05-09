@@ -241,10 +241,12 @@ public:
 
         uint32 enrageTimer;
         bool beam;
+        bool NotAnAmbiTurnerAchievComplete;
 
         void Reset()
         {
             beam = false;
+            NotAnAmbiTurnerAchievComplete = true;
 
             me->SetDisplayId(DISPLAYID_NORMAL); // "dressed up"
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE); // Rhyolith can't be attack directly in phase 1
@@ -447,10 +449,14 @@ public:
         void JustDied(Unit* killer)
         {
             if (pInstance)
-                    pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
-
-            if (pInstance)
+            {
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
                 pInstance->SetData(TYPE_RHYOLITH, DONE);
+
+                if (NotAnAmbiTurnerAchievComplete)
+                    pInstance->DoCompleteAchievement(5810); // Not an Ambi-Turner achiev
+
+            }
 
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
             if (foot)
@@ -818,6 +824,8 @@ public:
 
                     if (isTurningLeft())
                     {
+                        // Defeat Lord Rhyolith in the Firelands without ever causing him to turn left while his armor is intact.
+                        NotAnAmbiTurnerAchievComplete = false;
                         uint32 leftDamage = GetTotalLeftDamage() - GetTotalRightDamage();
                         if(leftDamage != 0)
                         {
