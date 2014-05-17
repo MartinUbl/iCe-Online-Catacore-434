@@ -242,39 +242,39 @@ public:
         enum haste_buff
         {
             NATURES_GRACE_BUFF = 16886,
-            NATURES_GRACE_R1   = 16880,
-            NATURES_GRACE_R2   = 61345,
-            NATURES_GRACE_R3   = 61346,
+            NATURES_GRACE_R1 = 16880,
+            NATURES_GRACE_R2 = 61345,
+            NATURES_GRACE_R3 = 61346,
         };
 
         void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            if(!GetCaster() || !GetCaster()->ToPlayer() || !GetTarget())
+            if (!GetCaster() || !GetCaster()->ToPlayer() || !GetTarget())
                 return;
 
             Unit *caster = GetCaster();
             int32 bp;
 
-            if(caster->ToPlayer()->HasSpellCooldown(16886))
+            if (caster->HasAura(93432)) // Nature's Torment Cooldown
                 return;
 
-            if(caster->HasAura(NATURES_GRACE_R1))
+            if (caster->HasAura(NATURES_GRACE_R1))
             {
                 bp = 5;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
+                caster->CastSpell(caster,93432,true); //  Nature's Torment Cooldown
             }
-            else if(caster->HasAura(NATURES_GRACE_R2))
+            else if (caster->HasAura(NATURES_GRACE_R2))
             {
                 bp = 10;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
+                caster->CastSpell(caster, 93432, true); //  Nature's Torment Cooldown
             }
-            else if(caster->HasAura(NATURES_GRACE_R3))
+            else if (caster->HasAura(NATURES_GRACE_R3))
             {
                 bp = 15;
                 caster->CastCustomSpell(caster, NATURES_GRACE_BUFF, &bp, 0, 0, true);
-                caster->ToPlayer()->AddSpellCooldown(16886,0,60000);
+                caster->CastSpell(caster, 93432, true); //  Nature's Torment Cooldown
             }
         }
 

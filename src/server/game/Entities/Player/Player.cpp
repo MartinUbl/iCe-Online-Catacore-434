@@ -26618,6 +26618,9 @@ void Player::TurnEclipseDriver(bool left)
         RemoveAurasDueToSpell(67484);
         CastSpell(this,67483,true);
     }
+
+    if (HasAura(16880) || HasAura(61345) || HasAura(61346)) // If player has Nature's Grace talent
+        RemoveAura(93432); // Remove Cooldown marker
 }
 
 void Player::ClearEclipseState()

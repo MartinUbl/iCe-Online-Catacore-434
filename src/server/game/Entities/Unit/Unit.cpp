@@ -9410,6 +9410,16 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 16880: // Nature's Grace:
+        {
+            if (HasAura(93432)) //Nature's Torment Cooldown
+                return false;
+            // Moonfire ( Sunfire) , Regrowth, or Insect Swarm
+            // Insect Swarm proc implemented in spell_druid.cpp
+            if (procSpell->Id != 8921 && procSpell->Id != 93402 && procSpell->Id != 8936)
+                return false;
+            break;
+        }
         case 99204: // Shaman T12 Elemental 2P Bonus
         {
             if (procSpell->Id != 403) // Lightning Bolt
