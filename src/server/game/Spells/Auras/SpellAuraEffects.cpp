@@ -5021,7 +5021,13 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 m
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32)1)<<(GetMiscValue()-1): 0);
+    uint32 trackMask = target->GetUInt32Value(PLAYER_TRACK_RESOURCES);
+    if (apply)
+        trackMask |= ((uint32)1) << (GetMiscValue() - 1);
+    else
+        trackMask &= ~((uint32)1) << (GetMiscValue() - 1);
+
+    target->SetUInt32Value(PLAYER_TRACK_RESOURCES, trackMask);
 }
 
 void AuraEffect::HandleAuraTrackStealthed(AuraApplication const *aurApp, uint8 mode, bool apply) const
