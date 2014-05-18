@@ -278,18 +278,44 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 SetCriteriaProgress(achievementCriteria, miscvalue2);
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD:
-                // Check for item level and quality supplied in miscvalues
+            {
+                ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>((uint32) miscvalue1);
+                if (!proto)
+                    break;
+
+                // Check for item requirements listed in moreRequirements
+                bool fits = true;
                 for (uint8 i = 0; i < 3; i++)
                 {
+                    if (achievementCriteria->moreRequirement[i] == 0)
+                        continue;
+
+                    // check for quality
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_QUALITY_EQUIPPED
-                        && miscvalue1 < achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        && proto->Quality < achievementCriteria->moreRequirementValue[i])
+                        fits = false;
+
+                    // item level
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_LEVEL
-                        && miscvalue2 < achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        && proto->ItemLevel < achievementCriteria->moreRequirementValue[i])
+                        fits = false;
+
+                    // item class (must be equal)
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_CLASS
+                        && proto->Class != achievementCriteria->moreRequirementValue[i])
+                        fits = false;
+
+                    // item subclass (also must be equal)
+                    if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_SUBCLASS
+                        && proto->SubClass != achievementCriteria->moreRequirementValue[i])
+                        fits = false;
                 }
-                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+
+                if (fits)
+                    SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+
                 break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY:
                 if (!miscvalue1)
                     continue;

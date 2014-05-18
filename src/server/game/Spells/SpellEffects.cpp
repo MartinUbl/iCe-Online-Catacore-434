@@ -5080,7 +5080,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         if (pItem->GetProto()->Quality == ITEM_QUALITY_EPIC)
             player->AddGuildNews(GUILD_NEWS_ITEM_CRAFT, pItem->GetEntry());
 
-        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, pItem->GetProto()->Quality, pItem->GetProto()->ItemLevel);
+        player->UpdateGuildAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, pItem->GetProto()->ItemId);
 
         // Check if it was archaeology project, and update proper criterias
         if (m_spellInfo->researchProjectId > 0)
