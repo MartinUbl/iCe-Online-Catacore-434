@@ -4624,6 +4624,10 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF1;
             count++;
             break;
+        case 49016: // Unholy Frenzy is positive spell in spite of having damage dealing effect
+            mSpellCustomAttr[i] &= ~SPELL_ATTR0_CU_NEGATIVE_EFF1;
+            count++;
+            break;
         case 74522: // Skinning (Grandmaster)
             // Because of bug in DBC, we need to set basepoints manually
             spellInfo->EffectBasePoints[1] = 7;
