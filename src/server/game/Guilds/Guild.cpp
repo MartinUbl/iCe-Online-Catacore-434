@@ -357,22 +357,32 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
+            {
                 // Wierd, but true. We need to check more reqs for class and race
                 if (!player || player->getLevel() < achievementCriteria->reach_level.level)
                     continue;
 
                 // check for morerequirement
+                bool fits = true;
                 for (uint8 i = 0; i < 3; i++)
                 {
+                    if (achievementCriteria->moreRequirement[i] == 0)
+                        continue;
+
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS
                         && player->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        fits = false;
+
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_RACE2
                         && player->ToPlayer()->getRace() != achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        fits = false;
                 }
-                SetCriteriaProgress(achievementCriteria, player->getLevel());
+
+                if (fits)
+                    SetCriteriaProgress(achievementCriteria, player->getLevel(), PROGRESS_HIGHEST);
+
                 break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
             case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
             {
