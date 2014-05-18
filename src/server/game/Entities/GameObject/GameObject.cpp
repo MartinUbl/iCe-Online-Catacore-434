@@ -1346,6 +1346,9 @@ void GameObject::Use(Unit* user)
                         {
                             ok->Use(player);
                             SetLootState(GO_JUST_DEACTIVATED);
+
+                            // accumulate pool catch progress
+                            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL);
                         }
                         else
                             player->SendLoot(GetGUID(),LOOT_FISHING);

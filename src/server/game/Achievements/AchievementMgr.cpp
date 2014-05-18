@@ -1628,7 +1628,13 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             {
                 if (!miscvalue1)
                     continue;
-                
+
+                SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            {
+                // no special conditions - called after successfull fishing "cycle" on fishing pool
                 SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
                 break;
             }
@@ -1654,7 +1660,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_SPENT_GOLD_GUILD_REPAIRS:
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
             case ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD:
-            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
             case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_GUILD_ACHIEVEMENT_POINTS:
             case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_TABARD:
@@ -1826,6 +1831,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= achievementCriteria->reach_bg_rating.rating;
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:
             return progress->counter >= achievementCriteria->win_rated_battleground.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            return progress->counter >= achievementCriteria->catch_from_pool.count;
         // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:

@@ -504,6 +504,13 @@ struct AchievementCriteriaEntry
             uint32  dungeonsComplete;
         } use_lfg;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL = 127
+        struct
+        {
+            uint32 unused;
+            uint32 count;
+        } catch_from_pool;
+
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND = 130
         struct
         {

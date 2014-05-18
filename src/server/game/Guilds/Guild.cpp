@@ -359,6 +359,12 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            {
+                // no special conditions - called after successfull fishing "cycle" on fishing pool
+                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+                break;
+            }
             default:
                 // Not implemented, sorry
                 continue;
@@ -605,6 +611,8 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
         case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_SPECIFIC:
         case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_GENERIC:
             return progress->counter >= achievementCriteria->guild_challenge.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            return progress->counter >= achievementCriteria->raw.count;
         default:
             break;
     }
