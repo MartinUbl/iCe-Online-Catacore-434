@@ -5607,41 +5607,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
                     break;
                 }
-                case 96890: // Electrical Charge
-                {
-                    if (!triggeredByAura)
-                        break;
-
-                    int8 stackamount = triggeredByAura->GetBase()->GetStackAmount();
-
-                    uint8 chance = stackamount * 10;
-
-                    // little change to linear chance
-                    if (stackamount < 3)
-                        chance -= 8;
-                    else
-                        chance += 8;
-
-                    if (roll_chance_i(chance))
-                    {
-                        Unit* target = getVictim();
-                        if (!target || target->IsFriendlyTo(this))
-                        {
-                            Unit::AttackerSet const& atts = getAttackers();
-                            Unit::AttackerSet::iterator itr = atts.begin();
-                            if (itr != atts.end())
-                                target = (*itr);
-                        }
-                        if (target)
-                        {
-                            // as comments on wowhead say, the real damage is 2-4 times higher than tooltip value
-                            int32 bp0 = (urand(20, 35) * urand(985, 1266) / 10.0f) * stackamount;
-                            CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
-                            RemoveAurasDueToSpell(96890);
-                        }
-                    }
-                    break;
-                }
                 // Sweeping Strikes
                 case 18765:
                 case 35429:
@@ -7447,9 +7412,54 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 // Variable Pulse Lightning Capacitor (for some reason listed under SPELLFAMILY_PALADIN, u mad Blizzard?)
                 case 96887:
+                {
                     // trigger Electrical Charge
                     triggered_spell_id = 96890;
+
+                    Aura* electricAura = GetAura(96890);
+                    if (!electricAura)
+                        break;
+
+                    int8 stackamount = electricAura->GetStackAmount();
+
+                    uint8 chance = stackamount * 10;
+
+                    // increase by one forthcoming stack
+                    if (stackamount < 10)
+                        stackamount++;
+
+                    // little change to linear chance
+                    if (stackamount < 3)
+                        chance -= 8;
+                    else
+                        chance += 8;
+
+                    if (roll_chance_i(chance))
+                    {
+                        Unit* target = pVictim;
+                        if (!target || target->IsFriendlyTo(this))
+                        {
+                            target = getVictim();
+                            if (!target || target->IsFriendlyTo(this))
+                            {
+                                Unit::AttackerSet const& atts = getAttackers();
+                                Unit::AttackerSet::iterator itr = atts.begin();
+                                if (itr != atts.end())
+                                    target = (*itr);
+                            }
+                        }
+
+                        if (target)
+                        {
+                            // as comments on wowhead say, the real damage is 2-4 times higher than tooltip value
+                            int32 bp0 = (urand(20, 35) * urand(985, 1266) / 10.0f) * stackamount;
+                            CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
+                            RemoveAurasDueToSpell(96890);
+                            return true;
+                        }
+                    }
                     break;
+                }
                 // Selfless Healer - handled in Word of Glory code
                 case 85804:
                 case 85803:
