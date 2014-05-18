@@ -7412,6 +7412,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 // Variable Pulse Lightning Capacitor (for some reason listed under SPELLFAMILY_PALADIN, u mad Blizzard?)
                 case 96887:
+                case 97119:
                 {
                     // trigger Electrical Charge
                     triggered_spell_id = 96890;
@@ -7453,6 +7454,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         {
                             // as comments on wowhead say, the real damage is 2-4 times higher than tooltip value
                             int32 bp0 = (urand(20, 35) * urand(985, 1266) / 10.0f) * stackamount;
+
+                            if (dummySpell->Id == 97119)
+                                bp0 *= 2.0f;
+
                             CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
                             RemoveAurasDueToSpell(96890);
                             return true;
