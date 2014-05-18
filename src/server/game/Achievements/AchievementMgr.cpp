@@ -1581,7 +1581,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
                 break;
             }
-            case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_CURRENCY_TYPE:
             {
                 if (!miscvalue1 || !miscvalue2)
                     continue;
@@ -1589,7 +1589,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (miscvalue1 != achievementCriteria->own_currency.currencyId)
                     continue;
 
-                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_SET);
+                SetCriteriaProgress(achievementCriteria, miscvalue2, PROGRESS_ACCUMULATE);
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
@@ -1818,7 +1818,7 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= 9000;
         case ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS:
             return progress->counter >= achievementCriteria->use_lfg.dungeonsComplete;
-        case ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE:
+        case ACHIEVEMENT_CRITERIA_TYPE_EARN_CURRENCY_TYPE:
             return progress->counter >= achievementCriteria->own_currency.count;
         case ACHIEVEMENT_CRITERIA_TYPE_ARCHAEOLOGY:
             return progress->counter >= achievementCriteria->archaeology.count;

@@ -12010,7 +12010,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, CurrencySource src, bool ign
         if (IsInWorld() && !GetSession()->PlayerLoading())
         {
             if (count > 0)
-                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_CURRENCY_TYPE, id, newTotalCount);
+                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_CURRENCY_TYPE, id, newTotalCount - oldTotalCount);
 
             // on new case just set init.
             if(itr->second.state == PLAYERCURRENCY_NEW)
