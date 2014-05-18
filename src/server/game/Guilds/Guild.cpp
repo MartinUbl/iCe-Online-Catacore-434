@@ -322,22 +322,32 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
                 SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_ACCUMULATE);
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_HK_RACE:
+            {
                 // HKs will count only for player kills
                 if (!unit || !unit->ToPlayer())
                     continue;
 
                 // check for morerequirement
+                bool fits = true;
                 for (uint8 i = 0; i < 3; i++)
                 {
+                    if (achievementCriteria->moreRequirement[i] == 0)
+                        continue;
+
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_CLASS2
                         && unit->ToPlayer()->getClass() != achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        fits = false;
+
                     if (achievementCriteria->moreRequirement[i] == ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PLAYER_LEVEL2
                         && unit->ToPlayer()->getLevel() < achievementCriteria->moreRequirementValue[i])
-                        continue;
+                        fits = false;
                 }
-                SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+
+                if (fits)
+                    SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
+
                 break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
                 // Wierd, but true. We need to check more reqs for class and race
                 if (!player || player->getLevel() < achievementCriteria->reach_level.level)
