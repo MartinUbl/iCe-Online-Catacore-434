@@ -348,6 +348,14 @@ void GuildAchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes typ
 
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS:
+            {
+                if (!miscvalue1)
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, miscvalue1, PROGRESS_SET);
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
                 // Wierd, but true. We need to check more reqs for class and race
                 if (!player || player->getLevel() < achievementCriteria->reach_level.level)
@@ -648,6 +656,8 @@ bool GuildAchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* ac
         case ACHIEVEMENT_CRITERIA_TYPE_GUILD_CHALLENGE_GENERIC:
             return progress->counter >= achievementCriteria->guild_challenge.count;
         case ACHIEVEMENT_CRITERIA_TYPE_CATCH_FROM_POOL:
+            return progress->counter >= achievementCriteria->raw.count;
+        case ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS:
             return progress->counter >= achievementCriteria->raw.count;
         default:
             break;
@@ -2745,6 +2755,9 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
 
     if (!_CreateNewBankTab())
         return;
+
+    // achievements retains tab in natural numbering (1, 2, .., 8), not in internal numbering (0, 1, .., 7)
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BUY_GUILD_BANK_SLOTS, tabId + 1);
 
     player->ModifyMoney(-int32(tabCost));
 
