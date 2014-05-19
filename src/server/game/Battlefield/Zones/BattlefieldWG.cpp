@@ -474,8 +474,8 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
     uint32 WinHonor = 0;
     uint32 LossHonor = 0;
 
-    WinHonor = 350 + 25 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
-    LossHonor = 100 + 15 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
+    WinHonor = 450 + 25 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_DEF] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_DEF];
+    LossHonor = 200 + 15 * m_Data32[BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT] + 10 * m_Data32[BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT];
 
     for (GuidSet::const_iterator itr = m_PlayersInWar[GetDefenderTeam()].begin(); itr != m_PlayersInWar[GetDefenderTeam()].end(); ++itr)
     {
@@ -485,12 +485,12 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
             if (player->HasAura(SPELL_LIEUTENANT))
             {
                 player->RewardHonor(NULL, 1, WinHonor);
-                RewardMarkOfHonor(player, 3);
+                //RewardMarkOfHonor(player, 3);
             }
             else if (player->HasAura(SPELL_CORPORAL))
             {
                 player->RewardHonor(NULL, 1, WinHonor);
-                RewardMarkOfHonor(player, 2);
+                //RewardMarkOfHonor(player, 2);
             }
             IncrementQuest(player, WGQuest[player->GetTeamId()][1], true);
             // Send Wintergrasp victory achievement
@@ -508,12 +508,12 @@ void BattlefieldWG::OnBattleEnd(bool endbytimer)
             if (player->HasAura(SPELL_LIEUTENANT))
             {
                 player->RewardHonor(NULL, 1, LossHonor);
-                RewardMarkOfHonor(player, 1);
+                //RewardMarkOfHonor(player, 1);
             }
             else if (player->HasAura(SPELL_CORPORAL))
             {
                 player->RewardHonor(NULL, 1, LossHonor);
-                RewardMarkOfHonor(player, 1);
+                //RewardMarkOfHonor(player, 1);
             }
         }
     }
