@@ -3217,6 +3217,13 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
                 return 6 * IN_MILLISECONDS;
             break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Chilblains
+            if (spellproto->Id == 50434 || spellproto->Id == 50435)
+                return 8 * IN_MILLISECONDS;
+            break;
+        }
         case SPELLFAMILY_DRUID:
         {
             // Faerie Fire - limit to 40 seconds in PvP (3.1)
