@@ -3199,6 +3199,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
     {
         case SPELLFAMILY_HUNTER:
         {
+            // Wing Clip
+            if (spellproto->Id == 2974)
+                return 8 * IN_MILLISECONDS;
             // Wyvern Sting
             if (spellproto->SpellFamilyFlags[1] & 0x1000)
                 return 6 * IN_MILLISECONDS;
