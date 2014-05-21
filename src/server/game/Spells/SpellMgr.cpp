@@ -3038,8 +3038,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Kidney Shot
             if (spellproto->SpellFamilyFlags[0] & 0x200000)
                 return DIMINISHING_CONTROL_STUN;
-            // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
-            if (spellproto->SpellIconID == 163)
+            // Crippling poison + Wound Poison - Limit to 10 seconds in PvP
+            if (spellproto->SpellIconID == 163 || spellproto->SpellIconID == 1496)
                 return DIMINISHING_LIMITONLY;
             break;
         }
