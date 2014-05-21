@@ -9759,7 +9759,7 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
     m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
 
     // Warriors Charge - Stun the target - must be implemented this way since charge doesn't have "Trigger spell" effect
-    if (m_spellInfo->Id == 100)
+    if (m_spellInfo->Id == 100 && !target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
         m_caster->CastSpell(target, 96273, true);
 
     // Juggernaut - share cooldown of Charge and Intercept
