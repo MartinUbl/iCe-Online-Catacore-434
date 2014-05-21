@@ -7682,7 +7682,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (!caster)
                         break;
 
-                    // talent Revitalize
+                    // talent Revitalize ( Replenishment part )
                     if (caster->HasAura(48539) || caster->HasAura(48544))
                         caster->CastSpell(caster, 57669, true);
                     break;
