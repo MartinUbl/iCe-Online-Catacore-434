@@ -3923,7 +3923,7 @@ void Unit::_RegisterAuraEffect(AuraEffect * aurEff, bool apply)
         m_modAuras[aurEff->GetAuraType()].remove(aurEff);
 }
 
-// All aura base removes should go threw this function!
+// All aura base removes should go through this function!
 void Unit::RemoveOwnedAura(AuraMap::iterator &i, AuraRemoveMode removeMode)
 {
     Aura * aura = i->second;

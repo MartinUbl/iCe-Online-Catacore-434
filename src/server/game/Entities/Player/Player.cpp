@@ -25797,6 +25797,32 @@ void Player::ProcessCastedAuraApplyMapChange()
 {
     if (getClass() == CLASS_MAGE)
     {
+        // Living bomb
+        std::list<SavedCastedAura> bombList;
+        uint32 livingBombs = 0;
+
+        for (std::list<SavedCastedAura*>::reverse_iterator itr = m_myCastedAuras.rbegin(); itr != m_myCastedAuras.rend(); ++itr)
+        {
+            if ((*itr)->spell == 44457)
+            {
+                SavedCastedAura livingBomb;
+                livingBomb.spell = (*itr)->spell;
+                livingBomb.targetGUID = (*itr)->targetGUID;
+                bombList.push_back(livingBomb);
+            }
+        }
+
+        for (std::list<SavedCastedAura>::iterator itr = bombList.begin(); itr != bombList.end(); ++itr)
+        {
+            livingBombs++;
+
+            if (livingBombs > 3) // Maximum 3 at time
+            {
+                if (Unit * target = Unit::GetUnit(*this, (*itr).targetGUID))
+                    target->RemoveAura((*itr).spell, GetGUID());
+            }
+        }
+
         // Pyromaniac
         if (HasAura(34293) || HasAura(34295))
         {
