@@ -5495,6 +5495,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 21; // 35 yd
             break;
         case 83154: // Piercing Chill
+            spellInfo->excludeTargetAuraSpell = 116; // Frostbolt
             spellInfo->EffectRadiusIndex[0] = 9; // 20 yd
             spellInfo->EffectRadiusIndex[1] = 9; // 20 yd
             break;
