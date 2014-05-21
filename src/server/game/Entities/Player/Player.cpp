@@ -6115,8 +6115,37 @@ void Player::UpdateRating(CombatRating cr)
     // stat used stored in miscValueB for this aura
     AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if ((*i)->GetMiscValue() & (1<<cr))
-            amount += int32(GetStat(Stats((*i)->GetMiscValueB())) * (*i)->GetAmount() / 100.0f);
+    if ((*i)->GetMiscValue() & (1 << cr))
+    {
+        switch ((*i)->GetId())
+        {
+            // Twisted Faith
+            case 47573:
+            case 47577:
+            // Elemental Precision
+            case 30672:
+            case 30673:
+            case 30674:
+            // Balance of Power 
+            case 33592:
+            case 33596:
+            {
+                PlayerLevelInfo info;
+                sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), getLevel(), &info);
+
+                int32 stat = (int32)GetStat(Stats((*i)->GetMiscValueB())); // All spirit
+                // Don't count bonus from base spirit
+                stat -= info.stats[STAT_SPIRIT];
+
+                amount += int32( stat * (*i)->GetAmount() / 100.0f);
+                break;
+            }
+            default:
+                amount += int32(GetStat(Stats((*i)->GetMiscValueB())) * (*i)->GetAmount() / 100.0f);
+                break;
+        }
+    }
+
     if (amount < 0)
         amount = 0;
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr, uint32(amount));
