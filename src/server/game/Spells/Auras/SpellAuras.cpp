@@ -1716,6 +1716,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (!caster)
                         break;
 
+                    if (GetId() == 22812) // Barkskin
+                    {
+                        if (caster->HasAura(63057)) // Glyph of Barkskin
+                            caster->CastSpell(caster, 63058, true);
+                    }
+
                     // Rejuvenation
                     if (target && GetId() == 774)
                     {
@@ -2310,7 +2316,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 break;
             case SPELLFAMILY_DRUID:
             {
-                if (GetId() == 22812) //Barksin
+                if (GetId() == 22812) //Barkskin
                 {
                     if (caster && caster->HasAura(99009) && removeMode == AURA_REMOVE_BY_EXPIRE) // T12 4P druid item set
                     {

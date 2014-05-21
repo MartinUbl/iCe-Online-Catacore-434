@@ -3079,14 +3079,6 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
 
     crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
 
-    // reduce crit chance from Rating for players
-    if (attackType != RANGED_ATTACK)
-    {
-        // Glyph of barkskin
-        if (pVictim->HasAura(63057) && pVictim->HasAura(22812))
-            crit -= 25.0f;
-    }
-
     if (!spell)// If not spell (pure melee / ranged attack)
     {
         if (pVictim)
