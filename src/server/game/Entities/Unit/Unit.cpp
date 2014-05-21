@@ -6172,7 +6172,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     int32 bp0 = damage * triggeredByAura->GetAmount() / 100.0f;
                     CastCustomSpell(this, 91394, &bp0, 0, 0, true);
                 }
-                //TODO On 4.3.4  healing reduction increase by 8,16,25 % from 3,7,10 %
 
                 if (HasAura(11175)) // Permafrost (Rank 1)
                     CastCustomSpell(68391, SPELLVALUE_BASE_POINT0, -3, pVictim, true);
@@ -10441,23 +10440,6 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint32 /*damage*/, A
         case 5497:                                          // Improved Mana Gems
             triggered_spell_id = 37445;                     // Mana Surge
             break;
-        case 7010:  // Revitalize - can proc on full hp target
-        case 7011:
-        case 7012:
-        {
-            if (!roll_chance_i(triggeredByAura->GetAmount()))
-                return false;
-            switch(pVictim->getPowerType())
-            {
-                case POWER_MANA:   triggered_spell_id = 48542; break;
-                case POWER_RAGE:   triggered_spell_id = 48541; break;
-                case POWER_ENERGY: triggered_spell_id = 48540; break;
-                case POWER_RUNIC_POWER: triggered_spell_id = 48543; break;
-                default:
-                    break;
-            }
-            break;
-        }
         default:
             break;
     }
