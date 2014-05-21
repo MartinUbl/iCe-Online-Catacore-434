@@ -4683,13 +4683,16 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         {
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL, m_spellValue->EffectBasePoints[1]);
 
+            // Gift of Nature 
+            float GoNbonus = (caster->HasAura(87305)) ? 0.25f : 0.0f;
+
             // Gift of the Earthmother
             if (caster->HasAura(51181))
-                addhealth *= 1.15f;
+                addhealth *= (1.15f + GoNbonus);
             else if (caster->HasAura(51180))
-                addhealth *= 1.10f;
+                addhealth *= (1.10f + GoNbonus);
             else if (caster->HasAura(51179))
-                addhealth *= 1.05f;
+                addhealth *= (1.05f + GoNbonus);
         }
         // Riptide - increase healing done by Chain Heal
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x100)
