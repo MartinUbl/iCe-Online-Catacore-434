@@ -57,20 +57,20 @@ enum Spells
 
 typedef struct
 {
-    const uint32 areaId;
+    uint32 areaId;
     bool visited;
 }FirelandsAreaId;
 
-#define MAX_AREAS 5
-
-FirelandsAreaId areas[5] = 
+uint32 areasIds[5] =
 {
-    { 5764, false }, // BETHILAC_LAIR_AREA
-    { 5821, false }, // PATH_OF_CORRUPTION_AREA
-    { 5766, false }, // SHATTEREDSTONE_AREA
-    { 5765, false }, // FLAMEBREACH_AREA
-    { 5791, false }  // RIDGE_OF_ANCIENT_FLAME_AREA
+    { 5764 }, // BETHILAC_LAIR_AREA
+    { 5821 }, // PATH_OF_CORRUPTION_AREA
+    { 5766 }, // SHATTEREDSTONE_AREA
+    { 5765 }, // FLAMEBREACH_AREA
+    { 5791 }  // RIDGE_OF_ANCIENT_FLAME_AREA
 };
+
+#define MAX_AREAS 5
 
 # define NEVER  (0xffffffff) // used as "delayed" timer ( max uint32 value)
 
@@ -87,7 +87,15 @@ class boss_shannox : public CreatureScript
                     pInstance = c->GetInstanceScript();
 
                 Reset();
+
+                for (uint32 i = 0; i < 5; i++)
+                {
+                    areas[i].areaId = areasIds[i];
+                    areas[i].visited = false;
+                }
             }
+
+            FirelandsAreaId areas[5];
 
             Creature* pRiplimb;
             Creature* pSummonSpear;
