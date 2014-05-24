@@ -1141,6 +1141,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
+                }
                 case 50675: // Ebon Imp (from Bane of Doom)
                 {
                     // Mostly custom values, who cares about these stupid little imps
