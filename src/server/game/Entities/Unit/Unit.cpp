@@ -9478,6 +9478,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
                             return false;
 
+                        // Kill Command has 1680 SpellIconID, which is wrong and we dont want it
+                        if (procSpell->Id == 83381)
+                            return false;
+
                         if (pHunter->HasAura(53257))
                             pHunter->RemoveAuraFromStack(53257); // Drop 1 charge of Cobra strike when pet critical strike with his ability
 
@@ -10331,6 +10335,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
             if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473 ))
+                return false;
+            // Kill Command has 1680 SpellIconID, which is wrong and we dont want it
+            if (procSpell->Id == 83381)
                 return false;
             break;
         }
