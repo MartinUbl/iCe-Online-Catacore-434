@@ -1125,14 +1125,22 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     if (!pInfo)
                     {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
+                        SetCreateMana(28 + 10 * petlevel);
+                        SetCreateHealth(28 + 30 * petlevel);
                     }
+
+                    if (Player *owner = m_owner->ToPlayer()) // get 100% of owning player's haste
+                    {
+                        float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
+                        bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                        ApplyCastTimePercentMod(bonus, true);
+                        SetCreateHealth(uint32(owner->GetMaxHealth()*0.8)); // hp must be 0.8x of DK hp
+                    }
+
                     SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
-                }
                 case 50675: // Ebon Imp (from Bane of Doom)
                 {
                     // Mostly custom values, who cares about these stupid little imps
