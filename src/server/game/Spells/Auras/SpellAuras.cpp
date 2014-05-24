@@ -1741,7 +1741,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                         uint32 pheal = pEff->GetAmount() > 0 ? pEff->GetAmount() : 0;
                         pheal = caster->SpellHealingBonus(target, GetSpellProto(), 0, pheal, DOT);
-                        pheal *= 4;
+
+                        pheal *= GetEffect(EFFECT_0)->GetTotalTicks();
 
                         bp0 = bp0*pheal / 100;
                         caster->CastCustomSpell(target, 64801, &bp0, 0, 0, true);
