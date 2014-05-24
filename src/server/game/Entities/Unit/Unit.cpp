@@ -7566,8 +7566,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // At melee attack or any single target ability
                     if (singleTarget)
                     {
-                        if(pVictim && pVictim->GetAuraCount(31803) == 5)
-                            CastSpell(pVictim,42463,true); // + 15 % weapon dmg at 5 stacks
+                        if (pVictim)
+                        {
+                            if (Aura * censure = pVictim->GetAura(31803,GetGUID()))
+                                if (censure->GetStackAmount() == 5)
+                                    CastSpell(pVictim, 42463, true); // + 15 % weapon dmg at 5 stacks
+                        }
 
                         triggered_spell_id = 31803;
                     }
