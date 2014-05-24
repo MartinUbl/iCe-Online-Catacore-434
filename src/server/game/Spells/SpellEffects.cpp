@@ -4693,6 +4693,8 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 addhealth *= (1.10f + GoNbonus);
             else if (caster->HasAura(51179))
                 addhealth *= (1.05f + GoNbonus);
+            else if (caster->HasAura(87305)) // If player has only Gift of Nature
+                addhealth *= GoNbonus;
         }
         // Riptide - increase healing done by Chain Heal
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x100)
