@@ -2868,8 +2868,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Starfall
             if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
             {
-                //Shapeshifting into an animal form or mounting cancels the effect.
-                if (m_caster->GetCreatureType() == CREATURE_TYPE_BEAST || m_caster->IsMounted())
+                //Mounting cancels Starfall the effect.
+                if (m_caster->IsMounted())
                 {
                     if (m_triggeredByAuraSpell)
                         m_caster->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id);

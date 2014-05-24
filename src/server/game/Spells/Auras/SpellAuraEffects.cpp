@@ -4304,6 +4304,10 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const *aurApp, uint8 mo
         case FORM_FLIGHT:
         case FORM_MOONKIN:
         {
+            // Starfall buff will be completely removed if you shift into any form other than caster or Moonkin Form.
+            if (form != FORM_MOONKIN)
+                target->RemoveAurasDueToSpell(48505);
+
             // remove movement slowing effects
             target->RemoveAurasWithMechanic((1 << MECHANIC_SNARE));
 
