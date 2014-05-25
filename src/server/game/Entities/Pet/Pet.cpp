@@ -1133,6 +1133,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     {
                         float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
                         bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                        bonus = bonus >= 25 ? 25 : bonus; // Limit to maxium 1.5s cast time
                         ApplyCastTimePercentMod(bonus, true);
                         SetCreateHealth(uint32(owner->GetMaxHealth()*0.8)); // hp must be 0.8x of DK hp
                     }
