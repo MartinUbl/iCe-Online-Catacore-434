@@ -2040,6 +2040,9 @@ void Pet::LearnPetPassives()
         case 19668: // Shadowfiend
             CastSpell(this, 63623, true);
             break;
+        case 510:   // Water Elemental
+            CastSpell(this, 65220, true);
+            break;
         default:
         {
             if (IsPetGhoul())
