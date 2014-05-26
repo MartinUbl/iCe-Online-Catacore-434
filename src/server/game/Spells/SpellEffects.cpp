@@ -4034,9 +4034,9 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     float x, y, z, orientation;
     m_targets.m_dstPos.GetPosition(x, y, z, orientation);
 
-    // In some raids, spells like Killing spree teleport player below floor ( try to use GetHeight2 function for z computation )
-    if (unitTarget->GetMap() && unitTarget->GetMap()->IsRaidOrHeroicDungeon())
-        z = unitTarget->GetMap()->GetHeight2(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
+    // In some raids, spells like Killing spree teleport player below floor ( try to add small amount to z axis)
+    if (unitTarget->GetMap() && unitTarget->GetMap()->IsRaid())
+        z += 0.75f;
 
     if (!orientation && m_targets.getUnitTarget())
         orientation = m_targets.getUnitTarget()->GetOrientation();
