@@ -4522,6 +4522,10 @@ void Unit::RemoveArenaAuras(bool onleave)
         else
             ++iter;
     }
+    // Weakened Heart has SPELL_ATTR0_NEGATIVE_1 so it's counted as negative, but should be cleared on enter
+    // It is clearer this way
+    if (onleave == false)
+        RemoveAura(55711);
 }
 
 void Unit::RemoveAllAurasOnDeath()
