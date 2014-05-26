@@ -10157,14 +10157,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Revitalize
         case 81094:
         {
-            // Prevent casting when on cooldown
-            if (ToPlayer() && ToPlayer()->HasSpellCooldown(81094))
-                return false;
-            // Also prevent proc from other spells (only from Rejuvenation and Lifebloom)
-            if (procSpell->Id != 774 && procSpell->Id != 33763 && procSpell->Id != 94447)
-                return false;
-
-            break;
+            // Disallow proc -> Handled in AuraEffect::PeriodicTick, due to procing bug
+            // It seems that if aura has only PROC_FLAG_DONE_PERIODIC it wont proc from SPELL_AURA_PERIODIC_HEAL effects.
+            // TODO: Global problem -> Find reason why !!!
+            return false;
         }
         // Ready, Steady, Aim...
         case 82925:
