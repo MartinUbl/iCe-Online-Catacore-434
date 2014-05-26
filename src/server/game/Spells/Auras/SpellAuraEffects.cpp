@@ -2349,7 +2349,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 if (m_spellProto->Id == 774 || m_spellProto->Id == 33763)
                 {
                     // Revitalize ( hack for proc, from some reason talent can't proc from Lifebloom )
-                    if (caster->HasAura(48539) || caster->HasAura(48544) && caster->ToPlayer())
+                    if ((caster->HasAura(48539) || caster->HasAura(48544)) && caster->ToPlayer())
                     {
                         if (caster->ToPlayer()->HasSpellCooldown(81094) == false) // Dont have cooldown for Revitailze
                         {
