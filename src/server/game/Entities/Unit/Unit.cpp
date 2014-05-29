@@ -7159,8 +7159,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 //Proc only from critical Arcane Shot, Aimed Shot or Explosive Shot 
                 if ((procSpell->Id == 3044 || procSpell->Id == 19434 || procSpell->Id == 53301) && (procEx & PROC_EX_CRITICAL_HIT))
                 {
-                    if (Unit* pPet = Unit::GetUnit(*this,GetPetGUID()))
-                        pPet->CastSpell(pPet, (dummySpell->Id == 83340) ? 83359 : 89388, true);
+                    // Cast Sic 'em buff on hunter
+                    this->CastSpell(this, (dummySpell->Id == 83340) ? 83359 : 89388, true);
                     break;
                 }
                 else
