@@ -436,7 +436,7 @@ public:
                         {
                             current->auraEff_id = i;
                             current->aura_per_timer = aurEff->GetPeriodicTimer();
-                            current->aura_bp =aurEff->GetAmount();
+                            current->aura_bp = aurEff->GetAmount();
                             break;
                         }
                     }
@@ -481,6 +481,15 @@ public:
                  }
 
                 akt = akt->next; // look for another aura in list
+            }
+
+            // Dont forget dealloc memory for linked list :D
+            // Too lazy to rewrite it to C++, leave it for oldschool C learning purpose :P
+            for (akt = begin; akt != NULL;)
+            {
+                begin = akt;
+                akt = akt->next;
+                free((void*)begin);
             }
         }
 
