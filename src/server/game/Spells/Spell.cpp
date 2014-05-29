@@ -1520,23 +1520,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         m_caster->ToPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
     }
 
-    // Camouflage should have duration 6 seconds if hunter used it in combat
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_HUNTER)
-    {
-        if (Aura * hunterCamouflage = m_caster->GetAura(51755))
-        {
-            if (m_caster->isInCombat())
-            {
-                hunterCamouflage->SetDuration(6000);
-                if (Pet * pet = m_caster->ToPlayer()->GetPet())
-                {
-                    if (Aura * petCamouflage = pet->GetAura(51755))
-                        petCamouflage->SetDuration(6000);
-                }
-            }
-        }
-    }
-
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_DRUID && ((Player*)m_caster)->GetTalentBranchSpec(((Player*)m_caster)->GetActiveSpec()) == 752)
     {
         bool EclipseLeft = m_caster->ToPlayer()->IsEclipseDriverLeft();
