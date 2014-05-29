@@ -2884,9 +2884,6 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (IsPositiveSpell(spell->Id)
         &&(!IsHostileTo(pVictim)))  //prevent from affecting enemy by "positive" spell
         return SPELL_MISS_NONE;
-    // Check for immune
-    if (pVictim->IsImmunedToDamage(spell))
-        return SPELL_MISS_IMMUNE;
 
     if (this == pVictim)
         return SPELL_MISS_NONE;
