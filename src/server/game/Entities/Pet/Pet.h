@@ -129,6 +129,12 @@ class Pet : public Guardian
         void SavePetToDB(PetSlot mode);
         void Remove(PetSlot mode, bool returnreagent = false);
         static void DeleteFromDB(uint32 guidlow);
+        
+        static bool IsPetBasicAttackSpell(uint32 spellId)
+        {
+            //                 Bite                Claw                Smack
+            return (spellId == 17253 || spellId == 16827 || spellId == 49966) ? true : false;
+        }
 
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
         void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
