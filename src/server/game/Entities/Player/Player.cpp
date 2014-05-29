@@ -25747,8 +25747,8 @@ bool Player::SaveCastedAuraApplyCondition(Unit* target, const SpellEntry* spell)
 
     if (getClass() == CLASS_MAGE)
     {
-        // Pyromaniac
-        if (HasAura(34293) || HasAura(34295))
+        // Pyromaniac + Living Bomb for maximum target limitation
+        if (HasAura(34293) || HasAura(34295) || HasSpell(44457)) 
         {
             if (spell->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE))
                 return true;
