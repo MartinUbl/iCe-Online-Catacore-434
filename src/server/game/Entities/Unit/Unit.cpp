@@ -9433,7 +9433,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        case 16880: // Nature's Grace:
+        case 16880: // Nature's Grace
+        case 61345:
+        case 61346:
         {
             if (HasAura(93432)) //Nature's Torment Cooldown
                 return false;
@@ -9441,6 +9443,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Insect Swarm proc implemented in spell_druid.cpp
             if (procSpell->Id != 8921 && procSpell->Id != 93402 && procSpell->Id != 8936)
                 return false;
+
+            this->CastSpell(this, 93432, true); // Need to do it explicitly because in some cases triggered spell from triggered spell is not applied correctly
             break;
         }
         case 99204: // Shaman T12 Elemental 2P Bonus
