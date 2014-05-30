@@ -1648,7 +1648,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
 
     // Seal of Righteousness
     if (GetTypeId() == TYPEID_PLAYER && HasAura(20154))
-        CastSpell(pVictim, 25742, true);
+    {
+        // In addition, your Seal of Righteousness now hits all enemy targets within melee range.
+        CastSpell(pVictim, HasAura(85126) ? 101423 : 25742, true);
+    }
 
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
@@ -7300,25 +7303,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Seal of Righteousness - melee proc dummy (addition ${$MWS*(0.022*$AP+0.044*$SPH)} damage)
-            if (dummySpell->SpellFamilyFlags[0]&0x8000000)
-            {
-                if (effIndex != 0)
-                    return false;
-                triggered_spell_id = 20187;
-                float ap = GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) +
-                             SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, pVictim);
-                basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap*0.011f + 0.022f * holy) / 1000;
-
-                if (pVictim && HasAura(85126)) // If has Seals of Command talent
-                {
-                    // In addition, your Seal of Righteousness now hits all enemy targets within melee range.
-                    CastCustomSpell(pVictim, 101423, &basepoints0, 0, 0, true);
-                    return false;
-                }
-                break;
-            }
             // Tower of Radiance rank 3 is for some reason listed as "dummy" instead of "trigger spell" like previous ranks
             if (dummySpell->Id == 85512)
             {
