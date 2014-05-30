@@ -8911,6 +8911,9 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
 
     Player* plr = m_caster->m_movedPlayer;
 
+    if (plr == NULL)
+        return;
+
     if (damage > 0)
         plr->AddComboPoints(unitTarget, damage, this);
     else
