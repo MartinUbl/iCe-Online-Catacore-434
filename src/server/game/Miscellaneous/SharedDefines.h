@@ -283,7 +283,7 @@ enum SpellAttr0
     SPELL_ATTR0_PASSIVE                          = 0x00000040, //  6 Passive spell
     SPELL_ATTR0_UNK7                             = 0x00000080, //  7 visible?
     SPELL_ATTR0_UNK8                             = 0x00000100, //  8
-    SPELL_ATTR0_UNK9                             = 0x00000200, //  9
+    SPELL_ATTR0_TARGET_MAINHAND_ITEM             = 0x00000200, //  9 Client automatically selects item from mainhand slot as a cast target
     SPELL_ATTR0_UNK10                            = 0x00000400, // 10 on next swing 2
     SPELL_ATTR0_UNK11                            = 0x00000800, // 11
     SPELL_ATTR0_DAYTIME_ONLY                     = 0x00001000, // 12 only useable at daytime, not set in 2.4.2
@@ -292,7 +292,7 @@ enum SpellAttr0
     SPELL_ATTR0_OUTDOORS_ONLY                    = 0x00008000, // 15 Only useable outdoors.
     SPELL_ATTR0_NOT_SHAPESHIFT                   = 0x00010000, // 16 Not while shapeshifted
     SPELL_ATTR0_ONLY_STEALTHED                   = 0x00020000, // 17 Must be in stealth
-    SPELL_ATTR0_UNK18                            = 0x00040000, // 18
+    SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE         = 0x00040000, // 18 client won't hide unit weapons in sheath on cast/channel
     SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION         = 0x00080000, // 19 spelldamage depends on caster level
     SPELL_ATTR0_STOP_ATTACK_TARGET               = 0x00100000, // 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK     = 0x00200000, // 21 Cannot be dodged/parried/blocked

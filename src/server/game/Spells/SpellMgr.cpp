@@ -2015,6 +2015,7 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
     if (caster)
     {
         Player* pl = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+
         if (pl)
         {
             // Pet abilities, probably hack, but who knows
@@ -5216,7 +5217,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL; // active during Chakra state - do not remove by right-click
             break;
         case 43810: // Frost Wyrm
-            spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_UNK18;
+            spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT | SPELL_ATTR0_CANT_USED_IN_COMBAT | SPELL_ATTR0_DONT_AFFECT_SHEATH_STATE;
             count++;
             break;
         case 63531: //  Retribution Aura Overflow ( Communion ) retribution paladin talent, missing basepoint
