@@ -5703,6 +5703,9 @@ void AuraEffect::HandleCharmConvert(AuraApplication const *aurApp, uint8 mode, b
 
     Unit *caster = GetCaster();
 
+    if (!caster)
+        return;
+
     if (apply)
         target->SetCharmedBy(caster, CHARM_TYPE_CONVERT, aurApp);
     else
