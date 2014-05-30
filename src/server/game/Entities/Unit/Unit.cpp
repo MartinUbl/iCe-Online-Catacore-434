@@ -7116,6 +7116,44 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         }
         case SPELLFAMILY_HUNTER:
         {
+            // Tamed Pet Passive  ( Listening for procs )
+            // Here should be handled all custom procs from pets !!!
+            if (dummySpell->Id == 83727)
+            {
+                Unit * pet = triggeredByAura->GetCaster(); // Hunter's Pet
+                if (!pet)
+                    return false;
+
+                Unit* pHunter = Unit::GetUnit(*pet, pet->GetOwnerGUID());
+
+                if (!pHunter)
+                    return false;
+
+                if (Pet::IsPetBasicAttackSpell(procSpell->Id))
+                {
+                    // Remove Sic 'em buff after casting basic attack from Hunter
+                    pHunter->RemoveAura(83359);
+                    pHunter->RemoveAura(89388);
+
+                    if (procEx & PROC_EX_CRITICAL_HIT) // Invigoration talent proc only from critical basic attacks
+                    {
+                        if (pHunter->HasAura(53257))
+                            pHunter->RemoveAuraFromStack(53257); // Drop 1 charge of Cobra strike when pet critical strike with his ability
+
+                        if (AuraEffect * aurEff = pHunter->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0)) // Has Invigoration talent
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            pHunter->CastCustomSpell(pHunter, 53398, &bp0, NULL, NULL, true); // Focus gain
+                        }
+                    }
+                }
+                else // Procs from non basic attacks of pet
+                {
+
+                }
+
+                break;
+            }
             // Thrill of the Hunt
             if (dummySpell->SpellIconID == 2236)
             {
@@ -9468,7 +9506,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        case 20784: // Tamed Pet Passive ( Aura on hunter's pets, trigger Frenzy when they hit with their basic attacks )
+        case 20784: // Tamed Pet Passive ( Frenzy only)
         {
             // Exclude bad proc flags
             if ((procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) || (procFlags & PROC_FLAG_DONE_PERIODIC) )
@@ -9488,26 +9526,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
                     if (amount)
                         pet->CastCustomSpell(pet, 19615, &amount, 0, 0, true);
-
-                    if (procEx & PROC_EX_CRITICAL_HIT) // Invigoration talent proc only from critical basic attacks
-                    {
-                        // Check if triggered only from basic attack abilities (Claw, Bite or Smack)
-                        if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
-                            return false;
-
-                        // Kill Command has 1680 SpellIconID, which is wrong and we dont want it
-                        if (procSpell->Id == 83381)
-                            return false;
-
-                        if (pHunter->HasAura(53257))
-                            pHunter->RemoveAuraFromStack(53257); // Drop 1 charge of Cobra strike when pet critical strike with his ability
-
-                        if (AuraEffect * aurEff = pHunter->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0)) // Has Invigoration talent
-                        {
-                            int32 bp0 = aurEff->GetAmount();
-                            pHunter->CastCustomSpell(pHunter, 53398, &bp0, NULL, NULL, true); // Focus gain
-                        }
-                    }
                 }
             }
             return false;
