@@ -10342,11 +10342,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // check if we're doing a critical hit
             if (!(procSpell->SpellFamilyFlags[1] & 0x10000000) && (procEx != PROC_EX_CRITICAL_HIT) )
                 return false;
-            // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
-            if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473 ))
-                return false;
-            // Kill Command has 1680 SpellIconID, which is wrong and we dont want it
-            if (procSpell->Id == 83381)
+            // check if it was procced from pet basic attack
+            if (!Pet::IsPetBasicAttackSpell(procSpell->Id))
                 return false;
             break;
         }
