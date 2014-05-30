@@ -7272,6 +7272,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 int32 holy = SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) +
                              SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, pVictim);
                 basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap*0.011f + 0.022f * holy) / 1000;
+
+                if (pVictim && HasAura(85126)) // If has Seals of Command talent
+                {
+                    // In addition, your Seal of Righteousness now hits all enemy targets within melee range.
+                    CastCustomSpell(pVictim, 101423, &basepoints0, 0, 0, true);
+                    return false;
+                }
                 break;
             }
             // Tower of Radiance rank 3 is for some reason listed as "dummy" instead of "trigger spell" like previous ranks
