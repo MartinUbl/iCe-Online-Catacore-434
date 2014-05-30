@@ -491,15 +491,16 @@ public:
                 akt = akt->next;
                 free((void*)begin);
             }
+            begin = NULL;
         }
 
 
-            void Register()
-            {
-                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-                OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleImpactEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffect += SpellEffectFn(spell_mage_impact_SpellScript::HandleEffectScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
 
     SpellScript* GetSpellScript() const
     {
