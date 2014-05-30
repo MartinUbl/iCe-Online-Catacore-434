@@ -3098,7 +3098,8 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         // Careful Aim hunter's talent
         if (pCaster->HasAura(34482) || pCaster->HasAura(34483))
         {
-            if (pVictim->GetHealthPct() > 80.0f)
+            if (AuraEffect * aurEff = pCaster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2222, EFFECT_1))
+            if (pVictim->GetHealthPct() > aurEff->GetAmount())
             {
                 // Steady Shot, Cobra Shot, Aimed Shot and Aimed Shot (Master Marksman)
                 if (spell->Id == 56641 || spell->Id == 77767 || spell->Id == 19434 || spell->Id == 82928)
