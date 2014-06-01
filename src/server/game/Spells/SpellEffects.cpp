@@ -1710,6 +1710,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         // Dont forget count damage reduction auras if damage was manually computed !!!
         if (apply_direct_bonus == false)
         {
+            float DoneTotalMod = 1.0f;
+
+            // Some spells don't benefit from pct done mods
+            if (!(m_spellInfo->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS) && m_originalCaster)
+            {
+                Unit::AuraEffectList const &mModDamagePercentDone = m_originalCaster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                for (Unit::AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+                if (((*i)->GetMiscValue() & GetSpellSchoolMask(m_spellInfo)) &&
+                    (*i)->GetSpellProto()->EquippedItemClass == -1 &&          // -1 == any item class (not wand)
+                    (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0) // 0 == any inventory type (not wand)
+                    DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
+            }
+
+            damage *= DoneTotalMod;
+
+
             float TakenTotalMod = 1.0f;
             TakenTotalMod *= unitTarget->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, m_spellInfo->SchoolMask);
 
