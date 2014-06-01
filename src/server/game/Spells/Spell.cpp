@@ -4523,6 +4523,17 @@ void Spell::SendSpellCooldown()
     if (m_spellInfo->Attributes & (SPELL_ATTR0_DISABLED_WHILE_ACTIVE | SPELL_ATTR0_PASSIVE) || m_IsTriggeredSpell)
         return;
 
+
+    if (m_spellInfo->Id == 78674 && _player->HasAura(93400))
+    {
+        if (m_casttime > 0) // Do not trigger cooldown for Starsurge if player was casting normal one (without inst casting boost)
+        {
+            _player->RemoveSpellCooldown(78674, true); // From some reason cooldown is set anyway, so clear it manually
+            return;
+        }
+        // Shooting Stars
+        _player->RemoveAurasDueToSpell(93400);
+    }
     _player->AddSpellAndCategoryCooldowns(m_spellInfo,m_CastItem ? m_CastItem->GetEntry() : 0, this);
 }
 

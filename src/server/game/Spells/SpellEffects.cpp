@@ -1162,11 +1162,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // Glyph of Starsurge
                     if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(62971))
                         m_caster->ToPlayer()->ModifySpellCooldown(48505, -5000, true);
-
-                    // Shooting Stars
-                    if (m_caster && m_caster->ToPlayer() && m_caster->HasAura(93400))
-                        m_caster->ToPlayer()->RemoveAurasDueToSpell(93400);
-
                 }
                 // Starfire
                 else if (m_spellInfo->Id == 2912)
