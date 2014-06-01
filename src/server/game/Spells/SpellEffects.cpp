@@ -6864,7 +6864,7 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
         return;
     }
 
-    if (m_spellInfo->Id == 62124)
+    if (m_spellInfo->Id == 62124) // Hand of Reckoning
     {
         int32 damageDone = int32(1 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
         bool is_crit = m_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask, m_attackType);
