@@ -4231,6 +4231,10 @@ void SpellMgr::LoadSpellCustomAttr()
             // these spells have charges, which causes their drop after first trigger (which is wrong)
             spellInfo->procCharges = 0;
             break;
+        case 34490: // Silencing Shot
+        case 19503: // Scatter Shot
+            spellInfo->speed = 0;  // Should not have travel time
+            break;
         case 55095: // Frost Fever
             // originally MECHANIC_PACIFY, but that causes the effect to be dispelled with other pacify spells,
             // and that's wrong
