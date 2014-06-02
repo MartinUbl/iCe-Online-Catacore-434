@@ -1646,6 +1646,13 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
             CastSpell(pVictim, 1604, true);
     }
 
+    // Seal of Righteousness
+    if (GetTypeId() == TYPEID_PLAYER && HasAura(20154))
+    {
+        // In addition, your Seal of Righteousness now hits all enemy targets within melee range.
+        CastSpell(pVictim, HasAura(85126) ? 101423 : 25742, true);
+    }
+
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
 
@@ -7296,13 +7303,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Seal of Righteousness
-            if (dummySpell->Id == 20154)
-            {
-                // In addition, your Seal of Righteousness now hits all enemy targets within melee range.
-                CastSpell(pVictim, HasAura(85126) ? 101423 : 25742, true);
-                return false;
-            }
             // Tower of Radiance rank 3 is for some reason listed as "dummy" instead of "trigger spell" like previous ranks
             if (dummySpell->Id == 85512)
             {
