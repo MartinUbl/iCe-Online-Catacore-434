@@ -1656,7 +1656,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += 0.117f * m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
                 }
                 // Seal of Righteousness
-                else if (m_spellInfo->Id == 25742 || m_spellInfo->Id == 101423)
+                else if (m_spellInfo->Id == 25742)
                 {
                     // damage formula is little wierd - divide weapon damage by 1.8 to be more accurent to tooltip
                     apply_direct_bonus = false;
