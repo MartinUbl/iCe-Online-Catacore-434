@@ -4591,7 +4591,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         // Flash Heal
         else if (m_spellInfo->Id == 2061 && caster->HasAura(88688))
         {
-            caster->RemoveAurasDueToSpell(88688); // Surge of Light remove
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
         }
         // Chain Heal and Riptide
