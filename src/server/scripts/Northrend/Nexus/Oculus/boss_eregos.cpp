@@ -155,6 +155,10 @@ public:
         {
             if (pInstance)
                 pInstance->SetData(DATA_EREGOS_EVENT, DONE);
+
+            // Make cache visible for players
+            if (GameObject * goCache = me->FindNearestGameObject(191349, 500.0f))
+                goCache->SetPhaseMask(PHASEMASK_ANYWHERE, true);
         }
     };
 
