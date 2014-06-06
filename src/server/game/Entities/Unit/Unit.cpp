@@ -9481,8 +9481,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Insect Swarm proc implemented in spell_druid.cpp
             if (procSpell->Id != 8921 && procSpell->Id != 93402 && procSpell->Id != 8936)
                 return false;
-
-            this->CastSpell(this, 93432, true); // Need to do it explicitly because in some cases triggered spell from triggered spell is not applied correctly
             break;
         }
         case 99204: // Shaman T12 Elemental 2P Bonus
@@ -15689,6 +15687,9 @@ void Unit::SetPower(Powers power, int32 val)
             CastSpell(this, 48517, true);
             ToPlayer()->TurnEclipseDriver(true);
 
+            if (HasAura(16880) || HasAura(61345) || HasAura(61346)) // If player has Nature's Grace talent
+                RemoveAura(93432); // Remove Cooldown marker
+
             // Euphoria
             int32 bp0 = 0;
             if (HasAura(81062))
@@ -15704,6 +15705,9 @@ void Unit::SetPower(Powers power, int32 val)
             //run lunar eclipse
             CastSpell(this, 48518, true);
             ToPlayer()->TurnEclipseDriver(false);
+
+            if (HasAura(16880) || HasAura(61345) || HasAura(61346)) // If player has Nature's Grace talent
+                RemoveAura(93432); // Remove Cooldown marker
 
             // Euphoria
             int32 bp0 = 0;
