@@ -1083,6 +1083,9 @@ class npc_darkmoon_mola: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
+            if (!pPlayer || pPlayer->IsInWorld() == false)
+                return true;
+
             if (pCreature->isQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
@@ -1095,6 +1098,9 @@ class npc_darkmoon_mola: public CreatureScript
 
         bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
         {
+            if (!pPlayer || pPlayer->IsInWorld() == false)
+                return true;
+
             pPlayer->CLOSE_GOSSIP_MENU();
 
             // Info
