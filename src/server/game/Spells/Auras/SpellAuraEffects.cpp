@@ -4931,9 +4931,34 @@ void AuraEffect::HandleAuraModSilence(AuraApplication const *aurApp, uint8 mode,
         // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
             if (Spell *spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
-                if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
-                    // Stop spells on prepare or casting state
-                    target->InterruptSpell(CurrentSpellTypes(i), false);
+            if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+            {
+                // Stop spells on prepare or casting state
+                target->InterruptSpell(CurrentSpellTypes(i), false);
+
+                // Some custom events after interrupting spell from silence
+                Aura *aura = GetBase();
+                Unit *caster = GetCaster();
+
+                if (aura && caster)
+                {
+                    switch (aura->GetId())
+                    {
+                        case 34490:// Glyph of Silencing shot
+                        {
+                            if (caster->HasAura(56836))
+                            {
+                                int32 bp0 = 10;
+                                caster->CastCustomSpell(caster, 82716, &bp0, 0, 0, true); // Focus gain
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
     }
     else
     {
