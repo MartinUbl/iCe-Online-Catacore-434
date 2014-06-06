@@ -7483,15 +7483,6 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                         if(m_originalCaster->ToPlayer() && m_originalCaster->HasAura(56805))
                             m_originalCaster->ToPlayer()->ModifySpellCooldown(1766,-6000,true);
                         break;
-                    case 34490:// Glyph of Silencing shot
-                    {
-                        if (m_originalCaster->HasAura(56836))
-                        {
-                            int32 bp0 = 10;
-                            m_originalCaster->CastCustomSpell(m_originalCaster, 82716, &bp0, 0, 0, true); // Focus gain
-                        }
-                    }
-                        break;
                 }
             }
         }
