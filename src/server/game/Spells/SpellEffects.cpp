@@ -1720,7 +1720,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (((*i)->GetMiscValue() & GetSpellSchoolMask(m_spellInfo)) &&
                     (*i)->GetSpellProto()->EquippedItemClass == -1 &&          // -1 == any item class (not wand)
                     (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0) // 0 == any inventory type (not wand)
-                    DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
+                {
+                    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) // Restrict this bonus only for paladins damage abilities
+                                                                             // otherwise in some spell is bonus counted twice
+                        DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
+                }
             }
 
             damage *= DoneTotalMod;
