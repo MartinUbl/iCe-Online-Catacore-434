@@ -2293,11 +2293,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 switch(GetId())
                 {
-                    case 50514: // Summon Gargoyle
-                        if (removeMode != AURA_REMOVE_BY_EXPIRE)
-                            break;
-                        target->CastSpell(target, GetEffect(0)->GetAmount(), true, NULL, GetEffect(0));
-                        break;
                     case 49028: // Dancing Rune Weapon
                     {
                         if (caster && caster->HasAura(98966) && removeMode == AURA_REMOVE_BY_EXPIRE) // Death Knight T12 Blood 4P Bonus

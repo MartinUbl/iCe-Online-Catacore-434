@@ -8122,9 +8122,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     }
                     break;
                 case SPELLFAMILY_DEATHKNIGHT:
-                    // Summon Gargoyle (will start feeding gargoyle)
-                    if (GetId() == 61777 && target)
-                        target->CastSpell(target, m_spellProto->EffectTriggerSpell[m_effIndex], true);
                     break;
                 default:
                     break;
