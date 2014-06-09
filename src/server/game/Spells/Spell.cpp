@@ -1536,11 +1536,12 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 }
                 else
                 {
+                    if (!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192)) // only under effect of Lunar shower
+                        break;
+
                     // (Hotfix) - Moonfire will now generate Lunar Energy when crossing from Solar to Lunar on the Eclipse bar.
                     int32 bp0 = -8;
                     m_caster->ModifyPower(POWER_ECLIPSE, bp0);
-                    if (!m_caster->HasAura(81006) && !m_caster->HasAura(81191) && !m_caster->HasAura(81192)) // only under effect of Lunar shower
-                        break;
                 }
                 break;
 
