@@ -9514,8 +9514,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         }
         case 20784: // Tamed Pet Passive ( Frenzy only)
         {
-            // Exclude bad proc flags
-            if ((procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) || (procFlags & PROC_FLAG_DONE_PERIODIC) )
+            // Proc only from basic attacks abilities
+            if (procSpell && !Pet::IsPetBasicAttackSpell(procSpell->Id))
                 return false;
 
             if (Unit * pet = triggeredByAura->GetCaster()) // Hunter's Pet
