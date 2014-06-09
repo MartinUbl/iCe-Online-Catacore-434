@@ -34,8 +34,6 @@ using G3D::Vector3;
 using G3D::Ray;
 using G3D::AABox;
 
-#ifndef NO_CORE_FUNCS
-
 struct GameobjectModelData
 {
     GameobjectModelData(const std::string& name_, const AABox& box) :
@@ -84,7 +82,6 @@ void LoadGameObjectModelList()
 
     fclose(model_list_file);
     sLog->outString(">> Loaded %u GameObject models", uint32(model_list.size()));
-
 }
 
 GameObjectModel::~GameObjectModel()
@@ -183,5 +180,3 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     }
     return hit;
 }
-
-#endif

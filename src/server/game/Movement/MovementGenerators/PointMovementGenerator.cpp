@@ -28,25 +28,35 @@
 #include "World.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
+#include "Player.h"
+#include "CreatureGroups.h"
 
 //----- Point Movement Generator
 template<class T>
-void PointMovementGenerator<T>::Initialize(T* unit)
+void PointMovementGenerator<T>::DoInitialize(T* unit)
 {
     if (!unit->IsStopped())
         unit->StopMoving();
 
-    unit->addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
-    i_recalculateSpeed = false;
+    unit->addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+
+    if (id == EVENT_CHARGE_PREPATH)
+        return;
+
     Movement::MoveSplineInit init(unit);
-    init.MoveTo(i_x, i_y, i_z);
+    init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (speed > 0.0f)
         init.SetVelocity(speed);
     init.Launch();
+
+    // Call for creature group update
+    if (Creature* creature = unit->ToCreature())
+        if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
+            creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
 }
 
 template<class T>
-bool PointMovementGenerator<T>::Update(T* unit, const uint32& /*diff*/)
+bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
 {
     if (!unit)
         return false;
@@ -58,54 +68,61 @@ bool PointMovementGenerator<T>::Update(T* unit, const uint32& /*diff*/)
     }
 
     unit->addUnitState(UNIT_STAT_ROAMING_MOVE);
+
+    if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit->movespline->Finalized())
+    {
+        i_recalculateSpeed = false;
+        Movement::MoveSplineInit init(unit);
+        init.MoveTo(i_x, i_y, i_z, m_generatePath);
+        if (speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
+            init.SetVelocity(speed);
+        init.Launch();
+
+        // Call for creature group update
+        if (Creature* creature = unit->ToCreature())
+            if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
+                creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
+    }
+
     return !unit->movespline->Finalized();
 }
 
 template<class T>
-void PointMovementGenerator<T>::Finalize(T* unit)
+void PointMovementGenerator<T>::DoFinalize(T* unit)
 {
-    // if we charged when falling, do not take full fall damage
-    if (unit->hasUnitState(UNIT_STAT_CHARGING) && unit->GetTypeId() == TYPEID_PLAYER)
-        unit->ToPlayer()->SetFallInformation(0, unit->GetPositionZ());
-
-    unit->clearUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE|UNIT_STAT_CHARGING);
+    if (unit->hasUnitState(UNIT_STAT_CHARGING))
+        unit->clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
     if (unit->movespline->Finalized())
         MovementInform(unit);
 }
+
 template<class T>
-void PointMovementGenerator<T>::Reset(T* unit)
+void PointMovementGenerator<T>::DoReset(T* unit)
 {
     if (!unit->IsStopped())
         unit->StopMoving();
 
-    unit->addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+    unit->addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 }
 
 template<class T>
-void PointMovementGenerator<T>::MovementInform(T* /*unit*/)
-{
-}
+void PointMovementGenerator<T>::MovementInform(T* /*unit*/) { }
 
 template <> void PointMovementGenerator<Creature>::MovementInform(Creature* unit)
 {
-    /*if (id == EVENT_FALL_GROUND)
-    {
-        unit->setDeathState(JUST_DIED);
-        unit->SetFlying(true);
-    }*/
     if (unit->AI())
         unit->AI()->MovementInform(POINT_MOTION_TYPE, id);
 }
 
-template void PointMovementGenerator<Player>::Initialize(Player*);
-template void PointMovementGenerator<Creature>::Initialize(Creature*);
-template void PointMovementGenerator<Player>::Finalize(Player*);
-template void PointMovementGenerator<Creature>::Finalize(Creature*);
-template void PointMovementGenerator<Player>::Reset(Player*);
-template void PointMovementGenerator<Creature>::Reset(Creature*);
-template bool PointMovementGenerator<Player>::Update(Player*, const uint32&);
-template bool PointMovementGenerator<Creature>::Update(Creature*, const uint32&);
+template void PointMovementGenerator<Player>::DoInitialize(Player*);
+template void PointMovementGenerator<Creature>::DoInitialize(Creature*);
+template void PointMovementGenerator<Player>::DoFinalize(Player*);
+template void PointMovementGenerator<Creature>::DoFinalize(Creature*);
+template void PointMovementGenerator<Player>::DoReset(Player*);
+template void PointMovementGenerator<Creature>::DoReset(Creature*);
+template bool PointMovementGenerator<Player>::DoUpdate(Player*, uint32);
+template bool PointMovementGenerator<Creature>::DoUpdate(Creature*, uint32);
 
 void AssistanceMovementGenerator::Finalize(Unit* unit)
 {
@@ -115,9 +132,9 @@ void AssistanceMovementGenerator::Finalize(Unit* unit)
         unit->GetMotionMaster()->MoveSeekAssistanceDistract(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 
-void EffectMovementGenerator::Initialize(Unit *unit)
+void EffectMovementGenerator::Initialize(Unit* unit)
 {
-    unit->addUnitState(UNIT_STAT_JUMPING);
+    //
 }
 
 bool EffectMovementGenerator::Update(Unit* unit, const uint32&)
@@ -127,19 +144,19 @@ bool EffectMovementGenerator::Update(Unit* unit, const uint32&)
 
 void EffectMovementGenerator::Finalize(Unit* unit)
 {
-    unit->clearUnitState(UNIT_STAT_JUMPING);
-
     if (unit->GetTypeId() != TYPEID_UNIT)
         return;
 
-    if (((Creature*)unit)->AI() && unit->movespline->Finalized())
-        ((Creature*)unit)->AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
     // Need restore previous movement since we have no proper states system
-    /*if (unit->isAlive() && !unit->hasUnitState(UNIT_STAT_CONFUSED|UNIT_STAT_FLEEING))
+    if (unit->isAlive() && !unit->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING))
     {
         if (Unit* victim = unit->getVictim())
             unit->GetMotionMaster()->MoveChase(victim);
         else
             unit->GetMotionMaster()->Initialize();
-    }*/
+    }
+
+    if (unit->ToCreature()->AI())
+        unit->ToCreature()->AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
 }
+

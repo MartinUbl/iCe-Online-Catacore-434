@@ -25,6 +25,7 @@
 #include "GridStates.h"
 #include "ScriptMgr.h"
 #include "VMapFactory.h"
+#include "MMapFactory.h"
 #include "MapInstanced.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
@@ -35,6 +36,19 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "DynamicTree.h"
+#include "Vehicle.h"
+
+union u_map_magic
+{
+    char asChar[4];
+    uint32 asUInt;
+};
+
+u_map_magic MapMagic        = { {'M','A','P','S'} };
+u_map_magic MapVersionMagic = { {'v','1','.','3'} };
+u_map_magic MapAreaMagic    = { {'A','R','E','A'} };
+u_map_magic MapHeightMagic  = { {'M','H','G','T'} };
+u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -59,6 +73,8 @@ Map::~Map()
 
     if (!m_scriptSchedule.empty())
         sWorld->DecreaseScheduledScriptCount(m_scriptSchedule.size());
+
+    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), i_InstanceId);
 }
 
 bool Map::ExistMap(uint32 mapid,int gx,int gy)
@@ -107,7 +123,17 @@ bool Map::ExistVMap(uint32 mapid,int gx,int gy)
     return true;
 }
 
-void Map::LoadVMap(int gx,int gy)
+void Map::LoadMMap(int gx, int gy)
+{
+    bool mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gx, gy);
+
+    if (mmapLoadResult)
+        sLog->outDetail("MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+    else
+        sLog->outDetail("Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+}
+
+void Map::LoadVMap(int gx, int gy)
 {
                                                             // x and y are swapped !!
     int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx,gy);
@@ -155,8 +181,8 @@ void Map::LoadMap(int gx,int gy, bool reload)
     }
 
     // map file name
-    char *tmp=NULL;
-    int len = sWorld->GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
+    char* tmp = NULL;
+    int len = sWorld->GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
     tmp = new char[len];
     snprintf(tmp, len, (char *)(sWorld->GetDataPath()+"maps/%03u%02u%02u.map").c_str(),GetId(),gx,gy);
     sLog->outDetail("Loading map %s",tmp);
@@ -173,9 +199,13 @@ void Map::LoadMap(int gx,int gy, bool reload)
 
 void Map::LoadMapAndVMap(int gx,int gy)
 {
-    LoadMap(gx,gy);
+    LoadMap(gx, gy);
+   // Only load the data for the base map
     if (i_InstanceId == 0)
-        LoadVMap(gx, gy);                                   // Only load the data for the base map
+    {
+        LoadVMap(gx, gy);
+        LoadMMap(gx, gy);
+    }
 }
 
 void Map::InitStateMachine()
@@ -1029,8 +1059,8 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
                 GridMaps[gx][gy]->unloadData();
                 delete GridMaps[gx][gy];
             }
-            // x and y are swapped
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
+            MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId(), gx, gy);
         }
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridPair(gx, gy));
@@ -1102,7 +1132,7 @@ GridMap::~GridMap()
     unloadData();
 }
 
-bool GridMap::loadData(char *filename)
+bool GridMap::loadData(char* filename)
 {
     // Unload old data if exist
     unloadData();

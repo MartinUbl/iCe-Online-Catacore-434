@@ -431,7 +431,7 @@ void SpellCastTargets::write (ByteBuffer & data)
 
 Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, bool skipCheck):
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, Caster)),
-m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
+m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(PathGenerator(m_caster))
 {
     m_customAttr = sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id);
     m_skipCheck = skipCheck;
@@ -550,6 +550,7 @@ Spell::~Spell()
 
     if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
         ASSERT(m_caster->ToPlayer()->m_spellModTakingSpell != this);
+
     delete m_spellValue;
 
     CheckEffectExecuteData();
@@ -6694,8 +6695,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (strict && m_caster->IsScriptOverriden(m_spellInfo, 6953))
                         m_caster->RemoveMovementImpairingAuras();
                 }
+
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
+
+                Unit* target = m_targets.getUnitTarget();
+
+                if (!target)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                Position pos;
+                target->GetFirstCollisionPosition(pos, CONTACT_DISTANCE, target->GetRelativeAngle(m_caster));
+
+                m_preGeneratedPath.SetPathLengthLimit(GetSpellMaxRange(m_spellInfo, true) * 12.0f);
+                bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize(), false, false);
+                if (m_preGeneratedPath.GetPathType() & PATHFIND_SHORT)
+                    return SPELL_FAILED_OUT_OF_RANGE;
+                else if (!result)
+                    return SPELL_FAILED_NOPATH;
                 break;
             }
             case SPELL_EFFECT_SKINNING:

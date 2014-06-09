@@ -28,12 +28,25 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 
-void HomeMovementGenerator<Creature>::Initialize(Creature* owner)
+void HomeMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
+    owner->SetWalk(false);
+    owner->addUnitState(UNIT_STAT_EVADE);
     _setTargetLocation(owner);
 }
 
-void HomeMovementGenerator<Creature>::Reset(Creature *)
+void HomeMovementGenerator<Creature>::DoFinalize(Creature* owner)
+{
+    if (arrived)
+    {
+        owner->clearUnitState(UNIT_STAT_EVADE);
+        owner->SetWalk(true);
+        owner->LoadCreaturesAddon(true);
+        owner->AI()->JustReachedHome();
+    }
+}
+
+void HomeMovementGenerator<Creature>::DoReset(Creature*)
 {
 }
 
@@ -45,11 +58,11 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
     Movement::MoveSplineInit init(owner);
     float x, y, z, o;
     // at apply we can select more nice return points base at current movegen
-    //if (owner->GetMotionMaster()->empty() || !owner->GetMotionMaster()->top()->GetResetPosition(owner,x,y,z))
-    //{
-    owner->GetHomePosition(x, y, z, o);
-    init.SetFacing(o);
-    //}
+    if (owner->GetMotionMaster()->empty() || !owner->GetMotionMaster()->top()->GetResetPosition(*owner, x, y, z))
+    {
+        owner->GetHomePosition(x, y, z, o);
+        init.SetFacing(o);
+    }
     init.MoveTo(x,y,z);
     init.SetWalk(false);
     init.Launch();
@@ -58,19 +71,8 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
     owner->clearUnitState(UNIT_STAT_ALL_STATE & ~UNIT_STAT_EVADE);
 }
 
-bool HomeMovementGenerator<Creature>::Update(Creature* owner, const uint32 /*time_diff*/)
+bool HomeMovementGenerator<Creature>::DoUpdate(Creature* owner, const uint32 /*time_diff*/)
 {
     arrived = owner->movespline->Finalized();
     return !arrived;
-}
-
-void HomeMovementGenerator<Creature>::Finalize(Creature* owner)
-{
-    if (arrived)
-    {
-        owner->clearUnitState(UNIT_STAT_EVADE);
-        owner->SetWalk(true);
-        owner->LoadCreaturesAddon(true);
-        owner->AI()->JustReachedHome();
-    }
 }

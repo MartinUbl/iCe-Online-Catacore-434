@@ -26,6 +26,7 @@
 */
 
 #include "Common.h"
+#include "Memory.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
 #include "SystemConfig.h"
@@ -58,6 +59,7 @@
 #include "TemporarySummon.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
+#include "MMapFactory.h"
 #include "GameEventMgr.h"
 #include "PoolMgr.h"
 #include "GridNotifiersImpl.h"
@@ -146,6 +148,7 @@ World::~World()
         delete command;
 
     VMAP::VMapFactory::clear();
+    MMAP::MMapFactory::clear();
 
     //TODO free addSessQueue
 }
@@ -1217,10 +1220,12 @@ void World::LoadConfigSettings(bool reload)
     }
 
     m_bool_configs[CONFIG_VMAP_INDOOR_CHECK] = sConfig->GetBoolDefault("vmap.enableIndoorCheck", 0);
+    m_bool_configs[CONFIG_ENABLE_MMAPS] = sConfig->GetBoolDefault("mmap.enablePathFinding", false);
     bool enableLOS = sConfig->GetBoolDefault("vmap.enableLOS", true);
     bool enableHeight = sConfig->GetBoolDefault("vmap.enableHeight", true);
     std::string ignoreMapIds = sConfig->GetStringDefault("vmap.ignoreMapIds", "");
     std::string ignoreSpellIds = sConfig->GetStringDefault("vmap.ignoreSpellIds", "");
+
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
     VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
@@ -1293,6 +1298,9 @@ void World::SetInitialWorldSettings()
 {
     ///- Initialize the random number generator
     srand((unsigned int)time(NULL));
+
+    ///- Initialize detour memory management
+    dtAllocSetCustom(dtCustomAlloc, dtCustomFree);
 
     ///- Initialize config settings
     LoadConfigSettings();

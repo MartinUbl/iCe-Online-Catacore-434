@@ -59,7 +59,7 @@ namespace Movement
         return MOVE_RUN;
     }
 
-    void MoveSplineInit::Launch()
+    int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit->movespline;
 
@@ -74,14 +74,13 @@ namespace Movement
         }
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
-        // this also allows calculate spline position and update map position in much greater intervals
-        // Don't compute for transport movement if the unit is in a motion between two transports
-        if (!move_spline.Finalized() && move_spline.onTransport == (unit->GetTransGUID() != 0))
+        // this also allows CalculatePath spline position and update map position in much greater intervals
+        if (!move_spline.Finalized())
             real_position = move_spline.ComputePosition();
 
         // should i do the things that user should do? - no.
         if (args.path.empty())
-            return;
+            return 0;
 
         // correct first vertex
         args.path[0] = real_position;
@@ -100,7 +99,7 @@ namespace Movement
             args.velocity = unit->GetSpeed(SelectSpeedType(moveFlags));
 
         if (!args.Validate(unit))
-            return;
+            return 0;
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
             moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;
@@ -119,6 +118,8 @@ namespace Movement
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit->SendMessageToSet(&data, true);
+
+        return move_spline.Duration();
     }
 
     void MoveSplineInit::Stop()
@@ -178,8 +179,19 @@ namespace Movement
         args.flags.EnableFacingAngle();
     }
 
-    void MoveSplineInit::MoveTo(Vector3 const& dest)
+    void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
     {
+        if (generatePath)
+        {
+            PathGenerator path(unit);
+            bool result = path.CalculatePath(dest.x, dest.y, dest.z, forceDestination);
+            if (result && path.GetPathType() & ~PATHFIND_NOPATH)
+            {
+                MovebyPath(path.GetPath());
+                return;
+            }
+        }
+
         args.path_Idx_offset = 0;
         args.path.resize(2);
         TransportPathTransform transform(unit, args.TransformForTransport);

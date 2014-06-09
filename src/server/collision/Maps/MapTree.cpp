@@ -21,17 +21,12 @@
 #include "VMapManager2.h"
 #include "VMapDefinitions.h"
 #include "Log.h"
+#include "Errors.h"
 
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <limits>
-
-#ifndef NO_CORE_FUNCS
-    #include "Errors.h"
-#else
-    #define ASSERT(x)
-#endif
 
 using G3D::Vector3;
 
@@ -480,5 +475,4 @@ namespace VMAP
         }
         iLoadedTiles.erase(tile);
     }
-
 }

@@ -482,6 +482,7 @@ enum UnitState
     UNIT_STAT_FLEEING_MOVE    = 0x02000000,
     UNIT_STAT_CHASE_MOVE      = 0x04000000,
     UNIT_STAT_FOLLOW_MOVE     = 0x08000000,
+    UNIT_STAT_IGNORE_PATHFINDING = 0x10000000,                 // do not use pathfinding in any MovementGenerator
     UNIT_STAT_UNATTACKABLE    = (UNIT_STAT_IN_FLIGHT | UNIT_STAT_ONVEHICLE),
     UNIT_STAT_MOVING          = UNIT_STAT_ROAMING_MOVE | UNIT_STAT_CONFUSED_MOVE | UNIT_STAT_FLEEING_MOVE| UNIT_STAT_CHASE_MOVE | UNIT_STAT_FOLLOW_MOVE ,
     UNIT_STAT_CONTROLLED      = (UNIT_STAT_CONFUSED | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING),
@@ -1527,8 +1528,11 @@ class Unit : public WorldObject
         void JumpTo(float speedXY, float speedZ, bool forward = true);
         void JumpTo(WorldObject *obj, float speedZ);
 
-        void MonsterMoveWithSpeed(float x, float y, float z, float speed);
-        void SendMonsterMoveTransport(Unit *vehicleOwner);
+        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
+        //void SetFacing(float ori, WorldObject* obj = NULL);
+        void SendMonsterMoveExitVehicle(Position const* newPos);
+        //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
+        void SendMonsterMoveTransport(Unit* vehicleOwner);
         void SendMovementFlagUpdate();
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_LEVITATING);}
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);}

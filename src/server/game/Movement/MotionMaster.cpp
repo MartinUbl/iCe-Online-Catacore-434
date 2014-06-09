@@ -316,21 +316,22 @@ MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slo
     }
 }
 
-void
-MotionMaster::MovePoint(uint32 id, float x, float y, float z)
+
+void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
 {
     if (i_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) targeted point (Id: %u X: %f Y: %f Z: %f)", i_owner->GetGUIDLow(), id, x, y, z);
-        Mutate(new PointMovementGenerator<Player>(id,x,y,z), MOTION_SLOT_ACTIVE);
+        Mutate(new PointMovementGenerator<Player>(id,x,y,z, generatePath), MOTION_SLOT_ACTIVE);
     }
     else
     {
         sLog->outStaticDebug("Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(), id, x, y, z);
-        Mutate(new PointMovementGenerator<Creature>(id,x,y,z), MOTION_SLOT_ACTIVE);
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath), MOTION_SLOT_ACTIVE);
     }
 }
+
 void MotionMaster::MoveLand(uint32 id, Position const& pos)
 {
     float x, y, z;
@@ -403,31 +404,11 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-speedZ);
 
     Movement::MoveSplineInit init(i_owner);
-    init.MoveTo(x,y,z);
+    init.MoveTo(x,y,z,false);
     init.SetParabolic(max_height,0);
     init.SetVelocity(speedXY);
     init.Launch();
     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
-}
-
-void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id)
-{
-    if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
-        return;
-
-    i_owner->addUnitState(UNIT_STAT_CHARGING);
-    i_owner->m_TempSpeed = speed;
-    if (i_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        sLog->outStaticDebug("Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", i_owner->GetGUIDLow(), x, y, z);
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, speed), MOTION_SLOT_CONTROLLED);
-    }
-    else
-    {
-        sLog->outStaticDebug("Creature (Entry: %u GUID: %u) charge point (X: %f Y: %f Z: %f)",
-            i_owner->GetEntry(), i_owner->GetGUIDLow(), x, y, z);
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, speed), MOTION_SLOT_CONTROLLED);
-    }
 }
 
 void MotionMaster::MoveFall(uint32 id/*=0*/)
@@ -452,10 +433,40 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
     }
 
     Movement::MoveSplineInit init(i_owner);
-    init.MoveTo(i_owner->GetPositionX(), i_owner->GetPositionY(), tz);
+    init.MoveTo(i_owner->GetPositionX(), i_owner->GetPositionY(), tz, false);
     init.SetFall();
     init.Launch();
     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
+}
+
+void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id, bool generatePath)
+{
+    if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
+        return;
+
+    if (i_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        sLog->outDebug("Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", i_owner->GetGUIDLow(), x, y, z);
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath, speed), MOTION_SLOT_CONTROLLED);
+    }
+    else
+    {
+        sLog->outDebug("Creature (Entry: %u GUID: %u) charge point (X: %f Y: %f Z: %f)",
+            i_owner->GetEntry(), i_owner->GetGUIDLow(), x, y, z);
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, speed), MOTION_SLOT_CONTROLLED);
+    }
+}
+
+void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
+{
+    Vector3 dest = path.GetActualEndPosition();
+
+    MoveCharge(dest.x, dest.y, dest.z, speed, id);
+
+    Movement::MoveSplineInit init(i_owner);
+    init.MovebyPath(path.GetPath());
+    init.SetVelocity(speed);
+    init.Launch();
 }
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
@@ -682,9 +693,9 @@ void MotionMaster::DelayedDelete(_Ty curr)
 bool MotionMaster::GetDestination(float &x, float &y, float &z)
 {
     if (i_owner->movespline->Finalized())
-       return false;
+        return false;
 
-    const G3D::Vector3& dest = i_owner->movespline->FinalDestination();
+    G3D::Vector3 const& dest = i_owner->movespline->FinalDestination();
     x = dest.x;
     y = dest.y;
     z = dest.z;

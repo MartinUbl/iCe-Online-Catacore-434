@@ -67,4 +67,3 @@ class WaypointStore
 #define sWaypointMgr WaypointStore::instance()
 
 #endif
-

@@ -73,6 +73,7 @@
 #include "GameObjectAI.h"
 #include "ScriptedCreature.h"
 #include "MoveSpline.h"
+#include "PathGenerator.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -9789,11 +9790,15 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
     Position pos;
     target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     target->GetFirstCollisionPosition(pos, target->GetObjectSize(), angle);
-    m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
 
     // Warriors Charge - Stun the target - must be implemented this way since charge doesn't have "Trigger spell" effect
     if (m_spellInfo->Id == 100 && !target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
         m_caster->CastSpell(target, 96273, true);
+
+    if (m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    else
+        m_caster->GetMotionMaster()->MoveCharge(m_preGeneratedPath, SPEED_CHARGE, EVENT_CHARGE_PREPATH);
 
     // Juggernaut - share cooldown of Charge and Intercept
     if (m_caster->HasAura(64976))
