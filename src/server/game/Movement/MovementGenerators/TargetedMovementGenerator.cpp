@@ -42,6 +42,9 @@ bool TargetedMovementGeneratorMedium<T, D>::HasValidTargettedMovementPath(T* own
             // if we are "stuck" in required distance without LoS, set indirect flag - will ignore pathfinding
             if (!i_target->IsWithinLOSInMap(owner))
                 return false;
+            // also when we are close, but in problematic height position (tangent too pitched), we also do not have valid path
+            if (fabs(end.z - i_target->GetPositionZ()) > 1.0 && !i_target->IsFlying())
+                return false;
         }
     }
 
@@ -119,6 +122,12 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
     {
         // Cant reach target
         i_recalculateTravel = true;
+
+        // otherwise store target X/Y/Z
+        storedDest.x = i_target->GetPositionX();
+        storedDest.y = i_target->GetPositionY();
+        storedDest.z = i_target->GetPositionZ();
+
         return;
     }
 
@@ -129,27 +138,46 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
 
     Movement::MoveSplineInit init(owner);
 
+    // if some path has been found - store the destination
+    const G3D::Vector3 &dest = i_path->GetActualEndPosition();
+    storedDest.x = dest.x;
+    storedDest.y = dest.y;
+    storedDest.z = dest.z;
+
     // if the path generated is not direct (have to go through wall), we have to choose another path
     bool usepath = HasValidTargettedMovementPath(owner);
     if (!usepath)
     {
-        float xt = x, yt = y, zt = z;
-        float xo = owner->GetPositionX(), yo = owner->GetPositionY(), zo = owner->GetPositionZ();
-
-        float addDist = 0.0f;
-        // we will try to find path as if the target and source would be further away from themselves
-        for (; addDist < 6.0f; addDist += 1.0f)
+        // if we have incomplete path, that doesn't mean we have to generate new path - the target is probably flying
+        if (!(i_path->GetPathType() & PATHFIND_INCOMPLETE))
         {
-            i_target->GetClosePoint(xt, yt, zt, size, i_offset + addDist / 2.0f, i_angle - M_PI);
-            owner->GetClosePoint(xo, yo, zo, 0.0f, addDist, i_angle);
+            storedDest.x = i_target->GetPositionX();
+            storedDest.y = i_target->GetPositionY();
+            storedDest.z = i_target->GetPositionZ();
 
-            i_path->SetForceSource(xo, yo, zo);
-            bool result = i_path->CalculatePath(xt, yt, zt, forceDest);
-            if (result && !(i_path->GetPathType() & PATHFIND_NOPATH) && HasValidTargettedMovementPath(owner))
+            float xt = x, yt = y, zt = z;
+            float xo = owner->GetPositionX(), yo = owner->GetPositionY(), zo = owner->GetPositionZ();
+
+            float addDist = 0.0f;
+            // we will try to find path as if the target and source would be further away from themselves
+            for (; addDist < 6.0f; addDist += 1.0f)
             {
-                usepath = true;
-                break;
+                i_target->GetClosePoint(xt, yt, zt, size, i_offset + addDist / 2.0f, i_angle - M_PI);
+                owner->GetClosePoint(xo, yo, zo, 0.0f, addDist, i_angle);
+
+                i_path->SetForceSource(xo, yo, zo);
+                bool result = i_path->CalculatePath(xt, yt, zt, forceDest);
+                if (result && !(i_path->GetPathType() & PATHFIND_NOPATH) && HasValidTargettedMovementPath(owner))
+                {
+                    usepath = true;
+                    break;
+                }
             }
+        }
+        else
+        {
+            // incomplete path is valid in most cases
+            usepath = true;
         }
     }
 
@@ -205,7 +233,7 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
         i_recheckDistance.Reset(100);
         //More distance let have better performance, less distance let have more sensitive reaction at target move.
         float allowed_dist = owner->GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
-        G3D::Vector3 dest = owner->movespline->FinalDestination();
+        G3D::Vector3 &dest = storedDest;
         float ori = 0.0f;
         if (owner->movespline->onTransport)
             if (TransportBase* transport = owner->GetDirectTransport())

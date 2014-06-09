@@ -62,6 +62,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
 
         PathGenerator* i_path;
         TimeTrackerSmall i_recheckDistance;
+        G3D::Vector3 storedDest;
         float i_offset;
         float i_angle;
         bool i_recalculateTravel : 1;
