@@ -59,8 +59,17 @@ namespace MMAP
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
     {
-        return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS)
-            && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
+        // TEMP
+        // This will allow pathfinding only on Outland - this measure is there just to make us able to test
+        // the pathfinding system on isolated map without greater impact on game stability
+
+        // developers on Windows machines will have pathfinding turned on automatically everywhere by config switch
+#ifdef _WIN32
+        return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS);
+#else
+        return ((mapId == 530) && sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS));
+#endif
+        //return sWorld->getBoolConfig(CONFIG_ENABLE_MMAPS) && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
     }
 
     void MMapFactory::clear()
