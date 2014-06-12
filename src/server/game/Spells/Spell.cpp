@@ -1561,12 +1561,16 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
             case 5176:
                 if(EclipseLeft)
                 {
-                    m_caster->ModifyPower(POWER_ECLIPSE,-13);
+                    int32 bp0 = -13;
+
+                    if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus ( Wrath generates 3 additional Lunar Energy )
+                        bp0 -= 3;
+
+                    m_caster->ModifyPower(POWER_ECLIPSE,bp0);
 
                     if (!m_caster->ToPlayer()->IsEclipseDriverLeft())
                         break;
                     // talent Euphoria - generate 2x eclipse
-                    int32 bp0 = -13;
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
@@ -1581,12 +1585,17 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
             case 2912:
                 if(!EclipseLeft)
                 {
-                    m_caster->ModifyPower(POWER_ECLIPSE, 20);
+                    int32 bp0 = 20;
+
+                    if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus ( Starfire generates 5 additional Solar Energy )
+                        bp0 += 5;
+
+                    m_caster->ModifyPower(POWER_ECLIPSE, bp0);
 
                     if (m_caster->ToPlayer()->IsEclipseDriverLeft())
                         break;
                     // talent Euphoria - generate 2x eclipse
-                    int32 bp0 = 20;
+
                     if (!m_caster->HasAura(48518) && !m_caster->HasAura(48517) &&
                         ((m_caster->HasAura(81062) && roll_chance_i(24))
                         || (m_caster->HasAura(81061) && roll_chance_i(12))))
@@ -5661,7 +5670,7 @@ void Spell::TakeRunePower(bool didhit)
     plr->ClearLastUsedRuneList();
 
     if (!anyRuneUsed) // if no runes are to be used no runic power is generated => no further processing is needed
-        if (GetSpellInfo() && GetSpellInfo()->Id != 57330) //  // Horn of Winter is exception
+        if (GetSpellInfo() && GetSpellInfo()->Id != 57330) // Horn of Winter is exception
             return;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
