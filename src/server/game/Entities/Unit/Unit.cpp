@@ -8885,6 +8885,9 @@ void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* 
     if (pVictim == NULL || !pVictim->isAlive() || !procSpell)
         return;
 
+    if (GetTypeId() != TYPEID_PLAYER)
+        return;
+
     // not allow proc extra attack spell at extra attack
     if (m_extraAttacks && IsSpellHaveEffect(sSpellStore.LookupEntry(procSpell->Id), SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         return;
@@ -8897,8 +8900,20 @@ void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* 
     }
     else     // Direct negative spell
     {
-        if (roll_chance_f(6.0f)) // Not sure, can't find proof of proc chance after 4.3 nerf
-            CastSpell(pVictim, procSpell->Id, true); // Cast copy of that spell
+        if (roll_chance_f(6.5f)) // Not sure, can't find proof of proc chance after 4.3 nerf
+        {
+            if (!ToPlayer()->HasSpellCooldown(101056)) 
+            {
+                // We have to force 1 second CD, because aoe spells can hit many targets => higher chance to proc
+                // Proc chance should be derived from single cast of spell not from units hits
+                ToPlayer()->AddSpellCooldown(101056, 0, 1000);
+
+                CastSpell(pVictim, procSpell->Id, true); // Cast copy of that spell
+            }
+            else
+                return;
+        }
+
     }
 }
 
