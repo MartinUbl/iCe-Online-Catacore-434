@@ -3074,7 +3074,7 @@ public:
 
             moltenBoltTimer = 8000;
             checkMeleeTimer = 2500;
-            burryTimer      = 15000;
+            burryTimer      = urand(10000,15000);
             teleTimer       = NEVER;
             emergeTimer     = NEVER;
         }
@@ -3732,44 +3732,16 @@ public:
             else transformTimer -= diff;
         }
 
-        /*uint8 GetDelugeCounter(void)
-        {
-            if (!instance)
-                me->ForcedDespawn();
-
-            Map::PlayerList const& plList = instance->instance->GetPlayers();
-            uint8 counter = 0;
-
-            if (plList.isEmpty())
-                return 0;
-
-            for(Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-            {
-                if ( Player * p = itr->getSource())
-                {
-                    if (p->IsInWorld() && (p->HasAura(DELUGE) || p->HasAura(101015)))
-                        counter++;
-                }
-            }
-            return counter;
-        }*/
-
         void SpellHit(Unit* caster, const SpellEntry* spell)
         {
             if (spell->Id == 110469) // Borrowed harmless spell
             {
-                //uint8 max = (Is25ManRaid()) ? 3 : 1;
-
                 if (bubbles < maxBubbles)
                 {
                     bubbles++;
                     caster->CastSpell(caster,DELUGE,true);
                     me->ForcedDespawn();
-                    //return;
                 }
-
-                //caster->CastSpell(caster,DELUGE,true);
-                //me->ForcedDespawn();
             }
         }
 
