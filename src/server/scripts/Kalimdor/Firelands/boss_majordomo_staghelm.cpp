@@ -136,6 +136,7 @@ public:
         uint32 energyCounter;
         bool FromCatToScorpion;
         bool barUsed;
+        bool abilityUsed;
 
         SummonList Summons;
 
@@ -147,6 +148,7 @@ public:
                 instance->SetData(TYPE_STAGHELM, NOT_STARTED);
             }
 
+            abilityUsed = true; // First transformation
             energyCounter = 0;
             TransformToDruid();
             morphs = 0;
@@ -279,6 +281,8 @@ public:
 
         void TransformToCat()
         {
+            abilityUsed = false;
+
             if (barUsed == false && IsHeroic())
             {
                 me->CastSpell(me, SPELL_CONCENTRATION_BAR, true);
@@ -308,6 +312,8 @@ public:
 
         void TransformToScorpion()
         {
+            abilityUsed = false;
+
             if (barUsed == false && IsHeroic())
             {
                 me->CastSpell(me, SPELL_CONCENTRATION_BAR, true);
@@ -623,14 +629,14 @@ public:
                     return;
                 }
 
-                if(RaidIsClusteredTogether())
+                if (RaidIsClusteredTogether())
                 {
-                    if(!me->HasAura(SPELL_SCORPION_FORM))
+                    if (!me->HasAura(SPELL_SCORPION_FORM) && abilityUsed)
                         TransformToScorpion();
                 }
                 else
                 {
-                    if(!me->HasAura(SPELL_CAT_FORM))
+                    if (!me->HasAura(SPELL_CAT_FORM) && abilityUsed)
                         TransformToCat();
                 }
 
@@ -668,7 +674,7 @@ public:
             }
             else Energy_timer -= diff;
 
-            if(Berserk_timer <= diff) // Berser after 10 minutes
+            if(Berserk_timer <= diff) // Berserk after 10 minutes
             {
                 me->CastSpell(me,SPELL_BERSERK,true);
                 Berserk_timer = NEVER;
@@ -679,11 +685,14 @@ public:
             if( PHASE == PHASE_SCORPION && me->GetPower(POWER_ENERGY) == 100)
             {
                 me->CastSpell(me,SPELL_FLAME_SCYTE,false);
+                abilityUsed = true;
             }
 
             if( PHASE == PHASE_CAT && me->GetPower(POWER_ENERGY) == 100)
             {
-                //me->CastSpell(me,SPELL_SUMMON_SPIRIT,false); // Summon 1 cat copy of Majordomo ( cat)
+                abilityUsed = true;
+
+                //me->CastSpell(me,SPELL_SUMMON_SPIRIT,false); // Summon 1 cat copy of Majordomo
                 me->SummonCreature(52593, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ(),me->GetOrientation(),TEMPSUMMON_CORPSE_DESPAWN, 500);
                 Player * p = SelectRandomRangedPlayer();
 
