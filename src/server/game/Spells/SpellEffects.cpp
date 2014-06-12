@@ -10619,6 +10619,10 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
         if (effIndex != 0)
             return;
 
+        // generating 25 Runic Power
+        int32 bp0 = 250;
+        plr->CastCustomSpell(plr, 62458, &bp0, 0, 0, true); // Probably not correct spell
+
         for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
             if (plr->GetRuneCooldown(i))
