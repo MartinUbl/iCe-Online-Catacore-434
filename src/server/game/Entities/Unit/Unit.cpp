@@ -6950,6 +6950,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                         break;
                     if (caster->HasSpellCooldown(95746))
                         break;
+                    if (caster->GetActiveTalentBranchSpec() != SPEC_DRUID_BALANCE)
+                        break;
                     caster->AddSpellAndCategoryCooldowns(sSpellStore.LookupEntry(95746), 0);
                     int32 change = caster->IsEclipseDriverLeft() ? -13 : 20;
                     caster->ModifyPower(POWER_ECLIPSE, change);
