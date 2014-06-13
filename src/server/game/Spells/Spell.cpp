@@ -1563,7 +1563,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 {
                     int32 bp0 = -13;
 
-                    if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus ( Wrath generates 3 additional Lunar Energy )
+                    // T12 Balance 4P Bonus ( While not in an Eclipse state your Wrath generates 3 additional Lunar Energy )
+                    if (m_caster->HasAura(99049) && !m_caster->HasAura(48517) && !m_caster->HasAura(48518)) 
                         bp0 -= 3;
 
                     m_caster->ModifyPower(POWER_ECLIPSE,bp0);
@@ -1587,7 +1588,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 {
                     int32 bp0 = 20;
 
-                    if (m_caster->HasAura(99049)) // T12 Balance 4P Bonus ( Starfire generates 5 additional Solar Energy )
+                    // T12 Balance 4P Bonus ( While not in an Eclipse state your Starfire generates 5 additional Solar Energy )
+                    if (m_caster->HasAura(99049) && !m_caster->HasAura(48517) && !m_caster->HasAura(48518))
                         bp0 += 5;
 
                     m_caster->ModifyPower(POWER_ECLIPSE, bp0);
