@@ -7305,8 +7305,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (procSpell && (procSpell->Id == 101423 || procSpell->Id == 25742 || procSpell->Id == 20424))
                     return false;
 
-                // (Seals of Command) In addition, your Seal of Righteousness now hits all enemy targets within melee range.
-                CastSpell(pVictim, HasAura(85126) ? 101423 : 25742, true);
+                // Prevent multiple procs (dunno why happend twice)
+                if (ToPlayer() && ToPlayer()->HasSpellCooldown(20154))
+                    return false;
+                else
+                {
+                    if (ToPlayer())
+                        ToPlayer()->AddSpellCooldown(20154, 0, 500);
+
+                    // (Seals of Command) In addition, your Seal of Righteousness now hits all enemy targets within melee range.
+                    CastSpell(pVictim, HasAura(85126) ? 101423 : 25742, true);
+                }
 
                 return false;
             }
