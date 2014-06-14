@@ -464,7 +464,10 @@ void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
     MoveCharge(dest.x, dest.y, dest.z, speed, id);
 
     Movement::MoveSplineInit init(i_owner);
-    init.MovebyPath(path.GetPath());
+    if (!(path.GetPathType() & PATHFIND_NOT_USING_PATH))
+        init.MovebyPath(path.GetPath());
+    else
+        init.MoveTo(dest, false);
     init.SetVelocity(speed);
     init.Launch();
 }

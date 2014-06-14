@@ -39,20 +39,49 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
         unit->StopMoving();
 
     unit->addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    m_incompletePath = false;
 
     if (id == EVENT_CHARGE_PREPATH)
         return;
 
-    Movement::MoveSplineInit init(unit);
-    init.MoveTo(i_x, i_y, i_z, m_generatePath);
-    if (speed > 0.0f)
-        init.SetVelocity(speed);
-    init.Launch();
+    ProceedMovement(unit, false);
 
     // Call for creature group update
     if (Creature* creature = unit->ToCreature())
         if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
             creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
+}
+
+template<class T>
+void PointMovementGenerator<T>::ProceedMovement(T* unit, bool onfinalize)
+{
+    // disambiguate - moving by path is handler by us, moving without pathing is handled by MoveSplineInit itself
+    Movement::MoveSplineInit init(unit);
+    if (m_generatePath)
+    {
+        PathGenerator path(unit);
+        bool result = path.CalculatePath(i_x, i_y, i_z, false);
+        if (result && path.GetPathType() & ~PATHFIND_NOPATH)
+        {
+            init.MovebyPath(path.GetPath());
+            // save the case, when the path is incomplete
+            if (path.GetPathType() & PATHFIND_INCOMPLETE)
+                m_incompletePath = true;
+        }
+        else if ((path.GetPathType() & PATHFIND_NOT_USING_PATH) || unit->GetTypeId() == TYPEID_UNIT)
+            init.MoveTo(i_x, i_y, i_z, false);
+    }
+    else // otherwise move directly towards
+        init.MoveTo(i_x, i_y, i_z, false);
+
+    if (speed > 0.0f)
+        init.SetVelocity(speed);
+    init.Launch();
+
+    // this means, that we have only one more attempt after finishing incomplete path
+    // - connecting three or more paths is not possible, nor needed in most cases
+    if (onfinalize)
+        m_incompletePath = false;
 }
 
 template<class T>
@@ -72,11 +101,7 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
     if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit->movespline->Finalized())
     {
         i_recalculateSpeed = false;
-        Movement::MoveSplineInit init(unit);
-        init.MoveTo(i_x, i_y, i_z, m_generatePath);
-        if (speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
-            init.SetVelocity(speed);
-        init.Launch();
+        ProceedMovement(unit, false);
 
         // Call for creature group update
         if (Creature* creature = unit->ToCreature())
@@ -90,6 +115,14 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
 template<class T>
 void PointMovementGenerator<T>::DoFinalize(T* unit)
 {
+    // if we had incomplete path, there's a chance, that the path would be found
+    // as joining at the end of actual path (unknown reason)
+    if (m_incompletePath)
+    {
+        ProceedMovement(unit, true);
+        return;
+    }
+
     if (unit->hasUnitState(UNIT_STAT_CHARGING))
         unit->clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 

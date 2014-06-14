@@ -146,7 +146,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
 
     // if the path generated is not direct (have to go through wall), we have to choose another path
     bool usepath = HasValidTargettedMovementPath(owner);
-    if (!usepath)
+    if (!usepath && !(i_path->GetPathType() & PATHFIND_NOT_USING_PATH))
     {
         // if we have incomplete path, that doesn't mean we have to generate new path - the target is probably flying
         if (!(i_path->GetPathType() & PATHFIND_INCOMPLETE))
@@ -182,7 +182,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
     }
 
     // if direct path exists, move along
-    if (usepath)
+    if (usepath && !(i_path->GetPathType() & PATHFIND_NOT_USING_PATH))
         init.MovebyPath(i_path->GetPath());
     else // if not, move straight through the thing, that breaks LoS, this is very special case (thin LoS breaking object with too complicated path around)
         init.MoveTo(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), false, true);
