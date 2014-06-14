@@ -3068,7 +3068,7 @@ public:
 
         void Reset()
         {
-            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             inHome = true;
             me->SetVisible(true);
 
