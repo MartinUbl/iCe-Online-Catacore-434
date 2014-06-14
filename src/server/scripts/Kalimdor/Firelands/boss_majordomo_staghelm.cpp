@@ -136,7 +136,7 @@ public:
         uint32 energyCounter;
         bool FromCatToScorpion;
         bool barUsed;
-        bool abilityUsed;
+        bool canMorph;
 
         SummonList Summons;
 
@@ -148,7 +148,7 @@ public:
                 instance->SetData(TYPE_STAGHELM, NOT_STARTED);
             }
 
-            abilityUsed = true; // First transformation
+            canMorph = true; // First transformation
             energyCounter = 0;
             TransformToDruid();
             morphs = 0;
@@ -281,7 +281,7 @@ public:
 
         void TransformToCat()
         {
-            abilityUsed = false;
+            canMorph = false;
 
             if (barUsed == false && IsHeroic())
             {
@@ -312,7 +312,7 @@ public:
 
         void TransformToScorpion()
         {
-            abilityUsed = false;
+            canMorph = false;
 
             if (barUsed == false && IsHeroic())
             {
@@ -346,6 +346,8 @@ public:
 
         void TransformToDruid()
         {
+            canMorph = true;
+
             me->RemoveAura(SPELL_ADRENALINE);
             me->RemoveAura(SPELL_CAT_FORM);
             me->RemoveAura(SPELL_SCORPION_FORM);
@@ -631,12 +633,12 @@ public:
 
                 if (RaidIsClusteredTogether())
                 {
-                    if (!me->HasAura(SPELL_SCORPION_FORM) && abilityUsed)
+                    if (!me->HasAura(SPELL_SCORPION_FORM) && canMorph)
                         TransformToScorpion();
                 }
                 else
                 {
-                    if (!me->HasAura(SPELL_CAT_FORM) && abilityUsed)
+                    if (!me->HasAura(SPELL_CAT_FORM) && canMorph)
                         TransformToCat();
                 }
 
@@ -685,12 +687,12 @@ public:
             if( PHASE == PHASE_SCORPION && me->GetPower(POWER_ENERGY) == 100)
             {
                 me->CastSpell(me,SPELL_FLAME_SCYTE,false);
-                abilityUsed = true;
+                canMorph = true;
             }
 
             if( PHASE == PHASE_CAT && me->GetPower(POWER_ENERGY) == 100)
             {
-                abilityUsed = true;
+                canMorph = true;
 
                 //me->CastSpell(me,SPELL_SUMMON_SPIRIT,false); // Summon 1 cat copy of Majordomo
                 me->SummonCreature(52593, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ(),me->GetOrientation(),TEMPSUMMON_CORPSE_DESPAWN, 500);
