@@ -52,7 +52,7 @@ bool TargetedMovementGeneratorMedium<T, D>::HasValidTargettedMovementPath(T* own
 }
 
 template<class T, typename D>
-void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool updateDestination)
+void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool updateDestination)
 {
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
@@ -112,7 +112,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
 
     // allow pets to use shortcut if no path found when following their master
     bool forceDest = (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->isPet()
-                        && owner->hasUnitState(UNIT_STAT_FOLLOW));
+        && owner->hasUnitState(UNIT_STAT_FOLLOW));
 
     G3D::Vector3 startPos;
 
@@ -127,6 +127,9 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
         storedDest.x = i_target->GetPositionX();
         storedDest.y = i_target->GetPositionY();
         storedDest.z = i_target->GetPositionZ();
+
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_NOPATH);
 
         return;
     }
@@ -178,14 +181,33 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
         {
             // incomplete path is valid in most cases
             usepath = true;
+
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_NOPATH);
         }
+    }
+    else if ((i_path->GetPathType() & (PATHFIND_INCOMPLETE | PATHFIND_NOPATH) && !(i_path->GetPathType() & PATHFIND_NOT_USING_PATH)))
+    {
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_NOPATH);
     }
 
     // if direct path exists, move along
     if (usepath && !(i_path->GetPathType() & PATHFIND_NOT_USING_PATH))
+    {
         init.MovebyPath(i_path->GetPath());
+
+        // if valid path is found (not incomplete nor "no"), set pathfinding state to OK
+        if (!(i_path->GetPathType() & (PATHFIND_INCOMPLETE | PATHFIND_NOPATH)) && owner->GetTypeId() == TYPEID_UNIT)
+            owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_OK);
+    }
     else // if not, move straight through the thing, that breaks LoS, this is very special case (thin LoS breaking object with too complicated path around)
+    {
         init.MoveTo(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), false, true);
+
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_OK);
+    }
 
     init.SetWalk(((D*)this)->EnableWalking());
     // Using the same condition for facing target as the one that is used for SetInFront on movement end

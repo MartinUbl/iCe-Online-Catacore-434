@@ -169,6 +169,8 @@ m_path_id(0), m_formation(NULL)
     m_SightDistance = sWorld->getFloatConfig(CONFIG_SIGHT_MONSTER);
     m_CombatDistance = 0;//MELEE_RANGE;
 
+    m_nextPathfindReachTestTimer = 0;
+
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
 
@@ -643,6 +645,31 @@ void Creature::Update(uint32 diff)
                     m_regenTimer -= diff;*/
             if (m_regenTimer >= CREATURE_REGEN_INTERVAL)
                 m_regenTimer -= CREATURE_REGEN_INTERVAL;
+
+            if (bInCombat)
+            {
+                if (m_nextPathfindReachTestTimer != 0)
+                {
+                    if (GetMotionMaster()->hasPathfindingState(PATHFIND_STATE_INITIAL) || getMSTimeDiff(m_nextPathfindReachTestTimer, getMSTime()) >= PATHFINDING_NOPATH_EVADE_DELAY)
+                    {
+                        if (GetMotionMaster()->hasPathfindingState(PATHFIND_STATE_NOPATH))
+                        {
+                            /*if (IsAIEnabled)
+                                AI()->EnterEvadeMode();*/
+
+                            if (HostileReference* pVictim = getThreatManager().getCurrentVictim())
+                                pVictim->removeReference();
+                        }
+
+                        m_nextPathfindReachTestTimer = 0;
+                    }
+                }
+                else
+                {
+                    if (GetMotionMaster()->hasPathfindingState(PATHFIND_STATE_NOPATH))
+                        m_nextPathfindReachTestTimer = getMSTime();
+                }
+            }
 
             break;
         }
@@ -2025,6 +2052,10 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
     // skip non hostile to caster enemy creatures
     if (!IsHostileTo(enemy))
+        return false;
+
+    // and he has to be reachable by path
+    if (!CanReachByPath(enemy))
         return false;
 
     return true;

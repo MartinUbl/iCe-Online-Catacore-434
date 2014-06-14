@@ -17383,6 +17383,27 @@ bool Unit::InitTamedPet(Pet * pet, uint8 level, uint32 spell_id)
     return true;
 }
 
+bool Unit::CanReachByPath(Unit const* target) const
+{
+    if (!IsInWorld() || !target || !target->IsInWorld())
+        return false;
+
+    // to test reachability, lets generate path
+    PathGenerator path(this);
+    bool result = path.CalculatePath(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), false, false);
+
+    // when not using pathfinding, the target is always reachable
+    if (path.GetPathType() & PATHFIND_NOT_USING_PATH)
+        return true;
+
+    // the target is not reachable when error occured, when no path found, or when incomplete path has been found
+    if (!result || (path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_INCOMPLETE)))
+        return false;
+
+    // otherwise is reachable
+    return true;
+}
+
 bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const *& spellProcEvent)
 {
     if (!aura || !aura->GetSpellProto())

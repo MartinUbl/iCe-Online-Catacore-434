@@ -2046,6 +2046,8 @@ class Unit : public WorldObject
         void AddPetAura(PetAura const* petSpell);
         void RemovePetAura(PetAura const* petSpell);
 
+        bool CanReachByPath(Unit const* target) const;
+
         uint32 GetModelForForm(ShapeshiftForm form);
         uint32 GetModelForTotem(PlayerTotemType totemType);
 

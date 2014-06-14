@@ -579,6 +579,12 @@ MotionMaster::MoveDistract(uint32 timer)
 
 void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
 {
+    // reset pathfinding state when not starting chase motion type
+    if (m->GetMovementGeneratorType() != CHASE_MOTION_TYPE)
+        setPathfindingState(PATHFIND_STATE_OK);
+    else
+        setPathfindingState(PATHFIND_STATE_NOPATH | PATHFIND_STATE_INITIAL);
+
     if (MovementGenerator *curr = Impl[slot])
     {
         bool wasAtTop = (i_top == slot);
@@ -651,6 +657,22 @@ void MotionMaster::propagateSpeedChange()
         if (Impl[i])
             Impl[i]->unitSpeedChanged();
     }
+}
+
+void MotionMaster::setPathfindingState(uint32 state)
+{
+    m_pathfindingState |= uint32(state);
+
+    // if the path is OK, unset NOPATH (doesn't have sense) and INITIAL (also not needed)
+    if (state == PATHFIND_STATE_OK)
+        unsetPathfindingState(PATHFIND_STATE_NOPATH | PATHFIND_STATE_INITIAL);
+    else if (state == PATHFIND_STATE_NOPATH)
+        unsetPathfindingState(PATHFIND_STATE_OK);
+}
+
+void MotionMaster::unsetPathfindingState(uint32 state)
+{
+    m_pathfindingState &= ~state;
 }
 
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const

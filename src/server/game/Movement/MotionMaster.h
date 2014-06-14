@@ -59,6 +59,16 @@ enum MovementGeneratorType
     NULL_MOTION_TYPE      = 17,
 };
 
+// delay for evading, when no valid path has been found
+#define PATHFINDING_NOPATH_EVADE_DELAY 2000
+
+enum PathFindingMotionState
+{
+    PATHFIND_STATE_OK           = 0x01,                     // set when path is sucessfully found, or when not using pathfinding (direct path is always OK)
+    PATHFIND_STATE_NOPATH       = 0x02,                     // set when no valid path found (will fallback to evade soon)
+    PATHFIND_STATE_INITIAL      = 0x04,                     // set when mutating to new movement generator
+};
+
 enum MovementSlot
 {
     MOTION_SLOT_IDLE,
@@ -181,6 +191,11 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
         MovementGeneratorType GetMotionSlotType(int slot) const;
 
+        uint32 getPathfindingState() { return m_pathfindingState; }
+        bool hasPathfindingState(uint32 state) { return (m_pathfindingState & state); }
+        void setPathfindingState(uint32 state);
+        void unsetPathfindingState(uint32 state);
+
         void propagateSpeedChange();
 
         bool GetDestination(float &x, float &y, float &z);
@@ -196,5 +211,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         Unit       *i_owner;
         ExpireList *m_expList;
         uint8       m_cleanFlag;
+
+        uint32      m_pathfindingState;
 };
 #endif
