@@ -34,6 +34,7 @@
 #include "Util.h"
 #include "Pet.h"
 #include "World.h"
+#include "MMapFactory.h"
 
 void WorldSession::HandleDismissCritter(WorldPacket &recv_data)
 {
@@ -215,7 +216,14 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                     // Not let attack through obstructions
                     if (sWorld->getBoolConfig(CONFIG_PET_LOS))
                     {
-                        if (!pet->IsWithinLOSInMap(TargetUnit))
+                        // in case of pathfinding turned off, verify LoS
+                        if (!MMAP::MMapFactory::IsPathfindingEnabled(pet->GetMapId()))
+                        {
+                            if (!pet->IsWithinLOSInMap(TargetUnit))
+                                return;
+                        }
+                        // otherwise verify complete path existance
+                        else if (!pet->CanReachByPath(TargetUnit))
                             return;
                     }
 
