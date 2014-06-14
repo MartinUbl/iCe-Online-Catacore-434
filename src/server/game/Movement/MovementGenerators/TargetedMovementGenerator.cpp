@@ -203,7 +203,10 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     }
     else // if not, move straight through the thing, that breaks LoS, this is very special case (thin LoS breaking object with too complicated path around)
     {
-        init.MoveTo(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), false, true);
+        if (i_path->GetPathType() & PATHFIND_NOT_USING_PATH)
+            init.MoveTo(dest.x, dest.y, dest.z, false, true);
+        else
+            init.MoveTo(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), false, true);
 
         if (owner->GetTypeId() == TYPEID_UNIT)
             owner->GetMotionMaster()->setPathfindingState(PATHFIND_STATE_OK);
