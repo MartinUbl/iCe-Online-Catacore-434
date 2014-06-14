@@ -6404,10 +6404,8 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffIndex effIndex)
     if (unitTarget->isInFlight())
         return;
 
-    float dis = GetEffectRadius(effIndex);
-
     float fx,fy,fz;
-    m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize(),dis);
+    m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize());
 
     unitTarget->NearTeleportTo(fx,fy,fz,-m_caster->GetOrientation(),unitTarget == m_caster);
 }
