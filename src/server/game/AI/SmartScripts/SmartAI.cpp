@@ -142,7 +142,7 @@ void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* /*invoker*/)
     if (wp)
     {
         me->GetPosition(&mLastOOCPos);
-        me->GetMotionMaster()->MovePoint(wp->id, wp->x, wp->y, wp->z);
+        me->GetMotionMaster()->MovePoint(wp->id, wp->x, wp->y, wp->z, true);
         GetScript()->ProcessEventsFor(SMART_EVENT_WAYPOINT_START, NULL, wp->id, GetScript()->GetPathId());
     }
 }
@@ -263,7 +263,7 @@ void SmartAI::ResumePath()
     //mWPReached = false;
     SetRun(mRun);
     if (mLastWP)
-        me->GetMotionMaster()->MovePoint(mLastWP->id, mLastWP->x, mLastWP->y, mLastWP->z);
+        me->GetMotionMaster()->MovePoint(mLastWP->id, mLastWP->x, mLastWP->y, mLastWP->z, true);
 }
 
 void SmartAI::ReturnToLastOOCPos()
@@ -332,7 +332,7 @@ void SmartAI::UpdatePath(const uint32 diff)
             if (wp)
             {
                 SetRun(mRun);
-                me->GetMotionMaster()->MovePoint(wp->id, wp->x, wp->y, wp->z);
+                me->GetMotionMaster()->MovePoint(wp->id, wp->x, wp->y, wp->z, true);
             }
         }
 

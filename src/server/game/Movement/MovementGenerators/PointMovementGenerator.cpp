@@ -61,7 +61,7 @@ void PointMovementGenerator<T>::ProceedMovement(T* unit, bool onfinalize)
     {
         PathGenerator path(unit);
         bool result = path.CalculatePath(i_x, i_y, i_z, false);
-        if (result && path.GetPathType() & ~PATHFIND_NOPATH)
+        if (result && !(path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_NOT_USING_PATH)))
         {
             init.MovebyPath(path.GetPath());
             // save the case, when the path is incomplete

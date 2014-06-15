@@ -265,7 +265,7 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         else
             member->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
 
-        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+        member->GetMotionMaster()->MovePoint(0, dx, dy, dz, true);
         member->SetHomePosition(dx, dy, dz, pathangle);
     }
 }

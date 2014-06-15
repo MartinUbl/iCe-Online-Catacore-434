@@ -182,7 +182,7 @@ void npc_escortAI::ReturnToLastPoint()
 {
     float x, y, z, o;
     me->GetHomePosition(x, y, z, o);
-    me->GetMotionMaster()->MovePoint(POINT_LAST_POINT, x, y, z);
+    me->GetMotionMaster()->MovePoint(POINT_LAST_POINT, x, y, z, true);
 }
 
 void npc_escortAI::EnterEvadeMode()
@@ -250,7 +250,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
                         float fRetX, fRetY, fRetZ;
                         me->GetRespawnCoord(fRetX, fRetY, fRetZ);
 
-                        me->GetMotionMaster()->MovePoint(POINT_HOME, fRetX, fRetY, fRetZ);
+                        me->GetMotionMaster()->MovePoint(POINT_HOME, fRetX, fRetY, fRetZ, true);
 
                         m_uiWPWaitTimer = 0;
 
@@ -278,7 +278,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
 
             if (!HasEscortState(STATE_ESCORT_PAUSED))
             {
-                me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z, true);
                 sLog->outDebug("TSCR: EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
 
                 WaypointStart(CurrentWP->id);
@@ -387,7 +387,7 @@ void npc_escortAI::OnPossess(bool apply)
         {
             Returning = true;
             me->GetMotionMaster()->MovementExpired();
-            me->GetMotionMaster()->MovePoint(WP_LAST_POINT, LastPos.x, LastPos.y, LastPos.z);
+            me->GetMotionMaster()->MovePoint(WP_LAST_POINT, LastPos.x, LastPos.y, LastPos.z, true);
         }
     }
 }

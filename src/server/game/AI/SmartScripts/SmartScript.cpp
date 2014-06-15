@@ -986,7 +986,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 return;
             float x, y, z;
             me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, (float)e.action.moveRandom.distance);
-            me->GetMotionMaster()->MovePoint(SMART_RANDOM_POINT, x, y, z);
+            me->GetMotionMaster()->MovePoint(SMART_RANDOM_POINT, x, y, z, true);
             break;
         }
         case SMART_ACTION_SET_VISIBILITY:
@@ -1267,7 +1267,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 return;
             bool run = e.action.setRun.run ? true : false;
             CAST_AI(SmartAI, me->AI())->SetRun(run);
-            me->GetMotionMaster()->MovePoint(0, e.target.x, e.target.y , e.target.z);
+            me->GetMotionMaster()->MovePoint(0, e.target.x, e.target.y, e.target.z, true);
             break;
         }
         case SMART_ACTION_RESPAWN_TARGET:

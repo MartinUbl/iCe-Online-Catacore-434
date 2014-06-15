@@ -304,7 +304,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint32 spellid
                     }
                     break;
                 case COMMAND_MOVETO:                       // Spell Move To, action 4
-                    pet->GetMotionMaster()->MovePoint(0, pos_x, pos_y, pos_z);
+                    pet->GetMotionMaster()->MovePoint(0, pos_x, pos_y, pos_z, true);
                     break;
                 default:
                     sLog->outError("WORLD: unknown PET flag Action %i and spellid %i.", uint32(flag), spellid);

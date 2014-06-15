@@ -6757,7 +6757,7 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
 
     Player* pl = m_session->GetPlayer();
 
-    caster->GetMotionMaster()->MovePoint(0, pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ());
+    caster->GetMotionMaster()->MovePoint(0, pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), true);
     return true;
 }
 

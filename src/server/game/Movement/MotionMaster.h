@@ -170,7 +170,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MoveFleeing(Unit* enemy, uint32 time = 0);
         void MovePoint(uint32 id, const Position &pos)
             { MovePoint(id, pos.m_positionX, pos.m_positionY, pos.m_positionZ); }
-        void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
+        void MovePoint(uint32 id, float x, float y, float z, bool generatePath = false);
 
         void MoveLand(uint32 id, Position const& pos);
         void MoveTakeoff(uint32 id, Position const& pos);

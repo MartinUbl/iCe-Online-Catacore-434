@@ -189,7 +189,7 @@ void FollowerAI::EnterEvadeMode()
         {
             float fPosX, fPosY, fPosZ;
             me->GetPosition(fPosX, fPosY, fPosZ);
-            me->GetMotionMaster()->MovePoint(POINT_COMBAT_START, fPosX, fPosY, fPosZ);
+            me->GetMotionMaster()->MovePoint(POINT_COMBAT_START, fPosX, fPosY, fPosZ, true);
         }
     }
     else

@@ -776,7 +776,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         {
             float x,y,z;
             me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, (float)action.raw.param1);
-            me->GetMotionMaster()->MovePoint(0,x,y,z);
+            me->GetMotionMaster()->MovePoint(0,x,y,z,true);
             break;
         }
         case ACTION_T_SET_STAND_STATE:
