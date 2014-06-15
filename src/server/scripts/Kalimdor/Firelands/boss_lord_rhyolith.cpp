@@ -492,7 +492,7 @@ public:
             me->GetMotionMaster()->MovementExpired(false);
             me->SetWalk(true);
             me->SetSpeed(MOVE_WALK,1.2f,true);
-            me->GetMotionMaster()->MovePoint(0, x, y, z);
+            me->GetMotionMaster()->MovePoint(0, x, y, z, false, false);
             me->SetSpeed(MOVE_WALK,1.2f,true);
         }
 

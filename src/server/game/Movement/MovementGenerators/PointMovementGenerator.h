@@ -30,8 +30,8 @@ template<class T>
 class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
     public:
-        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, float _speed = 0.0f) : id(_id),
-            i_x(_x), i_y(_y), i_z(_z), speed(_speed), i_recalculateSpeed(false), m_generatePath(_generatePath) {}
+        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, float _speed = 0.0f, bool _clearPrevious = true) : id(_id),
+            i_x(_x), i_y(_y), i_z(_z), speed(_speed), i_recalculateSpeed(false), m_generatePath(_generatePath), m_clearPrevious(_clearPrevious) {}
 
         void DoInitialize(T*);
         void DoFinalize(T*);
@@ -54,6 +54,7 @@ class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementG
         float speed;
         bool i_recalculateSpeed;
         bool m_generatePath;
+        bool m_clearPrevious;
         bool m_incompletePath;
 };
 
