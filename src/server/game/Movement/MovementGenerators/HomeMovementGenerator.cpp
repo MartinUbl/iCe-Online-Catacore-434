@@ -53,7 +53,11 @@ void HomeMovementGenerator<Creature>::DoReset(Creature*)
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
 {
     if (owner->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
+    {
+        arrived = false;
+        DoFinalize(owner);
         return;
+    }
 
     Movement::MoveSplineInit init(owner);
     float x, y, z, o;

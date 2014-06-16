@@ -31,6 +31,10 @@ IdleMovementGenerator si_idleMovement;
 // But it should not be sent otherwise there are many redundent packets
 void IdleMovementGenerator::Initialize(Unit* owner)
 {
+    // clear evade flag - this is there i.e. for one-point home movement cases
+    if (owner->hasUnitState(UNIT_STAT_EVADE))
+        owner->clearUnitState(UNIT_STAT_EVADE);
+
     Reset(owner);
 }
 
