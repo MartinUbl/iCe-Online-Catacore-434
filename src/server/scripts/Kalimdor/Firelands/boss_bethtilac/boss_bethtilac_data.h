@@ -30,7 +30,7 @@ namespace Bethtilac
 
 // Encounter data
 
-static const float webZPosition = 111.7f;
+static const float webZPosition = 109.0f;
 //static const float groundZPosition = 74.042f;
 
 enum BethtilacSpawns
