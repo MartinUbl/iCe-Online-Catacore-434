@@ -3851,7 +3851,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(triggered_spell_id);
     if (!spellInfo)
     {
-        sLog->outError("EffectTriggerSpell of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
+        if (triggered_spell_id != 0) // stop spamming console if triggering was turned off by us
+            sLog->outError("EffectTriggerSpell of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
         return;
     }
 
