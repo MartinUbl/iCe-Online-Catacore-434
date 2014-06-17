@@ -650,9 +650,10 @@ void Creature::Update(uint32 diff)
             {
                 if (m_nextPathfindReachTestTimer != 0)
                 {
-                    if (GetMotionMaster()->hasPathfindingState(PATHFIND_STATE_INITIAL) || getMSTimeDiff(m_nextPathfindReachTestTimer, getMSTime()) >= PATHFINDING_NOPATH_EVADE_DELAY)
+                    MotionMaster* mmaster = GetMotionMaster();
+                    if (mmaster->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE && (mmaster->hasPathfindingState(PATHFIND_STATE_INITIAL) || getMSTimeDiff(m_nextPathfindReachTestTimer, getMSTime()) >= PATHFINDING_NOPATH_EVADE_DELAY))
                     {
-                        if (GetMotionMaster()->hasPathfindingState(PATHFIND_STATE_NOPATH))
+                        if (mmaster->hasPathfindingState(PATHFIND_STATE_NOPATH))
                         {
                             /*if (IsAIEnabled)
                                 AI()->EnterEvadeMode();*/

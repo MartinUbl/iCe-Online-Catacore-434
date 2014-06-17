@@ -583,7 +583,7 @@ void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
     if (m->GetMovementGeneratorType() != CHASE_MOTION_TYPE)
         setPathfindingState(PATHFIND_STATE_OK);
     else
-        setPathfindingState(PATHFIND_STATE_NOPATH | PATHFIND_STATE_INITIAL);
+        setPathfindingState(PATHFIND_STATE_OK | PATHFIND_STATE_INITIAL);
 
     if (MovementGenerator *curr = Impl[slot])
     {
