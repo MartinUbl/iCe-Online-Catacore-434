@@ -6129,6 +6129,9 @@ void Player::UpdateRating(CombatRating cr)
             // Balance of Power 
             case 33592:
             case 33596:
+            // Enlightened Judgements
+            case 53556:
+            case 53557:
             {
                 PlayerLevelInfo info;
                 sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), getLevel(), &info);
