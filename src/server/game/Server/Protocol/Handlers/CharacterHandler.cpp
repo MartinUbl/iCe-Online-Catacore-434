@@ -1148,6 +1148,30 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
 
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_REMOVE_PVP_TITLES))
+    {
+        CharTitlesEntry const* tit = sCharTitlesStore.LookupEntry(42);
+        if (tit)
+            pCurrChar->SetTitle(tit, true);
+
+        tit = sCharTitlesStore.LookupEntry(43);
+        if (tit)
+            pCurrChar->SetTitle(tit, true);
+
+        tit = sCharTitlesStore.LookupEntry(44);
+        if (tit)
+            pCurrChar->SetTitle(tit, true);
+
+        tit = sCharTitlesStore.LookupEntry(45);
+        if (tit)
+            pCurrChar->SetTitle(tit, true);
+
+        if (!pCurrChar->HasTitle(pCurrChar->GetUInt32Value(PLAYER_CHOSEN_TITLE)))
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_REMOVE_PVP_TITLES);
+    }
+
     // show time before shutdown if shutdown planned.
     if (sWorld->IsShutdowning())
         sWorld->ShutdownMsg(true,pCurrChar);
