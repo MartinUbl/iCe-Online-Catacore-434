@@ -138,8 +138,6 @@ void LoadDB2Stores(const std::string& dataPath)
     ItemExtendedCostEntry* a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 78;
-    a->RequiredArenaSlot = 1;
-    a->RequiredPersonalArenaRating = 2250;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 165000;
     // insert
@@ -149,8 +147,6 @@ void LoadDB2Stores(const std::string& dataPath)
     a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 79;
-    a->RequiredArenaSlot = 2;
-    a->RequiredPersonalArenaRating = 2000;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
     // insert
@@ -160,8 +156,6 @@ void LoadDB2Stores(const std::string& dataPath)
     a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 80;
-    a->RequiredArenaSlot = 1;
-    a->RequiredPersonalArenaRating = 2050;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
     // insert
@@ -171,8 +165,6 @@ void LoadDB2Stores(const std::string& dataPath)
     a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 81;
-    a->RequiredArenaSlot = 1;
-    a->RequiredPersonalArenaRating = 1850;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 220000;
     // insert
@@ -182,8 +174,6 @@ void LoadDB2Stores(const std::string& dataPath)
     a = new ItemExtendedCostEntry;
     memset(a, 0, sizeof(ItemExtendedCostEntry));
     a->ID = 82;
-    a->RequiredArenaSlot = 1;
-    a->RequiredPersonalArenaRating = 1650;
     a->RequiredCurrency[0] = 390;
     a->RequiredCurrencyCount[0] = 165000;
     // insert
