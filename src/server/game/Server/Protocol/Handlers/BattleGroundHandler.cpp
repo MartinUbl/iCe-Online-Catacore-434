@@ -782,14 +782,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recv_data)
 
     recv_data >> arenaslot;
 
-    /* arena season arena disabler */
-    if (isRated || arenaslot < 10) // this condition is present only to avoid complier complains about unreachable code and so (arenaslot is always lower than 10)
-    {
-        SendNotification("Rated arenas are currently disabled.");
-        recv_data.rfinish();
-        return;
-    }
-
     // ignore if we already in BG or BG queue
     if (_player->InBattleground())
         return;
