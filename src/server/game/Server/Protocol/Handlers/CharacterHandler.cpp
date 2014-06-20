@@ -1170,6 +1170,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
 
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_REMOVE_PVP_TITLES);
+
+        pCurrChar->SaveToDB();
     }
 
     // show time before shutdown if shutdown planned.
