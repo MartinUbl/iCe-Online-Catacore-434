@@ -6014,6 +6014,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_VALID_TARGETS;
     }
 
+    // Dont let players cast beg spell by themselves ( learned via /run PickupSpell(7267) macro)
+    if (m_spellInfo->Id == 7267 && !m_IsTriggeredSpell)
+        return SPELL_FAILED_SPELL_UNAVAILABLE;
+
     if (m_spellInfo->Id == 53271 && m_caster->GetTypeId() == TYPEID_PLAYER) // Master's Call
     {
         Unit* pPet = Unit::GetUnit(*m_caster, m_caster->GetPetGUID());
