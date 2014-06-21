@@ -3062,6 +3062,8 @@ public:
         uint32 burryTimer;
         uint32 emergeTimer;
         uint32 teleTimer;
+        uint32 aliveTimer;
+
         bool inHome;
 
         uint32 type;
@@ -3072,6 +3074,7 @@ public:
             inHome = true;
             me->SetVisible(true);
 
+            aliveTimer = 1000;
             moltenBoltTimer = 8000;
             checkMeleeTimer = 2500;
             burryTimer      = urand(10000,15000);
@@ -3111,7 +3114,20 @@ public:
         void UpdateAI ( const uint32 diff)
         {
             if (!UpdateVictim())
+            {
+                if (aliveTimer <= diff)
+                {
+                    if (me->getDeathState() != ALIVE)
+                    {
+                        me->SetVisible(true);
+                        me->setDeathState(ALIVE);
+                    }
+                    aliveTimer = 1000;
+                }
+                else aliveTimer -= diff;
+
                 return;
+            }
 
             if (moltenBoltTimer <= diff)
             {
