@@ -1006,6 +1006,12 @@ public:
 
             if(instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            std::list<Creature*> orbs;
+            GetCreatureListWithEntryInGrid(orbs, me, FANDRAL_FLAME, 200.0f);
+
+            for (std::list<Creature*>::iterator iter = orbs.begin(); iter != orbs.end(); ++iter)
+                (*iter)->ForcedDespawn();
         }
 
         void JustReachedHome()
