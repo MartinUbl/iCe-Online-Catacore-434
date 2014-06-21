@@ -99,13 +99,13 @@ class DBCStorage
             // Load data from sql
             if (sql)
             {
-                std::string query = "SELECT * FROM " + sql->sqlTableName;
+                std::ostringstream query;
+                query << "SELECT * FROM " << sql->sqlTableName;
                 if (sql->indexPos >= 0)
-                    query +=" ORDER BY " + *sql->indexName + " DESC";
-                query += ";";
+                    query << " ORDER BY " << *sql->indexName << " DESC";
+                query << ";";
 
-
-                result = WorldDatabase.Query(query.c_str());
+                result = WorldDatabase.Query(query.str().c_str());
                 if (result)
                 {
                     sqlRecordCount = uint32(result->GetRowCount());
