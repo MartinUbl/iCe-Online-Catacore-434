@@ -2650,6 +2650,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             Powers power = Powers(GetMiscValue());
 
+            if (target->getPowerType() != power && !(GetSpellProto()->AttributesEx7 & SPELL_ATTR7_CAN_RESTORE_SECONDARY_POWER))
+                return;
+
             if (target->GetMaxPower(power) == 0)
                 return;
 

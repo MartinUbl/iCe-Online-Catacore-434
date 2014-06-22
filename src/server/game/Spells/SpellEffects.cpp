@@ -5378,6 +5378,9 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
 
     Powers power = Powers(m_spellInfo->EffectMiscValue[effIndex]);
 
+    if (unitTarget->getPowerType() != power && !(m_spellInfo->AttributesEx7 & SPELL_ATTR7_CAN_RESTORE_SECONDARY_POWER))
+        return;
+
     // Some level depends spells
     int level_multiplier = 0;
     int level_diff = 0;
@@ -5529,6 +5532,9 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
         return;
 
     Powers power = Powers(m_spellInfo->EffectMiscValue[effIndex]);
+
+    if (unitTarget->getPowerType() != power && !(m_spellInfo->AttributesEx7 & SPELL_ATTR7_CAN_RESTORE_SECONDARY_POWER))
+        return;
 
     uint32 maxPower = unitTarget->GetMaxPower(power);
     if (maxPower == 0)
@@ -7473,7 +7479,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
             // check if we can interrupt spell
             if ((spell->getState() == SPELL_STATE_CASTING
                 || (spell->getState() == SPELL_STATE_PREPARING && spell->GetCastTime() > 0.0f))
-                && ((interruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) || (curSpellInfo->AttributesEx7 & SPELL_ATTR7_CAN_BE_KICKED)) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                && (interruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
             {
                 if (m_originalCaster)
                 {
