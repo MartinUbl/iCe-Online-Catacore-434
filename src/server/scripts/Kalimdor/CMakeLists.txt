@@ -49,6 +49,7 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/DragonSoul/boss_morchok.cpp
   Kalimdor/CavernsOfTime/DragonSoul/dragonsoul.h
   Kalimdor/CavernsOfTime/DragonSoul/boss_ultraxion.cpp
+  Kalimdor/CavernsOfTime/DragonSoul/dragon_soul_trash.cpp
   Kalimdor/CavernsOfTime/DragonSoul/instance_dragonsoul.cpp
   Kalimdor/CavernsOfTime/DragonSoul/boss_warlord_zonozz.cpp
   Kalimdor/CavernsOfTime/EndTime/boss_echo_of_sylvanas.cpp

@@ -604,6 +604,7 @@ void AddSC_boss_echo_of_sylvanas();
 void AddSC_boss_echo_of_tyrande();
 void AddSC_boss_murozond();
 void AddSC_instance_dragonsoul();
+void AddSC_dragon_soul_trash();
 void AddSC_boss_deathwing();
 void AddSC_boss_hagara_the_stormbinder();
 void AddSC_boss_morchok();
@@ -1259,6 +1260,7 @@ void AddCataclysmScripts()
     AddSC_boss_shannox();
 
     AddSC_instance_dragonsoul();
+    AddSC_dragon_soul_trash();
     AddSC_boss_deathwing();
     AddSC_boss_hagara_the_stormbinder();
     AddSC_boss_morchok();
