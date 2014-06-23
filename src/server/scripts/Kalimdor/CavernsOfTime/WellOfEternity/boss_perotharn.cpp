@@ -56,30 +56,6 @@ public:
             me->MonsterYell(text, LANG_UNIVERSAL, 0);
         }
 
-        void RemoveBeamAurasFromPlayers()
-        {
-            Map::PlayerList const& plList = me->GetMap()->GetPlayers();
-
-            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-            {
-                if (Player * p = itr->getSource())
-                {
-                }
-            }
-        }
-
-        void ApplyVortexAuraOnPlayers()
-        {
-            Map::PlayerList const& plList = me->GetMap()->GetPlayers();
-
-            for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
-            {
-                if (Player * p = itr->getSource())
-                {
-                }
-            }
-        }
-
         void DoAction(const int32 action)
         {
         }
@@ -95,9 +71,9 @@ public:
 
         void KilledUnit(Unit* victim)
         {
-            if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+            /*if (victim && victim->GetTypeId() == TYPEID_PLAYER)
             {
-            }
+            }*/
         }
 
         void JustDied()
