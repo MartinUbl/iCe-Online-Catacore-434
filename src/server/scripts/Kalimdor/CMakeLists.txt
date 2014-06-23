@@ -58,6 +58,12 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/EndTime/boss_murozond.cpp
   Kalimdor/CavernsOfTime/EndTime/instance_end_time.cpp
   Kalimdor/CavernsOfTime/EndTime/endtime.h
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_mannoroth.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_perotharn.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_queen_azshara.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity_trash.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/instance_well_of_eternity.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_archbishop_benedictus.cpp
   Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_arcurion.cpp

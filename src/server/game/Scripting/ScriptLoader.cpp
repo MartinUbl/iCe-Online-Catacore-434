@@ -615,6 +615,12 @@ void AddSC_instance_hour_of_twilight();
 void AddSC_boss_archbishop_benedictus();
 void AddSC_boss_asira_dawnslayer();
 void AddSC_boss_arcurion();
+void AddSC_instance_well_of_eternity();
+void AddSC_boss_queen_azshara();
+void AddSC_boss_mannoroth();
+void AddSC_boss_perotharn();
+void AddSC_well_of_eternity_trash();
+
 
 // battlegrounds
 
@@ -1265,6 +1271,12 @@ void AddCataclysmScripts()
     AddSC_boss_archbishop_benedictus();
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_arcurion();
+
+    AddSC_instance_well_of_eternity();
+    AddSC_boss_queen_azshara();
+    AddSC_boss_mannoroth();
+    AddSC_boss_perotharn();
+    AddSC_well_of_eternity_trash();
 
     AddSC_instance_end_time();
     AddSC_boss_echo_of_jaina();
