@@ -165,20 +165,6 @@ public:
     }
 };
 
-//deprecated in cataclysm--improved healthstone talent removed.
-/*uint32 const spell_warl_create_healthstone::spell_warl_create_healthstone_SpellScript::iTypes[8][3] = {
-    { 5512, 19004, 19005},              // Minor Healthstone
-    { 5511, 19006, 19007},              // Lesser Healthstone
-    { 5509, 19008, 19009},              // Healthstone
-    { 5510, 19010, 19011},              // Greater Healthstone
-    { 9421, 19012, 19013},              // Major Healthstone
-    {22103, 22104, 22105},              // Master Healthstone
-    {36889, 36890, 36891},              // Demonic Healthstone
-    {36892, 36893, 36894}               // Fel Healthstone
-};*/
-
-
-/*//27285 Seed of Corruption
 class spell_warl_seed_of_corruption : public SpellScriptLoader
 {
     public:
@@ -196,20 +182,13 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
                 return true;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList)
-            {
-                unitList.remove(GetTargetUnit());
-            }
-
             void HandleExtraEffect(SpellEffIndex effIndex)
             {
                 Unit * caster = GetCaster();
                 Unit * unit = GetHitUnit();
 
-                if (!GetSpellInfo() || !caster || !unit || !caster->HasAura(74434))
+                if (!caster || !unit || !caster->HasAura(86664)) // Soulburn: Seed of Corruption ( talent )
                     return;
-
-                caster->RemoveAura(74434);
 
                 if (GetSpellInfo()->Id == 27285 || GetSpellInfo()->Id == 32865) // Soulburn: Seed of Corruption
                 {
@@ -217,17 +196,14 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
                     if (soulShardGained == false)
                     {
-                        caster->CastSpell(caster,87388,true); // Gain 1 soul shard
                         soulShardGained = true;
+                        caster->CastSpell(caster,87388,true); // Gain 1 soul shard
                     }
                 }
-
-                else return;
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_warl_seed_of_corruption_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
                 OnEffect += SpellEffectFn(spell_warl_seed_of_corruption_SpellScript::HandleExtraEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
@@ -236,7 +212,7 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         {
             return new spell_warl_seed_of_corruption_SpellScript();
         }
-};*/
+};
 
 // 54049 Shadow Bite
 class spell_warl_shadow_bite : public SpellScriptLoader
@@ -333,7 +309,7 @@ void AddSC_warlock_spell_scripts()
 {
     new spell_warl_demonic_empowerment();
     new spell_warl_create_healthstone();
-    //new spell_warl_seed_of_corruption();
+    new spell_warl_seed_of_corruption();
     new spell_warl_shadow_bite();
     new npc_hand_of_guldan();
 }

@@ -1352,22 +1352,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 }
                 break;
             case SPELLFAMILY_WARLOCK:
-                switch(GetId())
+                switch (GetId())
                 {
                     case 48020: // Demonic Circle
                         if (target->GetTypeId() == TYPEID_PLAYER)
-                            if (GameObject* obj = target->GetGameObject(48018))
+                        if (GameObject* obj = target->GetGameObject(48018))
+                        {
+                            // Soulburn: Demonic Circle
+                            if (target->HasAura(74434))
                             {
-                                // Soulburn: Demonic Circle
-                                if (target->HasAura(74434))
-                                {
-                                    target->CastSpell(target, 79438, true);
-                                    caster->RemoveAura(74434);
-                                }
-
-                                target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation(), target->GetMap()->IsBattlegroundOrArena() ? TELE_TO_NOT_LEAVE_COMBAT : 0);
-                                target->ToPlayer()->RemoveMovementImpairingAuras();
+                                target->CastSpell(target, 79438, true);
+                                caster->RemoveAura(74434);
                             }
+
+                            target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(), target->GetMap()->IsBattlegroundOrArena() ? TELE_TO_NOT_LEAVE_COMBAT : 0);
+                            target->ToPlayer()->RemoveMovementImpairingAuras();
+                        }
                         break;
                     case 6358: // Seduction (succubus)
                         // Glyph of Seduction
@@ -1377,7 +1377,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                         }
                         break;
+                    case 27243: // Seed of Corruption
+                    {
+                        if (!caster)
+                            break;
+                        caster->RemoveAura(74434);
+                    }
+                    break;
                     case 1490: // Curse of the Elements
+                    {
                         if (!caster || !caster->ToPlayer())
                             break;
 
@@ -1386,7 +1394,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             caster->CastSpell(caster, 86105, true);
                         else if (caster->HasAura(18179)) // Jinx (Rank 1)
                             caster->CastSpell(caster, 85547, true);
-                        break;
+                    }
+                break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
