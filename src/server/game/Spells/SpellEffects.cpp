@@ -8952,11 +8952,44 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     else
     {
         // Rogue: Redirect
-        if (GetSpellInfo()->Id == 73981 && plr->GetComboPoints() > 0 && plr->GetComboTarget())
+        if (GetSpellInfo()->Id == 73981 && plr->GetComboPoints() > 0)
         {
+            Unit * comboTarget = ObjectAccessor::GetUnit(*plr, plr->GetComboTarget());
+            if (comboTarget == NULL)
+                return;
+
+            Unit::AuraApplicationMap const& auras = comboTarget->GetAppliedAuras();
+            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
+                Aura * aura = itr->second->GetBase();
+                uint32 auraId = aura->GetSpellProto()->Id;
+
+                switch (auraId)
+                {
+                    // Transfers any existing combo points to the current enemy target, as well as any insight gained from Bandit's Guile
+                    case 84745:
+                    case 84746:
+                    case 84747:
+                    {
+                        if (itr->second->GetBase()->GetCasterGUID() == plr->GetGUID())
+                        {
+                            if (Aura* insightCopy = plr->AddAura(auraId, unitTarget))
+                                insightCopy->SetDuration(aura->GetDuration());
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
             uint8 combopoints = plr->GetComboPoints();
             plr->ClearComboPoints();
             plr->AddComboPoints(unitTarget, combopoints, this);
+            // Remove old rogue's insights
+            comboTarget->RemoveAura(84745, plr->GetGUID());
+            comboTarget->RemoveAura(84746, plr->GetGUID());
+            comboTarget->RemoveAura(84747, plr->GetGUID());
         }
     }
 }
