@@ -26,6 +26,8 @@
 #include "Common.h"
 #include <map>
 
+struct CalendarEvent;
+
 struct AuctionEntry;
 class Item;
 class Object;
@@ -41,6 +43,7 @@ enum MailMessageType
     MAIL_CREATURE       = 3,                                // client send CMSG_CREATURE_QUERY on this mailmessagetype
     MAIL_GAMEOBJECT     = 4,                                // client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
     MAIL_ITEM           = 5,                                // client send CMSG_ITEM_QUERY on this mailmessagetype
+    MAIL_CALENDAR       = 6
 };
 
 enum MailCheckMask
@@ -99,6 +102,7 @@ class MailSender
         {
         }
         MailSender(Object* sender, MailStationery stationery = MAIL_STATIONERY_DEFAULT);
+        MailSender(CalendarEvent* sender);
         MailSender(AuctionEntry* sender);
     public:                                                 // Accessors
         MailMessageType GetMailMessageType() const { return m_messageType; }

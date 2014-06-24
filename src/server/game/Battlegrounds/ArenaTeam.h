@@ -217,6 +217,7 @@ class ArenaTeam
         void UpdateMembersConquestPointCap();
 
         void NotifyStatsChanged();
+        void MassInviteToEvent(WorldSession* session);
 
         void FinishWeek();
         void FinishGame(int32 teamRatingMod);
