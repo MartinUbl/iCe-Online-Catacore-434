@@ -429,7 +429,7 @@ public:
 
                             targets.resize(targets.size() < INSTABILITY ? targets.size() : INSTABILITY);
 
-                            for (std::list<Player*>::iterator itr = targets.begin; itr != targets.end(); itr++)
+                            for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
                                 if (*itr && (*itr)->IsInWorld())
                                     me->CastSpell(*itr, 84529, true); // Electric Instability
 
