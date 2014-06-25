@@ -940,30 +940,13 @@ public:
         if (!pPlayer->IsInSameRaidWith(static_cast<Player *>(caster)))
             return true;
 
-        // Repeating this at every use is ugly and inefficient. But as long as we don't have proper
-        // GO scripting with at least On Create and On Update events, the other options are no less
-        // ugly and hacky.
-        uint32 newSpell = 0;
-        if (pGO->GetEntry() == 193169)                                  // Soulwell for rank 2
-        {
-            if (caster->HasAura(18693))      // Improved Healthstone rank 2
-                newSpell = 58898;
-            else if (caster->HasAura(18692)) // Improved Healthstone rank 1
-                newSpell = 58896;
-            else newSpell = 58890;
-        }
-        else if (pGO->GetEntry() == 181621)                             // Soulwell for rank 1
-        {
-            if (caster->HasAura(18693))      // Improved Healthstone rank 2
-                newSpell = 34150;
-            else if (caster->HasAura(18692)) // Improved Healthstone rank 1
-                newSpell = 34149;
-            else newSpell = 34130;
-        }
+        #define ITEM_HEALTHSTONE (5512)
 
-        pGO->AddUse();
-        pPlayer->CastSpell(pPlayer, newSpell, true);
-        return true;
+        if (pPlayer->HasItemCount(ITEM_HEALTHSTONE, 1))
+            return true;
+
+        pPlayer->CastSpell(pPlayer, 34130, true);
+        return false;
     }
 };
 
