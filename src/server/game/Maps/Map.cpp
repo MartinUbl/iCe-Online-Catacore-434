@@ -2822,6 +2822,8 @@ void InstanceMap::PermBindAllPlayers(Player *player, Unit* pUnit)
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
             plr->GetSession()->SendPacket(&data);
+
+            player->GetSession()->SendCalendarRaidLockout(save, true);
         }
 
         sLog->outChar("IP:(%s) account:(%u) character:(%s) action:(%s) entry:(%u) name:(%s) instance:(%s (id:(%u)) %s:(X:(%f) Y:(%f) Z:(%f) map:(%u))",

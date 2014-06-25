@@ -1104,6 +1104,7 @@ void InitOpcodeTable()
     OPCODE( CMSG_CALENDAR_REMOVE_EVENT,                   STATUS_LOGGEDIN, &WorldSession::HandleCalendarRemoveEvent       );
     OPCODE( CMSG_CALENDAR_COPY_EVENT,                     STATUS_LOGGEDIN, &WorldSession::HandleCalendarCopyEvent         );
     OPCODE( CMSG_CALENDAR_EVENT_INVITE,                   STATUS_LOGGEDIN, &WorldSession::HandleCalendarEventInvite       );
+    OPCODE( CMSG_CALENDAR_EVENT_SIGNUP,                   STATUS_LOGGEDIN, &WorldSession::HandleCalendarEventSignup       );
     OPCODE( CMSG_CALENDAR_EVENT_RSVP,                     STATUS_LOGGEDIN, &WorldSession::HandleCalendarEventRsvp         );
     OPCODE( CMSG_CALENDAR_EVENT_REMOVE_INVITE,            STATUS_LOGGEDIN, &WorldSession::HandleCalendarEventRemoveInvite );
     OPCODE( CMSG_CALENDAR_EVENT_STATUS,                   STATUS_LOGGEDIN, &WorldSession::HandleCalendarEventStatus       );
@@ -1112,13 +1113,17 @@ void InitOpcodeTable()
     OPCODE( SMSG_CALENDAR_SEND_EVENT,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_FILTER_GUILD,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_ARENA_TEAM,                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_CALENDAR_CLEAR_PENDING_ACTION,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_INVITE,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_INVITE_REMOVED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_STATUS,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_COMMAND_RESULT,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_RAID_LOCKOUT_ADDED,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_RAID_LOCKOUT_REMOVED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_CALENDAR_RAID_LOCKOUT_UPDATED,           STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_INVITE_ALERT,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_CALENDAR_EVENT_INVITE_NOTES,             STATUS_UNHANDLED,&WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_CALENDAR_EVENT_INVITE_NOTES_ALERT,       STATUS_UNHANDLED,&WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT,     STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT,      STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_EVENT_REMOVED_ALERT,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
@@ -1148,9 +1153,9 @@ void InitOpcodeTable()
     OPCODE( MSG_MOVE_SET_PITCH_RATE,                      STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_FORCE_PITCH_RATE_CHANGE,                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( CMSG_FORCE_PITCH_RATE_CHANGE_ACK,             STATUS_NEVER,    &WorldSession::Handle_NULL                     );
-    OPCODE( SMSG_SPLINE_MOVE_SET_PITCH_RATE,                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
+    OPCODE( SMSG_SPLINE_MOVE_SET_PITCH_RATE,              STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_MOVE_ABANDON_TRANSPORT,                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
-    OPCODE( SMSG_CALENDAR_UPDATE_INVITE_LIST,             STATUS_NEVER,    &WorldSession::Handle_NULL                     );
+    OPCODE( SMSG_CALENDAR_UPDATE_INVITE_LIST,             STATUS_NEVER,    &WorldSession::Handle_ServerSide               );
     OPCODE( SMSG_CALENDAR_UPDATE_INVITE_LIST2,            STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( CMSG_UPDATE_MISSILE_TRAJECTORY,               STATUS_NEVER,    &WorldSession::Handle_NULL                     );
     OPCODE( SMSG_UPDATE_ACCOUNT_DATA_COMPLETE,            STATUS_NEVER,    &WorldSession::Handle_ServerSide               );

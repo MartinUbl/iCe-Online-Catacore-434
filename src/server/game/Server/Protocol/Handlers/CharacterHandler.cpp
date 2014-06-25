@@ -46,6 +46,7 @@
 #include "ScriptMgr.h"
 #include "Battleground.h"
 #include "GuildFinderMgr.h"
+#include "CalendarMgr.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -784,6 +785,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket & recv_data)
             sLog->outCharDump(dump.c_str(),GetAccountId(),GUID_LOPART(guid),name.c_str());
     }
 
+    sCalendarMgr->RemoveAllPlayerEventsAndInvites(guid);
     Player::DeleteFromDB(guid, GetAccountId());
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);

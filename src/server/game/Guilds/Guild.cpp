@@ -2910,8 +2910,11 @@ void Guild::HandleLeaveMember(WorldSession* session)
             // Leader cannot leave if he is not the last member
             SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_LEADER_LEAVE);
         else
+        {
+            sCalendarMgr->RemovePlayerGuildEventsAndSignups(player->GetGUID(), GetId());
             // Guild is disbanded if leader leaves.
             Disband();
+        }
     }
     else
     {
@@ -2923,6 +2926,8 @@ void Guild::HandleLeaveMember(WorldSession* session)
         SendCommandResult(session, GUILD_COMMAND_QUIT, ERR_GUILD_COMMAND_SUCCESS, m_name);
 
         player->SetLeaveGuildData(GetId());
+
+        sCalendarMgr->RemovePlayerGuildEventsAndSignups(player->GetGUID(), GetId());
     }
 }
 
