@@ -82,6 +82,7 @@
 #include "SmartAI.h"
 #include "GuildFinderMgr.h"
 #include "TicketMgr.h"
+#include "CalendarMgr.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1760,6 +1761,9 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
+
+    sLog->outString("Loading Calendar data...");
+    sCalendarMgr->LoadFromDB();
 
     ///- Initialize game time and timers
     sLog->outDebug("DEBUG:: Initialize game time and timers");
