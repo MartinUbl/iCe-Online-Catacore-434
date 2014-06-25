@@ -5913,18 +5913,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     owner->CastSpell(owner,58227,true,castItem,triggeredByAura);
                     return true;
                 }
-                // Divine purpose
-                case 31871:
-                case 31872:
-                {
-                    // Roll chane
-                    if (!pVictim || !pVictim->isAlive() || !roll_chance_i(triggerAmount))
-                        return false;
-
-                    // Remove any stun effect on target
-                    pVictim->RemoveAurasWithMechanic(1<<MECHANIC_STUN, AURA_REMOVE_BY_ENEMY_SPELL);
-                    return true;
-                }
                 case 71519: // Deathbringer's Will Normal
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
