@@ -410,55 +410,30 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////
                         if(Instability_timer<=diff)
                         {
-                            Map* map;
-                            map = me->GetMap();
+                            Map* map = me->GetMap();
                             Map::PlayerList const& plrList = map->GetPlayers();
-                            if (plrList.isEmpty())
-                                return;
-                            uint32 max_players = plrList.getSize();
+                            std::list<Player*> targets;
 
-                            Player** pole;
-                            pole=(Player**)calloc(max_players,sizeof(Player*));
-                            if(!pole) // Allocation failed
-                                return;
-
-                            uint32 iter = 0;
                             for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                             {
-                                if (Player* pPlayer = itr->getSource())
-                                    if(pPlayer && pPlayer->ToPlayer() && pPlayer->isAlive() && pPlayer->IsInWorld())
-                                    {
-                                        pole[iter] = pPlayer; // zapisem si hracov do dynamickeho pola
-                                        iter++;
-                                    }
+                                if (Player* pl = itr->getSource())
+                                if (!pl->HasAura(84948) && // Dont have Gravity Crush aura
+                                    !pl->HasAura(92486) &&
+                                    !pl->HasAura(92487) &&
+                                    !pl->HasAura(92488) &&
+                                    pl->isAlive() && pl->IsInWorld())
+                                    targets.push_back(pl);
                             }
-                            iter--;
 
-                            Player* pom = NULL;
-                            for(uint32 i = 0; i < iter; i++)
-                                for(uint32 j = 0; j < (iter -i - 1);j++)
-                                    if(pole[j] && pole[j+1] && ( me->GetDistance(pole[j]) < me->GetDistance(pole[j+1]) ))
-                                    {
-                                        pom = pole[j];
-                                        pole[j] = pole[j+1];
-                                        pole[j+1] = pom;
-                                    }
+                            targets.sort(Trinity::ObjectDistanceOrderPred(me,false));
 
-                            for(uint32 i = 0;i < INSTABILITY;i++)
-                            {
-                                if(i <= iter)
-                                {
-                                    if (INSTABILITY == 1 && urand(0,1) && ((i + 1) <= iter)) // 50 % chance to cast on second one if INSTABILITY == 1 and second exist
-                                    {
-                                        if(!pole[i +1 ]->HasAura(92486 ) && !pole[i + 1]->HasAura(92488 ) && !pole[i + 1]->HasAura(84948 ) && !pole[i + 1]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
-                                            me->CastSpell(pole[i + 1],84529,true);
-                                    }
-                                    else if(!pole[i]->HasAura(92486 ) && !pole[i]->HasAura(92488 ) && !pole[i]->HasAura(84948 ) && !pole[i]->HasAura(92487 )) // Ludi s gravity crushom vynechavam
-                                        me->CastSpell(pole[i],84529,true);
-                                }
-                            }
-                            Instability_timer=1000;
-                            free((void*)pole); // Dealloction
+                            targets.resize(targets.size() < INSTABILITY ? targets.size() : INSTABILITY);
+
+                            for (std::list<Player*>::iterator itr = targets.begin; itr != targets.end(); itr++)
+                                if (*itr && (*itr)->IsInWorld())
+                                    me->CastSpell(*itr, 84529, true); // Electric Instability
+
+                            Instability_timer = 1000;
                         }
                         else Instability_timer-=diff;
 
