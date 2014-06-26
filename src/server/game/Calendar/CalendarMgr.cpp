@@ -164,10 +164,17 @@ void CalendarMgr::RemoveEvent(uint64 eventId, uint64 remover)
         stmt->setUInt64(0, invite->GetInviteId());
         trans->Append(stmt);
 
-        // guild events only? check invite status here?
+        std::stringstream ss;
+        ss << "Calendar event was removed !\n\n Title of event was : \n\n" << calendarEvent->GetTitle() << "\n\n Event description was :\n\n" << calendarEvent->GetDescription();
+        MailSender sender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT);
+        SQLTransaction mailTrans = CharacterDatabase.BeginTransaction();
+        MailDraft* md = new MailDraft("Calendar information", ss.str().c_str());
+        Player* target = sObjectMgr->GetPlayer(invite->GetInviteeGUID());
         // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
         if (remover && invite->GetInviteeGUID() != remover)
-            mail.SendMailTo(trans, MailReceiver(invite->GetInviteeGUID()), calendarEvent, MAIL_CHECK_MASK_COPIED);
+            md->SendMailTo(trans, MailReceiver(target, GUID_LOPART(invite->GetInviteeGUID())), sender);
+        delete md;
+        CharacterDatabase.CommitTransaction(mailTrans);
 
         delete invite;
     }
