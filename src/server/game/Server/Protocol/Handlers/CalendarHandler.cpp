@@ -355,10 +355,15 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 {
+    // Temporary disable copying of events
+    recvData.rfinish();
+    return;
+    /*
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
     uint32 eventTime;
+
 
     recvData >> eventId >> inviteId;
     recvData.ReadPackedTime(eventTime);
@@ -392,7 +397,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
         // should we change owner when somebody makes a copy of event owned by another person?
     }
     else
-        sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
+        sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);*/
 }
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
