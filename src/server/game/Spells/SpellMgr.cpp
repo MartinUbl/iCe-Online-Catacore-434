@@ -4474,6 +4474,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 101010: // [DND] Target Indicator - Quick Shot (Darkmoon faire island spell)
             spellInfo->DurationIndex = 27; // lenghten duration to 3 seconds from 1.25s, we need it to last longer
             break;
+        case 76155: // Tidal Surge (Ozumat encounter)
+        case 76133:
+            spellInfo->DurationIndex = 5;
+            break;
         case 81281: // Fungal growth
         case 81288:
             spellInfo->EffectRadiusIndex[0] = 14; // 8 yards
