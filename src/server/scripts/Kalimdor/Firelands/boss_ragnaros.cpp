@@ -2769,11 +2769,7 @@ public:
                     {
                         uint32 dist = (uint32) me->GetDistance(victim);
 
-                        Position pos;
-                        pos.m_positionX = MIDDLE_X;
-                        pos.m_positionY = MIDDLE_Y;
-
-                        bool canJump = (pos.GetExactDist2d(MIDDLE_X,MIDDLE_Y) >= 58.0f ) ? false : true;
+                        bool canJump = (me->GetExactDist2d(MIDDLE_X,MIDDLE_Y) >= 58.0f ) ? false : true;
 
                         if (dist <= 10 && canJump)
                             me->JumpTo(8.0f, 5.0f,false);
@@ -2827,7 +2823,7 @@ public:
             if (Unit * vic = me->getVictim())
             {
                 if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE) && !me->HasAura(100907) && !me->HasAura(100567)) // Freeze through transmission
-                    me->GetMotionMaster()->MovePoint(0,vic->GetPositionX(),vic->GetPositionY(),vic->GetPositionZ());
+                    me->GetMotionMaster()->MovePoint(0,vic->GetPositionX(),vic->GetPositionY(),vic->GetPositionZ(),false,false);
             }
 
             if (Chasin_timer <= diff) // Few seconds after spawn Metoer should be passive
