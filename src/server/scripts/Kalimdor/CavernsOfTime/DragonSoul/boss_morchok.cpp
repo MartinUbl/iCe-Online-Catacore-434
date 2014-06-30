@@ -759,7 +759,7 @@ public:
                 caster->ToCreature()->AI()->DoAction(ACTION_SPAWN_FRAGMENT);
 
             // Immediately cast black blood after spawning all fragments
-            if (aurEff->GetTickNumber() == aurEff->GetTotalTicks())
+            if (aurEff->GetTickNumber() == (uint32)aurEff->GetTotalTicks())
                 caster->ToCreature()->AI()->DoAction(ACTION_CAST_BLACK_BLOOD);
         }
 
@@ -805,7 +805,7 @@ public:
             }
 
             // Destroy fragments + black blood after last tick of channeling of Black Blood
-            if (aurEff->GetTickNumber() == aurEff->GetTotalTicks())
+            if (aurEff->GetTickNumber() == (uint32)aurEff->GetTotalTicks())
             {
                 std::list<Creature*> vortexes;
                 caster->GetCreatureListWithEntryInGrid(vortexes, EARTHEN_VORTEX_ENTRY, 500.0f);
