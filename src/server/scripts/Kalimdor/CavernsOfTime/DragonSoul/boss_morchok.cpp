@@ -19,7 +19,7 @@
 #include "ScriptPCH.h"
 #include "dragonsoul.h"
 #include "MapManager.h"
-#include <random>
+//#include <random>
 #include <algorithm>
 
 struct Quotes
