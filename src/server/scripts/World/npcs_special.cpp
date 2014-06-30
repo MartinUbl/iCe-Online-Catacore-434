@@ -2288,8 +2288,18 @@ public:
         npc_training_dummyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
             uiEntry = pCreature->GetEntry();
+
+            int32 xPos = me->GetPositionX();
+            int32 yPos = me->GetPositionY();
+
+            if ( (xPos == 1887 || xPos == 1886) && (yPos == -4631 || yPos == -4630))
+                isFinishingMovesDummy = true;
+            else
+                isFinishingMovesDummy = false;
         }
 
+        bool isFinishingMovesDummy;
+        uint32 setHealthTimer;
         uint32 uiEntry;
         uint32 uiResetTimer;
         uint32 uiDespawnTimer;
@@ -2303,6 +2313,12 @@ public:
 
             uiResetTimer = 5000;
             uiDespawnTimer = 15000;
+
+            if (isFinishingMovesDummy)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop Regenerating HP
+                me->SetHealth(me->CountPctFromMaxHealth(18));
+            }
         }
 
         void EnterEvadeMode()
@@ -2335,6 +2351,17 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+            if (setHealthTimer <= uiDiff)
+            {
+                if (isFinishingMovesDummy)
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop Regenerating HP
+                    me->SetHealth(me->CountPctFromMaxHealth(18));
+                }
+                setHealthTimer = 5000;
+            }
+            else setHealthTimer -= uiDiff;
 
             if (!me->hasUnitState(UNIT_STAT_STUNNED))
                 me->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
