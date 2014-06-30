@@ -127,7 +127,7 @@ void mob_droneAI::EnterCombat(Unit *who)
 
 void mob_droneAI::JustDied(Unit *killer)
 {
-    if (instance)
+    if (instance && (me->GetPositionZ() + 5.0f) < webZPosition) // 5 yard tolerance for sure
         instance->SetData(DATA_DEATH_FROM_ABOVE_ACHIEV, 0); // Failed achiev
 }
 
