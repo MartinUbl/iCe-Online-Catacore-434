@@ -2803,11 +2803,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             //Slam
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_SLAM && m_spellInfo->SpellIconID == 559)
             {
-                int32 bp0 = damage;
-                m_caster->CastCustomSpell(unitTarget, 50783, &bp0, NULL, NULL, true, 0);
+                m_caster->CastSpell(unitTarget,50783,true);
                 // Single-minded fury (warrior): Slam off-hand
                 if (m_caster->HasAura(81099) && m_caster->haveOffhandWeapon())
-                    m_caster->CastCustomSpell(unitTarget, 97992, &bp0, NULL, NULL, true, 0);
+                    m_caster->CastSpell(unitTarget,97992,true);
                 return;
             }
             // Concussion Blow
