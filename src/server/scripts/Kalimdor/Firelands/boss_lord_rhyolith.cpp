@@ -239,12 +239,19 @@ public:
         uint32 rDamage_field[4];
         uint32 directionPower;
 
+        // Debug info for achiev
+        uint64 whispGUID;
+        uint32 debugWhispTimer;
+
         uint32 enrageTimer;
         bool beam;
         bool NotAnAmbiTurnerAchievComplete;
 
         void Reset()
         {
+            whispGUID = 0;
+            debugWhispTimer = 100;
+
             beam = false;
             NotAnAmbiTurnerAchievComplete = true;
 
@@ -307,6 +314,12 @@ public:
             if (pInstance)
                 if(pInstance->GetData(TYPE_RHYOLITH)!=DONE)
                     pInstance->SetData(TYPE_RHYOLITH, NOT_STARTED);
+        }
+
+        void ReceiveEmote(Player* pPlayer, uint32 text_emote) // This is only temporary
+        {
+            if (pPlayer && text_emote == TEXTEMOTE_KNEEL)
+                whispGUID = pPlayer->GetGUID();
         }
 
         void FootDamaged(uint64 guid, uint32 damage)
@@ -455,7 +468,6 @@ public:
 
                 if (NotAnAmbiTurnerAchievComplete)
                     pInstance->DoCompleteAchievement(5810); // Not an Ambi-Turner achiev
-
             }
 
             Unit* foot = Unit::GetUnit(*me, leftFootGUID);
@@ -673,6 +685,14 @@ public:
         {
             if (!UpdateVictim() || !me->getVictim())
                 return;
+
+            if (debugWhispTimer <= diff)
+            {
+                if (whispGUID && NotAnAmbiTurnerAchievComplete == false)
+                    me->MonsterWhisper("My left foot itches like crazy. Achievement FAILED !", whispGUID);
+                debugWhispTimer = 10000;
+            }
+            else debugWhispTimer -= diff;
 
             // displayid switch at 75% and 50%
             if (displayIdPhase < 1 && me->GetHealthPct() < 75.0f)
