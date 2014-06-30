@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "firelands.h"
+#include <map>
 
 enum Spells
 {
@@ -125,8 +126,12 @@ public:
         InstanceScript * instance;
         SummonList Summons;
 
+        std::map<uint64, uint32> tormentMap;
+
         void Reset()
         {
+            tormentMap.clear();
+
             if(instance)
             {
                 instance->SetData(DATA_PAIN_ACHIEV, 1);
@@ -141,6 +146,20 @@ public:
             bladeTimer              = 28000;
             berserkTimer            = 6 * MINUTE;
             meleePhase = true;
+        }
+
+        void AddTormentData(uint64 playerGUID)
+        {
+            std::map<uint64, uint32>::iterator it = tormentMap.find(playerGUID);
+
+            if (it == tormentMap.end())
+                tormentMap.insert(std::pair<uint64, uint32>(playerGUID, 1));
+            else
+                it->second++;
+
+            // Defeat Baleroc in the Firelands without allowing any member of your raid to suffer Torment more than three times.
+            if (instance && it->second > 3)
+                instance->SetData(DATA_PAIN_ACHIEV, 0); // Achiev failed
         }
 
         void JustSummoned(Creature* summon)
@@ -740,6 +759,9 @@ public:
                 }
             }
 
+            if (Unit * pBaleroc = target->FindNearestCreature(53494, 200.0f, true))
+            if (boss_baleroc::boss_balerocAI* pAI = (boss_baleroc::boss_balerocAI*)(pBaleroc->GetAI()))
+                pAI->AddTormentData(target->GetGUID());
         }
 
         void Register()
@@ -853,10 +875,6 @@ class spell_gen_torment : public SpellScriptLoader
                 if(spellId)
                 {
                     uint32 stacks = target->GetAuraCount(spellId);
-
-                    if (stacks >= 4)
-                        if (InstanceScript * pInstance = caster->GetInstanceScript())
-                            pInstance->SetData(DATA_PAIN_ACHIEV, 0); // Achiev failed
 
                     if(stacks)
                         SetHitDamage( (500 + GetHitDamage()) * stacks); // pre nerfed value
