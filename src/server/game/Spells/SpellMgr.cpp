@@ -4428,6 +4428,14 @@ void SpellMgr::LoadSpellCustomAttr()
 
 /*************************  END OF RAGNAROS FIRELANDS *****************************/
 
+/*************************         DRAGON SOUL        *****************************/
+
+        case 104512: // Earthen Vortex ( unwanted summon effect)
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_NONE;
+            break;
+
+/*************************        DRAGON SOUL END        *****************************/
+
         case 88691: //Marked for Death Tracking
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_STALKED;
             count++;

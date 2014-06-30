@@ -3990,6 +3990,17 @@ void Spell::cancel()
     if (m_spellState == SPELL_STATE_FINISHED)
         return;
 
+    // HACK FIX
+    // Channeled spells are interrupted sometimes cause moving ???
+    // TODO: Find reason and fix it !
+    switch (m_spellInfo->Id)
+    {
+        // Morchok spells
+        case 103851:
+        case 103821:
+            return;
+    }
+
     SetReferencedFromCurrent(false);
     if (m_selfContainer && *m_selfContainer == this)
         *m_selfContainer = NULL;

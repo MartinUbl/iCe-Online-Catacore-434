@@ -2358,6 +2358,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else
                         caster->RemoveAurasDueToSpell(63611);
                     break;
+                case 109615: // In Morchok encounter
+                    if (apply)
+                        target->SetStunned(true);
+                    else
+                        target->SetStunned(false);
+                    break;
             }
             break;
         case SPELLFAMILY_ROGUE:
