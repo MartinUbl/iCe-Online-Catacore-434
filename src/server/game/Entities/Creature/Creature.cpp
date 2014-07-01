@@ -714,6 +714,8 @@ void Creature::RegenerateHealth()
         addvalue = uint32(addvalue * ((*i)->GetAmount() + 100) / 100.0f);
 
     addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_REGEN) * CREATURE_REGEN_INTERVAL  / (5 * IN_MILLISECONDS);
+
+    ModifyHealth(addvalue);
 }
 
 void Creature::DoFleeToGetAssistance()
