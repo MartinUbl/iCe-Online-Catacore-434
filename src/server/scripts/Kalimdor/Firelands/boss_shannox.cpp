@@ -1093,6 +1093,7 @@ class npc_crystal_prison : public CreatureScript
 
             void Reset()
             {
+                me->SetRegeneratingHealth(false);
                 selfKillTimer = 1000;
             }
 
