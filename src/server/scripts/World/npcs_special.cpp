@@ -2296,6 +2296,8 @@ public:
                 isFinishingMovesDummy = true;
             else
                 isFinishingMovesDummy = false;
+
+            me->SetRegeneratingHealth(!isFinishingMovesDummy); // Stop health regen
         }
 
         bool isFinishingMovesDummy;
@@ -2315,10 +2317,7 @@ public:
             uiDespawnTimer = 15000;
 
             if (isFinishingMovesDummy)
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop Regenerating HP
                 me->SetHealth(me->CountPctFromMaxHealth(18));
-            }
         }
 
         void EnterEvadeMode()
@@ -2355,10 +2354,8 @@ public:
             if (setHealthTimer <= uiDiff)
             {
                 if (isFinishingMovesDummy)
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); // Stop Regenerating HP
                     me->SetHealth(me->CountPctFromMaxHealth(18));
-                }
+
                 setHealthTimer = 5000;
             }
             else setHealthTimer -= uiDiff;
