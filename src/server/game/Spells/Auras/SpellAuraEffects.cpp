@@ -1840,14 +1840,14 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         if (caster->HasAura(95740))
                         {
                             // chance is slightly increased (+3%), because our pseudorandom number generator is dumb whore
-                            int chance = 10 + 3;
+                            int chance = 10 /*+ 3*/;
 
                             if (caster->HasAura(78228)) // Harnessed Shadows r2
                                 chance += 8;
                             else if (caster->HasAura(33191)) // Harnessed Shadows r1
                                 chance += 4;
 
-                            if (roll_chance_i(chance))
+                            if (chance > rand() % 99)
                             {
                                 caster->CastSpell(caster, 77487, true);
                                 // add marker if 3 stacks applied
