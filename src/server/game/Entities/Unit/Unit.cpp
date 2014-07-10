@@ -9921,16 +9921,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
 
             if (Player * pWarlock = (Player*)GetOwner()) // Get Warlock
-            if (AuraEffect const * aurEff = pWarlock->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1982, EFFECT_2)) // Mana feed talent
             {
-                basepoints0 = aurEff->GetAmount();
+                if (AuraEffect const * aurEff = pWarlock->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1982, EFFECT_2)) // Mana feed talent
+                {
+                    basepoints0 = aurEff->GetAmount();
 
-                #define ENTRY_VOIDWALKER (1860)
-                #define ENTRY_FELGUARD   (17252)
+                    #define ENTRY_VOIDWALKER (1860)
+                    #define ENTRY_FELGUARD   (17252)
 
-                // Now restores more mana (four times as much) when the warlock is using a Felguard or Felhunter.
-                if (ToCreature()->GetEntry() == ENTRY_VOIDWALKER || ToCreature()->GetEntry() == ENTRY_FELGUARD)
-                    basepoints0 *= 4;
+                    // Now restores more mana (four times as much) when the warlock is using a Felguard or Felhunter.
+                    if (ToCreature()->GetEntry() == ENTRY_VOIDWALKER || ToCreature()->GetEntry() == ENTRY_FELGUARD)
+                        basepoints0 *= 4;
+                }
+                else return false;
             }
             else return false;
             break;

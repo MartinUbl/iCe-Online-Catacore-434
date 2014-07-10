@@ -1190,6 +1190,11 @@ class npc_immolation_trap : public CreatureScript
                     || pWho->HasAura(SPELL_WARY) || pWho->HasAura(101215) || pWho->HasAura(101216) || pWho->HasAura(101217))
                     return;
 
+                #define MUSHROOM_ENTRY 47649
+
+                if (pWho->GetEntry() == MUSHROOM_ENTRY)
+                    return;
+
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL || (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE))
                 {
                     passive = true;
