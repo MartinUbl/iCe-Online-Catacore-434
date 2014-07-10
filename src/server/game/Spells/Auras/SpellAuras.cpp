@@ -1365,7 +1365,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                                 caster->RemoveAura(74434);
                             }
 
-                            target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(), target->GetMap()->IsBattlegroundOrArena() ? TELE_TO_NOT_LEAVE_COMBAT : 0);
+                            target->ToPlayer()->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),TELE_TO_NOT_LEAVE_COMBAT);
                             target->ToPlayer()->RemoveMovementImpairingAuras();
                         }
                         break;
