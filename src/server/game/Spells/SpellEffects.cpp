@@ -6304,9 +6304,8 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             heal_amount += (int32(pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) * 0.5f) * 0.3f;
         m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, NULL, NULL, true);
         // Glyph of Felhunter
-        if (Unit * pOwner = m_caster->GetOwner())
-            if (pOwner->GetAura(56249))
-                pOwner->CastCustomSpell(pOwner, 19658, &heal_amount, NULL, NULL, true);
+            if (pOwner && pOwner->HasAura(56249))
+                m_caster->CastCustomSpell(pOwner, 19658, &heal_amount, NULL, NULL, true);
     }
 
     switch(m_spellInfo->Id)
