@@ -444,7 +444,7 @@ enum SpellAttr4
     SPELL_ATTR4_UNK22                            = 0x00400000, // 22
     SPELL_ATTR4_UNK23                            = 0x00800000, // 23
     SPELL_ATTR4_UNK24                            = 0x01000000, // 24
-    SPELL_ATTR4_UNK25                            = 0x02000000, // 25 pet scaling auras
+    SPELL_ATTR4_IS_PET_SCALING                   = 0x02000000, // 25 pet scaling auras
     SPELL_ATTR4_CAST_ONLY_IN_OUTLAND             = 0x04000000, // 26 Can only be used in Outland.
     SPELL_ATTR4_UNK27                            = 0x08000000, // 27
     SPELL_ATTR4_UNK28                            = 0x10000000, // 28
