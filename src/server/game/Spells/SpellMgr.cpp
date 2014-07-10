@@ -4151,6 +4151,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectSpellClassMask[0].Set(0x06200000,0x00001106,0xB610020F);
             count++;
             break;
+        case 51180: // Gift of the Earthmother (rank 2) -> bad spell effect data (rank 1,3 are fine)
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            break;
         case 85421: // Burning Ember ( warlock )
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
