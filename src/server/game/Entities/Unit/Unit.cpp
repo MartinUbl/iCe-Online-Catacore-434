@@ -2193,6 +2193,9 @@ void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &he
         // Need remove it later
         if ((*i)->GetAmount() <= 0)
             existExpired = true;
+
+        if ((*i)->GetBase() && existExpired == false)
+            (*i)->GetBase()->SetNeedClientUpdateForTargets();
     }
 
     // Remove all expired absorb auras
