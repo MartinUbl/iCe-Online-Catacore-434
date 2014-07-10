@@ -1835,6 +1835,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (caster && caster->HasAura(90459))
                         caster->CastSpell(caster, 90507, true);
                 }
+                else if (GetId() == 49203) // Hungering Cold
+                {
+                    if (caster && target)
+                        caster->AddAura(55095, target); // Enemies should be also afflicted by Forst Fever
+                }
                 break;
         }
 
