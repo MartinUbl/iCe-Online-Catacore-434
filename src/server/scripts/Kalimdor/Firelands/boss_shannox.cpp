@@ -977,7 +977,9 @@ class npc_crystal_trap : public CreatureScript
                     || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
                     return;
 
-                if ( pWho->isPet() || pWho->isGuardian())
+                #define MUSHROOM_ENTRY 47649
+
+                if (pWho->isPet() || pWho->isGuardian() || pWho->GetEntry() == MUSHROOM_ENTRY)
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
