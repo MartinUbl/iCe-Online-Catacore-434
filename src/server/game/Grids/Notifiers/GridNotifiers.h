@@ -928,7 +928,7 @@ namespace Trinity
             float i_range;
     };
 
-    // do attack at call of help to friendly crearture
+    // do attack at call of help to friendly creature
     class CallOfHelpCreatureInRangeDo
     {
         public:
