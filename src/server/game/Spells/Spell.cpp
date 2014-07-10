@@ -3660,7 +3660,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         break;
                 }
                 // Death Pact
-                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     Unit * unit_to_add = NULL;
                     Unit * target_unit = NULL;
@@ -3670,9 +3670,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                             && (*itr)->GetOwnerGUID() == m_caster->GetGUID()
                             && (*itr)->ToCreature()->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD)
                         {
-                            // Prefer targeted minion
-                            if (m_caster->getVictim() && m_caster->getVictim()->IsInWorld() && m_caster->getVictim() == (*itr))
-                                target_unit = (*itr);
+                            // // Prefer targeted minion
+                            if (Unit * selectedUnit = m_caster->ToPlayer()->GetSelectedUnit())
+                                if (selectedUnit->GetGUID() == (*itr)->GetGUID())
+                                    target_unit = (*itr);
 
                             unit_to_add = (*itr);
                             break;
