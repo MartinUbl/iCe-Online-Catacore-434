@@ -18,7 +18,9 @@
 #include "ScriptPCH.h"
 #include "well_of_eternity.h"
 
-# define NEVER  (0xffffffff)
+#define NEVER  (0xffffffff)
+
+#define GO_FIREWALL (207679)
 
 const Position leftEndPositions[2] =
 {
