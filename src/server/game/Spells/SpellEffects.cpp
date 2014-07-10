@@ -1436,7 +1436,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
-                else if (m_spellInfo->Id == 79136)
+                else if (m_spellInfo->Id == 79136) // Venomous Wound
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         damage += 0.176f*((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -6298,7 +6298,10 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     // Devour Magic
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Category == SPELLCATEGORY_DEVOUR_MAGIC)
     {
-        int32 heal_amount = SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 1);
+        int32 heal_amount = SpellMgr::CalculateSpellEffectAmount(m_spellInfo, EFFECT_0);
+        Unit * pOwner = m_caster->GetOwner();
+        if (pOwner)
+            heal_amount += (int32(pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) * 0.5f) * 0.3f;
         m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, NULL, NULL, true);
         // Glyph of Felhunter
         if (Unit * pOwner = m_caster->GetOwner())
