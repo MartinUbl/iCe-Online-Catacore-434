@@ -2574,20 +2574,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         GetBase()->SetDuration(0);
                     }
             }
-            // Drain Mana
-            if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK
-                && m_spellProto->SpellFamilyFlags[0] & 0x00000010)
-            {
-                int32 manaFeedVal = 0;
-                if (AuraEffect const * aurEff = GetBase()->GetEffect(1))
-                    manaFeedVal = aurEff->GetAmount();
-                // Mana Feed - Drain Mana
-                if (manaFeedVal > 0)
-                {
-                    manaFeedVal = manaFeedVal * gain_amount / 100;
-                    caster->CastCustomSpell(caster, 32554, &manaFeedVal, NULL, NULL, true, NULL, this);
-                }
-            }
             break;
         }
         case SPELL_AURA_OBS_MOD_POWER:
