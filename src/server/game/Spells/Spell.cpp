@@ -5950,8 +5950,15 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
-    if(m_spellInfo->Id == 98619) // Wings of Flame ( Hacky way probably )
-        return SPELL_CAST_OK;
+    // HACK
+    // Allow some generic spell to be cast without additional checks
+    switch (m_spellInfo->Id)
+    {
+        case 98619: // Wings of Flame 
+            return SPELL_CAST_OK;
+        case 110231: // ShadowCloak
+            return (m_caster->isInCombat()) ? SPELL_FAILED_AFFECTING_COMBAT : SPELL_CAST_OK;
+    }
 
     // Combat ressurections per encounter are limited since Cataclysm
     if (InstanceScript * pInstance = m_caster->GetInstanceScript())

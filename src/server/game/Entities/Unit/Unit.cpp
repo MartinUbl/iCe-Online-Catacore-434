@@ -5611,6 +5611,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     triggered_spell_id = 26654;
                     break;
                 }
+                case 108124 : // Fel Decay (Perotharn encounter)
+                {
+                    // Proc only from heals
+                    if((procFlag & PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS) || (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS))
+                    {
+                        if (Unit * caster = triggeredByAura->GetCaster())
+                        {
+                            int32 bp0 = (damage / 2) + 1; // Deal half damage from heal to healer
+                            caster->CastCustomSpell(caster, 108128, &bp0, 0, 0, true); // Fel Surge
+                        }
+                    }
+                    break;
+                }
                 // Unstable Power
                 case 24658:
                 {
