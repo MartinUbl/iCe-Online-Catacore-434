@@ -304,20 +304,12 @@ public:
             if (!roll_chance_i(absorbChance))
                 return;
 
-            target->CastSpell(target, SPELL_CAUTERIZE_DAMAGE, true);
+            int32 bp0 = 12, bp1 = target->CountPctFromMaxHealth(40);
+
+            target->CastCustomSpell(target,SPELL_CAUTERIZE_DAMAGE,&bp0,&bp1,0,true);
             target->ToPlayer()->AddSpellCooldown(SPELL_CAUTERIZE_DAMAGE, 0, 60000);
 
-            uint32 health40 = target->CountPctFromMaxHealth(40);
-
-            // hp > 40% - absorb hp till 40%
-            if (target->GetHealth() > health40)
-                absorbAmount = dmgInfo.GetDamage() - target->GetHealth() + health40;
-            // hp lower than 40% - absorb everything
-            else
-            {
-                absorbAmount = dmgInfo.GetDamage();
-                target->SetHealth(health40);
-            }
+            absorbAmount = dmgInfo.GetDamage();
         }
 
         void Register()
