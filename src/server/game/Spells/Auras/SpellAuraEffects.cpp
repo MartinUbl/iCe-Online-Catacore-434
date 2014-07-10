@@ -984,6 +984,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                     case 79061: // Mark of the Wild - raid-wide
                     case 79062: // Blessing of Kings
                     case 79063: // Blessing of Kings - raid-wide
+                    case 90363: // Embrace of the Shale Spider
                         amount = resist / 2;
                         break;
                     case 19891: // Resistance Aura
