@@ -9915,6 +9915,26 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
+        case 91702: // Mana Feed (Tamed Pet Passive 07 (DND))
+        {
+            if (!(procEx & PROC_EX_CRITICAL_HIT) || GetTypeId() != TYPEID_UNIT) // Proc only from pet critical basic attacks
+                return false;
+
+            if (Player * pWarlock = (Player*)GetOwner()) // Get Warlock
+            if (AuraEffect const * aurEff = pWarlock->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1982, EFFECT_2)) // Mana feed talent
+            {
+                basepoints0 = aurEff->GetAmount();
+
+                #define ENTRY_VOIDWALKER (1860)
+                #define ENTRY_FELGUARD   (17252)
+
+                // Now restores more mana (four times as much) when the warlock is using a Felguard or Felhunter.
+                if (ToCreature()->GetEntry() == ENTRY_VOIDWALKER || ToCreature()->GetEntry() == ENTRY_FELGUARD)
+                    basepoints0 *= 4;
+            }
+            else return false;
+            break;
+        }
         // Sudden Doom
         case 49018:
         case 49529:
