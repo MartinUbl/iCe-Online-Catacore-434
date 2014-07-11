@@ -419,6 +419,17 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
                 pPlayer->RemoveAurasDueToSpell(spell);
 }
 
+// Add Aura on all players in instance
+void InstanceScript::DoAddAuraOnPlayers(Unit * source, uint32 auraId)
+{
+    Map::PlayerList const &PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+        if (Player* pPlayer = i->getSource())
+            source->AddAura(auraId, pPlayer);
+}
+
 // Set scripted power to all players in instance
 void InstanceScript::DoSetScriptedPowerToPlayers(int32 amount)
 {
