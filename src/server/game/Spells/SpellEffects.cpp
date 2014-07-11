@@ -4507,8 +4507,20 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
         }
 
+        // Devour magic (Warlock pet heal ability)
+        if (m_spellInfo->Id == 19658) 
+        {
+            if (Unit * pOwner = m_caster->GetOwner())
+            {
+                if (pOwner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    addhealth += (int32(pOwner->ToPlayer()->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) * 0.5f) * 0.3f;
+                    addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
+                }
+            }
+        }
         // Word of Glory (paladin holy talent)
-        if (m_spellInfo->Id == 85673)
+        else if (m_spellInfo->Id == 85673)
         {
             //multiply by amount of holy power
             int32 holypower = caster->GetPower(POWER_HOLY_POWER);
@@ -6298,14 +6310,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     // Devour Magic
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Category == SPELLCATEGORY_DEVOUR_MAGIC)
     {
-        int32 heal_amount = SpellMgr::CalculateSpellEffectAmount(m_spellInfo, EFFECT_0);
         Unit * pOwner = m_caster->GetOwner();
-        if (pOwner)
-            heal_amount += (int32(pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) * 0.5f) * 0.3f;
-        m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, NULL, NULL, true);
+        m_caster->CastSpell(m_caster, 19658,true);
         // Glyph of Felhunter
             if (pOwner && pOwner->HasAura(56249))
-                m_caster->CastCustomSpell(pOwner, 19658, &heal_amount, NULL, NULL, true);
+                m_caster->CastSpell(pOwner, 19658,true);
     }
 
     switch(m_spellInfo->Id)
