@@ -212,46 +212,6 @@ public:
     }
 };
 
-// 50524 Runic Power Feed (keeping Gargoyle alive)
-class spell_dk_runic_power_feed : public SpellScriptLoader
-{
-public:
-    spell_dk_runic_power_feed() : SpellScriptLoader("spell_dk_runic_power_feed") { }
-
-    class spell_dk_runic_power_feed_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_dk_runic_power_feed_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
-        {
-            if (!sSpellStore.LookupEntry(DK_SPELL_SUMMON_GARGOYLE))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                // No power, dismiss Gargoyle
-                if (caster->GetPower(POWER_RUNIC_POWER) < 30)
-                    caster->RemoveAurasDueToSpell(DK_SPELL_SUMMON_GARGOYLE, caster->GetGUID());
-                else
-                    caster->ModifyPower(POWER_RUNIC_POWER, -30);
-            }
-        }
-
-        void Register()
-        {
-            OnEffect += SpellEffectFn(spell_dk_runic_power_feed_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_dk_runic_power_feed_SpellScript();
-    }
-};
-
 // 55090 Scourge Strike (55265, 55270, 55271)
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
@@ -332,6 +292,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_anti_magic_shell_raid();
     new spell_dk_anti_magic_shell_self();
     new spell_dk_anti_magic_zone();
-    new spell_dk_runic_power_feed();
     new spell_dk_scourge_strike();
 }
