@@ -8901,12 +8901,12 @@ void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* 
     if (procFlags & PROC_FLAG_DONE_PERIODIC) // If triggered by dot
     {
         // Cast Wrath of Tarecgosa spell ( arcane damage )
-        if (roll_chance_f(7.5f))
+        if (roll_chance_f(8.0f))
             CastCustomSpell(101085, SPELLVALUE_BASE_POINT0, damage, pVictim, true);
     }
     else     // Direct negative spell
     {
-        if (roll_chance_f(6.5f)) // Not sure, can't find proof of proc chance after 4.3 nerf
+        if (roll_chance_f(7.0f)) // Not sure, can't find proof of proc chance after 4.3 nerf
         {
             if (!ToPlayer()->HasSpellCooldown(101056)) 
             {
@@ -8914,7 +8914,16 @@ void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* 
                 // Proc chance should be derived from single cast of spell not from units hits
                 ToPlayer()->AddSpellCooldown(101056, 0, 1000);
 
-                CastSpell(pVictim, procSpell->Id, true); // Cast copy of that spell
+                // Special condition for Improved Devouring plague
+                if (procSpell->Id == 63675)
+                if (Aura * aPlague = pVictim->GetAura(2944))
+                if (AuraEffect const * aurEff = this->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0))
+                {
+                    int32 basepoints0 = aurEff->GetAmount() * aPlague->GetEffect(0)->GetTotalTicks() * this->SpellDamageBonus(pVictim, aPlague->GetSpellProto(), 0, aPlague->GetEffect(0)->GetAmount(), DOT) / 100;
+                    CastCustomSpell(pVictim, 63675, &basepoints0, NULL, NULL, true, NULL, aPlague->GetEffect(0));
+                }
+                else
+                    CastSpell(pVictim, procSpell->Id, true); // Cast copy of that spell
             }
             else
                 return;
