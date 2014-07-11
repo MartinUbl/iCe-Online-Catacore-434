@@ -12283,6 +12283,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         DoneTotalMod = 1.0f;
     }
 
+    if (spellProto->AttributesEx4 & SPELL_ATTR4_FIXED_DAMAGE)
+    {
+        TakenTotal = 0;
+        TakenTotalMod = 1.0f;
+    }
+
     float tmpDamage = (int32(pdamage) + DoneTotal) * DoneTotalMod;
 
     // apply spellmod to Done damage (flat and pct)
