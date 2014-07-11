@@ -8915,9 +8915,10 @@ void Unit::HandleProcTriggerSpellCopy(Unit *pVictim, uint32 damage, AuraEffect* 
                 ToPlayer()->AddSpellCooldown(101056, 0, 1000);
 
                 // Special condition for Improved Devouring plague
-                if (procSpell->Id == 63675)
-                if (Aura * aPlague = pVictim->GetAura(2944))
-                if (AuraEffect const * aurEff = this->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0))
+                Aura * aPlague = pVictim->GetAura(2944);
+                AuraEffect const * aurEff = this->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0);
+
+                if (procSpell->Id == 63675 && aPlague && aurEff && aPlague->GetEffect(0))
                 {
                     int32 basepoints0 = aurEff->GetAmount() * aPlague->GetEffect(0)->GetTotalTicks() * this->SpellDamageBonus(pVictim, aPlague->GetSpellProto(), 0, aPlague->GetEffect(0)->GetAmount(), DOT) / 100;
                     CastCustomSpell(pVictim, 63675, &basepoints0, NULL, NULL, true, NULL, aPlague->GetEffect(0));
