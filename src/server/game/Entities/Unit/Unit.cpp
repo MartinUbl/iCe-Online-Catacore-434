@@ -9920,17 +9920,21 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (!(procEx & PROC_EX_CRITICAL_HIT) || GetTypeId() != TYPEID_UNIT) // Proc only from pet critical basic attacks
                 return false;
 
+             // Felstorm + Pursuit + Whiplash are not basic attack spells
+            if (procSpell->Id == 89753 || procSpell->Id == 30153 || procSpell->Id == 6360)
+                return false;
+
             if (Player * pWarlock = (Player*)GetOwner()) // Get Warlock
             {
                 if (AuraEffect const * aurEff = pWarlock->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1982, EFFECT_2)) // Mana feed talent
                 {
                     basepoints0 = aurEff->GetAmount();
 
-                    #define ENTRY_VOIDWALKER (1860)
+                    #define ENTRY_FELHUNTER (417)
                     #define ENTRY_FELGUARD   (17252)
 
                     // Now restores more mana (four times as much) when the warlock is using a Felguard or Felhunter.
-                    if (ToCreature()->GetEntry() == ENTRY_VOIDWALKER || ToCreature()->GetEntry() == ENTRY_FELGUARD)
+                    if (ToCreature()->GetEntry() == ENTRY_FELHUNTER || ToCreature()->GetEntry() == ENTRY_FELGUARD)
                         basepoints0 *= 4;
                 }
                 else return false;
