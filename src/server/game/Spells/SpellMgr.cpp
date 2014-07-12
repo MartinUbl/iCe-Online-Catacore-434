@@ -3417,8 +3417,7 @@ bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2, bool sameCast
 
     if (!sameCaster)
     {
-        if (spellInfo_1->AttributesEx & SPELL_ATTR1_STACK_FOR_DIFF_CASTERS
-            || spellInfo_1->AttributesEx3 & SPELL_ATTR3_STACK_FOR_DIFF_CASTERS)
+        if (spellInfo_1->AttributesEx3 & SPELL_ATTR3_STACK_FOR_DIFF_CASTERS)
             return true;
 
         // check same periodic auras
@@ -4755,7 +4754,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 93120: // Ravenous Creeper:
         case 93121: // Toxic Spores
         case 93122: // 4 difficulty entries
-            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
         case 85483: // Conclave of Wind:
@@ -5550,7 +5549,7 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 83487: // Chains (Halfus Wyrmbreaker)
-            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             count++;
             break;
         case 77758: // Thrash
@@ -5576,7 +5575,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 87655: // Purple beam
         case 35371: // White beam
-            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
         break;
         case 90045: // Indomitable
         case 92946:
@@ -5607,7 +5606,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 99223: // Sticky Webbing ( triggered)
             spellInfo->DurationIndex = 66;  // 2.5s
-            spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
         case 99506: // The Widow's Kiss

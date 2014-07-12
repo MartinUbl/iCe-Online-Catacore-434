@@ -320,12 +320,12 @@ enum SpellAttr1
     SPELL_ATTR1_CHANNELED_2                      = 0x00000040, //  6 channeled self
     SPELL_ATTR1_CANT_BE_REFLECTED                = 0x00000080, //  7
     SPELL_ATTR1_NOT_IN_COMBAT_TARGET             = 0x00000100, //  8 Spell req target not to be in combat state
-    SPELL_ATTR1_UNK9                             = 0x00000200, //  9 melee spells
+    SPELL_ATTR1_MELEE_COMBAT_START               = 0x00000200, //  9 player starts melee combat after this spell is cast
     SPELL_ATTR1_NO_THREAT                        = 0x00000400, // 10 no generates threat on cast 100% (old NO_INITIAL_AGGRO)
     SPELL_ATTR1_UNK11                            = 0x00000800, // 11 aura
-    SPELL_ATTR1_UNK12                            = 0x00001000, // 12
-    SPELL_ATTR1_USE_RADIUS_AS_MAX_DISTANCE       = 0x00002000, // 13
-    SPELL_ATTR1_STACK_FOR_DIFF_CASTERS           = 0x00004000, // 14
+    SPELL_ATTR1_IS_PICKPOCKET                    = 0x00001000, // 12 Pickpocket
+    SPELL_ATTR1_FARSIGHT                         = 0x00002000, // 13 Client removes farsight on aura loss
+    SPELL_ATTR1_CHANNEL_TRACK_TARGET             = 0x00004000, // 14 Client automatically forces unit to face target when channeling
     SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY         = 0x00008000, // 15 remove auras on immunity
     SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE      = 0x00010000, // 16 on immuniy
     SPELL_ATTR1_UNAUTOCASTABLE_BY_PET            = 0x00020000, // 17
@@ -335,12 +335,12 @@ enum SpellAttr1
     SPELL_ATTR1_UNK21                            = 0x00200000, // 21
     SPELL_ATTR1_REQ_COMBO_POINTS2                = 0x00400000, // 22 Req combo points on target
     SPELL_ATTR1_UNK23                            = 0x00800000, // 23
-    SPELL_ATTR1_UNK24                            = 0x01000000, // 24 Req fishing pole??
+    SPELL_ATTR1_IS_FISHING                       = 0x01000000, // 24 only fishing spells
     SPELL_ATTR1_UNK25                            = 0x02000000, // 25
     SPELL_ATTR1_UNK26                            = 0x04000000, // 26 works correctly with [target=focus] and [target=mouseover] macros?
     SPELL_ATTR1_UNK27                            = 0x08000000, // 27
     SPELL_ATTR1_IGNORE_IMMUNITY                  = 0x10000000, // 28 removed from Chains of Ice 3.3.0
-    SPELL_ATTR1_UNK29                            = 0x20000000, // 29
+    SPELL_ATTR1_CHANNEL_DISPLAY_SPELL_NAME       = 0x20000000, // 29 spell name is displayed in cast bar instead of 'channeling' text
     SPELL_ATTR1_ENABLE_AT_DODGE                  = 0x40000000, // 30 Overpower, Wolverine Bite
     SPELL_ATTR1_UNK31                            = 0x80000000  // 31
 };
