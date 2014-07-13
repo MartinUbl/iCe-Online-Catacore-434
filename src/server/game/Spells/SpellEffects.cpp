@@ -3818,13 +3818,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             {
                 // remove all harmful spells on you...
                 SpellEntry const* spell = iter->second->GetBase()->GetSpellProto();
-
-                if (spell->SchoolMask & SPELL_SCHOOL_MASK_MAGIC // only magic spells
-                    // ignore positive and passive auras
-                    && !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
-                {
-                    m_caster->RemoveAura(iter);
-                }
+                    if (((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && spell->SchoolMask != SPELL_SCHOOL_MASK_NORMAL) // only affect magic spells
+                        || (GetDispellMask(DispelType(spell->GetDispel())) & DISPEL_ALL_MASK)) &&
+                        // ignore positive an passive auras
+                        !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
+                    {
+                        m_caster->RemoveAura(iter);
+                    }
                 else
                     ++iter;
             }
