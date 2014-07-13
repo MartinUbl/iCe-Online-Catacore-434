@@ -1141,7 +1141,7 @@ class SpellMgr
             return NULL;
         }
 
-        bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
+        bool IsSpellProcEventCanTriggeredBy(SpellEntry const* spellProto, SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const;
 
         SpellEnchantProcEntry const* GetSpellEnchantProcEvent(uint32 enchId) const
         {
