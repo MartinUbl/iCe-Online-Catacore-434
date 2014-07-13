@@ -351,7 +351,7 @@ enum SpellAttr2
     SPELL_ATTR2_UNK1                             = 0x00000002, //  1 ? many triggered spells have this flag
     SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS            = 0x00000004, //  2
     SPELL_ATTR2_UNK3                             = 0x00000008, //  3
-    SPELL_ATTR2_ALWAYS_APPLY_MODIFIERS           = 0x00000010, //  4 ? spell modifiers are applied dynamically (even if aura is not passive)
+    SPELL_ATTR2_DISPLAY_IN_STANCE_BAR            = 0x00000010, //  4 client displays icon in stance bar when learned, even if not shapeshift
     SPELL_ATTR2_AUTOREPEAT_FLAG                  = 0x00000020, //  5
     SPELL_ATTR2_UNK6                             = 0x00000040, //  6
     SPELL_ATTR2_UNK7                             = 0x00000080, //  7
