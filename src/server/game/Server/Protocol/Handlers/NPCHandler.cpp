@@ -63,9 +63,7 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     SendTabardVendorActivate(guid);
 }
@@ -92,9 +90,7 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     SendShowBank(guid);
 }
@@ -132,9 +128,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     // trainer list loaded at check;
     if (!unit->isCanTrainingOf(_player,true))
@@ -210,9 +204,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     if (!unit->isCanTrainingOf(_player,true)) {
         SendTrainerBuyFailed(guid, spellId, 0);
@@ -293,9 +285,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     }
 
     GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
-    // remove fake death
-    //if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-    //    GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    // GetPlayer()->RemoveFakeDeath();
 
     if (unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider())
     {
@@ -351,9 +341,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     if (!code.empty())
     {
@@ -382,9 +370,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     SendSpiritResurrect();
 }
@@ -437,9 +423,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     SendBindPoint(unit);
 }
@@ -483,9 +467,7 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket & recv_data)
     if (!CheckStableMaster(npcGUID))
         return;
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     // remove mounts this fix bug where getting pet from stable while mounted deletes pet.
     if (GetPlayer()->IsMounted())
@@ -594,9 +576,7 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     Pet* pet = _player->GetPet();
 
@@ -676,9 +656,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     // reputation discount
     float discountMod = _player->GetReputationPriceDiscount(unit);

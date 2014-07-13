@@ -748,9 +748,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     Item *pItem = _player->GetItemByGuid(itemguid);
     if (pItem)
@@ -866,9 +864,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     Item *pItem = _player->GetItemFromBuyBackSlot(slot);
     if (pItem)
@@ -1021,9 +1017,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+    GetPlayer()->RemoveFakeDeath();
 
     // Stop the npc if moving
     if (pCreature->hasUnitState(UNIT_STAT_MOVING))

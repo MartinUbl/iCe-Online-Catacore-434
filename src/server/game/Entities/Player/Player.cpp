@@ -21487,6 +21487,12 @@ void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string
     *data << (uint8)GetChatTag();
 }
 
+void Player::RemoveFakeDeath()
+{
+    if (hasUnitState(UNIT_STAT_DIED))
+        RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+}
+
 void Player::Say(const std::string& text, const uint32 language)
 {
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_SAY, language, text);

@@ -563,9 +563,7 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
 
     if (GetPlayer()->GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_TABARDDESIGNER))
     {
-        // Remove fake death
-        if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-            GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveFakeDeath();
 
         if (Guild* pGuild = _GetPlayerGuild(this))
             pGuild->HandleSetEmblem(this, emblemInfo);
