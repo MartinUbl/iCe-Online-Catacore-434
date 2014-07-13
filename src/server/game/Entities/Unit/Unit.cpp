@@ -6222,20 +6222,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 counter->SetAmount(25);
                 return true;
             }
-            // Burnout
-            if (dummySpell->SpellIconID == 2998)
-            {
-                if (!procSpell)
-                    return false;
-
-                int32 cost = procSpell->manaCost + procSpell->ManaCostPercentage * GetCreateMana() / 100;
-                basepoints0 = cost * triggerAmount/100;
-                if (basepoints0 <= 0)
-                    return false;
-                triggered_spell_id = 44450;
-                target = this;
-                break;
-            }
             // Incanter's Regalia set (add trigger chance to Mana Shield)
             if (dummySpell->SpellFamilyFlags[0] & 0x8000)
             {
@@ -6372,14 +6358,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 target = this;
                 break;
             }
-           /* // Damage Shield
-            if (dummySpell->SpellIconID == 3214)
-            {
-                triggered_spell_id = 59653;
-                // % of amount blocked
-                basepoints0 = GetShieldBlockValue() * triggerAmount / 100;
-                break;
-            }*/
             // Glyph of Sunder Armor
             if (dummySpell->Id == 58387)
             {
