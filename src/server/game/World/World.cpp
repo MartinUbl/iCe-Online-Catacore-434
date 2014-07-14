@@ -1360,6 +1360,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Caching data stores into parsed structures...");
     sObjectMgr->CacheDBCData();
 
+    sLog->outString("Loading taxi data...");
+    sObjectMgr->LoadTaxiData();
+
     sLog->outString("Loading GameObject models...");
     LoadGameObjectModelList();
 
