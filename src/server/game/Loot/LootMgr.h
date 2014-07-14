@@ -152,6 +152,9 @@ struct LootItem
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const * player) const;
 
+    //Check for player in allowed players
+    bool AllowedForPlayerGuids(Player const * player) const;
+
     void AddAllowedLooter(Player const* player);
     AllowedLooterSet* GetAllowedLooters() { return &allowedGUIDs; }
 };

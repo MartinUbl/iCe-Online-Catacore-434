@@ -410,6 +410,18 @@ bool LootItem::AllowedForPlayer(Player const * player) const
             return false;
     }
 
+    if(!AllowedForPlayerGuids(player))
+        return false;
+
+    return true;
+}
+
+bool LootItem::AllowedForPlayerGuids(const Player *player) const
+{
+    if(allowedGUIDs.size() != 0 && (allowedGUIDs.find(player->GetGUIDLow()) == allowedGUIDs.end()))//Player not in list of allowed looters
+    {
+        return false;
+    }  
     return true;
 }
 
@@ -465,10 +477,18 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
 
+    Group * pGroup = lootOwner->GetGroup();
+
     tab->Process(*this, store.IsRatesAllowed(), lootMode);          // Processing is done there, callback via Loot::AddItem()
+    for(unsigned int i=0; i<items.size(); i++)
+    {
+        for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())    //fill only with players on the same map
+            if (Player* pl = itr->getSource())   
+                if(pl->GetMap() == GetMap())
+                    items[i].AddAllowedLooter(pl);
+    }
 
     // Setting access rights for group loot case
-    Group * pGroup = lootOwner->GetGroup();
     if (!personal && pGroup)
     {
         roundRobinPlayer = lootOwner->GetGUID();
