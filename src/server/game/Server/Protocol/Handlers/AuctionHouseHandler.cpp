@@ -318,7 +318,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     if (it == NULL)
         it = items[0]->CloneItem(1, pl);
     it->SetCount(totalCount);
-    //it->SetState(ITEM_CHANGED);
+    it->SetState(ITEM_CHANGED, pl);
+    it->RemoveFromUpdateQueueOf(pl);
 
     uint32 auction_time = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
 
