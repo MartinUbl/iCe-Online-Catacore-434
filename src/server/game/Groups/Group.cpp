@@ -881,6 +881,22 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
         if (!looter->IsInWorld())
             continue;
 
+        bool canLoot = true;
+        Creature* crea = pLootedObject->ToCreature();
+        if(crea)
+        {
+            for(unsigned int i=0; i<crea->loot.items.size(); i++)
+            {
+                if(!crea->loot.items[i].AllowedForPlayerGuids(looter))
+                {
+                    canLoot = false;
+                    break;
+                }
+            }          
+        }
+        if(!canLoot)
+            continue;
+
         if (looter->IsWithinDistInMap(pLootedObject,sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
         {
             data << uint64(looter->GetGUID());
