@@ -6990,24 +6990,8 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_WARRIOR:
         {
-            // Devastate (player ones)
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
-            {
-                // Player can apply only 58567 Sunder Armor effect.
-                bool needCast = !unitTarget->HasAura(58567);
-                if (needCast)
-                    m_caster->CastSpell(unitTarget, 58567, true);
-
-                if (Aura * aur = unitTarget->GetAura(58567))
-                {
-                    // 58388 - Glyph of Devastate dummy aura.
-                    if (int32 num = (needCast ? 0 : 1) + (m_caster->HasAura(58388) ? 1 : 0))
-                        aur->ModStackAmount(num);
-                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
-                }
-            }
             // Mortal Strike
-            else if (m_spellInfo->Id == 12294)
+            if (m_spellInfo->Id == 12294)
             {
                 // talent Lambs to the Slaughter
                 if (m_caster->HasAura(84583) || m_caster->HasAura(84587) || m_caster->HasAura(84588))
