@@ -483,7 +483,7 @@ enum SpellAttr5
     SPELL_ATTR5_UNK25                            = 0x02000000, // 25
     SPELL_ATTR5_UNK26                            = 0x04000000, // 26
     SPELL_ATTR5_UNK27                            = 0x08000000, // 27
-    SPELL_ATTR5_UNK28                            = 0x10000000, // 28
+    SPELL_ATTR7_CONSOLIDATED_RAID_BUFF           = 0x10000000, // 28 May be collapsed in raid buff frame (clientside attribute)
     SPELL_ATTR5_UNK29                            = 0x20000000, // 29
     SPELL_ATTR5_UNK30                            = 0x40000000, // 30
     SPELL_ATTR5_UNK31                            = 0x80000000  // 31 Forces all nearby enemies to focus attacks caster
