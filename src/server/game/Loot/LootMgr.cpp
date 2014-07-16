@@ -480,12 +480,15 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     Group * pGroup = lootOwner->GetGroup();
 
     tab->Process(*this, store.IsRatesAllowed(), lootMode);          // Processing is done there, callback via Loot::AddItem()
-    for(unsigned int i=0; i<items.size(); i++)
+    if(pGroup)
     {
-        for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())    //fill only with players on the same map
-            if (Player* pl = itr->getSource())   
-                if(pl->GetMap() == GetMap())
-                    items[i].AddAllowedLooter(pl);
+        for(unsigned int i=0; i<items.size(); i++)
+        {
+            for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())    //fill only with players on the same map
+                if (Player* pl = itr->getSource())   
+                    if(pl->GetMap() == GetMap())
+                        items[i].AddAllowedLooter(pl);
+        }
     }
 
     // Setting access rights for group loot case
