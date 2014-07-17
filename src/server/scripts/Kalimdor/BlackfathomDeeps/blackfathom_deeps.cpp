@@ -118,7 +118,7 @@ public:
             {
                 if (Player* pPlayer = i->getSource())
                 {
-                    if (pPlayer->isGameMaster())
+                    if (pPlayer->IsGameMaster())
                         continue;
 
                     if (pPlayer->IsAlive())

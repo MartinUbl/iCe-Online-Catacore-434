@@ -285,13 +285,13 @@ void Spell::EffectResurrectNew(SpellEffIndex effIndex)
 
     Player* pTarget = unitTarget->ToPlayer();
 
-    if (pTarget->isRessurectRequested())       // already have one active request
+    if (pTarget->IsRessurectRequested())       // already have one active request
         return;
 
     uint32 health = damage;
     uint32 mana = m_spellInfo->EffectMiscValue[effIndex];
     ExecuteLogEffectResurrect(effIndex, pTarget);
-    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->SetResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
@@ -2468,7 +2468,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 68996:                                 // Two forms (worgen transformation spell)
                 {
                     if(m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->IsInCombat())
-                        m_caster->ToPlayer()->toggleWorgenForm(!m_caster->ToPlayer()->isInWorgenForm(), true);
+                        m_caster->ToPlayer()->toggleWorgenForm(!m_caster->ToPlayer()->IsInWorgenForm(), true);
                     return;
                 }
                 case 53808:                                 // Pygmy Oil
@@ -4188,7 +4188,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             {
                 if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->isDead())
                 {
-                    if (unitTarget->ToPlayer()->isRessurectRequested())       // already have one active request
+                    if (unitTarget->ToPlayer()->IsRessurectRequested())       // already have one active request
                         return;
 
                     // Increase ressurection data after using soulstone
@@ -4200,7 +4200,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
 
                     ExecuteLogEffectResurrect(effIndex, unitTarget);
 
-                    unitTarget->ToPlayer()->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), unitTarget->GetMaxHealth()*0.3f, unitTarget->GetMaxPower(POWER_MANA)*0.3f);
+                    unitTarget->ToPlayer()->SetResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), unitTarget->GetMaxHealth()*0.3f, unitTarget->GetMaxPower(POWER_MANA)*0.3f);
                     SendResurrectRequest(unitTarget->ToPlayer());
 
                     m_spellAura->Remove();
@@ -4315,7 +4315,7 @@ void Spell::EffectUnlearnSpecialization(SpellEffIndex effIndex)
     Player *_player = (Player*)unitTarget;
     uint32 spellToUnlearn = m_spellInfo->EffectTriggerSpell[effIndex];
 
-    _player->removeSpell(spellToUnlearn);
+    _player->RemoveSpell(spellToUnlearn);
 
     sLog->outDebug("Spell: Player %u has unlearned spell %u from NpcGUID: %u", _player->GetGUIDLow(), spellToUnlearn, m_caster->GetGUIDLow());
 }
@@ -5572,7 +5572,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
     if (gameObjTarget)
     {
         // Players shouldn't be able to loot gameobjects that are currently despawned
-        if (!gameObjTarget->isSpawned() && !player->isGameMaster())
+        if (!gameObjTarget->isSpawned() && !player->IsGameMaster())
         {
             sLog->outError("Possible hacking attempt: Player %s [guid: %u] tried to loot a gameobject [entry: %u id: %u] which is on respawn time without being in GM mode!",
                             player->GetName(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
@@ -6152,7 +6152,7 @@ void Spell::EffectLearnSpell(SpellEffIndex effIndex)
     Player *player = (Player*)unitTarget;
 
     uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->EffectTriggerSpell[effIndex];
-    player->learnSpell(spellToLearn, false);
+    player->LearnSpell(spellToLearn, false);
 
     sLog->outDebug("Spell: Player %u has learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow());
 }
@@ -6887,7 +6887,7 @@ void Spell::EffectLearnPetSpell(SpellEffIndex effIndex)
     if (!learn_spellproto)
         return;
 
-    pet->learnSpell(learn_spellproto->Id);
+    pet->LearnSpell(learn_spellproto->Id);
 
     pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
     _player->PetSpellInitialize();
@@ -8340,7 +8340,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     // learn random explicit discovery recipe (if any)
                     if (uint32 discoveredSpell = GetExplicitDiscoverySpell(m_spellInfo->Id, (Player*)m_caster))
-                        m_caster->ToPlayer()->learnSpell(discoveredSpell, false);
+                        m_caster->ToPlayer()->LearnSpell(discoveredSpell, false);
                     return;
                 }
                 case 62428: // Load into Catapult
@@ -9235,7 +9235,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
 
             player->SetGlyph(m_glyphIndex, glyph);
             player->SendTalentsInfoData(false);
-            player->learnSpell(gp->SpellId, true);
+            player->LearnSpell(gp->SpellId, true);
         }
     }
     else
@@ -9642,7 +9642,7 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
 
     Player* pTarget = unitTarget->ToPlayer();
 
-    if (pTarget->isRessurectRequested())       // already have one active request
+    if (pTarget->IsRessurectRequested())       // already have one active request
         return;
 
     uint32 percentMod = 0;
@@ -9658,7 +9658,7 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
 
     ExecuteLogEffectResurrect(effIndex, pTarget);
 
-    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->SetResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 

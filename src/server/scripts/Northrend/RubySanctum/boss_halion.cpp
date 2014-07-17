@@ -195,7 +195,7 @@ public:
 
             if (!pWho || pWho->GetTypeId() != TYPEID_PLAYER) return;
 		
-            if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->ToPlayer()->isGameMaster()) return;
+            if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->ToPlayer()->IsGameMaster()) return;
 
             if (!intro && pWho->IsWithinDistInMap(me, 80.0f))
                 {
@@ -874,7 +874,7 @@ public:
                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                    {
                        if (!i->getSource()->IsInMap(me)) continue;
-                       if (i->getSource()->isGameMaster()) continue;
+                       if (i->getSource()->IsGameMaster()) continue;
                        if (i->getSource()->IsAlive()  && i->getSource()->IsWithinDistInMap(me, range))
                            return true;
                    }

@@ -1003,7 +1003,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                 /// Learn perks to him
                 for(int i = 1; i < pGuild->GetLevel(); ++i)
                     if(const GuildPerksEntry* perk = sGuildPerksStore.LookupEntry(i))
-                        pCurrChar->learnSpell(perk->SpellId, true);
+                        pCurrChar->LearnSpell(perk->SpellId, true);
             }
 
             pGuild->UpdateMemberStats(pCurrChar);
@@ -1114,7 +1114,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     pCurrChar->GetSession()->SendStablePet(0);
 
     // Set FFA PvP for non GM in non-rest mode
-    if (sWorld->IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING))
+    if (sWorld->IsFFAPvPRealm() && !pCurrChar->IsGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING))
         pCurrChar->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
     if (pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
@@ -1123,14 +1123,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     // Apply at_login requests
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
     {
-        pCurrChar->resetSpells();
+        pCurrChar->ResetSpells();
         SendNotification(LANG_RESET_SPELLS);
     }
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_LEARN_DEFAULT))
     {
-        pCurrChar->learnDefaultSpells();
-        pCurrChar->learnQuestRewardedSpells();
+        pCurrChar->LearnDefaultSpells();
+        pCurrChar->LearnQuestRewardedSpells();
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_LEARN_DEFAULT);
     }
 
@@ -1142,7 +1142,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
     {
-        pCurrChar->resetTalents(true);
+        pCurrChar->ResetTalents(true);
         pCurrChar->SendTalentsInfoData(false);              // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset state
         SendNotification(LANG_RESET_TALENTS);
     }
@@ -1183,7 +1183,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if (pCurrChar)
         pCurrChar->SetTaxiCheater(true);
 
-    if (pCurrChar->isGameMaster())
+    if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
 
     if (pCurrChar->getRace() == RACE_WORGEN /* is Worgen (:P) */

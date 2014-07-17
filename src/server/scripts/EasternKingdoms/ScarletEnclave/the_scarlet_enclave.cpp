@@ -85,7 +85,7 @@ public:
                         FlyBackTimer = 4500;
                         break;
                     case 2:
-                        if (!plr->isRessurectRequested())
+                        if (!plr->IsRessurectRequested())
                         {
                             me->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOMSPELL01);
                             DoCast(plr, SPELL_REVIVE, true);

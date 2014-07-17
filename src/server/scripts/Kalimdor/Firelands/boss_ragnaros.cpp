@@ -523,7 +523,7 @@ public:
 
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) // This is only for testing purpose ( for GMs only )
         {
-            if (pPlayer && pPlayer->isGameMaster() && text_emote == TEXTEMOTE_LAUGH)
+            if (pPlayer && pPlayer->IsGameMaster() && text_emote == TEXTEMOTE_LAUGH)
             {
                 me->setFaction(14);
                 me->SetVisible(true);
@@ -533,7 +533,7 @@ public:
                     unit->SetVisible(true);
             }
 
-            if (pPlayer && pPlayer->isGameMaster() && text_emote == TEXTEMOTE_KNEEL)
+            if (pPlayer && pPlayer->IsGameMaster() && text_emote == TEXTEMOTE_KNEEL)
             {
                 me->setFaction(35);
                 me->SetVisible(false);
@@ -546,7 +546,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who->ToPlayer() && !who->ToPlayer()->isGameMaster() && speech == false && me->getFaction() == 14)
+            if (who->ToPlayer() && !who->ToPlayer()->IsGameMaster() && speech == false && me->getFaction() == 14)
             {
                 speech = true;
                 PlayAndYell(intro.sound,intro.text);
@@ -825,7 +825,7 @@ public:
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    if (pPlayer->IsAlive() && !pPlayer->isGameMaster())
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
                     {
                         if (ignoreTanks == true)
                         {
@@ -1094,7 +1094,7 @@ public:
             // Copy players to second list
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 if(Player* pl = itr->getSource())
-                    if (pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster())
+                    if (pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
                         players.push_back(itr->getSource());
 
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
@@ -1103,7 +1103,7 @@ public:
                 {
                     counter = 0;
 
-                    if (p->IsInWorld() && p->IsAlive() && !p->isGameMaster())
+                    if (p->IsInWorld() && p->IsAlive() && !p->IsGameMaster())
                     {
                         // Measure distance for player to every player
                         for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
@@ -1492,7 +1492,7 @@ public:
                     {
                         if(Player* pPlayer = itr->getSource())
                         {
-                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 250.0f)
+                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->GetDistance(me) < 250.0f)
                             {
                                 if (playerCounter == 20) // Max 20 seed on 25 man
                                     break;

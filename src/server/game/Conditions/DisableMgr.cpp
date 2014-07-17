@@ -255,7 +255,7 @@ bool DisableMgr::IsDisabledFor(DisableType type, uint32 entry, Unit const* pUnit
             if (!pUnit)
                 return true;
             if (Player const* pPlayer = pUnit->ToPlayer())
-                if (pPlayer->isGameMaster())
+                if (pPlayer->IsGameMaster())
                     return false;
             return true;
         case DISABLE_TYPE_BATTLEGROUND:

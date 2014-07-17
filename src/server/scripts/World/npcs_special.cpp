@@ -3398,49 +3398,49 @@ public:
         switch(pQuest->GetQuestId())
         {
         case 314222:
-            pPlayer->learnSpell(75298, false);
+            pPlayer->LearnSpell(75298, false);
             break;
         case 314223:
-            pPlayer->learnSpell(75288, false);
+            pPlayer->LearnSpell(75288, false);
             break;
         case 314224:
-            pPlayer->learnSpell(75300, false);
+            pPlayer->LearnSpell(75300, false);
             break;
         case 314225:
-            pPlayer->learnSpell(75299, false);
+            pPlayer->LearnSpell(75299, false);
             break;
         case 314226:
-            pPlayer->learnSpell(75306, false);
+            pPlayer->LearnSpell(75306, false);
             break;
         case 314227:
-            pPlayer->learnSpell(75307, false);
+            pPlayer->LearnSpell(75307, false);
             break;
         case 314228:
-            pPlayer->learnSpell(75305, false);
+            pPlayer->LearnSpell(75305, false);
             break;
         case 314229:
-            pPlayer->learnSpell(75304, false);
+            pPlayer->LearnSpell(75304, false);
             break;
         case 314230:
-            pPlayer->learnSpell(75302, false);
+            pPlayer->LearnSpell(75302, false);
             break;
         case 314231:
-            pPlayer->learnSpell(75303, false);
+            pPlayer->LearnSpell(75303, false);
             break;
         case 314232:
-            pPlayer->learnSpell(75301, false);
+            pPlayer->LearnSpell(75301, false);
             break;
         case 314233:
-            pPlayer->learnSpell(75289, false);
+            pPlayer->LearnSpell(75289, false);
             break;
         case 314234:
-            pPlayer->learnSpell(75308, false);
+            pPlayer->LearnSpell(75308, false);
             break;
         case 314235:
-            pPlayer->learnSpell(75309, false);
+            pPlayer->LearnSpell(75309, false);
             break;
         case 314236:
-            pPlayer->learnSpell(75310, false);
+            pPlayer->LearnSpell(75310, false);
             break;
         default: break;
         }
@@ -3699,12 +3699,12 @@ public:
         {
             if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
             {
-                pPlayer->removeSpell(668);
+                pPlayer->RemoveSpell(668);
                 //pPlayer->GetSession()->KickPlayer();
             }
             else
             {
-                pPlayer->removeSpell(669);
+                pPlayer->RemoveSpell(669);
                 //pPlayer->GetSession()->KickPlayer();
             }
             //return true;
@@ -3713,12 +3713,12 @@ public:
         {
             if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
             {
-                pPlayer->learnSpell(668, false);
+                pPlayer->LearnSpell(668, false);
                 //pPlayer->GetSession()->KickPlayer();
             }
             else
             {
-                pPlayer->learnSpell(669, false);
+                pPlayer->LearnSpell(669, false);
                 //pPlayer->GetSession()->KickPlayer();
             }
             //return true;

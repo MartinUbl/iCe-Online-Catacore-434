@@ -241,7 +241,7 @@ class boss_blood_council_controller : public CreatureScript
                     {
                         if (Player* player = i->getSource())
                         {
-                            if (player->isGameMaster())
+                            if (player->IsGameMaster())
                                 continue;
 
                             if (player->IsAlive())

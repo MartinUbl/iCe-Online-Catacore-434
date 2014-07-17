@@ -136,7 +136,7 @@ void HostileReference::updateOnlineStatus()
     // target is no player or not gamemaster
     // target is not in flight
     if (isValid() &&
-        ((getTarget()->GetTypeId() != TYPEID_PLAYER || !((Player*)getTarget())->isGameMaster()) ||
+        ((getTarget()->GetTypeId() != TYPEID_PLAYER || !((Player*)getTarget())->IsGameMaster()) ||
         !getTarget()->HasUnitState(UNIT_STATE_IN_FLIGHT)))
     {
       Creature* creature = getSourceUnit()->ToCreature();
@@ -372,7 +372,7 @@ void ThreatManager::addThreat(Unit* pVictim, float fThreat, SpellSchoolMask scho
         return;
 
     // not to GM
-    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->isGameMaster()))
+    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->IsGameMaster()))
         return;
 
     // not to dead and not for dead
@@ -419,7 +419,7 @@ void ThreatManager::_addThreat(Unit *pVictim, float fThreat)
         HostileReference* hostilReference = new HostileReference(pVictim, this, 0);
         iThreatContainer.addReference(hostilReference);
         hostilReference->addThreat(fThreat);                // now we add the real threat
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->isGameMaster())
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->IsGameMaster())
             hostilReference->setOnlineOfflineState(false);  // GM is always offline
     }
 }

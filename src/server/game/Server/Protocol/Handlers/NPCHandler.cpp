@@ -252,7 +252,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recv_data)
         if (trainer_spell->IsCastable())
             _player->CastSpell(_player,trainer_spell->spell,true);
         else
-            _player->learnSpell(spellId, false);
+            _player->LearnSpell(spellId, false);
     }
 
     WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);

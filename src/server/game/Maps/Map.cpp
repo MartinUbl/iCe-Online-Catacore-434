@@ -2286,7 +2286,7 @@ uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        if (!itr->getSource()->isGameMaster())
+        if (!itr->getSource()->IsGameMaster())
             ++count;
     return count;
 }
@@ -2433,7 +2433,7 @@ bool InstanceMap::CanEnter(Player *player)
     }
 
     // allow GM's to enter
-    if (player->isGameMaster())
+    if (player->IsGameMaster())
         return Map::CanEnter(player);
 
     // cannot enter if the instance is full (player cap), GMs don't count
@@ -2447,7 +2447,7 @@ bool InstanceMap::CanEnter(Player *player)
 
     // cannot enter while an encounter is in progress on raids
     /*Group *pGroup = player->GetGroup();
-    if (!player->isGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
+    if (!player->IsGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
     if ( player->GetSession()->GetSecurity() == SEC_PLAYER && IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress()) 
     {
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
@@ -2463,7 +2463,7 @@ bool InstanceMap::CanEnter(Player *player)
         for (PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
             if (Player *iPlayer = i->getSource())
             {
-                if (iPlayer->isGameMaster()) // bypass GMs
+                if (iPlayer->IsGameMaster()) // bypass GMs
                     continue;
                 if (!player->GetGroup()) // player has not group and there is someone inside, deny entry
                 {
@@ -2660,7 +2660,7 @@ void InstanceMap::Update(const uint32& t_diff)
                 for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                 {
                     // and somebody doesnt have combat
-                    if (itr->getSource() && !itr->getSource()->IsInCombat() && !itr->getSource()->isGameMaster())
+                    if (itr->getSource() && !itr->getSource()->IsInCombat() && !itr->getSource()->IsGameMaster())
                     {
                         // we will make (at least) one for him :)
                         for (HostileRefManager::iterator iter = threatList->begin(); iter != threatList->end(); ++iter)

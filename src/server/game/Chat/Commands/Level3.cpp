@@ -1522,7 +1522,7 @@ bool ChatHandler::HandleUnLearnCommand(const char *args)
         spell_id = sSpellMgr->GetFirstSpellInChain (spell_id);
 
     if (target->HasSpell(spell_id))
-        target->removeSpell(spell_id,false,!allRanks);
+        target->RemoveSpell(spell_id,false,!allRanks);
     else
         SendSysMessage(LANG_FORGET_SPELL);
 
@@ -2198,7 +2198,7 @@ bool ChatHandler::HandleLearnAllCommand(const char* /*args*/)
             continue;
         }
 
-        m_session->GetPlayer()->learnSpell(spell, false);
+        m_session->GetPlayer()->LearnSpell(spell, false);
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_MANY_SPELLS);
@@ -2238,7 +2238,7 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* /*args*/)
             continue;
         }
 
-        m_session->GetPlayer()->learnSpell(spell, false);
+        m_session->GetPlayer()->LearnSpell(spell, false);
     }
 
     SendSysMessage(LANG_LEARNING_GM_SKILLS);
@@ -2286,7 +2286,7 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* /*args*/)
         if (!SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
 
-        m_session->GetPlayer()->learnSpell(i, false);
+        m_session->GetPlayer()->LearnSpell(i, false);
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_CLASS_SPELLS);
@@ -2422,7 +2422,7 @@ bool ChatHandler::HandleLearnAllLangCommand(const char* /*args*/)
 {
     // skipping UNIVERSAL language (0)
     for (uint8 i = 1; i < LANGUAGES_COUNT; ++i)
-        m_session->GetPlayer()->learnSpell(lang_description[i].spell_id, false);
+        m_session->GetPlayer()->LearnSpell(lang_description[i].spell_id, false);
 
     SendSysMessage(LANG_COMMAND_LEARN_ALL_LANG);
     return true;
@@ -2434,8 +2434,8 @@ bool ChatHandler::HandleLearnAllDefaultCommand(const char *args)
     if (!extractPlayerTarget((char*)args,&target))
         return false;
 
-    target->learnDefaultSpells();
-    target->learnQuestRewardedSpells();
+    target->LearnDefaultSpells();
+    target->LearnQuestRewardedSpells();
 
     PSendSysMessage(LANG_COMMAND_LEARN_ALL_DEFAULT_AND_QUEST,GetNameLink(target).c_str());
     return true;
@@ -2481,7 +2481,7 @@ bool ChatHandler::HandleLearnCommand(const char *args)
     if (allRanks)
         targetPlayer->learnSpellHighRank(spell);
     else
-        targetPlayer->learnSpell(spell, false);
+        targetPlayer->LearnSpell(spell, false);
 
     uint32 first_spell = sSpellMgr->GetFirstSpellInChain(spell);
     if (GetTalentSpellCost(first_spell))
@@ -5090,7 +5090,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
 
     if (target)
     {
-        target->resetSpells(/* bool myClassOnly */);
+        target->ResetSpells(/* bool myClassOnly */);
 
         ChatHandler(target).SendSysMessage(LANG_RESET_SPELLS);
         if (!m_session || m_session->GetPlayer() != target)
@@ -5119,7 +5119,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
             Unit *owner = creature->GetOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet *)creature)->IsPermanentPetFor(owner->ToPlayer()))
             {
-                ((Pet *)creature)->resetTalents(true);
+                ((Pet *)creature)->ResetTalents(true);
                 owner->ToPlayer()->SendTalentsInfoData(true);
 
                 ChatHandler(owner->ToPlayer()).SendSysMessage(LANG_RESET_PET_TALENTS);
@@ -5136,7 +5136,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
 
     if (target)
     {
-        target->resetTalents(true);
+        target->ResetTalents(true);
         target->SendTalentsInfoData(false);
         ChatHandler(target).SendSysMessage(LANG_RESET_TALENTS);
         if (!m_session || m_session->GetPlayer() != target)

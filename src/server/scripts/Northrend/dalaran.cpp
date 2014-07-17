@@ -71,7 +71,7 @@ public:
 
             Player *pPlayer = pWho->GetCharmerOrOwnerPlayerOrPlayerItself();
 
-            if (!pPlayer || pPlayer->isGameMaster() || pPlayer->IsBeingTeleported())
+            if (!pPlayer || pPlayer->IsGameMaster() || pPlayer->IsBeingTeleported())
                 return;
 
             switch (me->GetEntry())

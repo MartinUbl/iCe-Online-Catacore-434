@@ -152,7 +152,7 @@ public:
 
         void OnPlayerEnter(Player* plr)
         {
-            if (!plr || plr->isGameMaster())
+            if (!plr || plr->IsGameMaster())
                 return;
             if (m_auiEncounter[TYPE_CONCLAVE] != DONE &&
                 m_auiEncounter[TYPE_CONCLAVE] != NOT_STARTED)
@@ -556,7 +556,7 @@ public:
             {
                 if (Player* pPlayer = i->getSource())
                 {
-                    if (pPlayer->isGameMaster())
+                    if (pPlayer->IsGameMaster())
                         continue;
 
                     // add threat to all players in the instance

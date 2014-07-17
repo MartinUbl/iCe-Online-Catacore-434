@@ -1047,7 +1047,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
                 continue;
 
             uint32 leftInStock = !vendorItem->maxcount ? 0xFFFFFFFF : pCreature->GetVendorItemCurrentCount(vendorItem);
-            if (!_player->isGameMaster()) // ignore conditions if GM on
+            if (!_player->IsGameMaster()) // ignore conditions if GM on
             {
                 // Respect allowed class
                 if (!(itemTemplate->AllowableClass & _player->getClassMask()) && itemTemplate->Bonding == BIND_WHEN_PICKED_UP)

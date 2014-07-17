@@ -451,7 +451,7 @@ public:
             // Copy players to secons list
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 if(Player* pl = itr->getSource())
-                    if (pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster())
+                    if (pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster())
                         players.push_back(itr->getSource());
 
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
@@ -460,7 +460,7 @@ public:
                 {
                     counter = 0;
 
-                    if (p->IsInWorld() && p->IsAlive() && !p->isGameMaster())
+                    if (p->IsInWorld() && p->IsAlive() && !p->IsGameMaster())
                     {
                         // Measure distance for player to every player
                         for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
@@ -535,7 +535,7 @@ public:
                 {
                     if ( Player * p = itr->getSource())
                     {
-                        if (p->IsAlive() && !p->isGameMaster() && p->IsInWorld())
+                        if (p->IsAlive() && !p->IsGameMaster() && p->IsInWorld())
                         {
                             uint32 power = p->GetPower(POWER_SCRIPTED);
 

@@ -724,7 +724,7 @@ bool ChatHandler::HandleGMCommand(const char* args)
 {
     if (!*args)
     {
-        if (m_session->GetPlayer()->isGameMaster())
+        if (m_session->GetPlayer()->IsGameMaster())
             m_session->SendNotification(LANG_GM_ON);
         else
             m_session->SendNotification(LANG_GM_OFF);
@@ -998,7 +998,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
         if (pMap->IsBattlegroundOrArena())
         {
             // only allow if gm mode is on
-            if (!_player->isGameMaster())
+            if (!_player->IsGameMaster())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_GM,nameLink.c_str());
                 SetSentErrorMessage(true);
@@ -1106,7 +1106,7 @@ bool ChatHandler::HandleAppearCommand(const char* args)
         if (cMap->IsBattlegroundOrArena())
         {
             // only allow if gm mode is on
-            if (!_player->isGameMaster())
+            if (!_player->IsGameMaster())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_GM,chrNameLink.c_str());
                 SetSentErrorMessage(true);
@@ -1141,7 +1141,7 @@ bool ChatHandler::HandleAppearCommand(const char* args)
             else
             {
                 // we are not in group, let's verify our GM mode
-                if (!_player->isGameMaster())
+                if (!_player->IsGameMaster())
                 {
                     PSendSysMessage(LANG_CANNOT_GO_TO_INST_GM,chrNameLink.c_str());
                     SetSentErrorMessage(true);

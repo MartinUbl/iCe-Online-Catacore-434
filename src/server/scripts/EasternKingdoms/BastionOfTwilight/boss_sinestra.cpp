@@ -849,7 +849,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->IsAlive())
+                    if (pPlayer && !pPlayer->IsGameMaster() && pPlayer->IsAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if (!pPlayer->HasTankSpec() && !pPlayer->HasHealingSpec() && !pPlayer->HasAura(5487)) // Exclude healers and tanks
                             {
@@ -1000,7 +1000,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->IsAlive())
+                    if (pPlayer && !pPlayer->IsGameMaster() && pPlayer->IsAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if (!pPlayer->HasTankSpec() && IsOrb1Victim(pPlayer) == false &&  !pPlayer->HasAura(5487)) // Exclude tanks and orb1 victim
                             {

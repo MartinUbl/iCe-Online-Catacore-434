@@ -839,7 +839,7 @@ namespace Trinity
                             continue;
                         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                             continue;
-                        if (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster())
+                        if (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->IsGameMaster())
                             continue;
                         if (target->IsAlive() == i_requireDeadTarget)
                             continue;

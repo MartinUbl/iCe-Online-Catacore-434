@@ -3993,7 +3993,7 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId)
         // Learn our perks to him
         for(int i = 0; i < m_level-1; ++i)
             if(const GuildPerksEntry* perk = sGuildPerksStore.LookupEntry(i))
-                player->learnSpell(perk->SpellId, true);
+                player->LearnSpell(perk->SpellId, true);
     }
     else
     {
@@ -4103,7 +4103,7 @@ void Guild::DeleteMember(const uint64& guid, bool isDisbanding, bool isKicked)
         // remove all spells that related to this skill
         for (uint32 i = 0; i < sGuildPerksStore.GetNumRows(); ++i)
             if (GuildPerksEntry const *pAbility = sGuildPerksStore.LookupEntry(i))
-                    player->removeSpell(pAbility->SpellId);
+                    player->RemoveSpell(pAbility->SpellId);
     }
 
     _DeleteMemberFromDB(lowguid);
@@ -4901,7 +4901,7 @@ void Guild::LevelUp()
             player->GetSession()->SendPacket(&data);
 
             if (spellId)
-                player->learnSpell(spellId, true);
+                player->LearnSpell(spellId, true);
         }
 }
 

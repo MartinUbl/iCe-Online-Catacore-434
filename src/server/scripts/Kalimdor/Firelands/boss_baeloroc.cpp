@@ -363,7 +363,7 @@ public:
             {
                 if(Player* pl = itr->getSource())
                 {
-                    if ( pl && pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster() && pl->GetDistance(me) < 250.0f)
+                    if ( pl && pl->IsInWorld() && pl->IsAlive() && !pl->IsGameMaster() && pl->GetDistance(me) < 250.0f)
                     {
                         if (!pl->HasTankSpec() && !pl->HasAura(5487)) // Bear form
                         {

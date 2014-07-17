@@ -1213,7 +1213,7 @@ public:
                     Map::PlayerList const& plList = pInstance->instance->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                     {
-                        if ((*itr).getSource()->IsAlive() && (*itr).getSource()->isGameMaster() == false) 
+                        if ((*itr).getSource()->IsAlive() && (*itr).getSource()->IsGameMaster() == false) 
                             targetList.push_back((*itr).getSource());
                     }
 

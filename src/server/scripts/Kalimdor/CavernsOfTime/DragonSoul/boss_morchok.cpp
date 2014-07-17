@@ -428,7 +428,7 @@ public:
                 if (Player * p = itr->getSource())
                 {
                     if (!p->HasTankSpec() && !p->HasAura(5487) // Bear form
-                        && !p->isGameMaster() && p->IsAlive())
+                        && !p->IsGameMaster() && p->IsAlive())
                     {
                         beamTargets.push_back(p);
                     }

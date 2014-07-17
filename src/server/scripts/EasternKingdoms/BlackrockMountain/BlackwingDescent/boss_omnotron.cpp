@@ -374,7 +374,7 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (eventPhase != 0 || !me->canAttack(who) || !who->IsHostileTo(me) || who->GetDistance(me) > 10.0f || (who->ToPlayer() && who->ToPlayer()->isGameMaster()))
+            if (eventPhase != 0 || !me->canAttack(who) || !who->IsHostileTo(me) || who->GetDistance(me) > 10.0f || (who->ToPlayer() && who->ToPlayer()->IsGameMaster()))
                 return;
 
             AttackStart(who);

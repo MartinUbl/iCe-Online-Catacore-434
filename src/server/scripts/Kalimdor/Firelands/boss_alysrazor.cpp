@@ -1648,7 +1648,7 @@ class npc_Fendral : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (who && who->ToPlayer() && !who->ToPlayer()->isGameMaster() && who->GetDistance(me) <= 40.0f)
+                if (who && who->ToPlayer() && !who->ToPlayer()->IsGameMaster() && who->GetDistance(me) <= 40.0f)
                     if (!StartIntro)
                     {
                         me->SetInCombatWithZone();

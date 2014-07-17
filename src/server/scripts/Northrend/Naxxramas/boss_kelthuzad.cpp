@@ -657,7 +657,7 @@ public:
 
     bool OnTrigger(Player* pPlayer, const AreaTriggerEntry * /*at*/)
     {
-        if (pPlayer->isGameMaster())
+        if (pPlayer->IsGameMaster())
             return false;
 
         InstanceScript* pInstance = pPlayer->GetInstanceScript();

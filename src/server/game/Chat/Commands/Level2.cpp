@@ -3757,7 +3757,7 @@ void ChatHandler::HandleLearnSkillRecipesHelper(Player* player,uint32 skill_id)
         if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo,player,false))
             continue;
 
-        player->learnSpell(skillLine->spellId, false);
+        player->LearnSpell(skillLine->spellId, false);
     }
 }
 
@@ -4149,7 +4149,7 @@ bool ChatHandler::HandlePetLearnCommand(const char* args)
         return false;
     }
 
-    pet->learnSpell(spellId);
+    pet->LearnSpell(spellId);
 
     PSendSysMessage("Pet has learned spell %u", spellId);
     return true;
@@ -4173,7 +4173,7 @@ bool ChatHandler::HandlePetUnlearnCommand(const char *args)
     uint32 spellId = extractSpellIdFromLink((char*)args);
 
     if (pet->HasSpell(spellId))
-        pet->removeSpell(spellId, false);
+        pet->RemoveSpell(spellId, false);
     else
         PSendSysMessage("Pet doesn't have that spell");
 

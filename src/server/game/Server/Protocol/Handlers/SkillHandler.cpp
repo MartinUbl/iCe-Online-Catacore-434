@@ -68,7 +68,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
         if(_player->m_usedTalentCount == 0 || _player->GetTalentBranchSpec(_player->m_activeSpec) == 0)
         {
             if(_player->m_usedTalentCount != 0)
-                _player->resetTalents();
+                _player->ResetTalents();
 
             _player->SetTalentBranchSpec(specID, _player->m_activeSpec);
             for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
@@ -78,7 +78,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
                 if (!talentInfo || talentInfo->TalentTabID != specID)
                     continue;
 
-                _player->learnSpell(talentInfo->SpellID, false);
+                _player->LearnSpell(talentInfo->SpellID, false);
             }
 
             // Learn dummy mastery spells (mostly for displaying in client)
@@ -87,7 +87,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
             {
                 for (uint8 i = 0; i < 2; i++)
                     if (tabEntry->masterySpells[i])
-                        _player->learnSpell(tabEntry->masterySpells[i],false);
+                        _player->LearnSpell(tabEntry->masterySpells[i],false);
             }
 
             _player->UpdateMastery();
@@ -146,7 +146,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
         }
     }
     if(inOtherBranch && pointInBranchSpec < 31)
-        _player->resetTalents();
+        _player->ResetTalents();
 
     _player->SendTalentsInfoData(false);
 }
@@ -166,7 +166,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket & recv_data)
 
     GetPlayer()->RemoveFakeDeath();
 
-    if (!(_player->resetTalents()))
+    if (!(_player->ResetTalents()))
     {
         WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 8+4);    //you have not any talent
         data << uint64(0);
@@ -190,27 +190,27 @@ void WorldSession::HandleUnlearnSpecialization(WorldPacket& recv_data)
     {
         case 0: // Gnomish Engineer
             _player->RemoveAurasDueToSpell(20219);
-            _player->removeSpell(20219);
+            _player->RemoveSpell(20219);
             _player->IncompleteQuest(29477);
             break;
         case 1: // Goblin Engineer
             _player->RemoveAurasDueToSpell(20222);
-            _player->removeSpell(20222);
+            _player->RemoveSpell(20222);
             _player->IncompleteQuest(29475);
             break;
         case 2: // Elixir Master
             _player->RemoveAurasDueToSpell(28677);
-            _player->removeSpell(28677);
+            _player->RemoveSpell(28677);
             _player->IncompleteQuest(29481);
             break;
         case 3: // Potion Master
             _player->RemoveAurasDueToSpell(28675);
-            _player->removeSpell(28675);
+            _player->RemoveSpell(28675);
             _player->IncompleteQuest(29067);
             break;
         case 4: // Transmutation Master
             _player->RemoveAurasDueToSpell(28672);
-            _player->removeSpell(28672);
+            _player->RemoveSpell(28672);
             _player->IncompleteQuest(29482);
             break;
         default:

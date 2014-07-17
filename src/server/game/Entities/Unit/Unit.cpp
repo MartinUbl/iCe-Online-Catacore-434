@@ -10621,7 +10621,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
         return false;
 
     // always non-hostile to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->IsGameMaster())
         return false;
 
     if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
@@ -10758,7 +10758,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         return true;
 
     // always friendly to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->IsGameMaster())
         return true;
 
     if (GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && unit->ToPlayer()->InArena() && ToPlayer()->InArena())
@@ -10926,7 +10926,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     // nobody can attack GM in GM-mode
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
-        if (victim->ToPlayer()->isGameMaster())
+        if (victim->ToPlayer()->IsGameMaster())
             return false;
     }
     else
@@ -13840,7 +13840,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         && ToPlayer()->HasSpell(68996) /* Two forms */)
         {
             if (ToPlayer()->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-                ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+                ToPlayer()->SetInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
             else
                 ToPlayer()->toggleWorgenForm();
         }
@@ -13957,7 +13957,7 @@ bool Unit::isAttackableByAOE(bool requireDeadTarget, SpellEntry const *spellProt
         && (!spellProto || !(spellProto->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE)))
         return false;
 
-    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->isGameMaster())
+    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->IsGameMaster())
         return false;
 
     return !HasUnitState(UNIT_STATE_UNATTACKABLE);
@@ -14879,7 +14879,7 @@ void Unit::TauntApply(Unit* taunter)
 {
     ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->isGameMaster()))
+    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->IsGameMaster()))
         return;
 
     if (!CanHaveThreatList())
@@ -14905,7 +14905,7 @@ void Unit::TauntFadeOut(Unit *taunter)
 {
     ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->isGameMaster()))
+    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->IsGameMaster()))
         return;
 
     if (!CanHaveThreatList())

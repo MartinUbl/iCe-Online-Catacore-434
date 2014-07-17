@@ -110,7 +110,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     data << uint32(1);
     data << uint64(unit->GetGUID());
     data << uint32(curloc);
-    GetPlayer()->m_taxi.AppendTaximaskTo(data,GetPlayer()->isGameMaster()?GetPlayer()->isTaxiCheater():false);
+    GetPlayer()->m_taxi.AppendTaximaskTo(data,GetPlayer()->IsGameMaster()?GetPlayer()->isTaxiCheater():false);
     SendPacket(&data);
 
 	sLog->outDebug("WORLD: Sent SMSG_SHOWTAXINODES");

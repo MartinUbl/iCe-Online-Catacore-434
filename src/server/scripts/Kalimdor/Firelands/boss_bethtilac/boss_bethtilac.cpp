@@ -304,7 +304,7 @@ void boss_bethtilacAI::EnterEvadeMode()
         for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
         {
             Player *player = *it;
-            if (player->IsInWorld() && player->IsAlive() && !player->isGameMaster())
+            if (player->IsInWorld() && player->IsAlive() && !player->IsGameMaster())
                 return;
         }
     }
@@ -900,7 +900,7 @@ public:
             for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
             {
                 Player *player = *it;
-                if (player->IsInWorld() && player->IsAlive() && !player->isGameMaster() && player->GetExactDist2d(me) < 6.0f)
+                if (player->IsInWorld() && player->IsAlive() && !player->IsGameMaster() && player->GetExactDist2d(me) < 6.0f)
                     return player;
             }
 

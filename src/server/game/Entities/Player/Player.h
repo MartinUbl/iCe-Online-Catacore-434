@@ -803,6 +803,8 @@ enum TransferAbortReason
     TRANSFER_ABORT_NOT_FOUND4               = 0x0E,         // 3.2
     TRANSFER_ABORT_REALM_ONLY               = 0x0F,         // All players on party must be from the same realm.
     TRANSFER_ABORT_MAP_NOT_ALLOWED          = 0x10,         // Map can't be entered at this time.
+    TRANSFER_ABORT_LOCKED_TO_DIFFERENT_INSTANCE = 0x12,         // 4.2.2
+    TRANSFER_ABORT_ALREADY_COMPLETED_ENCOUNTER  = 0x13         // 4.2.2
 };
 
 enum InstanceResetWarningType
@@ -1242,7 +1244,7 @@ class Player : public Unit, public GridObject<Player>
                                                             // mount_id can be used in scripting calls
         bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
-        bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
+        bool IsGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
@@ -1798,13 +1800,13 @@ class Player : public Unit, public GridObject<Player>
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
-        bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
-        void learnSpell(uint32 spell_id, bool dependent);
-        void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
-        void resetSpells(bool myClassOnly = false);
-        void learnDefaultSpells();
-        void learnQuestRewardedSpells();
-        void learnQuestRewardedSpells(Quest const* quest);
+        bool AddSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
+        void LearnSpell(uint32 spell_id, bool dependent);
+        void RemoveSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
+        void ResetSpells(bool myClassOnly = false);
+        void LearnDefaultSpells();
+        void LearnQuestRewardedSpells();
+        void LearnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
         void AddTemporarySpell(uint32 spellId);
         void RemoveTemporarySpell(uint32 spellId);
@@ -1813,8 +1815,8 @@ class Player : public Unit, public GridObject<Player>
         std::string GetGuildName();
         uint32 GetFreeTalentPoints() const { return m_freeTalentPoints; }
         void SetFreeTalentPoints(uint32 points) { m_freeTalentPoints = points; }
-        bool resetTalents(bool no_cost = false);
-        uint32 resetTalentsCost() const;
+        bool ResetTalents(bool no_cost = false);
+        uint32 ResetTalentsCost() const;
         void InitTalentForLevel();
         void BuildPlayerTalentsInfoData(WorldPacket *data);
         void BuildPetTalentsInfoData(WorldPacket *data);
@@ -1909,7 +1911,7 @@ class Player : public Unit, public GridObject<Player>
         void RemoveGlobalCooldown(SpellEntry const *spellInfo);
         uint32 GetGlobalCooldown(SpellEntry const *spellInfo);
 
-        void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
+        void SetResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
             m_resurrectMap = mapId;
@@ -1919,9 +1921,9 @@ class Player : public Unit, public GridObject<Player>
             m_resurrectHealth = health;
             m_resurrectMana = mana;
         }
-        void clearResurrectRequestData() { setResurrectRequestData(0,0,0.0f,0.0f,0.0f,0,0); }
-        bool isRessurectRequestedBy(uint64 guid) const { return m_resurrectGUID == guid; }
-        bool isRessurectRequested() const { return m_resurrectGUID != 0; }
+        void ClearResurrectRequestData() { SetResurrectRequestData(0,0,0.0f,0.0f,0.0f,0,0); }
+        bool IsRessurectRequestedBy(uint64 guid) const { return m_resurrectGUID == guid; }
+        bool IsRessurectRequested() const { return m_resurrectGUID != 0; }
         void ResurectUsingRequestData();
 
         bool FallGround(uint8 FallMode);
@@ -2195,7 +2197,7 @@ class Player : public Unit, public GridObject<Player>
         int16 GetSkillTempBonusValue(uint32 skill) const;
         uint16 GetSkillStep(uint16 skill) const;            // 0...6
         bool HasSkill(uint32 skill) const;
-        void learnSkillRewardedSpells(uint32 id, uint32 value);
+        void LearnSkillRewardedSpells(uint32 id, uint32 value);
         void RemoveSpecializationAuras(void);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
@@ -2262,7 +2264,7 @@ class Player : public Unit, public GridObject<Player>
         void SetCanBlock(bool value);
         bool CanTitanGrip() const { return m_canTitanGrip; }
         void SetCanTitanGrip(bool value) { m_canTitanGrip = value; }
-        bool CanTameExoticPets() const { return isGameMaster() || HasAuraType(SPELL_AURA_ALLOW_TAME_PET_TYPE); }
+        bool CanTameExoticPets() const { return IsGameMaster() || HasAuraType(SPELL_AURA_ALLOW_TAME_PET_TYPE); }
 
         void SetRegularAttackTime();
         void SetBaseModValue(BaseModGroup modGroup, BaseModType modType, float value) { m_auraBaseMod[modGroup][modType] = value; }
@@ -2682,8 +2684,8 @@ class Player : public Unit, public GridObject<Player>
         //Worgen Transformations
 
         void toggleWorgenForm(bool apply = true, bool with_anim = false);
-        bool isInWorgenForm() { return HasAura(97709); };
-        void setInWorgenForm(uint32 form);
+        bool IsInWorgenForm() { return HasAura(97709); };
+        void SetInWorgenForm(uint32 form);
     
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
@@ -2803,7 +2805,7 @@ class Player : public Unit, public GridObject<Player>
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
 
         //bool isActiveObject() const { return true; }
-        bool canSeeSpellClickOn(Creature const* creature) const;
+        bool CanSeeSpellClickOn(Creature const* creature) const;
 
         uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
         void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }

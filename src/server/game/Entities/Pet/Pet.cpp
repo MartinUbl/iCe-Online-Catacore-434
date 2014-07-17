@@ -1278,7 +1278,7 @@ void Pet::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt32(), ActiveStates(fields[1].GetUInt8()), PETSPELL_UNCHANGED);
+            AddSpell(fields[0].GetUInt32(), ActiveStates(fields[1].GetUInt8()), PETSPELL_UNCHANGED);
         }
         while (result->NextRow());
     }
@@ -1424,7 +1424,7 @@ void Pet::_SaveAuras(SQLTransaction& trans)
     }
 }
 
-bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpellState state /*= PETSPELL_NEW*/, PetSpellType type /*= PETSPELL_NORMAL*/)
+bool Pet::AddSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpellState state /*= PETSPELL_NEW*/, PetSpellType type /*= PETSPELL_NORMAL*/)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -1494,7 +1494,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
                 // skip unknown ranks
                 if (!HasSpell(rankSpellId))
                     continue;
-                removeSpell(rankSpellId,false,false);
+                RemoveSpell(rankSpellId,false,false);
             }
         }
     }
@@ -1514,7 +1514,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
                     if (newspell.active == ACT_ENABLED)
                         ToggleAutocast(itr2->first, false);
 
-                    unlearnSpell(itr2->first,false,false);
+                    unLearnSpell(itr2->first,false,false);
                     break;
                 }
                 // ignore new lesser rank
@@ -1546,10 +1546,10 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
     return true;
 }
 
-bool Pet::learnSpell(uint32 spell_id)
+bool Pet::LearnSpell(uint32 spell_id)
 {
     // prevent duplicated entires in spell book
-    if (!addSpell(spell_id))
+    if (!AddSpell(spell_id))
         return false;
 
     if (!m_loading)
@@ -1569,10 +1569,10 @@ void Pet::InitLevelupSpellsForLevel()
     // Death Knight's ghoul
     if (GetEntry() == 26125)
     {
-        learnSpell(47468); // Claw
-        learnSpell(47481); // Gnaw
-        learnSpell(47484); // Huddle
-        learnSpell(47482); // Leap
+        LearnSpell(47468); // Claw
+        LearnSpell(47481); // Gnaw
+        LearnSpell(47484); // Huddle
+        LearnSpell(47482); // Leap
     }
 
     if (PetLevelupSpellSet const *levelupSpells = GetCreatureInfo()->family ? sSpellMgr->GetPetLevelupSpellList(GetCreatureInfo()->family) : NULL)
@@ -1582,10 +1582,10 @@ void Pet::InitLevelupSpellsForLevel()
         {
             // will called first if level down
             if (itr->first > level)
-                unlearnSpell(itr->second,true);                 // will learn prev rank if any
+                unLearnSpell(itr->second,true);                 // will learn prev rank if any
             // will called if level up
             else
-                learnSpell(itr->second);                        // will unlearn prev rank if any
+                LearnSpell(itr->second);                        // will unlearn prev rank if any
         }
     }
 
@@ -1602,17 +1602,17 @@ void Pet::InitLevelupSpellsForLevel()
 
             // will called first if level down
             if (spellEntry->spellLevel > level)
-                unlearnSpell(spellEntry->Id,true);
+                unLearnSpell(spellEntry->Id,true);
             // will called if level up
             else
-                learnSpell(spellEntry->Id);
+                LearnSpell(spellEntry->Id);
         }
     }
 }
 
-bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
+bool Pet::unLearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {
-    if (removeSpell(spell_id,learn_prev,clear_ab))
+    if (RemoveSpell(spell_id,learn_prev,clear_ab))
     {
         if (!m_loading)
         {
@@ -1625,7 +1625,7 @@ bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
     return false;
 }
 
-bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
+bool Pet::RemoveSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {
     PetSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -1656,7 +1656,7 @@ bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
     if (learn_prev)
     {
         if (uint32 prev_id = sSpellMgr->GetPrevSpellInChain (spell_id))
-            learnSpell(prev_id);
+            LearnSpell(prev_id);
         else
             learn_prev = false;
     }
@@ -1706,7 +1706,7 @@ void Pet::InitPetCreateSpells()
     CastPetAuras(false);
 }
 
-bool Pet::resetTalents(bool no_cost)
+bool Pet::ResetTalents(bool no_cost)
 {
     Unit *owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -1739,7 +1739,7 @@ bool Pet::resetTalents(bool no_cost)
 
     if (!no_cost)
     {
-        cost = resetTalentsCost();
+        cost = ResetTalentsCost();
 
         if (!player->HasEnoughMoney(cost))
         {
@@ -1779,7 +1779,7 @@ bool Pet::resetTalents(bool no_cost)
                 // unlearn if first rank is talent or learned by talent
                 if (itrFirstId == talentInfo->RankID[j] || sSpellMgr->IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
                 {
-                    unlearnSpell(itr->first,false);
+                    unLearnSpell(itr->first,false);
                     itr = m_spells.begin();
                     continue;
                 }
@@ -1811,7 +1811,7 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
 
     // reset for online
     if (online_pet)
-        online_pet->resetTalents(true);
+        online_pet->ResetTalents(true);
 
     // now need only reset for offline pets (all pets except online case)
     uint32 except_petnumber = online_pet ? online_pet->GetCharmInfo()->GetPetNumber() : 0;
@@ -1886,7 +1886,7 @@ void Pet::InitTalentForLevel()
     uint32 talentPointsForLevel = GetMaxTalentPointsForLevel(level);
     // Reset talents in case low level (on level down) or wrong points for level (hunter can unlearn TP increase talent)
     if (talentPointsForLevel == 0 || m_usedTalentCount > talentPointsForLevel)
-        resetTalents(true); // Remove all talent points
+        ResetTalents(true); // Remove all talent points
 
     SetFreeTalentPoints(talentPointsForLevel - m_usedTalentCount);
 
@@ -1898,7 +1898,7 @@ void Pet::InitTalentForLevel()
         owner->ToPlayer()->SendTalentsInfoData(true);
 }
 
-uint32 Pet::resetTalentsCost() const
+uint32 Pet::ResetTalentsCost() const
 {
     int64 days = int64(sWorld->GetGameTime() - m_resetTalentsTime)/DAY;
 
@@ -2067,7 +2067,7 @@ void Pet::LearnPetPassives()
         // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
         // Scale 01~03 (34902~34904, bonus from owner, not used)
         for (PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
-            addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
+            AddSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
     }
 }
 
@@ -2131,7 +2131,7 @@ bool Pet::IsPetAura(Aura const* aura)
 
 void Pet::learnSpellHighRank(uint32 spellid)
 {
-    learnSpell(spellid);
+    LearnSpell(spellid);
 
     if (uint32 next = sSpellMgr->GetNextSpellInChain(spellid))
         learnSpellHighRank(next);

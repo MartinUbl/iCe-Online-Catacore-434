@@ -622,7 +622,7 @@ void Creature::Update(uint32 diff)
             bool bIsPolymorphed = IsPolymorphed();
             bool bInCombat = IsInCombat() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
                              !GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
-                             !GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()->isGameMaster()); // or the victim/owner/charmer is not a GameMaster
+                             !GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()->IsGameMaster()); // or the victim/owner/charmer is not a GameMaster
 
             /*if (m_regenTimer <= diff)
             {*/
@@ -1850,7 +1850,7 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
 bool Creature::IsVisibleInGridForPlayer(Player const* pl) const
 {
     // gamemaster in GM mode see all, including ghosts
-    if (pl->isGameMaster())
+    if (pl->IsGameMaster())
         return true;
 
     // Trigger shouldn't be visible for players
@@ -2237,7 +2237,7 @@ void Creature::SetInCombatWithZone()
     {
         if (Player* pPlayer = i->getSource())
         {
-            if (pPlayer->isGameMaster())
+            if (pPlayer->IsGameMaster())
                 continue;
 
             if (pPlayer->IsAlive())

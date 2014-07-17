@@ -659,7 +659,7 @@ public:
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
             {
                 Player* pPlayer = itr->getSource();
-                if (pPlayer->isGameMaster())
+                if (pPlayer->IsGameMaster())
                     continue;
 
                 if (pPlayer->IsAlive())

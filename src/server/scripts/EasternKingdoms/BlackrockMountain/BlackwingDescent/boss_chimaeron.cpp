@@ -112,7 +112,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-             if(attacker->ToPlayer() && attacker->ToPlayer()->isGameMaster() )
+             if(attacker->ToPlayer() && attacker->ToPlayer()->IsGameMaster() )
                     return;
 
              if (damage > 500000 ) // Anti IK

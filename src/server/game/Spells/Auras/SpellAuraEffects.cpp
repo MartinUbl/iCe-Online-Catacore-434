@@ -4198,7 +4198,7 @@ void AuraEffect::HandlePhase(AuraApplication const *aurApp, uint8 mode, bool app
         if (!newPhase)
             newPhase = PHASEMASK_NORMAL;
 
-        if (pPlayer->isGameMaster())
+        if (pPlayer->IsGameMaster())
             newPhase = 0xFFFFFFFF;
 
         pPlayer->SetPhaseMask(newPhase, false);

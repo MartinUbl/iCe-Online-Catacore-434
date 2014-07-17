@@ -183,12 +183,12 @@ class Pet : public Guardian
         void _LoadSpells();
         void _SaveSpells(SQLTransaction& trans);
 
-        bool addSpell(uint32 spell_id,ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
-        bool learnSpell(uint32 spell_id);
+        bool AddSpell(uint32 spell_id,ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
+        bool LearnSpell(uint32 spell_id);
         void learnSpellHighRank(uint32 spellid);
         void InitLevelupSpellsForLevel();
-        bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
-        bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool unLearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool RemoveSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
 
         PetSpellMap     m_spells;
@@ -196,9 +196,9 @@ class Pet : public Guardian
 
         void InitPetCreateSpells();
 
-        bool resetTalents(bool no_cost = false);
+        bool ResetTalents(bool no_cost = false);
         static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = NULL);
-        uint32 resetTalentsCost() const;
+        uint32 ResetTalentsCost() const;
         void InitTalentForLevel();
 
         uint8 GetMaxTalentPointsForLevel(uint8 level);

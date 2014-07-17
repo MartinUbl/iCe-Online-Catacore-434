@@ -6516,7 +6516,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
     // zone check
-    if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->isGameMaster())
+    if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->IsGameMaster())
     {
         uint32 zone, area;
         m_caster->GetZoneAndAreaId(zone,area);
@@ -8345,7 +8345,7 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
         if (target->ToPlayer()->GetVisibility() == VISIBILITY_OFF)
             return false;
 
-        if (target->ToPlayer()->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+        if (target->ToPlayer()->IsGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
             return false;
     }
 

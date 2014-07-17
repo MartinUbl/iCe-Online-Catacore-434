@@ -102,7 +102,7 @@ void AggroAllPlayers(Creature* pTemp)
     {
         if (Player* pPlayer = i->getSource())
         {
-            if (pPlayer->isGameMaster())
+            if (pPlayer->IsGameMaster())
                 continue;
 
             if (pPlayer->IsAlive())
@@ -252,7 +252,7 @@ public:
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         Player* pPlayer = itr->getSource();
-                        if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false))
+                        if (pPlayer && !pPlayer->IsGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false))
                         {
                             DoResetThreat();
                             me->AddThreat(pPlayer,1.0f);
@@ -279,7 +279,7 @@ public:
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
                             Player* pPlayer = itr->getSource();
-                            if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,10.0f,30.0f,false))
+                            if (pPlayer && !pPlayer->IsGameMaster() && me->IsInRange(pPlayer,10.0f,30.0f,false))
                             {
                                 pPassenger->CastSpell(pPlayer,SPELL_SHIELD_BREAKER,true);
                                 break;
@@ -393,7 +393,7 @@ public:
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         Player* pPlayer = itr->getSource();
-                        if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false))
+                        if (pPlayer && !pPlayer->IsGameMaster() && me->IsInRange(pPlayer,8.0f,25.0f,false))
                         {
                             DoResetThreat();
                             me->AddThreat(pPlayer,5.0f);
@@ -849,7 +849,7 @@ public:
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         {
                             Player* pPlayer = itr->getSource();
-                            if (pPlayer && !pPlayer->isGameMaster() && me->IsInRange(pPlayer,5.0f,30.0f,false))
+                            if (pPlayer && !pPlayer->IsGameMaster() && me->IsInRange(pPlayer,5.0f,30.0f,false))
                             {
                                 DoCast(pTarget,SPELL_MULTI_SHOT);
                                 break;

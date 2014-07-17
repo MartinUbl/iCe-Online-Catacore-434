@@ -792,11 +792,11 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     if (status == 0)
     {
-        GetPlayer()->clearResurrectRequestData();           // reject
+        GetPlayer()->ClearResurrectRequestData();           // reject
         return;
     }
 
-    if (!GetPlayer()->isRessurectRequestedBy(guid))
+    if (!GetPlayer()->IsRessurectRequestedBy(guid))
         return;
 
     GetPlayer()->ResurectUsingRequestData();
@@ -1283,7 +1283,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_INSPECT_TALENT, guid_size+4+talent_points, false);
     data << plr->GetGUID();
 
-    if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
+    if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->IsGameMaster())
     {
         plr->BuildPlayerTalentsInfoData(&data);
     }

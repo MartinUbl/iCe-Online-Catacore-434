@@ -1747,9 +1747,9 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsPlayer((*itr)))
                 {
                     if (e.GetActionType() == SMART_ACTION_LEARN_SPELL)
-                        (*itr)->ToPlayer()->learnSpell(e.action.spell.spellID, false);
+                        (*itr)->ToPlayer()->LearnSpell(e.action.spell.spellID, false);
                     else
-                        (*itr)->ToPlayer()->removeSpell(e.action.spell.spellID, false, false);
+                        (*itr)->ToPlayer()->RemoveSpell(e.action.spell.spellID, false, false);
                 }
             }
 
