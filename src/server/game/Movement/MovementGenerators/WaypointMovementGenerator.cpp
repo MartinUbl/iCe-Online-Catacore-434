@@ -57,18 +57,18 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
 void WaypointMovementGenerator<Creature>::DoInitialize(Creature* creature)
 {
     LoadPath(creature);
-    creature->addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+    creature->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
 }
 
 void WaypointMovementGenerator<Creature>::DoFinalize(Creature* creature)
 {
-    creature->clearUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+    creature->ClearUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
     creature->SetWalk(false);
 }
 
 void WaypointMovementGenerator<Creature>::DoReset(Creature* creature)
 {
-    creature->addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+    creature->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
     StartMoveNow(creature);
 }
 
@@ -79,7 +79,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature* creature)
     if (m_isArrivalDone)
         return;
 
-    creature->clearUnitState(UNIT_STAT_ROAMING_MOVE);
+    creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
     m_isArrivalDone = true;
 
     if (i_path->at(i_currentNode)->event_id && urand(0, 99) < i_path->at(i_currentNode)->event_chance)
@@ -117,7 +117,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 
     m_isArrivalDone = false;
 
-    creature->addUnitState(UNIT_STAT_ROAMING_MOVE);
+    creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
     Movement::MoveSplineInit init(creature);
     init.MoveTo(node->x, node->y, node->z);
@@ -136,9 +136,9 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
 {
     // Waypoint movement can be switched on/off
     // This is quite handy for escort quests and other stuff
-    if (creature->hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
-        creature->clearUnitState(UNIT_STAT_ROAMING_MOVE);
+        creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
         return true;
     }
     // prevent a crash at empty waypoint path.
@@ -207,7 +207,7 @@ void FlightPathMovementGenerator::DoInitialize(Player* player)
 void FlightPathMovementGenerator::DoFinalize(Player* player)
 {
     // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
-    player->clearUnitState(UNIT_STAT_IN_FLIGHT);
+    player->ClearUnitState(UNIT_STATE_IN_FLIGHT);
 
     player->Unmount();
     player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
@@ -227,7 +227,7 @@ void FlightPathMovementGenerator::DoFinalize(Player* player)
 void FlightPathMovementGenerator::DoReset(Player* player)
 {
     player->getHostileRefManager().setOnlineOfflineState(false);
-    player->addUnitState(UNIT_STAT_IN_FLIGHT);
+    player->AddUnitState(UNIT_STATE_IN_FLIGHT);
     player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
     Movement::MoveSplineInit init(player);

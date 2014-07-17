@@ -489,7 +489,7 @@ class Creature : public Unit, public GridObject<Creature>
 
         uint8 getLevelForTarget(Unit const* target) const; // overwrite Unit::getLevelForTarget for boss level support
 
-        bool IsInEvadeMode() const { return hasUnitState(UNIT_STAT_EVADE); }
+        bool IsInEvadeMode() const { return HasUnitState(UNIT_STATE_EVADE); }
 
         bool AIM_Initialize(CreatureAI* ai = NULL);
         void Motion_Initialize();

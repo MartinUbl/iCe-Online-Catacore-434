@@ -915,7 +915,7 @@ public:
                 if(Creature* orb2 = me->FindNearestCreature(CREATURE_SHADOW_ORB2,200.0f,true))
                     me->CastSpell(orb2,92851,true);
 
-                me->clearUnitState(UNIT_STAT_CASTING);
+                me->ClearUnitState(UNIT_STATE_CASTING);
                 me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                 me->CastSpell(me,SPELL_SHADOW_PULSE,true);
 
@@ -1450,7 +1450,7 @@ public:
             if (Ticking_timer <= diff)
             {
                 Ticking_timer = 1000;
-                //if( !me->hasUnitState(UNIT_STAT_CASTING) )
+                //if( !me->HasUnitState(UNIT_STATE_CASTING) )
                    // return;
 
                 me->DealDamage(me, me->GetMaxHealth()*0.01f); // Kazdu sekundu uberem Calenovi 1 % jeho hp

@@ -187,7 +187,7 @@ public:
                 leftFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
                 pFoot->EnterVehicle(me, 0, false);
-                pFoot->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                pFoot->ClearUnitState(UNIT_STATE_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
                 if (Aura* armor = pFoot->GetAura(SPELL_OBSIDIAN_ARMOR))
@@ -200,7 +200,7 @@ public:
                 rightFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
                 pFoot->EnterVehicle(me, 1, false);
-                pFoot->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                pFoot->ClearUnitState(UNIT_STATE_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
                 if (Aura* armor = pFoot->GetAura(SPELL_OBSIDIAN_ARMOR))
@@ -877,7 +877,7 @@ public:
                     else
                         RefreshPowerBar(50 - direction * 50, false);
 
-                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                    if (!me->HasUnitState(UNIT_STATE_CASTING))
                         UpdateMovement();
 
 

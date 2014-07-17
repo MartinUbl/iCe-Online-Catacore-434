@@ -915,7 +915,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleEmoteOpcode(WorldPacket & recv_data)
 {
-    if (!GetPlayer()->isAlive() || GetPlayer()->hasUnitState(UNIT_STAT_DIED)) 
+    if (!GetPlayer()->isAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED)) 
         return;
 
     uint32 emote;
@@ -992,7 +992,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
             break;
         default:
             // Only allow text-emotes for "dead" entities (feign death included)
-            if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+            if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
                 break;
             GetPlayer()->SetEmoteState(emote_anim);
             break;

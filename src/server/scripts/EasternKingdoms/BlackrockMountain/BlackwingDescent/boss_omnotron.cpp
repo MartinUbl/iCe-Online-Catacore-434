@@ -212,7 +212,7 @@ struct boss_omnotron_systemAI: public ScriptedAI
         me->CastSpell(me, SPELL_ACTIVE, false);
         me->SetReactState(REACT_AGGRESSIVE);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->clearUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
+        me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
 
         me->SetPower(POWER_ENERGY, 100);
     }
@@ -226,7 +226,7 @@ struct boss_omnotron_systemAI: public ScriptedAI
         me->SetReactState(REACT_PASSIVE);
         me->RemoveAurasDueToSpell(SPELL_ACTIVE);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->addUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
+        me->AddUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
         DoCast(me,SPELL_SHUTTING_DOWN);
     }
 

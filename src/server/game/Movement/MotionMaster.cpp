@@ -99,7 +99,7 @@ MotionMaster::~MotionMaster()
 void
 MotionMaster::UpdateMotion(uint32 diff)
 {
-    if (i_owner->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED)) // what about UNIT_STAT_DISTRACTED? Why is this not included?
+    if (i_owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED)) // what about UNIT_STATE_DISTRACTED? Why is this not included?
         return;
     ASSERT(!empty());
 
@@ -272,7 +272,7 @@ MotionMaster::MoveChase(Unit* target, float dist, float angle)
     if (!target || target == i_owner || i_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
-    //i_owner->clearUnitState(UNIT_STAT_FOLLOW);
+    //i_owner->ClearUnitState(UNIT_STATE_FOLLOW);
     if (i_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) chase to %s (GUID: %u)",
@@ -298,7 +298,7 @@ MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slo
     if (!target || target == i_owner || i_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
-    //i_owner->addUnitState(UNIT_STAT_FOLLOW);
+    //i_owner->AddUnitState(UNIT_STATE_FOLLOW);
     if (i_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) follow to %s (GUID: %u)", i_owner->GetGUIDLow(),

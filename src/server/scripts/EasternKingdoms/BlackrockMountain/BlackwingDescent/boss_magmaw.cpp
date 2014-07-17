@@ -79,7 +79,7 @@ public:
             {
                 me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
                 pHead->EnterVehicle(me, 1, false);
-                pHead->addUnitState(UNIT_STAT_UNATTACKABLE);
+                pHead->AddUnitState(UNIT_STATE_UNATTACKABLE);
                 pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
         }
@@ -180,7 +180,7 @@ public:
                     pInVehicle->ExitVehicle();*/
                 if (pHead)
                 {
-                    pHead->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                    pHead->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                     pHead->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 }
             }
@@ -353,7 +353,7 @@ public:
                         {
                             pHead->RemoveAllAuras();
                             me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
-                            pHead->addUnitState(UNIT_STAT_UNATTACKABLE);
+                            pHead->AddUnitState(UNIT_STATE_UNATTACKABLE);
                             pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         }
                         DeExposeTimer = 0;

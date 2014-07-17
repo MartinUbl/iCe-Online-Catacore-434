@@ -2061,7 +2061,7 @@ class npc_Blazing_Talon_Clawshaper : public CreatureScript
 
                 if (IgnitionTimer <= diff && ElfForm)
                 {
-                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                    if (!me->HasUnitState(UNIT_STATE_CASTING))
                         if (Creature* Aly = me->FindNearestCreature(NPC_ALYSRAZOR, 200.0f))
                             me->CastSpell(Aly, SPELL_IGNITION, false);
                     IgnitionTimer = 5000;

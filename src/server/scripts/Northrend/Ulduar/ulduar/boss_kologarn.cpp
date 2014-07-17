@@ -257,7 +257,7 @@ public:
 
             events.Update(diff);
 
-            if (me->hasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
             
             if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))

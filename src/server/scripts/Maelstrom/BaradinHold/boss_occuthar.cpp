@@ -131,7 +131,7 @@ public:
                 me->CastSpell(me, SPELL_BERSERK, true);
             } else berserk_timer -= diff;
 
-            if (me->hasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             // Searing Shadows timer
@@ -213,7 +213,7 @@ public:
                         if (Unit *eye = me->SummonCreature(NPC_EYE_OF_OCCUTHAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0))
                         {
                             eye->EnterVehicle(target,0);
-                            eye->clearUnitState(UNIT_STAT_UNATTACKABLE); // applied when entering vehicle
+                            eye->ClearUnitState(UNIT_STATE_UNATTACKABLE); // applied when entering vehicle
                             eye->CastSpell(target, SPELL_GAZE_OF_OCCUTHAR, true);
                             eye->CastSpell(eye, SPELL_GAZE_OF_OCCUTHAR_VISUAL, true);
                         }

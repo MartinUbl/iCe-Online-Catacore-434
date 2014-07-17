@@ -265,7 +265,7 @@ void Unit::Update(uint32 p_time)
     // update combat timer only for players and pets (only pets with PetAI)
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || (ToCreature()->isPet() && IsControlledByPlayer())))
     {
-        // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
+        // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
         if (m_HostileRefManager.isEmpty())
@@ -358,7 +358,7 @@ void Unit::UpdateSplinePosition()
                 transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
     }
 
-    if (hasUnitState(UNIT_STAT_CANNOT_TURN))
+    if (HasUnitState(UNIT_STATE_CANNOT_TURN))
         loc.orientation = GetOrientation();
 
     SetPosition(loc.x, loc.y, loc.z, loc.orientation);
@@ -483,7 +483,7 @@ bool Unit::HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName, uint
 
 void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 {
-    if (!pVictim->isAlive() || pVictim->hasUnitState(UNIT_STAT_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->HasUnitState(UNIT_STATE_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
     {
         if (absorb)
             *absorb += damage;
@@ -1303,7 +1303,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     if (!pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->hasUnitState(UNIT_STAT_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->HasUnitState(UNIT_STATE_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
         return;
 
     SpellEntry const *spellProto = sSpellStore.LookupEntry(damageInfo->SpellID);
@@ -1570,7 +1570,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
 {
     Unit *pVictim = damageInfo->target;
 
-    if (!pVictim->isAlive() || pVictim->hasUnitState(UNIT_STAT_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->HasUnitState(UNIT_STATE_UNATTACKABLE) || (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode()))
         return;
 
     //You don't lose health from damage taken from another player while in a sanctuary
@@ -2221,7 +2221,7 @@ void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &he
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra)
 {
-    if (hasUnitState(UNIT_STAT_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    if (HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return;
 
     if (!pVictim->isAlive())
@@ -2957,7 +2957,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 
 float Unit::GetUnitDodgeChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNNED))
+    if (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_STUNNED))
         return 0.0f;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -2977,7 +2977,7 @@ float Unit::GetUnitDodgeChance() const
 
 float Unit::GetUnitParryChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNNED))
+    if (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_STUNNED))
         return 0.0f;
 
     float chance = 0.0f;
@@ -3009,7 +3009,7 @@ float Unit::GetUnitParryChance() const
 
 float Unit::GetUnitBlockChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNNED))
+    if (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_STUNNED))
         return 0.0f;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -3266,7 +3266,7 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 m_AutoRepeatFirstCast = true;
             }
-            addUnitState(UNIT_STAT_CASTING);
+            AddUnitState(UNIT_STATE_CASTING);
         } break;
 
         case CURRENT_CHANNELED_SPELL:
@@ -3279,7 +3279,7 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                 m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            addUnitState(UNIT_STAT_CASTING);
+            AddUnitState(UNIT_STATE_CASTING);
         } break;
 
         case CURRENT_AUTOREPEAT_SPELL:
@@ -10946,16 +10946,16 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
             // switch to melee attack from ranged/magic
             if (meleeAttack)
             {
-                if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+                if (!HasUnitState(UNIT_STATE_MELEE_ATTACKING))
                 {
-                    addUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    AddUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStart(victim);
                     return true;
                 }
             }
-            else if (hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            else if (HasUnitState(UNIT_STATE_MELEE_ATTACKING))
             {
-                clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                 SendMeleeAttackStop(victim);
                 return true;
             }
@@ -10965,7 +10965,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         //switch target
         InterruptSpell(CURRENT_MELEE_SPELL);
         if (!meleeAttack)
-            clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+            ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
     }
 
     if (m_attacking)
@@ -10978,7 +10978,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
 
     if (meleeAttack)
-        addUnitState(UNIT_STAT_MELEE_ATTACKING);
+        AddUnitState(UNIT_STATE_MELEE_ATTACKING);
 
     // set position before any AI calls/assistance
     //if (GetTypeId() == TYPEID_UNIT)
@@ -11022,7 +11022,7 @@ bool Unit::AttackStop()
     // Clear our target
     SetUInt64Value(UNIT_FIELD_TARGET, 0);
 
-    clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+    ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
 
     InterruptSpell(CURRENT_MELEE_SPELL);
 
@@ -11068,7 +11068,7 @@ void Unit::CombatStopWithPets(bool includingCast)
 
 bool Unit::isAttackingPlayer() const
 {
-    if (hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+    if (HasUnitState(UNIT_STATE_ATTACK_PLAYER))
         return true;
 
     for (ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
@@ -12576,7 +12576,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         // Judgement of Command proc always crits on stunned target
                         if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN)
                         if (spellProto->SpellFamilyFlags[0] & 0x0000000000800000LL && spellProto->SpellIconID == 561)
-                        if (pVictim->hasUnitState(UNIT_STAT_STUNNED))
+                        if (pVictim->HasUnitState(UNIT_STATE_STUNNED))
                             return true;
                         break;
                     }
@@ -13699,7 +13699,7 @@ void Unit::Unmount()
     {
         if (Pet *pPet = this->ToPlayer()->GetPet())
         {
-            if (pPet && pPet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) && !pPet->hasUnitState(UNIT_STAT_STUNNED))
+            if (pPet && pPet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) && !pPet->HasUnitState(UNIT_STATE_STUNNED))
                 pPet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
         else
@@ -13778,7 +13778,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if (PvP)
         m_CombatTimer = 5000;
 
-    if (isInCombat() || hasUnitState(UNIT_STAT_EVADE))
+    if (isInCombat() || HasUnitState(UNIT_STATE_EVADE))
         return;
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -13868,7 +13868,7 @@ void Unit::ClearInCombat()
         if (creature->GetCreatureInfo() && creature->GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE)
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);//re-apply Out of Combat Non Attackable flag if we leave combat, can be overriden in scripts in EnterEvadeMode()
 
-        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+        ClearUnitState(UNIT_STATE_ATTACK_PLAYER);
         if (HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
             SetUInt32Value(UNIT_DYNAMIC_FLAGS, ((Creature*)this)->GetCreatureInfo()->dynamicflags);
     }
@@ -13896,7 +13896,7 @@ void Unit::ClearInCombat()
 //TODO: remove this function
 bool Unit::isTargetableForAttack() const
 {
-    return isAttackableByAOE() && !hasUnitState(UNIT_STAT_DIED);
+    return isAttackableByAOE() && !HasUnitState(UNIT_STATE_DIED);
 }
 
 bool Unit::canAttack(Unit const* target, bool force) const
@@ -13923,7 +13923,7 @@ bool Unit::canAttack(Unit const* target, bool force) const
     else if (!IsHostileTo(target))
         return false;
 
-    if (!target->isAttackableByAOE() || target->hasUnitState(UNIT_STAT_DIED))
+    if (!target->isAttackableByAOE() || target->HasUnitState(UNIT_STATE_DIED))
         return false;
 
     // shaman totem quests: spell 8898, shaman can detect elementals but elementals cannot see shaman
@@ -13960,7 +13960,7 @@ bool Unit::isAttackableByAOE(bool requireDeadTarget, SpellEntry const *spellProt
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->isGameMaster())
         return false;
 
-    return !hasUnitState(UNIT_STAT_UNATTACKABLE);
+    return !HasUnitState(UNIT_STATE_UNATTACKABLE);
 }
 
 int32 Unit::ModifyHealth(int32 dVal)
@@ -14126,7 +14126,7 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
 
 bool Unit::canDetectStealthOf(Unit const* target, float distance) const
 {
-    if (hasUnitState(UNIT_STAT_STUNNED))
+    if (HasUnitState(UNIT_STATE_STUNNED))
         return false;
     if (distance < 0.24f) //collision
         return true;
@@ -16946,7 +16946,7 @@ void Unit::SendPetAIReaction(uint64 guid)
 
 void Unit::StopMoving()
 {
-    clearUnitState(UNIT_STAT_MOVING);
+    ClearUnitState(UNIT_STATE_MOVING);
 
     // not need send any packets if not in world or not moving
     if (!IsInWorld() || movespline->Finalized())
@@ -17304,16 +17304,16 @@ void Unit::SetContestedPvP(Player *attackedPlayer)
         return;
 
     player->SetContestedPvPTimer(30000);
-    if (!player->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+    if (!player->HasUnitState(UNIT_STATE_ATTACK_PLAYER))
     {
-        player->addUnitState(UNIT_STAT_ATTACK_PLAYER);
+        player->AddUnitState(UNIT_STATE_ATTACK_PLAYER);
         player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
         // call MoveInLineOfSight for nearby contested guards
         UpdateObjectVisibility();
     }
-    if (!hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+    if (!HasUnitState(UNIT_STATE_ATTACK_PLAYER))
     {
-        addUnitState(UNIT_STAT_ATTACK_PLAYER);
+        AddUnitState(UNIT_STATE_ATTACK_PLAYER);
         // call MoveInLineOfSight for nearby contested guards
         UpdateObjectVisibility();
     }
@@ -17997,33 +17997,33 @@ void Unit::SetControlled(bool apply, UnitState state)
 {
     if (apply)
     {
-        if (hasUnitState(state))
+        if (HasUnitState(state))
             return;
 
-        addUnitState(state);
+        AddUnitState(state);
         switch(state)
         {
-            case UNIT_STAT_STUNNED:
+            case UNIT_STATE_STUNNED:
                 SetStunned(true);
                 CastStop();
                 break;
-            case UNIT_STAT_ROOT:
-                if (!hasUnitState(UNIT_STAT_STUNNED))
+            case UNIT_STATE_ROOT:
+                if (!HasUnitState(UNIT_STATE_STUNNED))
                     SetRooted(true);
                 break;
-            case UNIT_STAT_CONFUSED:
-                if (!hasUnitState(UNIT_STAT_STUNNED))
+            case UNIT_STATE_CONFUSED:
+                if (!HasUnitState(UNIT_STATE_STUNNED))
                 {
-                    clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStop(m_attacking);
                     SetConfused(true);
                     CastStop();
                 }
                 break;
-            case UNIT_STAT_FLEEING:
-                if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_CONFUSED))
+            case UNIT_STATE_FLEEING:
+                if (!HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED))
                 {
-                    clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStop(m_attacking);
                     SetFeared(true);
                     CastStop();
@@ -18037,29 +18037,29 @@ void Unit::SetControlled(bool apply, UnitState state)
     {
         switch(state)
         {
-            case UNIT_STAT_STUNNED: if (HasAuraType(SPELL_AURA_MOD_STUN))    return;
+            case UNIT_STATE_STUNNED: if (HasAuraType(SPELL_AURA_MOD_STUN))    return;
                                     else    SetStunned(false);    break;
-            case UNIT_STAT_ROOT:    if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())    return;
+            case UNIT_STATE_ROOT:    if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())    return;
                                     else    SetRooted(false);     break;
-            case UNIT_STAT_CONFUSED:if (HasAuraType(SPELL_AURA_MOD_CONFUSE)) return;
+            case UNIT_STATE_CONFUSED:if (HasAuraType(SPELL_AURA_MOD_CONFUSE)) return;
                                     else    SetConfused(false);   break;
-            case UNIT_STAT_FLEEING: if (HasAuraType(SPELL_AURA_MOD_FEAR))    return;
+            case UNIT_STATE_FLEEING: if (HasAuraType(SPELL_AURA_MOD_FEAR))    return;
                                     else    SetFeared(false);     break;
             default: return;
         }
 
-        clearUnitState(state);
+        ClearUnitState(state);
 
-        if (hasUnitState(UNIT_STAT_STUNNED))
+        if (HasUnitState(UNIT_STATE_STUNNED))
             SetStunned(true);
         else
         {
-            if (hasUnitState(UNIT_STAT_ROOT))
+            if (HasUnitState(UNIT_STATE_ROOT))
                 SetRooted(true);
 
-            if (hasUnitState(UNIT_STAT_CONFUSED))
+            if (HasUnitState(UNIT_STATE_CONFUSED))
                 SetConfused(true);
-            else if (hasUnitState(UNIT_STAT_FLEEING))
+            else if (HasUnitState(UNIT_STATE_FLEEING))
                 SetFeared(true);
         }
     }
@@ -18150,7 +18150,7 @@ void Unit::SetStunned(bool apply)
         if (!pOwner || (pOwner->GetTypeId() == TYPEID_PLAYER && !pOwner->ToPlayer()->IsMounted()))
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        if (!hasUnitState(UNIT_STAT_ROOT))         // prevent allow move if have also root effect
+        if (!HasUnitState(UNIT_STATE_ROOT))         // prevent allow move if have also root effect
         {
             SendMoveUnroot(0);
             RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
@@ -18254,7 +18254,7 @@ void Unit::SetRooted(bool apply)
     }
     else
     {
-        if (!hasUnitState(UNIT_STAT_STUNNED))      // prevent allow move if have also stun effect
+        if (!HasUnitState(UNIT_STATE_STUNNED))      // prevent allow move if have also stun effect
         {
             m_rootTimes++; //blizzard internal check?
 
@@ -18361,7 +18361,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const * a
         return false;
     }
 
-    //if (hasUnitState(UNIT_STAT_UNATTACKABLE))
+    //if (HasUnitState(UNIT_STATE_UNATTACKABLE))
     //    return false;
 
     if (GetTypeId() == TYPEID_PLAYER && this->ToPlayer()->GetTransport())
@@ -18453,7 +18453,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const * a
                 charmer->ToPlayer()->VehicleSpellInitialize();
                 break;
             case CHARM_TYPE_POSSESS:
-                addUnitState(UNIT_STAT_POSSESSED);
+                AddUnitState(UNIT_STATE_POSSESSED);
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
                 charmer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 charmer->ToPlayer()->SetClientControl(this, 1);
@@ -18503,7 +18503,7 @@ void Unit::RemoveCharmedBy(Unit *charmer)
     }
 
     CharmType type;
-    if (hasUnitState(UNIT_STAT_POSSESSED))
+    if (HasUnitState(UNIT_STATE_POSSESSED))
         type = CHARM_TYPE_POSSESS;
     else if (charmer->IsOnVehicle(this))
         type = CHARM_TYPE_VEHICLE;
@@ -18521,7 +18521,7 @@ void Unit::RemoveCharmedBy(Unit *charmer)
 
     if (type == CHARM_TYPE_POSSESS)
     {
-        clearUnitState(UNIT_STAT_POSSESSED);
+        ClearUnitState(UNIT_STATE_POSSESSED);
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     }
 
@@ -19666,7 +19666,7 @@ void Unit::EnterVehicle(Vehicle *vehicle, int8 seatId, bool byAura)
         thisPlr->GetSession()->SendPacket(&data);
     }
 
-    SetControlled(true, UNIT_STAT_ROOT);
+    SetControlled(true, UNIT_STATE_ROOT);
     //movementInfo is set in AddPassenger
     //packets are sent in AddPassenger
 }
@@ -19717,7 +19717,7 @@ void Unit::ExitVehicle()
     Vehicle *vehicle = m_vehicle;
     m_vehicle = NULL;
 
-    SetControlled(false, UNIT_STAT_ROOT);
+    SetControlled(false, UNIT_STATE_ROOT);
 
     Position pos;
     vehicle->GetBase()->GetPosition(&pos);
@@ -20191,7 +20191,7 @@ bool CharmInfo::IsReturning()
 
 void Unit::SetInFront(Unit const* target)
 {
-    if (!hasUnitState(UNIT_STAT_CANNOT_TURN))
+    if (!HasUnitState(UNIT_STATE_CANNOT_TURN))
         SetOrientation(GetAngle(target));
 }
 

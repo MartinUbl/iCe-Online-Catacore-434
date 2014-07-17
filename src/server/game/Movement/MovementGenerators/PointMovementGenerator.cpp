@@ -38,7 +38,7 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     if (!unit->IsStopped() && m_clearPrevious)
         unit->StopMoving();
 
-    unit->addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    unit->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
     m_incompletePath = false;
 
     if (id == EVENT_CHARGE_PREPATH)
@@ -90,13 +90,13 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
     if (!unit)
         return false;
 
-    if (unit->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED))
+    if (unit->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
     {
-        unit->clearUnitState(UNIT_STAT_ROAMING_MOVE);
+        unit->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
         return true;
     }
 
-    unit->addUnitState(UNIT_STAT_ROAMING_MOVE);
+    unit->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
     if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit->movespline->Finalized())
     {
@@ -123,8 +123,8 @@ void PointMovementGenerator<T>::DoFinalize(T* unit)
         return;
     }
 
-    if (unit->hasUnitState(UNIT_STAT_CHARGING))
-        unit->clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    if (unit->HasUnitState(UNIT_STATE_CHARGING))
+        unit->ClearUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 
     if (unit->movespline->Finalized())
         MovementInform(unit);
@@ -136,7 +136,7 @@ void PointMovementGenerator<T>::DoReset(T* unit)
     if (!unit->IsStopped())
         unit->StopMoving();
 
-    unit->addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    unit->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 }
 
 template<class T>
@@ -181,7 +181,7 @@ void EffectMovementGenerator::Finalize(Unit* unit)
         return;
 
     // Need restore previous movement since we have no proper states system
-    if (unit->isAlive() && !unit->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING))
+    if (unit->isAlive() && !unit->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {
         if (Unit* victim = unit->getVictim())
             unit->GetMotionMaster()->MoveChase(victim);

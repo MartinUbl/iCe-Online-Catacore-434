@@ -480,7 +480,7 @@ public:
 
             if(Delay_melee_timer <= diff)
             {
-                me->clearUnitState(UNIT_STAT_CASTING);
+                me->ClearUnitState(UNIT_STATE_CASTING);
                 me->SetReactState(REACT_AGGRESSIVE);
                 Delay_melee_timer = 999999;
             }

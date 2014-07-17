@@ -133,7 +133,7 @@ class boss_emalon : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -236,7 +236,7 @@ class mob_tempest_minion : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 if (Aura const* overchargedAura = me->GetAura(SPELL_OVERCHARGED))

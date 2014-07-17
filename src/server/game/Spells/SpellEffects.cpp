@@ -2905,7 +2905,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
 
                 //Any effect which causes you to lose control of your character will supress the starfall effect.
-                if (m_caster->hasUnitState(UNIT_STAT_CONTROLLED))
+                if (m_caster->HasUnitState(UNIT_STATE_CONTROLLED))
                     return;
 
                 //Max 20 stars
@@ -6355,7 +6355,7 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
         return;
 
     // target must be OK to do this
-    if (unitTarget->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING))
+    if (unitTarget->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
         return;
 
     float angle = unitTarget->GetAngle(&m_targets.m_dstPos);
@@ -8901,7 +8901,7 @@ void Spell::EffectSanctuary(SpellEffIndex /*effIndex*/)
     unitTarget->VisitNearbyObject(m_caster->GetMap()->GetVisibilityDistance(), searcher);
     for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
     {
-        if (!(*iter)->hasUnitState(UNIT_STAT_CASTING))
+        if (!(*iter)->HasUnitState(UNIT_STATE_CASTING))
             continue;
 
         for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
@@ -9894,7 +9894,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     }
 
     // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT
-    if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
+    if (unitTarget->HasUnitState(UNIT_STATE_ROOT))
         return;
 
     // Instantly interrupt non melee spells being casted
@@ -9959,7 +9959,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
 void Spell::EffectLeapBack(SpellEffIndex effIndex)
 {
     // Dont jump if rooted
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->hasUnitState(UNIT_STAT_ROOT))
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasUnitState(UNIT_STATE_ROOT))
         return;
 
     float speedxy = float(m_spellInfo->EffectMiscValue[effIndex])/10;
@@ -10111,7 +10111,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
     pet->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->setDeathState(ALIVE);
-    pet->clearUnitState(UNIT_STAT_ALL_STATE);
+    pet->ClearUnitState(UNIT_STATE_ALL_STATE);
     pet->SetHealth(pet->CountPctFromMaxHealth(damage));
 
     //pet->AIM_Initialize();

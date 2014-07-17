@@ -57,7 +57,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
 
-    if (owner->hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
         return;
 
     if (owner->GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
@@ -112,7 +112,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
 
     // allow pets to use shortcut if no path found when following their master
     bool forceDest = (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->isPet()
-        && owner->hasUnitState(UNIT_STAT_FOLLOW));
+        && owner->HasUnitState(UNIT_STATE_FOLLOW));
 
     G3D::Vector3 startPos;
 
@@ -137,7 +137,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     D::_addUnitStateMove(owner);
     i_targetReached = false;
     i_recalculateTravel = false;
-    owner->addUnitState(UNIT_STAT_CHASE);
+    owner->AddUnitState(UNIT_STATE_CHASE);
 
     Movement::MoveSplineInit init(owner);
 
@@ -230,14 +230,14 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
     if (!owner || !owner->isAlive())
         return false;
 
-    if (owner->hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
         D::_clearUnitStateMove(owner);
         return true;
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner->hasUnitState(UNIT_STAT_CASTING))
+    if (owner->HasUnitState(UNIT_STATE_CASTING))
     {
         if (!owner->IsStopped())
             owner->StopMoving();
@@ -305,7 +305,7 @@ void ChaseMovementGenerator<T>::_reachTarget(T* owner)
 template<>
 void ChaseMovementGenerator<Player>::DoInitialize(Player* owner)
 {
-    owner->addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
+    owner->AddUnitState(UNIT_STATE_CHASE|UNIT_STATE_CHASE_MOVE);
     _setTargetLocation(owner, true);
 }
 
@@ -313,14 +313,14 @@ template<>
 void ChaseMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
     owner->SetWalk(false);
-    owner->addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
+    owner->AddUnitState(UNIT_STATE_CHASE|UNIT_STATE_CHASE_MOVE);
     _setTargetLocation(owner, true);
 }
 
 template<class T>
 void ChaseMovementGenerator<T>::DoFinalize(T* owner)
 {
-    owner->clearUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
+    owner->ClearUnitState(UNIT_STATE_CHASE|UNIT_STATE_CHASE_MOVE);
 }
 
 template<class T>
@@ -377,7 +377,7 @@ void FollowMovementGenerator<Creature>::_updateSpeed(Creature *owner)
 template<>
 void FollowMovementGenerator<Player>::DoInitialize(Player* owner)
 {
-    owner->addUnitState(UNIT_STAT_FOLLOW|UNIT_STAT_FOLLOW_MOVE);
+    owner->AddUnitState(UNIT_STATE_FOLLOW|UNIT_STATE_FOLLOW_MOVE);
     _updateSpeed(owner);
     _setTargetLocation(owner, true);
 }
@@ -385,7 +385,7 @@ void FollowMovementGenerator<Player>::DoInitialize(Player* owner)
 template<>
 void FollowMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
-    owner->addUnitState(UNIT_STAT_FOLLOW|UNIT_STAT_FOLLOW_MOVE);
+    owner->AddUnitState(UNIT_STATE_FOLLOW|UNIT_STATE_FOLLOW_MOVE);
     _updateSpeed(owner);
     _setTargetLocation(owner, true);
 }
@@ -393,7 +393,7 @@ void FollowMovementGenerator<Creature>::DoInitialize(Creature* owner)
 template<class T>
 void FollowMovementGenerator<T>::DoFinalize(T* owner)
 {
-    owner->clearUnitState(UNIT_STAT_FOLLOW|UNIT_STAT_FOLLOW_MOVE);
+    owner->ClearUnitState(UNIT_STATE_FOLLOW|UNIT_STATE_FOLLOW_MOVE);
     _updateSpeed(owner);
 }
 

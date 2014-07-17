@@ -149,7 +149,7 @@ class boss_archavon : public CreatureScript
 					return;
 				}
 
-				if (me->hasUnitState(UNIT_STAT_CASTING))
+				if (me->HasUnitState(UNIT_STATE_CASTING))
 					return;
 
 				// jump. jumps twice - iCelike, every 40 sec
@@ -315,7 +315,7 @@ class mob_archavon_warder : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())

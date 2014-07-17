@@ -31,13 +31,13 @@
 void HomeMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
     owner->SetWalk(false);
-    owner->addUnitState(UNIT_STAT_EVADE);
+    owner->AddUnitState(UNIT_STATE_EVADE);
     _setTargetLocation(owner);
 }
 
 void HomeMovementGenerator<Creature>::DoFinalize(Creature* owner)
 {
-    owner->clearUnitState(UNIT_STAT_EVADE);
+    owner->ClearUnitState(UNIT_STATE_EVADE);
     if (arrived)
     {
         owner->SetWalk(true);
@@ -52,7 +52,7 @@ void HomeMovementGenerator<Creature>::DoReset(Creature*)
 
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
 {
-    if (owner->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
+    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED))
     {
         arrived = false;
         DoFinalize(owner);
@@ -72,7 +72,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
     init.Launch();
 
     arrived = false;
-    owner->clearUnitState(UNIT_STAT_ALL_STATE & ~UNIT_STAT_EVADE);
+    owner->ClearUnitState(UNIT_STATE_ALL_STATE & ~UNIT_STATE_EVADE);
 }
 
 bool HomeMovementGenerator<Creature>::DoUpdate(Creature* owner, const uint32 /*time_diff*/)

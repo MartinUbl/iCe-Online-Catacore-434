@@ -1007,7 +1007,7 @@ public:
                                         {
                                             halfus->CastSpell((*itr), SPELL_BIND_WILL, false);
                                             DoZoneInCombat((*itr));
-                                            (*itr)->clearUnitState(UNIT_STAT_EVADE);
+                                            (*itr)->ClearUnitState(UNIT_STATE_EVADE);
                                             Free = false;
                                         };
                                 };
@@ -1043,7 +1043,7 @@ public:
                         if (Is25ManRaid())
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                                if (!me->hasUnitState(UNIT_STAT_CASTING))
+                                if (!me->HasUnitState(UNIT_STATE_CASTING))
                                     me->CastSpell(target, SPELL_FIREBALL, false);
                             BallTimer = 1400;
                             FireballTimer = 1520;
@@ -1051,7 +1051,7 @@ public:
                         else 
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
-                                if (!me->hasUnitState(UNIT_STAT_CASTING))
+                                if (!me->HasUnitState(UNIT_STATE_CASTING))
                                     me->CastSpell(target, SPELL_FIREBALL2, false);
                             BallTimer = 2900;
                             FireballTimer = 3020;
@@ -1061,7 +1061,7 @@ public:
                         FireballTimer -= diff;
             }
 
-            if (BallTimer <= diff && me->hasUnitState(UNIT_STAT_CASTING))
+            if (BallTimer <= diff && me->HasUnitState(UNIT_STATE_CASTING))
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10000, true))
                     {

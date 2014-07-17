@@ -1746,7 +1746,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2111,7 +2111,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2222,7 +2222,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2254,7 +2254,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2475,7 +2475,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2570,7 +2570,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2614,7 +2614,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -2653,7 +2653,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!target->isAlive())
                 return;
 
-            if (target->hasUnitState(UNIT_STAT_ISOLATED))
+            if (target->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -3517,7 +3517,7 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const
             case 99304:
             {
                 // make the Cinderweb Spiderling edible
-                triggerTarget->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                triggerTarget->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                 break;
             }
             case 87544: // Food ( Broiled Dragon Feast, Goblin Barbecue,.....)
@@ -4766,7 +4766,7 @@ void AuraEffect::HandleFeignDeath(AuraApplication const *aurApp, uint8 mode, boo
         target->VisitNearbyObject(target->GetMap()->GetVisibilityDistance(), searcher);
         for (UnitList::iterator iter = targets.begin(); iter != targets.end(); ++iter)
         {
-            if (!(*iter)->hasUnitState(UNIT_STAT_CASTING))
+            if (!(*iter)->HasUnitState(UNIT_STATE_CASTING))
                 continue;
 
             for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
@@ -4792,14 +4792,14 @@ void AuraEffect::HandleFeignDeath(AuraApplication const *aurApp, uint8 mode, boo
                                                             // blizz like 2.0.x
         target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
-        target->addUnitState(UNIT_STAT_DIED);
+        target->AddUnitState(UNIT_STATE_DIED);
     }
     else
     {
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
         target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-        target->clearUnitState(UNIT_STAT_DIED);
+        target->ClearUnitState(UNIT_STATE_DIED);
     }
 }
 
@@ -5534,7 +5534,7 @@ void AuraEffect::HandleModConfuse(AuraApplication const *aurApp, uint8 mode, boo
         }
     }
 
-    target->SetControlled(apply, UNIT_STAT_CONFUSED);
+    target->SetControlled(apply, UNIT_STATE_CONFUSED);
 }
 
 void AuraEffect::HandleModFear(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -5544,7 +5544,7 @@ void AuraEffect::HandleModFear(AuraApplication const *aurApp, uint8 mode, bool a
 
     Unit *target = aurApp->GetTarget();
 
-    target->SetControlled(apply, UNIT_STAT_FLEEING);
+    target->SetControlled(apply, UNIT_STATE_FLEEING);
 }
 
 void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -5569,7 +5569,7 @@ void AuraEffect::HandleAuraModStun(AuraApplication const *aurApp, uint8 mode, bo
         target->CastSpell(target, 91264, true);
     }
 
-    target->SetControlled(apply, UNIT_STAT_STUNNED);
+    target->SetControlled(apply, UNIT_STATE_STUNNED);
 }
 
 void AuraEffect::HandleAuraModRoot(AuraApplication const *aurApp, uint8 mode, bool apply) const
@@ -5579,7 +5579,7 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const *aurApp, uint8 mode, bo
 
     Unit *target = aurApp->GetTarget();
 
-    target->SetControlled(apply, UNIT_STAT_ROOT);
+    target->SetControlled(apply, UNIT_STATE_ROOT);
     
     if (apply)
     {
@@ -5606,7 +5606,7 @@ void AuraEffect::HandlePreventFleeing(AuraApplication const *aurApp, uint8 mode,
 
     Unit::AuraEffectList const& fearAuras = target->GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
     if (!fearAuras.empty())
-        target->SetControlled(!(apply), UNIT_STAT_FLEEING);
+        target->SetControlled(!(apply), UNIT_STATE_FLEEING);
 }
 
 /***************************/
@@ -6296,7 +6296,7 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const *aurApp, uint
     if (GetSpellProto()->Mechanic == MECHANIC_BANISH)
     {
         if (apply)
-            target->addUnitState(UNIT_STAT_ISOLATED);
+            target->AddUnitState(UNIT_STATE_ISOLATED);
         else
         {
             bool banishFound = false;
@@ -6308,7 +6308,7 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const *aurApp, uint
                     break;
                 }
             if (!banishFound)
-                target->clearUnitState(UNIT_STAT_ISOLATED);
+                target->ClearUnitState(UNIT_STATE_ISOLATED);
         }
     }
 }

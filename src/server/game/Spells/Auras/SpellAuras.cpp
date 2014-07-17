@@ -3105,7 +3105,7 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
             float radius;
             radius = GetSpellProto()->GetSpellRadius(caster, effIndex);
 
-            if (!GetUnitOwner()->hasUnitState(UNIT_STAT_ISOLATED))
+            if (!GetUnitOwner()->HasUnitState(UNIT_STATE_ISOLATED))
             {
                 switch(GetSpellProto()->Effect[effIndex])
                 {

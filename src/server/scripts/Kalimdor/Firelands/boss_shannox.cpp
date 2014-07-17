@@ -1285,7 +1285,7 @@ class npc_rageface : public CreatureScript
                 if ( damage >= distractDamage)
                 {
                     me->InterruptNonMeleeSpells(false);
-                    me->clearUnitState(UNIT_STAT_CASTING);
+                    me->ClearUnitState(UNIT_STATE_CASTING);
                     me->RemoveAura(100129); // Crit buff on rageface
                     me->RemoveAura(101212);
                     me->RemoveAura(101213);

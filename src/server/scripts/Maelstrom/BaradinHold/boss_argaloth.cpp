@@ -143,7 +143,7 @@ public:
                 meteor_timer = 15000;
             } else meteor_timer -= diff;
 
-            if (me->hasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             // Consuming Darknes timer. RaidMode-dependent count of DoTs

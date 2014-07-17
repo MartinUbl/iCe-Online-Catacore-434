@@ -436,7 +436,7 @@ public:
 
 /*****************************************************************************************/
 
-            if (me->hasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             if (castShardTimer <= diff)
@@ -488,7 +488,7 @@ public:
                 DoMeleeAttackIfReady();
             else // Spell attack phase
             {
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 if (me->isAttackReady())

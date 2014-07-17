@@ -630,7 +630,7 @@ public:
             // flame breath
             if (m_uiFlameBreathTimer <= uiDiff)
             {
-				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				if(!me->HasUnitState(UNIT_STATE_CASTING))
 				{
 					DoScriptText(SAY_SARTHARION_BREATH, me);
 					DoCast(me->getVictim(), RAID_MODE(SPELL_FLAME_BREATH, SPELL_FLAME_BREATH_H));
@@ -643,7 +643,7 @@ public:
             // Tail Sweep
             if (m_uiTailSweepTimer <= uiDiff)
             {
-				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				if(!me->HasUnitState(UNIT_STATE_CASTING))
 				{
 					DoCast(me->getVictim(), RAID_MODE(SPELL_TAIL_LASH, SPELL_TAIL_LASH_H));
 					m_uiTailSweepTimer = urand(10000,20000);
@@ -655,7 +655,7 @@ public:
             // Cleave
             if (m_uiCleaveTimer <= uiDiff)
             {
-				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				if(!me->HasUnitState(UNIT_STATE_CASTING))
 				{
 					DoCast(me->getVictim(), SPELL_CLEAVE);
 					m_uiCleaveTimer = urand(5000,8000);
@@ -667,7 +667,7 @@ public:
             // Lavas Strike
             if (m_uiLavaStrikeTimer <= uiDiff)
             {
-				if(!me->hasUnitState(UNIT_STAT_CASTING))
+				if(!me->HasUnitState(UNIT_STATE_CASTING))
 				{
 					if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
 					{

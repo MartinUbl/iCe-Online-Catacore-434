@@ -1901,7 +1901,7 @@ public:
             Unit *owner = me->GetCharmerOrOwner();
 
             me->CombatStop(true);
-            if (owner && !me->hasUnitState(UNIT_STAT_FOLLOW))
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
             {
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
@@ -1942,7 +1942,7 @@ public:
                 }
             }
 
-            if (!me->hasUnitState(UNIT_STAT_CASTING))
+            if (!me->HasUnitState(UNIT_STATE_CASTING))
             {
                 if(me->GetEntry() == 53438 ) // Mage T12 2P Bonus, this image is kinda different
                 {
@@ -2099,7 +2099,7 @@ public:
             Unit *owner = me->GetCharmerOrOwner();
 
             me->CombatStop(true);
-            if (owner && !me->hasUnitState(UNIT_STAT_FOLLOW))
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
             {
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
@@ -2140,7 +2140,7 @@ public:
                 }
             }
 
-            if (!me->hasUnitState(UNIT_STAT_CASTING))
+            if (!me->HasUnitState(UNIT_STATE_CASTING))
                 me->CastSpell(me->getVictim(), 99026, false); // Fireseed
 
         }
@@ -2186,7 +2186,7 @@ public:
             Unit *owner = me->GetCharmerOrOwner();
 
             me->CombatStop(true);
-            if (owner && !me->hasUnitState(UNIT_STAT_FOLLOW))
+            if (owner && !me->HasUnitState(UNIT_STATE_FOLLOW))
             {
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
@@ -2227,7 +2227,7 @@ public:
                 }
             }
 
-            if (!me->hasUnitState(UNIT_STAT_CASTING))
+            if (!me->HasUnitState(UNIT_STATE_CASTING))
                 me->CastSpell(me->getVictim(), 99226, false); // Flame Blast
         }
     };
@@ -2308,7 +2308,7 @@ public:
 
         void Reset()
         {
-            me->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
+            me->SetControlled(true,UNIT_STATE_STUNNED);//disable rotate
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true); //immune to knock aways like blast wave
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -2360,8 +2360,8 @@ public:
             }
             else setHealthTimer -= uiDiff;
 
-            if (!me->hasUnitState(UNIT_STAT_STUNNED))
-                me->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
+            if (!me->HasUnitState(UNIT_STATE_STUNNED))
+                me->SetControlled(true,UNIT_STATE_STUNNED);//disable rotate
 
             if (uiEntry != NPC_CATACLYSM_TARGET_DUMMY)
             {
@@ -4619,7 +4619,7 @@ class npc_moonwell_chalice: public CreatureScript
             virtual void IsSummonedBy(Unit *summoner)
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->addUnitState(UNIT_STAT_ROOT);
+                me->AddUnitState(UNIT_STATE_ROOT);
                 me->CastSpell(me, 100403, false);
             }
             virtual void EnterEvadeMode()

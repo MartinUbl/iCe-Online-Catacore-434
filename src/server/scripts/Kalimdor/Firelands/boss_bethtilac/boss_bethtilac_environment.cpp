@@ -207,7 +207,7 @@ void filamentAI::PassengerBoarded(Unit *unit, int8 seat, bool apply)
     if (apply)
     {
         me->ForcedDespawn(10000); // Don't despawn if player is in middle of transporting
-        unit->addUnitState(UNIT_STAT_ONVEHICLE);        // makes the passenger unattackable
+        unit->AddUnitState(UNIT_STATE_ON_VEHICLE);        // makes the passenger unattackable
         AddTimer(EVENT_TRANSFER_START, 1500, false);
 
         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -215,7 +215,7 @@ void filamentAI::PassengerBoarded(Unit *unit, int8 seat, bool apply)
     }
     else
     {
-        unit->clearUnitState(UNIT_STAT_ONVEHICLE);
+        unit->ClearUnitState(UNIT_STATE_ON_VEHICLE);
         //unit->NearTeleportTo(unit->GetPositionX(), unit->GetPositionY(), webZPosition + 1.0f, unit->GetOrientation());
     }
 

@@ -2144,9 +2144,9 @@ void Battleground::AddSpectator(Player* pl)
         // use mechanism like in bg queue invites
         pl->SetBattlegroundEntryPoint();
         pl->SetBattlegroundId(GetInstanceID(), GetTypeID());
-        pl->addUnitState(UNIT_STAT_UNATTACKABLE);
-        pl->addUnitState(UNIT_STAT_ISOLATED);
-        pl->addUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
+        pl->AddUnitState(UNIT_STATE_UNATTACKABLE);
+        pl->AddUnitState(UNIT_STATE_ISOLATED);
+        pl->AddUnitState(UNIT_STATE_CANNOT_AUTOATTACK);
         pl->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         pl->UnsummonPetTemporaryIfAny();
 
@@ -2170,9 +2170,9 @@ void Battleground::RemoveSpectator(Player* pl)
     {
         pl->SetBattlegroundId(0, BATTLEGROUND_TYPE_NONE);
         pl->SetBGTeam(0);
-        pl->clearUnitState(UNIT_STAT_UNATTACKABLE);
-        pl->clearUnitState(UNIT_STAT_ISOLATED);
-        pl->clearUnitState(UNIT_STAT_CANNOT_AUTOATTACK);
+        pl->ClearUnitState(UNIT_STATE_UNATTACKABLE);
+        pl->ClearUnitState(UNIT_STATE_ISOLATED);
+        pl->ClearUnitState(UNIT_STATE_CANNOT_AUTOATTACK);
         pl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 
         RemovePlayerAtLeave(pl->GetGUID(), true, true);

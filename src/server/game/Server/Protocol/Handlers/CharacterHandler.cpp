@@ -1199,7 +1199,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                  "login",
                  pCurrChar->GetGUIDLow());
 
-    if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
+    if (!pCurrChar->IsStandState() && !pCurrChar->HasUnitState(UNIT_STATE_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;

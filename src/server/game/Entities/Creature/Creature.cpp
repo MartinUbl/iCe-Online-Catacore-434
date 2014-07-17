@@ -748,7 +748,7 @@ void Creature::DoFleeToGetAssistance()
         if (!pCreature)
             //SetFeared(true, getVictim()->GetGUID(), 0 ,sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
             //TODO: use 31365
-            SetControlled(true, UNIT_STAT_FLEEING);
+            SetControlled(true, UNIT_STATE_FLEEING);
         else
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
     }
@@ -1615,7 +1615,7 @@ void Creature::setDeathState(DeathState s)
         if (GetCreatureInfo()->InhabitType & INHABIT_WATER)
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        clearUnitState(UNIT_STAT_ALL_STATE);
+        ClearUnitState(UNIT_STATE_ALL_STATE);
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
         LoadCreaturesAddon(true);
         Motion_Initialize();
@@ -1672,7 +1672,7 @@ void Creature::Respawn(bool force)
         {
             setDeathState(JUST_DIED);
             i_motionMaster.Clear();
-            clearUnitState(UNIT_STAT_ALL_STATE);
+            ClearUnitState(UNIT_STATE_ALL_STATE);
             LoadCreaturesAddon(true);
         }
         else
@@ -2063,7 +2063,7 @@ bool Creature::_IsTargetAcceptable(const Unit *target) const
     // if the target cannot be attacked, the target is not acceptable
     if (IsFriendlyTo(target)
         || !target->isAttackableByAOE()
-        || target->hasUnitState(UNIT_STAT_DIED)
+        || target->HasUnitState(UNIT_STATE_DIED)
         || (m_vehicle && (IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target))))
         return false;
 

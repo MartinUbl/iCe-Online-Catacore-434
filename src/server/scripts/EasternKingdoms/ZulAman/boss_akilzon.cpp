@@ -453,7 +453,7 @@ class mob_amani_kiddnaper : public CreatureScript
 
                             if (pVeh)
                             {
-                                //pVeh->GetPassenger(1)->clearUnitState(UNIT_STAT_UNATTACKABLE);
+                                //pVeh->GetPassenger(1)->ClearUnitState(UNIT_STATE_UNATTACKABLE);
                                 me->AddAura(SPELL_PLUCKED, pTarget);
                             }
                         }

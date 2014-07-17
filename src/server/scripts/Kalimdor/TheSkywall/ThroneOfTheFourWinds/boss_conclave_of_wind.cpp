@@ -360,7 +360,7 @@ Zephyr (ultimate)       _OK
 
             npc_conclave_bossAI::UpdateAI(diff);
 
-            if(!UpdateVictim() || !alive || !valid_targets/* || me->hasUnitState(UNIT_STAT_CASTING)*/)
+            if(!UpdateVictim() || !alive || !valid_targets/* || me->HasUnitState(UNIT_STATE_CASTING)*/)
                 return;
 
             DoMeleeAttackIfReady();
@@ -448,7 +448,7 @@ Sleet Storm (ultimate)  _OK
 
             npc_conclave_bossAI::UpdateAI(diff);
 
-            if(!UpdateVictim() || !alive || !valid_targets || me->hasUnitState(UNIT_STAT_CASTING))
+            if(!UpdateVictim() || !alive || !valid_targets || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             if(spell_windchill_timer < diff)
@@ -745,7 +745,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
             }
 
             // DoSpellAttackIfReady(86182); // changed to random target:
-            if (!me->hasUnitState(UNIT_STAT_CASTING) && me->isAttackReady())
+            if (!me->HasUnitState(UNIT_STATE_CASTING) && me->isAttackReady())
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f))
                 {

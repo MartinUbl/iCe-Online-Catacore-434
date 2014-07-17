@@ -357,7 +357,7 @@ class boss_alakir: public CreatureScript
                                 if (staticShockTimer <= diff)
                                 {
                                     me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                                    if (me->hasUnitState(UNIT_STAT_CASTING))
+                                    if (me->HasUnitState(UNIT_STATE_CASTING))
                                         break;
                                     me->CastSpell(me, SPELL_STATIC_SHOCK_HC_ONLY, false);
                                     staticShockTimer = 2000;
@@ -373,7 +373,7 @@ class boss_alakir: public CreatureScript
                             DoScriptText(-1850528, me);
 
                             me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                            if (me->hasUnitState(UNIT_STAT_CASTING))
+                            if (me->HasUnitState(UNIT_STATE_CASTING))
                                 break;
                             me->CastSpell(me, SPELL_WIND_BURST, false);
 
@@ -391,7 +391,7 @@ class boss_alakir: public CreatureScript
                             if (target)
                             {
                                 me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                                if (me->hasUnitState(UNIT_STAT_CASTING))
+                                if (me->HasUnitState(UNIT_STATE_CASTING))
                                     break;
                                 me->CastSpell(target, SPELL_LIGHTNING_STRIKE_DAMAGE, false);
                                 float ori = me->GetAngle(target->GetPositionX(), target->GetPositionY());
@@ -429,7 +429,7 @@ class boss_alakir: public CreatureScript
                                 if (staticShockTimer <= diff)
                                 {
                                     me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                                    if (me->hasUnitState(UNIT_STAT_CASTING))
+                                    if (me->HasUnitState(UNIT_STATE_CASTING))
                                         break;
                                     me->CastSpell(me, SPELL_STATIC_SHOCK_HC_ONLY, false);
                                     staticShockTimer = 2000;
@@ -806,7 +806,7 @@ class npc_squall_vortex: public CreatureScript
                     if (Aura* aura = pPassenger->AddAura(SPELL_SQUALL_LINE_VEHICLE, pPassenger))
                         aura->SetDuration(phaseTimer);
                     pPassenger->EnterVehicle(pVehicle,0);
-                    pPassenger->clearUnitState(UNIT_STAT_UNATTACKABLE); // applied when entering vehicle
+                    pPassenger->ClearUnitState(UNIT_STATE_UNATTACKABLE); // applied when entering vehicle
                     pVehicle->GetMotionMaster()->MoveFollow(me, 0.0f, 0.0f);
                     pVehicle->SetSpeed(MOVE_RUN, me->GetSpeed(MOVE_RUN), true);
                 }

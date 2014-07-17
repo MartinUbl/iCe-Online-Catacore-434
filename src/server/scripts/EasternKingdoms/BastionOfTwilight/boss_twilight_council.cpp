@@ -944,8 +944,8 @@ public:
             me->SetSpeed(MOVE_RUN,1.5f,true);
             me->SetReactState(REACT_AGGRESSIVE);
             flames_break=0;
-            if (me->hasUnitState(UNIT_STAT_CASTING))
-                me->clearUnitState(UNIT_STAT_CASTING); // keby nahodou
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                me->ClearUnitState(UNIT_STATE_CASTING); // keby nahodou
             Rising_flames_timer=33000;
             Flame_torrent_timer=10000;
             Inferno_rush_timer=15000;
@@ -1149,7 +1149,7 @@ public:
                                         me->SummonCreature(CREATURE_INFERNO_RUSH, me->GetPositionX() + cos(uhol)*jednotkova_dlzka, me->GetPositionY() + sin(uhol)*jednotkova_dlzka, 831.92f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                                     }
 
-                                    me->addUnitState(UNIT_STAT_CASTING); // nechceme aby zacal castit ked bude bezat znova za tankom
+                                    me->AddUnitState(UNIT_STATE_CASTING); // nechceme aby zacal castit ked bude bezat znova za tankom
                                     DoCast(Rush_target,82856,true); // Spell za mna jumpne na hraca + da knockback
                                     me->SetSpeed(MOVE_RUN,5.0f,true);
                                     can_knock=true;
@@ -1163,7 +1163,7 @@ public:
 
                             if(spread_flame_timer <= diff && can_knock) // Po dvoch sekundach mu neham casting flagu lebo nechem aby castil za behu s5 za tankom
                             {
-                                me->clearUnitState(UNIT_STAT_CASTING);
+                                me->ClearUnitState(UNIT_STATE_CASTING);
                                 me->SetSpeed(MOVE_RUN,1.5f,true);
                                 can_knock=false;
                             }

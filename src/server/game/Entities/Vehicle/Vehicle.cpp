@@ -53,7 +53,7 @@ Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleI
     {
         case 160: // Isle of Conquest Turret
         case 244: // Wintergrasp Turret
-            me->SetControlled(true, UNIT_STAT_ROOT);
+            me->SetControlled(true, UNIT_STATE_ROOT);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         case 158:
@@ -331,7 +331,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     }
 
     if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
-        unit->addUnitState(UNIT_STAT_ONVEHICLE);
+        unit->AddUnitState(UNIT_STATE_ON_VEHICLE);
 
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
@@ -419,7 +419,7 @@ void Vehicle::RemovePassenger(Unit *unit)
         ++m_usableSeatNum;
     }
 
-    unit->clearUnitState(UNIT_STAT_ONVEHICLE);
+    unit->ClearUnitState(UNIT_STATE_ON_VEHICLE);
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER

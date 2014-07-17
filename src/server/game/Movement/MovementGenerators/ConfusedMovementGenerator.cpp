@@ -93,7 +93,7 @@ void ConfusedMovementGenerator<T>::DoInitialize(T* unit)
 
     unit->StopMoving();
     unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-    unit->addUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    unit->AddUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
 }
 
 template<>
@@ -115,20 +115,20 @@ void ConfusedMovementGenerator<T>::DoReset(T* unit)
 {
     i_nextMove = 1;
     i_nextMoveTime.Reset(0);
-    unit->addUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    unit->AddUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
     unit->StopMoving();
 }
 
 template<class T>
 bool ConfusedMovementGenerator<T>::DoUpdate(T* unit, uint32 diff)
 {
-    if (unit->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
+    if (unit->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED))
         return true;
 
     if (i_nextMoveTime.Passed())
     {
         // currently moving, update location
-        unit->addUnitState(UNIT_STAT_CONFUSED_MOVE);
+        unit->AddUnitState(UNIT_STATE_CONFUSED_MOVE);
 
         if (unit->movespline->Finalized())
         {
@@ -143,7 +143,7 @@ bool ConfusedMovementGenerator<T>::DoUpdate(T* unit, uint32 diff)
         if (i_nextMoveTime.Passed())
         {
             // start moving
-            unit->addUnitState(UNIT_STAT_CONFUSED_MOVE);
+            unit->AddUnitState(UNIT_STATE_CONFUSED_MOVE);
 
             ASSERT(i_nextMove <= MAX_CONF_WAYPOINTS);
             float x = i_waypoints[i_nextMove][0];
@@ -163,7 +163,7 @@ template<>
 void ConfusedMovementGenerator<Player>::DoFinalize(Player* unit)
 {
     unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-    unit->clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    unit->ClearUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
     unit->StopMoving();
 }
 
@@ -171,7 +171,7 @@ template<>
 void ConfusedMovementGenerator<Creature>::DoFinalize(Creature* unit)
 {
     unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-    unit->clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    unit->ClearUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
     if (unit->getVictim())
         unit->SetUInt64Value(UNIT_FIELD_TARGET, unit->getVictim()->GetGUID());
 }

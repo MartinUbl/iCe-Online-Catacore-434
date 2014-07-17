@@ -615,7 +615,7 @@ public:
 
             success = false;
 
-            if(GetHitUnit()->hasUnitState(UNIT_STAT_CASTING))
+            if(GetHitUnit()->HasUnitState(UNIT_STATE_CASTING))
                 success = true;
         }
 

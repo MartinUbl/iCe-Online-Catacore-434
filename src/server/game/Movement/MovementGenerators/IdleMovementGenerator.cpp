@@ -32,27 +32,27 @@ IdleMovementGenerator si_idleMovement;
 void IdleMovementGenerator::Initialize(Unit* owner)
 {
     // clear evade flag - this is there i.e. for one-point home movement cases
-    if (owner->hasUnitState(UNIT_STAT_EVADE))
-        owner->clearUnitState(UNIT_STAT_EVADE);
+    if (owner->HasUnitState(UNIT_STATE_EVADE))
+        owner->ClearUnitState(UNIT_STATE_EVADE);
 
     Reset(owner);
 }
 
 void IdleMovementGenerator::Reset(Unit* owner)
 {
-    if (owner->hasUnitState(UNIT_STAT_MOVE))
+    if (owner->HasUnitState(UNIT_STATE_MOVE))
         owner->StopMoving();
 }
 
 void RotateMovementGenerator::Initialize(Unit* owner)
 {
-    if (owner->hasUnitState(UNIT_STAT_MOVE))
+    if (owner->HasUnitState(UNIT_STATE_MOVE))
         owner->StopMoving();
 
     if (owner->getVictim())
         owner->SetInFront(owner->getVictim());
 
-    owner->addUnitState(UNIT_STAT_ROTATING);
+    owner->AddUnitState(UNIT_STATE_ROTATING);
 
     owner->AttackStop();
 }
@@ -83,19 +83,19 @@ bool RotateMovementGenerator::Update(Unit* owner, const uint32& diff)
 
 void RotateMovementGenerator::Finalize(Unit* unit)
 {
-    unit->clearUnitState(UNIT_STAT_ROTATING);
+    unit->ClearUnitState(UNIT_STATE_ROTATING);
     if (unit->GetTypeId() == TYPEID_UNIT)
       unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
 }
 
 void DistractMovementGenerator::Initialize(Unit* owner)
 {
-    owner->addUnitState(UNIT_STAT_DISTRACTED);
+    owner->AddUnitState(UNIT_STATE_DISTRACTED);
 }
 
 void DistractMovementGenerator::Finalize(Unit* owner)
 {
-    owner->clearUnitState(UNIT_STAT_DISTRACTED);
+    owner->ClearUnitState(UNIT_STATE_DISTRACTED);
 }
 
 bool DistractMovementGenerator::Update(Unit* /*owner*/, const uint32& time_diff)
@@ -109,6 +109,6 @@ bool DistractMovementGenerator::Update(Unit* /*owner*/, const uint32& time_diff)
 
 void AssistanceDistractMovementGenerator::Finalize(Unit *unit)
 {
-    unit->clearUnitState(UNIT_STAT_DISTRACTED);
+    unit->ClearUnitState(UNIT_STATE_DISTRACTED);
     unit->ToCreature()->SetReactState(REACT_AGGRESSIVE);
 }

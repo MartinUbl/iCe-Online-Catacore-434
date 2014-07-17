@@ -697,7 +697,7 @@ public:
                     HeroicIntro -= diff;
             }
 
-            if (Jump == true && !me->hasUnitState(UNIT_STAT_CASTING))
+            if (Jump == true && !me->HasUnitState(UNIT_STATE_CASTING))
             {
                 Jump = false;
                 me->GetMotionMaster()->MoveJump(-102.292519f,-439.359955f,73.534279f,20.0f,20.0f);

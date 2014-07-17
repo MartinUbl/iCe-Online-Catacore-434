@@ -1020,7 +1020,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
     GetPlayer()->RemoveFakeDeath();
 
     // Stop the npc if moving
-    if (pCreature->hasUnitState(UNIT_STAT_MOVING))
+    if (pCreature->HasUnitState(UNIT_STATE_MOVING))
         pCreature->StopMoving();
 
     VendorItemData const *vendorItems = pCreature->GetVendorItems();

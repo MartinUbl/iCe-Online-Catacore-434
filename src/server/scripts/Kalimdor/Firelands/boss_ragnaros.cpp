@@ -2799,7 +2799,7 @@ public:
                 me->getThreatManager().resetAllAggro();
                 me->AddThreat(p,99999999.0f);
                 me->CastSpell(p,FIXATE,false);
-                me->clearUnitState(UNIT_STAT_CASTING);
+                me->ClearUnitState(UNIT_STATE_CASTING);
             }
         }
 
