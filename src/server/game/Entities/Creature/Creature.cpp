@@ -450,7 +450,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data)
     }
 
     // trigger creature is always not selectable and can not be attacked
-    if (isTrigger())
+    if (IsTrigger())
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     InitializeReactState();
@@ -494,12 +494,12 @@ void Creature::Update(uint32 diff)
 
     if (IsInWater())
     {
-        if (canSwim())
+        if (CanSwim())
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
     }
     else
     {
-        if (canWalk() || CanFly())
+        if (CanWalk() || CanFly())
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
     }
 
@@ -1475,7 +1475,7 @@ bool Creature::canSeeOrDetect(Unit const* u, bool detect, bool /*inVisibleList*/
 
 bool Creature::canStartAttack(Unit const* who, bool force) const
 {
-    if (isCivilian())
+    if (IsCivilian())
         return false;
 
     if (!CanFly() && (GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE + m_CombatDistance))
@@ -1498,7 +1498,7 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
             return false;
     }
 
-    if (!canCreatureAttack(who, force))
+    if (!CanCreatureAttack(who, force))
         return false;
 
     return IsWithinLOSInMap(who);
@@ -1625,12 +1625,12 @@ void Creature::setDeathState(DeathState s)
 
         if (IsInWater())
         {
-            if (canSwim())
+            if (CanSwim())
                 AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         }
         else
         {
-            if (canWalk())
+            if (CanWalk())
                 RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         }
 
@@ -1854,7 +1854,7 @@ bool Creature::IsVisibleInGridForPlayer(Player const* pl) const
         return true;
 
     // Trigger shouldn't be visible for players
-    //if (isTrigger())
+    //if (IsTrigger())
     //    return false;
     // Rat: this makes no sense, triggers are always sent to players, but with invisible model and can not be attacked or targeted!
 
@@ -2020,7 +2020,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // we don't need help from non-combatant ;)
-    if (isCivilian())
+    if (IsCivilian())
         return false;
 
     // skip fighting creature
@@ -2091,7 +2091,7 @@ void Creature::SaveRespawnTime()
 }
 
 // this should not be called by petAI or
-bool Creature::canCreatureAttack(Unit const *pVictim, bool force) const
+bool Creature::CanCreatureAttack(Unit const *pVictim, bool force) const
 {
     if (!pVictim->IsInMap(this))
         return false;

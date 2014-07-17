@@ -7641,7 +7641,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
         }
         else
         {
-            if (!uVictim->ToCreature()->isRacialLeader())
+            if (!uVictim->ToCreature()->IsRacialLeader())
                 return false;
 
             honor_f = 100.0f;                               // ??? need more info
@@ -23994,7 +23994,7 @@ void Player::UpdateTriggerVisibility()
         if (IS_CREATURE_GUID(*itr))
         {
             Creature *obj = IsInWorld() ? GetMap()->GetCreature(*itr) : NULL;
-            if (!obj || !obj->isTrigger())
+            if (!obj || !obj->IsTrigger())
                 continue;
 
             obj->BuildCreateUpdateBlockForPlayer(&udata,this);

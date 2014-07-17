@@ -181,7 +181,7 @@ void TempSummon::InitStats(uint32 duration)
 
     Unit *owner = GetSummoner();
 
-    if (owner && isTrigger() && m_spells[0])
+    if (owner && IsTrigger() && m_spells[0])
     {
         setFaction(owner->getFaction());
         SetLevel(owner->getLevel());

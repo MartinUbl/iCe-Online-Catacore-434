@@ -3017,7 +3017,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
         case TYPEID_UNIT:
             if (!((Creature const*)this)->CanFly())
             {
-                bool canSwim = ((Creature const*)this)->canSwim();
+                bool canSwim = ((Creature const*)this)->CanSwim();
                 float ground_z = z;
                 float max_z = canSwim
                     ? GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))

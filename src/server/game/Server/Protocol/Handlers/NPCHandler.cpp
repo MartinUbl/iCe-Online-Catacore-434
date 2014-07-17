@@ -287,7 +287,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
     // GetPlayer()->RemoveFakeDeath();
 
-    if (unit->IsArmorer() || unit->isCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider())
+    if (unit->IsArmorer() || unit->IsCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider())
     {
         unit->StopMoving();
     }

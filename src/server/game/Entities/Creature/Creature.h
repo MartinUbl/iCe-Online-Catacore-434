@@ -432,11 +432,11 @@ class Creature : public Unit, public GridObject<Creature>
 
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
-        bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
-        bool isTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
-        bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
+        bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool IsTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
+        bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
+        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
         bool SetWalk(bool enable);
         void SetLevitate(bool enable);
@@ -446,11 +446,11 @@ class Creature : public Unit, public GridObject<Creature>
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
         void InitializeReactState()
         {
-            if (IsTotem() || isTrigger() || GetCreatureType() == CREATURE_TYPE_CRITTER)
+            if (IsTotem() || IsTrigger() || GetCreatureType() == CREATURE_TYPE_CRITTER)
                 SetReactState(REACT_PASSIVE);
             else
                 SetReactState(REACT_AGGRESSIVE);
-            /*else if (isCivilian())
+            /*else if (IsCivilian())
             SetReactState(REACT_DEFENSIVE);*/;
         }
 
@@ -465,7 +465,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
-        bool canCreatureAttack(Unit const *pVictim, bool force = true) const;
+        bool CanCreatureAttack(Unit const *pVictim, bool force = true) const;
         bool IsImmunedToSpell(SpellEntry const* spellInfo);
                                                             // redefine Unit::IsImmunedToSpell
         bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
