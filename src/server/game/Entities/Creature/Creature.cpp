@@ -1721,10 +1721,10 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     RemoveCorpse(false);
 }
 
-void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
+void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn)
 {
     if (TempSummon* summon = this->ToTempSummon())
-        summon->UnSummon();
+        summon->UnSummon(msTimeToDespawn);
     else
         ForcedDespawn(msTimeToDespawn);
 }
