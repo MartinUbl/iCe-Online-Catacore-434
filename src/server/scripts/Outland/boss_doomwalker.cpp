@@ -128,7 +128,7 @@ public:
             {
                 DoScriptText(RAND(SAY_OVERRUN_1,SAY_OVERRUN_2), me);
 
-                DoCast(me->getVictim(), SPELL_OVERRUN);
+                DoCast(me->GetVictim(), SPELL_OVERRUN);
                 Overrun_Timer = 25000 + rand()%15000;
             } else Overrun_Timer -= diff;
 
@@ -155,7 +155,7 @@ public:
                 pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
 
                 if (!pTarget)
-                    pTarget = me->getVictim();
+                    pTarget = me->GetVictim();
 
                 if (pTarget)
                     DoCast(pTarget, SPELL_CHAIN_LIGHTNING);
@@ -166,7 +166,7 @@ public:
             //Spell Sunder Armor
             if (Armor_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SUNDER_ARMOR);
+                DoCast(me->GetVictim(), SPELL_SUNDER_ARMOR);
                 Armor_Timer = 10000 + rand()%15000;
             } else Armor_Timer -= diff;
 

@@ -166,7 +166,7 @@ public:
             {
                 if (Creature* pTemp = Unit::GetCreature(*me, *itr))
                 {
-                    if (pTemp->isAlive())
+                    if (pTemp->IsAlive())
                         pTemp->ForcedDespawn();
                 }
             }
@@ -178,8 +178,8 @@ public:
             if (pSummoned->GetEntry() == CREATURE_COLLAPSING_STAR)
             {
                 Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                if (me->getVictim())
-                    pSummoned->AI()->AttackStart(pTarget ? pTarget : me->getVictim());
+                if (me->GetVictim())
+                    pSummoned->AI()->AttackStart(pTarget ? pTarget : me->GetVictim());
                 m_lCollapsingStarGUIDList.push_back(pSummoned->GetGUID());
             }
         }
@@ -259,7 +259,7 @@ public:
 
                 if (QuantumStrike_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE,H_SPELL_QUANTUM_STRIKE), true);
+                    DoCast(me->GetVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE,H_SPELL_QUANTUM_STRIKE), true);
 
                     QuantumStrike_Timer = urand(4000, 14000);
                 } else QuantumStrike_Timer -= diff;
@@ -267,21 +267,21 @@ public:
                 if (BigBang_Timer <= diff)
                 {
                     DoScriptText(RAND(SAY_BIG_BANG_1,SAY_BIG_BANG_2), me);
-                    DoCast(me->getVictim(), RAID_MODE(SPELL_BIG_BANG,H_SPELL_BIG_BANG), true);
+                    DoCast(me->GetVictim(), RAID_MODE(SPELL_BIG_BANG,H_SPELL_BIG_BANG), true);
 
                     BigBang_Timer = 90000;
                 } else BigBang_Timer -= diff;
 
                 if (Ascend_Timer <= diff)
                 {
-                    DoCast(me->getVictim(),SPELL_ASCEND, true);
+                    DoCast(me->GetVictim(),SPELL_ASCEND, true);
 
                     Ascend_Timer = 480000;
                 } else Ascend_Timer -= diff;
 
                 if (PhasePunch_Timer <= diff)
                 {
-                    DoCast(me->getVictim(),SPELL_PHASE_PUNCH, true);
+                    DoCast(me->GetVictim(),SPELL_PHASE_PUNCH, true);
 
                     PhasePunch_Timer = 8000;
                 } else PhasePunch_Timer -= diff;
@@ -296,7 +296,7 @@ public:
                 if (Berserk_Timer <= diff)
                 {
                     DoScriptText(SAY_BERSERK, me);
-                    DoCast(me->getVictim(),SPELL_BERSERK, true);
+                    DoCast(me->GetVictim(),SPELL_BERSERK, true);
 
                     Berserk_Timer = 360000;
                 } else Berserk_Timer -= diff;

@@ -153,7 +153,7 @@ class spell_pri_penance : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *unitTarget = GetHitUnit();
-                if (!unitTarget || !unitTarget->isAlive())
+                if (!unitTarget || !unitTarget->IsAlive())
                     return;
 
                 Unit *caster = GetCaster();
@@ -306,17 +306,17 @@ class mob_shadowy_apparition: public CreatureScript
                 }
                 // If we are not moving towards our target, do it
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                 if (me->isAttackReady())
                 {
                     // If we are within range melee the target
-                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    if (me->IsWithinMeleeRange(me->GetVictim()))
                     {
                         me->CastSpell(me, 87529, true);
                         if (me->GetCharmerOrOwnerPlayerOrPlayerItself())
                         {
-                            me->CastSpell(me->getVictim(), 87532, true, 0, 0, me->GetCharmerOrOwnerPlayerOrPlayerItself()->GetGUID());
+                            me->CastSpell(me->GetVictim(), 87532, true, 0, 0, me->GetCharmerOrOwnerPlayerOrPlayerItself()->GetGUID());
                             me->Kill(me);
                             me->ForcedDespawn(100);
                         }

@@ -66,7 +66,7 @@ public:
             //KnockAway_Timer
             if (KnockAway_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKAWAY);
+                DoCast(me->GetVictim(), SPELL_KNOCKAWAY);
                 KnockAway_Timer = 15000;
             } else KnockAway_Timer -= diff;
 

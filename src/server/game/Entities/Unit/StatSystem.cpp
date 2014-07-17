@@ -471,7 +471,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     if (ranged)
     {
         UpdateDamagePhysical(RANGED_ATTACK);
-        if (pet && pet->isHunterPet()) // At ranged attack change for hunter pet
+        if (pet && pet->IsHunterPet()) // At ranged attack change for hunter pet
             pet->UpdateAttackPowerAndDamage();
     }
     else
@@ -1206,7 +1206,7 @@ bool Guardian::UpdateStats(Stats stat)
     }
     else if (stat == STAT_STAMINA)
     {
-        if (owner->getClass() == CLASS_WARLOCK && isPet())
+        if (owner->getClass() == CLASS_WARLOCK && IsPet())
         {
             ownersBonus = float(owner->GetStat(STAT_STAMINA)) * 0.75f;
             value += ownersBonus;
@@ -1214,7 +1214,7 @@ bool Guardian::UpdateStats(Stats stat)
         else
         {
             mod = 0.45f;
-            if (isPet())
+            if (IsPet())
             {
                 switch(ToPet()->GetTalentType())
                 {
@@ -1294,7 +1294,7 @@ void Guardian::UpdateResistances(uint32 school)
         float value  = GetTotalAuraModValue(UnitMods(UNIT_MOD_RESISTANCE_START + school));
 
         // hunter and warlock pets gain 40% of owner's resistance
-        if (isPet())
+        if (IsPet())
             value += float(m_owner->GetResistance(SpellSchools(school))) * 0.4f;
 
         SetResistance(SpellSchools(school), int32(value));
@@ -1310,7 +1310,7 @@ void Guardian::UpdateArmor()
     UnitMods unitMod = UNIT_MOD_ARMOR;
 
     // warlock pets gain 35% of owner's armor value, for hunter pets it depends on pet talent type.
-    if (isPet())
+    if (IsPet())
     {
         float mod = 0.35f;
         switch(ToPet()->GetTalentType())
@@ -1407,7 +1407,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     Unit* owner = GetOwner();
     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
     {
-        if (isHunterPet())                      //hunter pets benefit from owner's attack power
+        if (IsHunterPet())                      //hunter pets benefit from owner's attack power
         {
             // pre-Cata it used to be 0.22f coefficient for bonusAP and 0.425f for bonus damage
             // now hunter pets damage scales equally with hunter
@@ -1437,7 +1437,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             bonusAP = fire * 0.57f;
         }
         //demons benefit from warlocks shadow or fire damage
-        else if (isPet())
+        else if (IsPet())
         {
             int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
             int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
@@ -1517,14 +1517,14 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 
     //  Pet's base damage changes depending on happiness
-    if (isHunterPet() && attType == BASE_ATTACK)
+    if (IsHunterPet() && attType == BASE_ATTACK)
     {
         mindamage = mindamage * 1.25f;
         maxdamage = maxdamage * 1.25f;
     }
 
     // Implementation of Beast Mastery hunter mastery proficiency
-    if (isHunterPet() && m_owner && m_owner->ToPlayer())
+    if (IsHunterPet() && m_owner && m_owner->ToPlayer())
     {
         Player* pOwner = m_owner->ToPlayer();
         if (pOwner && pOwner->HasMastery() &&

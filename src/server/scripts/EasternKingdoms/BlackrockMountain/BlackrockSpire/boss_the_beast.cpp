@@ -67,7 +67,7 @@ public:
             //Flamebreak_Timer
             if (Flamebreak_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FLAMEBREAK);
+                DoCast(me->GetVictim(), SPELL_FLAMEBREAK);
                 Flamebreak_Timer = 10000;
             } else Flamebreak_Timer -= diff;
 
@@ -82,7 +82,7 @@ public:
             //TerrifyingRoar_Timer
             if (TerrifyingRoar_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_TERRIFYINGROAR);
+                DoCast(me->GetVictim(), SPELL_TERRIFYINGROAR);
                 TerrifyingRoar_Timer = 20000;
             } else TerrifyingRoar_Timer -= diff;
 

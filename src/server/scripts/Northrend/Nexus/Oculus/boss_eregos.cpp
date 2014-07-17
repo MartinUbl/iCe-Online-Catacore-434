@@ -121,8 +121,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-			if(me->getVictim()->GetDistance2d(me) > 40.0f)
-				me->GetMotionMaster()->MoveChase(me->getVictim());
+			if(me->GetVictim()->GetDistance2d(me) > 40.0f)
+				me->GetMotionMaster()->MoveChase(me->GetVictim());
 			else
 			{
 				me->GetMotionMaster()->MovementExpired();
@@ -131,13 +131,13 @@ public:
 
 			if(uiBarrageTimer <= diff)
 			{
-				DoCast(me->getVictim(),SPELL_ARCANE_BARRAGE);
+				DoCast(me->GetVictim(),SPELL_ARCANE_BARRAGE);
 				uiBarrageTimer = 500;
 			} else uiBarrageTimer -= diff;
 
 			if(uiVolleyTimer <= diff)
 			{
-				DoCast(me->getVictim(),SPELL_ARCANE_VOLLEY);
+				DoCast(me->GetVictim(),SPELL_ARCANE_VOLLEY);
 				uiBarrageTimer = 1000;
 				uiVolleyTimer = 4000;
 			} else uiVolleyTimer -= diff;

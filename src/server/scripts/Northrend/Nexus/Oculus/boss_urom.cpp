@@ -276,10 +276,10 @@ public:
                 if (uiArcaneExplosionTimer <= uiDiff)
                 {
                     Position pPos;
-                    me->getVictim()->GetPosition(&pPos);
+                    me->GetVictim()->GetPosition(&pPos);
 
                     me->NearTeleportTo(pPos.GetPositionX(),pPos.GetPositionY(),pPos.GetPositionZ(),pPos.GetOrientation());
-                    me->GetMotionMaster()->MoveChase(me->getVictim(),0,0);
+                    me->GetMotionMaster()->MoveChase(me->GetVictim(),0,0);
                     me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
 
                     bCanCast = false;

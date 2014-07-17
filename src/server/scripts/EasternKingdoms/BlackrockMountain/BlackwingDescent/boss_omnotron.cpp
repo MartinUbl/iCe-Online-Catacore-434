@@ -474,7 +474,7 @@ public:
                 /*bool running = false;
                 for (uint8 i = 0; i < E_MAX; i++)
                 {
-                    if (pBosses[i] && pBosses[i]->isInCombat())
+                    if (pBosses[i] && pBosses[i]->IsInCombat())
                         running = true;
                 }
 

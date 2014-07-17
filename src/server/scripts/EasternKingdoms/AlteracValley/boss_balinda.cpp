@@ -67,7 +67,7 @@ public:
 
             if (uiWaterBoltTimer < diff)
             {
-                DoCast(me->getVictim(), SPELL_WATERBOLT);
+                DoCast(me->GetVictim(), SPELL_WATERBOLT);
                 uiWaterBoltTimer = 5*IN_MILLISECONDS;
             } else uiWaterBoltTimer -= diff;
 
@@ -157,25 +157,25 @@ public:
 
             if (uiArcaneExplosionTimer < diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANE_EXPLOSION);
+                DoCast(me->GetVictim(), SPELL_ARCANE_EXPLOSION);
                 uiArcaneExplosionTimer =  urand(5*IN_MILLISECONDS,15*IN_MILLISECONDS);
             } else uiArcaneExplosionTimer -= diff;
 
             if (uiConeOfColdTimer < diff)
             {
-                DoCast(me->getVictim(), SPELL_CONE_OF_COLD);
+                DoCast(me->GetVictim(), SPELL_CONE_OF_COLD);
                 uiConeOfColdTimer = urand(10*IN_MILLISECONDS,20*IN_MILLISECONDS);
             } else uiConeOfColdTimer -= diff;
 
             if (uiFireBoltTimer < diff)
             {
-                DoCast(me->getVictim(), SPELL_FIREBALL);
+                DoCast(me->GetVictim(), SPELL_FIREBALL);
                 uiFireBoltTimer = urand(5*IN_MILLISECONDS,9*IN_MILLISECONDS);
             } else uiFireBoltTimer -= diff;
 
             if (uiFrostboltTimer < diff)
             {
-                DoCast(me->getVictim(), SPELL_FROSTBOLT);
+                DoCast(me->GetVictim(), SPELL_FROSTBOLT);
                 uiFrostboltTimer = urand(4*IN_MILLISECONDS,12*IN_MILLISECONDS);
             } else uiFrostboltTimer -= diff;
 

@@ -124,7 +124,7 @@ public:
                 //If we are 100%MANA cast Arcane Erruption
                 if (me->GetPower(POWER_MANA) == me->GetMaxPower(POWER_MANA))
                 {
-                    DoCast(me->getVictim(), SPELL_ARCANEERUPTION);
+                    DoCast(me->GetVictim(), SPELL_ARCANEERUPTION);
                     DoScriptText(EMOTE_MANA_FULL, me);
                     me->SetPower(POWER_MANA,0);
                 }
@@ -132,7 +132,7 @@ public:
                 //Trample Spell
                 if (uiTrampleTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_TRAMPLE);
+                    DoCast(me->GetVictim(), SPELL_TRAMPLE);
                     uiTrampleTimer = urand(3000,7000);
                 } else uiTrampleTimer -= diff;
 

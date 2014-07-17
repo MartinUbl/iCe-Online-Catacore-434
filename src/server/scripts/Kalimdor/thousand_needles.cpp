@@ -384,7 +384,7 @@ public:
             {
                 if (m_uiResetTimer <= uiDiff)
                 {
-                    if (!me->getVictim())
+                    if (!me->GetVictim())
                         EnterEvadeMode();
                     else
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

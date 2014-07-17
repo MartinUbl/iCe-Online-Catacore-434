@@ -221,7 +221,7 @@ public:
                 {
                     me->RemoveAurasDueToSpell(DOUBLE_ATTACK_BUFF); // odstranim ho
                     me->CastSpell(me,DOUBLE_ATTACK,true); // Seems working
-                    //me->AttackerStateUpdate(me->getVictim());
+                    //me->AttackerStateUpdate(me->GetVictim());
                     //me->resetAttackTimer();
                     //DoMeleeAttackIfReady(); // Hit again
                 }
@@ -271,7 +271,7 @@ public:
         }
         else Berserk_timer -=diff;
 
-        if(me->GetExactDist2d(-106.0f,19.0f)> 60 && me->isInCombat()) // Evade if we are out the room
+        if(me->GetExactDist2d(-106.0f,19.0f)> 60 && me->IsInCombat()) // Evade if we are out the room
             EnterEvadeMode();
 
     if(PHASE == 1)
@@ -346,7 +346,7 @@ public:
             {
                 if(!me->IsNonMeleeSpellCasted(false)) // Maybe
                 {
-                    me->CastSpell(me->getVictim(),BREAK,true);
+                    me->CastSpell(me->GetVictim(),BREAK,true);
                     me->CastSpell(me,DOUBLE_ATTACK_BUFF,true);
                     Delay_melee_timer = 7000; // Prevent melee casting for 7 seconds after Double attack
                     me->SetReactState(REACT_PASSIVE);
@@ -378,7 +378,7 @@ public:
                         {
                             counter++;
                             Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                            if( unit->ToPlayer() && unit->isAlive() && counter > 3 && counter <= 8) // Cast slime on 5 targets , excluding tanks ( 3 max )
+                            if( unit->ToPlayer() && unit->IsAlive() && counter > 3 && counter <= 8) // Cast slime on 5 targets , excluding tanks ( 3 max )
                                 me->CastSpell(unit,CAUSTIC_SLIME_MISSILE,true);
                         }
                     }
@@ -470,7 +470,7 @@ public:
         {
             if(Break_timer <= diff)
             {
-                me->CastSpell(me->getVictim(),BREAK,true);
+                me->CastSpell(me->GetVictim(),BREAK,true);
                 me->CastSpell(me,DOUBLE_ATTACK_BUFF,true);
                 Delay_melee_timer = 5000; // Prevent melee casting for 5 seconds after Double attack
                 Break_timer = 15000;

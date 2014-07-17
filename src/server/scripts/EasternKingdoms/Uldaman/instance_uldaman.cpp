@@ -170,7 +170,7 @@ class instance_uldaman : public InstanceMapScript
                 for (std::vector<uint64>::const_iterator i = vStoneKeeper.begin(); i != vStoneKeeper.end(); ++i)
                 {
                     Creature *pTarget = instance->GetCreature(*i);
-                    if (!pTarget || !pTarget->isAlive() || pTarget->getFaction() == 14)
+                    if (!pTarget || !pTarget->IsAlive() || pTarget->getFaction() == 14)
                         continue;
                     pTarget->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                     pTarget->setFaction(14);
@@ -191,7 +191,7 @@ class instance_uldaman : public InstanceMapScript
                 for (std::vector<uint64>::const_iterator i = vArchaedasWallMinions.begin(); i != vArchaedasWallMinions.end(); ++i)
                 {
                     Creature *pTarget = instance->GetCreature(*i);
-                    if (!pTarget || !pTarget->isAlive() || pTarget->getFaction() == 14)
+                    if (!pTarget || !pTarget->IsAlive() || pTarget->getFaction() == 14)
                         continue;
                     archaedas->CastSpell(pTarget, SPELL_AWAKEN_VAULT_WALKER, true);
                     pTarget->CastSpell(pTarget, SPELL_ARCHAEDAS_AWAKEN,true);

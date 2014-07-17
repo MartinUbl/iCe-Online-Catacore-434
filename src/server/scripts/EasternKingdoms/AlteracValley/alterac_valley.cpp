@@ -128,37 +128,37 @@ class mob_av_marshal_or_warmaster : public CreatureScript
 
                 if (uiChargeTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_CHARGE);
+                    DoCast(me->GetVictim(), SPELL_CHARGE);
                     uiChargeTimer = urand(10*IN_MILLISECONDS,25*IN_MILLISECONDS);
                 } else uiChargeTimer -= diff;
 
                 if (uiCleaveTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_CLEAVE);
+                    DoCast(me->GetVictim(), SPELL_CLEAVE);
                     uiCleaveTimer =  urand(10*IN_MILLISECONDS,16*IN_MILLISECONDS);
                 } else uiCleaveTimer -= diff;
 
                 if (uiDemoralizingShoutTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEMORALIZING_SHOUT);
+                    DoCast(me->GetVictim(), SPELL_DEMORALIZING_SHOUT);
                     uiDemoralizingShoutTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
                 } else uiDemoralizingShoutTimer -= diff;
 
                 if (uiWhirlwind1Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_WHIRLWIND1);
+                    DoCast(me->GetVictim(), SPELL_WHIRLWIND1);
                     uiWhirlwind1Timer = urand(6*IN_MILLISECONDS,20*IN_MILLISECONDS);
                 } else uiWhirlwind1Timer -= diff;
 
                 if (uiWhirlwind2Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_WHIRLWIND2);
+                    DoCast(me->GetVictim(), SPELL_WHIRLWIND2);
                     uiWhirlwind2Timer = urand(10*IN_MILLISECONDS,25*IN_MILLISECONDS);
                 } else uiWhirlwind2Timer -= diff;
 
                 if (uiEnrageTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_ENRAGE);
+                    DoCast(me->GetVictim(), SPELL_ENRAGE);
                     uiEnrageTimer = urand(10*IN_MILLISECONDS,30*IN_MILLISECONDS);
                 }else uiEnrageTimer -= diff;
 

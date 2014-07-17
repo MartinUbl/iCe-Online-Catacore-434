@@ -81,19 +81,19 @@ public:
 
             if (uiAvatarTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_AVATAR);
+                DoCast(me->GetVictim(), SPELL_AVATAR);
                 uiAvatarTimer =  urand(15*IN_MILLISECONDS,20*IN_MILLISECONDS);
             } else uiAvatarTimer -= diff;
 
             if (uiThunderclapTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
+                DoCast(me->GetVictim(), SPELL_THUNDERCLAP);
                 uiThunderclapTimer = urand(5*IN_MILLISECONDS,15*IN_MILLISECONDS);
             } else uiThunderclapTimer -= diff;
 
             if (uiStormboltTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_STORMBOLT);
+                DoCast(me->GetVictim(), SPELL_STORMBOLT);
                 uiStormboltTimer = urand(10*IN_MILLISECONDS,25*IN_MILLISECONDS);
             } else uiStormboltTimer -= diff;
 

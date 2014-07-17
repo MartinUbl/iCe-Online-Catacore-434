@@ -265,7 +265,7 @@ class boss_alakir: public CreatureScript
                             m_large_model_guid = tmp_large_model->GetGUID();
                             tmp_large_model->SetMaxHealth(me->GetMaxHealth());
                             tmp_large_model->SetHealth(me->GetHealth());
-                            if (Unit* victim = me->getVictim())
+                            if (Unit* victim = me->GetVictim())
                                 tmp_large_model->AI()->AttackStart(victim);
                         }
 
@@ -404,7 +404,7 @@ class boss_alakir: public CreatureScript
                         } else lightningStrikeTimer -= diff;
 
                     // attack
-                        if (me->IsWithinMeleeRange(me->getVictim()))
+                        if (me->IsWithinMeleeRange(me->GetVictim()))
                             me->InterruptSpell(CURRENT_CHANNELED_SPELL);
                         DoMeleeAttackIfReady();
                         DoSpellAttackIfReady(SPELL_ELECTROCUTE); // case primary target is not in melee range
@@ -470,7 +470,7 @@ class boss_alakir: public CreatureScript
                         } else stormlingTimer -= diff;
 
                     // attack
-                        if (me->IsWithinMeleeRange(me->getVictim()))
+                        if (me->IsWithinMeleeRange(me->GetVictim()))
                             me->InterruptSpell(CURRENT_CHANNELED_SPELL);
                         DoMeleeAttackIfReady();
                         DoSpellAttackIfReady(SPELL_ELECTROCUTE); // case primary target is not in melee range

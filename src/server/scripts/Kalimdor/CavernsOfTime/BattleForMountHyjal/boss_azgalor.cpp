@@ -122,7 +122,7 @@ public:
             if (i == 7 && pInstance)
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_THRALL));
-                if (pTarget && pTarget->isAlive())
+                if (pTarget && pTarget->IsAlive())
                     me->AddThreat(pTarget,0.0f);
             }
         }
@@ -184,7 +184,7 @@ public:
 
             if (CleaveTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 CleaveTimer = 10000+rand()%5000;
             } else CleaveTimer -= diff;
 
@@ -254,7 +254,7 @@ public:
 
         void MoveInLineOfSight(Unit *who)
         {
-            if (me->IsWithinDist(who, 50) && !me->isInCombat() && me->IsHostileTo(who))
+            if (me->IsWithinDist(who, 50) && !me->IsInCombat() && me->IsHostileTo(who))
                 AttackStart(who);
         }
 

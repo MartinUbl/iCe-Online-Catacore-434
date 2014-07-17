@@ -179,7 +179,7 @@ public:
         void InitScriptData()
         {
             Player* pPlayer = NULL;
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* summoner = CAST_SUM(me)->GetSummoner())
                     if (summoner->GetTypeId() == TYPEID_PLAYER)
                         pPlayer = CAST_PLR(summoner);
@@ -194,7 +194,7 @@ public:
         void WaypointReached(uint32 i)
         {
             Player* pPlayer = NULL;
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* summoner = CAST_SUM(me)->GetSummoner())
                     if (summoner->GetTypeId() == TYPEID_PLAYER)
                         pPlayer = CAST_PLR(summoner);
@@ -242,7 +242,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_REPORTS_FROM_THE_FIELD) == QUEST_STATUS_INCOMPLETE)
@@ -402,7 +402,7 @@ public:
         {
             if (Player* pPlayer = me->GetPlayer(*me,uiPlayerGUID))
             {
-                if (pPlayer->isAlive())
+                if (pPlayer->IsAlive())
                 {
                     pSummon->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     pSummon->GetMotionMaster()->MovePoint(0, afCenter[0], afCenter[1], afCenter[2]);

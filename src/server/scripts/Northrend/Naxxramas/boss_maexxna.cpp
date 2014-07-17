@@ -111,7 +111,7 @@ public:
                         {
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true, -SPELL_WEB_WRAP))
                             {
-								if(pTarget != me->getVictim())
+								if(pTarget != me->GetVictim())
 								{
 									pTarget->RemoveAura(RAID_MODE(SPELL_WEB_SPRAY_10,SPELL_WEB_SPRAY_25));
 									uint8 pos = rand()%MAX_POS_WRAP;
@@ -123,7 +123,7 @@ public:
 								{
 									if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true, -SPELL_WEB_WRAP))
 									{
-										if(pTarget != me->getVictim())
+										if(pTarget != me->GetVictim())
 										{
 											pTarget->RemoveAura(RAID_MODE(SPELL_WEB_SPRAY_10,SPELL_WEB_SPRAY_25));
 											uint8 pos = rand()%MAX_POS_WRAP;
@@ -146,7 +146,7 @@ public:
                         events.ScheduleEvent(EVENT_SHOCK, urand(8000,10000));
                         break;
                     case EVENT_POISON:
-                        DoCast(me->getVictim(), RAID_MODE(SPELL_NECROTIC_POISON_10,SPELL_NECROTIC_POISON_25));
+                        DoCast(me->GetVictim(), RAID_MODE(SPELL_NECROTIC_POISON_10,SPELL_NECROTIC_POISON_25));
                         events.ScheduleEvent(EVENT_POISON, urand(7000, 10000));
                         break;
                     case EVENT_FRENZY:

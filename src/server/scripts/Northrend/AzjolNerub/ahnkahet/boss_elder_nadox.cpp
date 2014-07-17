@@ -127,7 +127,7 @@ public:
 
             if (uiPlagueTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BROOD_PLAGUE);
+                DoCast(me->GetVictim(), SPELL_BROOD_PLAGUE);
                 uiPlagueTimer = 15*IN_MILLISECONDS;
             } else uiPlagueTimer -= diff;
 

@@ -174,7 +174,7 @@ public:
             {
                 if (Creature* pSpark = Unit::GetCreature(*me, *itr))
                 {
-                    if (pSpark->isAlive())
+                    if (pSpark->IsAlive())
                     {
                         pSpark->SetSpeed(MOVE_RUN, 2.0f);
                         pSpark->GetMotionMaster()->Clear();
@@ -248,8 +248,8 @@ public:
                         uiSplitTimer = 25*IN_MILLISECONDS;
                         bIsSplitPhase = true;
 
-                        if (me->getVictim())
-                            me->GetMotionMaster()->MoveChase(me->getVictim());
+                        if (me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                 }
                 else
@@ -270,7 +270,7 @@ public:
 
             if (uiBallLightningTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_BALL_LIGHTNING);
+                DoCast(me->GetVictim(), SPELL_BALL_LIGHTNING);
                 uiBallLightningTimer = urand(10*IN_MILLISECONDS, 11*IN_MILLISECONDS);
             }
             else
@@ -357,7 +357,7 @@ public:
                 if (pInstance)
                 {
                     Creature* pIonar = pInstance->instance->GetCreature(pInstance->GetData64(DATA_IONAR));
-                    if (pIonar && pIonar->isAlive())
+                    if (pIonar && pIonar->IsAlive())
                     {
                         if (me->GetDistance(pIonar) > DATA_MAX_SPARK_DISTANCE)
                         {

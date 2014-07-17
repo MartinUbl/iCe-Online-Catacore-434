@@ -98,7 +98,7 @@ class npc_maxima_darkmoon: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MAXIMA_GOSSIP_1_INFO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -298,7 +298,7 @@ class npc_teleporter_fozlebub: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FOZLEBUB_GOSSIP_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -427,7 +427,7 @@ class npc_jessica_darkmoon: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, JESSICA_GOSSIP_1_INFO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -754,7 +754,7 @@ class npc_rinling_darkmoon: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, RINLING_GOSSIP_1_INFO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -1086,7 +1086,7 @@ class npc_darkmoon_mola: public CreatureScript
             if (!pPlayer || pPlayer->IsInWorld() == false)
                 return true;
 
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, MOLA_GOSSIP_INFO_TEXT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -1600,7 +1600,7 @@ class npc_finlay_darkmoon: public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, FINLAY_GOSSIP_1_INFO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);

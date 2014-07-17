@@ -1197,7 +1197,7 @@ class boss_Alysrazor : public CreatureScript
                             GetCreatureListWithEntryInGrid(creatures, me, NPC_BLAZING_TALON_INITIATE, 100.0f);
                             if (!creatures.empty())
                                 for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                                    if ((*iter)->IsInWorld() && (*iter)->isAlive())
+                                    if ((*iter)->IsInWorld() && (*iter)->IsAlive())
                                         (*iter)->CastSpell((*iter), SPELL_BLAZING_SHIELD_HC, false);
                         }
 
@@ -1429,17 +1429,17 @@ class boss_Alysrazor : public CreatureScript
                     if (!UpdateVictim() || !FlyUP)
                         return;
 
-                    if ((FlyTimer <= diff || me->GetMotionMaster()->GetCurrentMovementGeneratorType() == 0) && me->GetDistance(me->getVictim()) >= 2.0f)
+                    if ((FlyTimer <= diff || me->GetMotionMaster()->GetCurrentMovementGeneratorType() == 0) && me->GetDistance(me->GetVictim()) >= 2.0f)
                     {
-                        me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()+7.0f);
+                        me->GetMotionMaster()->MovePoint(0, me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY(), me->GetVictim()->GetPositionZ()+7.0f);
                         FlyTimer = 500;
                     }
 
-                    if (me->GetDistance(me->getVictim()) < 1.0f)
+                    if (me->GetDistance(me->GetVictim()) < 1.0f)
                         me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
 
                     if (me->GetPositionZ() < 60.0f)
-                        me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), 65.0f);
+                        me->GetMotionMaster()->MovePoint(0, me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY(), 65.0f);
                 }
 
                 if (Phase == 6 && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == 0 && me->GetPositionZ() > 100.0f)
@@ -1937,7 +1937,7 @@ class npc_molten_meteor : public CreatureScript
                 }
                 else FallTimer -=diff;
                 
-                if (Fall && me->isAlive())
+                if (Fall && me->IsAlive())
                 {
                     me->GetMotionMaster()->MovePoint(0, me->GetPositionX() + 60*cos(i), me->GetPositionY() + 60*sin(i), 60.0f);
                     if (me->GetDistance(-49.34f, -277.97f, 70.0f) > distance)
@@ -2376,7 +2376,7 @@ class npc_Voracious_Hatchling : public CreatureScript
 
                 if (losTimer <= diff) // Player can hide in LoS in meteor (GO) and hatchling can attack cause he is not in LoS
                 {
-                    if (Unit * vic = me->getVictim())
+                    if (Unit * vic = me->GetVictim())
                     {
                         if (vic->IsInWorld() && !me->IsWithinLOSInMap(vic))
                             me->GetMotionMaster()->MovePoint(0, vic->GetPositionX(), vic->GetPositionY(), vic->GetPositionZ());
@@ -2425,7 +2425,7 @@ class npc_Voracious_Hatchling : public CreatureScript
 
                 if (GushingWoundTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_GUSHING_WOUND_Y10, false);
+                    me->CastSpell(me->GetVictim(), SPELL_GUSHING_WOUND_Y10, false);
                     GushingWoundTimer = 60000;
                 }
                 else GushingWoundTimer -= diff;

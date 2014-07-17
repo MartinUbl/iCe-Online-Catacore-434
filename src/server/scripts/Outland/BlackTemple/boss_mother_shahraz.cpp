@@ -166,7 +166,7 @@ public:
             for (uint8 i = 0; i < 3; ++i)
             {
                 Unit* pUnit = SelectUnit(SELECT_TARGET_RANDOM, 1);
-                if (pUnit && pUnit->isAlive() && (pUnit->GetTypeId() == TYPEID_PLAYER))
+                if (pUnit && pUnit->IsAlive() && (pUnit->GetTypeId() == TYPEID_PLAYER))
                 {
                     TargetGUID[i] = pUnit->GetGUID();
                     pUnit->CastSpell(pUnit, SPELL_TELEPORT_VISUAL, true);
@@ -191,7 +191,7 @@ public:
             if (BeamTimer <= diff)
             {
                 Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                if (!pTarget || !pTarget->isAlive())
+                if (!pTarget || !pTarget->IsAlive())
                     return;
 
                 BeamTimer = 9000;
@@ -269,13 +269,13 @@ public:
 
             if (ShriekTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SILENCING_SHRIEK);
+                DoCast(me->GetVictim(), SPELL_SILENCING_SHRIEK);
                 ShriekTimer = 25000+rand()%10 * 1000;
             } else ShriekTimer -= diff;
 
             if (SaberTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SABER_LASH);
+                DoCast(me->GetVictim(), SPELL_SABER_LASH);
                 SaberTimer = 25000+rand()%10 * 1000;
             } else SaberTimer -= diff;
 

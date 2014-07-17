@@ -131,7 +131,7 @@ public:
             {
                 if (Player* pPlayer = i->getSource())
                 {
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                         return false;
                 }
             }

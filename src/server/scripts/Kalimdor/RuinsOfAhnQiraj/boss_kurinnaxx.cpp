@@ -102,7 +102,7 @@ public:
             //Mortal Wound spell
             if (uiMortalWoundTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MORTALWOUND);
+                DoCast(me->GetVictim(), SPELL_MORTALWOUND);
                 uiMortalWoundTimer = urand(2000,7000);
             } else uiMortalWoundTimer -= diff;
 
@@ -117,7 +117,7 @@ public:
             //Wide Slash spell
             if (uiWideSlashTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WIDE_SLASH);
+                DoCast(me->GetVictim(), SPELL_WIDE_SLASH);
                 uiWideSlashTimer = urand(10000,15000);
             } else uiWideSlashTimer -= diff;
 

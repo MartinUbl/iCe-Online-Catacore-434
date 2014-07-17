@@ -521,7 +521,7 @@ void BattlegroundSA::TeleportPlayers()
             if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
                 plr->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
-            if (!plr->isAlive())
+            if (!plr->IsAlive())
             {
                 plr->ResurrectPlayer(1.0f);
                 plr->SpawnCorpseBones();

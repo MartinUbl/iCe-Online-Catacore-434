@@ -532,7 +532,7 @@ public:
             {
                 SetCombatMovement(true);
                 if(m_uiPhase == PHASE_DRAGONS)
-                    if(Unit *pVehicle = ((Unit*)Unit::GetUnit(*me, me->getVictim()->GetGUID())))
+                    if(Unit *pVehicle = ((Unit*)Unit::GetUnit(*me, me->GetVictim()->GetGUID())))
                         me->GetMotionMaster()->MoveChase(pVehicle);
             }
         }
@@ -576,7 +576,7 @@ public:
                 Map::PlayerList const &lPlayers = pMap->GetPlayers();
                 for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                 {
-                    if(!itr->getSource()->isAlive())
+                    if(!itr->getSource()->IsAlive())
                         continue;
                     itr->getSource()->NearTeleportTo(VortexLoc[0].x, VortexLoc[0].y, VORTEX_Z, 0); 
                     itr->getSource()->CastSpell(itr->getSource(), SPELL_VORTEX, true, NULL, NULL, me->GetGUID());
@@ -599,7 +599,7 @@ public:
                     Map::PlayerList const &lPlayers = pMap->GetPlayers();
                     for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                     {
-                        if(!itr->getSource()->isAlive())
+                        if(!itr->getSource()->IsAlive())
                             continue;
 
                         itr->getSource()->KnockbackFrom(pVortex->GetPositionX(), pVortex->GetPositionY(),-float(pVortex->GetDistance2d(itr->getSource())),7);
@@ -612,8 +612,8 @@ public:
                 {
                     me->SetFlying(false);
                     me->RemoveUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
-                    if(me->getVictim())
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                    if(me->GetVictim())
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                     Creature* pVortex = GetClosestCreatureWithEntry(me, NPC_VORTEX, 100.0f);
                     if(pVortex)
@@ -659,9 +659,9 @@ public:
             int max_lords = m_uiIs10Man ? NEXUS_LORD_COUNT :NEXUS_LORD_COUNT_H;
             for(int i=0; i < max_lords;i++)
             {
-                if(Creature *pLord = me->SummonCreature(NPC_NEXUS_LORD, me->getVictim()->GetPositionX()-5+rand()%10, me->getVictim()->GetPositionY()-5+rand()%10, me->getVictim()->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                if(Creature *pLord = me->SummonCreature(NPC_NEXUS_LORD, me->GetVictim()->GetPositionX()-5+rand()%10, me->GetVictim()->GetPositionY()-5+rand()%10, me->GetVictim()->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
                 {
-                    pLord->AI()->AttackStart(me->getVictim());
+                    pLord->AI()->AttackStart(me->GetVictim());
                     pLord->SetInCombatWithZone();
                 }
             }
@@ -940,7 +940,7 @@ public:
                 me->SetSpeed(MOVE_RUN, 3.5f, true);
                 me->SetSpeed(MOVE_WALK, 3.5f, true);
 				SetCombatMovement(true);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
             }else m_uiEnrageTimer -= uiDiff;
      
             if(m_uiPhase == PHASE_FLOOR)
@@ -1176,9 +1176,9 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         me->GetMotionMaster()->Clear(false);        // No moving!
                         me->GetMotionMaster()->MoveIdle();
-                        if(Unit *pVehicle = ((Unit*)Unit::GetUnit(*me, me->getVictim()->GetGUID())))
+                        if(Unit *pVehicle = ((Unit*)Unit::GetUnit(*me, me->GetVictim()->GetGUID())))
                         {
-                            float victim_threat = me->getThreatManager().getThreat(me->getVictim());
+                            float victim_threat = me->getThreatManager().getThreat(me->GetVictim());
                             DoResetThreat();
                             me->AI()->AttackStart(pVehicle);
                             me->AddThreat(pVehicle, victim_threat);
@@ -1335,7 +1335,7 @@ public:
                     {
                         case 1:
                             pAlexstrasza->SetVisible(true);
-                            pAlexstrasza->SetFacingToObject(me->getVictim());
+                            pAlexstrasza->SetFacingToObject(me->GetVictim());
                             break;
                         case 4:
                             m_uiSubPhase = SUBPHASE_DIE;
@@ -1472,7 +1472,7 @@ public:
         //    Map::PlayerList const &lPlayers = pMap->GetPlayers();
         //    for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
         //    {
-        //        if(!itr->getSource()->isAlive())
+        //        if(!itr->getSource()->IsAlive())
         //        continue;
 
         //        if(itr->getSource()->IsWithinDist2d(me->GetPositionX(), me->GetPositionY(), 15.0f) && !itr->getSource()->HasAura(55849))
@@ -1505,7 +1505,7 @@ public:
 
                 if(Creature* pMalygos = (Creature*)Unit::GetUnit(*me, pMalygosGUID))
                 {
-                    if(!pMalygos->isAlive())
+                    if(!pMalygos->IsAlive())
                     {
                         me->ForcedDespawn();
                         return;
@@ -1589,13 +1589,13 @@ public:
 		void DamageTaken(Unit* pWho, uint32& amount) //OJaaaa
 		{
 			if(pWho && ((Creature *)pWho)->GetEntry() == NPC_NEXUS_LORD)
-				WorkaroundAttack(me->getVictim());
+				WorkaroundAttack(me->GetVictim());
 		}
 
 		void WorkaroundAttack(Unit* pTarget) //OJaaaa
 		{
 			if(!pTarget)
-				pTarget = me->getVictim();
+				pTarget = me->GetVictim();
 
 			if(!pTarget)
 				return;
@@ -1718,7 +1718,7 @@ public:
           Map::PlayerList const &lPlayers = pMap->GetPlayers();
           for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
           {
-            if(!itr->getSource()->isAlive())
+            if(!itr->getSource()->IsAlive())
               continue;
 
             if(!itr->getSource()->IsWithinDist2d(me->GetPositionX(), me->GetPositionY(), realRange))

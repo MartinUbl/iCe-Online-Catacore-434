@@ -817,7 +817,7 @@ namespace Trinity
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_ENEMY:
-                        if (target->isTotem())
+                        if (target->IsTotem())
                             continue;
                         if (!target->isAttackableByAOE(i_requireDeadTarget, m_spellInfo))
                             continue;
@@ -833,7 +833,7 @@ namespace Trinity
                         }
                         break;
                     case SPELL_TARGETS_ALLY:
-                        if (target->isTotem())
+                        if (target->IsTotem())
                             continue;
                         if (!i_source->IsFriendlyTo(target))
                             continue;
@@ -841,7 +841,7 @@ namespace Trinity
                             continue;
                         if (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster())
                             continue;
-                        if (target->isAlive() == i_requireDeadTarget)
+                        if (target->IsAlive() == i_requireDeadTarget)
                             continue;
                         break;
                     case SPELL_TARGETS_ENTRY:

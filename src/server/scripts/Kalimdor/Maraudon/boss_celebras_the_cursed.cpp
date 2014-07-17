@@ -79,7 +79,7 @@ public:
             //EntanglingRoots
             if (EntanglingRoots_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ENTANGLINGROOTS);
+                DoCast(me->GetVictim(), SPELL_ENTANGLINGROOTS);
                 EntanglingRoots_Timer = 20000;
             } else EntanglingRoots_Timer -= diff;
 

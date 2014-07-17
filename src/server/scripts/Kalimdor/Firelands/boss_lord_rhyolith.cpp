@@ -683,7 +683,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!UpdateVictim() || !me->getVictim())
+            if (!UpdateVictim() || !me->GetVictim())
                 return;
 
             if (debugWhispTimer <= diff)
@@ -712,12 +712,12 @@ public:
                 //reset damage count dealt by players for getting loot
                 me->ResetPlayerDamageReq();
                 //me->SetReactState(REACT_AGGRESSIVE);
-                //me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
+                //me->SetUInt64Value(UNIT_FIELD_TARGET,me->GetVictim()->GetGUID());
 
                 // back to normal movement
 
                 //me->GetMotionMaster()->MovementExpired(true);
-                //me->GetMotionMaster()->MoveChase(me->getVictim());
+                //me->GetMotionMaster()->MoveChase(me->GetVictim());
                 me->SetWalk(false);
                 me->SetSpeed(MOVE_RUN,1.0f,true);
 
@@ -988,9 +988,9 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     me->SetRooted(false);
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, me->getVictim()->GetGUID());
+                    me->SetUInt64Value(UNIT_FIELD_TARGET, me->GetVictim()->GetGUID());
                     me->GetMotionMaster()->MovementExpired(true);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     canAttackIn2Phase = true;
                     sitAnimTimer = NEVER;
                 }
@@ -1015,7 +1015,7 @@ public:
 
                     if (IsHeroic())
                     {
-                        //me->CastSpell(me->getVictim(),101324,true); // Summon spell
+                        //me->CastSpell(me->GetVictim(),101324,true); // Summon spell
 
                         Unit * pl1 = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
                         Unit * pl2 = SelectTarget(SELECT_TARGET_RANDOM,0,100.0f,true);
@@ -1213,7 +1213,7 @@ public:
                     Map::PlayerList const& plList = pInstance->instance->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                     {
-                        if ((*itr).getSource()->isAlive() && (*itr).getSource()->isGameMaster() == false) 
+                        if ((*itr).getSource()->IsAlive() && (*itr).getSource()->isGameMaster() == false) 
                             targetList.push_back((*itr).getSource());
                     }
 

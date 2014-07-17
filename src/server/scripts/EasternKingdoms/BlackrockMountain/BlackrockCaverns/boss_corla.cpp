@@ -155,7 +155,7 @@ public:
                     Creature* pZealot = me->GetCreature(*me, ZealotGUID);
                     if(pZealot)
                     {
-                        if(pZealot->isAlive())
+                        if(pZealot->IsAlive())
                         {
                             achiev = false;
                             pZealot->Kill(pZealot);
@@ -395,7 +395,7 @@ public:
                 case 3:
                 case 4:
                 case 5:
-                    me->CastSpell(me->getVictim(), DUNGEON_MODE(SPELL_GRAVITY_STRIKE, SPELL_GRAVITY_STRIKE_H), false);
+                    me->CastSpell(me->GetVictim(), DUNGEON_MODE(SPELL_GRAVITY_STRIKE, SPELL_GRAVITY_STRIKE_H), false);
                     break;
                 case 6:
                     me->CastSpell(me, DUNGEON_MODE(SPELL_GRIEVOUS_WHIRL, SPELL_GRIEVOUS_WHIRL_H), false);

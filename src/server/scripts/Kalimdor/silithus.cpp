@@ -91,7 +91,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(7785) == QUEST_STATUS_NONE &&
@@ -200,7 +200,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(8304) == QUEST_STATUS_INCOMPLETE &&

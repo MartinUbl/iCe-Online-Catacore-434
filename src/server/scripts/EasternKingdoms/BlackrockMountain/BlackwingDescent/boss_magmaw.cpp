@@ -238,16 +238,16 @@ public:
             {
                 if (MagmaSpitTimer <= diff)
                 {
-                    if (me->getVictim()->GetDistance(me) > 17.5f)
+                    if (me->GetVictim()->GetDistance(me) > 17.5f)
                     {
                         enraged = true;
-                        me->CastSpell(me->getVictim(), SPELL_MAGMA_SPIT_ENRAGE, false);
+                        me->CastSpell(me->GetVictim(), SPELL_MAGMA_SPIT_ENRAGE, false);
                         MagmaSpitTimer = urand(6000, 9000);
                     }
                     else
                     {
                         enraged = false;
-                        me->CastSpell(me->getVictim(), SPELL_MAGMA_SPIT, false);
+                        me->CastSpell(me->GetVictim(), SPELL_MAGMA_SPIT, false);
                         MagmaSpitTimer = urand(8000, 13000);
                     }
                 }
@@ -277,7 +277,7 @@ public:
                     if (SpawnPincerTimer <= diff)
                     {
                         for (uint8 i = 0; i < PINCER_COUNT; i++)
-                            pPincers[i] = me->getVictim()->SummonGameObject(800001, PincerPos[i].m_positionX, PincerPos[i].m_positionY, PincerPos[i].m_positionZ, PincerPos[i].m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                            pPincers[i] = me->GetVictim()->SummonGameObject(800001, PincerPos[i].m_positionX, PincerPos[i].m_positionY, PincerPos[i].m_positionZ, PincerPos[i].m_orientation, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                         DespawnPincerTimer = 10000;
                         SpawnPincerTimer = 0;
                     }
@@ -289,8 +289,8 @@ public:
                 {
                     if (MangleTimer <= diff)
                     {
-                        me->CastSpell(me->getVictim(), SPELL_MANGLE, false);
-                        me->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, false);
+                        me->CastSpell(me->GetVictim(), SPELL_MANGLE, false);
+                        me->CastSpell(me->GetVictim(), SPELL_SWELTERING_ARMOR, false);
                         MangleTimer = 0;
                         //EatTimer = 5000;
                         SpawnPincerTimer = 5000;
@@ -314,11 +314,11 @@ public:
                 {
                     if (EatTimer <= diff)
                     {
-                        me->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, false);
-                        if (me->getVictim()->ToPlayer())
+                        me->CastSpell(me->GetVictim(), SPELL_SWELTERING_ARMOR, false);
+                        if (me->GetVictim()->ToPlayer())
                         {
-                            me->getVictim()->ToPlayer()->EnterVehicle(me, 0);
-                            pInVehicle = me->getVictim()->ToPlayer();
+                            me->GetVictim()->ToPlayer()->EnterVehicle(me, 0);
+                            pInVehicle = me->GetVictim()->ToPlayer();
                         }
 
                         // SPRAY the room!

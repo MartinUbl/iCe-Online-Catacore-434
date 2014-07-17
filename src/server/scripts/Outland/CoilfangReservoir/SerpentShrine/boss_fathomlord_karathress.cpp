@@ -145,7 +145,7 @@ public:
                     if (RAdvisors[i])
                     {
                         pAdvisor = (Unit::GetCreature((*me), RAdvisors[i]));
-                        if (pAdvisor && !pAdvisor->isAlive())
+                        if (pAdvisor && !pAdvisor->IsAlive())
                         {
                             pAdvisor->Respawn();
                             pAdvisor->AI()->EnterEvadeMode();
@@ -223,7 +223,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -253,7 +253,7 @@ public:
 
                 //if there aren't other units, cast on the tank
                 if (!pTarget)
-                    pTarget = me->getVictim();
+                    pTarget = me->GetVictim();
 
                 if (pTarget)
                     DoCast(pTarget, SPELL_CATACLYSMIC_BOLT);
@@ -263,7 +263,7 @@ public:
             //SearNova_Timer
             if (SearNova_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SEAR_NOVA);
+                DoCast(me->GetVictim(), SPELL_SEAR_NOVA);
                 SearNova_Timer = 20000+rand()%40000;
             } else SearNova_Timer -= diff;
 
@@ -284,7 +284,7 @@ public:
                     if (Advisors[i])
                     {
                         Advisor = (Unit::GetCreature(*me, Advisors[i]));
-                        if (Advisor && Advisor->isAlive())
+                        if (Advisor && Advisor->IsAlive())
                         {
                             continueTriggering = true;
                             break;
@@ -343,7 +343,7 @@ public:
             pet = false;
 
             Creature *Pet = Unit::GetCreature(*me, SummonedPet);
-            if (Pet && Pet->isAlive())
+            if (Pet && Pet->IsAlive())
             {
                 Pet->DealDamage(Pet, Pet->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             }
@@ -362,7 +362,7 @@ public:
                 Karathress = (Unit::GetCreature((*me), pInstance->GetData64(DATA_KARATHRESS)));
 
                 if (Karathress)
-                    if (!me->isAlive() && Karathress)
+                    if (!me->IsAlive() && Karathress)
                         CAST_AI(boss_fathomlord_karathress::boss_fathomlord_karathressAI, Karathress->AI())->EventSharkkisDeath();
             }
         }
@@ -379,7 +379,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -403,14 +403,14 @@ public:
             //LeechingThrow_Timer
             if (LeechingThrow_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_LEECHING_THROW);
+                DoCast(me->GetVictim(), SPELL_LEECHING_THROW);
                 LeechingThrow_Timer = 20000;
             } else LeechingThrow_Timer -= diff;
 
             //Multishot_Timer
             if (Multishot_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MULTISHOT);
+                DoCast(me->GetVictim(), SPELL_MULTISHOT);
                 Multishot_Timer = 20000;
             } else Multishot_Timer -= diff;
 
@@ -419,7 +419,7 @@ public:
             {
                 DoCast(me, SPELL_THE_BEAST_WITHIN);
                 Creature *Pet = Unit::GetCreature(*me, SummonedPet);
-                if (Pet && Pet->isAlive())
+                if (Pet && Pet->IsAlive())
                 {
                     Pet->CastSpell(Pet, SPELL_PET_ENRAGE, true);
                 }
@@ -502,7 +502,7 @@ public:
                 Karathress = (Unit::GetCreature((*me), pInstance->GetData64(DATA_KARATHRESS)));
 
                 if (Karathress)
-                    if (!me->isAlive() && Karathress)
+                    if (!me->IsAlive() && Karathress)
                         CAST_AI(boss_fathomlord_karathress::boss_fathomlord_karathressAI, Karathress->AI())->EventTidalvessDeath();
             }
         }
@@ -520,7 +520,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -549,7 +549,7 @@ public:
             //FrostShock_Timer
             if (FrostShock_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROST_SHOCK);
+                DoCast(me->GetVictim(), SPELL_FROST_SHOCK);
                 FrostShock_Timer = 25000+rand()%5000;
             } else FrostShock_Timer -= diff;
 
@@ -560,7 +560,7 @@ public:
                 Unit *SpitfireTotem = Unit::GetUnit(*me, CREATURE_SPITFIRE_TOTEM);
                 if (SpitfireTotem)
                 {
-                    CAST_CRE(SpitfireTotem)->AI()->AttackStart(me->getVictim());
+                    CAST_CRE(SpitfireTotem)->AI()->AttackStart(me->GetVictim());
                 }
                 Spitfire_Timer = 60000;
             } else Spitfire_Timer -= diff;
@@ -629,7 +629,7 @@ public:
                 Karathress = (Unit::GetCreature((*me), pInstance->GetData64(DATA_KARATHRESS)));
 
                 if (Karathress)
-                    if (!me->isAlive() && Karathress)
+                    if (!me->IsAlive() && Karathress)
                         CAST_AI(boss_fathomlord_karathress::boss_fathomlord_karathressAI, Karathress->AI())->EventCaribdisDeath();
             }
         }
@@ -646,7 +646,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             //Only if not incombat check if the event is started
-            if (!me->isInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
+            if (!me->IsInCombat() && pInstance && pInstance->GetData(DATA_KARATHRESSEVENT))
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_KARATHRESSEVENT_STARTER));
 
@@ -670,19 +670,19 @@ public:
             //WaterBoltVolley_Timer
             if (WaterBoltVolley_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WATER_BOLT_VOLLEY);
+                DoCast(me->GetVictim(), SPELL_WATER_BOLT_VOLLEY);
                 WaterBoltVolley_Timer = 30000;
             } else WaterBoltVolley_Timer -= diff;
 
             //TidalSurge_Timer
             if (TidalSurge_Timer <= diff)
             {
-                Unit* vict = me->getVictim();
+                Unit* vict = me->GetVictim();
                 if (vict)
                 {
-                    DoCast(me->getVictim(), SPELL_TIDAL_SURGE);
+                    DoCast(me->GetVictim(), SPELL_TIDAL_SURGE);
                     // Hacky way to do it - won't trigger elseways
-                    me->getVictim()->CastSpell(me->getVictim(), SPELL_TIDAL_SURGE_FREEZE, true);
+                    me->GetVictim()->CastSpell(me->GetVictim(), SPELL_TIDAL_SURGE_FREEZE, true);
                 }
                 TidalSurge_Timer = 15000+rand()%5000;
             } else TidalSurge_Timer -= diff;
@@ -713,12 +713,12 @@ public:
                 // It can be cast on any of the mobs
                 Unit *pUnit = NULL;
 
-                while (pUnit == NULL || !pUnit->isAlive())
+                while (pUnit == NULL || !pUnit->IsAlive())
                 {
                     pUnit = selectAdvisorUnit();
                 }
 
-                if (pUnit && pUnit->isAlive())
+                if (pUnit && pUnit->IsAlive())
                     DoCast(pUnit, SPELL_HEAL);
                 Heal_Timer = 60000;
             } else Heal_Timer -= diff;

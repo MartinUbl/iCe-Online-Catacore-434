@@ -171,7 +171,7 @@ class boss_karsh: public CreatureScript
                 // Cleave, nic specialniho
                 if (CleaveTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_CLEAVE, false);
+                    me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
                     CleaveTimer = urand(30,60)*100;
                 } else CleaveTimer -= diff;
 

@@ -61,7 +61,7 @@ public:
             if (FlyBackTimer <= diff)
             {
                 Player *plr = NULL;
-                if (me->isSummon())
+                if (me->IsSummon())
                     if (Unit *summoner = CAST_SUM(me)->GetSummoner())
                         if (summoner->GetTypeId() == TYPEID_PLAYER)
                             plr = CAST_PLR(summoner);

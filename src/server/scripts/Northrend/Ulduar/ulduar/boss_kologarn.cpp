@@ -260,7 +260,7 @@ public:
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
             
-            if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))
+            if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->GetVictim()))
                 DoCastAOE(SPELL_PETRIFY_BREATH, true);
         
             if (!left && !right)
@@ -272,12 +272,12 @@ public:
                 case EVENT_SMASH:
                     if (left && right)
                     {
-                        if (me->IsWithinMeleeRange(me->getVictim()))
+                        if (me->IsWithinMeleeRange(me->GetVictim()))
                             DoCastVictim(SPELL_TWO_ARM_SMASH, true);
                     }
                     else if (left || right)
                     {
-                        if (me->IsWithinMeleeRange(me->getVictim()))
+                        if (me->IsWithinMeleeRange(me->GetVictim()))
                             DoCastVictim(SPELL_ONE_ARM_SMASH, true);
                     }
                     events.RescheduleEvent(EVENT_SMASH, 15000);
@@ -412,8 +412,8 @@ public:
         {
             if (checkTimer <= diff)
             {
-                if (me->getVictim() && me->getVictim()->isAlive())
-                    me->GetMotionMaster()->MovePoint(0,me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ());
+                if (me->GetVictim() && me->GetVictim()->IsAlive())
+                    me->GetMotionMaster()->MovePoint(0,me->GetVictim()->GetPositionX(),me->GetVictim()->GetPositionY(),me->GetVictim()->GetPositionZ());
             
                 checkTimer = 500;
             }
@@ -541,7 +541,7 @@ public:
                 {
                     for (uint8 n = 0; n < RAID_MODE(1, 3); ++n)
                     {
-                        if (me->GetVehicleKit()->GetPassenger(n) && me->GetVehicleKit()->GetPassenger(n)->isAlive())
+                        if (me->GetVehicleKit()->GetPassenger(n) && me->GetVehicleKit()->GetPassenger(n)->IsAlive())
                             me->Kill(me->GetVehicleKit()->GetPassenger(n), true);
                     }
                     Gripped = false;
@@ -559,7 +559,7 @@ public:
                     {
                         if (Unit* GripTarget = Unit::GetUnit(*me, GripTargetGUID[n]))
                         {
-                            if (GripTarget && GripTarget->isAlive())
+                            if (GripTarget && GripTarget->IsAlive())
                             {
                                 GripTarget->EnterVehicle(me, n);
                                 me->AddAura(SPELL_STONE_GRIP, GripTarget);
@@ -587,7 +587,7 @@ public:
                     for (uint8 n = 0; n < RAID_MODE(1, 3); ++n)
                     {
                         Unit* pGripTarget = me->GetVehicleKit()->GetPassenger(n);
-                        if (pGripTarget && pGripTarget->isAlive())
+                        if (pGripTarget && pGripTarget->IsAlive())
                         {
                             pGripTarget->RemoveAurasDueToSpell(SPELL_STONE_GRIP);
                             pGripTarget->RemoveAurasDueToSpell(SPELL_STONE_GRIP_STUN);

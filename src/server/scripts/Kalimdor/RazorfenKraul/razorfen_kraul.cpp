@@ -174,7 +174,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isAlive())
+            if (!me->IsAlive())
                 return;
 
             if (pInstance)

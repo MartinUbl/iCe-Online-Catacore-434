@@ -105,7 +105,7 @@ public:
         void UpdateAI(const uint32 /*diff*/)
         {
             Unit* temp = Unit::GetUnit((*me),FrostTombGUID);
-            if ((temp && temp->isAlive() && !temp->HasAura(SPELL_FROST_TOMB)) || !temp)
+            if ((temp && temp->IsAlive() && !temp->HasAura(SPELL_FROST_TOMB)) || !temp)
                 me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
         }
     };
@@ -206,7 +206,7 @@ public:
             if (ShadowboltTimer <= diff)
             {
                 Unit *pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
-                if (pTarget && pTarget->isAlive() && pTarget->GetTypeId() == TYPEID_PLAYER)
+                if (pTarget && pTarget->IsAlive() && pTarget->GetTypeId() == TYPEID_PLAYER)
                     me->CastSpell(pTarget, DUNGEON_MODE(SPELL_SHADOWBOLT, SPELL_SHADOWBOLT_HEROIC), true);
                 ShadowboltTimer = 5000;
             } else ShadowboltTimer -= diff;
@@ -224,7 +224,7 @@ public:
                         {
                             Skeleton->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             Skeleton->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY() , me->GetPositionZ());
-                            Skeleton->AddThreat(me->getVictim(), 0.0f);
+                            Skeleton->AddThreat(me->GetVictim(), 0.0f);
                             DoZoneInCombat(Skeleton);
                         }
                     }
@@ -235,7 +235,7 @@ public:
             if (FrostTombTimer <= diff)
             {
                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    if (pTarget->isAlive())
+                    if (pTarget->IsAlive())
                     {
                         //DoCast(pTarget, SPELL_FROST_TOMB_SUMMON, true);
                         if (Creature *pChains = me->SummonCreature(CREATURE_FROSTTOMB, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 20000))
@@ -317,10 +317,10 @@ public:
             me->SetStandState(UNIT_STAND_STATE_STAND);
             DoCast(me, SPELL_SCOURGE_RESSURRECTION, true);
 
-            if (me->getVictim())
+            if (me->GetVictim())
             {
-                me->GetMotionMaster()->MoveChase(me->getVictim());
-                me->AI()->AttackStart(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
+                me->AI()->AttackStart(me->GetVictim());
             }
             else
                 me->GetMotionMaster()->Initialize();
@@ -345,7 +345,7 @@ public:
 
                     if (Decrepify_Timer <= diff)
                     {
-                        DoCast(me->getVictim(), SPELL_DECREPIFY);
+                        DoCast(me->GetVictim(), SPELL_DECREPIFY);
                         Decrepify_Timer = 30000;
                     } else Decrepify_Timer -= diff;
 
@@ -353,7 +353,7 @@ public:
                 }
             }else
             {
-                if (me->isAlive())
+                if (me->IsAlive())
                     me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             }
 

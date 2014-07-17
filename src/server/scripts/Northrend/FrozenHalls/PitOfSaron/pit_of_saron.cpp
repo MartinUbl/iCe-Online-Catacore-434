@@ -252,7 +252,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_GLACIAL_STRIKE:
-                        DoCast(me->getVictim(), SPELL_GLACIAL_STRIKE);
+                        DoCast(me->GetVictim(), SPELL_GLACIAL_STRIKE);
                         events.RescheduleEvent(EVENT_GLACIAL_STRIKE, 8000);
                         return;
                     case EVENT_FROSTBLADE:
@@ -445,7 +445,7 @@ public:
                         events.RescheduleEvent(EVENT_BLINDING_DIRT, 10000);
                         return;
                     case EVENT_PUNCTURE_WOUND:
-                        DoCast(me->getVictim(), SPELL_PUNCTURE_WOUND);
+                        DoCast(me->GetVictim(), SPELL_PUNCTURE_WOUND);
                         events.RescheduleEvent(EVENT_PUNCTURE_WOUND, 9000);
                         return;
                     case EVENT_SHOVELLED:
@@ -697,7 +697,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_FROST_BREATH:
-                        DoCast(me->getVictim(), SPELL_FROST_BREATH);
+                        DoCast(me->GetVictim(), SPELL_FROST_BREATH);
                         events.RescheduleEvent(EVENT_FROST_BREATH, 10000);
                         return;
                 }
@@ -753,7 +753,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_DEVOUR_FLESH:
-                        DoCast(me->getVictim(), SPELL_DEVOUR_FLESH);
+                        DoCast(me->GetVictim(), SPELL_DEVOUR_FLESH);
                         events.RescheduleEvent(EVENT_DEVOUR_FLESH, 8000);
                         return;
                 }
@@ -811,7 +811,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_ARCING_SLICE:
-                        DoCast(me->getVictim(), SPELL_ARCING_SLICE);
+                        DoCast(me->GetVictim(), SPELL_ARCING_SLICE);
                         events.RescheduleEvent(EVENT_ARCING_SLICE, 10000);
                         return;
                     case EVENT_DEMORALIZING_SHOUT:
@@ -819,7 +819,7 @@ public:
                         events.RescheduleEvent(EVENT_DEMORALIZING_SHOUT, 20000);
                         return;
                     case EVENT_SHIELD_BLOCK:
-                        DoCast(me->getVictim(), SPELL_SHIELD_BLOCK);
+                        DoCast(me->GetVictim(), SPELL_SHIELD_BLOCK);
                         events.RescheduleEvent(EVENT_SHIELD_BLOCK, 8000);
                         return;
                 }

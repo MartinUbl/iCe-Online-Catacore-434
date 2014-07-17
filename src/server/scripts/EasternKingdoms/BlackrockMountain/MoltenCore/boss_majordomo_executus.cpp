@@ -122,7 +122,7 @@ public:
             //Blastwave_Timer
             if (Blastwave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BLASTWAVE);
+                DoCast(me->GetVictim(), SPELL_BLASTWAVE);
                 Blastwave_Timer = 10000;
             } else Blastwave_Timer -= diff;
 

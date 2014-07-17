@@ -223,8 +223,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim() && !me->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                me->Kill(me->getVictim());
+            if (me->GetVictim() && !me->GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                me->Kill(me->GetVictim());
 
             events.Update(diff);
 

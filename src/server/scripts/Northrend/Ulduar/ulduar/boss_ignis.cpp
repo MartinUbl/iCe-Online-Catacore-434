@@ -238,7 +238,7 @@ public:
                         break;
                     case EVENT_SCORCH:
                         DoScriptText(RAND(SAY_SCORCH_1, SAY_SCORCH_2), me);
-                        if (Unit *pTarget = me->getVictim())
+                        if (Unit *pTarget = me->GetVictim())
                             me->SummonCreature(NPC_GROUND_SCORCH, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45000);
                         DoCast(SPELL_SCORCH);
                         events.RescheduleEvent(EVENT_SCORCH,25000);
@@ -273,7 +273,7 @@ public:
                 summon->SetReactState(REACT_AGGRESSIVE);
                 summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
             }
-            summon->AI()->AttackStart(me->getVictim());
+            summon->AI()->AttackStart(me->GetVictim());
             summon->AI()->DoZoneInCombat();
             summons.Summon(summon);
         }
@@ -451,7 +451,7 @@ class spell_ignis_slag_pot : public SpellScriptLoader
 
                 Unit * target = GetTarget();
                 aurEffCaster->CastSpell(target, SPELL_SLAG_POT_DAMAGE, true);
-                if (target->isAlive() && !GetDuration())
+                if (target->IsAlive() && !GetDuration())
                      target->CastSpell(target, SPELL_SLAG_IMBUED, true);
             }
 

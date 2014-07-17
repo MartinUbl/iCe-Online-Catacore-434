@@ -65,7 +65,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         switch(pCreature->GetEntry())
@@ -168,7 +168,7 @@ public:
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_CRIMSONWING,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF+25);
             break;
         case 26602:
-            if (pCreature->isTaxi())
+            if (pCreature->IsTaxi())
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, GOSSIP_THRICESTAR1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 26);
             if (pPlayer->GetQuestStatus(11692) == QUEST_STATUS_COMPLETE)
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_THRICESTAR2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 27);

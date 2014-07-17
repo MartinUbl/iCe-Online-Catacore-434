@@ -92,14 +92,14 @@ public:
             //ToxicVolley_Timer
             if (ToxicVolley_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_TOXICVOLLEY);
+                DoCast(me->GetVictim(), SPELL_TOXICVOLLEY);
                 ToxicVolley_Timer = 9000;
             } else ToxicVolley_Timer -= diff;
 
             //Uppercut_Timer
             if (Uppercut_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_UPPERCUT);
+                DoCast(me->GetVictim(), SPELL_UPPERCUT);
                 Uppercut_Timer = 12000;
             } else Uppercut_Timer -= diff;
 
@@ -113,11 +113,11 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 // Invisible Model
                 me->SetDisplayId(11686);
-                SummonAdds(me->getVictim());
-                SummonAdds(me->getVictim());
-                SummonAdds(me->getVictim());
-                SummonAdds(me->getVictim());
-                SummonAdds(me->getVictim());
+                SummonAdds(me->GetVictim());
+                SummonAdds(me->GetVictim());
+                SummonAdds(me->GetVictim());
+                SummonAdds(me->GetVictim());
+                SummonAdds(me->GetVictim());
                 Invisible = true;
                 Invisible_Timer = 15000;
 

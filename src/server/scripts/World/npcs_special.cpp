@@ -168,7 +168,7 @@ public:
         {
             Creature* pCreature = Unit::GetCreature(*me, m_uiSpawnedGUID);
 
-            if (pCreature && pCreature->isAlive())
+            if (pCreature && pCreature->IsAlive())
                 return pCreature;
 
             return NULL;
@@ -214,7 +214,7 @@ public:
 
                             if (pMarkAura->GetDuration() < AURA_DURATION_TIME_LEFT)
                             {
-                                if (!pLastSpawnedGuard->getVictim())
+                                if (!pLastSpawnedGuard->GetVictim())
                                     pLastSpawnedGuard->AI()->AttackStart(pWho);
                             }
                         }
@@ -244,7 +244,7 @@ public:
                         // ROOFTOP only triggers if the player is on the ground
                         if (!pPlayerTarget->IsFlying())
                         {
-                            if (!pLastSpawnedGuard->getVictim())
+                            if (!pLastSpawnedGuard->GetVictim())
                                 pLastSpawnedGuard->AI()->AttackStart(pWho);
                         }
                         break;
@@ -741,7 +741,7 @@ public:
 
         void SpellHit(Unit *caster, const SpellEntry *spell)
         {
-            if (caster->GetTypeId() == TYPEID_PLAYER && me->isAlive() && spell->Id == 20804)
+            if (caster->GetTypeId() == TYPEID_PLAYER && me->IsAlive() && spell->Id == 20804)
             {
                 if ((CAST_PLR(caster)->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE) || (CAST_PLR(caster)->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
                     if (Doctorguid)
@@ -781,12 +781,12 @@ public:
         void UpdateAI(const uint32 /*diff*/)
         {
             //lower HP on every world tick makes it a useful counter, not officlone though
-            if (me->isAlive() && me->GetHealth() > 6)
+            if (me->IsAlive() && me->GetHealth() > 6)
             {
                 me->ModifyHealth(-5);
             }
 
-            if (me->isAlive() && me->GetHealth() <= 6)
+            if (me->IsAlive() && me->GetHealth() <= 6)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -931,7 +931,7 @@ public:
             if (Spell->Id == SPELL_LESSER_HEAL_R2 || Spell->Id == SPELL_FORTITUDE_R1)
             {
                 //not while in combat
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     return;
 
                 //nothing to be done now
@@ -1042,7 +1042,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (bCanRun && !me->isInCombat())
+            if (bCanRun && !me->IsInCombat())
             {
                 if (RunAwayTimer <= diff)
                 {
@@ -1107,7 +1107,7 @@ public:
 
             if (me->isAttackReady())
             {
-                DoCast(me->getVictim(), SPELL_DEATHTOUCH, true);
+                DoCast(me->GetVictim(), SPELL_DEATHTOUCH, true);
                 me->resetAttackTimer();
             }
         }
@@ -1140,7 +1140,7 @@ public:
     npc_kingdom_of_dalaran_quests() : CreatureScript("npc_kingdom_of_dalaran_quests") { }
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->HasItemCount(ITEM_KT_SIGNET,1) && (!pPlayer->GetQuestRewardStatus(QUEST_MAGICAL_KINGDOM_A) ||
@@ -1174,7 +1174,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         bool canBuy;
@@ -1251,7 +1251,7 @@ public:
 
         if (canBuy)
         {
-            if (pCreature->isVendor())
+            if (pCreature->IsVendor())
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
@@ -1284,10 +1284,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isTrainer())
+        if (pCreature->IsTrainer())
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
 
         if (pCreature->isCanTrainingAndResetTalentsOf(pPlayer))
@@ -1390,7 +1390,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->HasSpellCooldown(SPELL_INT) ||
@@ -1701,7 +1701,7 @@ public:
             me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER , float(Info->attackpower));
 
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-            if (!me->getVictim() && me->isSummon())
+            if (!me->GetVictim() && me->IsSummon())
                 if (Unit * Owner = CAST_SUM(me)->GetSummoner())
                     if (Owner->getAttackerForHelper())
                         AttackStart(Owner->getAttackerForHelper());
@@ -1710,7 +1710,7 @@ public:
         //Redefined for random target selection:
         void MoveInLineOfSight(Unit *who)
         {
-            if (!me->getVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
+            if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
             {
                 if (me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                     return;
@@ -1745,7 +1745,7 @@ public:
                         else
                             spell = SPELL_CRIPPLING_POISON;
 
-                        DoCast(me->getVictim(), spell);
+                        DoCast(me->GetVictim(), spell);
                     }
 
                     SpellTimer = VIPER_TIMER;
@@ -1753,7 +1753,7 @@ public:
                 else //Venomous Snake
                 {
                     if (urand(0,2) == 0) //33% chance to cast
-                        DoCast(me->getVictim(), SPELL_DEADLY_POISON);
+                        DoCast(me->GetVictim(), SPELL_DEADLY_POISON);
                     SpellTimer = VENOMOUS_SNAKE_TIMER + (rand() %5)*100;
                 }
             } else SpellTimer -= diff;
@@ -1895,7 +1895,7 @@ public:
         // Do not reload Creature templates on evade mode enter - prevent visual lost
         void EnterEvadeMode()
         {
-            if (me->IsInEvadeMode() || !me->isAlive())
+            if (me->IsInEvadeMode() || !me->IsAlive())
                 return;
 
             Unit *owner = me->GetCharmerOrOwner();
@@ -1910,10 +1910,10 @@ public:
 
         bool OwnerHasDifferentVictim(Unit * owner)
         {
-            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->getVictim())
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->GetVictim())
                 return true;
 
-            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
                 return true;
 
             return false;
@@ -1928,15 +1928,15 @@ public:
             if (OwnerHasDifferentVictim(owner))
             {
                 Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
-                if (victim && me->canSeeOrDetect(victim, false) && victim->isAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
+                if (victim && me->canSeeOrDetect(victim, false) && victim->IsAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(victim,90000.0f);
                     me->Attack(victim, true);
                 }
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         me->AI()->EnterEvadeMode();
                     return;
                 }
@@ -1946,7 +1946,7 @@ public:
             {
                 if(me->GetEntry() == 53438 ) // Mage T12 2P Bonus, this image is kinda different
                 {
-                    me->CastSpell(me->getVictim(), 99062, false); // Should use Fireball wich hit's around 6-7k
+                    me->CastSpell(me->GetVictim(), 99062, false); // Should use Fireball wich hit's around 6-7k
                 }
                 else
                 {
@@ -1965,7 +1965,7 @@ public:
                         if (urand(0,2) > 0)
                             spellToCast = 59637; // Fire Blast (sometimes casts instead of main spell)
 
-                    me->CastSpell(me->getVictim(), spellToCast, false);
+                    me->CastSpell(me->GetVictim(), spellToCast, false);
 
                     castCounter++;
                 }
@@ -2014,7 +2014,7 @@ public:
         // Fly away when dismissed
         void SpellHit(Unit *source, const SpellEntry *spell)
         {
-            if (spell->Id != 50515 || !me->isAlive())
+            if (spell->Id != 50515 || !me->IsAlive())
                 return;
 
             Unit *owner = me->GetOwner();
@@ -2093,7 +2093,7 @@ public:
         // Do not reload Creature templates on evade mode enter - prevent visual lost
         void EnterEvadeMode()
         {
-            if (me->IsInEvadeMode() || !me->isAlive())
+            if (me->IsInEvadeMode() || !me->IsAlive())
                 return;
 
             Unit *owner = me->GetCharmerOrOwner();
@@ -2108,10 +2108,10 @@ public:
 
         bool OwnerHasDifferentVictim(Unit * owner)
         {
-            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->getVictim())
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->GetVictim())
                 return true;
 
-            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
                 return true;
 
             return false;
@@ -2126,22 +2126,22 @@ public:
             if (OwnerHasDifferentVictim(owner))
             {
                 Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
-                if (victim && me->canSeeOrDetect(victim, false) && victim->isAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
+                if (victim && me->canSeeOrDetect(victim, false) && victim->IsAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(victim,90000.0f);
                     me->Attack(victim, true);
                 }
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         me->AI()->EnterEvadeMode();
                     return;
                 }
             }
 
             if (!me->HasUnitState(UNIT_STATE_CASTING))
-                me->CastSpell(me->getVictim(), 99026, false); // Fireseed
+                me->CastSpell(me->GetVictim(), 99026, false); // Fireseed
 
         }
     };
@@ -2180,7 +2180,7 @@ public:
         // Do not reload Creature templates on evade mode enter - prevent visual lost
         void EnterEvadeMode()
         {
-            if (me->IsInEvadeMode() || !me->isAlive())
+            if (me->IsInEvadeMode() || !me->IsAlive())
                 return;
 
             Unit *owner = me->GetCharmerOrOwner();
@@ -2195,10 +2195,10 @@ public:
 
         bool OwnerHasDifferentVictim(Unit * owner)
         {
-            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->getVictim())
+            if (!owner->GetUInt64Value(UNIT_FIELD_TARGET) || !me->GetVictim())
                 return true;
 
-            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->getVictim()->GetGUID())
+            if (owner->GetUInt64Value(UNIT_FIELD_TARGET) != me->GetVictim()->GetGUID())
                 return true;
 
             return false;
@@ -2213,22 +2213,22 @@ public:
             if (OwnerHasDifferentVictim(owner))
             {
                 Unit *victim = Unit::GetUnit(*me,owner->GetUInt64Value(UNIT_FIELD_TARGET));
-                if (victim && me->canSeeOrDetect(victim, false) && victim->isAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
+                if (victim && me->canSeeOrDetect(victim, false) && victim->IsAlive() && victim->IsHostileTo(me) && me->canAttack(victim))
                 {
                     me->getThreatManager().clearReferences();
                     me->AddThreat(victim,90000.0f);
                     me->Attack(victim, true);
                 }
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
-                    if (me->isInCombat())
+                    if (me->IsInCombat())
                         me->AI()->EnterEvadeMode();
                     return;
                 }
             }
 
             if (!me->HasUnitState(UNIT_STATE_CASTING))
-                me->CastSpell(me->getVictim(), 99226, false); // Flame Blast
+                me->CastSpell(me->GetVictim(), 99226, false); // Flame Blast
         }
     };
 
@@ -2412,7 +2412,7 @@ public:
 
         void DamageTaken(Unit* /*pKiller*/, uint32 &damage)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
                 {
                     if (pOwner->HasAura(GLYPH_OF_SHADOWFIEND))
@@ -2423,7 +2423,7 @@ public:
 
         void DamageDealt(Unit* target, uint32& damage, DamageEffectType damageType)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
             if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
             {
                 if (pOwner->HasAura(99154) && target && pOwner->HasAura(SHADOWFORM)) // Priest T12 Shadow 2P Bonus
@@ -2433,7 +2433,7 @@ public:
 
         void SummonedCreatureDespawn(Creature*) 
         {
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
                     if (pOwner->IsInWorld() && pOwner->ToPlayer() && me->ToPet())
                         pOwner->ToPlayer()->ToPlayer()->RemovePet(me->ToPet(),PET_SLOT_OTHER_PET,false);
@@ -2441,7 +2441,7 @@ public:
 
         void JustDied(Unit *)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pOwner = CAST_SUM(me)->GetSummoner())
                     if (pOwner->IsInWorld() && pOwner->ToPlayer() && me->ToPet())
                         pOwner->ToPlayer()->ToPlayer()->RemovePet(me->ToPet(),PET_SLOT_OTHER_PET,false);
@@ -2486,7 +2486,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isSummon())
+        if (pCreature->IsSummon())
         {
             if (pPlayer == CAST_SUM(pCreature)->GetSummoner())
             {
@@ -2560,7 +2560,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->getClass() == CLASS_HUNTER)
@@ -3186,7 +3186,7 @@ public:
         {
             if(init)
             {
-                if (me->isSummon())
+                if (me->IsSummon())
                 {
                     if ((pOwner = CAST_SUM(me)->GetSummoner()) != NULL)
                     {
@@ -3231,7 +3231,7 @@ public:
 
         void Reset()
         {
-            if (me->isSummon())
+            if (me->IsSummon())
                 pOwner = CAST_SUM(me)->GetSummoner();
 
             if(pOwner)
@@ -3246,9 +3246,9 @@ public:
             {
                 if (me->isAttackReady())
                 {
-                    if (me->IsWithinMeleeRange(me->getVictim()))
+                    if (me->IsWithinMeleeRange(me->GetVictim()))
                     {
-                        me->AttackerStateUpdate(me->getVictim());
+                        me->AttackerStateUpdate(me->GetVictim());
                         me->resetAttackTimer();
 
                         if(pOwner) // Add charge of Ancient Power to the Owner on dealing damage
@@ -3618,7 +3618,7 @@ public:
             if (who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE) || who->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE))
                 return;
 
-            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
+            if (who->IsAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
                 me->CastSpell(who, 82691, true);
         }
 
@@ -3763,9 +3763,9 @@ public:
 
         void BarrierChecker(Unit *who)
         {
-            if (who->isAlive() && !who->HasAura(81782))
+            if (who->IsAlive() && !who->HasAura(81782))
                 me->CastSpell(who, 81782, true);
-            if (who->isAlive() && who->HasAura(81782))
+            if (who->IsAlive() && who->HasAura(81782))
             {
 
                 if (AuraEffect const* aur = who->GetAuraEffect(81782,0))
@@ -3926,7 +3926,7 @@ class boss_event_jarmila: public CreatureScript
                             ThunderclapTimer += 3000;
 
                         int32 bp0 = 35000;
-                        me->CastCustomSpell(me->getVictim(), 55101, &bp0, 0, 0, false);
+                        me->CastCustomSpell(me->GetVictim(), 55101, &bp0, 0, 0, false);
                         QuakeTimer = 25000;
                     } else QuakeTimer -= diff;
 
@@ -4014,7 +4014,7 @@ class boss_event_jarmila: public CreatureScript
                     me->GetMotionMaster()->MovementExpired();
                     me->GetMotionMaster()->Clear();
                     me->StopMoving();
-                    DoStartNoMovement(me->getVictim());
+                    DoStartNoMovement(me->GetVictim());
                     me->GetMotionMaster()->MoveIdle();
                     MyPet = me->SummonCreature(99902,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,10000);
                 }
@@ -4113,7 +4113,7 @@ class boss_event_jarmila_pet: public CreatureScript
                 if (FatalBiteTimer <= diff)
                 {
                     int32 bp0 = 25000;
-                    me->CastCustomSpell(me->getVictim(), 54663, &bp0, 0, 0, false);
+                    me->CastCustomSpell(me->GetVictim(), 54663, &bp0, 0, 0, false);
                     me->ModifyPower(POWER_FOCUS,-35);
                     FatalBiteTimer = urand(6000,12000);
                 } else FatalBiteTimer -= diff;
@@ -4492,7 +4492,7 @@ class npc_summon_doomguard: public CreatureScript
 
                 if (doomBoltTimer <= diff)
                 {
-                    Unit* target = me->getVictim();
+                    Unit* target = me->GetVictim();
 
                     if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                     {
@@ -4501,7 +4501,7 @@ class npc_summon_doomguard: public CreatureScript
                         Unit::AttackerSet const& attackers = owner->getAttackers();
                         for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->isAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
+                            if ((*itr) && (*itr)->IsAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
                                 capableTargets.push_back(*itr);
                         }
 
@@ -4511,9 +4511,9 @@ class npc_summon_doomguard: public CreatureScript
 
                     if (target)
                     {
-                        if (target != me->getVictim())
+                        if (target != me->GetVictim())
                         {
-                            me->AddThreat(me->getVictim(), -1000.0f);
+                            me->AddThreat(me->GetVictim(), -1000.0f);
                             me->AddThreat(target, 1000.0f);
                         }
                         me->CastSpell(target, 85692, false);
@@ -4562,7 +4562,7 @@ class npc_summon_infernal: public CreatureScript
 
                 if (victimUpdateTimer <= diff)
                 {
-                    Unit* target = me->getVictim();
+                    Unit* target = me->GetVictim();
 
                     if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                     {
@@ -4571,7 +4571,7 @@ class npc_summon_infernal: public CreatureScript
                         Unit::AttackerSet const& attackers = owner->getAttackers();
                         for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
                         {
-                            if ((*itr) && (*itr)->isAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
+                            if ((*itr) && (*itr)->IsAlive() && ((*itr)->HasAura(603) || (*itr)->HasAura(980)))
                                 capableTargets.push_back(*itr);
                         }
 
@@ -4581,9 +4581,9 @@ class npc_summon_infernal: public CreatureScript
 
                     if (target)
                     {
-                        if (target != me->getVictim())
+                        if (target != me->GetVictim())
                         {
-                            me->AddThreat(me->getVictim(), -1000.0f);
+                            me->AddThreat(me->GetVictim(), -1000.0f);
                             me->AddThreat(target, 1000.0f);
                         }
                     }

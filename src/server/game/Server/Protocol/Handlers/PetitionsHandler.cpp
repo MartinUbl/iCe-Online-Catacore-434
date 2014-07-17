@@ -91,7 +91,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         sLog->outDebug("WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(guidNPC));
         return;
     }
-    if (!pCreature->isTabardDesigner())
+    if (!pCreature->IsTabardDesigner())
         return;
 
     GetPlayer()->RemoveFakeDeath();

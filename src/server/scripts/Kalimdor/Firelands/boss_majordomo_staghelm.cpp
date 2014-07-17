@@ -379,7 +379,7 @@ public:
             {
                 Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
 
-                if(unit && unit->isAlive() && unit->ToPlayer() && IsRangedClass(unit->ToPlayer()) )
+                if(unit && unit->IsAlive() && unit->ToPlayer() && IsRangedClass(unit->ToPlayer()) )
                     ranged_targets.push_back(unit->ToPlayer());
             }
 
@@ -411,7 +411,7 @@ public:
 
                     if(seed_aura)
                     {
-                        if (unit == me->getVictim()) // Don't apply seed on main tank
+                        if (unit == me->GetVictim()) // Don't apply seed on main tank
                         {
                             seed_aura->Remove(AURA_REMOVE_BY_DEFAULT);
                             continue;
@@ -451,7 +451,7 @@ public:
             // Copy players to secons list
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 if(Player* pl = itr->getSource())
-                    if (pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster())
+                    if (pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster())
                         players.push_back(itr->getSource());
 
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
@@ -460,7 +460,7 @@ public:
                 {
                     counter = 0;
 
-                    if (p->IsInWorld() && p->isAlive() && !p->isGameMaster())
+                    if (p->IsInWorld() && p->IsAlive() && !p->isGameMaster())
                     {
                         // Measure distance for player to every player
                         for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
@@ -483,7 +483,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!UpdateVictim() || !me->getVictim())
+            if (!UpdateVictim() || !me->GetVictim())
             {
                 if (eventTimer <= diff)
                 {
@@ -518,8 +518,8 @@ public:
             if (me->GetPositionX() < 352.0f)
                 ScriptedAI::EnterEvadeMode();
 
-            if (!me->IsWithinLOSInMap(me->getVictim()) && IsInHumanForm() == false)
-                me->Kill(me->getVictim());
+            if (!me->IsWithinLOSInMap(me->GetVictim()) && IsInHumanForm() == false)
+                me->Kill(me->GetVictim());
 
             if (powerTimer <= diff && IsHeroic())
             {
@@ -535,7 +535,7 @@ public:
                 {
                     if ( Player * p = itr->getSource())
                     {
-                        if (p->isAlive() && !p->isGameMaster() && p->IsInWorld())
+                        if (p->IsAlive() && !p->isGameMaster() && p->IsInWorld())
                         {
                             uint32 power = p->GetPower(POWER_SCRIPTED);
 
@@ -746,10 +746,10 @@ public:
 
             if ( Creature* pMajor = me->FindNearestCreature(52571,100.0f,true) )
             {
-                if (pMajor->getVictim())
+                if (pMajor->GetVictim())
                 {
-                    me->AddThreat(pMajor->getVictim(),50.0f);
-                    me->GetMotionMaster()->MoveChase(pMajor->getVictim());
+                    me->AddThreat(pMajor->GetVictim(),50.0f);
+                    me->GetMotionMaster()->MoveChase(pMajor->GetVictim());
                 }
             }
         }
@@ -1076,7 +1076,7 @@ public:
 
                 if(StunTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(),RECKLESS_LEAP_STUN,true);
+                    me->CastSpell(me->GetVictim(),RECKLESS_LEAP_STUN,true);
                     StunTimer = NEVER;
                 }
                 else StunTimer -= diff;
@@ -1205,7 +1205,7 @@ class spell_gen_flame_scythe : public SpellScriptLoader
             {
                 for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
                 {
-                    if ((*itr)->isGuardian() || (*itr)->isPet())
+                    if ((*itr)->IsGuardian() || (*itr)->IsPet())
                     {
                         itr = unitList.erase(itr);
                     }

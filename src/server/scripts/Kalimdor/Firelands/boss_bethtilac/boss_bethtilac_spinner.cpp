@@ -60,7 +60,7 @@ public:
     mob_spinner(): CreatureScript("mob_cinderweb_spinner") {}
     CreatureAI *GetAI(Creature *creature) const
     {
-        if (creature->isSummon())
+        if (creature->IsSummon())
             return new mob_spinnerAI(creature);
 
         return NULL;

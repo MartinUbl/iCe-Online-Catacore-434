@@ -53,9 +53,9 @@ public:
         {
             if (!m_bEggDestroyed)
             {
-                if (!me->getVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
+                if (!me->GetVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
 
                     if (me->IsWithinDistInMap(who, 5) && me->IsWithinLOSInMap(who))
@@ -70,9 +70,9 @@ public:
                 }
             } else if (m_bWhelpHatched)
             {
-                if (!me->getVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
+                if (!me->GetVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
 
                     float attackRadius = me->GetAttackDistance(who);

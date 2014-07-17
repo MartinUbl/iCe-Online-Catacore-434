@@ -81,7 +81,7 @@ public:
             IsBanished = true;
             Enraged = false;
 
-            if (m_pInstance && me->isAlive())
+            if (m_pInstance && me->IsAlive())
             {
                 if (m_pInstance->GetData(TYPE_OVERSEER) != DONE)
                     DoCast(me, SPELL_BANISH, true);
@@ -181,7 +181,7 @@ public:
 
             if (CorrosiveAcid_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CORROSIVE_ACID);
+                DoCast(me->GetVictim(), SPELL_CORROSIVE_ACID);
                 CorrosiveAcid_Timer = 15000 + rand()%10000;
             } else CorrosiveAcid_Timer -= diff;
 

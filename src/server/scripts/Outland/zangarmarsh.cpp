@@ -173,7 +173,7 @@ public:
 
             if (LightningBolt_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_LIGHTNING_BOLT);
+                DoCast(me->GetVictim(), SPELL_LIGHTNING_BOLT);
                 LightningBolt_Timer = 5000;
             } else LightningBolt_Timer -= diff;
 
@@ -276,7 +276,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isVendor() && pPlayer->GetReputationRank(942) == REP_EXALTED)
+        if (pCreature->IsVendor() && pPlayer->GetReputationRank(942) == REP_EXALTED)
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
@@ -395,10 +395,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isVendor())
+        if (pCreature->IsVendor())
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_POISONS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TIMOTHY_DANIELS_ITEM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -540,12 +540,12 @@ public:
 
         void SummonAdds()
         {
-            if(!me->isAlive() || !UpdateVictim())
+            if(!me->IsAlive() || !UpdateVictim())
                 return;
             if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() + 8, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
-                pSummon->AI()->AttackStart(me->getVictim());
+                pSummon->AI()->AttackStart(me->GetVictim());
             if(Creature* pSummon = me->SummonCreature(NPC_SUMMON, me->GetPositionX() - 8, me->GetPositionY() + 15, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
-                pSummon->AI()->AttackStart(me->getVictim());
+                pSummon->AI()->AttackStart(me->GetVictim());
         }
 
     };

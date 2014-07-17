@@ -217,7 +217,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    if (ToUnit() && ToUnit()->getVictim())
+    if (ToUnit() && ToUnit()->GetVictim())
         flags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
 
     ByteBuffer buf(500);
@@ -396,7 +396,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
     if (flags & UPDATEFLAG_HAS_ATTACKING_TARGET)
     {
-        ObjectGuid victimGuid = ToUnit()->getVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
+        ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteBit(victimGuid[2]);
         data->WriteBit(victimGuid[7]);
         data->WriteBit(victimGuid[0]);
@@ -578,7 +578,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
 
     if (flags & UPDATEFLAG_HAS_ATTACKING_TARGET)
     {
-        ObjectGuid victimGuid = ToUnit()->getVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
+        ObjectGuid victimGuid = ToUnit()->GetVictim()->GetGUID();   // checked in BuildCreateUpdateBlockForPlayer
         data->WriteByteSeq(victimGuid[4]);
         data->WriteByteSeq(victimGuid[0]);
         data->WriteByteSeq(victimGuid[3]);
@@ -2326,7 +2326,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
         if (pet)
         {
-            if (pet->isHunterPet())
+            if (pet->IsHunterPet())
             {
                 // Spirit Bond effect
                 if (HasAura(19578) && !HasAura(19579))
@@ -2556,7 +2556,7 @@ namespace Trinity
 
                 float x,y,z;
 
-                if (!c->isAlive() || c->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED) ||
+                if (!c->IsAlive() || c->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED) ||
                     !c->GetMotionMaster()->GetDestination(x,y,z))
                 {
                     x = c->GetPositionX();
@@ -3015,7 +3015,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
-            if (!((Creature const*)this)->canFly())
+            if (!((Creature const*)this)->CanFly())
             {
                 bool canSwim = ((Creature const*)this)->canSwim();
                 float ground_z = z;
@@ -3040,7 +3040,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             break;
         case TYPEID_PLAYER:
-            if (!((Player const*)this)->canFly())
+            if (!((Player const*)this)->CanFly())
             {
                 float ground_z = z;
                 float max_z = GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK));

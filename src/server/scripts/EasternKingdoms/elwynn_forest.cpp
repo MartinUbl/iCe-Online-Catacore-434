@@ -238,8 +238,8 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (me->isAlive())
-                if (!me->isInCombat())
+            if (me->IsAlive())
+                if (!me->IsInCombat())
                 {
                     if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) <= 1.0f)
                         if (Creature* Worg = me->FindNearestCreature(NPC_BLACKROCK_BATTLE_WORG, 5.0f, true))
@@ -267,11 +267,11 @@ public:
                 DoMeleeAttackIfReady();
             else
             {
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     DamageCount = 0;
                 else
                 {
-                    if (me->getVictim()->isPet())
+                    if (me->GetVictim()->IsPet())
                         DamageCount = 0;
                 }
 
@@ -408,7 +408,7 @@ public:
             }
             else
             {
-                if (pWho->isPet())
+                if (pWho->IsPet())
                 {
                     me->AI()->AttackStart(pWho);
                     DamageCount = 0;
@@ -425,11 +425,11 @@ public:
                 DoMeleeAttackIfReady();
             else
             {
-                if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
+                if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
                     DamageCount = 0;
                 else
                 {
-                    if (me->getVictim()->isPet())
+                    if (me->GetVictim()->IsPet())
                         DamageCount = 0;
                 }
 
@@ -481,7 +481,7 @@ public:
         void GetCreature(float X, float Y)
         {
             if (me->GetHomePosition().GetPositionX() == X && me->GetHomePosition().GetPositionY() == Y)
-                if (!me->isInCombat() && !me->HasAura(SPELL_SPYING))
+                if (!me->IsInCombat() && !me->HasAura(SPELL_SPYING))
                     DoCast(me, SPELL_SPYING);
 
             CastSpyglass();
@@ -506,7 +506,7 @@ public:
             if (me->GetHomePosition().GetPositionX() != X8 && me->GetHomePosition().GetPositionY() != Y8)
             if (me->GetHomePosition().GetPositionX() != X9 && me->GetHomePosition().GetPositionY() != Y9)
                 if (me->GetHomePosition().GetPositionX() == me->GetPositionX() && me->GetHomePosition().GetPositionY() == me->GetPositionY())
-                    if (!me->isInCombat() && !me->HasAura(SPELL_SPYGLASS))
+                    if (!me->IsInCombat() && !me->HasAura(SPELL_SPYGLASS))
                         DoCast(me, SPELL_SPYGLASS);
         }
 
@@ -580,7 +580,7 @@ public:
     {
         npc_goblin_assassinAI(Creature *c) : ScriptedAI(c) 
         {
-            if (!me->isInCombat() && !me->HasAura(SPELL_SPYING))
+            if (!me->IsInCombat() && !me->HasAura(SPELL_SPYING))
                 DoCast(SPELL_SNEAKING);
         }
 

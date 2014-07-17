@@ -101,21 +101,21 @@ public:
             //        //MarkOfFrost_Timer
             //        if (MarkOfFrost_Timer <= diff)
             //        {
-            //            DoCast(me->getVictim(), SPELL_MARKOFFROST);
+            //            DoCast(me->GetVictim(), SPELL_MARKOFFROST);
             //            MarkOfFrost_Timer = 25000;
             //        } else MarkOfFrost_Timer -= diff;
 
             //Chill_Timer
             if (Chill_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CHILL);
+                DoCast(me->GetVictim(), SPELL_CHILL);
                 Chill_Timer = 13000 + rand()%12000;
             } else Chill_Timer -= diff;
 
             //Breath_Timer
             if (Breath_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROSTBREATH);
+                DoCast(me->GetVictim(), SPELL_FROSTBREATH);
                 Breath_Timer = 10000 + rand()%5000;
             } else Breath_Timer -= diff;
 
@@ -137,7 +137,7 @@ public:
             //Cleave_Timer
             if (Cleave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 Cleave_Timer = 7000;
             } else Cleave_Timer -= diff;
 

@@ -346,7 +346,7 @@ public:
 
                 if (uiSinsterStrikeTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_SINSTER_STRIKE);
+                    DoCast(me->GetVictim(), SPELL_SINSTER_STRIKE);
                     uiSinsterStrikeTimer = urand(5 * IN_MILLISECONDS, 9 * IN_MILLISECONDS);
                 } else uiSinsterStrikeTimer -= diff;
 
@@ -393,7 +393,7 @@ public:
                 if (uiSacrificeTimer <= diff)
                 {
                     Unit* pSacrificeTarget = pInstance ? Unit::GetUnit(*me, pInstance->GetData64(DATA_SACRIFICED_PLAYER)) : NULL;
-                    if (pInstance && !summons.empty() && pSacrificeTarget && pSacrificeTarget->isAlive())
+                    if (pInstance && !summons.empty() && pSacrificeTarget && pSacrificeTarget->IsAlive())
                         me->Kill(pSacrificeTarget, false); // durability damage?
 
                     //go down
@@ -419,7 +419,7 @@ public:
             if (pInstance)
             {
                 Creature* pSvala = Unit::GetCreature((*me), pInstance->GetData64(DATA_SVALA));
-                if (pSvala && pSvala->isAlive())
+                if (pSvala && pSvala->IsAlive())
                     pKiller->Kill(pSvala);
 
                 pInstance->SetData(DATA_SVALA_SORROWGRAVE_EVENT, DONE);

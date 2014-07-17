@@ -63,7 +63,7 @@ public:
     mob_spiderling(): CreatureScript("mob_cinderweb_spiderling") {}
     CreatureAI *GetAI(Creature *creature) const
     {
-        if (creature->isSummon())
+        if (creature->IsSummon())
             return new mob_spiderlingAI(creature);
 
         return NULL;
@@ -225,7 +225,7 @@ bool mob_spiderlingAI::FollowTarget()
 
 bool mob_spiderlingAI::CanFollowTarget(Unit *target) const
 {
-    return target->isAlive() && target->GetPositionZ() < webZPosition - 20.0f;
+    return target->IsAlive() && target->GetPositionZ() < webZPosition - 20.0f;
 }
 
 

@@ -104,7 +104,7 @@ public:
 
             if (Uppercut_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_UPPERCUT);
+                DoCast(me->GetVictim(), SPELL_UPPERCUT);
                 Uppercut_Timer = 15000;
             } else Uppercut_Timer -= diff;
 
@@ -141,7 +141,7 @@ public:
         }
         else
         {
-            if (pCreature->isQuestGiver())
+            if (pCreature->IsQuestGiver())
                 pPlayer->PrepareQuestMenu(pCreature->GetGUID());
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
         }
@@ -183,7 +183,7 @@ public:
 
             if (MagneticPull_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MAGNETIC_PULL);
+                DoCast(me->GetVictim(), SPELL_MAGNETIC_PULL);
                 MagneticPull_Timer = 15000;
             } else MagneticPull_Timer -= diff;
 
@@ -224,7 +224,7 @@ public:
         if (pCreature->GetEntry() == 23484)
         {
             // Aldor vendor
-            if (pCreature->isVendor() && (pPlayer->GetReputationRank(932) == REP_EXALTED) && (pPlayer->GetReputationRank(935) == REP_EXALTED) && (pPlayer->GetReputationRank(942) == REP_EXALTED))
+            if (pCreature->IsVendor() && (pPlayer->GetReputationRank(932) == REP_EXALTED) && (pPlayer->GetReputationRank(935) == REP_EXALTED) && (pPlayer->GetReputationRank(942) == REP_EXALTED))
             {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
                 pPlayer->SEND_GOSSIP_MENU(11085, pCreature->GetGUID());
@@ -238,7 +238,7 @@ public:
         if (pCreature->GetEntry() == 23483)
         {
             // Scryers vendor
-            if (pCreature->isVendor() && (pPlayer->GetReputationRank(934) == REP_EXALTED) && (pPlayer->GetReputationRank(935) == REP_EXALTED) && (pPlayer->GetReputationRank(942) == REP_EXALTED))
+            if (pCreature->IsVendor() && (pPlayer->GetReputationRank(934) == REP_EXALTED) && (pPlayer->GetReputationRank(935) == REP_EXALTED) && (pPlayer->GetReputationRank(942) == REP_EXALTED))
             {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
                 pPlayer->SEND_GOSSIP_MENU(11085, pCreature->GetGUID());
@@ -564,7 +564,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_WBI) == QUEST_STATUS_INCOMPLETE)
@@ -608,7 +608,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ISANAH_GOSSIP_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -677,7 +677,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (!pPlayer->hasQuest(10211))

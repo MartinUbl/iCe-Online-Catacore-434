@@ -870,7 +870,7 @@ void Battleground::EndBattleground(uint32 winner)
         if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             plr->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
-        if (!plr->isAlive())
+        if (!plr->IsAlive())
         {
             plr->ResurrectPlayer(1.0f);
             plr->SpawnCorpseBones();
@@ -1071,7 +1071,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
     if (plr && plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
         plr->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
-    if (plr && !plr->isAlive())                              // resurrect on exit
+    if (plr && !plr->IsAlive())                              // resurrect on exit
     {
         plr->ResurrectPlayer(1.0f);
         plr->SpawnCorpseBones();
@@ -1994,7 +1994,7 @@ uint32 Battleground::GetAlivePlayersCountByTeam(uint32 Team) const
         if (itr->second.Team == Team)
         {
             Player* pl = sObjectMgr->GetPlayer(itr->first);
-            if (pl && pl->isAlive() && !pl->HasByteFlag(UNIT_FIELD_BYTES_2, 3, FORM_SPIRITOFREDEMPTION))
+            if (pl && pl->IsAlive() && !pl->HasByteFlag(UNIT_FIELD_BYTES_2, 3, FORM_SPIRITOFREDEMPTION))
                 ++count;
         }
     }
@@ -2101,7 +2101,7 @@ void Battleground::RewardXPAtKill(Player* plr, Player* victim)
         for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
             Player* member = itr->getSource();
-            if (!member || !member->isAlive())                   // only for alive
+            if (!member || !member->IsAlive())                   // only for alive
                 continue;
 
             if (!member->IsAtGroupRewardDistance(victim))        // at req. distance

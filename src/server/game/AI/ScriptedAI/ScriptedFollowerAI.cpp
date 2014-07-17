@@ -69,7 +69,7 @@ void FollowerAI::AttackStart(Unit* pWho)
 //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
 bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
 {
-    if (!pWho || !pWho->getVictim())
+    if (!pWho || !pWho->GetVictim())
         return false;
 
     //experimental (unknown) flag not present
@@ -77,7 +77,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
         return false;
 
     //not a player
-    if (!pWho->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!pWho->GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
         return false;
 
     //never attack friendly
@@ -88,7 +88,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
     if (me->IsWithinDistInMap(pWho, MAX_PLAYER_DISTANCE) && me->IsWithinLOSInMap(pWho))
     {
         //already fighting someone?
-        if (!me->getVictim())
+        if (!me->GetVictim())
         {
             AttackStart(pWho);
             return true;
@@ -111,7 +111,7 @@ void FollowerAI::MoveInLineOfSight(Unit* pWho)
         if (HasFollowState(STATE_FOLLOW_INPROGRESS) && AssistPlayerInCombat(pWho))
             return;
 
-        if (!me->canFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        if (!me->CanFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
             return;
 
         if (me->IsHostileTo(pWho))
@@ -119,7 +119,7 @@ void FollowerAI::MoveInLineOfSight(Unit* pWho)
             float fAttackRadius = me->GetAttackDistance(pWho);
             if (me->IsWithinDistInMap(pWho, fAttackRadius) && me->IsWithinLOSInMap(pWho))
             {
-                if (!me->getVictim())
+                if (!me->GetVictim())
                 {
                     pWho->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                     AttackStart(pWho);
@@ -203,7 +203,7 @@ void FollowerAI::EnterEvadeMode()
 
 void FollowerAI::UpdateAI(const uint32 uiDiff)
 {
-    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !me->getVictim())
+    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !me->GetVictim())
     {
         if (m_uiUpdateFollowTimer <= uiDiff)
         {
@@ -290,7 +290,7 @@ void FollowerAI::MovementInform(uint32 uiMotionType, uint32 uiPointId)
 
 void FollowerAI::StartFollow(Player* pLeader, uint32 uiFactionForFollower, const Quest* pQuest)
 {
-    if (me->getVictim())
+    if (me->GetVictim())
     {
         sLog->outDebug("TSCR: FollowerAI attempt to StartFollow while in combat.");
         return;
@@ -330,7 +330,7 @@ Player* FollowerAI::GetLeaderForFollower()
 {
     if (Player* pLeader = Unit::GetPlayer(*me, m_uiLeaderGUID))
     {
-        if (pLeader->isAlive())
+        if (pLeader->IsAlive())
             return pLeader;
         else
         {
@@ -340,7 +340,7 @@ Player* FollowerAI::GetLeaderForFollower()
                 {
                     Player* pMember = pRef->getSource();
 
-                    if (pMember && pMember->isAlive() && me->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
+                    if (pMember && pMember->IsAlive() && me->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
                     {
                         sLog->outDebug("TSCR: FollowerAI GetLeader changed and returned new leader.");
                         m_uiLeaderGUID = pMember->GetGUID();

@@ -62,7 +62,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(11223) == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(11223))
@@ -123,7 +123,7 @@ public:
 
         void AttackedBy(Unit* pAttacker)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 return;
 
             if (me->IsFriendlyTo(pAttacker))
@@ -197,7 +197,7 @@ public:
 
         void AttackedBy(Unit* pAttacker)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 return;
 
             if (me->IsFriendlyTo(pAttacker))
@@ -265,7 +265,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(4185) == QUEST_STATUS_INCOMPLETE)
@@ -336,7 +336,7 @@ public:
 
             if (Creature *pMarzon = Unit::GetCreature(*me, MarzonGUID))
             {
-                if (pMarzon->isAlive())
+                if (pMarzon->IsAlive())
                     pMarzon->DisappearAndDie();
             }
         }
@@ -345,7 +345,7 @@ public:
         {
             if (Creature *pMarzon = Unit::GetCreature(*me, MarzonGUID))
             {
-                if (pMarzon->isAlive() && !pMarzon->isInCombat())
+                if (pMarzon->IsAlive() && !pMarzon->IsInCombat())
                     pMarzon->AI()->AttackStart(pWho);
             }
         }
@@ -483,11 +483,11 @@ public:
         {
             DoScriptText(SAY_MARZON_2, me);
 
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                 {
-                    if (pSummoner && pSummoner->isAlive() && !pSummoner->isInCombat())
+                    if (pSummoner && pSummoner->IsAlive() && !pSummoner->IsInCombat())
                         CAST_CRE(pSummoner)->AI()->AttackStart(pWho);
                 }
             }
@@ -497,11 +497,11 @@ public:
         {
             me->DisappearAndDie();
 
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                 {
-                    if (pSummoner && pSummoner->isAlive())
+                    if (pSummoner && pSummoner->IsAlive())
                         CAST_CRE(pSummoner)->DisappearAndDie();
                 }
             }
@@ -512,7 +512,7 @@ public:
             if (uiType != POINT_MOTION_TYPE)
                 return;
 
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                 {

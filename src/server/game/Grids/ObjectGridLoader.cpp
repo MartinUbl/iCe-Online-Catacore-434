@@ -62,7 +62,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
         Creature * c = iter->getSource();
         ++iter;
 
-        ASSERT(!c->isPet() && "ObjectGridRespawnMover don't must be called for pets");
+        ASSERT(!c->IsPet() && "ObjectGridRespawnMover don't must be called for pets");
 
         Cell const& cur_cell  = c->GetCurrentCell();
 
@@ -108,7 +108,7 @@ template<> void AddUnitState(Creature *obj, CellPair const& cell_pair)
     Cell cell(cell_pair);
 
     obj->SetCurrentCell(cell);
-    if (obj->isSpiritService())
+    if (obj->IsSpiritService())
         obj->setDeathState(DEAD);
 }
 
@@ -296,7 +296,7 @@ ObjectGridStoper::Visit(CreatureMapType &m)
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
     for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if (iter->getSource()->isInCombat())
+        if (iter->getSource()->IsInCombat())
         {
             iter->getSource()->CombatStop();
             iter->getSource()->DeleteThreatList();

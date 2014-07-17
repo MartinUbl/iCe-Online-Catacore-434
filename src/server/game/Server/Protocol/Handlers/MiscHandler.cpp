@@ -62,7 +62,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 
     recv_data.read_skip<uint8>();
 
-    if (GetPlayer()->isAlive()||GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (GetPlayer()->IsAlive()||GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     // the world update order is sessions, players, creatures
@@ -370,7 +370,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
 
     uint8 reason = 0;
 
-    if (GetPlayer()->isInCombat())
+    if (GetPlayer()->IsInCombat())
         reason = 1;
     else if (GetPlayer()->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR))
         reason = 3;                                         // is jumping or falling
@@ -388,7 +388,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     }
 
     //instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in worldserver.conf
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->isInFlight() ||
+    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsInFlight() ||
         GetSecurity() >= AccountTypes(sWorld->getIntConfig(CONFIG_INSTANT_LOGOUT)))
     {
         WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
@@ -748,7 +748,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    if (GetPlayer()->isAlive())
+    if (GetPlayer()->IsAlive())
         return;
 
     // do not allow corpse reclaim in arena
@@ -787,7 +787,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     recv_data >> guid;
     recv_data >> status;
 
-    if (GetPlayer()->isAlive())
+    if (GetPlayer()->IsAlive())
         return;
 
     if (status == 0)
@@ -828,7 +828,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     recv_data >> Trigger_ID;
     sLog->outDebug("Trigger ID:%u",Trigger_ID);
 
-    if (GetPlayer()->isInFlight())
+    if (GetPlayer()->IsInFlight())
     {
         sLog->outDebug("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
@@ -899,7 +899,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
 
     uint32 quest_id = sObjectMgr->GetQuestForAreaTrigger(Trigger_ID);
-    if (quest_id && GetPlayer()->isAlive() && GetPlayer()->IsActiveQuest(quest_id))
+    if (quest_id && GetPlayer()->IsAlive() && GetPlayer()->IsActiveQuest(quest_id))
     {
         Quest const* pQuest = sObjectMgr->GetQuestTemplate(quest_id);
         if (pQuest)
@@ -1384,7 +1384,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     recv_data >> Orientation;                               // o (3.141593 = 180 degrees)
 
     //sLog->outDebug("Received opcode CMSG_WORLD_TELEPORT");
-    if (GetPlayer()->isInFlight())
+    if (GetPlayer()->IsInFlight())
     {
         sLog->outDebug("Player '%s' (GUID: %u) in flight, ignore worldport command.",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow());
         return;
@@ -1735,7 +1735,7 @@ void WorldSession::HandleCancelMountAuraOpcode(WorldPacket & /*recv_data*/)
         return;
     }
 
-    if (_player->isInFlight())                               // not blizz like; no any messages on blizz
+    if (_player->IsInFlight())                               // not blizz like; no any messages on blizz
     {
         ChatHandler(this).SendSysMessage(LANG_YOU_IN_FLIGHT);
         return;
@@ -1865,7 +1865,7 @@ void WorldSession::SendSetPhaseShift()
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
 {
-    if (_player->isInFlight())
+    if (_player->IsInFlight())
         return;
 
     if(Battlefield* bf = sBattlefieldMgr.GetBattlefieldToZoneId(_player->GetZoneId()))

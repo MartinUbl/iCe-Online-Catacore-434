@@ -52,7 +52,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket & recv_data)
     if (!unit)
         return;
 
-    if (!unit->isBattleMaster())                             // it's not battlemaster
+    if (!unit->IsBattleMaster())                             // it's not battlemaster
         return;
 
     // Stop the npc if moving
@@ -556,13 +556,13 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
                 _player->SetBattlegroundEntryPoint();
 
             // resurrect the player
-            if (!_player->isAlive())
+            if (!_player->IsAlive())
             {
                 _player->ResurrectPlayer(1.0f);
                 _player->SpawnCorpseBones();
             }
             // stop taxi flight at port
-            if (_player->isInFlight())
+            if (_player->IsInFlight())
             {
                 _player->GetMotionMaster()->MovementExpired();
                 _player->CleanupAfterTaxiFlight();
@@ -632,7 +632,7 @@ void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
     sLog->outDebug("WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
     // not allow leave battleground in combat
-    if (_player->isInCombat())
+    if (_player->IsInCombat())
         if (Battleground* bg = _player->GetBattleground())
             if (bg->GetStatus() != STATUS_WAIT_LEAVE)
                 return;
@@ -717,7 +717,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket & recv_data)
     if (!unit)
         return;
 
-    if (!unit->isSpiritService())                            // it's not spirit service
+    if (!unit->IsSpiritService())                            // it's not spirit service
         return;
 
     if (bg)
@@ -741,7 +741,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket & recv_data)
     if (!unit)
         return;
 
-    if (!unit->isSpiritService())                            // it's not spirit service
+    if (!unit->IsSpiritService())                            // it's not spirit service
         return;
 
     if (bg)

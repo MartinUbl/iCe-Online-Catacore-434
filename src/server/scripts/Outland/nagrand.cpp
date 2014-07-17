@@ -168,7 +168,7 @@ public:
 
         void AttackedBy(Unit* pAttacker)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 return;
 
             if (me->IsFriendlyTo(pAttacker))
@@ -233,7 +233,7 @@ public:
             //Spear_Throw_Timer
             if (Spear_Throw_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SPEAR_THROW);
+                DoCast(me->GetVictim(), SPELL_SPEAR_THROW);
                 Spear_Throw_Timer = 20000;
             } else Spear_Throw_Timer -= diff;
 
@@ -362,7 +362,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         //gossip before obtaining Survey the Land
@@ -475,7 +475,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(10044) == QUEST_STATUS_INCOMPLETE)
@@ -562,7 +562,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(10107) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(10108) == QUEST_STATUS_INCOMPLETE)
@@ -688,7 +688,7 @@ public:
             if (pSummoned->GetEntry() == NPC_MURK_BRUTE)
                 DoScriptText(SAY_MAG_NO_ESCAPE, pSummoned);
 
-            if (pSummoned->isTotem())
+            if (pSummoned->IsTotem())
                 return;
 
             pSummoned->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
@@ -711,12 +711,12 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             npc_escortAI::UpdateAI(uiDiff);
-            if (!me->getVictim())
+            if (!me->GetVictim())
                 return;
 
             if (m_uiChainLightningTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_CHAIN_LIGHTNING);
+                DoCast(me->GetVictim(), SPELL_CHAIN_LIGHTNING);
                 m_uiChainLightningTimer = urand(7000, 14000);
             }
             else
@@ -735,7 +735,7 @@ public:
 
             if (m_uiFrostShockTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_FROST_SHOCK);
+                DoCast(me->GetVictim(), SPELL_FROST_SHOCK);
                 m_uiFrostShockTimer = urand(7500, 15000);
             }
             else

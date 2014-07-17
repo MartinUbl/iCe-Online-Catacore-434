@@ -118,7 +118,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_WOUND:
-                        DoCast(me->getVictim(), SPELL_MORTAL_WOUND);
+                        DoCast(me->GetVictim(), SPELL_MORTAL_WOUND);
                         events.ScheduleEvent(EVENT_WOUND, 12000);
                         break;
                     case EVENT_ENRAGE:
@@ -136,7 +136,7 @@ public:
 						{
 							for(std::list<Creature*>::iterator itr = ZombieList.begin(); itr != ZombieList.end(); ++itr)
 							{
-								if((*itr) && (*itr)->isAlive())
+								if((*itr) && (*itr)->IsAlive())
 									(*itr)->DealDamage((*itr),(*itr)->GetHealth()-(*itr)->CountPctFromMaxHealth(5));
 							}
 						}
@@ -167,11 +167,11 @@ public:
                 }
             }
 
-            if (me->getVictim() && me->getVictim()->GetEntry() == MOB_ZOMBIE)
+            if (me->GetVictim() && me->GetVictim()->GetEntry() == MOB_ZOMBIE)
             {
-                if (me->IsWithinMeleeRange(me->getVictim()))
+                if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
-                    me->Kill(me->getVictim());
+                    me->Kill(me->GetVictim());
                     me->ModifyHealth(int32(me->CountPctFromMaxHealth(5)));
                 }
             }

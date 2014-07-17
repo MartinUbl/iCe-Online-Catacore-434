@@ -200,7 +200,7 @@ public:
             case SPELL_EYES_OF_OCCUTHAR:
             case SPELL_EYES_OF_OCCUTHAR_H:
                 {
-                    if (target == me->getVictim() || target->GetTypeId() != TYPEID_PLAYER)
+                    if (target == me->GetVictim() || target->GetTypeId() != TYPEID_PLAYER)
                         break;
                     me->CastSpell(target, SPELL_EYES_OF_OCCUTHAR_VISUAL, true);
                     break;

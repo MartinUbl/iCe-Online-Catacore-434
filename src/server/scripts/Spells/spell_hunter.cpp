@@ -181,7 +181,7 @@ public:
                 return;
 
             Unit * pTarget = GetTarget();
-            if (!pTarget->ToPlayer()->isInCombat())
+            if (!pTarget->ToPlayer()->IsInCombat())
                 return;
 
             uint32 spellId = SPELL_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_SNIPER_TRAINING_R1;
@@ -254,7 +254,7 @@ public:
 
         bool Load()
         {
-            if (!GetCaster()->isPet())
+            if (!GetCaster()->IsPet())
                 return false;
             return true;
         }
@@ -297,7 +297,7 @@ public:
 
         bool Load()
         {
-            if (!GetCaster()->isPet())
+            if (!GetCaster()->IsPet())
                 return false;
             return true;
         }

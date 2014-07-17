@@ -129,7 +129,7 @@ public:
             if (i == 7 && pInstance)
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_JAINAPROUDMOORE));
-                if (pTarget && pTarget->isAlive())
+                if (pTarget && pTarget->IsAlive())
                     me->AddThreat(pTarget,0.0f);
             }
         }
@@ -288,7 +288,7 @@ public:
 
         void MoveInLineOfSight(Unit *who)
         {
-            if (me->IsWithinDist(who, 50) && !me->isInCombat() && me->IsHostileTo(who))
+            if (me->IsWithinDist(who, 50) && !me->IsInCombat() && me->IsHostileTo(who))
                 AttackStart(who);
         }
 

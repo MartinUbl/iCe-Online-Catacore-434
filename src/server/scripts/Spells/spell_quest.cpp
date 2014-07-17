@@ -42,7 +42,7 @@ public:
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         if (Creature* pCreatureTarget = GetHitCreature())
-            if (!pCreatureTarget->isPet() && pCreatureTarget->GetEntry() == _originalEntry)
+            if (!pCreatureTarget->IsPet() && pCreatureTarget->GetEntry() == _originalEntry)
             {
                 pCreatureTarget->UpdateEntry(_newEntry);
                 if (_shouldAttack && pCreatureTarget->IsAIEnabled)

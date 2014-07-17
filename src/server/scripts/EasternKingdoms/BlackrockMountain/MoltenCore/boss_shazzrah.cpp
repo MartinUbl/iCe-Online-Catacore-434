@@ -71,7 +71,7 @@ public:
             //ArcaneExplosion_Timer
             if (ArcaneExplosion_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANEEXPLOSION);
+                DoCast(me->GetVictim(), SPELL_ARCANEEXPLOSION);
                 ArcaneExplosion_Timer = 5000 + rand()%4000;
             } else ArcaneExplosion_Timer -= diff;
 
@@ -95,7 +95,7 @@ public:
             //Countspell_Timer
             if (Countspell_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_COUNTERSPELL);
+                DoCast(me->GetVictim(), SPELL_COUNTERSPELL);
                 Countspell_Timer = 16000 + rand()%4000;
             } else Countspell_Timer -= diff;
 

@@ -318,7 +318,7 @@ void Battlefield::InvitePlayerToWar(Player *player)
         return;
 
     // TODO : needed ?
-    if (player->isInFlight())
+    if (player->IsInFlight())
         return;
 
     if (player->InArena() || player->GetBattleground())
@@ -497,7 +497,7 @@ void Battlefield::PlayerAcceptInviteToWar(Player *player)
         player->SetBattlegroundEntryPoint();
 
         player->Unmount();
-        if (player->isInFlight())
+        if (player->IsInFlight())
         {
             player->GetMotionMaster()->MovementExpired();
             player->CleanupAfterTaxiFlight();
@@ -635,7 +635,7 @@ void Battlefield::ShowNpc(Creature *p_Creature, bool p_Aggressive)
     p_Creature->SetPhaseMask(1, true);
     p_Creature->SetVisible(true);
     p_Creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-    if (!p_Creature->isAlive())
+    if (!p_Creature->IsAlive())
         p_Creature->Respawn(true);
     if (p_Aggressive)
         p_Creature->SetReactState(REACT_AGGRESSIVE);

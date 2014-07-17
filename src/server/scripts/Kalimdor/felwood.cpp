@@ -55,7 +55,7 @@ public:
     {
         uint32 eCreature = pCreature->GetEntry();
 
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (eCreature == 9528)

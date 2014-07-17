@@ -664,23 +664,23 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->IsWithinMeleeRange(me->getVictim()))
+            if (me->IsWithinMeleeRange(me->GetVictim()))
             {
                 if (uiArcingSmashTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_ARCING_SMASH);
+                    DoCast(me->GetVictim(), SPELL_ARCING_SMASH);
                     uiArcingSmashTimer = TIMER_ARCING_SMASH;
                 } else uiArcingSmashTimer -= diff;
 
                 if (uiTrampleTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_TRAMPLE);
+                    DoCast(me->GetVictim(), SPELL_TRAMPLE);
                     uiTrampleTimer = TIMER_TRAMPLE;
                 } else uiTrampleTimer -= diff;
 
                 if (uiUppercutTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_UPPERCUT);
+                    DoCast(me->GetVictim(), SPELL_UPPERCUT);
                     uiUppercutTimer = TIMER_UPPERCUT;
                 } else uiUppercutTimer -= diff;
             }
@@ -850,9 +850,9 @@ public:
 
             if (uiShockTimer <= diff)
             {
-                if (me->IsWithinMeleeRange(me->getVictim()))
+                if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
-                    DoCast(me->getVictim(), SPELL_SHOCK);
+                    DoCast(me->GetVictim(), SPELL_SHOCK);
                     uiShockTimer = TIMER_SHOCK;
                 }
             }

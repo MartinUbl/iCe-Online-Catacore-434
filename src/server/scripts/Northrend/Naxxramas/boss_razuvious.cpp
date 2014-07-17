@@ -198,7 +198,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_STRIKE:
-                        DoCast(me->getVictim(), SPELL_UNBALANCING_STRIKE);
+                        DoCast(me->GetVictim(), SPELL_UNBALANCING_STRIKE);
                         events.ScheduleEvent(EVENT_STRIKE, 28000);
                         return;
                     case EVENT_SHOUT:
@@ -286,9 +286,9 @@ public:
 				{
 					if(pSpell->m_spellInfo->Id != 55479)
 					{
-						if(Possessed && Possessed->isAlive())
+						if(Possessed && Possessed->IsAlive())
 							Possessed->RemoveAurasDueToSpell(530);
-						if(Possessor && Possessor->isAlive())
+						if(Possessor && Possessor->IsAlive())
 							Possessor->InterruptNonMeleeSpells(false);
 						Possessor = NULL;
 						Possessed = NULL;
@@ -297,9 +297,9 @@ public:
 				}
 				else if(Possessor->isDead())
 				{
-					if(Possessed && Possessed->isAlive())
+					if(Possessed && Possessed->IsAlive())
 						Possessed->RemoveAurasDueToSpell(530);
-					if(Possessor && Possessor->isAlive())
+					if(Possessor && Possessor->IsAlive())
 						Possessor->InterruptNonMeleeSpells(false);
 					Possessor = NULL;
 					Possessed = NULL;
@@ -309,9 +309,9 @@ public:
 
 			if(UnpossessTimer <= diff)
 			{
-				if(Possessed && Possessed->isAlive())
+				if(Possessed && Possessed->IsAlive())
 					Possessed->RemoveAurasDueToSpell(530);
-				if(Possessor && Possessor->isAlive())
+				if(Possessor && Possessor->IsAlive())
 					Possessor->InterruptNonMeleeSpells(false);
 				Possessor = NULL;
 				Possessed = NULL;

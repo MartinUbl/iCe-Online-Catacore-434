@@ -118,7 +118,7 @@ public:
             }
             else if (Banish_Timer <= diff)
             {
-                Unit* temp = me->getVictim();
+                Unit* temp = me->GetVictim();
                 if (temp && temp->GetTypeId() == TYPEID_PLAYER)
                 {
                     DoCast(temp, SPELL_BANISHED_SHATTRATH_A);
@@ -188,7 +188,7 @@ public:
             }
             else if (Banish_Timer <= diff)
             {
-                Unit* temp = me->getVictim();
+                Unit* temp = me->GetVictim();
                 if (temp && temp->GetTypeId() == TYPEID_PLAYER)
                 {
                     DoCast(temp, SPELL_BANISHED_SHATTRATH_S);

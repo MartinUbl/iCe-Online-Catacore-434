@@ -437,7 +437,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool isTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
+        bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
         bool SetWalk(bool enable);
         void SetLevitate(bool enable);
 
@@ -446,7 +446,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
         void InitializeReactState()
         {
-            if (isTotem() || isTrigger() || GetCreatureType() == CREATURE_TYPE_CRITTER)
+            if (IsTotem() || isTrigger() || GetCreatureType() == CREATURE_TYPE_CRITTER)
                 SetReactState(REACT_PASSIVE);
             else
                 SetReactState(REACT_AGGRESSIVE);
@@ -472,7 +472,7 @@ class Creature : public Unit, public GridObject<Creature>
                                                             // redefine Unit::IsImmunedToSpellEffect
         bool isElite() const
         {
-            if (isPet())
+            if (IsPet())
                 return false;
 
             uint32 rank = GetCreatureInfo()->rank;
@@ -481,7 +481,7 @@ class Creature : public Unit, public GridObject<Creature>
 
         bool isWorldBoss() const
         {
-            if (isPet())
+            if (IsPet())
                 return false;
 
             return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;

@@ -162,7 +162,7 @@ class StartMovementEvent : public BasicEvent
         StartMovementEvent(Creature& owner) : BasicEvent(), m_owner(owner) { }
         bool Execute(uint64 /*eventTime*/, uint32 /*diff*/)
         {
-            m_owner.GetMotionMaster()->MoveChase(m_owner.getVictim());
+            m_owner.GetMotionMaster()->MoveChase(m_owner.GetVictim());
             return true;
         }
 
@@ -292,7 +292,7 @@ class boss_professor_putricide : public CreatureScript
                     default:
                         break;
                 }
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     DoZoneInCombat(summon);
             }
 
@@ -577,7 +577,7 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         case EVENT_RESUME_ATTACK:
                             me->SetReactState(REACT_DEFENSIVE);
-                            AttackStart(me->getVictim());
+                            AttackStart(me->GetVictim());
                             // remove Tear Gas
                             instance->DoRemoveAurasDueToSpellOnPlayers(71615);
                             instance->DoRemoveAurasDueToSpellOnPlayers(71618);

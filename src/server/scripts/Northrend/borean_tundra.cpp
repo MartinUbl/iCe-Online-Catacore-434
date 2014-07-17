@@ -217,7 +217,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(11957) == QUEST_STATUS_INCOMPLETE)
@@ -263,7 +263,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_ACES_HIGH) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_ACES_HIGH_DAILY) == QUEST_STATUS_INCOMPLETE) //It's the same dragon for both quests.
@@ -597,7 +597,7 @@ public:
                 go_caribou->SetLootState(GO_JUST_DEACTIVATED);
 
             if (TempSummon *summon = me->ToTempSummon())
-                if (summon->isSummon())
+                if (summon->IsSummon())
                     if (Unit *pTemp = summon->GetSummoner())
                         if (pTemp->GetTypeId() == TYPEID_PLAYER)
                             CAST_PLR(pTemp)->KilledMonsterCredit(me->GetEntry(),0);
@@ -1245,7 +1245,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_LAST_RITES) == QUEST_STATUS_INCOMPLETE && pCreature->GetAreaId() == 4128)
@@ -1298,7 +1298,7 @@ public:
             if (uiType != POINT_MOTION_TYPE)
                 return;
 
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                     CAST_AI(npc_thassarian::npc_thassarianAI,CAST_CRE(pSummoner)->AI())->bArthasInPosition = true;
         }
@@ -1330,7 +1330,7 @@ public:
 
             me->AddUnitState(UNIT_STATE_STUNNED);
             me->CastSpell(me, SPELL_STUN, true);
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                     CAST_AI(npc_thassarian::npc_thassarianAI,CAST_CRE(pSummoner)->AI())->bArlosInPosition = true;
         }
@@ -1387,7 +1387,7 @@ public:
             if (uiType != POINT_MOTION_TYPE)
                 return;
 
-            if (me->isSummon())
+            if (me->IsSummon())
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                     CAST_AI(npc_thassarian::npc_thassarianAI,CAST_CRE(pSummoner)->AI())->bTalbotInPosition = true;
         }
@@ -1410,19 +1410,19 @@ public:
             {
                 if (uiShadowBoltTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_SHADOW_BOLT);
+                    DoCast(me->GetVictim(), SPELL_SHADOW_BOLT);
                     uiShadowBoltTimer = urand(5000,12000);
                 } else uiShadowBoltTimer -= uiDiff;
 
                 if (uiDeflectionTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEFLECTION);
+                    DoCast(me->GetVictim(), SPELL_DEFLECTION);
                     uiDeflectionTimer = urand(20000,25000);
                 } else uiDeflectionTimer -= uiDiff;
 
                 if (uiSoulBlastTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_SOUL_BLAST);
+                    DoCast(me->GetVictim(), SPELL_SOUL_BLAST);
                     uiSoulBlastTimer  = urand (12000,18000);
                 } else uiSoulBlastTimer -= uiDiff;
             }
@@ -1498,7 +1498,7 @@ public:
                 me->AddUnitState(UNIT_STATE_STUNNED);
                 me->CastSpell(me, SPELL_STUN, true);
 
-                if (me->isSummon())
+                if (me->IsSummon())
                     if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                         CAST_AI(npc_thassarian::npc_thassarianAI,CAST_CRE(pSummoner)->AI())->bLeryssaInPosition = true;
                 bDone = true;
@@ -1506,7 +1506,7 @@ public:
             else
             {
                 me->SetStandState(UNIT_STAND_STATE_SIT);
-                if (me->isSummon())
+                if (me->IsSummon())
                     if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                     pSummoner->SetStandState(UNIT_STAND_STATE_SIT);
                 uiPhaseTimer = 1500;
@@ -1523,7 +1523,7 @@ public:
                 switch (Phase)
                 {
                     case 1:
-                        if (me->isSummon())
+                        if (me->IsSummon())
                             if (Unit* pThassarian = CAST_SUM(me)->GetSummoner())
                                 DoScriptText(SAY_THASSARIAN_4, pThassarian);
                         uiPhaseTimer = 5000;
@@ -1535,7 +1535,7 @@ public:
                         ++Phase;
                         break;
                     case 3:
-                        if (me->isSummon())
+                        if (me->IsSummon())
                             if (Unit* pThassarian = CAST_SUM(me)->GetSummoner())
                                 DoScriptText(SAY_THASSARIAN_5, pThassarian);
                         uiPhaseTimer = 5000;
@@ -1547,7 +1547,7 @@ public:
                         ++Phase;
                         break;
                     case 5:
-                        if (me->isSummon())
+                        if (me->IsSummon())
                             if (Unit* pThassarian = CAST_SUM(me)->GetSummoner())
                         DoScriptText(SAY_THASSARIAN_6, pThassarian);
                         uiPhaseTimer = 5000;
@@ -1560,7 +1560,7 @@ public:
                         ++Phase;
                         break;
                     case 7:
-                        if (me->isSummon())
+                        if (me->IsSummon())
                             if (Unit* pThassarian = CAST_SUM(me)->GetSummoner())
                             {
                                 DoScriptText(SAY_THASSARIAN_7, pThassarian);
@@ -2539,7 +2539,7 @@ public:
         if (pPlayer->HasAura(SPELL_RIGHTEOUS_VISION) && pPlayer->GetQuestStatus(QUEST_THE_HUNT_IS_ON) == QUEST_STATUS_INCOMPLETE)
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, charGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        if (pCreature->isVendor())
+        if (pCreature->IsVendor())
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         pPlayer->SEND_GOSSIP_MENU(uiGossipText, pCreature->GetGUID());

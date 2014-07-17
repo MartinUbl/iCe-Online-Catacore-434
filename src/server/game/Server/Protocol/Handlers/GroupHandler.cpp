@@ -729,7 +729,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket & recv_data)
     if (movedPlayer)
     {
         //Do not allow leader to change group of player in combat
-        if (movedPlayer->isInCombat())
+        if (movedPlayer->IsInCombat())
             return;
 
         // everything's fine, do it

@@ -224,7 +224,7 @@ struct boss_twin_baseAI : public ScriptedAI
                 {
                     Unit* pPlayer = itr->getSource();
                     if (!pPlayer) continue;
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                         if (pSummoned->GetEntry() == NPC_LIGHT_ESSENCE)
                             pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
                         if (pSummoned->GetEntry() == NPC_DARK_ESSENCE)
@@ -237,7 +237,7 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
     {
-        if (!me || !me->isAlive())
+        if (!me || !me->IsAlive())
             return;
 
         if (pDoneBy->GetGUID() == me->GetGUID())
@@ -289,7 +289,7 @@ struct boss_twin_baseAI : public ScriptedAI
             m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
             if (Creature* pSister = GetSister())
             {
-                if (!pSister->isAlive())
+                if (!pSister->IsAlive())
                 {
                     m_pInstance->SetData(TYPE_VALKIRIES, DONE);
                     Summons.DespawnAll();
@@ -314,7 +314,7 @@ struct boss_twin_baseAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
             m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
         }
-        if (me->isAlive())
+        if (me->IsAlive())
         {
             me->SummonCreature(m_uiEssenceNpcId, EssenceLocation[0].GetPositionX(), EssenceLocation[0].GetPositionY(), EssenceLocation[0].GetPositionZ());
             me->SummonCreature(m_uiEssenceNpcId, EssenceLocation[1].GetPositionX(), EssenceLocation[1].GetPositionY(), EssenceLocation[1].GetPositionZ());
@@ -619,7 +619,7 @@ public:
             if (m_uiRangeCheckTimer < uiDiff)
             {
                 if (Unit *pTarget = me->SelectNearestTarget(2.0f))
-                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive())
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsAlive())
                     {
                         DoCastAOE(SPELL_UNLEASHED_DARK);
                         me->GetMotionMaster()->MoveIdle();
@@ -653,7 +653,7 @@ public:
             if (m_uiRangeCheckTimer < uiDiff)
             {
                 if (Unit *pTarget = me->SelectNearestTarget(2.0f))
-                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive())
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsAlive())
                     {
                         DoCastAOE(SPELL_UNLEASHED_LIGHT);
                         me->GetMotionMaster()->MoveIdle();

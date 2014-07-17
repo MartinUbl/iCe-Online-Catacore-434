@@ -85,9 +85,9 @@ class boss_watchkeeper_gargolmar : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (!me->getVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
+                if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
 
                     float attackRadius = me->GetAttackDistance(who);
@@ -121,7 +121,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
 
                 if (MortalWound_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_MORTAL_WOUND);
+                    DoCast(me->GetVictim(), SPELL_MORTAL_WOUND);
                     MortalWound_Timer = 5000+rand()%8000;
                 }
                 else

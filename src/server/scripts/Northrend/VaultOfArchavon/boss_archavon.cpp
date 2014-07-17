@@ -164,7 +164,7 @@ class boss_archavon : public CreatureScript
 						float speedXY = me->GetDistance2d(pJumpTarget);
 						me->GetMotionMaster()->MoveJump(pJumpTarget->GetPositionX(), pJumpTarget->GetPositionY(), pJumpTarget->GetPositionZ(), speedXY, 18);
 
-					//	me->CastSpell(me->getVictim(), SPELL_CRUSHING_LEAP, false); // trigger missile effect handled wrong?
+					//	me->CastSpell(me->GetVictim(), SPELL_CRUSHING_LEAP, false); // trigger missile effect handled wrong?
 
 						// boss emote to raid. $N = Name of victim
 						me->MonsterTextEmote("Archavon the Stone Watcher lunges for $N!", pJumpTarget->GetGUID(), true);
@@ -188,7 +188,7 @@ class boss_archavon : public CreatureScript
 					else
 					{
 						// go back to victim
-						me->GetMotionMaster()->MoveChase(me->getVictim());
+						me->GetMotionMaster()->MoveChase(me->GetVictim());
 						m_bJumpOne = true;
 					}
 
@@ -201,7 +201,7 @@ class boss_archavon : public CreatureScript
 				// stomp. every 40 sec, 25 sec after jump
 				if(m_uiStomp_Timer < diff)
 				{
-					me->CastSpell(me->getVictim(), SPELL_STOMP, false);
+					me->CastSpell(me->GetVictim(), SPELL_STOMP, false);
 
 					m_bImpale_Countdown = true;
 					m_uiRockShards_Timer += 3000; // not to cast rock shards before impale
@@ -213,20 +213,20 @@ class boss_archavon : public CreatureScript
 				// impale after stomp
 				if(m_uiImpale_Timer < diff)
 				{
-					me->CastSpell(me->getVictim(), SPELL_IMPALE, false);
+					me->CastSpell(me->GetVictim(), SPELL_IMPALE, false);
 
 					// apply iCelike DOT
 					if(SpellEntry* customSpell = (SpellEntry *)sSpellStore.LookupEntry(26548))
 					{
 						customSpell->EffectBasePoints[0] = customSpell->EffectBasePoints[0] * RAID_MODE(8,11);
-						me->CastSpell(me->getVictim(), customSpell, true);
+						me->CastSpell(me->GetVictim(), customSpell, true);
 
 						customSpell->EffectBasePoints[0] = customSpell->EffectBasePoints[0] / RAID_MODE(8,11);
 						customSpell = NULL;
 					}
 
 					// enter vehicle manually
-					if(Player* pImpaled = (Player *)me->getVictim())
+					if(Player* pImpaled = (Player *)me->GetVictim())
 					{
 						pImpaled->EnterVehicle(me, 0);
 						me->getThreatManager().modifyThreatPercent(pImpaled, -99);

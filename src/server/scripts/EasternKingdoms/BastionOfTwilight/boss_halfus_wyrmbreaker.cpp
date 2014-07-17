@@ -403,8 +403,8 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(me->getVictim() && me->getVictim()->ToPlayer() && !me->IsWithinLOSInMap(me->getVictim())) // If halfus is in texture
-                me->getVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
+            if(me->GetVictim() && me->GetVictim()->ToPlayer() && !me->IsWithinLOSInMap(me->GetVictim())) // If halfus is in texture
+                me->GetVictim()->ToPlayer()->TeleportTo(671, me->GetPositionX(), me->GetPositionY(),me->GetPositionZ() + 20.0f,0.0f);
 
             if (!CycloneWinds && me->GetAura(SPELL_CYCLONE_WINDS))
                 CycloneWinds = true;
@@ -667,7 +667,7 @@ public:
                 me->RemoveAura(Blindness);
 
             if (Creature* halfus = Unit::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
-                if (me->getVictim() == halfus)
+                if (me->GetVictim() == halfus)
                     halfus->CombatStop(true);
 
             if (BuffTimer <= diff && Active)
@@ -726,29 +726,29 @@ public:
                             Active = false;
                         };
                     if (UpdateVictim())
-                        me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()+7.0f);
+                        me->GetMotionMaster()->MovePoint(0, me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY(), me->GetVictim()->GetPositionZ()+7.0f);
                     };
             };
 
             if (!UpdateVictim())
                 return;
 
-            if ((FlyTimer <= diff || me->GetMotionMaster()->GetCurrentMovementGeneratorType() == 0) && me->GetDistance(me->getVictim()) >= 2.0f)
+            if ((FlyTimer <= diff || me->GetMotionMaster()->GetCurrentMovementGeneratorType() == 0) && me->GetDistance(me->GetVictim()) >= 2.0f)
             {
-                me->GetMotionMaster()->MovePoint(0, me->getVictim()->GetPositionX(), me->getVictim()->GetPositionY(), me->getVictim()->GetPositionZ()+7.0f);
+                me->GetMotionMaster()->MovePoint(0, me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY(), me->GetVictim()->GetPositionZ()+7.0f);
                 FlyTimer = 500;
             }
             else FlyTimer -= diff;
 
-            if (me->GetDistance(me->getVictim()) < 1.5f)
+            if (me->GetDistance(me->GetVictim()) < 1.5f)
                 me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
 
             if (me->isAttackReady() && !me->IsNonMeleeSpellCasted(false))
             {
-               if (me->GetDistance(me->getVictim()) < 2.0f)
+               if (me->GetDistance(me->GetVictim()) < 2.0f)
                 {
                     FlyTimer = 500;
-                    me->AttackerStateUpdate(me->getVictim());
+                    me->AttackerStateUpdate(me->GetVictim());
                     me->resetAttackTimer();
                 }
              }
@@ -947,7 +947,7 @@ public:
                                         PosX = -338.9981f;
                                     if (PosY == 0.0f)
                                         PosY = -711.216675f;
-                                    if ((*itr)->isAlive())
+                                    if ((*itr)->IsAlive())
                                         (*itr)->GetMotionMaster()->MovePoint(3, PosX, PosY, 888.096802f);
                                     if (Position < 6)
                                     {
@@ -980,7 +980,7 @@ public:
                         };
 
                     for (std::list<Creature*>::const_iterator itr = WhelpsList.begin(); itr != WhelpsList.end(); ++itr)
-                        if (!(*itr)->isAlive() || !(*itr)->IsInWorld())
+                        if (!(*itr)->IsAlive() || !(*itr)->IsInWorld())
                         {
                             Free = false;
                             return;
@@ -1030,7 +1030,7 @@ public:
                             BreathTimer = 15*IN_MILLISECONDS;
                             FireballTimer = 11*IN_MILLISECONDS;
                             BallTimer = 500;
-                            me->CastSpell(me->getVictim(), SPELL_FIREBALL_BARRAGE, false);
+                            me->CastSpell(me->GetVictim(), SPELL_FIREBALL_BARRAGE, false);
                             BarrageTimer = 30*IN_MILLISECONDS;
                         }
                     else
@@ -1083,7 +1083,7 @@ public:
                     BallTimer = 30*IN_MILLISECONDS;
                     FireballTimer = 11*IN_MILLISECONDS;
                     BarrageTimer = 15*IN_MILLISECONDS;
-                    me->CastSpell(me->getVictim(), SPELL_SCORCHING_BREATH, true);
+                    me->CastSpell(me->GetVictim(), SPELL_SCORCHING_BREATH, true);
                     BreathTimer = 30*IN_MILLISECONDS;
                 }
              else

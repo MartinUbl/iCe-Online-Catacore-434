@@ -98,7 +98,7 @@ public:
             //NoxiousBreath_Timer
             if (m_uiNoxiousBreath_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_NOXIOUSBREATH);
+                DoCast(me->GetVictim(), SPELL_NOXIOUSBREATH);
                 m_uiNoxiousBreath_Timer = 14000 + rand()%6000;
             }
             else
@@ -173,7 +173,7 @@ public:
             //MoonFire_Timer
             if (m_uiMoonFire_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_MOONFIRE);
+                DoCast(me->GetVictim(), SPELL_MOONFIRE);
                 m_uiMoonFire_Timer = 5000;
             }
             else

@@ -81,7 +81,7 @@ public:
     {
         npc_blackfathom_deeps_eventAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (pCreature->isSummon())
+            if (pCreature->IsSummon())
             {
                 pCreature->SetHomePosition(HomePosition);
                 AttackPlayer();
@@ -121,7 +121,7 @@ public:
                     if (pPlayer->isGameMaster())
                         continue;
 
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                     {
                         me->SetInCombatWith(pPlayer);
                         pPlayer->SetInCombatWith(me);
@@ -142,7 +142,7 @@ public:
                 {
                     if (uiRavageTimer <= uiDiff)
                     {
-                        DoCast(me->getVictim(), SPELL_RAVAGE);
+                        DoCast(me->GetVictim(), SPELL_RAVAGE);
                         uiRavageTimer = urand(9000,14000);
                     } else uiRavageTimer -= uiDiff;
                     break;
@@ -182,7 +182,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
-            if (me->isSummon()) //we are not a normal spawn.
+            if (me->IsSummon()) //we are not a normal spawn.
                 if (pInstance)
                     pInstance->SetData(DATA_EVENT, pInstance->GetData(DATA_EVENT) + 1);
         }

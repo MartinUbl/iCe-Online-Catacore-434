@@ -193,10 +193,10 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
                 return;
 
-            if (!me->getVictim() && me->getThreatManager().isThreatListEmpty())
+            if (!me->GetVictim() && me->getThreatManager().isThreatListEmpty())
             {
                 EnterEvadeMode();
                 return;
@@ -225,7 +225,7 @@ public:
                     return;
 
                 case EVENT_MIGHTY_KICK:
-                    DoCast(me->getVictim(), SPELL_MIGHTY_KICK);
+                    DoCast(me->GetVictim(), SPELL_MIGHTY_KICK);
                     events.ScheduleEvent(EVENT_MIGHTY_KICK, 25000, GCD_1);
                     return;
 
@@ -239,12 +239,12 @@ public:
                     return;
 
                 case EVENT_TOXIC_WASTE:
-                    DoCast(me->getVictim(), SPELL_TOXIC_WASTE);
+                    DoCast(me->GetVictim(), SPELL_TOXIC_WASTE);
                     events.ScheduleEvent(EVENT_TOXIC_WASTE, 5000);
                     return;
 
                 case EVENT_SHADOW_BOLT:
-                    DoCast(me->getVictim(), SPELL_SHADOW_BOLT);
+                    DoCast(me->GetVictim(), SPELL_SHADOW_BOLT);
                     events.ScheduleEvent(EVENT_SHADOW_BOLT, 15000);
                     return;
 
@@ -263,7 +263,7 @@ public:
 
                 case EVENT_END_EXPLOSIVE_BARRAGE:
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     events.ScheduleEvent(EVENT_EXPLOSIVE_BARRAGE, 25000);
                     break;
             }

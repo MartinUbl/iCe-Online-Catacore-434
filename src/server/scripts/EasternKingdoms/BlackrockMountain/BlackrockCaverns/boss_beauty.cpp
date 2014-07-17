@@ -188,13 +188,13 @@ class mob_child_of_beauty: public CreatureScript
                 Creature* pLucky = GetClosestCreatureWithEntry(me,NPC_LUCKY,1000.0f);
                 Creature* pSpot = GetClosestCreatureWithEntry(me,NPC_SPOT,1000.0f);
                 Creature* pBuster = GetClosestCreatureWithEntry(me,NPC_BUSTER,1000.0f);
-                if (pMom && pMom->isAlive() && !pMom->isInCombat())
+                if (pMom && pMom->IsAlive() && !pMom->IsInCombat())
                     pMom->AI()->AttackStart(pVictim);
-                if (pLucky && pLucky->isAlive() && !pLucky->isInCombat())
+                if (pLucky && pLucky->IsAlive() && !pLucky->IsInCombat())
                     pLucky->AI()->AttackStart(pVictim);
-                if (pSpot && pSpot->isAlive() && !pSpot->isInCombat())
+                if (pSpot && pSpot->IsAlive() && !pSpot->IsInCombat())
                     pSpot->AI()->AttackStart(pVictim);
-                if (pBuster && pBuster->isAlive() && !pBuster->isInCombat())
+                if (pBuster && pBuster->IsAlive() && !pBuster->IsInCombat())
                     pBuster->AI()->AttackStart(pVictim);
             }
 
@@ -203,7 +203,7 @@ class mob_child_of_beauty: public CreatureScript
                 if (me->GetEntry() == NPC_RUNTY)
                 {
                     Creature* pMom = GetClosestCreatureWithEntry(me, NPC_BEAUTY, 5000.0f);
-                    if (pMom && pMom->isAlive())
+                    if (pMom && pMom->IsAlive())
                         pMom->CastSpell(pMom, SPELL_BERSERK, true);
                 }
             }

@@ -334,7 +334,7 @@ class npc_stinky_icc : public CreatureScript
             {
                 //uint64 festergutGUID = instance ? instance->GetData64(DATA_FESTERGUT) : 0;
                 //if (Creature* festergut = me->GetCreature(*me, festergutGUID))
-                //    if (festergut->isAlive())
+                //    if (festergut->IsAlive())
                 //        festergut->AI()->Talk(SAY_STINKY_DEAD);
             }
 

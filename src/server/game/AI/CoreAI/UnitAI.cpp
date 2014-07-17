@@ -50,18 +50,18 @@ void UnitAI::DoMeleeAttackIfReady()
     if (me->isAttackReady())
     {
         //If we are within range melee the target
-        if (me->IsWithinMeleeRange(me->getVictim()))
+        if (me->IsWithinMeleeRange(me->GetVictim()))
         {
-            me->AttackerStateUpdate(me->getVictim());
+            me->AttackerStateUpdate(me->GetVictim());
             me->resetAttackTimer();
         }
     }
     if (me->haveOffhandWeapon() && me->isAttackReady(OFF_ATTACK))
     {
         //If we are within range melee the target
-        if (me->IsWithinMeleeRange(me->getVictim()))
+        if (me->IsWithinMeleeRange(me->GetVictim()))
         {
-            me->AttackerStateUpdate(me->getVictim(), OFF_ATTACK);
+            me->AttackerStateUpdate(me->GetVictim(), OFF_ATTACK);
             me->resetAttackTimer(OFF_ATTACK);
         }
     }
@@ -74,9 +74,9 @@ bool UnitAI::DoSpellAttackIfReady(uint32 spell)
 
     if (me->isAttackReady())
     {
-        if (me->IsWithinCombatRange(me->getVictim(), GetSpellMaxRange(spell, false)))
+        if (me->IsWithinCombatRange(me->GetVictim(), GetSpellMaxRange(spell, false)))
         {
-            me->CastSpell(me->getVictim(), spell, false);
+            me->CastSpell(me->GetVictim(), spell, false);
             me->resetAttackTimer();
         }
         else
@@ -130,7 +130,7 @@ float UnitAI::DoGetSpellMaxRange(uint32 spellId, bool positive)
 
 void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
 {
-    if (me->isInCombat())
+    if (me->IsInCombat())
     {
         std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
         for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
@@ -145,7 +145,7 @@ void UnitAI::DoAddAuraToAllHostilePlayers(uint32 spellid)
 
 void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
 {
-    if (me->isInCombat())
+    if (me->IsInCombat())
     {
         std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
         for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
@@ -166,7 +166,7 @@ void UnitAI::DoCast(uint32 spellId)
     {
         default:
         case AITARGET_SELF:     target = me; break;
-        case AITARGET_VICTIM:   target = me->getVictim(); break;
+        case AITARGET_VICTIM:   target = me->GetVictim(); break;
         case AITARGET_ENEMY:
         {
             const SpellEntry * spellInfo = GetSpellStore()->LookupEntry(spellId);
@@ -186,8 +186,8 @@ void UnitAI::DoCast(uint32 spellId)
             DefaultTargetSelector targetSelector(me, range, playerOnly, -(int32)spellId);
             if (!(spellInfo->Attributes & SPELL_ATTR0_BREAKABLE_BY_DAMAGE)
                 && !(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_VICTIM)
-                && targetSelector(me->getVictim()))
-                target = me->getVictim();
+                && targetSelector(me->GetVictim()))
+                target = me->GetVictim();
             else
                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, targetSelector);
             break;
@@ -288,10 +288,10 @@ void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
             }
     }
 
-    if (!charmer->isInCombat())
+    if (!charmer->IsInCombat())
         me->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, me->GetFollowAngle());
 
-    Unit *target = me->getVictim();
+    Unit *target = me->GetVictim();
     if (!target || !charmer->canAttack(target))
         AttackStart(charmer->SelectNearestTargetInAttackDistance());
 }

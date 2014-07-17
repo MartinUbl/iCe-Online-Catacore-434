@@ -150,7 +150,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
-            if (me->isAlive()) 
+            if (me->IsAlive()) 
             {
                 pInstance->SetData(TYPE_HALION, NOT_STARTED);
                 pInstance->SetData(TYPE_HALION_EVENT, FAIL);
@@ -203,7 +203,7 @@ public:
                     intro = true;
                 }
 
-            if (intro && !me->isInCombat() && pWho->IsWithinDistInMap(me, 30.0f))
+            if (intro && !me->IsInCombat() && pWho->IsWithinDistInMap(me, 30.0f))
             {
                // AttackStart(pWho);
                me->SetInCombatWith(pWho);
@@ -234,7 +234,7 @@ public:
 
             Creature* pclone = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_TWILIGHT));
 
-            if (!pclone || !pclone->isAlive())
+            if (!pclone || !pclone->IsAlive())
             {
                 if (GameObject* pGoPortal = me->FindNearestGameObject(GO_HALION_PORTAL_1, 50.0f))
                     pGoPortal->Delete();
@@ -324,7 +324,7 @@ public:
                           DoCast(SPELL_FIERY_EXPLOSION);
                           me->SetDisplayId(31952);
                           SetCombatMovement(true);
-                          me->GetMotionMaster()->MoveChase(me->getVictim());
+                          me->GetMotionMaster()->MoveChase(me->GetVictim());
                           setStage(0);
                           m_uiIntroAppTimer = 30*IN_MILLISECONDS;
                      } else m_uiIntroAppTimer -= uiDiff;
@@ -378,7 +378,7 @@ public:
                         Creature* pControl = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_CONTROL));
                         if (!pControl)
                             pControl = me->SummonCreature(NPC_HALION_CONTROL, SpawnLoc[0].x, SpawnLoc[0].y, SpawnLoc[0].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 1000);
-                        else if (!pControl->isAlive())
+                        else if (!pControl->IsAlive())
                             pControl->Respawn();
                         pControl->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         me->SetInCombatWith(pControl);
@@ -414,7 +414,7 @@ public:
                         Creature* pTwilight = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_TWILIGHT));
                         if (!pTwilight)
                             pTwilight = me->SummonCreature(NPC_HALION_TWILIGHT, SpawnLoc[0].x, SpawnLoc[0].y, SpawnLoc[0].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 1000);
-                        else if (!pTwilight->isAlive())
+                        else if (!pTwilight->IsAlive())
                             pTwilight->Respawn();
                         pTwilight->SetCreatorGUID(0);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -451,9 +451,9 @@ public:
 
                 case 7:
                     if (me->IsNonMeleeSpellCasted(false)) return;
-                    if (me->getVictim()->GetTypeId() != TYPEID_PLAYER) return;
+                    if (me->GetVictim()->GetTypeId() != TYPEID_PLAYER) return;
                     SetCombatMovement(true);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     setStage(8);
                     break;
 
@@ -565,11 +565,11 @@ public:
             Creature* pFocus = me->GetMap()->GetCreature(pInstance->GetData64(NPC_ORB_ROTATION_FOCUS));
             if (!pFocus )
                  pFocus = me->SummonCreature(NPC_ORB_ROTATION_FOCUS, SpawnLoc[0].x, SpawnLoc[0].y, SpawnLoc[0].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 1000);
-            else if (!pFocus->isAlive())
+            else if (!pFocus->IsAlive())
                  pFocus->Respawn();
 
             if (Creature* pReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL)))
-                if (pReal->isAlive())
+                if (pReal->IsAlive())
                     me->SetHealth(pReal->GetHealth());
             if (!me->HasAura(SPELL_TWILIGHT_ENTER))
                  DoCast(me, SPELL_TWILIGHT_ENTER);
@@ -620,7 +620,7 @@ public:
                 setStage(1);
                 DoCast(me, SPELL_TWILIGHT_PRECISION);
                 if (Creature* pReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL)))
-                    if (pReal->isAlive())
+                    if (pReal->IsAlive())
                        me->SetHealth(pReal->GetHealth());
             }
 
@@ -641,7 +641,7 @@ public:
                    pGoPortal->Delete();
 
             if (Creature* pReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL)))
-                if (!pReal->isAlive())
+                if (!pReal->IsAlive())
                 {
                     pInstance->SetData(TYPE_HALION, DONE);
                     pReal->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
@@ -684,7 +684,7 @@ public:
             if (!pInstance || pInstance->GetData(TYPE_HALION) != IN_PROGRESS || pInstance->GetData(TYPE_HALION_EVENT) == FAIL)
             {
                 if (Creature* pReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL)))
-                    if (!pReal->isAlive())
+                    if (!pReal->IsAlive())
                         pReal->Respawn();
 
                 me->ForcedDespawn();
@@ -875,7 +875,7 @@ public:
                    {
                        if (!i->getSource()->IsInMap(me)) continue;
                        if (i->getSource()->isGameMaster()) continue;
-                       if (i->getSource()->isAlive()  && i->getSource()->IsWithinDistInMap(me, range))
+                       if (i->getSource()->IsAlive()  && i->getSource()->IsWithinDistInMap(me, range))
                            return true;
                    }
             }
@@ -914,8 +914,8 @@ public:
                 pHalionReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL));
                 pHalionTwilight = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_TWILIGHT));
 
-                float p_RealHP = (pHalionReal && pHalionReal->isAlive()) ? pHalionReal->GetHealthPct() : 100.0f;
-                float p_TwilightHP = (pHalionTwilight && pHalionTwilight->isAlive()) ? pHalionTwilight->GetHealthPct() : 100.0f;
+                float p_RealHP = (pHalionReal && pHalionReal->IsAlive()) ? pHalionReal->GetHealthPct() : 100.0f;
+                float p_TwilightHP = (pHalionTwilight && pHalionTwilight->IsAlive()) ? pHalionTwilight->GetHealthPct() : 100.0f;
 
                 float m_diff = (p_RealHP - p_TwilightHP);
 
@@ -929,7 +929,7 @@ public:
 
                 if (!m_lastBuffReal || m_lastBuffReal != Buff[buffnum].real)
                 {
-                    if (pHalionReal && pHalionReal->isAlive())
+                    if (pHalionReal && pHalionReal->IsAlive())
                     {
                         if (m_lastBuffReal) pHalionReal->RemoveAurasDueToSpell(m_lastBuffReal);
                         pHalionReal->CastSpell(pHalionReal, Buff[buffnum].real, true);
@@ -939,7 +939,7 @@ public:
 
                 if (!m_lastBuffTwilight || m_lastBuffTwilight != Buff[buffnum].twilight)
                 {
-                    if (pHalionTwilight && pHalionTwilight->isAlive())
+                    if (pHalionTwilight && pHalionTwilight->IsAlive())
                     {
                         if (m_lastBuffTwilight) pHalionTwilight->RemoveAurasDueToSpell(m_lastBuffTwilight);
                         pHalionTwilight->CastSpell(pHalionTwilight, Buff[buffnum].twilight, true);
@@ -1008,7 +1008,7 @@ public:
                 float x,y;
                 me->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
                 pPulsar1 = me->SummonCreature(NPC_SHADOW_PULSAR_N, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-            } else if (!pPulsar1->isAlive())
+            } else if (!pPulsar1->IsAlive())
                         pPulsar1->Respawn();
 
             Creature* pPulsar2 = me->GetMap()->GetCreature(pInstance->GetData64(NPC_SHADOW_PULSAR_S));
@@ -1017,7 +1017,7 @@ public:
                 float x,y;
                 me->GetNearPoint2D(x, y, FR_RADIUS, m_direction + M_PI);
                 pPulsar2 = me->SummonCreature(NPC_SHADOW_PULSAR_S, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-            } else if (!pPulsar2->isAlive())
+            } else if (!pPulsar2->IsAlive())
                         pPulsar2->Respawn();
         }
 

@@ -116,7 +116,7 @@ public:
             {
                 if (Unit* Archimonde = Unit::GetUnit((*me), ArchimondeGUID))
                 {
-                    if (Archimonde->HealthBelowPct(2) || !Archimonde->isAlive())
+                    if (Archimonde->HealthBelowPct(2) || !Archimonde->IsAlive())
                         DoCast(me, SPELL_DENOUEMENT_WISP);
                     else
                         DoCast(Archimonde, SPELL_ANCIENT_SPARK);
@@ -351,7 +351,7 @@ public:
         bool CanUseFingerOfDeath()
         {
             // First we check if our current victim is in melee range or not.
-            Unit* victim = me->getVictim();
+            Unit* victim = me->GetVictim();
             if (victim && me->IsWithinDistInMap(victim, me->GetAttackDistance(victim)))
                 return false;
 
@@ -364,7 +364,7 @@ public:
             for (; itr != m_threatlist.end(); ++itr)
             {
                 Unit* pUnit = Unit::GetUnit((*me), (*itr)->getUnitGuid());
-                if (pUnit && pUnit->isAlive())
+                if (pUnit && pUnit->IsAlive())
                     targets.push_back(pUnit);
             }
 
@@ -378,7 +378,7 @@ public:
                 if (!me->IsWithinDistInMap(pTarget, me->GetAttackDistance(pTarget)))
                     return true;                                // Cast Finger of Death
                 else                                            // This target is closest, he is our new tank
-                    me->AddThreat(pTarget, me->getThreatManager().getThreat(me->getVictim()));
+                    me->AddThreat(pTarget, me->getThreatManager().getThreat(me->GetVictim()));
             }
 
             return false;
@@ -452,7 +452,7 @@ public:
             if (me->HasAura(chargeSpell))
             {
                 me->RemoveAuraFromStack(chargeSpell);
-                DoCast(me->getVictim(), unleashSpell);
+                DoCast(me->GetVictim(), unleashSpell);
                 HasCast = true;
                 SoulChargeCount--;
             }
@@ -463,7 +463,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
             {
                 if (pInstance)
                 {
@@ -553,7 +553,7 @@ public:
                     me->GetMotionMaster()->MoveIdle();
 
                     //all members of raid must get this buff
-                    DoCast(me->getVictim(), SPELL_PROTECTION_OF_ELUNE);
+                    DoCast(me->GetVictim(), SPELL_PROTECTION_OF_ELUNE);
                     HasProtected = true;
                     Enraged = true;
                 }
@@ -573,7 +573,7 @@ public:
             {
                 if (HandOfDeathTimer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_HAND_OF_DEATH);
+                    DoCast(me->GetVictim(), SPELL_HAND_OF_DEATH);
                     HandOfDeathTimer = 2000;
                 } else HandOfDeathTimer -= diff;
                 return;                                         // Don't do anything after this point.
@@ -605,7 +605,7 @@ public:
 
             if (FearTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FEAR);
+                DoCast(me->GetVictim(), SPELL_FEAR);
                 FearTimer = 42000;
             } else FearTimer -= diff;
 
@@ -618,7 +618,7 @@ public:
 
                 Unit *temp = SelectUnit(SELECT_TARGET_RANDOM, 1);
                 if (!temp)
-                    temp = me->getVictim();
+                    temp = me->GetVictim();
 
                 //replace with spell cast 31903 once implicitTarget 73 implemented
                 SummonDoomfire(temp);

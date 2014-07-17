@@ -287,7 +287,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
     // GetPlayer()->RemoveFakeDeath();
 
-    if (unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider())
+    if (unit->IsArmorer() || unit->isCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider())
     {
         unit->StopMoving();
     }
@@ -296,7 +296,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     _player->KilledMonsterCredit(unit->GetEntry(),unit->GetGUID());
 
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
-    if (unit->isSpiritGuide())
+    if (unit->IsSpiritGuide())
     {
         Battleground *bg = _player->GetBattleground();
         if (bg)
@@ -413,7 +413,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket & recv_data)
     uint64 npcGUID;
     recv_data >> npcGUID;
 
-    if (!GetPlayer()->IsInWorld() || !GetPlayer()->isAlive())
+    if (!GetPlayer()->IsInWorld() || !GetPlayer()->IsAlive())
         return;
 
     Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(npcGUID,UNIT_NPC_FLAG_INNKEEPER);

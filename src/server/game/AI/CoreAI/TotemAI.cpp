@@ -35,7 +35,7 @@
 
 int TotemAI::Permissible(const Creature *creature)
 {
-    if (creature->isTotem())
+    if (creature->IsTotem())
         return PERMIT_BASE_PROACTIVE;
 
     return PERMIT_BASE_NO;
@@ -43,7 +43,7 @@ int TotemAI::Permissible(const Creature *creature)
 
 TotemAI::TotemAI(Creature *c) : CreatureAI(c), i_victimGuid(0), i_targetSearchTimer(0)
 {
-    ASSERT(c->isTotem());
+    ASSERT(c->IsTotem());
 
     // Search spell
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(me->ToTotem()->GetSpell());
@@ -71,7 +71,7 @@ void TotemAI::UpdateAI(const uint32 diff)
     if (me->ToTotem()->GetTotemType() != TOTEM_ACTIVE)
         return;
 
-    if (!me->isAlive())
+    if (!me->IsAlive())
         return;
 
     // pointer to appropriate target if found any

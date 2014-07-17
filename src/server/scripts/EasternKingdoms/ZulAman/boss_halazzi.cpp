@@ -149,7 +149,7 @@ class boss_halazzi : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-                summon->AI()->AttackStart(me->getVictim());
+                summon->AI()->AttackStart(me->GetVictim());
                 if (summon->GetEntry() == MOB_SPIRIT_LYNX)
                     LynxGUID = summon->GetGUID();
             }
@@ -186,8 +186,8 @@ class boss_halazzi : public CreatureScript
                             me->SetHealth(me->GetMaxHealth()*0.30f);
                         me->RemoveAurasDueToSpell(SPELL_TRANSFORM_SPLIT2);
                         DoCast(me, SPELL_TRANSFORM_MERGE, true);
-                        me->Attack(me->getVictim(), true);
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->Attack(me->GetVictim(), true);
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                     if (Creature *Lynx = Unit::GetCreature(*me, LynxGUID))
                     {
@@ -421,7 +421,7 @@ class mob_halazzi_lynx : public CreatureScript
 
                 if (shredder_timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_SHRED_ARMOR);
+                    DoCast(me->GetVictim(), SPELL_SHRED_ARMOR);
                     shredder_timer = 4000;
                 } else shredder_timer -= diff;
 

@@ -139,7 +139,7 @@ public:
                 Creature *c = Unit::GetCreature(*me, NearbyGUID[i]);
                 if (c)
                 {
-                    if (!c->isInCombat())
+                    if (!c->IsInCombat())
                     {
                         c->SetNoCallAssistance(true);
                         if (c->AI())
@@ -276,7 +276,7 @@ public:
                 case SPELL_THUNDER_BUFF:
                 case SPELL_MSTRIKE_BUFF:
                 case SPELL_STORM_BUFF:
-                    return me->getVictim();
+                    return me->GetVictim();
 
                 case SPELL_MANAB_BUFF:
                     return GetHatedManaUser();

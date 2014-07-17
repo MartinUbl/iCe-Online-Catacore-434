@@ -174,7 +174,7 @@ public:
                 {
                     if (Player* pPlayer = i->getSource())
                     {
-                        if (pPlayer->isAlive() && /*i->getSource()->GetPositionZ() <= -21.434931f*/pPlayer->IsInWater())
+                        if (pPlayer->IsAlive() && /*i->getSource()->GetPositionZ() <= -21.434931f*/pPlayer->IsInWater())
                         {
                             if (Water == WATERSTATE_SCALDING)
                             {
@@ -258,7 +258,7 @@ public:
                 case 21215: LeotherasTheBlind = pCreature->GetGUID();    break;
                 /*case TRASHMOB_COILFANG_PRIESTESS:
                 case TRASHMOB_COILFANG_SHATTERER:
-                    if (pCreature->isAlive())
+                    if (pCreature->IsAlive())
                         ++TrashCount;
                     break;*/
             }

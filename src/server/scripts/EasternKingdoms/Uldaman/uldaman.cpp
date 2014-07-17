@@ -83,7 +83,7 @@ class mob_jadespine_basilisk : public CreatureScript
 
                     Unit* pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
 
-                    if (!pTarget || pTarget == me->getVictim())
+                    if (!pTarget || pTarget == me->GetVictim())
                         pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
 
                     if (pTarget)

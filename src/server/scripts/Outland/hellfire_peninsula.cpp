@@ -111,13 +111,13 @@ public:
 
             if (Shock_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHOCK);
+                DoCast(me->GetVictim(), SPELL_SHOCK);
                 Shock_Timer = 10000;
             } else Shock_Timer -= diff;
 
             if (EnvelopingWinds_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ENVELOPING_WINDS);
+                DoCast(me->GetVictim(), SPELL_ENVELOPING_WINDS);
                 EnvelopingWinds_Timer = 25000;
             } else EnvelopingWinds_Timer -= diff;
 
@@ -193,7 +193,7 @@ public:
                     DoScriptText(EMOTE_WOLF_HOWL, me);
                     break;
                 case 50:
-                    if (pRyga && pRyga->isAlive() && !pRyga->isInCombat())
+                    if (pRyga && pRyga->IsAlive() && !pRyga->IsInCombat())
                         DoScriptText(SAY_WOLF_WELCOME, pRyga);
                     break;
             }
@@ -247,7 +247,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_NALADU_ITEM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
@@ -299,10 +299,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isVendor())
+        if (pCreature->IsVendor())
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_REDEEM_MARKS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         if (pPlayer->GetQuestStatus(QUEST_DIGGING_FOR_PRAYER_BEADS) == QUEST_STATUS_INCOMPLETE)
@@ -357,7 +357,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TROLLBANE_ITEM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);

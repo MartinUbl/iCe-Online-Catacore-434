@@ -1715,7 +1715,7 @@ void AuraEffect::UpdatePeriodic(Unit *caster)
 bool AuraEffect::IsPeriodicTickCrit(Unit *target, Unit const *caster) const
 {
     ASSERT(caster);
-    if (caster->isSpellCrit(target, m_spellProto, GetSpellSchoolMask(m_spellProto)))
+    if (caster->IsSpellCrit(target, m_spellProto, GetSpellSchoolMask(m_spellProto)))
         return true;
 
     return false;
@@ -1743,7 +1743,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!caster || !target)
                 break;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2105,10 +2105,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!caster)
                 return;
 
-            if (!caster->isAlive())
+            if (!caster->IsAlive())
                 return;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2171,7 +2171,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellProto());
             int32 new_damage = caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);
 
-            if (!target->isAlive() && caster->IsNonMeleeSpellCasted(false))
+            if (!target->IsAlive() && caster->IsNonMeleeSpellCasted(false))
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
                     if (Spell* spell = caster->GetCurrentSpell(CurrentSpellTypes(i)))
                         if (spell->m_spellInfo->Id == GetId())
@@ -2219,7 +2219,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!caster || !caster->GetHealth())
                 break;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2251,7 +2251,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!caster)
                 break;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2261,7 +2261,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             }
 
             // heal for caster damage (must be alive)
-            if (target != caster && GetSpellProto()->AttributesEx2 & SPELL_ATTR2_HEALTH_FUNNEL && !caster->isAlive())
+            if (target != caster && GetSpellProto()->AttributesEx2 & SPELL_ATTR2_HEALTH_FUNNEL && !caster->IsAlive())
                 break;
 
             if (GetBase()->GetDuration() == -1 && target->IsFullHealth())
@@ -2472,7 +2472,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (GetMiscValue() < 0 || GetMiscValue() >= int8(MAX_POWERS))
                 break;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2487,7 +2487,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (target->getPowerType() != power)
                 break;
 
-            if (!caster || !caster->isAlive())
+            if (!caster || !caster->IsAlive())
                 break;
 
             if (GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
@@ -2567,7 +2567,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (GetMiscValue() < 0)
                 return;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2611,7 +2611,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (m_amount < 0 || GetMiscValue() >= int8(MAX_POWERS))
                 return;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2650,7 +2650,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (!caster)
                 return;
 
-            if (!target->isAlive())
+            if (!target->IsAlive())
                 return;
 
             if (target->HasUnitState(UNIT_STATE_ISOLATED))
@@ -2670,7 +2670,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             Powers powerType = Powers(GetMiscValue());
 
-            if (!target->isAlive() || target->getPowerType() != powerType)
+            if (!target->IsAlive() || target->getPowerType() != powerType)
                 return;
 
             uint32 gain = uint32(-target->ModifyPower(powerType, -damage));
@@ -3041,12 +3041,12 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
             {
                 // Feeding Frenzy Rank 1
                 case 53511:
-                    if (target->getVictim() && target->getVictim()->HealthBelowPct(35))
+                    if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
                         target->CastSpell(target, 60096, true, 0, this);
                     return;
                 // Feeding Frenzy Rank 2
                 case 53512:
-                    if (target->getVictim() && target->getVictim()->HealthBelowPct(35))
+                    if (target->GetVictim() && target->GetVictim()->HealthBelowPct(35))
                         target->CastSpell(target, 60097, true, 0, this);
                     return;
                 default:
@@ -3829,7 +3829,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const
             {
                 case FORM_CAT:
                     // Fandral's Flamescythe effect
-                    if (target->isInCombat() && (target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1)))
+                    if (target->IsInCombat() && (target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1) || target->ToPlayer()->HasItemOrGemWithIdEquipped(69897, 1)))
                     {
                         target->CastSpell(target, 99244, true);
                         target->SetDisplayId(38150);
@@ -5454,7 +5454,7 @@ void AuraEffect::HandleModThreat(AuraApplication const *aurApp, uint8 mode, bool
         return;
 
     Unit *target = aurApp->GetTarget();
-    if (apply && !target->isAlive())
+    if (apply && !target->IsAlive())
         return;
 
     Unit *caster = GetCaster();
@@ -5474,11 +5474,11 @@ void AuraEffect::HandleAuraModTotalThreat(AuraApplication const *aurApp, uint8 m
 
     Unit *target = aurApp->GetTarget();
 
-    if (!target->isAlive() || target->GetTypeId() != TYPEID_PLAYER)
+    if (!target->IsAlive() || target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Unit *caster = GetCaster();
-    if (!caster || !caster->isAlive())
+    if (!caster || !caster->IsAlive())
         return;
 
     target->getHostileRefManager().addTempThreat((float)GetAmount(), apply);
@@ -5491,11 +5491,11 @@ void AuraEffect::HandleModTaunt(AuraApplication const *aurApp, uint8 mode, bool 
 
     Unit *target = aurApp->GetTarget();
 
-    if (!target->isAlive() || !target->CanHaveThreatList())
+    if (!target->IsAlive() || !target->CanHaveThreatList())
         return;
 
     Unit *caster = GetCaster();
-    if (!caster || !caster->isAlive())
+    if (!caster || !caster->IsAlive())
         return;
 
     if (apply)
@@ -5649,7 +5649,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const *aurApp, uint8 mode, 
         return;
 
     Unit *target = aurApp->GetTarget();
-    if (target->GetTypeId() != TYPEID_UNIT || !target->ToCreature()->isPet())
+    if (target->GetTypeId() != TYPEID_UNIT || !target->ToCreature()->IsPet())
         return;
 
     Pet *pet = target->ToPet();
@@ -5671,7 +5671,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const *aurApp, uint8 mode, 
         {
             // Reinitialize the pet bar and make the pet come back to the owner
             caster->ToPlayer()->PetSpellInitialize();
-            if (!pet->getVictim())
+            if (!pet->GetVictim())
                 pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, pet->GetFollowAngle());
         }
     }
@@ -6403,7 +6403,7 @@ void AuraEffect::HandleAuraModResistance(AuraApplication const *aurApp, uint8 mo
         if (GetMiscValue() & int32(1 << x))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), TOTAL_VALUE, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->IsPet())
                 target->ApplyResistanceBuffModsMod(SpellSchools(x), GetAmount() > 0, float(GetAmount()), apply);
         }
     }
@@ -6422,7 +6422,7 @@ void AuraEffect::HandleAuraModBaseResistancePCT(AuraApplication const *aurApp, u
     if (target->GetTypeId() != TYPEID_PLAYER)
     {
         //pets only have base armor
-        if (target->ToCreature()->isPet() && (GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
+        if (target->ToCreature()->IsPet() && (GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
             target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(amount), apply);
     }
     else
@@ -6445,7 +6445,7 @@ void AuraEffect::HandleModResistancePercent(AuraApplication const *aurApp, uint8
         if (GetMiscValue() & int32(1 << i))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_PCT, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->IsPet())
             {
                 target->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,(float)GetAmount(), apply);
                 target->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,(float)GetAmount(), apply);
@@ -6465,7 +6465,7 @@ void AuraEffect::HandleModBaseResistance(AuraApplication const *aurApp, uint8 mo
     if (target->GetTypeId() != TYPEID_PLAYER)
     {
         //only pets have base stats
-        if (target->ToCreature()->isPet() && (GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
+        if (target->ToCreature()->IsPet() && (GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
             target->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(GetAmount()), apply);
     }
     else
@@ -6520,7 +6520,7 @@ void AuraEffect::HandleAuraModStat(AuraApplication const *aurApp, uint8 mode, bo
         if (GetMiscValue() < 0 || GetMiscValue() == i)
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->IsPet())
                 target->ApplyStatBuffMod(Stats(i),(float)GetAmount(),apply);
         }
     }
@@ -6688,7 +6688,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 
         if (miscB == 0 || miscB & (1 << i))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, amount, apply);
-            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->IsPet())
                 target->ApplyStatPercentBuffMod(Stats(i), amount, apply);
         }
     }
@@ -6937,7 +6937,7 @@ void AuraEffect::HandleAuraModIncreaseHealthPercent(AuraApplication const *aurAp
     // Unit will keep hp% after MaxHealth being modified if unit is alive.
     float percent = target->GetHealthPct();
     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(GetAmount()), apply);
-    if (target->isAlive())
+    if (target->IsAlive())
         target->SetHealth(target->CountPctFromMaxHealth(int32(percent)));
 }
 
@@ -7887,7 +7887,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
         // AT REMOVE
         else
         {
-            if ((IsQuestTameSpell(GetId())) && caster && caster->isAlive() && target->isAlive())
+            if ((IsQuestTameSpell(GetId())) && caster && caster->IsAlive() && target->IsAlive())
             {
                 uint32 finalSpelId = 0;
                 switch(GetId())
@@ -8394,7 +8394,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (guid)
                     {
                         Creature *totem = caster->GetMap()->GetCreature(guid);
-                        if (totem && totem->isTotem())
+                        if (totem && totem->IsTotem())
                             caster->ToPlayer()->CastSpell(totem, 6277, true);
                     }
                 }

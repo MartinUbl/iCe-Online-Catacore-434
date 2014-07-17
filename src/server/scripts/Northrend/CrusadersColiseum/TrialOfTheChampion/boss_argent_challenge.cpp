@@ -127,7 +127,7 @@ public:
 
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 250, true))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                     {
                         DoCast(pTarget, SPELL_HAMMER_JUSTICE);
                         DoCast(pTarget, SPELL_HAMMER_RIGHTEOUS);
@@ -204,7 +204,7 @@ public:
             bDone = false;
 
             if (Creature *pMemory = Unit::GetCreature(*me, MemoryGUID))
-                if (pMemory->isAlive())
+                if (pMemory->IsAlive())
                     pMemory->RemoveFromWorld();
         }
 
@@ -251,7 +251,7 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 250, true))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                         DoCast(pTarget,SPELL_HOLY_FIRE);
                 }
                  if (me->HasAura(SPELL_SHIELD))
@@ -264,7 +264,7 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 250, true))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                         DoCast(pTarget,SPELL_SMITE);
                 }
                 if (me->HasAura(SPELL_SHIELD))
@@ -286,7 +286,7 @@ public:
                             break;
                         case 1:
                             if (Creature *pMemory = Unit::GetCreature(*me, MemoryGUID))
-                                if (pMemory->isAlive())
+                                if (pMemory->IsAlive())
                                     DoCast(pMemory, SPELL_RENEW);
                             break;
                     }
@@ -349,7 +349,7 @@ public:
             {
                 if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                         DoCast(pTarget, SPELL_OLD_WOUNDS);
                 }
                 uiOldWoundsTimer = 12000;
@@ -365,7 +365,7 @@ public:
             {
                 if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,1))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                         DoCast(pTarget,SPELL_SHADOWS_PAST);
                 }
                 uiShadowPastTimer = 5000;
@@ -376,11 +376,11 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 if (Unit* pSummoner = CAST_SUM(me)->GetSummoner())
                 {
-                    if (pSummoner && pSummoner->isAlive())
+                    if (pSummoner && pSummoner->IsAlive())
                         CAST_CRE(pSummoner)->AI()->SetData(1,0);
                 }
             }

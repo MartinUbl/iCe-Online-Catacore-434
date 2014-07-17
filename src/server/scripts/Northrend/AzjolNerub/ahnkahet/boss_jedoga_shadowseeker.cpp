@@ -166,12 +166,12 @@ public:
             if (pInstance->GetData(DATA_JEDOGA_SHADOWSEEKER_EVENT) != IN_PROGRESS || !bOnGround)
                 return;
 
-            if (!me->getVictim() && who->isTargetableForAttack() && me->IsHostileTo(who) && who->isInAccessiblePlaceFor(me))
+            if (!me->GetVictim() && who->isTargetableForAttack() && me->IsHostileTo(who) && who->isInAccessiblePlaceFor(me))
             {
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
                 {
-                    if (!me->getVictim())
+                    if (!me->GetVictim())
                     {
                         who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                         AttackStart(who);
@@ -204,8 +204,8 @@ public:
 
             if (UpdateVictim())
             {
-                AttackStart(me->getVictim());
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                AttackStart(me->GetVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
             }
             else
             {
@@ -216,7 +216,7 @@ public:
                     if (pInstance->GetData(DATA_JEDOGA_SHADOWSEEKER_EVENT) != IN_PROGRESS)
                         EnterCombat(pTarget);
                 }
-                else if (!me->isInCombat())
+                else if (!me->IsInCombat())
                     EnterEvadeMode();
             }
         }

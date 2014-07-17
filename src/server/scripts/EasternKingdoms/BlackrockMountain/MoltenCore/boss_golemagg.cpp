@@ -107,7 +107,7 @@ public:
             {
                 if (m_uiEarthquakeTimer <= uiDiff)
                 {
-                    DoCast(me->getVictim(), SPELL_EARTHQUAKE);
+                    DoCast(me->GetVictim(), SPELL_EARTHQUAKE);
                     m_uiEarthquakeTimer = 3*IN_MILLISECONDS;
                 }
                 else
@@ -165,7 +165,7 @@ public:
                 {
                     if (Creature* pGolemagg = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_GOLEMAGG)))
                     {
-                        if (pGolemagg->isAlive())
+                        if (pGolemagg->IsAlive())
                         {
                             DoScriptText(EMOTE_LOWHP, me);
                             me->SetFullHealth();
@@ -185,7 +185,7 @@ public:
             // Mangle
             if (m_uiMangleTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_MANGLE);
+                DoCast(me->GetVictim(), SPELL_MANGLE);
                 m_uiMangleTimer = 10*IN_MILLISECONDS;
             }
             else

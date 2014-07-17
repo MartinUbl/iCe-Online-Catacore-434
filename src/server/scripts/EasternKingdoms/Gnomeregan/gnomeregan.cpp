@@ -234,7 +234,7 @@ public:
                 {
                     if (Creature* pSummon = Unit::GetCreature(*me, *itr))
                     {
-                        if (pSummon->isAlive())
+                        if (pSummon->IsAlive())
                             pSummon->DisappearAndDie();
                         else
                             pSummon->RemoveCorpse();
@@ -256,7 +256,7 @@ public:
                     if (pPlayer->isGameMaster())
                         continue;
 
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                     {
                         pTemp->SetInCombatWith(pPlayer);
                         pPlayer->SetInCombatWith(pTemp);
@@ -565,7 +565,7 @@ public:
 
         void SetDataSummoner()
         {
-            if (!me->isSummon())
+            if (!me->IsSummon())
                 return;
 
             if (Unit* pSummon = CAST_SUM(me)->GetSummoner())
@@ -582,7 +582,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
-            if (!me->isSummon())
+            if (!me->IsSummon())
                 return;
 
             if (Unit* pSummon = CAST_SUM(me)->GetSummoner())

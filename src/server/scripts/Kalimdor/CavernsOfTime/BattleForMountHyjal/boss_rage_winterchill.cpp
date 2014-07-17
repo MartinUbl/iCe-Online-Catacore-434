@@ -113,7 +113,7 @@ public:
             if (i == 7 && pInstance)
             {
                 Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_JAINAPROUDMOORE));
-                if (pTarget && pTarget->isAlive())
+                if (pTarget && pTarget->IsAlive())
                     me->AddThreat(pTarget,0.0f);
             }
         }
@@ -163,7 +163,7 @@ public:
             } else FrostArmorTimer -= diff;
             if (DecayTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_DEATH_AND_DECAY);
+                DoCast(me->GetVictim(), SPELL_DEATH_AND_DECAY);
                 DecayTimer = 60000+rand()%20000;
                 switch (urand(0,1))
                 {
@@ -179,7 +179,7 @@ public:
             } else DecayTimer -= diff;
             if (NovaTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROST_NOVA);
+                DoCast(me->GetVictim(), SPELL_FROST_NOVA);
                 NovaTimer = 30000+rand()%15000;
                 switch (urand(0,1))
                 {

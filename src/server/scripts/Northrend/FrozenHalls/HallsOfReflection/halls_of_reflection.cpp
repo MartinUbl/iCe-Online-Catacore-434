@@ -181,7 +181,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(m_isSylvana ? QUEST_DELIVRANCE_FROM_THE_PIT_H2 : QUEST_DELIVRANCE_FROM_THE_PIT_A2) == QUEST_STATUS_COMPLETE)
@@ -852,7 +852,7 @@ public:
                         events.ScheduleEvent(EVENT_SHADOW_STEP, 8000);
                         return;
                     case EVENT_DEADLY_POISON:
-                        DoCast(me->getVictim(), SPELL_DEADLY_POISON);
+                        DoCast(me->GetVictim(), SPELL_DEADLY_POISON);
                         events.ScheduleEvent(EVENT_DEADLY_POISON, 10000);
                         return;
                     case EVENT_ENVENOMED_DAGGER_THROW:
@@ -861,7 +861,7 @@ public:
                         events.ScheduleEvent(EVENT_ENVENOMED_DAGGER_THROW, 10000);
                         return;
                     case EVENT_KIDNEY_SHOT:
-                        DoCast(me->getVictim(), SPELL_KIDNEY_SHOT);
+                        DoCast(me->GetVictim(), SPELL_KIDNEY_SHOT);
                         events.ScheduleEvent(EVENT_KIDNEY_SHOT, 10000);
                         return;
                 }
@@ -918,11 +918,11 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SPECTRAL_STRIKE:
-                        DoCast(me->getVictim(), SPELL_SPECTRAL_STRIKE);
+                        DoCast(me->GetVictim(), SPELL_SPECTRAL_STRIKE);
                         events.ScheduleEvent(EVENT_SPECTRAL_STRIKE, 5000);
                         return;
                     case EVENT_SHIELD_BASH:
-                        DoCast(me->getVictim(), SPELL_SHIELD_BASH);
+                        DoCast(me->GetVictim(), SPELL_SHIELD_BASH);
                         events.ScheduleEvent(EVENT_SHIELD_BASH, 5000);
                         return;
                     case EVENT_TORTURED_ENRAGE:

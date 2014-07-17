@@ -170,7 +170,7 @@ public:
 
             if (uiStaticChargeTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_STATIC_CHARGE);
+                DoCast(me->GetVictim(), SPELL_STATIC_CHARGE);
                 uiStaticChargeTimer = 20000 + rand()%5000;
             } uiStaticChargeTimer -= diff;
 

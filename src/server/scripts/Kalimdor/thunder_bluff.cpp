@@ -55,7 +55,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(925) == QUEST_STATUS_INCOMPLETE)
@@ -107,25 +107,25 @@ public:
 
             if (Uppercut_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_UPPERCUT);
+                DoCast(me->GetVictim(), SPELL_UPPERCUT);
                 Uppercut_Timer = 20000;
             } else Uppercut_Timer -= diff;
 
             if (Thunderclap_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
+                DoCast(me->GetVictim(), SPELL_THUNDERCLAP);
                 Thunderclap_Timer = 15000;
             } else Thunderclap_Timer -= diff;
 
             if (MortalStrike_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MORTAL_STRIKE);
+                DoCast(me->GetVictim(), SPELL_MORTAL_STRIKE);
                 MortalStrike_Timer = 15000;
             } else MortalStrike_Timer -= diff;
 
             if (Cleave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 Cleave_Timer = 7000;
             } else Cleave_Timer -= diff;
 

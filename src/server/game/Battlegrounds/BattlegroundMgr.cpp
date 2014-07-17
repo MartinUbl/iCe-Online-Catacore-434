@@ -848,7 +848,7 @@ bool BattlegroundMgr::AddArenaSpectator(Player* pl, uint32 instanceID)
     if (!pl || instanceID == 0)
         return false;
 
-    if (pl->isInCombat() || pl->InBattleground() || pl->isDead())
+    if (pl->IsInCombat() || pl->InBattleground() || pl->isDead())
     {
         pl->GetSession()->SendNotification("Couldn't teleport to arena as spectator due combat/battleground/flight/death.");
         return false;

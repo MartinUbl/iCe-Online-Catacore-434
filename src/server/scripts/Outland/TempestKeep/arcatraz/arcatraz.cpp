@@ -203,7 +203,7 @@ class npc_millhouse_manastorm : public CreatureScript
 
                     DoScriptText(SAY_PYRO, me);
 
-                    DoCast(me->getVictim(), SPELL_PYROBLAST);
+                    DoCast(me->GetVictim(), SPELL_PYROBLAST);
                     Pyroblast_Timer = 40000;
                 }
                 else
@@ -211,7 +211,7 @@ class npc_millhouse_manastorm : public CreatureScript
 
                 if (Fireball_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_FIREBALL);
+                    DoCast(me->GetVictim(), SPELL_FIREBALL);
                     Fireball_Timer = 4000;
                 }
                 else
@@ -315,9 +315,9 @@ class npc_warden_mellichar : public CreatureScript
                 if (IsRunning)
                     return;
 
-                if (!me->getVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
+                if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
                 {
-                    if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                    if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                         return;
                     if (who->GetTypeId() != TYPEID_PLAYER)
                         return;

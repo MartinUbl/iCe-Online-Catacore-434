@@ -183,7 +183,7 @@ public:
                             DoCast(pEmbraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
                         me->GetMotionMaster()->Clear();
                         me->SetSpeed(MOVE_WALK, 1.0f, true);
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                         Phase = FEEDING;
                         uiPhaseTimer = 20*IN_MILLISECONDS;
                         break;
@@ -195,7 +195,7 @@ public:
                     case NORMAL:
                         if (uiBloodthirstTimer <= diff)
                         {
-                            DoCast(me->getVictim(), SPELL_BLOODTHIRST);
+                            DoCast(me->GetVictim(), SPELL_BLOODTHIRST);
                             uiBloodthirstTimer = 10*IN_MILLISECONDS;
                         } else uiBloodthirstTimer -= diff;
 
@@ -217,7 +217,7 @@ public:
                             {
                                 pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
                                 // exclude pets & totems
-                                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive())
+                                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsAlive())
                                     target_list.push_back(pTarget);
                                 pTarget = NULL;
                             }
@@ -229,7 +229,7 @@ public:
 						            DoCast(pEmbraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
 					            me->GetMotionMaster()->Clear();
 				                me->SetSpeed(MOVE_WALK, 1.0f, true);
-					            me->GetMotionMaster()->MoveChase(me->getVictim());
+					            me->GetMotionMaster()->MoveChase(me->GetVictim());
 						        Phase = FEEDING;
 								uiPhaseTimer = 20*IN_MILLISECONDS;
                                 /*DoCast(me, SPELL_VANISH);
@@ -251,7 +251,7 @@ public:
         {
             Unit* pEmbraceTarget = GetEmbraceTarget();
 
-            if (Phase == FEEDING && pEmbraceTarget && pEmbraceTarget->isAlive())
+            if (Phase == FEEDING && pEmbraceTarget && pEmbraceTarget->IsAlive())
             {
               uiEmbraceTakenDamage += damage;
               if (uiEmbraceTakenDamage > (uint32) DUNGEON_MODE(DATA_EMBRACE_DMG, H_DATA_EMBRACE_DMG))
@@ -396,7 +396,7 @@ public:
         InstanceScript *pInstance = pGO->GetInstanceScript();
 
         Creature *pPrinceTaldaram = Unit::GetCreature(*pGO, pInstance ? pInstance->GetData64(DATA_PRINCE_TALDARAM) : 0);
-        if (pPrinceTaldaram && pPrinceTaldaram->isAlive())
+        if (pPrinceTaldaram && pPrinceTaldaram->IsAlive())
         {
             // maybe these are hacks :(
             pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);

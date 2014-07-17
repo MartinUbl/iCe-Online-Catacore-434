@@ -363,7 +363,7 @@ public:
             {
                 if(Player* pl = itr->getSource())
                 {
-                    if ( pl && pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster() && pl->GetDistance(me) < 250.0f)
+                    if ( pl && pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster() && pl->GetDistance(me) < 250.0f)
                     {
                         if (!pl->HasTankSpec() && !pl->HasAura(5487)) // Bear form
                         {
@@ -406,8 +406,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!me->IsWithinLOS(me->getVictim()->GetPositionX(),me->getVictim()->GetPositionY(),me->getVictim()->GetPositionZ()))
-                me->Kill(me->getVictim(),true);
+            if (!me->IsWithinLOS(me->GetVictim()->GetPositionX(),me->GetVictim()->GetPositionY(),me->GetVictim()->GetPositionZ()))
+                me->Kill(me->GetVictim(),true);
 
             if (countDownTimer <= diff)
             {
@@ -419,8 +419,8 @@ public:
 
             if (blazeOfGloryTimer <= diff)
             {
-                if(me->getVictim()->ToPlayer())
-                    me->CastSpell(me->getVictim(),BLAZE_OF_GLORY,true);
+                if(me->GetVictim()->ToPlayer())
+                    me->CastSpell(me->GetVictim(),BLAZE_OF_GLORY,true);
                 me->CastSpell(me, INCENDIARY_SOUL, true);
                 blazeOfGloryTimer = urand(8000,13000);
             }
@@ -495,31 +495,31 @@ public:
                 {
                     if(me->HasAura(99352) || me->HasAura(99405) ) // Decimation Blade
                     {
-                        if (me->IsWithinCombatRange(me->getVictim(), GetSpellMaxRange(99353, false)))
+                        if (me->IsWithinCombatRange(me->GetVictim(), GetSpellMaxRange(99353, false)))
                         {
                             me->setAttackTimer(BASE_ATTACK, 4500);
                             me->setAttackTimer(OFF_ATTACK, 4500);
 
                             bool avoided = false; // Decimation blade can be only dodged or parried
 
-                            if (roll_chance_f(me->getVictim()->GetUnitDodgeChance()))
+                            if (roll_chance_f(me->GetVictim()->GetUnitDodgeChance()))
                                 avoided = true;
 
-                            if (roll_chance_f(me->getVictim()->GetUnitParryChance()))
+                            if (roll_chance_f(me->GetVictim()->GetUnitParryChance()))
                                 avoided = true;
 
-                            int32 bp0 = me->getVictim()->CountPctFromMaxHealth(90);
+                            int32 bp0 = me->GetVictim()->CountPctFromMaxHealth(90);
 
-                            if (me->getVictim()->CountPctFromMaxHealth(90) < 250000 )
+                            if (me->GetVictim()->CountPctFromMaxHealth(90) < 250000 )
                                 bp0 = 250000;
 
                             if(avoided)
                                 bp0 = 0;
 
-                            me->CastCustomSpell(me->getVictim(),99353,&bp0,0,0,true); // Decimation Strike
+                            me->CastCustomSpell(me->GetVictim(),99353,&bp0,0,0,true); // Decimation Strike
 
                             if (avoided)
-                                me->getVictim()->RemoveAurasDueToSpell(99353);
+                                me->GetVictim()->RemoveAurasDueToSpell(99353);
 
                             //me->resetAttackTimer();
                         }
@@ -528,26 +528,26 @@ public:
 
                     if (me->HasAura(99350)) // Inferno Blade
                     {
-                        if (me->IsWithinCombatRange(me->getVictim(), GetSpellMaxRange(99351, false)))
+                        if (me->IsWithinCombatRange(me->GetVictim(), GetSpellMaxRange(99351, false)))
                         {
                             me->setAttackTimer(BASE_ATTACK, 1800);
                             me->setAttackTimer(OFF_ATTACK, 1800);
 
                             bool avoided = false; // Inferno blade can be dodged,parried or blocked
 
-                            if (roll_chance_f(me->getVictim()->GetUnitDodgeChance()))
+                            if (roll_chance_f(me->GetVictim()->GetUnitDodgeChance()))
                                 avoided = true;
 
-                            if (roll_chance_f(me->getVictim()->GetUnitParryChance()))
+                            if (roll_chance_f(me->GetVictim()->GetUnitParryChance()))
                                 avoided = true;
 
-                            if (roll_chance_f(me->getVictim()->GetUnitBlockChance()))
+                            if (roll_chance_f(me->GetVictim()->GetUnitBlockChance()))
                                 avoided = true;
 
                             if(avoided)
-                                me->CastCustomSpell(me->getVictim(),99351,0,0,0,true);
+                                me->CastCustomSpell(me->GetVictim(),99351,0,0,0,true);
                             else
-                                me->CastSpell(me->getVictim(),99351,true); // Inferno strike
+                                me->CastSpell(me->GetVictim(),99351,true); // Inferno strike
 
                             //me->resetAttackTimer();
                         }
@@ -637,7 +637,7 @@ public:
                 if (!itr->getSource())
                     continue;
 
-               if ( !itr->getSource()->isAlive())
+               if ( !itr->getSource()->IsAlive())
                     continue;
 
                 if (me->GetDistance2d(itr->getSource()) < min_range)
@@ -665,7 +665,7 @@ public:
                 if (!itr->getSource())
                     continue;
 
-                if ( !itr->getSource()->isAlive())
+                if ( !itr->getSource()->IsAlive())
                     continue;
 
                 if (me->GetDistance2d(itr->getSource()) <= 14.0f) // 15 yards ( - 1 yard )

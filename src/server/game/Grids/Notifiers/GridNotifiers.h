@@ -499,7 +499,7 @@ namespace Trinity
             bool operator()(Creature* u)
             {
                 if (i_funit->GetTypeId() != TYPEID_PLAYER || !((Player*)i_funit)->isHonorOrXPTarget(u) ||
-                    u->getDeathState() != CORPSE || u->isDeadByDefault() || u->isInFlight() ||
+                    u->getDeathState() != CORPSE || u->isDeadByDefault() || u->IsInFlight() ||
                     (u->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_HUMANOID-1))) == 0 ||
                     (u->GetDisplayId() != u->GetNativeDisplayId()))
                     return false;
@@ -518,7 +518,7 @@ namespace Trinity
             ExplodeCorpseObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
             bool operator()(Player* u)
             {
-                if (u->getDeathState() != CORPSE || u->isInFlight() ||
+                if (u->getDeathState() != CORPSE || u->IsInFlight() ||
                     u->HasAuraType(SPELL_AURA_GHOST) || (u->GetDisplayId() != u->GetNativeDisplayId()))
                     return false;
 
@@ -526,7 +526,7 @@ namespace Trinity
             }
             bool operator()(Creature* u)
             {
-                if (u->getDeathState() != CORPSE || u->isInFlight() || u->isDeadByDefault() ||
+                if (u->getDeathState() != CORPSE || u->IsInFlight() || u->isDeadByDefault() ||
                     (u->GetDisplayId() != u->GetNativeDisplayId()) ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL) != 0)
                     return false;
@@ -545,7 +545,7 @@ namespace Trinity
             CannibalizeObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
             bool operator()(Player* u)
             {
-                if (i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight())
+                if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight())
                     return false;
 
                 return i_funit->IsWithinDistInMap(u, i_range);
@@ -553,7 +553,7 @@ namespace Trinity
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if (i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight() ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
                     return false;
 
@@ -571,7 +571,7 @@ namespace Trinity
             CarrionFeederObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
             bool operator()(Player* u)
             {
-                if (i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight())
+                if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight())
                     return false;
 
                 return i_funit->IsWithinDistInMap(u, i_range);
@@ -579,7 +579,7 @@ namespace Trinity
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if (i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight() ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL) != 0)
                     return false;
 
@@ -716,7 +716,7 @@ namespace Trinity
             MostHPMissingInRange(Unit const* obj, float range, uint32 hp) : i_obj(obj), i_range(range), i_hp(hp) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && u->GetMaxHealth() - u->GetHealth() > i_hp)
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && u->GetMaxHealth() - u->GetHealth() > i_hp)
                 {
                     i_hp = u->GetMaxHealth() - u->GetHealth();
                     return true;
@@ -735,8 +735,8 @@ namespace Trinity
             FriendlyCCedInRange(Unit const* obj, float range) : i_obj(obj), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
-                    (u->isFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STATE_STUNNED) || u->HasUnitState(UNIT_STATE_CONFUSED)))
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                    (u->isFeared() || u->IsCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STATE_STUNNED) || u->HasUnitState(UNIT_STATE_CONFUSED)))
                 {
                     return true;
                 }
@@ -753,7 +753,7 @@ namespace Trinity
             FriendlyMissingBuffInRange(Unit const* obj, float range, uint32 spellid) : i_obj(obj), i_range(range), i_spell(spellid) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
                     !(u->HasAura(i_spell)))
                 {
                     return true;
@@ -772,7 +772,7 @@ namespace Trinity
             AnyUnfriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u))
+                if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u))
                     return true;
                 else
                     return false;
@@ -789,10 +789,10 @@ namespace Trinity
             AnyUnfriendlyNoTotemUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (!u->isAlive())
+                if (!u->IsAlive())
                     return false;
 
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isTotem())
+                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
                     return false;
 
                 if(!u->isTargetableForAttack())
@@ -814,7 +814,7 @@ namespace Trinity
 
             bool operator()(Unit* u)
             {
-                return u->isAlive()
+                return u->IsAlive()
                     && i_obj->IsWithinDistInMap(u, i_range)
                     && !i_funit->IsFriendlyTo(u)
                     && u->isVisibleForOrDetect(i_funit, false);
@@ -844,7 +844,7 @@ namespace Trinity
             AnyFriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_funit->IsFriendlyTo(u))
+                if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_funit->IsFriendlyTo(u))
                     return true;
                 else
                     return false;
@@ -861,7 +861,7 @@ namespace Trinity
             AnyUnitInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
+                if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
 
                 return false;
@@ -913,7 +913,7 @@ namespace Trinity
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
                 if (!u->isTargetableForAttack())
                     return false;
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isTotem())
+                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
                     return false;
 
                 if ((i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u))&& i_obj->IsWithinDistInMap(u, i_range))
@@ -962,7 +962,7 @@ namespace Trinity
 
     struct AnyDeadUnitCheck
     {
-        bool operator()(Unit* u) { return !u->isAlive(); }
+        bool operator()(Unit* u) { return !u->IsAlive(); }
     };
 
     struct AnyStealthedCheck
@@ -1104,7 +1104,7 @@ namespace Trinity
 
             bool operator()(Creature* u)
             {
-                if (u->GetEntry() == i_entry && u->isAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
+                if (u->GetEntry() == i_entry && u->IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
                 {
                     i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                     return true;
@@ -1128,7 +1128,7 @@ namespace Trinity
         AnyPlayerInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
         bool operator()(Player* u)
         {
-            if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
+            if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range))
                 return true;
 
             return false;
@@ -1144,7 +1144,7 @@ namespace Trinity
         AllFriendlyCreaturesInGrid(Unit const* obj) : pUnit(obj) {}
         bool operator() (Unit* u)
         {
-            if (u->isAlive() && u->GetVisibility() == VISIBILITY_ON && u->IsFriendlyTo(pUnit))
+            if (u->IsAlive() && u->GetVisibility() == VISIBILITY_ON && u->IsFriendlyTo(pUnit))
                 return true;
 
             return false;
@@ -1210,7 +1210,7 @@ namespace Trinity
         bool operator() (Player* pPlayer)
         {
             //No threat list check, must be done explicit if expected to be in combat with creature
-            if (!pPlayer->isGameMaster() && pPlayer->isAlive() && !pUnit->IsWithinDist(pPlayer,fRange,false))
+            if (!pPlayer->isGameMaster() && pPlayer->IsAlive() && !pUnit->IsWithinDist(pPlayer,fRange,false))
                 return true;
 
             return false;

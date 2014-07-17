@@ -173,7 +173,7 @@ class boss_obsidius: public CreatureScript
                 {
                     if (StoneBlowTimer <= diff)
                     {
-                        me->CastSpell(me->getVictim(),SPELL_STONE_BLOW,false);
+                        me->CastSpell(me->GetVictim(),SPELL_STONE_BLOW,false);
                         StoneBlowTimer = urand(7000,9000);
                     } else StoneBlowTimer -= diff;
 

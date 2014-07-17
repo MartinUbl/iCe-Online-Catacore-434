@@ -105,7 +105,7 @@ public:
         {
             if (pInstance)
             {
-                if (me->isAlive())
+                if (me->IsAlive())
                 {
                     pInstance->SetData(DATA_SUPREMUSEVENT, NOT_STARTED);
                     //ToggleDoors(true);
@@ -228,7 +228,7 @@ public:
                     case EVENT_VOLCANO:
                     {
                         Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 999, true);
-                        if (!pTarget) pTarget = me->getVictim();
+                        if (!pTarget) pTarget = me->GetVictim();
                         if (pTarget)
                         {
                             //DoCast(pTarget, SPELL_VOLCANIC_SUMMON);//movement bugged

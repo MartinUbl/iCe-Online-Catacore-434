@@ -141,7 +141,7 @@ public:
            {
            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
                   if(Player* pPlayer = i->getSource())
-                        if(pPlayer->isAlive())
+                        if(pPlayer->IsAlive())
                         {
                             pPlayer->SendUpdateWorldState(UPDATE_STATE_UI_SHOW,0);
                             if (pPlayer->HasAura(74807))
@@ -154,7 +154,7 @@ public:
            {
            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
                   if(Player* pPlayer = i->getSource())
-                        if(pPlayer->isAlive())
+                        if(pPlayer->IsAlive())
                             pPlayer->SendUpdateWorldState(UPDATE_STATE_UI_SHOW,0);
            }
         }
@@ -484,7 +484,7 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                         DoCast(pTarget, SPELL_AGOSTAR);
                 }
                 uiAgostarTimer = 8000;
@@ -546,7 +546,7 @@ public:
 
             if (uiRajarTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_RAJAR);
+                DoCast(me->GetVictim(), SPELL_RAJAR);
                 uiRajarTimer = 11000;
             }else uiRajarTimer -= uiDiff;
 
@@ -603,7 +603,7 @@ public:
 
             if (uiMachaqueTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_MACHACAR_CRANEOS);
+                DoCast(me->GetVictim(), SPELL_MACHACAR_CRANEOS);
 				uiMachaqueTimer = 12000;
             }else uiMachaqueTimer -= uiDiff;
 
@@ -657,7 +657,7 @@ public:
 
             if (uiGolpeTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_GOLPE_MORTAL);
+                DoCast(me->GetVictim(), SPELL_GOLPE_MORTAL);
 				uiGolpeTimer = 9000;
             }else uiGolpeTimer -= uiDiff;
 

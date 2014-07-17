@@ -257,7 +257,7 @@ public:
                         }
                         break;
                     case 9:
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                         m_uiBellowingRoarTimer = 1000;
                         break;
                     case 10:

@@ -82,28 +82,28 @@ public:
             //BlastWave_Timer
             if (BlastWave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BLASTWAVE);
+                DoCast(me->GetVictim(), SPELL_BLASTWAVE);
                 BlastWave_Timer = 20000;
             } else BlastWave_Timer -= diff;
 
             //Shout_Timer
             if (Shout_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHOUT);
+                DoCast(me->GetVictim(), SPELL_SHOUT);
                 Shout_Timer = 10000;
             } else Shout_Timer -= diff;
 
             //Cleave_Timer
             if (Cleave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 Cleave_Timer = 7000;
             } else Cleave_Timer -= diff;
 
             //Knockaway_Timer
             if (Knockaway_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKAWAY);
+                DoCast(me->GetVictim(), SPELL_KNOCKAWAY);
                 Knockaway_Timer = 14000;
             } else Knockaway_Timer -= diff;
 

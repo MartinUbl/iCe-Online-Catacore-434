@@ -194,7 +194,7 @@ public:
                 for (std::list<Creature*>::const_iterator itr = KaddrakList.begin(); itr != KaddrakList.end(); ++itr)
                 {
 					KaddrakGUIDList.push_back((*itr)->GetGUID());
-                    if ((*itr)->isAlive())
+                    if ((*itr)->IsAlive())
                     {
                         if (uiPositionCounter == 0)
                         {
@@ -247,7 +247,7 @@ public:
 					        for (std::list<uint64>::iterator itr = KaddrakGUIDList.begin(); itr != KaddrakGUIDList.end(); ++itr)
 							{
 								Creature* pSource = pInstance->instance->GetCreature(*itr);
-						        if (pSource && pSource->isAlive())
+						        if (pSource && pSource->IsAlive())
 								{
 									Creature* tmp1 = pSource->SummonCreature(34055/*17096*/,0,0,0,0,TEMPSUMMON_TIMED_DESPAWN,1000);
 									tmp1->setFaction(pSource->getFaction());
@@ -318,7 +318,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
 		InstanceScript* pInstance = pCreature->GetInstanceScript();
@@ -381,7 +381,7 @@ public:
             for (std::list<uint64>::const_iterator itr = lDwarfGUIDList.begin(); itr != lDwarfGUIDList.end(); ++itr)
             {
                 Creature* pTemp = Unit::GetCreature(*me, pInstance ? (*itr) : 0);
-                if (pTemp && pTemp->isAlive())
+                if (pTemp && pTemp->IsAlive())
                     pTemp->ForcedDespawn();
             }
             lDwarfGUIDList.clear();
@@ -395,7 +395,7 @@ public:
 					//
 					if (Creature* pCreature = Unit::GetCreature(*me,pInstance->GetData64(99)))//GetClosestCreatureWithEntry(me, CREATURE_TRIBUNAL_OF_THE_AGES, 1000.0f))
                     {
-                        if (!pCreature->isAlive())
+                        if (!pCreature->IsAlive())
                             pCreature->Respawn();
                         CAST_AI(mob_tribuna_controller::mob_tribuna_controllerAI, pCreature->AI())->UpdateFacesList();
                         uiControllerGUID = pCreature->GetGUID();

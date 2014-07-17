@@ -548,7 +548,7 @@ void Pet::Update(uint32 diff)
         {
             // unsummon pet that lost owner
             Player* owner = GetOwner();
-            if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && !isPossessed()) || (isControlled() && !owner->GetPetGUID()))
+            if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && !IsPossessed()) || (isControlled() && !owner->GetPetGUID()))
             //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
                 Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
@@ -643,7 +643,7 @@ void Creature::Regenerate(Powers power, uint32 diff)
             // TODO: use correct formula, this one gives really tiny regeneration
             // TODO: use UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER and UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER
                 // so client will display the regeneration smoothly
-            if (isInCombat() || GetCharmerOrOwnerGUID())
+            if (IsInCombat() || GetCharmerOrOwnerGUID())
             {
                 float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
                 float Spirit = GetStat(STAT_SPIRIT);
@@ -740,7 +740,7 @@ void Pet::GivePetXP(uint32 xp)
     if (xp < 1)
         return;
 
-    if (!isAlive())
+    if (!IsAlive())
         return;
     
     uint8 maxlevel = std::min((uint8)sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL), GetOwner()->getLevel());
@@ -867,7 +867,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
     //Determine pet type
     PetType petType = MAX_PET_TYPE;
-    if (isPet() && m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (IsPet() && m_owner->GetTypeId() == TYPEID_PLAYER)
     {
         if ((m_owner->getClass() == CLASS_WARLOCK)
             || (m_owner->getClass() == CLASS_SHAMAN)        // Fire Elemental
@@ -2050,7 +2050,7 @@ void Pet::LearnPetPassives()
                 int bp0 = -90;
                 CastCustomSpell(this, 62137, &bp0, 0, 0, true);
             }
-            if (isHunterPet())
+            if (IsHunterPet())
                 CastSpell(this, 65220, true);
             break;
         }

@@ -68,14 +68,14 @@ public:
             //Shoot_Timer
             if (Shoot_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHOOT);
+                DoCast(me->GetVictim(), SPELL_SHOOT);
                 Shoot_Timer = 500;
             } else Shoot_Timer -= diff;
 
             //StunBomb_Timer
             if (StunBomb_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_STUNBOMB);
+                DoCast(me->GetVictim(), SPELL_STUNBOMB);
                 StunBomb_Timer = 14000;
             } else StunBomb_Timer -= diff;
 

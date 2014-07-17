@@ -86,7 +86,7 @@ public:
             //NoxiousBreath_Timer
             if (m_uiNoxiousBreath_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_NOXIOUSBREATH);
+                DoCast(me->GetVictim(), SPELL_NOXIOUSBREATH);
                 m_uiNoxiousBreath_Timer = 14000 + rand()%6000;
             }
             else
@@ -104,7 +104,7 @@ public:
             //VolatileInfection_Timer
             if (m_uiVolatileInfection_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_VOLATILEINFECTION);
+                DoCast(me->GetVictim(), SPELL_VOLATILEINFECTION);
                 m_uiVolatileInfection_Timer = 7000 + rand()%5000;
             }
             else
@@ -116,7 +116,7 @@ public:
             {
                 ++m_uiCorruptionsCasted;                        // prevent casting twice on same hp
                 DoScriptText(SAY_CASTCORRUPTION, me);
-                DoCast(me->getVictim(), SPELL_CORRUPTIONOFEARTH);
+                DoCast(me->GetVictim(), SPELL_CORRUPTIONOFEARTH);
             }
 
             DoMeleeAttackIfReady();

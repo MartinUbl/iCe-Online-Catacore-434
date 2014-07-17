@@ -63,7 +63,7 @@ public:
     mob_drone(): CreatureScript("mob_cinderweb_drone") {}
     CreatureAI *GetAI(Creature *creature) const
     {
-        if (creature->isSummon())
+        if (creature->IsSummon())
             return new mob_droneAI(creature);
 
         return NULL;
@@ -253,7 +253,7 @@ void mob_droneAI::DoAction(const int32 event)
             break;
 
         case CAST_BOILING_SPATTER:
-            me->CastSpell(me->getVictim(), SPELL_BOILING_SPATTER, false);
+            me->CastSpell(me->GetVictim(), SPELL_BOILING_SPATTER, false);
             break;
 
         case CAST_BURNING_ACID:

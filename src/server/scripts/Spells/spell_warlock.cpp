@@ -65,7 +65,7 @@ public:
         {
             if (Creature* targetCreature = GetHitCreature())
             {
-                if (targetCreature->isPet())
+                if (targetCreature->IsPet())
                 {
                     CreatureInfo const * ci = sObjectMgr->GetCreatureTemplate(targetCreature->GetEntry());
                     switch (ci->family)

@@ -147,7 +147,7 @@ public:
         void JustSummoned(Creature* pSummon)
         {
             SummonList.push_back(pSummon->GetGUID());
-            pSummon->AI()->AttackStart(me->getVictim());
+            pSummon->AI()->AttackStart(me->GetVictim());
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -197,7 +197,7 @@ public:
                             {
                                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 {
-                                    if (pTarget && pTarget->isAlive())
+                                    if (pTarget && pTarget->IsAlive())
                                         DoCast(pTarget,SPELL_DEATH_RESPITE);
                                 }
                                 uiDeathRespiteTimer = urand(15000,16000);
@@ -225,7 +225,7 @@ public:
                             {
                                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 {
-                                    if (pTarget && pTarget->isAlive())
+                                    if (pTarget && pTarget->IsAlive())
                                         DoCast(pTarget,SPELL_DESECRATION);
                                 }
                                 uiDesecration = urand(15000,16000);
@@ -252,7 +252,7 @@ public:
                     {
                         if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         {
-                            if (pTarget && pTarget->isAlive())
+                            if (pTarget && pTarget->IsAlive())
                                 DoCast(pTarget,SPELL_MARKED_DEATH);
                         }
                         uiMarkedDeathTimer = urand (5000, 7000);
@@ -324,7 +324,7 @@ public:
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
                 {
-                    if (pTarget && pTarget->isAlive())
+                    if (pTarget && pTarget->IsAlive())
                     DoCast(pTarget, (SPELL_LEAP));
                 }
                 uiAttackTimer = 3500;

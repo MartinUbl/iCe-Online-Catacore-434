@@ -391,7 +391,7 @@ class boss_nalorakk : public CreatureScript
                 {
                     if (BrutalStrike_Timer <= diff) // blizzlike status: done
                     {
-                        DoCast(me->getVictim(), SPELL_BRUTALSWIPE);
+                        DoCast(me->GetVictim(), SPELL_BRUTALSWIPE);
 
                         BrutalStrike_Timer = 20000;
                     } else BrutalStrike_Timer -= diff;
@@ -414,19 +414,19 @@ class boss_nalorakk : public CreatureScript
                 {
                     if (LaceratingSlash_Timer <= diff)
                     {
-                        DoCast(me->getVictim(), SPELL_LACERATINGSLASH);
+                        DoCast(me->GetVictim(), SPELL_LACERATINGSLASH);
                         LaceratingSlash_Timer = 4000;
                     } else LaceratingSlash_Timer -= diff;
 
                     if (RendFlesh_Timer <= diff)
                     {
-                        DoCast(me->getVictim(), SPELL_RENDFLESH);
+                        DoCast(me->GetVictim(), SPELL_RENDFLESH);
                         RendFlesh_Timer = 6000;
                     } else RendFlesh_Timer -= diff;
 
                     if (DeafeningRoar_Timer <= diff)
                     {
-                        DoCast(me->getVictim(), SPELL_DEAFENINGROAR);
+                        DoCast(me->GetVictim(), SPELL_DEAFENINGROAR);
                         DeafeningRoar_Timer = 10000;
                     } else DeafeningRoar_Timer -= diff;
                 }

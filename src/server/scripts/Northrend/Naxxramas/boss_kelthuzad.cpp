@@ -248,7 +248,7 @@ struct NotCharmedTargetSelector : public std::unary_function<Unit *, bool> {
     NotCharmedTargetSelector() {}
 
     bool operator() (const Unit *pTarget) {
-        return (!pTarget->isCharmed());
+        return (!pTarget->IsCharmed());
     }
 };
 
@@ -424,7 +424,7 @@ public:
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
                             me->CastStop();
 
-                            DoStartMovement(me->getVictim());
+                            DoStartMovement(me->GetVictim());
                             events.ScheduleEvent(EVENT_BOLT, urand(3000,8000));
                             events.ScheduleEvent(EVENT_NOVA, 12000);
                             events.ScheduleEvent(EVENT_DETONATE, urand(20000,30000));
@@ -497,7 +497,7 @@ public:
                             for (uint8 i = 1; i <= count; i++)
                             {
                                 Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true);
-                                if (pTarget && !pTarget->isCharmed() && (chained.find(pTarget->GetGUID()) == chained.end()))
+                                if (pTarget && !pTarget->IsCharmed() && (chained.find(pTarget->GetGUID()) == chained.end()))
                                 {
                                     DoCast(pTarget, SPELL_CHAINS_OF_KELTHUZAD);
                                     float scale = pTarget->GetFloatValue(OBJECT_FIELD_SCALE_X);
@@ -518,7 +518,7 @@ public:
                             {
                                 if (Unit* player = Unit::GetPlayer(*me, (*itr).first))
                                 {
-                                    if (!player->isCharmed())
+                                    if (!player->IsCharmed())
                                     {
                                         player->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
                                         std::map<uint64, float>::iterator next = itr;

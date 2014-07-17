@@ -132,7 +132,7 @@ public:
             //Cast Erruption and let them die
             if (!HealthAbovePct(10))
             {
-                DoCast(me->getVictim(), SPELL_ERUPTION);
+                DoCast(me->GetVictim(), SPELL_ERUPTION);
                 me->setDeathState(JUST_DIED);
                 me->RemoveCorpse();
             }

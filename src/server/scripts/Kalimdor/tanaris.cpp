@@ -115,15 +115,15 @@ public:
             {
                 if (SendItem_Timer <= diff)
                 {
-                    if (me->getVictim()->GetTypeId() == TYPEID_PLAYER)
-                        SendItem(me->getVictim());
+                    if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
+                        SendItem(me->GetVictim());
                     SendItem_Timer = 5000;
                 } else SendItem_Timer -= diff;
             }
 
             if (FrostShock_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FROST_SHOCK);
+                DoCast(me->GetVictim(), SPELL_FROST_SHOCK);
                 FrostShock_Timer = 15000;
             } else FrostShock_Timer -= diff;
 
@@ -256,10 +256,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isVendor() && pPlayer->GetQuestRewardStatus(2662))
+        if (pCreature->IsVendor() && pPlayer->GetQuestRewardStatus(2662))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
@@ -300,7 +300,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(10279) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestRewardStatus(10279))
@@ -369,7 +369,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(2954) == QUEST_STATUS_INCOMPLETE)
@@ -552,7 +552,7 @@ public:
         {
             FollowerAI::MoveInLineOfSight(pWho);
 
-            if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && pWho->GetEntry() == NPC_TORTA)
+            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE | STATE_FOLLOW_POSTEVENT) && pWho->GetEntry() == NPC_TORTA)
             {
                 if (me->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
                 {
@@ -591,7 +591,7 @@ public:
                         m_uiPostEventTimer = 5000;
 
                         Unit *pTorta = Unit::GetUnit(*me, TortaGUID);
-                        if (!pTorta || !pTorta->isAlive())
+                        if (!pTorta || !pTorta->IsAlive())
                         {
                             //something happened, so just complete
                             SetFollowComplete();

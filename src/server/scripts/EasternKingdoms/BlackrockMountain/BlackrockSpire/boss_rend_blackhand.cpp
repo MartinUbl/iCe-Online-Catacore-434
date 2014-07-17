@@ -67,21 +67,21 @@ public:
             //WhirlWind_Timer
             if (WhirlWind_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WHIRLWIND);
+                DoCast(me->GetVictim(), SPELL_WHIRLWIND);
                 WhirlWind_Timer = 18000;
             } else WhirlWind_Timer -= diff;
 
             //Cleave_Timer
             if (Cleave_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
+                DoCast(me->GetVictim(), SPELL_CLEAVE);
                 Cleave_Timer = 10000;
             } else Cleave_Timer -= diff;
 
             //Thunderclap_Timer
             if (Thunderclap_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
+                DoCast(me->GetVictim(), SPELL_THUNDERCLAP);
                 Thunderclap_Timer = 16000;
             } else Thunderclap_Timer -= diff;
 

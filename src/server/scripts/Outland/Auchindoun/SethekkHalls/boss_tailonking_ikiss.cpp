@@ -93,7 +93,7 @@ public:
 
         void MoveInLineOfSight(Unit *who)
         {
-            if (!me->getVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
+            if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
             {
                 if (!Intro && me->IsWithinDistInMap(who, 100))
                 {
@@ -101,7 +101,7 @@ public:
                     DoScriptText(SAY_INTRO, me);
                 }
 
-                if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+                if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                     return;
 
                 float attackRadius = me->GetAttackDistance(who);

@@ -128,7 +128,7 @@ public:
             //NoxiousBreath_Timer
             if (m_uiNoxiousBreath_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_NOXIOUSBREATH);
+                DoCast(me->GetVictim(), SPELL_NOXIOUSBREATH);
                 m_uiNoxiousBreath_Timer = 14000 + rand()%6000;
             }
             else
@@ -146,7 +146,7 @@ public:
             //ArcaneBlast_Timer
             if (m_uiArcaneBlast_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_ARCANEBLAST);
+                DoCast(me->GetVictim(), SPELL_ARCANEBLAST);
                 m_uiArcaneBlast_Timer = 7000 + rand()%5000;
             }
             else
@@ -155,7 +155,7 @@ public:
             //BellowingRoar_Timer
             if (m_uiBellowingRoar_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_BELLOWINGROAR);
+                DoCast(me->GetVictim(), SPELL_BELLOWINGROAR);
                 m_uiBellowingRoar_Timer = 20000 + rand()%10000;
             }
             else
@@ -222,7 +222,7 @@ public:
             //PoisonCloud_Timer
             if (m_uiPoisonCloud_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_POSIONCLOUD);
+                DoCast(me->GetVictim(), SPELL_POSIONCLOUD);
                 m_uiPoisonCloud_Timer = 30000;
             }
             else
@@ -231,7 +231,7 @@ public:
             //PosionBreath_Timer
             if (m_uiPosionBreath_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_POSIONBREATH);
+                DoCast(me->GetVictim(), SPELL_POSIONBREATH);
                 m_uiPosionBreath_Timer = 12000;
             }
             else

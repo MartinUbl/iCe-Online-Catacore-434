@@ -134,7 +134,7 @@ public:
 
             if (MightyBlowTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MIGHTY_BLOW, true);
+                DoCast(me->GetVictim(), SPELL_MIGHTY_BLOW, true);
                 MightyBlowTimer = 10*IN_MILLISECONDS;
             } else MightyBlowTimer -= diff;
 
@@ -152,7 +152,7 @@ public:
         {
             if (HealthBelowPct(5))
                 pSummon->DealDamage(pSummon, uint32(pSummon->GetHealth() * 0.5), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-            pSummon->AI()->AttackStart(me->getVictim());
+            pSummon->AI()->AttackStart(me->GetVictim());
         }
     };
 
@@ -249,7 +249,7 @@ public:
 				if(uiInitSummonTimer <= diff)
 				{
 					float cx,cy,cz;
-					me->GetContactPoint(me->getVictim(),cx,cy,cz,3.0f);
+					me->GetContactPoint(me->GetVictim(),cx,cy,cz,3.0f);
 					me->SummonCreature(29830,cx,cy,cz,0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,15000);
 					uiInitSummonTimer = 0;
 				} else uiInitSummonTimer -= diff;
@@ -257,7 +257,7 @@ public:
 
             if (uiSurgeTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SURGE);
+                DoCast(me->GetVictim(), SPELL_SURGE);
                 uiSurgeTimer = 7*IN_MILLISECONDS;
             } else uiSurgeTimer -= diff;
 
@@ -308,7 +308,7 @@ public:
             //Check if the npc is near of Drakkari Colossus.
             if (Creature *pColossus = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_DRAKKARI_COLOSSUS) : 0))
             {
-                if (pColossus->isAlive() && me->IsInRange3d(pColossus->GetHomePosition().GetPositionX(),pColossus->GetHomePosition().GetPositionY(),pColossus->GetHomePosition().GetPositionZ(),0.0f,17.0f))
+                if (pColossus->IsAlive() && me->IsInRange3d(pColossus->GetHomePosition().GetPositionX(),pColossus->GetHomePosition().GetPositionY(),pColossus->GetHomePosition().GetPositionZ(),0.0f,17.0f))
                     me->SetReactState(REACT_PASSIVE);
                 else
                     me->SetReactState(REACT_AGGRESSIVE);
@@ -321,12 +321,12 @@ public:
             {
                 if (Creature *pColossus = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_DRAKKARI_COLOSSUS) : 0))
                 {
-                    if (pColossus->isAlive() && !pColossus->isInCombat())
+                    if (pColossus->IsAlive() && !pColossus->IsInCombat())
                     {
                         pColossus->RemoveAura(SPELL_FREEZE_ANIM);
                         pColossus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         pColossus->SetReactState(REACT_AGGRESSIVE);
-                        if (pDone_by && pDone_by->isAlive())
+                        if (pDone_by && pDone_by->IsAlive())
                             pColossus->AI()->AttackStart(pDone_by);
                         EnterEvadeMode();
                     }
@@ -342,13 +342,13 @@ public:
 
             if (uiMojoWaveTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MOJO_WAVE);
+                DoCast(me->GetVictim(), SPELL_MOJO_WAVE);
                 uiMojoWaveTimer = 15*IN_MILLISECONDS;
             } else uiMojoWaveTimer -= diff;
 
             if (uiMojoPuddleTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MOJO_PUDDLE);
+                DoCast(me->GetVictim(), SPELL_MOJO_PUDDLE);
                 uiMojoPuddleTimer = 18*IN_MILLISECONDS;
             } else uiMojoPuddleTimer -= diff;
 

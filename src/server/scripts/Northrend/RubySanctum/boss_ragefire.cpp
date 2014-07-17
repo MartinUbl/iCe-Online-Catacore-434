@@ -83,7 +83,7 @@ public:
             me->SetRespawnDelay(7*DAY);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-            if (me->isAlive()) pInstance->SetData(TYPE_RAGEFIRE, NOT_STARTED);
+            if (me->IsAlive()) pInstance->SetData(TYPE_RAGEFIRE, NOT_STARTED);
 
             m_uiFlameBreathTimer = urand(5*IN_MILLISECONDS,15*IN_MILLISECONDS);
             m_uiEnrage = urand(20*IN_MILLISECONDS,40*IN_MILLISECONDS);
@@ -288,7 +288,7 @@ public:
                      SetFly(false);
                      SetCombatMovement(true);
                      me->GetMotionMaster()->Clear();
-                     me->GetMotionMaster()->MoveChase(me->getVictim());
+                     me->GetMotionMaster()->MoveChase(me->GetVictim());
                      setStage(7);
                      break;
 
@@ -370,7 +370,7 @@ public:
                      SetFly(false);
                      SetCombatMovement(true);
                      me->GetMotionMaster()->Clear();
-                     me->GetMotionMaster()->MoveChase(me->getVictim());
+                     me->GetMotionMaster()->MoveChase(me->GetVictim());
                      setStage(14);
                      break;
 

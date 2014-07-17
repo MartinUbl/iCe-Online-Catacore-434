@@ -239,7 +239,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (creature->GetEntry() == NPC_JAINA_PART1)
@@ -376,7 +376,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         if (creature->GetEntry() == NPC_JAINA_PART1)
@@ -886,7 +886,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_SOUL_STRIKE:
-                        DoCast(me->getVictim(), SPELL_SOUL_STRIKE);
+                        DoCast(me->GetVictim(), SPELL_SOUL_STRIKE);
                         events.RescheduleEvent(EVENT_SOUL_STRIKE, 8000);
                         return;
                 }

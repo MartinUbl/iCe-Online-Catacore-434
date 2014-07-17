@@ -354,7 +354,7 @@ public:
                 {
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (i->getSource() && i->getSource()->isAlive() &&
+                        if (i->getSource() && i->getSource()->IsAlive() &&
                             i->getSource()->GetPositionX() <= POS_X_NORTH &&
                             i->getSource()->GetPositionX() >= POS_X_SOUTH &&
                             i->getSource()->GetPositionY() <= POS_Y_GATE &&
@@ -362,7 +362,7 @@ public:
                         {
                             checklife = true;
                         }
-                        else if (i->getSource() && i->getSource()->isAlive() &&
+                        else if (i->getSource() && i->getSource()->IsAlive() &&
                             i->getSource()->GetPositionX() <= POS_X_NORTH &&
                             i->getSource()->GetPositionX() >= POS_X_SOUTH &&
                             i->getSource()->GetPositionY() >= POS_Y_GATE &&
@@ -389,7 +389,7 @@ public:
                 case SPELL_INFORM_LIVE_KNIGHT:  spellId = SPELL_INFORM_DEAD_KNIGHT;     break;
                 case SPELL_INFORM_LIVE_RIDER:   spellId = SPELL_INFORM_DEAD_RIDER;      break;
             }
-            if (spellId && me->isInCombat())
+            if (spellId && me->IsInCombat())
             {
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SPELLCAST);
                 if (Creature *pRandomDeadTrigger = Unit::GetCreature(*me, DeadTriggerGUID[rand() % POS_DEAD]))
@@ -399,7 +399,7 @@ public:
 
         void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
         {
-            if (!me->isInCombat())
+            if (!me->IsInCombat())
                 return;
 
             switch(spell->Id)
@@ -439,7 +439,7 @@ public:
 
 		bool IsInRightSide(Unit* pWho)
 		{
-			if (pWho && pWho->isAlive() &&
+			if (pWho && pWho->IsAlive() &&
 				pWho->GetPositionX() <= POS_X_NORTH &&
 				pWho->GetPositionX() >= POS_X_SOUTH &&
 				pWho->GetPositionY() <= POS_Y_GATE &&
@@ -584,7 +584,7 @@ public:
                         break;
 						}
                     case EVENT_HARVEST:
-                        DoCast(me->getVictim(), SPELL_HARVEST_SOUL, true);
+                        DoCast(me->GetVictim(), SPELL_HARVEST_SOUL, true);
                         events.ScheduleEvent(EVENT_HARVEST, urand(20000,25000));
                         break;
                     case EVENT_TELEPORT:
@@ -657,7 +657,7 @@ public:
 
         void JustDied(Unit * /*killer*/)
         {
-            if (me->isSummon())
+            if (me->IsSummon())
             {
                 if (Unit *owner = CAST_SUM(me)->GetSummoner())
                     CombatAI::JustDied(owner);
@@ -683,7 +683,7 @@ public:
                 {
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        if (i->getSource() && i->getSource()->isAlive() && isOnSameSide(i->getSource()))
+                        if (i->getSource() && i->getSource()->IsAlive() && isOnSameSide(i->getSource()))
                         {
                             AttackStart(i->getSource());
                             return;
@@ -698,7 +698,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (gateClose && (!isOnSameSide(me) || (me->getVictim() && !isOnSameSide(me->getVictim()))))
+            if (gateClose && (!isOnSameSide(me) || (me->GetVictim() && !isOnSameSide(me->GetVictim()))))
             {
                 EnterEvadeMode();
                 return;

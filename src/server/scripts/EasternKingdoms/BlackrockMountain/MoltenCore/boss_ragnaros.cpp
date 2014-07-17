@@ -169,7 +169,7 @@ public:
             //WrathOfRagnaros_Timer
             if (WrathOfRagnaros_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WRATHOFRAGNAROS);
+                DoCast(me->GetVictim(), SPELL_WRATHOFRAGNAROS);
 
                 if (urand(0,1))
                     DoScriptText(SAY_WRATH, me);
@@ -191,21 +191,21 @@ public:
             //LavaBurst_Timer
             if (LavaBurst_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_LAVABURST);
+                DoCast(me->GetVictim(), SPELL_LAVABURST);
                 LavaBurst_Timer = 10000;
             } else LavaBurst_Timer -= diff;
 
             //Erruption_Timer
             if (LavaBurst_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ERRUPTION);
+                DoCast(me->GetVictim(), SPELL_ERRUPTION);
                 Erruption_Timer = urand(20000,45000);
             } else Erruption_Timer -= diff;
 
             //ElementalFire_Timer
             if (ElementalFire_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_ELEMENTALFIRE);
+                DoCast(me->GetVictim(), SPELL_ELEMENTALFIRE);
                 ElementalFire_Timer = urand(10000,14000);
             } else ElementalFire_Timer -= diff;
 
@@ -265,12 +265,12 @@ public:
             } else Submerge_Timer -= diff;
 
             //If we are within range melee the target
-            if (me->IsWithinMeleeRange(me->getVictim()))
+            if (me->IsWithinMeleeRange(me->GetVictim()))
             {
                 //Make sure our attack is ready and we arn't currently casting
                 if (me->isAttackReady() && !me->IsNonMeleeSpellCasted(false))
                 {
-                    me->AttackerStateUpdate(me->getVictim());
+                    me->AttackerStateUpdate(me->GetVictim());
                     me->resetAttackTimer();
                 }
             }
@@ -279,7 +279,7 @@ public:
                 //MagmaBurst_Timer
                 if (MagmaBurst_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_MAGMABURST);
+                    DoCast(me->GetVictim(), SPELL_MAGMABURST);
 
                     if (!HasYelledMagmaBurst)
                     {

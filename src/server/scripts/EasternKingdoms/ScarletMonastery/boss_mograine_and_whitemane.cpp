@@ -90,7 +90,7 @@ public:
             me->SetStandState(UNIT_STAND_STATE_STAND);
 
             if (m_pInstance)
-                if (me->isAlive())
+                if (me->IsAlive())
                     m_pInstance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT,NOT_STARTED);
 
             m_bHasDied = false;
@@ -187,8 +187,8 @@ public:
                     m_uiCrusaderStrike_Timer = 10000;
                     m_uiHammerOfJustice_Timer = 10000;
 
-                    if (me->getVictim())
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                    if (me->GetVictim())
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                     m_bHeal = true;
                 }
@@ -201,14 +201,14 @@ public:
             //m_uiCrusaderStrike_Timer
             if (m_uiCrusaderStrike_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_CRUSADERSTRIKE);
+                DoCast(me->GetVictim(), SPELL_CRUSADERSTRIKE);
                 m_uiCrusaderStrike_Timer = 10000;
             } else m_uiCrusaderStrike_Timer -= uiDiff;
 
             //m_uiHammerOfJustice_Timer
             if (m_uiHammerOfJustice_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_HAMMEROFJUSTICE);
+                DoCast(me->GetVictim(), SPELL_HAMMEROFJUSTICE);
                 m_uiHammerOfJustice_Timer = 60000;
             } else m_uiHammerOfJustice_Timer -= uiDiff;
 
@@ -256,7 +256,7 @@ public:
             m_bCanResurrect = false;
 
             if (m_pInstance)
-                if (me->isAlive())
+                if (me->IsAlive())
                     m_pInstance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, NOT_STARTED);
         }
 
@@ -304,7 +304,7 @@ public:
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
 
-                DoCast(me->getVictim(), SPELL_DEEPSLEEP);
+                DoCast(me->GetVictim(), SPELL_DEEPSLEEP);
                 m_bCanResurrectCheck = true;
                 m_bCanResurrect = true;
                 return;
@@ -327,7 +327,7 @@ public:
                     if (Creature* pMograine = Unit::GetCreature((*me), m_pInstance->GetData64(DATA_MOGRAINE)))
                     {
                         // checking m_bCanResurrectCheck prevents her healing Mograine while he is "faking death"
-                        if (m_bCanResurrectCheck && pMograine->isAlive() && !pMograine->HealthAbovePct(75))
+                        if (m_bCanResurrectCheck && pMograine->IsAlive() && !pMograine->HealthAbovePct(75))
                             pTarget = pMograine;
                     }
                 }
@@ -348,7 +348,7 @@ public:
             //m_uiHolySmite_Timer
             if (m_uiHolySmite_Timer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_HOLYSMITE);
+                DoCast(me->GetVictim(), SPELL_HOLYSMITE);
                 m_uiHolySmite_Timer = 6000;
             } else m_uiHolySmite_Timer -= uiDiff;
 

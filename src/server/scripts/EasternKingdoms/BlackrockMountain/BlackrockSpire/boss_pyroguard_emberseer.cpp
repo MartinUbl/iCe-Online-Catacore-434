@@ -67,14 +67,14 @@ public:
             //FireNova_Timer
             if (FireNova_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FIRENOVA);
+                DoCast(me->GetVictim(), SPELL_FIRENOVA);
                 FireNova_Timer = 6000;
             } else FireNova_Timer -= diff;
 
             //FlameBuffet_Timer
             if (FlameBuffet_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FLAMEBUFFET);
+                DoCast(me->GetVictim(), SPELL_FLAMEBUFFET);
                 FlameBuffet_Timer = 14000;
             } else FlameBuffet_Timer -= diff;
 

@@ -202,7 +202,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(6981) == QUEST_STATUS_INCOMPLETE)
@@ -390,7 +390,7 @@ public:
 
         void MoveInLineOfSight(Unit *who)
         {
-            if (!who || (!who->isAlive())) return;
+            if (!who || (!who->IsAlive())) return;
 
             if (me->IsWithinDistInMap(who, 10.0f) && (who->GetTypeId() == TYPEID_PLAYER) && CAST_PLR(who)->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE && !EventInProgress)
             {
@@ -412,7 +412,7 @@ public:
                 if (!pWarrior)
                     return;
 
-                if (!pWarrior->isAlive() && pWarrior->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE) {
+                if (!pWarrior->IsAlive() && pWarrior->GetQuestStatus(1719) == QUEST_STATUS_INCOMPLETE) {
                     EventInProgress = false;
                     DoScriptText(SAY_TWIGGY_FLATHEAD_DOWN, me);
                     pWarrior->FailQuest(1719);
@@ -423,7 +423,7 @@ public:
                         {
                             Creature* pCreature = Unit::GetCreature((*me), AffrayChallenger[i]);
                             if (pCreature) {
-                                if (pCreature->isAlive())
+                                if (pCreature->IsAlive())
                                 {
                                     pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
                                     pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -439,7 +439,7 @@ public:
                     {
                         Creature* pCreature = Unit::GetCreature((*me), BigWill);
                         if (pCreature) {
-                            if (pCreature->isAlive()) {
+                            if (pCreature->IsAlive()) {
                                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
                                 pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 pCreature->setDeathState(JUST_DIED);
@@ -483,7 +483,7 @@ public:
                             if (AffrayChallenger[i])
                             {
                                 Creature* pCreature = Unit::GetCreature((*me), AffrayChallenger[i]);
-                                if ((!pCreature || (!pCreature->isAlive())) && !Challenger_down[i])
+                                if ((!pCreature || (!pCreature->IsAlive())) && !Challenger_down[i])
                                 {
                                     DoScriptText(SAY_TWIGGY_FLATHEAD_DOWN, me);
                                     Challenger_down[i] = true;
@@ -499,7 +499,7 @@ public:
                         {
                             DoScriptText(SAY_TWIGGY_FLATHEAD_FRAY, me);
                             Creature* pCreature = Unit::GetCreature((*me), AffrayChallenger[Wave]);
-                            if (pCreature && (pCreature->isAlive()))
+                            if (pCreature && (pCreature->IsAlive()))
                             {
                                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -525,7 +525,7 @@ public:
                         else if (Wave >= 6 && EventBigWill && BigWill)
                         {
                             Creature* pCreature = Unit::GetCreature((*me), BigWill);
-                            if (!pCreature || !pCreature->isAlive())
+                            if (!pCreature || !pCreature->IsAlive())
                             {
                                 DoScriptText(SAY_TWIGGY_FLATHEAD_OVER, me);
                                 EventInProgress = false;

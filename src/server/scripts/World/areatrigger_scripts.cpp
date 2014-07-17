@@ -129,7 +129,7 @@ class AreaTrigger_at_legion_teleporter : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
         {
-            if (player->isAlive() && !player->isInCombat())
+            if (player->IsAlive() && !player->IsInCombat())
             {
                 if (player->GetTeam() == ALLIANCE && player->GetQuestRewardStatus(QUEST_GAINING_ACCESS_A))
                 {

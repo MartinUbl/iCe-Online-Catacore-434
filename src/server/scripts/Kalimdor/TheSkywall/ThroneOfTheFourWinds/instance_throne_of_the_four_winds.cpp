@@ -450,7 +450,7 @@ public:
                 for(Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
                     if(Player* player = itr->getSource())
                     {
-                        if(!player->isAlive())
+                        if(!player->IsAlive())
                             continue;
                         // teleport player if under critical Z
                         if(m_auiEncounter[TYPE_CONCLAVE] == DONE)
@@ -560,7 +560,7 @@ public:
                         continue;
 
                     // add threat to all players in the instance
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                     {
                         creature->SetInCombatWith(pPlayer);
                         pPlayer->SetInCombatWith(creature);

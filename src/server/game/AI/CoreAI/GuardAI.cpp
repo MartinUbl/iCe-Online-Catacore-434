@@ -30,7 +30,7 @@
 
 int GuardAI::Permissible(const Creature *creature)
 {
-    if (creature->isGuard())
+    if (creature->IsGuard())
         return PERMIT_BASE_SPECIAL;
 
     return PERMIT_BASE_NO;
@@ -43,11 +43,11 @@ GuardAI::GuardAI(Creature *c) : CreatureAI(c), i_victimGuid(0), i_state(STATE_NO
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
     // Ignore Z for flying creatures
-    if (!me->canFly() && me->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
+    if (!me->CanFly() && me->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (!me->getVictim() && me->canAttack(u) &&
-        (u->IsHostileToPlayers() || me->IsHostileTo(u) /*|| u->getVictim() && me->IsFriendlyTo(u->getVictim())*/) &&
+    if (!me->GetVictim() && me->canAttack(u) &&
+        (u->IsHostileToPlayers() || me->IsHostileTo(u) /*|| u->GetVictim() && me->IsFriendlyTo(u->GetVictim())*/) &&
         u->isInAccessiblePlaceFor(me))
     {
         float attackRadius = me->GetAttackDistance(u);
@@ -62,7 +62,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
 
 void GuardAI::EnterEvadeMode()
 {
-    if (!me->isAlive())
+    if (!me->IsAlive())
     {
         sLog->outStaticDebug("Creature stopped attacking because he is dead [guid=%u]", me->GetGUIDLow());
         me->GetMotionMaster()->MoveIdle();
@@ -81,7 +81,7 @@ void GuardAI::EnterEvadeMode()
     {
         sLog->outStaticDebug("Creature stopped attacking because victim does not exist [guid=%u]", me->GetGUIDLow());
     }
-    else if (!victim ->isAlive())
+    else if (!victim ->IsAlive())
     {
         sLog->outStaticDebug("Creature stopped attacking because victim is dead [guid=%u]", me->GetGUIDLow());
     }
@@ -89,7 +89,7 @@ void GuardAI::EnterEvadeMode()
     {
         sLog->outStaticDebug("Creature stopped attacking because victim is using stealth [guid=%u]", me->GetGUIDLow());
     }
-    else if (victim ->isInFlight())
+    else if (victim ->IsInFlight())
     {
         sLog->outStaticDebug("Creature stopped attacking because victim is flying away [guid=%u]", me->GetGUIDLow());
     }
@@ -111,17 +111,17 @@ void GuardAI::EnterEvadeMode()
 
 void GuardAI::UpdateAI(const uint32 /*diff*/)
 {
-    // update i_victimGuid if me->getVictim() !=0 and changed
+    // update i_victimGuid if me->GetVictim() !=0 and changed
     if (!UpdateVictim())
         return;
 
-    i_victimGuid = me->getVictim()->GetGUID();
+    i_victimGuid = me->GetVictim()->GetGUID();
 
     if (me->isAttackReady())
     {
-        if (me->IsWithinMeleeRange(me->getVictim()))
+        if (me->IsWithinMeleeRange(me->GetVictim()))
         {
-            me->AttackerStateUpdate(me->getVictim());
+            me->AttackerStateUpdate(me->GetVictim());
             me->resetAttackTimer();
         }
     }

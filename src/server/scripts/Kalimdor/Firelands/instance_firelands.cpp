@@ -264,7 +264,7 @@ public:
                 {
                     if (pBethtilac->isDead() && pShannox->isDead() && pRhyolith->isDead() && pAlysrazor->isDead())
                     {
-                        if (pBaleroc->isAlive())
+                        if (pBaleroc->IsAlive())
                             pBaleroc->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
 
                         if (GameObject * door1 = this->instance->GetGameObject(this->GetData64(DATA_BALEROC_FRONT_DOOR)))

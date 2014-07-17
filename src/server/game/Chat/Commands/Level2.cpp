@@ -225,7 +225,7 @@ bool ChatHandler::HandleGoTriggerCommand(const char* args)
     }
 
     // stop flight if need
-    if (_player->isInFlight())
+    if (_player->IsInFlight())
     {
         _player->GetMotionMaster()->MovementExpired();
         _player->CleanupAfterTaxiFlight();
@@ -270,7 +270,7 @@ bool ChatHandler::HandleGoGraveyardCommand(const char* args)
     }
 
     // stop flight if need
-    if (_player->isInFlight())
+    if (_player->IsInFlight())
     {
         _player->GetMotionMaster()->MovementExpired();
         _player->CleanupAfterTaxiFlight();
@@ -373,7 +373,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     }
 
     // stop flight if need
-    if (_player->isInFlight())
+    if (_player->IsInFlight())
     {
         _player->GetMotionMaster()->MovementExpired();
         _player->CleanupAfterTaxiFlight();
@@ -430,7 +430,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     }
 
     // stop flight if need
-    if (_player->isInFlight())
+    if (_player->IsInFlight())
     {
         _player->GetMotionMaster()->MovementExpired();
         _player->CleanupAfterTaxiFlight();
@@ -1148,7 +1148,7 @@ bool ChatHandler::HandleNpcDelVendorItemCommand(const char* args)
         return false;
 
     Creature* vendor = getSelectedCreature();
-    if (!vendor || !vendor->isVendor())
+    if (!vendor || !vendor->IsVendor())
     {
         SendSysMessage(LANG_COMMAND_VENDORSELECTION);
         SetSentErrorMessage(true);
@@ -1227,7 +1227,7 @@ bool ChatHandler::HandleNpcAddMoveCommand(const char* args)
     {
         pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
         pCreature->GetMotionMaster()->Initialize();
-        if (pCreature->isAlive())                            // dead creature will reset movement generator at respawn
+        if (pCreature->IsAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
             pCreature->Respawn(true);
@@ -1262,7 +1262,7 @@ bool ChatHandler::HandleNpcChangeLevelCommand(const char* args)
         return false;
     }
 
-    if (pCreature->isPet())
+    if (pCreature->IsPet())
     {
         if (((Pet*)pCreature)->getPetType() == HUNTER_PET)
         {
@@ -1329,7 +1329,7 @@ bool ChatHandler::HandleNpcDeleteCommand(const char* args)
     else
         unit = getSelectedCreature();
 
-    if (!unit || unit->isPet() || unit->isTotem())
+    if (!unit || unit->IsPet() || unit->IsTotem())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
@@ -1413,7 +1413,7 @@ bool ChatHandler::HandleNpcMoveCommand(const char* args)
         }
         pCreature->GetMap()->CreatureRelocation(pCreature,x, y, z,o);
         pCreature->GetMotionMaster()->Initialize();
-        if (pCreature->isAlive())                            // dead creature will reset movement generator at respawn
+        if (pCreature->IsAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
             pCreature->Respawn();
@@ -1494,7 +1494,7 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(const char* args)
     {
         type_str = guid_str;
         pCreature = getSelectedCreature();
-        if (!pCreature || pCreature->isPet())
+        if (!pCreature || pCreature->IsPet())
             return false;
         lowguid = pCreature->GetDBTableGUIDLow();
     }
@@ -1552,7 +1552,7 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(const char* args)
 
         pCreature->SetDefaultMovementType(move_type);
         pCreature->GetMotionMaster()->Initialize();
-        if (pCreature->isAlive())                            // dead creature will reset movement generator at respawn
+        if (pCreature->IsAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
             pCreature->Respawn();
@@ -1581,7 +1581,7 @@ bool ChatHandler::HandleNpcSetModelCommand(const char* args)
 
     Creature *pCreature = getSelectedCreature();
 
-    if (!pCreature || pCreature->isPet())
+    if (!pCreature || pCreature->IsPet())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
@@ -1663,7 +1663,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(const char* args)
     pCreature->SetRespawnRadius((float)option);
     pCreature->SetDefaultMovementType(mtype);
     pCreature->GetMotionMaster()->Initialize();
-    if (pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+    if (pCreature->IsAlive())                                // dead creature will reset movement generator at respawn
     {
         pCreature->setDeathState(JUST_DIED);
         pCreature->Respawn();
@@ -1767,16 +1767,16 @@ bool ChatHandler::HandleNpcUnFollowCommand(const char* /*args*/)
 bool ChatHandler::HandleNpcTameCommand(const char* /*args*/)
 {
     Creature *creatureTarget = getSelectedCreature ();
-    if (!creatureTarget || creatureTarget->isPet ())
+    if (!creatureTarget || creatureTarget->IsPet())
     {
         PSendSysMessage (LANG_SELECT_CREATURE);
         SetSentErrorMessage (true);
         return false;
     }
 
-    Player *player = m_session->GetPlayer ();
+    Player *player = m_session->GetPlayer();
 
-    if (player->GetPetGUID ())
+    if (player->GetPetGUID())
     {
         SendSysMessage (LANG_YOU_ALREADY_HAVE_PET);
         SetSentErrorMessage (true);
@@ -1854,7 +1854,7 @@ bool ChatHandler::HandleNpcSetPhaseCommand(const char* args)
 
     pCreature->SetPhaseMask(phasemask,true);
 
-    if (!pCreature->isPet())
+    if (!pCreature->IsPet())
         pCreature->SaveToDB();
 
     return true;
@@ -1895,7 +1895,7 @@ bool ChatHandler::HandleNpcSetDeathStateCommand(const char* args)
         return false;
 
     Creature* pCreature = getSelectedCreature();
-    if (!pCreature || pCreature->isPet())
+    if (!pCreature || pCreature->IsPet())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
@@ -4041,7 +4041,7 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
     Player *player = m_session->GetPlayer();
     Creature *creatureTarget = getSelectedCreature();
 
-    if (!creatureTarget || creatureTarget->isPet() || creatureTarget->GetTypeId() == TYPEID_PLAYER)
+    if (!creatureTarget || creatureTarget->IsPet() || creatureTarget->GetTypeId() == TYPEID_PLAYER)
     {
         PSendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);

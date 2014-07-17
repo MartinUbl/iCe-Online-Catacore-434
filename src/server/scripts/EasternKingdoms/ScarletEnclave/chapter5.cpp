@@ -303,7 +303,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(12801) == QUEST_STATUS_INCOMPLETE)
@@ -1316,7 +1316,7 @@ public:
                                 if (!PlayerList.isEmpty())
                                 {
                                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                        if (i->getSource()->isAlive() && me->IsWithinDistInMap(i->getSource(), 50))
+                                        if (i->getSource()->IsAlive() && me->IsWithinDistInMap(i->getSource(), 50))
                                             i->getSource()->CastSpell(i->getSource(), SPELL_THE_LIGHT_OF_DAWN_Q, false);
                                 }
                             }
@@ -1357,25 +1357,25 @@ public:
 
                 if (uiDeath_strike <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEATH_STRIKE);
+                    DoCast(me->GetVictim(), SPELL_DEATH_STRIKE);
                     uiDeath_strike = 5000 + rand()%5000;
                 } else uiDeath_strike -= diff;
 
                 if (uiDeath_embrace <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_DEATH_EMBRACE);
+                    DoCast(me->GetVictim(), SPELL_DEATH_EMBRACE);
                     uiDeath_embrace = 5000 + rand()%5000;
                 } else uiDeath_embrace -= diff;
 
                 if (uiIcy_touch <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_ICY_TOUCH1);
+                    DoCast(me->GetVictim(), SPELL_ICY_TOUCH1);
                     uiIcy_touch = 5000 + rand()%5000;
                 } else uiIcy_touch -= diff;
 
                 if (uiUnholy_blight <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_UNHOLY_BLIGHT);
+                    DoCast(me->GetVictim(), SPELL_UNHOLY_BLIGHT);
                     uiUnholy_blight = 5000 + rand()%5000;
                 } else uiUnholy_blight -= diff;
 
@@ -1534,9 +1534,9 @@ public:
         void NPCChangeTarget(uint64 ui_GUID)
         {
             if (Creature* pTemp = Unit::GetCreature(*me, ui_GUID))
-                if (pTemp->isAlive())
+                if (pTemp->IsAlive())
                     if (Unit* pTarger = SelectUnit(SELECT_TARGET_RANDOM,0))
-                        if (pTarger->isAlive())
+                        if (pTarger->IsAlive())
                         {
                             // pTemp->DeleteThreatList();
                             pTemp->AddThreat(pTarger, 0.0f);
@@ -1653,7 +1653,7 @@ public:
         void DespawnNPC(uint64 pGUID)
         {
             if (Creature* pTemp = Unit::GetCreature(*me, pGUID))
-                if (pTemp->isAlive())
+                if (pTemp->IsAlive())
                 {
                     pTemp->SetVisibility(VISIBILITY_OFF);
                     pTemp->Kill(pTemp);

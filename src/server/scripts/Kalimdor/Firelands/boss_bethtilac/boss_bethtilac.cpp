@@ -265,7 +265,7 @@ bool boss_bethtilacAI::UpdateVictim()
         return true;
     }
 
-    if (phase != PHASE_1 || !me->isInCombat())
+    if (phase != PHASE_1 || !me->IsInCombat())
         return false;
 
     // in phase 1 while there are enemies below the web
@@ -304,7 +304,7 @@ void boss_bethtilacAI::EnterEvadeMode()
         for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
         {
             Player *player = *it;
-            if (player->IsInWorld() && player->isAlive() && !player->isGameMaster())
+            if (player->IsInWorld() && player->IsAlive() && !player->isGameMaster())
                 return;
         }
     }
@@ -349,7 +349,7 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
     {
         if (instance && instance->GetData(TYPE_BETHTILAC) == IN_PROGRESS)
             EnterEvadeMode();
-        else if (me->isInCombat())
+        else if (me->IsInCombat())
             SpiderAI::EnterEvadeMode();
         return;
     }
@@ -363,7 +363,7 @@ void boss_bethtilacAI::UpdateAI(const uint32 diff)
     }
 
     if (!IsInTransfer() && !me->IsNonMeleeSpellCasted(false))
-        if (Unit *pVictim = me->getVictim())
+        if (Unit *pVictim = me->GetVictim())
         {
             if (me->IsWithinMeleeRange(pVictim))
                 DoMeleeAttackIfReady();
@@ -551,17 +551,17 @@ void boss_bethtilacAI::DoAction(const int32 event)
             break;
 
         case SP_VENOM_RAIN:
-            if (!me->getVictim() && !me->IsNonMeleeSpellCasted(false))
+            if (!me->GetVictim() && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell((Unit*)NULL, SPELL_VENOM_RAIN, false);
             break;
 
         case SP_EMBER_FLARE:
-            if (me->getVictim() && !me->IsNonMeleeSpellCasted(false))
+            if (me->GetVictim() && !me->IsNonMeleeSpellCasted(false))
                 me->CastSpell((Unit*)NULL, SPELL_EMBER_FLARE, false);
             break;
 
         case SP_METEOR_BURN:
-            if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
+            if (!me->IsNonMeleeSpellCasted(false) && me->GetVictim())
             {
                 DebugOutput("casting Meteor Burn");
                 me->CastCustomSpell(SPELL_METEOR_BURN, SPELLVALUE_MAX_TARGETS, 1, me, false);
@@ -600,7 +600,7 @@ void boss_bethtilacAI::DoAction(const int32 event)
             break;
 
         case SP_WIDOW_KISS:
-            me->CastSpell(me->getVictim(), SPELL_WIDOW_KISS, false);
+            me->CastSpell(me->GetVictim(), SPELL_WIDOW_KISS, false);
             break;
 
         default:
@@ -900,7 +900,7 @@ public:
             for (list<Player*>::iterator it = players.begin(); it != players.end(); it++)
             {
                 Player *player = *it;
-                if (player->IsInWorld() && player->isAlive() && !player->isGameMaster() && player->GetExactDist2d(me) < 6.0f)
+                if (player->IsInWorld() && player->IsAlive() && !player->isGameMaster() && player->GetExactDist2d(me) < 6.0f)
                     return player;
             }
 

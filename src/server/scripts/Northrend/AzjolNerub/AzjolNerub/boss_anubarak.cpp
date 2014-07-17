@@ -214,7 +214,7 @@ public:
                     {
                         if (Creature *Guardian = me->SummonCreature(CREATURE_GUARDIAN,SpawnPointGuardian[i],TEMPSUMMON_CORPSE_DESPAWN,0))
                         {
-                            Guardian->AddThreat(me->getVictim(), 0.0f);
+                            Guardian->AddThreat(me->GetVictim(), 0.0f);
                             DoZoneInCombat(Guardian);
                         }
                     }
@@ -231,7 +231,7 @@ public:
                             {
                                 if (Creature *Venomancer = me->SummonCreature(CREATURE_VENOMANCER,SpawnPoint[i],TEMPSUMMON_CORPSE_DESPAWN,0))
                                 {
-                                    Venomancer->AddThreat(me->getVictim(), 0.0f);
+                                    Venomancer->AddThreat(me->GetVictim(), 0.0f);
                                     DoZoneInCombat(Venomancer);
                                 }
                             }
@@ -250,7 +250,7 @@ public:
                             {
                                 if (Creature *Datter = me->SummonCreature(CREATURE_DATTER,SpawnPoint[i],TEMPSUMMON_CORPSE_DESPAWN,0))
                                 {
-                                    Datter->AddThreat(me->getVictim(), 0.0f);
+                                    Datter->AddThreat(me->GetVictim(), 0.0f);
                                     DoZoneInCombat(Datter);
                                 }
                             }
@@ -294,7 +294,7 @@ public:
                 if (bChanneling == true)
                 {
                     for (uint8 i = 0; i < 8; ++i)
-                    DoCast(me->getVictim(), SPELL_SUMMON_CARRION_BEETLES, true);
+                    DoCast(me->GetVictim(), SPELL_SUMMON_CARRION_BEETLES, true);
                     bChanneling = false;
                 }
                 else if (uiCarrionBeetlesTimer <= diff)
@@ -312,7 +312,7 @@ public:
 
                 if (uiPoundTimer <= diff)
                 {
-                    if (Unit *target = me->getVictim())
+                    if (Unit *target = me->GetVictim())
                     {
                         if (Creature *pImpaleTarget = DoSummonImpaleTarget(target))
                             me->CastSpell(pImpaleTarget, DUNGEON_MODE(SPELL_POUND, SPELL_POUND_H), false);

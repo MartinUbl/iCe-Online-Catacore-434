@@ -114,7 +114,7 @@ void HostileReference::addThreat(float fModThreat)
     if (isValid() && fModThreat >= 0.0f)
     {
         Unit* victim_owner = getTarget()->GetCharmerOrOwner();
-        if (victim_owner && victim_owner->isAlive())
+        if (victim_owner && victim_owner->IsAlive())
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }
 }
@@ -376,7 +376,7 @@ void ThreatManager::addThreat(Unit* pVictim, float fThreat, SpellSchoolMask scho
         return;
 
     // not to dead and not for dead
-    if (!pVictim->isAlive() || !getOwner()->isAlive())
+    if (!pVictim->IsAlive() || !getOwner()->IsAlive())
         return;
 
     ASSERT(getOwner()->GetTypeId() == TYPEID_UNIT);

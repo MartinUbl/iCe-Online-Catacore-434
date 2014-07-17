@@ -84,7 +84,7 @@ public:
             if (m_uiConsumeFlesh_Timer <= uiDiff)
             {
                 if (me->GetEntry() == NPC_RISEN_HUSK)
-                    DoCast(me->getVictim(), SPELL_CONSUME_FLESH);
+                    DoCast(me->GetVictim(), SPELL_CONSUME_FLESH);
 
                 m_uiConsumeFlesh_Timer = 15000;
             }
@@ -94,7 +94,7 @@ public:
             if (m_uiIntangiblePresence_Timer <= uiDiff)
             {
                 if (me->GetEntry() == NPC_RISEN_SPIRIT)
-                    DoCast(me->getVictim(), SPELL_INTANGIBLE_PRESENCE);
+                    DoCast(me->GetVictim(), SPELL_INTANGIBLE_PRESENCE);
 
                 m_uiIntangiblePresence_Timer = 20000;
             }
@@ -373,7 +373,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_JAINAS_AUTOGRAPH) == QUEST_STATUS_INCOMPLETE)
@@ -412,10 +412,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isVendor() && pPlayer->GetQuestRewardStatus(QUEST_NATS_MEASURING_TAPE))
+        if (pCreature->IsVendor() && pPlayer->GetQuestRewardStatus(QUEST_NATS_MEASURING_TAPE))
         {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
             pPlayer->SEND_GOSSIP_MENU(7640, pCreature->GetGUID());
@@ -480,7 +480,7 @@ public:
 
         void AttackedBy(Unit* pAttacker)
         {
-            if (me->getVictim())
+            if (me->GetVictim())
                 return;
 
             if (me->IsFriendlyTo(pAttacker))
@@ -561,8 +561,8 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
             SetCombatMovement(true);
 
-            if (me->isInCombat())
-                if (Unit* pUnit = me->getVictim())
+            if (me->IsInCombat())
+                if (Unit* pUnit = me->GetVictim())
                     me->GetMotionMaster()->MoveChase(pUnit);
         }
 

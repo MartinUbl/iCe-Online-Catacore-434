@@ -396,7 +396,7 @@ public:
                     for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                     {
                         Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                            if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive() )
+                            if ( unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->IsAlive() )
                                 if(unit->HasAura(92486 ) || unit->HasAura(92488 ) || unit->HasAura(84948 ) || unit->HasAura(92487 )) // Gravity Crush
                                 {
                                     if(unit->GetTypeId() == TYPEID_PLAYER )
@@ -421,7 +421,7 @@ public:
                                     !pl->HasAura(92486) &&
                                     !pl->HasAura(92487) &&
                                     !pl->HasAura(92488) &&
-                                    pl->isAlive() && pl->IsInWorld())
+                                    pl->IsAlive() && pl->IsInWorld())
                                     targets.push_back(pl);
                             }
 
@@ -678,13 +678,13 @@ public:
 
             if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true))
             {
-                if(!pIgnacious->isInCombat()) // Ak neni Feludius v combate donutim ho :D
+                if(!pIgnacious->IsInCombat()) // Ak neni Feludius v combate donutim ho :D
                 {
                     if(!pIgnacious->IsInEvadeMode())
                     {
-                        pIgnacious->Attack(me->getVictim(),true);
-                        pIgnacious->AddThreat(me->getVictim(),100.0f);
-                        pIgnacious->GetMotionMaster()->MoveChase(me->getVictim()); // zostal na mieste ;)
+                        pIgnacious->Attack(me->GetVictim(),true);
+                        pIgnacious->AddThreat(me->GetVictim(),100.0f);
+                        pIgnacious->GetMotionMaster()->MoveChase(me->GetVictim()); // zostal na mieste ;)
                     }
                 }
             }
@@ -736,13 +736,13 @@ public:
                 {
                 if(Creature *pIgnacious = me->FindNearestCreature(IGNACIOUS_ENTRY, 300, true)) // Musel som to dat aj sem pretoze ked je jeden z bossov v evademode tak ignoruje vsetko, t.j dalo by sa to bugovat
                 {
-                    if(!pIgnacious->isInCombat()) // Ak nie Feludius v combate donutim ho :D
+                    if(!pIgnacious->IsInCombat()) // Ak nie Feludius v combate donutim ho :D
                     {
                         if(!pIgnacious->IsInEvadeMode())
                         {
-                            pIgnacious->Attack(me->getVictim(),true);
-                            pIgnacious->AddThreat(me->getVictim(),100.0f);
-                            pIgnacious->GetMotionMaster()->MoveChase(me->getVictim());
+                            pIgnacious->Attack(me->GetVictim(),true);
+                            pIgnacious->AddThreat(me->GetVictim(),100.0f);
+                            pIgnacious->GetMotionMaster()->MoveChase(me->GetVictim());
                         }
                     }
                 }
@@ -762,7 +762,7 @@ public:
                         for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                         {
                             Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid());
-                            if (target && target->GetTypeId() == TYPEID_PLAYER && target->isAlive())
+                            if (target && target->GetTypeId() == TYPEID_PLAYER && target->IsAlive())
                                 if(target->HasAura(SPELL_WATER_LOGGED))
                                 DoCast(target,SPELL_FROZEN,true); // Ak ma target na sebe watterlogged debuff dostane FROZEN
                         }
@@ -783,7 +783,7 @@ public:
 
                             if (target && target->GetTypeId() == TYPEID_PLAYER )
                             {
-                                if( urand(0,100) <= 50 && me->getVictim() != target) // 50% sanca na spawn bomby pod hraca + vylucim Tanka Feludiusa
+                                if( urand(0,100) <= 50 && me->GetVictim() != target) // 50% sanca na spawn bomby pod hraca + vylucim Tanka Feludiusa
                                     me->SummonCreature(CREATURE_WATER_BOMB,target->GetPositionX()+urand(0,15)-urand(0,15),target->GetPositionY()+urand(0,15)-urand(0,15),target->GetPositionZ(),0.0f,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                         }
@@ -1017,12 +1017,12 @@ public:
 
             if(Creature *pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 300, true))
             {
-                if(!pFeludius->isInCombat()) // Ak neni Feludius v combate donutim ho :D
+                if(!pFeludius->IsInCombat()) // Ak neni Feludius v combate donutim ho :D
                 {
                     if(!pFeludius->IsInEvadeMode())
                     {
-                        pFeludius->Attack(me->getVictim(),true);
-                        pFeludius->GetMotionMaster()->MoveChase(me->getVictim()); // zostal na mieste dakedy ;)
+                        pFeludius->Attack(me->GetVictim(),true);
+                        pFeludius->GetMotionMaster()->MoveChase(me->GetVictim()); // zostal na mieste dakedy ;)
                     }
                 }
             }
@@ -1044,12 +1044,12 @@ public:
     {
             if(Creature *pFeludius = me->FindNearestCreature(FELUDIUS_ENTRY, 300, true)) // Musel som to dat aj sem pretoze ked je jeden z bossov v evademode tak ignoruje vsetko, t.j dalo by sa to bugovat
             {
-                if(!pFeludius->isInCombat())
+                if(!pFeludius->IsInCombat())
                 {
                     if(!pFeludius->IsInEvadeMode())
                     {
-                        pFeludius->Attack(me->getVictim(),true);
-                        pFeludius->GetMotionMaster()->MoveChase(me->getVictim());
+                        pFeludius->Attack(me->GetVictim(),true);
+                        pFeludius->GetMotionMaster()->MoveChase(me->GetVictim());
                     }
                 }
             }
@@ -1107,7 +1107,7 @@ public:
                     if(!me->IsNonMeleeSpellCasted(false))
                     {
                         can_interrupt = false;
-                        DoCast(me->getVictim(),SPELL_FLAME_TORRENT);
+                        DoCast(me->GetVictim(),SPELL_FLAME_TORRENT);
                         Flame_torrent_timer = urand(13000,20000);
                         ticked = false; // urcite vycasti do 60 aspon jeden torrent
                     }
@@ -1249,7 +1249,7 @@ public:
 
         void DamageDealt(Unit* target, uint32& /*damage*/, DamageEffectType typeOfDamage)
         {
-            if(pfeludius && pfeludius->getVictim() && pfeludius->getVictim() == target) // Feludius tank can't get waterlogged debuff
+            if(pfeludius && pfeludius->GetVictim() && pfeludius->GetVictim() == target) // Feludius tank can't get waterlogged debuff
                 return;
 
             if(typeOfDamage == SPELL_DIRECT_DAMAGE) // Po zasahu bombou aplikujem Watterlogged
@@ -1482,7 +1482,7 @@ public:
                     update_movement=true;
                     Update_timer=500;
                     can_interrupt=true;
-                    DoCast(me->getVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
+                    DoCast(me->GetVictim(),83070);// Hned potom zacastim na aktualneho tanka Lightning blast
                     can_tele=false;
                 }
         }
@@ -1493,7 +1493,7 @@ public:
         {
                     if (getDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || getDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) // Ak som v 10 mane
                     {
-                        if(pRod_marked_player && pRod_marked_player->isAlive())
+                        if(pRod_marked_player && pRod_marked_player->IsAlive())
                         {
                             DoCast(pRod_marked_player,83282,true);
                             can_chaining=false;
@@ -1511,7 +1511,7 @@ public:
                         {
                             if (Player* pPlayer = itr->getSource())
                             {
-                                if(pPlayer && pPlayer->isAlive() && pPlayer->HasAura(83099) ) // Cast Chain lightning na ludi s markou
+                                if(pPlayer && pPlayer->IsAlive() && pPlayer->HasAura(83099) ) // Cast Chain lightning na ludi s markou
                                     DoCast(pPlayer,83282,true);
                             }
                         }
@@ -1620,14 +1620,14 @@ public:
                                 }
 
                                 me->InterruptNonMeleeSpells(false);
-                                DoCast(me->getVictim(),82285); // Elemental stasis
+                                DoCast(me->GetVictim(),82285); // Elemental stasis
 
                                 // V tretej faze maju hracom opadnut debuffy  ( grounded /swirling winds )
                                 std::list<HostileReference*>::const_iterator i = me->getThreatManager().getThreatList().begin();
                                 for (i = me->getThreatManager().getThreatList().begin(); i!= me->getThreatManager().getThreatList().end(); ++i)
                                 {
                                     Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                                    if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->isAlive())
+                                    if (unit && (unit->GetTypeId() == TYPEID_PLAYER) && unit->IsAlive())
                                     {
                                         if(unit->HasAura(83500)) // Ak ma hrac auru swirling winds zhodim mu ju
                                             unit->RemoveAurasDueToSpell(83500);
@@ -1890,11 +1890,11 @@ public:
                     can_interrupt=false;
                     // Summon 5 Eruption spike okolo hraca
                     DoCast(83675); // Only visual Eruption
-                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->getVictim()->GetPositionX()-3.4,me->getVictim()->GetPositionY()-2,me->getVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->getVictim()->GetPositionX()-2.4,me->getVictim()->GetPositionY()+3.2,me->getVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->getVictim()->GetPositionX()+1.1,me->getVictim()->GetPositionY()+3.2,me->getVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->getVictim()->GetPositionX()+0.31,me->getVictim()->GetPositionY()-3.8,me->getVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->getVictim()->GetPositionX()+2.2,me->getVictim()->GetPositionY()-0.31,me->getVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->GetVictim()->GetPositionX()-3.4,me->GetVictim()->GetPositionY()-2,me->GetVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->GetVictim()->GetPositionX()-2.4,me->GetVictim()->GetPositionY()+3.2,me->GetVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->GetVictim()->GetPositionX()+1.1,me->GetVictim()->GetPositionY()+3.2,me->GetVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->GetVictim()->GetPositionX()+0.31,me->GetVictim()->GetPositionY()-3.8,me->GetVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    me->SummonCreature(CREATURE_ERUPTION_NPC,me->GetVictim()->GetPositionX()+2.2,me->GetVictim()->GetPositionY()-0.31,me->GetVictim()->GetPositionZ(),0.0f,TEMPSUMMON_CORPSE_DESPAWN, 0);
                     Eruption_timer=33000;
                 }
             }
@@ -2263,16 +2263,16 @@ public:
         void UpdateAI(const uint32 diff)
         {
 
-            if(me->getVictim())
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED); // Unwanted daze
+            if(me->GetVictim())
+                me->GetVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED); // Unwanted daze
 
             // toto by melo vyresit problem s padem, uvidime
-            if (me->getVictim() && me->GetDistance(me->getVictim()) <= 4.0f) // melee range
+            if (me->GetVictim() && me->GetDistance(me->GetVictim()) <= 4.0f) // melee range
             {
-                if(me->getVictim()->ToPlayer() && me->HasAura(92302))
+                if(me->GetVictim()->ToPlayer() && me->HasAura(92302))
                 {
-                    if( me->getVictim()->HasAura(92307) )
-                        me->getVictim()->RemoveAurasDueToSpell(92307);
+                    if( me->GetVictim()->HasAura(92307) )
+                        me->GetVictim()->RemoveAurasDueToSpell(92307);
 
                     me->CastSpell(me, 92548, true); // Zacastim instant Glaciate
                     me->SetReactState(REACT_AGGRESSIVE);

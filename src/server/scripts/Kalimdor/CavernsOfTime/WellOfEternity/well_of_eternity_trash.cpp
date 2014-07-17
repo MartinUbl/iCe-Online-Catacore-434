@@ -185,8 +185,8 @@ public:
 
             if (gripTimer <= diff)
             {
-                if (me->getVictim())
-                    me->CastSpell(me->getVictim(), SPELL_DEMON_GRIP, true);
+                if (me->GetVictim())
+                    me->CastSpell(me->GetVictim(), SPELL_DEMON_GRIP, true);
                 gripTimer = 2000;
             }
             else gripTimer -= diff;

@@ -71,7 +71,7 @@ public:
         }
 
         // allow use in flight only
-        if (pPlayer->isInFlight() && !disabled)
+        if (pPlayer->IsInFlight() && !disabled)
             return false;
 
         // error

@@ -160,8 +160,8 @@ class boss_omor_the_unscarred : public CreatureScript
                     if (OrbitalStrike_Timer <= diff)
                     {
                         Unit* temp = NULL;
-                        if (me->IsWithinMeleeRange(me->getVictim()))
-                            temp = me->getVictim();
+                        if (me->IsWithinMeleeRange(me->GetVictim()))
+                            temp = me->GetVictim();
                         else temp = SelectUnit(SELECT_TARGET_RANDOM,0);
 
                         if (temp && temp->GetTypeId() == TYPEID_PLAYER)
@@ -206,7 +206,7 @@ class boss_omor_the_unscarred : public CreatureScript
                     if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
                     {
                         if (pTarget)
-                            pTarget = me->getVictim();
+                            pTarget = me->GetVictim();
 
                         DoCast(pTarget, SPELL_SHADOW_BOLT);
                         Shadowbolt_Timer = 4000+rand()%2500;

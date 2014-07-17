@@ -416,7 +416,7 @@ void hyjalAI::EnterEvadeMode()
     me->CombatStop(true);
     me->LoadCreaturesAddon();
 
-    if (me->isAlive())
+    if (me->IsAlive())
         me->GetMotionMaster()->MoveTargetedHome();
 
     me->SetLootRecipient(NULL);
@@ -854,7 +854,7 @@ void hyjalAI::UpdateAI(const uint32 diff)
             if (BossGUID[i])
             {
                 Unit* pUnit = Unit::GetUnit((*me), BossGUID[i]);
-                if (pUnit && (!pUnit->isAlive()))
+                if (pUnit && (!pUnit->IsAlive()))
                 {
                     if (BossGUID[i] == BossGUID[0])
                     {
@@ -896,10 +896,10 @@ void hyjalAI::UpdateAI(const uint32 diff)
                 {
                     case TARGETTYPE_SELF: pTarget = me; break;
                     case TARGETTYPE_RANDOM: pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0); break;
-                    case TARGETTYPE_VICTIM: pTarget = me->getVictim(); break;
+                    case TARGETTYPE_VICTIM: pTarget = me->GetVictim(); break;
                 }
 
-                if (pTarget && pTarget->isAlive())
+                if (pTarget && pTarget->IsAlive())
                 {
                     DoCast(pTarget, Spells[i].SpellId);
                     SpellTimer[i] = Spells[i].Cooldown;
@@ -1011,7 +1011,7 @@ void hyjalAI::WaypointReached(uint32 i)
         {
             for (std::list<Creature*>::const_iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
             {
-                if ((*itr) && (*itr)->isAlive() && (*itr) != me && (*itr)->GetEntry() != JAINA)
+                if ((*itr) && (*itr)->IsAlive() && (*itr) != me && (*itr)->GetEntry() != JAINA)
                 {
                     if (!(*itr)->IsWithinDist(me, 60))
                         (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
@@ -1052,7 +1052,7 @@ void hyjalAI::DoOverrun(uint32 faction, const uint32 diff)
             {
                 for (std::list<Creature*>::const_iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->isAlive())
+                    if ((*itr) && (*itr)->IsAlive())
                     {
                         (*itr)->CastSpell(*itr, SPELL_TELEPORT_VISUAL, true);
                         (*itr)->setFaction(35);//make them friendly so mobs won't attack them

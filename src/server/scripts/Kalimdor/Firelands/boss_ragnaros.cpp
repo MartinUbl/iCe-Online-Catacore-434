@@ -825,7 +825,7 @@ public:
             {
                 if(Player* pPlayer = itr->getSource())
                 {
-                    if (pPlayer->isAlive() && !pPlayer->isGameMaster())
+                    if (pPlayer->IsAlive() && !pPlayer->isGameMaster())
                     {
                         if (ignoreTanks == true)
                         {
@@ -941,8 +941,8 @@ public:
 
         void CheckMeleeDistance(void) // If Ragnaros cannot reach his victim in melee range, he should cast magma blast on him
         {
-            if (!me->IsWithinMeleeRange(me->getVictim()))
-                me->CastSpell(me->getVictim(),MAGMA_BLAST,true);
+            if (!me->IsWithinMeleeRange(me->GetVictim()))
+                me->CastSpell(me->GetVictim(),MAGMA_BLAST,true);
             CheckTimer = 3000;
         }
 
@@ -972,8 +972,8 @@ public:
 
         inline bool CanCast(void) // We can't allow casting when we don't have our victim  in UNIT_FIELD_TARGET, due to spells animation ( Sulfuras smash,Splitting blow )
         {
-            if (me->IsInWorld() && me->getVictim() && me->getVictim()->IsInWorld() )
-                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
+            if (me->IsInWorld() && me->GetVictim() && me->GetVictim()->IsInWorld() )
+                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->GetVictim()->GetGUID())
                     return true;
 
             return false;
@@ -1094,7 +1094,7 @@ public:
             // Copy players to second list
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 if(Player* pl = itr->getSource())
-                    if (pl->IsInWorld() && pl->isAlive() && !pl->isGameMaster())
+                    if (pl->IsInWorld() && pl->IsAlive() && !pl->isGameMaster())
                         players.push_back(itr->getSource());
 
             for(Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
@@ -1103,7 +1103,7 @@ public:
                 {
                     counter = 0;
 
-                    if (p->IsInWorld() && p->isAlive() && !p->isGameMaster())
+                    if (p->IsInWorld() && p->IsAlive() && !p->isGameMaster())
                     {
                         // Measure distance for player to every player
                         for (std::list<Player*>::iterator j = players.begin(); j != players.end(); ++j)
@@ -1130,9 +1130,9 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->IsInWorld() && me->getVictim() && me->getVictim()->IsInWorld())
+            if (me->IsInWorld() && me->GetVictim() && me->GetVictim()->IsInWorld())
             {
-                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->getVictim()->GetGUID())
+                if (me->GetUInt64Value(UNIT_FIELD_TARGET) == me->GetVictim()->GetGUID())
                 {
                     me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
                     me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
@@ -1167,8 +1167,8 @@ public:
 
             if (AllowTurning_timer <= diff) // Put again  our victim to  UNIT_FIELD_TARGET
             {
-                if (me->getVictim() && me->getVictim()->IsInWorld())
-                    me->SetUInt64Value(UNIT_FIELD_TARGET,me->getVictim()->GetGUID());
+                if (me->GetVictim() && me->GetVictim()->IsInWorld())
+                    me->SetUInt64Value(UNIT_FIELD_TARGET,me->GetVictim()->GetGUID());
                 AllowTurning_timer = NEVER;
             }
             else AllowTurning_timer -= diff;
@@ -1185,8 +1185,8 @@ public:
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
                     if (PHASE == PHASE1 || PHASE == PHASE2 || PHASE == PHASE3 || PHASE == PHASE4)
-                        if (CanCast() && me->IsWithinMeleeRange(me->getVictim()))
-                            me->CastSpell(me->getVictim(),BURNING_WOUND_DOT,true);
+                        if (CanCast() && me->IsWithinMeleeRange(me->GetVictim()))
+                            me->CastSpell(me->GetVictim(),BURNING_WOUND_DOT,true);
 
                     BurningWoundTimer = urand(4000,8000);
                 }
@@ -1242,7 +1242,7 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false) && CanCast())
                     {
-                        me->CastSpell(me->getVictim(),HAND_OF_RAGNAROS,false);
+                        me->CastSpell(me->GetVictim(),HAND_OF_RAGNAROS,false);
                         Hand_of_ragnaros_timer = 25000;
                     }
                  }
@@ -1324,7 +1324,7 @@ public:
                         SpawnSonsOfFlameHeroic(RIGHT);
                 }*/
 
-                me->CastSpell(me->getVictim(),SPLITTING_BLOW,false); // Burry animation
+                me->CastSpell(me->GetVictim(),SPLITTING_BLOW,false); // Burry animation
                 me->SetFacingTo(angle);
                 AllowTurning_timer = 8000 + 45000 + 6000; // Casting time + 45 seconds
 
@@ -1492,7 +1492,7 @@ public:
                     {
                         if(Player* pPlayer = itr->getSource())
                         {
-                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 250.0f)
+                            if ( pPlayer && pPlayer->IsInWorld() && pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetDistance(me) < 250.0f)
                             {
                                 if (playerCounter == 20) // Max 20 seed on 25 man
                                     break;
@@ -1563,7 +1563,7 @@ public:
 
                     AllowTurning_timer = 8000 + 45000+ 6000; // Casting time + 45 seconds
 
-                    me->CastSpell(me->getVictim(),SPLITTING_BLOW,false); // Burry anim
+                    me->CastSpell(me->GetVictim(),SPLITTING_BLOW,false); // Burry anim
                     me->SetFacingTo(angle);
                     Burry_timer = 11900;
                     Lava_Bolt_timer = 15000;
@@ -1816,8 +1816,8 @@ public:
                             breadthTimer = 3000;
                             geyserTimer = breadthTimer + 10000;
                             spreadFlamesTimer = dreadFlameTimer + 7000;
-                            if (me->getVictim())
-                                me->GetMotionMaster()->MoveChase(me->getVictim());
+                            if (me->GetVictim())
+                                me->GetMotionMaster()->MoveChase(me->GetVictim());
                             me->SetReactState(REACT_AGGRESSIVE);
                             me->CastSpell(me,SUPERHEATED,true);
                             break;
@@ -1838,9 +1838,9 @@ public:
 
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 
-                    if (!me->IsNonMeleeSpellCasted(false) && me->getVictim())
+                    if (!me->IsNonMeleeSpellCasted(false) && me->GetVictim())
                     {
-                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                         chaseTimer = NEVER;
                     }
                 }
@@ -1902,8 +1902,8 @@ public:
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->CastSpell(me,EMPOWER_SULFURAS,false);
                         chaseTimer = 5100;
-                        if(me->getVictim())
-                            me->GetMotionMaster()->MoveChase(me->getVictim());
+                        if(me->GetVictim())
+                            me->GetMotionMaster()->MoveChase(me->GetVictim());
                         // Visual missiles during casting of Empower Sulfuras
                         for (uint8  j = 0; j < 6 ; j++)
                         {
@@ -2120,16 +2120,16 @@ public:
                 me->RemoveAurasDueToSpell(SS_LAVA_POOLS); // visual lava pools
                 me->CastSpell(me,SULFURUSH_DMG,false); // Impact damage
 
-                //me->CastSpell(me->getVictim(),SUMMON_WAVE_N,true); // NORTH
+                //me->CastSpell(me->GetVictim(),SUMMON_WAVE_N,true); // NORTH
                 lava_wave = me->SummonCreature(LAVA_WAVE_NPC,me->GetPositionX() + cos(angle)*distance,me->GetPositionY() + sin(angle)* distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN,10000);
                 Move(lava_wave,me->GetOrientation());
 
-                //me->CastSpell(me->getVictim(),SUMMON_WAVE_E,true); // EAST
+                //me->CastSpell(me->GetVictim(),SUMMON_WAVE_E,true); // EAST
                 angle = me->GetOrientation() - (M_PI/2);
                 lava_wave = me->SummonCreature(LAVA_WAVE_NPC,me->GetPositionX() + cos(angle)*distance,me->GetPositionY() + sin(angle)* distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN,10000);
                 Move(lava_wave,angle);
 
-                //me->CastSpell(me->getVictim(),SUMMON_WAVE_W,true); // WEST
+                //me->CastSpell(me->GetVictim(),SUMMON_WAVE_W,true); // WEST
                 angle = me->GetOrientation() + (M_PI/2);
                 lava_wave = me->SummonCreature(LAVA_WAVE_NPC,me->GetPositionX() + cos(angle)*distance,me->GetPositionY() + sin(angle)* distance,me->GetPositionZ(),angle,TEMPSUMMON_TIMED_DESPAWN,10000);
                 Move(lava_wave,angle);
@@ -2761,11 +2761,11 @@ public:
 
                     if (IsHeroic()) // In Heroic Difficulty Combustion inflicts 2000 Fire damage every second on the triggering player. This effect stacks.
                     {
-                        if (Unit * vict = me->getVictim())
+                        if (Unit * vict = me->GetVictim())
                             vict->CastSpell(vict,100249,true);
                     }
 
-                    if (Unit *victim = me->getVictim())
+                    if (Unit *victim = me->GetVictim())
                     {
                         uint32 dist = (uint32) me->GetDistance(victim);
 
@@ -2820,7 +2820,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (Unit * vic = me->getVictim())
+            if (Unit * vic = me->GetVictim())
             {
                 if (!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE) && !me->HasAura(100907) && !me->HasAura(100567)) // Freeze through transmission
                     me->GetMotionMaster()->MovePoint(0,vic->GetPositionX(),vic->GetPositionY(),vic->GetPositionZ(),false,false);
@@ -3124,10 +3124,10 @@ public:
 
             if (checkMeleeTimer <= diff)
             {
-                if (!me->IsWithinMeleeRange(me->getVictim()) || !me->IsWithinLOSInMap(me->getVictim()))
+                if (!me->IsWithinMeleeRange(me->GetVictim()) || !me->IsWithinLOSInMap(me->GetVictim()))
                 {
                     if (!me->HasAura(SUBMERGE_STATE_AURA))
-                        me->CastSpell(me->getVictim(),MOLTEN_BLAST,false);
+                        me->CastSpell(me->GetVictim(),MOLTEN_BLAST,false);
                 }
                 checkMeleeTimer = 2000;
             }

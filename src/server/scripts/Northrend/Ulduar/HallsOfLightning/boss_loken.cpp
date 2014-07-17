@@ -148,7 +148,7 @@ public:
                             return;
 
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                            if (i->getSource() && i->getSource()->isAlive() && i->getSource()->isTargetableForAttack())
+                            if (i->getSource() && i->getSource()->IsAlive() && i->getSource()->isTargetableForAttack())
                             {
                                 int32 dmg;
                                 float m_fDist = me->GetExactDist(i->getSource()->GetPositionX(), i->getSource()->GetPositionY(), i->getSource()->GetPositionZ());
@@ -171,8 +171,8 @@ public:
                     DoCast(me, SPELL_PULSING_SHOCKWAVE_AURA, true);
 
                     DoCast(me, SPELL_PULSING_SHOCKWAVE_N); // need core support
-					me->AI()->AttackStart(me->getVictim());
-					me->GetMotionMaster()->MoveChase(me->getVictim());
+					me->AI()->AttackStart(me->GetVictim());
+					me->GetMotionMaster()->MoveChase(me->GetVictim());
                     m_bIsAura = true;
                     m_uiResumePulsingShockwave_Timer = 0;
                 }

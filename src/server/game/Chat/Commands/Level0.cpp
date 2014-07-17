@@ -82,14 +82,14 @@ bool ChatHandler::HandleUnstuckCommand(const char* /*args*/)
 {
     Player *chr = m_session->GetPlayer();
 
-    if (chr->isInFlight())
+    if (chr->IsInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
         return false;
     }
 
-    if (chr->isInCombat())
+    if (chr->IsInCombat())
     {
         SendSysMessage(LANG_YOU_IN_COMBAT);
         SetSentErrorMessage(true);
@@ -204,7 +204,7 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
         return false;
     }
 
-    if (m_session->GetPlayer()->isInFlight())
+    if (m_session->GetPlayer()->IsInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
@@ -344,7 +344,7 @@ bool ChatHandler::HandleSpectatorJoinCommand(const char* args)
         return true;
     }
 
-    if (pl->isInCombat())
+    if (pl->IsInCombat())
     {
         PSendSysMessage("You are in combat!");
         return true;
@@ -359,7 +359,7 @@ bool ChatHandler::HandleSpectatorJoinCommand(const char* args)
         PSendSysMessage("You are in group!");
         return true;
     }
-    if (!pl->isAlive())
+    if (!pl->IsAlive())
     {
         PSendSysMessage("You are dead!");
         return true;

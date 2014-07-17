@@ -86,7 +86,7 @@ void SummonList::DespawnAll()
         else
         {
             erase(begin());
-            if (summon->isSummon())
+            if (summon->IsSummon())
             {
                 summon->DestroyForNearbyPlayers();
                 CAST_SUM(summon)->UnSummon();
@@ -125,9 +125,9 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
     if (me->isAttackReady())
     {
         //If we are within range melee the target
-        if (me->IsWithinMeleeRange(me->getVictim()))
+        if (me->IsWithinMeleeRange(me->GetVictim()))
         {
-            me->AttackerStateUpdate(me->getVictim());
+            me->AttackerStateUpdate(me->GetVictim());
             me->resetAttackTimer();
         }
     }
@@ -149,7 +149,7 @@ void ScriptedAI::DoStartNoMovement(Unit* pVictim)
 
 void ScriptedAI::DoStopAttack()
 {
-    if (me->getVictim())
+    if (me->GetVictim())
         me->AttackStop();
 }
 
@@ -411,7 +411,7 @@ void ScriptedAI::DoTeleportAll(float fX, float fY, float fZ, float fO)
     Map::PlayerList const &PlayerList = map->GetPlayers();
     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         if (Player* i_pl = i->getSource())
-            if (i_pl->isAlive())
+            if (i_pl->IsAlive())
                 i_pl->TeleportTo(me->GetMapId(), fX, fY, fZ, fO, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
@@ -506,7 +506,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
         return false;
     }
 
-    if (me->IsInEvadeMode() || !me->getVictim())
+    if (me->IsInEvadeMode() || !me->GetVictim())
         return false;
 
     float fX = me->GetPositionX();
@@ -559,7 +559,7 @@ BossAI::BossAI(Creature *c, uint32 id) : ScriptedAI(c)
 
 void BossAI::_Reset()
 {
-    if (!me->isAlive())
+    if (!me->IsAlive())
         return;
 
     events.Reset();
@@ -649,7 +649,7 @@ bool BossAI::CheckBoundary(Unit *who)
 void BossAI::JustSummoned(Creature *summon)
 {
     summons.Summon(summon);
-    if (me->isInCombat())
+    if (me->IsInCombat())
         DoZoneInCombat(summon);
 }
 
@@ -685,7 +685,7 @@ Creature* GetRandomCreatureWithEntryInRange(WorldObject* pSource, uint32 uiEntry
     for (std::list<Creature*>::iterator itr = crList.begin(); itr != crList.end(); )
     {
         // XOR results 0 when both of conditions are true or both are false, that's what we need
-        if (!(bAlive ^ (*itr)->isAlive()))
+        if (!(bAlive ^ (*itr)->IsAlive()))
             ++itr;
         else
             itr = crList.erase(itr);

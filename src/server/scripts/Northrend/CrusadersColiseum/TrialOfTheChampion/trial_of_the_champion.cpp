@@ -387,7 +387,7 @@ public:
                     if (pPlayer->isGameMaster())
                         continue;
 
-                    if (pPlayer->isAlive())
+                    if (pPlayer->IsAlive())
                     {
                         pTemp->SetHomePosition(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
                         pTemp->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);

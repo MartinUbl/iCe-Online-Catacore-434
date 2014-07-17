@@ -299,7 +299,7 @@ public:
         {
            if (Creature* npc = instance->GetCreature(GetData64(entry)))
            {
-               if (npc->isAlive())
+               if (npc->IsAlive())
                {
                     npc->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     npc->GetMotionMaster()->MovePoint(1,x,y,z);
@@ -326,7 +326,7 @@ public:
             {
                 if (Creature* add = instance->GetCreature((*itr)))
                 {
-                    if (add->isAlive())
+                    if (add->IsAlive())
                         return false;
                 }
             }
@@ -334,7 +334,7 @@ public:
             {
                 if (Creature* add = instance->GetCreature(((*itr))))
                 {
-                    if (add->isAlive())
+                    if (add->IsAlive())
                         return false;
                 }
             }

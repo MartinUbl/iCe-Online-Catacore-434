@@ -217,7 +217,7 @@ public:
             // Flame Leviathan's Tower Event triggers
            Creature* pFlameLeviathan = instance->GetCreature(uiLeviathanGUID);
 
-            if (pFlameLeviathan && pFlameLeviathan->isAlive()) //No leviathan, no event triggering ;)
+            if (pFlameLeviathan && pFlameLeviathan->IsAlive()) //No leviathan, no event triggering ;)
                 switch(uiEventId)
                 {
                     case EVENT_TOWER_OF_STORM_DESTROYED:

@@ -140,7 +140,7 @@ public:
         void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
         {
             if (pSpell->Id == SPELL_THRASHING_CHARGE) {
-                me->CastSpell(me->getVictim(), SPELL_THRASHING_CHARGE_2, false);
+                me->CastSpell(me->GetVictim(), SPELL_THRASHING_CHARGE_2, false);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             }
         }
@@ -203,7 +203,7 @@ public:
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        DoCast(me->getVictim(), SPELL_DAMPENING_WAVE);
+                        DoCast(me->GetVictim(), SPELL_DAMPENING_WAVE);
                         dampening_waveTimer = 12000;
                     }
                 } else dampening_waveTimer -= diff;
@@ -278,14 +278,14 @@ public:
                 {
                     Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (!pTarget)
-                        pTarget = me->getVictim();
+                        pTarget = me->GetVictim();
 
                     Creature* pSummon = me->SummonCreature(NPC_ROCK_BORE, pTarget->GetPositionX() + 10.0f, pTarget->GetPositionY(), pTarget->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                     pSummon->AI()->AttackStart(pTarget);
                     
                     Unit* pTarget2 = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (!pTarget2)
-                        pTarget2 = me->getVictim();
+                        pTarget2 = me->GetVictim();
 
                     Creature* pSummon2 = me->SummonCreature(NPC_ROCK_BORE, pTarget2->GetPositionX() + 10.0f, pTarget2->GetPositionY(), pTarget2->GetPositionZ(),0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                     pSummon2->AI()->AttackStart(pTarget2);
@@ -296,7 +296,7 @@ public:
                 {
                     Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                     if (!pTarget)
-                        pTarget = me->getVictim();
+                        pTarget = me->GetVictim();
                     if (pTarget) {
                         me->CastSpell(pTarget, SPELL_THRASHING_CHARGE, false);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);

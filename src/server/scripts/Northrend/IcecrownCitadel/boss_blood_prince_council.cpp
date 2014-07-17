@@ -206,15 +206,15 @@ class boss_blood_council_controller : public CreatureScript
                 DoCast(me, SPELL_INVOCATION_OF_BLOOD_VALANAR);
 
                 if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
-                    if (!keleseth->isInCombat())
+                    if (!keleseth->IsInCombat())
                         DoZoneInCombat(keleseth);
 
                 if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
-                    if (!taldaram->isInCombat())
+                    if (!taldaram->IsInCombat())
                         DoZoneInCombat(taldaram);
 
                 if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
-                    if (!valanar->isInCombat())
+                    if (!valanar->IsInCombat())
                         DoZoneInCombat(valanar);
 
                 events.ScheduleEvent(EVENT_INVOCATION_OF_BLOOD, 30000);
@@ -244,7 +244,7 @@ class boss_blood_council_controller : public CreatureScript
                             if (player->isGameMaster())
                                 continue;
 
-                            if (player->isAlive())
+                            if (player->IsAlive())
                                 player->AddAura(SPELL_SHADOW_PRISON_DUMMY, player);
                         }
                     }
@@ -390,7 +390,7 @@ class boss_prince_keleseth_icc : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!controller->isInCombat())
+                    if (!controller->IsInCombat())
                         DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
@@ -575,7 +575,7 @@ class boss_prince_taldaram_icc : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!controller->isInCombat())
+                    if (!controller->IsInCombat())
                         DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
@@ -774,7 +774,7 @@ class boss_prince_valanar_icc : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!controller->isInCombat())
+                    if (!controller->IsInCombat())
                         DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
@@ -823,7 +823,7 @@ class boss_prince_valanar_icc : public CreatureScript
                         break;
                 }
                 summons.Summon(summon);
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     DoZoneInCombat(summon);
             }
 
@@ -1231,19 +1231,19 @@ class npc_dark_nucleus : public CreatureScript
                     return;
 
                 if (!lockedTarget)
-                    if (me->getVictim() == attacker)
+                    if (me->GetVictim() == attacker)
                         lockedTarget = true;
             }
 
             void UpdateAI(const uint32 diff)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     return;
 
                 if (targetAuraCheck <= diff)
                 {
                     targetAuraCheck = 1000;
-                    if (Unit* victim = me->getVictim())
+                    if (Unit* victim = me->GetVictim())
                         if (me->GetDistance(victim) < 15.0f &&
                             !victim->HasAura(SPELL_SHADOW_RESONANCE_RESIST, me->GetGUID()))
                         {
@@ -1258,9 +1258,9 @@ class npc_dark_nucleus : public CreatureScript
                 {
                     if (Unit* victim = me->SelectVictim())
                     {
-                        if (me->getVictim() && me->getVictim() != victim)
+                        if (me->GetVictim() && me->GetVictim() != victim)
                         {
-                            me->getVictim()->RemoveAurasDueToSpell(SPELL_SHADOW_RESONANCE_RESIST, me->GetGUID());
+                            me->GetVictim()->RemoveAurasDueToSpell(SPELL_SHADOW_RESONANCE_RESIST, me->GetGUID());
                             lockedTarget = true;
                         }
 

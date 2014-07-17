@@ -4114,7 +4114,7 @@ bool ChatHandler::HandleDieCommand(const char* /*args*/)
             return false;
     }
 
-    if (target->isAlive())
+    if (target->IsAlive())
     {
         if (sWorld->getBoolConfig(CONFIG_DIE_COMMAND_MODE))
             m_session->GetPlayer()->Kill(target);
@@ -4139,7 +4139,7 @@ bool ChatHandler::HandleDamageCommand(const char * args)
         return false;
     }
 
-    if (!target->isAlive())
+    if (!target->IsAlive())
         return true;
 
     char* damageStr = strtok((char*)args, " ");
@@ -5114,7 +5114,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
     {
         // Try reset talents as Hunter Pet
         Creature* creature = getSelectedCreature();
-        if (!*args && creature && creature->isPet())
+        if (!*args && creature && creature->IsPet())
         {
             Unit *owner = creature->GetOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet *)creature)->IsPermanentPetFor(owner->ToPlayer()))
@@ -6190,7 +6190,7 @@ bool ChatHandler::HandleRespawnCommand(const char* /*args*/)
     Unit* target = getSelectedUnit();
     if (pl->GetSelection() && target)
     {
-        if (target->GetTypeId() != TYPEID_UNIT || target->isPet())
+        if (target->GetTypeId() != TYPEID_UNIT || target->IsPet())
         {
             SendSysMessage(LANG_SELECT_CREATURE);
             SetSentErrorMessage(true);
@@ -6702,7 +6702,7 @@ bool ChatHandler::HandleCastTargetCommand(const char *args)
         return false;
     }
 
-    if (!caster->getVictim())
+    if (!caster->GetVictim())
     {
         SendSysMessage(LANG_SELECTED_TARGET_NOT_HAVE_VICTIM);
         SetSentErrorMessage(true);
@@ -6730,7 +6730,7 @@ bool ChatHandler::HandleCastTargetCommand(const char *args)
 
     caster->SetFacingToObject(m_session->GetPlayer());
 
-    caster->CastSpell(caster->getVictim(),spell,triggered);
+    caster->CastSpell(caster->GetVictim(),spell,triggered);
 
     return true;
 }
@@ -7398,7 +7398,7 @@ bool ChatHandler::HandleFreezeCommand(const char *args)
             {
                 pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
                 // not let dismiss dead pet
-                if (pet && pet->isAlive())
+                if (pet && pet->IsAlive())
                     player->RemovePet(pet,PET_SLOT_OTHER_PET);
             }
         }
@@ -7603,7 +7603,7 @@ bool ChatHandler::HandleBindSightCommand(const char * /*args*/)
 
 bool ChatHandler::HandleUnbindSightCommand(const char * /*args*/)
 {
-    if (m_session->GetPlayer()->isPossessing())
+    if (m_session->GetPlayer()->IsPossessing())
         return false;
 
     m_session->GetPlayer()->StopCastingBindSight();

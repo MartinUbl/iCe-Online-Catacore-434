@@ -168,7 +168,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_FORCEFUL_SMASH:
-                        DoCast(me->getVictim(), SPELL_FORCEFUL_SMASH);
+                        DoCast(me->GetVictim(), SPELL_FORCEFUL_SMASH);
                         events.ScheduleEvent(EVENT_FORCEFUL_SMASH, 10000);
                         return;
                     case EVENT_OVERLORDS_BRAND:
@@ -264,7 +264,7 @@ public:
                         return;
                     case EVENT_ICY_BLAST_2:
                         if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget->getVictim(), SPELL_ICY_BLAST_2);
+                            DoCast(pTarget->GetVictim(), SPELL_ICY_BLAST_2);
                         events.ScheduleEvent(EVENT_ICY_BLAST, 30000);
                         return;
                 }
@@ -291,7 +291,7 @@ class player_overlord_brandAI : public PlayerAI
 
         void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
         {
-            me->CastCustomSpell(SPELL_OVERLORD_BRAND_DAMAGE, SPELLVALUE_BASE_POINT0, damage, tyrannus->getVictim(), true, NULL, NULL, tyrannus->GetGUID());
+            me->CastCustomSpell(SPELL_OVERLORD_BRAND_DAMAGE, SPELLVALUE_BASE_POINT0, damage, tyrannus->GetVictim(), true, NULL, NULL, tyrannus->GetGUID());
         }
 
         void HealDone(Unit* /*target*/, uint32& addHealth)

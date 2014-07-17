@@ -54,11 +54,11 @@ void CreatureAI::DoZoneInCombat(Creature* creature,float maxRange)
         return;
     }
 
-    if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
+    if (!creature->HasReactState(REACT_PASSIVE) && !creature->GetVictim())
     {
         if (Unit *target = creature->SelectNearestTarget(maxRange))
             creature->AI()->AttackStart(target);
-        else if (creature->isSummon())
+        else if (creature->IsSummon())
         {
             if (Unit *summoner = creature->ToTempSummon()->GetSummoner())
             {
@@ -71,7 +71,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature,float maxRange)
         }
     }
 
-    if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
+    if (!creature->HasReactState(REACT_PASSIVE) && !creature->GetVictim())
     {
         sLog->outError("DoZoneInCombat called for creature that has empty threat list (creature entry = %u)", creature->GetEntry());
         return;
@@ -89,7 +89,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature,float maxRange)
             if (pPlayer->isGameMaster())
                 continue;
 
-            if (pPlayer->isAlive())
+            if (pPlayer->IsAlive())
             {
                 creature->SetInCombatWith(pPlayer);
                 pPlayer->SetInCombatWith(creature);
@@ -120,7 +120,7 @@ void CreatureAI::MoveInLineOfSight_Safe(Unit *who)
 
 void CreatureAI::MoveInLineOfSight(Unit *who)
 {
-    if (me->getVictim())
+    if (me->GetVictim())
         return;
 
     if (me->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET) // non-combat pets should just stand there and look good;)
@@ -128,10 +128,10 @@ void CreatureAI::MoveInLineOfSight(Unit *who)
 
     if (me->canStartAttack(who, false))
         AttackStart(who);
-    //else if (who->getVictim() && me->IsFriendlyTo(who)
+    //else if (who->GetVictim() && me->IsFriendlyTo(who)
     //    && me->IsWithinDistInMap(who, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
-    //    && me->canStartAttack(who->getVictim(), true)) // TODO: if we use true, it will not attack it when it arrives
-    //    me->GetMotionMaster()->MoveChase(who->getVictim());
+    //    && me->canStartAttack(who->GetVictim(), true)) // TODO: if we use true, it will not attack it when it arrives
+    //    me->GetMotionMaster()->MoveChase(who->GetVictim());
 }
 
 void CreatureAI::EnterEvadeMode()
@@ -160,6 +160,6 @@ void CreatureAI::EnterEvadeMode()
 
 /*void CreatureAI::AttackedBy(Unit* attacker)
 {
-    if (!me->getVictim())
+    if (!me->GetVictim())
         AttackStart(attacker);
 }*/

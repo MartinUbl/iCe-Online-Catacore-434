@@ -146,7 +146,7 @@ public:
 
             if (StrikeTimer <= diff)
             {
-                me->CastSpell(me->getVictim(), SPELL_WOUNDING_STRIKE, false);
+                me->CastSpell(me->GetVictim(), SPELL_WOUNDING_STRIKE, false);
                 StrikeTimer = 15000;
             } else StrikeTimer -= diff;
 

@@ -99,9 +99,9 @@ public:
 
 		void MoveInLineOfSight(Unit *who)
 		{
-			if (!me->getVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
+			if (!me->GetVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
 			{
-				if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+				if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
 					return;
 
 				if (!Intro && me->IsWithinDistInMap(who, me->GetAttackDistance(who)))
@@ -161,7 +161,7 @@ public:
 		void SpawnDummyAggro(uint32 direction)
 		{
 			pDummyAggro = NULL;
-			pAggro = me->getVictim();
+			pAggro = me->GetVictim();
 	     //      DoStopAttack();
 			switch(direction)
 			{
@@ -219,7 +219,7 @@ public:
 
 		void UpdateAI(const uint32 diff)
 		{
-			if (!UpdateVictim() || me->getVictim()->GetEntry() == 28183)
+			if (!UpdateVictim() || me->GetVictim()->GetEntry() == 28183)
 			{
 				if (Intro)
 				{
@@ -444,9 +444,9 @@ public:
 
 		void MoveInLineOfSight(Unit *who)
 		{
-			if (!me->getVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
+			if (!me->GetVictim() && who->isTargetableForAttack() && me->IsHostileTo(who))
 			{
-				if (!me->canFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+				if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
 					return;
 
 				float attackRadius = me->GetAttackDistance(who);

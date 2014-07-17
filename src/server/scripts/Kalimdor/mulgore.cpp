@@ -54,7 +54,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (!pPlayer->GetQuestRewardStatus(770))
@@ -119,7 +119,7 @@ public:
 
         void SpellHit(Unit* pCaster, SpellEntry const* pSpell)
         {
-            if (!me->getVictim() && !bEvent && pSpell->Id == SPELL_LUNCH)
+            if (!me->GetVictim() && !bEvent && pSpell->Id == SPELL_LUNCH)
             {
                 if (pCaster->GetTypeId() == TYPEID_PLAYER)
                     uiPlayerGUID = pCaster->GetGUID();

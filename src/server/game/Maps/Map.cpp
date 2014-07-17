@@ -2234,7 +2234,7 @@ void Map::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_UNIT:
-                if (!obj->ToCreature()->isPet())
+                if (!obj->ToCreature()->IsPet())
                     SwitchGridContainers(obj->ToCreature(), on);
                 break;
             default:
@@ -2342,7 +2342,7 @@ void Map::AddToActive(Creature* c)
     AddToActiveHelper(c);
 
     // also not allow unloading spawn grid to prevent creating creature clone at load
-    if (!c->isPet() && c->GetDBTableGUIDLow())
+    if (!c->IsPet() && c->GetDBTableGUIDLow())
     {
         float x,y,z;
         c->GetRespawnCoord(x,y,z);
@@ -2363,7 +2363,7 @@ void Map::RemoveFromActive(Creature* c)
     RemoveFromActiveHelper(c);
 
     // also allow unloading spawn grid
-    if (!c->isPet() && c->GetDBTableGUIDLow())
+    if (!c->IsPet() && c->GetDBTableGUIDLow())
     {
         float x,y,z;
         c->GetRespawnCoord(x,y,z);
@@ -2646,7 +2646,7 @@ void InstanceMap::Update(const uint32& t_diff)
             HostileRefManager* threatList = NULL;
             for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
             {
-                if (itr->getSource() && itr->getSource()->isInCombat())
+                if (itr->getSource() && itr->getSource()->IsInCombat())
                 {
                     combatPresent = true;
                     threatList = &(itr->getSource()->getHostileRefManager());
@@ -2660,7 +2660,7 @@ void InstanceMap::Update(const uint32& t_diff)
                 for (Map::PlayerList::const_iterator itr = plList.begin(); itr != plList.end(); ++itr)
                 {
                     // and somebody doesnt have combat
-                    if (itr->getSource() && !itr->getSource()->isInCombat() && !itr->getSource()->isGameMaster())
+                    if (itr->getSource() && !itr->getSource()->IsInCombat() && !itr->getSource()->isGameMaster())
                     {
                         // we will make (at least) one for him :)
                         for (HostileRefManager::iterator iter = threatList->begin(); iter != threatList->end(); ++iter)

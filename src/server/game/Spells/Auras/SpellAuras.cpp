@@ -564,7 +564,7 @@ void Aura::UpdateTargetMap(Unit * caster, bool apply)
             // persistent area aura does not hit flying targets
             if (GetType() == DYNOBJ_AURA_TYPE)
             {
-                if (itr->first->isInFlight())
+                if (itr->first->IsInFlight())
                     addUnit = false;
             }
             // unit auras can not stack with each other
@@ -1953,7 +1953,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             if (caster)
                             {
                                 caster->CastSpell(caster, 96968, true); // AoE
-                                if (caster->isAlive())
+                                if (caster->IsAlive())
                                     caster->setDeathState(JUST_DIED); // must not despawn due to delayed AoE damage/animation
                             }
                         }
@@ -2736,7 +2736,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 // Improved Health Funnel
                 if (apply)
                 {
-                    if (target && target->isPet())
+                    if (target && target->IsPet())
                     {
                         if (caster->HasAura(18703))
                             target->CastSpell(target, 60955, true);

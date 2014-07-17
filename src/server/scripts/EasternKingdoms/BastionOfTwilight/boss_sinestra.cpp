@@ -296,7 +296,7 @@ public:
                 if ( Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 {
                     Player * p = unit->ToPlayer();
-                    if (p && p->isAlive())
+                    if (p && p->IsAlive())
                     {
                         if (!p->HasTankSpec() && !p->HasAura(5487)) // Bear form
                         {
@@ -535,7 +535,7 @@ public:
             // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
             if (CheckTimer <= Diff)
             {
-                bool inMeleeRange = ( me->IsWithinMeleeRange(me->getVictim()) ) ? true : false;
+                bool inMeleeRange = ( me->IsWithinMeleeRange(me->GetVictim()) ) ? true : false;
 
                 if (inMeleeRange == false)
                     if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true) )
@@ -771,7 +771,7 @@ public:
             // CheckTimer - If tank is not in melee range, cast Twilight blast on random player
             if (CheckTimer <= Diff)
             {
-                bool inMeleeRange = ( me->IsWithinMeleeRange(me->getVictim()) ) ? true : false;
+                bool inMeleeRange = ( me->IsWithinMeleeRange(me->GetVictim()) ) ? true : false;
 
                 if (inMeleeRange == false)
                     if ( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true) )
@@ -849,7 +849,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
+                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->IsAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if (!pPlayer->HasTankSpec() && !pPlayer->HasHealingSpec() && !pPlayer->HasAura(5487)) // Exclude healers and tanks
                             {
@@ -878,8 +878,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim())
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            if (me->GetVictim())
+                me->GetVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
 
             if (Fixate_timer <= diff)
             {
@@ -897,8 +897,8 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->GetAura(35371,me->getVictim()->GetGUID()) )
-                    me->getVictim()->CastSpell(me,35371,true); // White beam
+                if ( ! me->GetAura(35371,me->GetVictim()->GetGUID()) )
+                    me->GetVictim()->CastSpell(me,35371,true); // White beam
                 Beam_timer = 100;
             }
             else Beam_timer -= diff;
@@ -925,7 +925,7 @@ public:
 
             if(!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE)) 
             {
-                Unit * victim = me->getVictim();
+                Unit * victim = me->GetVictim();
                 if(victim)
                     me->GetMotionMaster()->MovePoint(0,victim->GetPositionX(),victim->GetPositionY(),victim->GetPositionZ());
             }
@@ -985,7 +985,7 @@ public:
         bool IsOrb1Victim(Player * p)
         {
             if (Creature * orb1 = me->FindNearestCreature(CREATURE_SHADOW_ORB1,200.0f,true) )
-                if( orb1->getVictim() && orb1->getVictim() == p)
+                if( orb1->GetVictim() && orb1->GetVictim() == p)
                     return true;
             return false;
         }
@@ -1000,7 +1000,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     Player* pPlayer = itr->getSource();
-                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->isAlive())
+                    if (pPlayer && !pPlayer->isGameMaster() && pPlayer->IsAlive())
                         if (pPlayer->GetDistance(me) < 100.0f)
                             if (!pPlayer->HasTankSpec() && IsOrb1Victim(pPlayer) == false &&  !pPlayer->HasAura(5487)) // Exclude tanks and orb1 victim
                             {
@@ -1029,8 +1029,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim())
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            if (me->GetVictim())
+                me->GetVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
 
             if (Fixate_timer <= diff)
             {
@@ -1056,8 +1056,8 @@ public:
 
             if (Beam_timer <= diff)
             {
-                if ( ! me->getVictim()->GetAura(35371,me->GetGUID()) )
-                    me->CastSpell(me->getVictim(),35371,true); // White beam
+                if ( ! me->GetVictim()->GetAura(35371,me->GetGUID()) )
+                    me->CastSpell(me->GetVictim(),35371,true); // White beam
 
                 Beam_timer = 100;
             }
@@ -1065,7 +1065,7 @@ public:
 
             if(!me->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE)) 
             {
-                Unit * victim = me->getVictim();
+                Unit * victim = me->GetVictim();
                 if(victim)
                     me->GetMotionMaster()->MovePoint(0,victim->GetPositionX(),victim->GetPositionY(),victim->GetPositionZ());
             }
@@ -1175,8 +1175,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(me->getVictim())
-                me->getVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            if(me->GetVictim())
+                me->GetVictim()->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
 
             DoMeleeAttackIfReady();
         }
@@ -1223,7 +1223,7 @@ public:
         {
             if (Breath_timer <= diff) // Kazdych +- 10 sekund cast frontal cone shadow dmg
             {
-                me->CastSpell(me->getVictim(),SPELL_TWILIGHT_BREATH,false);
+                me->CastSpell(me->GetVictim(),SPELL_TWILIGHT_BREATH,false);
                 Breath_timer = 10000;
             }
             else Breath_timer -= diff;

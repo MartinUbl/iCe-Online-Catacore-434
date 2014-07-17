@@ -134,7 +134,7 @@ public:
 
             if (DEMORALIZINGSHOUT_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_DEMORALIZINGSHOUT);
+                DoCast(me->GetVictim(), SPELL_DEMORALIZINGSHOUT);
                 DEMORALIZINGSHOUT_Timer = 70000;
             } else DEMORALIZINGSHOUT_Timer -= diff;
         }
@@ -221,7 +221,7 @@ public:
         {
             FollowerAI::MoveInLineOfSight(pWho);
 
-            if (!me->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_SPRAGGLE)
+            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_SPRAGGLE)
             {
                 if (me->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
                 {
@@ -277,7 +277,7 @@ public:
                     if (m_uiEndEventTimer <= uiDiff)
                     {
                         Unit *pSpraggle = Unit::GetUnit(*me, SpraggleGUID);
-                        if (!pSpraggle || !pSpraggle->isAlive())
+                        if (!pSpraggle || !pSpraggle->IsAlive())
                         {
                             SetFollowComplete();
                             return;

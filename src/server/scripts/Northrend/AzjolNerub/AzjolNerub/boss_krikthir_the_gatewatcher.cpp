@@ -188,8 +188,8 @@ public:
             std::list<Player*>::const_iterator j;
 
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                if ((me->IsWithinLOSInMap(i->getSource()) || !checkLoS) && me->getVictim() != i->getSource() &&
-                    me->IsWithinDistInMap(i->getSource(), range) && i->getSource()->isAlive())
+                if ((me->IsWithinLOSInMap(i->getSource()) || !checkLoS) && me->GetVictim() != i->getSource() &&
+                    me->IsWithinDistInMap(i->getSource(), range) && i->getSource()->IsAlive())
                     temp.push_back(i->getSource());
 
             if (temp.size())
@@ -241,7 +241,7 @@ public:
 
             if (uiMindFlayTimer <= diff)
             {
-                me->CastSpell(me->getVictim(), SPELL_MIND_FLAY, true);
+                me->CastSpell(me->GetVictim(), SPELL_MIND_FLAY, true);
                 uiMindFlayTimer = 10*IN_MILLISECONDS;
             } else uiMindFlayTimer -= diff;
 
@@ -273,15 +273,15 @@ public:
             pInstance->SetData(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT, DONE);
             //Achievement: Watch him die
             Creature *pAdd = Unit::GetCreature(*me, pInstance->GetData64(DATA_WATCHER_GASHRA));
-            if (!pAdd || !pAdd->isAlive())
+            if (!pAdd || !pAdd->IsAlive())
                 return;
 
             pAdd = Unit::GetCreature(*me, pInstance->GetData64(DATA_WATCHER_SILTHIK));
-            if (!pAdd || !pAdd->isAlive())
+            if (!pAdd || !pAdd->IsAlive())
                 return;
 
             pAdd = Unit::GetCreature(*me, pInstance->GetData64(DATA_WATCHER_NARJIL));
-            if (!pAdd || !pAdd->isAlive())
+            if (!pAdd || !pAdd->IsAlive())
                 return;
 
             pInstance->DoCompleteAchievement(ACHIEV_WATH_HIM_DIE);
@@ -319,7 +319,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             //The spell is not working propperly
-            DoCast(me->getVictim(),SPELL_ACID_SPLASH, true);
+            DoCast(me->GetVictim(),SPELL_ACID_SPLASH, true);
         }
     };
 
@@ -365,7 +365,7 @@ public:
 
             if (uiBackstabTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BACKSTAB);
+                DoCast(me->GetVictim(), SPELL_BACKSTAB);
                 uiBackstabTimer = 12*IN_MILLISECONDS;
             } else uiBackstabTimer -= diff;
 
@@ -412,7 +412,7 @@ public:
 
             if (uiShadowNovaTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHADOW_NOVA, true);
+                DoCast(me->GetVictim(), SPELL_SHADOW_NOVA, true);
                 uiShadowNovaTimer = 17*IN_MILLISECONDS;
             } else uiShadowNovaTimer -= diff;
 
@@ -451,13 +451,13 @@ public:
 
             if (uiStrikeTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_STRIKE, true);
+                DoCast(me->GetVictim(), SPELL_STRIKE, true);
                 uiStrikeTimer = 15*IN_MILLISECONDS;
             } else uiStrikeTimer -= diff;
 
             if (uiCleaveTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE, true);
+                DoCast(me->GetVictim(), SPELL_CLEAVE, true);
                 uiCleaveTimer = 17*IN_MILLISECONDS;
             } else uiCleaveTimer -= diff;
 
@@ -518,7 +518,7 @@ public:
 
             if (uiInfectedBiteTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_INFECTED_BITE, true);
+                DoCast(me->GetVictim(), SPELL_INFECTED_BITE, true);
                 uiInfectedBiteTimer = 15*IN_MILLISECONDS;
             } else uiInfectedBiteTimer -= diff;
 
@@ -580,13 +580,13 @@ public:
 
             if (uiInfectedBiteTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_INFECTED_BITE, true);
+                DoCast(me->GetVictim(), SPELL_INFECTED_BITE, true);
                 uiInfectedBiteTimer = 11*IN_MILLISECONDS;
             } else uiInfectedBiteTimer -= diff;
 
             if (uiBindingWebsTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_BLINDING_WEBS, true);
+                DoCast(me->GetVictim(), SPELL_BLINDING_WEBS, true);
                 uiBindingWebsTimer = 17*IN_MILLISECONDS;
             } else uiBindingWebsTimer -= diff;
 
@@ -649,13 +649,13 @@ public:
 
             if (uiInfectedBiteTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_INFECTED_BITE, true);
+                DoCast(me->GetVictim(), SPELL_INFECTED_BITE, true);
                 uiInfectedBiteTimer = 15*IN_MILLISECONDS;
             } else uiInfectedBiteTimer -= diff;
 
             if (uiPoisonSprayTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_POSION_SPRAY, true);
+                DoCast(me->GetVictim(), SPELL_POSION_SPRAY, true);
                 uiPoisonSprayTimer = 17*IN_MILLISECONDS;
             } else uiPoisonSprayTimer -= diff;
 

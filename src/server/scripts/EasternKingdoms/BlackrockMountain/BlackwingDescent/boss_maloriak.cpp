@@ -631,13 +631,13 @@ public:
             {
             case 0:
                 {
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     break;
                 }
             case 1:
                 {
                     DoScriptText(TEXT_RED_VIAL, me);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                     ChangeCauldronColor(0);
                 }
@@ -645,7 +645,7 @@ public:
             case 2:
                 {
                     DoScriptText(TEXT_BLUE_VIAL,me);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
 
                     ChangeCauldronColor(1);
                 }
@@ -663,7 +663,7 @@ public:
                     ChangeCauldronColor(3);
                     uiEngulfingDarkness = 6000;
                     uiVilleSwill = 8000;
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     if(pLord)
                     {
                         pLord->MonsterYell("Your mixtures are weak, Maloriak! They need a bit more... kick!",0,0);
@@ -679,8 +679,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(me->getVictim() && !me->IsWithinLOSInMap(me->getVictim()))
-                me->Kill(me->getVictim());
+            if(me->GetVictim() && !me->IsWithinLOSInMap(me->GetVictim()))
+                me->Kill(me->GetVictim());
 
             if (!IntroDone)
             {
@@ -701,7 +701,7 @@ public:
             {
                 Jump = false;
                 me->GetMotionMaster()->MoveJump(-102.292519f,-439.359955f,73.534279f,20.0f,20.0f);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
                 if(pCauldronTrigger)
                     pCauldronTrigger->CastSpell(pCauldronTrigger, SPELL_DEBILITATING_SLIME_VISUAL, false);
             }
@@ -1008,7 +1008,7 @@ public:
                             Poradi = 4;
                             CastTimer = 3000;
                             Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
-                            if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
+                            if (target && target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
                             break;
                         }
@@ -1045,7 +1045,7 @@ public:
                             can_interrupt = false;
                             CastTimer = 20000;
                             Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
-                            if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
+                            if (target && target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                                 me->CastSpell(target,SPELL_SCORCHING_BLAST10N,false);
                             break;
                         }
@@ -1091,7 +1091,7 @@ public:
                             CastTimer = 5000;
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             {
-                                if (pTarget->isAlive())
+                                if (pTarget->IsAlive())
                                 {
                                     if (Creature *pFlashFreeze = me->SummonCreature(NPC_FLASH_FREEZE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
@@ -1126,7 +1126,7 @@ public:
                             CastTimer = 2000;
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             {
-                                if (pTarget->isAlive())
+                                if (pTarget->IsAlive())
                                 {
                                     if (Creature *pFlashFreeze = me->SummonCreature(NPC_FLASH_FREEZE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
@@ -1189,7 +1189,7 @@ public:
                 if (uiMagmaJets <= diff)
                 {
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
-                    if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
+                    if (target && target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
                         me->SetFacingTo(target->GetOrientation());
                         //DoCast(SPELL_MAGMA_JETS);
@@ -1209,7 +1209,7 @@ public:
                 {
                     uiEngulfingDarkness = 12000;
                     Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0);
-                    if (target && target->isAlive() && target->GetTypeId() == TYPEID_PLAYER)
+                    if (target && target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     {
                         me->StopMoving();
                         me->CastSpell(target, SPELL_ENFULGING_DARKNESS, false);
@@ -1270,7 +1270,7 @@ public:
             for (std::vector<uint64>::const_iterator itr = PrimeSubject.begin(); itr != PrimeSubject.end(); ++itr) {
                 Prime = me->GetMap()->GetCreature((*itr));
                 if (Prime) {
-                    if (Prime->isAlive())
+                    if (Prime->IsAlive())
                         Prime->ToCreature()->ForcedDespawn();
                 }
             }
@@ -1410,7 +1410,7 @@ public:
             me->CastSpell(me, SPELL_GROWTH_CATACLYST_10M, true);
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->GetMotionMaster()->Clear(true);
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
         }
 
         void UpdateAI(uint32 const diff)

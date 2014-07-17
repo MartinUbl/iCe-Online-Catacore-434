@@ -66,21 +66,21 @@ public:
             //Impending doom timer
             if (ImpendingDoom_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_IMPENDINGDOOM);
+                DoCast(me->GetVictim(), SPELL_IMPENDINGDOOM);
                 ImpendingDoom_Timer = 20000;
             } else ImpendingDoom_Timer -= diff;
 
             //Lucifron's curse timer
             if (LucifronCurse_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_LUCIFRONCURSE);
+                DoCast(me->GetVictim(), SPELL_LUCIFRONCURSE);
                 LucifronCurse_Timer = 15000;
             } else LucifronCurse_Timer -= diff;
 
             //Shadowshock
             if (ShadowShock_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_SHADOWSHOCK);
+                DoCast(me->GetVictim(), SPELL_SHADOWSHOCK);
                 ShadowShock_Timer = 6000;
             } else ShadowShock_Timer -= diff;
 

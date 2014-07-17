@@ -904,7 +904,7 @@ public:
                     me->GetMotionMaster()->MoveCharge(newx, newy, z, 5.5f);
             }
 
-            if (!me->isInCombat() && SlowedDown)
+            if (!me->IsInCombat() && SlowedDown)
             {
                 SlowedDown = false;
                 me->SetSpeed(MOVE_RUN, 2.0f, true);

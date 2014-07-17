@@ -73,7 +73,7 @@ public:
 
         void SpellHit(Unit *caster, const SpellEntry *spell)
         {
-            if (spell->Id == SPELL_PERSUASIVE_STRIKE && caster->GetTypeId() == TYPEID_PLAYER && me->isAlive() && !uiSpeech_counter)
+            if (spell->Id == SPELL_PERSUASIVE_STRIKE && caster->GetTypeId() == TYPEID_PLAYER && me->IsAlive() && !uiSpeech_counter)
             {
                 if (CAST_PLR(caster)->GetQuestStatus(12720) == QUEST_STATUS_INCOMPLETE)
                 {
@@ -308,7 +308,7 @@ public:
                         {
                             Creature* pTemp = Unit::GetCreature(*me, m_uiValrothGUID);
 
-                            if (!pTemp || !pTemp->isAlive())
+                            if (!pTemp || !pTemp->IsAlive())
                             {
                                 DoScriptText(SAY_BREAKOUT8, me);
                                 m_uiWave_Timer = 5000;
@@ -396,7 +396,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (uiStage && !me->isInCombat())
+            if (uiStage && !me->IsInCombat())
             {
                 if (uiStage_timer <= diff)
                 {
@@ -492,14 +492,14 @@ public:
             if (uiInquisitor_Penance_timer <= diff)
             {
                 Shout();
-                DoCast(me->getVictim(), SPELL_INQUISITOR_PENANCE);
+                DoCast(me->GetVictim(), SPELL_INQUISITOR_PENANCE);
                 uiInquisitor_Penance_timer = 2000 + rand()%5000;
             } else uiInquisitor_Penance_timer -= diff;
 
             if (uiValroth_Smite_timer <= diff)
             {
                 Shout();
-                DoCast(me->getVictim(), SPELL_VALROTH_SMITE);
+                DoCast(me->GetVictim(), SPELL_VALROTH_SMITE);
                 uiValroth_Smite_timer = 1000 + rand()%5000;
             } else uiValroth_Smite_timer -= diff;
 
@@ -673,7 +673,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (PlayerGUID && !me->getVictim() && me->isAlive())
+            if (PlayerGUID && !me->GetVictim() && me->IsAlive())
             {
                 if (ExecuteSpeech_Timer <= diff)
                 {

@@ -49,7 +49,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
     // For 2D/3D system selection
     //bool is_land_ok  = creature->canWalk();                // not used?
     //bool is_water_ok = creature->canSwim();                // not used?
-    bool is_air_ok = creature->canFly();
+    bool is_air_ok = creature->CanFly();
 
     const float angle = float(rand_norm()) * static_cast<float>(M_PI*2.0f);
     const float range = float(rand_norm()) * wander_distance;
@@ -126,7 +126,7 @@ void RandomMovementGenerator<Creature>::DoInitialize(Creature* creature)
     if (!creature)
         return;
 
-    if (!creature->isAlive())
+    if (!creature->IsAlive())
         return;
 
     if (!wander_distance)

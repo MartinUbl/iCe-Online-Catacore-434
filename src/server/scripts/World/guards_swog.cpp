@@ -124,7 +124,7 @@ static Unit *most_hated_by(Creature *me)
 /* returns false if there's no nearby creature */
 static bool flee_for_assistance(Creature *c, float searchradius)
 {
-    if (!c->getVictim() || searchradius <= 0)
+    if (!c->GetVictim() || searchradius <= 0)
         return false;
 
     /* anti-flee (paladin, ...) auras */
@@ -136,7 +136,7 @@ static bool flee_for_assistance(Creature *c, float searchradius)
     Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
-    Trinity::NearestAssistCreatureInCreatureRangeCheck u_check(c, c->getVictim(), searchradius);
+    Trinity::NearestAssistCreatureInCreatureRangeCheck u_check(c, c->GetVictim(), searchradius);
     Trinity::CreatureLastSearcher<Trinity::NearestAssistCreatureInCreatureRangeCheck> searcher(c, helper, u_check);
 
     TypeContainerVisitor<Trinity::CreatureLastSearcher<Trinity::NearestAssistCreatureInCreatureRangeCheck>, GridTypeMapContainer > grid_creature_searcher(searcher);
@@ -216,7 +216,7 @@ struct guards_swogAI : public ScriptedAI
     }
 
     void ReceiveEmote(Player* who, uint32 emote) {
-        if (me->isInCombat())
+        if (me->IsInCombat())
             return;
         if (emote == TEXTEMOTE_SALUTE && me->IsWithinDistInMap(who, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY))) {
             std::ostringstream report;
@@ -325,7 +325,7 @@ void guards_swogAI::UpdateAI(const uint32 diff)
                         me->CastSpell(me, 66179, true);  /* visual + speed (but insufficient) */
                         me->SetSpeed(MOVE_RUN, 3.0f);
                         me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveFleeing(me->getVictim(), 0);
+                        me->GetMotionMaster()->MoveFleeing(me->GetVictim(), 0);
                         me->ForcedDespawn(2000);  /* ~2sec = ~visible range  */
                     }
                     doquote(20, flee_quotes, sizeof(flee_quotes), me);
@@ -346,17 +346,17 @@ void guards_swogAI::UpdateAI(const uint32 diff)
             /* fourth possible action: supress current victim (dispellable) */
             case 3:
                 /* if top victim is spellcaster, use silence, else cripple */
-                if (me->getVictim()->GetMaxPower(POWER_MANA)) {
+                if (me->GetVictim()->GetMaxPower(POWER_MANA)) {
                     SpellEntry *wrentry = sSpellStore.LookupEntryNoConst(38913);
                     if (!wrentry)
                         break;
                     /* not my idea! don't flame me for this blasphemy! */
                     uint32 oldindex = wrentry->DurationIndex;
                     wrentry->DurationIndex = 1;
-                    me->CastSpell(me->getVictim(), wrentry, true);  /* 10sec silence */
+                    me->CastSpell(me->GetVictim(), wrentry, true);  /* 10sec silence */
                     wrentry->DurationIndex = oldindex;
                 } else {
-                    me->CastSpell(me->getVictim(), 41281, true);  /* triggered (instant) cripple */
+                    me->CastSpell(me->GetVictim(), 41281, true);  /* triggered (instant) cripple */
                 }
                 break;
 
@@ -383,12 +383,12 @@ void guards_swogAI::UpdateAI(const uint32 diff)
                         break;
 
                     for (std::list<Creature*>::const_iterator cfriend = friends.begin(); cfriend != friends.end(); ++cfriend)
-                        if (!(*cfriend)->isInCombat())
-                            (*cfriend)->AI()->AttackStart(me->getVictim());
+                        if (!(*cfriend)->IsInCombat())
+                            (*cfriend)->AI()->AttackStart(me->GetVictim());
                 }
 
-                if (me->getVictim())
-                    me->getVictim()->CastSpell(me->getVictim(), 59908, true);  /* nice ebon blade mark, selfcast! */
+                if (me->GetVictim())
+                    me->GetVictim()->CastSpell(me->GetVictim(), 59908, true);  /* nice ebon blade mark, selfcast! */
                 doquote(10, aggro_quotes, sizeof(aggro_quotes), me);
                 break;
 

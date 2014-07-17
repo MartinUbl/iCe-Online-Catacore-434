@@ -91,7 +91,7 @@ public:
             //RepulsiveGaze_Timer
             if (RepulsiveGaze_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_REPULSIVEGAZE);
+                DoCast(me->GetVictim(), SPELL_REPULSIVEGAZE);
                 RepulsiveGaze_Timer = 20000;
             } else RepulsiveGaze_Timer -= diff;
 

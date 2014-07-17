@@ -468,7 +468,7 @@ public:
 
     bool OnGossipHello(Player * pPlayer, GameObject* pGo)
     {
-        if(pPlayer && !pPlayer->isInCombat() && uses < 50)
+        if(pPlayer && !pPlayer->IsInCombat() && uses < 50)
         {
             pPlayer->CastSpell(pPlayer,87544,true); // Food
             uses++;

@@ -186,9 +186,9 @@ public:
 
 			if(ResetTimer <= diff)
 			{
-			//	DoCast(m_creature->getVictim(), 41978, true);
-				//DoCast(me->getVictim(), 41978, true);
-				DoCast(me->getVictim(),32264,true);
+			//	DoCast(m_creature->GetVictim(), 41978, true);
+				//DoCast(me->GetVictim(), 41978, true);
+				DoCast(me->GetVictim(),32264,true);
 				me->getThreatManager().clearReferences();
 				Unit* pFutureTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
 				if(pFutureTarget)
@@ -199,10 +199,10 @@ public:
 
 			if(StackTimer <= diff)
 			{
-				DoCast(me->getVictim(), 41978, true);
-				//DoCast(me->getVictim(),32264,true);
-				//if (me->getVictim())
-				//	me->getVictim()->JustAddAura(32264, m_creature);
+				DoCast(me->GetVictim(), 41978, true);
+				//DoCast(me->GetVictim(),32264,true);
+				//if (me->GetVictim())
+				//	me->GetVictim()->JustAddAura(32264, m_creature);
 				StackTimer = 1000;
 			} else StackTimer -= diff;
 		}

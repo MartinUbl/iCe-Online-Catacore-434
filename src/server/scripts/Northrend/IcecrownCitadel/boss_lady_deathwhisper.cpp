@@ -253,7 +253,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 // Full House achievement
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
-                        if (unit->isAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
+                        if (unit->IsAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
                             livingAddEntries.insert(unit->GetEntry());
 
                 if (livingAddEntries.size() >= 5)
@@ -268,7 +268,7 @@ class boss_lady_deathwhisper : public CreatureScript
                                 if (!member || !member->IsAtGroupRewardDistance(me))
                                     continue;
 
-                                if (member->isAlive()|| !member->GetCorpse())
+                                if (member->IsAlive()|| !member->GetCorpse())
                                     member->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_FULL_HOUSE, 0, me);
                             }
                         }
@@ -300,7 +300,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 {
                     //Talk(SAY_PHASE_2);
                     //Talk(EMOTE_PHASE_2);
-                    DoStartMovement(me->getVictim());
+                    DoStartMovement(me->GetVictim());
                     uiDamage -= me->GetPower(POWER_MANA);
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
@@ -524,7 +524,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 std::list<Creature*> tmpList;
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Creature* cre = ObjectAccessor::GetCreature(*me, *itr))
-                        if (cre->isAlive() && (cre->GetEntry() == NPC_CULT_FANATIC || cre->GetEntry() == NPC_CULT_ADHERENT))
+                        if (cre->IsAlive() && (cre->GetEntry() == NPC_CULT_FANATIC || cre->GetEntry() == NPC_CULT_ADHERENT))
                             tmpList.push_back(cre);
 
                 // noone to empower

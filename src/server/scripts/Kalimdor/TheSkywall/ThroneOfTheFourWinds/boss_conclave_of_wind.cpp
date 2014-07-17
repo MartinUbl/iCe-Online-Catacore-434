@@ -266,7 +266,7 @@ public:
 
     bool UpdateVictim()
     {
-        if(!me->isInCombat())
+        if(!me->IsInCombat())
             return false;
 
         // not to attack invalid target out of the platform
@@ -287,7 +287,7 @@ public:
                 else
                 {
                     AttackStart(victim);
-                    return me->getVictim();
+                    return me->GetVictim();
                 }
             }
             else
@@ -600,7 +600,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                         {
                             if(Player* pPlayer = itr->getSource())
                             {
-                                if(me->GetDistance2d(pPlayer) < 80.0f && pPlayer->isAlive())
+                                if(me->GetDistance2d(pPlayer) < 80.0f && pPlayer->IsAlive())
                                 {
                                     pPlayer->SetUInt64Value(PLAYER_FARSIGHT, pDummy->GetGUID());
                                     pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), 200.04f, pPlayer->GetOrientation());
@@ -623,7 +623,7 @@ Hurricane (ultimate)    _effects OK, visual workaround OK
                         {
                             if(me->GetDistance2d(pPlayer) < 80.0f)
                             {
-                                if(pPlayer->isAlive())
+                                if(pPlayer->IsAlive())
                                 {
                                     float a = ((float)urand(0,628))/100;
                                     pPlayer->NearTeleportTo(me->GetPositionX()+10.0f*cos(a), me->GetPositionY()+10.0f*sin(a), 220.04f, pPlayer->GetOrientation());
@@ -979,7 +979,7 @@ public:
             if(!UpdateVictim())
                 return;
 
-            if(me->GetDistance2d(me->getVictim()) > 50.0f)
+            if(me->GetDistance2d(me->GetVictim()) > 50.0f)
             {
                 me->getThreatManager().resetAllAggro();
                 me->GetMotionMaster()->MoveTargetedHome();

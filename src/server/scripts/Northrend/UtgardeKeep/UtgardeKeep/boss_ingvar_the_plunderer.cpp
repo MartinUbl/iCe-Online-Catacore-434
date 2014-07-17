@@ -154,8 +154,8 @@ public:
             bEventInProgress = false;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->UpdateEntry(MOB_INGVAR_UNDEAD);
-            me->SetInCombatWith(me->getVictim());
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->SetInCombatWith(me->GetVictim());
+            me->GetMotionMaster()->MoveChase(me->GetVictim());
 
             DoScriptText(YELL_AGGRO_2,me);
         }
@@ -209,9 +209,9 @@ public:
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
                 {
                     if (bIsUndead)
-                        DoCast(me->getVictim(), SPELL_WOE_STRIKE);
+                        DoCast(me->GetVictim(), SPELL_WOE_STRIKE);
                     else
-                        DoCast(me->getVictim(), SPELL_CLEAVE);
+                        DoCast(me->GetVictim(), SPELL_CLEAVE);
                     uiCleaveTimer = rand()%5000 + 2000;
                 }
             } else uiCleaveTimer -= diff;
@@ -221,9 +221,9 @@ public:
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
                 {
                     if (bIsUndead)
-                        DoCast(me->getVictim(), SPELL_DARK_SMASH);
+                        DoCast(me->GetVictim(), SPELL_DARK_SMASH);
                     else
-                        DoCast(me->getVictim(), SPELL_SMASH);
+                        DoCast(me->GetVictim(), SPELL_SMASH);
                     uiSmashTimer = 10000;
                 }
             } else uiSmashTimer -= diff;

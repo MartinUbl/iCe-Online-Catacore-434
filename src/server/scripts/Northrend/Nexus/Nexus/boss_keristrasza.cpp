@@ -197,7 +197,7 @@ public:
 
             if (uiCrystalfireBreathTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CRYSTALFIRE_BREATH);
+                DoCast(me->GetVictim(), SPELL_CRYSTALFIRE_BREATH);
                 uiCrystalfireBreathTimer = 12*IN_MILLISECONDS;
             } else uiCrystalfireBreathTimer -= diff;
 
@@ -234,7 +234,7 @@ public:
         InstanceScript *pInstance = pGO->GetInstanceScript();
 
         Creature *pKeristrasza = Unit::GetCreature(*pGO, pInstance ? pInstance->GetData64(DATA_KERISTRASZA) : 0);
-        if (pKeristrasza && pKeristrasza->isAlive())
+        if (pKeristrasza && pKeristrasza->IsAlive())
         {
             // maybe these are hacks :(
             pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);

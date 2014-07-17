@@ -63,7 +63,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_CHILDREN_OF_URSOC) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_THE_BEAR_GODS_OFFSPRING) == QUEST_STATUS_INCOMPLETE)
@@ -177,7 +177,7 @@ public:
             if (Creature* Mrfloppy = GetClosestCreatureWithEntry(me, NPC_MRFLOPPY, 50.0f))
                 pSummoned->AI()->AttackStart(Mrfloppy);
             else
-                pSummoned->AI()->AttackStart(me->getVictim());
+                pSummoned->AI()->AttackStart(me->GetVictim());
         }
 
         void WaypointReached(uint32 i)
@@ -775,7 +775,7 @@ public:
 
             if (uiChopTimer <= uiDiff)
             {
-                DoCast(me->getVictim(), SPELL_CHOP);
+                DoCast(me->GetVictim(), SPELL_CHOP);
                 uiChopTimer = urand(10000,12000);
             }
             else
@@ -807,7 +807,7 @@ public:
 
 	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
 	{
-		if (pCreature->isQuestGiver())
+		if (pCreature->IsQuestGiver())
 			pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
 		//if (pPlayer->GetQuestStatus(13666) == QUEST_STATUS_INCOMPLETE)
@@ -840,7 +840,7 @@ public:
 
 	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
 	{
-		if (pCreature->isQuestGiver())
+		if (pCreature->IsQuestGiver())
 			pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
 		//if (pPlayer->GetQuestStatus(13666) == QUEST_STATUS_INCOMPLETE)

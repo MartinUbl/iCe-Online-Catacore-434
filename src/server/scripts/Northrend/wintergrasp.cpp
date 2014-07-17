@@ -63,7 +63,7 @@ class npc_wg_demolisher_engineer : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(1);
@@ -132,7 +132,7 @@ class npc_wg_spirit_guide : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
@@ -183,7 +183,7 @@ class npc_wg_queue : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
@@ -301,13 +301,13 @@ class npc_wg_quest_giver : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->isQuestGiver())
+        if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
         BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
         if (BfWG)
         {
-            if (creature->isQuestGiver())
+            if (creature->IsQuestGiver())
             {
                 Object* pObject = (Object *) creature;
                 QuestRelations* pObjectQR = sObjectMgr->GetCreatureQuestRelationMap();

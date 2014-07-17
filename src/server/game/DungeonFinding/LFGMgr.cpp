@@ -1797,7 +1797,7 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
 
     if (!grp || !grp->isLFGGroup())                        // should never happen, but just in case...
         error = LFG_TELEPORTERROR_INVALID_LOCATION;
-    else if (!plr->isAlive())
+    else if (!plr->IsAlive())
         error = LFG_TELEPORTERROR_PLAYER_DEAD;
     else if (plr->IsFalling() || plr->HasUnitState(UNIT_STATE_JUMPING))
         error = LFG_TELEPORTERROR_FALLING;
@@ -1857,7 +1857,7 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
                 if (!plr->GetMap()->IsDungeon() && !plr->GetMap()->IsRaid())
                     plr->SetBattlegroundEntryPoint();
 
-                if (plr->isInFlight())
+                if (plr->IsInFlight())
                 {
                     plr->GetMotionMaster()->MovementExpired();
                     plr->CleanupAfterTaxiFlight();

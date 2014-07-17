@@ -262,7 +262,7 @@ public:
                             DoCast(me, SPELL_BERSERK);
                             return;
                         case EVENT_CLEAVE:
-                            DoCast(me->getVictim(), SPELL_CLEAVE);
+                            DoCast(me->GetVictim(), SPELL_CLEAVE);
                             events.ScheduleEvent(EVENT_CLEAVE, 2000+rand()%2000, 0, PHASE_GROUND);
                             return;
                         case EVENT_TAIL:

@@ -283,7 +283,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         if (textLength > 0)
             msg = recv_data.ReadString(textLength);
 
-        if ((msg.empty() || !_player->isAFK()) && !_player->isInCombat())
+        if ((msg.empty() || !_player->isAFK()) && !_player->IsInCombat())
         {
             if (!_player->isAFK())
             {
@@ -915,7 +915,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleEmoteOpcode(WorldPacket & recv_data)
 {
-    if (!GetPlayer()->isAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED)) 
+    if (!GetPlayer()->IsAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED)) 
         return;
 
     uint32 emote;
@@ -958,7 +958,7 @@ namespace Trinity
 
 void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
 {
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
         return;
 
     if (!GetPlayer()->CanSpeak())

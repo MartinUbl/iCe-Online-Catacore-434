@@ -155,7 +155,7 @@ class boss_akilzon : public CreatureScript
                 for (uint8 i = 0; i < 6; ++i)
                 {
                     Unit* bird = Unit::GetUnit(*me,BirdGUIDs[i]);
-                    if (bird && bird->isAlive())
+                    if (bird && bird->IsAlive())
                     {
                         bird->ToCreature()->ForcedDespawn();
                     }
@@ -172,7 +172,7 @@ class boss_akilzon : public CreatureScript
 
                 if (id == 0)
                 {
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                 }
             }
 
@@ -181,14 +181,14 @@ class boss_akilzon : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (me->getVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
+                if (me->GetVictim()->GetPositionZMinusOffset() > me->GetPositionZ()+5)
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveFall();
                         float x,y,z;
-                        me->getVictim()->GetPosition(x,y,z);
+                        me->GetVictim()->GetPosition(x,y,z);
                         me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
                      }
                 }
@@ -206,7 +206,7 @@ class boss_akilzon : public CreatureScript
                     Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1);
 
                     if (!pTarget)
-                        pTarget = me->getVictim();
+                        pTarget = me->GetVictim();
 
                     me->SetFacingToObject(pTarget);
 
@@ -220,7 +220,7 @@ class boss_akilzon : public CreatureScript
                     // Call Lightning
                     CallLightningCounter++;
 
-                    DoCast(me->getVictim(), SPELL_CALL_LIGHTNING);
+                    DoCast(me->GetVictim(), SPELL_CALL_LIGHTNING);
                 }
 
                 if (ElectricalStormTimer <= diff) // blizzlike status: done
@@ -268,8 +268,8 @@ class boss_akilzon : public CreatureScript
                             Creature *pCreature = me->SummonCreature(npc_soaring_eagle, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
                             if (pCreature)
                             {
-                                pCreature->AddThreat(me->getVictim(), 1.0f);
-                                pCreature->AI()->AttackStart(me->getVictim());
+                                pCreature->AddThreat(me->GetVictim(), 1.0f);
+                                pCreature->AI()->AttackStart(me->GetVictim());
                                 BirdGUIDs[i] = pCreature->GetGUID();
                             }
                         }
@@ -299,7 +299,7 @@ class boss_akilzon : public CreatureScript
                         Creature *pCreature = me->SummonCreature(npc_amani_kiddnaper, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
                         if (pCreature)
                         {
-                            pCreature->AddThreat(me->getVictim(), 1.0f);
+                            pCreature->AddThreat(me->GetVictim(), 1.0f);
                             pCreature->AI()->DoZoneInCombat();
                             AmaniKiddnaperGUID = pCreature->GetGUID();
                         }
@@ -499,7 +499,7 @@ class mob_amani_kiddnaper : public CreatureScript
                 {
                     if ((pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0)) != NULL)
                     {
-                        if ((pTarget->ToPlayer() && pTarget->ToPlayer()->HasTankSpec()) || !pTarget->isAlive())
+                        if ((pTarget->ToPlayer() && pTarget->ToPlayer()->HasTankSpec()) || !pTarget->IsAlive())
                             pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
 
                         float x,y,z;

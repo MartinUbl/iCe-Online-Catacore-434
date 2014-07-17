@@ -90,7 +90,7 @@ public:
             if(!pInstance)
                 return;
 
-            if (me->isAlive()) pInstance->SetData(TYPE_BALTHARUS, NOT_STARTED);
+            if (me->IsAlive()) pInstance->SetData(TYPE_BALTHARUS, NOT_STARTED);
             me->SetRespawnDelay(7*DAY);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -106,7 +106,7 @@ public:
 
             if ((pDummyTarget = me->GetMap()->GetCreature( pInstance->GetData64(NPC_BALTHARUS_TARGET))) != NULL)
             {
-                if (!pDummyTarget->isAlive()) pDummyTarget->Respawn();
+                if (!pDummyTarget->IsAlive()) pDummyTarget->Respawn();
 
                 pDummyTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 pDummyTarget->GetMotionMaster()->MoveIdle();
@@ -143,7 +143,7 @@ public:
         {
             if (!pInstance) return;
 
-          //  if (pDummyTarget && pDummyTarget->isSummon()) 
+          //  if (pDummyTarget && pDummyTarget->IsSummon()) 
           //      pDummyTarget->ForcedDespawn();
 
             DoScriptText(-1666303,me);
@@ -169,7 +169,7 @@ public:
             if ( summoned->GetEntry() != NPC_BALTHARUS_TARGET )
             {
                  if (!pClone) pClone = summoned;
-                 else if (!pClone->isAlive()) pClone = summoned;
+                 else if (!pClone->IsAlive()) pClone = summoned;
                  pClone->SetInCombatWithZone();
             }
         }
@@ -201,13 +201,13 @@ public:
         {
             if (!pInstance) return;
 
-            if (!me || !me->isAlive())
+            if (!me || !me->IsAlive())
                 return;
 
             if(pDoneBy->GetGUID() == me->GetGUID()) 
               return;
 
-            if (pClone && pClone->isAlive())
+            if (pClone && pClone->IsAlive())
             {
                 pDoneBy->DealDamage(pClone, uiDamage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 uiDamage = 0;
@@ -582,7 +582,7 @@ public:
                                   {
                                   if (!pHalion)
                                       pHalion = me->SummonCreature(NPC_HALION_REAL, SpawnLocXer[3].x, SpawnLocXer[3].y, SpawnLocXer[3].z, 6.23f, TEMPSUMMON_MANUAL_DESPAWN, HOUR*IN_MILLISECONDS);
-                                  if (pHalion && !pHalion->isAlive())
+                                  if (pHalion && !pHalion->IsAlive())
                                       pHalion->Respawn();
                                   if (pHalion)
                                       pHalion->SetCreatorGUID(0);

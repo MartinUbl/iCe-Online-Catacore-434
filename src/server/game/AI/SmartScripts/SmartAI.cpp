@@ -120,7 +120,7 @@ WayPoint* SmartAI::GetNextWayPoint()
 
 void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* /*invoker*/)
 {
-    if (me->isInCombat())// no wp movement in combat
+    if (me->IsInCombat())// no wp movement in combat
     {
         sLog->outError("SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
         return;
@@ -289,7 +289,7 @@ void SmartAI::UpdatePath(const uint32 diff)
     {
         if (mWPPauseTimer < diff)
         {
-            if (!me->isInCombat() && !HasEscortState(SMART_ESCORT_RETURNING) && (mWPReached || mLastWPIDReached == SMART_ESCORT_LAST_OOC_POINT || mForcedPaused))
+            if (!me->IsInCombat() && !HasEscortState(SMART_ESCORT_RETURNING) && (mWPReached || mLastWPIDReached == SMART_ESCORT_LAST_OOC_POINT || mForcedPaused))
             {
                 GetScript()->ProcessEventsFor(SMART_EVENT_WAYPOINT_RESUMED, NULL, mLastWP->id, GetScript()->GetPathId());
                 RemoveEscortState(SMART_ESCORT_PAUSED);
@@ -318,7 +318,7 @@ void SmartAI::UpdatePath(const uint32 diff)
             mWPReached = false;
         }
     }
-    if (me->isInCombat() || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
+    if (me->IsInCombat() || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
         return;
     // handle next wp
     if (mWPReached)//reached WP
@@ -439,7 +439,7 @@ void SmartAI::MovementInform(uint32 MovementType, uint32 Data)
 
 void SmartAI::EnterEvadeMode()
 {
-    if (!me->isAlive())
+    if (!me->IsAlive())
         return;
 
     me->RemoveAllAuras();
@@ -481,7 +481,7 @@ void SmartAI::MoveInLineOfSight(Unit* who)
         float fAttackRadius = me->GetAttackDistance(who);
         if (me->IsWithinDistInMap(who, fAttackRadius) && me->IsWithinLOSInMap(who))
         {
-            if (!me->getVictim())
+            if (!me->GetVictim())
             {
                 who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                 AttackStart(who);
@@ -507,7 +507,7 @@ bool SmartAI::CanAIAttack(const Unit* /*who*/) const
 
 bool SmartAI::AssistPlayerInCombat(Unit* pWho)
 {
-    if (!pWho || !pWho->getVictim())
+    if (!pWho || !pWho->GetVictim())
         return false;
 
     //experimental (unknown) flag not present
@@ -515,7 +515,7 @@ bool SmartAI::AssistPlayerInCombat(Unit* pWho)
         return false;
 
     //not a player
-    if (!pWho->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!pWho->GetVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
         return false;
 
     //never attack friendly
@@ -526,7 +526,7 @@ bool SmartAI::AssistPlayerInCombat(Unit* pWho)
     if (me->IsWithinDistInMap(pWho, SMART_MAX_AID_DIST) && me->IsWithinLOSInMap(pWho))
     {
         //already fighting someone?
-        if (!me->getVictim())
+        if (!me->GetVictim())
         {
             AttackStart(pWho);
             return true;
@@ -761,12 +761,12 @@ void SmartAI::SetCombatMove(bool on)
     mCanCombatMove = on;
     if (!HasEscortState(SMART_ESCORT_ESCORTING))
     {
-        if (on && me->getVictim())
+        if (on && me->GetVictim())
         {
             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
             {
                 SetRun(mRun);
-                me->GetMotionMaster()->MoveChase(me->getVictim());
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
                 me->CastStop();
             }
         }

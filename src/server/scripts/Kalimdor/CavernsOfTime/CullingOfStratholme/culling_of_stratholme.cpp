@@ -1037,7 +1037,7 @@ public:
                         case 72:
                         case 74:
                         case 76:
-                            if (me->isInCombat())
+                            if (me->IsInCombat())
                                 uiPhaseTimer = 1000;
                             else
                             {
@@ -1051,7 +1051,7 @@ public:
                             }
                             break;
                         case 78:
-                            if (me->isInCombat())
+                            if (me->IsInCombat())
                                 uiPhaseTimer = 1000;
                             else
                             {
@@ -1182,7 +1182,7 @@ public:
             }
 
             //Battling skills
-            if (!me->getVictim())
+            if (!me->GetVictim())
                 return;
 
             if (uiExorcismTimer < diff)

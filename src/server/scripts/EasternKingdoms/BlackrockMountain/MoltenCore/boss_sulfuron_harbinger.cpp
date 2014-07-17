@@ -78,7 +78,7 @@ public:
             //DemoralizingShout_Timer
             if (DemoralizingShout_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_DEMORALIZINGSHOUT);
+                DoCast(me->GetVictim(), SPELL_DEMORALIZINGSHOUT);
                 DemoralizingShout_Timer = 15000 + rand()%5000;
             } else DemoralizingShout_Timer -= diff;
 
@@ -105,7 +105,7 @@ public:
             //Knockdown_Timer
             if (Knockdown_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKDOWN);
+                DoCast(me->GetVictim(), SPELL_KNOCKDOWN);
                 Knockdown_Timer = 12000 + rand()%3000;
             } else Knockdown_Timer -= diff;
 

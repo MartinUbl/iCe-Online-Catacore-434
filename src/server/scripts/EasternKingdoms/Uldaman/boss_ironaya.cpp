@@ -69,12 +69,12 @@ class boss_ironaya : public CreatureScript
                 //If we are <50% hp do knockaway ONCE
                 if (!bHasCastedKnockaway && HealthBelowPct(50))
                 {
-                    DoCast(me->getVictim(), SPELL_KNOCKAWAY, true);
+                    DoCast(me->GetVictim(), SPELL_KNOCKAWAY, true);
 
                     // current aggro target is knocked away pick new target
                     Unit* pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
 
-                    if (!pTarget || pTarget == me->getVictim())
+                    if (!pTarget || pTarget == me->GetVictim())
                         pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 1);
 
                     if (pTarget)

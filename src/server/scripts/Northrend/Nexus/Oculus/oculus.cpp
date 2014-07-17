@@ -157,7 +157,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pCreature->GetInstanceScript()->GetData(DATA_DRAKOS_EVENT) == DONE)

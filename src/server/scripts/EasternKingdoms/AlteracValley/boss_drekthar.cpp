@@ -85,25 +85,25 @@ public:
 
             if (uiWhirlwindTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WHIRLWIND);
+                DoCast(me->GetVictim(), SPELL_WHIRLWIND);
                 uiWhirlwindTimer =  urand(8*IN_MILLISECONDS,18*IN_MILLISECONDS);
             } else uiWhirlwindTimer -= diff;
 
             if (uiWhirlwind2Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_WHIRLWIND2);
+                DoCast(me->GetVictim(), SPELL_WHIRLWIND2);
                 uiWhirlwind2Timer = urand(7*IN_MILLISECONDS,25*IN_MILLISECONDS);
             } else uiWhirlwind2Timer -= diff;
 
             if (uiKnockdownTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_KNOCKDOWN);
+                DoCast(me->GetVictim(), SPELL_KNOCKDOWN);
                 uiKnockdownTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
             } else uiKnockdownTimer -= diff;
 
             if (uiFrenzyTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_FRENZY);
+                DoCast(me->GetVictim(), SPELL_FRENZY);
                 uiFrenzyTimer = urand(20*IN_MILLISECONDS,30*IN_MILLISECONDS);
             } else uiFrenzyTimer -= diff;
 

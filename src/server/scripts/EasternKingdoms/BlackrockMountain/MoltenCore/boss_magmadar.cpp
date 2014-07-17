@@ -80,7 +80,7 @@ public:
             //Panic_Timer
             if (Panic_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_PANIC);
+                DoCast(me->GetVictim(), SPELL_PANIC);
                 Panic_Timer = 35000;
             } else Panic_Timer -= diff;
 

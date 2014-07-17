@@ -165,7 +165,7 @@ public:
         {
             if (!CanStartEvent)//boss is invisible, don't attack
                 return;
-            if (!me->getVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)))
+            if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)))
             {
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius))
@@ -215,7 +215,7 @@ public:
 
             if (me->getThreatManager().getThreatList().empty())//check if should evade
             {
-                if (me->isInCombat())
+                if (me->IsInCombat())
                     EnterEvadeMode();
                 return;
             }
@@ -271,7 +271,7 @@ public:
                         Map::PlayerList const &PlayerList = pMap->GetPlayers();
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            if (i->getSource() && i->getSource()->isAlive() && me->HasInArc(float(diff/20000*M_PI*2),i->getSource()) && me->IsWithinDist(i->getSource(), SPOUT_DIST) && !i->getSource()->IsInWater())
+                            if (i->getSource() && i->getSource()->IsAlive() && me->HasInArc(float(diff/20000*M_PI*2),i->getSource()) && me->IsWithinDist(i->getSource(), SPOUT_DIST) && !i->getSource()->IsInWater())
                                 DoCast(i->getSource(), SPELL_SPOUT, true);//only knock back palyers in arc, in 100yards, not in water
                         }
                     }
@@ -292,8 +292,8 @@ public:
                 if (GeyserTimer <= diff)
                 {
                     Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,1);
-                    if (!pTarget && me->getVictim())
-                        pTarget = me->getVictim();
+                    if (!pTarget && me->GetVictim())
+                        pTarget = me->GetVictim();
                     if (pTarget)
                         DoCast(pTarget, SPELL_GEYSER, true);
                     GeyserTimer = rand()%5000 + 15000;
@@ -304,8 +304,8 @@ public:
                     if (WaterboltTimer <= diff)
                     {
                         Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
-                        if (!pTarget && me->getVictim())
-                            pTarget = me->getVictim();
+                        if (!pTarget && me->GetVictim())
+                            pTarget = me->GetVictim();
                         if (pTarget)
                             DoCast(pTarget, SPELL_WATERBOLT, true);
                         WaterboltTimer = 3000;
@@ -338,7 +338,7 @@ public:
                     EnterEvadeMode();
                     return;
                 }
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                     DoZoneInCombat();
 
                 if (!Spawned)
@@ -424,7 +424,7 @@ public:
 
         void MoveInLineOfSight(Unit *who)
         {
-            if (!who || me->getVictim()) return;
+            if (!who || me->GetVictim()) return;
 
             if (who->isTargetableForAttack() && who->isInAccessiblePlaceFor(me) && me->IsHostileTo(who) && me->IsWithinDistInMap(who, 45))
             {
@@ -436,8 +436,8 @@ public:
         {
             if (MultiShotTimer <= diff)
             {
-                if (me->getVictim())
-                    DoCast(me->getVictim(), SPELL_SPREAD_SHOT, true);
+                if (me->GetVictim())
+                    DoCast(me->GetVictim(), SPELL_SPREAD_SHOT, true);
 
                 MultiShotTimer = 10000+rand()%10000;
                 ShootBowTimer += 1500;//add global cooldown

@@ -321,7 +321,7 @@ public:
             {
                 if (!me->IsNonMeleeSpellCasted(false))
                 {
-                    me->CastSpell(me->getVictim(), SPELL_CRUSH_ARMOR, false);
+                    me->CastSpell(me->GetVictim(), SPELL_CRUSH_ARMOR, false);
                     crushArmorTimer = urand(6000, 15000);
                 }
             }
@@ -428,7 +428,7 @@ public:
                 if (Player * p = itr->getSource())
                 {
                     if (!p->HasTankSpec() && !p->HasAura(5487) // Bear form
-                        && !p->isGameMaster() && p->isAlive())
+                        && !p->isGameMaster() && p->IsAlive())
                     {
                         beamTargets.push_back(p);
                     }

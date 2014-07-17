@@ -259,13 +259,13 @@ class boss_shannox : public CreatureScript
 
                 if (Creature  * pRiplimb = me->GetCreature((*me), pInstance->GetData64(DATA_RIPLIMB_GUID)))
                 {
-                    if (pRiplimb->isAlive())
+                    if (pRiplimb->IsAlive())
                         pRiplimb->Kill(pRiplimb);
                 }
 
                 if (Creature  * pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID)))
                 {
-                    if (pRageface->isAlive())
+                    if (pRageface->IsAlive())
                         pRageface->Kill(pRageface);
                 }
 
@@ -314,13 +314,13 @@ class boss_shannox : public CreatureScript
                     pRiplimb = me->GetCreature((*me), pInstance->GetData64(DATA_RIPLIMB_GUID));
                     pRageface = me->GetCreature((*me), pInstance->GetData64(DATA_RAGEFACE_GUID));
 
-                    if (pRiplimb && !pRiplimb->isAlive())
+                    if (pRiplimb && !pRiplimb->IsAlive())
                     {
                         pRiplimb->Respawn();
                         pRiplimb->RemoveAllAuras();
                     }
 
-                    if (pRageface && !pRiplimb->isAlive())
+                    if (pRageface && !pRiplimb->IsAlive())
                     {
                         pRageface->Respawn();
                         pRiplimb->RemoveAllAuras();
@@ -332,14 +332,14 @@ class boss_shannox : public CreatureScript
 
             void EnterEvadeMode()
             {
-                if (pRiplimb && !pRiplimb->isAlive())
+                if (pRiplimb && !pRiplimb->IsAlive())
                 {
                     pRiplimb->setDeathState(DEAD);
                     pRiplimb->Respawn(true);
                     pRiplimb->RemoveAllAuras();
                 }
 
-                if (pRageface && !pRageface->isAlive())
+                if (pRageface && !pRageface->IsAlive())
                 {
                     pRageface->setDeathState(DEAD);
                     pRageface->Respawn(true);
@@ -474,13 +474,13 @@ class boss_shannox : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (!me->isInCombat())
+                if (!me->IsInCombat())
                 {
-                    if (pRageface && pRageface->getVictim())
-                        AttackStart(pRageface->getVictim());
+                    if (pRageface && pRageface->GetVictim())
+                        AttackStart(pRageface->GetVictim());
 
-                    if (pRiplimb && pRiplimb->getVictim())
-                        AttackStart(pRiplimb->getVictim());
+                    if (pRiplimb && pRiplimb->GetVictim())
+                        AttackStart(pRiplimb->GetVictim());
                 }
 
                 if (!UpdateVictim())
@@ -537,7 +537,7 @@ class boss_shannox : public CreatureScript
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
                         if(me->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) == 71557) // Only if Shannox has spear equiped (in main hand)
-                            me->CastSpell(me->getVictim(), SPELL_ARCING_SLASH, false);
+                            me->CastSpell(me->GetVictim(), SPELL_ARCING_SLASH, false);
                         ArcingSlashTimer = 11000;
                     }
                 }
@@ -579,7 +579,7 @@ class boss_shannox : public CreatureScript
                 {
                     if (!me->IsNonMeleeSpellCasted(false))
                     {
-                        if (pRiplimb->isAlive())
+                        if (pRiplimb->IsAlive())
                         {
                             switch (urand(0, 3))
                             {
@@ -646,13 +646,13 @@ class boss_shannox : public CreatureScript
 
                 if (separationCheckTimer <= diff)
                 {
-                    if (pRiplimb && pRiplimb->isAlive() && me->GetDistance(pRiplimb) >= 60.0f)
+                    if (pRiplimb && pRiplimb->IsAlive() && me->GetDistance(pRiplimb) >= 60.0f)
                     {
                         me->CastSpell(me, SPELL_SEPARATION_ANXIETY, true);
                         pRiplimb->CastSpell(pRiplimb, SPELL_SEPARATION_ANXIETY, true);
                     }
 
-                    if (pRageface && pRageface->isAlive() && me->GetDistance(pRageface) >= 60.0f)
+                    if (pRageface && pRageface->IsAlive() && me->GetDistance(pRageface) >= 60.0f)
                     {
                         me->CastSpell(me, SPELL_SEPARATION_ANXIETY, true);
                         pRageface->CastSpell(pRageface, SPELL_SEPARATION_ANXIETY, true);
@@ -829,7 +829,7 @@ class npc_riplimb : public CreatureScript
                 if (bossWait == 2)
                 {
                     me->GetMotionMaster()->Clear(true);
-                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
                     me->RemoveAurasDueToSpell(SPELL_SPEAR_VISUAL);
 
                     if (pBoss)
@@ -878,7 +878,7 @@ class npc_riplimb : public CreatureScript
 
                 if (limbRipTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(), SPELL_LIMB_RIP, false);
+                    me->CastSpell(me->GetVictim(), SPELL_LIMB_RIP, false);
                     limbRipTimer = urand(8000, 10000);
                 }
                 else
@@ -979,7 +979,7 @@ class npc_crystal_trap : public CreatureScript
 
                 #define MUSHROOM_ENTRY 47649
 
-                if (pWho->isPet() || pWho->isGuardian() || pWho->GetEntry() == MUSHROOM_ENTRY)
+                if (pWho->IsPet() || pWho->IsGuardian() || pWho->GetEntry() == MUSHROOM_ENTRY)
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
@@ -1111,7 +1111,7 @@ class npc_crystal_prison : public CreatureScript
                 {
                     if (((npc_crystal_trap::npc_crystal_trapAI*)pTrap->GetAI())->GetPrisoner())
                     {
-                        if (!((npc_crystal_trap::npc_crystal_trapAI*)pTrap->GetAI())->GetPrisoner()->isAlive())
+                        if (!((npc_crystal_trap::npc_crystal_trapAI*)pTrap->GetAI())->GetPrisoner()->IsAlive())
                             me->Kill(me);
 
                         if (((npc_crystal_trap::npc_crystal_trapAI*)pTrap->GetAI())->GetPrisoner()->GetTypeId() == TYPEID_UNIT &&
@@ -1369,7 +1369,7 @@ class npc_rageface : public CreatureScript
 
                 if (faceRageTimer <= diff)
                 {
-                    me->CastSpell(me->getVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
+                    me->CastSpell(me->GetVictim(),99947,false); // Stunning and mauling enemy for 30 seconds with increasing damage
                     faceRageTimer = NEVER;
                 }
                 else faceRageTimer -= diff;

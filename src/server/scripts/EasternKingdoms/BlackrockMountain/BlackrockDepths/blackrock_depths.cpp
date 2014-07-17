@@ -263,7 +263,7 @@ public:
                     if (RingBossGUID)
                     {
                         Creature *boss = Unit::GetCreature(*me,RingBossGUID);
-                        if (boss && !boss->isAlive() && boss->isDead())
+                        if (boss && !boss->IsAlive() && boss->isDead())
                         {
                             RingBossGUID = 0;
                             Event_Timer = 5000;
@@ -276,7 +276,7 @@ public:
                     for (uint8 i = 0; i < MAX_MOB_AMOUNT; ++i)
                     {
                         Creature *mob = Unit::GetCreature(*me,RingMobGUID[i]);
-                        if (mob && !mob->isAlive() && mob->isDead())
+                        if (mob && !mob->IsAlive() && mob->isDead())
                         {
                             RingMobGUID[i] = 0;
                             --MobCount;
@@ -413,7 +413,7 @@ public:
             //ThunderClap_Timer
             if (ThunderClap_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
+                DoCast(me->GetVictim(), SPELL_THUNDERCLAP);
                 ThunderClap_Timer = 10000;
             } else ThunderClap_Timer -= diff;
 
@@ -422,7 +422,7 @@ public:
             {
                 if (FireballVolley_Timer <= diff)
                 {
-                    DoCast(me->getVictim(), SPELL_FIREBALLVOLLEY);
+                    DoCast(me->GetVictim(), SPELL_FIREBALLVOLLEY);
                     FireballVolley_Timer = 15000;
                 } else FireballVolley_Timer -= diff;
             }
@@ -430,7 +430,7 @@ public:
             //MightyBlow_Timer
             if (MightyBlow_Timer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MIGHTYBLOW);
+                DoCast(me->GetVictim(), SPELL_MIGHTYBLOW);
                 MightyBlow_Timer = 10000;
             } else MightyBlow_Timer -= diff;
 
@@ -518,7 +518,7 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
         if (pPlayer->GetQuestStatus(QUEST_4001) == QUEST_STATUS_INCOMPLETE)
@@ -582,10 +582,10 @@ public:
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (pCreature->isQuestGiver())
+        if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (pCreature->isVendor() && pPlayer->GetReputationRank(59) >= REP_FRIENDLY)
+        if (pCreature->IsVendor() && pPlayer->GetReputationRank(59) >= REP_FRIENDLY)
               pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_ITEM_SHOW_ACCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
         if (pPlayer->GetQuestRewardStatus(QUEST_A_BINDING_CONTRACT) != 1 &&

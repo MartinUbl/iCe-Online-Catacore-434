@@ -298,8 +298,8 @@ public:
                     m_uiPoisonedSpearTimer = 10000;
                     m_uiWhirlwindTimer = 20000;
                     me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
-					if(me->getVictim())
-						me->GetMotionMaster()->MoveChase(me->getVictim());
+					if(me->GetVictim())
+						me->GetMotionMaster()->MoveChase(me->GetVictim());
                 }
             }
         }
