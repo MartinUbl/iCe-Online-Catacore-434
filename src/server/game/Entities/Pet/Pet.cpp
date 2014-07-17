@@ -989,7 +989,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetCreateMana(28 + 10 * petlevel);
                         SetCreateHealth(28 + 30 * petlevel);
                     }
-                    int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
+                    int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
                     break;
@@ -1019,7 +1019,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetCreateHealth(14900+9200.0f*(m_owner->getLevel()-80)/5.0f);
                         SetCreateMana(9800+6200.0f*(m_owner->getLevel()-80)/5.0f);
                     }
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
                     SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
                     SetModifierValue(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(m_owner->GetStat(STAT_INTELLECT)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
@@ -1029,7 +1029,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     if (!pInfo)
                         SetCreateHealth(30 + 30*petlevel);
-                    float bonusDmg = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
+                    float bonusDmg = m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
                     break;
@@ -1114,7 +1114,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         else if (m_owner->ToPlayer()->GetActiveTalentBranchSpec() == SPEC_MAGE_FIRE)
                             srcSchool = SPELL_SCHOOL_MASK_FIRE;
                     }
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(srcSchool) * 0.33f));
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(srcSchool) * 0.33f));
 
                     SetDisplayId(m_owner->GetDisplayId());
                     if (!pInfo)
@@ -1150,9 +1150,9 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     // Mostly custom values, who cares about these stupid little imps
                     SetCreateHealth(petlevel*petlevel/2);
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.05f)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.10f)));
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.05f)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.10f)));
                     break;
                 }
             }

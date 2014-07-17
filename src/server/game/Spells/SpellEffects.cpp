@@ -973,7 +973,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         bp0 = 25;
 
                     // We must calculate maximal basepoints manually
-                    int32 maxbp = pOwner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
+                    int32 maxbp = pOwner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SPELL);
                     if (bp0 == 50)
                         maxbp *= 1.4f;
                     else
@@ -1906,7 +1906,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 bp0 = 25;
 
             // We must calculate maximal basepoints manually
-            int32 maxbp = m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SPELL);
+            int32 maxbp = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SPELL);
             if (bp0 == 50)
                 maxbp *= 1.4f;
             else
@@ -7087,7 +7087,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             if (m_spellInfo->Id == 20467)
             {
                 spell_bonus += int32(0.08f*m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                spell_bonus += int32(0.13f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
+                spell_bonus += int32(0.13f*m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo)));
             }
             // Templar's Verdict
             else if (m_spellInfo->Id == 85256)
