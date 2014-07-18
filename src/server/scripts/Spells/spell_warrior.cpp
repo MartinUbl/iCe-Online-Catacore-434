@@ -63,49 +63,7 @@ class spell_warr_last_stand : public SpellScriptLoader
         }
 };
 
-#define SPELL_SUNDER_ARMOR (58567)
-
-class spell_warr_devastate : public SpellScriptLoader
-{
-    public:
-        spell_warr_devastate() : SpellScriptLoader("spell_warr_devastate") { }
-
-        class spell_warr_devastate_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_devastate_SpellScript);
-
-            void CalculateDamage(SpellEffIndex /*effIndex*/)
-            {
-                Unit * unitTarget = GetHitUnit();
-                Unit * caster = GetCaster();
-
-                if (!caster || !unitTarget)
-                    return;
-
-                // + damage for each application of Sunder Armor on the target
-                if (Aura * sunderAura = unitTarget->GetAura(SPELL_SUNDER_ARMOR, caster->GetGUID()))
-                    SetHitDamage(GetHitDamage() * sunderAura->GetStackAmount());
-                else
-                    PreventHitDefaultEffect(EFFECT_1);
-
-                // Apply Sunder armor
-                caster->CastSpell(unitTarget, SPELL_SUNDER_ARMOR, true);
-            }
-
-            void Register()
-            {
-                OnEffect += SpellEffectFn(spell_warr_devastate_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_devastate_SpellScript;
-        }
-};
-
 void AddSC_warrior_spell_scripts()
 {
-    new spell_warr_last_stand();
-    new spell_warr_devastate();
+    new spell_warr_last_stand;
 }
