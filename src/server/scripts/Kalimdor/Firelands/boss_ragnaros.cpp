@@ -390,6 +390,8 @@ public:
         uint32 Enrage_timer;
         uint32 AllowTurning_timer;
         uint32 Text_timer;
+        uint32 QuoteTimer;
+        bool canQuote;
         uint32 Kill_timer;
         // Intermission 4 timers
         uint32 HeroicIntermissionTimer;
@@ -481,10 +483,12 @@ public:
             geyserTimer             = NEVER;
             spreadFlamesTimer       = NEVER;
             chaseTimer              = NEVER;
+            QuoteTimer              = NEVER;
             IntermissionStep        = 0;
             PHASE = PHASE1;
             reemerge = 0;
             burried  = false;
+            canQuote = true;
 
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -775,8 +779,13 @@ public:
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            uint8 rand_ = urand(0,2);
-            PlayAndYell(RandomKill[rand_].sound,RandomKill[rand_].text);
+            if (canQuote)
+            {
+                canQuote = false;
+                QuoteTimer = 2000; // Can say another kill quote only after 2 seconds delay
+                uint8 rand_ = urand(0,2);
+                PlayAndYell(RandomKill[rand_].sound,RandomKill[rand_].text);
+            }
         }
 
         void JustSummoned(Creature* summon)
@@ -960,9 +969,10 @@ public:
             }
         }
 
-        Position GetRandomPositionInRadius(float radius)// From middle of Ragnaros platform
+        Position GetRandomPositionInRadius(float max_radius)// From middle of Ragnaros platform
         {
-            float angle = urand(0,2*M_PI);
+            float radius = frand(0.0f, max_radius);
+            float angle = frand(0.0f,2*M_PI);
             Position pos;
             pos.m_positionX = MIDDLE_X + cos(angle)*radius;
             pos.m_positionY = MIDDLE_Y + sin(angle)*radius;
@@ -1129,6 +1139,13 @@ public:
             //Return since we have no target
             if (!UpdateVictim())
                 return;
+
+            if (QuoteTimer <= diff)
+            {
+                canQuote = true; // Can say kill quote again :)
+                QuoteTimer = NEVER;
+            }
+            else QuoteTimer -= diff;
 
             if (me->IsInWorld() && me->GetVictim() && me->GetVictim()->IsInWorld())
             {
@@ -2224,6 +2241,14 @@ public:
             //me->GetMotionMaster()->MoveFall(0);
         }
 
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
+        }
+
         void UpdateAI ( const uint32 diff)
         {
             if (instance && instance->GetData(TYPE_RAGNAROS) != IN_PROGRESS)
@@ -2335,6 +2360,14 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->CastSpell(me,FLAME_PILLAR_TRANSFORM,true);
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
         }
 
         void UpdateAI ( const uint32 diff)
@@ -2462,6 +2495,14 @@ public:
             Flame_timer = 3000;
         }
 
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
+        }
+
         void UpdateAI ( const uint32 diff)
         {
             if (Flame_timer <= diff)
@@ -2515,6 +2556,14 @@ public:
         void DoAction(const int32 action)
         {
             morphTimer = (uint32)action;
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
         }
 
         void UpdateAI ( const uint32 diff)
@@ -2580,6 +2629,14 @@ public:
             {
                 me->GetMotionMaster()->MoveChase(player);
             }
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
         }
 
         void EnterCombat(Unit* who)
@@ -3898,6 +3955,14 @@ public:
         void EnterCombat(Unit* /*enemy*/) {}
         void DamageTaken(Unit* /*who*/, uint32 &damage) { damage = 0; }
 
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
+        }
+
         void IsSummonedBy(Unit* pSummoner)
         {
             if (pSummoner && pSummoner->ToCreature())
@@ -3935,6 +4000,14 @@ public:
         void Reset()
         {
             geyserTimer = 500;
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+            if (Creature * pRag = me->FindNearestCreature(RAGNAROS, 200.0f, true))
+                pRag->AI()->KilledUnit(victim);
         }
 
         void UpdateAI ( const uint32 diff)
