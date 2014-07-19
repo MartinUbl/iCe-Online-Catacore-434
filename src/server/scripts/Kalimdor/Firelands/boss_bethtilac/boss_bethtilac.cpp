@@ -751,16 +751,14 @@ void boss_bethtilacAI::SummonSpiderlings()
 
             for (uint8 j = 0; j < spidersNum; j++)
             {
-                float x, y, z,o;
+                float x, y, z, o;
                 // spawn them at 4 yards distance 
                 x = MIDDLE_X + cos(me->GetAngle(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY())) * (me->GetDistance2d(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY()) + (4*j));
                 y = MIDDLE_Y + sin(me->GetAngle(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY())) * (me->GetDistance2d(spawnPoints[i].GetPositionX(), spawnPoints[i].GetPositionY()) + (4*j));
-                z = me->GetMap()->GetHeight2(x, y, 80.0f);
+                z = me->GetMap()->GetHeight2(x, y, 80.0f) + 2.0f;
                 o = spawnPoints[i].GetOrientation();
 
-                Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-
-                if (spiderLing)
+                if(Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
                     spiderLing->SetSpeed(MOVE_RUN, 0.6f, true);
             }
         }
@@ -776,15 +774,12 @@ void boss_bethtilacAI::SummonSpiderlings()
             x = MIDDLE_X + cos(me->GetAngle(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY())) * (me->GetDistance2d(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY()) + (2 * j));
             y = MIDDLE_Y + sin(me->GetAngle(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY())) * (me->GetDistance2d(spawnPoints[randPos].GetPositionX(), spawnPoints[randPos].GetPositionY()) + (2 * j));
             z = me->GetMap()->GetHeight2(x, y, 80.0f);
-            o = spawnPoints[randPos].GetOrientation();
+            o = spawnPoints[randPos].GetOrientation() + 2.0f;
 
-            Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-
-            if (spiderLing)
+            if(Creature * spiderLing = me->SummonCreature(NPC_CINDERWEB_SPIDERLING, x, y, z, o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
                 spiderLing->SetSpeed(MOVE_RUN, 0.5f, true);
         }
     }
-
 }
 
 
