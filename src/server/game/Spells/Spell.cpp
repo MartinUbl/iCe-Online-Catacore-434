@@ -2539,9 +2539,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
             if (m_spellInfo->Id == 98010) // Volcanic Birth (Firelands)
             {
-                // summon creature somewhere on his platform (cannot be identified different way)
-                dist  = ((float)urand(0,400))/10.0f;
-                angle = (float)(urand(0, 628)) / 100.0f;
+                // summon creature somewhere on his platform (not in our direction)
+                angle = frand(M_PI / 4.0f,(M_PI));
+                angle = (urand(0,1)) ? angle : -angle;
+                dist  = frand(0.0f,42.0f);
+
                 pos.m_positionX = -374.337006f;
                 pos.m_positionY = -318.489990f;
                 pos.m_positionZ = 100.413002f;

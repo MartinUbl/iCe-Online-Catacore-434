@@ -1654,7 +1654,7 @@ public:
                             pLord->CastSpell(pLord,SPELL_OBSIDIAN_ARMOR,false);
                     }
                     else
-                        me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ());
+                        me->GetMotionMaster()->MovePoint(0,pLord->GetPositionX(),pLord->GetPositionY(),pLord->GetPositionZ(),false,false);
                 }
 
                 Path_correction_timer = 500;
