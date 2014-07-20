@@ -26110,7 +26110,7 @@ bool Player::CanUseBattlegroundObject()
              //i'm not sure if these two are correct, because invisible players should get visible when they click on flag
              !HasStealthAura() &&                           // not stealthed
              !HasInvisibilityAura() &&                      // not invisible
-             !HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE) &&     // not camouflaged (hunter)
+             !isCamouflaged() &&                            // not camouflaged (hunter)
              !HasAura(SPELL_RECENTLY_DROPPED_FLAG) &&       // can't pickup
              IsAlive()                                      // live player
 );

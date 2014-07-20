@@ -14742,6 +14742,32 @@ void Unit::SetHover(bool on)
         RemoveAurasDueToSpell(11010);
 }
 
+void Unit::RemoveCamouflage()
+{
+    RemoveAurasDueToSpell(80325);
+    RemoveAurasDueToSpell(51755);
+    RemoveAurasDueToSpell(80326);
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (Unit* pPet = Unit::GetUnit(*this,GetPetGUID()))
+        {
+            pPet->RemoveAurasDueToSpell(51755);
+            pPet->RemoveAurasDueToSpell(80326);
+            pPet->RemoveAurasDueToSpell(80325);
+        }
+    }
+    else
+    {
+        if (Unit* pHunter = Unit::GetUnit(*this,GetOwnerGUID()))
+        {
+            pHunter->RemoveAurasDueToSpell(51755);
+            pHunter->RemoveAurasDueToSpell(80326);
+            pHunter->RemoveAurasDueToSpell(80325);
+        }
+    }
+}
+
 void Unit::setDeathState(DeathState s)
 {
     // death state needs to be updated before RemoveAllAurasOnDeath() calls HandleChannelDeathItem(..) so that

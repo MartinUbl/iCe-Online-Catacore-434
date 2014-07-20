@@ -4010,25 +4010,6 @@ void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode, 
 {
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
         return;
-
-    Unit *target = aurApp->GetTarget();
-
-    if (!apply && !(target->isCamouflaged()))
-    {
-        target->RemoveAurasDueToSpell(80325);
-        target->RemoveAurasDueToSpell(80326);
-
-        if (target->GetPetGUID())
-        {
-            Unit* pPet = Unit::GetUnit(*target, target->GetPetGUID());
-            if (pPet)
-            {
-                pPet->RemoveAurasDueToSpell(51755);
-                pPet->RemoveAurasDueToSpell(80326);
-                pPet->RemoveAurasDueToSpell(80325);
-            }
-        }
-    }
 }
 
 void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mode, bool apply) const

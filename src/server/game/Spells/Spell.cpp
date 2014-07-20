@@ -6328,7 +6328,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->IsVisionObscured(target))
                 {
                     // Camouflage should be ripped by melee abilities
-                    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE || ((m_spellInfo->EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED) != 0) || !target->HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE))
+                    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE || ((m_spellInfo->EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED) != 0) || !target->isCamouflaged())
                         return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
                 }
             }
