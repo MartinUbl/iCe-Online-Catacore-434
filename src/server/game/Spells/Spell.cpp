@@ -3908,50 +3908,10 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
         // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
         if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
         {
-            uint32 removeException = 0;
+            #define CAMOUFLAGE_EXCEPTION_SPELLID 51755 // Hunter ability exception (should be removed after damage done)
 
-            // If has camouflage
-            if (m_caster->HasAura(51755))
-            {
-                // there are some exceptions, which does not break camouflage
-                switch (m_spellInfo->Id)
-                {
-                    case 136:   // Mend Pet
-                    case 982:   // Revive Pet
-                    case 1543:  // Flare
-                    case 13813: // Explosive Trap
-                    case 82939: // Explosive Trap (trap launcher)
-                    case 13795: // Immolation Trap
-                    case 82945: // Immolation Trap (trap launcher)
-                    case 1499:  // Freezing Trap
-                    case 60192: // Freezing Trap (trap launcher)
-                    case 13809: // Ice Trap
-                    case 82941: // Ice Trap (trap launcher)
-                    case 34600: // Snake Trap
-                    case 82948: // Snake Trap (trap launcher)
-                    // Hunter aspects
-                    case 5118:
-                    case 13159:
-                    case 13165:
-                    case 20043:
-                    case 3045: // Rapid Fire
-                    case 35079: // Misdirection
-                    case 53271: // Master's Call
-                    case 53480: // Roar of Sacrifice
-                    // Call pet spells
-                    case 883:
-                    case 83242:
-                    case 83243:
-                    case 83244:
-                    case 83245:
-                    // Dissmiss pet
-                    case 2641:
-                        removeException = 51755;
-                        break;
-                }
-            }
+            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST, CAMOUFLAGE_EXCEPTION_SPELLID);
 
-            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST, removeException);
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
                 if (EffectTargetType[m_spellInfo->Effect[i]] == SPELL_REQUIRE_UNIT)

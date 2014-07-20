@@ -544,6 +544,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
+        // Camouflage is removed by any damage dealt by pet or hunter
+        if ((GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_HUNTER) || IsHunterPet())
+            RemoveCamouflage();
+
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
         pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto ? spellProto->Id : 0);
 
