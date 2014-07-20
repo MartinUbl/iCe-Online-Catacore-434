@@ -394,13 +394,6 @@ void ThreatManager::addThreat(Unit* pVictim, float fThreat, SpellSchoolMask scho
         threat -= reducedThreat;
         if (unit)
             _addThreat(unit, reducedThreat);
-
-        // Tricks of the Trade
-        if (pVictim->HasAura(57934) && !pVictim->HasAura(59628) && unit && !unit->HasAura(57933))
-        {
-            pVictim->CastSpell(pVictim, 59628, true);
-            unit->CastSpell(unit, 57933, true);
-        }
     }
 
     _addThreat(pVictim, threat);

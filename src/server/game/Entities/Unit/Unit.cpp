@@ -548,6 +548,16 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if ((GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_HUNTER) || IsHunterPet())
             RemoveCamouflage();
 
+        // Tricks of the Trade
+        if (pVictim->HasAura(57934) && !pVictim->HasAura(59628) && !HasAura(57933))
+        {
+            if (!(spellProto && (spellProto->AttributesEx & SPELL_ATTR1_NO_THREAT)))
+            {
+                pVictim->CastSpell(pVictim, 59628, true);
+                CastSpell(this, 57933, true);
+            }
+        }
+
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
         pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto ? spellProto->Id : 0);
 
