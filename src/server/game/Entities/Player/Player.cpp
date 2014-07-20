@@ -25011,6 +25011,7 @@ void Player::AutoUnequipOffhandIfNeed(bool force /*= false*/)
     if (off_msg == EQUIP_ERR_OK)
     {
         RemoveItem(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND, true);
+        _ApplyWeaponDependentAuraMods(offItem,OFF_ATTACK,false);
         StoreItem(off_dest, offItem, true);
     }
     else
