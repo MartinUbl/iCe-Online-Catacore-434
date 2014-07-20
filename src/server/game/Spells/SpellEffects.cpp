@@ -1701,19 +1701,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (this->m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
                         damage = int32(damage * 0.5f);
                 }
-                else if (m_spellInfo->Id == 48963 // Morbidity
-                    || m_spellInfo->Id == 49564
-                    || m_spellInfo->Id == 49565)
-                {
-                    if (effIndex != EFFECT_1)
-                        break;
-
-                    if (AuraEffect * aurEff = m_caster->GetAuraEffect(m_spellInfo->Id, EFFECT_1,0))
-                    {
-                        int bonusDmg = 100 + aurEff->GetAmount();
-                        damage = (damage * bonusDmg) / 100;
-                    }
-                }
                 break;
             }
         }
