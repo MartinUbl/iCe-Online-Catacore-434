@@ -8558,6 +8558,10 @@ void Player::_ApplyWeaponDependentAuraMods(Item *item,WeaponAttackType attackTyp
     for (AuraEffectList::const_iterator itr = auraCritList.begin(); itr != auraCritList.end(); ++itr)
         _ApplyWeaponDependentAuraCritMod(item,attackType,*itr,apply);
 
+    // Need to recheck item conditions dependent auras (SPELL_AURA_MOD_HIT_CHANCE)
+    UpdateMeleeHitChances();
+    UpdateRangedHitChances();
+
     AuraEffectList const& auraDamageFlatList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for (AuraEffectList::const_iterator itr = auraDamageFlatList.begin(); itr != auraDamageFlatList.end(); ++itr)
         _ApplyWeaponDependentAuraDamageMod(item,attackType,*itr,apply);

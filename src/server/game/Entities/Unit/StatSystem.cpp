@@ -757,14 +757,32 @@ void Player::UpdateArmorPenetration(int32 amount)
 
 void Player::UpdateMeleeHitChances()
 {
-    m_modMeleeHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    int32 hitModifier = 0;
+
+    AuraEffectList const& auraHitList = GetAuraEffectsByType(SPELL_AURA_MOD_HIT_CHANCE);
+    for (AuraEffectList::const_iterator itr = auraHitList.begin(); itr != auraHitList.end(); ++itr)
+    {
+        if (HasItemFitToSpellRequirements((*itr)->GetSpellProto()))
+            hitModifier += (*itr)->GetAmount();
+    }
+
+    m_modMeleeHitChance = (float)hitModifier;
     SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modMeleeHitChance);
     m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
 }
 
 void Player::UpdateRangedHitChances()
 {
-    m_modRangedHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    int32 hitModifier = 0;
+
+    AuraEffectList const& auraHitList = GetAuraEffectsByType(SPELL_AURA_MOD_HIT_CHANCE);
+    for (AuraEffectList::const_iterator itr = auraHitList.begin(); itr != auraHitList.end(); ++itr)
+    {
+        if (HasItemFitToSpellRequirements((*itr)->GetSpellProto()))
+            hitModifier += (*itr)->GetAmount();
+    }
+
+    m_modRangedHitChance = (float)hitModifier;
     SetFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modRangedHitChance);
     m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
 }
