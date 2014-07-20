@@ -6993,20 +6993,15 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         case SPELLFAMILY_WARRIOR:
         {
             // Devastate (player ones)
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
+            if ((m_spellInfo->SpellFamilyFlags[1] & 0x40))
             {
-                // Player can apply only 58567 Sunder Armor effect.
-                bool needCast = !unitTarget->HasAura(58567);
-                if (needCast)
-                    m_caster->CastSpell(unitTarget, 58567, true);
+                #define SPELL_SUNDER_ARMOR (58567)
 
-                if (Aura * aur = unitTarget->GetAura(58567))
-                {
-                    // 58388 - Glyph of Devastate dummy aura.
-                    if (int32 num = (needCast ? 0 : 1) + (m_caster->HasAura(58388) ? 1 : 0))
-                        aur->ModStackAmount(num);
-                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
-                }
+                // + damage for each application of Sunder Armor on the target
+                if (Aura * sunderAura = unitTarget->GetAura(SPELL_SUNDER_ARMOR, m_caster->GetGUID()))
+                    fixed_bonus += SpellMgr::CalculateSpellEffectAmount(m_spellInfo, effIndex, m_caster) * sunderAura->GetStackAmount();
+
+                m_caster->CastSpell(unitTarget, SPELL_SUNDER_ARMOR, true);
             }
             // Mortal Strike
             else if (m_spellInfo->Id == 12294)
@@ -7347,7 +7342,8 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 fixed_bonus += CalculateDamage(j, unitTarget);
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += CalculateDamage(j, unitTarget);
+                if (m_spellInfo->Id != 20243) // Dont add fixed_bonus twice in Devastate -> HACK
+                    fixed_bonus += CalculateDamage(j, unitTarget);
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
