@@ -21844,17 +21844,6 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
                 return false;
             break;
         }
-        // Nerves of Cold Steel
-        case 49226:
-        case 50137:
-        case 50138:
-        {
-            // Apply bonus only for only if dual wielding
-            Item *item = GetWeaponForAttack(BASE_ATTACK);
-            if (!item || item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
-                return false;
-            break;
-        }
     }
 
     return sSpellMgr->IsAffectedByMod(spellInfo, mod);
