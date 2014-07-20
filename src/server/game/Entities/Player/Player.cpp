@@ -25032,7 +25032,7 @@ OutdoorPvP * Player::GetOutdoorPvP() const
     return sOutdoorPvPMgr->GetOutdoorPvPToZoneId(GetZoneId());
 }
 
-bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem)
+bool Player::HasItemFitToSpellRequirements(SpellEntry const* spellInfo, Item const* ignoreItem)
 {
     if (spellInfo->EquippedItemClass < 0)
         return true;
@@ -25110,7 +25110,7 @@ void Player::RemoveItemDependentAurasAndCasts(Item * pItem)
         }
 
         // skip if not item dependent or have alternative item
-        if (HasItemFitToSpellReqirements(spellInfo,pItem))
+        if (HasItemFitToSpellRequirements(spellInfo,pItem))
         {
             ++itr;
             continue;
@@ -25123,7 +25123,7 @@ void Player::RemoveItemDependentAurasAndCasts(Item * pItem)
     // currently casted spells can be dependent from item
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
-            if (spell->getState() != SPELL_STATE_DELAYED && !HasItemFitToSpellReqirements(spell->m_spellInfo,pItem))
+            if (spell->getState() != SPELL_STATE_DELAYED && !HasItemFitToSpellRequirements(spell->m_spellInfo,pItem))
                 InterruptSpell(CurrentSpellTypes(i));
 }
 
