@@ -26718,7 +26718,7 @@ uint32 Player::CalculateTalentsPoints() const
 
     int32 talentPoints = int32(talentsAtLevel->tp);
 
-    if (getClass() != CLASS_DEATH_KNIGHT || GetMapId() != 609)
+    if (getClass() != CLASS_DEATH_KNIGHT || GetMapId() != 609 || IsGameMaster())
         return uint32(talentPoints * talentRate);
 
     // Death Knights on map 609 have to gain talent points for levels at or below 55 by quests
