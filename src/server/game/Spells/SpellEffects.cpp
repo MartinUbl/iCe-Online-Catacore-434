@@ -5951,6 +5951,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         if (!pet)
             return;
 
+        pet->ToggleAutocast(63619,true); // Toggle autocast on ShadowCrawl after spawn
+        pet->SetOwnerGUID(m_caster->GetGUID());
         pet->SetReactState(REACT_AGGRESSIVE);
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         pet->SetCreatorGUID(m_originalCaster->GetGUID());
