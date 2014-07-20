@@ -13328,13 +13328,23 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     // SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT  included in weapon damage
 
     // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE for non-physical spells like Scourge Strike, Frost Strike, this is NOT included in weapon damage
+    // Some spells don't benefit from pct done mods
     if (spellProto)
-        if (GetSpellSchoolMask(spellProto) != SPELL_SCHOOL_MASK_NORMAL)
+        if (!(spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS))
         {
-            AuraEffectList const &mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+            AuraEffectList const & mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
             for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-                if (((*i)->GetMiscValue() & GetSpellSchoolMask(spellProto)) && !((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
-                    DoneTotalMod *= ((*i)->GetAmount()+100.0f)/100.0f;
+            {
+                if ((*i)->GetMiscValue() & spellProto->SchoolMask && !(spellProto->SchoolMask & SPELL_SCHOOL_MASK_NORMAL))
+                {
+                    if ((*i)->GetSpellProto()->EquippedItemClass == -1)
+                        AddPctN(DoneTotalMod, (*i)->GetAmount());
+                    else if (!((*i)->GetSpellProto()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellProto()->EquippedItemSubClassMask == 0))
+                        AddPctN(DoneTotalMod, (*i)->GetAmount());
+                    else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellProto()))
+                        AddPctN(DoneTotalMod, (*i)->GetAmount());
+                }
+            }
         }
 
     AuraEffectList const &mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
