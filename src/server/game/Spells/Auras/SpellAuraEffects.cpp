@@ -402,14 +402,14 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //340
     &AuraEffect::HandleNULL,                                      //341 SPELL_AURA_MOD_COOLDOWN_NATIVE
     &AuraEffect::HandleModMeleeRangedSpeedPct,                    //342 SPELL_AURA_MOD_MELEE_RANGED_HASTE_2
-    &AuraEffect::HandleNULL,                                      //343
-    &AuraEffect::HandleNULL,                                      //344
-    &AuraEffect::HandleNULL,                                      //345
+    &AuraEffect::HandleNULL,                                      //343 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_1 implemented in Unit::MeleeDamageBonus (only Bandit's Guile + vendetta)
+    &AuraEffect::HandleNULL,                                      //344 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_2 implemented in Unit::MeleeDamageBonus
+    &AuraEffect::HandleNULL,                                      //345 SPELL_AURA_BYPASS_ARMOR implemented in Unit::CalcArmorReducedDamage
     &AuraEffect::HandleAuraEnableAltPower,                        //346 SPELL_AURA_ENABLE_ALT_POWER
-    &AuraEffect::HandleNULL,                                      //347
-    &AuraEffect::HandleNULL,                                      //348
-    &AuraEffect::HandleNULL,                                      //349
-    &AuraEffect::HandleNULL,                                      //350
+    &AuraEffect::HandleNULL,                                      //347 SPELL_AURA_HASTE_MOD_COOLDOWN implemented in Player::UpdateHaste()
+    &AuraEffect::HandleNULL,                                      //348 SPELL_AURA_MOD_LOOT_MONEY_GAIN implemeted in WorldSession::HandleLootMoneyOpcode
+    &AuraEffect::HandleNULL,                                      //349 SPELL_AURA_MOD_CURRENCY_GAIN implemented in Player::ModifyCurrency
+    &AuraEffect::HandleNULL,                                      //350 SPELL_AURA_MOD_GATHER_QUANTITY
     &AuraEffect::HandleNULL,                                      //351
     &AuraEffect::HandleNULL,                                      //352
     &AuraEffect::HandleModCamouflage,                             //353 SPELL_AURA_CAMOUFLAGE
