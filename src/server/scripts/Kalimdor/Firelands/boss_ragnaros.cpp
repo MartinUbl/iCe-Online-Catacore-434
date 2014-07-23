@@ -2726,7 +2726,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE|UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
             me->ForcedDespawn(40000);
-            Blazing_heat_timer = 300;
+            Blazing_heat_timer = 500;
             me->CastSpell(me,BLAZING_HEAT_DMG_HEAL,true);
         }
 

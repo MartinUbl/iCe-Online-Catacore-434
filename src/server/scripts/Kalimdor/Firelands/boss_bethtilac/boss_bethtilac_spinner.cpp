@@ -20,17 +20,13 @@
  * as part of the script of Beth'tilac
  */
 
-
 #include "ScriptPCH.h"
 #include "../firelands.h"
 #include "boss_bethtilac_data.h"
 #include "boss_bethtilac_spiderAI.h"
 
-
 namespace Bethtilac
 {
-
-
 class mob_spinnerAI: public SpiderAI
 {
 public:
@@ -73,9 +69,6 @@ void load_mob_Spinner()
 }
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////
 // implementation of Cinderweb Spinner
 
@@ -96,8 +89,6 @@ enum SpinnerEvents
 };
 
 
-
-
 mob_spinnerAI::mob_spinnerAI(Creature *creature)
     : SpiderAI(creature)
     , hanging(false)
@@ -106,23 +97,20 @@ mob_spinnerAI::mob_spinnerAI(Creature *creature)
 {
 }
 
-
 mob_spinnerAI::~mob_spinnerAI()
 {
 }
-
 
 void mob_spinnerAI::EnterEvadeMode()
 {
     // do nothing
 }
 
-
 void mob_spinnerAI::JustDied(Unit *killer)
 {
     DoAction(EVENT_SUMMON_FILAMENT);
+    me->ForcedDespawn(10000);
 }
-
 
 void mob_spinnerAI::UpdateAI(const uint32 diff)
 {
@@ -138,7 +126,6 @@ void mob_spinnerAI::UpdateAI(const uint32 diff)
 
     UpdateTimers(diff);
 }
-
 
 void mob_spinnerAI::DoAction(const int32 event)
 {
@@ -165,7 +152,6 @@ void mob_spinnerAI::DoAction(const int32 event)
             break;
     }
 }
-
 
 void mob_spinnerAI::MovementInform(uint32 type, uint32 id)
 {
@@ -200,7 +186,6 @@ void mob_spinnerAI::MovementInform(uint32 type, uint32 id)
     }
 }
 
-
 void mob_spinnerAI::IsSummonedBy(Unit *summoner)
 {
     onGround = false;
@@ -215,7 +200,6 @@ void mob_spinnerAI::IsSummonedBy(Unit *summoner)
     SummonFilament();
     DoZoneInCombat();
 }
-
 
 void mob_spinnerAI::SpellHit(Unit *caster, const SpellEntry *spell)
 {
@@ -233,6 +217,4 @@ void mob_spinnerAI::SpellHit(Unit *caster, const SpellEntry *spell)
         }
     }
 }
-
-
 }   // end of namespace

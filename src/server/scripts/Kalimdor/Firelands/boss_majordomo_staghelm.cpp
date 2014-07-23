@@ -161,6 +161,8 @@ public:
             Berserk_timer = 10 * MINUTE;
             Human_timer = NEVER;
             barUsed = false;
+
+            me->RemoveAllDynObjects();
         }
 
         void KilledUnit(Unit * victim)
@@ -408,6 +410,8 @@ public:
                 if(unit && unit->ToPlayer())
                 {
                     Aura * seed_aura = unit->GetAura(SPELL_SEARING_SEEDS);
+                    // Sometimes happened that spell was interrupted somehow -> check it and if so apply manually
+                    seed_aura = seed_aura == NULL ? me->AddAura(SPELL_SEARING_SEEDS, unit) : seed_aura;
 
                     if(seed_aura)
                     {
@@ -626,7 +630,7 @@ public:
                     }
 
                     Human_timer = 4050;
-                    Phase_check_timer = 4050;
+                    Phase_check_timer = 4200;
                     morphs = 0;
                     return;
                 }
@@ -980,7 +984,7 @@ public:
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* spell)
         {
-            if (spell->Id == KNEEEL_TO_THE_FLAME)
+            if (spell->Id == KNEEEL_TO_THE_FLAME || spell->Id == 100101) // or difficulty variant
             {
                 std::list<Creature*> orbs;
                 GetCreatureListWithEntryInGrid(orbs, me, FANDRAL_FLAME, 200.0f);
