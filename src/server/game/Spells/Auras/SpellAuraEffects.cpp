@@ -1792,6 +1792,28 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             caster->RemoveAura(74434); // Soulburn buff
                         }
                         break;
+                    /*  Shooting Stars proc handled here, because from some mystical reason this talent ignore any
+                        changes in HandleProcTriggerSpellor or records in spell_proc_event
+                        If someone wil find reason why, I'll give him a cookie !!!
+                        UGLY UGLY HACK !!!
+                    */
+                    case 8921:  // Moonfire
+                    case 93402: // Sunfire
+                    case 5570:  // Insect Swarm
+                    {
+                        if (!caster)
+                            break;
+
+                        float chance = 0.0f;
+                        if (caster->HasAura(93398)) // Shooting Stars (Rank 1)
+                            chance = 2.0f;
+                        else if (caster->HasAura(93399)) // Shooting Stars (Rank 2)
+                            chance = 4.0f;
+
+                        if (roll_chance_f(chance))
+                            caster->CastSpell(caster, 93400, true);
+                        break;
+                    }
                     case 603:    // Bane of Doom
                         {
                             uint32 chance = 20;

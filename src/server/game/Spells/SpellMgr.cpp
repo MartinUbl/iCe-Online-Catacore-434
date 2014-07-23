@@ -5410,6 +5410,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectTriggerSpell[0] = 0;
             spellInfo->DurationIndex = 21; // unlimited duration
             break;
+        case 93398: // Shooting Stars (hack)
+        case 93399:
+        {
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        }
         case 81441: // Shadowfury
         case 92644: // Shadowfury (heroic difficulty)
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;

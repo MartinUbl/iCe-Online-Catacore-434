@@ -9494,14 +9494,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        case 93398: // Shooting Stars
-        case 93399:
-        {
-            // Moonfire(Sunfire) or Insect Swarm 
-            if (procSpell->Id != 8921 && procSpell->Id != 93402 && procSpell->Id != 5570)
-                return false;
-            break;
-        }
         case 16880: // Nature's Grace
         case 61345:
         case 61346:
