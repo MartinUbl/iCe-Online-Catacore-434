@@ -16932,14 +16932,14 @@ Player* Unit::GetSpellModOwner() const
     if (GetTypeId() == TYPEID_PLAYER)
         return (Player*)this;
 
-    if (GetTypeId() == TYPEID_DYNAMICOBJECT)
+    /*if (GetTypeId() == TYPEID_DYNAMICOBJECT)
     {
         if (Unit * dynOwner = ToDynamicObject()->GetCaster())
         {
             if (dynOwner->GetTypeId() == TYPEID_PLAYER)
                 return dynOwner->ToPlayer();
         }
-    }
+    }*/
 
     if (this->ToCreature()->IsPet() || this->ToCreature()->IsTotem())
     {
