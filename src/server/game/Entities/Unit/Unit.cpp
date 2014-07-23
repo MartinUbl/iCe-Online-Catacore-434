@@ -544,8 +544,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        // Camouflage is removed by any damage dealt by pet or hunter
-        if ((GetTypeId() == TYPEID_PLAYER && ToPlayer()->getClass() == CLASS_HUNTER) || IsHunterPet())
+        // Camouflage is removed by any damage delat to hunter or any damage done by pet or hunter itself
+        if (pVictim->isCamouflaged())
+            pVictim->RemoveCamouflage();
+        else if (isCamouflaged())
             RemoveCamouflage();
 
         // Tricks of the Trade
