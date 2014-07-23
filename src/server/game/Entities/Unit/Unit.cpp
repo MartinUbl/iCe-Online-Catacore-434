@@ -8871,6 +8871,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
             }
             if (dummySpell->Id == 53508) // Wolverine Bite
             {
+                *handled = true;
                 if (!(procEx & PROC_EX_CRITICAL_HIT)) // proc only from critical strikes
                     return false;
             }
