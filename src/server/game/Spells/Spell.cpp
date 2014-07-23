@@ -5808,6 +5808,10 @@ void Spell::HandleThreatSpells(uint32 spellId)
     if (!threat)
         return;
 
+    if ((m_spellInfo->AttributesEx  & SPELL_ATTR1_NO_THREAT) ||
+        (m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO))
+        return;
+
     if (m_targets.getUnitTarget())
     {
         if (m_targets.getUnitTarget()->CanHaveThreatList())
