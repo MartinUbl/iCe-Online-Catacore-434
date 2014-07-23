@@ -2119,6 +2119,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
     }
 
+    // Despawn wild mushrooms before teleporting
+    DespawnAllSummonsByEntry(47649);
+
     // The player was ported to another map and looses the duel immediately.
     // We have to perform this check before the teleport, otherwise the
     // ObjectAccessor won't find the flag.

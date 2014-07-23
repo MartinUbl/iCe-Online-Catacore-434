@@ -2667,6 +2667,19 @@ class Player : public Unit, public GridObject<Player>
             }
         }
 
+        void DespawnAllSummonsByEntry(uint32 entry)
+        {
+            Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
+            if (pSummmons && !pSummmons->empty())
+            {
+                Creature* pTemp = NULL;
+                for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
+                    if (Creature * cr = Creature::GetCreature(*this, (*itr).first))
+                        cr->ForcedDespawn();
+                    pSummmons->clear();
+            }
+        }
+
         bool isUsingLfg();
 
         typedef std::set<uint32> DFQuestsDoneList;
