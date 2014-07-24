@@ -4038,10 +4038,9 @@ void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode, 
 
     Unit *target = aurApp->GetTarget();
 
-    if (!apply && target)
+    if (!apply && !(target->isCamouflaged()))
     {
         // Drop other Camouflage auras
-        target->RemoveAurasDueToSpell(51755);
         target->RemoveAurasDueToSpell(80326);
         target->RemoveAurasDueToSpell(80325);
     }
