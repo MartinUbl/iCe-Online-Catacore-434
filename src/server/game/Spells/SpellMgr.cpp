@@ -4483,6 +4483,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 49838: // Stop Time
         case 50526: // Wandering Plague
         case 52916: // Honor Among Thieves
+        case 83676: // Resistance is Futile periodic aura
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             count++;
             break;
