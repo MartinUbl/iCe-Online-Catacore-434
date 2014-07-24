@@ -4031,11 +4031,20 @@ void AuraEffect::HandleModActionButton(AuraApplication const *aurApp, uint8 mode
     }
 }
 
-//TODO: Finish this aura
 void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
         return;
+
+    Unit *target = aurApp->GetTarget();
+
+    if (!apply && target)
+    {
+        // Drop other Camouflage auras
+        target->RemoveAurasDueToSpell(51755);
+        target->RemoveAurasDueToSpell(80326);
+        target->RemoveAurasDueToSpell(80325);
+    }
 }
 
 void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mode, bool apply) const
