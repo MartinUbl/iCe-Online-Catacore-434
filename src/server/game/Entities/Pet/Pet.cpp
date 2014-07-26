@@ -989,6 +989,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetCreateMana(28 + 10 * petlevel);
                         SetCreateHealth(28 + 30 * petlevel);
                     }
+                    // 1.5s attack time
+                    SetAttackTime(BASE_ATTACK, cinfo->baseattacktime);
                     int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
@@ -1089,6 +1091,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
                         dmg_multiplier = 0.6f;
 
+                    // wolf attack speed is 1.5s
+                    SetAttackTime(BASE_ATTACK, cinfo->baseattacktime);
                     SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
 
                     // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 2
