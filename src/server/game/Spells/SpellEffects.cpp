@@ -1691,15 +1691,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.035f);
                 }
-                //// Death Coil - disable adding bonus
-                //else if (m_spellInfo->Id == 47632)
-                //    apply_direct_bonus = false;
                 // Howling Blast
                 else if (m_spellInfo->Id == 49184)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.44f);
-                    if (this->m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
-                        damage = int32(damage * 0.5f);
+                    if (m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
+                        damage = int32(damage / 2);
+                }
+                // Explosive Trap
+                else if (m_spellInfo->Id == 13812)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
                 }
                 break;
             }
