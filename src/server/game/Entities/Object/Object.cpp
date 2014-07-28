@@ -2232,6 +2232,10 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
         }
     }
 
+    // Wild mushrooms should be considered as totems
+    if (entry == 47649)
+        mask = UNIT_MASK_TOTEM;
+
     uint32 phase = PHASEMASK_NORMAL, team = 0;
     if (summoner)
     {
