@@ -6419,28 +6419,8 @@ void AuraEffect::HandleAuraModResistance(AuraApplication const *aurApp, uint8 mo
         if (GetMiscValue() & int32(1 << x))
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), TOTAL_VALUE, float(GetAmount()), apply);
-
-            if (target->GetTypeId() == TYPEID_PLAYER)
-            {
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->IsPet())
                 target->ApplyResistanceBuffModsMod(SpellSchools(x), GetAmount() > 0, float(GetAmount()), apply);
-
-                Pet * pet = target->ToPlayer()->GetPet();
-                if (!pet)
-                    continue;
-
-                Unit::AuraEffectList const& resistList = pet->GetAuraEffectsByType(SPELL_AURA_MOD_RESISTANCE);
-                for (Unit::AuraEffectList::const_iterator itr = resistList.begin(); itr != resistList.end(); ++itr)
-                {
-                    if ((*itr)->GetSpellProto()->AttributesEx4 & SPELL_ATTR4_IS_PET_SCALING)
-                    {
-                        if ((*itr)->GetMiscValue() & GetMiscValue())
-                        {
-                            int32 newAddition = apply ? (GetAmount() * 0.4f) : (-GetAmount() * 0.4f);
-                            (*itr)->SetAmount((*itr)->GetAmount() + newAddition);
-                        }
-                    }
-                }
-            }
         }
     }
 }
