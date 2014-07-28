@@ -1841,6 +1841,78 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
     return (newdamage > 1) ? newdamage : 1;
 }
 
+uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, SpellEntry const* spellInfo) const
+{
+    // Magic damage, check for resists
+    if (!(schoolMask & SPELL_SCHOOL_MASK_SPELL))
+        return 0;
+
+    // Ignore spells that can't be resisted
+    if (spellInfo && spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES)
+        return 0;
+
+    uint8 const bossLevel = 85;
+    uint32 const bossResistanceConstant = 510;
+    uint32 resistanceConstant = 0;
+    uint8 level = victim->getLevel();
+
+    if (level == bossLevel)
+        resistanceConstant = bossResistanceConstant;
+    else
+        resistanceConstant = level * 5;
+
+    int32 baseVictimResistance = victim->GetResistance(schoolMask);
+    baseVictimResistance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+
+    if (Player const* player = ToPlayer())
+        baseVictimResistance -= player->GetSpellPenetrationItemMod();
+
+    // Resistance can't be lower then 0
+    int32 victimResistance = std::max<int32>(baseVictimResistance, 0);
+
+    if (victimResistance > 0)
+    {
+        int32 ignoredResistance = 0;
+
+        AuraEffectList const& ResIgnoreAuras = GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
+        for (AuraEffectList::const_iterator itr = ResIgnoreAuras.begin(); itr != ResIgnoreAuras.end(); ++itr)
+            if ((*itr)->GetMiscValue() & schoolMask)
+                ignoredResistance += (*itr)->GetAmount();
+
+        ignoredResistance = std::min<int32>(ignoredResistance, 100);
+        ApplyPctN(victimResistance, 100 - ignoredResistance);
+    }
+
+    if (victimResistance <= 0)
+        return 0;
+
+    float averageResist = float(victimResistance) / float(victimResistance + resistanceConstant);
+
+    float discreteResistProbability[11];
+    for (uint32 i = 0; i < 11; ++i)
+    {
+        discreteResistProbability[i] = 0.5f - 2.5f * fabs(0.1f * i - averageResist);
+        if (discreteResistProbability[i] < 0.0f)
+            discreteResistProbability[i] = 0.0f;
+    }
+
+    if (averageResist <= 0.1f)
+    {
+        discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
+        discreteResistProbability[1] = 5.0f * averageResist;
+        discreteResistProbability[2] = 2.5f * averageResist;
+    }
+
+    uint32 resistance = 0;
+    float r = float(rand_norm());
+    float probabilitySum = discreteResistProbability[0];
+
+    while (r >= probabilitySum && resistance < 10)
+        probabilitySum += discreteResistProbability[++resistance];
+
+    return resistance * 10;
+}
+
 void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo)
 {
     if (!pVictim || !pVictim->IsAlive() || !damage)
@@ -1848,73 +1920,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
 
     DamageInfo dmgInfo = DamageInfo(this, pVictim, damage, spellInfo, schoolMask, damagetype);
 
-    // Magic damage, check for resists
-    // Ignore spells that cant be resisted
-    if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0 && (!spellInfo || (spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) == 0))
-    {
-        float baseVictimResistance = float(pVictim->GetResistance(GetFirstSchoolInMask(schoolMask)));
-        if (spellInfo && spellInfo->Id == 44614)
-        {
-            float frostresist = pVictim->GetResistance(SPELL_SCHOOL_FROST);
-            float fireresist = pVictim->GetResistance(SPELL_SCHOOL_FIRE);
-            baseVictimResistance = (frostresist > fireresist) ? fireresist : frostresist;
-        }
-
-        float ignoredResistance = float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
-        if (Player* player = ToPlayer())
-            ignoredResistance -= float(player->GetSpellPenetrationItemMod());
-        float victimResistance = baseVictimResistance + ignoredResistance;
-
-        if (victimResistance < 0)       // resistance can't be negative
-            victimResistance = 0;
-
-        static const uint32 BOSS_LEVEL = 88;
-        static const float BOSS_RESISTANCE_CONSTANT = 510.0;
-        uint32 level = getLevel();
-        float resistanceConstant = 0.0f;
-
-        if (level == BOSS_LEVEL)
-            resistanceConstant = BOSS_RESISTANCE_CONSTANT;
-        else
-            resistanceConstant = level * 5.0f;
-
-        float averageResist = victimResistance / (victimResistance + resistanceConstant);
-        float discreteResistProbability[11];
-        for (uint32 i = 0; i < 11; ++i)
-        {
-            discreteResistProbability[i] = 0.5f - 2.5f * fabs(0.1f * i - averageResist);
-            if (discreteResistProbability[i] < 0.0f)
-                discreteResistProbability[i] = 0.0f;
-        }
-
-        if (averageResist <= 0.1f)
-        {
-            discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
-            discreteResistProbability[1] = 5.0f * averageResist;
-            discreteResistProbability[2] = 2.5f * averageResist;
-        }
-
-        float r = float(rand_norm());
-        uint32 i = 0;
-        float probabilitySum = discreteResistProbability[0];
-
-        while (r >= probabilitySum && i < 10)
-            probabilitySum += discreteResistProbability[++i];
-
-        float damageResisted = float(damage * i / 10);
-
-        AuraEffectList const &ResIgnoreAurasAb = GetAuraEffectsByType(SPELL_AURA_MOD_ABILITY_IGNORE_TARGET_RESIST);
-        for (AuraEffectList::const_iterator j = ResIgnoreAurasAb.begin(); j != ResIgnoreAurasAb.end(); ++j)
-            if (((*j)->GetMiscValue() & schoolMask) && (*j)->IsAffectedOnSpell(spellInfo))
-                AddPctN(damageResisted, -(*j)->GetAmount());
-
-        AuraEffectList const &ResIgnoreAuras = GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
-        for (AuraEffectList::const_iterator j = ResIgnoreAuras.begin(); j != ResIgnoreAuras.end(); ++j)
-            if ((*j)->GetMiscValue() & schoolMask)
-                AddPctN(damageResisted, -(*j)->GetAmount());
-
-        dmgInfo.ResistDamage(uint32(damageResisted));
-    }
+    uint32 spellResistance = CalcSpellResistance(pVictim, schoolMask, spellInfo);
+    dmgInfo.ResistDamage(CalculatePctN(damage, spellResistance));
 
     // Ignore Absorption Auras
     float auraAbsorbMod = 0;
@@ -20191,6 +20198,17 @@ bool Unit::IsVisionObscured(Unit* pVictim)
             return true;
     }
     return false;
+}
+
+uint32 Unit::GetResistance(SpellSchoolMask mask) const
+{
+    int32 resist = -1;
+    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+        if (mask & (1 << i) && (resist < 0 || resist > int32(GetResistance(SpellSchools(i)))))
+            resist = int32(GetResistance(SpellSchools(i)));
+
+    // resist value will never be negative here
+    return uint32(resist);
 }
 
 void CharmInfo::SetIsCommandAttack(bool val)

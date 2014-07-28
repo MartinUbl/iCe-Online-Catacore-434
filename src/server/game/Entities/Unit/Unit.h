@@ -1262,10 +1262,11 @@ class Unit : public WorldObject
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0+stat)); }
         void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0+stat, val); }
-        uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
+        uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL); }
         void SetArmor(int32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
 
         uint32 GetResistance(SpellSchools school) const { return GetUInt32Value(UNIT_FIELD_RESISTANCES+school); }
+        uint32 GetResistance(SpellSchoolMask mask) const;
         void SetResistance(SpellSchools school, int32 val) { SetStatInt32Value(UNIT_FIELD_RESISTANCES+school,val); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
@@ -1976,6 +1977,7 @@ class Unit : public WorldObject
         uint32 CalcNotIgnoreDamageRedunction(uint32 damage, SpellSchoolMask damageSchoolMask);
         static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellEntry const *spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEntry const *spellInfo, WeaponAttackType attackType=MAX_ATTACK);
+        uint32 CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, SpellEntry const* spellInfo) const;
         void CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo = NULL);
         void CalcHealAbsorb(Unit *pVictim, const SpellEntry *spellProto, uint32 &healAmount, uint32 &absorb);
 
