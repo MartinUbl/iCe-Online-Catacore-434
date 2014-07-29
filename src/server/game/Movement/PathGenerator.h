@@ -49,6 +49,22 @@ enum PathType
     PATHFIND_SHORT = 0x20,   // path is longer or equal to its limited path length
 };
 
+enum PathAlternationType
+{
+    OL_BE_BRTRIANGLE_TO_OUT = 1,
+    OL_BE_OUT_TO_BRTRIANGLE = 2,
+    OL_BE_ULTRIANGLE_TO_OUT = 3,
+    OL_BE_OUT_TO_ULTRIANGLE = 4,
+    OL_BE_BRTRIANGLE_TO_ULTRIANGLE = 5,
+    OL_BE_ULTRIANGLE_TO_BRTRIANGLE = 6,
+    BE_BE_BRTRIANGLE_TO_OUT = 7,
+    BE_BE_OUT_TO_BRTRIANGLE = 8,
+    BE_BE_ULTRIANGLE_TO_OUT = 9,
+    BE_BE_OUT_TO_ULTRIANGLE = 10,
+    BE_BE_BRTRIANGLE_TO_ULTRIANGLE = 11,
+    BE_BE_ULTRIANGLE_TO_BLTRIANGLE = 12,
+};
+
 class PathGenerator
 {
 public:
@@ -99,7 +115,15 @@ private:
     dtNavMesh const* _navMesh;              // the nav mesh
     dtNavMeshQuery const* _navMeshQuery;    // the nav mesh query used to find the path
 
+    G3D::Vector3 _storedStartPosition;      // stored starting position in case of path alternation
+    G3D::Vector3 _storedEndPosition;        // stored ending position in case of path alternation
+    bool _needAlternation;                  // flag to indicate whether the path needed to be alternated
+    uint32 _alternationType;                // type of alternation applied
+
     dtQueryFilter _filter;  // use single filter for all movements, update it when needed
+
+    void VerifyAlternation(G3D::Vector3& startVector, G3D::Vector3& endVector);
+    void ProcessAlternation();
 
     void SetStartPosition(G3D::Vector3 const& point) { _startPosition = point; }
     void SetEndPosition(G3D::Vector3 const& point) { _actualEndPosition = point; _endPosition = point; }
@@ -122,7 +146,7 @@ private:
 
     void BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 const& endPos);
     void BuildPointPath(float const* startPoint, float const* endPoint);
-    void BuildShortcut();
+    void BuildShortcut(G3D::Vector3 const& startPos, G3D::Vector3 const& endPos);
 
     NavTerrain GetNavTerrain(float x, float y, float z);
     void CreateFilter();

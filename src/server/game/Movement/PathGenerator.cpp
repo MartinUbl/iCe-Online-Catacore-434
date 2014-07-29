@@ -33,7 +33,8 @@ _polyLength(0), _type(PATHFIND_BLANK), _useStraightPath(false),
 _forceDestination(false), _pointPathLimit(MAX_POINT_PATH_LENGTH), _straightLine(false),
 _forceSource(false),
 _endPosition(G3D::Vector3::zero()), _sourceUnit(owner), _navMesh(NULL),
-_navMeshQuery(NULL)
+_navMeshQuery(NULL),
+_needAlternation(false)
 {
     memset(_pathPolyRefs, 0, sizeof(_pathPolyRefs));
 
@@ -83,14 +84,21 @@ bool PathGenerator::CalculatePath(float destX, float destY, float destZ, bool fo
     if (!_navMesh || !_navMeshQuery || _sourceUnit->HasUnitState(UNIT_STATE_IGNORE_PATHFINDING) ||
         !HaveTile(start) || !HaveTile(dest))
     {
-        BuildShortcut();
+        BuildShortcut(start, dest);
         _type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
         return true;
     }
 
     UpdateFilter();
 
+    // test if path alternation is needed
+    VerifyAlternation(start, dest);
+
     BuildPolyPath(start, dest);
+
+    // if alternation was needed, proceed
+    ProcessAlternation();
+
     return true;
 }
 
@@ -106,6 +114,155 @@ void PathGenerator::SetForceSource(float x, float y, float z)
 void PathGenerator::UnsetForceSource()
 {
     _forceSource = false;
+}
+
+void PathGenerator::VerifyAlternation(G3D::Vector3& startVector, G3D::Vector3& endVector)
+{
+    if (!_sourceUnit || !_sourceUnit->IsInWorld())
+        return;
+
+    _needAlternation = false;
+
+    float sx = startVector.x, sy = startVector.y, sz = startVector.z;
+    float dx = endVector.x, dy = endVector.y, dz = endVector.z;
+
+    // Outland
+    if (_sourceUnit->GetMapId() == 530)
+    {
+        // Blade's Edge Mountains arena
+        // triangle "on the bottom right"
+
+        // source is in triangle + above the line (Y-coord is oriented mathematically the other way)
+        if (sz > 7.5f && sx > 2821.122559f && sx < 2843.760742f && sy > 5911.699219f && sy < 5930.075684f && sy < -0.81174646*sx + 8220.1119345f)
+        {
+            // dest is in the same triangle
+            if (dz > 7.5f && dx > 2821.122559f && dx < 2843.760742f && dy > 5911.699219f && dy < 5930.075684f && dy < -0.81174646*dx + 8220.1119345f)
+            {
+                // no alternation needed
+                return;
+            }
+
+            startVector.x = 2834.926758f;
+            startVector.y = 5923.780273f;
+            startVector.z = 11.064119f;
+            _needAlternation = true;
+
+            // dest is in the other triangle
+            if (dz > 7.5f && dx > 2828.993652f && dx < 2859.013672f && dy > 5923.300293f && dy < 5949.687012f && dy > -0.87897f*dx + 8436.287562f)
+                _alternationType = OL_BE_BRTRIANGLE_TO_ULTRIANGLE;
+            else
+                _alternationType = OL_BE_BRTRIANGLE_TO_OUT;
+        }
+        // dest is in triangle + above the line (Y-coord is oriented mathematically the other way)
+        else if (dz > 7.5f && dx > 2821.122559f && dx < 2843.760742f && dy > 5911.699219f && dy < 5930.075684f && dy < -0.81174646*dx + 8220.1119345f)
+        {
+            // source is in the same triangle
+            // no need to check this again - checked in previous block, A & B <=> B & A
+            //if (sz > 7.5f && sx > 2821.122559f && sx < 2843.760742f && sy > 5911.699219f && sy < 5930.075684f && sy < -0.81174646*sx + 8220.1119345f)
+            //{
+                // no alternation needed
+                //return;
+            //}
+
+            endVector.x = 2834.926758f;
+            endVector.y = 5923.780273f;
+            endVector.z = 11.064119f;
+            _needAlternation = true;
+
+            // source is in the other triangle
+            if (sz > 7.5f && sx > 2828.993652f && sx < 2859.013672f && sy > 5923.300293f && sy < 5949.687012f && sy > -0.87897f*sx + 8436.287562f)
+                _alternationType = OL_BE_ULTRIANGLE_TO_BRTRIANGLE;
+            else
+                _alternationType = OL_BE_OUT_TO_BRTRIANGLE;
+        }
+        // source is in triangle (the other one)
+        else if (sz > 7.5f && sx > 2828.993652f && sx < 2859.013672f && sy > 5923.300293f && sy < 5949.687012f && sy > -0.87897f*sx + 8436.287562f)
+        {
+            // dest is in the same triangle
+            if (dz > 7.5f && dx > 2828.993652f && dx < 2859.013672f && dy > 5923.300293f && dy < 5949.687012f && dy > -0.87897f*dx + 8436.287562f)
+            {
+                // no alternation needed
+                return;
+            }
+
+            // no need to check for the dest in other triangle, already checked
+            startVector.x = 2842.479248f;
+            startVector.y = 5933.283691f;
+            startVector.z = 11.077043f;
+            _needAlternation = true;
+            _alternationType = OL_BE_ULTRIANGLE_TO_OUT;
+        }
+        // dest is in triangle (the other one)
+        else if (dz > 7.5f && dx > 2828.993652f && dx < 2859.013672f && dy > 5923.300293f && dy < 5949.687012f && dy > -0.87897f*dx + 8436.287562f)
+        {
+            // again - no need to check if source and dest is in the same triangle
+
+            // no need to check for the dest in other triangle, already checked
+            endVector.x = 2842.479248f;
+            endVector.y = 5933.283691f;
+            endVector.z = 11.077043f;
+            _needAlternation = true;
+            _alternationType = OL_BE_OUT_TO_ULTRIANGLE;
+        }
+    }
+}
+
+void PathGenerator::ProcessAlternation()
+{
+    if (!_needAlternation)
+        return;
+
+    if (_alternationType == OL_BE_BRTRIANGLE_TO_OUT)
+    {
+        _pathPoints.resize(_pathPoints.size() + 2);
+        for (int i = _pathPoints.size() - 1; i > 1; i--)
+            _pathPoints[i] = _pathPoints[i - 2];
+        _pathPoints[0] = GetStartPosition();
+        _pathPoints[1] = G3D::Vector3(2831.358398f, 5919.316895f, 11.273203f);
+    }
+    else if (_alternationType == OL_BE_OUT_TO_BRTRIANGLE)
+    {
+        _pathPoints.resize(_pathPoints.size() + 2);
+        _pathPoints[_pathPoints.size() - 2] = G3D::Vector3(2831.358398f, 5919.316895f, 11.273203f);
+        _pathPoints[_pathPoints.size() - 1] = GetEndPosition();
+    }
+    else if (_alternationType == OL_BE_ULTRIANGLE_TO_OUT)
+    {
+        _pathPoints.resize(_pathPoints.size() + 2);
+        for (int i = _pathPoints.size() - 1; i > 1; i--)
+            _pathPoints[i] = _pathPoints[i - 2];
+        _pathPoints[0] = GetStartPosition();
+        _pathPoints[1] = G3D::Vector3(2846.697266f, 5938.762695f, 11.235924f);
+    }
+    else if (_alternationType == OL_BE_OUT_TO_ULTRIANGLE)
+    {
+        _pathPoints.resize(_pathPoints.size() + 2);
+        _pathPoints[_pathPoints.size() - 2] = G3D::Vector3(2846.697266f, 5938.762695f, 11.235924f);
+        _pathPoints[_pathPoints.size() - 1] = GetEndPosition();
+    }
+    else if (_alternationType == OL_BE_BRTRIANGLE_TO_ULTRIANGLE)
+    {
+        _pathPoints.clear();
+        _pathPoints.resize(4);
+        _pathPoints[0] = GetStartPosition();
+        _pathPoints[1] = G3D::Vector3(2831.358398f, 5919.316895f, 11.273203f);
+        _pathPoints[2] = G3D::Vector3(2846.697266f, 5938.762695f, 11.235924f);
+        _pathPoints[3] = GetEndPosition();
+    }
+    else if (_alternationType == OL_BE_ULTRIANGLE_TO_BRTRIANGLE)
+    {
+        _pathPoints.clear();
+        _pathPoints.resize(4);
+        _pathPoints[0] = GetStartPosition();
+        _pathPoints[1] = G3D::Vector3(2846.697266f, 5938.762695f, 11.235924f);
+        _pathPoints[2] = G3D::Vector3(2831.358398f, 5919.316895f, 11.273203f);
+        _pathPoints[3] = GetEndPosition();
+    }
+
+    NormalizePath();
+
+    if ((_type & PATHFIND_INCOMPLETE) || (_type & PATHFIND_SHORTCUT))
+        _type = PATHFIND_NORMAL;
 }
 
 dtPolyRef PathGenerator::GetPathPolyByPosition(dtPolyRef const* polyPath, uint32 polyPathSize, float const* point, float* distance) const
@@ -192,7 +349,7 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
     if (startPoly == INVALID_POLYREF || endPoly == INVALID_POLYREF)
     {
         sLog->outDebug("++ BuildPolyPath :: (startPoly == 0 || endPoly == 0)\n");
-        BuildShortcut();
+        BuildShortcut(startPos, endPos);
         bool path = _sourceUnit->GetTypeId() == TYPEID_UNIT && _sourceUnit->ToCreature()->CanFly();
 
         bool waterPath = _sourceUnit->GetTypeId() == TYPEID_UNIT && _sourceUnit->ToCreature()->CanSwim();
@@ -243,7 +400,7 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
 
         if (buildShotrcut)
         {
-            BuildShortcut();
+            BuildShortcut(startPos, endPos);
             _type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
             return;
         }
@@ -269,7 +426,7 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
     {
         sLog->outDebug("++ BuildPolyPath :: (startPoly == endPoly)\n");
 
-        BuildShortcut();
+        BuildShortcut(startPos, endPos);
 
         _pathPolyRefs[0] = startPoly;
         _polyLength = 1;
@@ -359,7 +516,7 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
             if (dtStatusFailed(_navMeshQuery->closestPointOnPoly(suffixStartPoly, endPoint, suffixEndPoint, NULL)))
             {
                 // suffixStartPoly is still invalid, error state
-                BuildShortcut();
+                BuildShortcut(startPos, endPos);
                 _type = PATHFIND_NOPATH;
                 return;
             }
@@ -474,7 +631,7 @@ void PathGenerator::BuildPolyPath(G3D::Vector3 const& startPos, G3D::Vector3 con
         {
             // only happens if we passed bad data to findPath(), or navmesh is messed up
             sLog->outError("%u's Path Build failed: 0 length path", _sourceUnit->GetGUIDLow());
-            BuildShortcut();
+            BuildShortcut(startPos, endPos);
             _type = PATHFIND_NOPATH;
             return;
         }
@@ -534,14 +691,18 @@ void PathGenerator::BuildPointPath(const float *startPoint, const float *endPoin
         // single point paths can be generated here
         /// @todo check the exact cases
         sLog->outDebug("++ PathGenerator::BuildPointPath FAILED! path sized %d returned\n", pointCount);
-        BuildShortcut();
+        G3D::Vector3 startPos(startPoint[0], startPoint[1], startPoint[2]);
+        G3D::Vector3 endPos(endPoint[0], endPoint[1], endPoint[2]);
+        BuildShortcut(startPos, endPos);
         _type = PATHFIND_NOPATH;
         return;
     }
     else if (pointCount == _pointPathLimit)
     {
         sLog->outDebug("++ PathGenerator::BuildPointPath FAILED! path sized %d returned, lower than limit set to %d\n", pointCount, _pointPathLimit);
-        BuildShortcut();
+        G3D::Vector3 startPos(startPoint[0], startPoint[1], startPoint[2]);
+        G3D::Vector3 endPos(endPoint[0], endPoint[1], endPoint[2]);
+        BuildShortcut(startPos, endPos);
         _type = PATHFIND_SHORT;
         return;
     }
@@ -568,7 +729,9 @@ void PathGenerator::BuildPointPath(const float *startPoint, const float *endPoin
         else
         {
             SetActualEndPosition(GetEndPosition());
-            BuildShortcut();
+            G3D::Vector3 startPos(startPoint[0], startPoint[1], startPoint[2]);
+            G3D::Vector3 endPos(endPoint[0], endPoint[1], endPoint[2]);
+            BuildShortcut(startPos, endPos);
         }
 
         _type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
@@ -583,7 +746,7 @@ void PathGenerator::NormalizePath()
         _sourceUnit->UpdateAllowedPositionZ(_pathPoints[i].x, _pathPoints[i].y, _pathPoints[i].z);
 }
 
-void PathGenerator::BuildShortcut()
+void PathGenerator::BuildShortcut(G3D::Vector3 const& startPos, G3D::Vector3 const& endPos)
 {
     sLog->outDebug("++ BuildShortcut :: making shortcut\n");
 
@@ -593,8 +756,8 @@ void PathGenerator::BuildShortcut()
     _pathPoints.resize(2);
 
     // set start and a default next position
-    _pathPoints[0] = GetStartPosition();
-    _pathPoints[1] = GetActualEndPosition();
+    _pathPoints[0] = startPos;
+    _pathPoints[1] = endPos;
 
     NormalizePath();
 
