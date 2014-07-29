@@ -480,7 +480,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     Group * pGroup = lootOwner->GetGroup();
 
     tab->Process(*this, store.IsRatesAllowed(), lootMode);          // Processing is done there, callback via Loot::AddItem()
-    if(pGroup)
+    if(pGroup && GetMap()->ToInstanceMap())
     {
         for(unsigned int i=0; i<items.size(); i++)
         {
