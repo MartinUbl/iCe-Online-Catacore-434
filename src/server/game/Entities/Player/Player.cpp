@@ -25346,7 +25346,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
             if(map && (map->IsRaid() || map->IsDungeon()))   //Do not add any XP, if players are Power leveling in instances
             {
                 InstanceMap* insMap = GetMap()->ToInstanceMap();
-                if(insMap->GetPlayersCountExceptGMs() > 1) //More then 1 player in raid and no group => powerleveling
+                if(insMap && insMap->GetPlayersCountExceptGMs() > 1) //More then 1 player in raid and no group => powerleveling
                 {
                     xp = 0;
                 }
