@@ -25377,7 +25377,7 @@ bool Player::CheckIfPlayersInInstanceAreInGroup(Group* group, Map::PlayerList pL
            Player* pPlayer = i->getSource();
            for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next()) //Check if player is in group
            {
-               if(pPlayer == itr->getSource())
+               if(pPlayer = itr->getSource())
                    isInGroup = true;
            }
            if(!isInGroup) //Player is in instance, but not in group, so he/she is probabaly powerleveling
