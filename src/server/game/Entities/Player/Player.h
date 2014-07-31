@@ -2221,7 +2221,6 @@ class Player : public Unit, public GridObject<Player>
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
-        bool CheckIfPlayersInInstanceAreInGroup(Group* group,  Map::PlayerList pList);
         void RewardPlayerAndGroupAtEvent(uint32 creature_id,WorldObject* pRewardSource);
         bool isHonorOrXPTarget(Unit* pVictim);
 
