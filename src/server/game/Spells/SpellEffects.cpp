@@ -3805,7 +3805,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     if (((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && spell->SchoolMask != SPELL_SCHOOL_MASK_NORMAL) // only affect magic spells
                         || (GetDispellMask(DispelType(spell->GetDispel())) & DISPEL_ALL_MASK)) &&
                         // ignore positive an passive auras
-                        !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive()
+                        (!iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
                         // Censure excpetion, probably there should be some condition SPELL_DAMAGE_CLASS_MELEE and SPELLFAMILY_PALADIN but why when this is only exception :)
                         || spell->Id == 31803)
                     {
