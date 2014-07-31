@@ -1493,6 +1493,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->GetOwner() && m_caster->GetOwner()->ToPlayer())
                         damage += ceil(0.516f*float(m_caster->GetOwner()->ToPlayer()->GetTotalAttackPowerValue(RANGED_ATTACK)));
                 }
+                // Explosive Trap
+                else if (m_spellInfo->Id == 13812)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
+                }
                 break;
             }
             case SPELLFAMILY_SHAMAN:
@@ -1697,11 +1702,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.44f);
                     if (m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
                         damage = int32(damage / 2);
-                }
-                // Explosive Trap
-                else if (m_spellInfo->Id == 13812)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
                 }
                 break;
             }
