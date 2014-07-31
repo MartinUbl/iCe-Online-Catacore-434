@@ -25293,6 +25293,16 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
                         for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
                             itr_xp = uint32(itr_xp*(1.0f + (*i)->GetAmount() / 100.0f));
 
+                        if(is_raid || is_dungeon)   //Do not add any XP, if players are Power leveling in instances
+                        {
+                            InstanceMap* insMap = GetMap()->ToInstanceMap();
+                            if(insMap)
+                            {
+                                if(!CheckIfPlayersInInstanceAreInGroup(pGroup, insMap->GetPlayers()))
+                                    itr_xp = 0;
+                            }
+                        }
+
                         pGroupGuy->GiveXP(itr_xp, pVictim, group_rate);
                         if (Pet* pet = pGroupGuy->GetPet())
                             pet->GivePetXP(itr_xp/2);
@@ -25332,6 +25342,16 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
             for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
                 xp = uint32(xp*(1.0f + (*i)->GetAmount() / 100.0f));
 
+            Map* map = GetMap();
+            if(map && (map->IsRaid() || map->IsDungeon()))   //Do not add any XP, if players are Power leveling in instances
+            {
+                InstanceMap* insMap = GetMap()->ToInstanceMap();
+                if(insMap && insMap->GetPlayersCountExceptGMs() > 1) //More then 1 player in raid and no group => powerleveling
+                {
+                    xp = 0;
+                }
+            }
+
             GiveXP(xp, pVictim);
 
             if (Pet* pet = GetPet())
@@ -25343,6 +25363,28 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
         }
     }
     return xp || honored_kill;
+}
+
+bool Player::CheckIfPlayersInInstanceAreInGroup(Group* group, Map::PlayerList pList)
+{
+    bool isInGroup;
+    if(group && !pList.isEmpty())
+    {
+        for (Map::PlayerList::iterator i = pList.begin(); i != pList.end(); ++i) //Check all players in instance
+        {
+            isInGroup = false;
+            Player* pPlayer = i->getSource();
+            for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next()) //Check if player is in group
+            {
+                if(pPlayer == itr->getSource())
+                    isInGroup = true;
+            }
+            if(!isInGroup) //Player is in instance, but not in group, so he/she is probably powerleveling
+                return false;
+        }
+    }
+
+    return true; //All players in instance are in group too
 }
 
 void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource)
