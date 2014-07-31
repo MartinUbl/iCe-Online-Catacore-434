@@ -5032,55 +5032,87 @@ int32 Unit::GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_
     return modifier;
 }
 
-int32 Unit::GetTotalAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+int32 Unit::GetTotalAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op) const
 {
     int32 modifier = 0;
 
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
-        if ((*i)->IsAffectedOnSpell(affectedSpell))
-            modifier += (*i)->GetAmount();
+        if (op == SPELLMOD_NONE)
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell))
+                modifier += (*i)->GetAmount();
+        }
+        else
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetSpellModType() == op)
+                modifier += (*i)->GetAmount();
+        }
     }
     return modifier;
 }
 
-float Unit::GetTotalAuraMultiplierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+float Unit::GetTotalAuraMultiplierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op) const
 {
     float multiplier = 1.0f;
 
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
-        if ((*i)->IsAffectedOnSpell(affectedSpell))
-            multiplier *= (100.0f + (*i)->GetAmount())/100.0f;
+        if (op == SPELLMOD_NONE)
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell))
+                multiplier *= (100.0f + (*i)->GetAmount())/100.0f;
+        }
+        else
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetSpellModType() == op)
+                multiplier *= (100.0f + (*i)->GetAmount())/100.0f;
+        }
     }
     return multiplier;
 }
 
-int32 Unit::GetMaxPositiveAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+int32 Unit::GetMaxPositiveAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op) const
 {
     int32 modifier = 0;
 
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
-        if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() > modifier)
-            modifier = (*i)->GetAmount();
+        if (op == SPELLMOD_NONE)
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() > modifier)
+                modifier = (*i)->GetAmount();
+        }
+        else
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() > modifier && (*i)->GetSpellModType() == op)
+                modifier = (*i)->GetAmount();
+        }
     }
 
     return modifier;
 }
 
-int32 Unit::GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+int32 Unit::GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op) const
 {
     int32 modifier = 0;
 
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
-        if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() < modifier)
-            modifier = (*i)->GetAmount();
+        if (op == SPELLMOD_NONE)
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() < modifier)
+                modifier = (*i)->GetAmount();
+        }
+        else
+        {
+            if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() < modifier && (*i)->GetSpellModType() == op)
+                modifier = (*i)->GetAmount();
+        }
     }
 
     return modifier;

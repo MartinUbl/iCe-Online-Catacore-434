@@ -124,7 +124,8 @@ enum SpellModOp
     SPELLMOD_VALUE_MULTIPLIER       = 27,
     SPELLMOD_RESIST_DISPEL_CHANCE   = 28,
     SPELLMOD_CRIT_DAMAGE_BONUS_2    = 29, //one not used spell
-    SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30
+    SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30,
+    SPELLMOD_NONE                   = 99
 };
 
 #define MAX_SPELLMOD 32
@@ -1754,10 +1755,10 @@ class Unit : public WorldObject
         int32 GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
         int32 GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
 
-        int32 GetTotalAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const;
-        float GetTotalAuraMultiplierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const;
-        int32 GetMaxPositiveAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const;
-        int32 GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const;
+        int32 GetTotalAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op = SPELLMOD_NONE) const;
+        float GetTotalAuraMultiplierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op = SPELLMOD_NONE) const;
+        int32 GetMaxPositiveAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op = SPELLMOD_NONE) const;
+        int32 GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell, SpellModOp op = SPELLMOD_NONE) const;
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school); }
         void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
