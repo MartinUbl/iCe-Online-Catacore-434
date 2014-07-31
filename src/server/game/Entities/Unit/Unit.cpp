@@ -10290,10 +10290,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        // Denounce (proc only with Holy Shock)
+        // Denounce
         case 85509:
         {
-            if (procSpell->Id != 879)
+            if (procSpell->Id != 879) // Exorcism only
                 return false;
             break;
         }
