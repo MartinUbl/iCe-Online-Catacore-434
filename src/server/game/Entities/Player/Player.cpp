@@ -25733,6 +25733,62 @@ PartyResult Player::CanUninviteFromGroup() const
     return ERR_PARTY_RESULT_OK;
 }
 
+Player::GUIDTimestampMap * Player::GetSummonMapFor(uint32 entry)
+{
+    SummonMap::iterator itr = m_summonMap.find(entry);
+    if (itr != m_summonMap.end())
+        return &((*itr).second);
+
+    return NULL;
+}
+
+void Player::AddSummonToMap(uint32 entry, uint64 guid, uint64 timestamp)
+{
+    SummonMap::iterator itr = m_summonMap.find(entry);
+    if (itr != m_summonMap.end())
+        (*itr).second[guid] = timestamp;
+    else
+        m_summonMap[entry][guid] = timestamp;
+}
+
+uint32 Player::DespawnOldestSummon(uint32 entry)
+{
+    uint32 returnData = 0; // Some useful data from last despawned summon (if there are some)
+
+    SummonMap::iterator itr = m_summonMap.find(entry);
+    if (itr != m_summonMap.end())
+    {
+        GUIDTimestampMap::iterator ittd = (*itr).second.end();
+        for (GUIDTimestampMap::iterator itr2 = (*itr).second.begin(); itr2 != (*itr).second.end(); ++itr2)
+        {
+            if (ittd == (*itr).second.end() || (*itr2).second < (*ittd).second)
+                ittd = itr2;
+        }
+        if (ittd != (*itr).second.end())
+        {
+            if (Creature* pOldest = Creature::GetCreature(*this, (*ittd).first))
+            {
+                returnData = pOldest->AI()->GetData(1);
+                pOldest->ForcedDespawn();
+                (*itr).second.erase(ittd);
+            }
+        }
+    }
+    return returnData;
+}
+
+void Player::DespawnAllSummonsByEntry(uint32 entry)
+{
+    Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
+    if (pSummmons && !pSummmons->empty())
+    {
+        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
+            if (Creature * cr = Creature::GetCreature(*this, (*itr).first))
+                cr->ForcedDespawn();
+            pSummmons->clear();
+    }
+}
+
 bool Player::isUsingLfg()
 {
     uint64 guid = GetGUID();

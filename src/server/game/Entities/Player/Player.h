@@ -2630,55 +2630,10 @@ class Player : public Unit, public GridObject<Player>
 
         SummonMap m_summonMap;
 
-        GUIDTimestampMap* GetSummonMapFor(uint32 entry)
-        {
-            SummonMap::iterator itr = m_summonMap.find(entry);
-            if (itr != m_summonMap.end())
-                return &((*itr).second);
-
-            return NULL;
-        }
-        void AddSummonToMap(uint32 entry, uint64 guid, uint64 timestamp)
-        {
-            SummonMap::iterator itr = m_summonMap.find(entry);
-            if (itr != m_summonMap.end())
-                (*itr).second[guid] = timestamp;
-            else
-                m_summonMap[entry][guid] = timestamp;
-        }
-        void DespawnOldestSummon(uint32 entry)
-        {
-            SummonMap::iterator itr = m_summonMap.find(entry);
-            if (itr != m_summonMap.end())
-            {
-                GUIDTimestampMap::iterator ittd = (*itr).second.end();
-                for (GUIDTimestampMap::iterator itr2 = (*itr).second.begin(); itr2 != (*itr).second.end(); ++itr2)
-                {
-                    if (ittd == (*itr).second.end() || (*itr2).second < (*ittd).second)
-                        ittd = itr2;
-                }
-                if (ittd != (*itr).second.end())
-                {
-                    if (Creature* pOldest = Creature::GetCreature(*this, (*ittd).first))
-                    {
-                        pOldest->ForcedDespawn();
-                        (*itr).second.erase(ittd);
-                    }
-                }
-            }
-        }
-
-        void DespawnAllSummonsByEntry(uint32 entry)
-        {
-            Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
-            if (pSummmons && !pSummmons->empty())
-            {
-                for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
-                    if (Creature * cr = Creature::GetCreature(*this, (*itr).first))
-                        cr->ForcedDespawn();
-                    pSummmons->clear();
-            }
-        }
+        GUIDTimestampMap* GetSummonMapFor(uint32 entry);
+        void AddSummonToMap(uint32 entry, uint64 guid, uint64 timestamp);
+        uint32 DespawnOldestSummon(uint32 entry);
+        void DespawnAllSummonsByEntry(uint32 entry);
 
         bool isUsingLfg();
 
