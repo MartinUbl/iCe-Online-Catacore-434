@@ -52,6 +52,8 @@ class AuraEffect
         int32 GetBaseAmount() const { return m_baseAmount; }
         int32 GetAmplitude() const { return m_amplitude; }
 
+        SpellModOp GetSpellModType() const { return (m_spellmod) ? m_spellmod->op : SPELLMOD_NONE;}
+
         int32 GetMiscValueB() const { return m_spellProto->EffectMiscValueB[m_effIndex]; }
         int32 GetMiscValue() const { return m_spellProto->EffectMiscValue[m_effIndex]; }
         AuraType GetAuraType() const { return (AuraType)m_spellProto->EffectApplyAuraName[m_effIndex]; }

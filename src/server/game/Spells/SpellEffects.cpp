@@ -585,9 +585,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                         apply_direct_bonus = false;
 
-                        int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                        if (bonuspct != 0)
-                            damage *= 1.0f+((float)bonuspct/100.0f);
+                        damage *= pOwner->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
+
                         break;
                     }
                     // Gargoyle Strike (gargoyle, dk)
@@ -601,9 +600,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                         apply_direct_bonus = false;
 
-                        int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                        if (bonuspct != 0)
-                            damage *= 1.0f+((float)bonuspct/100.0f);
+                        damage *= pOwner->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
+
                         break;
                     }
                 }
@@ -1007,9 +1005,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (!pOwner)
                         break;
 
-                    int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                    if (bonuspct != 0)
-                        damage *= 1.0f+((float)bonuspct/100.0f);
+                    damage *= pOwner->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
+
                 }
                 // Whiplash (succubus)
                 else if (m_spellInfo->Id == 6360 && m_caster->ToPet())
@@ -1033,9 +1030,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += pOwner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)*0.9f;
                     apply_direct_bonus = false;
 
-                    int32 bonuspct = pOwner->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                    if (bonuspct != 0)
-                        damage *= 1.0f+((float)bonuspct/100.0f);
+                    damage *= pOwner->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
                 }
                 break;
             }
@@ -1678,11 +1673,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     int32 sph = m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
                     damage += int32(0.04f*(sph+ap)*0.675f); // 0.675 is magic number, present almost everywhere..
 
-                    int32 bonuspct = m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo);
-                    if (bonuspct != 0)
-                        damage *= 1.0f+((float)bonuspct /100.0f);
+                    damage *= m_caster->GetTotalAuraMultiplierByAffectMask(SPELL_AURA_ADD_PCT_MODIFIER, m_spellInfo, SPELLMOD_DAMAGE);
 
-                    damage += m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_FLAT_MODIFIER, m_spellInfo);
+                    int32 flatBonus = m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_FLAT_MODIFIER, m_spellInfo,SPELLMOD_DAMAGE);
+                    if (flatBonus)
+                        damage = (damage * m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_ADD_FLAT_MODIFIER, m_spellInfo,SPELLMOD_DAMAGE))/100;
 
                     apply_direct_bonus = false;
                 }
