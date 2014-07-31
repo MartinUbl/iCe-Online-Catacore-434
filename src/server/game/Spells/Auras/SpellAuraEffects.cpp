@@ -689,12 +689,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
                 // Take benefit from higher value ( spell power or attack power )
                 DoneActualBenefit = std::max(sp,ap);
             }
-
             // Retribution Aura
             else if (GetSpellProto()->Id == 7294)
             {
                 if (caster->GetTypeId() == TYPEID_PLAYER)
-                    DoneActualBenefit = ceil(float(caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY)) / 30.3f);
+                    DoneActualBenefit = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY) * 3.3f;
             }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
