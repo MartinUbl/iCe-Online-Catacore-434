@@ -25346,9 +25346,10 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
             if(map && (map->IsRaid() || map->IsDungeon()))   //Do not add any XP, if players are Power leveling in instances
             {
                 InstanceMap* insMap = GetMap()->ToInstanceMap();
-                if(insMap->GetPlayersCountExceptGMs() > 1) //More then 1 player in raid and no group => powerleveling
+                if(insMap)
                 {
-                    xp = 0;
+                    if(!CheckIfPlayersInInstanceAreInGroup(pGroup, insMap->GetPlayers()))
+                        xp = 0;
                 }
             }
 
@@ -25368,22 +25369,21 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 bool Player::CheckIfPlayersInInstanceAreInGroup(Group* group, Map::PlayerList pList)
 {
     bool isInGroup;
-    if(group && !pList.isEmpty())
+    if(!pList.isEmpty())
     {
-        for (Map::PlayerList::iterator i = pList.begin(); i != pList.end(); ++i) //Check all players in instance
-        {
-            isInGroup = false;
-            Player* pPlayer = i->getSource();
-            for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next()) //Check if player is in group
-            {
-                if(pPlayer == itr->getSource())
-                    isInGroup = true;
-            }
-            if(!isInGroup) //Player is in instance, but not in group, so he/she is probably powerleveling
-                return false;
-        }
+       for (Map::PlayerList::iterator i = pList.begin(); i != pList.end(); ++i) //Check all players in instance
+       {
+           isInGroup = false;
+           Player* pPlayer = i->getSource();
+           for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next()) //Check if player is in group
+           {
+               if(pPlayer == itr->getSource())
+                   isInGroup = true;
+           }
+           if(!isInGroup) //Player is in instance, but not in group, so he/she is probabaly powerleveling
+               return false;
+       }
     }
-
     return true; //All players in instance are in group too
 }
 
