@@ -5923,11 +5923,15 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
         }
     }*/
 
+    uint32 oldestSummonData = 0;
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player::GUIDTimestampMap* tsMap = m_caster->ToPlayer()->GetSummonMapFor(entry);
         if (tsMap && tsMap->size() >= GetMaxActiveSummons(entry))
-            m_caster->ToPlayer()->DespawnOldestSummon(entry);
+        {
+            oldestSummonData = m_caster->ToPlayer()->DespawnOldestSummon(entry);
+        }
     }
 
     // Shadowfiend should be summoned as pet
@@ -5980,22 +5984,16 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 {
                     // we need to know the totem's GUID before it is actually created
                     uint32 lowGUID = sObjectMgr->GenerateLowGuidForUnit(true);
+
                     if (m_originalCaster->GetTypeId() == TYPEID_PLAYER
                         && properties->Slot >= SUMMON_SLOT_TOTEM
                         && properties->Slot < MAX_TOTEM_SLOT)
                     {
-                        // This packet has to be received by the client before the actual unit creation
-                        WorldPacket data(SMSG_TOTEM_CREATED, 1+8+4+4);
-
-                        data << uint8(properties->Slot-1);
-                        // guessing GUID that will be assigned to the totem
-                        data << uint64(MAKE_NEW_GUID(lowGUID, entry, HIGHGUID_UNIT));
-                        data << uint32(duration);
-                        data << uint32(m_spellInfo->Id);
-                        m_originalCaster->ToPlayer()->SendDirectMessage(&data);
+                        m_originalCaster->ToPlayer()->SendTotemCreateInfo(m_spellInfo,duration,entry,properties->Slot,lowGUID);
                     }
 
                     summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, 0, lowGUID);
+
                     if (!summon || !summon->IsTotem())
                         return;
 
@@ -6019,9 +6017,6 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         uint32 displayId = m_originalCaster->GetModelForTotem(PlayerTotemType(properties->Id));
                         summon->SetNativeDisplayId(displayId);
                         summon->SetDisplayId(displayId);
-
-                        //summon->SendUpdateToPlayerm_originalCaster->ToPlayer();
-                       
                     }
                     break;
                 }
@@ -6068,9 +6063,36 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
 
                         TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
 
-                        summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+                        #define MUSHROOM_ENTRY 47649
+
+                        if (entry == MUSHROOM_ENTRY)
+                        {
+                            Player::GUIDTimestampMap* summonMap = m_caster->ToPlayer()->GetSummonMapFor(MUSHROOM_ENTRY);
+                            uint32 slot = 0;
+                            if (oldestSummonData == 0)
+                                slot = summonMap == NULL ? 1 : summonMap->size() + 1;
+                            else
+                                slot = oldestSummonData;
+
+                            // we need to know the mushrooms's GUID before it is actually created
+                            uint32 lowGUID = sObjectMgr->GenerateLowGuidForUnit(true);
+
+                            if (m_originalCaster->GetTypeId() == TYPEID_PLAYER && slot >= SUMMON_SLOT_TOTEM && slot < 4)
+                            {
+                                // mushrooms should behave like totems -> should appear below player's mana bar
+                                m_originalCaster->ToPlayer()->SendTotemCreateInfo(m_spellInfo,duration,MUSHROOM_ENTRY,slot,lowGUID);
+                            }
+                            summon = m_caster->GetMap()->SummonCreature(entry, pos, NULL, duration, m_originalCaster, 0, lowGUID);
+
+                            if (summon)
+                                summon->AI()->SetData(0, slot); // Remember slot of new mushroom
+                        }
+                        else
+                            summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+
                         if (!summon)
                             continue;
+
                         if (properties->Category == SUMMON_CATEGORY_ALLY)
                         {
                             summon->SetOwnerGUID(m_originalCaster->GetGUID());

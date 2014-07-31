@@ -2175,6 +2175,8 @@ class Player : public Unit, public GridObject<Player>
             StopMirrorTimer(FIRE_TIMER);
         }
 
+        void SendTotemCreateInfo(SpellEntry const * spell, uint32 duration, uint32 entry, uint32 slot, uint64 lowGUID);
+
         bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
         void JoinedChannel(Channel *c);

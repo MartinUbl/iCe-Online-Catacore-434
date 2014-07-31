@@ -525,6 +525,11 @@ public:
         {
             if(IsMushroom())
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
+
+            slotNumber = 0;
+
+            if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                me->SetOwnerGUID(me->ToTempSummon()->GetSummoner()->GetGUID());
         }
 
         enum spells
@@ -540,6 +545,7 @@ public:
         };
 
         uint32 Stealth_timer;
+        uint32 slotNumber;
 
         bool IsMushroom(void)
         {
@@ -549,6 +555,20 @@ public:
         void Reset()
         {
             Stealth_timer = 6000;
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            if (type == 1) // Get slot number of mushroom
+                return slotNumber;
+
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == 0)
+                slotNumber = data;
         }
 
         void JustDied(Unit * victim)
@@ -581,10 +601,11 @@ public:
             summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, pPlayer->GetGUID());
             summon->setFaction(pPlayer->getFaction());
             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, 78777);
+            summon->SetOwnerGUID(pPlayer->GetGUID());
 
             summon->CastSpell(summon,FUNGAL_VISUAL,true);
-            Aura * aur = summon->GetAura(FUNGAL_VISUAL);
-            if (aur)
+
+            if (Aura * aur = summon->GetAura(FUNGAL_VISUAL))
                 aur->SetDuration(20000); // Mistake in DB ?? ( 30s before )
 
             if(pPlayer->HasAura(FUNGAL_GROWTH_RANK1))
@@ -593,6 +614,9 @@ public:
                 summon->CastSpell(summon, TRIGGERING_AURA_R2, true);
 
             summon->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PACIFIED); // Dont attack
+
+            me->DestroyForNearbyPlayers();
+            me->ForcedDespawn(2000);
         }
 
         void UpdateAI (const uint32 diff)
@@ -601,6 +625,7 @@ public:
             {
                 if(IsMushroom())
                     me->CastSpell(me,92661,true); // Turn "Invisible" - > actually it is SPELL_AURA_MOD_STEALTH
+
                 Stealth_timer = 60000;
             }
             else Stealth_timer -= diff;

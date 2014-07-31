@@ -2232,10 +2232,6 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
         }
     }
 
-    // Wild mushrooms should be considered as totems
-    if (entry == 47649)
-        mask = UNIT_MASK_TOTEM;
-
     uint32 phase = PHASEMASK_NORMAL, team = 0;
     if (summoner)
     {
@@ -2900,7 +2896,7 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
         SendMessageToSet(&data, true);
 }
 
-void WorldObject::DestroyForNearbyPlayers()
+void WorldObject::DestroyForNearbyPlayers(uint64 exceptGUID)
 {
     if (!IsInWorld())
         return;
@@ -2920,6 +2916,10 @@ void WorldObject::DestroyForNearbyPlayers()
             continue;
 
         if (isType(TYPEMASK_UNIT) && ((Unit*)this)->GetCharmerGUID() == plr->GetGUID()) // TODO: this is for puppet
+            continue;
+
+        // TODO: Remove this hack after rewriting of stealth/invisibility system !
+        if (plr->GetGUID() == exceptGUID)
             continue;
 
         DestroyForPlayer(plr);

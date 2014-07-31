@@ -14222,7 +14222,13 @@ void Unit::SetVisibility(UnitVisibility x)
     m_Visibility = x;
 
     if (m_Visibility == VISIBILITY_GROUP_STEALTH)
-        DestroyForNearbyPlayers();
+    {
+        if (GetEntry() == 47649 && GetOwner()) // TODO: Remove this ugly hack !
+            DestroyForNearbyPlayers(GetOwner()->GetGUID());
+        else
+            DestroyForNearbyPlayers();
+    }
+
 
     UpdateObjectVisibility();
 }

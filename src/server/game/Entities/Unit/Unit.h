@@ -1249,7 +1249,11 @@ class Unit : public WorldObject
         bool IsGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN; }
         bool IsPet() const      { return m_unitTypeMask & UNIT_MASK_PET; }
         bool IsHunterPet() const{ return m_unitTypeMask & UNIT_MASK_HUNTER_PET; }
-        bool IsTotem() const    { return m_unitTypeMask & UNIT_MASK_TOTEM; }
+        bool IsTotem() const    
+        {
+            // druid's shrooms should be considered as totems
+            return (m_unitTypeMask & UNIT_MASK_TOTEM) || GetEntry() == 47649; 
+        }
         bool IsVehicle() const  { return m_unitTypeMask & UNIT_MASK_VEHICLE; }
 
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }

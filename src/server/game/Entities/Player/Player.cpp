@@ -1097,6 +1097,19 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket(&data);
 }
 
+void Player::SendTotemCreateInfo(SpellEntry const * spell, uint32 duration, uint32 entry, uint32 slot, uint64 lowGUID)
+{
+    // This packet has to be received by the client before the actual unit creation
+    WorldPacket data(SMSG_TOTEM_CREATED, 1+8+4+4);
+
+    data << uint8(slot-1);
+    // guessing GUID that will be assigned to the totem
+    data << uint64(MAKE_NEW_GUID(lowGUID, entry, HIGHGUID_UNIT));
+    data << uint32(duration);
+    data << uint32(spell->Id);
+    SendDirectMessage(&data);
+}
+
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
     if (!IsAlive() || IsGameMaster())
