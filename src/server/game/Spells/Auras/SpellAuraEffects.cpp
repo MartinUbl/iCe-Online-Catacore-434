@@ -693,7 +693,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             else if (GetSpellProto()->Id == 7294)
             {
                 if (caster->GetTypeId() == TYPEID_PLAYER)
-                    DoneActualBenefit = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY) * 3.3f;
+                    DoneActualBenefit = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY) * 0.033f;
             }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
