@@ -2053,7 +2053,7 @@ float Spell::GetEffectRadius(uint32 effIndex)
     return m_spellInfo->GetSpellRadius(m_caster, effIndex);
 }
 
-void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry, bool extendRadius)
+void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry)
 {
     if (TargetType == SPELL_TARGETS_GO)
         return;
@@ -2085,22 +2085,6 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNo
             break;
     }
 
-    // This stuff is reqired to properly add units (mostly creatures) with huge combat reach to unitmap
-    // Radius must be extended and then we need to cut units which are not in (original radius + combat reach of unit) range
-    // This system is allowed only in dungeon/raid maps and only for players AoE (enemy) spells
-    bool radiusExtensionAllowed = false;
-    Map * map = m_caster->GetMap();
-    #define RADIUS_ADDITION (50.0f)
-
-    if (extendRadius && map)
-    {
-        if (map->IsRaid() || map->IsNonRaidDungeon())
-        {
-            radius = radius + RADIUS_ADDITION;
-            radiusExtensionAllowed = true;
-        }
-    }
-
     bool requireDeadTarget = bool(m_spellInfo->AttributesEx3 & SPELL_ATTR3_REQUIRE_DEAD_TARGET);
     Trinity::SpellNotifierCreatureAndPlayer notifier(m_caster, TagUnitMap, radius, type, m_spellInfo, TargetType, pos, entry, requireDeadTarget);
     if ((m_spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY)
@@ -2111,17 +2095,6 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNo
 
     if (m_customAttr & SPELL_ATTR0_CU_EXCLUDE_SELF)
         TagUnitMap.remove(m_caster);
-
-    if (radiusExtensionAllowed)
-    {
-        for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end();)
-        {
-            if (m_caster->GetExactDist(*itr) <= (radius - RADIUS_ADDITION) + (*itr)->GetObjectSize())
-                itr++;
-            else
-                itr = TagUnitMap.erase(itr);
-        }
-    }
 }
 
 void Spell::SearchGOAreaTarget(std::list<GameObject*> &TagGOMap, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry)
@@ -3115,8 +3088,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
             case SPELL_TARGETS_ENEMY:
             case SPELL_TARGETS_CHAINHEAL:
             case SPELL_TARGETS_ANY:
-                // radius extension in case of players spells which are targetting enemy units
-                SearchAreaTarget(unitList, radius, pushType, targetType, 0, (m_caster->GetTypeId() == TYPEID_PLAYER && targetType == SPELL_TARGETS_ENEMY));
+                SearchAreaTarget(unitList, radius, pushType, targetType);
                 break;
             default:
                 switch (cur)
