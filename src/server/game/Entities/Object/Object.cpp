@@ -699,22 +699,6 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                 {
                     *data << uint32(m_floatValues[index]);
                 }
-                else if (index == UNIT_FIELD_COMBATREACH)
-                {
-                    // Somone could call this hack, but I dont think so :)
-                    // Can't find any better solution or place for it
-                    if (target->getClass() == CLASS_HUNTER && GetTypeId() == TYPEID_UNIT)
-                    {
-                        if (ToCreature()->HasInternalCombatReachSet())
-                            *data << uint32(ToCreature()->GetSavedCombatReach() + 2.0f);
-                        else if (m_floatValues[index] > 40.0f)
-                            *data << uint32(40.0f);
-                        else
-                            *data << uint32(m_floatValues[index]);
-                    }
-                    else
-                        *data << uint32(m_floatValues[index]);
-                }
                 // Gamemasters should be always able to select units - remove not selectable flag
                 else if (index == UNIT_FIELD_FLAGS)
                 {
