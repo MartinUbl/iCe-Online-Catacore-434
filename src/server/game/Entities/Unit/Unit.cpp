@@ -3502,10 +3502,6 @@ bool Unit::_OnAuraReapply(Aura* oldAura, Aura* newAura)
     //Unit* oldCaster = oldAura->GetCaster();
     Unit* newCaster = newAura->GetCaster();
 
-    // Auras with this attribute should not be reapplied, just silently refreshed with update
-    if (spellProto->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION)
-        return false;
-
     switch (spellProto->Id)
     {
         // Necrotic Strike heal absorb part
