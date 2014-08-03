@@ -188,6 +188,7 @@ void Map::LoadMap(int gx,int gy, bool reload)
     sLog->outDetail("Loading map %s",tmp);
     // loading data
     GridMaps[gx][gy] = new GridMap();
+    dontDump(GridMaps[gx][gy], sizeof(GridMap));
     if (!GridMaps[gx][gy]->loadData(tmp))
     {
         sLog->outError("Error loading map file: \n %s\n", tmp);
@@ -1209,6 +1210,7 @@ bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 /*size*/)
     if (!(header.flags & MAP_AREA_NO_AREA))
     {
         m_area_map = new uint16 [16*16];
+        dontDump(m_area_map, sizeof(uint16)*16*16);
         if (fread(m_area_map, sizeof(uint16), 16*16, in) != 16*16)
             return false;
     }
@@ -1230,6 +1232,8 @@ bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
         {
             m_uint16_V9 = new uint16 [129*129];
             m_uint16_V8 = new uint16 [128*128];
+            dontDump(m_uint16_V9, sizeof(uint16) * 129 * 129);
+            dontDump(m_uint16_V8, sizeof(uint16) * 128 * 128);
             if (fread(m_uint16_V9, sizeof(uint16), 129*129, in) != 129*129 ||
                 fread(m_uint16_V8, sizeof(uint16), 128*128, in) != 128*128)
                 return false;
@@ -1240,6 +1244,8 @@ bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
         {
             m_uint8_V9 = new uint8 [129*129];
             m_uint8_V8 = new uint8 [128*128];
+            dontDump(m_uint8_V9, sizeof(uint8) * 129 * 129);
+            dontDump(m_uint8_V8, sizeof(uint8) * 128 * 128);
             if (fread(m_uint8_V9, sizeof(uint8), 129*129, in) != 129*129 ||
                 fread(m_uint8_V8, sizeof(uint8), 128*128, in) != 128*128)
                 return false;
@@ -1250,6 +1256,8 @@ bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
         {
             m_V9 = new float [129*129];
             m_V8 = new float [128*128];
+            dontDump(m_V9, sizeof(float) * 129 * 129);
+            dontDump(m_V8, sizeof(float) * 128 * 128);
             if (fread(m_V9, sizeof(float), 129*129, in) != 129*129 ||
                 fread(m_V8, sizeof(float), 128*128, in) != 128*128)
                 return false;
@@ -1280,16 +1288,19 @@ bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 /*size*/)
     if (!(header.flags & MAP_LIQUID_NO_TYPE))
     {
         m_liquidEntry = new uint16 [16*16];
+        dontDump(m_liquidEntry, sizeof(uint16) * 16 * 16);
         if (fread(m_liquidEntry, sizeof(uint16), 16*16, in) != 16*16)
             return false;
 
         m_liquidFlags = new uint8[16*16];
+        dontDump(m_liquidFlags, sizeof(uint8) * 16 * 16);
         if (fread(m_liquidFlags, sizeof(uint8), 16*16, in) != 16*16)
             return false;
     }
     if (!(header.flags & MAP_LIQUID_NO_HEIGHT))
     {
         m_liquidMap = new float [m_liquidWidth*m_liquidHeight];
+        dontDump(m_liquidMap, sizeof(float) * m_liquidWidth * m_liquidHeight);
         if (fread(m_liquidMap, sizeof(float), m_liquidWidth*m_liquidHeight, in) != m_liquidWidth*m_liquidHeight)
             return false;
     }

@@ -95,6 +95,7 @@ namespace VMAP
         {
             std::string mapFileName = getMapFileName(mapId);
             StaticMapTree* newTree = new StaticMapTree(mapId, basePath);
+            dontDump(newTree, sizeof(StaticMapTree));
             if (!newTree->InitMap(mapFileName, this))
                 return false;
             instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(mapId, newTree)).first;
@@ -256,6 +257,7 @@ namespace VMAP
                 delete worldmodel;
                 return NULL;
             }
+            dontDump(worldmodel, sizeof(WorldModel));
             sLog->outDebug("VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
             model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
             model->second.setModel(worldmodel);

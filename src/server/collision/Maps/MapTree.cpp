@@ -22,6 +22,7 @@
 #include "VMapDefinitions.h"
 #include "Log.h"
 #include "Errors.h"
+#include "Util.h"
 
 #include <string>
 #include <sstream>
