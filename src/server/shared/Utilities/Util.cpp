@@ -31,6 +31,11 @@
 #endif
 #include <ace/TSS_T.h>
 
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <asm-generic/mman.h>
+#endif
+
 #ifdef USE_SFMT_FOR_RNG
 typedef ACE_TSS<SFMTRand> SFMTRandTSS;
 static SFMTRandTSS sfmtRand;
@@ -259,6 +264,15 @@ uint32 CreatePIDFile(const std::string& filename)
     fclose(pid_file);
 
     return (uint32)pid;
+}
+
+void dontDump(void* mem, int len)
+{
+#ifdef _WIN32
+    // no advise for Windows users
+#else
+    madvise(mem, len, MADV_DONTDUMP);
+#endif
 }
 
 size_t utf8length(std::string& utf8str)
