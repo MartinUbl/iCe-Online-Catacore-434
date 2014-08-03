@@ -19,6 +19,11 @@
 #include <stdlib.h>
 #include "DetourAlloc.h"
 
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <asm-generic/mman.h>
+#endif
+
 static void *dtAllocDefault(int size, dtAllocHint)
 {
 	return malloc(size);
@@ -40,7 +45,13 @@ void dtAllocSetCustom(dtAllocFunc *allocFunc, dtFreeFunc *freeFunc)
 
 void* dtAlloc(int size, dtAllocHint hint)
 {
+#ifndef _WIN32
+    void* memalloc = sAllocFunc(size, hint);
+    madvise(memalloc, size, MADV_DONTDUMP);
+    return memalloc;
+#else
 	return sAllocFunc(size, hint);
+#endif
 }
 
 void dtFree(void* ptr)
