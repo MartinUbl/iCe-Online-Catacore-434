@@ -9500,6 +9500,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             trigger_spell_id = 26470;
             break;
         }
+        case 74001: // Combat Readiness
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                ToPlayer()->SetCombatReadinessTimer(10 * IN_MILLISECONDS);
+            break;
+        }
         // Unyielding Knights (item exploit 29108\29109)
         case 38164:
         {
