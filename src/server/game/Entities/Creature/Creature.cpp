@@ -1478,6 +1478,9 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
     if (IsCivilian())
         return false;
 
+    if (who->IsMushroom())
+        return false;
+
     if (!CanFly() && (GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE + m_CombatDistance))
         //|| who->IsControlledByPlayer() && who->IsFlying()))
         // we cannot check flying for other creatures, too much map/vmap calculation

@@ -253,8 +253,15 @@ void TempSummon::UnSummon(uint32 msTime)
     }
 
     Unit* owner = GetSummoner();
-    if (owner && owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
-        owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
+    if (owner)
+    {
+        if (owner->GetTypeId() == TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
+            owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
+
+        // Delete temporary summon from summon map
+        if (Player * pPlayer = owner->ToPlayer())
+            pPlayer->DeleteSummonFromMapByGUID(GetEntry(),GetGUID());
+    }
 
     AddObjectToRemoveList();
 }

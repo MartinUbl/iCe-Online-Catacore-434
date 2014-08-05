@@ -25760,6 +25760,20 @@ void Player::DespawnAllSummonsByEntry(uint32 entry)
     }
 }
 
+void Player::DeleteSummonFromMapByGUID(uint32 entry, uint64 guid)
+{
+    Player::GUIDTimestampMap* pSummmons = GetSummonMapFor(entry);
+    if (pSummmons && !pSummmons->empty())
+    {
+        for (Player::GUIDTimestampMap::iterator itr = pSummmons->begin(); itr != pSummmons->end();++itr)
+            if ((*itr).first == guid)
+            {
+                pSummmons->erase(itr);
+                break;
+            }
+    }
+}
+
 bool Player::isUsingLfg()
 {
     uint64 guid = GetGUID();

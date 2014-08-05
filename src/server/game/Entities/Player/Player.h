@@ -2635,6 +2635,8 @@ class Player : public Unit, public GridObject<Player>
         void AddSummonToMap(uint32 entry, uint64 guid, uint64 timestamp);
         uint32 DespawnOldestSummon(uint32 entry);
         void DespawnAllSummonsByEntry(uint32 entry);
+        void DeleteSummonFromMapByGUID(uint32 entry, uint64 guid);
+
 
         bool isUsingLfg();
 

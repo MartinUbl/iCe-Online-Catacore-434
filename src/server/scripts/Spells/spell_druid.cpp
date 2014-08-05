@@ -523,7 +523,7 @@ public:
     {
         wild_mushroom_and_treant_npcAI(Creature* creature) : ScriptedAI(creature) 
         {
-            if(IsMushroom())
+            if(me->IsMushroom())
                 me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
 
             slotNumber = 0;
@@ -547,11 +547,6 @@ public:
         uint32 Stealth_timer;
         uint32 slotNumber;
 
-        bool IsMushroom(void)
-        {
-            return (me->GetEntry() == 47649) ? true : false ;
-        }
-
         void Reset()
         {
             Stealth_timer = 6000;
@@ -573,7 +568,7 @@ public:
 
         void JustDied(Unit * victim)
         {
-            if(IsMushroom() && victim != me) // if mushroom is killed by someone else, do nothing
+            if(me->IsMushroom() && victim != me) // if mushroom is killed by someone else, do nothing
                 return;
 
             Player * pPlayer = NULL;
@@ -582,9 +577,6 @@ public:
                 pPlayer = me->ToTempSummon()->GetSummoner()->ToPlayer();
 
             if(pPlayer == NULL)
-                return;
-
-            if(pPlayer->getClass() != CLASS_DRUID) // Only druids
                 return;
 
             if (!pPlayer->HasAura(FUNGAL_GROWTH_RANK1) && !pPlayer->HasAura(FUNGAL_GROWTH_RANK2) ) // No talent no deal
@@ -623,14 +615,14 @@ public:
         {
             if(Stealth_timer <= diff)
             {
-                if(IsMushroom())
+                if(me->IsMushroom())
                     me->CastSpell(me,92661,true); // Turn "Invisible" - > actually it is SPELL_AURA_MOD_STEALTH
 
                 Stealth_timer = 60000;
             }
             else Stealth_timer -= diff;
 
-            if(!IsMushroom())
+            if(!me->IsMushroom())
                 DoMeleeAttackIfReady();
         }
     };

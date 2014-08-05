@@ -562,7 +562,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Creature* pet=ObjectAccessor::GetCreatureOrPetOrVehicle(*_player,guid);
+    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player,guid);
 
     if (!pet)
     {
@@ -617,9 +617,15 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
         return;
 
     uint8 slotId;
+    uint64 totemGUID;
 
     recvPacket >> slotId;
-    // uint64 totem's GUID. we don't need it
+    recvPacket >> totemGUID;
+
+    // Unsummon druid's mushrooms
+    if (Creature* totem = GetPlayer()->GetMap()->GetCreature(totemGUID))
+    if (totem->IsMushroom() && totem->ToTempSummon())
+        totem->ToTempSummon()->UnSummon();
 
     ++slotId;
     if (slotId >= MAX_TOTEM_SLOT)
@@ -629,6 +635,7 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
         return;
 
     Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_SummonSlot[slotId]);
+
     // Don't unsummon sentry totem
     if (totem && totem->IsTotem() && totem->GetEntry() != SENTRY_TOTEM_ENTRY)
         totem->ToTotem()->UnSummon();
