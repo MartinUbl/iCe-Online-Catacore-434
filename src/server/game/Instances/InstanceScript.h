@@ -155,7 +155,7 @@ class InstanceScript : public ZoneScript
 
         //Used by the map's CanEnter function.
         //This is to prevent players from entering during boss encounters.
-        bool IsEncounterInProgress() const;
+        virtual bool IsEncounterInProgress() const;
 
         // Players can use combat ressurection only once in 10 man and max 3 times in 25 man
         bool CanUseCombatRessurrection() const;
@@ -163,15 +163,9 @@ class InstanceScript : public ZoneScript
         // Setters and Getters for ressurrection counting
         uint32 GetResurrectionData() const;
 
-        void AddRessurectionData()
-        {
-            ressCounter++;
-        }
+        void AddRessurectionData() { ressCounter++; }
 
-        void ResetRessurectionData()
-        {
-            ressCounter = 0;
-        }
+        void ResetRessurectionData(){ ressCounter = 0; }
 
         //Called when a player successfully enters the instance.
         virtual void OnPlayerEnter(Player *) {}

@@ -5396,12 +5396,8 @@ void Spell::SendResurrectRequest(Player* target)
 	data << uint32(target->GetResurrectionSpellId());
     target->GetSession()->SendPacket(&data);
 
-    // Only for players
-    if (m_caster->GetTypeId() == TYPEID_UNIT)
-        return;
-
     // Increase ressurection data after battle res
-    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
+    if (InstanceScript * pInstance = target->GetInstanceScript())
     {
         if (target->GetResurrectionSpellId() == 21169) // Except Reincarnation
             return;
