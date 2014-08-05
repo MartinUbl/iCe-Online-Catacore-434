@@ -532,6 +532,8 @@ Player::Player (WorldSession *session): Unit(), m_antiHackServant(this), m_achie
     m_deathTimer = 0;
     m_deathExpireTime = 0;
 
+    m_combatReadinessTimer = 0;
+
     m_swingErrorMsg = 0;
 
     m_DetectInvTimer = 1*IN_MILLISECONDS;
@@ -1608,6 +1610,17 @@ void Player::Update(uint32 p_time)
 
     //Handle Water/drowning
     HandleDrowning(p_time);
+
+    if (m_combatReadinessTimer > 0)
+    {
+        if (p_time >= m_combatReadinessTimer)
+        {
+            //Combat Readiness should drop after ten seconds of any incoming weapon strikes
+            RemoveAura(74001);
+            m_combatReadinessTimer = 0;
+        }
+        else m_combatReadinessTimer -= p_time;
+    }
 
     //Handle detect stealth players
     if (m_DetectInvTimer > 0)

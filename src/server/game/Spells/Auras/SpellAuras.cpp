@@ -1536,6 +1536,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (Aura* rec = target->GetAura(73651))
                         rec->RefreshDuration();
                 }
+                else if (GetId() == 74001) // Combat Readiness
+                {
+                    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->SetCombatReadinessTimer(10 * IN_MILLISECONDS);
+                }
                 // Killing Spree
                 else if (GetId() == 51690)
                 {

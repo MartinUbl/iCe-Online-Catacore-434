@@ -2637,6 +2637,7 @@ class Player : public Unit, public GridObject<Player>
         void DespawnAllSummonsByEntry(uint32 entry);
         void DeleteSummonFromMapByGUID(uint32 entry, uint64 guid);
 
+        void SetCombatReadinessTimer(uint32 _time) { m_combatReadinessTimer = _time; }
 
         bool isUsingLfg();
 
@@ -3073,6 +3074,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_drunkTimer;
         uint16 m_drunk;
         uint32 m_weaponChangeTimer;
+
+        uint32 m_combatReadinessTimer;
 
         uint32 m_zoneUpdateId;
         uint32 m_zoneUpdateTimer;
