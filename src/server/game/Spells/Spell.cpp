@@ -2116,7 +2116,7 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNo
     {
         for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end();)
         {
-            if (m_caster->GetExactDist(*itr) <= (radius - RADIUS_ADDITION) + (*itr)->GetObjectSize())
+            if ((*itr)->GetExactDist(pos) <= (radius - RADIUS_ADDITION) + (*itr)->GetObjectSize())
                 itr++;
             else
                 itr = TagUnitMap.erase(itr);
