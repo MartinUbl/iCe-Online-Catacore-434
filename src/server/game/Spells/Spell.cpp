@@ -6042,7 +6042,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NO_PET;
     }
 
-    // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms
+    // Wild Mushrooms: Detonate - can be cast only if there are some Mushrooms and all mushrooms must be max 40 yards from caster
     if (m_spellInfo->Id == 88751)
     {
         if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -6050,6 +6050,13 @@ SpellCastResult Spell::CheckCast(bool strict)
             Player::GUIDTimestampMap* summonMap = m_caster->ToPlayer()->GetSummonMapFor(47649);
             if (!summonMap || summonMap->empty())
                 return SPELL_FAILED_NO_VALID_TARGETS;
+            else
+            {
+                for (Player::GUIDTimestampMap::iterator itr = summonMap->begin(); itr != summonMap->end();++itr)
+                    if (Creature * cr = Creature::GetCreature(*m_caster, (*itr).first))
+                        if (m_caster->GetDistance(cr) > 40.0f)
+                            return SPELL_FAILED_OUT_OF_RANGE;
+            }
         }
     }
 

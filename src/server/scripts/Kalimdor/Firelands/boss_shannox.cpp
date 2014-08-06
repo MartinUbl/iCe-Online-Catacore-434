@@ -977,9 +977,7 @@ class npc_crystal_trap : public CreatureScript
                     || pWho->HasAura(SPELL_DOGGED_DETERMINATION))
                     return;
 
-                #define MUSHROOM_ENTRY 47649
-
-                if (pWho->IsPet() || pWho->IsGuardian() || pWho->GetEntry() == MUSHROOM_ENTRY)
+                if (pWho->IsPet() || pWho->IsGuardian() || pWho->IsMushroom())
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_RIPLIMB && !((npc_riplimb::npc_riplimbAI*)pWho->GetAI())->canBeTrapped)
@@ -1190,9 +1188,7 @@ class npc_immolation_trap : public CreatureScript
                     || pWho->HasAura(SPELL_WARY) || pWho->HasAura(101215) || pWho->HasAura(101216) || pWho->HasAura(101217))
                     return;
 
-                #define MUSHROOM_ENTRY 47649
-
-                if (pWho->GetEntry() == MUSHROOM_ENTRY)
+                if (pWho->IsMushroom())
                     return;
 
                 if (pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetCharmerOrOwnerPlayerOrPlayerItself() != NULL || (pWho->GetEntry() == NPC_RIPLIMB || pWho->GetEntry() == NPC_RAGEFACE))
