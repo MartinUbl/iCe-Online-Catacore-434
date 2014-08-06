@@ -410,9 +410,6 @@ bool LootItem::AllowedForPlayer(Player const * player) const
             return false;
     }
 
-    if(!AllowedForPlayerGuids(player))
-        return false;
-
     return true;
 }
 
@@ -899,7 +896,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             // blocked rolled items and quest items, and !ffa items
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer) && l.items[i].AllowedForPlayerGuids(lv.viewer))
                 {
                     uint8 slot_type;
 
@@ -927,7 +924,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         {
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer) && l.items[i].AllowedForPlayerGuids(lv.viewer))
                 {
                     if (l.roundRobinPlayer != 0 && lv.viewer->GetGUID() != l.roundRobinPlayer)
                         // item shall not be displayed.
@@ -959,7 +956,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
 
             for (uint8 i = 0; i < l.items.size(); ++i)
             {
-                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer))
+                if (l.items[i].itemid >= 0 && !l.items[i].is_looted && !l.items[i].freeforall && l.items[i].conditions.empty() && l.items[i].AllowedForPlayer(lv.viewer) && l.items[i].AllowedForPlayerGuids(lv.viewer))
                 {
                     b << uint8(i) << l.items[i];
                     b << uint8(slot_type);

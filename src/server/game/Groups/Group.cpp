@@ -715,7 +715,7 @@ void Group::GroupLoot(Loot *loot, WorldObject* pLootedObject)
                 Player *member = itr->getSource();
                 if (!member || !member->GetSession())
                     continue;
-                if (i->AllowedForPlayer(member))
+                if (i->AllowedForPlayer(member) && (i->AllowedForPlayerGuids(member)))
                 {
                     if (member->IsWithinDistInMap(pLootedObject,sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
                     {
@@ -803,7 +803,7 @@ void Group::NeedBeforeGreed(Loot *loot, WorldObject* pLootedObject)
                 if (!playerToRoll || !playerToRoll->GetSession())
                     continue;
 
-                bool allowedForPlayer = i->AllowedForPlayer(playerToRoll);
+                bool allowedForPlayer = i->AllowedForPlayer(playerToRoll) && i->AllowedForPlayerGuids(playerToRoll);
                 if (playerToRoll->CanUseItem(item) == EQUIP_ERR_OK && allowedForPlayer)
                 {
                     if (playerToRoll->IsWithinDistInMap(pLootedObject,sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
