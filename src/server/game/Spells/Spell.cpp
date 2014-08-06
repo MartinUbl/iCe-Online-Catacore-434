@@ -5384,6 +5384,7 @@ void Spell::SendResurrectRequest(Player* target)
     // However, the packet structure differs slightly
 
     const char* sentName = m_caster->GetTypeId() == TYPEID_PLAYER ? "" : m_caster->GetNameForLocaleIdx(target->GetSession()->GetSessionDbLocaleIndex());
+    uint32 spellId = target->GetResurrectionSpellId();
 
     WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+strlen(sentName)+1+1+1));
     data << uint64(m_caster->GetGUID());
@@ -5393,17 +5394,16 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint8(0);
 
     data << uint8(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);
-	data << uint32(target->GetResurrectionSpellId());
+	data << uint32(spellId);
     target->GetSession()->SendPacket(&data);
 
-    // Increase ressurection data after battle res
+    // Increase ressurection data after using combat res
     if (InstanceScript * pInstance = target->GetInstanceScript())
     {
-        if (target->GetResurrectionSpellId() == 21169) // Except Reincarnation
-            return;
-
         if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
-            pInstance->AddRessurectionData();
+        if (SpellEntry const* spell = sSpellStore.LookupEntry(spellId))
+            if (spell->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
+                pInstance->AddRessurectionData();
     }
 }
 
@@ -5942,8 +5942,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (pInstance->instance->IsRaid())
         {
-            if (m_spellInfo->HasSpellEffect(SPELL_EFFECT_RESURRECT)
-                || m_spellInfo->HasSpellEffect(SPELL_EFFECT_SELF_RESURRECT) || m_spellInfo->Id == 20707) // or Soulstone
+            if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_BATTLE_RESURRECTION)
             {
                 if (!pInstance->CanUseCombatRessurrection())
                     return SPELL_FAILED_IN_COMBAT_RES_LIMIT_REACHED;

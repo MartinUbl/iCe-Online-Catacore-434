@@ -4177,13 +4177,6 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
                     if (unitTarget->ToPlayer()->IsRessurectRequested())       // already have one active request
                         return;
 
-                    // Increase ressurection data after using soulstone
-                    if (InstanceScript * pInstance = m_caster->GetInstanceScript())
-                    {
-                        if (pInstance->instance->IsRaid() && pInstance->IsEncounterInProgress())
-                            pInstance->AddRessurectionData();
-                    }
-
                     ExecuteLogEffectResurrect(effIndex, unitTarget);
 
                     unitTarget->ToPlayer()->SetResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), unitTarget->GetMaxHealth()*0.3f, unitTarget->GetMaxPower(POWER_MANA)*0.3f);
