@@ -541,20 +541,8 @@ public:
         {
             if (amount >= 0) // Add armor
             {
-                for ( int32 i = 0 ; i < amount; i++)
-                {
-                    Aura * a = me->GetAura(SPELL_MOLTEN_ARMOR);
-                    if (!a)
-                        me->GetAura(101157);
-                    if (!a)
-                        me->GetAura(101158);
-                    if (!a)
-                        me->GetAura(101159);
-                    if (a)
-                        a->SetStackAmount(a->GetStackAmount() + 1);
-                    else
-                        me->AddAura(SPELL_MOLTEN_ARMOR,me);
-                }
+                for (int32 i = 0; i < amount; i++)
+                    me->CastSpell(me, SPELL_MOLTEN_ARMOR, true);
             }
             else    // Reduce armor
             {
