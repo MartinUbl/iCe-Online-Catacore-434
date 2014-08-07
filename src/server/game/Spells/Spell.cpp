@@ -5139,7 +5139,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
     size_t hitPos = data->wpos(); 
     *data << (uint8)0; // placeholder 
 
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && hit <= 255; ++ihit)
+    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && hit < 255; ++ihit)
     {
         if ((*ihit).missCondition == SPELL_MISS_NONE) // Add only hits
         {
@@ -5149,7 +5149,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
         }
     }
 
-    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end() && hit <= 255; ++ighit)
+    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end() && hit < 255; ++ighit)
     {
         *data << uint64(ighit->targetGUID); // Always hits
         ++hit;
