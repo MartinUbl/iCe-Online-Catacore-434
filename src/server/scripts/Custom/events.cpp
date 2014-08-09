@@ -228,7 +228,7 @@ class LotteryHelper: public WorldScript
 
                     QueryResult res = CharacterDatabase.PQuery("SELECT name FROM characters WHERE guid = %u", GUID_LOPART(target_guid));
                     if (res)
-                        sLog->outChar("Goblin Lottery: player %s " UI64FMTD " has won " UI64FMTD " gold (without vat: " UI64FMTD " gold)!", (*res)[0].GetString().c_str(), moneyamount/GOLD, moneyamount_notvat/GOLD);
+                        sLog->outChar("Goblin Lottery: player %s (%u) has won " UI64FMTD " gold (without vat: " UI64FMTD " gold)!", (*res)[0].GetString().c_str(), GUID_LOPART(target_guid), moneyamount / GOLD, moneyamount_notvat / GOLD);
                 }
             }
         }
