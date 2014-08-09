@@ -4467,7 +4467,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 104512: // Earthen Vortex ( unwanted summon effect)
             spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_NONE;
             break;
-
+        case 98399: // I think these spells should be used by Ragnaros for clustering check, but i did it manually, so borrow them :)
+        case 100943:
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            break;
 /*************************        DRAGON SOUL END        *****************************/
 
         case 88691: //Marked for Death Tracking
@@ -4740,6 +4744,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 86825: case 92879: case 92880: case 92881: // Blackout (Valiona)
         case 98474: case 100212: case 100213: case 100214: // Flame Scythe (Majordomo Staghelm)
         case 100431:                            // Flaming Cleave ( Fireland's trash )
+        case 103527: case 104605: case 108345: case 108346: // Void Diffusion (Warlord Zon'ozz)
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;

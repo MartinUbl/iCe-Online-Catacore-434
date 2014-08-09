@@ -3976,6 +3976,8 @@ void Spell::cancel()
         // Morchok spells
         case 103851:
         case 103821:
+        // Warlord spell
+        case 103946:
             return;
     }
 
