@@ -233,7 +233,7 @@ public:
                 for (Map::PlayerList::const_iterator itr = plrList.begin(); itr != plrList.end(); ++itr)
                 {
                     if (Player* pPlayer = itr->getSource())
-                        pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5311));// Elementary achievment
+                        pPlayer->GetAchievementMgr().CompletedAchievement(sAchievementStore.LookupEntry(5311), true);// Elementary achievment
                 }
 
             }
