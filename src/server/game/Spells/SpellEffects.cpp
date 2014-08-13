@@ -8806,7 +8806,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             continue;
 
                         uint32 dotEffIndex = dot_eff->GetEffIndex();
-                        int32 dot_tick = m_caster->SpellDamageBonus(unitTarget, dot_spell, dotEffIndex, dot_eff->GetAmount(), DOT, dot_eff->GetBase()->GetStackAmount());
+                        int32 dot_tick = dot_eff->GetAmount();
                         uint32 dot_amplitude = dot_spell->EffectAmplitude[dotEffIndex];
 
                         if (dot_amplitude > 0 && dot_tick > 0)
