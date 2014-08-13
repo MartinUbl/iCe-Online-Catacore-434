@@ -11862,6 +11862,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
+    if (spellProto->Id == 83853) // Prevent double spell damage bonus for Combustion DoT
+        return pdamage;
+
     // For totems get damage bonus from owner
     if (GetTypeId() == TYPEID_UNIT && this->ToCreature()->IsTotem())
         if (Unit *owner = GetOwner())
