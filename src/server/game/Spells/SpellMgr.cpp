@@ -5098,7 +5098,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_USABLE_WHILE_STUNNED;
             count++;
             break;
-        case 86664: // Soulburn: Seed of Corruption (bad dbc data) -> stupid blizzard
+        case 86664: // Soulburn: Seed of Corruption (bad dbc data) -> hate you blizzard
             spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY; 
             break;
