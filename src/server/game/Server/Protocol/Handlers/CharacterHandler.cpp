@@ -1007,6 +1007,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             }
 
             pGuild->UpdateMemberStats(pCurrChar);
+
+            for (uint32 i = 0; i < 2; i++)
+            {
+                uint32 skillid = pCurrChar->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + i);
+                pGuild->SetMemberProfessionData(pCurrChar->GetGUID(), skillid, pCurrChar->GetSkillValue(skillid), 0);
+            }
         }
         else
         {

@@ -32,6 +32,7 @@
 #include "DisableMgr.h"
 #include "CalendarMgr.h"
 #include "BattlegroundMgr.h"
+#include "SpellMgr.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -1494,6 +1495,16 @@ bool Guild::Member::LoadFromDB(Field* fields)
     professions[1].skillId = fields[32].GetUInt32();
     professions[1].skillValue = fields[33].GetUInt32();
     professions[1].title = 0;
+
+    // check if it's the primary profession in the skill field
+    for (uint32 i = 0; i < 2; i++)
+    {
+        if (!IsPrimaryProfessionSkill(professions[i].skillId))
+        {
+            professions[i].skillId = 0;
+            professions[i].skillValue = 0;
+        }
+    }
 
     m_activityWeek = fields[34].GetUInt32();
     m_activityTotal = fields[35].GetUInt32();
@@ -4130,6 +4141,9 @@ void Guild::SetMemberProfessionData(const uint64& guid, uint32 skillId, uint32 s
 
 void Guild::Member::SetProfessionData(uint32 skillId, uint32 skillValue, uint32 title)
 {
+    if (!IsPrimaryProfessionSkill(skillId))
+        return;
+
     for (uint32 i = 0; i < 2; i++)
     {
         if (professions[i].skillId == skillId)
