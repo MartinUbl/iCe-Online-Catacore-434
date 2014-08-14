@@ -7521,17 +7521,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                     int8 stackamount = electricAura->GetStackAmount();
 
-                    uint8 chance = stackamount * 10;
-
-                    // increase by one forthcoming stack
-                    if (stackamount < 10)
-                        stackamount++;
-
-                    // little change to linear chance
-                    if (stackamount < 3)
-                        chance -= 8;
-                    else
-                        chance += 8;
+                    int chance = stackamount * 18;
+                    if (chance > 100)
+                        chance = 100;
 
                     if (roll_chance_i(chance))
                     {
@@ -7550,11 +7542,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                         if (target)
                         {
-                            // as comments on wowhead say, the real damage is 2-4 times higher than tooltip value
-                            int32 bp0 = (urand(20, 35) * urand(985, 1266) / 10.0f) * stackamount;
-
-                            if (dummySpell->Id == 97119)
-                                bp0 *= 2.0f;
+                            int32 bp0 = dummySpell->EffectBasePoints[0] * stackamount;
 
                             CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
                             RemoveAurasDueToSpell(96890);
