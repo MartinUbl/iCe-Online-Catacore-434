@@ -11862,8 +11862,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
-    if (spellProto->Id == 83853) // Prevent double spell damage bonus for Combustion DoT
-        return pdamage;
+    // Some spells should not gain any spell damage bonus, because their damage was computed from (mostly percentage) damage of other spells
+    // There is no special attribute or any general rule ...
+    switch (spellProto->Id)
+    {
+        case 63675: // Improved Devouring Plague
+        case 83853: // Combustion
+        case 12654: // Ignite
+            return pdamage;
+    }
 
     // For totems get damage bonus from owner
     if (GetTypeId() == TYPEID_UNIT && this->ToCreature()->IsTotem())
