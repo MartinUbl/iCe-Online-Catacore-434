@@ -6339,9 +6339,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             return false;
                     }
                     triggered_spell_id = 12654;
-                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
-
                     basepoints0 = basepoints0 / 2;
+                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
                     break;
                 }
                 // Glyph of Ice Block
@@ -8401,7 +8400,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 basepoints0 = (triggerAmount * damage / 100) / 10;
                 triggered_spell_id = 50536;
-                basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id, EFFECT_0);
+                basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
                 break;
             }
             // Vendetta
@@ -9183,7 +9182,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         basepoints0 = damage * 0.3f;
 
                     basepoints0 = basepoints0 / (GetSpellMaxDuration(TriggerPS) / 1000);
-                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), trigger_spell_id);
+                    basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
                     break;
                 }
                 if (auraSpellInfo->SpellIconID == 2225)     // Serpent Spread 1,2
@@ -20145,47 +20144,21 @@ void Unit::OutDebugInfo() const
         sLog->outString("On vehicle %u.", GetVehicleBase()->GetEntry());
 }
 
-uint32 Unit::GetRemainingDotDamage(uint64 caster, uint32 spellId, uint8 effectIndex) const
+uint32 Unit::GetRemainingPeriodicAmount(uint64 casterGUID, uint32 spellId, AuraType auraType, uint8 effectIndex) const
 {
-    int32 amount = 0;
-    int32 old_amount = 1;
+    uint32 amount = 0;
 
-    AuraEffectList const& DoTAuras = GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-
-    // measure against IKs due to possible memory leaks (OJaaaa)
-    // any output amount < 500000 is OK
-    // only loap-verified output amount >= 500000 is OK (in case the amount is REALLY over 500000)
-    while (amount != old_amount)
+    // Make a copy so we can prevent iterator invalidation
+    AuraEffectList periodicAuras(GetAuraEffectsByType(auraType));
+    for (AuraEffectList::const_iterator i = periodicAuras.begin(); i != periodicAuras.end(); ++i)
     {
-        old_amount = amount;
-        amount = 0;
-
-        AuraEffectList const l_DoTAuras = DoTAuras; // local copy
-        for (AuraEffectList::const_iterator i = l_DoTAuras.begin(); i != l_DoTAuras.end(); ++i)
-        {
-            if ((*i)->GetCasterGUID() != caster || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex)
-                continue;
-
-            int32 total = (*i)->GetTotalTicks();
-            int32 ticknum = (int32)(*i)->GetTickNumber();
-            if (ticknum >= total)   // should not happen but happens...
-            {
-                amount = 0;
-                break;
-            }
-
-            amount = ((*i)->GetAmount() * (total - ticknum)) / total;
-            break;
-        }
-
-        if (amount < 500000)
-            break;
+        if ((*i)->GetCasterGUID() != casterGUID || (*i)->GetId() != spellId || (*i)->GetEffIndex() != effectIndex || !(*i)->GetTotalTicks())
+            continue;
+        int32 ticksRemaining = std::max<int32>((*i)->GetTotalTicks() - int32((*i)->GetTickNumber()), 0);
+        amount += uint32(((*i)->GetAmount() * ticksRemaining) / (*i)->GetTotalTicks());
+        break;
     }
-
-    if (amount < 0) // check value
-        amount = 0;
-
-    return uint32(amount); // type conversion
+    return amount;
 }
 
 bool Unit::IsVisionObscured(Unit* pVictim)
