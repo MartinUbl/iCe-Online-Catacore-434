@@ -4469,6 +4469,29 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
     }
 }
 
+void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 miscValue, uint64 casterGUID, uint32 exceptSpellId)
+{
+    // Make a copy so we can prevent iterator invalidation
+    AuraEffectList aurasCopy(GetAuraEffectsByType(aurType));
+
+    for (AuraEffectList::iterator iter = aurasCopy.begin(); iter != aurasCopy.end(); ++iter)
+    {
+        // For sure
+        if ((*iter)->GetBase() == NULL)
+            continue;
+        if ((*iter)->GetBase()->IsPassive())
+            continue;
+        if ((*iter)->GetMiscValue() != miscValue)
+            continue;
+        if ((*iter)->GetCasterGUID() == casterGUID && (*iter)->GetId() == exceptSpellId)
+            continue;
+
+        if (Unit * caster = (*iter)->GetCaster())
+        if (caster->GetTypeId() == TYPEID_PLAYER || caster->IsHunterPet())
+            (*iter)->GetBase()->Remove();
+    }
+}
+
 void Unit::RemoveAllAuras()
 {
     // this may be a dead loop if some events on aura remove will continiously apply aura on remove

@@ -1701,6 +1701,7 @@ class Unit : public WorldObject
         void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
         void RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemode = AURA_REMOVE_BY_DEFAULT, uint32 except=0);
         void RemoveMovementImpairingAuras();
+        void RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 miscValue, uint64 casterGUID, uint32 exceptSpellId);
 
         void RemoveAreaAurasDueToLeaveWorld();
         void RemoveAllAuras();

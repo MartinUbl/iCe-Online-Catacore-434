@@ -2239,6 +2239,7 @@ struct SpellEntry
 
     // some additional helper functions
     bool AppliesAuraType(uint32 type) const;
+    int32 GetIndexOfApplyAuraByType(uint32 type) const;
     float GetSpellRadius(Unit *caster, uint32 effIndex) const;
     bool HasSpellEffect(uint32 effectId) const;
 
