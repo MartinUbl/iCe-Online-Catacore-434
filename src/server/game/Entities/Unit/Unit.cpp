@@ -12151,7 +12151,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     //Ebon plague (need special handling, cause missing spell effect data)
     if (Aura * aura = pVictim->GetAura(65142))
     {
-        uint32 amount = aura->GetSpellProto()->EffectBasePoints[EFFECT_1];
+        int32 amount = aura->GetSpellProto()->EffectBasePoints[EFFECT_1];
         bool applyBonus = true;
         // Dont add bonus taken damage if target has same aura with same amount (prevent stacking)
         AuraEffectList const& damageTakenList = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
