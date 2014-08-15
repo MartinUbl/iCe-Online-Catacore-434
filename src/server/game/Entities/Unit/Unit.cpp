@@ -12153,6 +12153,21 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float TakenTotalMod = 1.0f;
     TakenTotalMod *= pVictim->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->SchoolMask);
 
+    //Ebon plague (need special handling, cause missing spell effect data)
+    if (Aura * aura = pVictim->GetAura(65142))
+    {
+        uint32 amount = aura->GetSpellProto()->EffectBasePoints[EFFECT_1];
+        bool applyBonus = true;
+        // Dont add bonus taken damage if target has same aura with same amount (prevent stacking)
+        AuraEffectList const& damageTakenList = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+        for (AuraEffectList::const_iterator i = damageTakenList.begin(); i != damageTakenList.end(); ++i)
+            if (amount == (*i)->GetAmount() && (SPELL_SCHOOL_MASK_MAGIC & GetSpellSchoolMask((*i)->GetSpellProto())))
+                applyBonus = false;
+
+        if (applyBonus && (SPELL_SCHOOL_MASK_MAGIC & GetSpellSchoolMask(spellProto)))
+                AddPctN(TakenTotalMod, amount);
+    }
+
     // .. taken pct: dummy auras
     AuraEffectList const& mDummyAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_DUMMY);
     for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)

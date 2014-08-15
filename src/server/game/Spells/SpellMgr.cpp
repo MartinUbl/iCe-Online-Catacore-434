@@ -4983,15 +4983,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->DurationIndex = 21;
             count++;
             break;
-        case 65142: // Ebon Plague
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
-            spellInfo->SpellFamilyFlags[2] = 0x10;
-            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
-            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
-            spellInfo->EffectMiscValue[1] = SPELL_SCHOOL_MASK_MAGIC;
-            spellInfo->EffectBasePoints[1] = 8;
-            count++;
-            break;
         case 41013:     // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
             count++;
