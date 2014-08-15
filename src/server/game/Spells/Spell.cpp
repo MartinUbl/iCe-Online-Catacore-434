@@ -3636,6 +3636,21 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 {
                     m_targets.setUnitTarget(*(unitList.begin()));
                 }
+
+                switch (m_spellInfo->Id)
+                {
+                    case 85547:
+                    case 86105:
+                    // Jinx: Curse of the Elements
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                    {
+                        if ((*itr)->HasAura(1490)) // Not on CoE targets
+                            itr = unitList.erase(itr);
+                        else
+                            ++itr;
+                    }
+                    break;
+                }
             }
             else
             {

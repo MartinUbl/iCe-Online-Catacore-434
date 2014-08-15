@@ -2934,6 +2934,14 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                             caster->CastSpell(caster, 101977, true); // Energize warlock with one soul shard
                     }
                     break;
+                case 1490: // Curse of the Elements
+                {
+                    if (caster->HasAura(85479)) // Jinx (Rank 2)
+                        caster->CastSpell(caster, 86105, true);
+                    else if (caster->HasAura(18179)) // Jinx (Rank 1)
+                        caster->CastSpell(caster, 85547, true);
+                }
+                break;
             }
             break;
         }

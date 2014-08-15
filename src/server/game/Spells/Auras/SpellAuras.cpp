@@ -1330,18 +1330,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->RemoveAura(74434);
                     }
                     break;
-                    case 1490: // Curse of the Elements
-                    {
-                        if (!caster || !caster->ToPlayer())
-                            break;
-
-                        // Jinx, casting Jinx: Curse of the Elements
-                        if (caster->HasAura(85479)) // Jinx (Rank 2)
-                            caster->CastSpell(caster, 86105, true);
-                        else if (caster->HasAura(18179)) // Jinx (Rank 1)
-                            caster->CastSpell(caster, 85547, true);
-                    }
-                break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
