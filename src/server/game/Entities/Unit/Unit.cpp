@@ -7555,10 +7555,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
 
                         if (target)
                         {
-                            // Cant proc in not in LoS
-                            if (!target->IsWithinLOSInMap(this))
-                                break;
-
                             int32 bp0 = dummySpell->EffectBasePoints[0] * stackamount;
 
                             CastCustomSpell(target, 96891, &bp0, NULL, NULL, true);
