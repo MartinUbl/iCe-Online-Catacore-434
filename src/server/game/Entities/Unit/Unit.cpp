@@ -4567,7 +4567,7 @@ void Unit::RemoveAllNegativeAuras()
     }
 }
 
-void Unit::RemoveArenaAuras(bool onleave)
+void Unit::RemoveArenaAuras(bool onLeave, bool isArena)
 {
     // in join, remove positive buffs, on end, remove negative
     // used to remove positive visible auras in arenas
@@ -4575,20 +4575,19 @@ void Unit::RemoveArenaAuras(bool onleave)
     {
         AuraApplication const * aurApp = iter->second;
         Aura const * aura = aurApp->GetBase();
-        if (!(aura->GetSpellProto()->AttributesEx4 & SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
-            && !aura->IsPassive()                               // don't remove passive auras
-            && (!(aura->GetSpellProto()->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) || !(aura->GetSpellProto()->Attributes & SPELL_ATTR0_UNK8))   // not unaffected by invulnerability auras or not having that unknown flag (that seemed the most probable)
-            && (aurApp->IsPositive() ^ onleave)                 // remove positive buffs on enter, negative buffs on leave
-            && !aura->GetSpellProto()->AppliesAuraType(SPELL_AURA_MOD_SHAPESHIFT) // shapeshifts are removed after adding to battleground (due to falling under map for unknown reason)
-            && !(aura->GetSpellProto()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT))
-            RemoveAura(iter);
-        else
+
+        // Do not removed these auras !!!
+        if ((aura->GetSpellProto()->AttributesEx4 & SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
+            || aura->IsPassive() 
+            || (aura->GetSpellProto()->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+            || (aurApp->IsPositive() && onLeave)
+            || aura->GetSpellProto()->AppliesAuraType(SPELL_AURA_MOD_SHAPESHIFT) // shapeshifts are removed later, after adding to battleground (due to falling under map for unknown reason)
+            || (aura->GetSpellProto()->Attributes & SPELL_ATTR0_CANT_CANCEL) // mostly guild tabards
+            || (isArena == false && aura->GetSpellProto()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)) // do not remove flasks if in BG
             ++iter;
+        else
+            RemoveAura(iter);
     }
-    // Weakened Heart has SPELL_ATTR0_NEGATIVE_1 so it's counted as negative, but should be cleared on enter
-    // It is clearer this way
-    if (onleave == false)
-        RemoveAura(55711);
 }
 
 void Unit::RemoveAllAurasOnDeath()

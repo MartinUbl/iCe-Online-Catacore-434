@@ -1093,7 +1093,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
             /* remove negative auras on BG/arena leave */
-            plr->RemoveArenaAuras(true);
+            plr->RemoveArenaAuras(true,isArena());
 
             // if arena, remove the specific arena auras
             if (isArena())
@@ -1262,7 +1262,7 @@ void Battleground::AddPlayer(Player* plr)
     plr->RemoveArenaEnchantments(TEMP_ENCHANTMENT_SLOT);
 
     if (Pet* pPet = plr->GetPet())
-        pPet->RemoveArenaAuras();
+        pPet->RemoveArenaAuras(false,isArena());
 
     // add arena specific auras
     if (isArena())

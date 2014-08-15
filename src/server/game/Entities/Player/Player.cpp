@@ -2267,9 +2267,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (mEntry->IsBattlegroundOrArena())
             {
                 RemoveArenaSpellCooldowns(true);
-                RemoveArenaAuras();
+                RemoveArenaAuras(false,mEntry->IsBattleArena());
                 if (pet)
-                    pet->RemoveArenaAuras();
+                    pet->RemoveArenaAuras(false,mEntry->IsBattleArena());
             }
 
             // remove pet on map change

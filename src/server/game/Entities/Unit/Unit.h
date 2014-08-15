@@ -1707,7 +1707,7 @@ class Unit : public WorldObject
         void RemoveAllAuras();
         void RemoveAllPositiveAuras();
         void RemoveAllNegativeAuras();
-        void RemoveArenaAuras(bool onleave = false);
+        void RemoveArenaAuras(bool onleave, bool arena);
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasRequiringDeadTarget();
         void DelayOwnedAuras(uint32 spellId, uint64 caster, int32 delaytime);
