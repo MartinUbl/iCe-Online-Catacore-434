@@ -12131,30 +12131,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
                     if (pVictim->GetDiseasesByCaster(owner->GetGUID()) > 0)
                         DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
-
-            // Impurity (dummy effect)
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                PlayerSpellMap playerSpells = this->ToPlayer()->GetSpellMap();
-                for (PlayerSpellMap::const_iterator itr = playerSpells.begin(); itr != playerSpells.end(); ++itr)
-                {
-                    if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                        continue;
-                    switch (itr->first)
-                    {
-                        case 49220:
-                        case 49633:
-                        case 49635:
-                        case 49636:
-                        case 49638:
-                        {
-                            if (const SpellEntry *proto=sSpellStore.LookupEntry(itr->first))
-                                ApCoeffMod *= (100.0f + SpellMgr::CalculateSpellEffectAmount(proto, 0)) / 100.0f;
-                        }
-                        break;
-                    }
-                }
-            }
         break;
         case SPELLFAMILY_GENERIC:
             // The Widow's Kiss
@@ -12198,13 +12174,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 {
                     if (pVictim->GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    AddPctN(TakenTotalMod, (*i)->GetAmount());
-                }
-                break;
-            // Ebon Plague
-            case 1933:
-                if ((*i)->GetMiscValue() & (spellProto ? GetSpellSchoolMask(spellProto) : 0))
-                {
                     AddPctN(TakenTotalMod, (*i)->GetAmount());
                 }
                 break;
