@@ -1102,18 +1102,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
         }
 
         // Player debuff stacking
-        if (aurApp->IsNegative() && caster && (caster->GetTypeId() == TYPEID_PLAYER || caster->IsHunterPet()) && target)
+        if (aurApp->IsNegative() && caster && (caster->GetTypeId() == TYPEID_PLAYER || caster->IsHunterPet()) && target && aurApp->GetBase())
         {
             const SpellEntry * spellproto = GetSpellProto();
-            
+
             if (spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_RESISTANCE_PCT) != -1)
-                target->RemovePlayerAurasWithSameAuraTypeByMiscValue(SPELL_AURA_MOD_RESISTANCE_PCT, spellproto->EffectMiscValue[uint32(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_RESISTANCE_PCT))], caster->GetGUID(), spellproto->Id);
+                target->RemovePlayerAurasWithSameAuraTypeDueToStack(SPELL_AURA_MOD_RESISTANCE_PCT,aurApp->GetBase()->GetEffect(uint8(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_RESISTANCE_PCT))), caster->GetGUID(), spellproto->Id);
             else if (spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) != -1)
-                target->RemovePlayerAurasWithSameAuraTypeByMiscValue(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellproto->EffectMiscValue[uint32(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN))], caster->GetGUID(), spellproto->Id);
+                target->RemovePlayerAurasWithSameAuraTypeDueToStack(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, aurApp->GetBase()->GetEffect(uint8(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN))), caster->GetGUID(), spellproto->Id);
             else if (spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE) != -1)
-                target->RemovePlayerAurasWithSameAuraTypeByMiscValue(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, spellproto->EffectMiscValue[uint32(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE))], caster->GetGUID(), spellproto->Id);
+                target->RemovePlayerAurasWithSameAuraTypeDueToStack(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, aurApp->GetBase()->GetEffect(uint8(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE))), caster->GetGUID(), spellproto->Id);
             else if (spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_MELEE_RANGED_HASTE_2) != -1)
-                target->RemovePlayerAurasWithSameAuraTypeByMiscValue(SPELL_AURA_MOD_MELEE_RANGED_HASTE_2,0, caster->GetGUID(), spellproto->Id);
+                target->RemovePlayerAurasWithSameAuraTypeDueToStack(SPELL_AURA_MOD_MELEE_RANGED_HASTE_2,aurApp->GetBase()->GetEffect(uint8(spellproto->GetIndexOfApplyAuraByType(SPELL_AURA_MOD_MELEE_RANGED_HASTE_2))), caster->GetGUID(), spellproto->Id);
         }
 
         switch (GetSpellProto()->SpellFamilyName)

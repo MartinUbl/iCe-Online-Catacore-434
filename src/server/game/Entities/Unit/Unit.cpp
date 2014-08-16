@@ -4469,8 +4469,13 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
     }
 }
 
-void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 miscValue, uint64 casterGUID, uint32 exceptSpellId)
+void Unit::RemovePlayerAurasWithSameAuraTypeDueToStack(AuraType aurType, AuraEffect * aurEff, uint64 casterGUID, uint32 exceptSpellId)
 {
+    if (aurEff->GetAmount() == 0)
+        return;
+
+    int32 miscValue = aurEff->GetMiscValue();
+
      // Earth and Moon (hack this, because we dont want to erase CoE from warlock, just drop all other EaM debuffs)
     if (aurType == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN && exceptSpellId == 60433)
     {
@@ -4481,6 +4486,7 @@ void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 
             else
                 ++iter;
         }
+        return;
     }
 
     // Make a copy so we can prevent iterator invalidation
@@ -4491,7 +4497,7 @@ void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 
         // For sure
         if ((*iter)->GetBase() == NULL)
             continue;
-        if ((*iter)->GetBase()->IsPassive())
+        if ((*iter)->GetBase()->IsPassive() || (*iter)->GetBase()->IsPermanent())
             continue;
         if ((*iter)->GetMiscValue() != miscValue)
             continue;
