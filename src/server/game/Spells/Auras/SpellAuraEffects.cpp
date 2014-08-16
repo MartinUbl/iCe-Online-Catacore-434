@@ -2936,10 +2936,13 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const
                     break;
                 case 1490: // Curse of the Elements
                 {
-                    if (caster->HasAura(85479)) // Jinx (Rank 2)
-                        caster->CastSpell(caster, 86105, true);
-                    else if (caster->HasAura(18179)) // Jinx (Rank 1)
-                        caster->CastSpell(caster, 85547, true);
+                    if (caster && target)
+                    {
+                        if (caster->HasAura(85479)) // Jinx (Rank 2)
+                            caster->CastSpell(target, 86105, true);
+                        else if (caster->HasAura(18179)) // Jinx (Rank 1)
+                            caster->CastSpell(target, 85547, true);
+                    }
                 }
                 break;
             }

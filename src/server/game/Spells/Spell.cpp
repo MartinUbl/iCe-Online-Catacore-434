@@ -3644,7 +3644,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     // Jinx: Curse of the Elements
                     for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
                     {
-                        if ((*itr)->HasAura(1490)) // Not on CoE targets
+                        if ((*itr)->HasAuraTypeWithValue(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN,8))
                             itr = unitList.erase(itr);
                         else
                             ++itr;
