@@ -4562,8 +4562,11 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode, 
     {
         // Remove casterauraspell and all stacks of Shadow Infusion
         if (GetCaster())
+        {
+            // Cast visual spell on pet
+            GetCaster()->CastSpell(target, 70895, true);
             GetCaster()->RemoveAurasDueToSpell(93426);
-
+        }
         if (target)
             target->RemoveAurasDueToSpell(91342);
     }
