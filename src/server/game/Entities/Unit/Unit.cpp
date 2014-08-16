@@ -6353,8 +6353,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             return false;
                     }
                     triggered_spell_id = 12654;
-                    basepoints0 = basepoints0 / 2;
+                    if (GetTypeId() == TYPEID_PLAYER)
+                        ToPlayer()->ApplySpellMod(12654, SPELLMOD_DOT, basepoints0);
                     basepoints0 += pVictim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id,SPELL_AURA_PERIODIC_DAMAGE,EFFECT_0);
+                    basepoints0 = basepoints0 / 2;
                     break;
                 }
                 // Glyph of Ice Block
