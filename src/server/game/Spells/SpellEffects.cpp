@@ -2088,8 +2088,29 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 82627, true);
-                    break;
+
+                    // 1% chance, because 1 in BP of this dummy effect (probably for chance to trigger)
+                    if (roll_chance_i(1))
+                    {
+                        uint32 rand_eff = urand(0, 2);
+                        switch (rand_eff)
+                        {
+                            case 0:
+                                // Painful Shock
+                                unitTarget->CastSpell(unitTarget, 82407, true);
+                                break;
+                            case 1:
+                                // Magnetized!
+                                unitTarget->CastSpell(unitTarget, 82403, true);
+                                break;
+                            case 2:
+                                // Reversed shield
+                                unitTarget->CastSpell(unitTarget, 82406, true);
+                                break;
+                        }
+                    }
                 }
+                break;
                 case 17251:                                 // Spirit Healer Res
                 {
                     if (!unitTarget || !m_originalCaster)
