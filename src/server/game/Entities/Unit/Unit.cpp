@@ -4471,6 +4471,9 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
 
 void Unit::RemovePlayerAurasWithSameAuraTypeDueToStack(AuraType aurType, AuraEffect * aurEff, uint64 casterGUID, uint32 exceptSpellId)
 {
+    if (aurEff == NULL)
+        return;
+
     if (aurEff->GetAmount() == 0)
         return;
 
