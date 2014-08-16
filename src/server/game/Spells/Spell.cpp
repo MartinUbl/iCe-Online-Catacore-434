@@ -4197,6 +4197,14 @@ void Spell::cast(bool skipCheck)
               m_preCastSpell = 68391;
              break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Dark Transformation
+            if (m_spellInfo->Id == 63560)
+            if (Unit * target = m_targets.getUnitTarget())
+                m_caster->CastSpell(target, 70895, true); // cast visual effect
+            break;
+        }
     }
 
     // traded items have trade slot instead of guid in m_itemTargetGUID
