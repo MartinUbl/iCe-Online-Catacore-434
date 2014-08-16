@@ -5937,15 +5937,6 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
             else
                 result = (effIndex != EFFECT_2);
             break;
-        case 60433: // Earth and Moon (hack)
-            if (Unit * target = m_targets.getUnitTarget())
-            {
-                // Dont apply -> dont stack with other player auras
-                if (target->HasAuraTypeWithValue(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, 8)
-                    && !target->GetAura(60433))
-                    result = false;
-            }
-            break;
     }
 
     return result;

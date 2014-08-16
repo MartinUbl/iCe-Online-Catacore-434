@@ -4471,18 +4471,6 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
 
 void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 miscValue, uint64 casterGUID, uint32 exceptSpellId)
 {
-     // Earth and Moon (hack this, because we dont want to erase CoE from warlock, just drop all other EaM debuffs)
-    if (aurType == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN && exceptSpellId == 60433)
-    {
-        for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
-        {
-            if (iter->second->GetBase()->GetId() == 60433 && iter->second->GetBase()->GetCasterGUID() != casterGUID)
-              RemoveAura(iter);
-            else
-                ++iter;
-        }
-    }
-
     // Make a copy so we can prevent iterator invalidation
     AuraEffectList aurasCopy(GetAuraEffectsByType(aurType));
 
@@ -4496,9 +4484,6 @@ void Unit::RemovePlayerAurasWithSameAuraTypeByMiscValue(AuraType aurType, int32 
         if ((*iter)->GetMiscValue() != miscValue)
             continue;
         if ((*iter)->GetCasterGUID() == casterGUID && (*iter)->GetId() == exceptSpellId)
-            continue;
-
-        if (aurType == SPELL_AURA_MOD_MELEE_RANGED_HASTE_2 && (*iter)->GetId() == 55095) // Dont drop Frost Fever
             continue;
 
         if (Unit * caster = (*iter)->GetCaster())
