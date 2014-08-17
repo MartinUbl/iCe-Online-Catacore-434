@@ -7925,6 +7925,36 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     break;
                 }
+                // Corrupted Blood
+                case 81701:
+                case 93187:
+                case 93188:
+                case 93189:
+                {
+                    if (!unitTarget || unitTarget->GetAuraCount(m_spellInfo->Id) == 100)
+                        return;
+                    static const uint32 corruptions[4] = {81836,81829,82125,82170};
+
+                    switch (unitTarget->GetAuraCount(m_spellInfo->Id))
+                    {
+                        case 25:
+                            unitTarget->CastSpell(unitTarget, corruptions[0], true);
+                            break;
+                        case 50:
+                            unitTarget->RemoveAura(corruptions[0]);
+                            unitTarget->CastSpell(unitTarget, corruptions[1], true);
+                            break;
+                        case 75:
+                            unitTarget->RemoveAura(corruptions[1]);
+                            unitTarget->CastSpell(unitTarget, corruptions[2], true);
+                            break;
+                        case 100:
+                            unitTarget->RemoveAura(corruptions[2]);
+                            unitTarget->CastSpell(unitTarget, corruptions[3], true);
+                            break;
+                    }
+                    break;
+                }
                 // Goblin Weather Machine
                 case 46203:
                 {
