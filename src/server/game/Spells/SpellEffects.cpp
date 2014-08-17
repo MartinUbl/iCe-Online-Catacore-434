@@ -7931,11 +7931,16 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 93188:
                 case 93189:
                 {
-                    if (!unitTarget || unitTarget->GetAuraCount(m_spellInfo->Id) == 100)
+                    if (!unitTarget)
                         return;
+
+                    Aura * aur = unitTarget->GetAura(m_spellInfo->Id);
+                    if (!aur)
+                        return;
+
                     static const uint32 corruptions[4] = {81836,81829,82125,82170};
 
-                    switch (unitTarget->GetAuraCount(m_spellInfo->Id))
+                    switch (aur->GetStackAmount())
                     {
                         case 25:
                             unitTarget->CastSpell(unitTarget, corruptions[0], true);
