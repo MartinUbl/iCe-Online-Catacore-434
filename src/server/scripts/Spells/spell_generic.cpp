@@ -843,13 +843,13 @@ class spell_gen_gift_of_naaru : public SpellScriptLoader
                 amount += int32(std::max(healTick, 0));
             }
 
-            void Register() override
+            void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_gift_of_naaru_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const
         {
             return new spell_gen_gift_of_naaru_AuraScript();
         }
