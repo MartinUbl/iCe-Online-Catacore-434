@@ -112,6 +112,11 @@ class AuraEffect
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(Unit * target, bool apply) const;
     private:
+
+        int32 m_damage;
+        float m_critChance;
+        float m_donePct;
+
         Aura * const m_base;
 
         SpellEntry const * const m_spellProto;
@@ -122,9 +127,6 @@ class AuraEffect
         int32 m_scriptedAmount;
 
         int32 m_amount;
-        int32 m_damage;
-        float m_critChance;
-        float m_donePct;
         bool m_canBeRecalculated;
 
         SpellModifier *m_spellmod;

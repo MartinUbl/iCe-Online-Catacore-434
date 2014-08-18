@@ -433,11 +433,10 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
 };
 
 AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, int32 *scriptedAmount, Unit *caster) :
-m_base(base), m_spellProto(base->GetSpellProto()), m_effIndex(effIndex),
+m_damage(0), m_critChance(0.0f), m_donePct(1.0f), m_base(base), m_spellProto(base->GetSpellProto()), m_effIndex(effIndex),
 m_baseAmount(baseAmount ? *baseAmount : m_spellProto->EffectBasePoints[m_effIndex]),
 m_scriptedAmount(scriptedAmount? *scriptedAmount : 0 ),
-m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTimer(0), m_tickNumber(0),
-m_damage(0), m_critChance(0.0f), m_donePct(1.0f)
+m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTimer(0), m_tickNumber(0)
 {
     CalculatePeriodic(caster, true);
 
