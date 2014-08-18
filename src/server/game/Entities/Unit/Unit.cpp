@@ -13392,59 +13392,6 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
             }
             
         }
-        // Formula based SP coefficient calculation is disabled cause all coeffs should be present in the DBC
-        // A few custom cases go into spell_bonus_data table
-        /*if ((!bonus && !scripted) || coeff < 0)
-        {
-            // Damage Done from spell damage bonus
-            int32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
-            // Damage over Time spells bonus calculation
-            float DotFactor = 1.0f;
-            if (damagetype == DOT)
-            {
-                int32 DotDuration = GetSpellDuration(spellProto);
-                // 200% limit
-                if (DotDuration > 0)
-                {
-                    if (DotDuration > 30000) DotDuration = 30000;
-                    if (!IsChanneledSpell(spellProto)) DotFactor = DotDuration / 15000.0f;
-                    uint32 x = 0;
-                    for (uint8 j = 0; j < MAX_SPELL_EFFECTS; j++)
-                    {
-                        if (spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
-                            spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
-                            spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH))
-                        {
-                            x = j;
-                            break;
-                        }
-                    }
-                    int32 DotTicks = 6;
-                    if (spellProto->EffectAmplitude[x] != 0)
-                        DotTicks = DotDuration / spellProto->EffectAmplitude[x];
-                    if (DotTicks)
-                    {
-                        DoneAdvertisedBenefit = DoneAdvertisedBenefit * int32(stack) / DotTicks;
-                        TakenAdvertisedBenefit = TakenAdvertisedBenefit * int32(stack) / DotTicks;
-                    }
-                }
-            }
-            // Distribute Damage over multiple effects, reduce by AoE
-            CastingTime = GetCastingTimeForBonus(spellProto, damagetype, CastingTime);
-            // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
-            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-            {
-                if (spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
-                    (spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH))
-                {
-                    CastingTime /= 2;
-                    break;
-                }
-            }
-            // As wowwiki says: C = (Cast Time / 3.5) * 1.88 (for healing spells)
-            coeff = (CastingTime / 3500.0f) * DotFactor * 1.88f;
-        }*/
-/*
         factorMod *= CalculateLevelPenalty(spellProto)* stack;
         TakenTotal += int32(TakenAdvertisedBenefit * coeff * factorMod);
         if (Player* modOwner = GetSpellModOwner())
