@@ -5980,6 +5980,15 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena() && m_caster->ToPlayer()->GetSpectatorInstanceId() > 0)
         return SPELL_FAILED_NO_VALID_TARGETS;
 
+    // Client allow players to cast destination spells to places which are not in LoS with them -> caused by camera angle ?
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_targets.HasDst() && (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION))
+    {
+        float x, y, z;
+        m_targets.m_dstPos.GetPosition(x, y, z);
+        if (!m_caster->IsWithinLOS(x,y,z))
+            return SPELL_FAILED_LINE_OF_SIGHT;
+    }
+
     Unit* Target = m_targets.getUnitTarget();
     if (m_spellInfo->Id == 30449 && Target) // Spellsteal Check
     {
