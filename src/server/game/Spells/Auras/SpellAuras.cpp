@@ -751,7 +751,19 @@ void Aura::RefreshDuration()
     SetDuration(GetMaxDuration());
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if (m_effects[i])
+        {
             m_effects[i]->ResetPeriodic();
+
+            Unit * caster = GetCaster();
+            WorldObject * target = GetOwner();
+
+            if (caster && target && target->ToUnit())
+            {
+                uint32 damage = std::max(m_effects[i]->GetAmount(), 0);
+                m_effects[i]->SetDamage(caster->SpellDamageBonusDone(target->ToUnit(), GetSpellProto(), i, damage, DOT) * m_effects[i]->GetDonePct());
+                m_effects[i]->CalculatePeriodic(caster, false);
+            }
+        }
 
     if (m_spellProto->manaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
@@ -1341,7 +1353,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Improved Devouring Plague
                     if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0))
                     {
-                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellDamageBonus(target, GetSpellProto(), 0, GetEffect(0)->GetAmount(), DOT) / 100;
+                        uint32 damage = caster->SpellDamageBonusDone(target, GetSpellProto(),EFFECT_0, GetEffect(0)->GetAmount(), DOT);
+                        damage = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, damage, DOT);
+                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * int32(damage) / 100;
+
                         caster->CastCustomSpell(target, 63675, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
                     }
                 }
@@ -1351,7 +1366,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Divine Touch (old Empowered Renew)
                     if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3021, 0))
                     {
-                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellHealingBonus(target, GetSpellProto(), 0, GetEffect(0)->GetAmount(), HEAL) / 100;
+                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellHealingBonus(target, GetSpellProto(), EFFECT_0, GetEffect(0)->GetAmount(), HEAL) / 100;
                         caster->CastCustomSpell(target, 63544, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
                     }
                 }
@@ -1679,7 +1694,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             break;
 
                         uint32 pheal = pEff->GetAmount() > 0 ? pEff->GetAmount() : 0;
-                        pheal = caster->SpellHealingBonus(target, GetSpellProto(), 0, pheal, DOT);
+                        pheal = caster->SpellHealingBonus(target, GetSpellProto(), EFFECT_0, pheal, DOT);
 
                         pheal *= GetEffect(EFFECT_0)->GetTotalTicks();
 
@@ -2714,6 +2729,56 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     }
                 }
             }
+    }
+}
+
+void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* caster)
+{
+    Unit* target = aurApp->GetTarget();
+
+    if (!caster || aurApp->GetRemoveMode())
+        return;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (!HasEffect(i))
+            continue;
+
+        if (IsAreaAuraEffect(m_spellProto->Effect[i]) || m_spellProto->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            continue;
+
+        switch (m_spellProto->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_PERIODIC_DAMAGE:
+            case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+            case SPELL_AURA_PERIODIC_LEECH:
+            {
+                AuraEffect* aurEff = GetEffect(i);
+
+                // ignore non positive values (can be result apply spellmods to aura damage
+                uint32 damage = std::max(aurEff->GetAmount(), 0);
+
+                aurEff->SetDonePct(caster->SpellDamagePctDone(target, m_spellProto, DOT)); // Calculate done percentage first!
+                aurEff->SetDamage(caster->SpellDamageBonusDone(target, m_spellProto, aurEff->GetEffIndex(), damage, DOT, GetStackAmount()) * aurEff->GetDonePct());
+                aurEff->SetCritChance(caster->GetUnitSpellCriticalChance(target, m_spellProto, GetSpellSchoolMask(m_spellProto)));
+                break;
+            }
+            case SPELL_AURA_PERIODIC_HEAL:
+            case SPELL_AURA_OBS_MOD_HEALTH:
+            {
+                AuraEffect* aurEff = GetEffect(i);
+
+                // ignore non positive values (can be result apply spellmods to aura damage
+                uint32 damage = std::max(aurEff->GetAmount(), 0);
+
+                aurEff->SetDonePct(caster->SpellHealingPctDone(target, m_spellProto)); // Calculate done percentage first!
+                aurEff->SetDamage(caster->SpellHealingBonusDone(target, m_spellProto, aurEff->GetEffIndex(), damage, DOT, GetStackAmount()) * aurEff->GetDonePct());
+                aurEff->SetCritChance(caster->GetUnitSpellCriticalChance(target, m_spellProto, GetSpellSchoolMask(m_spellProto)));
+                break;
+            }
+            default:
+                break;
+        }
     }
 }
 

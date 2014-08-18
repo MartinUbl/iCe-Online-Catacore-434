@@ -791,7 +791,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Conflagrate
                 if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
                 {
-                    AuraEffect const* aura = NULL;                // found req. aura for damage calculation
+                    AuraEffect const* auraEff = NULL;                // found req. aura for damage calculation
 
                     Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
@@ -804,18 +804,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         // Immolate
                         if ((*i)->GetSpellProto()->SpellFamilyFlags[0] & 0x4)
                         {
-                            aura = *i;                      // it selected always if exist
+                            auraEff = *i;                      // it selected always if exist
                             break;
                         }
                     }
 
                     // found Immolate
-                    if (aura)
+                    if (auraEff)
                     {
-                        uint32 pdamage = aura->GetAmount() > 0 ? aura->GetAmount() : 0;
-                        pdamage = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellProto(), aura->GetEffIndex(), pdamage, DOT, aura->GetBase()->GetStackAmount());
+                        uint32 pdamage = auraEff->GetAmount() > 0 ? auraEff->GetAmount() : 0;
+                        pdamage = m_caster->SpellDamageBonus(unitTarget, auraEff->GetSpellProto(),auraEff->GetEffIndex(), pdamage, DOT, auraEff->GetBase()->GetStackAmount());
+
                         uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
-                        uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellProto()) / aura->GetSpellProto()->EffectAmplitude[2]);
+                        uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(auraEff->GetSpellProto()) / auraEff->GetSpellProto()->EffectAmplitude[EFFECT_2]);
                         damage += pdamage * baseTotalTicks * pct_dir / 100;
 
                         uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2)) / 3;
@@ -1950,20 +1951,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         {
             if (unitTarget && unitTarget->isFrozen())
                 m_damage = m_damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
-        }
-    }
-
-    if (m_caster && m_spellInfo)
-    {
-        // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC
-        Unit::AuraEffectList const& effList = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
-        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
-        {
-            if ((*itr) && (*itr)->GetMiscValue() == int32(m_spellInfo->Mechanic))
-            {
-                if ((*itr)->GetAmount())
-                    m_damage *= (1+(*itr)->GetAmount()/100.0f);
-            }
         }
     }
 }
@@ -8862,7 +8849,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                             continue;
 
                         uint32 dotEffIndex = dot_eff->GetEffIndex();
-                        int32 dot_tick = dot_eff->GetAmount();
+                        int32 dot_tick = dot_eff->GetDamage();
                         uint32 dot_amplitude = dot_spell->EffectAmplitude[dotEffIndex];
 
                         if (dot_amplitude > 0 && dot_tick > 0)

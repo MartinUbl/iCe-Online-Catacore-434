@@ -173,6 +173,7 @@ class Aura
 
         void SetNeedClientUpdateForTargets() const;
         void HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster, bool apply);
+        void HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* caster);
         bool CanBeAppliedOn(Unit *target);
         bool CheckAreaTarget(Unit *target);
 

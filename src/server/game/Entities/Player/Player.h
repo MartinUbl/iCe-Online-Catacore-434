@@ -1345,7 +1345,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetBankBagSlotCount() const { return GetByteValue(PLAYER_BYTES_2, 2); }
         void SetBankBagSlotCount(uint8 count) { SetByteValue(PLAYER_BYTES_2, 2, count); }
         bool HasItemCount(uint32 item, uint32 count, bool inBankAlso = false) const;
-        bool HasItemFitToSpellRequirements(SpellEntry const* spellInfo, Item const* ignoreItem = NULL);
+        bool HasItemFitToSpellRequirements(SpellEntry const* spellInfo, Item const* ignoreItem = NULL) const;
         bool CanNoReagentCast(SpellEntry const* spellInfo) const;
         bool HasItemOrGemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot = NULL_SLOT) const;
         bool HasItemOrGemWithLimitCategoryEquipped(uint32 limitCategory, uint32 count, uint8 except_slot = NULL_SLOT) const;
@@ -2097,7 +2097,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateMastery();
         bool HasMastery();
         // Mastery points are always +8 - starting bonus
-        float GetMasteryPoints() { return GetRatingBonusValue(CR_MASTERY) + GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY); }
+        float GetMasteryPoints() const { return GetRatingBonusValue(CR_MASTERY) + GetTotalAuraModifier(SPELL_AURA_MOD_MASTERY); }
 
         uint32 GetMountCapabilityIndex(uint32 amount);
 

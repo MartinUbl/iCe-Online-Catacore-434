@@ -174,7 +174,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS
     &AuraEffect::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN implemented in Unit::MeleeDamageBonus
     &AuraEffect::HandleNoImmediateEffect,                         //114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT implemented in Unit::MeleeDamageBonus
-    &AuraEffect::HandleNoImmediateEffect,                         //115 SPELL_AURA_MOD_HEALING                 implemented in Unit::SpellBaseHealingBonusDoneTaken
+    &AuraEffect::HandleNoImmediateEffect,                         //115 SPELL_AURA_MOD_HEALING                 implemented in Unit::SpellBaseHealingBonusTaken
     &AuraEffect::HandleNoImmediateEffect,                         //116 SPELL_AURA_MOD_REGEN_DURING_COMBAT
     &AuraEffect::HandleNoImmediateEffect,                         //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE     implemented in Unit::MagicSpellHitResult
     &AuraEffect::HandleNoImmediateEffect,                         //118 SPELL_AURA_MOD_HEALING_PCT             implemented in Unit::SpellHealingBonus
@@ -436,7 +436,8 @@ AuraEffect::AuraEffect(Aura *base, uint8 effIndex, int32 *baseAmount, int32 *scr
 m_base(base), m_spellProto(base->GetSpellProto()), m_effIndex(effIndex),
 m_baseAmount(baseAmount ? *baseAmount : m_spellProto->EffectBasePoints[m_effIndex]),
 m_scriptedAmount(scriptedAmount? *scriptedAmount : 0 ),
-m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTimer(0), m_tickNumber(0)
+m_canBeRecalculated(true), m_spellmod(NULL), m_isPeriodic(false), m_periodicTimer(0), m_tickNumber(0),
+m_damage(0), m_critChance(0.0f), m_donePct(1.0f)
 {
     CalculatePeriodic(caster, true);
 
@@ -1158,20 +1159,6 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
         }
     }
 
-    if (caster && GetSpellProto() && amount != 0)
-    {
-        // Implement SPELL_AURA_MOD_DAMAGE_MECHANIC
-        Unit::AuraEffectList const& effList = caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_MECHANIC);
-        for (Unit::AuraEffectList::const_iterator itr = effList.begin(); itr != effList.end(); ++itr)
-        {
-            if ((*itr) && (*itr)->GetMiscValue() == int32(GetSpellProto()->Mechanic))
-            {
-                if ((*itr)->GetAmount())
-                    amount *= 1+((*itr)->GetAmount()/100.0f);
-            }
-        }
-    }
-
     GetBase()->CallScriptEffectCalcAmountHandlers(const_cast<AuraEffect const *>(this), amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
     return amount;
@@ -1720,7 +1707,6 @@ bool AuraEffect::IsPeriodicTickCrit(Unit *target, Unit const *caster) const
     ASSERT(caster);
     if (caster->IsSpellCrit(target, m_spellProto, GetSpellSchoolMask(m_spellProto)))
         return true;
-
     return false;
 }
 
@@ -1735,6 +1721,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
     bool prevented = GetBase() ? GetBase()->CallScriptEffectPeriodicHandlers(this, aurApp) : false;
     if (prevented)
         return;
+
+    // AOE spells are not affected by the new periodic system.
+    bool isAreaAura = (IsAreaAuraEffect(m_spellProto->Effect[GetEffIndex()]) || m_spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA);
 
     Unit * target = aurApp->GetTarget();
 
@@ -2031,12 +2020,15 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             uint32 resist = 0;
             CleanDamage cleanDamage =  CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
-            // ignore non positive values (can be result apply spellmods to aura damage
-            uint32 damage = GetAmount() > 0 ? GetAmount() : 0;
+            // ignore negative values (can be result apply spellmods to aura damage
+            uint32 damage = isAreaAura ? std::max(GetAmount(), 0) : m_damage;
 
             if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
             {
-                damage = caster->SpellDamageBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+                if (isAreaAura)
+                    damage = caster->SpellDamageBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellDamagePctDone(target, m_spellProto, DOT);
+
+                damage = target->SpellDamageBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
                 // Calculate armor mitigation
                 if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), m_effIndex))
@@ -2083,7 +2075,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             else
                 damage = uint32(target->CountPctFromMaxHealth(damage));
 
-            bool crit = IsPeriodicTickCrit(target, caster);
+            bool crit = false;
+
+            if (isAreaAura)
+                crit = IsPeriodicTickCrit(target, caster);
+            else
+                crit = roll_chance_f(m_critChance);
+
             if (crit)
                 damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
 
@@ -2157,10 +2155,18 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             uint32 resist = 0;
             CleanDamage cleanDamage =  CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
-            uint32 damage = GetAmount() > 0 ? GetAmount() : 0;
-            damage = caster->SpellDamageBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+            uint32 damage = isAreaAura ? std::max(GetAmount(), 0) : m_damage;
+            if (isAreaAura)
+                damage = caster->SpellDamageBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellDamagePctDone(target, m_spellProto, DOT);
+            damage = target->SpellDamageBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
 
-            bool crit = IsPeriodicTickCrit(target, caster);
+            bool crit = false;
+
+            if (isAreaAura)
+                crit = IsPeriodicTickCrit(target, caster);
+            else
+                crit = roll_chance_f(m_critChance);
+
             if (crit)
                 damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
 
@@ -2253,7 +2259,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 return;
             }
 
-            uint32 damage = GetAmount();
+            uint32 damage = isAreaAura ? GetAmount() : m_damage;
             // do not kill health donator
             if (caster->GetHealth() < damage)
                 damage = caster->GetHealth() - 1;
@@ -2399,7 +2405,9 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     damage = percent * target->GetMaxHealth() / 100.0f;
                 }
 
-                damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+                if (isAreaAura)
+                    damage = caster->SpellHealingBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellHealingPctDone(target, m_spellProto);
+                damage = target->SpellHealingBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
 
             // Warrior's Second Wind
@@ -2441,9 +2449,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     damage = damage * 1.2f;
             }
 
-            bool crit = IsPeriodicTickCrit(target, caster);
+            // AOE spells are not affected by the new periodic system.
+            bool isAreaAura = (IsAreaAuraEffect(m_spellProto->Effect[GetEffIndex()]) || m_spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA);
+            bool crit = false;
+
+            if (isAreaAura)
+                crit = IsPeriodicTickCrit(target, caster);
+            else
+                crit = roll_chance_f(m_critChance);
+
             if (crit)
-                damage = caster->SpellCriticalHealingBonus(m_spellProto, damage, target);
+                damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
 
             sLog->outDetail("PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), target->GetGUIDLow(), target->GetTypeId(), damage, GetId());

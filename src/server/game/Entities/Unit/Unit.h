@@ -1722,7 +1722,7 @@ class Unit : public WorldObject
         AuraEffect * GetAuraEffect(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
         AuraEffect * GetAuraEffectOfRankedSpell(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
         AuraEffect * GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 iconId, uint8 effIndex) const; // spell mustn't have familyflags
-        AuraEffect * GetAuraEffect(AuraType type, SpellFamilyNames family, uint32 familyFlag1 , uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID =0);
+        AuraEffect * GetAuraEffect(AuraType type, SpellFamilyNames family, uint32 familyFlag1 , uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID =0) const;
         inline AuraEffect* GetDummyAuraEffect(SpellFamilyNames name, uint32 iconId, uint8 effIndex) const { return GetAuraEffect(SPELL_AURA_DUMMY, name, iconId, effIndex);}
 
         AuraApplication * GetAuraApplication(uint32 spellId, uint64 casterGUID = 0, uint64 itemCasterGUID = 0, uint8 reqEffMask = 0, AuraApplication * except = NULL) const;
@@ -1952,23 +1952,33 @@ class Unit : public WorldObject
         int32 SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const;
         int32 SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask) const;
 
-        int32 SpellBaseHealingBonusDone(SpellSchoolMask schoolMask);
-        int32 SpellBaseHealingBonusDoneTaken(SpellSchoolMask schoolMask);
+        int32 SpellBaseHealingBonusDone(SpellSchoolMask schoolMask) const ;
+        int32 SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask) const;
 
-        // TODO: Split this function into (BonusDone/PctDone/BonusTaken)
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
-        // TODO: Split this function into (BonusDone/PctDone/BonusTaken)
+        uint32 SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1) const;
+        float  SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, DamageEffectType damagetype) const;
+        uint32 SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1) const;
+
         uint32 SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1) const;
+        float SpellHealingPctDone(Unit* victim, SpellEntry const* spellProto) const;
+        uint32 SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1) const;
+
+        void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
+        uint32 MeleeDamageBonusDone(Unit* pVictim, uint32 damage, WeaponAttackType attType, SpellEntry const* spellProto = NULL);
+        uint32 MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackType attType, SpellEntry const* spellProto = NULL);
 
         bool   isSpellBlocked(Unit *pVictim, SpellEntry const *spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   isBlockCritical();
         bool   IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
+        float  GetUnitSpellCriticalChance(Unit* victim, SpellEntry const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
+
         uint32 SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
         uint32 SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
 
         void SetContestedPvP(Player *attackedPlayer = NULL);
 
-        void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
         uint32 GetCastingTimeForBonus(SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime);
 
         uint32 GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex) const;
