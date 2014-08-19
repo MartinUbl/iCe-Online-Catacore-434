@@ -12314,7 +12314,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
-    // Some spells don't benefit from done mods
+    // Some spells don't benefit from done mods at all
     if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
         return pdamage;
 
@@ -12449,6 +12449,10 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
 
     // Some spells don't benefit from pct done mods
     if (spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS)
+        return 1.0f;
+
+    // Some spells don't benefit from done bonuses at all
+    if (spellProto->AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS)
         return 1.0f;
 
     // Some spells should not gain any spell damage bonus, because their damage was computed from (mostly percentage) damage of other spells
