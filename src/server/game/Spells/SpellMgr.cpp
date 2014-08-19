@@ -4559,22 +4559,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45576: // Cosmetic Fire Beam
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
-        case 1680: // Whirlwind  (Fury)
-            spellInfo->EffectRadiusIndex[0] = 8;
-            spellInfo->EffectRadiusIndex[1] = 8;
-            count++;
-            break;
-        case 44949: // Whirlwind Off-Hand (Fury)
-            spellInfo->EffectRadiusIndex[0] = 8;
-            spellInfo->EffectRadiusIndex[1] = 8;
-            count++;
-            break;
-        case 50622: // Whirlwind (triggered by Bladestorm)
-            spellInfo->EffectRadiusIndex[0] = 8;
-            spellInfo->EffectRadiusIndex[1] = 8;
-            spellInfo->EffectRadiusIndex[2] = 8;
-            count++;
-            break;
         case 77486: // Shadow Orb Power (disable spell proc, done in other way)
             spellInfo->Effect[0] = 0;
             break;
@@ -5040,18 +5024,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
             count++;
             break;
-        case 69055:     // Saber Lash
-        case 70814:     // Saber Lash
-            spellInfo->EffectRadiusIndex[0] = 8;
-            count++;
-            break;
-        case 69075:     // Bone Storm
-        case 70834:     // Bone Storm
-        case 70835:     // Bone Storm
-        case 70836:     // Bone Storm
-            spellInfo->EffectRadiusIndex[0] = 12;
-            count++;
-            break;
         case 18500: // Wing Buffet
         case 33086: // Wild Bite
         case 49749: // Piercing Blow
@@ -5161,9 +5133,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->StackAmount = 0; //TODO: remove when stacking of Decrease Run Speed % aura is fixed
             count++;
             break;
-        case 15237: // Holy Nova
-        case 23455: // Holy Nova - heal
-            spellInfo->EffectRadiusIndex[0] = 13;
             count++;
             break;
         case 87904:  // Al'akir:
@@ -5270,26 +5239,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 63531: //  Retribution Aura Overflow ( Communion ) retribution paladin talent, missing basepoint
             spellInfo->EffectBasePoints[1] = 3;
             break;
-        case 82415: // Dampening Wave
-        case 92650: // Dampening Wave (heroic difficulty)
-            // because of bug in dbc
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_60_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_60_YARDS;
-            break;
-        case 81828: // Thrashing Charge
-        case 92651: // Thrashing Charge (heroic difficulty)
-            // because bug of dbc we must set corrected target manually
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;
-            spellInfo->CastingTimeIndex = 1; // instant cast
-            break;
         case 81629: // Submerge
             spellInfo->EffectTriggerSpell[0] = 0; // Summon effect, summoned in AI
-            break;
-        case 81008: // Quake
-        case 92631: // Quake (Heroic difficulty)
-            // because of bug in dbc
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_80_YARDS;
             break;
        case 82699: // Water bomb
             spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
@@ -5381,12 +5332,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectChainTarget[1] = 3; 
             spellInfo->EffectRadiusIndex[1] = 22;
             break;
-        case 92076: // Gravity core chybajuci radius index
-        case 92537:
-        case 92538:
-        case 92539:
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;
-            break;
         case 92075:
             spellInfo->rangeIndex=6; // 100 yards
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
@@ -5416,32 +5361,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectTriggerSpell[0] = 0;
             break;
         }
-        case 81441: // Shadowfury
-        case 92644: // Shadowfury (heroic difficulty)
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;
-            break;
-        case 81440: // Frostbolt Volley
-        case 92642: // Frostbolt Volley (heroic difficulty)
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_40_YARDS;
-            break;
-        case 81569: // Spining Slash
-        case 92623: // Spining Slash (heroic difficulty)
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
-            break;
-        case 81508: // Dust Storm
-        case 92624: // Dust Storm (heoric difficulty)
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_40_YARDS;
-            spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_40_YARDS;
-            break;
-        case 81272: // Electrocute radius index ( Nefarian Encounter in BWD )
-        case 94088:
-        case 94089:
-        case 94090:
-            spellInfo->EffectRadiusIndex[0] = 22;
-            break;
         case 77987: // Growth Catalyst
         case 101440: // + difficulty entries
         case 101441:
@@ -5501,13 +5420,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 96466: // Whispers of Hethiss
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             break;
-        case 96560: // Word of Hethiss
-             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
-             spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;
-             break;
-        case 96685: // Venomous Effusion
-             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
-             break;
         case 96521: // Pool of Acrid Tears
         case 97089:
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_4_YARDS;
@@ -5531,7 +5443,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_AREA_ALLY_SRC;
             break;
         case 77569: // Release Aberration
-            spellInfo->EffectRadiusIndex[0] = 12;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;
             break;
         case 82848: // Massacre
             spellInfo->EffectRadiusIndex[0] = 28;
@@ -5552,9 +5464,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeTargetAuraSpell = 116; // Frostbolt
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_20_YARDS;
             spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_20_YARDS;
-            break;
-        case 30213: // Legion Strike
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_6_YARDS;
             break;
         case 95799: // Empowered shadow
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // disable applying spell modifier for direct damage
@@ -5652,19 +5561,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100828:
             spellInfo->AttributesEx2 &= ~(uint32)SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // don't ignore LoS
             break;
-
         //Deatbringer Saurfang
         case 7202: // Blood link
             spellInfo->EffectApplyAuraName[0]=SPELL_EFFECT_DUMMY;
-            break;
-
-        case 88314: // Twisting Winds
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_3_YARDS;
-            break;
-        case 89133: // Solar Fire (Normal)
-        case 89878: // Solar Fire (Heroic)
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
             break;
         case 74108: // Solar Winds (Normal)
         case 89130: // Solar Winds (Heroic)
