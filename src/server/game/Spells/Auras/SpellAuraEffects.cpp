@@ -2300,13 +2300,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             // ignore non positive values (can be result apply spellmods to aura damage)
             uint32 damage = isAreaAura ? std::max(GetAmount(), 0) : m_damage;
 
-            if (GetAuraType() == SPELL_AURA_PERIODIC_HEAL)
-            {
-                if (isAreaAura)
-                    damage = caster->SpellHealingBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellHealingPctDone(target, m_spellProto);
-                damage = target->SpellHealingBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
-            }
-
             if (GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH)
             {
                 // Taken mods
@@ -2410,6 +2403,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
                     damage = percent * target->GetMaxHealth() / 100.0f;
                 }
+
+                // SPELL_AURA_PERIODIC_HEAL -> apply spell healing bonus
+                if (isAreaAura)
+                    damage = caster->SpellHealingBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellHealingPctDone(target, m_spellProto);
+                damage = target->SpellHealingBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
 
             // Warrior's Second Wind
