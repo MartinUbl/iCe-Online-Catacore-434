@@ -12416,7 +12416,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     {
         if(coeff <= 0)
         {
-            if(effIndex <= MAX_SPELL_EFFECTS)
+            if(effIndex < MAX_SPELL_EFFECTS)
                 coeff = spellProto->EffectBonusCoefficient[effIndex]; // Spell power coeficient
             else
                 coeff = 0; // should never happen
@@ -12462,7 +12462,7 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
         case 63675: // Improved Devouring Plague
         case 83853: // Combustion
         case 12654: // Ignite
-            return 1.0f;;
+            return 1.0f;
     }
 
     // For totems pct done mods are calculated when its calculation is run on the player in SpellDamageBonusDone.
@@ -12772,7 +12772,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
         {
             if(coeff <= 0 || !bonus)
             {
-                if(effIndex <= MAX_SPELL_EFFECTS)
+                if(effIndex < MAX_SPELL_EFFECTS)
                     coeff = spellProto->EffectBonusCoefficient[effIndex]; // Spell power coeficient
                 else
                     coeff = 0; // should never happen
@@ -13486,7 +13486,7 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
 uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
 {
     // For totems get healing bonus from owner (statue isn't totem in fact)
-    if (GetTypeId() == TYPEID_UNIT && IsTotem())
+    if (GetTypeId() == TYPEID_UNIT && this->ToCreature()->IsTotem())
         if (Unit* owner = GetOwner())
             return owner->SpellHealingBonusDone(victim, spellProto,effIndex, healamount, damagetype, stack);
 
@@ -13545,9 +13545,13 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, u
     }
     else
     {
+        // Earthliving - 0.45% of normal hot coeff
+        if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && spellProto->SpellFamilyFlags[1] & 0x80000)
+            factorMod *= 0.45f;
+
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-            return healamount;
+            coeff = 0.0f;
     }
 
     // Default calculation
@@ -13555,7 +13559,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, u
     {
         if(coeff <= 0 || !bonus)
         {
-            if(effIndex <= MAX_SPELL_EFFECTS)
+            if(effIndex < MAX_SPELL_EFFECTS)
                 coeff = spellProto->EffectBonusCoefficient[effIndex]; // Spell power coeficient
             else
                 coeff = 0; // should never happen
@@ -13569,10 +13573,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, u
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
             coeff /= 100.0f;
         }
-
-        // Earthliving - 0.45% of normal hot coeff
-        if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && spellProto->SpellFamilyFlags[1] & 0x80000)
-            factorMod *= 0.45f;
 
         DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
     }
@@ -13728,10 +13728,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellProto, 
     {
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-        {
-            healamount = uint32(std::max((float(healamount) * TakenTotalMod), 0.0f));
-            return healamount;
-        }
+          coeff = 0.0f;
     }
 
     // Default calculation
@@ -13739,10 +13736,10 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellProto, 
     {
         if(coeff <= 0 || !bonus)
         {
-            if(effIndex <= MAX_SPELL_EFFECTS)
+            if(effIndex < MAX_SPELL_EFFECTS)
                 coeff = spellProto->EffectBonusCoefficient[effIndex]; // Spell power coeficient
             else
-                coeff = 0; // should never happen
+                coeff = 0.0f; // should never happen
         }
 
         factorMod *= CalculateLevelPenalty(spellProto) * int32(stack);

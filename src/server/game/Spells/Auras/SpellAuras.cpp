@@ -2755,7 +2755,7 @@ void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* cast
             {
                 AuraEffect* aurEff = GetEffect(i);
 
-                // ignore non positive values (can be result apply spellmods to aura damage
+                // ignore non positive values (can be result apply spellmods to aura damage)
                 uint32 damage = std::max(aurEff->GetAmount(), 0);
 
                 aurEff->SetDonePct(caster->SpellDamagePctDone(target, m_spellProto, DOT)); // Calculate done percentage first!
@@ -2768,7 +2768,7 @@ void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* cast
             {
                 AuraEffect* aurEff = GetEffect(i);
 
-                // ignore non positive values (can be result apply spellmods to aura damage
+                // ignore non positive values (can be result apply spellmods to aura damage)
                 uint32 damage = std::max(aurEff->GetAmount(), 0);
 
                 aurEff->SetDonePct(caster->SpellHealingPctDone(target, m_spellProto)); // Calculate done percentage first!

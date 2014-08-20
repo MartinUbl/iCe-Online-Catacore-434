@@ -2297,8 +2297,15 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (GetBase()->GetDuration() == -1 && target->IsFullHealth())
                 break;
 
-            // ignore non positive values (can be result apply spellmods to aura damage
-            int32 damage = m_amount > 0 ? m_amount : 0;
+            // ignore non positive values (can be result apply spellmods to aura damage)
+            uint32 damage = isAreaAura ? std::max(GetAmount(), 0) : m_damage;
+
+            if (GetAuraType() == SPELL_AURA_PERIODIC_HEAL)
+            {
+                if (isAreaAura)
+                    damage = caster->SpellHealingBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellHealingPctDone(target, m_spellProto);
+                damage = target->SpellHealingBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
+            }
 
             if (GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH)
             {
@@ -2403,10 +2410,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
                     damage = percent * target->GetMaxHealth() / 100.0f;
                 }
-
-                if (isAreaAura)
-                    damage = caster->SpellHealingBonusDone(target, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount()) * caster->SpellHealingPctDone(target, m_spellProto);
-                damage = target->SpellHealingBonusTaken(caster, GetSpellProto(), GetEffIndex(), damage, DOT, GetBase()->GetStackAmount());
             }
 
             // Warrior's Second Wind
@@ -2448,8 +2451,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     damage = damage * 1.2f;
             }
 
-            // AOE spells are not affected by the new periodic system.
-            bool isAreaAura = (IsAreaAuraEffect(m_spellProto->Effect[GetEffIndex()]) || m_spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA);
             bool crit = false;
 
             if (isAreaAura)
@@ -2541,7 +2542,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 break;
             }
 
-            // ignore non positive values (can be result apply spellmods to aura damage
+            // ignore non positive values (can be result apply spellmods to aura damage)
             uint32 damage = m_amount > 0 ? m_amount : 0;
 
             // Special case: draining x% of mana (up to a maximum of 2*x% of the caster's maximum mana)
@@ -2647,7 +2648,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
         }
         case SPELL_AURA_PERIODIC_ENERGIZE:
         {
-            // ignore non positive values (can be result apply spellmods to aura damage
+            // ignore non positive values (can be result apply spellmods to aura damage)
             if (m_amount < 0 || GetMiscValue() >= int8(MAX_POWERS))
                 return;
 
