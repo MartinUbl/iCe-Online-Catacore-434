@@ -1200,8 +1200,6 @@ class spell_gen_flame_scythe : public SpellScriptLoader
 
                 uint32 damage = (GetHitDamage() * 120) /100; // Pre nerfed value ( + 20 % cca )
 
-                damage *= ((caster->GetAuraCount(SPELL_FURY) * 8) + 100); // 8 % per apllication of fury
-                damage /= 100;
                 SetHitDamage(damage);
             }
 
@@ -1247,43 +1245,6 @@ class spell_gen_flame_scythe : public SpellScriptLoader
         }
 };
 
-class spell_gen_leaping_flames : public SpellScriptLoader
-{
-    public:
-        spell_gen_leaping_flames() : SpellScriptLoader("spell_gen_leaping_flames") { }
-
-        class spell_gen_leaping_flames_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_gen_leaping_flames_AuraScript);
-
-            void HandlePeriodicDamage(AuraEffect const* aurEff)
-            {
-                Unit* caster = GetCaster();
-                int32 _periodicDmg = 0;
-
-                if( caster == NULL)
-                    return;
-
-                _periodicDmg = aurEff->GetBaseAmount();
-
-                _periodicDmg *= ((caster->GetAuraCount(SPELL_FURY) * 8) + 100); // 8 % per apllication of fury
-                _periodicDmg /= 100;
-
-                const_cast<AuraEffect*>(aurEff)->SetAmount(_periodicDmg);
-            }
-
-                void Register()
-                {
-                    OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_leaping_flames_AuraScript::HandlePeriodicDamage, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-                }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_gen_leaping_flames_AuraScript();
-        }
-};
-
 void AddSC_boss_majordomo_staghelm()
 {
     //NPC'S
@@ -1296,7 +1257,6 @@ void AddSC_boss_majordomo_staghelm()
     // SPELLS
     new spell_searing_seed_explosion(); //  98620,100215,100216,100217
     new spell_gen_flame_scythe(); //        98474,100212,100213,100214
-    new spell_gen_leaping_flames(); //      98535,100206,100207,100208
     new spell_gen_kneel_to_the_flame();//   99705,100101
 }
 
@@ -1332,13 +1292,6 @@ void AddSC_boss_majordomo_staghelm()
     (100212, 'spell_gen_flame_scythe'),
     (100213, 'spell_gen_flame_scythe'),
     (100214, 'spell_gen_flame_scythe');
-
-    DELETE FROM `spell_script_names` WHERE  spell_id=98535 OR  spell_id=100206 OR  spell_id=100207 OR  spell_id=100208;
-    INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
-    VALUES (98535, 'spell_gen_leaping_flames'),
-    (100206, 'spell_gen_leaping_flames'),
-    (100207, 'spell_gen_leaping_flames'),
-    (100208, 'spell_gen_leaping_flames');
 
     UPDATE `creature_template` SET `ScriptName`='druid_of_the_flame' WHERE  `entry`=53619 LIMIT 1;
 
