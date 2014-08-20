@@ -13171,13 +13171,15 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
             break;
         default:
             if(modOwner && (modOwner->getClass() == CLASS_MAGE || modOwner->getClass() == CLASS_WARLOCK))
-            {
                 crit_bonus = damage; // 100% bonus for Mages and Warlocks in Cataclysm
-            } else {
+            else 
                 crit_bonus = damage / 2;                        // for spells is 50%
-            }
             break;
     }
+
+    // All healing spells crit for 200% instead of 150%.
+    if (spellProto->AttributesEx8 & SPELL_ATTR8_HEALING_SPELL)
+        crit_bonus = damage;
 
     // adds additional damage to crit_bonus (from talents)
     if (modOwner)
@@ -13192,14 +13194,12 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
     if (crit_bonus > 0)
         damage += crit_bonus;
 
-    if (spellProto && spellProto->Id == 116 &&  HasAura(83156)) // Piercing Chill rank 1
+    if (spellProto->Id == 116)
     {
-        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS,1, pVictim, true);// Piercing chill to one additional target
-    }
-
-    if (spellProto && spellProto->Id == 116 &&  HasAura(83157)) // Piercing Chill rank 2
-    {
-        CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS, 2 , pVictim, true); // Piercing chill to 2 additional target
+        if (HasAura(83156))
+            CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS,1, pVictim, true);// Piercing chill to 1 additional target
+        else if (HasAura(83157))
+            CastCustomSpell(83154, SPELLVALUE_MAX_TARGETS, 2 , pVictim, true); // Piercing chill to 2 additional target
     }
 
     return damage;
