@@ -812,16 +812,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // found Immolate
                     if (auraEff)
                     {
-                        uint32 pdamage = auraEff->GetAmount() > 0 ? auraEff->GetAmount() : 0;
-                        pdamage = m_caster->SpellDamageBonus(unitTarget, auraEff->GetSpellProto(),auraEff->GetEffIndex(), pdamage, DOT, auraEff->GetBase()->GetStackAmount());
-
-                        uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
-                        uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(auraEff->GetSpellProto()) / auraEff->GetSpellProto()->EffectAmplitude[EFFECT_2]);
-                        damage += pdamage * baseTotalTicks * pct_dir / 100;
-
-                        uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2)) / 3;
-                        m_spellValue->EffectBasePoints[1] = SpellMgr::CalculateSpellEffectBaseAmount(pdamage * baseTotalTicks * pct_dot / 100, m_spellInfo, 1);
-
+                        uint32 dotDamage = auraEff->GetDamage() > 0 ? auraEff->GetDamage() : 0;
+                        damage = 0.6f * (dotDamage * auraEff->GetTotalTicks());
                         apply_direct_bonus = false;
                         break;
                     }
