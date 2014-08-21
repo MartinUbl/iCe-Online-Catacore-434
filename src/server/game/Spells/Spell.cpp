@@ -3977,24 +3977,36 @@ void Spell::prepareFinish(AuraEffect const * triggeredByAura)
             cast(true);
     }
 }
+// TODO: Remove this !
+bool Spell::CanCancel()
+{
+    // HACK FIX
+    // Channeled spells are interrupted sometimes cause moving ???
+    // TODO: Find reason and fix it !
+    switch (m_spellInfo->Id)
+    {
+        // Lord Rhyolith spells (this is not actually channeled but still interrupting sometimes for no reason)
+        case 97282:
+        case 100411:
+        case 100968:
+        case 100969:
+        // Morchok spells
+        case 103851:
+        case 103821:
+        // Warlord spell
+        case 103946:
+            return false;
+    }
+    return true;
+}
 
 void Spell::cancel()
 {
     if (m_spellState == SPELL_STATE_FINISHED)
         return;
 
-    // HACK FIX
-    // Channeled spells are interrupted sometimes cause moving ???
-    // TODO: Find reason and fix it !
-    switch (m_spellInfo->Id)
-    {
-        // Morchok spells
-        case 103851:
-        case 103821:
-        // Warlord spell
-        case 103946:
-            return;
-    }
+    if (CanCancel() == false)
+        return;
 
     SetReferencedFromCurrent(false);
     if (m_selfContainer && *m_selfContainer == this)

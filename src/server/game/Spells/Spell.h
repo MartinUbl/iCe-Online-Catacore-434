@@ -447,6 +447,7 @@ class Spell
         void prepare(SpellCastTargets const* targets, AuraEffect const * triggeredByAura = NULL);
         void prepareFinish(AuraEffect const * triggeredByAura = NULL);
         void cancel();
+        bool CanCancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
         void finish(bool ok = true);
