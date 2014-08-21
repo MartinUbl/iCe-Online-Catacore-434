@@ -2047,6 +2047,9 @@ void Pet::LearnPetPassives()
         case 510:   // Water Elemental
             CastSpell(this, 65220, true);
             break;
+        case 28017: // Bloodworms (add Blood Gorged passive aura, cause sometimes it wont apply)
+            AddAura(50453,this);
+            break;
         default:
         {
             if (IsPetGhoul())
