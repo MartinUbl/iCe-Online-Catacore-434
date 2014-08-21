@@ -542,24 +542,17 @@ public:
             if (amount >= 0) // Add armor
             {
                 for (int32 i = 0; i < amount; i++)
-                    me->CastSpell(me, SPELL_MOLTEN_ARMOR, true);
+                    me->AddAura(SPELL_MOLTEN_ARMOR, me); // AddAura cuase TARGET_UNIT_NEARBY_ENTRY
             }
             else    // Reduce armor
             {
                 amount *= -1;
                 for (int32 i = 0; i < amount; i++)
                 {
-                    if (me->HasAura(SPELL_MOLTEN_ARMOR))
-                        me->RemoveAuraFromStack(SPELL_MOLTEN_ARMOR);
-                    else
-                    if (me->HasAura(101157))
-                        me->RemoveAuraFromStack(101157);
-                    else
-                    if (me->HasAura(101158))
-                        me->RemoveAuraFromStack(101158);
-                    else
-                    if (me->HasAura(101159))
-                        me->RemoveAuraFromStack(101159);
+                    me->RemoveAuraFromStack(SPELL_MOLTEN_ARMOR);
+                    me->RemoveAuraFromStack(101157);
+                    me->RemoveAuraFromStack(101158);
+                    me->RemoveAuraFromStack(101159);
                 }
             }
         }
@@ -1242,7 +1235,7 @@ public:
                     if (me->HasAura(SPELL_VOLCANO_SMOKE))
                     {
                         if (boss_rhyolith::boss_rhyolithAI* pAI = (boss_rhyolith::boss_rhyolithAI*)(pBoss->GetAI()))
-                            pAI->ModMoltenArmorStack(urand(2,3));
+                            pAI->ModMoltenArmorStack(urand(1,2));
                     }
                     // Every time he steps on an active volcano, he loses 8 stacks of the buff ( 16 was nerfed on 4.3.4)
                     else
