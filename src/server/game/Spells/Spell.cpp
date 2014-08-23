@@ -3541,11 +3541,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     // Fan of Knives
                     if (m_spellInfo->Id == 51723)
                     {
-                        float roll = 1;
+                        float roll = 100.0f;
                         if (m_caster->HasAura(16513))
-                            roll = 0.33f;
+                            roll = 33.0f;
                         else if (m_caster->HasAura(16514))
-                            roll = 0.67f;
+                            roll = 67.0f;
                         // Vile Poisons - second part of talent
                         if (m_caster->HasAura(16513) || m_caster->HasAura(16514) || m_caster->HasAura(16515))
                         {
@@ -3564,21 +3564,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                         if (SpellEntry const* poison = sSpellStore.LookupEntry(enchantEntry->spellid[0]))
                                         {
                                             // find poisons
-                                            if (poison && poison->Dispel == DISPEL_POISON)
+                                            if (poison && poison->Dispel == DISPEL_POISON && roll_chance_f(roll))
                                             {
                                                 // apply to all targets in radius
                                                 for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                                                 {
                                                     if ((*itr))
                                                     {
-                                                        // roll chance by rank. r 1 = 33% from normal chance
-                                                        // r 2 = 67% from normal chance
-                                                        // r 3 = 100% from normal chance
-                                                        if (roll_chance_f(poison->procChance * roll))
-                                                        {
-                                                            m_caster->CastSpell((*itr), poison->Id, true);
-                                                            itr = unitList.erase(itr);
-                                                        }
+                                                        m_caster->CastSpell((*itr), poison->Id, true);
+                                                        itr = unitList.erase(itr);
                                                     }
                                                 }
                                             }
