@@ -361,19 +361,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
     {
         switch (m_spellInfo->SpellFamilyName)
         {
+            // Meteor like spells (divided damage to targets)
+            if (m_customAttr & SPELL_ATTR0_CU_SHARE_DAMAGE)
+            {
+                uint32 count = 0;
+                for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    if (ihit->effectMask & (1<<effIndex))
+                        ++count;
+
+                damage /= count;                    // divide to all targets
+            }
+
             case SPELLFAMILY_GENERIC:
             {
-                // Meteor like spells (divided damage to targets)
-                if (m_customAttr & SPELL_ATTR0_CU_SHARE_DAMAGE)
-                {
-                    uint32 count = 0;
-                    for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        if (ihit->effectMask & (1<<effIndex))
-                            ++count;
-
-                    damage /= count;                    // divide to all targets
-                }
-
                 switch(m_spellInfo->Id)                     // better way to check unknown
                 {
                     // Positive/Negative Charge
