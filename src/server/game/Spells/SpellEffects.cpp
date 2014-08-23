@@ -1124,6 +1124,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             m_caster->CastCustomSpell(m_caster, 101024, &bp, 0, 0, true);
                     }
 
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
+
                     damage += int32(m_caster->ToPlayer()->GetComboPoints() * ap * 0.109f);
 
                     //If druid has 25 additional energy stored
