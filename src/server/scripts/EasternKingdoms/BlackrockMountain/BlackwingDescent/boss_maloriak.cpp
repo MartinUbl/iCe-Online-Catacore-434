@@ -997,8 +997,8 @@ public:
                         {
                             Poradi = 3;
                             CastTimer = 2000;
-                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
-                            me->CastSpell(target,SPELL_CONSUMING_FLAMES,false);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true))
+                                me->CastSpell(target,SPELL_CONSUMING_FLAMES,false);
                             can_interrupt = false;
                             break;
                         }
