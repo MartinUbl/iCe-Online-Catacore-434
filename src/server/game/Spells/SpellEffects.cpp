@@ -1612,6 +1612,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 if (m_spellInfo->Id == 88263)
                 {
                     damage += m_spellInfo->ap_bonus*m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
+
                     apply_direct_bonus = false;
                 }
                 // Shield of the Righteous
@@ -1640,10 +1644,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     uint32 sp = m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
                     uint32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
+                    damage += 0.344f * ((sp > ap) ? sp : ap);
+
                     if (Player* modOwner = m_caster->GetSpellModOwner())
                         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
 
-                    damage += 0.344f * ((sp > ap) ? sp : ap);
                     break;
                 }
                 // Hammer of Wrath
@@ -1651,11 +1656,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     apply_direct_bonus = false;
 
-                    if (Player* modOwner = m_caster->GetSpellModOwner())
-                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
-
                     damage += 0.39f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     damage += 0.117f * m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
+
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
                 }
                 // Seal of Righteousness
                 else if (m_spellInfo->Id == 25742 || m_spellInfo->Id == 101423)
@@ -1663,6 +1668,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     // damage formula is little wierd - divide weapon damage by 1.8 to be more accurent to tooltip
                     apply_direct_bonus = false;
                     damage = (m_caster->ToPlayer()->GetAttackTime(BASE_ATTACK)/1000.0f/1.8f)*0.011f*m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)*0.022f*m_caster->GetStat(STAT_INTELLECT);
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, damage);
                 }
                 // Consecration triggered spell
                 else if (m_spellInfo->Id == 81297)
