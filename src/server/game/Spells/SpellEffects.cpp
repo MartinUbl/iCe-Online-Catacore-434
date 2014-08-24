@@ -6978,20 +6978,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch (m_spellInfo->Id)
-            {
-                case 69055:     // Saber Lash
-                case 70814:     // Saber Lash
-                {
-                    uint32 count = 0;
-                    for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        if (ihit->effectMask & (1 << effIndex))
-                            ++count;
-
-                    totalDamagePercentMod /= count;
-                    break;
-                }
-            }
             break;
         }
         case SPELLFAMILY_WARRIOR:
