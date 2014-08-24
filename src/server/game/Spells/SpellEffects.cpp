@@ -1701,38 +1701,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
-        // Dont forget count damage reduction auras if damage was manually computed !!!
+        
         if (apply_direct_bonus == false)
         {
-            float DoneTotalMod = 1.0f;
+            // Count PCT done bonus for paladin directly calculated damage (dont count bonus twice for other spells)
+            // TODO: Remove all PCT bonuses from other spells and remove paladin family condition
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
+                damage = m_caster->SpellDamagePctDone(unitTarget, m_spellInfo, SPELL_DIRECT_DAMAGE);
 
-            // Some spells don't benefit from pct done mods
-            if (!(m_spellInfo->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS) && m_originalCaster)
-            {
-                Unit::AuraEffectList const &mModDamagePercentDone = m_originalCaster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-                for (Unit::AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-                if (((*i)->GetMiscValue() & GetSpellSchoolMask(m_spellInfo)) &&
-                    (*i)->GetSpellProto()->EquippedItemClass == -1 &&          // -1 == any item class (not wand)
-                    (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0) // 0 == any inventory type (not wand)
-                {
-                    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) // Restrict this bonus only for paladins damage abilities
-                                                                             // otherwise in some spell is bonus counted twice
-                        DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
-                }
-            }
-
-            damage *= DoneTotalMod;
-
-
-            float TakenTotalMod = 1.0f;
-            TakenTotalMod *= unitTarget->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, m_spellInfo->SchoolMask);
-
-            // Exception for Cheating Death ( dummy aura )
-            Aura * cheatingDeathAura = unitTarget->GetAura(45182);
-            if (cheatingDeathAura && cheatingDeathAura->GetEffect(EFFECT_0))
-                AddPctN(TakenTotalMod, cheatingDeathAura->GetEffect(EFFECT_0)->GetAmount());
-
-            damage *= TakenTotalMod;
+            // Dont forget count taken bonus after direct calculation
+            if (unitTarget)
+                damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE, 0);
         }
 
         m_damage += damage;
