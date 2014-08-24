@@ -12643,10 +12643,9 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
                         stacks = (*itr)->GetBase()->GetStackAmount();
                         break;
                     }
-                // + 10% for each application of Holy Vengeance/Blood Corruption on the target
+                // + 20% for each application of Holy Vengeance/Blood Corruption on the target
                 if (stacks)
-                    DoneTotalMod *= (10.0f + float(stacks)) / 10.0f;
-            }
+                    DoneTotalMod *= (20.0f + float(stacks)) / 10.0f;
             }
         break;
         case SPELLFAMILY_WARLOCK:
