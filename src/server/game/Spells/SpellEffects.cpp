@@ -1707,7 +1707,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             // Count PCT done bonus for paladin directly calculated damage (dont count bonus twice for other spells)
             // TODO: Remove all PCT bonuses from other spells and remove paladin family condition
             if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
-                damage = m_caster->SpellDamagePctDone(unitTarget, m_spellInfo, SPELL_DIRECT_DAMAGE);
+                damage *= m_caster->SpellDamagePctDone(unitTarget, m_spellInfo, SPELL_DIRECT_DAMAGE);
 
             // Dont forget count taken bonus after direct calculation
             if (unitTarget)
