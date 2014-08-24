@@ -7422,6 +7422,11 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
             }
             break;
+        case 56815: // Rune strike
+        case 66217: // Rune Strike Off-Hand
+            if (effIndex == EFFECT_0)
+                m_damage = 0.18f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+            break;
     }
 }
 
