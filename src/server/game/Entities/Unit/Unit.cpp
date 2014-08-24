@@ -12448,6 +12448,11 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return 1.0f;
 
+     // Hand of Light should profit from Inquisition, despite SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS -> was hotfixed in 4.3.0
+    if (spellProto->Id == 96172)
+    if (AuraEffect * aurEff = GetAuraEffect(84963,EFFECT_0)) // Inquisition
+        return (aurEff->GetAmount() + 100.0f) / 100.0f;
+
     // Some spells don't benefit from pct done mods
     if (spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS)
         return 1.0f;
