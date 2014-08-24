@@ -3549,7 +3549,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                         // Vile Poisons - second part of talent
                         if (m_caster->HasAura(16513) || m_caster->HasAura(16514) || m_caster->HasAura(16515))
                         {
-                            for (uint32 i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_OFFHAND;i++)
+                            for (uint32 i = EQUIPMENT_SLOT_MAINHAND; i <= EQUIPMENT_SLOT_OFFHAND;i++)
                             {
                                 // find main / off hand
                                 Item* item = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
