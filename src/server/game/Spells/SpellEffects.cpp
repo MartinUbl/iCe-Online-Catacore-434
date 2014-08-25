@@ -359,17 +359,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
     if (unitTarget && unitTarget->IsAlive())
     {
-        // Meteor like spells (divided damage to targets)
-        if (m_customAttr & SPELL_ATTR0_CU_SHARE_DAMAGE)
-        {
-            uint32 count = 0;
-            for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                if (ihit->effectMask & (1<<effIndex))
-                    ++count;
-
-            damage /= count;                    // divide to all targets
-        }
-
         switch (m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
@@ -1938,6 +1927,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             if (unitTarget && unitTarget->isFrozen())
                 m_damage = m_damage*(1.0f+m_caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
         }
+    }
+
+    // Mostly meteor like spells (divided damage to targets)
+    if (m_customAttr & SPELL_ATTR0_CU_SHARE_DAMAGE)
+    {
+        uint32 count = 0;
+        for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+            if (ihit->effectMask & (1<<effIndex))
+                ++count;
+
+        damage /= count;                    // divide to all targets
     }
 }
 
