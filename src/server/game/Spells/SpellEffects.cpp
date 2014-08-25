@@ -1363,13 +1363,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
                     {
-                        // Not nicest version, but it should be fine in avg
-                        uint32 minDamage = m_caster->getLevel() * 2;
-                        uint32 maxDamage = m_caster->getLevel() * 6;
-                        uint32 damagePerCombo = m_caster->getLevel() * 6.3f;
-
-                        float AP = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        damage = minDamage + ((damagePerCombo * combo) + AP * 0.091f) * 1 - maxDamage + (damagePerCombo + AP * 0.091);
+                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                        damage += int32(ap * combo * 0.091f);
 
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
