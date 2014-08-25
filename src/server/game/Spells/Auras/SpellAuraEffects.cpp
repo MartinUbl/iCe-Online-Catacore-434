@@ -2055,8 +2055,13 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 switch (GetId())
                 {
                     case 879: // Exorcism dot from Glyph of Exorcism -> 20 % from original Exorcism damage
-                        damage = (caster->SpellDamageBonus(target, m_spellProto, EFFECT_0, damage, SPELL_DIRECT_DAMAGE) * 0.2f) / GetTotalTicks();
+                    {
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(GetId());
+                        int32 basePoints = caster->CalculateSpellDamage(target, spellInfo, EFFECT_0);
+                        damage = caster->SpellDamageBonus(target, m_spellProto, EFFECT_0, basePoints, SPELL_DIRECT_DAMAGE);
+                        damage = (damage * 20 / 100) / GetTotalTicks();
                         break;
+                    }
                     case 70911: // Unbound Plague
                     case 72854: // Unbound Plague
                     case 72855: // Unbound Plague
