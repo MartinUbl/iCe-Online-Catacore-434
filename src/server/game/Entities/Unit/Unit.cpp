@@ -12650,7 +12650,6 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
                 if (stacks)
                     DoneTotalMod *= (10.0f + float(stacks)) / 10.0f;
             }
-            }
         break;
         case SPELLFAMILY_WARLOCK:
             //Fire and Brimstone
