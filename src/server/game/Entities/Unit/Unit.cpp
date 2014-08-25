@@ -7677,7 +7677,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             // Talent says that we need 5 stacks to proc, but according to video, damage is scaling with number of Censure stacks
                             if (Aura * censure = pVictim->GetAura(31803,GetGUID()))
                             {
-                                int32 bp0 = censure->GetStackAmount();
+                                int32 bp0 = censure->GetStackAmount() * 3;
                                 CastCustomSpell(pVictim, 42463, &bp0, 0, 0, true);
                             }
                         }
