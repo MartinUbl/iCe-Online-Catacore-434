@@ -174,37 +174,33 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_seed_of_corruption_SpellScript);
 
-            bool soulShardGained;
-
-            bool Load()
-            {
-                soulShardGained = false;
-                return true;
-            }
-
-            void HandleExtraEffect(SpellEffIndex effIndex)
+            void HandleSoulburn(std::list<Unit*>& unitList)
             {
                 Unit * caster = GetCaster();
-                Unit * unit = GetHitUnit();
 
-                if (!caster || !unit || !caster->HasAura(86664)) // Soulburn: Seed of Corruption ( talent )
+                // Need player with SoulBurn buff
+                if (!caster || !caster->ToPlayer() || !caster->HasAura(74434))
                     return;
 
-                if (GetSpellInfo()->Id == 27285 || GetSpellInfo()->Id == 32865) // Soulburn: Seed of Corruption
-                {
-                    caster->CastSpell(unit,172,true); // Corruption
+                // No talent -> no deal
+                if (!caster->HasAura(86664) || caster->ToPlayer()->GetActiveTalentBranchSpec() != SPEC_WARLOCK_AFFLICTION)
+                    return;
 
-                    if (soulShardGained == false)
-                    {
-                        soulShardGained = true;
-                        caster->CastSpell(caster,87388,true); // Gain 1 soul shard
-                    }
+                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                {
+                    if ((*itr))
+                        caster->CastSpell((*itr),172,true); // Corruption
                 }
+
+                // Remove Soulburn
+                caster->RemoveAura(74434);
+                // Gain 1 soul shard
+                caster->CastSpell(caster,87388,true);
             }
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_warl_seed_of_corruption_SpellScript::HandleExtraEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_warl_seed_of_corruption_SpellScript::HandleSoulburn, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
             }
         };
 
