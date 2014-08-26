@@ -1932,7 +1932,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             if (ihit->effectMask & (1<<effIndex))
                 ++count;
 
-        damage /= count;                    // divide to all targets
+        m_damage /= count;                    // divide to all targets
     }
 }
 
