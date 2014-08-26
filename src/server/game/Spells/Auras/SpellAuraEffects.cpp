@@ -2057,8 +2057,21 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     case 879: // Exorcism dot from Glyph of Exorcism -> 20 % from original Exorcism damage
                     {
                         SpellEntry const* spellInfo = sSpellStore.LookupEntry(GetId());
-                        int32 basePoints = caster->CalculateSpellDamage(target, spellInfo, EFFECT_0);
-                        damage = caster->SpellDamageBonus(target, m_spellProto, EFFECT_0, basePoints, SPELL_DIRECT_DAMAGE);
+                        int32 baseDamage = caster->CalculateSpellDamage(target, spellInfo, EFFECT_0);
+
+                        uint32 sp = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_HOLY);
+                        uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+
+                        baseDamage += 0.344f * ((sp > ap) ? sp : ap);
+
+                        if (Player* modOwner = caster->GetSpellModOwner())
+                            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_DAMAGE, baseDamage);
+
+                        baseDamage *= caster->SpellDamagePctDone(target, spellInfo, SPELL_DIRECT_DAMAGE);
+
+                        if (target)
+                            damage = target->SpellDamageBonusTaken(caster, spellInfo, EFFECT_0, (uint32)baseDamage, SPELL_DIRECT_DAMAGE, 0);
+
                         damage = (damage * 20 / 100) / GetTotalTicks();
                         break;
                     }
