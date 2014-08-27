@@ -4567,18 +4567,15 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 44543: //Fingers of Frost rank 1
             spellInfo->procChance = 7;
-            count++;
             break;
         case 44545: //Fingers of Frost rank 2
             spellInfo->procChance = 14;
-            count++;
             break;
         case 83074: //Fingers of Frost rank 3
             spellInfo->procChance = 20;
-            count++;
             break;
         case 44544: // Fingers of Frost proc'd effect
-            spellInfo->EffectSpellClassMask[0][0] |= 0x00020020; // add Ice Lance and Frostbolt (due to Shatter talent)
+            spellInfo->EffectSpellClassMask[0][0] |= 0x00020000; // add Ice Lance
             count++;
             break;
         case 81782: // Power Word : Barrier
