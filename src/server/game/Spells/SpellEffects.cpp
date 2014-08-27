@@ -1807,9 +1807,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             // talent Shatter - target must be frozen
             if (unitTarget->isFrozen())
             {
-                if (m_caster->HasAura(11170))
-                    m_damage *= 1.1f;
-                else if (m_caster->HasAura(12982))
+                if (m_caster->HasAura(11170) || m_caster->HasAura(12982))
                     m_damage *= 1.2f;
             }
             break;
