@@ -10562,21 +10562,21 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, uint32 /*damage*/, A
 
     switch(scriptId)
     {
-        case 836:                                           // Improved Blizzard (Rank 1)
+        case 836:                                           // Ice Shards  (Rank 1)
         {
             if (!procSpell || procSpell->SpellVisual[0] != 9487)
                 return false;
             triggered_spell_id = 12484;
             break;
         }
-        case 988:                                           // Improved Blizzard (Rank 2)
+        case 988:                                           // Ice Shards (Rank 2)
         {
             if (!procSpell || procSpell->SpellVisual[0] != 9487)
                 return false;
             triggered_spell_id = 12485;
             break;
         }
-        case 989:                                           // Improved Blizzard (Rank 3)
+        case 989:                                           // Ice Shards (Rank 3)
         {
             if (!procSpell || procSpell->SpellVisual[0] != 9487)
                 return false;
