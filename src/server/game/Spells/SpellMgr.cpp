@@ -3044,7 +3044,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROL_ROOT;
             // Ring of Frost
             if (spellproto->Id == 82691)
-                return DIMINISHING_DISORIENT;
+                return DIMINISHING_CONTROL_STUN;
             // Slow
             if (spellproto->Id == 31589)
                 return DIMINISHING_LIMITONLY;
