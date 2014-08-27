@@ -12603,8 +12603,8 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
     switch(spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
-            // Ice Lance
-            if (spellProto->Id == 30455)
+            // Ice Lance + Deep Freeze
+            if (spellProto->Id == 30455 || spellProto->Id == 71757)
             {
                 if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                 {
