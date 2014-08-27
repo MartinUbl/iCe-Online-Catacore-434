@@ -1678,11 +1678,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             case SPELLFAMILY_DEATHKNIGHT:
             {
                 // Howling Blast
-                else if (m_spellInfo->Id == 49184)
+                if (m_spellInfo->Id == 49184)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.44f);
-                    if (m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
-                        damage = int32(damage / 2);
                 }
                 break;
             }
@@ -1691,7 +1689,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
-        
         if (apply_direct_bonus == false)
         {
             // Count PCT done bonus for paladin directly calculated damage (dont count bonus twice for other spells)
@@ -1725,6 +1722,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             // bonus for diseased targets
             if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
                 m_damage += m_damage / 2;
+        }
+        break;
+        case 49184:// Howling Blast
+        {
+            if (m_targets.getUnitTargetGUID() != unitTarget->GetGUID()) // 50% of damage to non-primary targets
+                m_damage = int32(m_damage / 2);
         }
         break;
         // Ice Lance - special case (drop charge of Fingers of Frost)
