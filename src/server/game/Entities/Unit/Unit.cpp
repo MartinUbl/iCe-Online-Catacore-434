@@ -2903,7 +2903,11 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
 
     // Check for immune
     if (pVictim->IsImmunedToSpell(spell))
+    {
+        if (spell->Id == 44572 && pVictim->ToCreature()) // Deep freeze
+            CastSpell(pVictim, 71757, true);
         return SPELL_MISS_IMMUNE;
+    }
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
