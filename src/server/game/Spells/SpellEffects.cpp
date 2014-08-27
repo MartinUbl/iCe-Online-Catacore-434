@@ -7296,12 +7296,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 totalDamagePercentMod *= ((SpellMgr::CalculateSpellEffectAmount(m_spellInfo, EFFECT_2) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f) + 100.0f) / 100.0f;
                 break;
             }
-            // Blood-Caked Strike - Blood-Caked Blade
-            if (m_spellInfo->SpellIconID == 1736)
-            {
-                totalDamagePercentMod *= ((unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f) + 100.0f) / 100.0f;
-                break;
-            }
             // Heart Strike
             if (m_spellInfo->SpellFamilyFlags[EFFECT_0] & 0x1000000)
             {
@@ -7416,6 +7410,10 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         case 56815: // Rune strike
         case 66217: // Rune Strike Off-Hand
                 m_damage += 0.18f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+            break;
+        case 50463: // Blood-Caked Strike
+        case 61895:
+            m_damage += (m_damage * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 25) / 100;
             break;
     }
 }
