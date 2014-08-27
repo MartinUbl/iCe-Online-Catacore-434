@@ -987,6 +987,9 @@ namespace Trinity
                 if (!me->canAttack(u))
                     return false;
 
+                if (u->IsTotem())
+                    return false;
+
                 m_range = me->GetDistance(u);   // use found unit range as new range limit for next check
                 return true;
             }
