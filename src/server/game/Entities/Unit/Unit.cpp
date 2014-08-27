@@ -10040,7 +10040,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        case 83074: // Fingers of Frost
+        case 44543: // Fingers of Frost
+        case 44545:
+        case 83074: 
         {
             if(procSpell->Id == 30455) // should not proc from Ice Lance
                 return false;
