@@ -1716,6 +1716,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
     // Some special cases after damage recount
     switch (m_spellInfo->Id)
     {
+        case 879:
+        {
+            // Glyph of Exorcism (remember damage which direct damage of Exorcism done)
+            if (AuraEffect * aurEff = m_caster->GetAuraEffect(54934, EFFECT_0))
+                aurEff->SetScriptedAmount(m_damage);
+        }
+        break;
         // Ice Lance - special case (drop charge of Fingers of Frost)
         case 30455:
             if(Aura* pAura = m_caster->GetAura(44544))
