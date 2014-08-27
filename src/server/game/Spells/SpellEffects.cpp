@@ -7415,8 +7415,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             break;
         case 56815: // Rune strike
         case 66217: // Rune Strike Off-Hand
-            if (effIndex == EFFECT_0)
-                m_damage = 0.18f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                m_damage += 0.18f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
             break;
     }
 }
