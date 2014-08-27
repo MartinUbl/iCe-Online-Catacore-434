@@ -1677,12 +1677,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DEATHKNIGHT:
             {
-                // Blood Boil - bonus for diseased targets
-                if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000 && unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
-                {
-                    damage += damage / 2;
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.035f);
-                }
                 // Howling Blast
                 else if (m_spellInfo->Id == 49184)
                 {
@@ -1721,6 +1715,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             // Glyph of Exorcism (remember damage which direct damage of Exorcism done)
             if (AuraEffect * aurEff = m_caster->GetAuraEffect(54934, EFFECT_0))
                 aurEff->SetScriptedAmount(m_damage);
+        }
+        break;
+        // Blood Boil
+        case 48721:
+        {
+            if (m_targets.getUnitTargetGUID() == unitTarget->GetGUID())
+                m_caster->CastSpell(m_caster, 65658, true); // + 10 runic power
+            // bonus for diseased targets
+            if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
+                m_damage += m_damage / 2;
         }
         break;
         // Ice Lance - special case (drop charge of Fingers of Frost)
