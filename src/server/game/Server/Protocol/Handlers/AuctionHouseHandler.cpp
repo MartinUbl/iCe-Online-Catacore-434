@@ -315,8 +315,13 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
             pl->DestroyItemCount(item, itemStacks[i], true);
     }
 
+    bool itemIsCloned = false;
     if (it == NULL)
+    {
         it = items[0]->CloneItem(1, pl);
+        itemIsCloned = true;
+    }
+
     it->SetCount(totalCount);
     it->SetState(ITEM_CHANGED, pl);
     it->RemoveFromUpdateQueueOf(pl);
@@ -343,7 +348,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     sAuctionMgr->AddAItem(it);
     auctionHouse->AddAuction(AH);
 
-    pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
+    if (!itemIsCloned)
+        pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     it->DeleteFromInventoryDB(trans);
