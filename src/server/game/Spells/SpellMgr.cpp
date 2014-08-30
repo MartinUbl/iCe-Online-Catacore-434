@@ -4253,12 +4253,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx8 |= SPELL_ATTR8_AURA_SEND_AMOUNT;
             count++;
             break;
-        case 16213: // Purification (passive)
-            // 4.0.6a Blizzard hotfix, note in client not present, also DBC data wrong!
-            spellInfo->EffectBasePoints[0] = 25;
-            spellInfo->EffectBasePoints[1] = 25;
-            count++;
-            break;
         case 49224: // Magic Suppression (Ranks 1, 2 and 3)
         case 49610:
         case 49611:
