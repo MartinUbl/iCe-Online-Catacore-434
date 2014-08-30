@@ -192,6 +192,39 @@ void LFGMgr::LoadRewards()
     sLog->outString(">> Loaded %u lfg dungeon rewards.", count);
 }
 
+void LFGMgr::LoadEntrancePositions()
+{
+    uint32 oldMSTime = getMSTime();
+    m_entrancePositions.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT dungeonId, position_x, position_y, position_z, orientation FROM lfg_entrances");
+
+    if (!result)
+    {
+        sLog->outError(">> Loaded 0 lfg entrance positions. DB table `lfg_entrances` is empty or dont exist!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 dungeonId = fields[0].GetUInt32();
+        Position pos;
+        pos.m_positionX = fields[1].GetFloat();
+        pos.m_positionY = fields[2].GetFloat();
+        pos.m_positionZ = fields[3].GetFloat();
+        pos.m_orientation = fields[4].GetFloat();
+        m_entrancePositions[dungeonId] = pos;
+        ++count;
+    }
+    while (result->NextRow());
+
+    sLog->outString(">> Loaded %u lfg entrance positions.", count);
+}
+
+
 void LFGMgr::Update(uint32 diff)
 {
     if (!m_update)
@@ -1818,7 +1851,6 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
 
             if (!fromOpcode)
             {
-
                 // Select a player inside to be teleported to
                 for (GroupReference* itr = grp->GetFirstMember(); itr != NULL && !mapid; itr = itr->next())
                 {
@@ -1836,19 +1868,27 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
 
             if (!mapid)
             {
-                AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map);
-                if (!at)
+                LfgEntrancePositionMap::const_iterator itr = m_entrancePositions.find(dungeon->ID);
+                if (itr != m_entrancePositions.end())
                 {
-                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", plr->GetGUID(), dungeon->map, dungeon->difficulty);
-                    error = LFG_TELEPORTERROR_INVALID_LOCATION;
+                    mapid = dungeon->map;
+                    x = itr->second.GetPositionX();
+                    y = itr->second.GetPositionY();
+                    z = itr->second.GetPositionZ();
+                    orientation = itr->second.GetOrientation();
                 }
-                else
+                else if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map))
                 {
                     mapid = at->target_mapId;
                     x = at->target_X;
                     y = at->target_Y;
                     z = at->target_Z;
                     orientation = at->target_Orientation;
+                }
+                else
+                {
+                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", plr->GetGUID(), dungeon->map, dungeon->difficulty);
+                    error = LFG_TELEPORTERROR_INVALID_LOCATION;
                 }
             }
 

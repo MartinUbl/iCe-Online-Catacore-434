@@ -1549,6 +1549,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading LFG rewards...");
     sLFGMgr->LoadRewards();
 
+    sLog->outString("Loading LFG entrance positions...");
+    sLFGMgr->LoadEntrancePositions();
+
     sLog->outString("Loading UNIT_NPC_FLAG_SPELLCLICK Data...");
     sObjectMgr->LoadNPCSpellClickSpells();
 
