@@ -13250,7 +13250,7 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
                 damage *= 3;
 
             // Target is not killed
-            if (damage < int32(unitTarget->GetHealth()))
+            if (damage < unitTarget->GetHealth())
             {
                 // Deals damage equal to damage done to caster
                 int32 back_damage = damage;
@@ -13291,7 +13291,7 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
 
             // If the target is affected by Immolate spell, let's increase damage by 1/6 (info by DBC tooltip)
             if (unitTarget->HasAura(348))
-                damage += int32((float)damage/6.0f);
+                damage += uint32((float)damage/6.0f);
             break;
         }
         // Haunt
