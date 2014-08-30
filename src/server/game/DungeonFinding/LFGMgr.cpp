@@ -194,7 +194,6 @@ void LFGMgr::LoadRewards()
 
 void LFGMgr::LoadEntrancePositions()
 {
-    uint32 oldMSTime = getMSTime();
     m_entrancePositions.clear();
 
     QueryResult result = WorldDatabase.Query("SELECT dungeonId, position_x, position_y, position_z, orientation FROM lfg_entrances");
