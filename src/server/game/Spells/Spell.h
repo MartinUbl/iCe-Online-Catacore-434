@@ -466,6 +466,7 @@ class Spell
 
         // handlers
         void handle_immediate();
+        void HandeAfterCast();
         uint64 handle_delayed(uint64 t_offset);
         // handler helpers
         void _handle_immediate_phase();

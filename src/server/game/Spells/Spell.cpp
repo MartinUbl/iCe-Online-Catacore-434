@@ -4312,6 +4312,8 @@ void Spell::cast(bool skipCheck)
         handle_immediate();
     }
 
+    HandeAfterCast();
+
     if (m_customAttr & SPELL_ATTR0_CU_LINK_CAST)
     {
         if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(m_spellInfo->Id))
@@ -4537,6 +4539,36 @@ void Spell::_handle_finish_phase()
         // Real add combo points from effects
         if (m_comboPointGain)
             m_caster->m_movedPlayer->GainSpellComboPoints(m_comboPointGain);
+    }
+}
+
+void Spell::HandeAfterCast()
+{
+    switch (m_spellInfo->Id)
+    {
+        // Blood Boil
+        case 48721:
+            m_caster->CastSpell(m_caster, 65658, true); // + 10 runic power
+            break;
+        // Ice Lance - special case (drop charge of Fingers of Frost)
+        case 30455:
+            if(Aura* pAura = m_caster->GetAura(44544))
+                if (pAura->ModStackAmount(-1))
+                    m_caster->RemoveAurasDueToSpell(44544);
+            break;
+        // Shadowburn
+        case 17877:
+        {
+            // Glyph of Shadowburn implementation
+            if (unitTarget->GetHealthPct() <= 20.0f // 20% hp
+                && damage < int32(unitTarget->GetHealth()) // target is still alve
+                && m_caster->HasAura(56229) // has glyph
+                && !m_caster->ToPlayer()->HasSpellCooldown(56229)) // without CD
+            {
+                m_caster->CastSpell(m_caster, 77691, true); // dummy hack!
+            }
+            break;
+        }
     }
 }
 

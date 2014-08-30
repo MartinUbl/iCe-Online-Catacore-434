@@ -1306,6 +1306,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 dama
     else
         damage = 0;
 
+
+    damage = AfterAllSpellDamageComputation(spellInfo, damage, pVictim);
     damageInfo->damage = damage;
 }
 
@@ -13166,6 +13168,226 @@ float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellPro
         return true;
 
     return crit_chance > 0.0f ? crit_chance : 0.0f;
+}
+
+// After all damage was computed -> after all bonuses (done,taken,crit,absorb,resil,block,...)
+uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32 damage, Unit *pVictim)
+{
+    if (spellProto == NULL)
+        return damage;
+
+    Unit * caster = this;
+    Unit * unitTarget = pVictim;
+
+    if (!caster || !pVictim)
+        return damage;
+
+    // Some special cases after damage recount
+    switch (spellProto->Id)
+    {
+        case 879:
+        {
+            // Glyph of Exorcism (remember damage which direct damage of Exorcism done)
+            if (AuraEffect * aurEff = caster->GetAuraEffect(54934, EFFECT_0))
+                aurEff->SetScriptedAmount(damage);
+            break;
+        }
+        // Blood Boil
+        case 48721:
+        {
+            // bonus for diseased targets
+            if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, caster->GetGUID()))
+                damage += damage / 2;
+            break;
+        }
+        case 8092:  // Mind Blast
+        case 73510: // Mind Spike
+        {
+            // Increase damage done by every shadow orb stack
+            if (Aura* pOrbs = caster->GetAura(77487))
+                if (pOrbs->GetStackAmount() > 0)
+                {
+                    // 10% base bonus
+                    float coef = 0.1f;
+                    int32 es_bp0 = 10;
+                    int32 es_bp1 = 0;
+
+                    // Implementation of Shadow Orbs Power mastery proficiency
+                    if (spellProto->SpellFamilyName == SPELLFAMILY_PRIEST &&
+                        caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+                        caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_PRIEST_SHADOW &&
+                        damage > 1)
+                    {
+                        coef += caster->ToPlayer()->GetMasteryPoints() * 1.45f / 100.0f;
+                        es_bp0 += ceil(caster->ToPlayer()->GetMasteryPoints()*1.45f);
+                    }
+                    damage = float(damage) * (1.0f + (pOrbs->GetStackAmount() * coef));
+
+                    es_bp1 = es_bp0;
+
+                    // Empowered Shadows buff for increased DoT damage
+                    caster->CastCustomSpell(caster, 95799, &es_bp0, &es_bp1, 0, true);
+
+                    // Consume Shadow Orbs
+                    caster->RemoveAurasDueToSpell(77487);
+                }
+            break;
+        }
+        // Shadow Word: Death
+        case 32379:
+        {
+            if (unitTarget->GetHealthPct() <= 25.0f) // At or below 25 %
+            {
+                if(caster->HasAura(14910)) // Mind Melt (Rank 1)
+                    damage *= 1.15f;
+
+                if(caster->HasAura(33371)) // Mind Melt (Rank 2)
+                    damage *= 1.30f;
+            }
+
+            // Deals three times as much damage to targets below 25%
+            if (unitTarget->GetHealthPct() < 25.0f)
+                damage *= 3;
+
+            // Target is not killed
+            if (damage < int32(unitTarget->GetHealth()))
+            {
+                // Deals damage equal to damage done to caster
+                int32 back_damage = damage;
+                // Pain and Suffering reduces damage
+                if (AuraEffect * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 1))
+                    back_damage += aurEff->GetAmount() * back_damage / 100; // += due to - basepoint in spelleffect
+                caster->CastCustomSpell(caster, 32409, &back_damage, 0, 0, true);
+
+                if (unitTarget->GetHealthPct() <= 25.0f)
+                {
+                    // Glyph of Shadow Word: Death
+                    if (!caster->ToPlayer()->HasSpellCooldown(55682) && caster->HasAura(55682))
+                        caster->CastSpell(caster, 77691, true); // dummy hack!
+                }
+            }
+            break;
+        }
+        // Frostbolt (mage)
+        case 116:
+        {
+            // Frostbolt is involved in some other things, so we must ensure that mage is the caster
+            if (!unitTarget || caster->getClass() != CLASS_MAGE)
+                break;
+
+            // talent Shatter - target must be frozen
+            if (unitTarget->isFrozen())
+            {
+                if (caster->HasAura(11170) || caster->HasAura(12982))
+                    damage *= 1.2f;
+            }
+            break;
+        }
+        // Incinerate (warlock)
+        case 29722:
+        {
+            if (caster->getClass() != CLASS_WARLOCK)
+                break;
+
+            // If the target is affected by Immolate spell, let's increase damage by 1/6 (info by DBC tooltip)
+            if (unitTarget->HasAura(348))
+                damage += int32((float)damage/6.0f);
+            break;
+        }
+        // Haunt
+        case 48181:
+        {
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            damage += caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) * 0.5577f * 1.25f;
+            break;
+        }
+        // Soul Fire
+        case 6353:
+        {
+            // Improved Soul Fire talent
+            int32 bp0 = 0;
+            if (caster->HasAura(18119))
+                bp0 = 4;
+            else if (caster->HasAura(18120))
+                bp0 = 8;
+
+            if (bp0)
+                caster->CastCustomSpell(caster, 85383, &bp0, 0, 0, true);
+
+            // Burning Embers talent
+            bp0 = 0;
+            if (caster->HasAura(85112))
+                bp0 = 50;
+            else if (caster->HasAura(91986))
+                bp0 = 25;
+
+            // We must calculate maximal basepoints manually
+            int32 maxbp = caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SPELL);
+            if (bp0 == 50)
+                maxbp *= 1.4f;
+            else
+                maxbp *= 0.7f;
+            SpellEntry const* pSpell = sSpellStore.LookupEntry((bp0 == 50)?85112:((bp0 == 25)?91986:0));
+            if (pSpell)
+            {
+                // Burning Embers inflicts 25/50% of damage dealt OR damage based by formula
+                // - the lower of them
+                SpellScaling pScaling;
+                pScaling.Init(caster->getLevel(), pSpell);
+                maxbp = (maxbp + pScaling.avg[1])/7;
+                bp0 *= (damage/100)/7;
+                if (bp0 > maxbp)
+                    bp0 = maxbp;
+                // If we already have aura like this, only refresh if damage is lower
+                if (unitTarget->HasAura(85421) && unitTarget->GetAura(85421)->GetEffect(0) &&
+                    unitTarget->GetAura(85421)->GetEffect(0)->GetAmount() >= bp0)
+                    unitTarget->GetAura(85421)->RefreshDuration();
+                else
+                    caster->CastCustomSpell(unitTarget, 85421, &bp0, 0, 0, true);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    // Implementation of demonolgy warlock mastery Master Demonologist proficiency
+    if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && caster->IsPet())
+    {
+        Player* pOwner = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (pOwner && pOwner->HasMastery() &&
+            pOwner->GetTalentBranchSpec(pOwner->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
+        {
+            damage = damage * (1+(pOwner->GetMasteryPoints()*2.3f/100.0f));
+        }
+    }
+
+    if (spellProto->SpellFamilyName == SPELLFAMILY_MAGE)
+    {
+        // Implementation of Mana Adept mage mastery proficiency
+        if (caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+            caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_ARCANE &&
+            damage > 1)
+        {
+            // Get mana percentage (0.0f - 1.0f)
+            float manapct = float(caster->GetPower(POWER_MANA)) / float(caster->GetMaxPower(POWER_MANA));
+            // multiplier formula: 1 + (mastery*1.5*(%mana remain)/100)
+            damage = damage*(1.0f+caster->ToPlayer()->GetMasteryPoints()*1.5f*manapct/100.0f);
+        }
+
+        // Implementation of Frostburn mage mastery proficiency
+        if (caster->ToPlayer() && caster->ToPlayer()->HasMastery() &&
+            caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST &&
+            damage > 1)
+        {
+            if (unitTarget && unitTarget->isFrozen())
+                damage = damage*(1.0f+caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
+        }
+    }
+
+    return damage;
 }
 
 uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim)
