@@ -436,7 +436,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
         bool IsTrigger() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool CanSwim() const { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0 || IsPet(); }
         bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
         bool SetWalk(bool enable);
         void SetLevitate(bool enable);
