@@ -13382,7 +13382,7 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
             caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == SPEC_MAGE_FROST &&
             damage > 1)
         {
-            if (unitTarget && unitTarget->isFrozen())
+            if (unitTarget->HasAuraState(AURA_STATE_FROZEN, spellProto, caster))
                 damage = damage*(1.0f+caster->ToPlayer()->GetMasteryPoints()*2.5f/100.0f);
         }
     }
