@@ -13276,7 +13276,7 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
                 break;
 
             // talent Shatter - target must be frozen
-            if (unitTarget->isFrozen())
+            if (unitTarget->HasAuraState(AURA_STATE_FROZEN, spellProto, caster))
             {
                 if (caster->HasAura(11170) || caster->HasAura(12982))
                     damage *= 1.2f;
