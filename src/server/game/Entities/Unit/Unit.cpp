@@ -10486,9 +10486,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 18562) // Only from Swiftmend
                 return false;
 
+            int32 bp = 0;
+
             if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL,SPELLFAMILY_DRUID,2886,EFFECT_0))
-                basepoints0 = (damage * aurEff->GetAmount()) / 100;
-            break;
+            {
+                bp = (damage * aurEff->GetAmount()) / 100;
+                if (pVictim)
+                    pVictim->CastCustomSpell(pVictim, 81262, &bp, &bp, &bp, true, 0, 0, GetGUID());
+            }
+            return false;
         }
 
         // Body and Soul
