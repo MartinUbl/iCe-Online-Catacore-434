@@ -4560,7 +4560,7 @@ void Spell::HandeAfterCast()
         case 17877:
         {
             // Glyph of Shadowburn implementation
-            if (unitTarget->GetHealthPct() <= 20.0f // 20% hp
+            if (unitTarget && unitTarget->GetHealthPct() <= 20.0f // 20% hp
                 && damage < int32(unitTarget->GetHealth()) // target is still alve
                 && m_caster->HasAura(56229) // has glyph
                 && !m_caster->ToPlayer()->HasSpellCooldown(56229)) // without CD
