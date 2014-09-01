@@ -4445,21 +4445,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             // T12 Restoration 4P Bonus
             if (caster->HasAura(99015))
                 caster->CastCustomSpell(caster, 99017, &addhealth, 0, 0, true); // Firebloom
-
-            // Efflorescence
-            int32 bp0 = 0;
-            if (caster->HasAura(34151))
-                bp0 = addhealth*0.04f;
-            else if (caster->HasAura(81274))
-                bp0 = addhealth*0.08f;
-            else if (caster->HasAura(81275))
-                bp0 = addhealth*0.12f;
-
-            if (bp0)
-                unitTarget->CastCustomSpell(unitTarget, 81262, &bp0, &bp0, &bp0, true, 0, 0, caster->GetGUID());
-
-            //addhealth += tickheal * tickcount;
-            //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
         }
         // Glyph of Nourish
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[1] & 0x2000000)

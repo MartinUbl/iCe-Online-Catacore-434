@@ -10480,9 +10480,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             }
             break;
         }
-        // Efflorescence - must be triggered with value --> handled elsewhere
+        // Efflorescence
         case 81262:
-            return false;
+        {
+            if (procSpell->Id != 18562) // Only from Swiftmend
+                return false;
+
+            if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL,SPELLFAMILY_DRUID,2886,EFFECT_0))
+                basepoints0 = (damage * aurEff->GetAmount()) / 100;
+            break;
+        }
+
         // Body and Soul
         case 64128:
         case 65081:
