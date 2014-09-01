@@ -140,13 +140,13 @@ void CalendarMgr::AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite
     }
 }
 
-void CalendarMgr::RemoveEvent(uint64 eventId, uint64 remover)
+void CalendarMgr::RemoveEvent(uint64 eventId, uint64 removerGUID)
 {
     CalendarEvent* calendarEvent = GetEvent(eventId);
 
     if (!calendarEvent)
     {
-        SendCalendarCommandResult(remover, CALENDAR_ERROR_EVENT_INVALID);
+        SendCalendarCommandResult(removerGUID, CALENDAR_ERROR_EVENT_INVALID);
         return;
     }
 
@@ -154,7 +154,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, uint64 remover)
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     PreparedStatement* stmt;
-    MailDraft mail(calendarEvent->BuildCalendarMailSubject(remover), calendarEvent->BuildCalendarMailBody());
+    MailDraft mail(calendarEvent->BuildCalendarMailSubject(removerGUID), calendarEvent->BuildCalendarMailBody());
 
     CalendarInviteStore& eventInvites = _invites[eventId];
     for (size_t i = 0; i < eventInvites.size(); ++i)
@@ -166,12 +166,15 @@ void CalendarMgr::RemoveEvent(uint64 eventId, uint64 remover)
 
         std::stringstream ss;
         ss << "Calendar event was removed !\n\n Title of event was : \n\n" << calendarEvent->GetTitle() << "\n\n Event description was :\n\n" << calendarEvent->GetDescription();
+        if (Player* remover = sObjectMgr->GetPlayer(removerGUID))
+            ss << "\n\n This event was removed by player -> " << remover->GetName();
+
         MailSender sender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT);
         SQLTransaction mailTrans = CharacterDatabase.BeginTransaction();
         MailDraft* md = new MailDraft("Calendar information", ss.str().c_str());
         Player* target = sObjectMgr->GetPlayer(invite->GetInviteeGUID());
         // When an event is deleted, all invited (accepted/declined? - verify) guildies are notified via in-game mail. (wowwiki)
-        if (remover && invite->GetInviteeGUID() != remover)
+        if (removerGUID && invite->GetInviteeGUID() != removerGUID)
             md->SendMailTo(trans, MailReceiver(target, GUID_LOPART(invite->GetInviteeGUID())), sender);
         delete md;
         CharacterDatabase.CommitTransaction(mailTrans);
