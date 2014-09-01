@@ -9560,7 +9560,31 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
 {
     WorldPacket data(SMSG_CLEAR_TARGET, 8);
     data << uint64(m_caster->GetGUID());
-    m_caster->SendMessageToSet(&data, true);
+    //m_caster->SendMessageToSet(&data, true);
+
+    UnitList targets;
+    {
+        float radius = m_caster->GetMap()->GetVisibilityDistance();
+
+        CellPair p(Trinity::ComputeCellPair(m_caster->GetPositionX(),m_caster->GetPositionY()));
+        Cell cell(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+
+        Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(m_caster, m_caster, radius);
+        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(m_caster,targets, u_check);
+
+        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+        TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+
+        cell.Visit(p, grid_object_checker,  *m_caster->GetMap(), *m_caster, radius);
+        cell.Visit(p, world_object_checker, *m_caster->GetMap(), *m_caster, radius);
+    }
+
+    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end();)
+    {
+        if ((*itr)->GetTypeId() == TYPEID_PLAYER)
+            (*itr)->ToPlayer()->GetSession()->SendPacket(&data);
+    }
 }
 
 void Spell::EffectSelfResurrect(SpellEffIndex effIndex)
