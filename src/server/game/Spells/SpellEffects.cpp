@@ -9565,7 +9565,7 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
         cell.Visit(p, world_object_checker, *m_caster->GetMap(), *m_caster, radius);
     }
 
-    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end();)
+    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
     {
         if ((*itr)->GetTypeId() == TYPEID_PLAYER)
             (*itr)->ToPlayer()->GetSession()->SendPacket(&data);
