@@ -120,7 +120,7 @@ public:
             if (blue_aura_holder)
                 blue_aura_holder->RemoveAura(VISUAL_BLUE_AURA);
 
-            Unit * target = me->getVictim();
+            Unit * target = me->GetVictim();
             if (target)
                 me->CastSpell(target, PYROBLAST, false); // First Pyroblast
 
@@ -196,7 +196,7 @@ public:
                     {
                         Unit * target = SelectRandomPlayer(SELECT_TARGET_TOPAGGRO);
                         if (!target)
-                            target = me->getVictim();
+                            target = me->GetVictim();
                         if (target)
                         {
                             me->CastSpell(target, PYROBLAST, false);
@@ -218,7 +218,7 @@ public:
                     // 5 pyroblasts in total from start of the encounter or 4 during the repeating phase 1
                     else if (Pyroblast_Counter==4)
                     {
-                        if (!me->hasUnitState(UNIT_STAT_CASTING))
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
                         {
                             Phase = 2;
                             me->CastSpell(me, BLINK, false); 
@@ -261,7 +261,7 @@ public:
 
             if (Phase == 3) // Frost Volley phase
             {
-                if (!me->hasUnitState(UNIT_STAT_CASTING))
+                if (!me->HasUnitState(UNIT_STATE_CASTING))
                 {
                     // Cast 3 Frost Volleys
                     if (Frost_Volley_Counter<3)
@@ -273,7 +273,7 @@ public:
                 // 3 Frost Volleys, so it`s time to go back to phase 1
                 if (Frost_Volley_Counter == 3) 
                 {
-                    if (!me->hasUnitState(UNIT_STAT_CASTING))
+                    if (!me->HasUnitState(UNIT_STATE_CASTING))
                     {
                         Phase = 1;
                         Pyroblast_Counter = 0; // Reset counter before phase 1

@@ -207,7 +207,7 @@ public:
             //Temporal Blast
             if (Temporal_Blast_Timer <= diff)
             {
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 me->CastSpell(me, TEMPORAL_BLAST, false);
@@ -218,7 +218,7 @@ public:
             //Flame Breath
             if (Flame_Breath_Timer <= diff)
             {
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 me->CastSpell(me, INFINITE_BREATH, false);
@@ -231,7 +231,7 @@ public:
             {
                 Rewind_Time_Check = 500;
 
-                Unit * target = me->getVictim();
+                Unit * target = me->GetVictim();
                 if (target && target->HasAura(REWIND_TIME))
                 {
                     Rewind_Time_Check = 5000;
@@ -271,10 +271,10 @@ public:
                     Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         if (Player* player = i->getSource())
-                            if (player->IsInWorld() && player->isAlive() && !player->isGameMaster())
+                            if (player->IsInWorld() && player->IsAlive() && !player->IsGameMaster())
                             {
                                 // Resurrect dead players
-                                if (!player->isAlive())
+                                if (!player->IsAlive())
                                     player->ResurrectPlayer(100.0f);
 
                                 // Find correct player`s data
@@ -316,14 +316,14 @@ public:
             if (Distortion_Bomb_Timer <= diff) 
             {
                 // Disable cast Distortion bombs during Rewind Time
-                Unit * tank = me->getVictim();
+                Unit * tank = me->GetVictim();
                 if (tank)
                     if (tank && tank->HasAura(REWIND_TIME))
                         return;
 
                 Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200.0f, true);
                 if (!target)
-                    target = me->getVictim();
+                    target = me->GetVictim();
                 if (target) 
                 {
                     me->CastSpell(target, DISTORTION_BOMB, true);

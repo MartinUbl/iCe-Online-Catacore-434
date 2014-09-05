@@ -181,7 +181,7 @@ public:
                 {
                     First_Lunar_Guidance = true;
 
-                    if (me->hasUnitState(UNIT_STAT_CASTING))
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
                         return;
 
                     me->MonsterYell("Moon goddess, your light dims! I am lost without your guidance!", LANG_UNIVERSAL, 0);
@@ -196,7 +196,7 @@ public:
                 {
                     Second_Lunar_Guidance = true;
 
-                    if (me->hasUnitState(UNIT_STAT_CASTING))
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
                         return;
 
                     me->MonsterYell("The darkness closes in...my vision is clouded...", LANG_UNIVERSAL, 0);
@@ -211,7 +211,7 @@ public:
                 {
                     Tears_Of_Elune = true;
 
-                    if (me->hasUnitState(UNIT_STAT_CASTING))
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
                         return;
 
                     me->MonsterYell("Mother moon, I can no longer see your light! Your daughter is alone in the darkness!", LANG_UNIVERSAL, 0);
@@ -241,7 +241,7 @@ public:
             {
                 Eyes_Of_The_Goddess = true;
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 me->CastSpell(me, EYES_OF_THE_GODDESS, false);
@@ -276,11 +276,11 @@ public:
             {
                 Stardust = true;
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 Unit * target = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
-                if (!target) target = me->getVictim();
+                if (!target) target = me->GetVictim();
                 if (target) {
                     me->CastSpell(target, STARDUST, false);
                     switch(Phase) {
@@ -309,7 +309,7 @@ public:
             {
                 Moonlance = true;
 
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 if (Say_Moonlance == false) {
@@ -346,11 +346,11 @@ public:
                 (Tears_Of_Elune == false) && (Eyes_Of_The_Goddess == false) && (Stardust == false) && 
                 (Moonlance == false))
             {
-                if (me->hasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 Unit * target = SelectUnit(SELECT_TARGET_TOPAGGRO, 0);
-                if (!target) target = me->getVictim();
+                if (!target) target = me->GetVictim();
                 if (target) {
                     me->CastSpell(target, MOONBOLT, false);
                     switch(Phase) {

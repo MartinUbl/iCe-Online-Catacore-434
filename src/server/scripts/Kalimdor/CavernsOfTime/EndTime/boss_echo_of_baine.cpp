@@ -174,7 +174,7 @@ public:
         {
             if (spell->Id == THROW_TOTEM)
             {
-                if (!target) target = me->getVictim();
+                if (!target) target = me->GetVictim();
                 if (target)
                 {
                     // Targeted player has to summon totem or it`s not clickable
@@ -189,7 +189,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->hasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             // Pulverize 
