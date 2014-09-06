@@ -2633,8 +2633,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
             }
             break;
         case SPELLFAMILY_WARLOCK:
+            // Soulburn buff -> add or remove drain life and seed of corruption visual action bar effect
+            if (GetSpellProto()->Id == 74434)
+            {
+                if (apply)
+                {
+                    caster->CastSpell(caster, 93312, true);
+                    caster->CastSpell(caster, 93313, true);
+                }
+                else
+                {
+                    caster->RemoveAura(93312);
+                    caster->RemoveAura(93313);
+                }
+            }
             // Drain Soul - If the target is at or below 25% health, Drain Soul causes four times the normal damage
-            if (GetSpellProto()->SpellFamilyFlags[0] & 0x00004000)
+            else if (GetSpellProto()->SpellFamilyFlags[0] & 0x00004000)
             {
                 if (!caster)
                     break;
