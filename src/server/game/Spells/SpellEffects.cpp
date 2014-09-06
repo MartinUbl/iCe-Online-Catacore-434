@@ -3705,6 +3705,10 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     if (m_caster->IsInFlight())
         return;
 
+    // Dont jump if rooted
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasUnitState(UNIT_STATE_ROOT))
+        return;
+
     // Init dest coordinates
     float x, y, z;
     if (m_targets.HasDst())
