@@ -1717,7 +1717,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
 
                     // Talent Feral Swiftness
                     // Dash or Stampeding Roar cat / bear
-                    if (GetId() == 1850 || GetId() == 77761 || GetId() == 77764 && target)
+                    if ((GetId() == 1850 || GetId() == 77761 || GetId() == 77764) && target)
                     {
                         if (caster->HasAura(17002) && roll_chance_i(50)) // 50% chance
                             target->RemoveMovementImpairingAuras();
