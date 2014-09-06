@@ -2606,6 +2606,10 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
 
+    // All non-damaging interrupts off the global cooldown will now always hit the target.
+    if (spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
+        return SPELL_MISS_NONE;
+
     bool cannotMiss = false;
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
@@ -2655,10 +2659,6 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 
     // Same spells cannot be parry/dodge
     if (spell->Attributes & SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK)
-        return SPELL_MISS_NONE;
-
-    // All non-damaging interrupts off the global cooldown will now always hit the target.
-    if (spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
         return SPELL_MISS_NONE;
 
     // Chance resist mechanic
