@@ -9577,6 +9577,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 53259:
         case 53260:
         {
+            if (procSpell->Id != 3044) // Arcane Shot
+                return false;
+
             this->CastSpell(this,53257,true); // Generate second stack of Cobra strikes buff
             break;
         }
