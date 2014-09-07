@@ -2607,7 +2607,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         return SPELL_MISS_NONE;
 
     // All non-damaging interrupts off the global cooldown will now always hit the target.
-    if (spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
+    if ((spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) || (spell->AttributesEx7 & SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER)) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
         return SPELL_MISS_NONE;
 
     bool cannotMiss = false;
@@ -2788,6 +2788,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         if (pVictim->HasAura(31224)) // Temporary hackfix for Cloak of Shadows -> should have 100% chance to resist no matter what
             return SPELL_MISS_RESIST;
     }
+    // All non-damaging interrupts off the global cooldown will now always hit the target.
+    if ((spell->HasSpellEffect(SPELL_EFFECT_INTERRUPT_CAST) || (spell->AttributesEx7 & SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER)) && !spell->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
+        return SPELL_MISS_NONE;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
