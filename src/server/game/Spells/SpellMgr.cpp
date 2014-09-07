@@ -5068,6 +5068,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY; 
             break;
+        case 62758: // Wild Hunt (Rank 1) 
+        case 62762: // Wild Hunt (Rank 2) -> again fail DBC data
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY; 
+            break;
         // this is here until targetAuraSpell and alike support SpellDifficulty.dbc
         case 70459: // Ooze Eruption Search Effect
             spellInfo->targetAuraSpell = 0;

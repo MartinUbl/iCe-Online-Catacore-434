@@ -13203,6 +13203,21 @@ uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32
     if (!caster || !pVictim)
         return damage;
 
+    // By spell family
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_HUNTER:
+        {
+            if (Pet::IsPetBasicAttackSpell(spellProto->Id))
+            {
+                // Wild hunt
+                if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0)) // Your pet's Basic Attacks will deal 60/120% more damage, 
+                    damage = damage * aurEff->GetAmount() / 100;
+            }
+        }
+        break;
+    }
+
     // Some special cases after damage recount
     switch (spellProto->Id)
     {
