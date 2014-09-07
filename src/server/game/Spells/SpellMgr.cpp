@@ -4757,6 +4757,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45761: // Shoot
         case 42611: // Shoot
         case 62374: // Pursued
+        case 87854: // Arcane Barrage (VP)
+        case 92756: // Arcane Barrage (VP)
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
