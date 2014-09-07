@@ -7322,37 +7322,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 break;
             }
-            // Lock and Load
-            if (dummySpell->SpellIconID == 3579)
-            {
-                #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD
-
-                if (GetTypeId() != TYPEID_PLAYER || !procSpell || HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER))
-                    return false;
-
-                if (procFlag & PROC_FLAG_DONE_PERIODIC)
-                {
-                    // T.N.T -> allow to proc from  periodic effects
-                    AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
-
-                    // Immolation Trap, Explosive Trap or Black Arrow
-                    if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812  || procSpell->Id == 3674))
-                    {
-                        if (roll_chance_i(aurEff->GetAmount()))
-                            CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
-                    }
-                    else
-                        return false;
-                }
-                else if (procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
-                {
-                    if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
-                        CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
-                }
-                else return false;
-
-                break;
-            }
             // Rapid Recuperation
             if (dummySpell->SpellIconID == 3560)
             {
@@ -10455,6 +10424,37 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Need Interrupt or Silenced mechanic
             if (!(GetAllSpellMechanicMask(procSpell) & ((1<<MECHANIC_INTERRUPT)|(1<<MECHANIC_SILENCE))))
                 return false;
+            break;
+        }
+        // Lock and Load
+        case 56453:
+        {
+            #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD
+
+            if (GetTypeId() != TYPEID_PLAYER || !procSpell || HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER))
+                return false;
+
+            if (procFlags & PROC_FLAG_DONE_PERIODIC)
+            {
+                // T.N.T -> allow to proc from  periodic effects
+                AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
+
+                // Immolation Trap, Explosive Trap or Black Arrow
+                if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812  || procSpell->Id == 3674))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
+                }
+                else
+                    return false;
+            }
+            else if (procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
+            {
+                if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+                    CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
+            }
+            else return false;
+
             break;
         }
         // Glyph of Death's Embrace
