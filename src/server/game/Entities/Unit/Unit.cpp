@@ -7325,13 +7325,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Lock and Load
             if (dummySpell->SpellIconID == 3579)
             {
-                if (GetTypeId() != TYPEID_PLAYER || !procSpell)
+                #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD
+
+                if (GetTypeId() != TYPEID_PLAYER || !procSpell || HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER))
                     return false;
 
-                #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD for T.N.T talent
-                #define LOCK_AND_LOAD_BUFF 56453
-
-                if ((procFlag & PROC_FLAG_DONE_PERIODIC) && !HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER))
+                if (procFlag & PROC_FLAG_DONE_PERIODIC)
                 {
                     // T.N.T -> allow to proc from  periodic effects
                     AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
@@ -7347,8 +7346,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 }
                 else if (procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
                 {
-                    if (roll_chance_i(triggerAmount) && !ToPlayer()->HasSpellCooldown(LOCK_AND_LOAD_BUFF) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
-                        ToPlayer()->AddSpellCooldown(LOCK_AND_LOAD_BUFF, 0, 20000);
+                    if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+                        CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
                 }
                 else return false;
 
