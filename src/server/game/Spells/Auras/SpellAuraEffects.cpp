@@ -8167,6 +8167,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                 break;
             switch(GetId())
             {
+                // Elusiveness (Racial Passive)
+                case 21009:
+                {
+                    target->UpdateSpeed(MOVE_RUN, true);
+                    break;
+                }
                 // Unstable Power
                 case 24658:
                 {

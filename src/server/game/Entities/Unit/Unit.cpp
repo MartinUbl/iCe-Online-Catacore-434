@@ -15686,6 +15686,11 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 
     float bonus = non_stack_bonus > stack_bonus ? non_stack_bonus : stack_bonus;
 
+    // Elusiveness (Racial Passive)
+    if (AuraEffect * aurEff = GetAuraEffect(21009,EFFECT_0))
+    if (HasStealthAura())
+        main_speed_mod += aurEff->GetAmount();
+
     // now we ready for speed calculation
     float speed  = main_speed_mod ? bonus*(100.0f + main_speed_mod)/100.0f : bonus;
 

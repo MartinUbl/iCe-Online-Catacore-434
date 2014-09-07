@@ -2105,8 +2105,11 @@ int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 
             spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_RANGED_SPEED_PCT)
             //there are many more: slow speed, -healing pct
             value = int32(value*0.25f*exp(caster->getLevel()*(70 - spellEntry->spellLevel) / 1000.0f));
-        //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
+            //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
 
+        // Shadowmeld, increase stealth amount by 50 (guessing) -> Elusiveness (Racial Passive)
+        if (spellEntry->Id == 58984 && effIndex == EFFECT_2 && caster->HasAura(21009))
+            value += 50;
     }
     // Skinning, step for 525 maxskill
     if (spellEntry->Id == 74522)
