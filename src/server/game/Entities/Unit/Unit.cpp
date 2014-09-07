@@ -7331,11 +7331,33 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Lock and Load
             if (dummySpell->SpellIconID == 3579)
             {
-                // Proc only from periodic (from trap activation proc another aura of this spell)
-                if (!(procFlag & PROC_FLAG_DONE_PERIODIC) || !roll_chance_i(triggerAmount))
+                if (GetTypeId() != TYPEID_PLAYER || !procSpell)
                     return false;
-                triggered_spell_id = 56453;
-                target = this;
+
+                #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD for T.N.T talent
+                #define LOCK_AND_LOAD_BUFF 56453
+
+                if ((procFlag & PROC_FLAG_DONE_PERIODIC) && !HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER))
+                {
+                    // T.N.T -> allow to proc from  periodic effects
+                    AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
+
+                    // Immolation Trap, Explosive Trap or Black Arrow
+                    if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812  || procSpell->Id == 3674))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
+                    }
+                    else
+                        return false;
+                }
+                else if (procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
+                {
+                    if (roll_chance_i(triggerAmount) && !ToPlayer()->HasSpellCooldown(LOCK_AND_LOAD_BUFF) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+                        ToPlayer()->AddSpellCooldown(LOCK_AND_LOAD_BUFF, 0, 20000);
+                }
+                else return false;
+
                 break;
             }
             // Rapid Recuperation
@@ -10439,14 +10461,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             // Need Interrupt or Silenced mechanic
             if (!(GetAllSpellMechanicMask(procSpell) & ((1<<MECHANIC_INTERRUPT)|(1<<MECHANIC_SILENCE))))
-                return false;
-            break;
-        }
-        // Lock and Load
-        case 56453:
-        {
-            // Proc only from Frost/Freezing trap activation or from Freezing Arrow (the periodic dmg proc handled elsewhere)
-            if (!(procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) || !procSpell || !(procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST) || !roll_chance_i(triggerAmount))
                 return false;
             break;
         }
