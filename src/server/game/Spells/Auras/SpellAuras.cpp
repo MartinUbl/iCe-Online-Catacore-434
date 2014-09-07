@@ -1654,7 +1654,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     {
                         if (AuraEffect* pEff = GetEffect(0))
                         {
-                            int32 bp0 = pEff->GetAmount() * (float(GetMaxDuration()) / float(pEff->GetAmplitude()));
+                            int32 bp0 = pEff->GetDamage() * (float(GetMaxDuration()) / float(pEff->GetAmplitude()));
                             // Improved Serpent Sting - deal % of total damage done
                             if (caster->HasAura(82834))      // rank 2
                                 bp0 *= 0.3f;
