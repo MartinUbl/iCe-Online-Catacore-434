@@ -1347,7 +1347,8 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
          damageInfo->SpellID == 56641 || // Steady Shot
          damageInfo->SpellID == 19434 || // Aimed Shot
          damageInfo->SpellID == 82928 || // Aimed Shot (Master Marksman)
-         damageInfo->SpellID == 53209 )  // Chimera Shot
+         damageInfo->SpellID == 53209 || // Chimera Shot
+         damageInfo->SpellID == 2643)    // Multi-Shot
         &&
         ToPlayer() && ToPlayer()->HasMastery() &&
         ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == SPEC_HUNTER_MARKSMANSHIP)
