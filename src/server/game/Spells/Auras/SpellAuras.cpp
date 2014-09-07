@@ -1335,6 +1335,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                             target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                         }
                         break;
+                    case 27243: // Seed of Corruption
+                    {
+                        if (!caster)
+                            break;
+                        caster->RemoveAura(74434);
+                    }
+                    break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
