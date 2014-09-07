@@ -1339,6 +1339,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     {
                         if (!caster)
                             break;
+
+                        // Mark that, we casted SoC with Soulburn buff
+                        if (AuraEffect * aurEff = caster->GetAuraEffect(86664, EFFECT_0))
+                            aurEff->SetScriptedAmount(1);
+
                         caster->RemoveAura(74434);
                     }
                     break;

@@ -182,8 +182,14 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
                 if (!caster || !caster->ToPlayer() || !caster->HasAura(74434))
                     return;
 
+                AuraEffect * aurEff = caster->GetAuraEffect(86664, EFFECT_0);
+
                 // No talent -> no deal
-                if (!caster->HasAura(86664) || caster->ToPlayer()->GetActiveTalentBranchSpec() != SPEC_WARLOCK_AFFLICTION)
+                if (!aurEff || caster->ToPlayer()->GetActiveTalentBranchSpec() != SPEC_WARLOCK_AFFLICTION)
+                    return;
+
+                // Should be one if we casted SoC with Soublurn
+                if (aurEff->GetScriptedAmount() == 0)
                     return;
 
                 for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
@@ -192,8 +198,7 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
                         caster->CastSpell((*itr),172,true); // Corruption
                 }
 
-                // Remove Soulburn
-                caster->RemoveAura(74434);
+                aurEff->SetScriptedAmount(0);
                 // Gain 1 soul shard
                 caster->CastSpell(caster,87388,true);
             }
