@@ -13195,6 +13195,69 @@ float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellPro
     return crit_chance > 0.0f ? crit_chance : 0.0f;
 }
 
+// After all healing was computed -> after all bonuses (done,taken,crit,absorb,...)
+uint32 Unit::AfterAllSpellHealingCalculation(SpellEntry const *spellProto, uint32 heal, Unit *pVictim)
+{
+    if (spellProto == NULL || !pVictim)
+        return heal;
+
+    Unit * caster = this;
+
+    /**** Mastery System for healing spells**************/
+
+    if (Player *player = caster->ToPlayer())
+    {
+        if (player->HasMastery() && heal > 1)
+        {
+            BranchSpec playerSpec = player->GetActiveTalentBranchSpec();
+
+            // Implementation of Echo of Light mastery proficiency
+            if (spellProto->SpellFamilyName == SPELLFAMILY_PRIEST &&
+                playerSpec == SPEC_PRIEST_HOLY)
+            {
+                // Echo of Light HoT effect
+                int32 bp0 = heal*(player->GetMasteryPoints()*1.25f/100.0f);
+
+                // stack with old aura
+                if (Aura* echo = pVictim->GetAura(77489))
+                    if (AuraEffect* hoteff = echo->GetEffect(EFFECT_0))
+                        bp0 += hoteff->GetAmount()*((float)(hoteff->GetTotalTicks()-hoteff->GetTickNumber())/(float)hoteff->GetTotalTicks());
+
+                caster->CastCustomSpell(pVictim, 77489, &bp0, NULL, NULL, true);
+            }
+
+            // Implementation of Illuminated Healing mastery proficiency
+            if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN &&
+                playerSpec == SPEC_PALADIN_HOLY)
+            {
+                // Illuminated Healing absorb value and spellcast
+                int32 bp0 = heal*(player->GetMasteryPoints()*1.5f/100.0f);
+
+                // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
+                if (bp0 > caster->GetHealth()*0.33f)
+                    bp0 = caster->GetHealth()*0.33f;
+
+                if (Aura* pAura = pVictim->GetAura(86273, caster->GetGUID()))
+                {
+                    if (AuraEffect* pEff = pAura->GetEffect(EFFECT_0))
+                    {
+                        bp0 += pEff->GetAmount();
+                        if (bp0 > caster->GetHealth()*0.33f)
+                            bp0 = caster->GetHealth()*0.33f;
+
+                        pEff->SetAmount(bp0);
+                        pAura->SetNeedClientUpdateForTargets();
+                        pAura->SetDuration(pAura->GetMaxDuration());
+                    }
+                }
+                else
+                    caster->CastCustomSpell(pVictim, 86273, &bp0, 0, 0, true);
+            }
+        }
+    }
+    return heal;
+}
+
 // After all damage was computed -> after all bonuses (done,taken,crit,absorb,resil,block,...)
 uint32 Unit::AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32 damage, Unit *pVictim)
 {

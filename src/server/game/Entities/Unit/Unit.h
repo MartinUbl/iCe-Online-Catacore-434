@@ -1975,6 +1975,7 @@ class Unit : public WorldObject
         float  GetUnitSpellCriticalChance(Unit* victim, SpellEntry const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
 
         uint32 AfterAllSpellDamageComputation(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
+        uint32 AfterAllSpellHealingCalculation(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
 
         uint32 SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
         uint32 SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);

@@ -4548,56 +4548,12 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
         }
 
-        /**** Mastery System for healing spells**************/
 
         if (Player *player = m_caster->ToPlayer())
         {
             if (player->HasMastery() && addhealth > 1)
             {
                 BranchSpec playerSpec = player->GetActiveTalentBranchSpec();
-
-                // Implementation of Echo of Light mastery proficiency
-                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
-                    playerSpec == SPEC_PRIEST_HOLY)
-                {
-                    // Echo of Light HoT effect
-                    int32 bp0 = addhealth*(player->GetMasteryPoints()*1.25f/100.0f);
-
-                    // stack with old aura
-                    if (Aura* echo = unitTarget->GetAura(77489))
-                        if (AuraEffect* hoteff = echo->GetEffect(EFFECT_0))
-                            bp0 += hoteff->GetAmount()*((float)(hoteff->GetTotalTicks()-hoteff->GetTickNumber())/(float)hoteff->GetTotalTicks());
-
-                    m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
-                }
-
-                // Implementation of Illuminated Healing mastery proficiency
-                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-                    playerSpec == SPEC_PALADIN_HOLY)
-                {
-                    // Illuminated Healing absorb value and spellcast
-                    int32 bp0 = addhealth*(player->GetMasteryPoints()*1.5f/100.0f);
-
-                    // "The total absorption created can never exceed 1/3 of the casting paladin’s health."
-                    if (bp0 > m_caster->GetHealth()*0.33f)
-                        bp0 = m_caster->GetHealth()*0.33f;
-
-                    if (Aura* pAura = unitTarget->GetAura(86273, m_caster->GetGUID()))
-                    {
-                        if (AuraEffect* pEff = pAura->GetEffect(EFFECT_0))
-                        {
-                            bp0 += pEff->GetAmount();
-                            if (bp0 > m_caster->GetHealth()*0.33f)
-                                bp0 = m_caster->GetHealth()*0.33f;
-
-                            pEff->SetAmount(bp0);
-                            pAura->SetNeedClientUpdateForTargets();
-                            pAura->SetDuration(pAura->GetMaxDuration());
-                        }
-                    }
-                    else
-                        m_caster->CastCustomSpell(unitTarget, 86273, &bp0, 0, 0, true);
-                }
 
                 // Implementation of Harmony mastery proficiency
                 if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID &&
@@ -4608,7 +4564,6 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 }
             }
         }
-        /****************************************************/
 
         // Remove Grievious bite if fully healed
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
