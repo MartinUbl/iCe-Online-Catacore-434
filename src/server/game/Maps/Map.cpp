@@ -1673,6 +1673,10 @@ inline GridMap *Map::GetGrid(float x, float y)
     int gx=(int)(32-x/SIZE_OF_GRIDS);                       //grid x
     int gy=(int)(32-y/SIZE_OF_GRIDS);                       //grid y
 
+    // do not enter to invalid grid
+    if (gx >= MAX_NUMBER_OF_GRIDS || gy >= MAX_NUMBER_OF_GRIDS)
+        return NULL;
+
     // ensure GridMap is loaded
     EnsureGridCreated(GridPair(63-gx,63-gy));
 
