@@ -1632,7 +1632,7 @@ class npc_finlay_darkmoon: public CreatureScript
                     Creature* summon = pPlayer->SummonCreature(NPC_PLAYER_TONK, playerSpawnPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
                     if (summon)
                     {
-                        pPlayer->EnterVehicle(summon);
+                        pPlayer->EnterVehicle(summon,0);
                         pPlayer->CastSpell(pPlayer, SPELL_TONK_ENABLE, true);
 
                         int16 progress = pPlayer->GetReqKillOrCastCurrentCount(QUEST_TONK_COMMANDER, 33081);
