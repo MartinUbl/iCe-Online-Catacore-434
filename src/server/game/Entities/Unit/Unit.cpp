@@ -21175,7 +21175,8 @@ void Unit::EnterVehicle(Vehicle *vehicle, int8 seatId, AuraApplication const* au
     {
         if (vehicle->GetBase()->GetTypeId() == TYPEID_PLAYER && plr->IsInCombat())
         {
-            vehicle->GetBase()->RemoveAura(const_cast<AuraApplication*>(aurApp));
+            if (aurApp)
+                vehicle->GetBase()->RemoveAura(const_cast<AuraApplication*>(aurApp));
             return;
         }
 
