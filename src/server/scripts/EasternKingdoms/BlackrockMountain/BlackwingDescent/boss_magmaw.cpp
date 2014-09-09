@@ -78,7 +78,7 @@ public:
             if ((pHead = me->SummonCreature(42347, 0,0,0)) != NULL)
             {
                 me->CastSpell(pHead, SPELL_POINT_OF_VULNERABILITY_SHARE_DMG, true);
-                pHead->EnterVehicle(me, 1, false);
+                pHead->EnterVehicle(me, 1, NULL);
                 pHead->AddUnitState(UNIT_STATE_UNATTACKABLE);
                 pHead->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }

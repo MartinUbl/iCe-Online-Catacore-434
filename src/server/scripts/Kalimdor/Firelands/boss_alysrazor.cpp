@@ -697,7 +697,7 @@ class boss_Alysrazor : public CreatureScript
                         if (Creature* pSatchel1 = me->SummonCreature(NPC_MOLTEN_EGG,pBroodMother->GetPositionX(),pBroodMother->GetPositionY(),pBroodMother->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                         {
                             pBroodMother->ForcedDespawn(12000);
-                            pSatchel1->EnterVehicle(pBroodMother, 0, false);
+                            pSatchel1->EnterVehicle(pBroodMother, 0, NULL);
                             pBroodMother->GetMotionMaster()->MovePoint(0,-47.0f, -266.0f, 80.0f);
                         }
                     }
@@ -711,7 +711,7 @@ class boss_Alysrazor : public CreatureScript
                         if (Creature* pSatchel2 = me->SummonCreature(NPC_MOLTEN_EGG,pBroodMother->GetPositionX(),pBroodMother->GetPositionY(),pBroodMother->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
                         {
                             pBroodMother->ForcedDespawn(12000);
-                            pSatchel2->EnterVehicle(pBroodMother, 0, false);
+                            pSatchel2->EnterVehicle(pBroodMother, 0, NULL);
                             pBroodMother->GetMotionMaster()->MovePoint(0,-33.0f,-287.0f, 80.0f);
                         }
                     }

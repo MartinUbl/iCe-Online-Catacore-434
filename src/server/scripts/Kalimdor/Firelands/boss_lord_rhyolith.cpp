@@ -186,7 +186,7 @@ public:
             {
                 leftFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
-                pFoot->EnterVehicle(me, 0, false);
+                pFoot->EnterVehicle(me, 0, NULL);
                 pFoot->ClearUnitState(UNIT_STATE_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
@@ -199,7 +199,7 @@ public:
             {
                 rightFootGUID = pFoot->GetGUID();
                 pFoot->SetMaxHealth(me->GetMaxHealth() / 2);
-                pFoot->EnterVehicle(me, 1, false);
+                pFoot->EnterVehicle(me, 1, NULL);
                 pFoot->ClearUnitState(UNIT_STATE_UNATTACKABLE);
 
                 pFoot->CastSpell(pFoot, SPELL_OBSIDIAN_ARMOR, true);
