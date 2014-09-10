@@ -9508,6 +9508,23 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         }
     }
 
+    // Proc required some HP condition (mostly below PCT) to proc
+    switch (auraSpellInfo->Id)
+    {
+        // Leaden Despair
+        case 92180:
+        case 92185:
+        // Spidersilk Spindle
+        case 96947:
+        case 97130:
+        // Symbiotic Worm
+        case 92236:
+        case 92356:
+            if (HealthBelowPct(triggeredByAura->GetAmount()))
+                break;
+            else return false;
+    }
+
     // Custom requirements (not listed in procEx) Warning! damage dealing after this
     // Custom triggered spells
     switch (auraSpellInfo->Id)
