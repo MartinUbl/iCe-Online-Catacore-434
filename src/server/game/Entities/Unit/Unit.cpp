@@ -10584,6 +10584,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
         return false;
 
+    if (target == NULL)
+    {
+        // If there are no procflags and it is generic spell with damage part -> target should be victim, not caster.
+        if (procFlags == PROC_FLAG_NONE && auraSpellInfo->SpellFamilyName == SPELLFAMILY_GENERIC &&
+            (auraSpellInfo->HasSpellEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || auraSpellInfo->AppliesAuraType(SPELL_AURA_PERIODIC_DAMAGE)))
+            target = pVictim;
+    }
+
+
     // try detect target manually if not set
     if (target == NULL)
        target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && IsPositiveSpell(trigger_spell_id) ? this : pVictim;
