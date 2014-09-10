@@ -6024,7 +6024,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_NO_VALID_TARGETS;
 
     // Client allow players to cast destination spells to places which are not in LoS with them -> caused by camera angle ?
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_targets.HasDst() && (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION))
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC
+        && m_targets.HasDst() && (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION))
     {
         float x, y, z;
         m_targets.m_dstPos.GetPosition(x, y, z);
