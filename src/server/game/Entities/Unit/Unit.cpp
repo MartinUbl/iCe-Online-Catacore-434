@@ -13190,7 +13190,7 @@ float Unit::GetUnitSpellCriticalChance(Unit *pVictim, SpellEntry const *spellPro
 
     // debug mode for spell crits (it's fine thing to debug spellcrit procs)
     if (sObjectMgr->GetSpellCritDebug())
-        return true;
+        return 100.0f;
 
     return crit_chance > 0.0f ? crit_chance : 0.0f;
 }
