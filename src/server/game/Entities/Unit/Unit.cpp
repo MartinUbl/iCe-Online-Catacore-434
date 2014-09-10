@@ -9544,6 +9544,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 ToPlayer()->SetCombatReadinessTimer(10 * IN_MILLISECONDS);
             break;
         }
+        case 26016: // Vindication
+        {
+            target = pVictim;
+            break;
+        }
         // Unyielding Knights (item exploit 29108\29109)
         case 38164:
         {
