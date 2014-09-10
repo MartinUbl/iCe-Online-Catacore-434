@@ -5063,6 +5063,14 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
             count++;
             break;
+        case 88314: // Twisting Winds
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_1_YARD;
+            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_1_YARD;
+            break;
+        case 89133: // Solar Fire (Normal)
+        case 89878: // Solar Fire (Heroic)
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
+            break;
         case 33206: // Pain Suppression
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_USABLE_WHILE_STUNNED;
             count++;
