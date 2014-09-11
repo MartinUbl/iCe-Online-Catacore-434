@@ -10163,8 +10163,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             case 92125: // Prestor's Talisman of Machination
             case 92350: // Prestor's Talisman of Machination (Heroic)
             case 91048: // Stump of Time
-            case 92236: // Symbiotic Worm
-            case 92356: // Symbiotic Worm (Heroic)
             case 91025: // Theralion's Mirror
             case 92322: // Theralion's Mirror (Heroic)
             case 92114: // Unheeded Warning
@@ -10198,6 +10196,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             case 91080: // Harmlight Totem
             case 92234: // Bedrock Talisman
             case 91833: // Fury of Angerforge
+            case 92236: // Symbiotic Worm
+            case 92356: // Symbiotic Worm (Heroic)
                 if (ToPlayer()->HasSpellCooldown(auraSpellInfo->Id))
                     return false;
 
