@@ -1652,8 +1652,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Serpent Sting
                     if (caster && target && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
                     {
-                        uint32 bp0 = (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4) * 5;
-                        bp0 = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, bp0, DOT);
+                        int32 bp0 = (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4) * 5;
+                        bp0 = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, uint32(bp0), DOT);
 
                         // Improved Serpent Sting - deal % of total damage done
                         if (caster->HasAura(82834))      // rank 2
