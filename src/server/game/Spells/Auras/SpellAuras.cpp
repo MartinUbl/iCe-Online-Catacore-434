@@ -1650,11 +1650,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         caster->CastSpell(caster, 114406, true); // - 30 % damage taken 
 
                     // Serpent Sting
-                    if (caster && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
+                    if (caster && target && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
                     {
                         if (AuraEffect* pEff = GetEffect(0))
                         {
-                            int32 bp0 = pEff->GetDamage() * (float(GetMaxDuration()) / float(pEff->GetAmplitude()));
+                            uint32 baseDamage = SpellMgr::CalculateSpellEffectValueMultiplier(GetSpellProto(), EFFECT_0, caster);
+                            uint32 dotDamage = caster->SpellDamageBonus(target, GetSpellProto(), EFFECT_0, baseDamage, DOT);
+                            int32 bp0 = dotDamage * (float(GetMaxDuration()) / float(pEff->GetAmplitude()));
                             // Improved Serpent Sting - deal % of total damage done
                             if (caster->HasAura(82834))      // rank 2
                                 bp0 *= 0.3f;
