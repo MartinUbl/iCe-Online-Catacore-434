@@ -1803,6 +1803,24 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                             caster->CastSpell(caster, 93400, true);
                         break;
                     }
+                    case 3674: // Black Arrow 
+                    {
+                        if (!caster)
+                            break;
+                        #define LOCK_AND_LOAD_COOLDOWN_MARKER 67544 // 10 s iCD
+
+                        // T.N.T talent
+                        if (AuraEffect * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0))
+                        {
+                            if (!caster->HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER) && roll_chance_i(aurEff->GetAmount()))
+                            {
+                                // Generate double charge
+                                caster->CastSpell(caster, 56453, true);
+                                caster->CastSpell(caster, 56453, true);
+                            }
+                        }
+                        break;
+                    }
                     case 603:    // Bane of Doom
                         {
                             uint32 chance = 20;

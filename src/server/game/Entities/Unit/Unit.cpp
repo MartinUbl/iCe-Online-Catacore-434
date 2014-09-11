@@ -10465,8 +10465,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 // T.N.T -> allow to proc from  periodic effects
                 AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
 
-                // Immolation Trap, Explosive Trap or Black Arrow
-                if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812  || procSpell->Id == 3674))
+                // Immolation Trap, Explosive Trap or Black Arrow -> black arrow cant proc this talent from unknown reason hacked in PeriodicTick ...
+                if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812 /*|| procSpell->Id == 3674*/))
                 {
                     if (roll_chance_i(aurEff->GetAmount()))
                         CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
