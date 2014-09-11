@@ -1652,20 +1652,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     // Serpent Sting
                     if (caster && target && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
                     {
-                        if (AuraEffect* pEff = GetEffect(0))
-                        {
-                            uint32 bp0 = (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4) * 5;
-                            bp0 = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, bp0, DOT);
+                        uint32 bp0 = (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4) * 5;
+                        bp0 = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, bp0, DOT);
 
-                            // Improved Serpent Sting - deal % of total damage done
-                            if (caster->HasAura(82834))      // rank 2
-                                bp0 *= 0.3f;
-                            else if (caster->HasAura(19464)) // rank 1
-                                bp0 *= 0.15f;
+                        // Improved Serpent Sting - deal % of total damage done
+                        if (caster->HasAura(82834))      // rank 2
+                            bp0 *= 0.3f;
+                        else if (caster->HasAura(19464)) // rank 1
+                            bp0 *= 0.15f;
 
-                            if (bp0)
-                                caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
-                        }
+                        if (bp0)
+                            caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
                     }
                     // Camouflage
                     if (GetId() == 80326 && caster)
