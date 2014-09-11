@@ -9509,6 +9509,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     }
 
     // Proc required some HP condition (mostly below PCT) to proc
+    // Melee attacks which reduce you below x% health ...
     switch (auraSpellInfo->Id)
     {
         // Leaden Despair
@@ -9520,7 +9521,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Symbiotic Worm
         case 92236:
         case 92356:
-            if (HealthBelowPct(triggeredByAura->GetAmount()))
+            if (GetHealth() - damage < GetMaxHealth() * 0.35)
                 break;
             else return false;
     }
