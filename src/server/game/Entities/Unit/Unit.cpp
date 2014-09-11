@@ -9521,6 +9521,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Symbiotic Worm
         case 92236:
         case 92356:
+        // Bedrock Talisman
+        case 92234:
             if (GetHealth() - damage < GetMaxHealth() * 0.35)
                 break;
             else return false;
