@@ -9549,7 +9549,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         }
         case 26016: // Vindication
         {
-            target = pVictim;
+            if (this == pVictim)
+                return false;
             break;
         }
         // Unyielding Knights (item exploit 29108\29109)
