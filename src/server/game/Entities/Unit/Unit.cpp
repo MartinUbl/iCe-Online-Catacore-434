@@ -10446,16 +10446,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
         }
-        // Burning Determination
-        case 54748:
-        {
-            if (!procSpell)
-                return false;
-            // Need Interrupt or Silenced mechanic
-            if (!(GetAllSpellMechanicMask(procSpell) & ((1<<MECHANIC_INTERRUPT)|(1<<MECHANIC_SILENCE))))
-                return false;
-            break;
-        }
         // Lock and Load
         case 56453:
         {
