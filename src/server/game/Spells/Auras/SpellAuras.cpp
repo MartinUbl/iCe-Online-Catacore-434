@@ -2764,17 +2764,29 @@ void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* cast
                 aurEff->SetDamage(caster->SpellDamageBonusDone(target, m_spellProto, aurEff->GetEffIndex(), damage, DOT, GetStackAmount()) * aurEff->GetDonePct());
                 aurEff->SetCritChance(caster->GetUnitSpellCriticalChance(target, m_spellProto, GetSpellSchoolMask(m_spellProto)));
 
-                // Serpent Sting
-                if (caster && target && GetId() == 1978)
+                if (caster && target)
                 {
-                    // Improved Serpent Sting 
-                    if (AuraEffect * aESerpent = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER,536,EFFECT_0))
+                    // Custom scripted stuff right after DoT damage calculated
+                    switch (GetId())
                     {
-                        int32 bp0 = aurEff->GetDamage() * aurEff->GetTotalTicks();
-                        bp0 = bp0 * aESerpent->GetAmount() / 100;
+                        // Serpent Sting
+                        case 1978:
+                        case 88453:
+                        case 88466:
+                        {
+                            // Improved Serpent Sting 
+                            if (AuraEffect * aESerpent = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER,536,EFFECT_0))
+                            {
+                                int32 bp0 = aurEff->GetDamage() * aurEff->GetTotalTicks();
+                                bp0 = bp0 * aESerpent->GetAmount() / 100;
 
-                        if (bp0)
-                            caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
+                                if (bp0)
+                                    caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
                     }
                 }
 
