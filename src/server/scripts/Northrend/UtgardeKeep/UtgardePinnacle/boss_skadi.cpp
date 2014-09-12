@@ -280,10 +280,12 @@ public:
         {
             if (spell->Id == SPELL_HARPOON_DAMAGE)
             {
+                me->SetFullHealth();
                 m_uiSpellHitCount++;
                 if (m_uiSpellHitCount >= 3)
                 {
                     Phase = SKADI;
+                    me->ResetPlayerDamageReq();
                     me->SetFlying(false);
                     me->Unmount();
                     if(Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
@@ -298,8 +300,8 @@ public:
                     m_uiPoisonedSpearTimer = 10000;
                     m_uiWhirlwindTimer = 20000;
                     me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
-					if(me->GetVictim())
-						me->GetMotionMaster()->MoveChase(me->GetVictim());
+                    if(me->GetVictim())
+                        me->GetMotionMaster()->MoveChase(me->GetVictim());
                 }
             }
         }
