@@ -5650,21 +5650,6 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const *aurApp, uint8 mode, bo
     Unit *target = aurApp->GetTarget();
 
     target->SetControlled(apply, UNIT_STATE_ROOT);
-    
-    if (apply)
-    {
-        switch (GetSpellProto()->Id)
-        {
-            case 69001: //Transform: Worgen. not used?
-            {
-                if(target->GetTypeId() == TYPEID_PLAYER)
-                    target->ToPlayer()->toggleWorgenForm();
-                break;
-            }
-            default:
-                break;
-        }
-    }
 }
 
 void AuraEffect::HandlePreventFleeing(AuraApplication const *aurApp, uint8 mode, bool apply) const
