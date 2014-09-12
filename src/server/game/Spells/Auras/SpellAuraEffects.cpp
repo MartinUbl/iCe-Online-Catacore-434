@@ -1813,7 +1813,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         if (AuraEffect * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0))
                         {
                             if (!caster->HasAura(LOCK_AND_LOAD_COOLDOWN_MARKER) && roll_chance_i(aurEff->GetAmount()))
+                            {
                                 caster->CastSpell(caster, 56453, true);
+                                caster->CastSpell(caster, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
+                            }
                         }
                         break;
                     }
