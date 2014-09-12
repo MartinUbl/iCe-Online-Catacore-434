@@ -12400,6 +12400,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
         case 63675: // Improved Devouring Plague
         case 83853: // Combustion
         case 12654: // Ignite
+        case 83077: // Improved Serpent Sting
             return pdamage;
     }
 
@@ -12542,6 +12543,7 @@ float Unit::SpellDamagePctDone(Unit* victim, SpellEntry const* spellProto, Damag
         case 63675: // Improved Devouring Plague
         case 83853: // Combustion
         case 12654: // Ignite
+        case 83077: // Improved Serpent Sting
             return 1.0f;
     }
 

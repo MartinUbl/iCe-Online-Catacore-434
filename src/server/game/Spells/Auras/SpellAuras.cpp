@@ -1649,21 +1649,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     if (GetId() == 19263 && caster) // Deterrence
                         caster->CastSpell(caster, 114406, true); // - 30 % damage taken 
 
-                    // Serpent Sting
-                    if (caster && target && GetId() == 1978 && (caster->HasAura(82834) || caster->HasAura(19464)))
-                    {
-                        int32 bp0 = (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4) * 5;
-                        bp0 = target->SpellDamageBonusTaken(caster, GetSpellProto(),EFFECT_0, uint32(bp0), DOT);
-
-                        // Improved Serpent Sting - deal % of total damage done
-                        if (caster->HasAura(82834))      // rank 2
-                            bp0 *= 0.3f;
-                        else if (caster->HasAura(19464)) // rank 1
-                            bp0 *= 0.15f;
-
-                        if (bp0)
-                            caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
-                    }
                     // Camouflage
                     if (GetId() == 80326 && caster)
                         caster->RemoveAurasDueToSpell(80325); // remove triggered effect
@@ -2778,6 +2763,21 @@ void Aura::HandleAuraSpecificPeriodics(AuraApplication const* aurApp, Unit* cast
                 aurEff->SetDonePct(caster->SpellDamagePctDone(target, m_spellProto, DOT)); // Calculate done percentage first!
                 aurEff->SetDamage(caster->SpellDamageBonusDone(target, m_spellProto, aurEff->GetEffIndex(), damage, DOT, GetStackAmount()) * aurEff->GetDonePct());
                 aurEff->SetCritChance(caster->GetUnitSpellCriticalChance(target, m_spellProto, GetSpellSchoolMask(m_spellProto)));
+
+                // Serpent Sting
+                if (caster && target && GetId() == 1978)
+                {
+                    // Improved Serpent Sting 
+                    if (AuraEffect * aESerpent = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER,536,EFFECT_0))
+                    {
+                        int32 bp0 = aurEff->GetDamage() * aurEff->GetTotalTicks();
+                        bp0 = bp0 * aESerpent->GetAmount() / 100;
+
+                        if (bp0)
+                            caster->CastCustomSpell(target, 83077, &bp0, 0, 0, true);
+                    }
+                }
+
                 break;
             }
             case SPELL_AURA_PERIODIC_HEAL:
