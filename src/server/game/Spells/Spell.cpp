@@ -7737,21 +7737,6 @@ SpellCastResult Spell::CheckPower()
     // Check power amount
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    // Explicit focus condition
-    if (m_spellInfo->powerType == POWER_FOCUS)
-    {
-        // Wild Hunt
-        if (AuraEffect * aurEff1 = m_caster->GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_1))
-        {
-            if (m_caster->GetPower(powerType) >= 50 && Pet::IsPetBasicAttackSpell(m_spellInfo->Id)) // When your pet is at or above 50 Focus
-            {
-                m_powerCost += (m_powerCost * aurEff1->GetAmount()) / 100; // your pet's Basic Attacks cost additional focus.
-                if (int32(m_caster->GetPower(powerType)) < m_powerCost)
-                    return SPELL_FAILED_NO_POWER;
-            }
-        }
-    }
-
     if (int32(m_caster->GetPower(powerType)) < m_powerCost)
         return SPELL_FAILED_NO_POWER;
     else
