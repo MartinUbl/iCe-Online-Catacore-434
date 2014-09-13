@@ -1473,11 +1473,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->GetOwner() && m_caster->GetOwner()->ToPlayer())
                         damage += ceil(0.516f*float(m_caster->GetOwner()->ToPlayer()->GetTotalAttackPowerValue(RANGED_ATTACK)));
                 }
-                // Explosive Trap
-                else if (m_spellInfo->Id == 13812)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
-                }
                 break;
             }
             case SPELLFAMILY_SHAMAN:

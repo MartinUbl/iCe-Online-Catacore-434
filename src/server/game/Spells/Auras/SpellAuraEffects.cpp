@@ -774,6 +774,11 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             {
                 amount += caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.00369f;
             }
+            // Explosive Trap
+            else if (GetId() == 13812)
+            {
+                amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.546f) / 10;
+            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             {
