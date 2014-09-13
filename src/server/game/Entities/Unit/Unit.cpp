@@ -9562,21 +9562,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 355, EFFECT_0);
 
                 // Immolation Trap, Explosive Trap or Black Arrow
-                if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812 || procSpell->Id == 3674))
-                {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
-                }
+                if (aurEff && (procSpell->Id == 13797 || procSpell->Id == 13812 || procSpell->Id == 3674) && roll_chance_i(aurEff->GetAmount()))
+                    CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
                 else
                     return false;
             }
             else if (procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) // Only Lock and Load talent
             {
-                if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+                // This flag with combination with PROC_FLAG_DONE_PERIODIC doesnt work, have no idea why ...
+                // This part is hacked in Spell::AfterCast
+                /*if (roll_chance_i(triggerAmount) && (procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
                     CastSpell(this, LOCK_AND_LOAD_COOLDOWN_MARKER, true);
+                else return false;*/
+                return false;
             }
-            else return false;
-
             break;
         }
         case 26016: // Vindication
