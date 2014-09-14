@@ -5996,13 +5996,17 @@ bool Spell::ApplyEffectCondition(SpellEffIndex effIndex)
 SpellCastResult Spell::CheckCast(bool strict)
 {
     // HACK
-    // Allow some generic spell to be cast without additional checks
+    // Allow some spell to be cast without additional checks or some explicit checks
     switch (m_spellInfo->Id)
     {
         case 98619: // Wings of Flame 
             return SPELL_CAST_OK;
         case 110231: // ShadowCloak
             return (m_caster->IsInCombat()) ? SPELL_FAILED_AFFECTING_COMBAT : SPELL_CAST_OK;
+        case 52610: // Savage Roar
+            if (m_caster->GetShapeshiftForm() != FORM_CAT)
+               return SPELL_FAILED_NOT_SHAPESHIFT;
+            break;
     }
 
     // Combat ressurections per encounter are limited since Cataclysm
