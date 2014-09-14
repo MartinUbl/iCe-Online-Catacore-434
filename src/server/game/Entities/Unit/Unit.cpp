@@ -3565,7 +3565,18 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
             {
                 if (aura->GetSpellProto()->StackAmount)
                 {
-                    aura->ModStackAmount(foundAura->GetStackAmount());
+                    bool canAddStack = true;
+
+                    switch (aura->GetId())
+                    {
+                        //FrostFire Bolt only stacks if caster has glyph
+                        case 44614:
+                            if (!caster->HasAura(61205))
+                                canAddStack = false;
+                            break;
+                    }
+                    if (canAddStack)
+                        aura->ModStackAmount(foundAura->GetStackAmount());
                 }
 
                 // Update periodic timers from the previous aura

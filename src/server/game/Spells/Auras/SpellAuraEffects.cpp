@@ -764,10 +764,19 @@ int32 AuraEffect::CalculateAmount(Unit *caster)
             }
             // Explosive Shot (Explosive Shit sounds also nice :-P)
             else if (GetId() == 53301)
+            // Frostfire Bolt DoT from Glyph of Frostfire
+            else if (GetId() == 44614)
             {
                 float rmin = caster->GetWeaponDamageRange(RANGED_ATTACK,MINDAMAGE);
                 float rmax = caster->GetWeaponDamageRange(RANGED_ATTACK,MAXDAMAGE);
                 amount += 1.2f*((rmin+rmax)/2)+caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.232f;
+                if (!GetBase() || !GetBase()->GetUnitOwner())
+                    break;
+                int32 baseDamage = SpellMgr::CalculateSpellEffectAmount(m_spellProto, EFFECT_1, caster, &m_baseAmount, NULL);
+                uint32 directDamage = caster->SpellDamageBonus(GetBase()->GetUnitOwner(), m_spellProto, EFFECT_1, baseDamage, SPELL_DIRECT_DAMAGE);
+                // Your Frostfire Bolt now deals 3% additional damage over 12 sec
+                amount += directDamage * 0.03 / GetTotalTicks();
+                amount *= GetBase()->GetStackAmount();
             }
             // Lacerate
             else if (GetId() == 33745)

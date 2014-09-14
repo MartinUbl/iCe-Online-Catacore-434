@@ -5142,12 +5142,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
             count++;
             break;
-        case 44614: // Frostfire Bolt
-            spellInfo->StackAmount = 0; //TODO: remove when stacking of Decrease Run Speed % aura is fixed
-            count++;
-            break;
-            count++;
-            break;
         case 87904:  // Al'akir:
         case 101458: // Feedback
         case 101459: // 4 difficulty entries
